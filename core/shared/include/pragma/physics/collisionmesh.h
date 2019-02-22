@@ -1,0 +1,113 @@
+#ifndef __COLLISIONMESH_H__
+#define __COLLISIONMESH_H__
+
+#include "pragma/networkdefinitions.h"
+#include <mathutil/glmutil.h>
+#include "pragma/model/modelupdateflags.hpp"
+#include <vector>
+#include <memory>
+
+class PhysShape;
+struct PhysSoftBodyInfo;
+class DLLNETWORK CollisionMesh
+	: public std::enable_shared_from_this<CollisionMesh>
+{
+public:
+#pragma pack(push,1)
+	struct DLLNETWORK SoftBodyAnchor
+	{
+		enum class Flags : uint8_t
+		{
+			None = 0u,
+			Rigid = 1u,
+			DisableCollisions = Rigid<<1u
+		};
+		uint16_t vertexIndex = std::numeric_limits<uint16_t>::max();
+		uint32_t boneId = std::numeric_limits<uint32_t>::max();
+		float influence = 1.f;
+		Flags flags = Flags::None;
+	};
+#pragma pack(pop)
+	CollisionMesh(const CollisionMesh &other);
+private:
+	CollisionMesh(Game *game);
+
+	//void PhysSoftBody::AppendAnchor(uint32_t nodeId,PhysRigidBody &body,const Vector3 &localPivot,bool bDisableCollision,float influence)
+	struct DLLNETWORK SoftBodyInfo
+	{
+		SoftBodyInfo();
+		std::weak_ptr<ModelSubMesh> subMesh = {};
+		std::vector<uint32_t> triangles; // Triangles of sub-mesh to use of soft-body physics
+		std::shared_ptr<PhysSoftBodyInfo> info = nullptr;
+		std::vector<SoftBodyAnchor> anchors;
+	};
+	std::shared_ptr<SoftBodyInfo> m_softBodyInfo = nullptr;
+
+	Game *m_game = nullptr;
+	std::vector<Vector3> m_vertices;
+	std::vector<uint16_t> m_triangles;
+	std::vector<int> m_surfaceMaterials;
+	Vector3 m_min = {};
+	Vector3 m_max = {};
+	Vector3 m_origin = {};
+	std::shared_ptr<PhysShape> m_shape = nullptr;
+	bool m_bConvex = true;
+	int m_boneID = -1;
+	int m_surfaceMaterialId = 0;
+	Vector3 m_centerOfMass = {};
+	double m_volume = 0.0;
+	void ClipAgainstPlane(const Vector3 &n,double d,CollisionMesh &clippedMesh);
+public:
+	static std::shared_ptr<CollisionMesh> Create(Game *game);
+	static std::shared_ptr<CollisionMesh> Create(const CollisionMesh &other);
+	std::shared_ptr<PhysShape> CreateShape(const Vector3 &scale={1.f,1.f,1.f}) const;
+	void SetBoneParent(int boneID);
+	int GetBoneParent();
+	void CalculateBounds();
+	void GetAABB(Vector3 *min,Vector3 *max);
+	void SetAABB(Vector3 &min,Vector3 &max);
+	void SetOrigin(const Vector3 &origin);
+	Vector3 &GetOrigin();
+	std::shared_ptr<PhysShape> GetShape();
+	bool IntersectAABB(Vector3 *min,Vector3 *max);
+	void UpdateShape();
+	void SetConvex(bool bConvex);
+	bool IsConvex() const;
+	std::vector<Vector3> &GetVertices();
+	std::vector<int> &GetSurfaceMaterials();
+	void SetSurfaceMaterial(int id);
+	void SetSurfaceMaterial(const std::string &surfMat);
+	int GetSurfaceMaterial() const;
+	void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData);
+	void AddVertex(const Vector3 &v);
+	void Rotate(const Quat &rot);
+	void Translate(const Vector3 &t);
+	void Centralize();
+
+	// Triangles can be empty if the collision point-cloud was never triangulated
+	const std::vector<uint16_t> &GetTriangles() const;
+	std::vector<uint16_t> &GetTriangles();
+	void CalculateVolumeAndCom();
+	const Vector3 &GetCenterOfMass() const;
+	void SetCenterOfMass(const Vector3 &com);
+	double GetVolume() const;
+	void SetVolume(double vol);
+
+	void ClipAgainstPlane(const Vector3 &n,double d,CollisionMesh &clippedMeshA,CollisionMesh &clippedMeshB);
+
+	void SetSoftBody(bool b);
+	bool IsSoftBody() const;
+	ModelSubMesh *GetSoftBodyMesh() const;
+	void SetSoftBodyMesh(ModelSubMesh &mesh);
+	const std::vector<uint32_t> *GetSoftBodyTriangles() const;
+	std::vector<uint32_t> *GetSoftBodyTriangles();
+	PhysSoftBodyInfo *GetSoftBodyInfo() const;
+	bool AddSoftBodyAnchor(uint16_t vertIdx,uint32_t boneIdx,SoftBodyAnchor::Flags flags=SoftBodyAnchor::Flags::None,float influence=1.f,uint32_t *anchorIdx=nullptr);
+	void RemoveSoftBodyAnchor(uint32_t anchorIdx);
+	void ClearSoftBodyAnchors();
+	const std::vector<SoftBodyAnchor> *GetSoftBodyAnchors() const;
+	std::vector<SoftBodyAnchor> *GetSoftBodyAnchors();
+};
+REGISTER_BASIC_BITWISE_OPERATORS(CollisionMesh::SoftBodyAnchor::Flags);
+
+#endif

@@ -1,0 +1,40 @@
+include("../../CMakeShared.txt")
+
+link_external_library(engine)
+link_external_library(server)
+link_external_library(recast)
+link_external_library(detour)
+link_external_library(util_pad)
+link_external_library(util_versioned_archive)
+link_external_library(libvorbis)
+link_external_library(libogg)
+link_external_library(libnoise)
+link_external_library(clip2tri)
+link_external_library(util_bsp)
+link_external_library(util_vmf)
+link_external_library(util_fgd)
+link_external_library(util_mmd)
+link_external_library(util_source_script)
+link_external_library(shaderinfo)
+link_external_library(smdmodel)
+link_external_library(RectangleBinPack)
+link_external_library(assimp)
+link_external_library(pr_steamworks)
+
+add_include_dir(eigen)
+add_include_dir(miniball)
+add_include_dir(client)
+
+add_def(DLLNETWORK_EX)
+add_def(_ENABLE_EXTENDED_ALIGNED_STORAGE)
+
+set(CONFIG_ENABLE_MIKU_MIKU_DANCE_ASSET_SUPPORT "1" CACHE BOOL "Enable asset support for MikuMikuDance.")
+if($(CONFIG_ENABLE_MIKUMIKUDANCE_ASSET_SUPPORT) MATCHES ON)
+	list(APPEND DEFINITIONS ENABLE_MMD_IMPORT)
+endif()
+
+set(PRECOMPILED_HEADER "stdafx_shared")
+
+add_compile_options(/bigobj)
+
+def_project(shared lib)

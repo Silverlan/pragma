@@ -1,0 +1,877 @@
+#include "stdafx_shared.h"
+#include <pragma/game/game.h>
+#include "pragma/lua/classes/lconvar.h"
+#include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/libraries/lboundingvolume.h"
+#include "pragma/lua/libraries/lintersect.h"
+#include "pragma/lua/libraries/lsweep.h"
+#include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/libraries/ltimer.h"
+#include "pragma/lua/libraries/lgeometry.h"
+#ifdef PHYS_ENGINE_BULLET
+#include "pragma/lua/classes/lphysics.h"
+#elif PHYS_ENGINE_PHYSX
+#include "pragma/lua/classes/lphysx.h"
+#endif
+#include "pragma/lua/libraries/lmatrix.h"
+
+#include "pragma/lua/classes/ldef_vector.h"
+#include "luasystem.h"
+#include <pragma/math/angle/wvquaternion.h>
+#include "pragma/lua/classes/lvector.h"
+#include "pragma/lua/libraries/lrecast.h"
+#include "pragma/lua/libraries/lmath.h"
+#include "pragma/lua/libraries/lnoise.h"
+#include "pragma/lua/libraries/lregex.h"
+#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/libraries/ldebug.h"
+#include "pragma/lua/libraries/lmesh.h"
+#include "pragma/lua/libraries/ltable.h"
+#include "pragma/lua/classes/lcolor.h"
+#include "pragma/lua/libraries/los.h"
+#include "pragma/lua/libraries/ltime.hpp"
+#include "pragma/lua/libraries/lprint.h"
+#include "pragma/lua/classes/lerrorcode.h"
+#include "pragma/lua/classes/lcallback.h"
+#include "pragma/lua/classes/ldatastream.h"
+#include "pragma/lua/libraries/limport.hpp"
+#include "pragma/math/util_easing.hpp"
+#include "pragma/lua/libraries/lnav.hpp"
+#include "pragma/util/util_handled.hpp"
+#include "pragma/model/animation/animation.h"
+#include <pragma/math/vector/util_winding_order.hpp>
+#include "pragma/game/game_coordinate_system.hpp"
+#include "pragma/util/util_variable_type.hpp"
+#include <pragma/math/intersection.h>
+#include <regex>
+#include <complex>
+#include <luainterface.hpp>
+
+extern DLLENGINE Engine *engine;
+
+static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallback)
+{
+	out<<"Callback[";
+	if(hCallback.IsValid())
+		out<<"true";
+	else
+		out<<"false";
+	out<<"]";
+	return out;
+}
+
+void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
+{
+	// Remove sensitive functions and libraries
+	lua_pushnil(lua.GetState());
+	lua_setglobal(lua.GetState(),"dofile");
+
+	lua_pushnil(lua.GetState());
+	lua_setglobal(lua.GetState(),"loadfile");
+
+	std::array<std::string,7> fRemoveOs = {
+		"execute",
+		"rename",
+		"setlocale",
+		"getenv",
+		"remove",
+		"exit",
+		"tmpname"
+	};
+	Lua::GetGlobal(lua.GetState(),"os"); /* 1 */
+	auto tOs = Lua::GetStackTop(lua.GetState());
+	for(auto &name : fRemoveOs)
+	{
+		Lua::PushString(lua.GetState(),name); /* 2 */
+		Lua::PushNil(lua.GetState()); /* 3 */
+		Lua::SetTableValue(lua.GetState(),tOs); /* 1 */
+	}
+	Lua::Pop(lua.GetState(),1); /* 0 */
+
+	//lua_pushnil(lua.GetState());
+	//lua_setglobal(lua.GetState(),"os");
+	//
+
+	luabind::globals(lua.GetState())["print"] = luabind::nil;
+
+	lua.RegisterLibrary("vector",{
+		{"to_min_max",Lua::vector::to_min_max},
+		{"get_min_max",Lua::vector::get_min_max},
+		{"random",Lua::vector::random},
+		{"random2D",Lua::vector::random_2d},
+		{"create_from_string",Lua::vector::create_from_string},
+		{"calc_average",Lua::vector::calc_average},
+		{"calc_best_fitting_plane",Lua::vector::calc_best_fitting_plane},
+		{"calc_linear_velocity_from_angular",Lua::vector::angular_velocity_to_linear}
+	});
+
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","ORIGIN",uvec::ORIGIN);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","FORWARD",uvec::FORWARD);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","RIGHT",uvec::RIGHT);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","UP",uvec::UP);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","MIN",uvec::MIN);
+	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","MAX",uvec::MAX);
+
+	Lua::RegisterLibrary(lua.GetState(),"angle",{
+		{"random",Lua::global::angle_rand},
+		{"create_from_string",Lua::global::create_from_string}
+	});
+
+	Lua::RegisterLibrary(lua.GetState(),"noise",{
+		{"perlin",Lua_noise_perlin},
+		{"const",Lua_noise_const},
+		{"voronoi",Lua_noise_voronoi},
+		{"generate_height_map",Lua_noise_generate_height_map}
+	});
+
+	Lua::RegisterLibraryEnums(lua.GetState(),"noise",{
+		{"QUALITY_FAST",umath::to_integral(noise::NoiseQuality::QUALITY_FAST)},
+		{"QUALITY_STD",umath::to_integral(noise::NoiseQuality::QUALITY_STD)},
+		{"QUALITY_BEST",umath::to_integral(noise::NoiseQuality::QUALITY_BEST)}
+	});
+
+	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
+	lua_pushtablecfunction(lua.GetState(),"table","random",Lua::table::random);
+
+	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
+	lua_pushtablecfunction(lua.GetState(),"math","approach",Lua::math::approach);
+	lua_pushtablecfunction(lua.GetState(),"math","get_angle_difference",Lua::math::get_angle_difference);
+	lua_pushtablecfunction(lua.GetState(),"math","approach_angle",Lua::math::approach_angle);
+	lua_pushtablecfunction(lua.GetState(),"math","normalize_angle",Lua::math::normalize_angle);
+	lua_pushtablecfunction(lua.GetState(),"math","clamp_angle",Lua::math::clamp_angle);
+	lua_pushtablecfunction(lua.GetState(),"math","is_angle_in_range",Lua::math::is_angle_in_range);
+	lua_pushtablecfunction(lua.GetState(),"math","perlin_noise",Lua::math::perlin_noise);
+	lua_pushtablecfunction(lua.GetState(),"math","sign",Lua::math::sign);
+	lua_pushtablecfunction(lua.GetState(),"math","clamp",Lua::math::clamp);
+	lua_pushtablecfunction(lua.GetState(),"math","lerp",Lua::math::lerp);
+	lua_pushtablecfunction(lua.GetState(),"math","get_next_power_of_2",Lua::math::get_next_power_of_2);
+	lua_pushtablecfunction(lua.GetState(),"math","get_previous_power_of_2",Lua::math::get_previous_power_of_2);
+	lua_pushtablecfunction(lua.GetState(),"math","round",Lua::math::round);
+	lua_pushtablecfunction(lua.GetState(),"math","snap_to_grid",Lua::math::snap_to_grid);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline",Lua::math::calc_hermite_spline);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline_position",Lua::math::calc_hermite_spline_position);
+	lua_pushtablecfunction(lua.GetState(),"math","smooth_step",Lua::math::smooth_step);
+	lua_pushtablecfunction(lua.GetState(),"math","smoother_step",Lua::math::smoother_step);
+	lua_pushtablecfunction(lua.GetState(),"math","is_in_range",Lua::math::is_in_range);
+	lua_pushtablecfunction(lua.GetState(),"math","normalize_uv_coordinates",Lua::math::normalize_uv_coordinates);
+
+	lua_pushtablecfunction(lua.GetState(),"math","solve_quadric",Lua::math::solve_quadric);
+	lua_pushtablecfunction(lua.GetState(),"math","solve_cubic",Lua::math::solve_cubic);
+	lua_pushtablecfunction(lua.GetState(),"math","solve_quartic",Lua::math::solve_quartic);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_range",Lua::math::calc_ballistic_range);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_position",Lua::math::calc_ballistic_position);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_velocity",Lua::math::calc_ballistic_velocity);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_time_of_flight",Lua::math::calc_ballistic_time_of_flight);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_angle_of_reach",Lua::math::calc_ballistic_angle_of_reach);
+	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc",Lua::math::solve_ballistic_arc);
+	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc_lateral",Lua::math::solve_ballistic_arc_lateral);
+	lua_pushtablecfunction(lua.GetState(),"math","max_abs",Lua::math::abs_max);
+	lua_pushtablecfunction(lua.GetState(),"math","ease_in",Lua::math::ease_in);
+	lua_pushtablecfunction(lua.GetState(),"math","ease_out",Lua::math::ease_out);
+	lua_pushtablecfunction(lua.GetState(),"math","ease_in_out",Lua::math::ease_in_out);
+	lua_pushtablecfunction(lua.GetState(),"math","is_nan",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto f = Lua::CheckNumber(l,1);
+		Lua::PushBool(l,std::isnan(f));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","is_inf",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto f = Lua::CheckNumber(l,1);
+		Lua::PushBool(l,std::isinf(f));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","is_finite",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto f = Lua::CheckNumber(l,1);
+		Lua::PushBool(l,std::isfinite(f));
+		return 1;
+	}));
+
+	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
+		{"EASE_TYPE_BACK",umath::to_integral(umath::EaseType::Back)},
+		{"EASE_TYPE_BOUNCE",umath::to_integral(umath::EaseType::Bounce)},
+		{"EASE_TYPE_CIRCULAR",umath::to_integral(umath::EaseType::Circular)},
+		{"EASE_TYPE_CUBIC",umath::to_integral(umath::EaseType::Cubic)},
+		{"EASE_TYPE_ELASTIC",umath::to_integral(umath::EaseType::Elastic)},
+		{"EASE_TYPE_EXPONENTIAL",umath::to_integral(umath::EaseType::Exponential)},
+		{"EASE_TYPE_LINEAR",umath::to_integral(umath::EaseType::Linear)},
+		{"EASE_TYPE_QUADRATIC",umath::to_integral(umath::EaseType::Quadratic)},
+		{"EASE_TYPE_QUARTIC",umath::to_integral(umath::EaseType::Quartic)},
+		{"EASE_TYPE_QUINTIC",umath::to_integral(umath::EaseType::Quintic)},
+		{"EASE_TYPE_SINE",umath::to_integral(umath::EaseType::Sine)},
+
+		{"MAX_SINT8",std::numeric_limits<int8_t>::max()},
+		{"MIN_SINT8",std::numeric_limits<int8_t>::lowest()},
+		{"MAX_UINT8",std::numeric_limits<uint8_t>::max()},
+		{"MIN_UINT8",std::numeric_limits<uint8_t>::lowest()},
+		{"MAX_SINT16",std::numeric_limits<int16_t>::max()},
+		{"MIN_SINT16",std::numeric_limits<int16_t>::lowest()},
+		{"MAX_UINT16",std::numeric_limits<uint16_t>::max()},
+		{"MIN_UINT16",std::numeric_limits<uint16_t>::lowest()},
+		{"MAX_SINT32",std::numeric_limits<int32_t>::max()},
+		{"MIN_SINT32",std::numeric_limits<int32_t>::lowest()},
+		{"MAX_UINT32",std::numeric_limits<uint32_t>::max()},
+		{"MIN_UINT32",std::numeric_limits<uint32_t>::lowest()},
+		{"MAX_SINT64",std::numeric_limits<int64_t>::max()},
+		{"MIN_SINT64",std::numeric_limits<int64_t>::lowest()},
+		{"MAX_UINT64",std::numeric_limits<uint64_t>::max()},
+		{"MIN_UINT64",std::numeric_limits<uint64_t>::lowest()},
+		{"MAX_FLOAT",std::numeric_limits<float>::max()},
+		{"MIN_FLOAT",std::numeric_limits<float>::lowest()},
+		{"MAX_DOUBLE",std::numeric_limits<double>::max()},
+		{"MIN_DOUBLE",std::numeric_limits<double>::lowest()},
+		{"MAX_LONG_DOUBLE",std::numeric_limits<long double>::max()},
+		{"MIN_LONG_DOUBLE",std::numeric_limits<long double>::lowest()},
+
+		{"ROTATION_ORDER_XYZ",umath::to_integral(pragma::RotationOrder::XYZ)},
+		{"ROTATION_ORDER_YXZ",umath::to_integral(pragma::RotationOrder::YXZ)},
+		{"ROTATION_ORDER_XZX",umath::to_integral(pragma::RotationOrder::XZX)},
+		{"ROTATION_ORDER_XYX",umath::to_integral(pragma::RotationOrder::XYX)},
+		{"ROTATION_ORDER_YXY",umath::to_integral(pragma::RotationOrder::YXY)},
+		{"ROTATION_ORDER_YZY",umath::to_integral(pragma::RotationOrder::YZY)},
+		{"ROTATION_ORDER_ZYZ",umath::to_integral(pragma::RotationOrder::ZYZ)},
+		{"ROTATION_ORDER_ZXZ",umath::to_integral(pragma::RotationOrder::ZXZ)},
+		{"ROTATION_ORDER_XZY",umath::to_integral(pragma::RotationOrder::XZY)},
+		{"ROTATION_ORDER_YZX",umath::to_integral(pragma::RotationOrder::YZX)},
+		{"ROTATION_ORDER_ZYX",umath::to_integral(pragma::RotationOrder::ZYX)},
+		{"ROTATION_ORDER_ZXY",umath::to_integral(pragma::RotationOrder::ZXY)},
+		
+		{"AXIS_X",umath::to_integral(pragma::Axis::X)},
+		{"AXIS_Y",umath::to_integral(pragma::Axis::Y)},
+		{"AXIS_Z",umath::to_integral(pragma::Axis::Z)}
+	});
+
+	auto &mathMod = lua.RegisterLibrary("math");
+	auto complexNumberClassDef = luabind::class_<std::complex<double>>("ComplexNumber");
+	complexNumberClassDef.def(luabind::constructor<>());
+	complexNumberClassDef.def(luabind::constructor<double,double>());
+	complexNumberClassDef.def(luabind::tostring(luabind::self));
+	complexNumberClassDef.def(-luabind::const_self);
+	complexNumberClassDef.def(luabind::const_self /std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self *std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self +std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self -std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self ==std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self /double());
+	complexNumberClassDef.def(luabind::const_self *double());
+	complexNumberClassDef.def(luabind::const_self +double());
+	complexNumberClassDef.def(luabind::const_self -double());
+	complexNumberClassDef.def(luabind::const_self ==double());
+#ifdef _WIN32
+	complexNumberClassDef.def("SetReal",static_cast<double(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
+	complexNumberClassDef.def("SetImaginary",static_cast<double(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
+#else
+	complexNumberClassDef.def("SetReal",static_cast<void(std::complex<double>::*)(double)>(&std::complex<double>::real));
+	complexNumberClassDef.def("SetImaginary",static_cast<void(std::complex<double>::*)(double)>(&std::complex<double>::real));
+#endif
+	complexNumberClassDef.def("GetReal",static_cast<double(std::complex<double>::*)() const>(&std::complex<double>::real));
+	complexNumberClassDef.def("GetImaginary",static_cast<double(std::complex<double>::*)() const>(&std::complex<double>::imag));
+	//mathMod[complexNumberClassDef];
+
+	lua_pushtablecfunction(lua.GetState(),"debug","move_state_to_string",Lua::debug::move_state_to_string);
+	//lua_pushtablecfunction(lua.GetState(),"debug","enable_remote_debugging",Lua::debug::enable_remote_debugging);
+
+	lua_register(lua.GetState(),"print",Lua_print);
+	Lua::RegisterLibrary(lua.GetState(),"console",{
+		{"print",Lua_print},
+		{"print_table",Lua_PrintTable},
+		{"print_message",Lua_Msg},
+		{"print_messageln",Lua_MsgN},
+		{"print_color",Lua_MsgC},
+		{"print_warning",Lua_MsgW},
+		{"print_error",Lua_MsgE},
+
+		{"register_variable",Lua_cvar_CreateConVar},
+		{"register_command",Lua_cvar_CreateConCommand},
+		{"run",Lua_cvar_Run},
+		{"get_convar",Lua_cvar_GetConVar},
+		{"get_convar_int",Lua_cvar_GetConVarInt},
+		{"get_convar_float",Lua_cvar_GetConVarFloat},
+		{"get_convar_string",Lua_cvar_GetConVarString},
+		{"get_convar_bool",Lua_cvar_GetConVarBool},
+		{"get_convar_flags",Lua_cvar_GetConVarFlags},
+		{"add_change_callback",Lua_cvar_AddChangeCallback},
+
+		{"register_override",Lua::console::register_override},
+		{"clear_override",Lua::console::clear_override}
+	});
+
+	auto consoleMod = luabind::module(lua.GetState(),"console");
+
+	static const auto fGetConVarName = [](lua_State *l,ConVar &cvar) -> std::string {
+		auto *nw = engine->GetNetworkState(l);
+		auto &conVars = nw->GetConVars();
+		auto it = std::find_if(conVars.begin(),conVars.end(),[&cvar](const std::pair<std::string,std::shared_ptr<ConConf>> &pair) {
+			return pair.second.get() == &cvar;
+		});
+		if(it == conVars.end())
+			return "";
+		return it->first;
+	};
+	auto classDefConVar = luabind::class_<ConVar>("Var");
+	classDefConVar.def("GetString",&Lua_ConVar_GetString);
+	classDefConVar.def("GetInt",&Lua_ConVar_GetInt);
+	classDefConVar.def("GetFloat",&Lua_ConVar_GetFloat);
+	classDefConVar.def("GetBool",&Lua_ConVar_GetBool);
+	classDefConVar.def("GetFlags",&Lua_ConVar_GetFlags);
+	classDefConVar.def("GetDefault",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
+		Lua::PushString(l,cvar.GetDefault());
+	}));
+	classDefConVar.def("GetHelpText",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
+		Lua::PushString(l,cvar.GetHelpText());
+	}));
+	classDefConVar.def("AddChangeCallback",static_cast<void(*)(lua_State*,ConVar&,luabind::object)>([](lua_State *l,ConVar &cvar,luabind::object oFunction) {
+		Lua::CheckFunction(l,2);
+		auto fc = luabind::object(luabind::from_stack(l,2));
+		engine->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l,cvar),fc);
+	}));
+	classDefConVar.def("GetName",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
+		auto name = fGetConVarName(l,cvar);
+		Lua::PushString(l,name);
+	}));
+	consoleMod[classDefConVar];
+
+	// util
+	Lua::RegisterLibraryEnums(lua.GetState(),"util",{
+		{"SIZEOF_CHAR",sizeof(char)},
+		{"SIZEOF_BOOL",sizeof(bool)},
+		{"SIZEOF_INT",sizeof(int)},
+		{"SIZEOF_FLOAT",sizeof(float)},
+		{"SIZEOF_DOUBLE",sizeof(double)},
+		{"SIZEOF_LONG_LONG",sizeof(long long)},
+		{"SIZEOF_LONG_DOUBLE",sizeof(long double)},
+		{"SIZEOF_VECTOR3",sizeof(Vector3)},
+		{"SIZEOF_VECTOR2",sizeof(Vector2)},
+		{"SIZEOF_VECTOR4",sizeof(Vector4)},
+		{"SIZEOF_EULER_ANGLES",sizeof(EulerAngles)},
+		{"SIZEOF_QUATERNION",sizeof(Quat)},
+		{"SIZEOF_MAT2",sizeof(Mat2)},
+		{"SIZEOF_MAT2X3",sizeof(Mat2x3)},
+		{"SIZEOF_MAT2X4",sizeof(Mat2x4)},
+		{"SIZEOF_MAT3X2",sizeof(Mat3x2)},
+		{"SIZEOF_MAT3",sizeof(Mat3)},
+		{"SIZEOF_MAT3X4",sizeof(Mat3x4)},
+		{"SIZEOF_MAT4X2",sizeof(Mat4x2)},
+		{"SIZEOF_MAT4X3",sizeof(Mat4x3)},
+		{"SIZEOF_MAT4",sizeof(Mat4)},
+		{"SIZEOF_VECTOR2I",sizeof(Vector2i)},
+		{"SIZEOF_VECTOR3I",sizeof(Vector3i)},
+		{"SIZEOF_VECTOR4I",sizeof(Vector4i)},
+
+		{"VAR_TYPE_INVALID",umath::to_integral(util::VarType::Invalid)},
+		{"VAR_TYPE_BOOL",umath::to_integral(util::VarType::Bool)},
+		{"VAR_TYPE_DOUBLE",umath::to_integral(util::VarType::Double)},
+		{"VAR_TYPE_FLOAT",umath::to_integral(util::VarType::Float)},
+		{"VAR_TYPE_INT8",umath::to_integral(util::VarType::Int8)},
+		{"VAR_TYPE_INT16",umath::to_integral(util::VarType::Int16)},
+		{"VAR_TYPE_INT32",umath::to_integral(util::VarType::Int32)},
+		{"VAR_TYPE_INT64",umath::to_integral(util::VarType::Int64)},
+		{"VAR_TYPE_LONG_DOUBLE",umath::to_integral(util::VarType::LongDouble)},
+		{"VAR_TYPE_STRING",umath::to_integral(util::VarType::String)},
+		{"VAR_TYPE_UINT8",umath::to_integral(util::VarType::UInt8)},
+		{"VAR_TYPE_UINT16",umath::to_integral(util::VarType::UInt16)},
+		{"VAR_TYPE_UINT32",umath::to_integral(util::VarType::UInt32)},
+		{"VAR_TYPE_UINT64",umath::to_integral(util::VarType::UInt64)},
+		{"VAR_TYPE_EULER_ANGLES",umath::to_integral(util::VarType::EulerAngles)},
+		{"VAR_TYPE_COLOR",umath::to_integral(util::VarType::Color)},
+		{"VAR_TYPE_VECTOR",umath::to_integral(util::VarType::Vector)},
+		{"VAR_TYPE_VECTOR2",umath::to_integral(util::VarType::Vector2)},
+		{"VAR_TYPE_VECTOR4",umath::to_integral(util::VarType::Vector4)},
+		{"VAR_TYPE_ENTITY",umath::to_integral(util::VarType::Entity)},
+		{"VAR_TYPE_QUATERNION",umath::to_integral(util::VarType::Quaternion)},
+
+		{"EVENT_REPLY_HANDLED",umath::to_integral(util::EventReply::Handled)},
+		{"EVENT_REPLY_UNHANDLED",umath::to_integral(util::EventReply::Unhandled)}
+	});
+
+	auto classDefErrorCode = luabind::class_<ErrorCode>("ResultCode");
+	classDefErrorCode.def(luabind::constructor<>());
+	classDefErrorCode.def(luabind::constructor<const std::string&,int32_t>());
+	classDefErrorCode.def(luabind::tostring(luabind::self));
+	classDefErrorCode.def("GetMessage",&Lua_ErrorCode_GetMessage);
+	classDefErrorCode.def("GetValue",&Lua_ErrorCode_GetValue);
+	classDefErrorCode.def("IsError",&Lua_ErrorCode_IsError);
+
+	auto classDefCallback = luabind::class_<CallbackHandle>("Callback");
+	classDefCallback.def(luabind::tostring(luabind::self));
+	classDefCallback.def("IsValid",&Lua_Callback_IsValid);
+	classDefCallback.def("Remove",&Lua_Callback_Remove);
+
+	auto callbackHandlerClassDef = luabind::class_<CallbackHandler>("CallbackHandler");
+	Lua::CallbackHandler::register_class(callbackHandlerClassDef);
+
+	auto utilMod = luabind::module(lua.GetState(),"util");
+	utilMod[classDefErrorCode];
+	utilMod[classDefCallback];
+	utilMod[callbackHandlerClassDef];
+
+	auto defColor = luabind::class_<Color>("Color");
+	defColor.def(luabind::constructor<>());
+	defColor.def(luabind::constructor<short,short,short>());
+	defColor.def(luabind::constructor<short,short,short,short>());
+	defColor.def(luabind::constructor<const Vector3&>());
+	defColor.def(luabind::constructor<const Vector4&>());
+	defColor.def(luabind::constructor<const std::string&>());
+	defColor.def(luabind::tostring(luabind::self));
+	defColor.def_readwrite("r",&Color::r);
+	defColor.def_readwrite("g",&Color::g);
+	defColor.def_readwrite("b",&Color::b);
+	defColor.def_readwrite("a",&Color::a);
+	defColor.def(luabind::const_self /float());
+	defColor.def(luabind::const_self *float());
+	defColor.def(luabind::const_self +Color());
+	defColor.def(luabind::const_self -Color());
+	defColor.def(luabind::const_self ==Color());
+	defColor.def(float() *luabind::const_self);
+	defColor.def("Copy",&Lua::Color::Copy);
+	defColor.def("Set",static_cast<void(Color::*)(const Color&)>(&Color::Set));
+	defColor.def("Set",&Lua::Color::Set);
+	defColor.def("Lerp",&Lua::Color::Lerp);
+	defColor.def("ToVector4",&Lua::Color::ToVector4);
+	defColor.def("ToVector",&Lua::Color::ToVector);
+	utilMod[defColor];
+
+	auto _G = luabind::globals(lua.GetState());
+	_G["Color"] = _G["util"]["Color"]; // Add to global table for quicker access
+	_G["util"]["Color"]["Clear"] = Color(0,0,0,0);
+	// Pink Colors
+	_G["util"]["Color"]["Pink"] = Color::Pink;
+	_G["util"]["Color"]["LightPink"] = Color::LightPink;
+	_G["util"]["Color"]["HotPink"] = Color::HotPink;
+	_G["util"]["Color"]["DeepPink"] = Color::DeepPink;
+	_G["util"]["Color"]["PaleVioletRed"] = Color::PaleVioletRed;
+	_G["util"]["Color"]["MediumVioletRed"] = Color::MediumVioletRed;
+
+	// Red Colors
+	_G["util"]["Color"]["LightSalmon"] = Color::LightSalmon;
+	_G["util"]["Color"]["Salmon"] = Color::Salmon;
+	_G["util"]["Color"]["DarkSalmon"] = Color::DarkSalmon;
+	_G["util"]["Color"]["LightCoral"] = Color::LightCoral;
+	_G["util"]["Color"]["IndianRed"] = Color::IndianRed;
+	_G["util"]["Color"]["Crimson"] = Color::Crimson;
+	_G["util"]["Color"]["FireBrick"] = Color::FireBrick;
+	_G["util"]["Color"]["DarkRed"] = Color::DarkRed;
+	_G["util"]["Color"]["Red"] = Color::Red;
+
+	// Orange Colors
+	_G["util"]["Color"]["OrangeRed"] = Color::OrangeRed;
+	_G["util"]["Color"]["Tomato"] = Color::Tomato;
+	_G["util"]["Color"]["Coral"] = Color::Coral;
+	_G["util"]["Color"]["DarkOrange"] = Color::DarkOrange;
+	_G["util"]["Color"]["Orange"] = Color::Orange;
+
+	// Yellow Colors
+	_G["util"]["Color"]["Yellow"] = Color::Yellow;
+	_G["util"]["Color"]["LightYellow"] = Color::LightYellow;
+	_G["util"]["Color"]["LemonChiffon"] = Color::LemonChiffon;
+	_G["util"]["Color"]["LightGoldenrodYellow"] = Color::LightGoldenrodYellow;
+	_G["util"]["Color"]["PapayaWhip"] = Color::PapayaWhip;
+	_G["util"]["Color"]["Moccasin"] = Color::Moccasin;
+	_G["util"]["Color"]["PeachPuff"] = Color::PeachPuff;
+	_G["util"]["Color"]["PaleGoldenrod"] = Color::PaleGoldenrod;
+	_G["util"]["Color"]["Khaki"] = Color::Khaki;
+	_G["util"]["Color"]["DarkKhaki"] = Color::DarkKhaki;
+	_G["util"]["Color"]["Gold"] = Color::Gold;
+
+	// Brown Colors
+	_G["util"]["Color"]["Cornsilk"] = Color::Cornsilk;
+	_G["util"]["Color"]["BlanchedAlmond"] = Color::BlanchedAlmond;
+	_G["util"]["Color"]["Bisque"] = Color::Bisque;
+	_G["util"]["Color"]["NavajoWhite"] = Color::NavajoWhite;
+	_G["util"]["Color"]["Wheat"] = Color::Wheat;
+	_G["util"]["Color"]["BurlyWood"] = Color::BurlyWood;
+	_G["util"]["Color"]["Tan"] = Color::Tan;
+	_G["util"]["Color"]["RosyBrown"] = Color::RosyBrown;
+	_G["util"]["Color"]["SandyBrown"] = Color::SandyBrown;
+	_G["util"]["Color"]["Goldenrod"] = Color::Goldenrod;
+	_G["util"]["Color"]["DarkGoldenrod"] = Color::DarkGoldenrod;
+	_G["util"]["Color"]["Peru"] = Color::Peru;
+	_G["util"]["Color"]["Chocolate"] = Color::Chocolate;
+	_G["util"]["Color"]["SaddleBrown"] = Color::SaddleBrown;
+	_G["util"]["Color"]["Sienna"] = Color::Sienna;
+	_G["util"]["Color"]["Brown"] = Color::Brown;
+	_G["util"]["Color"]["Maroon"] = Color::Maroon;
+
+	// Green Colors
+	_G["util"]["Color"]["DarkOliveGreen"] = Color::DarkOliveGreen;
+	_G["util"]["Color"]["Olive"] = Color::Olive;
+	_G["util"]["Color"]["OliveDrab"] = Color::OliveDrab;
+	_G["util"]["Color"]["YellowGreen"] = Color::YellowGreen;
+	_G["util"]["Color"]["LimeGreen"] = Color::LimeGreen;
+	_G["util"]["Color"]["Lime"] = Color::Lime;
+	_G["util"]["Color"]["LawnGreen"] = Color::LawnGreen;
+	_G["util"]["Color"]["Chartreuse"] = Color::Chartreuse;
+	_G["util"]["Color"]["GreenYellow"] = Color::GreenYellow;
+	_G["util"]["Color"]["SpringGreen"] = Color::SpringGreen;
+	_G["util"]["Color"]["MediumSpringGreen"] = Color::MediumSpringGreen;
+	_G["util"]["Color"]["LightGreen"] = Color::LightGreen;
+	_G["util"]["Color"]["PaleGreen"] = Color::PaleGreen;
+	_G["util"]["Color"]["DarkSeaGreen"] = Color::DarkSeaGreen;
+	_G["util"]["Color"]["MediumAquamarine"] = Color::MediumAquamarine;
+	_G["util"]["Color"]["MediumSeaGreen"] = Color::MediumSeaGreen;
+	_G["util"]["Color"]["SeaGreen"] = Color::SeaGreen;
+	_G["util"]["Color"]["ForestGreen"] = Color::ForestGreen;
+	_G["util"]["Color"]["Green"] = Color::Green;
+	_G["util"]["Color"]["DarkGreen"] = Color::DarkGreen;
+
+	// Cyan Colors
+	_G["util"]["Color"]["Aqua"] = Color::Aqua;
+	_G["util"]["Color"]["Cyan"] = Color::Cyan;
+	_G["util"]["Color"]["LightCyan"] = Color::LightCyan;
+	_G["util"]["Color"]["PaleTurquoise"] = Color::PaleTurquoise;
+	_G["util"]["Color"]["Aquamarine"] = Color::Aquamarine;
+	_G["util"]["Color"]["Turquoise"] = Color::Turquoise;
+	_G["util"]["Color"]["MediumTurquoise"] = Color::MediumTurquoise;
+	_G["util"]["Color"]["DarkTurquoise"] = Color::DarkTurquoise;
+	_G["util"]["Color"]["LightSeaGreen"] = Color::LightSeaGreen;
+	_G["util"]["Color"]["CadetBlue"] = Color::CadetBlue;
+	_G["util"]["Color"]["DarkCyan"] = Color::DarkCyan;
+	_G["util"]["Color"]["Teal"] = Color::Teal;
+
+	// Blue Colors
+	_G["util"]["Color"]["LightSteelBlue"] = Color::LightSteelBlue;
+	_G["util"]["Color"]["PowderBlue"] = Color::PowderBlue;
+	_G["util"]["Color"]["LightBlue"] = Color::LightBlue;
+	_G["util"]["Color"]["SkyBlue"] = Color::SkyBlue;
+	_G["util"]["Color"]["LightSkyBlue"] = Color::LightSkyBlue;
+	_G["util"]["Color"]["DeepSkyBlue"] = Color::DeepSkyBlue;
+	_G["util"]["Color"]["DodgerBlue"] = Color::DodgerBlue;
+	_G["util"]["Color"]["CornflowerBlue"] = Color::CornflowerBlue;
+	_G["util"]["Color"]["SteelBlue"] = Color::SteelBlue;
+	_G["util"]["Color"]["RoyalBlue"] = Color::RoyalBlue;
+	_G["util"]["Color"]["Blue"] = Color::Blue;
+	_G["util"]["Color"]["MediumBlue"] = Color::MediumBlue;
+	_G["util"]["Color"]["DarkBlue"] = Color::DarkBlue;
+	_G["util"]["Color"]["Navy"] = Color::Navy;
+	_G["util"]["Color"]["MidnightBlue"] = Color::MidnightBlue;
+
+	// Purple, Violet and Magenta Colors
+	_G["util"]["Color"]["Lavender"] = Color::Lavender;
+	_G["util"]["Color"]["Thistle"] = Color::Thistle;
+	_G["util"]["Color"]["Plum"] = Color::Plum;
+	_G["util"]["Color"]["Violet"] = Color::Violet;
+	_G["util"]["Color"]["Orchid"] = Color::Orchid;
+	_G["util"]["Color"]["Fuchsia"] = Color::Fuchsia;
+	_G["util"]["Color"]["Magenta"] = Color::Magenta;
+	_G["util"]["Color"]["MediumOrchid"] = Color::MediumOrchid;
+	_G["util"]["Color"]["MediumPurple"] = Color::MediumPurple;
+	_G["util"]["Color"]["BlueViolet"] = Color::BlueViolet;
+	_G["util"]["Color"]["DarkViolet"] = Color::DarkViolet;
+	_G["util"]["Color"]["DarkOrchid"] = Color::DarkOrchid;
+	_G["util"]["Color"]["DarkMagenta"] = Color::DarkMagenta;
+	_G["util"]["Color"]["Purple"] = Color::Purple;
+	_G["util"]["Color"]["Indigo"] = Color::Indigo;
+	_G["util"]["Color"]["DarkSlateBlue"] = Color::DarkSlateBlue;
+	_G["util"]["Color"]["SlateBlue"] = Color::SlateBlue;
+	_G["util"]["Color"]["MediumSlateBlue"] = Color::MediumSlateBlue;
+
+	// White Colors
+	_G["util"]["Color"]["White"] = Color::White;
+	_G["util"]["Color"]["Snow"] = Color::Snow;
+	_G["util"]["Color"]["Honeydew"] = Color::Honeydew;
+	_G["util"]["Color"]["MintCream"] = Color::MintCream;
+	_G["util"]["Color"]["Azure"] = Color::Azure;
+	_G["util"]["Color"]["AliceBlue"] = Color::AliceBlue;
+	_G["util"]["Color"]["GhostWhite"] = Color::GhostWhite;
+	_G["util"]["Color"]["WhiteSmoke"] = Color::WhiteSmoke;
+	_G["util"]["Color"]["Seashell"] = Color::Seashell;
+	_G["util"]["Color"]["Beige"] = Color::Beige;
+	_G["util"]["Color"]["OldLace"] = Color::OldLace;
+	_G["util"]["Color"]["FloralWhite"] = Color::FloralWhite;
+	_G["util"]["Color"]["Ivory"] = Color::Ivory;
+	_G["util"]["Color"]["AntiqueWhite"] = Color::AntiqueWhite;
+	_G["util"]["Color"]["Linen"] = Color::Linen;
+	_G["util"]["Color"]["LavenderBlush"] = Color::LavenderBlush;
+	_G["util"]["Color"]["MistyRose"] = Color::MistyRose;
+
+	// Grey and Black Colors
+	_G["util"]["Color"]["Gainsboro"] = Color::Gainsboro;
+	_G["util"]["Color"]["LightGrey"] = Color::LightGrey;
+	_G["util"]["Color"]["Silver"] = Color::Silver;
+	_G["util"]["Color"]["DarkGray"] = Color::DarkGray;
+	_G["util"]["Color"]["Gray"] = Color::Gray;
+	_G["util"]["Color"]["DimGray"] = Color::DimGray;
+	_G["util"]["Color"]["LightSlateGray"] = Color::LightSlateGray;
+	_G["util"]["Color"]["SlateGray"] = Color::SlateGray;
+	_G["util"]["Color"]["DarkSlateGray"] = Color::DarkSlateGray;
+	_G["util"]["Color"]["Black"] = Color::Black;
+
+	auto dataStreamClassDef = luabind::class_<DataStream>("DataStream");
+	Lua::DataStream::register_class(dataStreamClassDef);
+	dataStreamClassDef.def(luabind::constructor<uint32_t>());
+	utilMod[dataStreamClassDef];
+}
+
+void Game::RegisterLuaLibraries()
+{
+	NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
+
+	auto *l = GetLuaState();
+	Lua::RegisterLibrary(l,"import",{
+		{"import_wrci",Lua::import::import_wrci},
+		{"import_wad",Lua::import::import_wad},
+		{"import_wrmi",Lua::import::import_wrmi},
+		//{"import_smd",Lua::import::import_smd},
+		{"import_obj",Lua::import::import_obj},
+		{"import_pmx",Lua::import::import_pmx}
+	});
+
+	auto activityEnums = ::Animation::GetActivityEnumRegister().GetEnums();
+	auto _G = luabind::globals(l);
+	for(auto i=decltype(activityEnums.size()){0};i<activityEnums.size();++i)
+		_G["Animation"][activityEnums.at(i)] = i;
+	auto eventEnums = ::Animation::GetEventEnumRegister().GetEnums();
+	for(auto i=decltype(eventEnums.size()){0};i<eventEnums.size();++i)
+		_G["Animation"][eventEnums.at(i)] = i;
+
+	auto *nw = GetNetworkState();
+	auto fAddEnum = [l](std::reference_wrapper<const std::string> name,uint32_t id) {
+		auto _G = luabind::globals(l);
+		_G["Animation"][name.get()] = id;
+	};
+	nw->GetLuaEnumRegisterCallbacks().push_back(::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum));
+	nw->GetLuaEnumRegisterCallbacks().push_back(::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum));
+
+	/*static const luaL_Reg funcs_recast[] = {
+		{"Test",Lua_recast_Test},
+		{NULL,NULL}
+	};
+	luaL_newlib(GetLuaState(),funcs_recast);
+	lua_setglobal(GetLuaState(),"recast");*/
+
+	Lua::nav::register_library(GetLuaInterface());
+
+	Lua::RegisterLibrary(GetLuaState(),"file",{
+		{"open",Lua::file::Open},
+		{"create_directory",Lua::file::CreateDir},
+		{"create_path",Lua::file::CreatePath},
+		{"exists",Lua::file::Exists},
+		{"delete",Lua::file::Delete},
+		{"find_external_game_resource_files",Lua::file::find_external_game_resource_files},
+		{"is_directory",Lua::file::IsDir},
+		{"find",Lua::file::Find},
+		{"get_attributes",Lua::file::GetAttributes},
+		{"get_flags",Lua::file::GetFlags},
+		{"read",Lua::file::Read},
+		{"write",Lua::file::Write},
+		{"get_canonicalized_path",Lua::file::GetCanonicalizedPath},
+		{"get_file_path",Lua::file::GetFilePath},
+		{"get_file_name",Lua::file::GetFileName},
+		{"get_file_extension",Lua::file::GetFileExtension},
+		{"get_size",Lua::file::GetSize},
+		{"compare_path",Lua::file::ComparePath},
+		{"remove_file_extension",Lua::file::RemoveFileExtension}
+	});
+
+	auto fileMod = luabind::module(GetLuaState(),"file");
+	auto classDefFile = luabind::class_<std::shared_ptr<LFile>>("File");
+	classDefFile.def("Close",&Lua_LFile_Close);
+	classDefFile.def("Size",&Lua_LFile_Size);
+	classDefFile.def("ReadLine",&Lua_LFile_ReadLine);
+	classDefFile.def("ReadInt32",&Lua_LFile_ReadInt32);
+	classDefFile.def("ReadUInt32",&Lua_LFile_ReadUInt32);
+	classDefFile.def("ReadInt16",&Lua_LFile_ReadInt16);
+	classDefFile.def("ReadUInt16",&Lua_LFile_ReadUInt16);
+	classDefFile.def("ReadInt8",&Lua_LFile_ReadInt8);
+	classDefFile.def("ReadUInt8",&Lua_LFile_ReadUInt8);
+	classDefFile.def("ReadInt64",&Lua_LFile_ReadInt64);
+	classDefFile.def("ReadUInt64",&Lua_LFile_ReadUInt64);
+	classDefFile.def("ReadBool",&Lua_LFile_ReadBool);
+	classDefFile.def("ReadChar",&Lua_LFile_ReadChar);
+	classDefFile.def("ReadFloat",&Lua_LFile_ReadFloat);
+	classDefFile.def("ReadDouble",&Lua_LFile_ReadDouble);
+	classDefFile.def("ReadLongDouble",&Lua_LFile_ReadLongDouble);
+	classDefFile.def("ReadVector",&Lua_LFile_ReadVector);
+	classDefFile.def("ReadVector2",&Lua_LFile_ReadVector2);
+	classDefFile.def("ReadVector4",&Lua_LFile_ReadVector4);
+	classDefFile.def("ReadAngles",&Lua_LFile_ReadAngles);
+	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,uint32_t)>(&Lua_LFile_ReadString));
+	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&)>(&Lua_LFile_ReadString));
+	classDefFile.def("WriteInt32",&Lua_LFile_WriteInt32);
+	classDefFile.def("WriteUInt32",&Lua_LFile_WriteUInt32);
+	classDefFile.def("WriteInt16",&Lua_LFile_WriteInt16);
+	classDefFile.def("WriteUInt16",&Lua_LFile_WriteUInt16);
+	classDefFile.def("WriteInt8",&Lua_LFile_WriteInt8);
+	classDefFile.def("WriteUInt8",&Lua_LFile_WriteUInt8);
+	classDefFile.def("WriteInt64",&Lua_LFile_WriteInt64);
+	classDefFile.def("WriteUInt64",&Lua_LFile_WriteUInt64);
+	classDefFile.def("WriteBool",&Lua_LFile_WriteBool);
+	classDefFile.def("WriteChar",&Lua_LFile_WriteChar);
+	classDefFile.def("WriteFloat",&Lua_LFile_WriteFloat);
+	classDefFile.def("WriteDouble",&Lua_LFile_WriteDouble);
+	classDefFile.def("WriteLongDouble",&Lua_LFile_WriteDouble);
+	classDefFile.def("WriteVector",&Lua_LFile_WriteVector);
+	classDefFile.def("WriteVector2",&Lua_LFile_WriteVector2);
+	classDefFile.def("WriteVector4",&Lua_LFile_WriteVector4);
+	classDefFile.def("WriteAngles",&Lua_LFile_WriteAngles);
+	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string,bool)>(&Lua_LFile_WriteString));
+	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string)>(&Lua_LFile_WriteString));
+	classDefFile.def("Seek",&Lua_LFile_Seek);
+	classDefFile.def("Tell",&Lua_LFile_Tell);
+	classDefFile.def("Eof",&Lua_LFile_Eof);
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string,std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds,uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds,uint32_t)>(&Lua_LFile_Write));
+	fileMod[classDefFile];
+
+	Lua::RegisterLibrary(GetLuaState(),"time",{
+		{"create_timer",Lua::time::create_timer},
+		{"create_simple_timer",Lua::time::create_simple_timer},
+		{"cur_time",Lua::time::cur_time},
+		{"real_time",Lua::time::real_time},
+		{"delta_time",Lua::time::delta_time},
+		{"time_since_epoch",Lua::time::time_since_epoch},
+		{"convert_duration",Lua::time::convert_duration}
+	});
+
+	auto timeMod = luabind::module(GetLuaState(),"time");
+	auto classDefTimer = luabind::class_<std::shared_ptr<TimerHandle>>("Timer");
+	classDefTimer.def("Start",&Lua_Timer_Start);
+	classDefTimer.def("Stop",&Lua_Timer_Stop);
+	classDefTimer.def("Pause",&Lua_Timer_Pause);
+	classDefTimer.def("Remove",&Lua_Timer_Remove);
+	classDefTimer.def("IsValid",&Lua_Timer_IsValid);
+	classDefTimer.def("GetTimeLeft",&Lua_Timer_GetTimeLeft);
+	classDefTimer.def("GetInterval",&Lua_Timer_GetTimeInterval);
+	classDefTimer.def("SetInterval",&Lua_Timer_SetTimeInterval);
+	classDefTimer.def("GetRepetitionsLeft",&Lua_Timer_GetRepetitionsLeft);
+	classDefTimer.def("SetRepetitions",&Lua_Timer_SetRepetitions);
+	classDefTimer.def("IsRunning",&Lua_Timer_IsRunning);
+	classDefTimer.def("IsPaused",&Lua_Timer_IsPaused);
+	classDefTimer.def("Call",&Lua_Timer_Call);
+	classDefTimer.def("SetCall",&Lua_Timer_SetCall);
+	timeMod[classDefTimer];
+
+	Lua::RegisterLibrary(GetLuaState(),"boundingvolume",{
+		{"get_rotated_aabb",Lua_boundingvolume_GetRotatedAABB}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"intersect",{
+		{"aabb_with_aabb",Lua::intersect::aabb_with_aabb},
+		{"sphere_with_sphere",Lua::intersect::sphere_with_sphere},
+		{"aabb_with_sphere",Lua::intersect::aabb_with_sphere},
+		{"line_with_aabb",Lua::intersect::line_aabb},
+		{"line_with_obb",Lua::intersect::line_obb},
+		{"line_with_mesh",Lua::intersect::line_mesh},
+		{"line_with_plane",Lua::intersect::line_plane},
+		{"point_in_aabb",Lua::intersect::vector_in_bounds},
+		{"point_in_plane_mesh",Lua::intersect::point_in_plane_mesh},
+		{"sphere_in_plane_mesh",Lua::intersect::sphere_in_plane_mesh},
+		{"aabb_in_plane_mesh",Lua::intersect::aabb_in_plane_mesh},
+		{"sphere_with_cone",Lua::intersect::sphere_with_cone},
+		{"line_with_triangle",Lua::intersect::line_triangle},
+		{"aabb_with_plane",Lua::intersect::aabb_with_plane},
+		{"obb_with_plane",Lua::intersect::obb_with_plane},
+		{"sphere_with_plane",Lua::intersect::sphere_with_plane}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"geometry",{
+		{"closest_point_on_aabb_to_point",Lua::geometry::closest_point_on_aabb_to_point},
+		{"closest_points_between_lines",Lua::geometry::closest_points_between_lines},
+		{"closest_point_on_plane_to_point",Lua::geometry::closest_point_on_plane_to_point},
+		{"closest_point_on_triangle_to_point",Lua::geometry::closest_point_on_triangle_to_point},
+		{"smallest_enclosing_sphere",Lua::geometry::smallest_enclosing_sphere},
+		{"closest_point_on_line_to_point",Lua::geometry::closest_point_on_line_to_point},
+		{"closest_point_on_sphere_to_line",Lua::geometry::closest_point_on_sphere_to_line},
+		{"get_triangle_winding_order",Lua::geometry::get_triangle_winding_order},
+		{"generate_truncated_cone_mesh",Lua::geometry::generate_truncated_cone_mesh},
+		{"calc_face_normal",Lua::geometry::calc_face_normal},
+		{"calc_volume_of_triangle",Lua::geometry::calc_volume_of_triangle},
+		{"calc_volume_of_polyhedron",Lua::geometry::calc_volume_of_polyhedron},
+		{"calc_center_of_mass",Lua::geometry::calc_center_of_mass},
+		{"calc_barycentric_coordinates",Lua::geometry::calc_barycentric_coordinates},
+		{"calc_rotation_between_planes",Lua::geometry::calc_rotation_between_planes},
+		{"get_side_of_point_to_line",Lua::geometry::get_side_of_point_to_line},
+		{"get_side_of_point_to_plane",Lua::geometry::get_side_of_point_to_plane},
+		{"get_outline_vertices",Lua::geometry::get_outline_vertices},
+		//{"triangulate_point_cloud",Lua::geometry::triangulate_point_cloud},
+		{"triangulate",Lua::geometry::triangulate}
+	});
+	Lua::RegisterLibraryEnums(GetLuaState(),"geometry",{
+		{"WINDING_ORDER_CLOCKWISE",umath::to_integral(WindingOrder::Clockwise)},
+		{"WINDING_ORDER_COUNTER_CLOCKWISE",umath::to_integral(WindingOrder::CounterClockwise)},
+		
+		{"LINE_SIDE_LEFT",umath::to_integral(Geometry::LineSide::Left)},
+		{"LINE_SIDE_RIGHT",umath::to_integral(Geometry::LineSide::Right)},
+		{"LINE_SIDE_ON_LINE",umath::to_integral(Geometry::LineSide::OnLine)},
+
+		{"PLANE_SIDE_FRONT",umath::to_integral(Geometry::PlaneSide::Front)},
+		{"PLANE_SIDE_BACK",umath::to_integral(Geometry::PlaneSide::Back)},
+		{"PLANE_SIDE_ON_PLANE",umath::to_integral(Geometry::PlaneSide::OnPlane)}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"sweep",{
+		{"aabb_with_aabb",Lua_sweep_AABBWithAABB},
+		{"aabb_with_plane",Lua_sweep_AABBWithPlane}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"matrix",{
+		{"create_from_axis_angle",Lua::matrix::create_from_axis_angle},
+		{"create_from_axes",Lua::matrix::create_from_axes},
+		{"create_orthogonal_matrix",Lua::matrix::create_orthogonal_matrix},
+		{"create_perspective_matrix",Lua::matrix::create_perspective_matrix},
+		{"create_look_at_matrix",Lua::matrix::create_look_at_matrix},
+		{"calc_covariance_matrix",Lua::matrix::calc_covariance_matrix}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"mesh",{
+		{"generate_convex_hull",Lua::mesh::generate_convex_hull},
+		{"calc_smallest_enclosing_bbox",Lua::mesh::calc_smallest_enclosing_bbox}
+	});
+
+	Lua::RegisterLibrary(GetLuaState(),"regex",{
+		{"match",Lua::regex::match},
+		{"search",Lua::regex::search},
+		{"replace",Lua::regex::replace}
+	});
+
+	auto regexMod = luabind::module(GetLuaState(),"regex");
+	auto classDefRegexResult = luabind::class_<std::match_results<const char*>>("Result");
+	classDefRegexResult.def(luabind::constructor<>());
+	classDefRegexResult.def(luabind::tostring(luabind::self));
+	classDefRegexResult.def("HasMatch",&Lua::regex::RegexResult::HasMatch);
+	classDefRegexResult.def("GetMatchCount",&Lua::regex::RegexResult::GetMatchCount);
+	classDefRegexResult.def("GetLength",&Lua::regex::RegexResult::GetLength);
+	classDefRegexResult.def("GetPosition",&Lua::regex::RegexResult::GetPosition);
+	classDefRegexResult.def("GetString",&Lua::regex::RegexResult::GetString);
+	classDefRegexResult.def("SetFormat",&Lua::regex::RegexResult::SetFormat);
+	regexMod[classDefRegexResult];
+
+	Lua::RegisterLibraryEnums(GetLuaState(),"regex",{
+		{"MATCH_DEFAULT",umath::to_integral(std::regex_constants::match_default)},
+		{"MATCH_NOT_BOL",umath::to_integral(std::regex_constants::match_not_bol)},
+		{"MATCH_NOT_EOL",umath::to_integral(std::regex_constants::match_not_eol)},
+		{"MATCH_NOT_BOW",umath::to_integral(std::regex_constants::match_not_bow)},
+		{"MATCH_NOT_EOW",umath::to_integral(std::regex_constants::match_not_eow)},
+		{"MATCH_ANY",umath::to_integral(std::regex_constants::match_any)},
+		{"MATCH_NOT_NULL",umath::to_integral(std::regex_constants::match_not_null)},
+		{"MATCH_CONTINUOUS",umath::to_integral(std::regex_constants::match_continuous)},
+		{"MATCH_PREV_AVAIL",umath::to_integral(std::regex_constants::match_prev_avail)},
+
+		{"FORMAT_DEFAULT",umath::to_integral(std::regex_constants::format_default)},
+		{"FORMAT_SED",umath::to_integral(std::regex_constants::format_sed)},
+		{"FORMAT_NO_COPY",umath::to_integral(std::regex_constants::format_no_copy)},
+		{"FORMAT_FIRST_ONLY",umath::to_integral(std::regex_constants::format_first_only)}
+	});
+
+#ifdef PHYS_ENGINE_BULLET
+	Lua::physenv::register_library(GetLuaInterface());
+#elif PHYS_ENGINE_PHYSX
+	static const luaL_Reg funcs_physx[] = {
+		{"create_box_controller",Lua_physx_CreateBoxController},
+		{"create_capsule_controller",Lua_physx_CreateCapsuleController},
+		{"create_material",Lua_physx_CreateMaterial},
+		{"create_scene",Lua_physx_CreateScene},
+		{"create_fixed_joint",Lua_physx_CreateFixedJoint},
+		{"create_spherical_joint",Lua_physx_CreateSphericalJoint},
+		{"create_revolute_joint",Lua_physx_CreateRevoluteJoint},
+		{"create_prismatic_joint",Lua_physx_CreatePrismaticJoint},
+		{"create_distance_joint",Lua_physx_CreateDistanceJoint},
+		{NULL,NULL}
+	};
+	luaL_newlib(GetLuaState(),funcs_physx);
+	lua_setglobal(GetLuaState(),"physx");
+#endif
+}

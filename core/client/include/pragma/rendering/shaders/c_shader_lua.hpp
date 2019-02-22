@@ -1,0 +1,270 @@
+#ifndef __C_SHADER_LUA_HPP__
+#define __C_SHADER_LUA_HPP__
+
+#include "pragma/clientdefinitions.h"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
+#include <shader/prosper_shader_base_image_processing.hpp>
+#include <pragma/lua/luaobjectbase.h>
+
+namespace pragma
+{
+	struct LuaDescriptorSetBinding;
+	struct LuaDescriptorSetInfo;
+	struct LuaVertexBinding;
+	struct LuaVertexAttribute;
+};
+
+lua_registercheck(DescriptorSetBinding,pragma::LuaDescriptorSetBinding);
+lua_registercheck(DescriptorSetInfo,pragma::LuaDescriptorSetInfo);
+lua_registercheck(VertexBinding,pragma::LuaVertexBinding);
+lua_registercheck(VertexAttribute,pragma::LuaVertexAttribute);
+namespace pragma
+{
+	struct DLLCLIENT LuaVKPipelineRasterizationStateCreateInfo
+		: public vk::PipelineRasterizationStateCreateInfo
+	{
+		std::array<bool,10> custom = {false};
+	};
+
+	class DLLCLIENT LuaShaderManager
+	{
+	private:
+		struct ShaderInfo
+		{
+			luabind::object luaClassObject;
+			::util::WeakHandle<prosper::Shader> whShader;
+		};
+		std::unordered_map<std::string,ShaderInfo> m_shaders;
+	public:
+		~LuaShaderManager();
+		void RegisterShader(std::string className,luabind::object &o);
+		luabind::object *GetClassObject(std::string className);
+	};
+
+	struct LuaVertexBinding
+	{
+		LuaVertexBinding()=default;
+		LuaVertexBinding(uint32_t inputRate,uint32_t stride=std::numeric_limits<uint32_t>::max())
+			: stride(stride),inputRate(static_cast<Anvil::VertexInputRate>(inputRate))
+		{}
+		uint32_t stride = 0u;
+		Anvil::VertexInputRate inputRate = Anvil::VertexInputRate::VERTEX;
+	};
+
+	struct LuaVertexAttribute
+	{
+		LuaVertexAttribute()=default;
+		LuaVertexAttribute(uint32_t format,uint32_t location=std::numeric_limits<uint32_t>::max(),uint32_t offset=std::numeric_limits<uint32_t>::max())
+			: location(location),format(static_cast<Anvil::Format>(format)),offset(offset)
+		{}
+		uint32_t location = 0u;
+		Anvil::Format format = Anvil::Format::R8G8B8A8_UNORM;
+		uint32_t offset = 0u;
+	};
+
+	struct LuaDescriptorSetBinding
+	{
+		LuaDescriptorSetBinding()=default;
+		LuaDescriptorSetBinding(uint32_t type,uint32_t shaderStages,uint32_t bindingIndex=std::numeric_limits<uint32_t>::max(),uint32_t descriptorArraySize=1u)
+			: type(static_cast<Anvil::DescriptorType>(type)),shaderStages(static_cast<Anvil::ShaderStageFlagBits>(shaderStages)),bindingIndex(bindingIndex),descriptorArraySize(descriptorArraySize)
+		{}
+		Anvil::DescriptorType type = {};
+		Anvil::ShaderStageFlags shaderStages = Anvil::ShaderStageFlagBits::ALL;
+		uint32_t bindingIndex = std::numeric_limits<uint32_t>::max();
+		uint32_t descriptorArraySize = 1u;
+	};
+
+	struct LuaDescriptorSetInfo
+	{
+		LuaDescriptorSetInfo()=default;
+		LuaDescriptorSetInfo(luabind::object lbindings,uint32_t setIndex=std::numeric_limits<uint32_t>::max())
+			: setIndex(setIndex)
+		{
+			Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(),2u,bindings,[](lua_State *l,int32_t idx) -> LuaDescriptorSetBinding {
+				return *Lua::CheckDescriptorSetBinding(l,idx);
+			});
+		}
+		uint32_t setIndex = 0u;
+		std::vector<LuaDescriptorSetBinding> bindings;
+	};
+	prosper::Shader::DescriptorSetInfo to_prosper_descriptor_set_info(const LuaDescriptorSetInfo &ldescSetInfo);
+
+	//////////////////
+
+	class DLLCLIENT LuaShaderBase
+		: public LuaObjectBase
+	{
+	public:
+		static LuaShaderBase *GetShader(Anvil::BasePipelineCreateInfo &pipelineInfo);
+
+		LuaShaderBase(prosper::Shader &shader);
+		LuaShaderBase(const LuaShaderBase&)=delete;
+		LuaShaderBase &operator=(const LuaShaderBase&)=delete;
+		void Initialize(const luabind::object &o);
+		void ClearLuaObject();
+		bool AttachDescriptorSetInfo(const pragma::LuaDescriptorSetInfo &descSetInfo);
+
+		prosper::Shader &GetShader() const;
+
+		virtual void SetIdentifier(const std::string &identifier)=0;
+		virtual void SetPipelineCount(uint32_t pipelineCount)=0;
+		virtual std::shared_ptr<prosper::PrimaryCommandBuffer> GetCurrentCommandBuffer()=0;
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {}
+		static void Lua_default_InitializePipeline(lua_State *l,LuaShaderBase *shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader->Lua_InitializePipeline(pipelineInfo,pipelineIdx);}
+
+		void Lua_OnInitialized() {}
+		static void Lua_default_OnInitialized(lua_State *l,LuaShaderBase *shader) {shader->Lua_OnInitialized();}
+
+		void Lua_OnPipelinesInitialized() {}
+		static void Lua_default_OnPipelinesInitialized(lua_State *l,LuaShaderBase *shader) {shader->Lua_OnPipelinesInitialized();}
+
+		void Lua_OnPipelineInitialized(uint32_t pipelineIdx) {}
+		static void Lua_default_OnPipelineInitialized(lua_State *l,LuaShaderBase *shader,uint32_t pipelineIdx) {shader->Lua_OnPipelineInitialized(pipelineIdx);}
+	protected:
+		void OnPipelineInitialized(uint32_t pipelineIdx);
+		void OnInitialized();
+		void OnPipelinesInitialized();
+		void InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		prosper::Shader &m_shader;
+
+		Anvil::BasePipelineCreateInfo *m_currentPipelineInfo = nullptr;
+	private:
+		uint32_t m_currentDescSetIndex = 0u;
+	};
+
+	class DLLCLIENT LuaShaderGraphicsBase
+		: public LuaShaderBase
+	{
+	public:
+		bool AttachVertexAttribute(const pragma::LuaVertexBinding &binding,const std::vector<pragma::LuaVertexAttribute> &attributes);
+	protected:
+		LuaShaderGraphicsBase(prosper::ShaderGraphics &shader);
+		void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx);
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)=0;
+	private:
+		uint32_t m_currentVertexAttributeLocation = 0u;
+	};
+
+	class DLLCLIENT LuaShaderComputeBase
+		: public LuaShaderBase
+	{
+	protected:
+		LuaShaderComputeBase(prosper::ShaderCompute &shader);
+		void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+	};
+
+	template<class TBaseShader,class TLuaBaseShader>
+		class TLuaShaderBase
+			: public TBaseShader,public TLuaBaseShader
+	{
+	public:
+		virtual std::shared_ptr<prosper::PrimaryCommandBuffer> GetCurrentCommandBuffer() override;
+	protected:
+		template<typename... TARGS>
+			TLuaShaderBase(prosper::Context &context,TARGS ...args)
+				: TBaseShader(context,std::forward<TARGS>(args)...),TLuaBaseShader(static_cast<TBaseShader&>(*this))
+		{}
+		virtual void SetIdentifier(const std::string &identifier) override;
+		virtual void SetPipelineCount(uint32_t pipelineCount) override;
+		virtual void OnPipelineInitialized(uint32_t pipelineIdx) override;
+		virtual void OnInitialized() override;
+		virtual void OnPipelinesInitialized() override;
+	};
+
+	class DLLCLIENT LuaShaderGraphics
+		: public TLuaShaderBase<prosper::ShaderGraphics,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderGraphics();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderCompute
+		: public TLuaShaderBase<prosper::ShaderCompute,LuaShaderComputeBase>
+	{
+	public:
+		LuaShaderCompute();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderImageProcessing
+		: public TLuaShaderBase<prosper::ShaderBaseImageProcessing,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderImageProcessing();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderPostProcessing
+		: public TLuaShaderBase<ShaderPPBase,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderPostProcessing();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderTextured3D
+		: public TLuaShaderBase<ShaderTextured3DBase,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderTextured3D();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		// virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
+
+		bool Lua_BindMaterialParameters(Material &mat);
+		static bool Lua_default_BindMaterialParameters(lua_State *l,LuaShaderTextured3D &shader,Material &mat) {return shader.Lua_BindMaterialParameters(mat);}
+
+		void Lua_InitializeGfxPipelineVertexAttributes(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);}
+
+		void Lua_InitializeGfxPipelinePushConstantRanges(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);}
+
+		void Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);}
+	protected:
+		virtual bool BindMaterialParameters(CMaterial &mat) override;
+		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+};
+template<class TBaseShader,class TLuaBaseShader>
+	std::shared_ptr<prosper::PrimaryCommandBuffer> pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::GetCurrentCommandBuffer() {return TBaseShader::GetCurrentCommandBuffer();}
+template<class TBaseShader,class TLuaBaseShader>
+	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::SetIdentifier(const std::string &identifier) {return TBaseShader::SetIdentifier(identifier);}
+template<class TBaseShader,class TLuaBaseShader>
+	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::SetPipelineCount(uint32_t pipelineCount) {return TBaseShader::SetPipelineCount(pipelineCount);}
+template<class TBaseShader,class TLuaBaseShader>
+	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::OnInitialized() {TBaseShader::OnInitialized(); TLuaBaseShader::OnInitialized();}
+template<class TBaseShader,class TLuaBaseShader>
+	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::OnPipelinesInitialized() {TBaseShader::OnPipelinesInitialized(); TLuaBaseShader::OnPipelinesInitialized();}
+template<class TBaseShader,class TLuaBaseShader>
+	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::OnPipelineInitialized(uint32_t pipelineIdx) {TBaseShader::OnPipelineInitialized(pipelineIdx); TLuaBaseShader::OnPipelineInitialized(pipelineIdx);}
+
+#endif

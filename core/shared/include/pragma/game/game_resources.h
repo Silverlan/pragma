@@ -1,0 +1,6 @@
+#ifndef __GAME_RESOURCES_H__
+#define __GAME_RESOURCES_H__
+
+#define RESOURCE_TRANSFER_FRAGMENT_SIZE 2'048
+
+#endif

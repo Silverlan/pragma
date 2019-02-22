@@ -73,3 +73,60 @@
 [submodule "third_party_libs/glm"]
 	path = third_party_libs/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "third_party_libs/gli"]
+	path = third_party_libs/gli
+	url = https://github.com/g-truc/gli.git
+[submodule "third_party_libs/glfw"]
+	path = third_party_libs/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "third_party_libs/anvil"]
+	path = third_party_libs/anvil
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/Anvil.git
+[submodule "third_party_libs/clip2tri"]
+	path = third_party_libs/clip2tri
+	url = https://github.com/raptor/clip2tri.git
+[submodule "third_party_libs/recastnavigation"]
+	path = third_party_libs/recastnavigation
+	url = https://github.com/recastnavigation/recastnavigation.git
+[submodule "third_party_libs/exprtk"]
+	path = third_party_libs/exprtk
+	url = https://github.com/ArashPartow/exprtk.git
+[submodule "external_libs/util_image"]
+	path = external_libs/util_image
+	url = https://github.com/Silverlan/util_image.git
+[submodule "third_party_libs/libzip"]
+	path = third_party_libs/libzip
+	url = https://github.com/nih-at/libzip.git
+[submodule "third_party_libs/libpng"]
+	path = third_party_libs/libpng
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "third_party_libs/rectangle_bin_pack"]
+	path = third_party_libs/rectangle_bin_pack
+	url = https://github.com/juj/RectangleBinPack.git
+[submodule "third_party_libs/miniball"]
+	path = third_party_libs/miniball
+	url = https://github.com/hbf/miniball.git
+[submodule "third_party_libs/squish"]
+	path = third_party_libs/squish
+	url = https://github.com/Cavewhere/squish.git
+[submodule "third_party_libs/vtflib"]
+	path = third_party_libs/vtflib
+	url = https://github.com/azuisleet/VTFLib.git
+[submodule "third_party_libs/openal-soft"]
+	path = third_party_libs/openal-soft
+	url = https://github.com/kcat/openal-soft.git
+[submodule "third_party_libs/luajit"]
+	path = third_party_libs/luajit
+	url = http://luajit.org/git/luajit-2.0.git
+[submodule "third_party_libs/alure"]
+	path = third_party_libs/alure
+	url = https://github.com/kcat/alure.git
+[submodule "third_party_libs/assimp"]
+	path = third_party_libs/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "third_party_libs/eigen"]
+	path = third_party_libs/eigen
+	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "third_party_libs/freetype"]
+	path = third_party_libs/freetype
+	url = https://github.com/ubawurinna/freetype-windows-binaries.git

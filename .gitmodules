@@ -64,3 +64,6 @@
 [submodule "external_libs/wgui"]
 	path = external_libs/wgui
 	url = https://github.com/Silverlan/wgui.git
+[submodule "modules/pr_steamworks"]
+	path = modules/pr_steamworks
+	url = https://github.com/Silverlan/pr_steamworks.git

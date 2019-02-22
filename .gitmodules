@@ -67,3 +67,6 @@
 [submodule "modules/pr_steamworks"]
 	path = modules/pr_steamworks
 	url = https://github.com/Silverlan/pr_steamworks.git
+[submodule "modules/interfaces"]
+	path = modules/interfaces
+	url = https://github.com/Silverlan/pragma_interfaces.git

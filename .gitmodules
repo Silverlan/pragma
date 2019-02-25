@@ -79,9 +79,6 @@
 [submodule "third_party_libs/glfw"]
 	path = third_party_libs/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "third_party_libs/anvil"]
-	path = third_party_libs/anvil
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/Anvil.git
 [submodule "third_party_libs/clip2tri"]
 	path = third_party_libs/clip2tri
 	url = https://github.com/raptor/clip2tri.git
@@ -130,3 +127,12 @@
 [submodule "third_party_libs/freetype"]
 	path = third_party_libs/freetype
 	url = https://github.com/ubawurinna/freetype-windows-binaries.git
+[submodule "third_party_libs/bullet"]
+	path = third_party_libs/bullet
+	url = https://github.com/bulletphysics/bullet3.git
+[submodule "third_party_libs/libsamplerate"]
+	path = third_party_libs/libsamplerate
+	url = https://github.com/erikd/libsamplerate.git
+[submodule "external_libs/util_smdmodel"]
+	path = external_libs/util_smdmodel
+	url = https://github.com/Silverlan/util_smdmodel.git

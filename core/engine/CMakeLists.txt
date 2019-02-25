@@ -6,7 +6,12 @@ link_external_library(util_zip)
 link_external_library(util_pragma_doc)
 link_external_library(util_pad)
 link_external_library(wms_shared)
+link_external_library(bzip2)
 
+add_external_library(luajit)
+add_external_library(lua)
+add_external_library(util_versioned_archive)
+add_external_library(libzip)
 
 add_def(DLLENGINE_EX)
 

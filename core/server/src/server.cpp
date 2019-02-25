@@ -21,7 +21,7 @@
 #pragma comment(lib,"shared.lib")
 #pragma comment(lib,"engine.lib")
 #pragma comment(lib,"recast.lib")
-#pragma comment(lib,"util.lib")
+#pragma comment(lib,"sharedutils.lib")
 #pragma comment(lib,"util_sound.lib")
 #pragma comment(lib,"mathutil.lib")
 #pragma comment(lib,"networkmanager.lib")

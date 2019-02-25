@@ -2,7 +2,7 @@
 #include "pragma/lua/classes/lmaterial.h"
 #include "luasystem.h"
 #include "material.h"
-#include "shaderinfo.h"
+#include <sharedutils/util_shaderinfo.hpp>
 
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {

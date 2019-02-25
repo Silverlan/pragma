@@ -52,8 +52,8 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 	}
 	if((flags &ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None)
 	{
-		m_min = Vector3(std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max());
-		m_max = Vector3(std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest());
+		m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
+		m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
 		m_center = {};
 	}
 	uint32_t vertCount = 0;
@@ -302,8 +302,8 @@ void ModelSubMesh::Update(ModelUpdateFlags flags)
 {
 	if((flags &ModelUpdateFlags::UpdateBounds) == ModelUpdateFlags::None)
 		return;
-	m_min = Vector3(std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max());
-	m_max = Vector3(std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest());
+	m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
+	m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
 	m_center = {};
 	if(!m_vertices->empty())
 	{

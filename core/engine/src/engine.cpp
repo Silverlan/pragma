@@ -13,14 +13,16 @@
 #pragma comment(lib,"luabind.lib")
 #pragma comment(lib,"Shlwapi.lib")
 #pragma comment(lib,"bzip2.lib")
-#pragma comment(lib,"util.lib")
+#pragma comment(lib,"sharedutils.lib")
 #pragma comment(lib,"mathutil.lib")
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"materialsystem.lib")
 #pragma comment(lib,"util_zip.lib")
-#pragma comment(lib,"pad.lib")
+#pragma comment(lib,"util_pad.lib")
+#pragma comment(lib,"zip.lib")
+#pragma comment(lib,"util_versioned_archive.lib")
 #pragma comment(lib,"util_pragma_doc.lib")
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 #ifdef PHYS_ENGINE_BULLET
 	#pragma comment(lib,"BulletDynamics_Debug.lib")
 	#pragma comment(lib,"BulletCollision_Debug.lib")
@@ -37,9 +39,9 @@
 #endif
 #else
 #ifdef PHYS_ENGINE_BULLET
-	#pragma comment(lib,"BulletDynamics_RelWithDebugInfo.lib")
-	#pragma comment(lib,"BulletCollision_RelWithDebugInfo.lib")
-	#pragma comment(lib,"BulletSoftBody_RelWithDebugInfo.lib")
+	#pragma comment(lib,"BulletDynamics.lib")
+	#pragma comment(lib,"BulletCollision.lib")
+	#pragma comment(lib,"BulletSoftBody.lib")
 	#pragma comment(lib,"LinearMath_RelWithDebugInfo.lib")
 #endif
 #ifdef PHYS_ENGINE_PHYSX
@@ -50,7 +52,7 @@
 	#pragma comment(lib,"PhysX3Vehicle.lib")
 	//#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
 #endif
-#endif
+#endif*/
 //
 
 #include "pragma/engine.h"

@@ -233,8 +233,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		}
 	}
 	std::vector<std::unordered_map<uint32_t,uint32_t>> lods;
-	Vector3 min(std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max());
-	Vector3 max(std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest());
+	Vector3 min(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
+	Vector3 max(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
 	for(unsigned int i=0;i<meshes.size();i++)
 	{
 		auto colMesh = CollisionMesh::Create(game);

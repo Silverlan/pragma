@@ -35,8 +35,12 @@ register_external_lib(util_timeline_scene external_libs/util)
 register_external_lib(util_versioned_archive external_libs/util)
 register_external_lib(util_vmf external_libs/util)
 register_external_lib(util_zip external_libs/util)
+register_external_lib(util_image external_libs/util)
 register_external_lib(vfilesystem)
 register_external_lib(wgui)
+
+add_subdirectory(sharedutils-static)
+set_target_properties(sharedutils-static PROPERTIES FOLDER external_libs)
 
 set_target_properties(networkmanager PROPERTIES FOLDER external_libs/networkmanager)
 set_target_properties(clientmanager PROPERTIES FOLDER external_libs/networkmanager)

@@ -1,7 +1,6 @@
 #include "stdafx_shared.h"
 
 // Link Libraries
-#pragma comment(lib,"shaderinfo.lib")
 #pragma comment(lib,"materialsystem.lib")
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"networkmanager.lib")

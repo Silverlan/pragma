@@ -6,7 +6,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include <pragma/entities/entity_iterator.hpp>
-#include <shaderinfo.h>
+#include <sharedutils/util_shaderinfo.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 
@@ -249,7 +249,7 @@ bool CLightComponent::ShouldPass(const Model &mdl,const CModelSubMesh &mesh)
 		return false;
 	auto &mat = materials[texId];
 	auto *info = mat.get()->GetShaderInfo();
-	if(info == nullptr || const_cast<ShaderInfo*>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
+	if(info == nullptr || const_cast<util::ShaderInfo*>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
 		return false;
 	CEShouldPassMesh evData {mdl,mesh};
 	InvokeEventCallbacks(EVENT_SHOULD_PASS_MESH,evData);

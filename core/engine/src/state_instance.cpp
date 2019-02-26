@@ -8,7 +8,7 @@ Engine::StateInstance::StateInstance(const std::shared_ptr<MaterialManager> &mat
 {
 	if(matErr == nullptr)
 	{
-		Con::crit<<"Unable to load error material! Validate or reinstall the game files!"<<Con::endl;
+		Con::cout<<"Unable to load error material! Validate or reinstall the game files!"<<Con::endl;
 		exit(EXIT_FAILURE);
 	}
 	materialManager->SetErrorMaterial(matErr);

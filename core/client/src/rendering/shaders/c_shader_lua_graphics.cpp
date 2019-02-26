@@ -34,18 +34,18 @@ void Lua::GraphicsPipelineCreateInfo::SetMultisamplingProperties(lua_State *l,An
 }
 void Lua::GraphicsPipelineCreateInfo::SetSampleCount(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t sampleCount)
 {
-	vk::SampleMask sampleMask;
+	const vk::SampleMask *sampleMask;
 	float minSampleShading;
 	pipelineInfo.get_multisampling_properties(nullptr,&sampleMask);
 	pipelineInfo.get_sample_shading_state(nullptr,&minSampleShading);
-	pipelineInfo.set_multisampling_properties(static_cast<Anvil::SampleCountFlagBits>(sampleCount),minSampleShading,sampleMask);
+	pipelineInfo.set_multisampling_properties(static_cast<Anvil::SampleCountFlagBits>(sampleCount),minSampleShading,sampleMask ? *sampleMask : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::SetMinSampleShading(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,float minSampleShading)
 {
 	Anvil::SampleCountFlagBits sampleCount;
-	vk::SampleMask sampleMask;
+	const vk::SampleMask *sampleMask;
 	pipelineInfo.get_multisampling_properties(&sampleCount,&sampleMask);
-	pipelineInfo.set_multisampling_properties(static_cast<Anvil::SampleCountFlagBits>(sampleCount),minSampleShading,sampleMask);
+	pipelineInfo.set_multisampling_properties(static_cast<Anvil::SampleCountFlagBits>(sampleCount),minSampleShading,sampleMask ? *sampleMask : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::SetSampleMask(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t sampleMask)
 {
@@ -272,10 +272,10 @@ void Lua::GraphicsPipelineCreateInfo::GetLogicOpState(lua_State *l,Anvil::Graphi
 void Lua::GraphicsPipelineCreateInfo::GetMultisamplingProperties(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	Anvil::SampleCountFlagBits samples;
-	vk::SampleMask mask;
-	pipelineInfo.get_multisampling_properties(&samples,&mask);
+	const vk::SampleMask *sampleMask;
+	pipelineInfo.get_multisampling_properties(&samples,&sampleMask);
 	Lua::PushInt(l,umath::to_integral(samples));
-	Lua::PushInt(l,static_cast<uint32_t>(mask));
+	Lua::PushInt(l,sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleCount(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {
@@ -285,9 +285,9 @@ void Lua::GraphicsPipelineCreateInfo::GetSampleCount(lua_State *l,Anvil::Graphic
 }
 void Lua::GraphicsPipelineCreateInfo::GetMinSampleShading(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {
-	vk::SampleMask mask;
-	pipelineInfo.get_multisampling_properties(nullptr,&mask);
-	Lua::PushInt(l,static_cast<uint32_t>(mask));
+	const vk::SampleMask *sampleMask;
+	pipelineInfo.get_multisampling_properties(nullptr,&sampleMask);
+	Lua::PushInt(l,sampleMask ? static_cast<uint32_t>(*sampleMask) : 0u);
 }
 void Lua::GraphicsPipelineCreateInfo::GetSampleMask(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {

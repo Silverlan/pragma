@@ -42,7 +42,6 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
-#include "pragma/lua/c_llight.hpp"
 #include <wgui/fontmanager.h>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
@@ -201,7 +200,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		}}
 	});
 
-	auto defShaderInfo = luabind::class_<ShaderInfo>("Info");
+	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
 	defShaderInfo.def("GetName",&Lua_ShaderInfo_GetName);
 	modShader[defShaderInfo];

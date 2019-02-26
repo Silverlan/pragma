@@ -6,7 +6,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
-#include <shaderinfo.h>
+#include <sharedutils/util_shaderinfo.hpp>
 #include <pragma/model/model.h>
 #include <image/prosper_render_target.hpp>
 
@@ -119,7 +119,7 @@ void Scene::PrepareRendering(RenderMode renderMode,bool bUpdateTranslucentMeshes
 							auto *info = mat->GetShaderInfo();
 							if(info != nullptr)
 							{
-								auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<ShaderInfo*>(info)->GetShader().get())->get();
+								auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
 								prosper::Shader *shader = nullptr;
 								if(drawWorld == 2)
 									shader = m_whShaderWireframe.get();

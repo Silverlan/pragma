@@ -1,5 +1,4 @@
 #include "stdafx_weave_server.h"
-#include "definitions.h"
 #include <string>
 #include <sstream>
 //#include <stdlib.h>

@@ -107,7 +107,7 @@ void CEngine::LoadConfig()
 
 void CEngine::PreloadClientConfig()
 {
-	m_preloadedConfig = std::unique_ptr<ConVarInfoList>(new ConVarInfoList()); // c++14 m_preloadedConfig = std::make_unique<ConVarInfoList>();
+	m_preloadedConfig = std::make_unique<ConVarInfoList>();
 	auto &cmds = *m_preloadedConfig.get();
 	ExecConfig("client.cfg",cmds.cvars);
 	std::string lan = "en";

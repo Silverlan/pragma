@@ -2,7 +2,7 @@
 #define __C_LSHADERINFO_H__
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
-class ShaderInfo;
+namespace util {class ShaderInfo;};
 
-DLLCLIENT void Lua_ShaderInfo_GetID(lua_State *l,ShaderInfo *shader);
+DLLCLIENT void Lua_ShaderInfo_GetID(lua_State *l,util::ShaderInfo &shader);
 #endif

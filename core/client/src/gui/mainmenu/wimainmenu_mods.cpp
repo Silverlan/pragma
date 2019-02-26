@@ -8,7 +8,7 @@
 #include "pragma/gui/wiprogressbar.h"
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/localization.h>
-#include <../modules/wv_chromium/wv_chromium/util_javascript.hpp>
+#include <../../../modules/pr_chromium/include/util_javascript.hpp>
 
 #define PAD_ADDON_VERBOSE 1
 

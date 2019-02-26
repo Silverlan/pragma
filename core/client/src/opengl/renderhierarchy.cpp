@@ -706,8 +706,8 @@ void RenderNode::FindEnclosingCube()
 {
 	if(!m_meshes.empty())
 	{
-		m_min = Vector3(std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max(),std::numeric_limits<glm::mediump_float>::max());
-		m_max = Vector3(std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest(),std::numeric_limits<glm::mediump_float>::lowest());
+		m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
+		m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
 		for(unsigned int i=0;i<m_meshes.size();i++)
 		{
 			NodeMeshInfo *info = m_meshes[i];

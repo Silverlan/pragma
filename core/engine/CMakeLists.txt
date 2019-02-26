@@ -13,6 +13,7 @@ add_external_library(lua)
 add_external_library(util_versioned_archive)
 add_external_library(libzip)
 
+add_def(ENGINE_EXPORTS)
 add_def(DLLENGINE_EX)
 
 set(PRECOMPILED_HEADER "stdafx_engine")

@@ -1,5 +1,4 @@
 #include "stdafx_weave.h"
-#include "definitions.h"
 #include <string>
 #include <sstream>
 //#include <stdlib.h>
@@ -78,7 +77,7 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 }
 #endif
 
-int main(int argc,char* argv[]) //try
+int main(int argc,char* argv[]) try
 {
 	#if defined(_M_X64) || defined(__amd64__)
 		#ifdef __linux__
@@ -153,11 +152,11 @@ int main(int argc,char* argv[]) //try
 #endif
 	return 0;
 }
-/*catch (...) {
+catch (...) {
 	// Note: Calling std::current_exception in a std::set_terminate handler will return NULL due to a bug in the VS libraries.
 	// Catching all unhandled exceptions here and then calling the handler works around that issue.
 	std::get_terminate()();
-}*/
+}
 
 #ifdef _WIN32
 	int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int)

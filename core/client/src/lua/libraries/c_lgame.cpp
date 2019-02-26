@@ -64,18 +64,14 @@ static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world,btSoftBodyWorl
 	world->addSoftBody(cloth);
 	return cloth;
 }
-	#pragma comment(lib,"BulletDynamics_RelWithDebugInfo.lib")
-	#pragma comment(lib,"BulletCollision_RelWithDebugInfo.lib")
-	#pragma comment(lib,"BulletSoftBody_RelWithDebugInfo.lib")
-	#pragma comment(lib,"LinearMath_RelWithDebugInfo.lib")
 #include "pragma/cinematic/choreographic_scene.hpp"
 #include "pragma/debug/c_debug_vehicle.hpp"
 #include <se_scene.hpp>
 
-#include <BussIK/Node.h>
-#include <BussIK/Tree.h>
-#include <BussIK/Jacobian.h>
-#include <BussIK/VectorRn.h>
+#include <pragma/buss_ik/Node.h>
+#include <pragma/buss_ik/Tree.h>
+#include <pragma/buss_ik/Jacobian.h>
+#include <pragma/buss_ik/VectorRn.h>
 #include <Bullet3Common/b3AlignedObjectArray.h>
 
 static void update_vehicle(Vehicle_Car *vhc)

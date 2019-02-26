@@ -3,7 +3,7 @@
 #include <wgui/wibase.h>
 #include <memory>
 #include <sharedutils/util_library.hpp>
-#include <../modules/wv_chromium/wv_chromium/util_javascript.hpp>
+#include <../../../modules/pr_chromium/include/util_javascript.hpp>
 extern DLLCLIENT ClientState *client;
 
 WIChromiumPage::WIChromiumPage(WIBase *parent)

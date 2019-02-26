@@ -30,7 +30,7 @@
 #include <pragma/engine_version.h>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
-#include <shaderinfo.h>
+#include <sharedutils/util_shaderinfo.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
@@ -577,7 +577,7 @@ static void init_shader(Material *mat)
 	if(info != nullptr)
 	{
 		auto shader = c_engine->GetShader(info->GetIdentifier());
-		const_cast<ShaderInfo*>(info)->SetShader(std::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
+		const_cast<util::ShaderInfo*>(info)->SetShader(std::make_shared<::util::WeakHandle<prosper::Shader>>(shader));
 	}
 }
 Material *ClientState::CreateMaterial(const std::string &path,const std::string &shader)

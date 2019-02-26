@@ -11,7 +11,7 @@ DLLENGINE Con::c_cerr Con::cerr;
 DLLENGINE Con::c_crit Con::crit;
 DLLENGINE Con::c_csv Con::csv;
 DLLENGINE Con::c_ccl Con::ccl;
-
+#pragma optimize("",off)
 extern DLLENGINE Engine *engine;
 static CVar cvLog = GetConVar("log_enabled");
 int Con::GetLogLevel()
@@ -149,3 +149,4 @@ std::basic_ostream<char,std::char_traits<char>> &Con::endl(std::basic_ostream<ch
 	return os;
 }
 
+#pragma optimize("",on)

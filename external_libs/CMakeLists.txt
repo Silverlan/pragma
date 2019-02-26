@@ -36,6 +36,8 @@ register_external_lib(util_versioned_archive external_libs/util)
 register_external_lib(util_vmf external_libs/util)
 register_external_lib(util_zip external_libs/util)
 register_external_lib(util_image external_libs/util)
+register_external_lib(util_dmx external_libs/util)
+register_external_lib(util_smdmodel external_libs/util)
 register_external_lib(vfilesystem)
 register_external_lib(wgui)
 

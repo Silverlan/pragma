@@ -1,34 +1,4 @@
 #include "stdafx_cengine.h"
-
-// Link Libraries
-#pragma comment(lib,"prosper.lib")
-#pragma comment(lib,"Anvil.lib")
-#pragma comment(lib,"vulkan-1.lib")
-#pragma comment(lib,"datasystem.lib")
-#pragma comment(lib,"cmaterialsystem.lib")
-#pragma comment(lib,"materialsystem.lib")
-#pragma comment(lib,"wgui.lib")
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"engine.lib")
-#pragma comment(lib,"shared.lib")
-#pragma comment(lib,"client.lib")
-#pragma comment(lib,"glfw3dll.lib")
-#pragma comment(lib,"glfw.lib")
-#ifdef USE_LUAJIT
-	#pragma comment(lib,"lua51.lib")
-#else
-	#pragma comment(lib,"lua530.lib")
-#endif
-#pragma comment(lib,"luasystem.lib")
-#pragma comment(lib,"util.lib")
-#pragma comment(lib,"mathutil.lib")
-#pragma comment(lib,"util_zip.lib")
-#pragma comment(lib,"alsoundsystem.lib")
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bzip2.lib")
-//
-
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
 #include "cmaterialmanager.h"
@@ -514,7 +484,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	matManager->GetTextureManager().SetTextureFileHandler([this](const std::string &fpath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
 		{
-			static auto formats = get_perfered_image_format_order();
+			static auto formats = get_perferred_image_format_order();
 			auto *cl = GetClientState();
 			auto path = fpath;
 			ufile::remove_extension_from_filename(path);

@@ -85,7 +85,7 @@ extern "C"
 		en = nullptr;
 	}
 }
-
+#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle Engine::GetConVarHandle(std::string scvar)
@@ -578,3 +578,4 @@ Engine::~Engine()
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 }
 
+#pragma optimize("",on)

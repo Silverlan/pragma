@@ -124,9 +124,6 @@
 [submodule "third_party_libs/eigen"]
 	path = third_party_libs/eigen
 	url = https://github.com/eigenteam/eigen-git-mirror.git
-[submodule "third_party_libs/freetype"]
-	path = third_party_libs/freetype
-	url = https://github.com/ubawurinna/freetype-windows-binaries.git
 [submodule "third_party_libs/bullet"]
 	path = third_party_libs/bullet
 	url = https://github.com/bulletphysics/bullet3.git
@@ -136,3 +133,9 @@
 [submodule "external_libs/util_smdmodel"]
 	path = external_libs/util_smdmodel
 	url = https://github.com/Silverlan/util_smdmodel.git
+[submodule "third_party_libs/anvil"]
+	path = third_party_libs/anvil
+	url = https://github.com/Silverlan/Anvil.git
+[submodule "external_libs/util_dmx"]
+	path = external_libs/util_dmx
+	url = https://github.com/Silverlan/util_dmx.git

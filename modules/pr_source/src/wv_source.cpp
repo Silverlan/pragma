@@ -8,7 +8,7 @@
 #include <mathutil/eulerangles.h>
 #include <fsys/filesystem.h>
 #include <util_archive.hpp>
-#include <util/util_file.h>
+#include <sharedutils/util_file.h>
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 #pragma comment(lib,"lua51.lib")

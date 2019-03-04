@@ -899,7 +899,7 @@ static void smooth_touching_poly_normals(const std::vector<std::shared_ptr<PolyM
 
 vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,const std::function<void(const std::string&)> &messageLogger)
 {
-	auto f = FileManager::OpenSystemFile(fileName.c_str(),"rb");
+	auto f = FileManager::OpenFile(fileName.c_str(),"rb");
 	if(f == nullptr)
 	{
 		if(messageLogger != nullptr)
@@ -1133,6 +1133,7 @@ vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,cons
 	fOut->Write<char>('L');
 	fOut->Write<char>('D');
 	fOut->Write<unsigned int>(WLD_VERSION);
+	static_assert(WLD_VERSION == 9);
 
 	auto offsetLocMaterials = fOut->Tell();
 	fOut->Write<uint64_t>(0);
@@ -1357,6 +1358,9 @@ vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,cons
 			auto offsetMeshes = fOut->Tell();
 			fOut->Write<uint64_t>(static_cast<uint64_t>(0)); // Size of entity information until mesh data; We don't need any specific entity info on the client, so we'll need this to skip them.
 
+			auto offsetLeaves = fOut->Tell();
+			fOut->Write<uint64_t>(0ull); // Leaves offset
+
 			enum class EntityFlags : uint64_t
 			{
 				None = 0ull,
@@ -1518,6 +1522,12 @@ vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,cons
 			fOut->Write<Vector3>(origin);
 
 			auto cur = fOut->Tell();
+			fOut->Seek(offsetLeaves);
+				fOut->Write<uint64_t>(cur -offsetLeaves);
+			fOut->Seek(cur);
+			fOut->Write<uint32_t>(0ull); // Number of leaves
+
+			cur = fOut->Tell();
 			fOut->Seek(offsetMeshes);
 				fOut->Write<uint64_t>(cur -offsetMeshes); // Offset to the entity meshes
 			fOut->Seek(cur);

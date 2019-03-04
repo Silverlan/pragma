@@ -193,6 +193,22 @@ float LGenericFloatPropertyWrapper::GetValue() const
 	}
 	return 0.f;
 }
+void LGenericFloatPropertyWrapper::SetValue(float f)
+{
+	switch(m_propertyType)
+	{
+		case ArithmeticFloatPropertyType::Float:
+			*static_cast<util::FloatProperty&>(*m_property) = f;
+			break;
+		case ArithmeticFloatPropertyType::Double:
+			*static_cast<util::DoubleProperty&>(*m_property) = f;
+			break;
+		case ArithmeticFloatPropertyType::LongDouble:
+			*static_cast<util::LongDoubleProperty&>(*m_property) = f;
+			break;
+	}
+	return;
+}
 LGenericFloatPropertyWrapper &LGenericFloatPropertyWrapper::operator=(const double &other)
 {
 	switch(m_propertyType)
@@ -793,6 +809,37 @@ int32_t LGenericIntPropertyWrapper::GetValue() const
 			return static_cast<int32_t>(static_cast<util::UInt64Property&>(*m_property).GetValue());
 	}
 	return 0;
+}
+void LGenericIntPropertyWrapper::SetValue(int32_t i)
+{
+	switch(m_propertyType)
+	{
+		case ArithmeticIntPropertyType::Int8:
+			*static_cast<util::Int8Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::UInt8:
+			*static_cast<util::UInt8Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::Int16:
+			*static_cast<util::Int16Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::UInt16:
+			*static_cast<util::UInt16Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::Int32:
+			*static_cast<util::Int32Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::UInt32:
+			*static_cast<util::UInt32Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::Int64:
+			*static_cast<util::Int64Property&>(*m_property) = i;
+			break;
+		case ArithmeticIntPropertyType::UInt64:
+			*static_cast<util::UInt64Property&>(*m_property) = i;
+			break;
+	}
+	return;
 }
 LGenericIntPropertyWrapper &LGenericIntPropertyWrapper::operator=(const int32_t &other)
 {

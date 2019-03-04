@@ -346,5 +346,5 @@ int Lua::intersect::line_triangle(lua_State *l)
 	Lua::Push<bool>(l,bIntersect);
 	Lua::PushNumber(l,t);
 	Lua::Push<Vector2>(l,Vector2{u,v});
-	return 4;
+	return 3;
 }

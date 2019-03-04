@@ -48,6 +48,7 @@ public:
 	void Link(LGenericIntPropertyWrapper &prop);
 	void Unlink();
 	float GetValue() const;
+	void SetValue(float f);
 	LGenericFloatPropertyWrapper &operator=(const double &other);
 	void SetLocked(bool bLocked,bool bLinkLocked=true);
 	bool IsLocked() const;
@@ -143,6 +144,7 @@ public:
 	void Link(LGenericIntPropertyWrapper &prop);
 	void Unlink();
 	int32_t GetValue() const;
+	void SetValue(int32_t i);
 	LGenericIntPropertyWrapper &operator=(const int32_t &other);
 	void SetLocked(bool bLocked,bool bLinkLocked=true);
 	bool IsLocked() const;
@@ -329,6 +331,11 @@ public:
 	TProperty &operator=(const LSimplePropertyWrapper<TProperty,T> &other) {GetProperty() = other;}
 	bool operator==(const T &val) const {return GetProperty() == val;}
 	bool operator==(const LSimplePropertyWrapper<TProperty,T> &prop) const {return GetProperty() == *prop;}
+
+	const T &GetValue() const {return const_cast<LSimplePropertyWrapper<TProperty,T>*>(this)->GetValue();}
+	T &GetValue() {return **static_cast<TProperty*>(prop.get());}
+
+	void SetValue(const T &v) {*static_cast<TProperty*>(prop.get()) = v;}
 
 	TProperty &operator*() {return GetProperty();}
 	const TProperty &operator*() const {return const_cast<LSimplePropertyWrapper<TProperty,T>*>(this)->operator*();}

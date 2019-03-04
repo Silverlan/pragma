@@ -246,7 +246,7 @@ public:
 	static void ClearCache();
 	const std::string &GetName() const;
 	uint32_t AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim);
-	int LookupAnimation(const std::string &name);
+	int LookupAnimation(const std::string &name) const;
 	int SelectWeightedAnimation(Activity activity,int32_t animIgnore=-1);
 	int SelectFirstAnimation(Activity activity) const;
 	unsigned char GetAnimationActivityWeight(uint32_t animation) const;
@@ -335,7 +335,9 @@ public:
 	void SetMass(float mass);
 	void AddBlendController(const std::string &name,int32_t min,int32_t max,bool loop);
 	BlendController *GetBlendController(uint32_t id);
+	const BlendController *GetBlendController(uint32_t id) const;
 	BlendController *GetBlendController(const std::string &name);
+	const BlendController *GetBlendController(const std::string &name) const;
 	int LookupBlendController(const std::string &name);
 	const std::vector<BlendController> &GetBlendControllers() const;
 	std::vector<BlendController> &GetBlendControllers();

@@ -19,6 +19,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ai::navigation::PathInfo::PathInfo(const std::shared_ptr<RcPathResult> &path)
 	: path(path),pathIdx(0)
 {}
@@ -634,3 +635,4 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 	}
 	return (m_moveInfo.moving == true) ? m_moveInfo.moveDir : Vector3{};
 }
+#pragma optimize("",on)

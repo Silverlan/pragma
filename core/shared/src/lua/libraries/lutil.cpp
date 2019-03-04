@@ -36,21 +36,8 @@ extern DLLENGINE Engine *engine;
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
-struct TestLuaCheckClass
-{
-	TestLuaCheckClass()
-	{
-		//Con::cout<<"Constructor!"<<Con::endl;
-	}
-	~TestLuaCheckClass()
-	{
-		//Con::cout<<"Destructor!"<<Con::endl;
-	}
-};
-
 int Lua::global::include(lua_State *l)
 {
-	TestLuaCheckClass x {};
 	std::string f = Lua::CheckString(l,1);
 	auto bIgnoreCache = s_bIgnoreIncludeCache;
 	if(Lua::IsSet(l,2) && bIgnoreCache == false)
@@ -133,7 +120,8 @@ int Lua::global::include(lua_State *l)
 		//auto r = Lua::Execute(l,[&f,l](int(*traceback)(lua_State*)) {
 		//	return Lua::IncludeFile(l,f,traceback);
 		//});
-		auto r = Lua::IncludeFile(l,f,Lua::HandleTracebackError);
+		auto n = Lua::GetStackTop(l);
+		auto r = Lua::IncludeFile(l,f,Lua::HandleTracebackError,LUA_MULTRET);
 		switch(r)
 		{
 			case Lua::StatusCode::ErrorFile:
@@ -143,6 +131,8 @@ int Lua::global::include(lua_State *l)
 			case Lua::StatusCode::ErrorSyntax:
 				Lua::HandleSyntaxError(l,r,f);
 				break;
+			case Lua::StatusCode::Ok:
+				return Lua::GetStackTop(l) -n;
 		}
 	}
 	return 0;
@@ -695,31 +685,29 @@ int Lua::util::read_scene_file(lua_State *l)
 	fPushValue(root);
 	return 1;
 }
-int Lua::util::fade_color_property(lua_State *l)
+
+template<class TProperty,typename TUnderlyingType>
+	bool fade_property_generic(Game &game,lua_State *l,const std::function<TUnderlyingType(lua_State*,int32_t)> &fCheck,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
 {
-	auto &game = *engine->GetNetworkState(l)->GetGameState();
-	auto colProp = Lua::Check<LColorProperty>(l,1);
-	auto &colDst = Lua::Check<Color>(l,2);
-	auto hsvSrc = ::util::rgb_to_hsv(*colProp);
-	auto hsvDst = ::util::rgb_to_hsv(colDst);
-	auto aSrc = (*colProp)->a;
-	auto aDst = colDst.a;
+	if(Lua::IsType<TProperty>(l,1) == false)
+		return false;
+	auto &vProp = Lua::Check<TProperty>(l,1);
+	auto vSrc = vProp.GetValue();
+	auto vDst = fCheck(l,2);
 
 	auto duration = Lua::CheckNumber(l,3);
 	if(duration == 0.f)
 	{
-		*colProp = colDst;
-		return 0;
+		vProp.SetValue(vDst);
+		return  false;
 	}
 	auto tStart = game.RealTime();
 	auto cb = FunctionCallback<void>::Create(nullptr);
-	cb.get<Callback<void>>()->SetFunction([&game,tStart,duration,colProp,hsvSrc,hsvDst,aSrc,aDst,cb]() mutable {
+	cb.get<Callback<void>>()->SetFunction([&game,tStart,duration,vProp,vSrc,vDst,cb,fLerp]() mutable {
 		auto tDelta = game.RealTime() -tStart;
 		auto sc = umath::min(umath::smooth_step(0.f,1.f,static_cast<float>(tDelta /duration)),1.f);
-		auto hsv = ::util::lerp_hsv(hsvSrc,hsvDst,sc);
-		auto newColor = ::util::hsv_to_rgb(hsv);
-		newColor.a = aSrc +(aDst -aSrc) *sc;
-		*colProp = newColor;
+		auto vNew = fLerp(vSrc,vDst,sc);
+		vProp.SetValue(vNew);
 		if(sc == 1.f)
 		{
 			if(cb.IsValid())
@@ -728,5 +716,73 @@ int Lua::util::fade_color_property(lua_State *l)
 	});
 	game.AddCallback("Think",cb);
 	Lua::Push<CallbackHandle>(l,cb);
-	return 1;
+	return true;
+}
+
+template<class TProperty,typename TUnderlyingType>
+	bool fade_vector_property_generic(Game &game,lua_State *l,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
+{
+	return fade_property_generic<TProperty,TUnderlyingType>(game,l,Lua::Check<TUnderlyingType>,fLerp);
+}
+
+int Lua::util::fade_property(lua_State *l)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	if(Lua::IsType<LColorProperty>(l,1))
+	{
+		auto &colProp = Lua::Check<LColorProperty>(l,1);
+		auto &colDst = Lua::Check<Color>(l,2);
+		auto hsvSrc = ::util::rgb_to_hsv(*colProp);
+		auto hsvDst = ::util::rgb_to_hsv(colDst);
+		auto aSrc = (*colProp)->a;
+		auto aDst = colDst.a;
+
+		auto duration = Lua::CheckNumber(l,3);
+		if(duration == 0.f)
+		{
+			*colProp = colDst;
+			return 0;
+		}
+		auto tStart = game.RealTime();
+		auto cb = FunctionCallback<void>::Create(nullptr);
+		cb.get<Callback<void>>()->SetFunction([&game,tStart,duration,colProp,hsvSrc,hsvDst,aSrc,aDst,cb]() mutable {
+			auto tDelta = game.RealTime() -tStart;
+			auto sc = umath::min(umath::smooth_step(0.f,1.f,static_cast<float>(tDelta /duration)),1.f);
+			auto hsv = ::util::lerp_hsv(hsvSrc,hsvDst,sc);
+			auto newColor = ::util::hsv_to_rgb(hsv);
+			newColor.a = aSrc +(aDst -aSrc) *sc;
+			*colProp = newColor;
+			if(sc == 1.f)
+			{
+				if(cb.IsValid())
+					cb.Remove();
+			}
+		});
+		game.AddCallback("Think",cb);
+		Lua::Push<CallbackHandle>(l,cb);
+		return 1;
+	}
+	if(fade_vector_property_generic<LVector2Property,Vector2>(game,l,[](const Vector2 &a,const Vector2 &b,float factor) -> Vector2 {
+			return Vector2{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor)};
+		}) ||
+		fade_vector_property_generic<LVector2iProperty,Vector2i>(game,l,[](const Vector2i &a,const Vector2i &b,float factor) -> Vector2i {
+			return Vector2i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor))};
+		}) ||
+		fade_vector_property_generic<LVector3Property,Vector3>(game,l,uvec::lerp) ||
+		fade_vector_property_generic<LVector3iProperty,Vector3i>(game,l,uvec::lerp) ||
+		fade_vector_property_generic<LVector4Property,Vector4>(game,l,[](const Vector4 &a,const Vector4 &b,float factor) -> Vector4 {
+			return Vector4{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor),umath::lerp(a.z,b.z,factor),umath::lerp(a.w,b.w,factor)};
+		}) ||
+		fade_vector_property_generic<LVector4iProperty,Vector4i>(game,l,[](const Vector4i &a,const Vector4i &b,float factor) -> Vector4i {
+			return Vector4i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor)),static_cast<int32_t>(umath::lerp(a.z,b.z,factor)),static_cast<int32_t>(umath::lerp(a.w,b.w,factor))};
+		}) ||
+		fade_vector_property_generic<LQuatProperty,Quat>(game,l,uquat::slerp) ||
+		fade_vector_property_generic<LEulerAnglesProperty,EulerAngles>(game,l,[](const EulerAngles &a,const EulerAngles &b,float factor) -> EulerAngles {
+			return EulerAngles{static_cast<float>(umath::lerp_angle(a.p,b.p,factor)),static_cast<float>(umath::lerp_angle(a.y,b.y,factor)),static_cast<float>(umath::lerp_angle(a.r,b.r,factor))};
+		}) ||
+		fade_property_generic<LGenericIntPropertyWrapper,int64_t>(game,l,Lua::CheckInt,umath::lerp) ||
+		fade_property_generic<LGenericFloatPropertyWrapper,float>(game,l,Lua::CheckNumber,umath::lerp)
+	)
+		return 1;
+	return 0;
 }

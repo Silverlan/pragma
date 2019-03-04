@@ -4,7 +4,7 @@
 #include "quaternion64.h"
 #include "quaternion48.h"
 #include "vector48.h"
-#include <animation.h>
+#include <pragma/model/animation/animation.h>
 #pragma optimize("",off)
 import::mdl::AnimationDesc::AnimationDesc(int32_t idx,const VFilePtr &f)
 	: m_index(idx)
@@ -284,7 +284,7 @@ std::shared_ptr<::Animation> import::mdl::AnimationDesc::CalcAnimation(const imp
 				if(frame == nullptr)
 					std::cout<<"WARNING: Invalid frame #"<<i<<" for move segment!"<<std::endl;
 				else
-					frame->SetMoveOffset(v.x,-v.y);
+					frame->SetMoveOffset(v.x,v.y);
 			}
 		}
 		// Fill up empty move offsets

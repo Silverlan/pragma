@@ -43,6 +43,7 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIIcon,WIIcon);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIRoundedTexturedRect,WIRoundedTexturedRect);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIIcon,WISilkIcon,WISilkIcon);
 
+extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const WIHandle &handle)
@@ -180,8 +181,8 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("GetClass",&GetClass);
 	classDef.def("Think",&Think);
 	classDef.def("InjectMouseMoveInput",&InjectMouseMoveInput);
-	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,int,int,int)>(&InjectMouseInput));
-	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,int,int)>(&InjectMouseInput));
+	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,int,int,int)>(&InjectMouseInput));
+	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,int,int)>(&InjectMouseInput));
 	classDef.def("InjectKeyboardInput",static_cast<void(*)(lua_State*,WIHandle&,int,int,int)>(&InjectKeyboardInput));
 	classDef.def("InjectKeyboardInput",static_cast<void(*)(lua_State*,WIHandle&,int,int)>(&InjectKeyboardInput));
 	classDef.def("InjectCharInput",static_cast<void(*)(lua_State*,WIHandle&,std::string,uint32_t)>(&InjectCharInput));
@@ -218,13 +219,23 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("GetEndPos",&GetEndPos);
 	classDef.def("SetClippingEnabled",&SetClippingEnabled);
 	classDef.def("IsClippingEnabled",&IsClippingEnabled);
+	classDef.def("SetAlwaysUpdate",&SetAlwaysUpdate);
+	classDef.def("SetBounds",&SetBounds);
 
-	classDef.def("AddAnchor",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&AddAnchor));
-	classDef.def("AddAnchor",static_cast<void(*)(lua_State*,WIHandle&,const std::string&,const Vector2&)>(&AddAnchor));
-	classDef.def("SetAnchorPos",&SetAnchorPos);
-	classDef.def("GetAnchorPos",&GetAnchorPos);
-	classDef.def("GetAbsoluteAnchorPos",&GetAbsoluteAnchorPos);
-	classDef.def("GetAnchorPosProperty",&GetAnchorPosProperty);
+	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&AddAttachment));
+	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&,const Vector2&)>(&AddAttachment));
+	classDef.def("SetAttachmentPos",&SetAttachmentPos);
+	classDef.def("GetAttachmentPos",&GetAttachmentPos);
+	classDef.def("GetAbsoluteAttachmentPos",&GetAbsoluteAttachmentPos);
+	classDef.def("GetAttachmentPosProperty",&GetAttachmentPosProperty);
+	
+	classDef.def("SetAnchor",&SetAnchor);
+	classDef.def("SetAnchorLeft",&SetAnchorLeft);
+	classDef.def("SetAnchorRight",&SetAnchorRight);
+	classDef.def("SetAnchorTop",&SetAnchorTop);
+	classDef.def("SetAnchorBottom",&SetAnchorBottom);
+	classDef.def("GetAnchor",&GetAnchor);
+	classDef.def("HasAnchor",&HasAnchor);
 
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&,bool)>(&Draw));
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,bool)>(&Draw));
@@ -1331,17 +1342,25 @@ void Lua::WIBase::Think(lua_State *l,WIHandle &hPanel)
 	lua_checkgui(l,hPanel);
 	hPanel->Think();
 }
-void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,int32_t x,int32_t y)
+void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->InjectMouseMoveInput(x,y);
+	auto &window = c_engine->GetWindow();
+	auto absPos = hPanel->GetAbsolutePos();
+	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
+	window.ClearCursorPosOverride();
 }
-void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,int button,int action,int mods)
+void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods)
 {
 	lua_checkgui(l,hPanel);
+	auto &window = c_engine->GetWindow();
+	auto absPos = hPanel->GetAbsolutePos();
+	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
+	window.ClearCursorPosOverride();
 }
-void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,int button,int action) {InjectMouseInput(l,hPanel,button,action,0);}
+void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action) {InjectMouseInput(l,hPanel,mousePos,button,action,0);}
 void Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods)
 {
 	lua_checkgui(l,hPanel);
@@ -1365,10 +1384,15 @@ void Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c)
 	const char *cStr = c.c_str();
 	hPanel->InjectCharInput(cStr[0]);
 }
-void Lua::WIBase::InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &offset)
+void Lua::WIBase::InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,const Vector2 &offset)
 {
 	lua_checkgui(l,hPanel);
+	auto &window = c_engine->GetWindow();
+	auto cursorPos = window.GetCursorPos();
+	auto absPos = hPanel->GetAbsolutePos();
+	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	hPanel->InjectScrollInput(offset);
+	window.ClearCursorPosOverride();
 }
 void Lua::WIBase::IsDescendant(lua_State *l,WIHandle &hPanel,WIHandle &hOther)
 {
@@ -1560,43 +1584,98 @@ void Lua::WIBase::IsClippingEnabled(lua_State *l,WIHandle &hPanel)
 	lua_checkgui(l,hPanel);
 	Lua::PushBool(l,hPanel->GetShouldScissor());
 }
-void Lua::WIBase::AddAnchor(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position)
+void Lua::WIBase::SetAlwaysUpdate(lua_State *l,WIHandle &hPanel,bool b)
 {
 	lua_checkgui(l,hPanel);
-	auto *pAnchor = hPanel->AddAnchor(name,position);
-	if(pAnchor == nullptr)
+	hPanel->SetThinkIfInvisible(b);
+}
+void Lua::WIBase::SetBounds(lua_State *l,WIHandle &hPanel,const Vector2 &start,const Vector2 &end)
+{
+	lua_checkgui(l,hPanel);
+	auto &pos = start;
+	auto size = end -start;
+	hPanel->SetPos(pos);
+	hPanel->SetSize(size);
+}
+void Lua::WIBase::AddAttachment(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position)
+{
+	lua_checkgui(l,hPanel);
+	auto *pAttachment = hPanel->AddAttachment(name,position);
+	if(pAttachment == nullptr)
 		return;
-	Lua::Property::push(l,*pAnchor->GetAbsPosProperty());
+	Lua::Property::push(l,*pAttachment->GetAbsPosProperty());
 }
-void Lua::WIBase::AddAnchor(lua_State *l,WIHandle &hPanel,const std::string &name) {AddAnchor(l,hPanel,name,{});}
-void Lua::WIBase::SetAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position)
+void Lua::WIBase::AddAttachment(lua_State *l,WIHandle &hPanel,const std::string &name) {AddAttachment(l,hPanel,name,{});}
+void Lua::WIBase::SetAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->SetAnchorPos(name,position);
+	hPanel->SetAttachmentPos(name,position);
 }
-void Lua::WIBase::GetAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name)
+void Lua::WIBase::GetAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name)
 {
 	lua_checkgui(l,hPanel);
-	auto *pos = hPanel->GetAnchorPos(name);
+	auto *pos = hPanel->GetAttachmentPos(name);
 	if(pos == nullptr)
 		return;
 	Lua::Push<Vector2i>(l,*pos);
 }
-void Lua::WIBase::GetAbsoluteAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name)
+void Lua::WIBase::GetAbsoluteAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name)
 {
 	lua_checkgui(l,hPanel);
-	auto *pos = hPanel->GetAbsoluteAnchorPos(name);
+	auto *pos = hPanel->GetAbsoluteAttachmentPos(name);
 	if(pos == nullptr)
 		return;
 	Lua::Push<Vector2>(l,*pos);
 }
-void Lua::WIBase::GetAnchorPosProperty(lua_State *l,WIHandle &hPanel,const std::string &name)
+void Lua::WIBase::GetAttachmentPosProperty(lua_State *l,WIHandle &hPanel,const std::string &name)
 {
 	lua_checkgui(l,hPanel);
-	auto *posProperty = hPanel->GetAnchorPosProperty(name);
+	auto *posProperty = hPanel->GetAttachmentPosProperty(name);
 	if(posProperty == nullptr)
 		return;
 	Lua::Property::push(l,**posProperty);
+}
+void Lua::WIBase::SetAnchor(lua_State *l,WIHandle &hPanel,float left,float top,float right,float bottom)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetAnchor(left,right,top,bottom);
+}
+void Lua::WIBase::SetAnchorLeft(lua_State *l,WIHandle &hPanel,float f)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetAnchorLeft(f);
+}
+void Lua::WIBase::SetAnchorRight(lua_State *l,WIHandle &hPanel,float f)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetAnchorRight(f);
+}
+void Lua::WIBase::SetAnchorTop(lua_State *l,WIHandle &hPanel,float f)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetAnchorTop(f);
+}
+void Lua::WIBase::SetAnchorBottom(lua_State *l,WIHandle &hPanel,float f)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetAnchorBottom(f);
+}
+void Lua::WIBase::GetAnchor(lua_State *l,WIHandle &hPanel)
+{
+	lua_checkgui(l,hPanel);
+	float left,right,top,bottom;
+	auto bAnchor = hPanel->GetAnchor(left,right,top,bottom);
+	if(bAnchor == false)
+		return;
+	Lua::PushNumber(l,left);
+	Lua::PushNumber(l,top);
+	Lua::PushNumber(l,right);
+	Lua::PushNumber(l,bottom);
+}
+void Lua::WIBase::HasAnchor(lua_State *l,WIHandle &hPanel)
+{
+	lua_checkgui(l,hPanel);
+	Lua::PushBool(l,hPanel->HasAnchor());
 }
 
 ////////////////////////////////////

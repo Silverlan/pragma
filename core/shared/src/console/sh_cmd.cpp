@@ -32,8 +32,16 @@ std::vector<BaseEntity*> command::find_named_targets(NetworkState *state,const s
 	std::vector<BaseEntity*> ents;
 	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<EntityIteratorFilterEntity>(targetName);
+	ents.reserve(entIt.GetCount());
 	for(auto *ent : entIt)
 		ents.push_back(ent);
+	if(ents.empty())
+	{
+		auto index = ustring::to_int(targetName);
+		auto *ent = game->GetEntity(index);
+		if(ent != nullptr)
+			ents.push_back(ent);
+	}
 	return ents;
 }
 

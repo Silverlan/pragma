@@ -193,6 +193,9 @@ namespace Lua
 		DLLNETWORK void AddIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &name,uint32_t chainLength,const std::string &type);
 		DLLNETWORK void RemoveIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,uint32_t id);
 		DLLNETWORK void RemoveIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &name);
+
+		DLLNETWORK void AddIncludeModel(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &modelName);
+		DLLNETWORK void GetIncludeModels(lua_State *l,const std::shared_ptr<::Model> &mdl);
 	};
 };
 

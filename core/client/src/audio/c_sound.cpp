@@ -309,6 +309,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::SoundBuffer &buffer,ALSoun
 		Con::cwar<<"WARNING: Error creating sound '"<<buffer.GetFilePath()<<"'!"<<Con::endl;
 		return nullptr;
 	}
+	snd->SetType(type);
 	InitializeSound(*snd);
 	return snd;
 }
@@ -324,6 +325,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(al::Decoder &decoder,ALSoundTy
 		Con::cwar<<"WARNING: Error creating sound '"<<decoder.GetFilePath()<<"'!"<<Con::endl;
 		return nullptr;
 	}
+	snd->SetType(type);
 	InitializeSound(*snd);
 	return snd;
 }

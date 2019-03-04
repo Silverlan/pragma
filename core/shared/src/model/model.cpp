@@ -1013,7 +1013,7 @@ uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<Anima
 	return m_animationIDs[name] = static_cast<uint32_t>(m_animations.size() -1);
 }
 
-int32_t Model::LookupAnimation(const std::string &name)
+int32_t Model::LookupAnimation(const std::string &name) const
 {
 	auto it = m_animationIDs.find(name);
 	if(it == m_animationIDs.end())
@@ -1222,12 +1222,14 @@ void Model::AddBlendController(const std::string &name,int32_t min,int32_t max,b
 	blend.max = max;
 	blend.loop = loop;
 }
+const BlendController *Model::GetBlendController(uint32_t id) const {return const_cast<Model*>(this)->GetBlendController(id);}
 BlendController *Model::GetBlendController(uint32_t id)
 {
 	if(id >= m_blendControllers.size())
 		return nullptr;
 	return &m_blendControllers[id];
 }
+const BlendController *Model::GetBlendController(const std::string &name) const {return const_cast<Model*>(this)->GetBlendController(name);}
 BlendController *Model::GetBlendController(const std::string &name)
 {
 	auto it = std::find_if(m_blendControllers.begin(),m_blendControllers.end(),[&name](BlendController &bc) {

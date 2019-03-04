@@ -281,7 +281,10 @@ void Lua::Model::register_class(
 	classDef.def("AddIKController",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&,const std::string&,uint32_t,const std::string&)>(&Lua::Model::AddIKController));
 	classDef.def("RemoveIKController",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&,uint32_t)>(&Lua::Model::RemoveIKController));
 	classDef.def("RemoveIKController",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&,const std::string&)>(&Lua::Model::RemoveIKController));
-
+	
+	classDef.def("AddIncludeModel",&Lua::Model::AddIncludeModel);
+	classDef.def("GetIncludeModels",&Lua::Model::GetIncludeModels);
+	
 	classDef.add_static_constant("FMERGE_NONE",umath::to_integral(::Model::MergeFlags::None));
 	classDef.add_static_constant("FMERGE_ANIMATIONS",umath::to_integral(::Model::MergeFlags::Animations));
 	classDef.add_static_constant("FMERGE_ATTACHMENTS",umath::to_integral(::Model::MergeFlags::Attachments));
@@ -389,7 +392,10 @@ void Lua::Model::register_class(
 		.def("SetFadeOutTime",&Lua::Animation::SetFadeOutTime)
 		.def("SetBoneWeight",&Lua::Animation::SetBoneWeight)
 		.def("GetBoneWeight",&Lua::Animation::GetBoneWeight)
-		.def("GetBoneWeights",&Lua::Animation::GetBoneWeights);
+		.def("GetBoneWeights",&Lua::Animation::GetBoneWeights)
+		.def("ClearFrames",static_cast<void(*)(lua_State*,const std::shared_ptr<::Animation>&)>([](lua_State *l,const std::shared_ptr<::Animation> &anim) {
+			anim->GetFrames().clear();
+		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),
 		luabind::def("RegisterActivity",&Lua::Animation::RegisterActivityEnum),
@@ -1769,6 +1775,22 @@ void Lua::Model::AddIKController(lua_State *l,const std::shared_ptr<::Model> &md
 void Lua::Model::AddIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &name,uint32_t chainLength,const std::string &type) {AddIKController(l,mdl,name,chainLength,type,umath::to_integral(util::ik::Method::Default));}
 void Lua::Model::RemoveIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,uint32_t id) {mdl->RemoveIKController(id);}
 void Lua::Model::RemoveIKController(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &name) {mdl->RemoveIKController(name);}
+void Lua::Model::AddIncludeModel(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &modelName)
+{
+	mdl->GetMetaInfo().includes.push_back(modelName);
+}
+void Lua::Model::GetIncludeModels(lua_State *l,const std::shared_ptr<::Model> &mdl)
+{
+	auto t = Lua::CreateTable(l);
+	auto &includes = mdl->GetMetaInfo().includes;
+	for(auto i=decltype(includes.size()){0u};i<includes.size();++i)
+	{
+		auto &inc = includes.at(i);
+		Lua::PushInt(l,i +1);
+		Lua::PushString(l,inc);
+		Lua::SetTableValue(l,t);
+	}
+}
 static void push_object_attachment(lua_State *l,const ObjectAttachment &att)
 {
 	auto tAtt = Lua::CreateTable(l);

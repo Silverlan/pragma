@@ -1,9 +1,9 @@
 #include "mdl.h"
-#include "umat.h"
-#include "uvec.h"
-#include "eulerangles.h"
-#include <modelmesh.h>
-#include <model.h>
+#include "mathutil/umat.h"
+#include <mathutil/uvec.h>
+#include <mathutil/eulerangles.h>
+#include <pragma/model/modelmesh.h>
+#include <pragma/model/model.h>
 
 static void build_node_matrix(Frame &frame,uint32_t id,const std::shared_ptr<Bone> &bone,std::vector<Mat4> &matrices)
 {

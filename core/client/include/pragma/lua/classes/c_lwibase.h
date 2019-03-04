@@ -123,14 +123,14 @@ namespace Lua
 		DLLCLIENT void IsFadingOut(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void GetClass(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void Think(lua_State *l,WIHandle &hPanel);
-		DLLCLIENT void InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,int32_t x,int32_t y);
-		DLLCLIENT void InjectMouseInput(lua_State *l,WIHandle &hPanel,int button,int action,int mods);
-		DLLCLIENT void InjectMouseInput(lua_State *l,WIHandle &hPanel,int button,int action);
+		DLLCLIENT void InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos);
+		DLLCLIENT void InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods);
+		DLLCLIENT void InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action);
 		DLLCLIENT void InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods);
 		DLLCLIENT void InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action);
 		DLLCLIENT void InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c,uint32_t mods);
 		DLLCLIENT void InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c);
-		DLLCLIENT void InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &offset);
+		DLLCLIENT void InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,const Vector2 &offset);
 		DLLCLIENT void IsDescendant(lua_State *l,WIHandle &hPanel,WIHandle &hOther);
 		DLLCLIENT void IsDescendantOf(lua_State *l,WIHandle &hPanel,WIHandle &hOther);
 		DLLCLIENT void IsAncestor(lua_State *l,WIHandle &hPanel,WIHandle &hOther);
@@ -162,13 +162,24 @@ namespace Lua
 		DLLCLIENT void GetEndPos(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetClippingEnabled(lua_State *l,WIHandle &hPanel,bool b);
 		DLLCLIENT void IsClippingEnabled(lua_State *l,WIHandle &hPanel);
+		DLLCLIENT void SetBounds(lua_State *l,WIHandle &hPanel,const Vector2 &start,const Vector2 &end);
 
-		DLLCLIENT void AddAnchor(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position);
-		DLLCLIENT void AddAnchor(lua_State *l,WIHandle &hPanel,const std::string &name);
-		DLLCLIENT void SetAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position);
-		DLLCLIENT void GetAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name);
-		DLLCLIENT void GetAbsoluteAnchorPos(lua_State *l,WIHandle &hPanel,const std::string &name);
-		DLLCLIENT void GetAnchorPosProperty(lua_State *l,WIHandle &hPanel,const std::string &name);
+		DLLCLIENT void SetAlwaysUpdate(lua_State *l,WIHandle &hPanel,bool b);
+
+		DLLCLIENT void AddAttachment(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position);
+		DLLCLIENT void AddAttachment(lua_State *l,WIHandle &hPanel,const std::string &name);
+		DLLCLIENT void SetAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position);
+		DLLCLIENT void GetAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name);
+		DLLCLIENT void GetAbsoluteAttachmentPos(lua_State *l,WIHandle &hPanel,const std::string &name);
+		DLLCLIENT void GetAttachmentPosProperty(lua_State *l,WIHandle &hPanel,const std::string &name);
+
+		DLLCLIENT void SetAnchor(lua_State *l,WIHandle &hPanel,float left,float top,float right,float bottom);
+		DLLCLIENT void SetAnchorLeft(lua_State *l,WIHandle &hPanel,float f);
+		DLLCLIENT void SetAnchorRight(lua_State *l,WIHandle &hPanel,float f);
+		DLLCLIENT void SetAnchorTop(lua_State *l,WIHandle &hPanel,float f);
+		DLLCLIENT void SetAnchorBottom(lua_State *l,WIHandle &hPanel,float f);
+		DLLCLIENT void GetAnchor(lua_State *l,WIHandle &hPanel);
+		DLLCLIENT void HasAnchor(lua_State *l,WIHandle &hPanel);
 	};
 
 	namespace WIButton

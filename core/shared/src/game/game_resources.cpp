@@ -7,6 +7,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 static bool s_bModuleInitialized = false;
 static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 {
@@ -14,7 +15,7 @@ static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 	if(dllHandle == nullptr)
 	{
 		std::string err;
-		dllHandle = nw->LoadLibraryModule("mount_external/wv_mount_external",{},&err);
+		dllHandle = nw->LoadLibraryModule("mount_external/pr_mount_external",{},&err);
 		if(dllHandle == nullptr)
 		{
 			static auto bPrintError = true;
@@ -137,3 +138,4 @@ bool util::port_file(NetworkState *nw,const std::string &path)
 		return false;
 	return ptrExtractResource(nw,path,util::IMPORT_PATH);
 }
+#pragma optimize("",on)

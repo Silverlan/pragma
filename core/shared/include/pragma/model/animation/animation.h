@@ -89,6 +89,7 @@ public:
 	void SetFadeOutTime(float t);
 	AnimationBlendController *SetBlendController(unsigned int controller);
 	AnimationBlendController *GetBlendController();
+	void ClearBlendController();
 	void Localize(const Skeleton &skeleton);
 	void Rotate(const Skeleton &skeleton,const Quat &rot);
 	void Translate(const Skeleton &skeleton,const Vector3 &t);

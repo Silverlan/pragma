@@ -13,11 +13,38 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_pos(util::Vector3Property::Create()),
 	m_orientation(util::QuatProperty::Create(uquat::identity())),
 	m_scale(util::Vector3Property::Create({1.f,1.f,1.f}))
-{}
+{
+	auto hEnt = ent.GetHandle();
+	m_pos->AddCallback([this,hEnt](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		if(hEnt.IsValid() == false)
+			return;
+		auto &ent = GetEntity();
+		ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
+		m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
+		auto pPhysComponent = ent.GetPhysicsComponent();
+		auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+		if(pPhys != NULL)
+			pPhys->SetPosition(pos);
+		ent.MarkForSnapshot();
+	});
+	m_orientation->AddCallback([this,hEnt](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
+		if(hEnt.IsValid() == false)
+			return;
+		auto &ent = GetEntity();
+		ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
+		m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
+		auto pPhysComponent = ent.GetPhysicsComponent();
+		auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+		if(phys != NULL)
+			phys->SetOrientation(rot);
+		ent.MarkForSnapshot();
+	});
+}
 void BaseTransformComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -110,14 +137,7 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
 		Con::cwar<<"! Ignoring..."<<Con::endl;
 		return;
 	}
-	ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
-	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 	*m_pos = pos;
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(pPhys != NULL)
-		pPhys->SetPosition(pos);
-	ent.MarkForSnapshot();
 }
 
 void BaseTransformComponent::SetPosition(const Vector3 &pos) {SetPosition(pos,false);}
@@ -141,14 +161,7 @@ void BaseTransformComponent::SetOrientation(const Quat &q)
 		Con::cwar<<"! Ignoring..."<<Con::endl;
 		return;
 	}
-	ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
-	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 	*m_orientation = q;
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(phys != NULL)
-		phys->SetOrientation(q);
-	ent.MarkForSnapshot();
 }
 
 void BaseTransformComponent::Save(DataStream &ds)
@@ -296,3 +309,4 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 void BaseTransformComponent::SetRawPosition(const Vector3 &pos) {*m_pos = pos;}
 void BaseTransformComponent::SetRawOrientation(const Quat &rot) {*m_orientation = rot;}
 void BaseTransformComponent::SetRawScale(const Vector3 &scale) {*m_scale = scale;}
+#pragma optimize("",on)

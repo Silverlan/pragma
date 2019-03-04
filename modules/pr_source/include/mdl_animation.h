@@ -1,10 +1,10 @@
 #ifndef __MDL_ANIMATION_H__
 #define __MDL_ANIMATION_H__
 
-#include <uvec.h>
-#include <filesystem.h>
+#include <mathutil/uvec.h>
+#include <fsys/filesystem.h>
 #include <array>
-#include <animation.h>
+#include <pragma/model/animation/animation.h>
 #include "mdl_bone.h"
 #include "quaternion48.h"
 #include "quaternion64.h"

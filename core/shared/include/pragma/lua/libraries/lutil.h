@@ -48,7 +48,7 @@ namespace Lua
 		DLLNETWORK int metres_to_units(lua_State *l);
 
 		DLLNETWORK int read_scene_file(lua_State *l);
-		DLLNETWORK int fade_color_property(lua_State *l);
+		DLLNETWORK int fade_property(lua_State *l);
 	};
 
 	template<class T,class TCast>
@@ -106,6 +106,6 @@ namespace Lua
 	{"units_to_metres",Lua::util::units_to_metres}, \
 	{"metres_to_units",Lua::util::metres_to_units}, \
 	{"read_scene_file",Lua::util::read_scene_file}, \
-	{"fade_color_property",Lua::util::fade_color_property},
+	{"fade_property",Lua::util::fade_property},
 
 #endif

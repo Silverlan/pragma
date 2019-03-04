@@ -44,6 +44,30 @@ int Lua::gui::create(lua_State *l)
 	return 1;
 }
 
+int Lua::gui::create_button(lua_State *l)
+{
+	int32_t arg = 1;
+	auto *str = Lua::CheckString(l,arg++);
+	WIHandle *hParent = nullptr;
+	if(Lua::IsSet(l,arg))// && !Lua::IsNumber(l,arg))
+		hParent = Lua::CheckGUIElementHandle(l,arg++);
+	auto *parent = (hParent != nullptr && hParent->IsValid()) ? hParent->get() : nullptr;
+	auto *pButton = WGUI::GetInstance().Create<::WIButton>(parent);
+	if(pButton == nullptr)
+		return 0;
+	pButton->SetText(str);
+	pButton->SizeToContents();
+	if(Lua::IsNumber(l,arg))
+	{
+		auto x = Lua::CheckInt(l,arg++);
+		auto y = Lua::CheckInt(l,arg++);
+		pButton->SetPos(x,y);
+	}
+	auto obj = WGUILuaInterface::GetLuaObject(l,pButton);
+	obj.push(l);
+	return 1;
+}
+
 int Lua::gui::create_label(lua_State *l)
 {
 	int32_t arg = 1;

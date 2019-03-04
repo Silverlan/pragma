@@ -1,6 +1,6 @@
 #include "phy.h"
-#include <filesystem.h>
-#include <util/util_string.h>
+#include <fsys/filesystem.h>
+#include <sharedutils/util_string.h>
 
 bool import::mdl::load_phy(const VFilePtr &f,std::vector<phy::PhyCollisionData> &solids,std::unordered_map<int32_t,phy::PhyRagdollConstraint> &constraints)
 {

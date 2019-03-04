@@ -1720,7 +1720,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"MEMORY_FEATURE_HOST_COHERENT_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::HostCoherent)},
 		{"MEMORY_FEATURE_LAZILY_ALLOCATED_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::LazilyAllocated)},
 		{"MEMORY_FEATURE_HOST_ACCESSABLE_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::HostAccessable)},
-		{"MEMORY_FEATURE_GPU_BULK",umath::to_integral(prosper::util::MemoryFeatureFlags::GPUBulk)},
+		{"MEMORY_FEATURE_GPU_BULK_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::GPUBulk)},
 		{"MEMORY_FEATURE_CPU_TO_GPU",umath::to_integral(prosper::util::MemoryFeatureFlags::CPUToGPU)},
 		{"MEMORY_FEATURE_GPU_TO_CPU",umath::to_integral(prosper::util::MemoryFeatureFlags::GPUToCPU)},
 

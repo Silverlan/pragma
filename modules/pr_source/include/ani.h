@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
-#include <uvec.h>
-#include <vertex.h>
+#include <mathutil/uvec.h>
+#include <pragma/model/vertex.h>
 #include "mdl_animation.h"
 
 #pragma pack(push,1)

@@ -1,6 +1,6 @@
 #include "mdl_sequence.h"
 #include "mdl.h"
-#include <util/util_string.h>
+#include <sharedutils/util_string.h>
 
 const std::unordered_map<std::string,int32_t> animEvents = {
 	{"AE_INVALID",-1},

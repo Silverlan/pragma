@@ -551,7 +551,8 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	const std::array<char,3> header = {'W','L','D'};
 	fOut->Write(header.data(),header.size());
 
-	fOut->Write<uint32_t>(WLD_VERSION); // TODO: WLD_VERSION
+	fOut->Write<uint32_t>(WLD_VERSION);
+	static_assert(WLD_VERSION == 9);
 	auto offsetMaterial = fOut->Tell();
 	fOut->Write<uint64_t>(0ull);
 	auto offsetEntities = fOut->Tell();

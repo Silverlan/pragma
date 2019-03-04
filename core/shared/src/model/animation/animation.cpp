@@ -117,6 +117,10 @@ AnimationBlendController *Animation::SetBlendController(unsigned int controller)
 	m_blendController->controller = controller;
 	return m_blendController.get();
 }
+void Animation::ClearBlendController()
+{
+	m_blendController = nullptr;
+}
 AnimationBlendController *Animation::GetBlendController()
 {
 	return m_blendController.get();

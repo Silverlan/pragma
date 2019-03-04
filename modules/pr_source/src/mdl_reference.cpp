@@ -1,5 +1,5 @@
 #include "mdl.h"
-#include <model.h>
+#include <pragma/model/model.h>
 
 static void to_local_bone_system(const SMDModel::Frame &frame,const SMDModel::Node &node,Vector3 &pos,Quat &rot)
 {

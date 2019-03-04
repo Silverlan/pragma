@@ -9,17 +9,17 @@
 #include "phy.h"
 #include "ani.h"
 #include "wv_source.hpp"
-#include <networkstate.h>
-#include <modelmesh.h>
-#include <activities.h>
-#include <filesystem.h>
-#include <model.h>
+#include <pragma/networkstate/networkstate.h>
+#include <pragma/model/modelmesh.h>
+#include <pragma/model/animation/activities.h>
+#include <fsys/filesystem.h>
+#include <pragma/model/model.h>
 #include <stack>
-#include <collisionmesh.h>
-#include <util/util_file.h>
-#include <util/util_string.h>
-#include <vertex_animation.hpp>
-#include <game_limits.h>
+#include <pragma/physics/collisionmesh.h>
+#include <sharedutils/util_file.h>
+#include <sharedutils/util_string.h>
+#include <pragma/model/animation/vertex_animation.hpp>
+#include <pragma/game/game_limits.h>
 
 #pragma optimize("",off)
 static const std::unordered_map<std::string,Activity> translateActivities = {
@@ -252,7 +252,7 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 					mdlName = ustring::substr(mdlName,7);
 				ufile::remove_extension_from_filename(mdlName);
 				auto wmdPath = mdlName +".wmd";
-				//mdlInfo.model.GetMetaInfo().includes.push_back(wmdPath);
+				mdlInfo.model.GetMetaInfo().includes.push_back(wmdPath);
 				if(FileManager::Exists("models\\" +wmdPath) == false)
 				{
 					auto r = convert_hl2_model(nw,fCreateModel,fCallback,"models\\",mdlName);

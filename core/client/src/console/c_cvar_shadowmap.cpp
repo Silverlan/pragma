@@ -11,6 +11,7 @@
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/rendering/c_cubemapside.h"
+#include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
 
 extern DLLCLIENT ClientState *client;
@@ -87,31 +88,25 @@ static void OnGameEnd(EntityHandle hEntity)
 	numShadowmapTargets = 0;
 }
 
-static bool GetShadowMap(std::vector<std::string> &argv,pragma::CLightComponent **light,ShadowMap **shadow,CBaseEntity **entity=nullptr,int *index=nullptr)
+static bool GetShadowMap(NetworkState *nw,std::vector<std::string> &argv,pragma::CLightComponent **light,ShadowMap **shadow,CBaseEntity **entity=nullptr)
 {
 	if(argv.empty())
 		return false;
-	auto idx = atoi(argv[0].c_str());
-	if(index != nullptr)
-		*index = idx;
-	auto *ent = c_game->GetEntity(idx);
-	if(entity != nullptr)
-		*entity = ent;
-	if(ent == nullptr)
-	{
-		Con::cwar<<"No entity with index "<<idx<<" found!"<<Con::endl;
+	auto ents = command::find_named_targets(nw,argv.front());
+	if(ents.empty())
 		return false;
-	}
+	auto *ent = static_cast<CBaseEntity*>(ents.front());
+	*entity = ent;
 	auto *pLightComponent = static_cast<pragma::CLightComponent*>(ent->FindComponent("light").get());
 	if(pLightComponent == nullptr)
 	{
-		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<idx<<") is not a light!"<<Con::endl;
+		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<argv.front()<<") is not a light!"<<Con::endl;
 		return false;
 	}
 	*light = pLightComponent;
 	if(pLightComponent->GetLight() == nullptr)
 	{
-		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<idx<<") has no light attached!"<<Con::endl;
+		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<argv.front()<<") has no light attached!"<<Con::endl;
 		return false;
 	}
 	*shadow = (*light)->GetShadowMap();
@@ -163,6 +158,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 				else
 					dt->SetPos(wLayer *3,hLayer); // Back
 				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+				dt->SetAlpha(0.78f);
 			}
 			break;
 		}
@@ -172,6 +168,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 			dt->SetTexture(*depthTexture,barrierImageLayout,barrierImageLayout);
 			dt->SetSize(wLayer,hLayer);
 			dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+			dt->SetAlpha(0.78f);
 			break;
 		}
 		case LightType::Directional:
@@ -185,6 +182,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 				dt->SetSize(wLayer,hLayer);
 				dt->SetPos(i *wLayer,0);
 				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+				dt->SetAlpha(0.78f);
 			}
 			auto csmMap = static_cast<ShadowMapCasc*>(shadow);
 			auto &staticDepthTex = csmMap->GetStaticPendingRenderTarget()->GetTexture();
@@ -211,15 +209,14 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 	base->SetSize(width,height);
 }
 
-void CMD_debug_light_shadowmap(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	dbg = nullptr;
 	pragma::CLightComponent *light;
 	ShadowMap *shadow;
 	CBaseEntity *ent;
-	int idx;
-	if(GetShadowMap(argv,&light,&shadow,&ent,&idx) == false)
+	if(GetShadowMap(nw,argv,&light,&shadow,&ent) == false)
 		return;
 	auto size = 256u;
 	if(argv.size() > 1)

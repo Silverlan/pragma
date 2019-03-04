@@ -23,6 +23,7 @@ static void register_gui(Lua::Interface &lua)
 	lua.RegisterLibrary("gui",{
 		{"create",Lua::gui::create},
 		{"create_label",Lua::gui::create_label},
+		{"create_button",Lua::gui::create_button},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
 		{"get_focused_element",Lua::gui::get_focused_element},

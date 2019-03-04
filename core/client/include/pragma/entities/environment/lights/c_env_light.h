@@ -5,6 +5,7 @@
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
+#include "pragma/rendering/lighting/c_light_data.hpp"
 
 enum class LightType : uint32_t
 {
@@ -128,14 +129,6 @@ namespace pragma
 			Static = 0,
 			Dynamic = 1
 		};
-		enum class BufferFlags : uint32_t
-		{
-			None = 0,
-			TurnedOn = 1,
-			TypeSpot = TurnedOn<<1,
-			TypePoint = TypeSpot<<1,
-			TypeDirectional = TypePoint<<1
-		};
 		enum class StateFlags : uint32_t
 		{
 			None = 0u,
@@ -175,32 +168,6 @@ namespace pragma
 			std::vector<std::shared_ptr<EntityInfo>>::iterator FindEntity(CBaseEntity *ent);
 			std::vector<std::shared_ptr<EntityInfo>> meshInfo;
 		};
-#pragma pack(push,1)
-		struct BufferData
-		{
-			Vector4 position {}; // position.w = distance
-			Vector4 color {};
-			Vector4 direction {}; // direction.w is unused
-			uint32_t shadowIndex = 0u;
-
-			float cutoffOuter = 0.f;
-			float cutoffInner = 0.f;
-			float attenuation = 0.f;
-			BufferFlags flags = BufferFlags::None;
-			uint32_t shadowMapIndex = 0u;
-
-			float falloffExponent = 1.f;
-
-			 // Alignment to vec4
-			float dummy0 = 0.f;
-		};
-		struct ShadowBufferData
-		{
-			Mat4 depthVP = umat::identity();
-			Mat4 view = umat::identity();
-			Mat4 projection = umat::identity();
-		};
-#pragma pack(pop)
 		/*class BufferUpdateInfo
 		{
 		private:
@@ -243,8 +210,8 @@ namespace pragma
 		uint64_t GetLastTimeShadowRendered() const;
 		void SetLastTimeShadowRendered(uint64_t t);
 
-		const BufferData &GetBufferData() const;
-		BufferData &GetBufferData();
+		const LightBufferData &GetBufferData() const;
+		LightBufferData &GetBufferData();
 		const ShadowBufferData *GetShadowBufferData() const;
 		ShadowBufferData *GetShadowBufferData();
 
@@ -252,14 +219,12 @@ namespace pragma
 		virtual void SetShadowType(ShadowType type) override;
 
 		virtual void SetFalloffExponent(float falloffExponent) override;
+
+		// For internal use only!
+		void SetRenderBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
+		void SetShadowBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
 	protected:
-		static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer;
-		static std::shared_ptr<prosper::UniformResizableBuffer> s_shadowBuffer;
-		static std::vector<CLightComponent*> s_bufferLights;
-		static std::vector<CLightComponent*> s_shadowBufferLights;
 		static std::size_t s_lightCount;
-		static std::size_t s_maxLightCount;
-		static std::size_t s_maxShadowCount;
 		void InitializeRenderBuffer();
 		void InitializeShadowBuffer();
 		void DestroyRenderBuffer();
@@ -267,7 +232,7 @@ namespace pragma
 		void InitializeLight(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
-		BufferData m_bufferData {};
+		LightBufferData m_bufferData {};
 		std::unique_ptr<ShadowBufferData> m_shadowBufferData = nullptr;
 		std::shared_ptr<prosper::Buffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::Buffer> m_shadowBuffer = nullptr;
@@ -319,7 +284,6 @@ namespace pragma
 		virtual void InitializeShadowMap();
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightComponent::BufferFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightComponent::StateFlags);
 
 class DLLCLIENT CEnvLight

@@ -39,7 +39,7 @@ void CLightSpotComponent::Initialize()
 		bufferData.cutoffInner = static_cast<float>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(CLightComponent::BufferData,cutoffInner),bufferData.cutoffInner);
+			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInner),bufferData.cutoffInner);
 	});
 	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		UpdateProjectionMatrix();
@@ -50,7 +50,7 @@ void CLightSpotComponent::Initialize()
 		bufferData.cutoffOuter = static_cast<float>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(CLightComponent::BufferData,cutoffOuter),bufferData.cutoffOuter);
+			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuter),bufferData.cutoffOuter);
 	});
 
 	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();

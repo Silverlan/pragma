@@ -1,11 +1,11 @@
 #include "fbx.h"
 #include "fbxfile.h"
 #include "wv_source.hpp"
-#include <networkstate.h>
-#include <util/util_file.h>
+#include <pragma/networkstate/networkstate.h>
+#include <sharedutils/util_file.h>
 #include <string>
-#include <model.h>
-#include <modelmesh.h>
+#include <pragma/model/model.h>
+#include <pragma/model/modelmesh.h>
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 

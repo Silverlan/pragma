@@ -6,6 +6,13 @@
 CallbackHandle LuaCallbackHandler::AddLuaCallback(std::string identifier,const luabind::object &o)
 {
 	ustring::to_lower(identifier);
+	if(m_callDepth > 0u)
+	{
+		// m_luaCallbacks is currently being iterated on, so we have to delay adding the new callback
+		auto hCallback = CallbackHandle{std::shared_ptr<TCallback>(new LuaCallback(o))};
+		m_addQueue.push(std::make_pair(identifier,hCallback));
+		return hCallback;
+	}
 	auto it = m_luaCallbacks.find(identifier);
 	if(it == m_luaCallbacks.end())
 		it = m_luaCallbacks.insert(std::unordered_map<std::string,std::vector<CallbackHandle>>::value_type(identifier,std::vector<CallbackHandle>())).first;

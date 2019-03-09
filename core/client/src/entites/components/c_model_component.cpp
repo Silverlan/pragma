@@ -19,6 +19,15 @@ void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_ON_UPDATE_LOD_BY_POS = componentManager.RegisterEvent("EVENT_ON_UPDATE_LOD_BY_POS",std::type_index(typeid(CModelComponent)));
 }
 
+void CModelComponent::Initialize()
+{
+	BaseModelComponent::Initialize();
+	auto &ent = GetEntity();
+	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+	if(pRenderComponent.valid())
+		pRenderComponent->SetRenderBufferDirty();
+}
+
 Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 	if(eventId == m_netEvSetBodyGroup)

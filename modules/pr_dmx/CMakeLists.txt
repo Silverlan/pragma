@@ -8,6 +8,8 @@ project(${PROJ_NAME} CXX)
 
 link_external_library(util_dmx)
 
+add_external_library(lua)
+
 add_include_dir(glm)
 
 link_generic_module_libraries()

@@ -45,6 +45,7 @@ public:
 	virtual CMaterial *GetWaterMaterial() const=0;
 	void InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal);
 	void InitializeWaterScene(const WaterScene &scene);
+	bool IsWaterSceneValid() const;
 protected:
 	std::unique_ptr<WaterScene> m_waterScene = nullptr;
 	uint8_t m_reflectionRendered = 0;

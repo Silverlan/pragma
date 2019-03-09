@@ -4,6 +4,7 @@
 #include <pragma/networkdefinitions.h>
 #include <string>
 #include <vector>
+#include <optional>
 #include <unordered_map>
 
 class Locale;
@@ -19,18 +20,18 @@ public:
 
 class DLLNETWORK Locale
 {
+public:
+	static bool Load(const std::string &file,bool bReload=false);
+	static void Initialize(std::string lan);
+	static bool GetText(const std::string &id,std::string &outText);
+	static bool GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText);
+	static std::string GetText(const std::string &id,const std::vector<std::string> &args={});
+	static const std::string &GetLanguage();
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;
 	static std::string m_language;
 	static bool Load(const std::string &file,const std::string &lan,bool bReload);
-public:
-	static bool Load(const std::string &file,bool bReload=false);
-	static void Initialize(std::string lan);
-	static std::string GetText(const std::string &id);
-	static std::string GetText(const std::string &id,const std::vector<std::string> &args);
-	static bool GetText(const std::string &id,std::string &r);
-	static const std::string &GetLanguage();
 };
 
 #endif

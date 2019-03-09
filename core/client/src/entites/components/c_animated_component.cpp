@@ -59,6 +59,9 @@ void CAnimatedComponent::Initialize()
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
+	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+	if(pRenderComponent.valid())
+		pRenderComponent->SetRenderBufferDirty();
 }
 
 void CAnimatedComponent::ReceiveData(NetPacket &packet)

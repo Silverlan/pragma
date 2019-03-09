@@ -497,7 +497,9 @@ set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -lua
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 
 function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
-	configure_file(${SRC_PATH} ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${FILE_NAME} COPYONLY)
+	if(EXISTS ${SRC_PATH})
+		configure_file(${SRC_PATH} ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${FILE_NAME} COPYONLY)
+	endif()
 endfunction(copy_output_file_abs)
 
 function(copy_output_file SRC_PATH DST_PATH FILE_NAME)
@@ -507,13 +509,17 @@ endfunction(copy_output_file)
 function(copy_output_file_ext SRC_PATH DST_PATH)
 	get_filename_component(SRC_FILE_NAME ${SRC_PATH} NAME_WE)
 	get_filename_component(SRC_FILE_PATH ${SRC_PATH} DIRECTORY)
-	configure_file(${SRC_FILE_PATH}/${SRC_FILE_NAME}.dll ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${SRC_FILE_NAME}.dll COPYONLY)
+	if(EXISTS ${SRC_FILE_PATH}/${SRC_FILE_NAME}.dll)
+		configure_file(${SRC_FILE_PATH}/${SRC_FILE_NAME}.dll ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${SRC_FILE_NAME}.dll COPYONLY)
+	endif()
 endfunction(copy_output_file_ext)
 
 function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 	get_filename_component(SRC_FILE_NAME ${SRC_PATH} NAME_WE)
 	get_filename_component(SRC_FILE_PATH ${SRC_PATH} DIRECTORY)
-	configure_file(${SRC_FILE_PATH}/${DST_FILE_NAME} ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${DST_FILE_NAME} COPYONLY)
+	if(EXISTS ${SRC_FILE_PATH}/${DST_FILE_NAME})
+		configure_file(${SRC_FILE_PATH}/${DST_FILE_NAME} ${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${DST_FILE_NAME} COPYONLY)
+	endif()
 endfunction(copy_output_file_extc)
 
 copy_output_file(core/pragma/${CMAKE_BUILD_TYPE} "" pragma.exe)
@@ -538,6 +544,7 @@ copy_output_file(external_libs/vfilesystem/${CMAKE_BUILD_TYPE} "bin" vfilesystem
 copy_output_file(external_libs/wgui/${CMAKE_BUILD_TYPE} "bin" wgui.dll)
 
 copy_output_file(modules/pr_source/${CMAKE_BUILD_TYPE} "modules/mount_external" pr_mount_external.dll)
+copy_output_file(modules/pr_dmx/${CMAKE_BUILD_TYPE} "modules" pr_dmx.dll)
 
 copy_output_file_ext(${DEPENDENCY_BOOST_SYSTEM_LIBRARY} "bin")
 copy_output_file_ext(${DEPENDENCY_BOOST_DATE_TIME_LIBRARY} "bin")

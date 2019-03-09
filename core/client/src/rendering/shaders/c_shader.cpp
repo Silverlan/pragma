@@ -23,6 +23,7 @@ using namespace Shader;
 
 ////////////////////////////
 
+#pragma optimize("",off)
 extern ClientState *client;
 extern DLLCLIENT CGame *c_game;
 Base3D::Base3D(const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
@@ -160,3 +161,4 @@ bool Base3D::BindEntity(Vulkan::CommandBufferObject *cmdBuffer,CBaseEntity *ent,
 	return true;
 }
 #endif
+#pragma optimize("",on)

@@ -15,6 +15,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId,const Vector3 &_offset)
 	: boneId(_boneId),offset(_offset)
 {}
@@ -117,7 +118,6 @@ void BaseActorComponent::UpdateMoveController()
 		//float moveYaw = GetBlendController(blendController);
 		//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
 		animComponent->SetBlendController(m_moveController,CInt32(yawOffset));
-		//std::cout<<yawOffset<<"("<<vel.x<<","<<vel.y<<","<<vel.z<<")"<<std::endl;
 	}
 }
 
@@ -301,3 +301,4 @@ void CEOnCharacterKilled::PushArguments(lua_State *l)
 	else
 		Lua::PushNil(l);
 }
+#pragma optimize("",on)

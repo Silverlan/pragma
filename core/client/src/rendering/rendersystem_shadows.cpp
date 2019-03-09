@@ -133,7 +133,7 @@ static void render_csm_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					auto *mat = const_cast<Model&>(*mdl).GetMaterial(subMesh->GetTexture());
-					if(mat->GetShaderIdentifier() == "nodraw") // TODO
+					if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 						continue;
 					if(s_shadowRenderMeshInfos.size() == s_shadowRenderMeshInfos.capacity())
 						s_shadowRenderMeshInfos.reserve(s_shadowRenderMeshInfos.size() +100);

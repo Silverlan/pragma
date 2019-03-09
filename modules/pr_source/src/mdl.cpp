@@ -865,8 +865,11 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	{
 		auto start = pp.GetStart();
 		auto end = pp.GetEnd();
-		auto loop = pp.GetLoop();
-		mdl.AddBlendController(pp.GetName(),start,end,(loop > start && loop < end) ? false : true);
+		auto loopPoint = pp.GetLoop();
+		auto loop = (loopPoint > start && loopPoint < end) ? false : true;
+		if(ustring::compare(pp.GetName(),"move_yaw",false)) // TODO: Dirty hack. Some models (e.g. gman.mdl) have no loop point for controllers that SHOULD have loop points (e.g. move_yaw). What to do about this? (Could change range of move_yaw from [0,360] to [-180,180] in-engine.)
+			loop = true;
+		mdl.AddBlendController(pp.GetName(),start,end,loop);
 	}
 
 	auto reference = std::make_shared<Animation>();

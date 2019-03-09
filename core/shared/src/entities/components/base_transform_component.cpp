@@ -306,7 +306,19 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	}
 	return trData;
 }
-void BaseTransformComponent::SetRawPosition(const Vector3 &pos) {*m_pos = pos;}
-void BaseTransformComponent::SetRawOrientation(const Quat &rot) {*m_orientation = rot;}
-void BaseTransformComponent::SetRawScale(const Vector3 &scale) {*m_scale = scale;}
+void BaseTransformComponent::SetRawPosition(const Vector3 &pos)
+{
+	// Callbacks mustn't be invoked, so we change the value directly
+	**m_pos = pos;
+}
+void BaseTransformComponent::SetRawOrientation(const Quat &rot)
+{
+	// Callbacks mustn't be invoked, so we change the value directly
+	**m_orientation = rot;
+}
+void BaseTransformComponent::SetRawScale(const Vector3 &scale)
+{
+	// Callbacks mustn't be invoked, so we change the value directly
+	**m_scale = scale;
+}
 #pragma optimize("",on)

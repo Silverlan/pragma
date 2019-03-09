@@ -54,34 +54,34 @@ void Locale::Initialize(std::string lan)
 	m_language = lan;
 }
 const std::string &Locale::GetLanguage() {return m_language;}
-std::string Locale::GetText(const std::string &id)
+bool Locale::GetText(const std::string &id,std::string &outText) {return GetText(id,{},outText);}
+static void insert_arguments(const std::vector<std::string> &args,std::string &inOutText)
 {
-	std::string r;
-	GetText(id,r);
-	return r;
-}
-std::string Locale::GetText(const std::string &id,const std::vector<std::string> &args)
-{
-	auto out = GetText(id);
 	for(auto i=decltype(args.size()){0};i<args.size();++i)
 	{
 		std::string sarg = "{";
 		sarg += std::to_string(i);
 		sarg += "}";
-		auto pos = out.find(sarg.c_str());
+		auto pos = inOutText.find(sarg.c_str());
 		if(pos != std::string::npos)
-			out = out.replace(pos,3,args[i]);
+			inOutText = inOutText.replace(pos,3,args[i]);
 	}
-	return out;
 }
-bool Locale::GetText(const std::string &id,std::string &r)
+bool Locale::GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText)
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
-	{
-		r = std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
 		return false;
-	}
-	r = it->second;
+	outText = it->second;
+	insert_arguments(args,outText);
 	return true;
+}
+std::string Locale::GetText(const std::string &id,const std::vector<std::string> &args)
+{
+	auto it = m_localization.texts.find(id);
+	if(it == m_localization.texts.end())
+		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
+	auto r = it->second;
+	insert_arguments(args,r);
+	return r;
 }

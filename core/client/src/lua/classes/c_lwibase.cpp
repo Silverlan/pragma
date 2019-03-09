@@ -221,6 +221,30 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("IsClippingEnabled",&IsClippingEnabled);
 	classDef.def("SetAlwaysUpdate",&SetAlwaysUpdate);
 	classDef.def("SetBounds",&SetBounds);
+	classDef.def("FindDescendantByName",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>([](lua_State *l,WIHandle &hPanel,const std::string &name) {
+		lua_checkgui(l,hPanel);
+		auto *el = hPanel->FindDescendantByName(name);
+		if(el == nullptr)
+			return;
+		auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+		oChild.push(l);
+	}));
+	classDef.def("FindDescendantsByName",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>([](lua_State *l,WIHandle &hPanel,const std::string &name) {
+		lua_checkgui(l,hPanel);
+		std::vector<WIHandle> children {};
+		hPanel->FindDescendantsByName(name,children);
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &hChild : children)
+		{
+			if(hChild.IsValid() == false)
+				continue;
+			auto oChild = WGUILuaInterface::GetLuaObject(l,hChild.get());
+			Lua::PushInt(l,idx++);
+			oChild.push(l);
+			Lua::SetTableValue(l,t);
+		}
+	}));
 
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&AddAttachment));
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&,const Vector2&)>(&AddAttachment));
@@ -2491,6 +2515,24 @@ void Lua::WITransformable::register_class(luabind::class_<WITransformableHandle 
 	classDef.def("GetMaxSize",&GetMaxSize);
 	classDef.def("Close",&Close);
 	classDef.def("GetDragArea",&GetDragArea);
+	classDef.def("IsBeingDragged",static_cast<void(*)(lua_State*,WITransformableHandle&)>([](lua_State *l,WITransformableHandle &hTransformable) {
+		lua_checkgui(l,hTransformable);
+		Lua::PushBool(l,static_cast<::WITransformable*>(hTransformable.get())->IsBeingDragged());
+	}));
+	classDef.def("IsBeingResized",static_cast<void(*)(lua_State*,WITransformableHandle&)>([](lua_State *l,WITransformableHandle &hTransformable) {
+		lua_checkgui(l,hTransformable);
+		Lua::PushBool(l,static_cast<::WITransformable*>(hTransformable.get())->IsBeingResized());
+	}));
+	classDef.def("SetDragBounds",static_cast<void(*)(lua_State*,WITransformableHandle&,const Vector2i&,const Vector2i&)>([](lua_State *l,WITransformableHandle &hTransformable,const Vector2i &min,const Vector2i &max) {
+		lua_checkgui(l,hTransformable);
+		static_cast<::WITransformable*>(hTransformable.get())->SetDragBounds(min,max);
+	}));
+	classDef.def("GetDragBounds",static_cast<void(*)(lua_State*,WITransformableHandle&)>([](lua_State *l,WITransformableHandle &hTransformable) {
+		lua_checkgui(l,hTransformable);
+		auto bounds = static_cast<::WITransformable*>(hTransformable.get())->GetDragBounds();
+		Lua::Push<Vector2i>(l,bounds.first);
+		Lua::Push<Vector2i>(l,bounds.second);
+	}));
 }
 
 void Lua::WITransformable::SetDraggable(lua_State *l,WITransformableHandle &hTransformable,bool b)

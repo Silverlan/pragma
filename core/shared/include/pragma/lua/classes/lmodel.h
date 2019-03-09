@@ -196,6 +196,9 @@ namespace Lua
 
 		DLLNETWORK void AddIncludeModel(lua_State *l,const std::shared_ptr<::Model> &mdl,const std::string &modelName);
 		DLLNETWORK void GetIncludeModels(lua_State *l,const std::shared_ptr<::Model> &mdl);
+		
+		DLLNETWORK void GetPhonemeMap(lua_State *l,const std::shared_ptr<::Model> &mdl);
+		DLLNETWORK void SetPhonemeMap(lua_State *l,const std::shared_ptr<::Model> &mdl,luabind::object o);
 	};
 };
 

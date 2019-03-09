@@ -68,6 +68,51 @@ int Lua::gui::create_button(lua_State *l)
 	return 1;
 }
 
+int Lua::gui::create_checkbox(lua_State *l)
+{
+	std::string label = Lua::CheckString(l,1);
+
+	WIHandle *hParent = nullptr;
+	if(Lua::IsSet(l,2))
+		hParent = Lua::CheckGUIElementHandle(l,2);
+	auto *parent = (hParent != nullptr && hParent->IsValid()) ? hParent->get() : nullptr;
+
+	auto &wgui = WGUI::GetInstance();
+	auto *pContainer = wgui.Create<::WIBase>(parent);
+	if(pContainer == nullptr)
+		return 0;
+	auto *pCheckbox = wgui.Create<::WICheckbox>(pContainer);
+	if(pCheckbox == nullptr)
+	{
+		pContainer->Remove();
+		return 0;
+	}
+
+	auto *pText = WGUI::GetInstance().Create<::WIText>(pContainer);
+	if(pText == nullptr)
+	{
+		pContainer->Remove();
+		pCheckbox->Remove();
+		return 0;
+	}
+
+	pText->SetText(label);
+	pText->SizeToContents();
+	pText->SetPos(pCheckbox->GetRight() +5,pCheckbox->GetHeight() *0.5f -pText->GetHeight() *0.5f);
+
+	pContainer->SizeToContents();
+
+	auto oContainer = WGUILuaInterface::GetLuaObject(l,pContainer);
+	oContainer.push(l);
+
+	auto oCheckbox = WGUILuaInterface::GetLuaObject(l,pCheckbox);
+	oCheckbox.push(l);
+
+	auto oText = WGUILuaInterface::GetLuaObject(l,pText);
+	oText.push(l);
+	return 3;
+}
+
 int Lua::gui::create_label(lua_State *l)
 {
 	int32_t arg = 1;

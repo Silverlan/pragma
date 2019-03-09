@@ -90,6 +90,8 @@ namespace Lua
 		{
 			pragma::Lua::check_component(l,hEnt);
 			std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
+			if(snd == nullptr)
+				return;
 			luabind::object(l,snd).push(l);
 		}
 	};

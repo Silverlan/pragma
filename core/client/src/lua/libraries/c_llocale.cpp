@@ -9,18 +9,36 @@ extern DLLCLIENT CGame *c_game;
 int Lua::Locale::get_text(lua_State *l)
 {
 	auto id = Lua::CheckString(l,1);
+	std::vector<std::string> args {};
 	auto bReturnSuccess = false;
-	if(Lua::IsSet(l,2))
-		bReturnSuccess = Lua::CheckBool(l,2);
-	std::string r;
-	auto b = ::Locale::GetText(id,r);
+	auto argIdx = 2;
+	if(Lua::IsSet(l,argIdx) && Lua::IsTable(l,argIdx))
+	{
+		auto numArgs = Lua::GetObjectLength(l,argIdx);
+		args.reserve(numArgs);
+		for(auto i=decltype(numArgs){0u};i<numArgs;++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,argIdx);
+			args.push_back(Lua::CheckString(l,-1));
+
+			Lua::Pop(l,1);
+		}
+		++argIdx;
+	}
+	if(Lua::IsSet(l,argIdx))
+		bReturnSuccess = Lua::CheckBool(l,argIdx);
 	uint32_t numResults = 1;
 	if(bReturnSuccess == true)
 	{
+		std::string r;
+		auto b = ::Locale::GetText(id,args,r);
 		Lua::PushBool(l,b);
+		Lua::PushString(l,r);
 		++numResults;
+		return numResults;
 	}
-	Lua::PushString(l,r);
+	Lua::PushString(l,::Locale::GetText(id,args));
 	return numResults;
 }
 

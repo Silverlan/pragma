@@ -24,6 +24,7 @@ static void register_gui(Lua::Interface &lua)
 		{"create",Lua::gui::create},
 		{"create_label",Lua::gui::create_label},
 		{"create_button",Lua::gui::create_button},
+		{"create_checkbox",Lua::gui::create_checkbox},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
 		{"get_focused_element",Lua::gui::get_focused_element},
@@ -38,7 +39,38 @@ static void register_gui(Lua::Interface &lua)
 		{"inject_mouse_input",Lua::gui::inject_mouse_input},
 		{"inject_keyboard_input",Lua::gui::inject_keyboard_input},
 		{"inject_char_input",Lua::gui::inject_char_input},
-		{"inject_scroll_input",Lua::gui::inject_scroll_input}
+		{"inject_scroll_input",Lua::gui::inject_scroll_input},
+		{"find_element_by_name",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string name = Lua::CheckString(l,1);
+			auto *p = WGUI::GetInstance().GetBaseElement();
+			if(p == nullptr)
+				return 0;
+			auto *r = p->FindDescendantByName(name);
+			if(r == nullptr)
+				return 0;
+			auto oChild = WGUILuaInterface::GetLuaObject(l,r);
+			oChild.push(l);
+			return 1;
+		})},
+		{"find_elements_by_name",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::vector<WIHandle> results {};
+			auto t = Lua::CreateTable(l);
+			std::string name = Lua::CheckString(l,1);
+			auto *p = WGUI::GetInstance().GetBaseElement();
+			if(p != nullptr)
+				p->FindDescendantsByName(name,results);
+			auto idx = 1;
+			for(auto &hEl : results)
+			{
+				if(hEl.IsValid() == false)
+					continue;
+				Lua::PushInt(l,idx++);
+				auto oChild = WGUILuaInterface::GetLuaObject(l,hEl.get());
+				oChild.push(l);
+				Lua::SetTableValue(l,t);
+			}
+			return 1;
+		})}
 	});
 	auto guiMod = luabind::module(l,"gui");
 
@@ -373,9 +405,13 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 	auto alSoundClassDef = luabind::class_<std::shared_ptr<ALSound>>("Source");
 	Lua::ALSound::Client::register_class(alSoundClassDef);
 
+	auto alBufferClassDef = luabind::class_<al::PSoundBuffer>("Source");
+	Lua::ALSound::Client::register_buffer(alBufferClassDef);
+
 	auto soundMod = luabind::module(lua.GetState(),"sound");
 	soundMod[classDefAlEffect];
 	soundMod[alSoundClassDef];
+	soundMod[alBufferClassDef];
 
 	RegisterVulkanLuaInterface(lua);
 }

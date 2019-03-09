@@ -11,6 +11,7 @@ namespace Lua
 		DLLCLIENT int create(lua_State *l);
 		DLLCLIENT int create_label(lua_State *l);
 		DLLCLIENT int create_button(lua_State *l);
+		DLLCLIENT int create_checkbox(lua_State *l);
 		DLLCLIENT int register_element(lua_State *l);
 		DLLCLIENT int get_base_element(lua_State *l);
 		DLLCLIENT int get_focused_element(lua_State *l);

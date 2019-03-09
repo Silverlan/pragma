@@ -285,6 +285,9 @@ void Lua::Model::register_class(
 	classDef.def("AddIncludeModel",&Lua::Model::AddIncludeModel);
 	classDef.def("GetIncludeModels",&Lua::Model::GetIncludeModels);
 	
+	classDef.def("GetPhonemeMap",&Lua::Model::GetPhonemeMap);
+	classDef.def("SetPhonemeMap",&Lua::Model::SetPhonemeMap);
+	
 	classDef.add_static_constant("FMERGE_NONE",umath::to_integral(::Model::MergeFlags::None));
 	classDef.add_static_constant("FMERGE_ANIMATIONS",umath::to_integral(::Model::MergeFlags::Animations));
 	classDef.add_static_constant("FMERGE_ATTACHMENTS",umath::to_integral(::Model::MergeFlags::Attachments));
@@ -1789,6 +1792,60 @@ void Lua::Model::GetIncludeModels(lua_State *l,const std::shared_ptr<::Model> &m
 		Lua::PushInt(l,i +1);
 		Lua::PushString(l,inc);
 		Lua::SetTableValue(l,t);
+	}
+}
+void Lua::Model::GetPhonemeMap(lua_State *l,const std::shared_ptr<::Model> &mdl)
+{
+	auto &phonemeMap = mdl->GetPhonemeMap();
+	if(phonemeMap.phonemes.empty())
+		return;
+	auto t = Lua::CreateTable(l);
+	for(auto &pair : phonemeMap.phonemes)
+	{
+		Lua::PushString(l,pair.first);
+		auto tFlexControllers = Lua::CreateTable(l);
+		for(auto &fc : pair.second.flexControllers)
+		{
+			Lua::PushString(l,fc.first);
+			Lua::PushNumber(l,fc.second);
+			Lua::SetTableValue(l,tFlexControllers);
+		}
+		Lua::SetTableValue(l,t);
+	}
+}
+void Lua::Model::SetPhonemeMap(lua_State *l,const std::shared_ptr<::Model> &mdl,luabind::object o)
+{
+	auto t = 2;
+	Lua::CheckTable(l,t);
+	auto &phonemeMap = mdl->GetPhonemeMap();
+	phonemeMap = {};
+
+	Lua::PushNil(l);
+	while(Lua::GetNextPair(l,t) != 0)
+	{
+		std::string phoneme = Lua::CheckString(l,-2);
+		auto tPhoneme = Lua::GetStackTop(l);
+		Lua::CheckTable(l,tPhoneme);
+
+		auto it = phonemeMap.phonemes.find(phoneme);
+		if(it == phonemeMap.phonemes.end())
+			phonemeMap.phonemes.insert(std::make_pair(phoneme,PhonemeInfo{}));
+
+		Lua::PushNil(l);
+		while(Lua::GetNextPair(l,tPhoneme) != 0)
+		{
+			std::string flexController = Lua::CheckString(l,-2);
+			auto value = Lua::CheckNumber(l,-1);
+
+			auto itInfo = it->second.flexControllers.find(flexController);
+			if(itInfo == it->second.flexControllers.end())
+				itInfo = it->second.flexControllers.insert(std::make_pair(flexController,value)).first;
+			itInfo->second = value;
+
+			Lua::Pop(l,1);
+		}
+
+		Lua::Pop(l,1);
 	}
 }
 static void push_object_attachment(lua_State *l,const ObjectAttachment &att)

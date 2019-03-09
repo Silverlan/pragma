@@ -14,6 +14,7 @@
 #include <pragma/physics/movetypes.h>
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
+#pragma optimize("",off)
 PhysWaterBuoyancySimulator::PhysWaterBuoyancySimulator()
 {}
 
@@ -305,8 +306,44 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 				{
 					auto volume = colMesh->GetVolume();
 					auto com = colMesh->GetCenterOfMass();
-					auto &verts = colMesh->GetVertices();
-					auto &triangles = colMesh->GetTriangles();
+					auto *verts = &colMesh->GetVertices();
+					const auto *triangles = &colMesh->GetTriangles();
+
+					std::vector<Vector3> aabbVerts;
+					const std::vector<uint16_t> aabbTris = {
+						0,6,7, // 1
+						0,7,5, // 1
+						3,0,5, // 2
+						3,1,0, // 2
+						2,0,1, // 3
+						2,6,0, // 3
+						7,6,2, // 4
+						4,7,2, // 4
+						4,1,3, // 5
+						1,4,2, // 5
+						4,3,5, // 6
+						4,5,7 // 6
+					};
+					if(triangles->empty())
+					{
+						// If physics mesh has no triangles, build generic mesh from AABB
+						Vector3 min,max;
+						colMesh->GetAABB(&min,&max);
+
+						aabbVerts = {
+							min, // 0
+							Vector3(max.x,min.y,min.z), // 1
+							Vector3(max.x,min.y,max.z), // 2
+							Vector3(max.x,max.y,min.z), // 3
+							max, // 4
+							Vector3(min.x,max.y,min.z), // 5
+							Vector3(min.x,min.y,max.z), // 6
+							Vector3(min.x,max.y,max.z) // 7
+						};
+
+						verts = &aabbVerts;
+						triangles = &aabbTris;
+					}
 
 					totalVolume += volume;
 
@@ -316,7 +353,7 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 					waterPlaneDistRelObj = uvec::dot(waterPlaneRelObj,waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj) -pos);
 					uvec::rotate(&waterPlaneRelObj,uquat::get_inverse(rot));
 
-					calc_surface_plane(surfaceSim,pos,rot,verts.begin(),verts.end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj);
+					calc_surface_plane(surfaceSim,pos,rot,verts->begin(),verts->end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj);
 
 					totalSubmerged += CalcBuoyancy(
 						rot,
@@ -325,7 +362,7 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 						waterPlaneRelObj,waterPlaneDistRelObj,
 						waterVelocity,
 						-gravity.y,
-						verts.begin(),triangles.begin(),triangles.end(),
+						verts->begin(),triangles->begin(),triangles->end(),
 						colObj->GetMass(),volume,colObj->GetLinearVelocity(),colObj->GetAngularVelocity(),
 						&buoyancy,&torque
 					);
@@ -580,3 +617,4 @@ Vector3 PhysWaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume) *umath::pow2(lenPolyhedron)) *-bodyAngularVelocity;
 }
+#pragma optimize("",on)

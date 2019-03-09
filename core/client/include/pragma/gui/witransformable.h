@@ -7,43 +7,15 @@
 class DLLCLIENT WITransformable
 	: public WIBase
 {
-protected:
-	enum class ResizeMode
-	{
-		none = -1,
-		ew = 1,
-		we = 2,
-		ns = 3,
-		sn = 4,
-		nwse = 5,
-		nesw = 6,
-		senw = 7,
-		swne = 8
-	};
-	WIHandle m_hMoveRect = {};
-	WIHandle m_hResizeRect = {};
-	bool m_bDraggable = false;
-	bool m_bResizable = false;
-	bool m_bDragging = false;
-	ResizeMode m_resizeMode = ResizeMode::none;
-	bool m_bResizing = false;
-	Vector2i m_resizeLastPos = {};
-	Vector2i m_dragCursorOffset = {};
-	void StartDrag();
-	void EndDrag();
-	void SetResizeMode(ResizeMode mode);
-	void StartResizing();
-	void EndResizing();
-	ResizeMode InvertResizeAxis(ResizeMode mode,bool bXAxis,bool bYAxis) const;
-	Vector2i m_minSize = {};
-	Vector2i m_maxSize = {-1,-1};
-	virtual void OnVisibilityChanged(bool bVisible) override;
-	Vector2i GetConfinedMousePos();
-	void OnTitleBarMouseEvent(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
-	void OnCloseButtonPressed();
-	void UpdateResizeRect();
-	void UpdateResizeRectPos();
 public:
+	enum class StateFlags : uint8_t
+	{
+		None = 0u,
+		Draggable = 1u,
+		Resizable = Draggable<<1u,
+		Dragging = Resizable<<1u,
+		Resizing = Dragging<<1u,
+	};
 	WITransformable();
 	virtual ~WITransformable() override;
 	virtual void Initialize() override;
@@ -78,6 +50,50 @@ public:
 	const Vector2i &GetMaxSize() const;
 	void Close();
 	virtual void Update() override;
+
+	bool IsBeingDragged() const;
+	bool IsBeingResized() const;
+
+	void SetDragBounds(const Vector2i &min,const Vector2i &max);
+	std::pair<Vector2i,Vector2i> GetDragBounds() const;
+protected:
+	enum class ResizeMode
+	{
+		none = -1,
+		ew = 1,
+		we = 2,
+		ns = 3,
+		sn = 4,
+		nwse = 5,
+		nesw = 6,
+		senw = 7,
+		swne = 8
+	};
+	WIHandle m_hMoveRect = {};
+	WIHandle m_hResizeRect = {};
+	StateFlags m_stateFlags = StateFlags::None;
+	ResizeMode m_resizeMode = ResizeMode::none;
+	Vector2i m_resizeLastPos = {};
+	Vector2i m_dragCursorOffset = {};
+	void StartDrag();
+	void EndDrag();
+	void SetResizeMode(ResizeMode mode);
+	void StartResizing();
+	void EndResizing();
+	ResizeMode InvertResizeAxis(ResizeMode mode,bool bXAxis,bool bYAxis) const;
+	Vector2i m_minSize = {};
+	Vector2i m_maxSize = {-1,-1};
+
+	Vector2i m_minDrag = {std::numeric_limits<int32_t>::lowest(),std::numeric_limits<int32_t>::lowest()};
+	Vector2i m_maxDrag = {std::numeric_limits<int32_t>::max(),std::numeric_limits<int32_t>::max()};
+
+	virtual void OnVisibilityChanged(bool bVisible) override;
+	Vector2i GetConfinedMousePos();
+	void OnTitleBarMouseEvent(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
+	void OnCloseButtonPressed();
+	void UpdateResizeRect();
+	void UpdateResizeRectPos();
 };
+REGISTER_BASIC_BITWISE_OPERATORS(WITransformable::StateFlags)
 
 #endif

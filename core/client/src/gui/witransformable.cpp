@@ -72,7 +72,7 @@ const Vector2i &WITransformable::GetMaxSize() const {return m_maxSize;}
 void WITransformable::OnTitleBarMouseEvent(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	MouseCallback(button,state,mods);
-	if(m_bDraggable == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Draggable) == false)
 		return;
 	if(button == GLFW::MouseButton::Left)
 	{
@@ -103,10 +103,10 @@ Vector2i WITransformable::GetConfinedMousePos()
 }
 void WITransformable::StartDrag()
 {
-	if(m_bDragging == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true)
 		return;
 	GetMousePos(&m_dragCursorOffset.x,&m_dragCursorOffset.y);
-	m_bDragging = true;
+	umath::set_flag(m_stateFlags,StateFlags::Dragging,true);
 }
 void WITransformable::OnVisibilityChanged(bool bVisible)
 {
@@ -122,27 +122,27 @@ void WITransformable::OnVisibilityChanged(bool bVisible)
 }
 void WITransformable::EndDrag()
 {
-	if(m_bDragging == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == false)
 		return;
-	m_bDragging = false;
+	umath::set_flag(m_stateFlags,StateFlags::Dragging,false);
 }
 void WITransformable::StartResizing()
 {
-	if(m_bResizing == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Resizing) == true || IsResizable() == false)
 		return;
-	m_bResizing = true;
+	umath::set_flag(m_stateFlags,StateFlags::Resizing,true);
 	m_resizeLastPos = GetConfinedMousePos();
 }
 void WITransformable::EndResizing()
 {
-	if(m_bResizing == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Resizing) == false)
 		return;
-	m_bResizing = false;
+	umath::set_flag(m_stateFlags,StateFlags::Resizing,false);
 	SetResizeMode(ResizeMode::none);
 }
 void WITransformable::SetResizeMode(ResizeMode mode)
 {
-	if(m_resizeMode == mode)
+	if(m_resizeMode == mode || IsResizable() == false)
 		return;
 	auto cursor = GLFW::Cursor::Shape::Arrow;
 	switch(mode)
@@ -184,7 +184,7 @@ void WITransformable::Initialize()
 	m_hMoveRect = CreateChild<WIBase>();
 	auto *pMoveRect = m_hMoveRect.get();
 	pMoveRect->AddStyleClass("move_rect");
-	pMoveRect->SetMouseInputEnabled(m_bDraggable);
+	pMoveRect->SetMouseInputEnabled(umath::is_flag_set(m_stateFlags,StateFlags::Draggable));
 	pMoveRect->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
 		std::bind(&WITransformable::OnTitleBarMouseEvent,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)
 	));
@@ -206,7 +206,7 @@ void WITransformable::MouseCallback(GLFW::MouseButton button,GLFW::KeyState stat
 void WITransformable::OnCursorMoved(int x,int y)
 {
 	WIBase::OnCursorMoved(x,y);
-	if(m_bResizing == true || m_bDragging == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Resizing) == true || umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true)
 		return;
 	if(x < -WIFRAME_RESIZE_OFFSET_BORDER || y < -WIFRAME_RESIZE_OFFSET_BORDER)
 	{
@@ -277,7 +277,7 @@ WITransformable::ResizeMode WITransformable::InvertResizeAxis(ResizeMode mode,bo
 void WITransformable::Think()
 {
 	WIBase::Think();
-	if(m_bResizing == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Resizing) == true)
 	{
 		Vector2i cursorPos = {};
 		GetMousePos(&cursorPos.x,&cursorPos.y);
@@ -376,7 +376,7 @@ void WITransformable::Think()
 		if(bSwap[0] == true || bSwap[1] == true)
 			m_resizeMode = InvertResizeAxis(m_resizeMode,bSwap[0],bSwap[1]);
 	}
-	else if(m_bDragging == true && m_hMoveRect.IsValid())
+	else if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true && m_hMoveRect.IsValid())
 	{
 		Vector2i mousePos;
 		WGUI::GetInstance().GetMousePos(mousePos.x,mousePos.y);
@@ -384,6 +384,11 @@ void WITransformable::Think()
 		SetAbsolutePos(npos);
 
 		auto curPos = GetPos();
+		curPos.x = umath::clamp(curPos.x,m_minDrag.x,m_maxDrag.x);
+		curPos.y = umath::clamp(curPos.y,m_minDrag.y,m_maxDrag.y);
+		SetPos(curPos);
+		curPos = GetPos();
+
 		auto prevPos = curPos;
 		CallCallbacks<void,std::reference_wrapper<Vector2i>,bool>("TranslateTransformPosition",std::ref(curPos),true);
 		SetPos(curPos);
@@ -393,7 +398,7 @@ void WITransformable::SetSize(int x,int y)
 {
 	auto oldSize = GetSize();
 	WIBase::SetSize(x,y);
-	if(m_bDragging == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true)
 	{
 		auto sz = GetSize();
 		Vector2 sc {1.f,1.f};
@@ -424,6 +429,17 @@ void WITransformable::SetSize(int x,int y)
 	}
 	UpdateResizeRect();
 }
+bool WITransformable::IsBeingDragged() const {return umath::is_flag_set(m_stateFlags,StateFlags::Dragging);}
+bool WITransformable::IsBeingResized() const {return umath::is_flag_set(m_stateFlags,StateFlags::Resizing);}
+void WITransformable::SetDragBounds(const Vector2i &min,const Vector2i &max)
+{
+	m_minDrag = min;
+	m_maxDrag = max;
+}
+std::pair<Vector2i,Vector2i> WITransformable::GetDragBounds() const
+{
+	return {m_minDrag,m_maxDrag};
+}
 void WITransformable::SetPos(int x,int y)
 {
 	WIBase::SetPos(x,y);
@@ -432,12 +448,12 @@ void WITransformable::SetPos(int x,int y)
 
 void WITransformable::SetDraggable(bool b)
 {
-	m_bDraggable = b;
+	umath::set_flag(m_stateFlags,StateFlags::Draggable,b);
 	if(b == false)
 		EndDrag();
 	if(m_hMoveRect.IsValid())
 		m_hMoveRect->SetMouseInputEnabled(b);
-	auto bMouseInput = (m_bResizable || m_bDraggable) ? true : false;
+	auto bMouseInput = (umath::is_flag_set(m_stateFlags,StateFlags::Resizable) || umath::is_flag_set(m_stateFlags,StateFlags::Draggable)) ? true : false;
 	SetMouseInputEnabled(bMouseInput);
 	SetMouseMovementCheckEnabled(bMouseInput);
 }
@@ -479,10 +495,10 @@ void WITransformable::SetVisible(bool b)
 }
 void WITransformable::SetResizable(bool b)
 {
-	m_bResizable = b;
+	umath::set_flag(m_stateFlags,StateFlags::Resizable,b);
 	if(b == false)
 		EndResizing();
-	auto bMouseInput = (m_bResizable || m_bDraggable) ? true : false;
+	auto bMouseInput = (umath::is_flag_set(m_stateFlags,StateFlags::Resizable) || umath::is_flag_set(m_stateFlags,StateFlags::Draggable)) ? true : false;
 	SetMouseInputEnabled(bMouseInput);
 	SetMouseMovementCheckEnabled(bMouseInput);
 
@@ -510,5 +526,5 @@ void WITransformable::SetResizable(bool b)
 	SetParent(pParent);
 	UpdateResizeRect();
 }
-bool WITransformable::IsDraggable() {return m_bDraggable;}
-bool WITransformable::IsResizable() {return m_bResizable;}
+bool WITransformable::IsDraggable() {return umath::is_flag_set(m_stateFlags,StateFlags::Draggable);}
+bool WITransformable::IsResizable() {return umath::is_flag_set(m_stateFlags,StateFlags::Resizable);}

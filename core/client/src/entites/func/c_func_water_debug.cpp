@@ -47,7 +47,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				r->SetSize(size *4,size);
 
 				auto pWaterComponent = entWater->GetComponent<pragma::CWaterComponent>();
-				if(pWaterComponent.valid() == false)
+				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return WIHandle{};
 				auto &waterScene = pWaterComponent->GetWaterScene();
 				// Debug GUI
@@ -55,6 +55,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				auto *pReflection = wgui.Create<WITexturedRect>(r);
 				pReflection->SetSize(size,size);
 				pReflection->SetTexture(*hdrInfo.hdrRenderTarget->GetTexture());
+				pReflection->SetName("dbg_water_reflection");
 
 				auto *pRefractionDepth = wgui.Create<WIDebugDepthTexture>(r);
 				pRefractionDepth->SetSize(size,size);
@@ -65,14 +66,15 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 					Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
 				});
 				pRefractionDepth->SetShouldResolveImage(true);
+				pRefractionDepth->SetName("dbg_water_refraction_depth");
 				hDepthTex = pRefractionDepth->GetHandle();
 
-				auto *pTest = wgui.Create<WIDebugMSAATexture>(r);
-				pTest->SetSize(size,size);
-				pTest->SetX(size *2u);
-				pTest->SetTexture(*waterScene.texScene);
-				pTest->SetShouldResolveImage(false);
-
+				auto *pSceneNoWater = wgui.Create<WIDebugMSAATexture>(r);
+				pSceneNoWater->SetSize(size,size);
+				pSceneNoWater->SetX(size *2u);
+				pSceneNoWater->SetTexture(*waterScene.texScene);
+				pSceneNoWater->SetShouldResolveImage(false);
+				pSceneNoWater->SetName("dbg_water_scene");
 				return r->GetHandle();
 			});
 			dbg->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([]() {

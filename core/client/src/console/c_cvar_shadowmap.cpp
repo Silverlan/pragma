@@ -17,6 +17,7 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;
@@ -159,6 +160,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 					dt->SetPos(wLayer *3,hLayer); // Back
 				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 				dt->SetAlpha(0.78f);
+				dt->SetName("dbg_shadowmap" +std::to_string(i));
 			}
 			break;
 		}
@@ -169,6 +171,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 			dt->SetSize(wLayer,hLayer);
 			dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 			dt->SetAlpha(0.78f);
+			dt->SetName("dbg_shadowmap" +std::to_string(0));
 			break;
 		}
 		case LightType::Directional:
@@ -183,6 +186,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 				dt->SetPos(i *wLayer,0);
 				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 				dt->SetAlpha(0.78f);
+				dt->SetName("dbg_shadowmap" +std::to_string(i));
 			}
 			auto csmMap = static_cast<ShadowMapCasc*>(shadow);
 			auto &staticDepthTex = csmMap->GetStaticPendingRenderTarget()->GetTexture();
@@ -196,6 +200,7 @@ static void initialize_debug_shadow_gui_elements(WIBase *base,pragma::CLightComp
 					dt->SetSize(wLayer,hLayer);
 					dt->SetPos(i *wLayer,hLayer);
 					dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+					dt->SetName("dbg_shadowmap_static" +std::to_string(i));
 				}
 			}
 			hLayer *= 2.0;
@@ -396,3 +401,4 @@ static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state,
 	CMD_debug_light_shadowmap(state,nullptr,argv);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count,CVAR_CALLBACK_cl_render_shadow_pssm_split_count);
+#pragma optimize("",on)

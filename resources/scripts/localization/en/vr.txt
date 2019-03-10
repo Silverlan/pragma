@@ -1,0 +1,6 @@
+key_vr = "VR Ctrl {0} Button {1}"
+key_vr_axis = "VR Ctrl {0} Axis {1}"
+vr_hmd = Head-Mounted Display
+vr_msg_switch_display = "Please switch to head-mounted display"
+vr_msg_error_init = "ERROR: Unable to initialize OpenVR: {0}"
+vr_msg_error_load = "ERROR: Unable to load OpenVR: {0}"

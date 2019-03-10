@@ -63,7 +63,9 @@ namespace pragma
 			Kinematic = Ragdoll<<1u,
 			CollisionsEnabled = Kinematic<<1u,
 			ApplyingLinearVelocity = CollisionsEnabled<<1u,
-			ApplyingAngularVelocity = ApplyingLinearVelocity<<1u
+			ApplyingAngularVelocity = ApplyingLinearVelocity<<1u,
+			ApplyingPhysicsPosition = ApplyingAngularVelocity<<1u,
+			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u
 		};
 
 		static ComponentEventId EVENT_ON_PHYSICS_INITIALIZED;
@@ -181,6 +183,7 @@ namespace pragma
 		Vector3 GetCollisionExtents() const;
 		Vector3 GetCollisionCenter() const;
 		void GetRotatedCollisionBounds(Vector3 *min,Vector3 *max) const;
+		StateFlags GetStateFlags() const;
 
 		Vector3 GetOrigin() const;
 		const Vector3 &GetLocalOrigin() const;

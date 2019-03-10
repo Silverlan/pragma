@@ -16,6 +16,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}
@@ -27,6 +28,9 @@ void CLightSpotComponent::Initialize()
 		auto &trData = static_cast<CEGetTransformationMatrix&>(evData.get());
 		trData.transformation = &MVPBias<1>::GetTransformationMatrix(trData.index);
 		return util::EventReply::Handled;
+	});
+	BindEventUnhandled(CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		UpdateTransformMatrix();
 	});
 	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		UpdateProjectionMatrix();
@@ -130,3 +134,4 @@ void CEnvLightSpot::Initialize()
 	AddComponent<CLightComponent>();
 	AddComponent<CLightSpotComponent>();
 }
+#pragma optimize("",on)

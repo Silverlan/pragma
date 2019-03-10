@@ -11,6 +11,10 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
+static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
+static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
+
+#pragma optimize("",off)
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = Anvil::Format::D32_SFLOAT;
 decltype(ShaderShadow::VERTEX_BINDING_BONE_WEIGHT) ShaderShadow::VERTEX_BINDING_BONE_WEIGHT = {Anvil::VertexInputRate::VERTEX};
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
@@ -45,6 +49,7 @@ bool ShaderShadow::BindMaterial(CMaterial &mat)
 	return true;*/
 	return false; // prosper TODO
 }
+
 bool ShaderShadow::BindEntity(CBaseEntity &ent,const Mat4 &depthMVP)
 {
 	if(ShaderEntity::BindEntity(ent) == false)
@@ -94,6 +99,8 @@ void ShaderShadow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
+
+	pipelineInfo.toggle_depth_bias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
 }
 
 //////////////////
@@ -696,3 +703,5 @@ void ShadowCSMStatic::InitializePipelineLayout(const Vulkan::Context &context,st
 	}));
 }
 #endif
+
+#pragma optimize("",on)

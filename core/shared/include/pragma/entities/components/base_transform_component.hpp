@@ -73,7 +73,7 @@ namespace pragma
 
 		void UpdateLastMovedTime();
 
-		// Set member variables directly, without any other influences
+		// Set member variables directly, without influencing physics
 		void SetRawPosition(const Vector3 &pos);
 		void SetRawOrientation(const Quat &rot);
 		void SetRawScale(const Vector3 &scale);

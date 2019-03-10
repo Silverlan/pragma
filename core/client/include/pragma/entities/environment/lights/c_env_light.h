@@ -70,6 +70,13 @@ namespace pragma
 		virtual void PushArguments(lua_State *l) override;
 		std::unique_ptr<ShadowMap> &shadowMap;
 	};
+	struct DLLCLIENT CEOnShadowBufferInitialized
+		: public ComponentEvent
+	{
+		CEOnShadowBufferInitialized(prosper::Buffer &shadowBuffer);
+		virtual void PushArguments(lua_State *l) override;
+		prosper::Buffer &shadowBuffer;
+	};
 	class DLLCLIENT CBaseLightComponent
 		: public BaseEnvLightComponent,
 		public CBaseNetComponent
@@ -110,6 +117,7 @@ namespace pragma
 		static pragma::ComponentEventId EVENT_SHOULD_UPDATE_RENDER_PASS;
 		static pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
 		static pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
+		static pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		static const prosper::UniformResizableBuffer &GetGlobalRenderBuffer();

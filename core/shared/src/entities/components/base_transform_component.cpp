@@ -28,7 +28,7 @@ BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 		m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-		if(pPhys != NULL)
+		if(pPhys != NULL && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
 			pPhys->SetPosition(pos);
 		ent.MarkForSnapshot();
 	});
@@ -40,7 +40,7 @@ BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 		m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-		if(phys != NULL)
+		if(phys != NULL && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
 			phys->SetOrientation(rot);
 		ent.MarkForSnapshot();
 	});
@@ -308,17 +308,17 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 }
 void BaseTransformComponent::SetRawPosition(const Vector3 &pos)
 {
-	// Callbacks mustn't be invoked, so we change the value directly
-	**m_pos = pos;
+	// TODO: Obsolete function; Remove this and use SetPosition instead!
+	*m_pos = pos;
 }
 void BaseTransformComponent::SetRawOrientation(const Quat &rot)
 {
-	// Callbacks mustn't be invoked, so we change the value directly
-	**m_orientation = rot;
+	// TODO: Obsolete function; Remove this and use SetOrientation instead!
+	*m_orientation = rot;
 }
 void BaseTransformComponent::SetRawScale(const Vector3 &scale)
 {
-	// Callbacks mustn't be invoked, so we change the value directly
-	**m_scale = scale;
+	// TODO: Obsolete function; Remove this and use SetScale instead!
+	*m_scale = scale;
 }
 #pragma optimize("",on)

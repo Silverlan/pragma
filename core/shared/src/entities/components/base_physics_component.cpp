@@ -196,7 +196,9 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
 			throw std::runtime_error(ss.str());
 		}
+		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
 		pTrComponent->SetRawOrientation(rot);
+		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
 
 		if(!bStatic && pVelComponent.valid())
 		{
@@ -233,7 +235,9 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
 			throw std::runtime_error(ss.str());
 		}
+		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
 		pTrComponent->SetRawPosition(pos);
+		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 	}
 	if(type == PHYSICSTYPE::DYNAMIC)
 	{
@@ -461,6 +465,8 @@ void BasePhysicsComponent::GetRotatedCollisionBounds(Vector3 *min,Vector3 *max) 
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent.valid() ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
 }
+
+BasePhysicsComponent::StateFlags BasePhysicsComponent::GetStateFlags() const {return m_stateFlags;}
 
 Vector3 BasePhysicsComponent::GetCollisionExtents() const
 {

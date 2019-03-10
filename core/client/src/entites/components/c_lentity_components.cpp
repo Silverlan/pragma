@@ -279,6 +279,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.add_static_constant("EVENT_SHOULD_PASS_MESH",pragma::CLightComponent::EVENT_SHOULD_PASS_MESH);
 	defCLight.add_static_constant("EVENT_SHOULD_UPDATE_RENDER_PASS",pragma::CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS);
 	defCLight.add_static_constant("EVENT_GET_TRANSFORMATION_MATRIX",pragma::CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX);
+	defCLight.add_static_constant("EVENT_HANDLE_SHADOW_MAP",pragma::CLightComponent::EVENT_HANDLE_SHADOW_MAP);
+	defCLight.add_static_constant("EVENT_ON_SHADOW_BUFFER_INITIALIZED",pragma::CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED);
 	entsMod[defCLight];
 
 	auto defCLightDirectional = luabind::class_<CLightDirectionalHandle,BaseEntityComponentHandle>("LightDirectionalComponent");

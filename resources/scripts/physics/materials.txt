@@ -11,7 +11,6 @@
 	$string footsteps "fx.fst_rock"
 	$string impact_soft "fx.phys_impact_rock_soft"
 	$string impact_hard "fx.phys_impact_rock_soft"
-	$int navigation_flags "NAV_FLAG_WALK + NAV_FLAG_SWIM"
 
 	audio
 	{

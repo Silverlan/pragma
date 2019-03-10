@@ -6,6 +6,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 #include <prosper_util.hpp>
@@ -92,6 +93,7 @@ ComponentEventId CLightComponent::EVENT_SHOULD_PASS_MESH = pragma::INVALID_COMPO
 ComponentEventId CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = pragma::INVALID_COMPONENT_ID;
 ComponentEventId CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = pragma::INVALID_COMPONENT_ID;
 ComponentEventId CLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMPONENT_ID;
+ComponentEventId CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
 void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_SHOULD_PASS_ENTITY = componentManager.RegisterEvent("SHOULD_PASS_ENTITY",std::type_index(typeid(CLightComponent)));
@@ -100,6 +102,7 @@ void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_SHOULD_UPDATE_RENDER_PASS = componentManager.RegisterEvent("SHOULD_UPDATE_RENDER_PASS",std::type_index(typeid(CLightComponent)));
 	EVENT_GET_TRANSFORMATION_MATRIX = componentManager.RegisterEvent("GET_TRANSFORMATION_MATRIX",std::type_index(typeid(CLightComponent)));
 	EVENT_HANDLE_SHADOW_MAP = componentManager.RegisterEvent("HANDLE_SHADOW_MAP");
+	EVENT_ON_SHADOW_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_SHADOW_BUFFER_INITIALIZED");
 }
 void CLightComponent::InitializeBuffers()
 {
@@ -137,6 +140,7 @@ void CLightComponent::InitializeShadowBuffer()
 	if(m_shadowBuffer != nullptr)
 		return;
 	m_shadowBuffer = ShadowDataBufferManager::GetInstance().Request(*this,*m_shadowBufferData);
+	BroadcastEvent(EVENT_ON_SHADOW_BUFFER_INITIALIZED,CEOnShadowBufferInitialized{*m_shadowBuffer});
 }
 
 void CLightComponent::DestroyRenderBuffer()
@@ -974,4 +978,14 @@ CEHandleShadowMap::CEHandleShadowMap(std::unique_ptr<ShadowMap> &shadowMap)
 	: shadowMap{shadowMap}
 {}
 void CEHandleShadowMap::PushArguments(lua_State *l) {}
+
+/////////////////
+
+CEOnShadowBufferInitialized::CEOnShadowBufferInitialized(prosper::Buffer &shadowBuffer)
+	: shadowBuffer{shadowBuffer}
+{}
+void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
+{
+	Lua::Push<Lua::Vulkan::Buffer>(l,shadowBuffer.shared_from_this());
+}
 #pragma optimize("",on)

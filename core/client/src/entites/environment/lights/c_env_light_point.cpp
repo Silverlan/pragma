@@ -74,6 +74,10 @@ void CLightPointComponent::Initialize()
 		trData.transformation = &MVPBias<6>::GetTransformationMatrix(trData.index);
 		return util::EventReply::Handled;
 	});
+	BindEventUnhandled(CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		for(auto i=0;i<6;i++)
+			UpdateTransformationMatrix(i);
+	});
 	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEHandleShadowMap&>(evData.get()).shadowMap = std::make_unique<ShadowMapCube>();
 		return util::EventReply::Handled;

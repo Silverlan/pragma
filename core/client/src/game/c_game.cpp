@@ -166,6 +166,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("OnPreRender");
 	RegisterCallback<void>("RenderPrepass");
 	RegisterCallback<void>("PostRenderScene");
+	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset");
 	RegisterCallback<
@@ -1304,6 +1305,8 @@ void CGame::SetLocalPlayer(pragma::CPlayerComponent *pl)
 {
 	m_plLocal = pl->GetHandle<pragma::CPlayerComponent>();
 	pl->SetLocalPlayer(true);
+	CallCallbacks<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned",pl);
+	CallLuaCallbacks<void,luabind::object>("OnLocalPlayerSpawned",pl->GetLuaObject());
 }
 
 void CGame::OnReceivedPlayerInputResponse(uint8_t userInputId)

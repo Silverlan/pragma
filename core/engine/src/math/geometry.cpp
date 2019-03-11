@@ -110,15 +110,21 @@ static Vector3 calc_cone_surface_normal(Vector3 coneCenter,const Vector3 &coneDi
 		pointOnSurface.y -coneCenter.y,
 		0.f
 	};
-	uvec::normalize(&v);
+	auto l = uvec::length(v);
+	if(l > 0.f)
+		v /= l;
 
 	auto r = Vector3{
-		v.x *coneHeight /radiusAtPoint,
-		v.y *coneHeight /radiusAtPoint,
-		-radiusAtPoint /coneHeight
+		(radiusAtPoint != 0.f) ? (v.x *coneHeight /radiusAtPoint) : 0.f,
+		(radiusAtPoint != 0.f) ? (v.y *coneHeight /radiusAtPoint) : 0.f,
+		(coneHeight != 0.f) ? (-radiusAtPoint /coneHeight) : 0.f
 	};
 	uvec::rotate(&r,rot);
-	uvec::normalize(&r);
+	l = uvec::length(r);
+	if(l > 0.f)
+		r /= l;
+	else
+		r = -coneDir;
 	return r;
 }
 

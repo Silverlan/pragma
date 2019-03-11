@@ -1,7 +1,13 @@
 #include "mdl.h"
 #include "wv_source.hpp"
 #include "nif.hpp"
+#include "fbx.h"
+#include <pragma/lua/libraries/lfile.h>
 #include <pragma/pragma_module.hpp>
+#include <pragma/ishared.hpp>
+#include <pragma/engine.h>
+#include <pragma/networkstate/networkstate.h>
+#include <pragma/game/game.h>
 #include <mathutil/uquat.h>
 #include <functional>
 #include <pragma/model/model.h>
@@ -9,6 +15,8 @@
 #include <fsys/filesystem.h>
 #include <util_archive.hpp>
 #include <sharedutils/util_file.h>
+#include <luasystem.h>
+#include <luainterface.hpp>
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 #pragma comment(lib,"lua51.lib")
@@ -24,7 +32,7 @@
 #pragma comment(lib,"util_archive.lib")
 #pragma comment(lib,"niflib_dll.lib")
 
-uint32_t import::util::add_texture(Model &mdl,const std::string &name)
+uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name)
 {
 	auto fname = name;
 	std::string ext;
@@ -44,6 +52,11 @@ uint32_t import::util::add_texture(Model &mdl,const std::string &name)
 	if(texGroup == nullptr)
 		texGroup = mdl.CreateTextureGroup();
 	texGroup->textures.push_back(idx);
+	auto *mat = nw.LoadMaterial(name);
+	if(mat == nullptr)
+		mat = nw.GetMaterialManager().GetErrorMaterial();
+	if(mat != nullptr)
+		mdl.AddMaterial(0,mat);
 	return idx;
 }
 
@@ -58,9 +71,26 @@ static bool write_data(const std::string &fpath,const std::vector<uint8_t> &data
 	return true;
 }
 
+extern DLLENGINE Engine *engine;
+
 class Model;
 class NetworkState;
 extern "C" {
+	void PRAGMA_EXPORT pragma_initialize_lua(Lua::Interface &lua)
+	{
+		auto &libSteamWorks = lua.RegisterLibrary("import",{
+			{"import_fbx",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+
+				auto &f = *Lua::CheckFile(l,1);
+				auto &mdl = Lua::Check<std::shared_ptr<Model>>(l,2);
+
+				std::vector<std::string> textures {};
+				auto bSuccess = import::load_fbx(engine->GetNetworkState(l),*mdl,f->GetHandle(),textures);
+				Lua::PushBool(l,bSuccess);
+				return 1;
+			})},
+		});
+	}
 	PRAGMA_EXPORT void initialize_archive_manager() {uarch::initialize();}
 	PRAGMA_EXPORT void close_archive_manager() {uarch::close();}
 	PRAGMA_EXPORT void find_files(const std::string &path,std::vector<std::string> *outFiles,std::vector<std::string> *outDirectories) {uarch::find_files(path,outFiles,outDirectories);}

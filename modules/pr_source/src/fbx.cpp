@@ -203,7 +203,7 @@ bool import::load_fbx(NetworkState *nw,Model &mdl,VFilePtr &f,std::vector<std::s
 					if(get_diffuse_file_name(mat,texture) == true)
 					{
 						textures.push_back(texture);
-						auto texId = import::util::add_texture(mdl,texture);
+						auto texId = import::util::add_texture(*nw,mdl,texture);
 						subMesh->SetTexture(texId);
 						break;
 					}

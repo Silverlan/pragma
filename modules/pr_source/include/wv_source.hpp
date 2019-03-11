@@ -10,7 +10,7 @@ namespace import
 {
 	namespace util
 	{
-		uint32_t add_texture(Model &mdl,const std::string &name);
+		uint32_t add_texture(NetworkState &nw,Model &mdl,const std::string &name);
 	};
 };
 

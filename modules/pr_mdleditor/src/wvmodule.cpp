@@ -18,7 +18,7 @@
 #pragma comment(lib,"shared.lib")
 #pragma comment(lib,"engine.lib")
 #pragma comment(lib,"util_smdmodel.lib")
-#pragma comment(lib,"pr_source.lib")
+#pragma comment(lib,"pr_mount_external.lib")
 #pragma comment(lib,"materialsystem.lib")
 
 #pragma comment(lib,"niflib_dll.lib")

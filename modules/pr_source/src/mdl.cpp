@@ -848,7 +848,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		});
 		if(it != texPaths.end())
 			texPath = ustring::sub(texPath,it->length());
-		textureTranslations.push_back(import::util::add_texture(mdl,texPath));
+		textureTranslations.push_back(import::util::add_texture(*nw,mdl,texPath));
 	}
 
 	auto &skeleton = mdl.GetSkeleton();

@@ -14,9 +14,7 @@ void SLightSpotVolComponent::Initialize()
 }
 void SLightSpotVolComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 {
-	packet->Write<float>(m_coneLength);
 	packet->Write<float>(m_coneAngle);
-	packet->Write<Color>(m_coneColor);
 }
 
 luabind::object SLightSpotVolComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightSpotVolComponentHandleWrapper>(l);}

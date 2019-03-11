@@ -17,9 +17,7 @@ namespace pragma
 		virtual void Initialize() override;
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		float m_coneLength = 100.f;
 		float m_coneAngle = 45.f;
-		Color m_coneColor;
 	};
 };
 

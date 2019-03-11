@@ -10,6 +10,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(env_light_spot_vol,CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
@@ -19,7 +20,8 @@ void CLightSpotVolComponent::Initialize()
 {
 	BaseEnvLightSpotVolComponent::Initialize();
 	auto &ent = GetEntity();
-	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+	ent.AddComponent<CModelComponent>();
+	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
 		FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -30,9 +32,7 @@ void CLightSpotVolComponent::Initialize()
 
 void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
-	m_coneLength = packet->Read<float>();
 	m_coneAngle = packet->Read<float>();
-	m_coneColor = packet->Read<Color>();
 }
 
 util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
@@ -62,17 +62,14 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	auto mdl = c_game->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
 
-	auto maxDist = m_coneLength;
+	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
+	auto maxDist = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 100.f;
 	auto endRadius = maxDist *umath::tan(umath::deg_to_rad(m_coneAngle));
-
-	std::stringstream ss;
-	ss<<m_coneColor.r<<" "<<m_coneColor.g<<" "<<m_coneColor.b<<" "<<m_coneColor.a;
 
 	auto *mat = static_cast<CMaterial*>(client->CreateMaterial("lightcone","light_cone"));
 	auto &data = mat->GetDataBlock();
 	data->AddValue("bool","translucent","1");
 	data->AddValue("float","cone_height",std::to_string(maxDist));
-	data->AddValue("color","cone_color",ss.str());
 	mat->SetTexture("diffusemap","error");
 
 	const uint32_t coneDetail = 64;
@@ -123,3 +120,4 @@ void CEnvLightSpotVol::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLightSpotVolComponent>();
 }
+#pragma optimize("",on)

@@ -14,10 +14,6 @@ namespace pragma
 #pragma pack(push,1)
 		struct PushConstants
 		{
-			float coneR;
-			float coneG;
-			float coneB;
-			float coneA;
 			float coneLength;
 		};
 #pragma pack(pop)

@@ -5,6 +5,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include <pragma/model/animation/vertex_animation.hpp>
+#include <prosper_command_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -45,6 +46,13 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 					auto bUseVertexAnim = false;
 					if(vertAnimBuffer != nullptr)
 					{
+						// Vertex animation buffer barrier
+						prosper::util::record_buffer_barrier(
+							**drawCmd,*vertAnimBuffer,
+							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
+							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+						);
+
 						auto pVertexAnimatedComponent = ent->GetComponent<pragma::CVertexAnimatedComponent>();
 						if(pVertexAnimatedComponent.valid())
 						{

@@ -9,6 +9,7 @@
 #include <sharedutils/util_shaderinfo.hpp>
 #include <pragma/model/model.h>
 #include <image/prosper_render_target.hpp>
+#include <prosper_command_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -60,8 +61,32 @@ void Scene::PrepareRendering(RenderMode renderMode,bool bUpdateTranslucentMeshes
 			auto itProcessed = renderInfo->processed.find(ent);
 			if(itProcessed == renderInfo->processed.end())
 			{
-				pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());//,true);
+				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
+				pRenderComponent->UpdateRenderData(drawCmd);//,true);
 				pRenderComponent->Render(renderMode);
+
+				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
+				if(wpRenderBuffer.expired() == false)
+				{
+					prosper::util::record_buffer_barrier(
+						**drawCmd,*wpRenderBuffer.lock(),
+						Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+						Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+					);
+					auto pAnimComponent = ent->GetAnimatedComponent();
+					if(pAnimComponent.valid())
+					{
+						auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent*>(pAnimComponent.get())->GetBoneBuffer();
+						if(wpBoneBuffer.expired() == false)
+						{
+							prosper::util::record_buffer_barrier(
+								**drawCmd,*wpBoneBuffer.lock(),
+								Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+								Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+							);
+						}
+					}
+				}
 				processed.insert(std::remove_reference_t<decltype(processed)>::value_type(ent,true));
 			}
 

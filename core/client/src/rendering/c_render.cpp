@@ -321,8 +321,82 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 	}
 	m_bFrameDepthBufferSamplingRequired = false;
 
+	// Visible light tile index buffer
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*scene->GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Entity instance buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Entity bone buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*pragma::get_instance_bone_buffer(),
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
+	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+	// Light source data barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,bufLightSources,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Shadow data barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,bufShadowData,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	auto &renderSettingsBufferData = c_game->GetGlobalRenderSettingsBufferData();
+	// Debug buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*renderSettingsBufferData.debugBuffer,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Time buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*renderSettingsBufferData.timeBuffer,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// CSM buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*renderSettingsBufferData.csmBuffer,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Camera buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*scene->GetCameraBuffer(),
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
+	// Render settings buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*scene->GetRenderSettingsBuffer(),
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
+
 	if(scene->BeginRenderPass(drawCmd) == false)
 		return;
+
 	auto bGlow = cvDrawGlow->GetBool();
 	auto bTranslucent = cvDrawTranslucent->GetBool();
 	auto bReflection = (renderFlags &FRender::Reflection) != FRender::None;
@@ -401,6 +475,38 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 		CallCallbacks("PreRenderParticles");
 
 		auto &glowInfo = m_scene->GetGlowInfo();
+
+		// Vertex buffer barrier
+		prosper::util::record_buffer_barrier(
+			**drawCmd,*pragma::CParticleSystemComponent::GetGlobalVertexBuffer(),
+			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
+			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+		);
+
+		for(auto *particle : culledParticles)
+		{
+			// Particle buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*particle->GetParticleBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+			);
+
+			// Animation start buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*particle->GetAnimationStartBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+			);
+
+			// Animation buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*particle->GetAnimationBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+			);
+		}
+
 		RenderParticleSystems(drawCmd,culledParticles,interpolation,RenderMode::World,false,&glowInfo.tmpBloomParticles);
 		if(bGlow == false)
 			glowInfo.tmpBloomParticles.clear();

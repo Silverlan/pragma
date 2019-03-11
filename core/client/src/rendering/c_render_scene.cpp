@@ -60,6 +60,21 @@ void CGame::RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 		{
 			if(shaderFog.BeginDraw(drawCmd) == true)
 			{
+				prosper::util::record_buffer_barrier(
+					**drawCmd,*scene->GetCameraBuffer(),
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				);
+				prosper::util::record_buffer_barrier(
+					**drawCmd,*scene->GetRenderSettingsBuffer(),
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				);
+				prosper::util::record_buffer_barrier(
+					**drawCmd,*scene->GetFogBuffer(),
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				);
 				shaderFog.Draw(
 					*(*hdrInfo.descSetGroupHdr)->get_descriptor_set(0u),
 					*(*hdrInfo.descSetGroupDepthPostProcessing)->get_descriptor_set(0u),
@@ -300,6 +315,20 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 		static std::vector<pragma::CLightComponent*> culledLightSources;
 		culledLightSources.clear();
 		auto &fp = scene->GetForwardPlusInstance();
+
+		// Camera buffer
+		prosper::util::record_buffer_barrier(
+			**drawCmd,*scene->GetCameraBuffer(),
+			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		);
+
+		// Render settings buffer
+		prosper::util::record_buffer_barrier(
+			**drawCmd,*scene->GetRenderSettingsBuffer(),
+			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		);
 		fp.Compute(*drawCmd,*(*depthTex->GetImage()),*scene->GetCameraDescriptorSetCompute());
 		auto &lightBits = fp.GetShadowLightBits();
 		for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
@@ -322,13 +351,27 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 		if(!bMultisampled)
 			prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-
 		scene->UpdateLightDescriptorSets(culledLightSources);
 
 		// Update shadows
 		if(bProfiling == true)
 			StartStageProfiling(umath::to_integral(ProfilingStage::ClientGameRenderShadows)); // TODO: Only for main scene
 		//c_engine->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
+
+		// Entity instance buffer barrier
+		prosper::util::record_buffer_barrier(
+			**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
+			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		);
+
+		// Entity bone buffer barrier
+		prosper::util::record_buffer_barrier(
+			**drawCmd,*pragma::get_instance_bone_buffer(),
+			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		);
+
 			RenderSystem::RenderShadows(drawCmd,culledLightSources);
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 			//drawCmd->SetViewport(w,h); // Reset the viewport
@@ -458,6 +501,35 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 				static_cast<prosper::MSAATexture&>(*prepass.textureDepth).Reset();
 			if(prepass.textureNormals != nullptr && prepass.textureNormals->IsMSAATexture())
 				static_cast<prosper::MSAATexture&>(*prepass.textureNormals).Reset();
+
+			// Entity instance buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+			);
+
+			// Entity bone buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*pragma::get_instance_bone_buffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+			);
+
+			// Camera buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*scene->GetCameraBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+			);
+
+			// View camera buffer barrier
+			prosper::util::record_buffer_barrier(
+				**drawCmd,*scene->GetViewCameraBuffer(),
+				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+			);
+
 			prepass.BeginRenderPass(*drawCmd);
 				auto bReflection = ((renderFlags &FRender::Reflection) != FRender::None) ? true : false;
 				auto pipelineType = (bReflection == true) ? pragma::ShaderPrepassBase::Pipeline::Reflection :
@@ -466,7 +538,6 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 				auto &shaderDepthStage = scene->GetPrepass().GetShader();
 				if(shaderDepthStage.BeginDraw(drawCmd,pipelineType) == true)
 				{
-					//drawCmd->SetScissor(w,h); // prosper TODO
 					shaderDepthStage.BindClipPlane(GetRenderClipPlane());
 					shaderDepthStage.BindSceneCamera(*scene,false);
 					if((renderFlags &FRender::Skybox) != FRender::None)
@@ -475,6 +546,7 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 						RenderSystem::RenderPrepass(drawCmd,*scene->GetCamera(),scene->GetCulledMeshes(),RenderMode::World,bReflection);
 					CallCallbacks<void>("RenderPrepass");
 					CallLuaCallbacks("RenderPrepass");
+
 					shaderDepthStage.BindSceneCamera(*scene,true);
 					if((renderFlags &FRender::View) != FRender::None)
 						RenderSystem::RenderPrepass(drawCmd,*scene->GetCamera(),scene->GetCulledMeshes(),RenderMode::View,bReflection);

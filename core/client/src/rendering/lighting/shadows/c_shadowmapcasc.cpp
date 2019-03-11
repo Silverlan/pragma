@@ -266,16 +266,7 @@ void ShadowMapCasc::UpdateFrustum(uint32_t splitId,Camera &cam,const Mat4 &matVi
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	prosper::Context::BufferUpdateInfo bufferUpdateInfo {};
-	bufferUpdateInfo.dstStageMask = {}; // Empty flags to prevent buffer barrier (barrier will be recorded with second update buffer command below)
-	bufferUpdateInfo.dstAccessMask = {};
-	c_engine->ScheduleRecordUpdateBuffer(
-		csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data(),
-		bufferUpdateInfo
-	);
-	bufferUpdateInfo = {};
-	bufferUpdateInfo.srcStageMask = {};
-	bufferUpdateInfo.srcAccessMask = {};
+	c_engine->ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
 	c_engine->ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,fard),splitDistance);
 
 	// Calculate new split distances

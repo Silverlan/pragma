@@ -111,12 +111,47 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling&>(*m_shaderLightCulling.get());
 	if(shaderLightCulling.BeginCompute(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)
 		return;
+
+	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
+	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+	// Light source data barrier
+	prosper::util::record_buffer_barrier(
+		*cmdBuffer,bufLightSources,
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+	);
+	// Shadow data barrier
+	prosper::util::record_buffer_barrier(
+		*cmdBuffer,bufShadowData,
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+	);
 	
-	auto &visLightTileIndexBuffer = GetTileVisLightIndexBuffer();
+	// Visible light tile index buffer
+	prosper::util::record_buffer_barrier(
+		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
+		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+	);
+
+	// Visible light index buffer
+	prosper::util::record_buffer_barrier(
+		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		Anvil::PipelineStageFlagBits::HOST_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::HOST_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+	);
 
 	auto workGroupCount = GetWorkGroupCount();
 	if(shaderLightCulling.Compute(*GetDescriptorSetCompute(),descSetCam,workGroupCount.first,workGroupCount.second,pragma::CLightComponent::GetLightCount()) == false)
 		return;
+
+	// Visible light index buffer
+	prosper::util::record_buffer_barrier(
+		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::HOST_BIT,
+		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::HOST_READ_BIT
+	);
+
 	shaderLightCulling.EndCompute();
 
 	// TODO: Synchronize this somehow

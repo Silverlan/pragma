@@ -13,6 +13,13 @@ set(PRECOMPILED_HEADER "stdafx_mdleditor")
 link_external_library(bullet)
 link_external_library(util_smdmodel)
 
+add_external_library(util_archive)
+add_external_library(niftools)
+add_external_library(lua)
+add_external_library(pr_mount_external)
+
+add_def(SMDMDL_STATIC)
+
 add_include_dir(glm)
 
 link_generic_module_libraries()

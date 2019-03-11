@@ -369,6 +369,7 @@ CParticleSystemComponent::~CParticleSystemComponent()
 	}
 }
 
+const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetGlobalVertexBuffer() {return s_vertexBuffer;}
 
 void CParticleSystemComponent::SetContinuous(bool b)
 {

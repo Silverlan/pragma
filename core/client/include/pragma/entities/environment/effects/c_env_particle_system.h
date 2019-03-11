@@ -27,6 +27,7 @@ namespace pragma
 		static void ClearBuffers();
 		static bool Precache(std::string fname,bool bReload=false);
 		static void ClearCache();
+		static const std::shared_ptr<prosper::Buffer> &GetGlobalVertexBuffer();
 
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);

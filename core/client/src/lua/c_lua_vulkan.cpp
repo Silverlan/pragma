@@ -217,7 +217,7 @@ namespace Lua
 			DLLCLIENT void RecordCopyImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::CopyInfo &copyInfo);
 			DLLCLIENT void RecordCopyBufferToImage(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Image &imgDst,const prosper::util::BufferImageCopyInfo &copyInfo);
 			DLLCLIENT void RecordCopyBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Buffer &bufDst,const Anvil::BufferCopy &copyInfo);
-			DLLCLIENT void RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds,uint32_t dstStageMask,uint32_t dstAccessMask);
+			DLLCLIENT void RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds);
 			DLLCLIENT void RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo);
 			DLLCLIENT void RecordResolveImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst);
 			DLLCLIENT void RecordBlitTexture(lua_State *l,CommandBuffer &hCommandBuffer,Texture &texSrc,Image &imgDst);
@@ -3048,10 +3048,10 @@ void Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua_State *l,CommandBuffer &
 	Lua::CheckVKCommandBuffer(l,1);
 	Lua::PushBool(l,prosper::util::record_copy_buffer(hCommandBuffer->GetAnvilCommandBuffer(),copyInfo,*bufSrc,*bufDst));
 }
-void Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds,uint32_t dstStageMask,uint32_t dstAccessMask)
+void Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds)
 {
 	Lua::CheckVKCommandBuffer(l,1);
-	Lua::PushBool(l,prosper::util::record_update_buffer(hCommandBuffer->GetAnvilCommandBuffer(),*buf,offset,ds->GetSize(),ds->GetData(),static_cast<Anvil::PipelineStageFlagBits>(dstStageMask),static_cast<Anvil::AccessFlagBits>(dstAccessMask)));
+	Lua::PushBool(l,prosper::util::record_update_buffer(hCommandBuffer->GetAnvilCommandBuffer(),*buf,offset,ds->GetSize(),ds->GetData()));
 }
 void Lua::Vulkan::VKCommandBuffer::RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo)
 {

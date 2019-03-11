@@ -7,6 +7,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 void OcclusionCullingHandlerInert::PerformCulling(const Scene &scene,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
 	EntityIterator entIt {*c_game};
@@ -58,3 +59,4 @@ void OcclusionCullingHandlerInert::PerformCulling(const Scene &scene,std::vector
 	//if(bUpdateLod == true)
 	//	m_lastLodCamPos = posCam;
 }
+#pragma optimize("",on)

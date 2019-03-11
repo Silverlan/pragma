@@ -40,24 +40,10 @@ bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)
 		return false;
 	auto &data = mat.GetDataBlock();
 	auto coneLength = 100.f;
-	Vector4 coneColor {1.f,1.f,1.f,1.f};
 	if(data != nullptr)
-	{
 		coneLength = data->GetFloat("cone_height");
-		auto dataCol = data->GetRawType<ds::Color>("cone_color");
-		if(dataCol != nullptr)
-		{
-			auto col = dataCol->GetValue();
-			coneColor = {
-				col.r /255.f,
-				col.g /255.f,
-				col.b /255.f,
-				col.a /255.f
-			};
-		}
-	}
 	return RecordPushConstants(
-		PushConstants{coneColor.r,coneColor.g,coneColor.b,coneColor.a,coneLength},
+		PushConstants{coneLength},
 		sizeof(ShaderTextured3DBase::PushConstants)
 	);
 }

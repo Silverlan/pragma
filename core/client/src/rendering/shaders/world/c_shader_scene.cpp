@@ -6,6 +6,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <prosper_command_buffer.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;

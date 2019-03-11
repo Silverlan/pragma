@@ -296,6 +296,7 @@ public:
 	const std::shared_ptr<prosper::Buffer> &GetRenderSettingsBuffer() const;
 	const std::shared_ptr<prosper::Buffer> &GetCameraBuffer() const;
 	const std::shared_ptr<prosper::Buffer> &GetViewCameraBuffer() const;
+	const std::shared_ptr<prosper::Buffer> &GetFogBuffer() const;
 	const std::shared_ptr<prosper::DescriptorSetGroup> &GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint=vk::PipelineBindPoint::eGraphics) const;
 	const std::shared_ptr<prosper::DescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
 	Anvil::DescriptorSet *GetCameraDescriptorSetGraphics() const;

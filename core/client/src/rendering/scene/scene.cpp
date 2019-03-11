@@ -258,6 +258,7 @@ void Scene::InitializeFogBuffer()
 	m_fogBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
+const std::shared_ptr<prosper::Buffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
 void Scene::SetShaderOverride(const std::string &srcShaderId,const std::string &shaderOverrideId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);

@@ -1,0 +1,294 @@
+<root>
+	<collection type="library">
+		<name>convert</name>
+		<desc>Library for converting files between different formats.</desc>
+		<module>
+			<name>dds</name>
+			<target>util_dds</target>
+		</module>
+		<function type="function">
+			<name>image_to_dds</name>
+			<desc>Attempts to convert the specified input file to the DDS-format and returns ''true'' on success (otherwise ''false'').</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">srcFile</arg>
+					<arg type="convert.DDSConvertInfo.ImageFormat">srcImageFormat</arg>
+					<arg type="string">dstFileName</arg>
+					<arg type="convert.DDSConvertInfo" default="convert.DDSConvertInfo()">convertInfo</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<collection type="class">
+			<name>DDSConvertInfo</name>
+			<desc>Contains information about the input and output formats for the image.</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new DDSConvertInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="convert.DDSConvertInfo">ddsConvertInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="convert.DDSConvertInfo.ConversionFlags" mode="rw">
+				<name>flags</name>
+				<desc></desc>
+				<default>convert.DDSConvertInfo.CONVERSION_FLAG_NONE</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>inputGamma</name>
+				<desc>Input gamma.</desc>
+				<default>2.2</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>outputGamma</name>
+				<desc>Output damma.</desc>
+				<default>2.2</default>
+			</member>
+			<member type="convert.DDSConvertInfo.HeightEvaluation" mode="rw">
+				<name>heightEvaluation</name>
+				<desc>Set height evaluation factors.</desc>
+				<default>convert.DDSConvertInfo.HeightEvaluation()</default>
+			</member>
+			<member type="convert.DDSConvertInfo.KaiserParameters" mode="rw">
+				<name>kaiserParameters</name>
+				<desc>Set Kaiser filter parameters.</desc>
+				<default>convert.DDSConvertInfo.KaiserParameters()</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>maxExtents</name>
+				<default>0</default>
+			</member>
+			<member type="convert.DDSConvertInfo.MipmapFilter" mode="rw">
+				<name>mipmapFilter</name>
+				<desc>Set mipmap filter.</desc>
+				<default>convert.DDSConvertInfo.MIPMAP_FILTER_BOX</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>maxMipmapLevel</name>
+				<desc>Set mipmap generation.</desc>
+				<default>-1</default>
+			</member>
+			<member type="convert.DDSConvertInfo.RoundMode" mode="rw">
+				<name>roundMode</name>
+				<default>convert.DDSConvertInfo.ROUND_MODE_NONE</default>
+			</member>
+			<member type="convert.DDSConvertInfo.WrapMode" mode="rw">
+				<name>wrapMode</name>
+				<desc>Set texture wrapping mode.</desc>
+				<default>convert.DDSConvertInfo.WRAP_MODE_MIRROR</default>
+			</member>
+			<member type="convert.DDSConvertInfo.ColorWeights" mode="rw">
+				<name>colorWeights</name>
+				<desc>
+Set the weights of each color channel. 
+The choice for these values is subjective. In most cases uniform color weights
+(1.0, 1.0, 1.0) work very well. A popular choice is to use the NTSC luma encoding 
+weights (0.2126, 0.7152, 0.0722).
+				</desc>
+				<default>convert.DDSConvertInfo.ColorWeights()</default>
+			</member>
+			<member type="convert.DDSConvertInfo.Format" mode="rw">
+				<name>format</name>
+				<desc>Set desired compression format.</desc>
+				<default>convert.DDSConvertInfo.FORMAT_DXT1</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>pitchAlignment</name>
+				<desc>Set pitch alignment in bytes.</desc>
+				<default>1</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>rgbmThreshold</name>
+				<default>0.15</default>
+			</member>
+			<member type="convert.DDSConvertInfo.Quality" mode="rw">
+				<name>quality</name>
+				<desc>Set compression quality settings.</desc>
+				<default>convert.DDSConvertInfo.QUALITY_NORMAL</default>
+			</member>
+			<member type="convert.DDSConvertInfo.PixelType" mode="rw">
+				<name>pixelType</name>
+				<desc>Set pixel type.</desc>
+				<default>convert.DDSConvertInfo.PIXEL_TYPE_UNSIGNED_NORM</default>
+			</member>
+			<enum_set type="flags">
+				<name>ConversionFlags</name>
+				<enum value="0">CONVERSION_FLAG_NONE</enum>
+				<enum value="1" type="bit">CONVERSION_FLAG_BIT_CONVERT_TO_NORMAL_MAP</enum>
+				<enum value="2" type="bit">CONVERSION_FLAG_BIT_GENERATE_MIPMAPS</enum>
+				<enum value="4" type="bit">CONVERSION_FLAG_BIT_NORMALIZE_MIPMAPS</enum>
+				<enum value="8" type="bit">CONVERSION_FLAG_BIT_NORMAL_MAP</enum>
+			</enum_set>
+			<enum_set>
+				<name>MipmapFilter</name>
+				<enum value="0">MIPMAP_FILTER_BOX</enum>
+				<enum value="1">MIPMAP_FILTER_TRIANGLE</enum>
+				<enum value="2">MIPMAP_FILTER_KAISER</enum>
+			</enum_set>
+			<enum_set>
+				<name>RoundMode</name>
+				<enum value="0">ROUND_MODE_NONE</enum>
+				<enum value="1">ROUND_MODE_TO_NEXT_POWER_OF_TWO</enum>
+				<enum value="2">ROUND_MODE_TO_NEAREST_POWER_OF_TWO</enum>
+				<enum value="3">ROUND_MODE_TO_PREVIOUS_POWER_OF_TWO</enum>
+				<enum value="4">ROUND_MODE_TO_NEXT_MULTIPLE_OF_FOUR</enum>
+				<enum value="5">ROUND_MODE_TO_NEAREST_MULTIPLE_OF_FOUR</enum>
+				<enum value="6">ROUND_MODE_TO_PREVIOUS_MULTIPLE_OF_FOUR</enum>
+			</enum_set>
+			<enum_set>
+				<name>WrapMode</name>
+				<enum value="0">WRAP_MODE_CLAMP</enum>
+				<enum value="1">WRAP_MODE_REPEAT</enum>
+				<enum value="2">WRAP_MODE_MIRROR</enum>
+			</enum_set>
+			<enum_set>
+				<name>Quality</name>
+				<enum value="0">QUALITY_FASTEST</enum>
+				<enum value="1">QUALITY_NORMAL</enum>
+				<enum value="2">QUALITY_PRODUCTION</enum>
+				<enum value="3">QUALITY_HIGHEST</enum>
+			</enum_set>
+			<enum_set>
+				<name>Format</name>
+				<enum value="0">FORMAT_RGB</enum>
+				<enum value="0">FORMAT_RGBA</enum>
+				<enum value="1">FORMAT_DXT1</enum>
+				<enum value="2">FORMAT_DXT1A</enum>
+				<enum value="3">FORMAT_DXT3</enum>
+				<enum value="4">FORMAT_DXT5</enum>
+				<enum value="5">FORMAT_DXT5N</enum>
+				<enum value="1">FORMAT_BC1</enum>
+				<enum value="2">FORMAT_BC1A</enum>
+				<enum value="3">FORMAT_BC2</enum>
+				<enum value="4">FORMAT_BC3</enum>
+				<enum value="5">FORMAT_BC3N</enum>
+				<enum value="6">FORMAT_BC4</enum>
+				<enum value="7">FORMAT_BC5</enum>
+				<enum value="8">FORMAT_DXT1N</enum>
+				<enum value="9">FORMAT_CTX1</enum>
+				<enum value="10">FORMAT_BC6</enum>
+				<enum value="11">FORMAT_BC7</enum>
+				<enum value="12">FORMAT_BC3_RGBM</enum>
+				<enum value="13">FORMAT_ETC1</enum>
+				<enum value="14">FORMAT_ETC2_R</enum>
+				<enum value="15">FORMAT_ETC2_RG</enum>
+				<enum value="16">FORMAT_ETC2_RGB</enum>
+				<enum value="17">FORMAT_ETC2_RGBA</enum>
+				<enum value="18">FORMAT_ETC2_RGB_A1</enum>
+				<enum value="19">FORMAT_ETC2_RGBM</enum>
+				<enum value="20">FORMAT_PVR_2BPP_RGB</enum>
+				<enum value="21">FORMAT_PVR_4BPP_RGB</enum>
+				<enum value="22">FORMAT_PVR_2BPP_RGBA</enum>
+				<enum value="23">FORMAT_PVR_4BPP_RGBA</enum>
+				<enum value="30">FORMAT_COUNT</enum>
+			</enum_set>
+			<enum_set>
+				<name>PixelType</name>
+				<enum value="0">PIXEL_TYPE_UNSIGNED_NORM</enum>
+				<enum value="1">PIXEL_TYPE_SIGNED_NORM</enum>
+				<enum value="2">PIXEL_TYPE_UNSIGNED_INT</enum>
+				<enum value="3">PIXEL_TYPE_SIGNED_INT</enum>
+				<enum value="4">PIXEL_TYPE_FLOAT</enum>
+				<enum value="5">PIXEL_TYPE_UNSIGNED_FLOAT</enum>
+				<enum value="6">PIXEL_TYPE_SHARED_EXP</enum>
+			</enum_set>
+			<enum_set>
+				<name>ImageFormat</name>
+				<enum value="0">IMAGE_FORMAT_TGA</enum>
+				<enum value="1">IMAGE_FORMAT_PNG</enum>
+			</enum_set>
+			<collection type="class">
+				<name>ColorWeights</name>
+				<desc></desc>
+				<function type="method">
+					<name>constructor</name>
+					<desc>Creates a new ColorWeights object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="convert.DDSConvertInfo.ColorWeights">colorWeights</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<member type="float" mode="rw">
+					<name>red</name>
+					<default>1.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>green</name>
+					<default>1.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>blue</name>
+					<default>1.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>alpha</name>
+					<default>1.0</default>
+				</member>
+			</collection>
+			<collection type="class">
+				<name>HeightEvaluation</name>
+				<desc></desc>
+				<function type="method">
+					<name>constructor</name>
+					<desc>Creates a new HeightEvaluation object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="convert.DDSConvertInfo.HeightEvaluation">heightEvaluation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<member type="float" mode="rw">
+					<name>redScale</name>
+					<default>0.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>greenScale</name>
+					<default>0.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>blueScale</name>
+					<default>0.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>alphaScale</name>
+					<default>1.0</default>
+				</member>
+			</collection>
+			<collection type="class">
+				<name>KaiserParameters</name>
+				<desc></desc>
+				<function type="method">
+					<name>constructor</name>
+					<desc>Creates a new KaiserParameters object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="convert.DDSConvertInfo.KaiserParameters">kaiserParameters</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<member type="float" mode="rw">
+					<name>width</name>
+					<default>3.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>alpha</name>
+					<default>4.0</default>
+				</member>
+				<member type="float" mode="rw">
+					<name>stretch</name>
+					<default>1.0</default>
+				</member>
+			</collection>
+		</collection>
+	</collection>
+</root>

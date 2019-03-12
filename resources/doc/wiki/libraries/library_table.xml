@@ -1,0 +1,198 @@
+<root>
+	<collection type="library" gui="1">
+		<name>table</name>
+		<desc>TODO</desc>
+		<function type="function" shared="1" gui="1" vanilla="1">
+			<name>concat</name>
+			<desc>Given a list where all elements are strings or numbers, returns the string ''list[i]..sep..list[i+1] ··· sep..list[j]''. The default value for ''sep'' is the empty string, the default for ''i'' is 1, and the default for ''j'' is ''#list''. If ''i'' is greater than ''j'', returns the empty string.</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.concat</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table">t</arg>
+					<arg type="string" default="&quot;&quot;">sep</arg>
+					<arg type="int" default="1">i</arg>
+				</parameters>
+				<returnValues>
+					<arg type="string">concatenatedString</arg>
+				</returnValues>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="table">t</arg>
+					<arg type="string">sep</arg>
+					<arg type="int">i</arg>
+					<arg type="int">j</arg>
+				</parameters>
+				<returnValues>
+					<arg type="string">concatenatedString</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>insert</name>
+				<desc>Inserts element ''value'' at position ''pos'' in ''list'', shifting up the elements ''list[pos], list[pos+1], ···, list[#list]''. The default value for ''pos'' is ''#list+1'', so that a call ''table.insert(t,x)'' inserts ''x'' at the end of list ''t''.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.insert</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="table">t</arg>
+						<arg type="any">value</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table">t</arg>
+						<arg type="int">pos</arg>
+						<arg type="any">value</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>move</name>
+				<desc>Moves elements from table ''a1'' to table ''a2''. This function performs the equivalent to the following multiple assignment: ''a2[t],··· = a1[f],···,a1[e]''. The default for ''a2'' is ''a1''. The destination range can overlap with the source range. The number of elements to be moved must fit in a Lua integer.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.move</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="table">a1</arg>
+						<arg type="any">f</arg>
+						<arg type="any">e</arg>
+						<arg type="any">t</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table">a1</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table">a1</arg>
+						<arg type="any">f</arg>
+						<arg type="any">e</arg>
+						<arg type="any">t</arg>
+						<arg type="table">a2</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table">a2</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>remove</name>
+				<desc>
+					Removes from ''list'' the element at position ''pos'', returning the value of the removed element. When ''pos'' is an integer between 1 and ''#list'', it shifts down the elements ''list[pos+1], list[pos+2], ···, list[#list]'' and erases element ''list[#list]''; The index ''pos'' can also be 0 when ''#list'' is 0, or ''#list'' + 1; in those cases, the function erases the element ''list[pos]''.\n
+					The default value for pos is ''#list'', so that a call ''table.remove(l)'' removes the last element of list ''l''.
+				</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.remove</url>
+				<lua>
+					local MyTable = { "Dog", "Cat", "Elephant", "Bird" }
+
+					print_table( MyTable )
+					table.remove( MyTable, 3 )
+					print_table( MyTable )
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="table">list</arg>
+					</parameters>
+					<returnValues>
+						<arg type="any">value</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table">list</arg>
+						<arg type="int">pos</arg>
+					</parameters>
+					<returnValues>
+						<arg type="any">value</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>pack</name>
+				<desc>Returns a new table with all parameters stored into keys 1, 2, etc. and with a field "''n''" with the total number of parameters. Note that the resulting table may not be a sequence.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.pack</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="any" variadic="1">arguments</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table">packedTable</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>unpack</name>
+				<desc>
+					Returns the elements from the given list. This function is equivalent to
+					<syntaxhighlight lang="lua">
+					return list[i], list[i+1], ···, list[j]
+					</syntaxhighlight>
+					By default, ''i'' is 1 and ''j'' is ''#list''.
+				</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.unpack</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="any">list</arg>
+						<arg type="int" default="1">i</arg>
+					</parameters>
+					<returnValues>
+						<arg type="any" variadic="1">elements</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="any">list</arg>
+						<arg type="int">i</arg>
+						<arg type="int">j</arg>
+					</parameters>
+					<returnValues>
+						<arg type="any" variadic="1">elements</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function" shared="1" gui="1" vanilla="1">
+			<name>sort</name>
+			<desc>
+				Sorts list elements in a given order, ''in-place'', from ''list[1]'' to ''list[#list]''. If ''comp'' is given, then it must be a function that receives two list elements and returns true when the first element must come before the second in the final order (so that, after the sort, ''i &lt; j'' implies ''not comp(list[j],list[i]))''. If ''comp'' is not given, then the standard Lua operator &lt; is used instead.\n
+				Note that the ''comp'' function must define a strict partial order over the elements in the list; that is, it must be asymmetric and transitive. Otherwise, no valid sort may be possible.\n
+				The sort algorithm is not stable; that is, elements not comparable by the given order (e.g., equal elements) may have their relative positions changed by the sort.
+			</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-table.sort</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table">list</arg>
+				</parameters>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="table">list</arg>
+					<arg type="function">comp</arg>
+				</parameters>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>random</name>
+			<desc>Returns a random value from the table. The table keys have to be sequential integers.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table">table</arg>
+				</parameters>
+			</overload>
+			<overload>
+				<returnValues>
+					<arg type="any">value</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

@@ -1,0 +1,38 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>GridPanel</name>
+			<derivedFrom>
+				<name>gui.Table</name>
+				<derivedFrom>gui.Element</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>AddItem</name>
+				<desc>Adds a new element to the grid panel.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="gui.Element">element</arg>
+						<arg type="int">row</arg>
+						<arg type="int">column</arg>
+					</parameters>
+					<returnValues>
+						<arg type="gui.Table.Cell">cell</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetColumnCount</name>
+				<desc>Returns the panel's number of columns.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">columnCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

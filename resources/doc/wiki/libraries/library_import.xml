@@ -1,0 +1,75 @@
+<root>
+	<collection type="library">
+		<name>import</name>
+		<desc>TODO</desc>
+		<function type="function" shared="1">
+			<name>import_wrci</name>
+			<desc>Imports data from a ''wrci''-file and applies it to the specified model.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="file.File">file</arg>
+					<arg type="game.Model">model</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1">
+			<name>import_wad</name>
+			<desc>Imports an animation from a ''wad''-file.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="file.File">file</arg>
+					<arg type="game.Model.Skeleton">skeleton</arg>
+				</parameters>
+				<returnValues>
+					<arg type="game.Model.Animation">animation</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1">
+			<name>import_wrmi</name>
+			<desc>Imports data from a ''wrmi''-file and applies it to the specified model.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="file.File">file</arg>
+					<arg type="game.Model">model</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1">
+			<name>import_obj</name>
+			<desc>Imports the meshes from a ''obj''-file.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="file.File">file</arg>
+				</parameters>
+				<returnValues>
+					<arg type="table" subType="game.Model.Mesh.Sub">meshes</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1">
+			<name>import_pmx</name>
+			<desc>Imports data from a ''pmx''-file and applies it to the specified model.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="file.File">file</arg>
+					<arg type="game.Model">model</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

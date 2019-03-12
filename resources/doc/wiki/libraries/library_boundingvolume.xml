@@ -1,0 +1,22 @@
+<root>
+	<collection type="library">
+		<name>boundingvolume</name>
+		<desc>TODO</desc>
+		<function type="function">
+			<name>get_rotated_aabb</name>
+			<desc>Rotates the given AABB by the specified Matrix and returns an AABB encompassing the rotated bounds.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="math.Vector">min</arg>
+					<arg type="math.Vector">max</arg>
+					<arg type="math.Mat4">rotationMatrix</arg>
+				</parameters>
+				<returnValues>
+					<arg type="math.Vector">rotatedMin</arg>
+					<arg type="math.Vector">rotatedMax</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

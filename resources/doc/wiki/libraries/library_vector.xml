@@ -1,0 +1,173 @@
+<root>
+	<collection type="library" gui="1">
+		<name>vector</name>
+		<desc>TODO</desc>
+		<group>
+			<function type="function" shared="1" gui="1">
+				<name>to_min_max</name>
+				<desc>
+					Given two vectors, the smaller value of both vectors for each axis will be assigned to ''a'', and the larger value to ''b''.\n
+					If a third vector ''c'' is given, the axis-values of ''c'' will be assigned to ''a'' and ''b'' respectively.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">a</arg>
+						<arg type="math.Vector2">b</arg>
+						<arg type="math.Vector2">c</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">a</arg>
+						<arg type="math.Vector">b</arg>
+						<arg type="math.Vector">c</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector4">a</arg>
+						<arg type="math.Vector4">b</arg>
+						<arg type="math.Vector4">c</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">a</arg>
+						<arg type="math.Vector2">b</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">a</arg>
+						<arg type="math.Vector">b</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector4">a</arg>
+						<arg type="math.Vector4">b</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1">
+				<name>get_min_max</name>
+				<desc>Goes through all vectors in the given table and returns two vectors, one with the minimum component values (x,y,z,w) and one with the maximum values.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="table" subType="math.Vector2">vectors</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">min</arg>
+						<arg type="math.Vector2">max</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table" subType="math.Vector">vectors</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table" subType="math.Vector4">vectors</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector4">min</arg>
+						<arg type="math.Vector4">max</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" shared="1" gui="1">
+				<name>random</name>
+				<desc>Returns a random unit vector with a spherical distribution.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">random</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1">
+				<name>random2D</name>
+				<desc>Returns a random 2-dimensional unit vector with a spherical distribution.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector2">random</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function" shared="1" gui="1">
+			<name>create_from_string</name>
+			<desc>Converts a string to a vector.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">string</arg>
+				</parameters>
+				<returnValues>
+					<arg type="math.Vector">vector</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>calc_average</name>
+			<desc>Calculates the average point for the specified point cloud.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table" subType="math.Vector">points</arg>
+				</parameters>
+				<returnValues>
+					<arg type="math.Vector">average</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>calc_best_fitting_plane</name>
+			<desc>Calculates the best fitting plane for the specified point cloud.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table" subType="math.Vector">points</arg>
+				</parameters>
+				<returnValues>
+					<arg type="math.Vector">planeNormal</arg>
+					<arg type="float">planeDistance</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>calc_linear_velocity_from_angular</name>
+			<desc></desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="math.Vector">refPos</arg>
+					<arg type="math.Vector">angularVelocity</arg>
+					<arg type="math.Vector">dstPos</arg>
+				</parameters>
+				<returnValues>
+					<arg type="math.Vector">linearVelocity</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<enum_set type="generic_constants" underlying_type="math.Vector" gui="1">
+			<name>Constants</name>
+			<enum value="math.Vector(0.0,0.0,0.0)">ORIGIN</enum>
+			<enum value="math.Vector(1.0,0.0,0.0)">FORWARD</enum>
+			<enum value="math.Vector(0.0,0.0,1.0)">RIGHT</enum>
+			<enum value="math.Vector(0.0,1.0,0.0)">UP</enum>
+			<enum value="math.Vector(math.MIN_FLOAT,math.MIN_FLOAT,math.MIN_FLOAT)">MIN</enum>
+			<enum value="math.Vector(math.MAX_FLOAT,math.MAX_FLOAT,math.MAX_FLOAT)">MAX</enum>
+		</enum_set>
+	</collection>
+</root>

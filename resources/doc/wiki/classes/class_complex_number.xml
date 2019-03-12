@@ -1,0 +1,195 @@
+<root>
+	<collection type="library">
+		<name>math</name>
+		<collection type="class" gui="1">
+			<name>ComplexNumber</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new complex number object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.ComplexNumber">complexNumber</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">real</arg>
+						<arg type="float">imaginary</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">complexNumber</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetReal</name>
+					<desc>Changes the real component of the complex number.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">real</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetReal</name>
+					<desc>Returns the real component of the complex number.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">real</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetImaginary</name>
+					<desc>Changes the imaginary component of the complex number.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">imaginary</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetImaginary</name>
+					<desc>Returns the imaginary component of the complex number.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">imaginary</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the complex number to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">complexNumber</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>-operator</name>
+				<desc>Inverts the complex number and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.ComplexNumber">inverse</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator/</name>
+				<desc>Divides the complex number by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.ComplexNumber">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator*</name>
+				<desc>Multiplies the complex number by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.ComplexNumber">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator+</name>
+				<desc>Adds the complex number with the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.ComplexNumber">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator-</name>
+				<desc>Subtracts the specified value from this complex number and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.ComplexNumber">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.ComplexNumber">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator==</name>
+				<desc>Compares the complex number to the specified value.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.ComplexNumber">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,130 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>ObservableComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetFirstPersonObserverOffset</name>
+					<desc>Returns whether first-person is enabled for this entity, as well as the first-person observer offset (if first-person is enabled).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasOffset</arg>
+							<arg type="math.Vector">offset</arg>
+						</returnValues>
+					</overload>
+					<related>ents.ObservableComponent:SetObserverOffset</related>
+				</function>
+				<function type="method" shared="1">
+					<name>SetFirstPersonObserverOffset</name>
+					<desc>Changes the entity's first-person observer offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">offset</arg>
+						</parameters>
+					</overload>
+					<related>ents.ObservableComponent:ResetObserverOffset</related>
+				</function>
+				<function type="method" shared="1">
+					<name>ResetFirstPersonObserverOffset</name>
+					<desc></desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFirstPersonModeEnabledProperty</name>
+					<desc>Returns the component's first-person enabled property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.BoolProperty">enabledProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFirstPersonObserverOffsetProperty</name>
+					<desc>Returns the component's first-person observer offset property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">offsetProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetThirdPersonObserverOffset</name>
+					<desc>Returns whether third-person is enabled for this entity, as well as the third-person observer offset (if third-person is enabled).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasOffset</arg>
+							<arg type="math.Vector">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetThirdPersonObserverOffset</name>
+					<desc>Changes the entity's third-person observer offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">offset</arg>
+						</parameters>
+					</overload>
+					<related>ents.ObservableComponent:SetObserverOffset</related>
+				</function>
+				<function type="method" shared="1">
+					<name>ResetThirdPersonObserverOffset</name>
+					<desc></desc>
+					<lua></lua>
+					<overload></overload>
+					<related>ents.ObservableComponent:ResetObserverOffset</related>
+				</function>
+				<function type="method" shared="1">
+					<name>GetThirdPersonModeEnabledProperty</name>
+					<desc>Returns the component's third-person enabled property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.BoolProperty">enabledProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetThirdPersonObserverOffsetProperty</name>
+					<desc>Returns the component's third-person observer offset property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">offsetProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetObserverOffset</name>
+					<desc>Changes both the entity's first-person and third-person offsets to the specified value.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ResetObserverOffset</name>
+					<desc>Resets both the entity's first-person and third-person offsets.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

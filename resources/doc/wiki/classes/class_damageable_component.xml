@@ -1,0 +1,24 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>DamageableComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>TakeDamage</name>
+				<desc>Applies the given damage info and deals damage according to entity and game rules.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.DamageInfo">damageInfo</arg>
+					</parameters>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_TAKE_DAMAGE</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,86 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>ShaderEntity</name>
+			<derivedFrom>
+				<name>shader.SceneLit3D</name>
+				<derivedFrom>
+					<name>shader.Scene3D</name>
+					<derivedFrom>
+						<name>shader.Graphics</name>
+						<derivedFrom>shader.Shader</derivedFrom>
+					</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="function">
+					<name>RecordBindInstanceDescriptorSet</name>
+					<desc>Binds the specified entity data.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.DescriptorSet">descriptorSet</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="function">
+					<name>RecordBindEntity</name>
+					<desc>Binds the specified entity data.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="function">
+					<name>RecordBindVertexAnimationOffset</name>
+					<desc>Binds the specified vertex animation offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">offset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="function">
+				<name>BindVertexAnimationOffset</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">offset</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>RecordDrawMesh</name>
+				<desc>Draws the specified mesh.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model.Mesh.Sub">mesh</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

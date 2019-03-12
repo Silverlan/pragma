@@ -1,0 +1,50 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>TreeList</name>
+			<derivedFrom>
+				<name>gui.Table</name>
+				<derivedFrom>gui.Element</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>AddItem</name>
+				<desc>Adds a new item to the root-level of this tree.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">text</arg>
+					</parameters>
+					<returnValues>
+						<arg type="gui.TreeList.Element">cell</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>ExpandAll</name>
+					<desc>Expands all elements in the tree.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>CollapseAll</name>
+					<desc>Collapses all elements in the tree.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetRootItem</name>
+				<desc>Returns the top-most tree-element.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="gui.TreeList.Element">rootItem</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

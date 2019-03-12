@@ -1,0 +1,148 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>Transform</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new Transform object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.Transform">transform</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetOrigin</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">origin</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRotation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetOrigin</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">origin</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRotation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>SetIdentity</name>
+				<desc></desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetInverse</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.Transform">inverse</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMatrix</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat4">matrix</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMatrix</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat4">matrix</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBasis</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat3">matrix</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBasis</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat3">matrix</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1" commutative="1">
+				<name>operator*</name>
+				<desc>Multiplies the transform with the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="phys.Transform">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="phys.Transform">transform</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">position</arg>
+					</parameters>
+					<returnValues>
+						<arg type="phys.Transform">transform</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Quaternion">rotation</arg>
+					</parameters>
+					<returnValues>
+						<arg type="phys.Transform">transform</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

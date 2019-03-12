@@ -1,0 +1,762 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>CommandBuffer</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the command buffer to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">commandBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the command buffer's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the command buffer's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordClearImage</name>
+					<desc>Clears the specified image using the given color or depth.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdClearColorImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="util.Color">clearColor</arg>
+							<arg type="vulkan.ClearImageInfo" default="vulkan.ClearImageInfo()">clearImageInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="float">clearDepth</arg>
+							<arg type="vulkan.ClearImageInfo" default="vulkan.ClearImageInfo()">clearImageInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordClearAttachment</name>
+					<desc>Clear the image of a bound framebuffer attachments.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdClearAttachments.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="util.Color">clearColor</arg>
+							<arg type="int">attachmentId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="float">clearDepth</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordCopyImage</name>
+					<desc>Copy data between images.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdCopyImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">imageSrc</arg>
+							<arg type="vulkan.Image">imageDst</arg>
+							<arg type="vulkan.ImageCopyInfo">copyInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordCopyBufferToImage</name>
+					<desc>Copy data from a buffer into an image.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdCopyBufferToImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">bufferSrc</arg>
+							<arg type="vulkan.Image">imageDst</arg>
+							<arg type="vulkan.BufferImageCopyInfo">copyInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordCopyBuffer</name>
+					<desc>Copy data between buffer regions.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdCopyBuffer.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">bufferSrc</arg>
+							<arg type="vulkan.Buffer">bufferDst</arg>
+							<arg type="vulkan.BufferCopyInfo">copyInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordUpdateBuffer</name>
+				<desc>Update a buffer's contents from host memory.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdUpdateBuffer.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Buffer">buffer</arg>
+						<arg type="int">offset</arg>
+						<arg type="util.DataStream">dataStream</arg>
+						<arg type="vulkan.PipelineStage">dstStageMask</arg>
+						<arg type="vulkan.Access">dstAccessMask</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordBlitImage</name>
+					<desc>Copy regions of an image, potentially performing format conversion.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBlitImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">imgSrc</arg>
+							<arg type="vulkan.Image">imgDst</arg>
+							<arg type="vulkan.BlitInfo">blitInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordResolveImage</name>
+					<desc>Resolve regions of an image.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdResolveImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">imgSrc</arg>
+							<arg type="vulkan.Image">imgDst</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordBlitTexture</name>
+					<desc>Resolves the texture image if it's a MSAA image, or copies it otherwise.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBlitImage.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Texture">texSrc</arg>
+							<arg type="vulkan.Image">imgDst</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordGenerateMipmaps</name>
+				<desc>Generates mipmaps for the specified image.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Image">image</arg>
+						<arg type="vulkan.ImageLayout">currentLayout</arg>
+						<arg type="vulkan.Access">srcAccessMask</arg>
+						<arg type="vulkan.PipelineStage">srcStage</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordPipelineBarrier</name>
+					<desc>Insert a memory dependency.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdPipelineBarrier.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.PipelineBarrierInfo">barrierInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordImageBarrier</name>
+					<desc>Insert a memory dependency for the specified image.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkImageMemoryBarrier.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="vulkan.ImageLayout">oldLayout</arg>
+							<arg type="vulkan.ImageLayout">newLayout</arg>
+							<arg type="vulkan.ImageSubresourceRange" default="vulkan.ImageSubresourceRange()">subresourceRange</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Image">image</arg>
+							<arg type="vulkan.PipelineStage">srcStageMask</arg>
+							<arg type="vulkan.PipelineStage">dstStageMask</arg>
+							<arg type="vulkan.ImageLayout">oldLayout</arg>
+							<arg type="vulkan.ImageLayout">newLayout</arg>
+							<arg type="vulkan.Access">srcAccessMask</arg>
+							<arg type="vulkan.Access">dstAccessMask</arg>
+							<arg type="int" default="0">baseLayer</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordBufferBarrier</name>
+					<desc>Insert a memory dependency for the specified buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkBufferMemoryBarrier.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="vulkan.PipelineStage">srcStage</arg>
+							<arg type="vulkan.PipelineStage">dstStage</arg>
+							<arg type="vulkan.Access">srcAccessMask</arg>
+							<arg type="vulkan.Access">dstAccessMask</arg>
+							<arg type="int">offset</arg>
+							<arg type="int">size</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="vulkan.PipelineStage">srcStage</arg>
+							<arg type="vulkan.PipelineStage">dstStage</arg>
+							<arg type="vulkan.Access">srcAccessMask</arg>
+							<arg type="vulkan.Access">dstAccessMask</arg>
+							<arg type="int" default="0">offset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordSetViewport</name>
+					<desc>Set the viewport on a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetViewport.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+							<arg type="int">x</arg>
+							<arg type="int">y</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordSetScissor</name>
+					<desc>Set the dynamic scissor rectangles on a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetScissor.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+							<arg type="int">x</arg>
+							<arg type="int">y</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordBeginRenderPass</name>
+					<desc>Begin a new render pass.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBeginRenderPass.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.RenderPassInfo">renderPassInfo</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordEndRenderPass</name>
+					<desc>End the current render pass.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdEndRenderPass.html</url>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordBindIndexBuffer</name>
+					<desc>Bind an index buffer to a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBindIndexBuffer.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">indexBuffer</arg>
+							<arg type="vulkan.IndexType">indexType</arg>
+							<arg type="int" default="0">offset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordBindVertexBuffer</name>
+					<desc>Bind a vertex buffer to a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBindVertexBuffers.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">vertexBuffer</arg>
+							<arg type="int" default="0">startBinding</arg>
+							<arg type="int" default="0">offset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordBindVertexBuffers</name>
+					<desc>Bind vertex buffers to a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdBindVertexBuffers.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table" subType="vulkan.Buffer">vertexBuffers</arg>
+							<arg type="int" default="0">startBinding</arg>
+							<arg type="table" subType="int" default="{}">offsets</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordCopyImageToBuffer</name>
+				<desc>Copy image data into a buffer.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdCopyImageToBuffer.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Image">srcImage</arg>
+						<arg type="vulkan.ImageLayout">srcImageLayout</arg>
+						<arg type="vulkan.Buffer">dstBuffer</arg>
+						<arg type="vulkan.BufferImageCopyInfo">copyInfo</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordDispatch</name>
+					<desc>Dispatch compute work items.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDispatch.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int" default="0">x</arg>
+							<arg type="int" default="0">y</arg>
+							<arg type="int" default="0">z</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordDispatchIndirect</name>
+					<desc>Dispatch compute work items using indirect parameters.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDispatchIndirect.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int" default="0">offset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>RecordDraw</name>
+					<desc>Draw primitives.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDraw.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">vertexCount</arg>
+							<arg type="int" default="1">instanceCount</arg>
+							<arg type="int" default="0">firstVertex</arg>
+							<arg type="int" default="0">firstInstance</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordDrawIndexed</name>
+					<desc>Issue an indexed draw into a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDrawIndexed.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">indexCount</arg>
+							<arg type="int" default="1">instanceCount</arg>
+							<arg type="int" default="0">firstIndex</arg>
+							<arg type="int" default="0">vertexOffset</arg>
+							<arg type="int" default="0">firstInstance</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordDrawIndexedIndirect</name>
+					<desc>Perform an indexed indirect draw.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDrawIndexedIndirect.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int">offset</arg>
+							<arg type="int">drawCount</arg>
+							<arg type="int">stride</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordDrawIndirect</name>
+					<desc>Issue an indirect draw into a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDrawIndirect.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int">offset</arg>
+							<arg type="int">drawCount</arg>
+							<arg type="int">stride</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordFillBuffer</name>
+				<desc>Fill a region of a buffer with a fixed value.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdFillBuffer.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Buffer">buffer</arg>
+						<arg type="int">offset</arg>
+						<arg type="int">size</arg>
+						<arg type="int">data</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>RecordResetEvent</name>
+				<desc>Reset an event object to non-signaled state.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdResetEvent.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Event">event</arg>
+						<arg type="vulkan.PipelineStage">stageMask</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>RecordSetBlendConstants</name>
+				<desc>Set the values of blend constants.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetBlendConstants.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector4">blendConstants</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordSetDepthBias</name>
+					<desc>Set the depth bias dynamic state.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetDepthBias.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">depthBiasConstantFactor</arg>
+							<arg type="float">depthBiasClamp</arg>
+							<arg type="float">slopeScaledDepthBias</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordSetDepthBounds</name>
+					<desc>Set the depth bias dynamic state.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetDepthBounds.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">minDepthBounds</arg>
+							<arg type="float">maxDepthBounds</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordSetEvent</name>
+				<desc>Set an event object to signaled state.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetEvent.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Event">event</arg>
+						<arg type="vulkan.PipelineStage">stageMask</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>RecordSetLineWidth</name>
+				<desc>Set the dynamic line width state.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetLineWidth.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">lineWidth</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordSetStencilCompareMask</name>
+					<desc>Set the stencil compare mask dynamic state.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetStencilCompareMask.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.StencilFace">faceMask</arg>
+							<arg type="int">stencilCompareMask</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordSetStencilReference</name>
+					<desc>Set the stencil reference dynamic state.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetStencilReference.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.StencilFace">faceMask</arg>
+							<arg type="int">stencilReference</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordSetStencilWriteMask</name>
+					<desc>Set the stencil write mask dynamic state.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdSetStencilWriteMask.html</url>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.StencilFace">faceMask</arg>
+							<arg type="int">stencilWriteMask</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RecordDrawGradient</name>
+				<desc>
+					Draws a gradient image. The direction is a 2-dimensional normal. The 'offset' of each node represents the position of the gradient step, 0 being at the start and 1 at the end (In relation to the direction). A maximum of 3 nodes are supported.\n
+					\n
+					It is '''not''' guaranteed that the texture has been fully drawn when this function returns.
+				</desc>
+				<lua>
+					<desc>
+						Creates a vertical gradient texture with red coloration at the top, green coloration at the middle and blue coloration at the bottom.
+					</desc>
+					<code>
+						local bSuccess = drawCmd:RecordDrawGradient(renderTarget,Vector2(0,-1),{
+							{
+								offset = 0.0,
+								color = Color(255,0,0,255)
+							},
+							{
+								offset = 0.5,
+								color = Color(0,255,0,255)
+							},
+							{
+								offset = 1.0,
+								color = Color(0,0,255,255)
+							}
+						})
+						if(bSuccess == true) then
+							-- Use the texture
+						end
+					</code>
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.RenderTarget">renderTarget</arg>
+						<arg type="math.Vector2">direction</arg>
+						<arg type="table">nodes</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>StopRecording</name>
+					<desc>Finish recording a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkEndCommandBuffer.html</url>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>StartRecording</name>
+					<desc>Start recording a command buffer.</desc>
+					<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkBeginCommandBuffer.html</url>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

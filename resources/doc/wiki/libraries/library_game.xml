@@ -1,0 +1,559 @@
+ <root>
+	<collection type="library">
+		<name>game</name>
+		<desc>TODO</desc>
+		<function type="function">
+			<name>precache_model</name>
+			<desc>Precaches the specified model.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">modelName</arg>
+				</parameters>
+			</overload>
+		</function>
+		<group>
+			<function type="function" client="1">
+				<name>create_particle_system</name>
+				<desc>
+					If a name is specified, it will attempt to create the specified particle, which will have to be precached first.\n
+					Alternatively a table with the particle data can be specified, see Particles for more information.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="ents.ParticleSystemComponent" default="nil">parent</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.ParticleSystemComponent">particleSystem</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table">particleData</arg>
+						<arg type="ents.ParticleSystemComponent" default="nil">parent</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.ParticleSystemComponent">particleSystem</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>precache_particle_system</name>
+				<desc>Precaches the specified particle system.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>save_particle_system</name>
+				<desc>Saves the specified particle data as a file with the given file name in "particles/".</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="table">particleData</arg>
+					</parameters>
+				</overload>
+			</function>
+		</group>
+		<function type="function" client="1">
+			<name>open_dropped_file</name>
+			<desc>
+				This function has no effect, unless called within a OnFilesDropped-callback! You can use this function to read (But not write!) from one of the dropped files.\n
+				You can either pass one of the filenames from the OnFilesDropped-callback, or the table index to one of the filenames.\n
+				You can not use this to open any files, other than the ones that have been dropped.
+			</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">fileName</arg>
+					<arg type="bool" default="false">binary</arg>
+				</parameters>
+				<returnValues>
+					<arg type="file.File">file</arg>
+				</returnValues>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="int">fileIndex</arg>
+					<arg type="bool" default="false">binary</arg>
+				</parameters>
+				<returnValues>
+					<arg type="file.File">file</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<group>
+			<function type="function" client="1">
+				<name>get_action_input</name>
+				<desc>Returns true if the given action is active for the local player.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="input.Action">action</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">pressed</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>set_action_input</name>
+				<desc>Activates/Deactivates the given action for the local player.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="input.Action">action</arg>
+						<arg type="bool">pressed</arg>
+					</parameters>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" client="1">
+				<name>draw_scene</name>
+				<desc>Draws the game scene. If no ''clearColor'' is specified, the render image will ''not'' be cleared.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.DrawSceneInfo">drawSceneInfo</arg>
+						<arg type="vulkan.RenderTarget">renderTarget</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>create_scene</name>
+				<desc>Creates a new scene object for rendering. If ''sampleCount'' is not specified, the sample count specified in the game settings will be used.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+						<arg type="float">fov</arg>
+						<arg type="float">fovView</arg>
+						<arg type="float">nearZ</arg>
+						<arg type="float">farZ</arg>
+						<arg type="vulkan.SampleCount">sampleCount</arg>
+					</parameters>
+					<returnValues>
+						<arg type="game.Scene">scene</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+						<arg type="float">fov</arg>
+						<arg type="float">fovView</arg>
+						<arg type="float">nearZ</arg>
+						<arg type="float">farZ</arg>
+					</parameters>
+					<returnValues>
+						<arg type="game.Scene">scene</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_render_scene</name>
+				<desc>Returns the scene used for the current render pass.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Scene">scene</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_render_scene_camera</name>
+				<desc>Returns the camera of the scene for the current render pass.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Camera">camera</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_scene</name>
+				<desc>Returns the main scene for rendering.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Scene">scene</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_scene_camera</name>
+				<desc>Returns the camera of the main scene.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Camera">camera</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" client="1">
+				<name>get_draw_command_buffer</name>
+				<desc>Returns the command buffer which is used for submitting draw calls.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.CommandBuffer">commandBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_setup_command_buffer</name>
+				<desc>Returns the command buffer which is used for setup calls.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.CommandBuffer">commandBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>flush_setup_command_buffer</name>
+				<desc>Waits for all queued setup commands to be complete and clears the setup command buffer.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+		</group>
+		<function type="function" client="1">
+			<name>get_camera_transform</name>
+			<desc>Returns the position and rotation of the main render scene camera.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="math.Vector">position</arg>
+					<arg type="math.Quaternion">rotation</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<group>
+			<function type="function" client="1">
+				<name>get_render_clip_plane</name>
+				<desc>Returns the current clip plane.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">clipPlane</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>set_render_clip_plane</name>
+				<desc>Changes the current clip plane.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">clipPlane</arg>
+					</parameters>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" client="1">
+				<name>get_debug_buffer</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Buffer">debugBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_time_buffer</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Buffer">timeBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_csm_buffer</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Buffer">csmBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>get_render_settings_descriptor_set</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.DescriptorSet">renderSettingsDescriptorSet</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>load_sound_scripts</name>
+			<desc>Loads the soundscripts from the specified file. If ''precache'' is set to ''true'', all sounds associated with the file will be automatically precached.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">soundScriptFileName</arg>
+					<arg type="bool" default="false">precache</arg>
+				</parameters>
+			</overload>
+		</function>
+		<group>
+			<function type="function">
+				<name>load_material</name>
+				<desc>
+					Loads and precaches the specified material.\n
+					If 'reload' is set to true, the material and all it's textures and parameters will be reloaded.\n
+					The ''loadInstantly'' is only available clientside.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">material</arg>
+						<arg type="bool" default="false">reload</arg>
+						<arg type="bool" default="false">loadInstantly</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>precache_material</name>
+				<desc>Precaches the specified material.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">material</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>create_material</name>
+				<desc>Creates a new material with the specified name and shader.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">shader</arg>
+					</parameters>
+					<returnValues>
+						<arg type="game.Material">material</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="string">shader</arg>
+					</parameters>
+					<returnValues>
+						<arg type="game.Material">material</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function">
+				<name>set_gravity</name>
+				<desc>Changes the game's gravity.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">gravity</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function">
+				<name>get_gravity</name>
+				<desc>Returns the game's gravity.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">gravity</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>load_model</name>
+			<desc>Loads the specified model.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">modelName</arg>
+				</parameters>
+				<returnValues>
+					<arg type="game.Model">model</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>create_model</name>
+			<desc>
+				Creates a new model and returns a handle to it.\n
+				If ''addReference'' is set to ''true'', a default reference pose, bone animation, mesh group and texture group will be generated.
+			</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">modelName</arg>
+				</parameters>
+				<returnValues>
+					<arg type="game.Model">model</arg>
+				</returnValues>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="bool" default="true">addReference</arg>
+				</parameters>
+				<returnValues>
+					<arg type="game.Model">model</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>set_time_scale</name>
+			<desc>Changes the game's current time scale.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="float">timeScale</arg>
+				</parameters>
+			</overload>
+		</function>
+		<function type="function">
+			<name>is_map_loaded</name>
+			<desc>Returns ''true'' if the current map has been fully loaded.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="bool">loaded</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>get_map_name</name>
+			<desc>Returns the name of the current map.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="string">mapName</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>get_game_state_flags</name>
+			<desc>Returns the game's state flags.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="game.StateFlags">stateFlags</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<!-- serverside -->
+		<function type="function" server="1">
+			<name>set_time_scale</name>
+			<desc>Changes the game's current time scale.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="float">timeScale</arg>
+				</parameters>
+			</overload>
+		</function>
+		<function type="function" server="1">
+			<name>load_map</name>
+			<desc>
+				Loads the specified map and places it relative to the specified ''origin''. This does '''not''' remove any existing map geometry!\n
+				If the loading was successful, ''true'' is returned, as well as a table of the new created entities.\n
+				If ''newWorldEntity'' is set to ''true'', the static map geometry will be created as a new world entity, otherwise it will be added to the existing one.
+			</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">mapName</arg>
+					<arg type="math.Vector" default="math.Vector(0.0,0.0,0.0)">origin</arg>
+					<arg type="bool" default="false">newWorldEntity</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+					<arg type="table" default="ents.Entity">entities</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" server="1">
+			<name>change_map</name>
+			<desc>Changes the current map. 'landmarkName' is the name of a info_landmark entity located on the current map, as well as the new map.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">mapName</arg>
+					<arg type="string" default="">landmarkName</arg>
+				</parameters>
+			</overload>
+		</function>
+		<!-- serverside -->
+		<enum_set type="flags" gui="1">
+			<name>Damagetype</name>
+			<enum value="0">DAMAGETYPE_GENERIC</enum>
+			<enum value="1" type="bit">DAMAGETYPE_EXPLOSION</enum>
+			<enum value="2" type="bit">DAMAGETYPE_BULLET</enum>
+			<enum value="32" type="bit">DAMAGETYPE_BASH</enum>
+			<enum value="64" type="bit">DAMAGETYPE_CRUSH</enum>
+			<enum value="128" type="bit">DAMAGETYPE_SLASH</enum>
+			<enum value="256" type="bit">DAMAGETYPE_ELECTRICITY</enum>
+			<enum value="512" type="bit">DAMAGETYPE_ENERGY</enum>
+			<enum value="1024" type="bit">DAMAGETYPE_FIRE</enum>
+			<enum value="2048" type="bit">DAMAGETYPE_PLASMA</enum>
+		</enum_set>
+		<enum_set gui="1">
+			<name>Hitgroup</name>
+			<enum value="math.MAX_UINT32">HITGROUP_INVALID</enum>
+			<enum value="0">HITGROUP_GENERIC</enum>
+			<enum value="1">HITGROUP_HEAD</enum>
+			<enum value="2">HITGROUP_CHEST</enum>
+			<enum value="3">HITGROUP_STOMACH</enum>
+			<enum value="4">HITGROUP_LEFT_ARM</enum>
+			<enum value="5">HITGROUP_RIGHT_ARM</enum>
+			<enum value="6">HITGROUP_LEFT_LEG</enum>
+			<enum value="7">HITGROUP_RIGHT_LEG</enum>
+			<enum value="8">HITGROUP_GEAR</enum>
+			<enum value="9">HITGROUP_TAIL</enum>
+		</enum_set>
+		<enum_set type="flags" client="1">
+			<name>RenderFlags</name>
+			<enum value="0">RENDER_FLAG_NONE</enum>
+			<enum value="1" type="bit">RENDER_FLAG_BIT_WORLD</enum>
+			<enum value="2" type="bit">RENDER_FLAG_BIT_VIEW</enum>
+			<enum value="4" type="bit">RENDER_FLAG_BIT_SKYBOX</enum>
+			<enum value="8" type="bit">RENDER_FLAG_BIT_SHADOWS</enum>
+			<enum value="16" type="bit">RENDER_FLAG_BIT_PARTICLES</enum>
+			<enum value="32" type="bit">RENDER_FLAG_BIT_GLOW</enum>
+			<enum value="64" type="bit">RENDER_FLAG_BIT_DEBUG</enum>
+			<enum value="128" type="bit">RENDER_FLAG_WATER_BIT</enum>
+			<enum value="255" type="bit">RENDER_FLAG_ALL</enum>
+			<enum value="256" type="bit">RENDER_FLAG_REFLECTION_BIT</enum>
+		</enum_set>
+		<enum_set type="flags">
+			<name>StateFlags</name>
+			<enum value="0">STATE_FLAG_NONE</enum>
+			<enum value="1" type="bit">STATE_FLAG_BIT_MAP_INITIALIZED</enum>
+			<enum value="2" type="bit">STATE_FLAG_BIT_GAME_INITIALIZED</enum>
+			<enum value="4" type="bit">STATE_FLAG_BIT_MAP_LOADED</enum>
+			<enum value="8" type="bit">STATE_FLAG_BIT_INITIAL_TICK</enum>
+			<enum value="16" type="bit">STATE_FLAG_BIT_LEVEL_TRANSITION</enum>
+		</enum_set>
+	</collection>
+</root>

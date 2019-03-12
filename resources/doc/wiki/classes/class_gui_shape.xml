@@ -1,0 +1,58 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>Shape</name>
+			<derivedFrom>gui.Element</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>AddVertex</name>
+				<desc>Adds the specified vertex to the element. You will have to call [pragma:ref]gui.Shape:Update[/pragma:ref] to apply the changes. The return value is the vertex index, which you can use for [pragma:ref]gui.Shape:SetVertexPos[/pragma:ref].</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">vertex</arg>
+					</parameters>
+					<returnValues>
+						<arg type="int">vertexId</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>Update</name>
+				<desc>Needs to be called to apply any changes made to this element through [pragma:ref]gui.Shape:AddVertex[/pragma:ref], [pragma:ref]gui.Shape:SetVertexPos[/pragma:ref] or [pragma:ref]gui.Shape:ClearVertices[/pragma:ref].</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method">
+				<name>SetVertexPos</name>
+				<desc>Changes the position of the specified vertex. You will have to call [pragma:ref]gui.Shape:Update[/pragma:ref] to apply the changes.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">vertexId</arg>
+						<arg type="math.Vector2">position</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method">
+				<name>ClearVertices</name>
+				<desc>Removes all vertices from this element. You will have to call [pragma:ref]gui.Shape:Update[/pragma:ref] to apply the changes.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method">
+				<name>InvertVertexPositions</name>
+				<desc>Inverts all vertices on the specified axes (Or both axes if nothing is specified).</desc>
+				<lua></lua>
+				<overload></overload>
+				<overload>
+					<parameters>
+						<arg type="bool">invertX</arg>
+						<arg type="bool">invertY</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

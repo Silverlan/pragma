@@ -1,0 +1,10 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>FuncPhysicsComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+		</collection>
+	</collection>
+</root>

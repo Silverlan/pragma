@@ -1,0 +1,47 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>TouchComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>SetTriggerFlags</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.TouchComponent.TriggerFlags">triggerFlags</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTriggerFlags</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.TouchComponent.TriggerFlags">triggerFlags</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_CAN_TRIGGER</enum>
+				<enum>EVENT_ON_START_TOUCH</enum>
+				<enum>EVENT_ON_END_TOUCH</enum>
+				<enum>EVENT_ON_TRIGGER</enum>
+			</enum_set>
+			<enum_set type="flags">
+				<name>TriggerFlags</name>
+				<enum value="0">TRIGGER_FLAG_NONE</enum>
+				<enum value="1" type="bit">TRIGGER_FLAG_BIT_PLAYERS</enum>
+				<enum value="2" type="bit">TRIGGER_FLAG_BIT_NPCS</enum>
+				<enum value="4" type="bit">TRIGGER_FLAG_BIT_PHYSICS</enum>
+				<enum value="7">TRIGGER_FLAG_EVERYTHING</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

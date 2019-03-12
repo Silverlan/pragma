@@ -1,0 +1,39 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>SubresourceLayout</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new SubresourceLayout object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.SubresourceLayout">subresourceLayout</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>offset</name>
+				<desc></desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>size</name>
+				<desc></desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>rowPitch</name>
+				<desc></desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>arrayPitch</name>
+				<desc></desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>depthPitch</name>
+				<desc></desc>
+			</member>
+		</collection>
+	</collection>
+</root>

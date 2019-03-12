@@ -1,0 +1,96 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class" base="1" server="1">
+			<name>BaseBehaviorTask</name>
+			<derivedFrom>ai.BehaviorTask</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" server="1">
+				<name>constructor</name>
+				<desc>Base constructor for BaseBehaviorTask.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int" default="ai.BehaviorTask.TYPE_SEQUENCE">nodeType</arg>
+						<arg type="int" default="ai.BehaviorTask.SELECTOR_TYPE_SEQUENTIAL">selectorType</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>tostring</name>
+				<desc>Converts the task to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">task</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" server="1">
+					<name>Start</name>
+					<desc>
+						Called whenever a NPC has started using this task. Returning anything but ''ai.BehaviorTask.RESULT_PENDING'' will end the task immediately, meaning that [pragma:ref]ai.BaseBehaviorTask:Think[/pragma:ref] will never be called!
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Schedule">schedule</arg>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ai.BehaviorTask.Result">result</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>Stop</name>
+					<desc>Called whenever a NPC has stopped using this task.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method" server="1">
+				<name>Think</name>
+				<desc>
+					Called every tick, as long as this task is active. If the task hasn't completed, return ''ai.BehaviorTask.RESULT_PENDING'', otherwise return either ''ai.BehaviorTask.RESULT_SUCCEEDED'' or ''ai.BehaviorResult.RESULT_FAILED''.\n
+This function won't be called until all child-tasks have been completed. ''childResult'' represents the state of the child-tasks (Either ''ai.BehaviorTask.RESULT_SUCCEEDED'' or ''ai.BehaviorTask.RESULT_FAILED''.).
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ai.Schedule">schedule</arg>
+						<arg type="ents.Entity">entity</arg>
+						<arg type="ai.BehaviorTask.Result">childResult</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ai.BehaviorTask.Result">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>OnTaskComplete</name>
+				<desc>Called whenever a child-task of this task has been completed. ''result'' is whatever result that child-task has returned.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ai.Schedule">schedule</arg>
+						<arg type="ai.Task">taskId</arg>
+						<arg type="ai.BehaviorTask.Result">result</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>OnSetScheduleParameter</name>
+				<desc>Called when [pragma:ref]ai.BehaviorTask:SetScheduleParameter[/pragma:ref] has been called on this task.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ai.BehaviorTask.ParameterId">taskParameterId</arg>
+						<arg type="int">scheduleParameterId</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

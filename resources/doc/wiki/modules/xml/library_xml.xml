@@ -1,0 +1,498 @@
+<root>
+	<collection type="library">
+		<name>xml</name>
+		<desc>Library for reading and writing XML files.</desc>
+		<module>
+			<name>xml</name>
+			<target>util_xml</target>
+		</module>
+		<group>
+			<function type="function">
+				<name>parse</name>
+				<desc>Parses the given string as XML.
+	On success ''true'' will be returned, as well as the root node.
+	On failure ''false'' will be returned, as well as a string describing the error, and the line and character at which the error occurred.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">xmlString</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+						<arg type="xml.Node">rootNode</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">xmlString</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+						<arg type="string">errorMessage</arg>
+						<arg type="int">line</arg>
+						<arg type="int">character</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>load</name>
+				<desc>Loads XML-data from a file.
+	On parse success ''true'' will be returned, as well as the root node.
+	On parse failure ''false'' will be returned, as well as a string describing the error, and the line and character at which the error occurred.
+	If the file could not be opened, ''nil'' will be returned.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">xmlFileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+						<arg type="xml.Node">rootNode</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">xmlFileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+						<arg type="string">errorMessage</arg>
+						<arg type="int">line</arg>
+						<arg type="int">character</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>create</name>
+				<desc>Creates a new XML node.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<collection type="class">
+			<name>Base</name>
+			<desc>Base class for XML objects.</desc>
+			<group>
+				<function type="method">
+					<name>GetName</name>
+					<desc>Returns the name of this XML object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">name</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetName</name>
+					<desc>Changes the name of this XML object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetValue</name>
+					<desc>Returns the value of this XML object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetValue</name>
+					<desc>Changes the value of this XML object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetParent</name>
+				<desc>Gets the node parent.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">parent</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+		<collection type="class">
+			<name>Node</name>
+			<desc>A XML node.</desc>
+			<derivedFrom>xml.Base</derivedFrom>
+			<group>
+				<function type="method">
+					<name>AppendAttribute</name>
+					<desc>Appends a new attribute to the node.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="string">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>AppendNode</name>
+				<desc>Appends a new child node.
+The appended child becomes the last child.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="xml.Node.Type">type</arg>
+						<arg type="string">name</arg>
+						<arg type="string">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetFirstNode</name>
+				<desc>Gets first child node, optionally matching node name.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="bool" default="true">matchCase</arg>
+					</parameters>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetLastNode</name>
+				<desc>Gets last child node, optionally matching node name.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="bool" default="true">matchCase</arg>
+					</parameters>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">node</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetNextSibling</name>
+				<desc>Gets next sibling node, optionally matching node name.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="bool" default="true">matchCase</arg>
+					</parameters>
+					<returnValues>
+						<arg type="xml.Node">sibling</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">sibling</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetPreviousSibling</name>
+				<desc>Gets previous sibling node, optionally matching node name.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="bool" default="true">matchCase</arg>
+					</parameters>
+					<returnValues>
+						<arg type="xml.Node">sibling</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node">sibling</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetType</name>
+				<desc>Gets type of node.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="xml.Node.Type">type</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>InsertAttribute</name>
+					<desc>Inserts a new attribute at specified place inside the node.
+	All attributes after and including the specified attribute are moved one position back.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="xml.Attribute">where</arg>
+							<arg type="string">name</arg>
+							<arg type="string">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetFirstAttribute</name>
+					<desc>Gets first attribute of node, optionally matching attribute name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="bool" default="true">matchCase</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetLastAttribute</name>
+					<desc>Gets last attribute of node, optionally matching attribute name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="bool" default="true">matchCase</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>PrependAttribute</name>
+					<desc>Prepends a new attribute to the node.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="string">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveAllAttributes</name>
+					<desc>Removes all attributes of the node.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveAttribute</name>
+					<desc>Removes the specified attribute from node.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="xml.Attribute">attribute</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveFirstAttribute</name>
+					<desc>Removes first attribute of the node.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveLastAttribute</name>
+					<desc>Removes the last attribute of the node.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>InsertNode</name>
+					<desc>Inserts a new child node at specified place inside the node.
+	All children after and including the specified node are moved one position back.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="xml.Node">where</arg>
+							<arg type="xml.Node.Type">type</arg>
+							<arg type="string">name</arg>
+							<arg type="string">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Node">node</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>PrependNode</name>
+					<desc>Prepends a new child node.
+	The prepended child becomes the first child, and all existing children are moved one position back.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="xml.Node.Type">type</arg>
+							<arg type="string">name</arg>
+							<arg type="string">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Node">node</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemodeNode</name>
+					<desc>Removes the specified child from the node.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="xml.Node">node</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveAllNodes</name>
+					<desc>Removes all child nodes (but not attributes).</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveFirstNode</name>
+					<desc>Removes the first child node.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveLastNode</name>
+					<desc>Removes the last child of the node.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>Save</name>
+				<desc>Saves this node as XML string to a file.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">fileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>ToString</name>
+				<desc>Converts this node to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">xml</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Type</name>
+				<enum value="0">TYPE_DOCUMENT</enum>
+				<enum value="1">TYPE_ELEMENT</enum>
+				<enum value="2">TYPE_DATA</enum>
+				<enum value="3">TYPE_CDATA</enum>
+				<enum value="4">TYPE_COMMENT</enum>
+				<enum value="5">TYPE_DECLARATION</enum>
+				<enum value="6">TYPE_DOCTYPE</enum>
+				<enum value="7">TYPE_PI</enum>
+			</enum_set>
+		</collection>
+		<collection type="class">
+			<name>Attribute</name>
+			<desc>A XML attribute.</desc>
+			<derivedFrom>xml.Attribute</derivedFrom>
+			<group>
+				<function type="method">
+					<name>GetNextAttribute</name>
+					<desc>Gets next attribute, optionally matching attribute name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="bool" default="true">matchCase</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPreviousAttribute</name>
+					<desc>Gets previous attribute, optionally matching attribute name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="bool" default="true">matchCase</arg>
+						</parameters>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="xml.Attribute">attribute</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

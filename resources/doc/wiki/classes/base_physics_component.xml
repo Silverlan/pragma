@@ -1,0 +1,464 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>PhysicsComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>SetCollisionBounds</name>
+					<desc>Changes the collision bounds for this entity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionBounds</name>
+					<desc>Returns the min and max collision bounds of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionExtents</name>
+					<desc>Returns the collision extents local to the [pragma:ref?ents.PhysicsComponent:GetCollisionCenter]collision center[/pragma:ref] position of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">extents</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionCenter</name>
+					<desc>Returns the collision center position of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">collisionCenter</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMoveType</name>
+					<desc>Returns the entity's move type.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.PhysicsComponent.MoveType">moveType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMoveType</name>
+					<desc>Changes the entity's move type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PhysicsComponent.MoveType">moveType</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetPhysicsObject</name>
+				<desc>Returns this entity's physics object, or nil if it doesn't have one.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.Object">physObject</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>InitializePhysics</name>
+					<desc>
+						Initializes this entity's physics and returns the new physics object, or ''nil'' if physics couldn't be initialized.\n
+						The 'type' Parameter is a physics type enum.\n
+						If you're passing a shape, this function will '''not''' transmit!
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.Type">type</arg>
+						</parameters>
+						<returnValues>
+							<arg type="phys.Object">physObject</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="phys.ConvexShape">shape</arg>
+							<arg type="float" default="0.0">mass</arg>
+						</parameters>
+						<returnValues>
+							<arg type="phys.Object">physObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>DestroyPhysicsObject</name>
+					<desc>Destroys the entity's physics object.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>DropToFloor</name>
+				<desc>Moves the entity to the floor. This will have no effect if the entity doesn't have any physics, or if there is no floor.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetTrigger</name>
+					<desc>If set to true, this entity will be treated as trigger. Will have no effect if the entity doesn't have physics.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">trigger</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsTrigger</name>
+					<desc>Returns true if this entity is a trigger.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">trigger</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetCollisionCallbacksEnabled</name>
+					<desc>Returns true if collision callbacks are enabled for this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">collisionCallbacksEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionCallbacksEnabled</name>
+					<desc>If set to true, allows you to retrieve physics collisions with other objects using the "Touch" entity hooks.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">collisionCallbacksEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionContactReportEnabled</name>
+					<desc>Returns true if collision contact reports are enabled for this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">collisionContactReportsEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionContactReportEnabled</name>
+					<desc>If set to true, allows you to retrieve detailed physics contact data with other objects using the "Contact" entity hook. This requires [pragma:ref]ents.PhysicsComponent:SetCollisionCallbacksEnabled[/pragma:ref] to be set as well!</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">collisionContactReportsEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetCollisionFilterMask</name>
+					<desc>Changes the entity's collision mask. (= What this entity should collide with)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionMask">collisionMask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionFilterMask</name>
+					<desc>Returns the entity's collision mask. (= What this entity should collide with)</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.CollisionMask">collisionMask</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionFilterGroup</name>
+					<desc>Changes the entity's collision group. (= Which entity types should collide with this entity)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionMask">collisionMask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionFilterGroup</name>
+					<desc>Returns the entity's collision group. (= Which entity types should collide with this entity)</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.CollisionMask">collisionMask</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionFilter</name>
+					<desc>Changes the entity's collision group and mask.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionMask">group</arg>
+							<arg type="phys.CollisionMask">mask</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>EnableCollisions</name>
+					<desc>Forces collisions between this and the target entity to be enabled, regardless of collision group and mask.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>DisableCollisions</name>
+					<desc>Forces collisions between this and the target entity to be disabled, regardless of collision group and mask.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionsEnabled</name>
+					<desc>Forces collisions between this and the target entity to be enabled/disabled, regardless of collision group and mask.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+							<arg type="bool">enabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ResetCollisions</name>
+					<desc>Resets the collision behavior between this and the target entity to the default.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetPhysJointConstraints</name>
+				<desc>
+					Returns a table containing all of this entity's physics joints. For each joint, the table constains another table with the following members:\n
+					* '''source''': The source bone id of the joint\n
+					* '''target''': The target bone id of the joint\n
+					* '''constraint''': The [pragma:ref?phys.Constraint]constraint object[/pragma:ref]
+				</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="table" subType="phys.Constraint">constraints</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetRotatedCollisionBounds</name>
+				<desc>Returns the min and max collision bounds of this entity, which still encapsulate it with its current rotation.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetPhysicsType</name>
+				<desc>Returns the entity's physics type.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.Type">type</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetCollisionRadius</name>
+				<desc>Returns the radius of the entity's collision bounds.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">radius</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>IsPhysicsProp</name>
+				<desc>Returns true if the entity's physics type is either phys.TYPE_DYNAMIC or phys.TYPE_SOFTBODY.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isPhysicsProp</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetAABBDistance</name>
+				<desc>Returns the closest distance on the entity's AABB collision box to the target position (Or AABB of the specified entity). This is more accurate than [pragma:ref]phys.Transform:GetDistance[/pragma:ref], but also more expensive!</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">point</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.PhysicsComponent">physComponent</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>IsRagdoll</name>
+				<desc>Returns true if the entity is a ragdoll.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isRagdoll</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>ApplyForce</name>
+					<desc>Adds the specified force to the entity's physics objects. If ''relativeOrigin'' is specified, the force will be applied at that position.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">force</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">force</arg>
+							<arg type="math.Vector">relativeOrigin</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ApplyImpulse</name>
+					<desc>Adds the specified impulse to the entity's physics objects. If ''relativeOrigin'' is specified, the impulse will be applied at that position.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">impulse</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">impulse</arg>
+							<arg type="math.Vector">relativeOrigin</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ApplyTorque</name>
+					<desc>Adds the specified torque to the entity's physics objects.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">torque</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ApplyTorqueImpulse</name>
+					<desc>Adds the specified torque impulse to the entity's physics objects.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">torque</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetMass</name>
+				<desc>Returns the entity's physics object mass.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">mass</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>MoveType</name>
+				<enum value="0">MOVETYPE_NONE</enum>
+				<enum value="1">MOVETYPE_WALK</enum>
+				<enum value="3">MOVETYPE_NOCLIP</enum>
+				<enum value="2">MOVETYPE_FLY</enum>
+				<enum value="4">MOVETYPE_FREE</enum>
+				<enum value="5">MOVETYPE_PHYSICS</enum>
+			</enum_set>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_PHYSICS_INITIALIZED</enum>
+				<enum>EVENT_ON_PHYSICS_DESTROYED</enum>
+				<enum>EVENT_ON_PHYSICS_UPDATED</enum>
+				<enum>EVENT_ON_DYNAMIC_PHYSICS_UPDATED</enum>
+				<enum>EVENT_ON_PRE_PHYSICS_SIMULATE</enum>
+				<enum>EVENT_ON_POST_PHYSICS_SIMULATE</enum>
+				<enum>EVENT_HANDLE_RAYCAST</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

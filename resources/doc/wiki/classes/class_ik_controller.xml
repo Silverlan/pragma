@@ -1,0 +1,142 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>IKController</name>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetEffectorName</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">effectorName</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetEffectorName</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">effectorName</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetChainLength</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">chainLength</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetChainLength</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">chainLength</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetType</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">type</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetType</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">type</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMethod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.IKController.Method">method</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMethod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.IKController.Method">method</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetKeyValues</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">keyValues</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetKeyValue</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">key</arg>
+							<arg type="string">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetKeyValue</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">key</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">key</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Method</name>
+				<enum value="0">METHOD_SELECTIVELY_DAMPED_LEAST_SQUARE</enum>
+				<enum value="1">METHOD_DAMPED_LEAST_SQUARES</enum>
+				<enum value="2">METHOD_DAMPED_LEAST_SQUARES_WITH_SINGULAR_VALUE_DECOMPOSITION</enum>
+				<enum value="3">METHOD_PSEUDOINVERSE</enum>
+				<enum value="4">METHOD_JACOBIAN_TRANSPOSE</enum>
+				<enum value="0">METHOD_DEFAULT</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,826 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>PlayerComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>GetTimeConnected</name>
+				<desc>Returns the time since the player has connected to the server.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">timeConnected</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>IsKeyDown</name>
+					<desc>Returns whether the specified action input is pressed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Action">action</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">keyDown</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetActionInput</name>
+					<desc>Returns true if the given action is pressed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Action">action</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">isPressed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetActionInputs</name>
+					<desc>Returns the bitflags for the currently pressed actions.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="input.Action">actions</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetActionInputAxisMagnitude</name>
+					<desc>Returns a value in the range [0,1] for the specified action, representing how much the joystick axis for that action is currently tilted.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Action">action</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">axisMagnitude</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetActionInputAxisMagnitude</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Action">action</arg>
+							<arg type="float">axisMagnitude</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetWalkSpeed</name>
+					<desc>Returns the player's walk speed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">walkSpeed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRunSpeed</name>
+					<desc>Returns the player's run speed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">runSpeed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSprintSpeed</name>
+					<desc>Returns the player's sprint speed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">sprintSpeed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetWalkSpeed</name>
+					<desc>Changes the player's walk speed. The default is 150.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">walkSpeed</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRunSpeed</name>
+					<desc>Changes the player's run speed. The default is 190.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">runSpeed</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetSprintSpeed</name>
+					<desc>Changes the player's sprint speed. The default is 320.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">sprintSpeed</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCrouchedWalkSpeed</name>
+					<desc>Returns the player's crouched walk speed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">crouchedWalkSpeed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCrouchedWalkSpeed</name>
+					<desc>Changes the player's crouched walk speed. The default is 63.33.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">crouchedWalkSpeed</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>IsLocalPlayer</name>
+				<desc>If called on the client, returns true if the player is the local player. If called on the server, returns true if the player is the server host.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">localPlayer</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetStandHeight</name>
+					<desc>Returns the height in units the player's collision bounds will change to when the player is standing upright.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">standHeight</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetStandHeight</name>
+					<desc>Changes the height in units the player's collision bounds will change to when the player is standing upright.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">standHeight</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCrouchHeight</name>
+					<desc>Returns the height in units the player's collision bounds will change to when the player is crouching.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">crouchHeight</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCrouchHeight</name>
+					<desc>Changes the height in units the player's collision bounds will change to when the player is crouching.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">crouchHeight</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetStandEyeLevel</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">standEyeLevel</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetStandEyeLevel</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">standEyeLevel</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCrouchEyeLevel</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">crouchEyeLevel</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCrouchEyeLevel</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">crouchEyeLevel</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetPlayerName</name>
+				<desc>Returns the player's name.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">name</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetObserverMode</name>
+					<desc>Changes the player's current observer mode.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PlayerComponent.ObserverMode">observerMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObserverMode</name>
+					<desc>Returns the player's current observer mode.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.PlayerComponent.ObserverMode">observerMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObserverModeProperty</name>
+					<desc>Returns the observer mode property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">observerModeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetObserverTarget</name>
+					<desc>Changes the target which should be observed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ObservableComponent">component</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObserverTarget</name>
+					<desc>Returns the target which is currently being observed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.ObservableComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetObserverCameraOffset</name>
+					<desc>Changes the player's observer camera offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObserverCameraOffset</name>
+					<desc>Returns the player's observer camera offset.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsObserverCameraLocked</name>
+					<desc>Returns ''true'' if the observer camera is locked.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">observerCameraLocked</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetObserverCameraLocked</name>
+					<desc>Locks or unlocks the observer camera.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">lockCamera</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetViewPos</name>
+				<desc>Returns the player's view/camera position. If called on the client, this will only be correct for the local player!</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">viewPos</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>ApplyViewRotationOffset</name>
+				<desc>Applies a 'view punch' effect to the player's camera for the given duration.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.EulerAngles">angles</arg>
+						<arg type="float" default="0.5">duration</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>PrintMessage</name>
+				<desc>Prints a message in the player's chat or console.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">message</arg>
+						<arg type="ents.PlayerComponent.MessageType">type</arg>
+					</parameters>
+				</overload>
+			</function>
+
+
+
+
+
+			<group>
+				<function type="method" shared="1">
+					<name>SetNextPrimaryAttack</name>
+					<desc>Disables the weapon's primary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetNextSecondaryAttack</name>
+					<desc>Disables the weapon's secondary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetNextAttack</name>
+					<desc>Disables the weapon's primary and secondary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetAutomaticPrimary</name>
+					<desc>If set to true, holding down the primary attack key will continuously invoke the weapon's primary fire.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">automaricPrimaryFire</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAutomaticSecondary</name>
+					<desc>If set to true, holding down the secondary attack key will continuously invoke the weapon's secondary fire.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">automaricSecondaryFire</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsAutomaticPrimary</name>
+					<desc>Returns true if the weapon's primary attack is set to automatic.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isPrimaryFireAutomatic</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsAutomaticSecondary</name>
+					<desc>Returns true if the weapon's secondary attack is set to automatic.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isSecondaryFireAutomatic</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>IsDeployed</name>
+				<desc>Returns true if the weapon is currently deployed.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isDeployed</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetPrimaryAmmoType</name>
+					<desc>Returns the weapon's primary ammo type id.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryAmmoTypeProperty</name>
+					<desc>Returns the weapon's primary ammo type property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryAmmoType</name>
+					<desc>Returns the weapon's secondary ammo type id.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryAmmoTypeProperty</name>
+					<desc>Returns the weapon's secondary ammo type property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasPrimaryAmmo</name>
+					<desc>Returns true if the weapon's primary clip size is larger than zero, or if the weapon's owner has any ammunition of the primary ammo type left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasPrimaryAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasSecondaryAmmo</name>
+					<desc>Returns true if the weapon's secondary clip size is larger than zero, or if the weapon's owner has any ammunition of the secondary ammo type left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasSecondaryAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsPrimaryClipEmpty</name>
+					<desc>Returns true if the weapon's primary clip size is 0.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isClipEmpty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsSecondaryClipEmpty</name>
+					<desc>Returns true if the weapon's secondary clip size is 0.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isClipEmpty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasAmmo</name>
+					<desc>Returns true if the weapon/owner has any primary or secondary ammo left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryClipSize</name>
+					<desc>Returns the current size of the weapon's primary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">clipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryClipSizeProperty</name>
+					<desc>Returns the primary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">clipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryClipSize</name>
+					<desc>Returns the current size of the weapon's secondary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">clipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryClipSizeProperty</name>
+					<desc>Returns the secondary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">clipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxPrimaryClipSize</name>
+					<desc>Returns the weapon's maximum capacity for the primary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">maxPrimaryClipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxPrimaryClipSizeProperty</name>
+					<desc>Returns the max primary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">maxPrimaryClipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxSecondaryClipSize</name>
+					<desc>Returns the weapon's maximum capacity for the secondary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">maxSecondaryClipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxSecondaryClipSizeProperty</name>
+					<desc>Returns the max secondary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">maxSecondaryClipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>PrimaryAttack</name>
+					<desc>Forces the weapon's primary attack to fire. If ''bFireOnce'' is set to ''false'', and the weapon's primary attack is automatic, the weapon will continue firing until [pragma:ref]ents.WeaponComponent:EndPrimaryAttack[/pragma:ref] or [pragma:ref]ents.WeaponComponent:EndAttack[/pragma:ref] has been called.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">fireOnce</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SecondaryAttack</name>
+					<desc>Forces the weapon's secondary attack to fire. If ''bFireOnce'' is set to ''false'', and the weapon's secondary attack is automatic, the weapon will continue firing until [pragma:ref]ents.WeaponComponent:EndSecondaryAttack[/pragma:ref] or [pragma:ref]ents.WeaponComponent:EndAttack[/pragma:ref] has been called.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">fireOnce</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>TertiaryAttack</name>
+					<desc>Forces the weapon's tertiary attack to fire.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Attack4</name>
+					<desc>Forces the weapon's fourth attack to fire.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Reload</name>
+					<desc>Forces the weapon to reload.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndAttack</name>
+					<desc>Ends the weapon's primary and secondary attacks, if either of them is active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndPrimaryAttack</name>
+					<desc>Ends the weapon's primary, if it's active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndSecondaryAttack</name>
+					<desc>Ends the weapon's secondary, if it's active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Deploy</name>
+					<desc>Deploys the weapon if it has an owner.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Holster</name>
+					<desc>Holsters the weapon if it has an owner.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>SetOwner</name>
+				<desc>Changes the owner of the weapon.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity" default="NULL">owner</arg>
+					</parameters>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_HANDLE_ACTION_INPUT</enum>
+			</enum_set>
+			<enum_set>
+				<name>MessageType</name>
+				<enum value="0">MESSAGE_TYPE_CONSOLE</enum>
+				<enum value="1">MESSAGE_TYPE_CHAT</enum>
+			</enum_set>
+			<enum_set>
+				<name>ObserverMode</name>
+				<enum value="0">OBSERVERMODE_NONE</enum>
+				<enum value="1">OBSERVERMODE_FIRSTPERSON</enum>
+				<enum value="2">OBSERVERMODE_THIRDPERSON</enum>
+				<enum value="3">OBSERVERMODE_SHOULDER</enum>
+				<enum value="4">OBSERVERMODE_ROAMING</enum>
+			</enum_set>
+			<!-- serverside -->
+			<function type="method" server="1">
+				<name>Respawn</name>
+				<desc>Respawns the player and invokes the "OnPlayerSpawned" gamemode hook.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" server="1">
+				<name>SetActionInput</name>
+				<desc>Activates/Deactivates the given action.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="input.Action">action</arg>
+						<arg type="bool">activate</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>Kick</name>
+				<desc>Kicks the player from the server for the given reason.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">reason</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SendResource</name>
+				<desc>Queues the specified file for transmission to the player. Returns ''true'' if the file was successfully queued.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">fileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- serverside -->
+			<!-- clientside -->
+			<group>
+				<function type="method" client="1">
+					<name>SetViewOffset</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">viewOffset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetViewOffset</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">viewOffset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>IsInFirstPersonMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isInFirstPersonMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

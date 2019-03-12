@@ -1,0 +1,46 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>SceneLit3D</name>
+			<derivedFrom>
+				<name>shader.Scene3D</name>
+				<derivedFrom>
+					<name>shader.Graphics</name>
+					<derivedFrom>shader.Shader</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="function">
+					<name>RecordBindLights</name>
+					<desc>Binds the specified light data.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.DescriptorSet">descriptorSetShadowMaps</arg>
+							<arg type="vulkan.DescriptorSet">descriptorSetLightSources</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="function">
+					<name>RecordBindScene</name>
+					<desc>Binds the specified scene data.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Scene">scene</arg>
+							<arg type="bool">view</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

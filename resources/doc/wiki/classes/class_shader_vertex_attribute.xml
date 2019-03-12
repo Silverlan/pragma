@@ -1,0 +1,56 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>VertexAttribute</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new VertexAttribute object.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Format">format</arg>
+						<arg type="int">location</arg>
+						<arg type="int">offset</arg>
+					</parameters>
+					<returnValues>
+						<arg type="shader.VertexAttribute">vertexAttribute</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Format">format</arg>
+						<arg type="int">location</arg>
+					</parameters>
+					<returnValues>
+						<arg type="shader.VertexAttribute">vertexAttribute</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Format" default="vulkan.FORMAT_R8G8B8A8_UNORM">format</arg>
+					</parameters>
+					<returnValues>
+						<arg type="shader.VertexAttribute">vertexAttribute</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="vulkan.Format" mode="rw">
+				<name>format</name>
+				<desc></desc>
+				<default>vulkan.FORMAT_R8G8B8A8_UNORM</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>offset</name>
+				<desc></desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>location</name>
+				<desc></desc>
+				<default>0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,75 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>Shape</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>GetBounds</name>
+				<desc>Returns the shape's bounds.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>IsConvex</name>
+					<desc>Returns ''true'' if the shape is a convex shape.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isConvex</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsConvexHull</name>
+					<desc>Returns ''true'' if the shape is a convex hull shape.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isConvex</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsHeightfield</name>
+					<desc>Returns ''true'' if the shape is a height field.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isConvex</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsTriangleShape</name>
+					<desc>Returns ''true'' if the shape is a triangle shape.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isTriangleShape</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>CalculateLocalInertia</name>
+				<desc>Calculates the local inertia for the shape.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">mass</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">localInertia</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

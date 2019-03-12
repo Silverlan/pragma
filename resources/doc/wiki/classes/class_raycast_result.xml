@@ -1,0 +1,61 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>RayCastResult</name>
+			<desc>TODO</desc>
+			<member type="bool" mode="r">
+				<name>hit</name>
+				<desc>''true'' if the ray has hit something, otherwise ''false''.</desc>
+			</member>
+			<member type="ents.Entity" mode="r">
+				<name>entity</name>
+				<desc>The entity that has been hit by the ray.</desc>
+			</member>
+			<member type="ents.Entity" mode="r">
+				<name>physObj</name>
+				<desc>The physics object that has been hit by the ray.</desc>
+			</member>
+			<member type="float" mode="r">
+				<name>fraction</name>
+				<desc>A value in the range [0,1], representing where the ray has hit the target. 0 means the target was hit at the ray start position, 1 means the target was hit at the ray destination position.</desc>
+			</member>
+			<member type="float" mode="r">
+				<name>distance</name>
+				<desc>The distance from the start position at which the ray hit the target.</desc>
+			</member>
+			<member type="math.Vector" mode="r">
+				<name>normal</name>
+				<desc>The surface normal of the hit target at the position where it was hit by the ray.</desc>
+			</member>
+			<member type="math.Vector" mode="r">
+				<name>position</name>
+				<desc>The hit position.</desc>
+			</member>
+			<member type="math.Vector" mode="r">
+				<name>startPosition</name>
+				<desc>The start position of the ray.</desc>
+			</member>
+			<member type="phys.CollisionObj" mode="r">
+				<name>colObj</name>
+				<desc>The collision object that was hit by the ray.</desc>
+			</member>
+			<member type="game.Model.Mesh" mode="r">
+				<name>mesh</name>
+				<desc>The mesh that was hit by the ray.</desc>
+			</member>
+			<member type="game.Model.Mesh.Sub" mode="r">
+				<name>subMesh</name>
+				<desc>The sub-mesh that was hit by the ray.</desc>
+			</member>
+			<member type="game.Material" mode="r">
+				<name>material</name>
+				<desc>The material that was hit by the ray.</desc>
+			</member>
+			<member type="string" mode="r">
+				<name>materialName</name>
+				<desc>The name of the material that was hit by the ray.</desc>
+			</member>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,24 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class" server="1">
+			<name>TaskDebugDrawText</name>
+			<derivedFrom>ai.BehaviorTask</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" server="1">
+				<name>SetMessage</name>
+				<desc>Changes the debug message.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">msg</arg>
+					</parameters>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Parameter</name>
+				<enum value="0">PARAMETER_MESSAGE</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,1639 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>operator==</name>
+				<desc>Compares if this model is the same as the specified one.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model">model</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetCollisionMeshes</name>
+					<desc>Returns a table of all collision meshes.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="game.Model.CollisionMesh">collisionMeshes</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearCollisionMeshes</name>
+					<desc>Clears all collision meshes from the model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>UpdateCollisionBounds</name>
+					<desc>Recalculates the collision bounds of this model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionBounds</name>
+					<desc>Returns the collision bounds for this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionBounds</name>
+					<desc>Changes the collision bounds for this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddCollisionMesh</name>
+					<desc>Adds a collision mesh to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.CollisionMesh">collisionMesh</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionMeshCount</name>
+					<desc>Returns the number of collision meshes in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">collisionMeshCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetSkeleton</name>
+				<desc>Returns the skeleton of this model.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Model.Skeleton">skeleton</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetAttachmentCount</name>
+					<desc>Returns the number of attachments within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">attachmentCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAttachments</name>
+					<desc>
+						Returns a table with information about all attachments contained in this model. Each table element is another table with the following members:\n
+						* {{template_type|math.EulerAngles}} angles\n
+						* {{template_type|int}} bone\n
+						* {{template_type|string}} name\n
+						* {{template_type|math.Vector}} offset
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">attachments</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAttachment</name>
+					<desc>
+						Returns a table with information about the specified attachment, or nil if it doesn't exist. The table contains the following members:\n
+						* {{template_type|math.EulerAngles}} angles\n
+						* {{template_type|int}} bone\n
+						* {{template_type|string}} name\n
+						* {{template_type|math.Vector}} offset
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">attachmentId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">attachmentData</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">attachmentData</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LookupAttachment</name>
+					<desc>Returns the id for the given attachment, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">attachmentId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddAttachment</name>
+					<desc>Adds a new attachment to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+							<arg type="string">boneName</arg>
+							<arg type="math.Vector">offset</arg>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">offset</arg>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAttachmentData</name>
+					<desc>
+						Changes the data of the specified attachment. The ''attachmentData'' argument should be a table with the following values:\n
+						* {{template_type|math.EulerAngles}} angles\n
+						* {{template_type|int}} bone\n
+						* {{template_type|string}} name\n
+						* {{template_type|math.Vector}} offset
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">attachmentData</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">attachmentId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">attachmentData</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveAttachment</name>
+					<desc>Removes an attachment from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentName</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">attachmentId</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LookupBone</name>
+					<desc>Returns the id for the given bone, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">boneName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">boneId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLocalBoneTransform</name>
+					<desc>Returns the bone position, rotation and scale in object space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animationId</arg>
+							<arg type="int">frameId</arg>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneCount</name>
+					<desc>Returns the number of bones within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">boneCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LookupAnimation</name>
+					<desc>Returns the id for the given animation, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">animationName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">animationId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimationCount</name>
+					<desc>Returns the number of animations within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">animationCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimations</name>
+					<desc>Returns a table of all animations for this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="Model.Animation">animations</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimationNames</name>
+					<desc>Returns a table of all animation names for this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">animationNames</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimation</name>
+					<desc>Returns the specified animation, or nil if it doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">animationName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="Model.Animation">animation</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">animationId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="Model.Animation">animation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimationName</name>
+					<desc>Returns the name for the specified animation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animationId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">animationNmae</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddAnimation</name>
+					<desc>Adds a new animation to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">animationName</arg>
+							<arg type="game.Model.Animation">animation</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">animationId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveAnimation</name>
+					<desc>Removes the specified animation from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animationId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearAnimations</name>
+					<desc>Removes all of the model's animations.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LookupObjectAttachment</name>
+					<desc>Returns the id for the given object attachment, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">objAttachmentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">objAttachmentId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObjectAttachmentCount</name>
+					<desc>Returns the number of object attachments defined in the model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">objectAttachmentCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddObjectAttachment</name>
+					<desc>Adds a new object attachment to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.ObjectAttachmentType">type</arg>
+							<arg type="string">objAttachmentName</arg>
+							<arg type="string">attachmentName</arg>
+							<arg type="table">keyValues</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">objAttachmentId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObjectAttachments</name>
+					<desc>
+						Returns a table with information about all object attachments contained in this model. Each table element is another table with the following members:\n
+						* {{template_type|string}} name\n
+						* {{template_type|string}} attachment\n
+						* {{template_type|game.Model.ObjectAttachmentType}} type\n
+						* {{template_type|table}} keyvalues
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">objectAttachments</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetObjectAttachment</name>
+					<desc>
+						Returns a table with information about the specified object attachment, or nil if it doesn't exist. The table contains the following members:\n
+						* {{template_type|string}} name\n
+						* {{template_type|string}} attachment\n
+						* {{template_type|game.Model.ObjectAttachmentType}} type\n
+						* {{template_type|table}} keyvalues
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">objectAttachmentData</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveObjectAttachment</name>
+					<desc>Removes an object attachment from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">objAttachmentName</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">objAttachmentId</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LookupBlendController</name>
+					<desc>Returns the id for the given blend controller, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">blendControllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">blendControllerId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBlendControllerCount</name>
+					<desc>Returns the number of blend controllers within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">blendControllerCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBlendControllers</name>
+					<desc>
+						Returns a table with information about all blend controllers contained in this model. Each table element is another table with the following members:\n
+						* {{template_type|bool}} loop\n
+						* {{template_type|int}} min\n
+						* {{template_type|int}} max\n
+						* {{template_type|string}} name
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">blendControllers</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBlendController</name>
+					<desc>
+						Returns a table with information about the specified blend controller, or nil if it doesn't exist. The table contains the following members:\n
+						* {{template_type|bool}} loop\n
+						* {{template_type|int}} min\n
+						* {{template_type|int}} max\n
+						* {{template_type|string}} name
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">blendControllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">blendController</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">blendControllerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">blendController</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LookupBodyGroup</name>
+					<desc>Returns the id for the specified bodygroup name, or -1 if it doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">bodyGroupName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">bodyGroupId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBodyGroupId</name>
+					<desc>Returns the id associated with the body group of the given name, or -1 if the bodygroup doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">bodyGroupName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">bodyGroupId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBodyGroupCount</name>
+					<desc>Returns the number of body groups in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">bodyGroupCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>PrecacheTextureGroup</name>
+					<desc>Precaches the materials associated with the specified texture group.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">textureGroupId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>PrecacheTextureGroups</name>
+					<desc>Precaches the materials associated with all texture groups of this model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTextureGroupCount</name>
+					<desc>Returns the number of texutre groups within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">textureGroupCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTextureGroups</name>
+					<desc>Returns the model's texture groups. Each table table entry is another table containg the texture ids for the respective texture group.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="table" subSubType="int">textureGroups</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTextureGroup</name>
+					<desc>Returns the texture ids for the specified texture group, or ''nil'' if it's not a valid texture group.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">textureGroupId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="int">textureGroups</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddTextureGroup</name>
+					<desc>Adds a new texture group to the model and returns its index.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">textureGroupId</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetReferencePose</name>
+				<desc>Returns the reference pose of this model. All bone positions and rotations of the reference pose are in entity space (Not relative to their respective parents).</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Model.Animation.Frame">referencePose</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetBaseMeshGroupIds</name>
+					<desc>Returns a table of ids representing the base mesh groups of this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="int">baseMeshGroupIds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBaseMeshGroupIds</name>
+					<desc>Changes the base mesh group ids for this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table" subType="int">baseMeshGroupIds</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddBaseMeshGroupId</name>
+					<desc>Adds a base mesh group.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">meshGroupId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMeshGroupId</name>
+					<desc>Returns the mesh group id for the specified body group. -1 is returned if no mesh group exists for this bodygroup.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">bodyGroupId</arg>
+							<arg type="int">partId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMeshGroup</name>
+					<desc>Returns the mesh group with the given name/id.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">meshGroupName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.MeshGroup">meshGroup</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">meshGroupId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.MeshGroup">meshGroup</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMeshGroups</name>
+					<desc>Returns a list of all mesh groups in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="game.Model.MeshGroup">meshGroups</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddMeshGroup</name>
+					<desc>Adds/Creates a new mesh group for this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">meshGroupName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.MeshGroup">meshGroup</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="game.Model.MeshGroup">meshGroup</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMeshGroupCount</name>
+					<desc>Returns the number of mesh groups in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">meshGroupCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearMeshGroups</name>
+					<desc>Removes all mesh groups from the model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveMeshGroup</name>
+					<desc>Removes the specified mesh group from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">meshGroupId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearBaseMeshGroupIds</name>
+					<desc>Clears all assigned base mesh groups for this model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMeshes</name>
+					<desc>Returns all meshes from the specified mesh group(s).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">meshGroupName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="game.Model.Mesh">meshes</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="table" subType="int">meshGroupId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="game.Model.Mesh">meshes</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMeshCount</name>
+					<desc>Returns the number of meshes in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">meshCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSubMeshCount</name>
+					<desc>Returns the number of sub-meshes in this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">subMeshCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>UpdateRenderBounds</name>
+					<desc>Recalculates the render bounds for this model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRenderBounds</name>
+					<desc>Returns the render bounds for this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRenderBounds</name>
+					<desc>Changes the render bounds for this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Update</name>
+				<desc>Updates the specified data for this model.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model.FUpdate" default="game.Model.FUPDATE_ALL_DATA">updateFlags</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetName</name>
+				<desc>Returns the name of this model.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">name</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMass</name>
+					<desc>Returns the mass of this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">mass</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMass</name>
+					<desc>Changes the mass of this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">mass</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>AddMaterial</name>
+					<desc>Adds a new material to the specified texture group of the model and returns its index.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">textureGroup</arg>
+							<arg type="game.Material">material</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">materialId</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">textureGroup</arg>
+							<arg type="string">materialName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">materialId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMaterial</name>
+					<desc>Replaces the specified material.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">materialId</arg>
+							<arg type="game.Material">material</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaterials</name>
+					<desc>Returns a table of all materials associated with this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="game.Material">materials</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaterialCount</name>
+					<desc>Returns the number of materials within this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">materialCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>AddHitbox</name>
+					<desc>Adds a new hitbox to the model (Or overwrites an existing one).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="game.Hitgroup">hitGroup</arg>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetHitboxCount</name>
+					<desc>Returns the number of hitboxes associated with this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">hitBoxCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetHitboxGroup</name>
+					<desc>Returns the hitbox group associated with the hitbox of the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Hitgroup">hitboxGroup</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetHitboxBounds</name>
+					<desc>Returns the bounds of the hitbox associated with the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetHitboxBones</name>
+					<desc>Returns a table of bone ids that have a hitbox attached to them.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Hitgroup">hitGroup</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="int">min</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="int">min</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetHitboxGroup</name>
+					<desc>Changes the hitbox group associated with the hitbox of the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="game.Hitgroup">hitGroup</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetHitboxBounds</name>
+					<desc>Changes the bounds of the hitbox associated with the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveHitbox</name>
+					<desc>Removes the hitbox associated with the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Save</name>
+					<desc>Saves the model as a file at the specified path and returns ''true'' on success.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">fileName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Copy</name>
+					<desc>Creates a copy of the model. Depending on the specified flags, the animations and meshes will be copied by reference (shallow) or value (deep).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.CopyFlags" default="game.Model.FCOPY_SHALLOW">copyFlags</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model">model</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetVertexCount</name>
+				<desc>Returns the number of vertices within this model.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">vertexCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetTriangleCount</name>
+				<desc>Returns the number of triangles within this model.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">triangleCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMaterialNames</name>
+					<desc>Returns the textures associated with this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">textures</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaterialPaths</name>
+					<desc>Returns the material paths associated with this model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">materialPaths</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LoadMaterials</name>
+					<desc>Loads the materials associated with the primary skin of this model. If ''bReload'' is set to ''true'', all materials and textures will be reloaded, otherwise they will be skipped if they already have been loaded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">reload</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddMaterialPath</name>
+					<desc>Adds a new path (Relative to the ''materials/''-directory) to the model, which it will use when looking for its textures.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">materialPath</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveMaterialPath</name>
+					<desc>Removes the specified material path from the model. Texture groups will be updated appropriately.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">materialPathIndex</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetMaterialPaths</name>
+					<desc>Changes the material paths of the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table" subType="string">materialPaths</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveMaterial</name>
+					<desc>Removes the specified material reference from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">materialIndex</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearMaterials</name>
+					<desc>Removes all texture references from the model.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Rotate</name>
+					<desc>Rotates all components (Meshes, Animations, etc.) of this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Translate</name>
+					<desc>Translates all components (Meshes, Animations, etc.) of this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">translation</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetEyeOffset</name>
+					<desc>Returns the model's eye offset.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">eyeOffset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetEyeOffset</name>
+					<desc>Changes the model's eye offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">eyeOffset</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<!--<function type="method" shared="1">
+				<name>ClipAgainstPlane</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">planeNormal</arg>
+						<arg type="float">planeDistance</arg>
+						<arg type="game.Model">clippedModelA</arg>
+						<arg type="game.Model">clippedModelB</arg>
+					</parameters>
+				</overload>
+			</function>-->
+			<function type="method" shared="1">
+				<name>Merge</name>
+				<desc>Merges the specified model with this one. The specified model will be unaffected by this operation.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model">model</arg>
+						<arg type="game.Model.FMerge" default="game.Model.FMERGE_ALL">mergeFlags</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetLODCount</name>
+					<desc>Returns the LOD count of the model.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">lodCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLODData</name>
+					<desc>
+						Returns a table with information about all LODs contained in this model. Each table element is another table with the following members:\n
+						* {{template_type|int}} lod\n
+						* {{template_type|table}} meshGroupReplacements
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="table">lods</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLODData</name>
+					<desc>
+						Returns information about the specified LOD. The returned table has the following members:\n
+						* {{template_type|int}} lod\n
+						* {{template_type|table}} meshGroupReplacements
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">lodIndex</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">lods</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLOD</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">lod</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>TranslateLODMeshes</name>
+					<desc>Returns the mesh group ids for the specified lod to their respective variants for the lod.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">lod</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="int">meshGroupIds</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">lod</arg>
+							<arg type="table" subType="int">meshGroupIds</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="int">meshGroupIds</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetJoints</name>
+				<desc>Returns the model's joints.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="table" subType="game.Model.Joint">joints</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetVertexAnimations</name>
+					<desc>Returns the model's vertex animations.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="game.Model.VertexAnimation">vertexAnimations</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetVertexAnimation</name>
+					<desc>Returns the vertex animation associated with the specified name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">vertexAnimName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.VertexAnimation">vertexAnimation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddVertexAnimation</name>
+					<desc>Adds a new vertex animation to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">vertexAnimName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.VertexAnimation">vertexAnimation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveVertexAnimation</name>
+					<desc>Removes the specified vertex animation from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">vertexAnimName</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetFlexControllers</name>
+					<desc>
+						Returns a table with information about all flex controllers contained in this model. Each table element is another table with the following members:\n
+						* {{template_type|string}} name\n
+						* {{template_type|float}} min\n
+						* {{template_type|float}} max
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="table">flexControllers</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFlexController</name>
+					<desc>
+						Returns a table with information about the specified flex controller. The table contains the following members:\n
+						* {{template_type|string}} name\n
+						* {{template_type|float}} min\n
+						* {{template_type|float}} max
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">flexControllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">flexController</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">flexControllerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table">flexController</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LookupFlexController</name>
+					<desc>Returns the id for the given flex controller, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">flexControllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">flexControllerId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFlexes</name>
+					<desc>Returns the model's flexes.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">flexes</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LookupFlex</name>
+					<desc>Returns the id for the given flex, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">flexName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">flexId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFlexFormula</name>
+					<desc>Returns the flex formula for the specified flex.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">flexName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">flexFormula</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">flexId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">flexFormula</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetIKControllers</name>
+					<desc>Returns the model's ik controllers.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="phys.IKController">ikControllers</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetIKController</name>
+					<desc>Returns the specified ik controller.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">ikControllerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="phys.IKController">ikControllers</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LookupIKController</name>
+					<desc>Returns the id for the given ik controller, or -1 if none with that name was found.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">ikControllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">ikControllerId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddIKController</name>
+					<desc>Adds a new ik controller to the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">ikControllerName</arg>
+							<arg type="int">chainLength</arg>
+							<arg type="string">type</arg>
+							<arg type="phys.IkMethod" default="phys.IK_METHOD_DEFAULT">method</arg>
+						</parameters>
+						<returnValues>
+							<arg type="phys.IKController">ikController</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveIKController</name>
+					<desc>Removes the specified ik controller from the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">ikControllerName</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">ikControllerId</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>AddIncludeModel</name>
+					<desc>Adds a model which should be included in this model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">includeModel</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetIncludeModels</name>
+					<desc>Returns the models this model should include.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">includeModels</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetPhonemeMap</name>
+					<desc>Returns the phoneme map of this model, or ''nil'' if it doesn't have one.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table">phonemeMap</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetPhonemeMap</name>
+					<desc>Changes the phoneme map for the model.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table">phonemeMap</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>GetVertexAnimationBuffer</name>
+				<desc>Returns the model's vertex animation buffer.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Buffer">vertexAnimationBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- clientside -->
+			<enum_set type="flags">
+				<name>FMerge</name>
+				<enum value="0">FMERGE_NONE</enum>
+				<enum value="1" type="bit">FMERGE_ANIMATIONS</enum>
+				<enum value="2" type="bit">FMERGE_ATTACHMENTS</enum>
+				<enum value="4" type="bit">FMERGE_BLEND_CONTROLLERS</enum>
+				<enum value="8" type="bit">FMERGE_HITBOXES</enum>
+				<enum value="16" type="bit">FMERGE_JOINTS</enum>
+				<enum value="32" type="bit">FMERGE_COLLISION_MESHES</enum>
+				<enum value="64" type="bit">FMERGE_MESHES</enum>
+				<enum value="127">FMERGE_ALL</enum>
+			</enum_set>
+			<enum_set type="flags">
+				<name>FCopy</name>
+				<enum value="0">FCOPY_NONE</enum>
+				<enum value="0">FCOPY_SHALLOW</enum>
+				<enum value="1" type="bit">FCOPY_BIT_MESHES</enum>
+				<enum value="2" type="bit">FCOPY_BIT_ANIMATIONS</enum>
+				<enum value="4" type="bit">FCOPY_BIT_VERTEX_ANIMATIONS</enum>
+				<enum value="8" type="bit">FCOPY_BIT_COLLISION_MESHES</enum>
+				<enum value="15">FCOPY_DEEP</enum>
+			</enum_set>
+			<enum_set type="flags">
+				<name>FUpdate</name>
+				<enum value="0">FUPDATE_NONE</enum>
+				<enum value="1" type="bit">FUPDATE_BOUNDS</enum>
+				<enum value="2" type="bit">FUPDATE_PRIMITIVE_COUNTS</enum>
+				<enum value="4" type="bit">FUPDATE_COLLISION_SHAPES</enum>
+				<enum value="8" type="bit">FUPDATE_TANGENTS</enum>
+				<enum value="16" type="bit">FUPDATE_VERTEX_BUFFER</enum>
+				<enum value="32" type="bit">FUPDATE_INDEX_BUFFER</enum>
+				<enum value="64" type="bit">FUPDATE_WEIGHT_BUFFER</enum>
+				<enum value="128" type="bit">FUPDATE_ALPHA_BUFFER</enum>
+				<enum value="256" type="bit">FUPDATE_VERTEX_ANIMATION_BUFFER</enum>
+				<enum value="512" type="bit">FUPDATE_CHILDREN</enum>
+				<enum value="496">FUPDATE_BUFFERS</enum>
+				<enum value="1023">FUPDATE_ALL</enum>
+				<enum value="527">FUPDATE_ALL_DATA</enum>
+			</enum_set>
+			<enum_set>
+				<name>ObjectAttachmentType</name>
+				<enum value="0">OBJECT_ATTACHMENT_TYPE_MODEL</enum>
+				<enum value="1">OBJECT_ATTACHMENT_TYPE_PARTICLE_SYSTEM</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

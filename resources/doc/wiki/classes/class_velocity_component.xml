@@ -1,0 +1,154 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>VelocityComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetVelocity</name>
+					<desc>Returns the entity's velocity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">velocity</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetVelocity</name>
+					<desc>Changes the entity's velocity to the specified vector. If the entity is networked, the velocity will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddVelocity</name>
+					<desc>Adds the specified vector to the entity's velocity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetVelocityProperty</name>
+					<desc>Returns the velocity property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">velocityProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLocalVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:GetVelocity[/pragma:ref], but returns the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">velocity</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetLocalVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:SetVelocity[/pragma:ref], but changes the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddLocalVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:AddVelocity[/pragma:ref], but adds the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetAngularVelocity</name>
+					<desc>Returns the entity's angular velocity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">velocity</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAngularVelocity</name>
+					<desc>Changes the entity's angular velocity to the specified vector. If the entity is networked, the angular velocity will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddAngularVelocity</name>
+					<desc>Adds the specified vector to the entity's angular velocity. If the entity is networked, the angular velocity will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLocalAngularVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:GetAngularVelocity[/pragma:ref], but returns the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">velocity</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetLocalAngularVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:SetAngularVelocity[/pragma:ref], but changes the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddLocalAngularVelocity</name>
+					<desc>Same as [pragma:ref]ents.VelocityComponent:AddAngularVelocity[/pragma:ref], but adds the velocity local to the entity's rotation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">velocity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAngularVelocityProperty</name>
+					<desc>Returns the angular velocity property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">angularVelocityProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

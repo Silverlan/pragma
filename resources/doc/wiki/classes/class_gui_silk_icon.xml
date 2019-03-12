@@ -1,0 +1,32 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>SilkIcon</name>
+			<derivedFrom>
+				<name>gui.Icon</name>
+				<derivedFrom>
+					<name>gui.TexturedShape</name>
+					<derivedFrom>
+						<name>gui.Shape</name>
+						<derivedFrom>gui.Element</derivedFrom>
+					</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>SetIcon</name>
+				<desc>Changes the icon of this element. You can find a list of all available silk icons [[Media:Index_silkicons.png|here]].</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">xStart</arg>
+						<arg type="int">yStart</arg>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

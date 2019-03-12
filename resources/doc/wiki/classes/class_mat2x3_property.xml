@@ -1,0 +1,141 @@
+<root>
+	<collection type="library">
+		<name>util</name>
+		<collection type="class" gui="1">
+			<name>Mat2x3Property</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new Mat2x3Property object.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Mat2x3">matrix</arg>
+					</parameters>
+					<returnValues>
+						<arg type="util.Mat2x3Property">matProperty</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="util.Mat2x3Property">matProperty</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the property to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">property</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- Generic methods -->
+			<group>
+				<function type="method" shared="1">
+					<name>AddCallback</name>
+					<desc>
+						Adds a new callback to this property which will be called whenever the property's value changes. The syntax for ''callback'' is:\n
+						{{template_overload|{{template_type|void}}|callback|{{template_param|math.Mat2x3}} oldValue,{{template_param|math.Mat2x3}} newValue}}
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="function">callback</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Callback">callbackObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>AddModifier</name>
+					<desc>
+						Adds a new modifier to this property which will be called before the property's value changes. Use this function to appliy changes to the value before it is applied. The syntax for ''modifier'' is:\n
+						{{template_overload|{{template_type|math.Mat2x3}}|callback|{{template_param|math.Mat2x3}} value}}
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="function">modifier</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Callback">callbackObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>InvokeCallbacks</name>
+					<desc>Invokes all registered callbacks for this property.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Get</name>
+					<desc>Returns the value of this property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat2x3">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Set</name>
+					<desc>Changes the value of this property.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat2x3">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetLocked</name>
+					<desc>Locks or unlocks this property. If the property is locked, its value cannot be changed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">locked</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsLocked</name>
+					<desc>Returns ''true'' if the property is locked.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">locked</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<!-- Generic methods -->
+			<group>
+				<function type="method" shared="1">
+					<name>Link</name>
+					<desc>Links this property to the specified property and clears the previous existing link (if there is one). This property's value will change whenever the value of ''otherProperty'' changes.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.Mat2x3Property">property</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Unlink</name>
+					<desc>Clears this property's link if there is one.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

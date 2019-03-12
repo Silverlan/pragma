@@ -1,0 +1,83 @@
+<root>
+	<collection type="library" gui="1">
+		<name>os</name>
+		<desc>TODO</desc>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>clock</name>
+				<desc>Return CPU time since Lua started in seconds.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-os.clock</url>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">clock</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>date</name>
+				<desc></desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-os.date</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">format</arg>
+						<arg type="float">time</arg>
+					</parameters>
+					<returnValues>
+						<arg type="string">date</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">format</arg>
+					</parameters>
+					<returnValues>
+						<arg type="string">date</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<returnValues>
+						<arg type="string">date</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>difftime</name>
+				<desc>Calculate the number of seconds between time t1 to time t2.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-os.difftime</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">t1</arg>
+						<arg type="float">t2</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">diffTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>time</name>
+				<desc>Given a formatted date table, as used by os.date() return the time in system seconds.</desc>
+				<url>http://www.lua.org/manual/5.3/manual.html#pdf-os.time</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="table">t</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">time</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<enum_set type="generic_constants" underlying_type="bool" gui="1">
+			<name>System</name>
+			<enum>SYSTEM_WINDOWS</enum>
+			<enum>SYSTEM_LINUX</enum>
+			<enum value="false">SYSTEM_X86</enum>
+			<enum value="true">SYSTEM_X64</enum>
+		</enum_set>
+	</collection>
+</root>

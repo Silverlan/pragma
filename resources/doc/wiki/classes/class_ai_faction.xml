@@ -1,0 +1,169 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class" server="1">
+			<name>Faction</name>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" server="1">
+					<name>AddClass</name>
+					<desc>Adds the specified NPC class to this faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">className</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>GetClasses</name>
+					<desc>Returns a table of all NPC classes that are part of this faction.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">className</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" server="1">
+					<name>SetDisposition</name>
+					<desc>Changes the disposition between this faction and the target faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+							<arg type="ai.Disposition">disposition</arg>
+							<arg type="bool" default="false">revert</arg>
+							<arg type="int" default="0">priority</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>GetDisposition</name>
+					<desc>Returns the faction's disposition to the specified target, as well as the priority.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ai.Disposition">disposition</arg>
+							<arg type="int">priority</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">className</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ai.Disposition">disposition</arg>
+							<arg type="int">priority</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ai.Disposition">disposition</arg>
+							<arg type="int">priority</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetEnemyFaction</name>
+					<desc>Marks the target faction as an enemy faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+							<arg type="bool" default="false">revert</arg>
+							<arg type="int" default="0">priority</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetAlliedFaction</name>
+					<desc>Marks the target faction as an allied faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+							<arg type="bool" default="false">revert</arg>
+							<arg type="int" default="0">priority</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetNeutralFaction</name>
+					<desc>Marks the target faction as a neutral faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+							<arg type="bool" default="false">revert</arg>
+							<arg type="int" default="0">priority</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetFearsomeFaction</name>
+					<desc>Marks the target faction as a fearsome faction.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Faction">faction</arg>
+							<arg type="bool" default="false">revert</arg>
+							<arg type="int" default="0">priority</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetDefaultDisposition</name>
+					<desc>Changes the faction's default disposition to targets which haven't explicitely been specified otherwise.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ai.Disposition">disposition</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>GetDefaultDisposition</name>
+					<desc>Returns the faction's default disposition.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ai.Disposition">disposition</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" server="1">
+				<name>HasClass</name>
+				<desc>Returns ''true'' if the specified class is within this faction.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">className</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">hasClass</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>GetName</name>
+				<desc>Returns the faction's name.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">name</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

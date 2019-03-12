@@ -1,0 +1,475 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>CollisionMesh</name>
+				<desc>TODO</desc>
+				<group>
+					<function type="function" shared="1">
+						<name>Create</name>
+						<desc>Returns a new collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="game.Model.CollisionMesh">collisionMesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>CreateBox</name>
+						<desc>Returns a new box-shaped collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.CollisionMesh">collisionMesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Copy</name>
+					<desc>Returns a copy of this collision mesh.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.CollisionMesh">copy</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>GetVertices</name>
+						<desc>Returns a table containing the vertices of this collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="math.Vector">vertices</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddVertex</name>
+						<desc>Adds a new vertex to the collision mesh. The internal bounds and physics shape won't be updated until [pragma:ref]game.Model.CollisionMesh:Update[/pragma:ref] is called.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">vertex</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddTriangle</name>
+						<desc>Adds a new triangle to the collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">idx0</arg>
+								<arg type="int">idx1</arg>
+								<arg type="int">idx2</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetVertices</name>
+						<desc>Changes the vertices of the collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="math.Vector">vertices</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetTriangles</name>
+						<desc>Changes the triangles of the collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="int">triangles</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearVertices</name>
+						<desc>Clears the vertices of this collision mesh.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearTriangles</name>
+						<desc>Clears the triangles of this collision mesh.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetVertexCount</name>
+						<desc>Returns the number of vertices in this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">vertexCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetAABB</name>
+						<desc>Returns the AABB bounds encompassing this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>IntersectAABB</name>
+						<desc>Returns true if the mesh intersects with the specified AABB.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</parameters>
+							<returnValues>
+								<arg type="bool">intersects</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetAABB</name>
+						<desc>Changes the AABB bounds of this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetBoneParentId</name>
+						<desc>Returns the Id of the bone this mesh is attached to, or -1 if it's not attached to a bone.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">boneParentId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetBoneParentId</name>
+						<desc>Changes the mesh's bone parent.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneParentId</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetOrigin</name>
+						<desc>Returns the local origin offset of this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="math.Vector">origin</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetOrigin</name>
+						<desc>Changes the mesh's origin.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">origin</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>GetShape</name>
+					<desc>Returns the underlying physics shape of this mesh (or nil if there isn't one).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.Shape">shape</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>GetSurfaceMaterialId</name>
+						<desc>Returns the main surface material Id of this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">surfaceMaterialId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetSurfaceMaterialIds</name>
+						<desc>Returns the surface material Ids of this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="int">surfaceMaterialId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetSurfaceMaterialId</name>
+						<desc>Changes the mesh's main surface material.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">surfaceMaterialId</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>IsConvex</name>
+						<desc>Returns true if the mesh is convex.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="bool">isConvex</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetConvex</name>
+						<desc>Changes whether this mesh is marked as convex.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="bool">convex</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Update</name>
+					<desc>Recalculates the mesh's bounds and updates its physics shape.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>Rotate</name>
+						<desc>Rotates all vertices of this collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Quaternion">rotation</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>Translate</name>
+						<desc>Translates all vertices of this collision mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">translation</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>GetTriangles</name>
+					<desc>Returns the triangles for this collision mesh. The returned table may be empty.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="int">triangles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClipAgainstPlane</name>
+					<desc>Clips this mesh against the specified plane and writes the resulting clipped meshes into ''clippedMeshA'' and ''clippedMeshB''.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">planeNormal</arg>
+							<arg type="float">planeDistance</arg>
+							<arg type="game.Model.CollisionMesh">clippedMeshA</arg>
+							<arg type="game.Model.CollisionMesh">clippedMeshB</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Centralize</name>
+					<desc>Moves all vertices so that the average of all vertices is the new center.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>GetVolume</name>
+						<desc>Returns the mesh's volume.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="float">volume</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetVolume</name>
+						<desc>Changes the mesh's volume.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="float">volume</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>SetSoftBody</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="bool">softBody</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>IsSoftBody</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="bool">softBody</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetSoftBodyMesh</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">softBodyMesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetSoftBodyMesh</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Mesh.Sub">softBodyMesh</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetSoftBodyInfo</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="phys.SoftBodyInfo">softBodyInfo</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetSoftBodyTriangles</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="int">softBodyTriangles</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetSoftBodyTriangles</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="int">softBodyTriangles</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddSoftBodyAnchor</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">vertexIndex</arg>
+								<arg type="int">boneIndex</arg>
+								<arg type="game.Model.CollisionMesh.FSoftBodyAnchor" default="game.Model.CollisionMesh.FSOFTBODY_ANCHOR_NONE">flags</arg>
+								<arg type="float" default="1.0">influence</arg>
+							</parameters>
+							<returnValues>
+								<arg type="int">anchorIndex</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>RemoveSoftBodyAnchor</name>
+						<desc>Removes the specified soft-body anchor.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">anchorIndex</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearSoftBodyAnchors</name>
+						<desc>Clears all soft-body anchors.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetSoftBodyAnchors</name>
+						<desc>
+							Returns the soft-body anchors of the collision mesh. Each anchor is another table with the following members:\n
+							* {{template_type|int}} vertexIndex\n
+							* {{template_type|int}} boneId\n
+							* {{template_type|float}} influence\n
+							* {{template_type|game.Model.CollisionMesh.FSoftBodyAnchor}} flags
+						</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table">anchors</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<enum_set type="flags">
+					<name>FSoftBodyAnchor</name>
+					<enum value="0">FSOFTBODY_ANCHOR_NONE</enum>
+					<enum value="1" type="bit">FSOFTBODY_ANCHOR_RIGID</enum>
+					<enum value="2" type="bit">FSOFTBODY_ANCHOR_DISABLE_COLLISIONS</enum>
+				</enum_set>
+			</collection>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,86 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>MeshGroup</name>
+				<desc>TODO</desc>
+				<function type="method" shared="1">
+					<name>operator==</name>
+					<desc>Checks if this mesh group is the same as the specified one.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.MeshGroup">meshGroup</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">equal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetName</name>
+					<desc>Returns the name of this mesh group.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">name</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>GetMeshes</name>
+						<desc>Returns the meshes of this mesh group.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Mesh">meshes</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddMesh</name>
+						<desc>Adds a mesh to this mesh group.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Mesh">mesh</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearMeshes</name>
+						<desc>Clears the meshes of the mesh group.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetMeshes</name>
+						<desc>Changes the meshes of the mesh group.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="game.Model.Mesh">meshes</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="function" shared="1">
+					<name>Create</name>
+					<desc>Creates a new mesh group.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="game.Model.MeshGroup">meshGroup</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</collection>
+		</collection>
+	</collection>
+</root>

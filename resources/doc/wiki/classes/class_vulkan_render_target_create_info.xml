@@ -1,0 +1,24 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>RenderTargetCreateInfo</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new RenderTargetCreateInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.RenderTargetCreateInfo">renderTargetCreateInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="bool" mode="rw">
+				<name>useLayerFramebuffers</name>
+				<desc>If set to ''true'', a framebuffer will be created for each layer of the render target.</desc>
+				<default>false</default>
+			</member>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,122 @@
+<root>
+	<collection type="library">
+		<name>math</name>
+		<collection type="class" gui="1">
+			<name>Transform</name>
+			<desc>A transform object representing a position, rotation and scale.</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetScale</name>
+					<desc>Returns the scale of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetScale</name>
+					<desc>Changes the scale of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPosition</name>
+					<desc>Returns the position of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">pos</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetPosition</name>
+					<desc>Changes the position of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">pos</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRotation</name>
+					<desc>Returns the rotation of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rot</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRotation</name>
+					<desc>Changes the rotation of this transform object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">rot</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetTransformationMatrix</name>
+				<desc>Returns the transformation matrix of this transform object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Mat4">transform</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>UpdateMatrix</name>
+				<desc>Updates the transformation matrix of this object.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new Transform object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Transform">transform</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">pos</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Transform">transform</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Quaternion">rot</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Transform">transform</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">pos</arg>
+						<arg type="math.Quaternion">rot</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Transform">transform</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

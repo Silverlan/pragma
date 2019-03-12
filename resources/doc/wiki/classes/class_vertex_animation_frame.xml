@@ -1,0 +1,64 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>VertexAnimation</name>
+				<collection type="class">
+					<name>MeshAnimation</name>
+					<collection type="class">
+						<name>Frame</name>
+						<desc>TODO</desc>
+						<group>
+							<function type="method" shared="1">
+								<name>GetVertices</name>
+								<desc>Returns the vertices of this frame.</desc>
+								<lua></lua>
+								<overload>
+									<returnValues>
+										<arg type="table" subType="math.Vector">vertices</arg>
+									</returnValues>
+								</overload>
+							</function>
+							<function type="method" shared="1">
+								<name>SetVertexCount</name>
+								<desc>Specifies the number of vertices in this frame.</desc>
+								<lua></lua>
+								<overload>
+									<parameters>
+										<arg type="int">vertexCount</arg>
+									</parameters>
+								</overload>
+							</function>
+							<function type="method" shared="1">
+								<name>SetVertexPosition</name>
+								<desc>Changes the position of the specified vertex.</desc>
+								<lua></lua>
+								<overload>
+									<parameters>
+										<arg type="int">vertexIndex</arg>
+										<arg type="math.Vector">position</arg>
+									</parameters>
+								</overload>
+							</function>
+							<function type="method" shared="1">
+								<name>GetVertexPosition</name>
+								<desc>Returns the position of the specified vertex.</desc>
+								<lua></lua>
+								<overload>
+									<parameters>
+										<arg type="int">vertexIndex</arg>
+									</parameters>
+									<returnValues>
+										<arg type="math.Vector">position</arg>
+									</returnValues>
+								</overload>
+							</function>
+						</group>
+					</collection>
+				</collection>
+			</collection>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,24 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>IteratorFilterSphere</name>
+			<derivedFrom>ents.IteratorFilter</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new iterator filter object.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">origin</arg>
+						<arg type="float">radius</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.IteratorFilterSphere">filter</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

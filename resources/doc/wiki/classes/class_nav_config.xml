@@ -1,0 +1,149 @@
+<root>
+	<collection type="library">
+		<name>nav</name>
+		<collection type="class">
+			<name>Config</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new nav config object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="nav.Config">navConfig</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">walkableRadius</arg>
+						<arg type="float">characterHeight</arg>
+						<arg type="float">maxClimbHeight</arg>
+						<arg type="float">walkableSlopeAngle</arg>
+					</parameters>
+					<returnValues>
+						<arg type="nav.Config">navConfig</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="float" mode="rw">
+				<name>walkableRadius</name>
+				<desc>
+					The distance to erode/shrink the walkable area of the heightfield away from obstructions.\n
+					[Limit: &gt;=0]\n
+					In general, this is the closest any part of the final mesh should get to an obstruction in the source geometry. It is usually set to the maximum agent radius.\n
+					While a value of zero is legal, it is not recommended and can result in odd edge case issues.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>characterHeight</name>
+				<desc>
+					Minimum floor to 'ceiling' height that will still allow the floor area to be considered walkable.\n
+					[Limit: &gt;= 3]\n
+					Permits detection of overhangs in the source geometry that make the geometry below un-walkable. The value is usually set to the maximum agent height.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>maxClimbHeight</name>
+				<desc>
+					Maximum ledge height that is considered to still be traversable. [Limit: &gt;=0]\n
+					Allows the mesh to flow over low lying obstructions such as curbs and up/down stairways. The value is usually set to how far up/down an agent can step.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>walkableSlopeAngle</name>
+				<desc>
+					The maximum slope that is considered walkable. [Limits: 0 &lt;= value &lt; 90] [Units: Degrees].\n
+					The practical upper limit for this parameter is usually around 85 degrees.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>maxEdgeLength</name>
+				<desc>
+					The maximum allowed length for contour edges along the border of the mesh. [Limit: &gt;=0].\n
+					Extra vertices will be inserted as needed to keep contour edges below this length. A value of zero effectively disables this feature.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>maxSimplificationError</name>
+				<desc>
+					The maximum distance a simplfied contour's border edges should deviate the original raw contour. [Limit: &gt;=0]\n
+					The effect of this parameter only applies to the xz-plane.
+				</desc>
+				<default>1.3</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>minRegionSize</name>
+				<desc>
+					The minimum number of cells allowed to form isolated island areas. [Limit: &gt;=0]\n
+					Any regions that are smaller than this area will be marked as unwalkable. This is useful in removing useless regions that can sometimes form on geometry such as table tops, box tops, etc.
+				</desc>
+				<default>8</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>mergeRegionSize</name>
+				<desc>
+					Any regions with a span count smaller than this value will, if possible, be merged with larger regions. [Limit: &gt;=0]
+				</desc>
+				<default>20</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>cellSize</name>
+				<desc>
+					The xz-plane cell size to use for fields. [Limit: > 0]\n
+					cs and ch define voxel/grid/cell size. So their values have significant side effects on all parameters defined in voxel units.\n
+					The minimum value for this parameter depends on the platform's floating point accuracy, with the practical minimum usually around 0.05.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>cellHeight</name>
+				<desc>
+					The y-axis cell size to use for fields. [Limit: > 0]\n
+					cs and ch define voxel/grid/cell size. So their values have significant side effects on all parameters defined in voxel units.\n
+					The minimum value for this parameter depends on the platform's floating point accuracy, with the practical minimum usually around 0.05.
+				</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>vertsPerPoly</name>
+				<desc>
+					The maximum number of vertices allowed for polygons generated during the contour to polygon conversion process. [Limit: >= 3]\n
+					If the mesh data is to be used to construct a Detour navigation mesh, then the upper limit is limited to &lt;= DT_VERTS_PER_POLYGON.
+				</desc>
+				<default>6.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>sampleDetailDist</name>
+				<desc>
+					Sets the sampling distance to use when generating the detail mesh.\n
+					(For height detail only.) [Limits: 0 or >= 0.9] [Units: wu]
+				</desc>
+				<default>60.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>sampleDetailMaxError</name>
+				<desc>
+					The maximum distance the detail mesh surface should deviate from heightfield data.\n
+					(For height detail only.) [Limit: >=0] [Units: wu]
+				</desc>
+				<default>1.0</default>
+			</member>
+			<member type="nav.Config.PartitionType" mode="rw">
+				<name>samplePartitionType</name>
+				<desc></desc>
+				<default>nav.Config.PARTITION_TYPE_WATERSHED</default>
+			</member>
+			<enum_set>
+				<name>PartitionType</name>
+				<enum value="0">PARTITION_TYPE_WATERSHED</enum>
+				<enum value="1">PARTITION_TYPE_MONOTONE</enum>
+				<enum value="2">PARTITION_TYPE_LAYERS</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

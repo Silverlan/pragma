@@ -1,0 +1,86 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>LightComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<!-- clientside -->
+			<group>
+				<function type="method" client="1">
+					<name>SetShadowType</name>
+					<desc>Changes the light's shadow type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.LightComponent.ShadowType">shadowType</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetShadowType</name>
+					<desc>Returns the light's shadow type.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.LightComponent.ShadowType">shadowType</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>UpdateBuffers</name>
+				<desc>Updates the light's buffers.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetAddToGameScene</name>
+				<desc>If set to ''true'', the light will automatically be added to the primary game scene.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">addToGameScene</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetFalloffExponent</name>
+					<desc>Returns the falloff exponent of the light source.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">falloffExponent</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetFalloffExponent</name>
+					<desc>Changes the falloff exponent of the light source.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">falloffExponent</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<enum_set type="flags" client="1">
+				<name>ShadowType</name>
+				<enum value="0">SHADOW_TYPE_NONE</enum>
+				<enum value="1" type="bit">SHADOW_TYPE_STATIC_ONLY</enum>
+				<enum value="3" type="bit">SHADOW_TYPE_FULL</enum>
+			</enum_set>
+			<enum_set client="1">
+				<name>Event</name>
+				<enum>EVENT_SHOULD_PASS_ENTITY</enum>
+				<enum>EVENT_SHOULD_PASS_ENTITY_MESH</enum>
+				<enum>EVENT_SHOULD_PASS_MESH</enum>
+				<enum>EVENT_SHOULD_UPDATE_RENDER_PASS</enum>
+				<enum>EVENT_GET_TRANSFORMATION_MATRIX</enum>
+			</enum_set>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,107 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class" gui="1">
+			<name>Material</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>IsValid</name>
+				<desc>Returns true if this material is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetShaderName</name>
+				<desc>Returns the name of the shader associated with this material, or en empty string if it doesn't have a shader assigned.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">shaderName</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetName</name>
+				<desc>Returns the name of the material (Usually the path to the material file).</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">materialName</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>IsTranslucent</name>
+				<desc>Returns ''true'' if the material has a ''$translucent'' parameter set to ''true''.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">translucent</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetDataBlock</name>
+				<desc>Returns the root data-block of the material.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="util.DataBlock">rootDataBlock</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>SetTexture</name>
+				<desc>Changes a texture of the material.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+						<arg type="string">textureName</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+						<arg type="util.Texture">texture</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+						<arg type="vulkan.Texture">texture</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetTextureInfo</name>
+				<desc>Changes a texture of the material.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+					</parameters>
+					<returnValues>
+						<arg type="util.TextureInfo">textureInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetData</name>
+				<desc>Returns the root data block of the material.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="util.DataBlock">dataBlock</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

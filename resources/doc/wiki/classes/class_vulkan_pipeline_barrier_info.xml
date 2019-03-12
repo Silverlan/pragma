@@ -1,0 +1,30 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>PipelineBarrierInfo</name>
+			<desc>TODO</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdPipelineBarrier.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new PipelineBarrierInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.PipelineBarrierInfo">pipelineBarrierInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="vulkan.PipelineStage" mode="rw">
+				<name>srcStageMask</name>
+				<desc>A bitmask of vk.PipelineStage flags specifying the source stage mask.</desc>
+				<default>vulkan.PIPELINE_STAGE_ALL_COMMANDS_BIT</default>
+			</member>
+			<member type="vulkan.PipelineStage" mode="rw">
+				<name>dstStageMask</name>
+				<desc>A bitmask of vk.PipelineStage flags specifying the destination stage mask.</desc>
+				<default>vulkan.PIPELINE_STAGE_ALL_COMMANDS_BIT</default>
+			</member>
+		</collection>
+	</collection>
+</root>

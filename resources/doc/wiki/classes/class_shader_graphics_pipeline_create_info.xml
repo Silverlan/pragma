@@ -1,0 +1,1063 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>GraphicsPipelineCreateInfo</name>
+			<derivedFrom>shader.BasePipelineCreateInfo</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>SetBlendingProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4">blendingProperties</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetBlendingProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector4">blendingProperties</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetCommonAlphaBlendProperties</name>
+					<desc>Enables generic alpha for this pipeline.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>SetColorBlendAttachmentProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">attachmentId</arg>
+							<arg type="bool">blendingEnabled</arg>
+							<arg type="vulkan.BlendOp">blendOpColor</arg>
+							<arg type="vulkan.BlendOp">blendOpAlpha</arg>
+							<arg type="vulkan.BlendFactor">srcColorBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">dstColorBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">srcAlphaBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">dstAlphaBlendFactor</arg>
+							<arg type="vulkan.ColorComponent">channelWriteMask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetColorBlendAttachmentProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">blendingEnabled</arg>
+							<arg type="vulkan.BlendOp">blendOpColor</arg>
+							<arg type="vulkan.BlendOp">blendOpAlpha</arg>
+							<arg type="vulkan.BlendFactor">srcColorBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">dstColorBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">srcAlphaBlendFactor</arg>
+							<arg type="vulkan.BlendFactor">dstAlphaBlendFactor</arg>
+							<arg type="vulkan.ColorComponent">channelWriteMask</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetMultisamplingProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SampleCount">sampleCount</arg>
+							<arg type="float">minSampleShading</arg>
+							<arg type="int">sampleMask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsSampleMaskEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">sampleMaskEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSampleMask</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">sampleMask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSampleShadingEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">sampleShadingEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSampleMaskEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">sampleMaskEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMultisamplingProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SampleCount">sampleCount</arg>
+							<arg type="int">mask</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSampleCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SampleCount">sampleCount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSampleCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SampleCount">sampleCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSampleShadingState</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">sampleShadingEnabled</arg>
+							<arg type="float">minSampleShading</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMinSampleShading</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">minSampleShading</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetViewportCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">viewportCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDynamicViewportsCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">dynamicViewportsCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetViewportsCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">viewportsCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDynamicViewportsCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">dynamicViewportsCount</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetPrimitiveTopology</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.PrimitiveTopology">primitiveTopology</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPrimitiveTopology</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.PrimitiveTopology">primitiveTopology</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetRasterizationOrder</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.RasterizationOrderAMD">rasterizationOrder</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRasterizationOrder</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.RasterizationOrderAMD">rasterizationOrder</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRasterizationProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.PolygonMode">polygonMode</arg>
+							<arg type="vulkan.CullMode">cullMode</arg>
+							<arg type="vulkan.FrontFace">frontFace</arg>
+							<arg type="float">lineWidth</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetRasterizationProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.PolygonMode">polygonMode</arg>
+							<arg type="vulkan.CullMode">cullMode</arg>
+							<arg type="vulkan.FrontFace">frontFace</arg>
+							<arg type="float">lineWidth</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetPolygonMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.PolygonMode">polygonMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPolygonMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.PolygonMode">polygonMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetCullMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CullMode">cullMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetCullMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.CullMode">cullMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetFrontFace</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.FrontFace">frontFace</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetFrontFace</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.FrontFace">frontFace</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetLineWidth</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">lineWidth</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetLineWidth</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">lineWidth</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetDynamicScissorBoxesCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">dynamicScissorBoxesCount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetScissorCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">scissorCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetScissorBoxProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">scissorBoxId</arg>
+							<arg type="int">x</arg>
+							<arg type="int">y</arg>
+							<arg type="int">w</arg>
+							<arg type="int">h</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetScissorBoxProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">scissorId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">x</arg>
+							<arg type="int">y</arg>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDynamicScissorBoxesCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">dynamicScissorBoxesCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetScissorBoxesCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">scissorBoxesCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetStencilTestProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">updateFrontFaceState</arg>
+							<arg type="vulkan.StencilOp">stencilFailOp</arg>
+							<arg type="vulkan.StencilOp">stencilPassOp</arg>
+							<arg type="vulkan.StencilOp">stencilDepthFailOp</arg>
+							<arg type="vulkan.CompareOp">stencilCompareOp</arg>
+							<arg type="int">stencilCompareMask</arg>
+							<arg type="int">stencilWriteMask</arg>
+							<arg type="int">stencilReference</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetStencilTestProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">stencilTestEnabled</arg>
+							<arg type="vulkan.StencilOp">frontStencilFairOp</arg>
+							<arg type="vulkan.StencilOp">frontStencilPassOp</arg>
+							<arg type="vulkan.StencilOp">frontStencilDepthFailOp</arg>
+							<arg type="vulkan.CompareOp">frontStencilCompareOp</arg>
+							<arg type="int">frontStencilCompareMask</arg>
+							<arg type="int">frontStencilWriteMask</arg>
+							<arg type="int">frontStencilReference</arg>
+							<arg type="vulkan.StencilOp">backStencilFailOp</arg>
+							<arg type="vulkan.StencilOp">backStencilPassOp</arg>
+							<arg type="vulkan.StencilOp">backStencilDepthFailOp</arg>
+							<arg type="vulkan.CompareOp">backStencilCompareOp</arg>
+							<arg type="int">backStencilCompareMask</arg>
+							<arg type="int">backStencilWriteMask</arg>
+							<arg type="int">backStencilReference</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetStencilTestEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">stencilTestEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetViewportProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">viewportId</arg>
+							<arg type="float">originX</arg>
+							<arg type="float">originY</arg>
+							<arg type="float">w</arg>
+							<arg type="float">h</arg>
+							<arg type="float">minDepth</arg>
+							<arg type="float">maxDepth</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetViewportProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">viewportId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">originX</arg>
+							<arg type="float">originY</arg>
+							<arg type="float">width</arg>
+							<arg type="float">height</arg>
+							<arg type="float">minDepth</arg>
+							<arg type="float">maxDepth</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>AreDepthWritesEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">depthWritesEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthWritesEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthWritesEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthBiasState</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">depthBiasEnabled</arg>
+							<arg type="float">depthBiasConstantFactor</arg>
+							<arg type="float">depthBiasClamp</arg>
+							<arg type="float">depthBiasSlopeFactor</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthBiasConstantFactor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">depthBiasConstantFactor</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthBiasClamp</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">depthBiasClamp</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthBiasSlopeFactor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">depthBiasSlopeFactor</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthBoundsState</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">depthBoundsEnabled</arg>
+							<arg type="float">minDepthBounds</arg>
+							<arg type="float">maxDepthBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMinDepthBounds</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">minDepthBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMaxDepthBounds</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">maxDepthBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthClamp</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">minDepthBounds</arg>
+							<arg type="float">maxDepthBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDepthTestState</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">depthTestStateEnabled</arg>
+							<arg type="vulkan.CompareOp">compareOp</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsDepthClampEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">depthClampEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBiasEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthBiasEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBiasProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthBiasEnabled</arg>
+							<arg type="float">depthBiasConstantFactor</arg>
+							<arg type="float">depthBiasClamp</arg>
+							<arg type="float">depthBiasSlopeFactor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBiasConstantFactor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">depthBiasConstantFactor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBiasClamp</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">depthBiasClamp</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBiasSlopeFactor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">depthBiasSlopeFactor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBoundsTestEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthBoundsTestEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthBoundsTestProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthBoundsTestEnabled</arg>
+							<arg type="float">minDepthBounds</arg>
+							<arg type="float">maxDepthBounds</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMinDepthBounds</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">minDepthBounds</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMaxDepthBounds</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">maxDepthBounds</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthClampEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthClampEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthTestProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthTestEnabled</arg>
+							<arg type="vulkan.CompareOp">compareOp</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthTestEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">depthTestEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetDynamicStates</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.DynamicState">dynamicStates</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDynamicStates</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.DynamicState">dynamicStates</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDynamicStateEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.DynamicState">dynamicState</arg>
+							<arg type="bool">enabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>AttachVertexAttribute</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="shader.VertexBinding">vertexBinding</arg>
+							<arg type="table" subType="shader.VertexAttribute">vertexAttributes</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetVertexAttributeCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">vertexAttributeCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetMinSampleShading</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">mask</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetSampleMask</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">minSampleShading</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetPatchControlPointsCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">patchControlPointsCount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPatchControlPointsCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">patchControlPointCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetPushConstantRanges</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="table">pushConstantRanges</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetSubpassId</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">subpassId</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetVertexAttributeProperties</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">vertexInputAttributeId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="int">location</arg>
+						<arg type="vulkan.Format">format</arg>
+						<arg type="int">stride</arg>
+						<arg type="vulkan.VertexInputRate">rate</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>IsAlphaToCoverageEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">alphaToCoverageEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAlphaToCoverageEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">alphaToCoverageEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsAlphaToOneEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">alphaToOneEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAlphaToOneEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">alphaToOneEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>IsPrimitiveRestartEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">primitiveRestartEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPrimitiveRestartEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">primitiveRestartEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetRasterizerDiscardEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">rasterizerDiscardEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsRasterizerDiscardEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">rasterizerDiscardEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>AddSpecializationConstant</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.ShaderStage">shaderStage</arg>
+						<arg type="int">constantId</arg>
+						<arg type="util.DataStream">constants</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetLogicOpState</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.LogicOp">logicOp</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetLogicOpProperties</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">logicOpEnabled</arg>
+							<arg type="vulkan.LogicOp">logicOp</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetLogicOpEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">logicOpEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

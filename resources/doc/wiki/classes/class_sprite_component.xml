@@ -1,0 +1,18 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>SpriteComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>StopAndRemoveEntity</name>
+				<desc>Stops the sprite and removes the sprite entity once the particle effect has fully stopped.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

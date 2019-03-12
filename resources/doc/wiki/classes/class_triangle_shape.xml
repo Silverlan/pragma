@@ -1,0 +1,22 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>TriangleShape</name>
+			<derivedFrom>phys.Shape</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1" debug="1">
+				<name>Test</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">origin</arg>
+						<arg type="float">radius</arg>
+						<arg type="float">power</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,149 @@
+<root>
+	<collection type="library" gui="1">
+		<name>time</name>
+		<desc>TODO</desc>
+		<group>
+			<function type="function">
+				<name>create_timer</name>
+				<desc>Creates a new timer. The timer will not start right away, you will have to call [pragma:ref]time.Timer:Start[/pragma:ref] to start it.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">delay</arg>
+						<arg type="int">repetitions</arg>
+						<arg type="function">callback</arg>
+						<arg type="time.TimerType" default="time.TIMER_TYPE_CURTIME">type</arg>
+					</parameters>
+					<returnValues>
+						<arg type="time.Timer">timer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>create_simple_timer</name>
+				<desc>Creates a new timer. This will automatically start the timer as well.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">delay</arg>
+						<arg type="function">callback</arg>
+						<arg type="time.TimerType" default="time.TIMER_TYPE_CURTIME">type</arg>
+					</parameters>
+					<returnValues>
+						<arg type="time.Timer">timer</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" gui="1">
+				<name>last_think</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">lastThink</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>cur_time</name>
+				<desc>Returns the passed time since the game has started. This is affected by the time scale!</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">curTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1">
+				<name>real_time</name>
+				<desc>Returns the passed time since the game has started. This is '''not''' affected by the time scale!</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">realTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>server_time</name>
+				<desc>
+					Same as time.cur_time, but automatically synchronized with the server's time!\n
+					'''Note''': If the server was running slower than the client for a short period of time (e.g. due to serverside lag), this time can actually run slightly backwards!
+				</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">serverTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" client="1">
+				<name>frame_time</name>
+				<desc>Returns the time in seconds between the current frame and the beginning of the previous frame.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">frameTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" client="1">
+				<name>delta_time</name>
+				<desc>Returns the passed time since the last tick.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">deltaTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>time_since_epoch</name>
+				<desc>Returns the time in ns since the unix epoch.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">timeSinceEpoch</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>convert_duration</name>
+			<desc>Converts the specified duration from the source duration type to the destination type.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="int">duration</arg>
+					<arg type="time.DurationType">srcDurationType</arg>
+					<arg type="time.DurationType">dstDurationType</arg>
+				</parameters>
+				<returnValues>
+					<arg type="int">convertedDuration</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<enum_set>
+			<name>DurationType</name>
+			<enum value="0">DURATION_TYPE_NANO_SECONDS</enum>
+			<enum value="1">DURATION_TYPE_MICRO_SECONDS</enum>
+			<enum value="2">DURATION_TYPE_MILLI_SECONDS</enum>
+			<enum value="3">DURATION_TYPE_SECONDS</enum>
+			<enum value="4">DURATION_TYPE_MINUTES</enum>
+			<enum value="5">DURATION_TYPE_HOURS</enum>
+		</enum_set>
+		<enum_set gui="1">
+			<name>TimerType</name>
+			<enum value="0">TIMER_TYPE_CURTIME</enum>
+			<enum value="1">TIMER_TYPE_REALTIME</enum>
+		</enum_set>
+		<enum_set gui="1">
+			<name>DurationType</name>
+			<enum value="0">TIMER_TYPE_CURTIME</enum>
+			<enum value="1">TIMER_TYPE_REALTIME</enum>
+			<enum value="1" client="1">TIMER_TYPE_SERVERTIME</enum>
+		</enum_set>
+	</collection>
+</root>

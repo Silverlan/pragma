@@ -1,0 +1,353 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>Sampler</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the sampler to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">sampler</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the sampler is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the sampler's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the sampler's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>Update</name>
+				<desc>Returns the internal VkSampler.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetMagFilter</name>
+					<desc>Returns the sampler's magnification filter.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Filter">filter</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMagFilter</name>
+					<desc>Changes the sampler's magnification filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Filter">filter</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMinFilter</name>
+					<desc>Returns the sampler's minification filter.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Filter">filter</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMinFilter</name>
+					<desc>Changes the sampler's minification filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Filter">filter</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetMipmapMode</name>
+					<desc>Returns the sampler's minification filter.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SamplerMipmapMode">mipmapMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMipmapMode</name>
+					<desc>Changes the sampler's minification filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SamplerMipmapMode">mipmapMode</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetAddressModeU</name>
+					<desc>Returns the sampler's U address mode.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAddressModeU</name>
+					<desc>Changes the sampler's U address mode.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAddressModeV</name>
+					<desc>Returns the sampler's V address mode.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAddressModeV</name>
+					<desc>Changes the sampler's V address mode.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAddressModeW</name>
+					<desc>Returns the sampler's W address mode.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAddressModeW</name>
+					<desc>Changes the sampler's W address mode.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.SamplerAddressMode">addressMode</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetMipLodBias</name>
+				<desc>Returns the sampler's mip lod bias.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">mipLodBias</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetAnisotropyEnabled</name>
+				<desc>Returns ''true'' if anisotropy is enabled.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">anisotropyEnabled</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetMaxAnisotropy</name>
+					<desc>Returns the sampler's max anisotropy.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">maxAnisotropy</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMaxAnisotropy</name>
+					<desc>Changes the sampler's max anisotropy.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">maxAnisotropy</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetCompareEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">compareEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetCompareEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">compareEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetCompareOperation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.CompareOp">compareOp</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetCompareOperation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CompareOp">compareOp</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetMinLod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">minLod</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMinLod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">minLod</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMaxLod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">maxLod</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMaxLod</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">maxLod</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetBorderColor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.BorderColor">borderColor</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetBorderColor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.BorderColor">borderColor</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetUnnormalizedCoordinates</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">unnormalizedCoordinates</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetUnnormalizedCoordinates</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">unnormalizedCoordinates</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

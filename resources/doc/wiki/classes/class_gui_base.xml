@@ -1,0 +1,169 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" base="1" gui="1">
+			<name>Base</name>
+			<derivedFrom>gui.Element</derivedFrom>
+			<desc>TODO</desc>
+			<function type="hook">
+				<name>constructor</name>
+				<desc>Base constructor for gui.Base.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook">
+				<name>OnInitialize</name>
+				<desc>Called after the element has been created.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook">
+				<name>OnThink</name>
+				<desc>Called at the beginning of the current frame, before GUI elements are rendered.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="hook">
+					<name>MouseCallback</name>
+					<desc>Called if [pragma:ref?gui.Element:SetMouseInputEnabled]mouse inputs are enabled[/pragma:ref] and a key has been pressed inside this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.MouseButton">mouseButton</arg>
+							<arg type="input.State">action</arg>
+							<arg type="input.Modifier">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="hook">
+					<name>KeyboardCallback</name>
+					<desc>Called if [pragma:ref?gui.Element:SetKeyboardInputEnabled]keyboard inputs are enabled[/pragma:ref] and a mouse button has been pressed inside this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Key">key</arg>
+							<arg type="int">scanCode</arg>
+							<arg type="input.State">action</arg>
+							<arg type="input.Modifier">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="hook">
+					<name>CharCallback</name>
+					<desc>Called if [pragma:ref?gui.Element:SetKeyboardInputEnabled]keyboard inputs are enabled[/pragma:ref] and a character key has been pressed inside this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">character</arg>
+							<arg type="input.Modifier">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="hook">
+					<name>ScrollCallback</name>
+					<desc>Called if [pragma:ref?gui.Element:SetMouseInputEnabled]mouse inputs are enabled[/pragma:ref] and the mouse wheel has been used while this element was in focus.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">xOffset</arg>
+							<arg type="float">yOffset</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="hook">
+				<name>OnVisibilityChanged</name>
+				<desc>Called whenever the visibility of this element changes.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">visible</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook">
+				<name>OnSizeChanged</name>
+				<desc>Called whenever the size of this element changes.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="hook">
+					<name>OnColorChanged</name>
+					<desc>Called whenever the color of this element changes.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">red</arg>
+							<arg type="float">green</arg>
+							<arg type="float">blue</arg>
+							<arg type="float">alpha</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="hook">
+					<name>OnAlphaChanged</name>
+					<desc>Called whenever the alpha of this element changes.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">alpha</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="hook">
+				<name>OnDraw</name>
+				<desc>Called whenever this element should be drawn.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+						<arg type="math.Mat4">transform</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="hook">
+					<name>OnCursorEntered</name>
+					<desc>Called if [pragma:ref?gui.Element:SetCursorMovementCheckEnabled]mouse movement checks are enabled[/pragma:ref] and the mouse has been moved inside the element.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="hook">
+					<name>OnCursorExited</name>
+					<desc>Called if [pragma:ref?gui.Element:SetCursorMovementCheckEnabled]mouse movement checks are enabled[/pragma:ref] and the mouse has left the element.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="hook">
+					<name>OnFocusGained</name>
+					<desc>Called when the element has gained focus.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="hook">
+					<name>OnFocusKilled</name>
+					<desc>Called when the element has lost focus.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="hook">
+				<name>OnRemove</name>
+				<desc>Called when this element is about to be removed.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+		</collection>
+	</collection>
+</root>

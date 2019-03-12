@@ -1,0 +1,52 @@
+<root>
+	<collection type="library" server="1">
+		<name>resource</name>
+		<desc>TODO</desc>
+		<group>
+			<function type="function">
+				<name>add_file</name>
+				<desc>
+					Adds this file to the list of resource files. It will automatically be downloaded to any new client connecting to the server, if the client doesn't already have the file or the file differ's from the server's. Returns ''true'' on success.\n
+					If ''stream'' is set to ''false'', all new clients will have to wait until the file has been fully downloaded, before they can't start playing.\n
+					If ''stream'' is set to ''true'', the file will be downloaded in the background.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">fileName</arg>
+						<arg type="bool" default="true">stream</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>add_lua_file</name>
+				<desc>
+					Adds the specified lua-file to the list of resource files. This is the same as resource.add_file, but follows the same rules as include for selecting the file.\n
+					Lua-files are never streamed, except for players that are already connected.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">fileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>get_list</name>
+			<desc>Returns a table of all files that are specified as resources.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="table" subType="string">resources</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

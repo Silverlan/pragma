@@ -1,0 +1,482 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>TransformComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetOrigin</name>
+					<desc>
+						Same as [pragma:ref]ents.TransformComponent:GetPos[/pragma:ref] if the entity has no physics. Otherwise returns returns a position relative to the root collision object of the entity\n
+						All animations and bones are relative to this position.
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">origin</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPos</name>
+					<desc>Returns the entity's world position.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetPos</name>
+					<desc>Changes the entity's world position to the specified vector. If the entity is networked, the position will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPosProperty</name>
+					<desc>Returns the component's position property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">posProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetRotation</name>
+					<desc>Returns the entity's world orientation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRotation</name>
+					<desc>Changes the entity's world orientation to the specified quaternion. If the entity is networked, the orientation will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRotationProperty</name>
+					<desc>Returns the component's rotation property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.QuaternionProperty">rotProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAngles</name>
+					<desc>
+						Returns the entity's world orientation as euler angles.\n
+						If a ''Vector'' or ''Entity'' was passed as argument, returns the angles between this entity's forward direction and the direction to the target ''pos'' / ''ent'''s center.
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">point</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.TransformComponent">component</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAngles</name>
+					<desc>Changes the entity's orientation to the specified euler angles. If the entity is networked, the orientation will be send to the clients in the next snapshot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPitch</name>
+					<desc>Returns the entity's pitch angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">pitch</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetPitch</name>
+					<desc>Changes the entity's pitch angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">pitch</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetYaw</name>
+					<desc>Returns the entity's yaw angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">yaw</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetYaw</name>
+					<desc>Changes the entity's yaw angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">yaw</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRoll</name>
+					<desc>Returns the entity's roll angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">roll</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRoll</name>
+					<desc>Changes the entity's roll angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">roll</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetDirection</name>
+					<desc>Returns the direction from this entity's center position to the target ''pos'' / ''ent'''s center.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">point</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.TransformComponent">component</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetDotProduct</name>
+					<desc>Returns the dot product between this entity's forward direction and the direction to the target ''pos'' / ''ent'''s center.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">point</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">angle</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.TransformComponent">component</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">angle</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+							<arg type="bool" default="false">ignoreYAxis</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">angle</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetForward</name>
+					<desc>Returns the forward direction of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">forward</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRight</name>
+					<desc>Returns the right direction of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">right</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetUp</name>
+					<desc>Returns the up direction of this entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">up</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetEyePos</name>
+					<desc>Returns the entity's eye position local to the world. This is the same as [pragma:ref]ents.TransformComponent:GetPos[/pragma:ref] for entities that don't have a custom eye offset specified.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">eyePos</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetEyeOffset</name>
+					<desc>Returns the entity's eye offset, local to the entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">eyeOffset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetEyeOffset</name>
+					<desc>Changes the entity's eye offset to the specified vector, local to the entity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">eyeOffset</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>LocalToWorld</name>
+					<desc>Transforms the given position and/or rotation from local entity space to world space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">localPos</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">worldPos</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">localRot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Quaternion">worldRot</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">localPos</arg>
+							<arg type="math.Quaternion">localRot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">worldPos</arg>
+							<arg type="math.Quaternion">worldRot</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WorldToLocal</name>
+					<desc>Transforms the given position and/or rotation from world space to local entity space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">worldPos</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">localPos</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">worldRot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Quaternion">localRot</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">worldPos</arg>
+							<arg type="math.Quaternion">worldRot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">localPos</arg>
+							<arg type="math.Quaternion">localRot</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetLastMoveTime</name>
+				<desc>Returns the last time the entity has moved or rotated.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">lastMoveTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetScale</name>
+					<desc>Returns the visual geometry and physics of the entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetScale</name>
+					<desc>Changes the scale of the entity. If the argument is a float, all scale axes will be set to that value.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="float">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetScaleProperty</name>
+					<desc>Returns the component's scale property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.VectorProperty">scaleProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxAxisScale</name>
+					<desc>Returns the scale axis-value with the largest absolute value.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">maxAxisScale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAbsMaxAxisScale</name>
+					<desc>Same as [pragma:ref]ents.TransformComponent:GetMaxAxisScale[/pragma:ref], but returns the absolute value.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">maxAbsAxisScale</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetDistance</name>
+				<desc>Returns the distance between this entity and the target position/entity.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">point</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.TransformComponent">component</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">distance</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,85 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>Skeleton</name>
+				<collection type="class">
+					<name>Bone</name>
+					<desc>TODO</desc>
+					<group>
+						<function type="method" shared="1">
+							<name>GetName</name>
+							<desc>Returns the name of this bone.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="string">name</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetName</name>
+							<desc>Changes the bone's name.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="string">name</arg>
+								</parameters>
+							</overload>
+						</function>
+					</group>
+					<function type="method" shared="1">
+						<name>GetID</name>
+						<desc>Returns the ID of this bone.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">boneId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<group>
+						<function type="method" shared="1">
+							<name>GetChildren</name>
+							<desc>Returns the children of this bone.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="game.Model.Skeleton.Bone">children</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetParent</name>
+							<desc>Returns the parent bone of this bone, or nil if this is a root bone.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="game.Model.Skeleton.Bone">parent</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetParent</name>
+							<desc>Changes the bone's parent.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="game.Model.Skeleton.Bone">parent</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>ClearParent</name>
+							<desc>Clears the bone's parent.</desc>
+							<lua></lua>
+							<overload></overload>
+						</function>
+					</group>
+				</collection>
+			</collection>
+		</collection>
+	</collection>
+</root>

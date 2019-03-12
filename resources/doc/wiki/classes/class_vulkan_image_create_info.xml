@@ -1,0 +1,89 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ImageCreateInfo</name>
+			<desc>Structure specifying the parameters of a newly created image object.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkImageCreateInfo.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new ImageCreateInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageCreateInfo">imageCreateInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="vulkan.ImageType" mode="rw">
+				<name>type</name>
+				<desc>A vulkan.ImageType value specifying the basic dimensionality of the image. Layers in array textures do not count as a dimension for the purposes of the image type.</desc>
+				<default>vulkan.IMAGE_TYPE_2D</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>width</name>
+				<desc>The width of the image extent.</desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>height</name>
+				<desc>The height of the image extent.</desc>
+				<default>0</default>
+			</member>
+			<member type="vulkan.Format" mode="rw">
+				<name>format</name>
+				<desc>A vulkan.Format describing the format and type of the data elements that will be contained in the image.</desc>
+				<default>vulkan.FORMAT_R8G8B8A8_UNORM</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>layers</name>
+				<desc>The number of layers in the image.</desc>
+				<default>1</default>
+			</member>
+			<member type="vulkan.ImageUsage" mode="rw">
+				<name>usageFlags</name>
+				<desc>A bitmask of vulkan.ImageUsage describing the intended usage of the image.</desc>
+				<default>vulkan.IMAGE_USAGE_COLOR_ATTACHMENT_BIT</default>
+			</member>
+			<member type="vulkan.SampleCount" mode="rw">
+				<name>samples</name>
+				<desc>The number of sub-data element samples in the image as defined in vulkan.SampleCount. See [pragma:url?https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#primsrast-multisampling]Multisampling[/pragma:url].</desc>
+				<default>vulkan.SAMPLE_COUNT_1_BIT</default>
+			</member>
+			<member type="vulkan.ImageTiling" mode="rw">
+				<name>tiling</name>
+				<desc>A vulkan.ImageTiling value specifying the tiling arrangement of the data elements in memory.</desc>
+				<default>vulkan.IMAGE_TILING_OPTIMAL</default>
+			</member>
+			<member type="vulkan.ImageLayout" mode="rw">
+				<name>postCreateLayout</name>
+				<desc>Image layout to transfer the image to after it is created.</desc>
+				<default>vulkan.IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL</default>
+			</member>
+			<member type="vulkan.ImageCreateInfo.Flags" mode="rw">
+				<name>flags</name>
+				<desc></desc>
+				<default>vulkan.ImageCreateInfo.FLAG_NONE</default>
+			</member>
+			<member type="vulkan.QueueFamily" mode="rw">
+				<name>queueFamilyMask</name>
+				<desc>Queue families which the image object is going to be used with. One or more user queue family bits can be enabled.</desc>
+				<default>vulkan.QUEUE_FAMILY_GRAPHICS_BIT</default>
+			</member>
+			<member type="vulkan.MemoryFeature" mode="rw">
+				<name>memoryFeatures</name>
+				<desc>Required memory features for this buffer.</desc>
+				<default>vulkan.MEMORY_FEATURE_GPU_BULK</default>
+			</member>
+			<enum_set type="flags">
+				<name>Flag</name>
+				<enum value="0">FLAG_NONE</enum>
+				<enum value="1" type="bit">FLAG_CUBEMAP_BIT</enum>
+				<enum value="2" type="bit">FLAG_CONCURRENT_SHARING_BIT</enum>
+				<enum value="4" type="bit">FLAG_FULL_MIPMAP_CHAIN_BIT</enum>
+				<enum value="8" type="bit">FLAG_SPARSE_BIT</enum>
+				<enum value="16" type="bit">FLAG_SPARSE_ALIASED_RESIDENCY_BIT</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

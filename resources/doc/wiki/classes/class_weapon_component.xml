@@ -1,0 +1,613 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>WeaponComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>SetNextPrimaryAttack</name>
+					<desc>Disables the weapon's primary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetNextSecondaryAttack</name>
+					<desc>Disables the weapon's secondary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetNextAttack</name>
+					<desc>Disables the weapon's primary and secondary attack, until [pragma:ref]time.cur_time()[/pragma:ref] has surpassed the specified time.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">time</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetAutomaticPrimary</name>
+					<desc>If set to true, holding down the primary attack key will continuously invoke the weapon's primary fire.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">automaricPrimaryFire</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAutomaticSecondary</name>
+					<desc>If set to true, holding down the secondary attack key will continuously invoke the weapon's secondary fire.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">automaricSecondaryFire</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsAutomaticPrimary</name>
+					<desc>Returns true if the weapon's primary attack is set to automatic.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isPrimaryFireAutomatic</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsAutomaticSecondary</name>
+					<desc>Returns true if the weapon's secondary attack is set to automatic.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isSecondaryFireAutomatic</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>IsDeployed</name>
+				<desc>Returns true if the weapon is currently deployed.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isDeployed</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetPrimaryAmmoType</name>
+					<desc>Returns the weapon's primary ammo type id.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryAmmoTypeProperty</name>
+					<desc>Returns the weapon's primary ammo type property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryAmmoType</name>
+					<desc>Returns the weapon's secondary ammo type id.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryAmmoTypeProperty</name>
+					<desc>Returns the weapon's secondary ammo type property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">ammoType</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasPrimaryAmmo</name>
+					<desc>Returns true if the weapon's primary clip size is larger than zero, or if the weapon's owner has any ammunition of the primary ammo type left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasPrimaryAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasSecondaryAmmo</name>
+					<desc>Returns true if the weapon's secondary clip size is larger than zero, or if the weapon's owner has any ammunition of the secondary ammo type left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasSecondaryAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsPrimaryClipEmpty</name>
+					<desc>Returns true if the weapon's primary clip size is 0.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isClipEmpty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsSecondaryClipEmpty</name>
+					<desc>Returns true if the weapon's secondary clip size is 0.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isClipEmpty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasAmmo</name>
+					<desc>Returns true if the weapon/owner has any primary or secondary ammo left.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasAmmo</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryClipSize</name>
+					<desc>Returns the current size of the weapon's primary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">clipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPrimaryClipSizeProperty</name>
+					<desc>Returns the primary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">clipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryClipSize</name>
+					<desc>Returns the current size of the weapon's secondary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">clipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSecondaryClipSizeProperty</name>
+					<desc>Returns the secondary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">clipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxPrimaryClipSize</name>
+					<desc>Returns the weapon's maximum capacity for the primary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">maxPrimaryClipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxPrimaryClipSizeProperty</name>
+					<desc>Returns the max primary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">maxPrimaryClipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxSecondaryClipSize</name>
+					<desc>Returns the weapon's maximum capacity for the secondary clip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">maxSecondaryClipSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxSecondaryClipSizeProperty</name>
+					<desc>Returns the max secondary clip size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.IntProperty">maxSecondaryClipSizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>PrimaryAttack</name>
+					<desc>Forces the weapon's primary attack to fire. If ''bFireOnce'' is set to ''false'', and the weapon's primary attack is automatic, the weapon will continue firing until [pragma:ref]ents.WeaponComponent:EndPrimaryAttack[/pragma:ref] or [pragma:ref]ents.WeaponComponent:EndAttack[/pragma:ref] has been called.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">fireOnce</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SecondaryAttack</name>
+					<desc>Forces the weapon's secondary attack to fire. If ''bFireOnce'' is set to ''false'', and the weapon's secondary attack is automatic, the weapon will continue firing until [pragma:ref]ents.WeaponComponent:EndSecondaryAttack[/pragma:ref] or [pragma:ref]ents.WeaponComponent:EndAttack[/pragma:ref] has been called.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">fireOnce</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>TertiaryAttack</name>
+					<desc>Forces the weapon's tertiary attack to fire.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Attack4</name>
+					<desc>Forces the weapon's fourth attack to fire.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Reload</name>
+					<desc>Forces the weapon to reload.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndAttack</name>
+					<desc>Ends the weapon's primary and secondary attacks, if either of them is active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndPrimaryAttack</name>
+					<desc>Ends the weapon's primary, if it's active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EndSecondaryAttack</name>
+					<desc>Ends the weapon's secondary, if it's active.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Deploy</name>
+					<desc>Deploys the weapon if it has an owner.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Holster</name>
+					<desc>Holsters the weapon if it has an owner.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_DEPLOY</enum>
+				<enum>EVENT_ON_HOLSTER</enum>
+				<enum>EVENT_ON_PRIMARY_ATTACK</enum>
+				<enum>EVENT_ON_SECONDARY_ATTACK</enum>
+				<enum>EVENT_ON_TERTIARY_ATTACK</enum>
+				<enum>EVENT_ON_ATTACK4</enum>
+				<enum>EVENT_ON_END_PRIMARY_ATTACK</enum>
+				<enum>EVENT_ON_END_SECONDARY_ATTACK</enum>
+				<enum>EVENT_ON_RELOAD</enum>
+				<enum>EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED</enum>
+				<enum>EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED</enum>
+			</enum_set>
+			<!-- serverside -->
+			<group>
+				<function type="method" server="1">
+					<name>SetPrimaryClipSize</name>
+					<desc>Changes the current size of the weapon's primary clip to the specified amount.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">clipSize</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetSecondaryClipSize</name>
+					<desc>Changes the current size of the weapon's secondary clip to the specified amount.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">clipSize</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetMaxPrimaryClipSize</name>
+					<desc>Changes the maxmimum capacity for the primary clip to the specified amount.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">maxClipSize</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetMaxSecondaryClipSize</name>
+					<desc>Changes the maxmimum capacity for the secondary clip to the specified amount.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">maxClipSize</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>AddPrimaryClip</name>
+					<desc>Adds the specified amount to the weapon's primary clip size.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>AddSecondaryClip</name>
+					<desc>Adds the specified amount to the weapon's secondary clip size.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>RefillPrimaryClip</name>
+					<desc>Adds the specified amount to the weapon's clip size and removes it from the owner's total ammo. If the owner has less ammo left than the specified amount, the amount will be clamped to the ammo count the owner has left. If no amount is specified, it will attempt to add a full clip. If the weapon has no owner, this function will have no effect.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>RefillSecondaryClip</name>
+					<desc>Adds the specified amount to the weapon's clip size and removes it from the owner's total ammo. If the owner has less ammo left than the specified amount, the amount will be clamped to the ammo count the owner has left. If no amount is specified, it will attempt to add a full clip. If the weapon has no owner, this function will have no effect.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>RemovePrimaryClip</name>
+					<desc>Removes the specified amount from the weapon's primary clip size.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int" default="1">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>RemoveSecondaryClip</name>
+					<desc>Removes the specified amount from the weapon's secondary clip size.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int" default="1">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>RemoveSecondaryClip</name>
+					<desc>Removes the specified amount from the weapon's secondary clip size.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int" default="1">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" server="1">
+					<name>SetPrimaryAmmoType</name>
+					<desc>Changes the weapon's primary ammo type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">ammoType</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">ammoType</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetSecondaryAmmoType</name>
+					<desc>Changes the weapon's secondary ammo type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">ammoType</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">ammoType</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<!-- serverside -->
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>PlayViewActivity</name>
+				<desc>Plays an animation associated with the specified activity on the owner's viewmodel (If it exists).</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model.Animation.Activity">activity</arg>
+						<arg type="ents.AnimatedComponent.FPlayAnim" default="ents.AnimatedComponent.FPLAYANIM_DEFAULT">flags</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" client="1">
+					<name>SetViewModel</name>
+					<desc>Changes the weapon's viewmodel (If deployed by a player in first-person).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">viewModel</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetViewModel</name>
+					<desc>Returns the weapon's viewmodel.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">viewModel</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetHideWorldModelInFirstPerson</name>
+					<desc>If ''true'', the weapon's world-model will not be rendered when the weapon is deployed in first-person.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">hide</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetHideWorldModelInFirstPerson</name>
+					<desc>Returns ''true'', if the weapon's world-model should not be rendered when the weapon is deployed in first-person.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hide</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>IsInFirstPersonMode</name>
+					<desc>Returns ''true'', if the weapon's owner is in first-person mode and this weapon is deployed.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">firstPersonMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetViewModelOffset</name>
+					<desc>Applies a translation offset to the view-model for this weapon.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetViewModelOffset</name>
+					<desc>Returns the translation offset to the view-model for this weapon.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetViewFOV</name>
+					<desc>Changes the FOV for this weapon while deployed in first-person.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">viewFov</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetViewFOV</name>
+					<desc>Returns the FOV for this weapon while deployed in first-person.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">viewFov</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

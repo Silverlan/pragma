@@ -1,0 +1,509 @@
+<root>
+	<collection type="library">
+		<name>file</name>
+		<collection type="class">
+			<name>File</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>Close</name>
+				<desc>Closes the file. No read or write operations can be performed until the file is re-opened.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Size</name>
+				<desc>Returns the size in bytes of this file.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">size</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadLine</name>
+					<desc>Reads all characters until a newline-character or the end of file has been reached.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">line</arg>
+						</returnValues>
+					</overload>
+				</function>
+			<function type="method" shared="1">
+				<name>ReadChar</name>
+				<desc>Reads a char (1 byte) from a binary file.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">value</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>WriteChar</name>
+				<desc>Writes a char (1 byte) to a binary file.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">value</arg>
+					</parameters>
+				</overload>
+			</function>
+				<function type="method" shared="1">
+					<name>ReadString</name>
+					<desc>Reads a null-terminated string from a binary file, if no size is specified. Otherwise returns the specified length of characters as string.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">length</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteString</name>
+					<desc>Writes a string to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">value</arg>
+							<arg type="bool" default="true">nullTerminated</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadInt32</name>
+					<desc>Reads an int (4 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt32</name>
+					<desc>Writes an int (4 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt32</name>
+					<desc>Reads an unsigned int (4 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt32</name>
+					<desc>Writes an unsigned int (4 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt16</name>
+					<desc>Reads a short (2 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt16</name>
+					<desc>Writes a short (2 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt16</name>
+					<desc>Reads an unsigned short (2 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt16</name>
+					<desc>Writes an unsigned short (2 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt8</name>
+					<desc>Reads an int of 1 byte from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt8</name>
+					<desc>Writes an int of 1 byte to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt8</name>
+					<desc>Reads an unsigned int of 1 byte from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt8</name>
+					<desc>Writes an unsigned int of 1 byte to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt64</name>
+					<desc>Reads an int of 8 bytes from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt64</name>
+					<desc>Writes an int of 8 bytes to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt64</name>
+					<desc>Reads an unsigned int of 8 bytes from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt64</name>
+					<desc>Writes an unsigned int 8 bytes to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadFloat</name>
+					<desc>Reads a Float (4 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteFloat</name>
+					<desc>Writes a float (4 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadDouble</name>
+					<desc>Reads a double (8 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteDouble</name>
+					<desc>Writes a double (8 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadLongDouble</name>
+					<desc>Reads a long double (16 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteLongDouble</name>
+					<desc>Writes a long double (16 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadBool</name>
+					<desc>Reads a bool (1 byte) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteBool</name>
+					<desc>Writes a bool (1 byte) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadVector</name>
+					<desc>Reads a Vector (3 floats = 12 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector</name>
+					<desc>Writes a Vector (3 floats = 12 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector2</name>
+					<desc>Reads a Vector2 (2 floats = 8 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector2</name>
+					<desc>Writes a Vector2 (2 floats = 8 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector4</name>
+					<desc>Reads a Vector4 (4 floats = 16 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector4">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector4</name>
+					<desc>Writes a Vector4 (4 floats = 16 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadAngles</name>
+					<desc>Reads EulerAngles (3 floats = 12 bytes) from a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.EulerAngles">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteAngles</name>
+					<desc>Writes a EulerAngles (3 floats = 12 bytes) to a binary file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">value</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Seek</name>
+					<desc>Goes to the specified position (in bytes) in the file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Tell</name>
+					<desc>Returns the current offset in the file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Eof</name>
+					<desc>Returns true if it has reached the end of the file.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">eof</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>IgnoreComments</name>
+				<desc>
+					This will automatically skip all of the specified types of comments when reading the file. This only works when in non-binary and reading mode!\n
+					If no parameters are passed, it will ignore all "//" comments.
+				</desc>
+				<lua>
+					local f = file.Open("data/test.txt","r")\n
+					f:IgnoreComments("//")\n
+					f:IgnoreComments("/*","*/")\n
+					// Read content\n
+					f:Close()
+				</lua>
+				<overload></overload>
+				<overload>
+					<parameters>
+						<arg type="string">singleLineComment</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">multiLineCommentStart</arg>
+						<arg type="string">multiLineCommentEnd</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>Read</name>
+					<desc>Reads the specified number of bytes from the file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">size</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.DataStream">dataStream</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+							<arg type="int">size</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Write</name>
+					<desc>Writes the specified number of bytes to the file.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+							<arg type="int">size</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

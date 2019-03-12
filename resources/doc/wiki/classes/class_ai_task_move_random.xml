@@ -1,0 +1,35 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class" server="1">
+			<name>TaskMoveRandom</name>
+			<derivedFrom>ai.BehaviorTask</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" server="1">
+				<name>SetMoveDistance</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">distance</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SetMoveActivity</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.Model.Animation.Activity">activity</arg>
+					</parameters>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Parameter</name>
+				<enum value="0">PARAMETER_DISTANCE</enum>
+				<enum value="1">PARAMETER_MOVE_ACTIVITY</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,105 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>ScrollBar</name>
+			<derivedFrom>gui.Element</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>GetScrollAmount</name>
+					<desc>Returns the amount of units that are scrolled every time scrolling is invoked.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">amount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetScrollAmount</name>
+					<desc>Changes the amount of units that are scrolled every time scrolling is invoked.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">amount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetScrollOffset</name>
+					<desc>Returns the current scroll position/offset.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetScrollOffset</name>
+					<desc>Changes the current scroll position/offset.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddScrollOffset</name>
+					<desc>Scrolls the specified amount.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>SetUp</name>
+				<desc>Sets up the scrollbar with the specified values. ''numList'' is the amount of items that are displayed at once, ''numTotal'' is the total amount of items that can be scrolled.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">numList</arg>
+						<arg type="int">numTotal</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetHorizontal</name>
+					<desc>Changes the scrollbar to be horizontal or vertical. The size will have to be changed accordingly.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">horizontal</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsHorizontal</name>
+					<desc>Returns ''true'' if this is a horizontal scrollbar.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">horizontal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsVertical</name>
+					<desc>Returns ''true'' if this is a vertical scrollbar.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">vertical</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

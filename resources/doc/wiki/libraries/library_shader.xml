@@ -1,0 +1,30 @@
+<root>
+	<collection type="library" client="1" gui="1">
+		<name>shader</name>
+		<desc>TODO</desc>
+		<function type="function">
+			<name>register</name>
+			<desc>Registers a new shader class.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">shaderName</arg>
+					<arg type="class">shaderClass</arg>
+				</parameters>
+			</overload>
+		</function>
+		<function type="function">
+			<name>get</name>
+			<desc>Returns the shader associated with the given identifier.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">shaderName</arg>
+				</parameters>
+				<returnValues>
+					<arg type="shader.Shader">shader</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

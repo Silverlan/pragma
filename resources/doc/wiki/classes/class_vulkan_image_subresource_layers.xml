@@ -1,0 +1,40 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ImageSubresourceLayers</name>
+			<desc>Structure specifying an image subresource layers.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkImageSubresourceLayers.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new ImageSubresourceLayers object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageSubresourceLayers">imageSubresourceLayers</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="vulkan.ImageAspect" mode="rw">
+				<name>aspectMask</name>
+				<desc>A combination of vulkan.ImageAspect flags, selecting the color, depth and/or stencil aspects to be copied.</desc>
+				<default>vulkan.IMAGE_ASPECT_NONE</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>mipLevel</name>
+				<desc>The mipmap level to copy from.</desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>baseArrayLayer</name>
+				<desc>The starting layer to copy.</desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>layerCount</name>
+				<desc>The number of layers to copy.</desc>
+				<default>0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,81 @@
+<root>
+	<collection type="library">
+		<name>net</name>
+		<collection type="class" server="1">
+			<name>RecipientFilter</name>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>GetRecipients</name>
+					<desc>Returns a table of all recipients of this filter.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="ents.PlayerComponent">recipients</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddRecipient</name>
+					<desc>Adds a new recipient to this filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PlayerComponent">recipient</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveRecipient</name>
+					<desc>Removes the specified recipient from this filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PlayerComponent">recipient</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>HasRecipient</name>
+					<desc>Returns ''true'' if the specified player is part of this filter.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PlayerComponent">recipient</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">result</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetFilterType</name>
+					<desc>Changes the filter type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="net.RecipientFilter.Type">filterType</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetFilterType</name>
+					<desc>Returns the filter type.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="net.RecipientFilter.Type">filterType</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Type</name>
+				<enum value="0">TYPE_INCLUDE</enum>
+				<enum value="1">TYPE_EXCLUDE</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

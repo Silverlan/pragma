@@ -1,0 +1,389 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class" client="1">
+			<name>Scene</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>GetCamera</name>
+				<desc>Returns the scene's camera.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Camera">camera</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetWidth</name>
+					<desc>Returns scene's width.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">width</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetHeight</name>
+					<desc>Returns scene's height.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSize</name>
+					<desc>Returns scene's size.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2i">size</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>Resize</name>
+					<desc>Resizes the scene.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2i">size</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>BeginDraw</name>
+				<desc></desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method">
+				<name>UpdateBuffers</name>
+				<desc>Update's the scene's buffers for the current frame.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.CommandBuffer">commandBuffer</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetWorldEnvironment</name>
+					<desc>Returns the scene's world environment.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.WorldEnvironment">worldEnvironment</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetWorldEnvironment</name>
+					<desc>Changes the scene's world environment.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.WorldEnvironment">worldEnvironment</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>ClearWorldEnvironment</name>
+					<desc>Clears the scene's world environment.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>InitializeRenderTarget</name>
+					<desc></desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>GetRenderTarget</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.RenderTarget">renderTarget</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetStagingRenderTarget</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.RenderTarget">stagingRenderTarget</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRenderTargetTextureDescriptorSet</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.DescriptorSet">renderTargetDescriptorSet</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetPrepassDepthTexture</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Texture">depthTexture</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPrepassNormalTexture</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Texture">normalTexture</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>BeginRenderPass</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CommandBuffer">drawCommandBuffer</arg>
+							<arg type="vulkan.RenderPass">renderPass</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CommandBuffer">drawCommandBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>EndRenderPass</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CommandBuffer">drawCommandBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetLightSources</name>
+					<desc>Specifies which light sources the scene should use.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table" subType="ents.LightComponent">lightSources</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetLightSources</name>
+					<desc>Returns the light sources this scene uses.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="ents.LightComponent">lightSources</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>LinkLightSources</name>
+					<desc>Links the light sources of this scene to the light sources of the specified scene, which means this scene will always use the same light sources as ''sceneOther''.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Scene">scene</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddLightSource</name>
+					<desc>Adds a light source to the scene.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.LightComponent">lightSource</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveLightSource</name>
+					<desc>Removes a light source from the scene.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.LightComponent">lightSource</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetEntities</name>
+					<desc>Specifies which entities the scene should use.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="table" subType="ents.Entity">entities</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetEntities</name>
+					<desc>Returns the entities that this scene is using.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="ents.Entity">entities</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>LinkEntities</name>
+					<desc>Links the entities of this scene to the entities of the specified scene, which means this scene will always use the same entities as ''sceneOther''.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Scene">scene</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddEntity</name>
+					<desc>Adds an entity to the scene.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RemoveEntity</name>
+					<desc>Removes an entity from the scene.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetCameraDescriptorSet</name>
+					<desc>Returns the camera descriptor set for the specified pipeline bind point.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.PipelineBindPoint" default="vulkan.PIPELINE_BIND_POINT_GRAPHICS">bindPoint</arg>
+						</parameters>
+						<returnValues>
+							<arg type="vulkan.DescriptorSet">cameraDescriptorSet</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetViewCameraDescriptorSet</name>
+					<desc>Returns the view-camera descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.DescriptorSet">viewCameraDescriptorSet</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetShaderOverride</name>
+					<desc>Replaces a shader in the scene, so that ''dstShaderName'' will be used instead of ''srcShaderName'' whenever an object is being rendered with ''srcShaderName''.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">srcShaderName</arg>
+							<arg type="string">dstShaderName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>ClearShaderOverride</name>
+					<desc>Resets the override for the specified shader.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">shaderName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPrepassShader</name>
+					<desc>Returns the scene's prepass shader.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="shader.Shader">shader</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetPrepassMode</name>
+					<desc>Changes the scene's prepass mode.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Scene.PrepassMode">prepassMode</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPrepassMode</name>
+					<desc>Returns the scene's prepass mode.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Scene.PrepassMode">prepassMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>PrepassMode</name>
+				<enum value="0">PREPASS_MODE_DISABLED</enum>
+				<enum value="1">PREPASS_MODE_DEPTH_ONLY</enum>
+				<enum value="2">PREPASS_MODE_EXTENDED</enum>
+			</enum_set>
+			<enum_set>
+				<name>RenderTargetTexture</name>
+				<enum value="0">RENDER_TARGET_TEXTURE_COLOR</enum>
+				<enum value="1">RENDER_TARGET_TEXTURE_BLOOM</enum>
+				<enum value="2">RENDER_TARGET_TEXTURE_DEPTH</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

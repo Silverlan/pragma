@@ -1,0 +1,52 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ImageCopyInfo</name>
+			<desc>Structure specifying an image copy operation.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkImageCopy.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new ImageCopyInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageCopyInfo">imageCopyInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>width</name>
+				<desc></desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>height</name>
+				<desc></desc>
+			</member>
+			<member type="vulkan.ImageSubresourceLayers" mode="rw">
+				<name>srcSubresource</name>
+				<desc></desc>
+			</member>
+			<member type="vulkan.ImageSubresourceLayers" mode="rw">
+				<name>dstSubresource</name>
+				<desc></desc>
+			</member>
+			<member type="math.Vectori" mode="rw">
+				<name>srcOffset</name>
+				<desc></desc>
+			</member>
+			<member type="math.Vectori" mode="rw">
+				<name>dstOffset</name>
+				<desc></desc>
+			</member>
+			<member type="vulkan.ImageLayout" mode="rw">
+				<name>srcImageLayout</name>
+				<desc></desc>
+			</member>
+			<member type="vulkan.ImageLayout" mode="rw">
+				<name>dstImageLayout</name>
+				<desc></desc>
+			</member>
+		</collection>
+	</collection>
+</root>

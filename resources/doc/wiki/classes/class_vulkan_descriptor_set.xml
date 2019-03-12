@@ -1,0 +1,201 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>DescriptorSet</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the descriptor set to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">descriptorSet</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the descriptor set is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the descriptor set's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the descriptor set's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetBindingInfo</name>
+					<desc>Returns information about the specified binding (or all bindings).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+						</parameters>
+						<returnValues>
+							<arg type="shader.DescriptorSetBinding">binding</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="shader.DescriptorSetBinding">bindings</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetBindingCount</name>
+					<desc>Returns the number of bindings of this descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">bindingCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetBindingTexture</name>
+					<desc>Binds the specified texture to the binding index of the descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Texture">texture</arg>
+							<arg type="int">layerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Texture">texture</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetBindingArrayTexture</name>
+					<desc>Binds the specified texture to the array index of the binding index of the descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Texture">texture</arg>
+							<arg type="int">arrayIndex</arg>
+							<arg type="int">layerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetBindingUniformBuffer</name>
+					<desc>Binds the specified buffer to the binding index of the descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int">startOffset</arg>
+							<arg type="int">size</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int" default="0">startOffset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetBindingUniformBufferDynamic</name>
+					<desc>Binds the specified buffer to the binding index of the descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int">startOffset</arg>
+							<arg type="int">size</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int" default="0">startOffset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetBindingStorageBuffer</name>
+					<desc>Binds the specified buffer to the binding index of the descriptor set.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int">startOffset</arg>
+							<arg type="int">size</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">bindingIndex</arg>
+							<arg type="vulkan.Buffer">buffer</arg>
+							<arg type="int" default="0">startOffset</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

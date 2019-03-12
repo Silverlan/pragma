@@ -1,0 +1,105 @@
+<root>
+	<collection type="library" vanilla="1" gui="1">
+		<name>coroutine</name>
+		<desc>TODO</desc>
+		<function type="function" shared="1" gui="1">
+			<name>create</name>
+			<desc>Creates a new coroutine, with body ''f''. ''f'' must be a function. Returns this new coroutine, an object with type "thread".</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="function">f</arg>
+				</parameters>
+				<returnValues>
+					<arg type="thread">thread</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>isyieldable</name>
+			<desc>
+				Returns true when the running coroutine can yield.\n
+				A running coroutine is yieldable if it is not the main thread and it is not inside a non-yieldable C function.
+			</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.isyieldable</url>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="bool">yieldable</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>resume</name>
+			<desc>
+				Starts or continues the execution of coroutine ''co''. The first time you resume a coroutine, it starts running its body. The values ''val1'', ... are passed as the arguments to the body function. If the coroutine has yielded, ''resume'' restarts it; the values ''val1'', ... are passed as the results from the yield.\n
+				If the coroutine runs without any errors, ''resume'' returns '''true''' plus any values passed to ''yield'' (when the coroutine yields) or any values returned by the body function (when the coroutine terminates). If there is any error, ''resume'' returns '''false''' plus the error message.
+			</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.resume</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="thread">co</arg>
+					<arg type="any" variadic="1">arguments</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">success</arg>
+					<arg type="any" variadic="1">results</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>running</name>
+			<desc>Returns the running coroutine plus a boolean, true when the running coroutine is the main one.</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.running</url>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="thread">co</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>status</name>
+			<desc>
+				Returns the status of coroutine ''co'', as a string: "running", if the coroutine is running (that is, it called ''status''); "suspended", if the coroutine is suspended in a call to ''yield'', or if it has not started running yet; "normal" if the coroutine is active but not running (that is, it has resumed another coroutine); and "dead" if the coroutine has finished its body function, or if it has stopped with an error.
+			</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.status</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="thread">co</arg>
+				</parameters>
+				<returnValues>
+					<arg type="string">status</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>wrap</name>
+			<desc>Creates a new coroutine, with body ''f''. ''f'' must be a function. Returns a function that resumes the coroutine each time it is called. Any arguments passed to the function behave as the extra arguments to ''resume''. Returns the same values returned by ''resume'', except the first boolean. In case of error, propagates the error.</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.wrap</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="function">f</arg>
+				</parameters>
+				<returnValues>
+					<arg type="function">function</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1">
+			<name>yield</name>
+			<desc>Suspends the execution of the calling coroutine. Any arguments to ''yield'' are passed as extra results to ''resume''.</desc>
+			<url>http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.yield</url>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="any" variadic="1">arguments</arg>
+				</parameters>
+			</overload>
+		</function>
+	</collection>
+</root>

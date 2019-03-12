@@ -1,0 +1,10 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>BallSocketConstraint</name>
+			<derivedFrom>phys.Constraint</derivedFrom>
+			<desc>TODO</desc>
+		</collection>
+	</collection>
+</root>

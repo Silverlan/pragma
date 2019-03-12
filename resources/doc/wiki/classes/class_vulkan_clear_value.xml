@@ -1,0 +1,59 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ClearValue</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new ClearValue object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ClearValue">clearValue</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="util.Color">clearColor</arg>
+					</parameters>
+					<returnValues>
+						<arg type="vulkan.ClearValue">clearValue</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">clearDepth</arg>
+						<arg type="int" default="0">clearStencil</arg>
+					</parameters>
+					<returnValues>
+						<arg type="vulkan.ClearValue">clearValue</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetColor</name>
+					<desc>Changes the clear value's color value.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.Color">clearColor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetDepthStencil</name>
+					<desc>Changes the clear value's depth and stencil values.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">clearDepth</arg>
+							<arg type="int" default="0">clearStencil</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

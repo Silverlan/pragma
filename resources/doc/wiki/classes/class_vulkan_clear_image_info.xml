@@ -1,0 +1,24 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ClearImageInfo</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new ClearImageInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ClearImageInfo">clearImageInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="vulkan.ImageSubresourceRange" mode="rw">
+				<name>subresourceRange</name>
+				<desc></desc>
+				<default>vulkan.ImageSubresourceRange()</default>
+			</member>
+		</collection>
+	</collection>
+</root>

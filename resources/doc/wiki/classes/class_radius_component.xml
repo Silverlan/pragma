@@ -1,0 +1,46 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>RadiusComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetRadius</name>
+					<desc>Returns the entity's radius.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">radius</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRadius</name>
+					<desc>Changes the entity's radius.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">radius</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRadiusProperty</name>
+					<desc>Returns the component's radius property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.FloatProperty">radiusProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_RADIUS_CHANGED</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

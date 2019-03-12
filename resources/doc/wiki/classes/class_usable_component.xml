@@ -1,0 +1,15 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>UsableComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_USE</enum>
+				<enum>EVENT_CAN_USE</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

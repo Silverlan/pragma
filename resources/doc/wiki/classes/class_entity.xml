@@ -1,0 +1,676 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class" base="1">
+			<name>Entity</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>Spawn</name>
+				<desc>Spawns the entity in the world. If the entity is networked, this will also create the clientside part of the entity.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>Remove</name>
+					<desc>Removes this entity from the world.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveSafely</name>
+					<desc>Removes this entity from the world in the next tick.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsValid</name>
+					<desc>Returns ''true'' if this entity is valid.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">valid</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>RemoveEntityOnRemoval</name>
+				<desc>Removes the specified entity when this entity is removed.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+						<arg type="bool" default="true">remove</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetSpawnFlags</name>
+				<desc>Returns the entity's spawn flags.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">spawnFlas</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetIndex</name>
+				<desc>Returns the entity's server-index.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">index</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>IsCharacter</name>
+					<desc>Returns ''true'' if this entity has a character component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isCharacter</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsPlayer</name>
+					<desc>Returns ''true'' if this entity has a player component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isPlayer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsWorld</name>
+					<desc>Returns ''true'' if this entity has a world component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isWorld</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsNPC</name>
+					<desc>Returns ''true'' if this entity has an AI component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isNPC</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsWeapon</name>
+					<desc>Returns ''true'' if this entity has a weapon component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isWeapon</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsVehicle</name>
+					<desc>Returns ''true'' if this entity has a vehicle component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isVehicle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsInert</name>
+					<desc>Returns ''true'' if the entity isn't a physics object or is sleeping.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isInert</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsScripted</name>
+					<desc>Returns true if the entity is a lua-scripted entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isScripted</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsSpawned</name>
+					<desc>Returns true if the entity is spawned.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isSpawned</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsStatic</name>
+					<desc>Returns ''true'' if this entity is static (Rarely moving).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isStatic</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsDynamic</name>
+					<desc>Returns ''true'' if this entity is dynamic (Frequently moving).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isDynamic</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetClass</name>
+				<desc>Returns the entity's class name.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">className</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetKeyValue</name>
+				<desc>Sets the specified key to the given value. Needs to be called before the entity is spawned.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">key</arg>
+						<arg type="string">value</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetRotation</name>
+					<desc>Returns the entity's rotation. This will return a unit quaternion if the entity has no transform component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRotation</name>
+					<desc>Changes the entity's rotation. If the entity is networked, the position will be send to the clients in the next snapshot. If the entity has no transform component, this function will have no effect.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAngles</name>
+					<desc>Returns the entity's angles. This will return (0,0,0) if the entity has no transform component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetAngles</name>
+					<desc>Changes the entity's rotation to the specified angles. If the entity is networked, the position will be send to the clients in the next snapshot. If the entity has no transform component, this function will have no effect.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPos</name>
+					<desc>Returns the entity's world position. This will return (0,0,0) if the entity has no transform component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetPos</name>
+					<desc>Changes the entity's world position to the specified vector. If the entity is networked, the position will be send to the clients in the next snapshot. If the entity has no transform component, this function will have no effect.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCenter</name>
+					<desc>Returns the collision center of the entity. This will return (0,0,0) if the entity has no transform component.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">center</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>AddComponent</name>
+					<desc>Adds a new component of the specified type to the entity. If the entity already has a component of that type, and ''forceCreateNew'' is set to ''false'', no new component will be created and the existing one will be returned.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">componentName</arg>
+							<arg type="bool" default="false">forceCreateNew</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ents.EntityComponent">component</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+							<arg type="bool" default="false">forceCreateNew</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ents.EntityComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RemoveComponent</name>
+					<desc>Removes all components of the specified type, or the specified component from the entity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">componentName</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.EntityComponent">component</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearComponents</name>
+					<desc>Removes all components from the entity.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>HasComponent</name>
+					<desc>Returns ''true'' if the entity has a component of the specified type.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">componentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">hasComponent</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">hasComponent</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetComponent</name>
+					<desc>Returns the first component of the specified type in the entity, or ''nil'' if there isn't one.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">componentName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ents.Component">component</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="ents.Component">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetComponents</name>
+					<desc>Returns all components of the entity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="ents.Component">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTransformComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_TRANSFORM).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.TransformComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPhysicsComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_PHYSICS).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.PhysicsComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCharacterComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_CHARACTER).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.CharacterComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWeaponComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_WEAPON).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.WeaponComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetVehicleComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_VEHICLE).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.VehicleComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPlayerComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_PLAYER).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.PlayerComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAIComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_AI).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.AIComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetModelComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_MODEL).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.ModelComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimatedComponent</name>
+					<desc>Alias for ent:GetComponent(ents.COMPONENT_ANIMATED).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.AnimatedComponent">component</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Save</name>
+					<desc>Saves the entity into the specified data stream.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Load</name>
+					<desc>Restores the entity from the specified data stream.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Copy</name>
+				<desc>Copies the entity.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ents.Entity">copy</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetAirDensity</name>
+				<desc>Returns the air density around the entity.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">airDensity</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1" commutative="1">
+				<name>operator==</name>
+				<desc>Compares this entity to the specified entity.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Type</name>
+				<enum>TYPE_DEFAULT</enum>
+				<enum>TYPE_LOCAL</enum>
+				<enum>TYPE_SHARED</enum>
+			</enum_set>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_HANDLE_KEY_VALUE</enum>
+				<enum>EVENT_ON_SPAWN</enum>
+				<enum>EVENT_ON_POST_SPAWN</enum>
+				<enum>EVENT_ON_COMPONENT_ADDED</enum>
+				<enum>EVENT_ON_COMPONENT_REMOVED</enum>
+			</enum_set>
+			<!-- serverside -->
+			<function type="method" server="1">
+				<name>IsShared</name>
+				<desc>Returns ''true'' if this entity is shared.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isShared</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SetShared</name>
+				<desc>
+					If set to ''false'', this entity will not be transmitted to the client. Make sure to call this before [pragma:ref]ents.Entity:Spawn[/pragma:ref], to make sure it's never transmitted in the first place (Making it a serverside-only entity).\n
+					'''Note:''' If the entity was shared, and you call this after [pragma:ref]ents.Entity:Spawn[/pragma:ref], the entity will '''not''' get removed on the clients when it's destroyed on the server!
+				</desc>
+				<lua>
+					local ent = ents.Create("point_target")\n
+					if(ent ~= nil) then\n
+						ent:SetShared(false) -- Entity will not be transmitted to the clients\n
+						ent:Spawn()\n
+					end
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="bool">shared</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SendNetEvent</name>
+				<desc>Can be used to send an entity-specific net message to the client. Use [ents.EntityReceiveNetEvent] to receive the event on the client.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+						<arg type="net.Packet">packet</arg>
+						<arg type="net.RecipientFilter">recipientFilter</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+						<arg type="net.RecipientFilter">recipientFilter</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>BroadcastNetEvent</name>
+				<desc>Can be used to send an entity-specific net message to all client. Use [ents.EntityReceiveNetEvent] to receive the event on the client.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>IsSynchronized</name>
+				<desc>Returns ''true'' if this entity is synchronized (and shared).</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isSynchronized</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SetSynchronized</name>
+				<desc>Set to ''false'' to disable synchronization from server to client. This entity will not be included in snapshots anymore (Position, rotation updates, etc.), but events (e.g. removal) will still be transmitted.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">synchronized</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>SetSnapshotDirty</name>
+				<desc>Marks the entity's snapshot data as dirty for the next snapshot, which will ensure it will be included in the next snapshot.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">dirty</arg>
+					</parameters>
+				</overload>
+			</function>
+			<!-- serverside -->
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>IsClientsideOnly</name>
+				<desc>Returns true if this entity only exists on the client.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">clientsideOnly</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetClientIndex</name>
+				<desc>Returns the entity's clientside index.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">index</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SendNetEvent</name>
+				<desc>Can be used to send an entity-specific net message via TCP or UDP to the client. Use [ents.EntityReceiveNetEvent] to receive the event on the client.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="int">eventId</arg>
+					</parameters>
+				</overload>
+			</function>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

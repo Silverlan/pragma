@@ -1,0 +1,139 @@
+<root>
+	<collection type="library">
+		<name>math</name>
+		<collection type="class" gui="1">
+			<name>Vectori</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new Vectori object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vectori">vector</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="int">x</arg>
+						<arg type="int">y</arg>
+						<arg type="int">z</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vectori">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>-operator</name>
+				<desc>Negates this vector and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vectori">negatedVector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator/</name>
+				<desc>Divides the vector by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vectori">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1" commutative="1">
+				<name>operator*</name>
+				<desc>Multiplies the vector by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vectori">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator+</name>
+				<desc>Adds the vector to the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vectori">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vectori">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator-</name>
+				<desc>Subtracts the specified value from this vector and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vectori">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vectori">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator==</name>
+				<desc>Compares this vector to the specified vector and returns ''true'' if they their values are equal.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vectori">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Copy</name>
+				<desc>Creates a copy of this object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vectori">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the vector to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>x</name>
+				<desc>The x-axis component of the vector.</desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>y</name>
+				<desc>The y-axis component of the vector.</desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>z</name>
+				<desc>The z-axis component of the vector.</desc>
+				<default>0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

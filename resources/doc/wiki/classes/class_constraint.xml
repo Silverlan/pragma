@@ -1,0 +1,211 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>Constraint</name>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>IsValid</name>
+					<desc>Returns ''true'' if this constraint is valid.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">valid</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Remove</name>
+					<desc>Removes this constraint from the world.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetSourceObject</name>
+					<desc>Returns the source object for this constraint, or nil if it doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.CollisionObj">collisionObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetObject</name>
+					<desc>Returns the target object for this constraint, or nil if it doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.CollisionObj">collisionObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetSourceTransform</name>
+					<desc>Returns the source transform for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.Transform">transform</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetTransform</name>
+					<desc>Returns the target transform for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.Transform">transform</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSourcePosition</name>
+					<desc>Returns the source position for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSourceRotation</name>
+					<desc>Returns the source rotation for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetPosition</name>
+					<desc>Returns the target position for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetRotation</name>
+					<desc>Returns the target rotation for this constraint, relative to the source object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetOverrideSolverIterationCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">iterationCount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetOverrideSolverIterationCount</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">iterationCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetBreakingImpulseThreshold</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">threshold</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBreakingImpulseThreshold</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">threshold</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetEnabled</name>
+					<desc>Enables or disables the constraint.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">enable</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsEnabled</name>
+					<desc>Returns ''true'' if the constraint is enabled, otherwise ''false''.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetCollisionsEnabled</name>
+					<desc>Enables or disables collisions between the constraint bodies.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">collisionsEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCollisionsEnabled</name>
+					<desc>Returns ''true'' if collisions between the constraint bodies are enabled, otherwise ''false''.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">collisionsEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EnableCollisions</name>
+					<desc>Enables collisions between the constraint bodies.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" shared="1">
+					<name>DisableCollisions</name>
+					<desc>Disables collisions between the constraint bodies.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

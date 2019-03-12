@@ -1,0 +1,184 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>Table</name>
+			<derivedFrom>
+				<name>gui.Container</name>
+				<derivedFrom>gui.Element</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>SetRowHeight</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">rowHeight</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetColumnWidth</name>
+					<desc>Changes the width of all cells within this column.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">columnWidth</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetSelectable</name>
+					<desc>If set to ''true'', the rows in the table will be selectable.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">selectable</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsSelectable</name>
+					<desc>Returns ''true'' if the rows in the table are selectable.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">selectable</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>AddRow</name>
+					<desc>Adds a new row to the table.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="gui.Table.Row">row</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddHeaderRow</name>
+					<desc>Adds a new header row to the table.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="gui.Table.Row">row</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRowCount</name>
+					<desc>Returns the number of rows this table contains.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">rowCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetSortable</name>
+					<desc>Changes whether the table can be sorted by columns.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">sortable</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsSortable</name>
+					<desc>Returns whether the table can be sorted by columns.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">sortable</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetScrollable</name>
+					<desc>Changes whether the table can be scrolled through.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">scrollable</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsScrollable</name>
+					<desc>Returns whether the table can be scrolled through.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">scrollable</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>Clear</name>
+				<desc>Removes all rows and cells from the table.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetRow</name>
+					<desc>Returns the ''n''th row in the table (Or ''nil'' if it doesn't exist.).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">n</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Table.Row">row</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSelectedRow</name>
+					<desc>Returns the selected row, or ''nil'' if none is selected.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="gui.Table.Row">row</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRows</name>
+					<desc>Returns all row elements contained in this GUI-table.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="gui.Table.Row">row</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>RemoveRow</name>
+				<desc>Removes the specified row from the table.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">rowId</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

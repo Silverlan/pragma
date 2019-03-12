@@ -1,0 +1,253 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>RayCastData</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new RayCastData object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.RayCastData">rayCastData</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetSource</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.Shape">shape</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="phys.Object">physObject</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">entity</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionObj">collisionObject</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="phys.Transform">transform</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetSourceRotation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetTarget</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="phys.Transform">transform</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetTargetRotation</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetRotation</name>
+					<desc>Same as calling both [pragma:ref]phys.RayCastData:SetSourceRotation[/pragma:ref] and [pragma:ref]phys.RayCastData:SetTargetRotation[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>SetFlags</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="phys.FTrace">flags</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetFilter</name>
+				<desc>
+					Specifies a filter for the trace data. The table-overload can be a table of Entity- or PhysObj-objects. The signature for the function-filter is:\n
+					{{template_overload|{{template_type|bool}}|shouldPassFilter|{{template_param|ents.Entity}} ent,{{template_param|phys.Object}} phys}}
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="phys.Object">physObject</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table" subType="ents.Entity">entities</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table" subType="phys.Object">physObjects</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="function">shouldPassFilter</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetCollisionFilterMask</name>
+					<desc>Combination of collision masks, which should be used as an additional filter. By default phys.COLLISIONMASK_ALL will be used. If the collision mask is set to phys.COLLISIONMASK_ALL, and phys.FTRACE_FILTER_INVERT has been set, it will use phys.COLLISIONMASK_NONE instead.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionMask">mask</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetCollisionFilterGroup</name>
+					<desc>
+						Changes the collision group of the raytrace. E.g. phys.COLLISIONMASK_PLAYER would apply the same collision rules, as if the raytrace was a player.\n
+						If phys.COLLISIONMASK_DEFAULT is used, the collision mask will be used as group instead. This is the default behavior.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="phys.CollisionMask">group</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetSourceTransform</name>
+					<desc>Returns the transformation of the trace source.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.Transform">transform</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetTransform</name>
+					<desc>Returns the transformation of the trace target.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="phys.Transform">transform</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSourceOrigin</name>
+					<desc>Returns the source origin of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">origin</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetOrigin</name>
+					<desc>Returns the target origin of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">origin</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSourceRotation</name>
+					<desc>Returns the target rotation of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetTargetRotation</name>
+					<desc>Returns the source rotation of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetDistance</name>
+					<desc>Returns the distance of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetDirection</name>
+					<desc>Returns the direction of the trace.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">direction</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

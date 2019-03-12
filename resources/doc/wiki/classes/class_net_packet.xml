@@ -1,0 +1,123 @@
+<root>
+	<collection type="library">
+		<name>net</name>
+		<collection type="class">
+			<name>Packet</name>
+			<derivedFrom>util.DataStream</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteEntity</name>
+					<desc>
+						Writes an entity handle (4 bytes) to the packet.\n
+						The entity may be ''NULL''.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity" default="NULL">entity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadEntity</name>
+					<desc>Reads an entity handle (4 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.Entity">entity</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>ReadSoundSource</name>
+				<desc>Reads a sound handle (4 bytes) from the packet.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="sound.Source">soundSource</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetTimeSinceTransmission</name>
+				<desc>Returns the time in milliseconds since the packet was either received or sent.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">timeSinceTransmission</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>ReadPlayer</name>
+					<desc>Reads a player handle (4 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.PlayerComponent">player</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WritePlayer</name>
+					<desc>Writes a player handle (4 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.PlayerComponent">player</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.Entity">player</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<!-- serverside -->
+			<function type="method" server="1">
+				<name>WriteSoundSource</name>
+				<desc>Writes a sound handle (4 bytes) to the packet.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="sound.Source">source</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" server="1">
+				<name>WriteUniqueEntity</name>
+				<desc>Same as [pragma:ref]net.Packet:WriteEntity[/pragma:ref], however this function can be used to transmit an entity handle to the client, even if the client doesn't know about the entity yet. This will transmit 8 bytes, instead of the 4 bytes transmitted through [pragma:ref]net.Packet:WriteEntity[/pragma:ref].</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity" default="NULL">entity</arg>
+					</parameters>
+				</overload>
+			</function>
+			<!-- serverside -->
+			<!-- clientside -->
+			<function type="method" client="1">
+				<name>ReadUniqueEntity</name>
+				<desc>
+					Reads an entity handle (Only works in conjunction with [pragma:ref]net.Packet:WriteUniqueEntity[/pragma:ref]), and calls the specified function once the entity has been created clientside. ''onCreated'' is a function with the following signature:\n
+					{{template_type|void}} onCreated({{template_param|Entity}} ent)\n
+					This function will read 8 bytes from the packet.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="function">onCreated</arg>
+					</parameters>
+					<returnValues>
+						<arg type="util.Callback">callbackObject</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

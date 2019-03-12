@@ -1,0 +1,48 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class" server="1">
+			<name>TaskPlaySound</name>
+			<derivedFrom>ai.BehaviorTask</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" server="1">
+				<name>SetSoundName</name>
+				<desc>Changes the sound source to play.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">soundName</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" server="1">
+					<name>SetGain</name>
+					<desc>Changes the volume of the sound.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">gain</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" server="1">
+					<name>SetPitch</name>
+					<desc>Changes the pitch of the sound.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">pitch</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<enum_set>
+				<name>Parameter</name>
+				<enum value="0">PARAMETER_SOUND_NAME</enum>
+				<enum value="1">PARAMETER_GAIN</enum>
+				<enum value="2">PARAMETER_PITCH</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

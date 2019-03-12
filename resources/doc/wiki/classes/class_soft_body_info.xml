@@ -1,0 +1,154 @@
+<root>
+	<collection type="library">
+		<name>phys</name>
+		<collection type="class">
+			<name>SoftBodyInfo</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>GetEffectorName</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">effectorName</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetMaterialStiffnessCoefficients</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">materialId</arg>
+							<arg type="float">linear</arg>
+							<arg type="float">angular</arg>
+							<arg type="float">volume</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaterialStiffnessCoefficients</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">materialId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">linear</arg>
+							<arg type="float">angular</arg>
+							<arg type="float">volume</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<member type="float" mode="rw">
+				<name>poseMatchingCoefficient</name>
+				<desc></desc>
+				<default>0.5</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>anchorsHardness</name>
+				<desc></desc>
+				<default>0.6999</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>dragCoefficient</name>
+				<desc></desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>rigidContactsHardness</name>
+				<desc></desc>
+				<default>1.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softContactsHardness</name>
+				<desc></desc>
+				<default>1.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>liftCoefficient</name>
+				<desc></desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>kineticContactsHardness</name>
+				<desc></desc>
+				<default>0.1</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>dynamicFrictionCoefficient</name>
+				<desc></desc>
+				<default>0.2</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>dampingCoefficient</name>
+				<desc></desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>volumeConversationCoefficient</name>
+				<desc></desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsRigidImpulseSplitK</name>
+				<desc></desc>
+				<default>0.5</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsRigidImpulseSplitR</name>
+				<desc></desc>
+				<default>0.5</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsRigidImpulseSplitS</name>
+				<desc></desc>
+				<default>0.5</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsKineticHardness</name>
+				<desc></desc>
+				<default>1.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsRigidHardness</name>
+				<desc></desc>
+				<default>0.1</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>softVsSoftHardness</name>
+				<desc></desc>
+				<default>0.5</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>pressureCoefficient</name>
+				<desc></desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>velocitiesCorrectionFactor</name>
+				<desc></desc>
+				<default>1.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>bendingConstraintsDistance</name>
+				<desc></desc>
+				<default>0.2</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>clusterCount</name>
+				<desc></desc>
+				<default>0</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>maxClusterIterations</name>
+				<desc></desc>
+				<default>8192</default>
+			</member>
+		</collection>
+	</collection>
+</root>

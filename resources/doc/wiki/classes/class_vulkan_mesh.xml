@@ -1,0 +1,101 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>Mesh</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the mesh to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">mesh</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetVertexBuffer</name>
+					<desc>Returns the mesh's vertex buffer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">vertexBuffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetVertexBuffer</name>
+					<desc>Changes the mesh's vertex buffer.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">vertexBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetVertexWeightBuffer</name>
+					<desc>Returns the mesh's vertex weight buffer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">vertexWeightBuffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetVertexWeightBuffer</name>
+					<desc>Changes the mesh's vertex weight buffer.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">vertexWeightBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAlphaBuffer</name>
+					<desc>Returns the mesh's alpha buffer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">alphaBuffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAlphaBuffer</name>
+					<desc>Changes the mesh's alpha buffer.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">alphaBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetIndexBuffer</name>
+					<desc>Returns the mesh's index buffer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">indexBuffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetIndexBuffer</name>
+					<desc>Changes the mesh's index buffer.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.Buffer">indexBuffer</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

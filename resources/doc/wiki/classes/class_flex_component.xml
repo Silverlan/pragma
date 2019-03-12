@@ -1,0 +1,63 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>FlexComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" client="1">
+					<name>SetFlexController</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">flexControllerId</arg>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">flexController</arg>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetFlexController</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">flexControllerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">flexController</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>CalcFlexValue</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">flexId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">value</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

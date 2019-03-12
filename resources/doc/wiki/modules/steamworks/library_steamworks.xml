@@ -1,0 +1,134 @@
+<root>
+	<collection type="library" shared="1">
+		<name>steamworks</name>
+		<desc>TODO</desc>
+		<module>
+			<name>steamworks</name>
+			<target>steamworks/wv_steamworks</target>
+		</module>
+		<function type="function">
+			<name>initialize</name>
+			<desc>Initializes steamworks and returns ''true'' on success.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="bool">success</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<enum_set>
+			<name>Result</name>
+			<enum value="1">RESULT_OK</enum>
+			<enum value="2">RESULT_FAIL</enum>
+			<enum value="3">RESULT_NO_CONNECTION</enum>
+			<enum value="5">RESULT_INVALID_PASSWORD</enum>
+			<enum value="6">RESULT_LOGGED_IN_ELSEWHERE</enum>
+			<enum value="7">RESULT_INVALID_PROTOCOL_VER</enum>
+			<enum value="8">RESULT_INVALID_PARAM</enum>
+			<enum value="9">RESULT_FILE_NOT_FOUND</enum>
+			<enum value="10">RESULT_BUSY</enum>
+			<enum value="11">RESULT_INVALID_STATE</enum>
+			<enum value="12">RESULT_INVALID_NAME</enum>
+			<enum value="13">RESULT_INVALID_EMAIL</enum>
+			<enum value="14">RESULT_DUPLICATE_NAME</enum>
+			<enum value="15">RESULT_ACCESS_DENIED</enum>
+			<enum value="16">RESULT_TIMEOUT</enum>
+			<enum value="17">RESULT_BANNED</enum>
+			<enum value="18">RESULT_ACCOUNT_NOT_FOUND</enum>
+			<enum value="19">RESULT_INVALID_STEAM_ID</enum>
+			<enum value="20">RESULT_SERVICE_UNAVAILABLE</enum>
+			<enum value="21">RESULT_NOT_LOGGED_ON</enum>
+			<enum value="22">RESULT_PENDING</enum>
+			<enum value="23">RESULT_ENCRYPTION_FAILURE</enum>
+			<enum value="24">RESULT_INSUFFICIENT_PRIVILEGE</enum>
+			<enum value="25">RESULT_LIMIT_EXCEEDED</enum>
+			<enum value="26">RESULT_REVOKED</enum>
+			<enum value="27">RESULT_EXPIRED</enum>
+			<enum value="28">RESULT_ALREADY_REDEEMED</enum>
+			<enum value="29">RESULT_DUPLICATE_REQUEST</enum>
+			<enum value="30">RESULT_ALREADY_OWNED</enum>
+			<enum value="31">RESULT_IP_NOT_FOUND</enum>
+			<enum value="32">RESULT_PERSIST_FAILED</enum>
+			<enum value="33">RESULT_LOCKING_FAILED</enum>
+			<enum value="34">RESULT_LOGON_SESSION_REPLACED</enum>
+			<enum value="35">RESULT_CONNECT_FAILED</enum>
+			<enum value="36">RESULT_HANDSHAKE_FAILED</enum>
+			<enum value="37">RESULT_IO_FAILURE</enum>
+			<enum value="38">RESULT_REMOTE_DISCONNECT</enum>
+			<enum value="39">RESULT_SHOPPING_CART_NOT_FOUND</enum>
+			<enum value="40">RESULT_BLOCKED</enum>
+			<enum value="41">RESULT_IGNORED</enum>
+			<enum value="42">RESULT_NO_MATCH</enum>
+			<enum value="43">RESULT_ACCOUNT_DISABLED</enum>
+			<enum value="44">RESULT_SERVICE_READ_ONLY</enum>
+			<enum value="45">RESULT_ACCOUNT_NOT_FEATURED</enum>
+			<enum value="46">RESULT_ADMINISTRATOR_OK</enum>
+			<enum value="47">RESULT_CONTENT_VERSION</enum>
+			<enum value="48">RESULT_TRY_ANOTHER_CM</enum>
+			<enum value="49">RESULT_PASSWORD_REQUIRED_TO_KICK_SESSION</enum>
+			<enum value="50">RESULT_ALREADY_LOGGED_IN_ELSEWHERE</enum>
+			<enum value="51">RESULT_SUSPENDED</enum>
+			<enum value="52">RESULT_CANCELLED</enum>
+			<enum value="53">RESULT_DATA_CORRUPTION</enum>
+			<enum value="54">RESULT_DISK_FULL</enum>
+			<enum value="55">RESULT_REMOTE_CALL_FAILED</enum>
+			<enum value="56">RESULT_PASSWORD_UNSET</enum>
+			<enum value="57">RESULT_EXTERNAL_ACCOUNT_UNLINKED</enum>
+			<enum value="58">RESULT_PSN_TICKET_INVALID</enum>
+			<enum value="59">RESULT_EXTERNAL_ACCOUNT_ALREADY_LINKED</enum>
+			<enum value="60">RESULT_REMOTE_FILE_CONFLICT</enum>
+			<enum value="61">RESULT_ILLEGAL_PASSWORD</enum>
+			<enum value="62">RESULT_SAME_AS_PREVIOUS_VALUE</enum>
+			<enum value="63">RESULT_ACCOUNT_LOGON_DENIED</enum>
+			<enum value="64">RESULT_CANNOT_USE_OLD_PASSWORD</enum>
+			<enum value="65">RESULT_INVALID_LOGIN_AUTH_CODE</enum>
+			<enum value="66">RESULT_ACCOUNT_LOGON_DENIED_NO_MAIL</enum>
+			<enum value="67">RESULT_HARDWARE_NOT_CAPABLE_OF_IPT</enum>
+			<enum value="68">RESULT_IPT_INIT_ERROR</enum>
+			<enum value="69">RESULT_PARENTAL_CONTROL_RESTRICTED</enum>
+			<enum value="70">RESULT_FACEBOOK_QUERY_ERROR</enum>
+			<enum value="71">RESULT_EXPIRED_LOGIN_AUTH_CODE</enum>
+			<enum value="72">RESULT_IP_LOGIN_RESTRICTION_FAILED</enum>
+			<enum value="73">RESULT_ACCOUNT_LOCKED_DOWN</enum>
+			<enum value="74">RESULT_ACCOUNT_LOGON_DENIED_VERIFIED_EMAIL_REQUIRED</enum>
+			<enum value="75">RESULT_NO_MATCHING_URL</enum>
+			<enum value="76">RESULT_BAD_RESPONSE</enum>
+			<enum value="77">RESULT_REQUIRE_PASSWORD_RE_ENTRY</enum>
+			<enum value="78">RESULT_VALUE_OUT_OF_RANGE</enum>
+			<enum value="79">RESULT_UNEXPECTED_ERROR</enum>
+			<enum value="80">RESULT_DISABLED</enum>
+			<enum value="81">RESULT_INVALID_CEG_SUBMISSION</enum>
+			<enum value="82">RESULT_RESTRICTED_DEVICE</enum>
+			<enum value="83">RESULT_REGION_LOCKED</enum>
+			<enum value="84">RESULT_RATE_LIMIT_EXCEEDED</enum>
+			<enum value="85">RESULT_ACCOUNT_LOGIN_DENIED_NEED_TWO_FACTOR</enum>
+			<enum value="86">RESULT_ITEM_DELETED</enum>
+			<enum value="87">RESULT_ACCOUNT_LOGIN_DENIED_THROTTLE</enum>
+			<enum value="88">RESULT_TWO_FACTOR_CODE_MISMATCH</enum>
+			<enum value="89">RESULT_TWO_FACTOR_ACTIVATION_CODE_MISMATCH</enum>
+			<enum value="90">RESULT_ACCOUNT_ASSOCIATED_TO_MULTIPLE_PARTNERS</enum>
+			<enum value="91">RESULT_NOT_MODIFIED</enum>
+			<enum value="92">RESULT_NO_MOBILE_DEVICE</enum>
+			<enum value="93">RESULT_TIME_NOT_SYNCED</enum>
+			<enum value="94">RESULT_SMS_CODE_FAILED</enum>
+			<enum value="95">RESULT_ACCOUNT_LIMIT_EXCEEDED</enum>
+			<enum value="96">RESULT_ACCOUNT_ACTIVITY_LIMIT_EXCEEDED</enum>
+			<enum value="97">RESULT_PHONE_ACTIVITY_LIMIT_EXCEEDED</enum>
+			<enum value="98">RESULT_REFUND_TO_WALLET</enum>
+			<enum value="99">RESULT_EMAIL_SEND_FAILURE</enum>
+			<enum value="100">RESULT_NOT_SETTLED</enum>
+			<enum value="101">RESULT_NEED_CAPTCHA</enum>
+			<enum value="102">RESULT_GSLT_DENIED</enum>
+			<enum value="103">RESULT_GS_OWNER_DENIED</enum>
+			<enum value="104">RESULT_INVALID_ITEM_TYPE</enum>
+			<enum value="105">RESULT_IP_BANNED</enum>
+			<enum value="106">RESULT_GSLT_EXPIRED</enum>
+			<enum value="107">RESULT_INSUFFICIENT_FUNDS</enum>
+			<enum value="108">RESULT_TOO_MANY_PENDING</enum>
+			<enum value="109">RESULT_NO_SITE_LICENSES_FOUND</enum>
+			<enum value="110">RESULT_WG_NETWORK_SEND_EXCEEDED</enum>
+			<enum value="111">RESULT_ACCOUNT_NOT_FRIENDS</enum>
+			<enum value="112">RESULT_LIMITED_USER_ACCOUNT</enum>
+		</enum_set>
+	</collection>
+</root>

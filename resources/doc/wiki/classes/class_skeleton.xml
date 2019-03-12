@@ -1,0 +1,118 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>Skeleton</name>
+				<desc>TODO</desc>
+				<group>
+					<function type="method" shared="1">
+						<name>GetBone</name>
+						<desc>Returns the bone with the specified bone ID, or nil if the bone doesn't exist.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Skeleton.Bone">bone</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetRootBones</name>
+						<desc>Returns a table with all root bones in this skeleton.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Skeleton.Bone">bone</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBones</name>
+						<desc>Returns a table with the bones in this skeleton.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Skeleton.Bone">bone</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>LookupBone</name>
+						<desc>Returns the id for the bone with the specified name.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="string">boneName</arg>
+							</parameters>
+							<returnValues>
+								<arg type="int">boneId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddBone</name>
+						<desc>Adds a new bone to the skeleton.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="string">boneName</arg>
+								<arg type="game.Model.Skeleton.Bone">bone</arg>
+							</parameters>
+						</overload>
+						<overload>
+							<parameters>
+								<arg type="string">boneName</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Skeleton.Bone">bone</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBoneCount</name>
+						<desc>Returns the number of bones associated with this skeleton.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">boneCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearBones</name>
+						<desc>Clears all bones in the skeleton.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>MakeRootBone</name>
+						<desc>Turns the specified bone into a root bone. This will fail if the bone has not yet been added to the skeleton.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Skeleton.Bone">bone</arg>
+							</parameters>
+							<returnValues>
+								<arg type="bool">success</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Merge</name>
+					<desc>Merges this skeleton with the specified one. This given skeleton will not be affected.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Skeleton">skeleton</arg>
+						</parameters>
+					</overload>
+				</function>
+			</collection>
+		</collection>
+	</collection>
+</root>

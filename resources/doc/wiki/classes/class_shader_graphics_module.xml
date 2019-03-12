@@ -1,0 +1,10 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>BaseGraphicsModule</name>
+			<derivedFrom>shader.BaseModule</derivedFrom>
+			<desc>TODO</desc>
+		</collection>
+	</collection>
+</root>

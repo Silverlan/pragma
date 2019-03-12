@@ -1,0 +1,88 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>RenderPassCreateInfo</name>
+			<desc>Structure specifying parameters of a newly created render pass.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkRenderPassCreateInfo.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new RenderPassCreateInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.RenderPassCreateInfo">renderPassCreateInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>AddAttachment</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Format">format</arg>
+						<arg type="vulkan.ImageLayout">initialLayout</arg>
+						<arg type="vulkan.ImageLayout">finalLayout</arg>
+						<arg type="vulkan.AttachmentLoadOp">loadOp</arg>
+						<arg type="vulkan.AttachmentStoreOp">storeOp</arg>
+						<arg type="vulkan.SampleCount" default="vulkan.SAMPLE_COUNT_1_BIT">sampleCount</arg>
+					</parameters>
+					<returnValues>
+						<arg type="int">attachmentId</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>AddSubPass</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">subPassId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddSubPassColorAttachment</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">subPassId</arg>
+							<arg type="int">colorAttachmentId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSubPassDepthStencilAttachmentEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">subPassId</arg>
+							<arg type="bool">enabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddSubPassDependency</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">subPassId</arg>
+							<arg type="int">sourceSubPassId</arg>
+							<arg type="int">destinationSubPassId</arg>
+							<arg type="vulkan.PipelineStage">sourceStageMask</arg>
+							<arg type="vulkan.PipelineStage">destinationStageMask</arg>
+							<arg type="vulkan.Access">sourceAccessMask</arg>
+							<arg type="vulkan.Access">destinationAccessMask</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

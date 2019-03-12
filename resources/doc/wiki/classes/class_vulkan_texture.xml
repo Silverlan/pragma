@@ -1,0 +1,123 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>Texture</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the texture to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">texture</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetImage</name>
+					<desc>Returns the texture's image.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Image">image</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetImageView</name>
+					<desc>Returns the texture's image view for the specified layer.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">layerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="vulkan.ImageView">imageView</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.ImageView">imageView</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSampler</name>
+					<desc>Returns the texture's sampler for the specified layer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Sampler">imageView</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetWidth</name>
+					<desc>Returns the texture's image width.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">width</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetHeight</name>
+					<desc>Returns the texture's image height.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetFormat</name>
+				<desc>Returns the texture's image format.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Format">format</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the texture is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the texture's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the texture's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

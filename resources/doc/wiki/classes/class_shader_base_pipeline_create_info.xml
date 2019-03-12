@@ -1,0 +1,34 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>BasePipelineCreateInfo</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>AttachPushConstantRange</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">offset</arg>
+						<arg type="int">size</arg>
+						<arg type="vulkan.ShaderStage">shaderStages</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>AttachDescriptorSetInfo</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="shader.DescriptorSetInfo">descriptorSetInfo</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

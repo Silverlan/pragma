@@ -1,0 +1,53 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>BufferCreateInfo</name>
+			<desc>Structure specifying the parameters of a newly created buffer object.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkBufferCreateInfo.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new BufferCreateInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.BufferCreateInfo">bufferCreateInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>size</name>
+				<desc>The number of bytes that should be allocated.</desc>
+				<default>0</default>
+			</member>
+			<member type="vulkan.QueueFamily" mode="rw">
+				<name>queueFamilyMask</name>
+				<desc>Queue families which the buffer object is going to be used with. One or more user queue family bits can be enabled.</desc>
+				<default>vulkan.QUEUE_FAMILY_GRAPHICS_BIT</default>
+			</member>
+			<member type="vulkan.BufferCreateInfo.Flag" mode="rw">
+				<name>flags</name>
+				<desc></desc>
+				<default>vulkan.BufferCreateInfo.FLAG_NONE</default>
+			</member>
+			<member type="vulkan.BufferCreateInfo.Flag" mode="rw">
+				<name>usageFlags</name>
+				<desc>Usage flags describing what the buffer will be used for.</desc>
+				<default>vulkan.BUFFER_USAGE_UNIFORM_BUFFER_BIT</default>
+			</member>
+			<member type="vulkan.MemoryFeature" mode="rw">
+				<name>memoryFeatures</name>
+				<desc>Required memory features for this buffer.</desc>
+				<default>vulkan.MEMORY_FEATURE_GPU_BULK</default>
+			</member>
+			<enum_set type="flags">
+				<name>Flag</name>
+				<enum value="0">FLAG_NONE</enum>
+				<enum value="1" type="bit">FLAG_CONCURRENT_SHARING_BIT</enum>
+				<enum value="2" type="bit">FLAG_DONT_ALLOCATE_MEMORY_BIT</enum>
+				<enum value="4" type="bit">FLAG_SPARSE_BIT</enum>
+				<enum value="8" type="bit">FLAG_SPARSE_ALIASED_RESIDENCY_BIT</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

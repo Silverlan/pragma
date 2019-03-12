@@ -1,0 +1,35 @@
+<root>
+	<collection type="library">
+		<name>util</name>
+		<collection type="class" shared="1" gui="1">
+			<name>Callback</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the callback is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Remove</name>
+				<desc>Removes this callback object.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the callback to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">callback</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

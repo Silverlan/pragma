@@ -1,0 +1,630 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>Animation</name>
+				<desc>TODO</desc>
+				<group>
+					<function type="method" shared="1">
+						<name>GetFrame</name>
+						<desc>Returns the frame with the specified ID.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Animation.Frame">frame</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddFrame</name>
+						<desc>Adds a new frame to the animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Frame">frame</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetFrames</name>
+						<desc>Returns a table of all frames in this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Animation.Frame">frames</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetFrameCount</name>
+						<desc>Returns the number of frames inside this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">frameCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetBoneList</name>
+						<desc>Returns a table containing the model's bone IDs being used by this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="int">boneList</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBoneCount</name>
+						<desc>Returns the number of bones inside this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">boneCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>LookupBone</name>
+						<desc>Returns the index of the specified bone in the animation's bone list.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="int">localBoneIdx</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetBoneList</name>
+						<desc>Changes the animation's bone list.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="int">bones</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddBoneId</name>
+						<desc>Adds a bone to the animation's bone list.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneId</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetBoneWeight</name>
+						<desc>Changes the bone weight for the specified bone.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneId</arg>
+								<arg type="float">weight</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBoneWeight</name>
+						<desc>Returns the bone weight for the specified bone.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">boneId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="float">weight</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBoneWeights</name>
+						<desc>Returns the animation's bone weights.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="float">boneWeights</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetActivity</name>
+						<desc>Returns the Activity associated with this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="game.Model.Animation.Activity">activity</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetActivity</name>
+						<desc>Changes the Activity associated with this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Activity">activity</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetActivityWeight</name>
+						<desc>Returns the weight of the activity associated with this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">weight</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetActivityWeight</name>
+						<desc>Changes the weight of the activity associated with this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">weight</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>RegisterActivity</name>
+						<desc>Registers a new activity.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="string">activityName</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Animation.Activity">activity</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>GetActivityEnums</name>
+						<desc>Registers all registered activities.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Animation.Activity">activities</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>GetActivityEnumName</name>
+						<desc>Returns the name of the specified activity.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Activity">activity</arg>
+							</parameters>
+							<returnValues>
+								<arg type="string">activityName</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetFPS</name>
+						<desc>Returns the animation's speed.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">fps</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetFPS</name>
+						<desc>Changes the animation's speed.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">fps</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetFlags</name>
+						<desc>Returns the flags of this animation.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="game.Model.Animation.Flag">flags</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetFlags</name>
+						<desc>Changes the flags of this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Flag">flags</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>RemoveFlags</name>
+						<desc>Removes flags from this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Flag">flags</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>GetDuration</name>
+					<desc>Returns the duration of this animation in seconds.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">duration</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>AddEvent</name>
+						<desc>Adds a new animation event. args is a table of strings.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+								<arg type="game.Model.Animation.Event">eventId</arg>
+								<arg type="table" subType="any">arguments</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetEvents</name>
+						<desc>
+							Returns the events inside the animation. Each event is another table with the following members:\n
+							* {{template_type|game.Model.Animation.Event}} type\n
+							* {{template_type|table}} arguments
+						</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="table">events</arg>
+							</returnValues>
+						</overload>
+						<overload>
+							<returnValues>
+								<arg type="table">events</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetEventCount</name>
+						<desc>Returns the number of animation events for the specified frame, or the number of all events if no frameId is specified.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="int">eventCount</arg>
+							</returnValues>
+						</overload>
+						<overload>
+							<returnValues>
+								<arg type="int">eventCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>RemoveEvent</name>
+						<desc>Removes an event from this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+								<arg type="int">eventIdx</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetEventData</name>
+						<desc>Changes the event data for the specified event.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+								<arg type="int">eventIdx</arg>
+								<arg type="game.Model.Animation.Event">type</arg>
+								<arg type="table" subType="any">arguments</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetEventType</name>
+						<desc>Changes the event type for the specified event.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+								<arg type="int">eventIdx</arg>
+								<arg type="game.Model.Animation.Event">type</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetEventArgs</name>
+						<desc>Changes the event arguments for the specified event.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="int">frameId</arg>
+								<arg type="int">eventIdx</arg>
+								<arg type="table" subType="any">arguments</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>RegisterEvent</name>
+						<desc>Registers a new animation event.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="string">eventName</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Animation.Event">eventId</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>GetEventEnums</name>
+						<desc>Registers all registered animation events.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Animation.Event">events</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>GetEventEnumName</name>
+						<desc>Returns the name of the specified animation event.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Animation.Event">eventId</arg>
+							</parameters>
+							<returnValues>
+								<arg type="string">eventName</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetFadeInTime</name>
+						<desc>Returns the time it takes for this animation to fade in.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="float">fadeTime</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetFadeOutTime</name>
+						<desc>Returns the time it takes for this animation to fade out.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="float">fadeTime</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetFadeInTime</name>
+						<desc>Changes the animation's fade-in time.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="float">fadeTime</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetFadeOutTime</name>
+						<desc>Changes the animation's fade-out time.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="float">fadeTime</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>GetBlendController</name>
+					<desc>
+						Returns the animation's blend controller, if it has one. The returned table has the following members:\n
+						* {{template_type|int}} controller\n
+						* {{template_type|table}} transitions\n
+						Each transition is also a table, in the below format:\n
+						* {{template_type|int}} animation\n
+						* {{template_type|int}} transition
+					</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table">blendController</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>CalcRenderBounds</name>
+						<desc>Calculates and returns the render bounds for this animation. Very expensive!</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model">model</arg>
+							</parameters>
+							<returnValues>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetRenderBounds</name>
+						<desc>Returns the render bounds for this animation.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model">model</arg>
+							</parameters>
+							<returnValues>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>Rotate</name>
+						<desc>Rotates all bone transformations for all frames in this animation. A skeleton is required to determine the root bones.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Skeleton">skeleton</arg>
+								<arg type="math.Quaternion">rotation</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>Translate</name>
+						<desc>Translates all bone transformations for all frames in this animation. A skeleton is required to determine the root bones.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Skeleton">skeleton</arg>
+								<arg type="math.Vector">translation</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Reverse</name>
+					<desc>Reverses the order of frames within this animation.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="function" shared="1">
+					<name>Create</name>
+					<desc>Creates a new animation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.Animation">animation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<enum_set>
+					<name>Activity</name>
+					<enum value="0">ACT_INVALID</enum>
+					<enum value="1">ACT_IDLE</enum>
+					<enum value="2">ACT_WALK</enum>
+					<enum value="3">ACT_RUN</enum>
+					<enum value="4">ACT_JUMP</enum>
+					<enum value="5">ACT_CROUCH</enum>
+					<enum value="6">ACT_CROUCH_IDLE</enum>
+					<enum value="7">ACT_CROUCH_WALK</enum>
+					<enum value="8">ACT_UNCROUCH</enum>
+					<enum value="9">ACT_ALERT</enum>
+					<enum value="10">ACT_FLINCH_HEAD</enum>
+					<enum value="11">ACT_FLINCH_CHEST</enum>
+					<enum value="12">ACT_FLINCH_STOMACH</enum>
+					<enum value="13">ACT_FLINCH_LEFT_ARM</enum>
+					<enum value="14">ACT_FLINCH_RIGHT_ARM</enum>
+					<enum value="15">ACT_FLINCH_LEFT_LEG</enum>
+					<enum value="16">ACT_FLINCH_RIGHT_LEG</enum>
+					<enum value="17">ACT_FLINCH_PHYSICS</enum>
+					<enum value="18">ACT_FLINCH_GENERIC</enum>
+					<enum value="19">ACT_FLINCH_LIGHT</enum>
+					<enum value="20">ACT_FLINCH_MEDIUM</enum>
+					<enum value="21">ACT_FLINCH_HEAVY</enum>
+					<enum value="22">ACT_DIE</enum>
+					<enum value="23">ACT_TURN_LEFT</enum>
+					<enum value="24">ACT_TURN_RIGHT</enum>
+					<enum value="25">ACT_MELEE_ATTACK1</enum>
+					<enum value="26">ACT_MELEE_ATTACK2</enum>
+					<enum value="27">ACT_MELEE_ATTACK3</enum>
+					<enum value="28">ACT_MELEE_ATTACK4</enum>
+					<enum value="29">ACT_MELEE_ATTACK5</enum>
+					<enum value="30">ACT_RANGE_ATTACK1</enum>
+					<enum value="31">ACT_RANGE_ATTACK2</enum>
+					<enum value="32">ACT_RANGE_ATTACK3</enum>
+					<enum value="33">ACT_RANGE_ATTACK4</enum>
+					<enum value="34">ACT_RANGE_ATTACK5</enum>
+					<enum value="35">ACT_VM_IDLE</enum>
+					<enum value="36">ACT_VM_DEPLOY</enum>
+					<enum value="37">ACT_VM_HOLSTER</enum>
+					<enum value="38">ACT_VM_PRIMARY_ATTACK</enum>
+					<enum value="39">ACT_VM_SECONDARY_ATTACK</enum>
+					<enum value="40">ACT_VM_TERTIARY_ATTACK</enum>
+					<enum value="41">ACT_VM_ATTACK4</enum>
+					<enum value="42">ACT_VM_ATTACK5</enum>
+					<enum value="43">ACT_VM_ATTACK6</enum>
+					<enum value="44">ACT_VM_ATTACK7</enum>
+					<enum value="45">ACT_VM_ATTACK8</enum>
+					<enum value="46">ACT_VM_ATTACK9</enum>
+					<enum value="47">ACT_VM_ATTACK10</enum>
+					<enum value="48">ACT_VM_RELOAD</enum>
+					<enum value="49">ACT_VM_RUN</enum>
+					<enum value="50">ACT_VM_RUN_PASSIVE</enum>
+					<enum value="51">ACT_VM_WALK</enum>
+					<enum value="52">ACT_VM_WALK_CROUCHED</enum>
+					<enum value="53">ACT_VM_AIM_TO_PASSIVE</enum>
+					<enum value="54">ACT_PASSIVE_TO_AIM</enum>
+					<enum value="55">ACT_VM_AIM_TO_IRONSIGHT</enum>
+					<enum value="56">ACT_VM_IRONSIGHT_TO_AIM</enum>
+				</enum_set>
+				<enum_set>
+					<name>Event</name>
+					<enum value="0">EVENT_EMITSOUND</enum>
+					<enum value="1">EVENT_FOOTSTEP_LEFT</enum>
+					<enum value="2">EVENT_FOOTSTEP_RIGHT</enum>
+				</enum_set>
+				<enum_set type="flags">
+					<name>Flag</name>
+					<enum value="1" type="bit">FLAG_LOOP</enum>
+					<enum value="2" type="bit">FLAG_NOREPEAT</enum>
+					<enum value="32" type="bit">FLAG_MOVEX</enum>
+					<enum value="64" type="bit">FLAG_MOVEZ</enum>
+					<enum value="128" type="bit">FLAG_AUTOPLAY</enum>
+					<enum value="256" type="bit">FLAG_GESTURE</enum>
+				</enum_set>
+			</collection>
+		</collection>
+	</collection>
+</root>

@@ -1,0 +1,63 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>TreeList</name>
+			<collection type="class" client="1" gui="1">
+				<name>Element</name>
+				<derivedFrom>
+					<name>gui.Table.Row</name>
+					<derivedFrom>gui.Element</derivedFrom>
+				</derivedFrom>
+				<desc>TODO</desc>
+				<group>
+					<function type="method">
+						<name>AddItem</name>
+						<desc>Adds a new item to the root-level of this sub-tree.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="string">text</arg>
+							</parameters>
+							<returnValues>
+								<arg type="gui.TreeList.Element">item</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method">
+						<name>GetItems</name>
+						<desc>Returns all child-elements of this sub-tree.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="gui.TreeList.Element">items</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method">
+						<name>Expand</name>
+						<desc>Expands this element. If ''all'' is set to true, all descendants of this element will be expanded as well.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="bool" default="false">all</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method">
+						<name>Collapse</name>
+						<desc>Collapses this element. If 'all'' is set to true, all descendants of this element will be collapsed as well.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="bool" default="false">all</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+			</collection>
+		</collection>
+	</collection>
+</root>

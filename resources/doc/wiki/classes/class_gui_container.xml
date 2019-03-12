@@ -1,0 +1,123 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>Container</name>
+			<derivedFrom>gui.Element</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>SetPadding</name>
+					<desc>Changes the padding for this element. If just one argument is passed, all paddings will be set to this value.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">top</arg>
+							<arg type="int">right</arg>
+							<arg type="int">bottom</arg>
+							<arg type="int">left</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">padding</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPaddingTop</name>
+					<desc>Changes the top padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">top</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPaddingRight</name>
+					<desc>Changes the right padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">right</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPaddingBottom</name>
+					<desc>Changes the bottom padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">bottom</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPaddingLeft</name>
+					<desc>Changes the left padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">left</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPadding</name>
+					<desc>Returns the padding for this element (Order: top, right, bottom, left).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">top</arg>
+							<arg type="int">right</arg>
+							<arg type="int">bottom</arg>
+							<arg type="int">left</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPaddingTop</name>
+					<desc>Returns the top padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">top</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPaddingRight</name>
+					<desc>Returns the right padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">right</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPaddingBottom</name>
+					<desc>Returns the bottom padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">bottom</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPaddingLeft</name>
+					<desc>Returns the left padding for this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">left</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

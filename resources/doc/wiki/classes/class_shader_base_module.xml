@@ -1,0 +1,74 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>BaseModule</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>SetShaderSource</name>
+				<desc>Changes the source code file path for the specified shader stage.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.ShaderStage">shaderStage</arg>
+						<arg type="string">shaderFilePath</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method">
+				<name>SetPipelineCount</name>
+				<desc>Changes the number of pipelines for this module.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">pipelineCount</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetCurrentCommandBuffer</name>
+				<desc>Returns the currently bound command buffer.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.CommandBuffer">commandBuffer</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="hook">
+				<name>InitializePipeline</name>
+				<desc>Use this function to initialize the specified pipeline.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">pipelineIndex</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="hook">
+					<name>OnInitialized</name>
+					<desc>Called when the shader has been fully initialized.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="hook">
+					<name>OnPipelinesInitialized</name>
+					<desc>Called when the shader's pipelines have been initialized.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="hook">
+					<name>OnPipelineInitialized</name>
+					<desc>Called when the specified pipelines has been initialized.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">pipelineIndex</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

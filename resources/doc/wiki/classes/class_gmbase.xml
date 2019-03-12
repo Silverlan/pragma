@@ -1,0 +1,191 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class" base="1">
+			<name>Base</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>GetName</name>
+				<desc>Returns the name of the gamemode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">name</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetIdentifier</name>
+				<desc>Returns the identifier of the gamemode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">identifier</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetClassName</name>
+				<desc>Returns the name of the Lua-class for this gamemode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">className</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetAuthor</name>
+				<desc>Returns the name of the author for this gamemode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">author</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetVersion</name>
+				<desc>Returns the version of the gamemode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">major</arg>
+						<arg type="int">minor</arg>
+						<arg type="int">revision</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>Think</name>
+				<desc>Called every frame of the game.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>Tick</name>
+				<desc>Called every tick of the game.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnEntityTakeDamage</name>
+				<desc>Called whenever an entity is about to take damage.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+						<arg type="game.DamageInfo">damageInfo</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnEntityTakenDamage</name>
+				<desc>Called whenever an entity has taken damage.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+						<arg type="game.DamageInfo">damageInfo</arg>
+						<arg type="int">oldHealth</arg>
+						<arg type="int">newHealth</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnEntityHealthChanged</name>
+				<desc>Called whenever an entity's health has changed.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.Entity">entity</arg>
+						<arg type="int">oldHealth</arg>
+						<arg type="int">newHealth</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnPlayerDeath</name>
+				<desc>Called when a player has died.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+						<arg type="game.DamageInfo">damageInfo</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnPlayerSpawned</name>
+				<desc>Called when a player has spawned (or respawned).</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnActionInput</name>
+				<desc>Called whenever a player's action input has been invoked.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+						<arg type="input.Action">action</arg>
+						<arg type="bool">pressed</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnPlayerDropped</name>
+				<desc>Called when a player has been dropped from the server.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+						<arg type="net.ClientDroppedReason">reason</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnPlayerReady</name>
+				<desc>Called when a player has been fully initialized after having joined the server.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnPlayerJoined</name>
+				<desc>Called immediately after a player has joined the server. Note that the player has not been fully initialized at this point.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.PlayerComponent">player</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnGameInitialized</name>
+				<desc>Called once the game has been initialized.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnGameReady</name>
+				<desc>Called once the game and gamemode have been initialized and the map has been loaded. This marks the actual starting point of the game.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnMapInitialized</name>
+				<desc>Called once the map has been fully initialized.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+		</collection>
+	</collection>
+</root>

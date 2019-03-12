@@ -1,0 +1,46 @@
+<root>
+	<collection type="library">
+		<name>nav</name>
+		<collection type="class">
+			<name>Mesh</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>Save</name>
+				<desc>Writes the navigation map to a file.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">fileName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Raycast</name>
+				<desc>Returns false if the raycast didn't hit anything.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">startPosition</arg>
+						<arg type="math.Vector">endPosition</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">hitPosition</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetConfig</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="nav.Config">navConfig</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

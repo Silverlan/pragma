@@ -1,0 +1,151 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>Mesh</name>
+				<desc>TODO</desc>
+				<function type="function" shared="1">
+					<name>Create</name>
+					<desc>Creates a new model mesh.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.Mesh">mesh</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>GetVertexCount</name>
+						<desc>Returns the amount of vertices contained in this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">vertexCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetTriangleVertexCount</name>
+						<desc>Returns the amount of vertices of all triangles contained in this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">triangleVertexCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetTriangleCount</name>
+						<desc>Returns the amount of triangles contained in this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="int">triangleCount</arg>
+							</returnValues>
+						</overload>
+					</function>
+				</group>
+				<group>
+					<function type="method" shared="1">
+						<name>GetSubMeshes</name>
+						<desc>Returns the [pragma:ref]game.Model.Mesh.Sub[/pragma:ref] objects contained in this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="table" subType="game.Model.Mesh.Sub">subMeshes</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>AddSubMesh</name>
+						<desc>Adds a sub mesh to this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Mesh.Sub">subMesh</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClearSubMeshes</name>
+						<desc>Clears the sub-meshes of the mesh.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>SetSubMeshes</name>
+						<desc>Changes the sub-meshes of the mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="table" subType="game.Model.Mesh.Sub">subMeshes</arg>
+							</parameters>
+						</overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Update</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.FUpdate" default="game.Model.FUPDATE_ALL_DATA">updateFlags</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBounds</name>
+					<desc>Returns the bounds of this mesh.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">min</arg>
+							<arg type="math.Vector">max</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<group>
+					<function type="method" shared="1">
+						<name>SetCenter</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">center</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetCenter</name>
+						<desc>Returns the center of the mesh, after it has been [pragma:ref?game.Model.Mesh:Update]updated[/pragma:ref].</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="math.Vector">center</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>Centralize</name>
+						<desc>Moves all vertices of all sub-meshes and makes the center of all vertices the new origin.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+				</group>
+				<function type="method" shared="1">
+					<name>Scale</name>
+					<desc>Scales all sub-meshes contained in this mesh.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+			</collection>
+		</collection>
+	</collection>
+</root>

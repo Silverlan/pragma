@@ -1,0 +1,36 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>DescriptorSetInfo</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new DescriptorSetInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="table" subType="vulkan.DescriptorSetBinding">bindings</arg>
+						<arg type="int">setIndex</arg>
+					</parameters>
+					<returnValues>
+						<arg type="shader.DescriptorSetInfo">descriptorSetInfo</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="table" subType="vulkan.DescriptorSetBinding" default="{}">bindings</arg>
+					</parameters>
+					<returnValues>
+						<arg type="shader.DescriptorSetInfo">descriptorSetInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>setIndex</name>
+				<desc></desc>
+				<default>0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

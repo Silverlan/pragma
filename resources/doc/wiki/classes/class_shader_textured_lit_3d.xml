@@ -1,0 +1,55 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>TexturedLit3D</name>
+			<derivedFrom>
+				<name>shader.ShaderEntity</name>
+				<derivedFrom>
+					<name>shader.SceneLit3D</name>
+					<derivedFrom>
+						<name>shader.Scene3D</name>
+						<derivedFrom>
+							<name>shader.Graphics</name>
+							<derivedFrom>shader.Shader</derivedFrom>
+						</derivedFrom>
+					</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="function">
+					<name>RecordBindMaterial</name>
+					<desc>Binds the specified material.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Material">material</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="function">
+					<name>RecordBindClipPlane</name>
+					<desc>Binds the specified clip plane. The ''x'', ''y'' and ''z'' components represent the plane normal, the ''w'' component the distance.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4">clipPlane</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<enum_set type="generic_constants">
+				<name>PushConstants</name>
+				<enum value="56">PUSH_CONSTANTS_SIZE</enum>
+				<enum value="56">PUSH_CONSTANTS_USER_DATA_OFFSET</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

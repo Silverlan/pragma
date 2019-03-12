@@ -1,0 +1,31 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>IteratorFilterComponent</name>
+			<derivedFrom>ents.IteratorFilter</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new iterator filter object.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">componentName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.IteratorFilterComponent">filter</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.ComponentId">componentId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.IteratorFilterComponent">filter</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

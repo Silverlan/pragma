@@ -1,0 +1,72 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>VertexWeight</name>
+				<desc>TODO</desc>
+				<function type="method" shared="1">
+					<name>constructor</name>
+					<desc>Creates a new vertex weight object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4i">boneIds</arg>
+							<arg type="math.Vector4">weights</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.VertexWeight">vertexWeight</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.VertexWeight">vertexWeight</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Copy</name>
+					<desc>Creates a copy of this object.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.VertexWeight">vertexWeight</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>tostring</name>
+					<desc>Converts the vertex weight to a string.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">vertex weight</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>operator==</name>
+					<desc>Compares this vertex weight to the specified one and returns ''true'' if they represent the same vertex weight.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.VertexWeight">vertexWeight</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">equal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<member type="math.Vector4i" mode="rw">
+					<name>boneIds</name>
+					<desc>The bone ids.</desc>
+				</member>
+				<member type="math.Vector4" mode="rw">
+					<name>weights</name>
+					<desc>The weights.</desc>
+				</member>
+			</collection>
+		</collection>
+	</collection>
+</root>

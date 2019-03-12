@@ -1,0 +1,306 @@
+<root>
+	<collection type="library">
+		<name>math</name>
+		<collection type="class" gui="1">
+			<name>Vector2</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new Vector2 object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector2">vector</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">y</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>-operator</name>
+				<desc>Negates this vector and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector2">negatedVector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1" commutative="1">
+				<name>operator/</name>
+				<desc>Divides the vector by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1" commutative="1">
+				<name>operator*</name>
+				<desc>Multiplies the vector by the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator+</name>
+				<desc>Adds the vector to the specified value and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator-</name>
+				<desc>Subtracts the specified value from this vector and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>operator==</name>
+				<desc>Compares this vector to the specified vector and returns ''true'' if they their values are equal.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">value</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Copy</name>
+				<desc>Creates a copy of this object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector2">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the vector to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">vector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>Set</name>
+					<desc>Changes the vector components to the specified values.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">vector</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="float">x</arg>
+							<arg type="float">y</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Get</name>
+					<desc>Returns the ''n'''th component of the vector.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">index</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetNormal</name>
+					<desc>Returns a normalized version of this vector.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">normal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Normalize</name>
+					<desc>Normalizes this vector.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Length</name>
+					<desc>Returns the length of this vector.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">length</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>LengthSqr</name>
+					<desc>Returns the squared length.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">squaredLength</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Distance</name>
+					<desc>Returns the distance between this vector and the given vector.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">target</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">distance</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>DistanceSqr</name>
+					<desc>Returns the squared distance between this vector and the given vector.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">target</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">squaredDistance</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Cross</name>
+				<desc>Returns the cross product between this vector and the given vector with an implicit z-axis value of 0.0.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">target</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">crossProduct</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>DotProduct</name>
+				<desc>Returns the dot product between this vector and the given vector.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">target</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">crossProduct</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>Rotate</name>
+					<desc>Rotates this vector around the given euler angles / quaternion / axis angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">target</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>RotateAround</name>
+					<desc>Rotates this vector by the specified euler angles around the given origin.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">origin</arg>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Lerp</name>
+				<desc>Linearly interpolates between this vector and the given vector v by the specified factor.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">target</arg>
+						<arg type="float">factor</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">interpolatedVector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Project</name>
+				<desc>Projects this vector onto a normal vector and returns the result.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">target</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector2">projectedVector</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="float" mode="rw">
+				<name>x</name>
+				<desc>The x-axis component of the vector.</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>y</name>
+				<desc>The y-axis component of the vector.</desc>
+				<default>0.0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

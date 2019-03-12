@@ -1,0 +1,132 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>SoundEmitterComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>CreateSound</name>
+					<desc>
+						Creates a sound that will be emitted from the entity's position. Does not automatically play.\n
+						If ''bShared'' is set to ''false'', the sound will be serverside only. This can be useful to ease stress on the network throughput, or for creating spots of interest for NPCs.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">soundName</arg>
+							<arg type="sound.Type">type</arg>
+						</parameters>
+						<returnValues>
+							<arg type="sound.Source">soundSource</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>EmitSound</name>
+					<desc>
+						Creates and automatically plays a sound that will be emitted from the entity's position.\n
+						If ''bShared'' is set to ''false'', the sound will be serverside only. This can be useful to ease stress on the network throughput, or for creating spots of interest for NPCs.\n
+						The argument ''bShared'' has no effect if the function is called clientside.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">soundName</arg>
+							<arg type="sound.Type">type</arg>
+							<arg type="float" default="1.0">gain</arg>
+							<arg type="float" default="1.0">pitch</arg>
+						</parameters>
+						<returnValues>
+							<arg type="sound.Source">soundSource</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>StopSounds</name>
+				<desc>Stops all sounds this entity is currently emitting.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetSounds</name>
+				<desc>Returns a table of all sounds associated with this entity.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="table" subType="sound.Source">soundSource</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_SOUND_CREATED</enum>
+			</enum_set>
+			<!-- serverside -->
+			<function type="method" server="1">
+				<name>CreateSound</name>
+				<desc>
+					Creates a sound that will be emitted from the entity's position. Does not automatically play.\n
+					If ''transmit'' is set to ''false'', the sound will be serverside only. This can be useful to ease stress on the network throughput, or for creating spots of interest for NPCs.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">soundName</arg>
+						<arg type="sound.Type">type</arg>
+						<arg type="bool">transmit</arg>
+					</parameters>
+					<returnValues>
+						<arg type="sound.Source">soundSource</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- serverside -->
+			<!-- clientside -->
+			<group>
+				<function type="method" client="1">
+					<name>CreateSound</name>
+					<desc>
+						Creates a sound that will be emitted from the entity's position. Does not automatically play.\n
+						If ''transmit'' is set to ''false'', the sound will be serverside only. This can be useful to ease stress on the network throughput, or for creating spots of interest for NPCs.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">soundName</arg>
+							<arg type="sound.Type">type</arg>
+							<arg type="bool">transmit</arg>
+						</parameters>
+						<returnValues>
+							<arg type="sound.Source">soundSource</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>EmitSound</name>
+					<desc>
+						Creates and automatically plays a sound that will be emitted from the entity's position.\n
+						If ''bShared'' is set to ''false'', the sound will be serverside only. This can be useful to ease stress on the network throughput, or for creating spots of interest for NPCs.\n
+						The argument ''transmit'' has no effect if the function is called clientside.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">soundName</arg>
+							<arg type="sound.Type">type</arg>
+							<arg type="float">gain</arg>
+							<arg type="float">pitch</arg>
+							<arg type="bool">transmit</arg>
+						</parameters>
+						<returnValues>
+							<arg type="sound.Source">soundSource</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

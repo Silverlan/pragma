@@ -1,0 +1,742 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>AnimatedComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>PlayAnimation</name>
+					<desc>Plays the specified animation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animId</arg>
+							<arg type="ents.AnimatedComponent.FPlayAnim" default="ents.AnimatedComponent.FPLAYANIM_DEFAULT">flags</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">animName</arg>
+							<arg type="ents.AnimatedComponent.FPlayAnim" default="ents.AnimatedComponent.FPLAYANIM_DEFAULT">flags</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetAnimation</name>
+					<desc>Returns the animation id of the entity's current animation, or -1 if no animation is playing.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">animId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>PlayActivity</name>
+					<desc>Plays an animation associated with the specified activity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Animation.Activity">activity</arg>
+							<arg type="ents.AnimatedComponent.FPlayAnim" default="ents.AnimatedComponent.FPLAYANIM_DEFAULT">flags</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetActivity</name>
+					<desc>Return's the activity associated with the entity's current animation, or -1 if no animation is playing / the animation has no activity.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="game.Model.Animation.Activity">activity</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>PlayLayeredAnimation</name>
+					<desc>Plays the specified animation as layered animation in the given slot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+							<arg type="int">animId</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+							<arg type="string">animName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>PlayLayeredActivity</name>
+					<desc>Plays an animation associated with the specified activity in the specified slot.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+							<arg type="game.Model.Animation.Activity">activity</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>StopLayeredAnimation</name>
+					<desc>Stops the current animation in the specified slot, if there is one playing.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLayeredAnimation</name>
+					<desc>Returns the animation playing in the specified layer slot, or -1 if none is currently playing.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">animId</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLayeredActivity</name>
+					<desc>Returns the activity of the animation playing in the specified layer slot, or ACT_INVALID if none is currently playing.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">slot</arg>
+						</parameters>
+						<returnValues>
+							<arg type="game.Model.Animation.Activity">activity</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetPlaybackRate</name>
+					<desc>Defines the speed at which this entity's animations are played. 1 = normal speed, 2 = twice the speed, etc. This also affects gestures.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">rate</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPlaybackRate</name>
+					<desc>Returns the entity's current playback rate.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">rate</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetPlaybackRateProperty</name>
+					<desc>Returns the playback rate property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.FloatProperty">playbackRateProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetBoneMatrix</name>
+					<desc>Returns the matrix for the specified bone, or nil if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Mat4">boneMatrix</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneTransform</name>
+					<desc>Returns the position, rotation and scale of the bone, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetEffectiveBoneTransform</name>
+					<desc>Returns the lastest calculated transform for the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Transform">transform</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetBoneBuffer</name>
+					<desc>Returns the entity's buffer containing data about its skeleton. If the entity isn't animated, ''nil'' will be returned.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">buffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetBoneRenderMatrices</name>
+					<desc>Returns the bone matrices used for rendering.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="math.Mat4">boneMatrices</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetBoneRenderMatrix</name>
+					<desc>Returns the bone matrix used for rendering for the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Mat4">boneMatrix</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetLocalVertexPosition</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Mesh.Sub">subMesh</arg>
+							<arg type="int">vertexId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBonePos</name>
+					<desc>Returns the position of the bone, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneRot</name>
+					<desc>Returns the rotation of the bone, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneRotation</name>
+					<desc>Alias for [pragma:ref]ents.AnimatedComponent:GetBoneRot[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneAngles</name>
+					<desc>Returns the angles of the bone, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetLocalBoneTransform</name>
+					<desc>Returns the position, rotation and scale of the bone in entity space, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetGlobalBoneTransform</name>
+					<desc>Returns the position, rotation and scale of the bone in world space, or ''nil'' if the bone doesn't exist.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBoneTransform</name>
+					<desc>Changes the position, rotation and scale of the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.EulerAngles">angles</arg>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBonePos</name>
+					<desc>Changes the entity's bone position for the specified bone. The position is local to the parent bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBoneRot</name>
+					<desc>Changes the entity's bone rotation for the specified bone. The rotation is local to the parent bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBoneAngles</name>
+					<desc>Changes the entity's bone angles for the specified bone. The angles are local to the parent bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetBoneScale</name>
+					<desc>Changes the entity's bone scale for the specified bone. The scale is local to the parent bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneScale</name>
+					<desc>Returns the entity's bone scale for the specified bone.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetLocalBoneTransform</name>
+					<desc>Changes the position, rotation and scale of the specified bone in entity space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetLocalBonePos</name>
+					<desc>Changes the position of the specified bone in entity space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetLocalBoneRot</name>
+					<desc>Changes the rotation of the specified bone in entity space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetGlobalBoneTransform</name>
+					<desc>Changes the position, rotation and scale of the specified bone in world space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+							<arg type="math.Quaternion">rotation</arg>
+							<arg type="math.Vector">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetGlobalBonePos</name>
+					<desc>Changes the position of the specified bone in world space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Vector">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetGlobalBoneRot</name>
+					<desc>Changes the rotation of the specified bone in world space.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">boneId</arg>
+							<arg type="math.Quaternion">rotation</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBoneCount</name>
+					<desc>Returns the amount of bones this entity has.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">boneCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<related>ents.AnimatedComponent:LookupBone</related>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>SetCycle</name>
+					<desc>Changes the progress of the current animation. 0 = Beginning, 1 = End of animation.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">scale</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetCycle</name>
+					<desc>Returns the progress of the current animation. 0 = Beginning, 1 = End of animation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">scale</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>AddAnimationEvent</name>
+					<desc>Adds a new animation event to the entity.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animId</arg>
+							<arg type="int">frameId</arg>
+							<arg type="game.Model.Animation.Event">animEvent</arg>
+							<arg type="table">arguments</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">animName</arg>
+							<arg type="int">frameId</arg>
+							<arg type="game.Model.Animation.Event">animEvent</arg>
+							<arg type="table">arguments</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">animId</arg>
+							<arg type="int">frameId</arg>
+							<arg type="function">callback</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Callback">callbackObject</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">animName</arg>
+							<arg type="int">frameId</arg>
+							<arg type="function">callback</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Callback">callbackObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ClearAnimationEvents</name>
+					<desc>Clears the animation events for the specified animation, frame, or all events.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">animId</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">animName</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">animId</arg>
+							<arg type="int">frameId</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">animName</arg>
+							<arg type="int">frameId</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>InjectAnimationEvent</name>
+					<desc>Triggers an animation event.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Animation.Event">eventId</arg>
+							<arg type="table" subType="any" default="{}">arguments</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>BindAnimationEvent</name>
+					<desc>Binds a function or component event to the specified animation event.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Animation.Event">eventId</arg>
+							<arg type="function">callback</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="game.Model.Animation.Event">eventId</arg>
+							<arg type="ents.EntityComponent">component</arg>
+							<arg type="string">methodName</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetVertexPosition</name>
+				<desc>Returns the position of the specified vertex.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">meshGroupId</arg>
+						<arg type="int">meshId</arg>
+						<arg type="int">subMeshId</arg>
+						<arg type="int">vertexId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">vertexPos</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetBlendController</name>
+					<desc>Sets the value for the specified blend controller.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">controllerId</arg>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">controllerName</arg>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetBlendController</name>
+					<desc>Returns the value for the specified blend controller.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">controllerId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">controllerName</arg>
+						</parameters>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<related>ents.AnimatedComponent:LookupBlendController</related>
+			</group>
+			<function type="method" shared="1">
+				<name>GetAttachmentTransform</name>
+				<desc>Returns the position and rotation for the specified attachment, or nil if the attachment doesn't exist.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">attachmentName</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">position</arg>
+						<arg type="math.Quaternion">rotation</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="int">attachmentId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">position</arg>
+						<arg type="math.Quaternion">rotation</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_HANDLE_ANIMATION_EVENT</enum>
+				<enum>EVENT_ON_PLAY_ANIMATION</enum>
+				<enum>EVENT_ON_PLAY_LAYERED_ANIMATION</enum>
+				<enum>EVENT_ON_PLAY_LAYERED_ACTIVITY</enum>
+				<enum>EVENT_ON_ANIMATION_COMPLETE</enum>
+				<enum>EVENT_ON_LAYERED_ANIMATION_START</enum>
+				<enum>EVENT_ON_LAYERED_ANIMATION_COMPLETE</enum>
+				<enum>EVENT_ON_ANIMATION_START</enum>
+				<enum>EVENT_TRANSLATE_LAYERED_ANIMATION</enum>
+				<enum>EVENT_TRANSLATE_ANIMATION</enum>
+				<enum>EVENT_TRANSLATE_ACTIVITY</enum>
+				<enum>EVENT_MAINTAIN_ANIMATIONS</enum>
+				<enum>EVENT_MAINTAIN_ANIMATION</enum>
+				<enum>EVENT_MAINTAIN_ANIMATION_MOVEMENT</enum>
+				<enum>EVENT_SHOULD_UPDATE_BONES</enum>
+
+				<enum>EVENT_ON_PLAY_ACTIVITY</enum>
+				<enum>EVENT_ON_STOP_LAYERED_ANIMATION</enum>
+				<enum>EVENT_ON_BONE_TRANSFORM_CHANGED</enum>
+				<enum>EVENT_ON_ANIMATIONS_UPDATED</enum>
+				<enum>EVENT_ON_BLEND_ANIMATION</enum>
+				<enum>EVENT_PLAY_ANIMATION</enum>
+
+				<enum client="1">EVENT_ON_SKELETON_UPDATED</enum>
+				<enum client="1">EVENT_ON_BONE_MATRICES_UPDATED</enum>
+				<enum client="1">EVENT_ON_BONE_BUFFER_INITIALIZED</enum>
+			</enum_set>
+			<enum_set type="flags">
+				<name>FPlayAnim</name>
+				<enum value="0">FPLAYANIM_NONE</enum>
+				<enum value="1" type="bit">FPLAYANIM_RESET</enum>
+				<enum value="2" type="bit">FPLAYANIM_TRANSMIT</enum>
+				<enum value="4" type="bit">FPLAYANIM_SNAP_TO</enum>
+				<enum value="2">FPLAYANIM_DEFAULT</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

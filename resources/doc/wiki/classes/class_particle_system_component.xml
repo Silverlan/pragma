@@ -1,0 +1,704 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>ParticleSystemComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<!-- clientside -->
+			<group>
+				<function type="method" client="1">
+					<name>Start</name>
+					<desc>Starts the emission for this particle system. If it was already playing, it will be stopped and restarted.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" client="1">
+					<name>Stop</name>
+					<desc>Stops the emission of this particle system. If ''instantaneous'' is set to ''false'', the remaining particles will stay alive until they have died naturally.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="false">instantaneous</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" client="1">
+					<name>AddInitializer</name>
+					<desc>Adds an initializer to the particle system.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="table">data</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>AddOperator</name>
+					<desc>Adds an operator to the particle system.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="table">data</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>AddRenderer</name>
+					<desc>Adds a renderer to the particle system.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="table">data</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>SetNodeTarget</name>
+				<desc>Changes the target entity/position for the given node.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">nodeId</arg>
+						<arg type="ents.Entity">target</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="int">nodeId</arg>
+						<arg type="math.Vector">target</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetNodeCount</name>
+				<desc>Returns the number of nodes associated with this particle system.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">nodeCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetNodePosition</name>
+				<desc>Returns the current position of the given node.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">nodeId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.Vector">nodePosition</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetNodeTarget</name>
+				<desc>Returns the target entity for the given node, or ''nil'' if there is no valid target.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">nodeId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="ents.Entity">nodeTarget</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetRemoveOnComplete</name>
+				<desc>If set to ''true'', the particle-system will be removed automatically once it's complete. This only works if the particle-system isn't looping!</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">removeOnComplete</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetRenderBounds</name>
+				<desc>Returns the render bounds for this particle system.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetRadius</name>
+				<desc>Changes the default particle radius for the particle system.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">radius</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetRadius</name>
+				<desc>Returns the default particle radius for the particle system.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">radius</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetExtent</name>
+				<desc>Changes the default particle extent size for the particle system.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">extent</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetExtent</name>
+				<desc>Returns the default particle extent size for the particle system.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">extent</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetMaterial</name>
+				<desc>Changes the material for the particles.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">material</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="game.Material">material</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetMaterial</name>
+				<desc>Returns the material for the particles.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.Material">material</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetOrientationType</name>
+				<desc>Changes the orientation type for the particles.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.ParticleSystemComponent.OrientationType">orientationType</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetOrientationType</name>
+				<desc>Returns the orientation type for the particles.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ents.ParticleSystemComponent.OrientationType">orientationType</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>IsContinuous</name>
+				<desc>Returns ''true'' if the particle system is continuous.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">continuous</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetContinuous</name>
+				<desc>Changes whether the particle system is continuous.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">continuous</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetRemoveOnComplete</name>
+				<desc>Returns ''true'' if the particle system will be removed automatically when complete.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">removeOnComplete</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetCastShadows</name>
+				<desc>Returns ''true'' if the particle system casts a shadow.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">castShadows</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetCastShadows</name>
+				<desc>Changes whether the particle system casts a shadow.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">castShadows</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetBloomScale</name>
+				<desc>Returns the particle's bloom scale.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">bloomScale</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetBloomScale</name>
+				<desc>Changes the particle's bloom scale.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">bloomScale</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetIntensity</name>
+				<desc>Returns the particle system's intensity.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">intensity</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetIntensity</name>
+				<desc>Changes the particle system's intensity.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">intensity</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetParticleCount</name>
+				<desc>Changes the particle system's current particle count.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">particleCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetMaxParticleCount</name>
+				<desc>Changes the particle system's maximum particle count.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">maxParticleCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>Die</name>
+				<desc>Causes the particle system to die immediately.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" client="1">
+				<name>IsActive</name>
+				<desc>Returns ''true'' if the particle system is currently active.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">active</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetRenderMode</name>
+				<desc>Returns the particle system's render mode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ents.RenderComponent.RenderMode">renderMode</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetRenderMode</name>
+				<desc>Changes the particle system's render mode.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.RenderComponent.RenderMode">renderMode</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>SetName</name>
+				<desc>Changes the particle system's name.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetName</name>
+				<desc>Returns the particle system's name.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">name</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>IsStatic</name>
+				<desc>Returns ''true'' if the system has no moving particles.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">static</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" client="1">
+					<name>AddChild</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ParticleSystemComponent">component</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetChildren</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="ents.ParticleSystemComponent">children</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetParent</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ParticleSystemComponent">parent</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>RemoveChild</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ParticleSystemComponent">child</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>HasChild</name>
+					<desc>Returns ''true'' if the specified component is a child of this system.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ParticleSystemComponent">component</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">hasChild</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetParent</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.ParticleSystemComponent">parent</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" client="1">
+					<name>GetAlphaMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="ents.ParticleSystemComponent.AlphaMode">alphaMode</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetAlphaMode</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ParticleSystemComponent.AlphaMode">alphaMode</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" client="1">
+					<name>GetEmissionRate</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">emissionRate</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetEmissionRate</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">emissionRate</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" client="1">
+					<name>SetNextParticleEmissionCount</name>
+					<desc>The number of particles to emit next time the system is simulated.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">emissionCount</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>PauseEmission</name>
+					<desc>Pauses the emission for the particle system.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method" client="1">
+					<name>ResumeEmission</name>
+					<desc>Resumes the emission for the particle system.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>GetLifeTime</name>
+				<desc>Returns the time the system has been alive.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="float">lifeTime</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" client="1">
+					<name>GetSoftParticles</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">softParticles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>SetSoftParticles</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">softParticles</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>Simulate</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">deltaTime</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>Render</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.CommandBuffer">drawCmd</arg>
+						<arg type="game.Scene">scene</arg>
+						<arg type="bool">bloom</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" client="1">
+				<name>GetRenderParticleCount</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">particleCount</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" client="1">
+					<name>IsActiveOrPaused</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">activeOrPaused</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>IsEmissionPaused</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">emissionPaused</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" client="1">
+					<name>GetVertexBuffer</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">buffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetParticleBuffer</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">buffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetAnimationStartBuffer</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">buffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetAnimationBuffer</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.Buffer">buffer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" client="1">
+					<name>GetAnimationDescriptorSet</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.DescriptorSet">descriptorSet</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" client="1">
+				<name>IsAnimated</name>
+				<desc>Returns ''true'' if the system is animated.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isAnimated</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set client="1">
+				<name>OrientationType</name>
+				<enum value="0">ORIENTATION_TYPE_ALIGNED</enum>
+				<enum value="1">ORIENTATION_TYPE_UPRIGHT</enum>
+				<enum value="2">ORIENTATION_TYPE_STATIC</enum>
+				<enum value="3">ORIENTATION_TYPE_WORLD</enum>
+				<enum value="4">ORIENTATION_TYPE_BILLBOARD</enum>
+			</enum_set>
+			<enum_set client="1">
+				<name>AlphaMode</name>
+				<enum value="0">ALPHA_MODE_ADDITIVE</enum>
+				<enum value="1">ALPHA_MODE_ADDITIVE_FULL</enum>
+				<enum value="2">ALPHA_MODE_OPAQUE</enum>
+				<enum value="3">ALPHA_MODE_MASKED</enum>
+				<enum value="4">ALPHA_MODE_TRANSLUCENT</enum>
+				<enum value="5">ALPHA_MODE_PREMULTIPLIED</enum>
+				<enum value="6">ALPHA_MODE_COUNT</enum>
+			</enum_set>
+			<!-- clientside -->
+		</collection>
+	</collection>
+</root>

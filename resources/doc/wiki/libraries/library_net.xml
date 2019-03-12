@@ -1,0 +1,177 @@
+<root>
+	<collection type="library">
+		<name>net</name>
+		<desc>TODO</desc>
+		<function type="function">
+			<name>register_component_event</name>
+			<desc>Registers a new entity component.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">eventName</arg>
+				</parameters>
+				<returnValues>
+					<arg type="ents.ComponentEventId">eventId</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>iterator</name>
+			<desc>Returns an iterator for iterating over entities or entity components. See the [[Entities#Iterators|article on iterators]] for more information.</desc>
+			<lua></lua>
+			<overload>
+				<returnValues>
+					<arg type="function">iterator</arg>
+				</returnValues>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="ents.IteratorFilterFlags">filterFlags</arg>
+					<arg type="table" subType="ents.IteratorFilter" default="{}">filters</arg>
+				</parameters>
+				<returnValues>
+					<arg type="function">iterator</arg>
+				</returnValues>
+			</overload>
+			<overload>
+				<parameters>
+					<arg type="table" subType="ents.IteratorFilter">filters</arg>
+				</parameters>
+				<returnValues>
+					<arg type="function">iterator</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<!-- serverside -->
+		<group>
+			<function type="function" server="1">
+				<name>register</name>
+				<desc>Registers a new net message.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function" server="1">
+				<name>broadcast</name>
+				<desc>Sends a message to all connected clients.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="string">identifier</arg>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function">
+				<name>send</name>
+				<desc>Sends a message to one or more clients, or the server if called clientside.</desc>
+				<lua></lua>
+				<overload server="1">
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="string">identifier</arg>
+						<arg type="net.Packet">packet</arg>
+						<arg type="ents.PlayerComponent">player</arg>
+					</parameters>
+				</overload>
+				<overload server="1">
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="string">identifier</arg>
+						<arg type="net.Packet">packet</arg>
+						<arg type="table" subType="ents.PlayerComponent">players</arg>
+					</parameters>
+				</overload>
+				<overload server="1">
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="string">identifier</arg>
+						<arg type="net.Packet">packet</arg>
+						<arg type="net.RecipientFilter">recipientFilter</arg>
+					</parameters>
+				</overload>
+				<overload client="1">
+					<parameters>
+						<arg type="net.Protocol">protocol</arg>
+						<arg type="string">identifier</arg>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="function">
+				<name>receive</name>
+				<desc>
+					Registers a new net message. The signature for the 'onReceive' function is:\n
+					{{template_state_sv}} {{template_overload|{{template_type|void}}|onReceive|{{template_param|NetPacket}} packet,{{template_param|Player}} pl}}\n
+					{{template_state_cl}} {{template_overload|{{template_type|void}}|onReceive|{{template_param|NetPacket}} packet}}\n
+					\n
+					'''Note:''' The message has to be registered on the server using [[net_register|net.register]]!
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">identifier</arg>
+						<arg type="function">onReceive</arg>
+					</parameters>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>register_event</name>
+			<desc>Registers a new net event.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="string">name</arg>
+				</parameters>
+				<returnValues>
+					<arg type="ents.NetEventId">netEventId</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<!-- serverside -->
+		<enum_set>
+			<name>ClientDroppedReason</name>
+			<enum value="0">CLIENT_DROPPED_REASON_DISCONNECTED</enum>
+			<enum value="1">CLIENT_DROPPED_REASON_TIMEOUT</enum>
+			<enum value="2">CLIENT_DROPPED_REASON_KICKED</enum>
+			<enum value="3">CLIENT_DROPPED_REASON_SHUTDOWN</enum>
+			<enum value="4">CLIENT_DROPPED_REASON_ERROR</enum>
+		</enum_set>
+		<enum_set>
+			<name>Protocol</name>
+			<enum value="0">PROTOCOL_UDP</enum>
+			<enum value="1">PROTOCOL_TCP</enum>
+		</enum_set>
+		<enum_set type="flags">
+			<name>ComponentFlags</name>
+			<enum value="0">COMPONENT_FLAG_NONE</enum>
+			<enum value="1" type="bit">COMPONENT_FLAG_BIT_NETWORKED</enum>
+		</enum_set>
+		<enum_set type="flags">
+			<name>IteratorFilterFlags</name>
+			<enum value="0">ITERATOR_FILTER_BIT_NONE</enum>
+			<enum value="1" type="bit">ITERATOR_FILTER_BIT_SPAWNED</enum>
+			<enum value="2" type="bit">ITERATOR_FILTER_BIT_PENDING</enum>
+			<enum value="4" type="bit">ITERATOR_FILTER_BIT_INCLUDE_SHARED</enum>
+			<enum value="8" type="bit">ITERATOR_FILTER_BIT_INCLUDE_NETWORK_LOCAL</enum>
+			<enum value="16" type="bit">ITERATOR_FILTER_BIT_CHARACTER</enum>
+			<enum value="32" type="bit">ITERATOR_FILTER_BIT_PLAYER</enum>
+			<enum value="64" type="bit">ITERATOR_FILTER_BIT_WEAPON</enum>
+			<enum value="128" type="bit">ITERATOR_FILTER_BIT_VEHICLE</enum>
+			<enum value="256" type="bit">ITERATOR_FILTER_BIT_NPC</enum>
+			<enum value="512" type="bit">ITERATOR_FILTER_BIT_PHYSICAL</enum>
+			<enum value="1024" type="bit">ITERATOR_FILTER_BIT_SCRIPTED</enum>
+			<enum value="2048" type="bit">ITERATOR_FILTER_BIT_MAP_ENTITY</enum>
+			<enum value="4096" type="bit">ITERATOR_FILTER_BIT_HAS_TRANSFORM</enum>
+			<enum value="8192" type="bit">ITERATOR_FILTER_BIT_HAS_MODEL</enum>
+			<enum value="4080">ITERATOR_FILTER_ANY_TYPE</enum>
+			<enum value="4095">ITERATOR_FILTER_ANY</enum>
+			<enum value="13">ITERATOR_FILTER_DEFAULT</enum>
+		</enum_set>
+	</collection>
+</root>

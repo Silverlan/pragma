@@ -1,0 +1,110 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>BulletInfo</name>
+			<desc>TODO</desc>
+			<member type="EulerAngles" mode="rw">
+				<name>spread</name>
+				<desc>The max spread that should be applied to the bullet. The roll-component of the angles is unused and will have no effect.</desc>
+				<default>EulerAngles(0,0,0)</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>force</name>
+				<desc>The force in units behind the bullet. This force will be applied to objects hit by the bullet to push them back.</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>distance</name>
+				<desc>The maximum travel distance for the bullet.</desc>
+				<default>game.LIMIT_MAX_WORLD_DISTANCE TODO</default>
+			</member>
+			<member type="game.DamageType" mode="rw">
+				<name>damageType</name>
+				<desc>The damage type which should be used when the bullet hits something.</desc>
+				<default>game.DAMAGETYPE_BULLET</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>bulletCount</name>
+				<desc>The number of bullets that should be fired when this struct is used.</desc>
+				<default>1</default>
+			</member>
+			<member type="ents.Entity" mode="rw">
+				<name>attacker</name>
+				<desc>The attacker who fired the bullet. This will be used to determine who dealt the damage.</desc>
+				<default>NULL</default>
+			</member>
+			<member type="ents.Entity" mode="rw">
+				<name>inflictor</name>
+				<desc>The inflictor which fired the bullet (i.e. the weapon).</desc>
+				<default>NULL</default>
+			</member>
+			<member type="int" mode="rw">
+				<name>tracerCount</name>
+				<desc>The frequency at which a tracer particle should be shown. 0 means no tracer, 1 means every bullet will have a tracer, 2 means every second bullet will have a tracer, etc.</desc>
+				<default>1</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>tracerRadius</name>
+				<desc>The radius (width) of the tracer beam particle.</desc>
+				<default>1.0</default>
+			</member>
+			<member type="util.Color" mode="rw">
+				<name>tracerColor</name>
+				<desc>The color of the tracer.</desc>
+				<default>Color(510,510,180,510)</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>tracerLength</name>
+				<desc>The length of the tracer particle.</desc>
+				<default>200.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>tracerSpeed</name>
+				<desc>The speed at which the tracer should travel.</desc>
+				<default>6000.0</default>
+			</member>
+			<member type="string" mode="rw">
+				<name>tracerMaterial</name>
+				<desc>The material that should be used for the tracer.</desc>
+				<default>"particles/beam_tracer"</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>tracerBloom</name>
+				<desc>The bloom intensity to use for the tracer particle.</desc>
+				<default>0.25</default>
+			</member>
+			<member type="string" mode="rw">
+				<name>ammoType</name>
+				<desc>The ammo type to use for the bullet.</desc>
+				<default>""</default>
+			</member>
+			<member type="math.Vector" mode="rw">
+				<name>direction</name>
+				<desc>The direction in which the bullet should travel. The bullet spread will be added to this direction randomly.</desc>
+				<default>math.Vector()</default>
+			</member>
+			<member type="math.Vector" mode="rw">
+				<name>effectOrigin</name>
+				<desc>The position at which the particle effects should originate from.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>damage</name>
+				<desc>The damage should be applied to whatever is hit by the bullet.</desc>
+				<default>0</default>
+			</member>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new BulletInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="game.BulletInfo">bulletInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<related>ents.ShooterComponent:FireBullets</related>
+			<related>util.fire_bullets</related>
+		</collection>
+	</collection>
+</root>

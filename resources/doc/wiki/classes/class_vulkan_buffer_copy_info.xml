@@ -1,0 +1,32 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>BufferCopyInfo</name>
+			<desc>Structure specifying a buffer copy operation.</desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkBufferCopy.html</url>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Creates a new BufferCopyInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.BufferCopyInfo">bufferCopyInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="int" mode="rw">
+				<name>size</name>
+				<desc>The number of bytes to copy.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>srcOffset</name>
+				<desc>The starting offset in bytes from the start of srcBuffer.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>dstOffset</name>
+				<desc>The starting offset in bytes from the start of dstBuffer.</desc>
+			</member>
+		</collection>
+	</collection>
+</root>

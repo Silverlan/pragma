@@ -1,0 +1,62 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" gui="1">
+			<name>Compute</name>
+			<derivedFrom>shader.Shader</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>RecordDispatch</name>
+				<desc>Dispatch compute work items.</desc>
+				<url>https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCmdDispatch.html</url>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int" default="1">x</arg>
+						<arg type="int" default="1">y</arg>
+						<arg type="int" default="1">z</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">success</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>RecordBeginCompute</name>
+					<desc>Binds the shader pipeline to a command buffer and prepares the shader for rendering.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="vulkan.CommandBuffer">commandBuffer</arg>
+							<arg type="int" default="0">pipelineIdx</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordEndCompute</name>
+					<desc>Performs cleanup to end the computing phase.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RecordCompute</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">success</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

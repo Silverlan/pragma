@@ -1,0 +1,174 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>DropDownMenu</name>
+			<derivedFrom>
+				<name>gui.TextEntry</name>
+				<derivedFrom>gui.Element</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>SelectOption</name>
+					<desc>Sets the specified option as selected.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">optionIdx</arg>
+							<arg type="string">option</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>ClearOptions</name>
+					<desc></desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>SelectOptionByText</name>
+					<desc>Finds the option with the specified text and selects it.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">text</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetOptionText</name>
+					<desc>Returns the text associated with the specified option.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">optionIndex</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">text</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetOptionText</name>
+					<desc>Changes the text associated with the specified option.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">optionIndex</arg>
+							<arg type="string">text</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetOptionValue</name>
+					<desc>Returns the value associated with the specified option.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">optionIndex</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetOptionValue</name>
+					<desc>Changes the value associated with the specified option.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">optionIndex</arg>
+							<arg type="string">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetValue</name>
+					<desc>Returns the value for the element's selected option.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetText</name>
+					<desc>Returns the element's current text.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">text</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetText</name>
+					<desc>Changes the element's current text.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">text</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetOptionCount</name>
+					<desc>Returns the number of options associated with this drop-down menu.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">optionCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddOption</name>
+					<desc>Adds a new option to this drop-down menu.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">option</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>OpenMenu</name>
+					<desc>Opens the drop-down menu.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>CloseMenu</name>
+					<desc>Closes the drop-down menu.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>ToggleMenu</name>
+					<desc>Toggles the drop-down menu.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>IsMenuOpen</name>
+					<desc>Returns ''true'' if the menu is open.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isMenuOpen</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

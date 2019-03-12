@@ -1,0 +1,548 @@
+<root>
+	<collection type="library">
+		<name>intersect</name>
+		<desc>TODO</desc>
+		<group>
+			<function type="function">
+				<name>aabb_with_aabb</name>
+				<desc>Returns an intersect type.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">min0</arg>
+						<arg type="math.Vector">max0</arg>
+						<arg type="math.Vector">min1</arg>
+						<arg type="math.Vector">max1</arg>
+					</parameters>
+					<returnValues>
+						<arg type="intersect.Result">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>aabb_with_sphere</name>
+				<desc>Returns ''true'' if the sphere is intersecting with the AABB.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+						<arg type="math.Vector">sphereOrigin</arg>
+						<arg type="float">sphereRadius</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>line_with_aabb</name>
+				<desc>If the line and AABB are intersecting, ''true'' is returned, as well as the time of first contact, and the time the trace exits the intersection. Otherwise ''false'' is returned.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">startPos</arg>
+						<arg type="math.Vector">lineDirection</arg>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">firstContact</arg>
+						<arg type="float">lineExit</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>point_in_aabb</name>
+				<desc>Returns ''true'' if the vector is inside the AABB.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">vector</arg>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>aabb_in_plane_mesh</name>
+				<desc>Returns an intersect type enum about the intersection between the AABB and the plane mesh made up by the planes in the table.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+						<arg type="table" subType="math.Plane">planes</arg>
+					</parameters>
+					<returnValues>
+						<arg type="intersect.Result">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>aabb_with_plane</name>
+				<desc>Returns ''true'' if the given AABB box intersects with the plane.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">min</arg>
+						<arg type="math.Vector">max</arg>
+						<arg type="math.Vector">planeNormal</arg>
+						<arg type="float">planeDistance</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function">
+				<name>sphere_with_sphere</name>
+				<desc>Returns ''true'' if there's an intersection between the two spheres.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">origin0</arg>
+						<arg type="float">radius0</arg>
+						<arg type="math.Vector">origin1</arg>
+						<arg type="float">radius1</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>sphere_in_plane_mesh</name>
+				<desc>Returns an intersect type enum about the intersection between the sphere and the plane mesh made up by the planes in the table.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">sphereOrigin</arg>
+						<arg type="float">sphereRadius</arg>
+						<arg type="table" subType="math.Plane">planes</arg>
+					</parameters>
+					<returnValues>
+						<arg type="intersect.Result">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>sphere_with_cone</name>
+				<desc>Returns ''true'' if there's an intersection between the specified sphere and cone.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">sphereOrigin</arg>
+						<arg type="float">radius</arg>
+						<arg type="math.Vector">coneOrigin</arg>
+						<arg type="math.Vector">coneDirection</arg>
+						<arg type="float">coneAngle</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>sphere_with_plane</name>
+				<desc>Returns ''true'' if the given sphere intersects with the plane.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">sphereOrigin</arg>
+						<arg type="float">radius</arg>
+						<arg type="math.Vector">planeNormal</arg>
+						<arg type="float">planeDistance</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function">
+				<name>line_with_obb</name>
+				<desc>
+					Returns ''true'' if the line intersects with the given oriented bounding box. If ''precise'' is set to ''true'', a more precise check will be performed (Costly!) and a value between [0,1] is returned, representing where on the ray the hit has occurred.\n
+					''rayDir'' '''shouldn't''' be normalized, it should have the maximum length for the line intersection check.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">obbMin</arg>
+						<arg type="math.Vector">obbMax</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">obbMin</arg>
+						<arg type="math.Vector">obbMax</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">obbMin</arg>
+						<arg type="math.Vector">obbMax</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>line_with_mesh</name>
+				<desc>Returns ''true'' if the line intersects with the given mesh/model. If ''precise'' is set to ''true'', a more precise check will be performed (Costly!) and a value between [0,1] is returned, representing where on the ray the hit has occurred.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh.Sub</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh.Sub</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh.Sub</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model.Mesh</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="int">lod</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="int">lod</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Quaternion">rotation</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="int">lod</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="int">lod</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="math.Vector">origin</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="int">lod</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="table" subType="int">bodyGroupIds</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="int">lod</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">rayStart</arg>
+						<arg type="math.Vector">rayDirection</arg>
+						<arg type="math.Vector">game.Model</arg>
+						<arg type="bool" default="false">precise</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">contactPosition</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>line_with_plane</name>
+				<desc>Returns ''true'' if the line intersects with the plane. If an intersection has been found, it will also return a float representing the distance to the intersection on the line.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">origin</arg>
+						<arg type="math.Vector">direction</arg>
+						<arg type="math.Vector">planeNormal</arg>
+						<arg type="float">planeDistance</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">intersectDistance</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>line_with_triangle</name>
+				<desc>Returns ''true'' if the line is intersecting the specified triangle. The second return value represents where the intersection occured, the third return value is the barycentric coordinates on the triangle.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">lineOrigin</arg>
+						<arg type="math.Vector">lineDirection</arg>
+						<arg type="math.Vector">v0</arg>
+						<arg type="math.Vector">v1</arg>
+						<arg type="math.Vector">v2</arg>
+						<arg type="bool" default="false">cull</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">intersect</arg>
+						<arg type="float">intersectionPosition</arg>
+						<arg type="math.Vector2">barycentricCoordinates</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function">
+			<name>point_in_plane_mesh</name>
+			<desc>Returns ''true'' if the point is contained in the specified k-DOP mesh.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="math.Vector">point</arg>
+					<arg type="table" subType="math.Plane">planes</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">intersect</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
+			<name>obb_with_plane</name>
+			<desc>Returns ''true'' if the given OBB box intersects with the plane.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="math.Vector">min</arg>
+					<arg type="math.Vector">max</arg>
+					<arg type="math.Vector">obbOrigin</arg>
+					<arg type="math.Quaternion">obbRotation</arg>
+					<arg type="math.Vector">planeNormal</arg>
+					<arg type="float">planeDistance</arg>
+				</parameters>
+				<returnValues>
+					<arg type="bool">intersect</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<enum_set gui="1">
+			<name>Result</name>
+			<enum value="0">RESULT_OUTSIDE</enum>
+			<enum value="1">RESULT_INSIDE</enum>
+			<enum value="2">RESULT_OVERLAP</enum>
+		</enum_set>
+	</collection>
+</root>

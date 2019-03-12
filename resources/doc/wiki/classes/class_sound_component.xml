@@ -1,0 +1,192 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>SoundComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>SetSoundSource</name>
+				<desc>Changes the sound that should be played.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">source</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetPitch</name>
+				<desc>Changes the sound pitch.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">pitch</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetGain</name>
+				<desc>Changes the sound volume.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">gain</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetRolloffFactor</name>
+				<desc>Changes the sound's rolloff factor.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">rolloffFactor</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetMinGain</name>
+				<desc>Changes the sound's minimum volume.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">minGain</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetMaxGain</name>
+				<desc>Changes the sound's maximum volume.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">maxGain</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetInnerConeAngle</name>
+				<desc>Changes the sound's inner cone angle.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">innerConeAngle</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetOuterConeAngle</name>
+				<desc>Changes the sound's outer cone angle.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">outerConeAngle</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetOffset</name>
+				<desc>Changes the sound's play offset.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">offset</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetReferenceDistance</name>
+				<desc>Changes the sound's reference distance.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">referenceDistance</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetMaxDistance</name>
+				<desc>Changes the sound's maximum audible distance.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="float">maxDistance</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetRelativeToListener</name>
+				<desc>Changes whether the sound should be played globally.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">relativeToListener</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetPlayOnSpawn</name>
+				<desc>Changes whether the sound should be played right away when the entity is spawned.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">playOnSpawn</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetLooping</name>
+				<desc>Changes whether the sound should loop.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">loop</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>SetSoundTypes</name>
+				<desc>Changes the sound types.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="sound.Type">types</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>PlaySound</name>
+				<desc>Starts the sound</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>StopSound</name>
+				<desc>Stops the sound</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="method" shared="1">
+				<name>GetSound</name>
+				<desc>Returns the sound object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="sound.Source">soundSource</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>IsPlaying</name>
+				<desc>Returns ''true'' if the sound is playing.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">isPlaying</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

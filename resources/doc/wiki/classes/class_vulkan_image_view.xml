@@ -1,0 +1,157 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ImageView</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the image view to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">imageView</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the image view is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the image view's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the image view's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetAspectMask</name>
+				<desc>Returns the image view's aspect mask.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageAspect">aspectMask</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetBaseLayer</name>
+					<desc>Returns the image view's base layer.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">baseLayer</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetBaseMipmapLevel</name>
+					<desc>Returns the base mipmap level.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">baseMipmapLevel</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetBaseMipmapSize</name>
+				<desc>Returns the image view's base mipmap size.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+						<arg type="int">depth</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetImageFormat</name>
+				<desc>Returns the image view's format.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Format">format</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetLayerCount</name>
+					<desc>Returns the number of layers in the image view.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">layerCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMipmapCount</name>
+					<desc>Returns the number of mipmaps in the image view.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">mipmapCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetSubresourceRange</name>
+				<desc>Returns the image view's subresource range.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.SubresourceRange">subresourceRange</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetSwizzleArray</name>
+				<desc>Returns the image view's swizzle array.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="table" subType="vulkan.ComponentSwizzle">swizzleArray</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetType</name>
+				<desc>Returns the image view's type.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageViewType">type</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

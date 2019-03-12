@@ -1,0 +1,301 @@
+<root>
+	<collection type="library">
+		<name>math</name>
+		<collection type="class" gui="1">
+			<name>EulerAngles</name>
+			<desc>Rotation order: yaw-pitch-roll.</desc>
+			<group>
+				<name>Directional</name>
+				<function type="method" shared="1">
+					<name>GetForward</name>
+					<desc>Calculates the normalized forward direction of the angles.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">forward</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRight</name>
+					<desc>Calculates the normalized right direction of the angles.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">right</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetUp</name>
+					<desc>Calculates the normalized up direction of the angles.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">up</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetOrientation</name>
+					<desc>Calculates the normalized forward, right and up directions of the angles.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector">forward</arg>
+							<arg type="math.Vector">right</arg>
+							<arg type="math.Vector">up</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Normalize</name>
+				<desc>Normalizes the angle-components so they fit into the range [-180,180] if no base is given, or [base,base +360] if a base-value was specified.</desc>
+				<lua></lua>
+				<overload></overload>
+				<overload>
+					<parameters>
+						<arg type="float">base</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>ToMatrix</name>
+					<desc>Converts the angles to a rotation matrix and returns the result.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat4">rotMat</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ToQuaternion</name>
+					<desc>Converts the angles to a quaternion.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.RotationOrder" default="math.ROTATION_ORDER_YXZ">rotationOrder</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Quaternion">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Copy</name>
+				<desc>Creates a copy of this object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>Set</name>
+				<desc>Changes the angle values to that of the specified argument(s).</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.EulerAngles">angles</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">pitch</arg>
+						<arg type="float">yaw</arg>
+						<arg type="float">roll</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new EulerAngles object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="float">pitch</arg>
+						<arg type="float">yaw</arg>
+						<arg type="float">roll</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.EulerAngles">angles</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Mat4">rotationMatrix</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">forward</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Vector">forward</arg>
+						<arg type="math.Vector">up</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="math.Quaternion">rotation</arg>
+					</parameters>
+					<returnValues>
+						<arg type="math.EulerAngles">angles</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the angles to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">angles</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>-operator</name>
+					<desc>Returns a copy of this object with negated angles.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>operator/</name>
+					<desc>Divides the angles by the specified value and returns them as a new EulerAngles object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1" commutative="1">
+					<name>operator*</name>
+					<desc>Multiplies the angles by the specified value and returns them as a new EulerAngles object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>operator+</name>
+					<desc>Adds the specified angles to the angles of this object and returns them as a new EulerAngles object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>operator-</name>
+					<desc>Subtracts the specified angles from the angles of this object and returns them as a new EulerAngles object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>operator==</name>
+					<desc>Compares the specified angles to the angles of this object and returns true if they are equal.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">angles</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">equal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>*operator</name>
+					<desc>Multiplies the angles by the specified value and returns them as a new EulerAngles object.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.EulerAngles">angles</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<member type="float" mode="rw">
+				<name>p</name>
+				<desc>The pitch-component of the angles.</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>y</name>
+				<desc>The yaw-component of the angles.</desc>
+				<default>0.0</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>r</name>
+				<desc>The roll-component of the angles.</desc>
+				<default>0.0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

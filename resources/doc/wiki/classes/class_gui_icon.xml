@@ -1,0 +1,29 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>Icon</name>
+			<derivedFrom>
+				<name>gui.TexturedShape</name>
+				<derivedFrom>
+					<name>gui.Shape</name>
+					<derivedFrom>gui.Element</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>SetClipping</name>
+				<desc>The element will display the specified clipping area from the element's material (e.g. a sprite-sheet).</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int">xStart</arg>
+						<arg type="int">yStart</arg>
+						<arg type="int">width</arg>
+						<arg type="int">height</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

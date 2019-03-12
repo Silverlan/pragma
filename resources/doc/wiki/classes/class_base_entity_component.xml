@@ -1,0 +1,317 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class" base="1">
+			<name>BaseEntityComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<function type="classmethod" shared="1">
+				<name>RegisterMember</name>
+				<desc>Registers a member variable for the class, which can be automatically networked, loaded or saved, and/or have getter and setter methods automatically generated depending on the specified flags. The getter and setter functions will have the names '''Get[name]''' and '''Set[name]''' respectively. The actual member variable name will be '''m_[name]''', with the first letter of the name being lowercase. e.g. if the name is '''Color''', the setter would be called '''SetColor''', the getter '''GetColor''' and the actual member variable '''m_color'''. If the ents.BaseEntityComponent.MEMBER_FLAG_BIT_PROPERTY is set, an additional getter-function called '''Get[name]Property''' will be generated, returning the property variable of the specified type.
+				Note that if any of the networked flags are set, the member HAS to be defined both serverside and clientside, and all networked members HAVE to be defined in the same order!
+				If the ents.BaseEntityComponent.MEMBER_FLAG_BIT_STORE flag is set, a version number has to be specified. The version number should correspond to the component's current version (at the time the member was defined for the first time). This is important because otherwise you will not be able to make changes to the component's members in the future without breaking previous savegames that include this component! Note that you should also never remove members that have the ents.BaseEntityComponent.MEMBER_FLAG_BIT_STORE flag specified, or you will also break savegames with this component.
+				If the ents.BaseEntityComponent.MEMBER_FLAG_BIT_STORE flag is not set, the version number argument will have no effect.
+			</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="string">name</arg>
+						<arg type="util.VarType">type</arg>
+						<arg type="any">initialValue</arg>
+						<arg type="ents.BaseEntityComponent.MemberFlags" default="ents.BaseEntityComponent.MEMBER_FLAG_DEFAULT">flags</arg>
+						<arg type="int" default="0">version</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>SetNetworked</name>
+					<desc>Changes whether this component is networked (i.e. transmits data between server and client). In general, you should use the ents.EntityComponent.FREGISTER_BIT_NETWORKED flag when registering the component instead.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">networked</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsNetworked</name>
+					<desc>Returns whether this component is networked (i.e. transmits data between server and client).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">networked</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetShouldTransmitSnapshotData</name>
+					<desc>Changes whether this component transmits snapshot data. This is disabled by default and should only be enabled if absolutely necessary. This also has to be enabled both serverside and clientside to have any effect. Once enabled, the [pragma:ref]ents.BaseEntityComponent.SendSnapshotData[/pragma:ref] and [pragma:ref]ents.BaseEntityComponent.ReceiveSnapshotData[/pragma:ref] hooks will be called whenever a snapshot is being sent or received.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">transmitData</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ShouldTransmitSnapshotData</name>
+					<desc>Returns true if this component transmits snapshot data.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">transmitData</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetVersion</name>
+				<desc>Returns the component's version. Primarily used when saving or loading the component.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">version</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" shared="1">
+				<name>RegisterNetEvent</name>
+				<desc>Registers a new net event for this component and returns the event's id, which can be used to send or receive the event. Make sure to call this function both serverside and clientside.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ents.NetEventId">netEvent</arg>
+					</returnValues>
+				</overload>
+				<related>ents.BaseEntityComponent:SendNetEvent</related>
+				<related>ents.BaseEntityComponent:BroadcastNetEvent</related>
+				<related>ents.BaseEntityComponent:ReceiveNetEvent</related>
+			</function>
+			<function type="method" shared="1">
+				<name>FlagCallbackForRemoval</name>
+				<desc>
+					Marks a [pragma:ref]util.Callback[/pragma:ref] object to be removed depending on the specified arguments:\n
+					* If ''callbackType'' is set to ents.EntityComponent.CALLBACK_TYPE_ENTITY, the third argument must be left empty. In this case the callback will be removed when the entity associated with this component is removed.
+					* If ''callbackType'' is set to ents.EntityComponent.CALLBACK_TYPE_COMPONENT, and no third argument is specified, the callback will be removed when this component is removed.
+					* If ''calbackType'' is set to ents.EntityComponent.CALLBACK_TYPE_COMPONENT, and the third argument is another component, the callback will be removed when either this, or the specified component is removed.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="util.Callback">callbackObject</arg>
+						<arg type="ents.EntityComponent.CallbackType">callbackType</arg>
+						<arg type="ents.EntityComponent">component</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="util.Callback">callbackObject</arg>
+						<arg type="ents.EntityComponent.CallbackType">callbackType</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>BindComponentInitEvent</name>
+					<desc>
+						Binds a function (or method) to be called when a component of the specified type has been added (and initialized) to the entity of this component. If a method name was specified, a method of that name should be implemented in the component. The signature for the function should be:\n
+						{{template_overload|{{template_type|void}}|on_init|{{template_param|ents.EntityComponent}} component}}
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+							<arg type="method">callbackFunction</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentId">componentId</arg>
+							<arg type="string">callbackMethodName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>BindEvent</name>
+					<desc>
+						Binds a function (or method) to be called whenever an event of the specified type was triggered in any of the components associated with the entity of this component. If a method name was specified, a method of that name should be implemented in the component. The signature of the function should be:\n
+						{{template_overload|{{template_type|void}}|on_event|{{template_param|any}} arguments...}}\n
+						The parameters depend on the event type.
+					</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentEventId">eventId</arg>
+							<arg type="method">callbackFunction</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="ents.ComponentEventId">eventId</arg>
+							<arg type="string">callbackMethodName</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>AddEntityComponent</name>
+				<desc>Adds a component of the specified type to the entity associated with this component. You can specify a function or method name, which will be called once the component has been initialized. The signature of the function should be:\n
+				{{template_overload|{{template_type|void}}|on_init|{{template_param|ents.EntityComponent}} component}}\n
+				Note that if the entity already has a component of the specified type, no additional component will be added and the callback will be called with the existing component as argument. If you want to add more than one component of the specified type, you will have to use [pragma:ref]ents.Entity:AddComponent[/pragma:ref] instead.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.ComponentId">componentId</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.ComponentId">componentId</arg>
+						<arg type="function">initFunction</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="ents.ComponentId">componentId</arg>
+						<arg type="string">methodName</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">componentName</arg>
+						<arg type="function">initFunction</arg>
+					</parameters>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="string">componentName</arg>
+						<arg type="string">methodName</arg>
+					</parameters>
+				</overload>
+				<related>ents.Entity:AddComponent</related>
+			</function>
+			<function type="hook" shared="1">
+				<name>Initialize</name>
+				<desc>Called once this component has been initialized.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnRemove</name>
+				<desc>Called when this component is about to be removed.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<function type="hook" shared="1">
+				<name>OnEntitySpawn</name>
+				<desc>Called when the entity associated with this component has been spawned. Note that if the component has been added to the entity after the entity has been spawned, this hook will be called anyway. This hook can also get called multiple times, if the component is moved from one entity to another.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="hook" shared="1">
+					<name>OnAttachedToEntity</name>
+					<desc>Called when this component has been added to an entity.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="hook" shared="1">
+					<name>OnDetachedFromEntity</name>
+					<desc>Called when this component has been removed from an entity. Note that this means the component will be added to a different entity immediately after (or is about to be removed).</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+			</group>
+			<group>
+				<function type="hook" shared="1">
+					<name>Save</name>
+					<desc>Called when this component should be saved. Use this function to write data required to restore the component when loaded. Make sure to increment the component's version number whenever you make changes to this function.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="hook" shared="1">
+					<name>Load</name>
+					<desc>Called when this component should be loaded. Use this function to restore the component using the data previously written in [pragma:ref]ents.BaseEntityComponent:Save[/pragma:ref]. Make sure to check the version number as well!</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.DataStream">dataStream</arg>
+							<arg type="int">version</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>tostring</name>
+				<desc>Converts the component to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">component</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<!-- clientside -->
+			<function type="hook" client="1">
+				<name>ReceiveData</name>
+				<desc>Called when the entity was spawned on the client. You can use this callback to receive additional data sent via [pragma:ref]ents.BaseEntityComponent:SendData[/pragma:ref].</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="hook" client="1">
+				<name>ReceiveNetEvent</name>
+				<desc>Called on the client whenever a net event message was dispatched on the server. Make sure to return true if the event id is a valid event.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="ents.NetEventId">eventId</arg>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+					<returnValues>
+						<arg type="util.EventReply" default="util.EVENT_REPLY_UNHANDLED">reply</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="hook" client="1">
+				<name>ReceiveSnapshotData</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="net.Packet">packet</arg>
+					</parameters>
+				</overload>
+			</function>
+			<!-- clientside -->
+			<enum_set type="flags">
+				<name>MemberFlags</name>
+				<enum value="0">MEMBER_FLAG_NONE</enum>
+				<enum value="1" type="bit">MEMBER_FLAG_BIT_PROPERTY</enum>
+				<enum value="2" type="bit">MEMBER_FLAG_BIT_GETTER</enum>
+				<enum value="4" type="bit">MEMBER_FLAG_BIT_SETTER</enum>
+				<enum value="8" type="bit">MEMBER_FLAG_BIT_STORE</enum>
+				<enum value="16" type="bit">MEMBER_FLAG_BIT_KEY_VALUE</enum>
+				<enum value="32" type="bit">MEMBER_FLAG_BIT_INPUT</enum>
+				<enum value="64" type="bit">MEMBER_FLAG_BIT_OUTPUT</enum>
+				<enum value="128" type="bit">MEMBER_FLAG_BIT_NETWORKED</enum>
+				<enum value="256" type="bit">MEMBER_FLAG_BIT_USE_HAS_GETTER</enum>
+				<enum value="512" type="bit">MEMBER_FLAG_BIT_USE_IS_GETTER</enum>
+				<enum value="1152">MEMBER_FLAG_TRANSMIT_ON_CHANGE</enum>
+				<enum value="2176">MEMBER_FLAG_SNAPSHOT_DATA</enum>
+				<enum value="126">MEMBER_FLAG_DEFAULT</enum>
+				<enum value="254">MEMBER_FLAG_DEFAULT_NETWORKED</enum>
+				<enum value="1278">MEMBER_FLAG_DEFAULT_TRANSMIT</enum>
+				<enum value="2302">MEMBER_FLAG_DEFAULT_SNAPSHOT</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

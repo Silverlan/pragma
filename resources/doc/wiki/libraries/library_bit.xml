@@ -1,0 +1,256 @@
+<root>
+	<collection type="library" gui="1">
+		<name>bit</name>
+		<desc>TODO</desc>
+		<function type="function" shared="1" gui="1" vanilla="1">
+			<name>tobit</name>
+			<desc>
+				Normalizes a number to the numeric range for bit operations and returns it. This function is usually not needed since all bit operations already normalize all of their input arguments. Check the [pragma:ref?http://bitop.luajit.org/semantics.html]operational semantics[/pragma:ref] for details.
+			</desc>
+			<url>http://bitop.luajit.org/api.html#tobit</url>
+			<lua>
+				print(0xffffffff)                --> 4294967295 (*)
+				print(bit.tobit(0xffffffff))     --> -1
+				printx(bit.tobit(0xffffffff))    --> 0xffffffff
+				print(bit.tobit(0xffffffff + 1)) --> 0
+				print(bit.tobit(2^40 + 1234))    --> 1234
+			</lua>
+			<overload>
+				<parameters>
+					<arg type="float">x</arg>
+				</parameters>
+				<returnValues>
+					<arg type="float">noramlizedValue</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function" shared="1" gui="1" vanilla="1">
+			<name>tohex</name>
+			<desc>
+				Converts its first argument to a hex string. The number of hex digits is given by the absolute value of the optional second argument. Positive numbers between 1 and 8 generate lowercase hex digits. Negative numbers generate uppercase hex digits. Only the least-significant 4*|n| bits are used. The default is to generate 8 lowercase hex digits.
+			</desc>
+			<url>http://bitop.luajit.org/api.html#tohex</url>
+			<lua>
+				print(bit.tohex(1))              --> 00000001
+				print(bit.tohex(-1))             --> ffffffff
+				print(bit.tohex(0xffffffff))     --> ffffffff
+				print(bit.tohex(-1, -8))         --> FFFFFFFF
+				print(bit.tohex(0x21, 4))        --> 0021
+				print(bit.tohex(0x87654321, 4))  --> 4321
+			</lua>
+			<overload>
+				<parameters>
+					<arg type="float">x</arg>
+					<arg type="int" default="8">n</arg>
+				</parameters>
+				<returnValues>
+					<arg type="string">hexString</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>bnot</name>
+				<desc>Returns the bitwise '''not''' of its argument.</desc>
+				<url>http://bitop.luajit.org/api.html#bnot</url>
+				<lua>
+					print(bit.bnot(0))            --> -1
+					printx(bit.bnot(0))           --> 0xffffffff
+					print(bit.bnot(-1))           --> 0
+					print(bit.bnot(0xffffffff))   --> 0
+					printx(bit.bnot(0x12345678))  --> 0xedcba987
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>bor</name>
+				<desc>Returns either the bitwise '''or''' of all of its arguments. Note that more than two arguments are allowed.</desc>
+				<url>http://bitop.luajit.org/api.html#bnot</url>
+				<lua>
+					print(bit.bor(1, 2, 4, 8))                --> 15
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x1</arg>
+						<arg type="float" variadic="1">x2</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>band</name>
+				<desc>Returns either the bitwise '''and''' of all of its arguments. Note that more than two arguments are allowed.</desc>
+				<url>http://bitop.luajit.org/api.html#bnot</url>
+				<lua>
+					printx(bit.band(0x12345678, 0xff))        --> 0x00000078
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x1</arg>
+						<arg type="float" variadic="1">x2</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>bxor</name>
+				<desc>Returns either the bitwise '''xor''' of all of its arguments. Note that more than two arguments are allowed.</desc>
+				<url>http://bitop.luajit.org/api.html#bnot</url>
+				<lua>
+					printx(bit.bxor(0xa5a5f0f0, 0xaa55ff00))  --> 0x0ff00ff0
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x1</arg>
+						<arg type="float" variadic="1">x2</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>lshift</name>
+				<desc>
+					Returns either the bitwise '''logical left-shift''' of its first argument by the number of bits given by the second argument.\n
+					Logical shifts treat the first argument as an unsigned number and shift in 0-bits. Arithmetic right-shift treats the most-significant bit as a sign bit and replicates it.
+	Only the lower 5 bits of the shift count are used (reduces to the range [0..31]).
+				</desc>
+				<url>http://bitop.luajit.org/api.html#lshift</url>
+				<lua>
+					print(bit.lshift(1, 0))              --> 1
+					print(bit.lshift(1, 8))              --> 256
+					print(bit.lshift(1, 40))             --> 256
+					printx(bit.lshift(0x87654321, 12))   --> 0x54321000
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">n</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>rshift</name>
+				<desc>
+					Returns either the bitwise '''logical right-shift''' of its first argument by the number of bits given by the second argument.\n
+					Logical shifts treat the first argument as an unsigned number and shift in 0-bits. Arithmetic right-shift treats the most-significant bit as a sign bit and replicates it.
+	Only the lower 5 bits of the shift count are used (reduces to the range [0..31]).
+				</desc>
+				<url>http://bitop.luajit.org/api.html#lshift</url>
+				<lua>
+					print(bit.rshift(256, 8))            --> 1
+					print(bit.rshift(-256, 8))           --> 16777215
+					printx(bit.rshift(0x87654321, 12))   --> 0x00087654
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">n</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>arshift</name>
+				<desc>
+					Returns either the bitwise '''arithmetic right-shift''' of its first argument by the number of bits given by the second argument.\n
+					Logical shifts treat the first argument as an unsigned number and shift in 0-bits. Arithmetic right-shift treats the most-significant bit as a sign bit and replicates it.
+	Only the lower 5 bits of the shift count are used (reduces to the range [0..31]).
+				</desc>
+				<url>http://bitop.luajit.org/api.html#lshift</url>
+				<lua>
+					print(bit.arshift(256, 8))           --> 1
+					print(bit.arshift(-256, 8))          --> -1
+					printx(bit.arshift(0x87654321, 12))  --> 0xfff87654
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">n</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<group>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>rol</name>
+				<desc>
+					Returns the bitwise '''left rotation''' of its first argument by the number of bits given by the second argument. Bits shifted out on one side are shifted back in on the other side.\n
+					Only the lower 5 bits of the rotate count are used (reduces to the range [0..31]).
+				</desc>
+				<url>http://bitop.luajit.org/api.html#rol</url>
+				<lua>
+					printx(bit.rol(0x12345678, 12))   --> 0x45678123
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">n</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function" shared="1" gui="1" vanilla="1">
+				<name>ror</name>
+				<desc>
+					Returns the bitwise '''right rotation''' of its first argument by the number of bits given by the second argument. Bits shifted out on one side are shifted back in on the other side.\n
+					Only the lower 5 bits of the rotate count are used (reduces to the range [0..31]).
+				</desc>
+				<url>http://bitop.luajit.org/api.html#rol</url>
+				<lua>
+					printx(bit.ror(0x12345678, 12))   --> 0x67812345
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="float">x</arg>
+						<arg type="float">n</arg>
+					</parameters>
+					<returnValues>
+						<arg type="float">result</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
+		<function type="function" shared="1" gui="1" vanilla="1">
+			<name>bswap</name>
+			<desc>Swaps the bytes of its argument and returns it. This can be used to convert little-endian 32 bit numbers to big-endian 32 bit numbers or vice versa.</desc>
+			<url>http://bitop.luajit.org/api.html#bswap</url>
+			<lua>
+				printx(bit.bswap(0x12345678)) --> 0x78563412
+				printx(bit.bswap(0x78563412)) --> 0x12345678
+			</lua>
+			<overload>
+				<parameters>
+					<arg type="float">x</arg>
+				</parameters>
+				<returnValues>
+					<arg type="float">result</arg>
+				</returnValues>
+			</overload>
+		</function>
+	</collection>
+</root>

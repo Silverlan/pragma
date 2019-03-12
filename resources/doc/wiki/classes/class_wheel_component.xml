@@ -1,0 +1,282 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>WheelComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>IsAttached</name>
+					<desc>Returns ''true'' if the wheel is attached to a vehicle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">attached</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetChassisConnectionPoint</name>
+					<desc>Returns the position at which the wheel is attached to the vehicle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">connectionPoint</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>IsFrontWheel</name>
+				<desc>Returns ''true'' if the wheel is a front wheel.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">frontWheel</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetWheelAxle</name>
+					<desc>Returns the wheel's unit axis direction.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">wheelAxle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWheelDirection</name>
+					<desc>Returns the down-direction of the wheel.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">wheelDirection</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetMaxSuspensionLength</name>
+					<desc>Returns the wheel's maximum suspension length.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionLength</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxSuspensionCompression</name>
+					<desc>Returns the wheel's maximum suspension compression.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionCompression</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetMaxDampingRelaxation</name>
+					<desc>Returns the wheel's damping relaxation.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">dampingRelaxation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWheelRadius</name>
+					<desc>Returns the wheel's radius.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">radius</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSuspensionStiffness</name>
+					<desc>Returns the wheel's suspension stiffness.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionStiffness</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWheelDampingCompression</name>
+					<desc>Returns the wheel's damping compression.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">dampingCompression</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFrictionSlip</name>
+					<desc>Returns the wheel's friction slip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">frictionSlip</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSteeringAngle</name>
+					<desc>Returns the wheel's steering angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">steeringAngle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWheelRotation</name>
+					<desc>Returns the wheel's current rotation around the axle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">rotation</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetRollInfluence</name>
+					<desc>Returns the wheel's roll influence.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">rollInfluence</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetVehicle</name>
+				<desc>Returns the vehicle this wheel is attached to.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ents.VehicleComponent">vehicle</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetRelativeSuspensionSpeed</name>
+					<desc>Returns the velocity of the wheel relative to the chassis.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionSpeed</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSuspensionForce</name>
+					<desc>Returns the force applied to the chassis by the suspension.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionForce</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetSkidGrip</name>
+					<desc>The amount of grip between the wheel and the ground surface.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">skidGrip</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetContactNormal</name>
+					<desc>Returns the wheel's contact normal with the ground surface.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">contactNormal</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetContactPoint</name>
+					<desc>Returns the wheel's contact position with the ground surface.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">contactPoint</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>IsInContact</name>
+					<desc>Returns if the wheel is in contact with the ground surface.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">inContact</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetSuspensionLength</name>
+					<desc>Returns the current length of the suspension in meters.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">suspensionLength</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetWorldSpaceWheelAxle</name>
+					<desc>Returns the direction of the wheel axle in world space.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">axle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetWorldSpaceWheelDirection</name>
+					<desc>Returns the wheel direction in world space.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">direction</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>GetGroundObject</name>
+				<desc>Returns the object the wheel is in contact with.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="phys.CollisionObj">groundObject</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

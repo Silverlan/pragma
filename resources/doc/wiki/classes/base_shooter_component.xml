@@ -1,0 +1,49 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>ShooterComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>FireBullets</name>
+				<desc>
+					Forces the entity to fire one or more bullets. This function has special behavior, which depends on the context in which it is called:\n
+					If the function is called clientside, and ''bMaster'' is set to true, it will be assumed that the shot was triggered by that client. In this case, the bullet-information is send to the server, and stored there.\n
+					If ''ents.ShooterComponent:FireBullets'' is then called serverside, with ''bMaster'' set to false, it will use the last received bullet information and simulate the actual bullet shot (Damage, etc.). It will also dispatch a message to all other clients, which then, in turn, store the received information, until ''ents.ShooterComponent:FireBullets'' has been called on their side with ''bMaster'' set to false.\n
+					If you just call ''ents.ShooterComponent:FireBullets'' in a shared weapon hook (e.g. [pragma:ref]ents.WeaponComponent:OnPrimaryAttack[/pragma:ref]), this behavior will automatically be applied.\n
+					If ''bMaster'' is not specified, it will be auto-determined. If the function is called clientside, and the entity is the local player's weapon, it will be ''true'', otherwise ''false''.\n
+					\n
+					You can't specify the bullet origin or direction with this function, they have to be specified using the ''ents.ShooterComponent.EVENT_ON_FIRE_BULLETS'' event, which will be called automatically whenever ''ents.ShooterComponent:FireBullets'' is used.\n
+					The purpose of this function is mainly to give whichever client fired the bullet immediate feedback, regardless of their latency. If you don't need that, you can use [pragma:ref]util.fire_bullets[/pragma:ref] instead.\n
+					\n
+					If the ''hitReport'' parameter is set to ''true'', a table containing a [pragma:ref]phys.RayCastResult[/pragma:ref] object for each bullet will be returned.
+				</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="game.BulletInfo">bulletInfo</arg>
+						<arg type="bool">hitReport</arg>
+						<arg type="bool">master</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table" subType="phys.RayCastResult">hitTargets</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="game.BulletInfo">bulletInfo</arg>
+						<arg type="bool" default="false">hitReport</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table" subType="phys.RayCastResult">hitTargets</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<enum_set>
+				<name>Event</name>
+				<enum>EVENT_ON_FIRE_BULLETS</enum>
+			</enum_set>
+		</collection>
+	</collection>
+</root>

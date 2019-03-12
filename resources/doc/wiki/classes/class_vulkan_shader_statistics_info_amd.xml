@@ -1,0 +1,38 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>ShaderStatisticsInfoAMD</name>
+			<desc></desc>
+			<url>https://www.khronos.org/registry/vulkan/specs/1.0-extensions/html/vkspec.html#VkShaderStatisticsInfoAMD</url>
+			<member type="vulkan.ShaderStage" mode="rw">
+				<name>shaderStageMask</name>
+				<desc>The combination of logical shader stages contained within this shader.</desc>
+			</member>
+			<member type="vulkan.ShaderResourceUsageAMD" mode="rw">
+				<name>resourceUsage</name>
+				<desc>An instance of VkShaderResourceUsageAMD describing internal physical device resources used by this shader.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>numPhysicalVgprs</name>
+				<desc>The maximum number of vector instruction general-purpose registers (VGPRs) available to the physical device.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>numPhysicalSgprs</name>
+				<desc>The maximum number of scalar instruction general-purpose registers (SGPRs) available to the physical device.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>numAvailableVgprs</name>
+				<desc>The maximum limit of VGPRs made available to the shader compiler.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>numAvailableSgprs</name>
+				<desc>The maximum limit of SGPRs made available to the shader compiler.</desc>
+			</member>
+			<member type="int" mode="rw">
+				<name>computeWorkGroupSize</name>
+				<desc>The local workgroup size of this shader in { X, Y, Z } dimensions.</desc>
+			</member>
+		</collection>
+	</collection>
+</root>

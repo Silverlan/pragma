@@ -1,0 +1,1322 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>Element</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the element to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">element</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method" commutative="1">
+				<name>operator==</name>
+				<desc>Compares this element to the specified element.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="gui.Element">element</arg>
+					</parameters>
+					<returnValues>
+						<arg type="bool">equal</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>IsValid</name>
+					<desc>Returns ''true'' if this GUI element is valid.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">valid</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>Remove</name>
+					<desc>Removes this GUI element.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveSafely</name>
+					<desc>Removes this GUI element at the next tick.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>RemoveElementOnRemoval</name>
+					<desc>Removes the specified GUI element when this element is removed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">element</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetZPos</name>
+					<desc>Changes the z-position of this GUI element. Elements with a higher z-position will be drawn over elements with a lower one.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">zPos</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetZPos</name>
+					<desc>Returns the z-position of this GUI element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">zPos</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>HasFocus</name>
+					<desc>Returns true if this GUI element has the focus.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasFocus</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>RequestFocus</name>
+					<desc>Will set the focus to this element, if it doesn't already have it. If another element, which isn't an ancestor of this element, already has the focus and it, or one of its ancestors, has it trapped, this will have no effect.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>KillFocus</name>
+					<desc>Kills the focus of this GUI element. This will have no effect if the focus for this element is trapped. If one of the ancestors of this element has the focus trapped, that ancestor will regain the focus.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>TrapFocus</name>
+					<desc>If set to ''true'', no other element will be able to request the focus, until this element has been removed or untrapped. This will '''not''' automatically request the focus for this element. Descendants of this element will still be able to request and trap the focus, however when they lose their focus, this element will regain it.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool" default="true">trapFocus</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsFocusTrapped</name>
+					<desc>Returns ''true'' if the focus for this element is trapped.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isTrapped</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>IsVisible</name>
+					<desc>Returns ''true'' if this element is visible.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isVisible</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetVisible</name>
+					<desc>Changes whether this element is visible. A hidden element will not think.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">visible</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetVisibilityProperty</name>
+					<desc>Returns the visibility property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.BoolProperty">visibilityProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetMouseInputEnabled</name>
+					<desc>Returns ''true'' if this element accepts mouse inputs.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">mouseInputEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetMouseInputEnabled</name>
+					<desc>If set to ''true'', mouse inputs will be accepted for this element, and the associated functions will be called for each input.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">mouseInputEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetKeyboardInputEnabled</name>
+					<desc>Returns ''true'' if this element accepts keyboard inputs.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">keyboardInputEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetKeyboardInputEnabled</name>
+					<desc>If set to ''true'', keyboard inputs will be accepted for this element, and the associated functions will be called for each input.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">keyboardInputEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetScrollInputEnabled</name>
+					<desc>Returns ''true'' if this element accepts scroll inputs.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">scrollInputEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetScrollInputEnabled</name>
+					<desc>If set to ''true'', scroll inputs will be accepted for this element, and the associated functions will be called for each input.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">scrollInputEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetCursorMovementCheckEnabled</name>
+					<desc>Returns ''true'' if this element keeps track of cursor movement.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">cursorMovementCheckEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetCursorMovementCheckEnabled</name>
+					<desc>If set to ''true'', cursor movement will be tracked for this element, and the associated functions will be called.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">cursorMovementCheckEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetPos</name>
+					<desc>Returns the position relative to the element's parent.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetPos</name>
+					<desc>Changes the element's position relative to the parent.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">position</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="float">x</arg>
+							<arg type="float">y</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAbsolutePos</name>
+					<desc>Returns the absolute position of this element (Relative to the view port).</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAbsolutePos</name>
+					<desc>Changes the element's absolute position (Relative to the view port).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">position</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="float">x</arg>
+							<arg type="float">y</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetPosProperty</name>
+					<desc>Returns the position property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.Vector2Property">posProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetX</name>
+					<desc>Returns the x-coordinate of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">x</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetY</name>
+					<desc>Returns the y-coordinate of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">y</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetX</name>
+					<desc>Changes the x-coordinate of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">x</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetY</name>
+					<desc>Changes the y-coordinate of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">y</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetLeft</name>
+					<desc>Alias for [pragma:ref]gui.Element:GetX[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">left</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetTop</name>
+					<desc>Alias for [pragma:ref]gui.Element:GetY[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">top</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetRight</name>
+					<desc>Equivalent to [pragma:ref]gui.Element:GetLeft[/pragma:ref] +[pragma:ref]gui.Element:GetWidth[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">right</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetBottom</name>
+					<desc>Equivalent to [pragma:ref]gui.Element:GetTop[/pragma:ref] +[pragma:ref]gui.Element:GetHeight[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">bottom</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetEndPos</name>
+					<desc>Returns the element's end coordinates at the bottom right corner.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2i">endPosition</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetColor</name>
+					<desc>Returns the color of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.Color">color</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetColorProperty</name>
+					<desc>Returns the color property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.ColorProperty">colorProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetColor</name>
+					<desc>Changes the color of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="util.Color">color</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAlpha</name>
+					<desc>Returns the transparency of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">alpha</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAlpha</name>
+					<desc>Changes the transparency of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">alpha</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FadeIn</name>
+					<desc>Fades the element from the current alpha to the target alpha. If no alpha is specified, it will fade in until fully visible.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">fadeTime</arg>
+							<arg type="float" default="255.0">targetAlpha</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FadeOut</name>
+					<desc>Fades the element from the current alpha to 0. If removeOnFaded is set to true, the element will also be removed once the fading is complete. If not specified, removeOnFaded will be treated as false.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">fadeTime</arg>
+							<arg type="bool" default="false">removeOnFaded</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsFading</name>
+					<desc>Returns ''true'' if the element is currently fading in or out.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isFading</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsFadingOut</name>
+					<desc>Returns ''true'' if this element is currently fading out.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isFadingOut</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsFadingIn</name>
+					<desc>Returns ''true'' if this element is currently fading in.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isFadingIn</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetMouseInBoundsProperty</name>
+				<desc>Returns the mouse in bounds property.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="util.BoolProperty">mouseInBoundsProperty</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetWidth</name>
+					<desc>Returns the width of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">width</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetHeight</name>
+					<desc>Returns the height of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSize</name>
+					<desc>Returns the size of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">size</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSizeProperty</name>
+					<desc>Returns the size property.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="util.Vector2Property">sizeProperty</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetSize</name>
+					<desc>Changes the size of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">size</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="float">x</arg>
+							<arg type="float">y</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>Resize</name>
+					<desc>Same as [pragma:ref?gui.Element:SetSize]gui.Element:SetSize(WIElement:GetSize())[/pragma:ref]. This will force the element to perform its update routine.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>SetWidth</name>
+					<desc>Changes the width of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">width</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetHeight</name>
+					<desc>Changes the height of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">height</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SizeToContents</name>
+					<desc>Required for some GUI elements after their size has been changed.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>SetAutoAlignToParent</name>
+					<desc>If set to ''true'', this element will immediately resize to its parent's size. As long as this mode is active, the element will always keep the same size as the parent.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">autoAlign</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="bool">autoAlignX</arg>
+							<arg type="bool">autoAlignY</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAutoAlignToParentX</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">autoAlignX</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAutoAlignToParentY</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">autoAlignY</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetParent</name>
+					<desc>Returns the parent of this GUI element, or nil if it doesn't have a parent.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="gui.Element">parent</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetParent</name>
+					<desc>Changes the element's parent.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">parent</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>ClearParent</name>
+					<desc>Clears the element's parent.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>GetChildren</name>
+					<desc>Returns a table with all children associated with this GUI element. If a ''className'' was specified, only the children of the specified class will be returned.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="gui.Element">children</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">className</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="gui.Element">children</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetFirstChild</name>
+					<desc>Returns the first child of this element with the specified class name, or nil if none was found. This is equivalent to [pragma:ref?gui.Element:GetChild]WIElement:GetChild(className,0)[/pragma:ref].</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">className</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Element">child</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetChild</name>
+					<desc>Returns the n-th child of this element (of the specified class, or all children).</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">index</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Element">child</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="string">className</arg>
+							<arg type="int">index</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Element">child</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsDescendant</name>
+					<desc>Returns ''true'' if the specified GUI element is a descendant of this element. (A child of this element, or a child of a child, etc.)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">element</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">isDescendant</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsDescendantOf</name>
+					<desc>Returns ''true'' if this element is a descendant of the specified GUI element. (A child of the element, or a child of a child, etc.)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">element</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">isDescendant</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsAncestor</name>
+					<desc>Returns ''true'' if the specified GUI element is an ancestor of this element. (The parent of this element, or the parent of the parent, etc.)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">element</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">isDescendant</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsAncestorOf</name>
+					<desc>Returns ''true'' if this element is an ancestor of the specified element. (The parent of the element, or the parent of the parent, etc.)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.Element">element</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">isDescendant</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FindChildByName</name>
+					<desc>Finds the first child of this element with the specified name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Element">child</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FindChildrenByName</name>
+					<desc>Finds all children of this element with the specified name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="gui.Element">children</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FindDescendantByName</name>
+					<desc>Finds the first descendant of this element with the specified name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="gui.Element">descendant</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>FindDescendantsByName</name>
+					<desc>Finds all descendants of this element with the specified name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="table" subType="gui.Element">descendants</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>IsPosInBounds</name>
+					<desc>Returns ''true'' if the specified position is within the bounds of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">position</arg>
+						</parameters>
+						<returnValues>
+							<arg type="bool">inBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsCursorInBounds</name>
+					<desc>Returns ''true'' if the current cursor position is within the bounds of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">inBounds</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetCursorPos</name>
+					<desc>Returns the current cursor position relative to this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">cursorPosition</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>Render</name>
+					<desc>Manually renders this element. This will '''not''' prevent default rendering!</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">origin</arg>
+							<arg type="math.Vector2">size</arg>
+							<arg type="math.Mat4" default="math.Mat4()">transform</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">size</arg>
+							<arg type="math.Mat4" default="math.Mat4()">transform</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>Draw</name>
+					<desc>Draws the GUI element and all its children.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">offset</arg>
+							<arg type="math.Vector2">size</arg>
+							<arg type="math.Mat4">transform</arg>
+							<arg type="bool" default="false">useScissor</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">offset</arg>
+							<arg type="math.Vector2">size</arg>
+							<arg type="bool" default="true">useScissor</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">size</arg>
+							<arg type="math.Mat4">transform</arg>
+							<arg type="bool" default="true">useScissor</arg>
+						</parameters>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">size</arg>
+							<arg type="bool" default="true">useScissor</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>AddCallback</name>
+					<desc>Adds a new callback for the specified event. The available events depend on the GUI element type. (See the main class page to get a list of all events.)</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="function">callback</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Callback">callbackObject</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>CallCallbacks</name>
+					<desc>Calls all callbacks associated with the specified name. A maximum of 8 arguments can be used.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="any" variadic="1">arguments</arg>
+						</parameters>
+						<returnValues>
+							<arg type="any">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetClass</name>
+				<desc>Returns the class name of this element.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">className</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>Think</name>
+				<desc>Directly calls this element's think function. This will '''not''' prevent the default thinking behavior.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>InjectMouseMoveInput</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">mousePos</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>InjectMouseInput</name>
+					<desc>Will behave the same as if the specified mouse button had been pressed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">mousePos</arg>
+							<arg type="input.MouseButton">mouseButton</arg>
+							<arg type="input.State">action</arg>
+							<arg type="input.Modifier" default="input.MOD_NONE">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>InjectKeyboardInput</name>
+					<desc>Will behave the same as if the specified keyboard key had been pressed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="input.Key">mouseButton</arg>
+							<arg type="input.State">action</arg>
+							<arg type="input.Modifier" default="input.MOD_NONE">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>InjectCharInput</name>
+					<desc>Will behave the same as if the specified character-key had been pressed.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">character</arg>
+							<arg type="input.Modifier" default="input.MOD_NONE">modifiers</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>InjectScrollInput</name>
+					<desc>Will behave the same as if the scroll wheel had been used.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">mousePos</arg>
+							<arg type="math.Vector2">scrollInput</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetName</name>
+					<desc>Returns the name of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">name</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetName</name>
+					<desc>Changes the name of this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>ScheduleUpdate</name>
+				<desc>Forces the element to run its update routine the next time it is rendered.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetSkin</name>
+					<desc>Changes the element's skin.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">skin</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>ResetSkin</name>
+					<desc>Clears the element's skin.</desc>
+					<lua></lua>
+					<overload></overload>
+				</function>
+				<function type="method">
+					<name>GetStyleClasses</name>
+					<desc>Returns a table of all custom skin classes that have been assigned to this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">styleClasses</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>AddStyleClass</name>
+					<desc>Adds a new custom style class to this element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">styleClass</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetCursor</name>
+					<desc>Changes the cursor shape of this element. Requires mouse input for this element to be enabled. The cursor will change when the mouse enters the bounds of the element.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="gui.CursorShape">cursorShape</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetCursor</name>
+					<desc>Returns the cursor shape of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="gui.CursorShape">cursorShape</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetTooltip</name>
+					<desc>Returns the element's tooltip message.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">toolTip</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetTooltip</name>
+					<desc>If the cursor hovers over the element for half a second, the specified tooltip will appear. Pass an empty string as argument to disable the tooltip.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">toolTip</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>HasTooltip</name>
+					<desc>Returns ''true'' if the element has a tooltip.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">toolTip</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetClippingEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">clippingEnabled</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsClippingEnabled</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">clippingEnabled</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>SetAlwaysUpdate</name>
+				<desc>If set to true, the element will be updated even if it's invisible.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="bool">alwaysUpdate</arg>
+					</parameters>
+				</overload>
+			</function>
+			<function type="method">
+				<name>SetBounds</name>
+				<desc></desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="math.Vector2">startPos</arg>
+						<arg type="math.Vector2">endPos</arg>
+					</parameters>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetAnchor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">left</arg>
+							<arg type="float">top</arg>
+							<arg type="float">right</arg>
+							<arg type="float">bottom</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAnchorLeft</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">leftAnchor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAnchorRight</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">rightAnchor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAnchorTop</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">topAnchor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAnchorBottom</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">bottomAnchor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAnchor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">leftAnchor</arg>
+							<arg type="float">topAnchor</arg>
+							<arg type="float">rightAnchor</arg>
+							<arg type="float">bottomAnchor</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>HasAnchor</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">hasAnchor</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>AddAttachment</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="math.Vector2" default="math.Vector2()">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetAttachmentPos</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+							<arg type="math.Vector2">position</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAttachmentPos</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector2i">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAbsoluteAttachmentPos</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="math.Vector2">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetAttachmentPosProperty</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">name</arg>
+						</parameters>
+						<returnValues>
+							<arg type="util.Vector2iProperty">position</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

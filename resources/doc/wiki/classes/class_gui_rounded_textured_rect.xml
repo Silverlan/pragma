@@ -1,0 +1,142 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>RoundedTexturedRect</name>
+			<derivedFrom>
+				<name>gui.TexturedShape</name>
+				<derivedFrom>
+					<name>gui.Shape</name>
+					<derivedFrom>gui.Element</derivedFrom>
+				</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>GetRoundness</name>
+					<desc>Returns the corner roundness of this element.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">roundness</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetRoundness</name>
+					<desc>Changes the corner roundness of this element. Can't be smaller than 0 or higher than 6. Higher values mean more roundness, but also more expensive to render.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">roundness</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>GetCornerSize</name>
+					<desc>Returns the area-size of the corners that will be rounded.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">cornerSize</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetCornerSize</name>
+					<desc>Changes the area-size of the corners that will be rounded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">cornerSize</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method">
+					<name>SetRoundTopRight</name>
+					<desc>If set to ''true'', the top right corner of the element will be drawn rounded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">roundTopRight</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsTopRightRound</name>
+					<desc>Returns ''true'' if the upper right corner of this element is round.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isTopRightRound</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetRoundTopLeft</name>
+					<desc>If set to ''true'', the top left corner of the element will be drawn rounded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">roundTopLeft</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsTopLeftRound</name>
+					<desc>Returns ''true'' if the upper left corner of this element is round.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isTopLeftRound</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetRoundBottomLeft</name>
+					<desc>If set to ''true'', the bottom left corner of the element will be drawn rounded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">roundBottomLeft</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsBottomLeftRound</name>
+					<desc>Returns ''true'' if the bottom left corner of this element is round.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isBottomLeftRound</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>SetRoundBottomRight</name>
+					<desc>If set to ''true'', the bottom right corner of the element will be drawn rounded.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">roundBottomRight</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsBottomRightRound</name>
+					<desc>Returns ''true'' if the bottom right corner of this element is round.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">isBottomRightRound</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

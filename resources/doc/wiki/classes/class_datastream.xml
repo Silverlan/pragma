@@ -1,0 +1,753 @@
+<root>
+	<collection type="library">
+		<name>util</name>
+		<collection type="class" gui="1">
+			<name>DataStream</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new datastream object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="util.DataStream">dataStream</arg>
+					</returnValues>
+				</overload>
+				<overload>
+					<parameters>
+						<arg type="int">size</arg>
+					</parameters>
+					<returnValues>
+						<arg type="util.DataStream">dataStream</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>GetSize</name>
+					<desc>Returns the size of this packet in bytes.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">size</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Resize</name>
+					<desc>Changes the size of the datastream.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">size</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Reserve</name>
+					<desc>Reserves the size for the datastream.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">size</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>Seek</name>
+					<desc>Changes the current offset for read/write operations.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">offset</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>Tell</name>
+					<desc>Returns the current offset for read/write operations.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">offset</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method" shared="1">
+				<name>Clear</name>
+				<desc>Sets the size of the datastream to 0.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteString</name>
+					<desc>Writes a string to the packet. If ''nullTerminated'' is set to false, it will only write the actual string characters and nothing else.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">value</arg>
+							<arg type="bool" default="true">nullTerminated</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadString</name>
+					<desc>Reads a string from the packet. If no length is specified, it will read until a null-byte has been reached.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+					<overload>
+						<parameters>
+							<arg type="int">length</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadStringUntil</name>
+					<desc>Reads a string from the packet until the specified character-sequence or the end of the packet has been reached.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">pattern</arg>
+						</parameters>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadLine</name>
+					<desc>Reads a string from the packet until a new-line character ("\n") or the end of the packet has been reached.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteChar</name>
+					<desc>Writes a character (1 byte) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadChar</name>
+					<desc>Reads a character (1 byte) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteBool</name>
+					<desc>Writes a boolean (1 byte) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadBool</name>
+					<desc>Reads a boolean (1 byte) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteInt64</name>
+					<desc>Writes an integer of 8 bytes to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt64</name>
+					<desc>Reads an integer of 8 bytes from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt64</name>
+					<desc>Writes an unsigned integer of 8 bytes to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt64</name>
+					<desc>Reads an unsigned integer of 8 bytes from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt8</name>
+					<desc>Writes an integer of 1 byte to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt8</name>
+					<desc>Reads an integer of 1 byte from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt8</name>
+					<desc>Writes an unsigned integer of 1 byte to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt8</name>
+					<desc>Reads an unsigned integer of 1 byte from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt32</name>
+					<desc>Writes an integer (4 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt32</name>
+					<desc>Reads an integer (4 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt32</name>
+					<desc>Writes an unsigned integer (4 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt32</name>
+					<desc>Reads an unsigned integer (4 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteInt16</name>
+					<desc>Writes a short (2 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadInt16</name>
+					<desc>Reads a short (2 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteUInt16</name>
+					<desc>Writes an unsigned short (2 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadUInt16</name>
+					<desc>Reads an unsigned short (2 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteFloat</name>
+					<desc>Writes a float (4 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadFloat</name>
+					<desc>Reads a float from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteDouble</name>
+					<desc>Writes a double (8 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadDouble</name>
+					<desc>Reads a double (8 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteLongDouble</name>
+					<desc>Writes a long double (16 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadLongDouble</name>
+					<desc>Reads a long double (16 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteVector</name>
+					<desc>Writes a vector (3 floats = 12 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector</name>
+					<desc>Reads a vector (3 floats = 12 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector2</name>
+					<desc>Writes a Vector2 (2 floats = 8 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector2</name>
+					<desc>Reads a Vector2 (2 floats = 8 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector4</name>
+					<desc>Writes a Vector4 (4 floats = 16 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector4</name>
+					<desc>Reads a Vector4 (4 floats = 16 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector4">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteAngles</name>
+					<desc>Writes euler angles (3 floats = 12 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.EulerAngles">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadAngles</name>
+					<desc>Reads euler angles (3 floats = 12 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.EulerAngles">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteQuaternion</name>
+					<desc>Writes a Quaternion (4 floats = 16 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Quaternion">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadQuaternion</name>
+					<desc>Reads a Quaternion (4 floats = 16 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Quaternion">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteMat2</name>
+					<desc>Writes a Mat2 (4 floats = 16 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat2">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat2</name>
+					<desc>Reads a Mat2 (4 floats = 16 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat2">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat2x3</name>
+					<desc>Writes a Mat2x3 (6 floats = 24 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat2x3">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat2x3</name>
+					<desc>Reads a Mat2x3 (6 floats = 24 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat2x3">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat2x4</name>
+					<desc>Writes a Mat2x4 (8 floats = 32 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat2x4">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat2x4</name>
+					<desc>Reads a Mat2x4 (8 floats = 32 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat2x4">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat3x2</name>
+					<desc>Writes a Mat3x2 (6 floats = 24 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat3x2">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat3x2</name>
+					<desc>Reads a Mat3x2 (6 floats = 24 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat3x2">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat3</name>
+					<desc>Writes a Mat3 (9 floats = 36 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat3">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat3</name>
+					<desc>Reads a Mat3 (9 floats = 36 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat3">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat3x4</name>
+					<desc>Writes a Mat3x4 (12 floats = 48 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat3x4">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat3x4</name>
+					<desc>Reads a Mat3x4 (12 floats = 48 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat3x4">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat4x2</name>
+					<desc>Writes a Mat4x2 (8 floats = 32 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat4x2">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat4x2</name>
+					<desc>Reads a Mat4x2 (8 floats = 32 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat4x2">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat4x3</name>
+					<desc>Writes a Mat4x3 (12 floats = 48 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat4x3">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat4x3</name>
+					<desc>Reads a Mat4x3 (12 floats = 48 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat4x3">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteMat4</name>
+					<desc>Writes a Mat4 (16 floats = 64 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Mat4">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadMat4</name>
+					<desc>Reads a Mat4 (16 floats = 64 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Mat4">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>WriteVector2i</name>
+					<desc>Writes a Vector2i (2 integers = 8 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector2i">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector2i</name>
+					<desc>Reads a Vector2i (2 integers = 8 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector2i">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVectori</name>
+					<desc>Writes a Vectori (3 integers = 12 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vectori">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVectori</name>
+					<desc>Reads a Vectori (3 integers = 12 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vectori">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>WriteVector4i</name>
+					<desc>Writes a Vector4i (4 integers = 16 bytes) to the packet.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="math.Vector4i">value</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>ReadVector4i</name>
+					<desc>Reads a Vector4i (4 integers = 16 bytes) from the packet.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="math.Vector4i">value</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

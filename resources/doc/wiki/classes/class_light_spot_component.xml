@@ -1,0 +1,54 @@
+<root>
+	<collection type="library">
+		<name>ents</name>
+		<collection type="class">
+			<name>LightSpotComponent</name>
+			<derivedFrom>ents.EntityComponent</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method" shared="1">
+					<name>GetOuterCutoffAngle</name>
+					<desc>Returns the light's outer cutoff angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">outerCutoffAngle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetOuterCutoffAngle</name>
+					<desc>Changes the light's outer cutoff angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">outerCutoffAngle</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+			<group>
+				<function type="method" shared="1">
+					<name>GetInnerCutoffAngle</name>
+					<desc>Returns the light's inner cutoff angle.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">innerCutoffAngle</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>SetInnerCutoffAngle</name>
+					<desc>Changes the light's inner cutoff angle.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">innerCutoffAngle</arg>
+						</parameters>
+					</overload>
+				</function>
+			</group>
+		</collection>
+	</collection>
+</root>

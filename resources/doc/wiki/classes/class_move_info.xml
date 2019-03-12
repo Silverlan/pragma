@@ -1,0 +1,49 @@
+<root>
+	<collection type="library">
+		<name>ai</name>
+		<collection type="class">
+			<name>MoveInfo</name>
+			<desc>TODO</desc>
+			<function type="method" shared="1">
+				<name>constructor</name>
+				<desc>Creates a new MoveInfo object.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="ai.MoveInfo">moveInfo</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<member type="game.Model.Animation.Activity" mode="rw">
+				<name>activity</name>
+				<desc>The move activity to play while the character is moving.</desc>
+				<default>game.Model.Animation.ACT_RUN</default>
+			</member>
+			<member type="math.Vector" mode="rw">
+				<name>faceTarget</name>
+				<desc>The target the character should face while moving.</desc>
+				<default></default>
+			</member>
+			<member type="bool" mode="rw">
+				<name>moveOnPath</name>
+				<desc>Whether or not to move directly to the target, or using a path.</desc>
+				<default>true</default>
+			</member>
+			<member type="float" mode="rw">
+				<name>moveSpeed</name>
+				<desc>The movement speed override.</desc>
+				<default></default>
+			</member>
+			<member type="float" mode="rw">
+				<name>turnSpeed</name>
+				<desc>The turn speed override.</desc>
+				<default></default>
+			</member>
+			<member type="float" mode="rw">
+				<name>destinationTolerance</name>
+				<desc>The distance the NPC has to be from the target destination for it to be considered 'reached'.</desc>
+				<default>10.0</default>
+			</member>
+		</collection>
+	</collection>
+</root>

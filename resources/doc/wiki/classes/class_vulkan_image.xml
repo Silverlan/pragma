@@ -1,0 +1,257 @@
+<root>
+	<collection type="library">
+		<name>vulkan</name>
+		<collection type="class" client="1" gui="1">
+			<name>Image</name>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>tostring</name>
+				<desc>Converts the image to a string.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="string">image</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>IsValid</name>
+				<desc>Returns ''true'' if the texture is valid.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="bool">valid</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>SetDebugName</name>
+					<desc>Changes the texture's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="string">debugName</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetDebugName</name>
+					<desc>Returns the texture's debug name.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="string">debugName</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetAspectSubresourceLayout</name>
+				<desc>Returns the texture's image.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="int" default="0">layerId</arg>
+						<arg type="int" default="0">mipmapId</arg>
+					</parameters>
+					<returnValues>
+						<arg type="vulkan.SubresourceLayout">subresourceLayout</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetAlignment</name>
+				<desc>Returns the image's alignment.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">alignment</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetExtent2D</name>
+					<desc>Returns the image's extents.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetExtent3D</name>
+					<desc>Returns the image's 3D extents.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+							<arg type="int">depth</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMipmapSize</name>
+					<desc>Returns the extents for the specified mipmap.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="int">mipmapId</arg>
+						</parameters>
+						<returnValues>
+							<arg type="int">width</arg>
+							<arg type="int">height</arg>
+							<arg type="int">depth</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetWidth</name>
+					<desc>Returns the image's width.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">width</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetHeight</name>
+					<desc>Returns the image's height.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">height</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetFormat</name>
+				<desc>Returns the image's format.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Format">format</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetMemoryTypes</name>
+				<desc>Returns information about the memory types the underlying VkImage instance supports.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Format">memoryTypes</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<group>
+				<function type="method">
+					<name>GetLayerCount</name>
+					<desc>Returns the number of layers in the image.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">layerCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetMipmapCount</name>
+					<desc>Returns the number of mipmaps in the image.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">mipmapCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetSampleCount</name>
+					<desc>Returns the number of samples this image uses.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="vulkan.SampleCount">sampleCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>GetSharingMode</name>
+				<desc>Returns the image's sharing mode.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.SharingMode">sharingMode</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetStorageSize</name>
+				<desc>Returns information about the amount of memory the underlying VkImage instance requires to work correctly.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="int">storageSize</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetTiling</name>
+				<desc>Returns the image's tiling.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageTiling">tiling</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetType</name>
+				<desc>Returns the image's type.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageType">type</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetUsage</name>
+				<desc>Returns the image's usage flags.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageUsage">usageFlags</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetMemoryBlock</name>
+				<desc>Returns the image's memory block.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.Memory">memory</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="method">
+				<name>GetSubresourceRange</name>
+				<desc>Returns the image's subresource range.</desc>
+				<lua></lua>
+				<overload>
+					<returnValues>
+						<arg type="vulkan.ImageSubresourceRange">subresourceRange</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

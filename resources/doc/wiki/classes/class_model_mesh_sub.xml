@@ -1,0 +1,542 @@
+<root>
+	<collection type="library">
+		<name>game</name>
+		<collection type="class">
+			<name>Model</name>
+			<collection type="class">
+				<name>Mesh</name>
+				<collection type="class">
+					<name>Sub</name>
+					<desc>TODO</desc>
+					<function type="function" shared="1">
+						<name>Create</name>
+						<desc>Creates a new model sub-mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">mesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>CreateBox</name>
+						<desc>Creates a new box-shaped model sub-mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">mesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="function" shared="1">
+						<name>CreateSphere</name>
+						<desc>Creates a new sphere-shaped model sub-mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="float">radius</arg>
+								<arg type="int" default="1">recursionLevel</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">mesh</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1" commutative="1">
+						<name>operator==</name>
+						<desc>Compares this mesh to the specified value.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.Mesh.Sub">mesh</arg>
+							</parameters>
+							<returnValues>
+								<arg type="bool">equal</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<group>
+						<function type="method" shared="1">
+							<name>GetMaterialIndex</name>
+							<desc>Returns the index into the model's materials of this sub-mesh.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="int">materialIndex</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetMaterialIndex</name>
+							<desc>Changes the index into the model's materials of this sub-mesh.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">materialIndex</arg>
+								</parameters>
+							</overload>
+						</function>
+					</group>
+					<group>
+						<function type="method" shared="1">
+							<name>GetVertexCount</name>
+							<desc>Returns the amount of vertices associated with this mesh.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="int">vertexCount</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetTriangleVertexCount</name>
+							<desc>Returns the amount of vertices of all triangles associated with this mesh.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="int">triangleVertexCount</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetTriangleCount</name>
+							<desc>Returns the amount of triangles associated with this mesh.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="int">triangleCount</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertices</name>
+							<desc>Returns the mesh's vertices.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="math.Vector">vertices</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetTriangles</name>
+							<desc>Returns the mesh's triangles.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="int">triangles</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetUVs</name>
+							<desc>Returns the mesh's uv coordinates.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="math.Vector2">triangles</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetNormals</name>
+							<desc>Returns the mesh's normals.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="math.Vector">normals</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexWeights</name>
+							<desc>Returns the mesh's vertex weights.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="game.Model.VertexWeight">vertexWeights</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>AddTriangle</name>
+							<desc>Adds a new triangle to the mesh.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="game.Model.Vertex">vertex0</arg>
+									<arg type="game.Model.Vertex">vertex1</arg>
+									<arg type="game.Model.Vertex">vertex2</arg>
+								</parameters>
+							</overload>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex0</arg>
+									<arg type="int">vertexIndex1</arg>
+									<arg type="int">vertexIndex2</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>AddVertex</name>
+							<desc>Adds a new vertex to the mesh and returns its index.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="game.Model.Vertex">vertex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="int">vertexIndex</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertex</name>
+							<desc>Changes the vertex data for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="game.Model.Vertex">vertex</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertexPosition</name>
+							<desc>Changes the position for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="math.Vector">position</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertexNormal</name>
+							<desc>Changes the normal for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="math.Vector">normal</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertexUV</name>
+							<desc>Changes the uv coordinates for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="math.Vector2">uv</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertexAlpha</name>
+							<desc>Changes the alpha for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="math.Vector2">alpha</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>SetVertexWeight</name>
+							<desc>Changes the vertex weight for the specified vertex.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+									<arg type="game.Model.VertexWeight">vertexWeight</arg>
+								</parameters>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertex</name>
+							<desc>Returns the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="game.Model.Vertex">vertex</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexPosition</name>
+							<desc>Returns the position of the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="math.Vector">vertexPosition</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexNormal</name>
+							<desc>Returns the normal of the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="math.Vector">vertexNormal</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexUV</name>
+							<desc>Returns the uv coordinates of the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="math.Vector2">vertexUvCoordinates</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexAlpha</name>
+							<desc>Returns the alphas of the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="math.Vector2">vertexAlphas</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" shared="1">
+							<name>GetVertexWeight</name>
+							<desc>Returns the vertex weights of the specified vertex, or nil if the vertex doesn't exist.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="int">vertexIndex</arg>
+								</parameters>
+								<returnValues>
+									<arg type="game.Model.VertexWeight">vertexWeights</arg>
+								</returnValues>
+							</overload>
+						</function>
+					</group>
+					<function type="method" shared="1">
+						<name>Update</name>
+						<desc></desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="game.Model.FUpdate" default="game.Model.FUPDATE_ALL_DATA">updateFlags</arg>
+							</parameters>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetBounds</name>
+						<desc>Returns the bounds of this mesh.</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="math.Vector">min</arg>
+								<arg type="math.Vector">max</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>GetCenter</name>
+						<desc>Returns the center of the mesh, after it has been [pragma:ref?game.Model.Mesh:Update]updated[/pragma:ref].</desc>
+						<lua></lua>
+						<overload>
+							<returnValues>
+								<arg type="math.Vector">center</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<function type="method" shared="1">
+						<name>Optimize</name>
+						<desc>Attempts to optimize the mesh by merging duplicate vertices.</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>NormalizeUVCoordinates</name>
+						<desc>Brings all uv coordinates into the range [0,1].</desc>
+						<lua></lua>
+						<overload></overload>
+					</function>
+					<function type="method" shared="1">
+						<name>ClipAgainstPlane</name>
+						<desc>Clips this mesh against the specified plane and writes the resulting clipped meshes into ''clippedMeshA'' and ''clippedMeshB''.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">planeNormal</arg>
+								<arg type="float">planeDistance</arg>
+								<arg type="bool" default="false">splitCoverMeshes</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">clippedMeshA</arg>
+								<arg type="game.Model.Mesh.Sub">clippedMeshB</arg>
+								<arg type="game.Model.Mesh.Sub">coverMeshA</arg>
+								<arg type="game.Model.Mesh.Sub">coverMeshB</arg>
+							</returnValues>
+						</overload>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">planeNormal</arg>
+								<arg type="float">planeDistance</arg>
+								<arg type="bool">splitCoverMeshes</arg>
+								<arg type="table" subType="math.Mat4">boneMatrices</arg>
+							</parameters>
+							<returnValues>
+								<arg type="game.Model.Mesh.Sub">clippedMeshA</arg>
+								<arg type="game.Model.Mesh.Sub">clippedMeshB</arg>
+								<arg type="game.Model.Mesh.Sub">coverMeshA</arg>
+								<arg type="game.Model.Mesh.Sub">coverMeshB</arg>
+							</returnValues>
+						</overload>
+					</function>
+					<group>
+						<function type="method" shared="1">
+							<name>GenerateNormals</name>
+							<desc>Generates generic normals for this mesh.</desc>
+							<lua></lua>
+							<overload></overload>
+						</function>
+						<function type="method" shared="1">
+							<name>ApplyUVMapping</name>
+							<desc>Generates UV coordinates based on the given information.</desc>
+							<lua></lua>
+							<overload>
+								<parameters>
+									<arg type="math.Vector">nu</arg>
+									<arg type="math.Vector">nv</arg>
+									<arg type="int">width</arg>
+									<arg type="int">height</arg>
+									<arg type="float">ou</arg>
+									<arg type="float">ov</arg>
+									<arg type="float">su</arg>
+									<arg type="float">sv</arg>
+								</parameters>
+							</overload>
+							<overload>
+								<parameters>
+									<arg type="math.Vector">nu</arg>
+									<arg type="math.Vector">nv</arg>
+									<arg type="float">ou</arg>
+									<arg type="float">ov</arg>
+									<arg type="float">su</arg>
+									<arg type="float">sv</arg>
+								</parameters>
+							</overload>
+						</function>
+					</group>
+					<function type="method" shared="1">
+						<name>Scale</name>
+						<desc>Scales this sub-mesh.</desc>
+						<lua></lua>
+						<overload>
+							<parameters>
+								<arg type="math.Vector">scale</arg>
+							</parameters>
+						</overload>
+					</function>
+					<!-- clientside -->
+					<group>
+						<function type="method" client="1">
+							<name>GetTangents</name>
+							<desc>Returns the mesh's tangents.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="math.Vector">tangents</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" client="1">
+							<name>GetBiTangents</name>
+							<desc>Returns the mesh's bi-tangents.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="table" subType="math.Vector">biTangents</arg>
+								</returnValues>
+							</overload>
+						</function>
+					</group>
+					<group>
+						<function type="method" client="1">
+							<name>GetVertexBuffer</name>
+							<desc>Returns the mesh's vertex buffer.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="vulkan.Buffer">vertexBuffer</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" client="1">
+							<name>GetVertexWeightBuffer</name>
+							<desc>Returns the mesh's vertex weight buffer.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="vulkan.Buffer">vertexWeightBuffer</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" client="1">
+							<name>GetAlphaBuffer</name>
+							<desc>Returns the mesh's alpha buffer.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="vulkan.Buffer">alphaBuffer</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" client="1">
+							<name>GetIndexBuffer</name>
+							<desc>Returns the mesh's index buffer.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="vulkan.Buffer">indexBuffer</arg>
+								</returnValues>
+							</overload>
+						</function>
+						<function type="method" client="1">
+							<name>GetVkMesh</name>
+							<desc>Returns the mesh's vulkan mesh.</desc>
+							<lua></lua>
+							<overload>
+								<returnValues>
+									<arg type="vulkan.Mesh">mesh</arg>
+								</returnValues>
+							</overload>
+						</function>
+					</group>
+					<!-- clientside -->
+				</collection>
+			</collection>
+		</collection>
+	</collection>
+</root>

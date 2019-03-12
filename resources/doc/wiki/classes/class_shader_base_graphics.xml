@@ -1,0 +1,23 @@
+<root>
+	<collection type="library">
+		<name>shader</name>
+		<collection type="class" client="1" base="1" gui="1">
+			<name>BaseGraphics</name>
+			<derivedFrom>
+				<name>shader.BaseGraphicsModule</name>
+				<derivedFrom>shader.BaseModule</derivedFrom>
+			</derivedFrom>
+			<derivedFrom>
+				<name>shader.Graphics</name>
+				<derivedFrom>shader.Shader</derivedFrom>
+			</derivedFrom>
+			<desc>TODO</desc>
+			<function type="method">
+				<name>constructor</name>
+				<desc>Base constructor for BaseGraphics.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
+		</collection>
+	</collection>
+</root>

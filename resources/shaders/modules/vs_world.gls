@@ -1,0 +1,105 @@
+#ifndef F_VS_WORLD_GLS
+#define F_VS_WORLD_GLS
+
+#include "vs_weighted.gls"
+#include "vs_buffer_locations.gls"
+#include "sh_vertex_data.gls"
+#include "sh_normalmapping.gls"
+#include "sh_parallaxmapping.gls"
+#include "sh_vertex_data.gls"
+#include "sh_mapping.gls"
+
+#include "../functions/sh_vector_to_depth.gls"
+#include "../lighting/sh_lighting.gls"
+#include "../modules/sh_csm.gls"
+#include "../modules/sh_rendersettings.gls"
+#include "../modules/sh_camera_info.gls"
+#include "../modules/sh_math.gls"
+#include "../modules/vs_vertex_animation.gls"
+#include "../modules/light_map/vs_lightmap.gls"
+
+layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
+layout(location = SHADER_UV_BUFFER_LOCATION) in vec2 in_vert_uv;
+layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
+
+#include "vs_light.gls"
+
+void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
+{
+	uint vertexAnimOffset = (u_material.vertexAnimInfo<<16)>>16;
+	uint vertexAnimCount = u_material.vertexAnimInfo>>16;
+	for(uint i=0;i<vertexAnimCount;++i)
+	{
+		uint offset = vertexAnimOffset +i;
+		VertexAnimationFrameData frameData = vaFrameData.data[offset];
+		vec3 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex].xyz;
+		vec3 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex].xyz;
+		vertPos += v0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+	}
+
+	mat4 MV = u_camera.V *mdlMatrix;
+	mat4 MVP = u_camera.P *MV;
+
+	mat4 mBone = calc_bone_matrix(is_weighted());
+	vec4 vpos = mBone *vec4(vertPos,1.0);
+
+	gl_Position = MVP *vpos;
+
+	vec4 vposWs = mdlMatrix *vpos;
+	vposWs.xyz /= vposWs.w;
+	vposWs.w = 1.0;
+
+	float lenSqrClipPlane = length_sqr(u_material.clipPlane);
+	if(lenSqrClipPlane > 0.0)
+	{
+		float lenClipPlane = sqrt(lenSqrClipPlane);
+		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),vec4(u_material.clipPlane /lenClipPlane,lenClipPlane));
+	}
+	else
+		gl_ClipDistance[0] = 1.0;
+
+	vec3 normal = normalize((vec4(in_vert_normal,0.0)).xyz);
+	vs_out.vert_pos_ws = vposWs.xyz;
+	//vs_out.vert_pos_cs = (u_camera.V *vposWs).xyz;
+
+	vs_out.vert_normal = normal;
+	vs_out.vert_normal_cs = (u_camera.V *mdlMatrix *vec4(normal,0)).xyz;
+	
+	vs_out.vert_uv = in_vert_uv;
+
+#if ENABLE_TANGENT_SPACE_NORMALS == 1
+	vs_out.vert_tangent = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
+	vs_out.vert_bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+#endif
+
+#if ENABLE_LIGHTMAP == 1
+	if(is_light_map_enabled())
+		vs_out.vert_uv_lightmap.xy = in_uv_lightmap;
+#endif
+
+	// Parallax Mapping
+	/*if(use_parallax_map() == true) // We only need these if parallax mapping is enabled
+	{
+		vec3 tangent = normalize((mBone *vec4(-in_vert_tangent,0.0)).xyz);
+		vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+		mat3 TBN = transpose(mat3(
+			normalize((mdlMatrix *vec4(tangent,0.0)).xyz),
+			normalize((mdlMatrix *vec4(bitangent,0.0)).xyz),
+			normalize((mdlMatrix *vec4(normal,0.0)).xyz)
+		));
+		vec3 camPosTs = TBN *u_renderSettings.posCam;
+		vec3 vertPosTs = TBN *vs_out.vert_pos_ws.xyz;
+
+		vs_out.tangentData.cam_dir_to_vert_ts = camPosTs -vertPosTs;
+	}*/
+	//
+
+	export_light_fragment_data(vposWs,mBone,normal,mdlMatrix);
+	//export_light_fragment_data(vposWs,mBone,normal,MV);
+}
+
+void export_world_fragment_data(vec3 vertPos) {export_world_fragment_data(get_model_matrix(),vertPos);}
+
+void export_world_fragment_data() {export_world_fragment_data(in_vert_pos);}
+
+#endif

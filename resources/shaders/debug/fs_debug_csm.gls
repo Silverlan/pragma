@@ -1,0 +1,57 @@
+#ifndef F_DEBUG_CSM_GLS
+#define F_DEBUG_CSM_GLS
+
+#include "../modules/sh_csm.gls"
+#include "fs_debug_info.gls"
+
+const float debugCSMColorScale = 1.f;
+vec4 debug_get_csm_cascade_color(vec4 col)
+{
+	if((u_debug.flags &DEBUG_LIGHT_SHOW_CASCADES) == 0)
+		return col;
+	switch(u_csm.count)
+	{
+		case 4:
+		{
+			if(gl_FragCoord.z < u_csm.fard.x)
+				col.b += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.y)
+				col.g += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.z)
+				col.r += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.w)
+			{
+				col.r += debugCSMColorScale *0.5f;
+				col.g += debugCSMColorScale *0.5f;
+			}
+			break;
+		}
+		case 3:
+		{
+			if(gl_FragCoord.z < u_csm.fard.x)
+				col.b += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.y)
+				col.g += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.z)
+				col.r += debugCSMColorScale;
+			break;
+		}
+		case 2:
+		{
+			if(gl_FragCoord.z < u_csm.fard.x)
+				col.b += debugCSMColorScale;
+			else if(gl_FragCoord.z < u_csm.fard.y)
+				col.g += debugCSMColorScale;
+			break;
+		}
+		default:
+		{
+			if(gl_FragCoord.z < u_csm.fard.x)
+				col.b += debugCSMColorScale;
+			break;
+		}
+	}
+	return col;
+}
+
+#endif

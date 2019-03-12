@@ -1,0 +1,159 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#define PUSH_USER_CONSTANTS \
+	float waterFogIntensity; \
+	uint enableReflection; \
+	mat4 reflectionVp;
+
+#include "../debug/fs_debug_csm.gls"
+#include "../modules/fs_world.gls"
+#include "../modules/fs_fog_data.gls"
+#include "../modules/sh_csm.gls"
+#include "../modules/sh_parallaxmapping.gls"
+#include "../modules/sh_time.gls"
+
+vec3 calc_light_specular(vec3 normal,vec3 viewVector)
+{
+	const float shineDamper = 40.0;
+	const float reflectivity = 1.0;
+	vec3 specularHighlights = vec3(0,0,0);
+
+	ivec2 location = ivec2(gl_FragCoord.xy);
+	ivec2 tileID = location / ivec2(16, 16);
+	uint index = tileID.y * u_renderSettings.numberOfTilesX + tileID.x;
+	uint offset = index * MAX_SCENE_LIGHTS;
+	for(uint i=0;i<MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset +i].index!=-1;i++)
+	{
+		uint lightIndex = visibleLightTileIndicesBuffer.data[offset +i].index;
+		
+		LightSourceData light = get_light_source(int(lightIndex));
+		vec3 fromLightVector;
+		if((light.flags &FLIGHT_TYPE_DIRECTIONAL) != 0)
+			fromLightVector = light.direction.xyz;
+		else
+			fromLightVector = fs_in.vert_pos_ws -light.position.xyz;
+
+		vec3 reflectedLight = reflect(normalize(fromLightVector),normal);
+		float specular = max(dot(reflectedLight,viewVector),0.0);
+		specular = pow(specular,shineDamper);
+		specularHighlights += light.color.rgb *specular *reflectivity;
+	}
+	return specularHighlights;
+}
+
+#define SHADER_UNIFORM_WATER_EFFECTS_SET (SHADER_UNIFORM_SHADOW_CUBE_MAPS_SET +1)
+
+#define SHADER_UNIFORM_REFLECTION_MAP_BINDING 0
+#define SHADER_UNIFORM_REFRACTION_MAP_BINDING (SHADER_UNIFORM_REFLECTION_MAP_BINDING +1)
+#define SHADER_UNIFORM_REFRACTION_DEPTH_MAP_BINDING (SHADER_UNIFORM_REFRACTION_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_WATER_SETTINGS_SET SHADER_UNIFORM_WATER_EFFECTS_SET
+#define SHADER_UNIFORM_WATER_SETTINGS_BINDING (SHADER_UNIFORM_REFRACTION_DEPTH_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_WATER_FOG_SET SHADER_UNIFORM_WATER_SETTINGS_SET
+#define SHADER_UNIFORM_WATER_FOG_BINDING (SHADER_UNIFORM_WATER_SETTINGS_BINDING +1)
+
+layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFLECTION_MAP_BINDING) uniform sampler2D u_reflectionMap;
+layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFRACTION_MAP_BINDING) uniform sampler2D u_refractionMap;
+layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFRACTION_DEPTH_MAP_BINDING) uniform sampler2D u_refractionDepthMap;
+
+layout(std140,set = SHADER_UNIFORM_WATER_SETTINGS_SET,binding = SHADER_UNIFORM_WATER_SETTINGS_BINDING) uniform WaterSettings
+{
+	float waterScale; // TODO: Remove me, let mapper decide!
+	float waveStrength;
+	float waveSpeed; // Wave direction?
+	float reflectiveIntensity;
+} u_water;
+
+layout(std140,set = SHADER_UNIFORM_WATER_FOG_SET,binding = SHADER_UNIFORM_WATER_FOG_BINDING) uniform UWaterFog
+{
+	Fog fog;
+} u_waterFog;
+
+void main()
+{
+	vec4 wposWorld = inverse(u_camera.V) *get_model_matrix() *vec4(fs_in.vert_pos_ws,1.0);
+	vec4 shadowCoord = u_material.reflectionVp *vec4(fs_in.vert_pos_ws,1.0);
+
+	shadowCoord.xy /= shadowCoord.w;
+	shadowCoord.x = shadowCoord.x *0.5 +0.5;
+	shadowCoord.y = shadowCoord.y *0.5 +0.5;
+
+	//const float waterScale = 4.0;
+	//const float waveStrength = 0.004;
+	//const float waveSpeed = 0.03 *waterScale;
+	//const float reflectiveIntensity = 1.2;
+	float waterScale = u_water.waterScale;
+	float waveStrength = u_water.waveStrength;
+	float waveSpeed = 0.03 *u_water.waveSpeed *u_water.waterScale; // ?
+	float reflectiveIntensity = u_water.reflectiveIntensity;
+
+	vec2 refractUv = shadowCoord.xy;
+	vec2 reflectUv = shadowCoord.xy;
+
+	float depthWaterFloor = get_depth_distance(texture(u_refractionDepthMap,refractUv).x,u_renderSettings.nearZ,u_renderSettings.farZ);
+	float depthWaterSurf = gl_FragCoord.z /gl_FragCoord.w;
+	float depthWater = depthWaterFloor -depthWaterSurf;
+
+	float t = mod(cur_time() *waveSpeed,1.0) /1.0;
+	vec2 uv = fs_in.vert_uv *waterScale;
+	vec2 dudvCoord = (texture(u_diffuseMap,vec2(uv.x +t,uv.y)).rg *0.1);
+	dudvCoord = uv +vec2(dudvCoord.x,dudvCoord.y +t);
+	vec2 distortion = (texture(u_diffuseMap,dudvCoord).rg *2.0 -1.0) *waveStrength;
+
+	refractUv += distortion;
+	refractUv = clamp(refractUv,0.001,0.999);
+
+	reflectUv += distortion;
+	reflectUv = clamp(reflectUv,0.001,0.999);
+
+	vec4 refractColor = texture(u_refractionMap,refractUv);
+
+	// Apply water fog
+	Fog fog = u_waterFog.fog;
+	refractColor.rgb = mix(refractColor.rgb,u_waterFog.fog.color.rgb,get_fog_factor(fog,depthWater) *u_material.waterFogIntensity);
+
+	vec3 viewVector = normalize(u_renderSettings.posCam -fs_in.vert_pos_ws.xyz);
+	vec3 vertNormal = (get_model_matrix() *vec4(fs_in.vert_normal,0.0)).xyz;
+	float refractiveFactor = dot(viewVector,vertNormal);
+	refractiveFactor = pow(refractiveFactor,reflectiveIntensity);
+
+	// Lighting
+	vec4 nmCol = texture(u_normalMap,dudvCoord);
+	vec3 normal = vec3(nmCol.r *2.0 -1.0,nmCol.b,nmCol.g *2.0 -1.0);
+	normal = normalize(normal);
+
+	vec3 specularHighlights = calc_light_specular(normal,viewVector);
+
+	//
+
+	/*if(true)
+	{
+		float scale = 1.0 /10.0;
+		fs_color = vec4((sin(fs_in.vert_pos_ws.x *scale *M_PI) +1.0) /2.0,(sin(fs_in.vert_pos_ws.y *scale *M_PI) +1.0) /2.0,(sin(fs_in.vert_pos_ws.z *scale *M_PI) +1.0) /2.0,0.4);
+		
+		fs_color = reflectColor;//mix(reflectColor,refractColor,refractiveFactor);
+		fs_color = mix(fs_color,vec4(0.0,0.3,0.5,1.0),0.2) +vec4(specularHighlights,0.0);
+		fs_color.a = 0.95;
+		//fs_color.a = 0.0;
+		//fs_color = mix(fs_color,vec4(0.0,0.3,0.5,1.0),0.2) +vec4(specularHighlights,0.0);
+		//fs_color = vec4(fs_in.vert_normal,0.8);
+		//fs_color.a = 0.8;
+		return;
+	}*/
+	if(u_material.enableReflection == 1)
+	{
+		vec4 reflectColor = texture(u_reflectionMap,reflectUv);
+		fs_color = mix(reflectColor,refractColor,refractiveFactor);
+	}
+	else
+		fs_color = refractColor;
+	fs_color = mix(fs_color,vec4(0.0,0.3,0.5,1.0),0.2) +vec4(specularHighlights,0.0);
+
+	//fs_color.rgb = calculate_fog(u_waterFog.fog,fs_color.rgb,u_renderSettings.nearZ,u_renderSettings.farZ).rgb;
+
+	fs_color.a = clamp(depthWater /20.0,0.0,1.0);
+}

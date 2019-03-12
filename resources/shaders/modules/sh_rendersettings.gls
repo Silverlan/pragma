@@ -1,0 +1,27 @@
+#ifndef F_SH_RENDERSETTINGS_GLS
+#define F_SH_RENDERSETTINGS_GLS
+
+#include "sh_uniform_locations.gls"
+
+#define FRENDER_UNLIT 1
+#define FRENDER_SSAO_ENABLED (FRENDER_UNLIT<<1)
+
+layout(std140,set = SHADER_UNIFORM_RENDER_SETTINGS_SET,binding = SHADER_UNIFORM_RENDER_SETTINGS_BINDING) uniform RenderSettings
+{
+	vec4 ambientColor;
+	vec3 posCam;
+	int flags;
+	float shadowRatioX;
+	float shadowRatioY;
+	float nearZ;
+	float farZ;
+	int viewportW;
+	int viewportH;
+	uint numberOfTilesX;
+	int shaderQuality; // 1 = lowest, 10 = highest
+} u_renderSettings;
+
+bool is_unlit() {return (u_renderSettings.flags &FRENDER_UNLIT) != 0;}
+bool is_ssao_enabled() {return (u_renderSettings.flags &FRENDER_SSAO_ENABLED) != 0;}
+
+#endif

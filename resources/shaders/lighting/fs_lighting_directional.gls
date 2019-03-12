@@ -1,0 +1,68 @@
+#ifndef F_FS_LIGHTING_DIRECTIONAL_GLS
+#define F_FS_LIGHTING_DIRECTIONAL_GLS
+
+#include "../modules/sh_csm.gls"
+#include "../functions/sh_vector_to_depth.gls"
+#include "fs_shadow.gls"
+#include "sh_light_sources.gls"
+
+float lookup_csm_texture(int index,vec2 uv)
+{
+	return texture(csmTextures[index],uv).r;
+}
+
+vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta)
+{
+	LightSourceData light = get_light_source(lightIdx);
+	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *get_vertex_normal()); // Is this correct?
+#if LIGHTING_USE_INCIDENCE_ANGLE == 1
+	float lambertTerm = max(dot(N,normalize(light.direction.xyz)),0.0);
+#else
+	float lambertTerm = 1.0;
+#endif
+	if(lambertTerm > 0.0)
+	{
+		int layer = get_csm_cascade_index();
+		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
+#if ENABLE_LIGHT_DEBUG == 1
+		if((u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+		{
+			vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
+			float shadow = 1.0;
+			if(layer != -1)
+			{
+				shadowCoord.w = shadowCoord.z *0.5 +0.5;
+				shadowCoord.x = shadowCoord.x *0.5 +0.5;
+				shadowCoord.y = shadowCoord.y *0.5 +0.5;
+				shadow = lookup_csm_texture(layer,vec2(shadowCoord.x,shadowCoord.y));
+			}
+			fragLightColor += vec3(shadow,shadow,shadow);
+		}
+		else if((u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+		{
+			vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
+			float shadow = shadowCoord.z;
+			fragLightColor += vec3(shadow,shadow,shadow);
+		}
+		else
+#endif
+		{
+			fragLightColor += fragColor *light.color.a *cosTheta *lambertTerm +specularColor;
+			float bias = 0.0;//max(0.001 *tan(acos(cosTheta)),0.00001);
+			vec4 shadowCoord = lightVertPos;
+			float shadow = 1.0;
+			if(layer != -1 && light.shadowIndex != 0)
+			{
+				shadow = calculate_shadow(
+					layer,
+					shadowCoord,
+					bias
+				);
+			}
+			fragLightColor.rgb *= shadow;
+		}
+	}
+	return fragLightColor;
+}
+
+#endif

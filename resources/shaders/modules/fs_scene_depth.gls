@@ -1,0 +1,22 @@
+#ifndef F_SCENE_DEPTH_GLS
+#define F_SCENE_DEPTH_GLS
+
+#include "fs_depth.gls"
+
+#ifndef SHADER_UNIFORM_SCENE_DEPTH_MAP_SET
+	#define SHADER_UNIFORM_SCENE_DEPTH_MAP_SET SHADER_UNIFORM_USER_SET1
+#endif
+
+#ifndef SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING
+	#define SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING 0
+#endif
+
+layout(set = SHADER_UNIFORM_SCENE_DEPTH_MAP_SET,binding = SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING) uniform sampler2D u_smpSceneDepth;
+
+float get_scene_depth(float wViewport,float hViewport)
+{
+	vec2 coord = gl_FragCoord.xy /vec2(wViewport,hViewport);
+	return texture(u_smpSceneDepth,coord).r;
+}
+
+#endif

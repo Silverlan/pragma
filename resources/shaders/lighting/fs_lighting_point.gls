@@ -1,0 +1,68 @@
+#ifndef F_FS_LIGHTING_POINT_GLS
+#define F_FS_LIGHTING_POINT_GLS
+
+#include "fs_shadow.gls"
+#include "sh_light_sources.gls"
+
+vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta,float lightDist,vec3 fragPosWs)
+{
+	LightSourceData light = get_light_source(lightIdx);
+	//float distScale = clamp(1 -(lightDist /light.position.w),0.0,1.0);
+	float distScale = calc_light_falloff(lightDist,light.position.w);
+	distScale = pow(distScale,light.falloffExponent);
+
+	if(distScale < 1.0)
+	{
+		float brightness = light.color.a;
+		brightness *= distScale;
+		vec3 localColor = fragColor *brightness *cosTheta +specularColor *distScale;
+		
+		float distToLight = length(light.position.xyz -fragPosWs);
+		float dist = (distToLight -u_renderSettings.nearZ) /(u_renderSettings.farZ -u_renderSettings.nearZ);
+		
+#if ENABLE_LIGHT_DEBUG == 1
+		if((u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+		{
+			float zFar = light.position.w;
+			float shadow = texture(shadowCubemaps[pointIdx],fragPosWs -light.position.xyz).r;
+			fragLightColor += vec3(shadow,shadow,shadow);
+		}
+		else if((u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+		{
+			float shadow = length(fragPosWs -light.position.xyz) /light.position.w;
+			fragLightColor += vec3(shadow,shadow,shadow);
+		}
+		else
+#endif
+		{
+			vec4 depthCoord = get_light_vertex_position(lightIdx);
+			depthCoord.z = length(fragPosWs -light.position.xyz) /light.position.w;
+			float shadow = (light.shadowMapIndex > 0) ? calculate_shadow(
+				fragPosWs,
+				shadowCubemaps[light.shadowMapIndex -1],
+				depthCoord.z,
+				light.position.xyz
+			) : 1.0;
+			/*float shadow = calculate_shadow(
+				fragPosWs,
+				shadowCubemaps[0],
+				depthCoord.z,
+				light.position.xyz
+			);*/
+			/*float shadow = (light.castShadows == 1) ? calculate_shadow(
+				fragPosWs,
+				shadowCubemaps[pointIdx],
+				depthCoord.z,
+				light.position.xyz
+			) : 1.0;*/
+			//float shadow = 1.0;
+
+			float shadowAmbient = 0.8;
+			shadow *= shadowAmbient;
+			fragLightColor.rgb += localColor.rgb *shadow;// +localColor.rgb *(1.f -shadowAmbient);
+		}
+	}
+	return fragLightColor;
+}
+
+#endif

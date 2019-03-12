@@ -1,0 +1,112 @@
+#ifndef F_GAUSSIANBLUR_GLS
+#define F_GAUSSIANBLUR_GLS
+
+float kernel5[] = float[](0.38774,0.24477,0.06136); // Sigma 1
+float kernel7[] = float[](0.214607,0.189879,0.131514,0.071303); // Sigma 2
+float kernel9[] = float[](0.20236,0.179044,0.124009,0.067234,0.028532); // Sigma 2
+float kernel11[] = float[](0.141836,0.13424,0.113806,0.086425,0.05879,0.035822); // Sigma 3
+float kernel13[] = float[](0.111043,0.107644,0.098059,0.083942,0.067526,0.051046,0.036262); // Sigma 4
+float kernel15[] = float[](0.105915,0.102673,0.093531,0.080066,0.064408,0.048689,0.034587,0.023089); // Sigma 4
+float kernel17[] = float[](0.08745,0.085724,0.080748,0.073088,0.06357,0.05313,0.042669,0.032928,0.024418); // Sigma 5
+float kernel19[] = float[](0.074903,0.073873,0.070865,0.066121,0.060009,0.052973,0.045484,0.037986,0.030857,0.024381); // Sigma 6
+float kernel21[] = float[](0.061476,0.060998,0.059587,0.057307,0.054261,0.050582,0.046421,0.041944,0.037311,0.032676,0.028174); // Sigma 8
+
+#define lookupKernelX(col,kernel) col += texture(tex,vec2(UV.x,UV.y)) *kernel[0]; \
+	for(int i=1;i<kernel.length();i++) \
+	{ \
+		col += texture(tex,vec2(UV.x -i *blurSize,UV.y)) *kernel[i]; \
+		col += texture(tex,vec2(UV.x +i *blurSize,UV.y)) *kernel[i]; \
+	}
+#define lookupKernelY(col,kernel) col += texture(tex,vec2(UV.x,UV.y)) *kernel[0]; \
+	for(int i=1;i<kernel.length();i++) \
+	{ \
+		col += texture(tex,vec2(UV.x,UV.y -i *blurSize)) *kernel[i]; \
+		col += texture(tex,vec2(UV.x,UV.y +i *blurSize)) *kernel[i]; \
+	}
+
+layout(push_constant) uniform pushConstants {
+	vec4 colorScale;
+	float blurSize;
+	int kernelSize;
+} u_pushConstants;
+
+float get_blur_size() {return u_pushConstants.blurSize;}
+
+vec4 get_gaussian_blur_horizontal(sampler2D tex,vec2 UV) // Horizontal Gaussian Blur
+{
+	ivec2 texSize = textureSize(tex,0);
+	float blurSize = get_blur_size() /texSize.x;
+	vec4 col = vec4(0.0,0.0,0.0,0.0);
+	switch(u_pushConstants.kernelSize)
+	{
+		case 0:
+		case 1:
+			lookupKernelX(col,kernel5);
+			break;
+		case 2:
+			lookupKernelX(col,kernel7);
+			break;
+		case 3:
+			lookupKernelX(col,kernel9);
+			break;
+		case 4:
+			lookupKernelX(col,kernel11);
+			break;
+		case 5:
+			lookupKernelX(col,kernel13);
+			break;
+		case 6:
+			lookupKernelX(col,kernel15);
+			break;
+		case 7:
+			lookupKernelX(col,kernel17);
+			break;
+		case 8:
+			lookupKernelX(col,kernel19);
+			break;
+		default:
+			lookupKernelX(col,kernel21);
+			break;
+	};
+	return col;
+}
+
+vec4 get_gaussian_blur_vertical(sampler2D tex,vec2 UV) // Vertical Gaussian Blur
+{
+	ivec2 texSize = textureSize(tex,0);
+	float blurSize = get_blur_size() /texSize.y;
+	vec4 col = vec4(0.0,0.0,0.0,0.0);
+	switch(u_pushConstants.kernelSize)
+	{
+		case 0:
+		case 1:
+			lookupKernelY(col,kernel5);
+			break;
+		case 2:
+			lookupKernelY(col,kernel7);
+			break;
+		case 3:
+			lookupKernelY(col,kernel9);
+			break;
+		case 4:
+			lookupKernelY(col,kernel11);
+			break;
+		case 5:
+			lookupKernelY(col,kernel13);
+			break;
+		case 6:
+			lookupKernelY(col,kernel15);
+			break;
+		case 7:
+			lookupKernelY(col,kernel17);
+			break;
+		case 8:
+			lookupKernelY(col,kernel19);
+			break;
+		default:
+			lookupKernelY(col,kernel21);
+			break;
+	};
+	return col;
+}
+#endif

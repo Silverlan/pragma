@@ -1,0 +1,62 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#include "sh_particle_mode.gls"
+#include "../modules/sh_export.gls"
+#include "../modules/sh_color.gls"
+#include "sh_particle_generic.gls"
+
+#if LIGHTING_ENABLED == 1
+vec3 get_vertex_position_ws() {return fs_in.vert_pos_ws.xyz;}
+vec3 get_vertex_position_cs() {return fs_in.vert_pos_cs;}
+vec3 get_vertex_normal() {return fs_in.vert_normal;}
+vec3 get_vertex_normal_cs() {return fs_in.vert_normal_cs;}
+#include "../lighting/fs_lighting.gls"
+#endif
+
+#include "../modules/fs_scene_depth.gls"
+#include "../modules/fs_alpha_test.gls"
+#include "../modules/sh_alpha_mode.gls"
+#include "sh_particle.gls"
+
+layout(location = 0) out vec4 fs_color;
+layout(location = 1) out vec4 fs_brightColor;
+
+void main()
+{
+	uint viewportW = u_instance.viewportSize>>16;
+	uint viewportH = (u_instance.viewportSize<<16)>>16;
+	float zScene = get_scene_depth(viewportW,viewportH);
+	if(zScene < gl_FragCoord.z)
+		discard;
+	vec2 uv = get_particle_uv();
+	vec4 col = fs_in.particle_color;
+	rgba8_to_rgba16(col);
+
+	fs_color = get_particle_color(uv) *col;
+	fs_color.rgb *= u_instance.texIntensity;
+	fs_color.a = get_particle_alpha(fs_color);
+
+	if(u_instance.orientation != PARTICLE_ORIENTATION_TYPE_WORLD && (u_instance.renderFlags &PARTICLE_FRENDER_SOFT) != 0)
+		fs_color.a *= get_depth_smooth_factor(u_instance.nearZ,u_instance.farZ,zScene);
+
+	// Alpha test
+	uint alphaCompareOp = COMPARE_OP_ALWAYS;
+	float alphaCompareRef = 0.0;
+	switch(u_instance.alphaMode)
+	{
+		case ALPHA_MODE_MASKED:
+			alphaCompareOp = COMPARE_OP_EQUAL;
+			alphaCompareRef = 1.0;
+			break;
+	}
+	apply_alpha_test(fs_color.a,alphaCompareOp,alphaCompareRef);
+	//
+
+#if LIGHTING_ENABLED == 1
+	if(is_particle_unlit() == false)
+		fs_color.rgb = calculate_lighting(fs_color.rgb,uv,mat4(1.0),get_vertex_position_ws(),fs_in.vert_normal,false);
+#endif
+}

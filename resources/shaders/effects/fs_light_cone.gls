@@ -1,0 +1,36 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#define PUSH_USER_CONSTANTS \
+	float coneLength;
+
+#include "sh_light_cone.gls"
+#include "../modules/fs_scene.gls"
+#include "../debug/fs_debug_info.gls"
+#include "../modules/fs_world.gls"
+#include "../modules/fs_scene_depth.gls"
+
+void main()
+{
+	fs_color = get_instance_color();
+	extract_bright_color(fs_color);
+
+	//if(is_fragment_in_shadow() == true)
+	//	discard;
+
+	mat4 m = get_model_matrix();
+	vec3 origin = vec3(m[3][0],m[3][1],m[3][2]); // Origin (Tip) of the cone in world-space
+	fs_color.a = 1.0 -min(length(fs_in.vert_pos_ws -origin) /u_material.coneLength,1.0);
+
+	mat4 vm = get_view_matrix();
+	vec3 vertPosCs = normalize((get_view_matrix() *vec4(fs_in.vert_pos_ws.xyz,1.0)).xyz);
+	vec3 vertNormCs = fs_in.vert_normal_cs;
+
+	float dt = abs(dot(normalize(vertNormCs),normalize(vertPosCs)));
+
+	dt = pow(dt,4);
+	fs_color.a *= dt;
+	fs_color.a *= get_depth_smooth_factor(u_renderSettings.nearZ,u_renderSettings.farZ,get_scene_depth(u_renderSettings.viewportW,u_renderSettings.viewportH));
+}

@@ -1,0 +1,100 @@
+#ifndef F_FS_SHADOW_SPOT_GLS
+#define F_FS_SHADOW_SPOT_GLS
+
+#include "../../modules/sh_poisson_disk.gls"
+#include "../../modules/sh_math.gls"
+#include "../../modules/sh_rendersettings.gls"
+#include "sh_shadow.gls"
+
+float get_shadow_value(sampler2D shadowMap,vec2 uv,float fragDepth)
+{
+	float d = texture(shadowMap,uv).r;
+	return (d < fragDepth) ? 0.0 : 1.0;
+}
+
+float calculate_spot_shadow(sampler2D shadowMap,vec4 shadowCoord,float bias,const float maxSampleOffset,const int samples,const float sampleSpread,const int numPoissonSamples)
+{
+	shadowCoord.xy /= shadowCoord.w;
+
+	float shadow = 0.0;
+	shadowCoord.z -= bias;
+
+	if(samples <= 1)
+		return get_shadow_value(shadowMap,shadowCoord.xy,shadowCoord.z);
+
+	const float offset = maxSampleOffset;
+	const float nsamples = sqrt(float(samples));
+	const float nsampleSpread = sampleSpread;
+	const float inc = (offset /nsamples) *2.0;
+
+	//shadow = get_shadow_value(shadowMap,shadowCoord.xy,shadowCoord.z);
+	for(int i=0;i<numPoissonSamples;++i)
+	{
+		vec2 poissonOffset = get_poisson_disk_offset(i) *nsampleSpread;
+		for(float x=-offset;x<offset;x+=inc)
+		{
+			for(float y=-offset;y<offset;y+=inc)
+				shadow += get_shadow_value(shadowMap,shadowCoord.xy +vec2(x,y) +poissonOffset,shadowCoord.z);
+		}
+	}
+	shadow /= float(samples *numPoissonSamples);
+	return shadow;
+}
+
+float calculate_spot_shadow(sampler2D shadowMap,vec4 shadowCoord,float bias)
+{
+	float maxSampleOffset = 0.0;
+	int samples = 0;
+	float sampleSpread = 0.0;
+	int numPoissonSamples = 0;
+
+	int quality = u_renderSettings.shaderQuality;
+	if(quality > 1)
+	{
+		numPoissonSamples = 2;
+		if(quality > 5)
+		{
+			maxSampleOffset = MIN_SHADOW_SAMPLE_OFFSET;
+			if(quality > 7)
+			{
+				sampleSpread = 0.0005;
+				if(quality == 10)
+					samples = pow2(16);
+				else
+					samples = pow2(8);
+			}
+			else
+			{
+				samples = pow2(4);
+				sampleSpread = 0.0001;
+			}
+		}
+		else
+		{
+			maxSampleOffset = MIN_SHADOW_SAMPLE_OFFSET;
+			samples = pow2(2);
+			sampleSpread = MIN_SHADOW_SAMPLE_OFFSET;
+		}
+	}
+	return calculate_spot_shadow(shadowMap,shadowCoord,bias,maxSampleOffset,samples,sampleSpread,numPoissonSamples);
+}
+
+float calculate_spot_shadow(sampler2D shadowMap,vec4 shadowCoord)
+{
+	return calculate_spot_shadow(shadowMap,shadowCoord,0.01);
+}
+
+////////////////////////////////////
+
+float calculate_spot_shadow(sampler2DShadow shadowMap,vec4 shadowCoord,float bias)
+{
+	float shadow = 0.0;
+	shadowCoord.w += bias;
+	return textureProj(shadowMap,vec4(
+		shadowCoord.x +u_renderSettings.shadowRatioX *shadowCoord.w,
+		shadowCoord.y +u_renderSettings.shadowRatioY *shadowCoord.w,
+		shadowCoord.z,shadowCoord.w
+	),bias);
+}
+
+#endif

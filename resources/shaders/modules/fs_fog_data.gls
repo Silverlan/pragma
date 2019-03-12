@@ -1,0 +1,39 @@
+#ifndef F_FS_FOG_DATA_GLS
+#define F_FS_FOG_DATA_GLS
+
+#include "../functions/fs_linearize_depth.gls"
+
+struct Fog
+{
+	vec4 color;
+	float start;
+	float end;
+	float density;
+	uint type;
+	uint flags;
+};
+
+float get_fog_factor(Fog fog,float fogCoord)
+{
+	float r;
+	switch(fog.type)
+	{
+	case 1:
+		r = exp(-fog.density *fogCoord);
+		break;
+	case 2:
+		r = exp(-pow(fog.density *fogCoord,2.0));
+		break;
+	default:
+		{
+			r = (fog.end -fogCoord) /(fog.end -fog.start);
+			r *= fog.density;
+		}
+	}
+	r = 1.0 -clamp(r,0.0,1.0);
+	return r;
+}
+vec3 calculate_fog(Fog fog,vec3 color,float depth) {return mix(color,fog.color.rgb,get_fog_factor(fog,depth)).rgb;}
+vec3 calculate_fog(Fog fog,vec3 color,float nearZ,float farZ) {return calculate_fog(fog,color,get_depth_distance(nearZ,farZ));}
+
+#endif

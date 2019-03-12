@@ -1,0 +1,6 @@
+#ifndef F_SH_SHADOW_GLS
+#define F_SH_SHADOW_GLS
+
+#define MIN_SHADOW_SAMPLE_OFFSET 0.001
+
+#endif

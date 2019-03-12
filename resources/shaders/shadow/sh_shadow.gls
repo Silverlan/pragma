@@ -1,0 +1,25 @@
+#ifndef F_SH_SHADOW_GLS
+#define F_SH_SHADOW_GLS
+
+#include "../modules/sh_export.gls"
+#include "../modules/sh_vertex_data_locations.gls"
+
+struct VertexData
+{
+	vec3 vert_pos_ws; // Vertex Position in world space
+	vec4 light_pos_ws; // Light Position in world space; 4th component stores the distance
+};
+layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
+#ifdef GLS_FRAGMENT_SHADER
+	fs_in
+#else
+	vs_out
+#endif
+;
+
+layout(push_constant) uniform pushConstants {
+	mat4 depthMVP;
+	vec4 lightPos; // 4th component stores the distance
+} u_pushConstants;
+
+#endif

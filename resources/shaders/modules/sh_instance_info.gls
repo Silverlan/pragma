@@ -1,0 +1,30 @@
+#ifndef F_SH_INSTANCE_INFO_GLS
+#define F_SH_INSTANCE_INFO_GLS
+
+#include "sh_uniform_locations.gls"
+#include "sh_entity_info.gls"
+
+#ifndef PUSH_USER_CONSTANTS
+	#define PUSH_USER_CONSTANTS
+#endif
+
+#define ENABLE_MATERIAL_PARAMETERS 1
+
+#define FLIGHT_MAP_ENABLED 1
+
+// Change per Material
+layout(push_constant) uniform Material
+{
+	vec3 clipPlane;
+	uint vertexAnimInfo;
+	vec4 phong; // rgb = Phong Color, a = Phong intensity
+	uint flags;
+	uint lightMapFlags;
+	float glowScale;
+	float parallaxHeightScale;
+	float alphaDiscardThreshold;
+	float phongIntensity;
+	PUSH_USER_CONSTANTS
+} u_material;
+
+#endif

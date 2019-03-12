@@ -1,0 +1,17 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#include "../debug/fs_debug_csm.gls"
+#include "../modules/fs_world.gls"
+#include "../modules/sh_csm.gls"
+#include "../modules/sh_parallaxmapping.gls"
+
+void main()
+{
+	vec2 texCoords = apply_parallax(use_parallax_map(),fs_in.vert_uv);
+	fs_color = get_processed_color(get_texture_color(u_diffuseMap,texCoords),texCoords);
+	fs_color = debug_get_csm_cascade_color(fs_color);
+	extract_bright_color(fs_color);
+}

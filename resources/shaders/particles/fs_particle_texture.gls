@@ -1,0 +1,37 @@
+#ifndef F_FS_PARTICLE_TEXTURE_GLS
+#define F_FS_PARTICLE_TEXTURE_GLS
+
+#include "../modules/fs_animated_texture.gls"
+
+#ifdef GLS_FRAGMENT_SHADER
+	#include "sh_particle_render_flags.gls"
+#ifndef ANIMATION_RENDER_FLAGS
+	#define ANIMATION_RENDER_FLAGS u_instance.renderFlags
+#endif
+	bool is_animated() {return ((ANIMATION_RENDER_FLAGS &PARTICLE_FRENDER_ANIMATED) != 0) ? true : false;}
+	bool is_particle_unlit() {return ((ANIMATION_RENDER_FLAGS &PARTICLE_FRENDER_UNLIT) != 0) ? true : false;}
+	bool get_black_to_alpha() {return ((ANIMATION_RENDER_FLAGS &PARTICLE_FRENDER_BLACK_TO_ALPHA) != 0) ? true : false;}
+	vec2 get_particle_uv(vec2 uv,float tStart)
+	{
+		if(is_animated() == false)
+			return uv;
+		return get_animated_texture_uv(uv,tStart);
+	}
+	float get_particle_alpha(vec4 col)
+	{
+		if(get_black_to_alpha())
+			return col.a *clamp(max(max(col.r,col.g),col.b),0,1);
+		return col.a;
+	}
+
+	#ifndef ENABLE_PARTICLE_TEXTURE
+		#define ENABLE_PARTICLE_TEXTURE 1
+	#endif
+	#if ENABLE_PARTICLE_TEXTURE == 1
+		layout(set = SHADER_UNIFORM_PARTICLE_MAP_SET,binding = SHADER_UNIFORM_PARTICLE_MAP_BINDING) uniform sampler2D u_smpParticle;
+		vec4 get_particle_color(vec2 uv) {return texture(u_smpParticle,uv);}
+		vec2 get_particle_uv() {return get_particle_uv(fs_in.vert_uv,fs_in.particle_start);}
+	#endif
+#endif
+
+#endif

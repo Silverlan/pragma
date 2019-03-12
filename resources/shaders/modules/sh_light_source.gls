@@ -1,0 +1,30 @@
+#ifndef F_SH_LIGHT_SOURCE_GLS
+#define F_SH_LIGHT_SOURCE_GLS
+
+#define FLIGHT_TURNED_ON 1
+#define FLIGHT_TYPE_SPOT (FLIGHT_TURNED_ON<<1)
+#define FLIGHT_TYPE_POINT (FLIGHT_TYPE_SPOT<<1)
+#define FLIGHT_TYPE_DIRECTIONAL (FLIGHT_TYPE_POINT<<1)
+
+struct LightSourceData
+{
+	vec4 position; // position.w = distance
+	vec4 color;
+	vec4 direction; // direction.w is unused
+	uint shadowIndex;
+	
+	// Spotlights
+	float cutoffOuter;
+	float cutoffInner;
+	float attenuation;
+
+	uint flags;
+	uint shadowMapIndex;
+
+	float falloffExponent;
+
+	 // Alignment to vec4
+	float dummy0;
+};
+
+#endif

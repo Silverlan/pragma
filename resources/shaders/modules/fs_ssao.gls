@@ -1,0 +1,20 @@
+#ifndef F_FS_SSAO_GLS
+#define F_FS_SSAO_GLS
+
+#include "sh_uniform_locations.gls"
+
+#ifndef ENABLE_SSAO
+	#define ENABLE_SSAO 1
+#endif
+#if ENABLE_SSAO == 1
+	layout(set = SHADER_UNIFORM_SSAO_MAP_SET,binding = SHADER_UNIFORM_SSAO_MAP_BINDING) uniform sampler2D u_ssao;
+	float get_ssao_occlusion()
+	{
+		vec2 uv = gl_FragCoord.xy;
+		uv.x /= u_renderSettings.viewportW;
+		uv.y /= u_renderSettings.viewportH;
+		return texture(u_ssao,uv).r;
+	}
+#endif
+
+#endif

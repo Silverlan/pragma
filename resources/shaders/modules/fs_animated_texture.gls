@@ -1,0 +1,45 @@
+#ifndef F_ANIMATED_TEXTURE_GLS
+#define F_ANIMATED_TEXTURE_GLS
+
+#include "sh_time.gls"
+
+layout(std140,set = SHADER_UNIFORM_TEXTURE_ANIMATION_SET,binding = SHADER_UNIFORM_TEXTURE_ANIMATION_BINDING) uniform TextureAnimation
+{
+	int offset;
+	int frames;
+	int fps;
+	int rows;
+	int columns;
+} u_animation;
+
+vec2 get_animated_texture_uv(vec2 UV,float tStart)
+{
+	if(u_animation.frames == 0)
+		return UV;
+	float frame = u_animation.offset;
+	float w = 1.0 /u_animation.columns;
+	float h = 1.0 /u_animation.rows;
+	if(u_animation.fps > 0)
+	{
+		float t = max(u_time.curTime -tStart,0.0);
+		float scale = float(u_animation.frames) /float(u_animation.fps);
+		float r = t /scale;
+		r = floor((t -floor(r) *scale) /scale *u_animation.frames);
+		frame += r;
+	}
+	else
+	{
+		float t = tStart;
+		float scale = t;
+		float r = floor(scale *u_animation.frames);
+		frame += r;
+	}
+	++frame;
+	vec2 texUV;
+	texUV.x = UV.x /u_animation.columns +w *(frame -1);
+	texUV.y = (UV.y /u_animation.rows) +h *(floor((frame -1) /u_animation.columns));
+	return texUV;
+}
+vec2 get_animated_texture_uv(vec2 UV) {return get_animated_texture_uv(UV,0);}
+
+#endif

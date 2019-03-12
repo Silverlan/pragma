@@ -1,0 +1,43 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#include "sh_prepass.gls"
+#include "../../modules/vs_weighted.gls"
+#include "../../modules/vs_vertex_animation.gls"
+
+layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
+
+void main()
+{
+	vec3 vertPos = in_vert_pos;
+	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
+	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
+	for(uint i=0;i<vertexAnimCount;++i)
+	{
+		uint offset = vertexAnimOffset +i;
+		VertexAnimationFrameData frameData = vaFrameData.data[offset];
+		vec3 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex].xyz;
+		vec3 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex].xyz;
+		vertPos += v0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+	}
+
+	mat4 mdlMatrix = get_model_matrix();
+	mat4 MV = u_camera.V *mdlMatrix;
+	mat4 MVP = u_camera.P *MV;
+
+	mat4 mBone = calc_bone_matrix(is_weighted());
+	vec4 vpos = mBone *vec4(vertPos,1.0);
+	gl_Position = MVP *vpos;
+
+	if(length_sqr(u_pushConstants.clipPlane.xyz) > 0.0)
+	{
+		vec4 vposWs = mdlMatrix *vpos;
+		vposWs.xyz /= vposWs.w;
+		vposWs.w = 1.0;
+		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.clipPlane);
+	}
+	else
+		gl_ClipDistance[0] = 1.0;
+}

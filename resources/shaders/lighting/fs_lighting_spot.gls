@@ -1,0 +1,76 @@
+#ifndef F_FS_LIGHTING_SPOT_GLS
+#define F_FS_LIGHTING_SPOT_GLS
+
+#include "fs_shadow.gls"
+#include "sh_light_sources.gls"
+
+vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta,vec3 posFromWorldSpace)
+{
+	LightSourceData light = get_light_source(lightIdx);
+	vec3 dirToLight = normalize(posFromWorldSpace);
+	
+	//vec3 N = normalize(get_vertex_normal_cs());
+	float lambertTerm = 1.0;//max(dot(N,-dirToLight),0.0); // TODO: Check me
+	//if(lambertTerm > 0.0) // Surface facing the light
+	{
+		vec3 lightDir = light.direction.xyz;
+		float cos_cur_angle = dot(-dirToLight,lightDir);
+		float cos_inner_cone_angle = light.cutoffInner;
+		float cos_outer_cone_angle = light.cutoffOuter;
+		
+		// Shadow
+		if(cos_cur_angle > cos_outer_cone_angle) // Within the cone
+		{
+			//float distScale = clamp(1.0 -(length(posFromWorldSpace) /light.position.w),0.0,1.0);
+			float distScale = calc_light_falloff(length(posFromWorldSpace),light.position.w);
+			distScale = pow(distScale,light.falloffExponent);
+
+			if(distScale != 0.0) // In range
+			{
+//#if ENABLE_LIGHT_DEBUG == 1
+				if(false)//(u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+				{
+					float zFar = light.position.w;
+					vec4 depthCoord = get_light_vertex_position(lightIdx);
+					depthCoord /= depthCoord.w;
+					float shadow = texture(shadowMaps[spotIdx],depthCoord.st).r;
+					fragLightColor += vec3(shadow,shadow,shadow);
+				}
+				else if(false)//(u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+				{
+					vec4 shadowCoord = get_light_vertex_position(lightIdx);
+					fragLightColor += vec3(shadowCoord.z,shadowCoord.z,shadowCoord.z);
+					//float shadow = length(get_vertex_position_ws() -light.position) /light.position.w;
+					//fragLightColor += vec3(shadow,shadow,shadow);
+				}
+				else
+//#endif
+				{
+					vec4 depthCoord = get_light_vertex_position(lightIdx);
+					depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
+					depthCoord = depthCoord /light.position.w;
+					float shadow = (light.shadowMapIndex > 0) ? calculate_shadow(
+						shadowMaps[light.shadowMapIndex -1],
+								depthCoord,
+								0.0 /* bias is 0, since it's already been applied in the shader pipeline */
+					) : 1.0;
+					float falloff = distScale *lambertTerm;
+					vec3 diffuseLight = (light.color.rgb *falloff) *light.color.a;
+
+					float cos_outer_minus_inner_angle = cos_inner_cone_angle -cos_outer_cone_angle;
+					float spot = clamp((cos_cur_angle -cos_outer_cone_angle) /cos_outer_minus_inner_angle,0.0,1.0);
+					float coneAttenuation = spot;
+					vec3 outColor = (
+						((diffuseLight *fragColor) *cosTheta +specularColor *distScale)
+						*coneAttenuation *shadow
+					);
+					fragLightColor += outColor;
+				}
+			}
+		}
+		//
+	}
+	return fragLightColor;
+}
+
+#endif

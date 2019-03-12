@@ -1,0 +1,27 @@
+#ifndef F_SH_ENTITY_INFO_GLS
+#define F_SH_ENTITY_INFO_GLS
+
+#include "sh_uniform_locations.gls"
+#include "sh_instance_flags.gls"
+
+#ifndef USE_INSTANCE_UNIFORM_BUFFER
+	#define USE_INSTANCE_UNIFORM_BUFFER 1
+#endif
+
+#if USE_INSTANCE_UNIFORM_BUFFER == 1
+
+// Change per Entity
+layout(std140,set = SHADER_UNIFORM_INSTANCE_SET,binding = SHADER_UNIFORM_INSTANCE_BINDING) uniform Instance
+{
+	mat4 M;
+	vec4 color;
+	uint flags;
+} u_instance;
+
+mat4 get_model_matrix() {return u_instance.M;}
+bool is_weighted() {return (u_instance.flags &FINSTANCE_WEIGHTED) != 0;}
+vec4 get_instance_color() {return u_instance.color;}
+
+#endif
+
+#endif

@@ -1,0 +1,42 @@
+#ifndef F_VS_WEIGHTED_GLS
+#define F_VS_WEIGHTED_GLS
+
+#include "vs_buffer_locations.gls"
+#include "sh_uniform_locations.gls"
+#include "sh_limits.gls"
+
+layout(location = SHADER_BONE_WEIGHT_ID_LOCATION) in ivec4 in_boneWeightIDs;
+layout(location = SHADER_BONE_WEIGHT_LOCATION) in vec4 in_weights;
+
+//uniform bool u_weighted; // Defined in push constants
+layout(std140,set = SHADER_UNIFORM_BONE_MATRIX_SET,binding = SHADER_UNIFORM_BONE_MATRIX_BINDING) uniform Bones
+{
+	mat4 matrices[MAX_BONES];
+} u_bones;
+
+mat4 calc_bone_matrix(bool weighted)
+{
+	if(weighted == false)
+		return mat4(1.0);
+	mat4 mat = mat4(0.0);
+	for(int i=0;i<BONE_WEIGHT_COUNT;i++)
+	{
+		if(in_boneWeightIDs[i] != -1)
+			mat += in_weights[i] *u_bones.matrices[in_boneWeightIDs[i]];
+	}
+	return mat;
+}
+
+vec4 get_weighted_vertex_position(bool weighted,vec4 vertexPos)
+{
+	mat4 mBone = calc_bone_matrix(weighted);
+	vec4 vpos = mBone *vertexPos;
+	return vpos;
+}
+vec4 get_weighted_vertex_position(vec4 vertexPos)
+{
+	return get_weighted_vertex_position(true,vertexPos);
+}
+
+
+#endif

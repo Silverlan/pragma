@@ -1,0 +1,6 @@
+#ifndef F_SH_INSTANCE_FLAGS_GLS
+#define F_SH_INSTANCE_FLAGS_GLS
+
+#define FINSTANCE_WEIGHTED 1
+
+#endif

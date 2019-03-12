@@ -1,0 +1,6 @@
+"textured"
+{
+	$texture diffusemap "models/player/soldier/soldier_d"
+	$texture normalmap "models/player/soldier/soldier_n"
+	$string surfacematerial "metal"
+}

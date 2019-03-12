@@ -1,0 +1,4 @@
+"wguitextured"
+{
+	$texture diffusemap "wgui/silkicons"
+}

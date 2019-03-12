@@ -1,0 +1,7 @@
+"zen"
+{
+	$string class "game.Zen"
+	$string name "Zen"
+	$string author "Silverlan"
+	$float version 0.1
+}

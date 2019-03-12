@@ -1,0 +1,12 @@
+"particle"
+{
+	$texture diffusemap "particles/fire_sprites_v2"
+	animation
+	{
+		$int offset 0
+		$int frames 64
+		$int fps 46
+		$int columns 8
+		$int rows 8
+	}
+}

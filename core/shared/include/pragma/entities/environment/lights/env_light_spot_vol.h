@@ -15,9 +15,16 @@ namespace pragma
 	public:
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
+
+		BaseEntity *GetSpotlightTarget() const;
 	protected:
+		virtual void SetSpotlightTarget(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		float m_coneAngle = 45.f;
+		EntityHandle m_hSpotlightTarget = {};
+		std::string m_kvSpotlightTargetName = "";
+		pragma::NetEventId m_netEvSetSpotlightTarget = pragma::INVALID_NET_EVENT;
 	};
 };
 

@@ -7,6 +7,7 @@
 	float coneLength;
 
 #include "sh_light_cone.gls"
+#include "../../modules/sh_poisson_disk.gls"
 #include "../modules/fs_scene.gls"
 #include "../debug/fs_debug_info.gls"
 #include "../modules/fs_world.gls"
@@ -16,9 +17,6 @@ void main()
 {
 	fs_color = get_instance_color();
 	extract_bright_color(fs_color);
-
-	//if(is_fragment_in_shadow() == true)
-	//	discard;
 
 	mat4 m = get_model_matrix();
 	vec3 origin = vec3(m[3][0],m[3][1],m[3][2]); // Origin (Tip) of the cone in world-space
@@ -33,4 +31,26 @@ void main()
 	dt = pow(dt,4);
 	fs_color.a *= dt;
 	fs_color.a *= get_depth_smooth_factor(u_renderSettings.nearZ,u_renderSettings.farZ,get_scene_depth(u_renderSettings.viewportW,u_renderSettings.viewportH));
+
+	int lightIndex = int(u_material.lightMapFlags);
+	if(lightIndex != -1)
+	{
+		LightSourceData light = get_light_source(lightIndex);
+		if(light.shadowMapIndex > 0)
+		{
+			vec4 depthCoord = get_light_vertex_position(lightIndex);
+			depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
+			depthCoord = depthCoord /light.position.w;
+
+			float shadow = calculate_spot_shadow(
+				shadowMaps[light.shadowMapIndex -1],depthCoord,
+				0.0 /* bias */,
+				0.004, /* maxSampleOffset */
+				4, /* samples */
+				0.0008, /* sampleSpread */
+				2 /* numPoissonSamples */
+			);
+			fs_color.a *= 1.0 -(1.0 -shadow) *0.8;
+		}
+	}
 }

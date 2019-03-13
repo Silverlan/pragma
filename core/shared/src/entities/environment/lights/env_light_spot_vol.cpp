@@ -4,10 +4,12 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_iterator.hpp"
 #include <algorithm>
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseEnvLightSpotVolComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -20,6 +22,8 @@ void BaseEnvLightSpotVolComponent::Initialize()
 			m_coneAngle = ustring::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"cone_color",false))
 			GetEntity().SetKeyValue("color",kvData.value);
+		else if(ustring::compare(kvData.key,"spotlight_target",false))
+			m_kvSpotlightTargetName = kvData.value;
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
@@ -29,9 +33,31 @@ void BaseEnvLightSpotVolComponent::Initialize()
 	ent.AddComponent("toggle");
 	ent.AddComponent("transform");
 	ent.AddComponent("color");
+	ent.AddComponent("point_at_target");
 	auto *pRadiusComponent = dynamic_cast<pragma::BaseRadiusComponent*>(ent.AddComponent("radius").get());
 	if(pRadiusComponent != nullptr)
 		pRadiusComponent->SetRadius(100.f);
+	m_netEvSetSpotlightTarget = SetupNetEvent("set_spotlight_target");
+}
+
+BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const {return m_hSpotlightTarget.get();}
+
+void BaseEnvLightSpotVolComponent::SetSpotlightTarget(BaseEntity &ent)
+{
+	m_hSpotlightTarget = ent.GetHandle();
+}
+
+void BaseEnvLightSpotVolComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	if(m_kvSpotlightTargetName.empty() == false)
+	{
+		EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState(),EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvSpotlightTargetName);
+		auto it = entIt.begin();
+		if(it != entIt.end())
+			SetSpotlightTarget(**it);
+	}
 }
 
 void BaseEnvLightSpotVolComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -41,3 +67,4 @@ void BaseEnvLightSpotVolComponent::OnEntityComponentAdded(BaseEntityComponent &c
 	if(pRenderComponent != nullptr)
 		pRenderComponent->SetCastShadows(false);
 }
+#pragma optimize("",on)

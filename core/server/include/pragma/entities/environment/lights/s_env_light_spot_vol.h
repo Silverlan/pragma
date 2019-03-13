@@ -18,6 +18,8 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+	protected:
+		virtual void SetSpotlightTarget(BaseEntity &ent) override;
 	};
 };
 

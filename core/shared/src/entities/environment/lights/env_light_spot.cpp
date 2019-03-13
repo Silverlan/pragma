@@ -3,6 +3,7 @@
 #include <sharedutils/util.h>
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include <pragma/entities/entity_iterator.hpp>
 #include <algorithm>
 
 using namespace pragma;
@@ -29,9 +30,10 @@ void BaseEnvLightSpotComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("light");
 	ent.AddComponent("radius");
+	ent.AddComponent("point_at_target");
 }
 
 void BaseEnvLightSpotComponent::SetOuterCutoffAngle(float ang) {*m_angOuterCutoff = ang;}
-float BaseEnvLightSpotComponent::GetOuterCutoffAngle() {return *m_angOuterCutoff;}
+float BaseEnvLightSpotComponent::GetOuterCutoffAngle() const {return *m_angOuterCutoff;}
 void BaseEnvLightSpotComponent::SetInnerCutoffAngle(float ang) {*m_angInnerCutoff = ang;}
-float BaseEnvLightSpotComponent::GetInnerCutoffAngle() {return *m_angInnerCutoff;}
+float BaseEnvLightSpotComponent::GetInnerCutoffAngle() const {return *m_angInnerCutoff;}

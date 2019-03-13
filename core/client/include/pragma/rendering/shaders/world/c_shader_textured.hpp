@@ -85,6 +85,13 @@ namespace pragma
 			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1
 		};
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			ClipPlaneBound = 1u,
+			ShouldUseLightMap = ClipPlaneBound<<1u
+		};
+
 #pragma pack(push,1)
 		struct PushConstants
 		{
@@ -133,8 +140,7 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-	private:
-		bool m_bClipPlaneBound = false;
+		StateFlags m_stateFlags = StateFlags::ShouldUseLightMap;
 	};
 
 	////////////////////////////
@@ -147,5 +153,6 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::MaterialFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::StateFlags)
 
 #endif

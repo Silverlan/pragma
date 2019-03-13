@@ -148,6 +148,10 @@ void CLightComponent::DestroyRenderBuffer()
 	//m_bufferUpdateInfo.clear(); // prosper TODO
 	if(m_renderBuffer == nullptr)
 		return;
+	umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
+	if(m_renderBuffer != nullptr)
+		c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
+
 	LightDataBufferManager::GetInstance().Free(m_renderBuffer);
 	m_renderBuffer = nullptr;
 }
@@ -633,6 +637,8 @@ void CLightComponent::SetFalloffExponent(float falloffExponent)
 	if(m_renderBuffer != nullptr)
 		c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,falloffExponent),m_bufferData.falloffExponent);
 }
+
+uint32_t CLightComponent::GetShadowMapIndex() const {return m_bufferData.shadowMapIndex;}
 
 void CLightComponent::SetShadowMapIndex(uint32_t idx)
 {

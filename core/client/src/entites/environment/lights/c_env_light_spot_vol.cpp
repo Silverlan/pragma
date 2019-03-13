@@ -4,6 +4,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include "pragma/networking/c_nwm_util.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/math/intersection.h>
@@ -30,9 +31,33 @@ void CLightSpotVolComponent::Initialize()
 	}
 }
 
+Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+{
+	if(eventId == m_netEvSetSpotlightTarget)
+	{
+		auto *ent = nwm::read_entity(packet);
+		if(ent != nullptr)
+			SetSpotlightTarget(*ent);
+		else
+			m_hSpotlightTarget = {};
+	}
+	else
+		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+	return true;
+}
+
 void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneAngle = packet->Read<float>();
+	auto hEnt = GetHandle();
+	nwm::read_unique_entity(packet,[this,hEnt](BaseEntity *ent) {
+		if(hEnt.expired())
+			return;
+		if(ent != nullptr)
+			SetSpotlightTarget(*ent);
+		else
+			m_hSpotlightTarget = {};
+	});
 }
 
 util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
@@ -107,7 +132,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 
 void CLightSpotVolComponent::OnEntitySpawn()
 {
-	BaseEntityComponent::OnEntitySpawn();
+	BaseEnvLightSpotVolComponent::OnEntitySpawn();
 	InitializeVolumetricLight();
 }
 

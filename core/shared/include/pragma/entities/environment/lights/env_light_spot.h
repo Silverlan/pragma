@@ -19,8 +19,8 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void SetOuterCutoffAngle(float ang);
 		virtual void SetInnerCutoffAngle(float ang);
-		float GetOuterCutoffAngle();
-		float GetInnerCutoffAngle();
+		float GetOuterCutoffAngle() const;
+		float GetInnerCutoffAngle() const;
 	protected:
 		util::PFloatProperty m_angInnerCutoff = nullptr;
 		util::PFloatProperty m_angOuterCutoff = nullptr;

@@ -1,4 +1,5 @@
 #include "stdafx_server.h"
+#include "pragma/networking/s_nwm_util.h"
 #include "pragma/entities/environment/lights/s_env_light_spot.h"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"

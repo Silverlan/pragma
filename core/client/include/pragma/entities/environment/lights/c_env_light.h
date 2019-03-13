@@ -224,6 +224,7 @@ namespace pragma
 		ShadowBufferData *GetShadowBufferData();
 
 		void SetShadowMapIndex(uint32_t idx);
+		uint32_t GetShadowMapIndex() const;
 		virtual void SetShadowType(ShadowType type) override;
 
 		virtual void SetFalloffExponent(float falloffExponent) override;

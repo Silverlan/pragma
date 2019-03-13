@@ -3,7 +3,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
-
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/lights/env_light_spot_vol.h>
 
@@ -23,6 +22,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		void InitializeVolumetricLight();
+		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 	};
 };
 

@@ -243,7 +243,7 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 	auto hdrImg = prosper::util::create_image(dev,imgCreateInfo);
 
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
 	if(sampleCount != Anvil::SampleCountFlagBits::_1_BIT)
 		imgCreateInfo.usage |= Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 	auto hdrBloomImg = prosper::util::create_image(dev,imgCreateInfo);

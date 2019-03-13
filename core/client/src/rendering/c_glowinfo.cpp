@@ -33,7 +33,7 @@ bool Scene::GlowInfo::Initialize(uint32_t width,uint32_t height,const HDRInfo &h
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	imgCreateInfo.format = pragma::ShaderGlow::RENDER_PASS_FORMAT;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	auto img = prosper::util::create_image(dev,imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

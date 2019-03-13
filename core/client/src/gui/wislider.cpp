@@ -37,6 +37,8 @@ void WISlider::Think()
 	SetProgress(v);
 }
 
+bool WISlider::IsBeingDragged() const {return m_bMoveSlider;}
+
 void WISlider::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	WIProgressBar::MouseCallback(button,state,mods);

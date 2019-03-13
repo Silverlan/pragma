@@ -18,6 +18,8 @@ public:
 	virtual void SetSize(int x,int y) override;
 	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual void Think() override;
+
+	bool IsBeingDragged() const;
 };
 
 #endif

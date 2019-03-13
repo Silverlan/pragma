@@ -291,9 +291,12 @@ void Lua::WIProgressBar::register_class(luabind::class_<WIProgressBarHandle COMM
 	//classDef.def("SetValueTranslator",&SetValueTranslator);
 }
 
-void Lua::WISlider::register_class(luabind::class_<WIProgressBarHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>>&)
+void Lua::WISlider::register_class(luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>> &classDef)
 {
-
+	classDef.def("IsBeingDragged",static_cast<void(*)(lua_State*,WISliderHandle&)>([](lua_State *l,WISliderHandle &hSlider) {
+		lua_checkgui(l,hSlider);
+		Lua::PushBool(l,static_cast<::WISlider*>(hSlider.get())->IsBeingDragged());
+	}));
 }
 
 void Lua::WIShape::register_class(luabind::class_<WIShapeHandle COMMA WIHandle> &classDef)

@@ -315,8 +315,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase *p)
 	}
 	else if(dynamic_cast<WIProgressBar*>(p) != nullptr)
 	{
-		//if(dynamic_cast<WISlider*>(p) != nullptr)
-		//	return new luabind::object(l,WISliderHandle(WIProgressBarHandle(p->GetHandle())));
+		if(dynamic_cast<WISlider*>(p) != nullptr)
+			return luabind::object(l,WISliderHandle(WIProgressBarHandle(p->GetHandle())));
 		return luabind::object(l,WIProgressBarHandle(p->GetHandle()));
 	}
 	return luabind::object(l,p->GetHandle());

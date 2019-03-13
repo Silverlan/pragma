@@ -138,9 +138,9 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);
 	guiMod[wiProgressBarClassDef];
 
-	//auto wiSliderClassDef = luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>>("WISlider");
-	//Lua::WISlider::register_class(wiSliderClassDef);
-	//lua_bind(wiSliderClassDef);
+	auto wiSliderClassDef = luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>>("Slider");
+	Lua::WISlider::register_class(wiSliderClassDef);
+	guiMod[wiSliderClassDef];
 
 	auto wiContainerClassDef = luabind::class_<WIContainerHandle COMMA WIHandle>("Container");
 	Lua::WIContainer::register_class(wiContainerClassDef);

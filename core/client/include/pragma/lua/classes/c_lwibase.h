@@ -205,7 +205,7 @@ namespace Lua
 
 	namespace WISlider
 	{
-		DLLCLIENT void register_class(luabind::class_<WIProgressBarHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>> &classDef);
 	};
 
 	namespace WIShape

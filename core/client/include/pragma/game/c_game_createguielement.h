@@ -6,7 +6,7 @@
 template<class TElement>
 	TElement *CGame::CreateGUIElement(WIBase *parent)
 {
-	TElement *p = WGUI::Create<TElement>(parent);
+	TElement *p = WGUI::GetInstance().Create<TElement>(parent);
 	if(p == nullptr)
 		return nullptr;
 	//InitializeGUIElement(p);

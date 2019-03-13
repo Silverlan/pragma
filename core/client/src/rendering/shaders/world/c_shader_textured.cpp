@@ -237,18 +237,18 @@ bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat)
 }
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
-	m_bClipPlaneBound = true;
+	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);
 	return RecordPushConstants(Vector3(clipPlane.x,clipPlane.y,clipPlane.z) *clipPlane.w,offsetof(PushConstants,clipPlane));
 }
 void ShaderTextured3DBase::OnPipelineBound()
 {
 	ShaderEntity::OnPipelineBound();
-	m_bClipPlaneBound = false;
+	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
 }
 void ShaderTextured3DBase::OnPipelineUnbound()
 {
 	ShaderEntity::OnPipelineUnbound();
-	m_bClipPlaneBound = false;
+	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
 }
 bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags)
 {
@@ -257,6 +257,8 @@ bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryComma
 }
 bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh)
 {
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
+		return true;
 	uint32_t useLightMap = (mesh.GetReferenceId() != std::numeric_limits<uint32_t>::max()) ? 1u : 0u;
 	RecordPushConstants(useLightMap,offsetof(ShaderTextured3DBase::PushConstants,material) +offsetof(ShaderTextured3DBase::PushConstants::Material,lightmapFlags));
 	prosper::Buffer *pLightMapUvBuffer = nullptr;
@@ -276,7 +278,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh)
 }
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 {
-	if(m_bClipPlaneBound == false && BindClipPlane({}) == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
 		return false;
 	return BindLightMapUvBuffer(mesh) && ShaderEntity::Draw(mesh);
 }

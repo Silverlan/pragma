@@ -1431,6 +1431,26 @@
 					</overload>
 				</function>
 				<function type="method" shared="1">
+					<name>GetFlexControllerCount</name>
+					<desc>Returns the number of flex controllers this model has.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="int">flexControllerCount</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
+					<name>GetFlexes</name>
+					<desc>Returns the model's flexes.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="table" subType="string">flexes</arg>
+						</returnValues>
+					</overload>
+				</function>
+				<function type="method" shared="1">
 					<name>LookupFlex</name>
 					<desc>Returns the id for the given flex, or -1 if none with that name was found.</desc>
 					<lua></lua>

@@ -330,6 +330,7 @@ public:
 
 	void LinkLightSources(Scene &other);
 	void LinkEntities(Scene &other);
+	void LinkWorldEnvironment(Scene &other);
 
 	pragma::ShaderPrepassBase &GetPrepassShader() const;
 	bool IsValid() const;

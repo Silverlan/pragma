@@ -4,6 +4,7 @@
 #include <pragma/math/plane.h>
 #include "pragma/rendering/scene/e_frustum.h"
 #include <mathutil/umath.h>
+#include <mathutil/umath_frustum.hpp>
 #include <pragma/math/vector/wvvector3.h>
 
 #define EPSILON 0.001f
@@ -95,8 +96,8 @@ void Camera::UpdateProjectionMatrices()
 	UpdateViewProjectionMatrix();
 }
 
-Vector3 Camera::GetFarPlaneCenter() const {return **m_pos +**m_forward *(**m_farZ);}
-Vector3 Camera::GetNearPlaneCenter() const {return **m_pos +**m_forward *(**m_nearZ);}
+Vector3 Camera::GetFarPlaneCenter() const {return umath::frustum::get_far_plane_center(*m_pos,*m_forward,*m_farZ);}
+Vector3 Camera::GetNearPlaneCenter() const {return umath::frustum::get_near_plane_center(*m_pos,*m_forward,*m_nearZ);}
 
 void Camera::SetViewMatrix(const Mat4 &mat)
 {
@@ -110,61 +111,27 @@ void Camera::SetProjectionMatrix(const Mat4 &mat) {*m_projectionMatrix = mat;}
 
 void Camera::GetNearPlaneBounds(float *wNear,float *hNear) const
 {
-	*hNear = (-(2 *tanf(m_fovRad /2.f) **m_nearZ)) *2.f;
-	*wNear = *hNear *m_aspectRatio;
+	umath::frustum::get_near_plane_size(m_fovRad,*m_nearZ,m_aspectRatio,*wNear,*hNear);
 }
 void Camera::GetFarPlaneBounds(float *wFar,float *hFar) const
 {
-	*hFar = (-(2 *tanf(m_fovRad /2.f) **m_farZ)) *2.f;
-	*wFar = *hFar *m_aspectRatio;
+	umath::frustum::get_far_plane_size(m_fovRad,*m_farZ,m_aspectRatio,*wFar,*hFar);
 }
 
-void Camera::GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *_wFar,float *_hFar) const
+void Camera::GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *wFar,float *hFar) const
 {
-	Vector3 up = *m_up;
-	Vector3 forward = *m_forward;
-	Vector3 right = -uvec::cross(up,forward);
-	uvec::normalize(&right);
-	float wFar,hFar;
-	GetFarPlaneBounds(&wFar,&hFar);
-
-	Vector3 fc = GetFarPlaneCenter();
-
-	Vector3 uFar = up *hFar /2.f;
-	Vector3 rFar = right *wFar /2.f;
-	vec->push_back(Vector3(fc -uFar -rFar)); // Bottom left of far plane
-	vec->push_back(Vector3(fc +uFar -rFar)); // Top left of far plane
-	vec->push_back(Vector3(fc +uFar +rFar)); // Top right of far plane
-	vec->push_back(Vector3(fc -uFar +rFar)); // Bottom right of far plane
-
-	if(_wFar != NULL)
-		*_wFar = wFar;
-	if(_hFar != NULL)
-		*_hFar = hFar;
+	auto &boundaries = umath::frustum::get_far_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_farZ,m_aspectRatio,wFar,hFar);
+	vec->reserve(boundaries.size());
+	for(auto &v : boundaries)
+		vec->push_back(v);
 }
 
-void Camera::GetNearPlaneBoundaries(std::vector<Vector3> *vec,float *_wNear,float *_hNear) const
+void Camera::GetNearPlaneBoundaries(std::vector<Vector3> *vec,float *wNear,float *hNear) const
 {
-	Vector3 up = *m_up;
-	Vector3 forward = *m_forward;
-	Vector3 right = -uvec::cross(up,forward);
-	uvec::normalize(&right);
-	float wNear,hNear;
-	GetNearPlaneBounds(&wNear,&hNear);
-
-	Vector3 nc = GetNearPlaneCenter();
-
-	Vector3 uNear = up *hNear /2.f;
-	Vector3 rNear = right *wNear /2.f;
-	vec->push_back(Vector3(nc -uNear -rNear)); // Bottom left of near plane
-	vec->push_back(Vector3(nc +uNear -rNear)); // Top left of near plane
-	vec->push_back(Vector3(nc +uNear +rNear)); // Top right of near plane
-	vec->push_back(Vector3(nc -uNear +rNear)); // Bottom right of near plane
-
-	if(_wNear != NULL)
-		*_wNear = wNear;
-	if(_hNear != NULL)
-		*_hNear = hNear;
+	auto &boundaries = umath::frustum::get_near_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_nearZ,m_aspectRatio,wNear,hNear);
+	vec->reserve(boundaries.size());
+	for(auto &v : boundaries)
+		vec->push_back(v);
 }
 
 void Camera::GetPlaneBoundaries(std::vector<Vector3> *vecNear,std::vector<Vector3> *vecFar,float *wNear,float *hNear,float *wFar,float *hFar) const
@@ -262,21 +229,11 @@ void Camera::GetFrustumPlanes(std::vector<Plane> &outPlanes) const
 
 Vector3 Camera::GetNearPlanePoint(const Vector2 &uv) const
 {
-	auto center = GetNearPlaneCenter();
-	auto wNear = 0.f;
-	auto hNear = 0.f;
-	GetNearPlaneBounds(&wNear,&hNear);
-	center += GetRight() *-(wNear /2.f *(uv.x -0.5f)) +GetUp() *(hNear /2.f *(uv.y -0.5f));
-	return center;
+	return umath::frustum::get_near_plane_point(*m_pos,*m_forward,GetRight(),*m_up,m_fovRad,*m_nearZ,m_aspectRatio,uv);
 }
 Vector3 Camera::GetFarPlanePoint(const Vector2 &uv) const
 {
-	auto center = GetFarPlaneCenter();
-	auto wFar = 0.f;
-	auto hFar = 0.f;
-	GetFarPlaneBounds(&wFar,&hFar);
-	center += GetRight() *-(wFar /2.f *(uv.x -0.5f)) +GetUp() *(hFar /2.f *(uv.y -0.5f));
-	return center;
+	return umath::frustum::get_far_plane_point(*m_pos,*m_forward,GetRight(),*m_up,m_fovRad,*m_farZ,m_aspectRatio,uv);
 }
 
 void Camera::GetFrustumPoints(std::vector<Vector3> &outPoints,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp)

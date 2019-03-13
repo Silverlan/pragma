@@ -598,16 +598,18 @@ int Lua::util::world_to_local(lua_State *l)
 int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
 {
 	int32_t arg = 1;
-	auto fov = Lua::CheckNumber(l,arg++);
-	auto width = Lua::CheckInt(l,arg++);
-	auto height = Lua::CheckInt(l,arg++);
 	auto *forward = Lua::CheckVector(l,arg++);
 	auto *right = Lua::CheckVector(l,arg++);
 	auto *up = Lua::CheckVector(l,arg++);
-
+	auto fov = Lua::CheckNumber(l,arg++);
+	auto nearZ = Lua::CheckNumber(l,arg++);
+	auto farZ = Lua::CheckNumber(l,arg++);
+	auto aspectRatio = Lua::CheckNumber(l,arg++);
+	auto width = Lua::CheckInt(l,arg++);
+	auto height = Lua::CheckInt(l,arg++);
 	auto *uv = Lua::CheckVector2(l,arg++);
 
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(static_cast<float>(umath::deg_to_rad(fov)),static_cast<float>(width),static_cast<float>(height),*forward,*right,*up,*uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(*forward,*right,*up,static_cast<float>(umath::deg_to_rad(fov)),nearZ,farZ,aspectRatio,static_cast<float>(width),static_cast<float>(height),*uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }
@@ -785,4 +787,14 @@ int Lua::util::fade_property(lua_State *l)
 	)
 		return 1;
 	return 0;
+}
+
+int Lua::util::round_string(lua_State *l)
+{
+	auto value = Lua::CheckNumber(l,1);
+	auto places = 0;
+	if(Lua::IsSet(l,2))
+		places = Lua::CheckInt(l,2);
+	Lua::PushString(l,::util::round_string(value,places));
+	return 1;
 }

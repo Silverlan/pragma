@@ -324,7 +324,7 @@ void CRenderComponent::PostRender(RenderMode) {}
 bool CRenderComponent::Render(pragma::ShaderTextured3DBase*,Material*,CModelSubMesh*) {return false;}
 void CRenderComponent::ReceiveData(NetPacket &packet)
 {
-	packet->Write<decltype(m_renderFlags)>(m_renderFlags);
+	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
 }
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
 void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)

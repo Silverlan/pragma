@@ -112,6 +112,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	camReflection->GetViewFOVProperty()->Link(*cam.GetViewFOVProperty());
 	camReflection->GetNearZProperty()->Link(*cam.GetNearZProperty());
 	camReflection->GetFarZProperty()->Link(*cam.GetFarZProperty());
+	sceneReflection->SetWorldEnvironment(*scene->GetWorldEnvironment());
 	sceneReflection->LinkLightSources(*scene);
 	sceneReflection->LinkEntities(*scene);
 

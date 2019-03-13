@@ -6,6 +6,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseRenderComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -13,7 +14,7 @@ void BaseRenderComponent::Initialize()
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare(kvData.key,"disableshadows",false))
-			SetCastShadows(util::to_boolean(kvData.value));
+			SetCastShadows(!util::to_boolean(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
@@ -46,3 +47,4 @@ void BaseRenderComponent::Load(DataStream &ds,uint32_t version)
 	BaseEntityComponent::Load(ds,version);
 	m_renderFlags = ds->Read<decltype(m_renderFlags)>();
 }
+#pragma optimize("",on)

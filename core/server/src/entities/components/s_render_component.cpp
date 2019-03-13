@@ -6,6 +6,7 @@ using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
+#pragma optimize("",off)
 void SRenderComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 {
 	packet->Write<decltype(m_renderFlags)>(m_renderFlags);
@@ -33,3 +34,4 @@ void SRenderComponent::SetCastShadows(bool b)
 	p->Write<bool>(b);
 	server->BroadcastTCP("ent_setcastshadows",p);
 }
+#pragma optimize("",on)

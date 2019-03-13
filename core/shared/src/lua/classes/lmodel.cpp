@@ -273,6 +273,9 @@ void Lua::Model::register_class(
 	classDef.def("LookupFlex",&Lua::Model::GetFlexId);
 	classDef.def("GetFlexFormula",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&,const std::string&)>(&Lua::Model::GetFlexFormula));
 	classDef.def("GetFlexFormula",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&,uint32_t)>(&Lua::Model::GetFlexFormula));
+	classDef.def("GetFlexControllerCount",static_cast<void(*)(lua_State*,const std::shared_ptr<::Model>&)>([](lua_State *l,const std::shared_ptr<::Model> &mdl) {
+		Lua::PushInt(l,mdl->GetFlexControllerCount());
+	}));
 
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
 	classDef.def("GetIKController",&Lua::Model::GetIKController);

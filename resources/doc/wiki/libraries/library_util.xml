@@ -16,6 +16,20 @@
 			</overload>
 		</function>
 		<function type="function">
+			<name>round_string</name>
+			<desc>Rounds the specified value for the specified number of decimal places.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="float">value</arg>
+					<arg type="int" default="0">places</arg>
+				</parameters>
+				<returnValues>
+					<arg type="string">roundedValue</arg>
+				</returnValues>
+			</overload>
+		</function>
+		<function type="function">
 			<name>fade_property</name>
 			<desc>Interpolates the property between its current value and the specified target value over the specified duration.</desc>
 			<lua></lua>
@@ -454,12 +468,15 @@
 			</overload>
 			<overload>
 				<parameters>
-					<arg type="float">fov</arg>
-					<arg type="int">width</arg>
-					<arg type="int">height</arg>
 					<arg type="math.Vector">forward</arg>
 					<arg type="math.Vector">right</arg>
 					<arg type="math.Vector">up</arg>
+					<arg type="float">fov</arg>
+					<arg type="float">nearZ</arg>
+					<arg type="float">farZ</arg>
+					<arg type="float">aspectRatio</arg>
+					<arg type="int">width</arg>
+					<arg type="int">height</arg>
 					<arg type="math.Vector2">uv</arg>
 				</parameters>
 				<returnValues>

@@ -512,6 +512,25 @@ void Scene::AddLight(pragma::CLightComponent *light) {m_lightSources->AddLightSo
 void Scene::RemoveLight(pragma::CLightComponent *light) {m_lightSources->RemoveLightSource(*light);}
 void Scene::LinkEntities(Scene &other) {m_entityList = other.m_entityList;}
 void Scene::LinkLightSources(Scene &other) {m_lightSources = other.m_lightSources;}
+void Scene::LinkWorldEnvironment(Scene &other)
+{
+	// T
+	auto &worldEnv = *GetWorldEnvironment();
+	auto &worldEnvOther = *other.GetWorldEnvironment();
+	worldEnv.GetAmbientColorProperty()->Link(*worldEnvOther.GetAmbientColorProperty());
+	worldEnv.GetShaderQualityProperty()->Link(*worldEnvOther.GetShaderQualityProperty());
+	worldEnv.GetShadowResolutionProperty()->Link(*worldEnvOther.GetShadowResolutionProperty());
+	worldEnv.GetUnlitProperty()->Link(*worldEnvOther.GetUnlitProperty());
+
+	auto &fogSettings = worldEnv.GetFogSettings();
+	auto &fogSettingsOther = worldEnvOther.GetFogSettings();
+	fogSettings.GetColorProperty()->Link(*fogSettingsOther.GetColorProperty());
+	fogSettings.GetEnabledProperty()->Link(*fogSettingsOther.GetEnabledProperty());
+	fogSettings.GetEndProperty()->Link(*fogSettingsOther.GetEndProperty());
+	fogSettings.GetMaxDensityProperty()->Link(*fogSettingsOther.GetMaxDensityProperty());
+	fogSettings.GetStartProperty()->Link(*fogSettingsOther.GetStartProperty());
+	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
+}
 const std::shared_ptr<Scene::LightListInfo> &Scene::GetLightSourceListInfo() const {return m_lightSources;}
 const std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() const {return const_cast<Scene&>(*this).GetLightSources();}
 std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() {return m_lightSources->lightSources;}

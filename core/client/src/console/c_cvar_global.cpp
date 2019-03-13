@@ -93,6 +93,18 @@ DLLCLIENT void CMD_getpos(NetworkState *state,pragma::BasePlayerComponent *pl,st
 	Con::cout<<pos.x<<" "<<pos.y<<" "<<pos.z<<Con::endl;
 }
 
+DLLCLIENT void CMD_getcampos(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	if(!state->IsGameActive())
+		return;
+	auto *game = static_cast<CGame*>(state->GetGameState());
+	auto *pCam = game->GetRenderCamera();
+	if(pCam == nullptr)
+		pCam = &game->GetSceneCamera();
+	auto &pos = pCam->GetPos();
+	Con::cout<<pos.x<<" "<<pos.y<<" "<<pos.z<<Con::endl;
+}
+
 DLLCLIENT void CMD_setang(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(argv.size() < 3)
@@ -123,6 +135,18 @@ DLLCLIENT void CMD_getang(NetworkState *state,pragma::BasePlayerComponent *pl,st
 	if(charComponent.expired())
 		return;
 	EulerAngles ang = charComponent->GetViewAngles();
+	Con::cout<<ang.p<<" "<<ang.y<<" "<<ang.r<<Con::endl;
+}
+
+DLLCLIENT void CMD_getcamang(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+{
+	if(!state->IsGameActive())
+		return;
+	auto *game = static_cast<CGame*>(state->GetGameState());
+	auto *pCam = game->GetRenderCamera();
+	if(pCam == nullptr)
+		pCam = &game->GetSceneCamera();
+	auto ang = EulerAngles{pCam->GetRotation()};
 	Con::cout<<ang.p<<" "<<ang.y<<" "<<ang.r<<Con::endl;
 }
 

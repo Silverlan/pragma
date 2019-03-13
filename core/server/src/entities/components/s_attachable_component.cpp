@@ -1,4 +1,5 @@
 #include "stdafx_server.h"
+#include "pragma/networking/s_nwm_util.h"
 #include "pragma/entities/components/s_attachable_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 
@@ -50,11 +51,6 @@ void SAttachableComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 	{
 		auto *info = m_attachment.get();
 		packet->Write<Bool>(true);
-		auto &hParent = info->parent;
-		if(hParent.expired())
-			nwm::write_entity(packet,nullptr);
-		else
-			nwm::write_entity(packet,&hParent->GetEntity());
 		packet->Write<int>(info->attachment);
 		packet->Write<int>(info->bone);
 		packet->Write<FAttachmentMode>(info->flags);
@@ -69,5 +65,10 @@ void SAttachableComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 			for(auto it=info->boneMapping.begin();it!=info->boneMapping.end();++it)
 				packet->Write<int>(*it);
 		}
+		auto &hParent = info->parent;
+		if(hParent.expired())
+			nwm::write_unique_entity(packet,nullptr);
+		else
+			nwm::write_unique_entity(packet,&hParent->GetEntity());
 	}
 }

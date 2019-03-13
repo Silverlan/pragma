@@ -3375,6 +3375,30 @@ namespace Lua
 	{}
 
 	template<class TLuaClass,class THandle>
+		void register_base_point_at_target_component_methods(lua_State *l,TLuaClass &def)
+	{
+		def.def("SetPointAtTarget",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hTarget) {
+			pragma::Lua::check_component(l,hEnt);
+			LUA_CHECK_ENTITY(l,hTarget);
+			if(hTarget.IsValid())
+				hEnt->SetPointAtTarget(*hTarget.get());
+			else
+				hEnt->ClearPointAtTarget();
+		}));
+		def.def("SetPointAtTarget",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->ClearPointAtTarget();
+		}));
+		def.def("GetPointAtTarget",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			auto *entPointAtTarget = hEnt->GetPointAtTarget();
+			if(entPointAtTarget == nullptr)
+				return;
+			entPointAtTarget->GetLuaObject()->push(l);
+		}));
+	}
+
+	template<class TLuaClass,class THandle>
 		void register_base_attachable_component_methods(lua_State *l,TLuaClass &def)
 	{
 		def.def("AttachToEntity",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,AttachmentInfo &attInfo) {

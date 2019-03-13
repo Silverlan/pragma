@@ -950,6 +950,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_debug_plane_component_methods<luabind::class_<CDebugPlaneHandle,BaseEntityComponentHandle>,CDebugPlaneHandle>(l,defCDebugPlane);
 	entsMod[defCDebugPlane];
 
+	auto defCPointAtTarget = luabind::class_<CPointAtTargetHandle,BaseEntityComponentHandle>("PointAtTargetComponent");
+	Lua::register_base_point_at_target_component_methods<luabind::class_<CPointAtTargetHandle,BaseEntityComponentHandle>,CPointAtTargetHandle>(l,defCPointAtTarget);
+	entsMod[defCPointAtTarget];
+
 	auto defCBSP = luabind::class_<CBSPHandle,BaseEntityComponentHandle>("BSPComponent");
 	entsMod[defCBSP];
 

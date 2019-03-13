@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/networking/c_nwm_util.h"
 
 using namespace pragma;
 
@@ -11,7 +12,6 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 	auto bParent = packet->Read<Bool>();
 	if(bParent == true)
 	{
-		auto *ent = nwm::read_entity(packet);
 		auto att = packet->Read<int>();
 		auto bone = packet->Read<int>();
 		auto flags = packet->Read<FAttachmentMode>();
@@ -29,23 +29,29 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 				boneMapping.push_back(boneId);
 			}
 		}
-		if(m_attachment == nullptr)
-			m_attachment = std::make_unique<AttachmentData>();
-		if(ent == nullptr)
-			m_attachment->parent = {};
-		else
-		{
-			auto pParentComponent = ent->AddComponent<CParentComponent>();
-			m_attachment->parent = pParentComponent.valid() ? 
-				util::WeakHandle<BaseParentComponent>{std::static_pointer_cast<CParentComponent>(pParentComponent->shared_from_this())} :
-				util::WeakHandle<BaseParentComponent>{};
-		}
-		m_attachment->attachment = att;
-		m_attachment->bone = bone;
-		m_attachment->flags = flags;
-		m_attachment->offset = offset;
-		m_attachment->rotation = rot;
-		m_attachment->boneMapping = boneMapping;
+
+		auto hThis = GetHandle();
+		nwm::read_unique_entity(packet,[this,hThis,att,bone,flags,offset,rot,bBoneMapping,boneMapping](BaseEntity *ent) {
+			if(hThis.expired())
+				return;
+			if(m_attachment == nullptr)
+				m_attachment = std::make_unique<AttachmentData>();
+			if(ent == nullptr)
+				m_attachment->parent = {};
+			else
+			{
+				auto pParentComponent = ent->AddComponent<CParentComponent>();
+				m_attachment->parent = pParentComponent.valid() ? 
+					util::WeakHandle<BaseParentComponent>{std::static_pointer_cast<CParentComponent>(pParentComponent->shared_from_this())} :
+					util::WeakHandle<BaseParentComponent>{};
+			}
+			m_attachment->attachment = att;
+			m_attachment->bone = bone;
+			m_attachment->flags = flags;
+			m_attachment->offset = offset;
+			m_attachment->rotation = rot;
+			m_attachment->boneMapping = boneMapping;
+		});
 	}
 }
 

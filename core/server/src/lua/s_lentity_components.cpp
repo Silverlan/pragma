@@ -382,6 +382,10 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_debug_plane_component_methods<luabind::class_<SDebugPlaneHandle,BaseEntityComponentHandle>,SDebugPlaneHandle>(l,defSDebugPlane);
 	entsMod[defSDebugPlane];
 
+	auto defSPointAtTarget = luabind::class_<SPointAtTargetHandle,BaseEntityComponentHandle>("PointAtTargetComponent");
+	Lua::register_base_point_at_target_component_methods<luabind::class_<SPointAtTargetHandle,BaseEntityComponentHandle>,SPointAtTargetHandle>(l,defSPointAtTarget);
+	entsMod[defSPointAtTarget];
+
 	auto defSInfoLandmark = luabind::class_<SInfoLandmarkHandle,BaseEntityComponentHandle>("InfoLandmarkComponent");
 	//Lua::register_base_info_landmark_component_methods<luabind::class_<SInfoLandmarkHandle,BaseEntityComponentHandle>,SInfoLandmarkHandle>(l,defSInfoLandmark);
 	entsMod[defSInfoLandmark];

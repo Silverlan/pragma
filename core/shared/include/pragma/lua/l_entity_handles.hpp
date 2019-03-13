@@ -41,6 +41,7 @@
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
+#include "pragma/entities/components/base_point_at_target_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/entities/func/basefuncwater.h"
 #include "pragma/entities/info/info_landmark.hpp"
@@ -258,6 +259,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugSphere);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugCone);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugCylinder);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugPlane);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BasePointAtTarget);
 
 struct lua_State;
 namespace Lua

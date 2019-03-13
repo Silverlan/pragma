@@ -27,6 +27,7 @@
 #include "pragma/entities/components/c_parent_component.hpp"
 #include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
+#include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
@@ -181,6 +182,7 @@ DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CDebugCylinder,BaseDebugCylinderCompo
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CDebugPlane,BaseDebugPlaneComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterClass,BaseFilterClassComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterName,BaseFilterNameComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CPointAtTarget,BasePointAtTargetComponentHandleWrapper);
 
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEnvSoundProbe);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CWeather);

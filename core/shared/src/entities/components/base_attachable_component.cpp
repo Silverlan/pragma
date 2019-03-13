@@ -13,6 +13,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -65,7 +66,7 @@ void BaseAttachableComponent::OnEntitySpawn()
 		if(it != entIt.end())
 		{
 			AttachmentInfo attInfo {};
-			attInfo.flags = FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
+			attInfo.flags = /*FAttachmentMode::SnapToOrigin | */FAttachmentMode::UpdateEachFrame;
 			AttachToEntity(*it,attInfo);
 		}
 	}
@@ -471,3 +472,4 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 	}
 	InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
+#pragma optimize("",on)

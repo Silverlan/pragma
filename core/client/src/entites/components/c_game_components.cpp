@@ -104,6 +104,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CDebugCylinderComponent>("debug_cylinder");
 	componentManager.RegisterComponentType<pragma::CDebugPlaneComponent>("debug_plane");
 	componentManager.RegisterComponentType<pragma::CBSPLeafComponent>("bsp_leaf");
+	componentManager.RegisterComponentType<pragma::CPointAtTargetComponent>("point_at_target");
 
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");

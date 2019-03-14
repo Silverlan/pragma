@@ -94,6 +94,7 @@ void LightDataBufferManager::DoInitialize()
 }
 void LightDataBufferManager::Reset()
 {
+	BaseLightBufferManager::Reset();
 	m_lightDataBuffers = {};
 	m_highestBufferIndexInUse = std::numeric_limits<uint32_t>::max();
 }

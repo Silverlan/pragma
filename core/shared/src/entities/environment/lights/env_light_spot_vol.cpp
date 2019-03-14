@@ -22,6 +22,8 @@ void BaseEnvLightSpotVolComponent::Initialize()
 			m_coneAngle = ustring::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"cone_color",false))
 			GetEntity().SetKeyValue("color",kvData.value);
+		else if(ustring::compare(kvData.key,"cone_start_offset",false))
+			m_coneStartOffset = util::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"spotlight_target",false))
 			m_kvSpotlightTargetName = kvData.value;
 		else

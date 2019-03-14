@@ -21,6 +21,7 @@ extern DLLCLIENT CGame *c_game;
 
 void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
+
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	dbg = nullptr;
 	if(c_game == nullptr || pl == nullptr)

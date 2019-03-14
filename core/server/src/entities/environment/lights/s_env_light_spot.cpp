@@ -14,6 +14,15 @@ void SLightSpotComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 {
 	packet->Write<float>(*m_angOuterCutoff);
 	packet->Write<float>(*m_angInnerCutoff);
+	packet->Write<float>(*m_coneStartOffset);
+}
+
+void SLightSpotComponent::SetConeStartOffset(float offset)
+{
+	BaseEnvLightSpotComponent::SetConeStartOffset(offset);
+	NetPacket p {};
+	p->Write<float>(offset);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetConeStartOffset,p);
 }
 
 void SLightSpotComponent::SetOuterCutoffAngle(float ang)

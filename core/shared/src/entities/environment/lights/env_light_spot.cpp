@@ -10,7 +10,7 @@ using namespace pragma;
 
 BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_angInnerCutoff(util::FloatProperty::Create(0.f)),
-	m_angOuterCutoff(util::FloatProperty::Create(0.f))
+	m_angOuterCutoff(util::FloatProperty::Create(0.f)),m_coneStartOffset(util::FloatProperty::Create(0.f))
 {}
 void BaseEnvLightSpotComponent::Initialize()
 {
@@ -22,6 +22,8 @@ void BaseEnvLightSpotComponent::Initialize()
 			*m_angOuterCutoff = util::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"innercutoff",false))
 			*m_angInnerCutoff = util::to_float(kvData.value);
+		else if(ustring::compare(kvData.key,"cone_start_offset",false))
+			*m_coneStartOffset = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
@@ -31,9 +33,13 @@ void BaseEnvLightSpotComponent::Initialize()
 	ent.AddComponent("light");
 	ent.AddComponent("radius");
 	ent.AddComponent("point_at_target");
+	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
 }
 
 void BaseEnvLightSpotComponent::SetOuterCutoffAngle(float ang) {*m_angOuterCutoff = ang;}
 float BaseEnvLightSpotComponent::GetOuterCutoffAngle() const {return *m_angOuterCutoff;}
 void BaseEnvLightSpotComponent::SetInnerCutoffAngle(float ang) {*m_angInnerCutoff = ang;}
 float BaseEnvLightSpotComponent::GetInnerCutoffAngle() const {return *m_angInnerCutoff;}
+
+void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}
+float BaseEnvLightSpotComponent::GetConeStartOffset() const {return *m_coneStartOffset;}

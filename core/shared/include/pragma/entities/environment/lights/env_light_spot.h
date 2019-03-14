@@ -21,9 +21,14 @@ namespace pragma
 		virtual void SetInnerCutoffAngle(float ang);
 		float GetOuterCutoffAngle() const;
 		float GetInnerCutoffAngle() const;
+
+		virtual void SetConeStartOffset(float offset);
+		float GetConeStartOffset() const;
 	protected:
 		util::PFloatProperty m_angInnerCutoff = nullptr;
 		util::PFloatProperty m_angOuterCutoff = nullptr;
+		util::PFloatProperty m_coneStartOffset = nullptr;
+		pragma::NetEventId m_netEvSetConeStartOffset = pragma::INVALID_NET_EVENT;
 	};
 };
 

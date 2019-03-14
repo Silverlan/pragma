@@ -18,9 +18,11 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void SetConeStartOffset(float offset) override;
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void ReceiveData(NetPacket &packet) override;
+		virtual bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 
 		void UpdateViewMatrices();
 		void UpdateProjectionMatrix();

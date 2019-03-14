@@ -21,12 +21,13 @@ namespace pragma
 		{
 			float nearZ;
 			float farZ;
+			float contrastFactor;
 		};
 #pragma pack(pop)
 
 		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier,const std::string &fsShader);
 		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ);
+		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor=1.f);
 	protected:
 		template<class TPushConstants>
 			bool Draw(Anvil::DescriptorSet &descSetDepthTex,const TPushConstants &pushConstants);
@@ -49,7 +50,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderCubeDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide);
+		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;
 	};
@@ -69,7 +70,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderCSMDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer);
+		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;
 	};

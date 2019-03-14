@@ -49,6 +49,7 @@ Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacke
 void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 {
 	m_coneAngle = packet->Read<float>();
+	m_coneStartOffset = packet->Read<float>();
 	auto hEnt = GetHandle();
 	nwm::read_unique_entity(packet,[this,hEnt](BaseEntity *ent) {
 		if(hEnt.expired())
@@ -105,11 +106,19 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 	{
 		auto startSc = i /static_cast<float>(segmentCount);
 		auto endSc = (i +1) /static_cast<float>(segmentCount);
-
-		auto startPos = dir *maxDist *startSc;
-		auto endPos = dir *maxDist *endSc;
-		auto segStartRadius = endRadius *startSc;
+		
 		auto segEndRadius = endRadius *endSc;
+		if(segEndRadius < m_coneStartOffset)
+			continue; // Skip this segment
+		auto segStartRadius = endRadius *startSc;
+		if(segStartRadius < m_coneStartOffset)
+		{
+			// Clamp this segment
+			segStartRadius = m_coneStartOffset;
+		}
+
+		auto startPos = dir *maxDist *static_cast<float>(segStartRadius /endRadius);
+		auto endPos = dir *maxDist *static_cast<float>(segEndRadius /endRadius);
 		auto subMesh = std::make_shared<CModelSubMesh>();
 		std::vector<Vector3> verts;
 		std::vector<Vector3> normals;

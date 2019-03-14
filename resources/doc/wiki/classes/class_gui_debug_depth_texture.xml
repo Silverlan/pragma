@@ -1,0 +1,42 @@
+<root>
+	<collection type="library">
+		<name>gui</name>
+		<collection type="class" client="1" gui="1">
+			<name>DebugDepthTexture</name>
+			<derivedFrom>gui.Element</derivedFrom>
+			<desc>TODO</desc>
+			<group>
+				<function type="method">
+					<name>SetContrastFactor</name>
+					<desc>Changes the contrast for the depth image.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="float">contrastFactor</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>GetContrastFactor</name>
+					<desc>Returns the contrast for the depth image.</desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="float">contrastFactor</arg>
+						</returnValues>
+					</overload>
+				</function>
+			</group>
+			<function type="method">
+				<name>SetTexture</name>
+				<desc>Changes the texture of this element.</desc>
+				<lua></lua>
+				<overload>
+					<parameters>
+						<arg type="vulkan.Texture">texture</arg>
+					</parameters>
+				</overload>
+			</function>
+		</collection>
+	</collection>
+</root>

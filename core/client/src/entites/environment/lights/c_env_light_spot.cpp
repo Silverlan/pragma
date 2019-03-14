@@ -61,6 +61,17 @@ void CLightSpotComponent::Initialize()
 	if(pLightComponent.valid())
 		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
 }
+Bool CLightSpotComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+{
+	if(eventId == m_netEvSetConeStartOffset)
+	{
+		auto coneStartOffset = packet->Read<float>();
+		SetConeStartOffset(coneStartOffset);
+	}
+	else
+		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+	return true;
+}
 void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvLightSpotComponent::OnEntityComponentAdded(component);
@@ -92,6 +103,18 @@ void CLightSpotComponent::ReceiveData(NetPacket &packet)
 {
 	*m_angOuterCutoff = packet->Read<float>();
 	*m_angInnerCutoff = packet->Read<float>();
+	auto coneStartOffset = packet->Read<float>();
+	SetConeStartOffset(coneStartOffset);
+}
+void CLightSpotComponent::SetConeStartOffset(float offset)
+{
+	BaseEnvLightSpotComponent::SetConeStartOffset(offset);
+	auto pLightComponent = GetEntity().GetComponent<pragma::CLightComponent>();
+	auto &bufferData = pLightComponent->GetBufferData();
+	bufferData.direction.w = offset;
+	auto &renderBuffer = pLightComponent->GetRenderBuffer();
+	if(renderBuffer != nullptr)
+		c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,direction) +offsetof(Vector4,w),offset);
 }
 luabind::object CLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightSpotComponentHandleWrapper>(l);}
 void CLightSpotComponent::UpdateTransformMatrix()

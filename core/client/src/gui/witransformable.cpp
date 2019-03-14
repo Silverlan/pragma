@@ -11,6 +11,7 @@ LINK_WGUI_TO_CLASS(WITransformable,WITransformable);
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5
 
+#pragma optimize("",off)
 WITransformable::WITransformable()
 	: WIBase()
 {
@@ -23,6 +24,17 @@ WITransformable::~WITransformable()
 		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
 }
 void WITransformable::Update() {WIBase::Update(); Resize();}
+void WITransformable::SetResizeRatioLocked(bool bLocked)
+{
+	if(bLocked == true && (GetWidth() == 0 || GetHeight() == 0))
+	{
+		SetResizeRatioLocked(false);
+		return;
+	}
+	umath::set_flag(m_stateFlags,StateFlags::ResizeRatioLocked,bLocked);
+	m_resizeRatio = GetWidth() /static_cast<float>(GetHeight());
+}
+bool WITransformable::IsResizeRatioLocked() const {return umath::is_flag_set(m_stateFlags,StateFlags::ResizeRatioLocked);}
 void WITransformable::SetMinWidth(int w) {SetMinSize(Vector2i(w,m_minSize.y));}
 void WITransformable::SetMinHeight(int h) {SetMinSize(Vector2i(m_minSize.x,h));}
 void WITransformable::SetMinSize(int w,int h) {SetMinSize(Vector2i(w,h));}
@@ -283,6 +295,7 @@ void WITransformable::Think()
 		GetMousePos(&cursorPos.x,&cursorPos.y);
 
 		auto size = GetSize();
+		auto oldSize = size;
 		auto pos = GetPos();
 		auto bChangeSize = false;
 		auto bChangePos = false;
@@ -370,7 +383,20 @@ void WITransformable::Think()
 		}
 
 		if(bChangeSize == true || bChangePos == true)
+		{
+			if(bChangeSize == true && IsResizeRatioLocked())
+			{
+				if(m_resizeMode == ResizeMode::ns || m_resizeMode == ResizeMode::sn)
+					size.x = size.y *m_resizeRatio;
+				else if(m_resizeMode == ResizeMode::we || m_resizeMode == ResizeMode::ew)
+					size.y = size.x *(1.f /m_resizeRatio);
+				else if(size.x > size.y)
+					size.x = size.y *m_resizeRatio;
+				else
+					size.y = size.x *(1.f /m_resizeRatio);
+			}
 			SetSize(size);
+		}
 		if(bChangePos == true)
 			SetPos(pos);
 		if(bSwap[0] == true || bSwap[1] == true)
@@ -528,3 +554,4 @@ void WITransformable::SetResizable(bool b)
 }
 bool WITransformable::IsDraggable() {return umath::is_flag_set(m_stateFlags,StateFlags::Draggable);}
 bool WITransformable::IsResizable() {return umath::is_flag_set(m_stateFlags,StateFlags::Resizable);}
+#pragma optimize("",on)

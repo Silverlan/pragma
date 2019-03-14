@@ -14,7 +14,11 @@ public:
 	virtual void Initialize() override;
 	virtual void Update() override;
 
+	void SetTexture(prosper::Texture &texture);
 	void SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId=0u);
+
+	void SetContrastFactor(float contrastFactor);
+	float GetContrastFactor() const;
 
 	void Update(float nearZ,float farZ);
 	void SetShouldResolveImage(bool b);
@@ -34,6 +38,7 @@ protected:
 	//Vulkan::TextureHandle m_hTexture; // prosper TODO
 	//Vulkan::RenderTarget m_renderTarget; // prosper TODO
 	uint32_t m_imageLayer = 0u;
+	float m_contrastFactor = 1.f;
 	//Vulkan::DescriptorSet m_descTexture; // prosper TODO
 	
 	bool m_bResolveImage = true;

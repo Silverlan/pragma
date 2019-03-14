@@ -19,13 +19,6 @@ WIFrame::~WIFrame()
 		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
 }
 
-void WIFrame::SetColor(float r,float g,float b,float a)
-{
-	WITransformable::SetColor(r,g,b,a);
-	if(m_hBg.IsValid())
-		m_hBg->SetColor(r,g,b,a);
-}
-
 void WIFrame::Initialize()
 {
 	SetDraggable(true);
@@ -33,6 +26,7 @@ void WIFrame::Initialize()
 
 	m_hBg = CreateChild<WIRect>();
 	m_hBg->SetAutoAlignToParent(true);
+	m_hBg->GetColorProperty()->Link(*GetColorProperty());
 	WITransformable::Initialize();
 	if(m_hMoveRect.IsValid())
 	{

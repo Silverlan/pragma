@@ -48,6 +48,26 @@
 						</returnValues>
 					</overload>
 				</function>
+				<function type="method">
+					<name>SetResizeRatioLocked</name>
+					<desc>If set to ''true'', the ratio of the element will be kept while resizing.</desc>
+					<lua></lua>
+					<overload>
+						<parameters>
+							<arg type="bool">resizeRatioLocked</arg>
+						</parameters>
+					</overload>
+				</function>
+				<function type="method">
+					<name>IsResizeRatioLocked</name>
+					<desc></desc>
+					<lua></lua>
+					<overload>
+						<returnValues>
+							<arg type="bool">resizeRatioLocked</arg>
+						</returnValues>
+					</overload>
+				</function>
 			</group>
 			<group>
 				<function type="method">

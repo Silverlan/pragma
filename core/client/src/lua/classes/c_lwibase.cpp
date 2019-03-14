@@ -24,6 +24,8 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIContainer,WIContainer);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIProgressBar,WIProgressBar);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WITransformable,WITransformable);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITransformable,WIFrame,WIFrame);
+DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIDebugDepthTexture,WIDebugDepthTexture);
+DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIDebugShadowMap,WIDebugShadowMap);
 
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIContainer,WITable,WITable);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIContainer,WITableRow,WITableRow);
@@ -42,6 +44,7 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WITexturedRect,W
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIIcon,WIIcon);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIRoundedTexturedRect,WIRoundedTexturedRect);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIIcon,WISilkIcon,WISilkIcon);
+DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIDebugSSAO,WIDebugSSAO);
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -245,6 +248,10 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 			Lua::SetTableValue(l,t);
 		}
 	}));
+	classDef.def("Update",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->Update();
+	}));
 
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&AddAttachment));
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&,const Vector2&)>(&AddAttachment));
@@ -302,7 +309,6 @@ void Lua::WISlider::register_class(luabind::class_<WISliderHandle COMMA luabind:
 void Lua::WIShape::register_class(luabind::class_<WIShapeHandle COMMA WIHandle> &classDef)
 {
 	classDef.def("AddVertex",&AddVertex);
-	classDef.def("Update",&Update);
 	classDef.def("SetVertexPos",&SetVertexPos);
 	classDef.def("ClearVertices",&ClearVertices);
 	classDef.def("InvertVertexPositions",static_cast<void(*)(lua_State*,WIShapeHandle&,bool,bool)>(&InvertVertexPositions));
@@ -531,7 +537,6 @@ void Lua::WILine::register_class(luabind::class_<WILineHandle COMMA WIHandle> &c
 	classDef.def("SetEndColor",&SetEndColor);
 	classDef.def("GetStartColor",&GetStartColor);
 	classDef.def("GetEndColor",&GetEndColor);
-	classDef.def("Update",&Update);
 	classDef.def("GetStartPosProperty",&GetStartPosProperty);
 	classDef.def("GetEndPosProperty",&GetEndPosProperty);
 }
@@ -1665,7 +1670,7 @@ void Lua::WIBase::GetAttachmentPosProperty(lua_State *l,WIHandle &hPanel,const s
 void Lua::WIBase::SetAnchor(lua_State *l,WIHandle &hPanel,float left,float top,float right,float bottom)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->SetAnchor(left,right,top,bottom);
+	hPanel->SetAnchor(left,top,right,bottom);
 }
 void Lua::WIBase::SetAnchorLeft(lua_State *l,WIHandle &hPanel,float f)
 {
@@ -1691,7 +1696,7 @@ void Lua::WIBase::GetAnchor(lua_State *l,WIHandle &hPanel)
 {
 	lua_checkgui(l,hPanel);
 	float left,right,top,bottom;
-	auto bAnchor = hPanel->GetAnchor(left,right,top,bottom);
+	auto bAnchor = hPanel->GetAnchor(left,top,right,bottom);
 	if(bAnchor == false)
 		return;
 	Lua::PushNumber(l,left);
@@ -1791,12 +1796,6 @@ void Lua::WIShape::AddVertex(lua_State *l,WIShapeHandle &hPanel,Vector2 v)
 	lua_checkgui(l,hPanel);
 	unsigned int vertID = hPanel.get<::WIShape>()->AddVertex(v);
 	Lua::PushInt(l,vertID);
-}
-
-void Lua::WIShape::Update(lua_State *l,WIShapeHandle &hPanel)
-{
-	lua_checkgui(l,hPanel);
-	hPanel.get<::WIShape>()->Update();
 }
 
 void Lua::WIShape::SetVertexPos(lua_State *l,WIShapeHandle &hPanel,unsigned int vertID,Vector2 v)
@@ -2160,11 +2159,6 @@ void Lua::WILine::GetEndColor(lua_State *l,WILineHandle &hPanel)
 {
 	lua_checkgui(l,hPanel);
 	Lua::Push<Color>(l,hPanel.get<::WILine>()->GetEndColor());
-}
-void Lua::WILine::Update(lua_State *l,WILineHandle &hPanel)
-{
-	lua_checkgui(l,hPanel);
-	hPanel.get<::WILine>()->Update();
 }
 void Lua::WILine::GetStartPosProperty(lua_State *l,WILineHandle &hPanel)
 {
@@ -2535,6 +2529,14 @@ void Lua::WITransformable::register_class(luabind::class_<WITransformableHandle 
 		auto bounds = static_cast<::WITransformable*>(hTransformable.get())->GetDragBounds();
 		Lua::Push<Vector2i>(l,bounds.first);
 		Lua::Push<Vector2i>(l,bounds.second);
+	}));
+	classDef.def("SetResizeRatioLocked",static_cast<void(*)(lua_State*,WITransformableHandle&,bool)>([](lua_State *l,WITransformableHandle &hTransformable,bool bResizeRatioLocked) {
+		lua_checkgui(l,hTransformable);
+		static_cast<::WITransformable*>(hTransformable.get())->SetResizeRatioLocked(bResizeRatioLocked);
+	}));
+	classDef.def("IsResizeRatioLocked",static_cast<void(*)(lua_State*,WITransformableHandle&)>([](lua_State *l,WITransformableHandle &hTransformable) {
+		lua_checkgui(l,hTransformable);
+		Lua::PushBool(l,static_cast<::WITransformable*>(hTransformable.get())->IsResizeRatioLocked());
 	}));
 }
 

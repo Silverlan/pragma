@@ -51,10 +51,10 @@ template<class TPushConstants>
 		RecordDraw(prosper::util::get_square_vertex_count()) == true;
 }
 
-bool ShaderDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ)
+bool ShaderDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor)
 {
 	return Draw(descSetDepthTex,PushConstants{
-		nearZ,farZ
+		nearZ,farZ,contrastFactor
 	});
 }
 
@@ -66,10 +66,10 @@ ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::Context &context,const std::
 	: ShaderDepthToRGB(context,identifier,"debug/fs_cube_depth_to_rgb")
 {}
 
-bool ShaderCubeDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide)
+bool ShaderCubeDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor)
 {
 	return ShaderDepthToRGB::Draw(descSetDepthTex,PushConstants{
-		{nearZ,farZ},static_cast<int32_t>(cubeSide)
+		{nearZ,farZ,contrastFactor},static_cast<int32_t>(cubeSide)
 	});
 }
 
@@ -81,10 +81,10 @@ ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::Context &context,const std::st
 	: ShaderDepthToRGB(context,identifier,"debug/fs_csm_depth_to_rgb")
 {}
 
-bool ShaderCSMDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer)
+bool ShaderCSMDepthToRGB::Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor)
 {
 	return ShaderDepthToRGB::Draw(descSetDepthTex,PushConstants{
-		{nearZ,farZ},static_cast<int32_t>(layer)
+		{nearZ,farZ,contrastFactor},static_cast<int32_t>(layer)
 	});
 }
 

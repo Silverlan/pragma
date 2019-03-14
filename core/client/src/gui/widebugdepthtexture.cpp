@@ -27,6 +27,15 @@ WIDebugDepthTexture::~WIDebugDepthTexture()
 		m_depthToRgbCallback.Remove();
 }
 
+void WIDebugDepthTexture::SetTexture(prosper::Texture &texture)
+{
+	SetTexture(texture,{
+		Anvil::PipelineStageFlagBits::LATE_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+	},{
+		Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+	});
+}
+
 void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId)
 {
 	m_srcDepthRenderTarget = nullptr;
@@ -195,7 +204,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB&>(*m_whCubeDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer);
+					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}
@@ -204,7 +213,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB&>(*m_whCsmDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer);
+					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}
@@ -213,7 +222,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderDepthToRGB&>(*m_whDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ);
+					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}
@@ -292,6 +301,9 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 		renderImg->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	});*/
 }
+
+void WIDebugDepthTexture::SetContrastFactor(float contrastFactor) {m_contrastFactor = contrastFactor;}
+float WIDebugDepthTexture::GetContrastFactor() const {return m_contrastFactor;}
 
 void WIDebugDepthTexture::Update()
 {

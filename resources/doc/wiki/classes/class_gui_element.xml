@@ -27,6 +27,12 @@
 					</returnValues>
 				</overload>
 			</function>
+			<function type="method">
+				<name>Update</name>
+				<desc>Needs to be called to apply certain changes made to some elements.</desc>
+				<lua></lua>
+				<overload></overload>
+			</function>
 			<group>
 				<function type="method">
 					<name>IsValid</name>

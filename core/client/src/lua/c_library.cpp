@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/ai/c_lai.hpp"
+#include <pragma/lua/lua_entity_component.hpp>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 
@@ -133,6 +134,48 @@ static void register_gui(Lua::Interface &lua)
 	auto wiTransformableClassDef = luabind::class_<WITransformableHandle COMMA WIHandle>("Transformable");
 	Lua::WITransformable::register_class(wiTransformableClassDef);
 	guiMod[wiTransformableClassDef];
+
+	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTextureHandle COMMA WIHandle>("DebugDepthTexture");
+	wiDebugDepthTextureClassDef.def("SetContrastFactor",static_cast<void(*)(lua_State*,WIDebugDepthTextureHandle&,float)>([](lua_State *l,WIDebugDepthTextureHandle &hEl,float contrastFactor) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIDebugDepthTexture*>(hEl.get())->SetContrastFactor(contrastFactor);
+	}));
+	wiDebugDepthTextureClassDef.def("GetContrastFactor",static_cast<void(*)(lua_State*,WIDebugDepthTextureHandle&)>([](lua_State *l,WIDebugDepthTextureHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushNumber(l,static_cast<::WIDebugDepthTexture*>(hEl.get())->GetContrastFactor());
+	}));
+	wiDebugDepthTextureClassDef.def("SetTexture",static_cast<void(*)(lua_State*,WIDebugDepthTextureHandle&,std::shared_ptr<prosper::Texture>&)>([](lua_State *l,WIDebugDepthTextureHandle &hEl,std::shared_ptr<prosper::Texture> &tex) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIDebugDepthTexture*>(hEl.get())->SetTexture(*tex);
+	}));
+	guiMod[wiDebugDepthTextureClassDef];
+
+	auto wiDebugShadowMapClassDef = luabind::class_<WIDebugShadowMapHandle COMMA WIHandle>("DebugShadowMap");
+	wiDebugShadowMapClassDef.def("SetContrastFactor",static_cast<void(*)(lua_State*,WIDebugShadowMapHandle&,float)>([](lua_State *l,WIDebugShadowMapHandle &hEl,float contrastFactor) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIDebugShadowMap*>(hEl.get())->SetContrastFactor(contrastFactor);
+	}));
+	wiDebugShadowMapClassDef.def("GetContrastFactor",static_cast<void(*)(lua_State*,WIDebugShadowMapHandle&)>([](lua_State *l,WIDebugShadowMapHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushNumber(l,static_cast<::WIDebugShadowMap*>(hEl.get())->GetContrastFactor());
+	}));
+	wiDebugShadowMapClassDef.def("SetShadowMapSize",static_cast<void(*)(lua_State*,WIDebugShadowMapHandle&,uint32_t,uint32_t)>([](lua_State *l,WIDebugShadowMapHandle &hEl,uint32_t w,uint32_t h) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIDebugShadowMap*>(hEl.get())->SetShadowMapSize(w,h);
+	}));
+	wiDebugShadowMapClassDef.def("SetLightSource",static_cast<void(*)(lua_State*,WIDebugShadowMapHandle&,CLightHandle&)>([](lua_State *l,WIDebugShadowMapHandle &hEl,CLightHandle &hLight) {
+		lua_checkgui(l,hEl);
+		pragma::Lua::check_component(l,hLight);
+		static_cast<::WIDebugShadowMap*>(hEl.get())->SetLightSource(*hLight);
+	}));
+	guiMod[wiDebugShadowMapClassDef];
+
+	auto wiDebugSsaoClassDef = luabind::class_<WIDebugSSAOHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>>("DebugSSAO");
+	wiDebugSsaoClassDef.def("SetUseBlurredSSAOImage",static_cast<void(*)(lua_State*,WIDebugSSAOHandle&,bool)>([](lua_State *l,WIDebugSSAOHandle &hEl,bool useBlurredImage) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIDebugSSAO*>(hEl.get())->SetUseBlurredSSAOImage(useBlurredImage);
+	}));
+	guiMod[wiDebugSsaoClassDef];
 
 	auto wiProgressBarClassDef = luabind::class_<WIProgressBarHandle COMMA WIHandle>("ProgressBar");
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);

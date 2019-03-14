@@ -271,6 +271,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase *p)
 					return luabind::object(l,WISilkIconHandle(WIIconHandle(WITexturedShapeHandle(WIShapeHandle((p->GetHandle()))))));
 				return luabind::object(l,WIIconHandle(WITexturedShapeHandle(WIShapeHandle(p->GetHandle()))));
 			}
+			else if(dynamic_cast<WIDebugSSAO*>(p) != nullptr)
+				return luabind::object(l,WIDebugSSAOHandle(WITexturedShapeHandle(WIShapeHandle(p->GetHandle()))));
 			return luabind::object(l,WITexturedShapeHandle(WIShapeHandle(p->GetHandle())));
 		}
 		else if(dynamic_cast<WIRoundedRect*>(p) != nullptr)
@@ -313,6 +315,10 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase *p)
 			return luabind::object(l,WIFrameHandle(WITransformableHandle(p->GetHandle())));
 		return luabind::object(l,WITransformableHandle(p->GetHandle()));
 	}
+	else if(dynamic_cast<WIDebugDepthTexture*>(p) != nullptr)
+		return luabind::object(l,WIDebugDepthTextureHandle(p->GetHandle()));
+	else if(dynamic_cast<WIDebugShadowMap*>(p) != nullptr)
+		return luabind::object(l,WIDebugShadowMapHandle(p->GetHandle()));
 	else if(dynamic_cast<WIProgressBar*>(p) != nullptr)
 	{
 		if(dynamic_cast<WISlider*>(p) != nullptr)

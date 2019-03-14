@@ -19,12 +19,6 @@
 				</overload>
 			</function>
 			<function type="method">
-				<name>Update</name>
-				<desc>Needs to be called to apply any changes made to this element through [pragma:ref]gui.Shape:AddVertex[/pragma:ref], [pragma:ref]gui.Shape:SetVertexPos[/pragma:ref] or [pragma:ref]gui.Shape:ClearVertices[/pragma:ref].</desc>
-				<lua></lua>
-				<overload></overload>
-			</function>
-			<function type="method">
 				<name>SetVertexPos</name>
 				<desc>Changes the position of the specified vertex. You will have to call [pragma:ref]gui.Shape:Update[/pragma:ref] to apply the changes.</desc>
 				<lua></lua>

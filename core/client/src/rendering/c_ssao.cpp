@@ -4,8 +4,8 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
+#include "pragma/gui/debug/widebugssao.hpp"
 #include "pragma/gui/widebugdepthtexture.h"
-#include "pragma/gui/widebugmsaatexture.hpp"
 #include <wgui/types/wirect.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
@@ -66,110 +66,72 @@ void SSAOInfo::Clear()
 prosper::Shader *SSAOInfo::GetSSAOShader() const {return shader.get();}
 prosper::Shader *SSAOInfo::GetSSAOBlurShader() const {return shaderBlur.get();}
 
- // prosper TODO
-/*
-void SSAOInfo::Initialize(const Vulkan::Context &context,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits samples,const Vulkan::Texture &texNorm,const Vulkan::Texture &texDepth)
-{
-	renderPass = context.GenerateRenderPass({
-		{texNorm->GetFormat(),texNorm->GetSampleCount(),true},
-		{texDepth->GetFormat(),texDepth->GetSampleCount(),true}
-	});
-	framebuffer = Vulkan::Framebuffer::Create(context,renderPass,width,height,{
-		texNorm->GetImageView(),
-		texDepth->GetImageView()
-	});
-
-	descSetNormalDepthBuffer = Shader::SSAO::CreateNormalDepthBufferDescSet();
-	descSetNormalDepthBuffer->Update(umath::to_integral(Shader::SSAO::Binding::NormalBuffer),texNorm);
-	descSetNormalDepthBuffer->Update(umath::to_integral(Shader::SSAO::Binding::DepthBuffer),texDepth);
-
-	rtOcclusion = Vulkan::RenderTarget::Create(context,width,height,vk::Format::eR8Unorm,false,false,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags &flags) {
-		info.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	});
-	rtOcclusionBlur = Vulkan::RenderTarget::Create(context,width,height,vk::Format::eR8Unorm,false,false,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags &flags) {
-		info.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	});
-
-	static auto hShaderSSAOBlur = ShaderSystem::get_shader("ssao_blur");
-	if(hShaderSSAOBlur.IsValid() == false)
-		return;
-	auto &shaderSSAOBlur = *hShaderSSAOBlur.get();
-	if(shaderSSAOBlur.GenerateDescriptorSet(0,descSetOcclusion) == true)
-		descSetOcclusion->Update(0,rtOcclusion->GetTexture());
-}
-
-void SSAOInfo::Clear()
-{
-	auto &context = c_engine->GetRenderContext();
-	context.WaitIdle();
-	renderPass = nullptr;
-	framebuffer = nullptr;
-	descSetNormalDepthBuffer = nullptr;
-
-	rtOcclusion = nullptr;
-	descSetOcclusion = nullptr;
-
-	rtOcclusionBlur = nullptr;
-}
-*/
 void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
-	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg != nullptr)
+	auto &wgui = WGUI::GetInstance();
+	auto *pRoot = wgui.GetBaseElement();
+	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+		return;
+	const std::string name = "debug_ssao";
+	auto *pEl = pRoot->FindDescendantByName(name);
+	auto v = util::to_int(argv.front());
+	if(v == 0)
 	{
-		dbg = nullptr;
+		if(pEl != nullptr)
+			pEl->Remove();
 		return;
 	}
-	dbg = nullptr;
-	if(c_game == nullptr)
+	if(pEl != nullptr)
 		return;
-	static WIHandle hDepthTex = {};
-	dbg = std::make_unique<DebugGameGUI>([]() {
-		auto &scene = c_game->GetScene();
-		auto &ssaoInfo = scene->GetSSAOInfo();
-		auto &prepass = scene->GetPrepass();
+	pEl = wgui.Create<WIBase>();
+	if(pEl == nullptr)
+		return;
+	pEl->SetName(name);
 
-		auto bExtended = prepass.IsExtended();
-		auto count = (bExtended == true) ? 4 : 2;
-		auto &wgui = WGUI::GetInstance();
-		auto *r = wgui.Create<WIBase>();
-		r->SetSize(256 *count,256);
+	auto &scene = c_game->GetScene();
+	auto &ssaoInfo = scene->GetSSAOInfo();
+	auto &prepass = scene->GetPrepass();
 
-		auto idx = 0u;
-		if(bExtended == true)
+	auto bExtended = prepass.IsExtended();
+	auto xOffset = 0u;
+	if(bExtended == true)
+	{
+		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
+		if(pNormals != nullptr)
 		{
-			auto *pNormals = wgui.Create<WIDebugMSAATexture>(r);
+			pNormals->SetX(xOffset);
 			pNormals->SetSize(256,256);
-			pNormals->SetX(256 *idx++);
 			pNormals->SetTexture(*prepass.textureNormals);
-			pNormals->SetShouldResolveImage(true);
-
-			auto *pDepths = wgui.Create<WIDebugDepthTexture>(r);
-			pDepths->SetSize(256,256);
-			pDepths->SetX(256 *idx++);
-			pDepths->SetTexture(*prepass.textureDepth,{
-				Anvil::PipelineStageFlagBits::LATE_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-			},{
-				Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-			});
-			pDepths->Update();
-			hDepthTex = pDepths->GetHandle();
+			pNormals->Update();
+			xOffset += 256;
 		}
+		auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+		if(pPrepassDepth != nullptr)
+		{
+			pPrepassDepth->SetX(xOffset);
+			pPrepassDepth->SetSize(256,256);
+			pPrepassDepth->SetTexture(*prepass.textureDepth);
+			pPrepassDepth->Update();
+			xOffset += 256;
+		}
+	}
+	auto *pSsao = wgui.Create<WIDebugSSAO>(pEl);
+	if(pSsao != nullptr)
+	{
+		pSsao->SetX(xOffset);
+		pSsao->SetSize(256,256);
+		pSsao->Update();
+		xOffset += 256;
+	}
+	auto *pSsaoBlur = wgui.Create<WIDebugSSAO>(pEl);
+	if(pSsaoBlur != nullptr)
+	{
+		pSsaoBlur->SetX(xOffset);
+		pSsaoBlur->SetSize(256,256);
+		pSsaoBlur->SetUseBlurredSSAOImage(true);
+		pSsaoBlur->Update();
+		xOffset += 256;
+	}
 
-		auto *pOcclusion = wgui.Create<WITexturedRect>(r);
-		pOcclusion->SetSize(256,256);
-		pOcclusion->SetX(256 *idx++);
-		pOcclusion->SetTexture(*ssaoInfo.renderTarget->GetTexture());
-
-		auto *pOcclusionBlur = wgui.Create<WITexturedRect>(r);
-		pOcclusionBlur->SetSize(256,256);
-		pOcclusionBlur->SetX(256 *idx++);
-		pOcclusionBlur->SetTexture(*ssaoInfo.renderTargetBlur->GetTexture());
-		return r->GetHandle();
-	});
-	dbg->AddCallback("PostRenderScene",FunctionCallback<>::Create([]() {
-		if(hDepthTex.IsValid() == false)
-			return;
-		static_cast<WIDebugDepthTexture*>(hDepthTex.get())->Update();
-	}));
+	pEl->SizeToContents();
 }

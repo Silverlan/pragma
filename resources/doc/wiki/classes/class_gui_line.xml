@@ -111,12 +111,6 @@
 					</overload>
 				</function>
 			</group>
-			<function type="method">
-				<name>Update</name>
-				<desc>Make sure to call this after changing the start or end position of the line.</desc>
-				<lua></lua>
-				<overload></overload>
-			</function>
 		</collection>
 	</collection>
 </root>

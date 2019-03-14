@@ -22,6 +22,9 @@
 #include "pragma/gui/wislider.h"
 #include "pragma/gui/wigridpanel.h"
 #include "pragma/gui/wicontainer.h"
+#include "pragma/gui/widebugdepthtexture.h"
+#include "pragma/gui/debug/widebugshadowmap.hpp"
+#include "pragma/gui/debug/widebugssao.hpp"
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIShape,WIShape);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIText,WIText);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WITextEntry,WITextEntry);
@@ -33,6 +36,8 @@ DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIContainer,WIContainer);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIProgressBar,WIProgressBar);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WITransformable,WITransformable);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITransformable,WIFrame,WIFrame);
+DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIDebugDepthTexture,WIDebugDepthTexture);
+DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIDebugShadowMap,WIDebugShadowMap);
 
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIContainer,WITable,WITable);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIContainer,WITableRow,WITableRow);
@@ -51,5 +56,6 @@ DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WITexturedRect,
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIIcon,WIIcon);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIRoundedTexturedRect,WIRoundedTexturedRect);
 DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIIcon,WISilkIcon,WISilkIcon);
+DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIDebugSSAO,WIDebugSSAO);
 
 #endif

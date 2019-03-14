@@ -140,73 +140,53 @@ void pragma::rendering::Prepass::EndRenderPass(prosper::PrimaryCommandBuffer &cm
 
 void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
-	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg != nullptr)
+	auto &wgui = WGUI::GetInstance();
+	auto *pRoot = wgui.GetBaseElement();
+	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
+		return;
+	const std::string name = "debug_ssao";
+	auto *pEl = pRoot->FindDescendantByName(name);
+	auto v = util::to_int(argv.front());
+	if(v == 0)
 	{
-		dbg = nullptr;
+		if(pEl != nullptr)
+			pEl->Remove();
 		return;
 	}
-	dbg = nullptr;
-	if(c_game == nullptr)
+	if(pEl != nullptr)
 		return;
-	static WIHandle hDepthTex = {};
-	dbg = std::make_unique<DebugGameGUI>([]() {
-		auto &scene = c_game->GetScene();
-		auto &prepass = scene->GetPrepass();
+	pEl = wgui.Create<WIBase>();
+	if(pEl == nullptr)
+		return;
+	pEl->SetName(name);
 
-		auto numEls = (prepass.textureNormals != nullptr) ? 3u : 2u;
-		auto &wgui = WGUI::GetInstance();
-		auto *r = wgui.Create<WIBase>();
-		r->SetSize(256 *numEls,256);
+	auto &scene = c_game->GetScene();
+	auto &ssaoInfo = scene->GetSSAOInfo();
+	auto &prepass = scene->GetPrepass();
 
-		auto idx = 0u;
-		if(prepass.textureNormals != nullptr)
+	auto bExtended = prepass.IsExtended();
+	auto xOffset = 0u;
+	if(prepass.textureNormals != nullptr)
+	{
+		auto *pNormals = wgui.Create<WITexturedRect>(pEl);
+		if(pNormals != nullptr)
 		{
-			auto *pNormals = wgui.Create<WIDebugMSAATexture>(r);
+			pNormals->SetX(xOffset);
 			pNormals->SetSize(256,256);
-			pNormals->SetX(256 *idx++);
 			pNormals->SetTexture(*prepass.textureNormals);
+			pNormals->Update();
+			xOffset += 256;
 		}
+	}
+	auto *pPrepassDepth = wgui.Create<WIDebugDepthTexture>(pEl);
+	if(pPrepassDepth != nullptr)
+	{
+		pPrepassDepth->SetX(xOffset);
+		pPrepassDepth->SetSize(256,256);
+		pPrepassDepth->SetTexture(*prepass.textureDepth);
+		pPrepassDepth->Update();
+		xOffset += 256;
+	}
 
-		auto *pDepths = wgui.Create<WIDebugDepthTexture>(r);
-		pDepths->SetSize(256,256);
-		pDepths->SetX(256 *idx++);
-		pDepths->SetTexture(*prepass.textureDepth,{
-			Anvil::PipelineStageFlagBits::LATE_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-		},{
-			Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
-		});
-		pDepths->Update();
-		hDepthTex = pDepths->GetHandle();
-		return r->GetHandle();
-	});
-	auto cbPreDraw = c_engine->AddCallback("PreDrawGUI",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> refDrawCmd) {
-		auto &drawCmd = refDrawCmd.get();
-		auto &scene = c_game->GetScene();
-		auto &prepass = scene->GetPrepass();
-		if(prepass.textureNormals == nullptr)
-			return;
-		auto &img = prepass.textureNormals->GetImage();
-		prosper::util::record_image_barrier(**drawCmd,img->GetAnvilImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-	}));
-	auto cbPostDraw = c_engine->AddCallback("PostDrawGUI",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> refDrawCmd) {
-		auto &drawCmd = refDrawCmd.get();
-		auto &scene = c_game->GetScene();
-		auto &prepass = scene->GetPrepass();
-		if(prepass.textureNormals == nullptr)
-			return;
-		auto &img = prepass.textureNormals->GetImage();
-		prosper::util::record_image_barrier(**drawCmd,img->GetAnvilImage(),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-	}));
-	dbg->CallOnRemove([cbPreDraw,cbPostDraw]() mutable {
-		if(cbPreDraw.IsValid())
-			cbPreDraw.Remove();
-		if(cbPostDraw.IsValid())
-			cbPostDraw.Remove();
-	});
-	dbg->AddCallback("PostRenderScene",FunctionCallback<>::Create([]() {
-		if(hDepthTex.IsValid() == false)
-			return;
-		static_cast<WIDebugDepthTexture*>(hDepthTex.get())->Update();
-	}));
+	pEl->SizeToContents();
 }

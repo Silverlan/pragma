@@ -15,6 +15,7 @@ public:
 		Resizable = Draggable<<1u,
 		Dragging = Resizable<<1u,
 		Resizing = Dragging<<1u,
+		ResizeRatioLocked = Resizing<<1u
 	};
 	WITransformable();
 	virtual ~WITransformable() override;
@@ -51,6 +52,9 @@ public:
 	void Close();
 	virtual void Update() override;
 
+	void SetResizeRatioLocked(bool bLocked);
+	bool IsResizeRatioLocked() const;
+
 	bool IsBeingDragged() const;
 	bool IsBeingResized() const;
 
@@ -83,6 +87,7 @@ protected:
 	ResizeMode InvertResizeAxis(ResizeMode mode,bool bXAxis,bool bYAxis) const;
 	Vector2i m_minSize = {};
 	Vector2i m_maxSize = {-1,-1};
+	float m_resizeRatio = 0.f;
 
 	Vector2i m_minDrag = {std::numeric_limits<int32_t>::lowest(),std::numeric_limits<int32_t>::lowest()};
 	Vector2i m_maxDrag = {std::numeric_limits<int32_t>::max(),std::numeric_limits<int32_t>::max()};

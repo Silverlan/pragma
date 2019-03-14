@@ -212,7 +212,6 @@ namespace Lua
 	{
 		DLLCLIENT void register_class(luabind::class_<WIShapeHandle COMMA WIHandle> &classDef);
 		DLLCLIENT void AddVertex(lua_State *l,WIShapeHandle &hPanel,Vector2 v);
-		DLLCLIENT void Update(lua_State *l,WIShapeHandle &hPanel);
 		DLLCLIENT void SetVertexPos(lua_State *l,WIShapeHandle &hPanel,unsigned int vertID,Vector2 v);
 		DLLCLIENT void ClearVertices(lua_State *l,WIShapeHandle &hPanel);
 		DLLCLIENT void InvertVertexPositions(lua_State *l,WIShapeHandle &hPanel,bool x,bool y);
@@ -304,7 +303,6 @@ namespace Lua
 		DLLCLIENT void SetEndColor(lua_State *l,WILineHandle &hPanel,const Color &col);
 		DLLCLIENT void GetStartColor(lua_State *l,WILineHandle &hPanel);
 		DLLCLIENT void GetEndColor(lua_State *l,WILineHandle &hPanel);
-		DLLCLIENT void Update(lua_State *l,WILineHandle &hPanel);
 		DLLCLIENT void GetStartPosProperty(lua_State *l,WILineHandle &hPanel);
 		DLLCLIENT void GetEndPosProperty(lua_State *l,WILineHandle &hPanel);
 	};

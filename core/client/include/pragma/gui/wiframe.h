@@ -19,7 +19,6 @@ public:
 	virtual void SetSize(int x,int y) override;
 	void SetTitle(std::string title);
 	std::string GetTitle() const;
-	virtual void SetColor(float r,float g,float b,float a=1.f);
 	void SetCloseButtonEnabled(bool b);
 	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 };

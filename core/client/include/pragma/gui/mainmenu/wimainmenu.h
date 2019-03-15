@@ -45,6 +45,9 @@ protected:
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	WIHandle m_hPatreonIcon;
 #endif
+#if ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD
+	WIHandle m_hFMODLogo = {};
+#endif
 	WIHandle m_hMods;
 	WIHandle m_hCredits;
 	CallbackHandle m_cbOnGameStart;

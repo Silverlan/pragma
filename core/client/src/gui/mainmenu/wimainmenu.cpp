@@ -278,6 +278,15 @@ void WIMainMenu::Initialize()
 	}));
 #endif
 
+#if ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD
+	m_hFMODLogo = CreateChild<WITexturedRect>();
+	auto *pIcon = m_hFMODLogo.get<WITexturedRect>();
+	pIcon->SetMaterial("third_party/fmod_logo");
+	pIcon->SetColor(Color::White);
+	pIcon->SetSize(64,32);
+	pIcon->SetMouseInputEnabled(true);
+#endif
+
 	/*WIHandle hConsole = CreateChild<WIConsole>();
 	WIConsole *console = hConsole.get<WIConsole>();
 	console->SetSize(256,512);
@@ -389,6 +398,13 @@ void WIMainMenu::SetSize(int x,int y)
 	{
 		auto *pIcon = m_hPatreonIcon.get();
 		pIcon->SetPos(x -pIcon->GetWidth() -20,y -pIcon->GetHeight() -60);
+	}
+#endif
+#if ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD
+	if(m_hFMODLogo.IsValid())
+	{
+		auto *pIcon = m_hFMODLogo.get();
+		pIcon->SetPos(x -pIcon->GetWidth() -20,y -pIcon->GetHeight() -50);
 	}
 #endif
 }

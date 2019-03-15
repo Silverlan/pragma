@@ -32,6 +32,9 @@ DLLNETWORK std::unordered_map<int32_t,std::string> ACTIVITY_NAMES = {
 	{umath::to_integral(Activity::TurnLeft),"ACT_TURN_LEFT"},
 	{umath::to_integral(Activity::TurnRight),"ACT_TURN_RIGHT"},
 
+	{umath::to_integral(Activity::GestureTurnLeft),"ACT_GESTURE_TURN_LEFT"},
+	{umath::to_integral(Activity::GestureTurnRight),"ACT_GESTURE_TURN_RIGHT"},
+
 	{umath::to_integral(Activity::MeleeAttack1),"ACT_MELEE_ATTACK1"},
 	{umath::to_integral(Activity::MeleeAttack2),"ACT_MELEE_ATTACK2"},
 	{umath::to_integral(Activity::MeleeAttack3),"ACT_MELEE_ATTACK3"},

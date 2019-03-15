@@ -73,6 +73,9 @@ enum class DLLNETWORK Activity : uint16_t
 	VmAimToIronSight,
 	VmIronSightToAim,
 
+	GestureTurnLeft,
+	GestureTurnRight,
+
 	Count
 };
 REGISTER_BASIC_ARITHMETIC_OPERATORS(Activity)

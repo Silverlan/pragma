@@ -608,6 +608,8 @@
 					<enum value="54">ACT_PASSIVE_TO_AIM</enum>
 					<enum value="55">ACT_VM_AIM_TO_IRONSIGHT</enum>
 					<enum value="56">ACT_VM_IRONSIGHT_TO_AIM</enum>
+					<enum value="57">ACT_GESTURE_TURN_LEFT</enum>
+					<enum value="58">ACT_GESTURE_TURN_RIGHT</enum>
 				</enum_set>
 				<enum_set>
 					<name>Event</name>

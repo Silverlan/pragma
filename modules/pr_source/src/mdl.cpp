@@ -178,7 +178,10 @@ static const std::unordered_map<std::string,Activity> translateActivities = {
 	{"ACT_VM_HOLSTER",Activity::VmHolster},
 	{"ACT_VM_PRIMARYATTACK",Activity::VmPrimaryAttack},
 	{"ACT_VM_SECONDARYATTACK",Activity::VmSecondaryAttack},
-	{"ACT_VM_RELOAD",Activity::VmReload}
+	{"ACT_VM_RELOAD",Activity::VmReload},
+
+	{"ACT_GESTURE_TURN_LEFT",Activity::GestureTurnLeft},
+	{"ACT_GESTURE_TURN_RIGHT",Activity::GestureTurnRight}
 };
 
 static const std::unordered_map<int32_t,AnimationEvent::Type> translateAnimEvent = {

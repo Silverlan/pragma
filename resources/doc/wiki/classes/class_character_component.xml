@@ -374,11 +374,11 @@
 			</group>
 			<function type="method" shared="1">
 				<name>GetAimRayData</name>
-				<desc>Returns a [pragma::ref]phys.RayCastResult[/pragma::ref] object for a ray-trace pointing form the character's eye position straight forward.</desc>
+				<desc>Returns a [pragma::ref]phys.RayCastData[/pragma::ref] object for a ray-trace pointing form the character's eye position straight forward.</desc>
 				<lua></lua>
 				<overload>
 					<returnValues>
-						<arg type="phys.RayCastResult">rayResult</arg>
+						<arg type="phys.RayCastData">rayData</arg>
 					</returnValues>
 				</overload>
 			</function>

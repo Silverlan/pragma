@@ -451,13 +451,23 @@ bool SAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const float *
 		{
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			PlayActivity(Activity::TurnLeft,info);
+			if(PlayActivity(Activity::TurnLeft,info) == false)
+			{
+				PlayActivity(Activity::Idle,info);
+				if(animComponent.valid())
+					animComponent->PlayLayeredActivity(0,Activity::GestureTurnLeft);
+			}
 		}
 		else
 		{
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
-			PlayActivity(Activity::TurnRight,info);
+			if(PlayActivity(Activity::TurnRight,info) == false)
+			{
+				PlayActivity(Activity::Idle,info);
+				if(animComponent.valid())
+					animComponent->PlayLayeredActivity(0,Activity::GestureTurnRight);
+			}
 		}
 	}
 	else if(act == Activity::TurnLeft || act == Activity::TurnRight)

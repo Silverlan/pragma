@@ -545,6 +545,7 @@ copy_output_file(external_libs/wgui/${CMAKE_BUILD_TYPE} "bin" wgui.dll)
 
 copy_output_file(modules/pr_source/${CMAKE_BUILD_TYPE} "modules/mount_external" pr_mount_external.dll)
 copy_output_file(modules/pr_dmx/${CMAKE_BUILD_TYPE} "modules" pr_dmx.dll)
+copy_output_file(modules/pr_dds/${CMAKE_BUILD_TYPE} "modules" pr_dds.dll)
 
 copy_output_file_ext(${DEPENDENCY_BOOST_SYSTEM_LIBRARY} "bin")
 copy_output_file_ext(${DEPENDENCY_BOOST_DATE_TIME_LIBRARY} "bin")

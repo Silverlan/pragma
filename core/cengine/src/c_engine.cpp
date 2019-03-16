@@ -416,8 +416,8 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto &cmds = *m_preloadedConfig.get();
 	auto res = cmds.find("cl_render_resolution");
 	pragma::RenderContext::CreateInfo contextCreateInfo {};
-	contextCreateInfo.width = 1024;
-	contextCreateInfo.height = 768;
+	contextCreateInfo.width = 1280;
+	contextCreateInfo.height = 1024;
 	if(res != nullptr && !res->argv.empty())
 	{
 		std::vector<std::string> vals;

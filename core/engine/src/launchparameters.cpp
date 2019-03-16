@@ -159,7 +159,7 @@ DLLENGINE void LPARAM_help(int,char*[])
 static void LPARAM_luaext(int argc,char *argv[])
 {
 	Lua::set_extended_lua_modules_enabled(true);
-	Lua::set_precompiled_files_enabled(false);
+	// Lua::set_precompiled_files_enabled(false);
 }
 
 static void LPARAM_verbose(int argc,char *argv[])

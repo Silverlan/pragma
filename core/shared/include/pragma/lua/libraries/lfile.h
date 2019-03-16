@@ -124,6 +124,7 @@ namespace Lua
 		DLLNETWORK int Delete(lua_State *l);
 		DLLNETWORK int IsDir(lua_State *l);
 		DLLNETWORK int Find(lua_State *l);
+		DLLNETWORK int FindLuaFiles(lua_State *l);
 		DLLNETWORK int find_external_game_resource_files(lua_State *l);
 		DLLNETWORK int GetAttributes(lua_State *l);
 		DLLNETWORK int GetFlags(lua_State *l);

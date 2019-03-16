@@ -52,7 +52,7 @@ static void cvar_steam_steamworks_enabled(bool val)
 	{
 		if(wpSteamworks.expired() == false && isteamworks != nullptr)
 			return;
-		const std::string libSteamworksPath {"steamworks/wv_steamworks"};
+		const std::string libSteamworksPath {"steamworks/pr_steamworks"};
 		std::shared_ptr<util::Library> libSteamworks = nullptr;
 		if(nwSv != nullptr)
 			libSteamworks = nwSv->InitializeLibrary(libSteamworksPath);
@@ -67,6 +67,7 @@ static void cvar_steam_steamworks_enabled(bool val)
 			isteamworks = std::make_unique<ISteamworks>(*libSteamworks);
 			if(isteamworks->initialize() == true)
 			{
+				isteamworks->subscribe_item(1684401267); // Automatically subscribe to pragma demo addon
 				isteamworks->update_subscribed_items();
 				if(nwSv != nullptr)
 					nwSv->CallCallbacks<void,std::reference_wrapper<ISteamworks>>("OnSteamworksInitialized",*isteamworks);
@@ -144,28 +145,53 @@ REGISTER_SHARED_CONVAR_CALLBACK(sv_gravity,[](NetworkState *state,ConVar*,std::s
 ////////////////////////////////
 ////////////////////////////////
 
-static void CMD_lua_compile(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
-	if(argv.empty() || !state->IsGameActive()) return;
-	Game *game = state->GetGameState();
-	auto *l = game->GetLuaState();
-	std::string f = argv[0];
+static void compile_lua_file(lua_State *l,Game &game,std::string f)
+{
 	StringToLower(f);
 	std::string subPath = ufile::get_path_from_filename(f);
 	std::string cur = "";
 	std::string path = cur +f;
 	path = FileManager::GetNormalizedPath(path);
-	auto s = game->LoadLuaFile(path);
+	auto s = game.LoadLuaFile(path);
 	if(s != Lua::StatusCode::Ok)
 		return;
 	if(path.length() > 3 && path.substr(path.length() -4) == ".lua")
 		path = path.substr(0,path.length() -4);
 	path += ".clua";
-	path = "lua\\" +path;
 	auto r = Lua::compile_file(l,path);
 	if(r == false)
 		Con::cwar<<"WARNING: Unable to write file '"<<path.c_str()<<"'..."<<Con::endl;
 	else
 		Con::cout<<"Successfully compiled as '"<<path.c_str()<<"'."<<Con::endl;
+}
+
+static void CMD_lua_compile(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
+	if(argv.empty() || !state->IsGameActive()) return;
+	Game *game = state->GetGameState();
+	auto *l = game->GetLuaState();
+	std::string arg = argv[0];
+	if(FileManager::IsDir("lua/" +arg))
+	{
+		std::function<void(const std::string&)> fCompileFiles = nullptr;
+		fCompileFiles = [l,game,&fCompileFiles](const std::string &path) {
+			std::vector<std::string> files {};
+			std::vector<std::string> dirs {};
+			FileManager::FindFiles(("lua/" +path +"/*").c_str(),&files,&dirs);
+			for(auto &f : files)
+			{
+				std::string ext;
+				if(ufile::get_extension(f,&ext) == false || ustring::compare(ext,"lua",false) == false)
+					continue;
+				compile_lua_file(l,*game,path +'/' +f);
+			}
+			for(auto &d : dirs)
+				fCompileFiles(path +'/' +d);
+		};
+		fCompileFiles(arg);
+		return;
+	}
+	compile_lua_file(l,*game,arg);
+
 }
 REGISTER_ENGINE_CONCOMMAND(lua_compile,CMD_lua_compile,ConVarFlags::None,"Opens the specified lua-file and outputs a precompiled file with the same name (And the extension '.clua').");
 

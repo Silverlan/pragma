@@ -5,7 +5,7 @@
 #include <sharedutils/functioncallback.h>
 #include <util_pcl.h>
 #include <luainterface.hpp>
-#include <pragma_module.hpp>
+#include <pragma/pragma_module.hpp>
 #ifdef _DEBUG
 #include <iostream>
 #endif

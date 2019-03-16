@@ -132,6 +132,43 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
 	lua_pushtablecfunction(lua.GetState(),"table","random",Lua::table::random);
+	lua_pushtablecfunction(lua.GetState(),"table","merge",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto t0 = 1;
+		auto t1 = 2;
+		Lua::CheckTable(l,t0);
+		Lua::CheckTable(l,t1);
+		auto bMergeByKey = false;
+		if(Lua::IsSet(l,3))
+			bMergeByKey = Lua::CheckBool(l,3);
+		if(bMergeByKey == false)
+		{
+			auto l0 = Lua::GetObjectLength(l,t0);
+			auto l1 = Lua::GetObjectLength(l,t1);
+			for(auto i=decltype(l1){1};i<=l1;++i)
+			{
+				Lua::PushInt(l,++l0);
+
+				Lua::PushInt(l,i);
+				Lua::GetTableValue(l,t1);
+
+				Lua::SetTableValue(l,t0);
+			}
+			Lua::PushValue(l,1);
+			return 1;
+		}
+
+		Lua::PushNil(l);
+		while(Lua::GetNextPair(l,t1) != 0)
+		{
+			Lua::PushValue(l,-2);
+			Lua::PushValue(l,-2);
+			Lua::SetTableValue(l,t0);
+
+			Lua::Pop(l,1); // We need the key at the top for the next iteration
+		}
+		Lua::PushValue(l,1);
+		return 1;
+	}));
 
 	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
 	lua_pushtablecfunction(lua.GetState(),"math","approach",Lua::math::approach);
@@ -648,6 +685,7 @@ void Game::RegisterLuaLibraries()
 		{"find_external_game_resource_files",Lua::file::find_external_game_resource_files},
 		{"is_directory",Lua::file::IsDir},
 		{"find",Lua::file::Find},
+		{"find_lua_files",Lua::file::FindLuaFiles},
 		{"get_attributes",Lua::file::GetAttributes},
 		{"get_flags",Lua::file::GetFlags},
 		{"read",Lua::file::Read},

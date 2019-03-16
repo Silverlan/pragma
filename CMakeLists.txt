@@ -68,6 +68,12 @@ search_lib_recursive_ext(DEPENDENCY_SMDMODEL_LIBRARY smdmodel)
 set(DEPENDENCY_UTIL_BSP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp)
 
+set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
+
+set(DEPENDENCY_UTIL_PCL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pcl/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_PCL_LIBRARY util_pcl)
+
 set(DEPENDENCY_UTIL_FGD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_fgd/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_FGD_LIBRARY util_fgd)
 
@@ -455,7 +461,8 @@ set_target_properties(rectangle_bin_pack PROPERTIES FOLDER third_party_libs)
 add_dependencies(BulletCollision LinearMath)
 add_dependencies(BulletDynamics BulletCollision)
 add_dependencies(util_pad zip)
-
+add_dependencies(pr_pcl util_pcl)
+add_dependencies(pr_source util_archive)
 add_dependencies(pr_dmx util_dmx)
 
 add_dependencies(mathutil sharedutils-static)
@@ -542,10 +549,14 @@ copy_output_file(external_libs/prosper/${CMAKE_BUILD_TYPE} "bin" prosper.dll)
 copy_output_file(external_libs/sharedutils/${CMAKE_BUILD_TYPE} "bin" sharedutils.dll)
 copy_output_file(external_libs/vfilesystem/${CMAKE_BUILD_TYPE} "bin" vfilesystem.dll)
 copy_output_file(external_libs/wgui/${CMAKE_BUILD_TYPE} "bin" wgui.dll)
+copy_output_file(external_libs/util_pcl/${CMAKE_BUILD_TYPE} "modules/pcl" util_pcl.dll)
+copy_output_file(external_libs/util_archive/${CMAKE_BUILD_TYPE} "modules/mount_external" util_archive.dll)
 
 copy_output_file(modules/pr_source/${CMAKE_BUILD_TYPE} "modules/mount_external" pr_mount_external.dll)
 copy_output_file(modules/pr_dmx/${CMAKE_BUILD_TYPE} "modules" pr_dmx.dll)
 copy_output_file(modules/pr_dds/${CMAKE_BUILD_TYPE} "modules" pr_dds.dll)
+copy_output_file(modules/pr_steamworks/${CMAKE_BUILD_TYPE} "modules/steamworks" pr_steamworks.dll)
+copy_output_file(modules/pr_pcl/${CMAKE_BUILD_TYPE} "modules/pcl" pr_pcl.dll)
 
 copy_output_file_ext(${DEPENDENCY_BOOST_SYSTEM_LIBRARY} "bin")
 copy_output_file_ext(${DEPENDENCY_BOOST_DATE_TIME_LIBRARY} "bin")
@@ -564,6 +575,23 @@ copy_output_file_extc(${DEPENDENCY_GLFW_LIBRARY} "bin" "glfw3.dll")
 
 get_filename_component(STEAM_AUDIO_SRC_PATH ${DEPENDENCY_STEAM_AUDIO_LIBRARY} DIRECTORY)
 copy_output_file_abs(${STEAM_AUDIO_SRC_PATH}/../../../bin/Windows/x64/phonon.dll "bin" "phonon.dll")
+
+get_filename_component(STEAMWORKS_DLL_DIRECTORY ${DEPENDENCY_STEAMWORKS_LIBRARY} DIRECTORY)
+get_filename_component(STEAMWORKS_DLL_NAME ${DEPENDENCY_STEAMWORKS_LIBRARY} NAME_WE)
+copy_output_file_abs(${STEAMWORKS_DLL_DIRECTORY}/${STEAMWORKS_DLL_NAME}.dll "modules/steamworks" "${STEAMWORKS_DLL_NAME}.dll")
+
+set(PCL_BINARY_DIRECTORY "" CACHE PATH "Path to PCL binary files.")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_common_release.dll "modules/pcl" "pcl_common_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_features_release.dll "modules/pcl" "pcl_features_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_filters_release.dll "modules/pcl" "pcl_filters_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_io_ply_release.dll "modules/pcl" "pcl_io_ply_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_io_release.dll "modules/pcl" "pcl_io_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_kdtree_release.dll "modules/pcl" "pcl_kdtree_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_octree_release.dll "modules/pcl" "pcl_octree_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_sample_consensus_release.dll "modules/pcl" "pcl_sample_consensus_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_search_release.dll "modules/pcl" "pcl_search_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_segmentation_release.dll "modules/pcl" "pcl_segmentation_release.dll")
+copy_output_file_abs(${PCL_BINARY_DIRECTORY}/pcl_surface_release.dll "modules/pcl" "pcl_surface_release.dll")
 
 # zip.dll
 # libsamplerate-0.dll

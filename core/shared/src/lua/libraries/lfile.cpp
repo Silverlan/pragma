@@ -430,6 +430,31 @@ int32_t Lua::file::find_external_game_resource_files(lua_State *l)
 	return 2;
 }
 
+int Lua::file::FindLuaFiles(lua_State *l)
+{
+	std::string path = Lua::CheckString(l,1);
+	fsys::SearchFlags fsearchmode;
+	if(Lua::IsSet(l,2) == true)
+		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
+	else
+		fsearchmode = fsys::SearchFlags::All;
+	std::vector<std::string> files;
+	FileManager::FindFiles((path +"/*.lua").c_str(),&files,nullptr,fsearchmode);
+	FileManager::FindFiles((path +"/*.clua").c_str(),&files,nullptr,fsearchmode);
+
+	auto t = Lua::CreateTable(l);
+	auto idx = 1;
+	for(auto &f : files)
+	{
+		ufile::remove_extension_from_filename(f);
+		f += ".lua";
+		Lua::PushInt(l,idx++);
+		Lua::PushString(l,f);
+		Lua::SetTableValue(l,t);
+	}
+	return 1;
+}
+
 int Lua::file::Find(lua_State *l)
 {
 	std::string path = luaL_checkstring(l,1);

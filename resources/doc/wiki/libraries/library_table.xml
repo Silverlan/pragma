@@ -194,5 +194,20 @@
 				</returnValues>
 			</overload>
 		</function>
+		<function type="function" shared="1" gui="1">
+			<name>merge</name>
+			<desc>Appends all values from t1 into t0 if ''mergeByKey'' is set to ''false''. If ''mergeByKey'' is set to ''true'', the values will be copied with key, overwriting existing values.</desc>
+			<lua></lua>
+			<overload>
+				<parameters>
+					<arg type="table">t0</arg>
+					<arg type="table">t1</arg>
+					<arg type="bool" default="false">mergeByKey</arg>
+				</parameters>
+				<returnValues>
+					<arg type="table">t0</arg>
+				</returnValues>
+			</overload>
+		</function>
 	</collection>
 </root>

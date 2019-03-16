@@ -84,7 +84,7 @@
 					</overload>
 				</function>
 				<function type="function">
-					<name>remove_app_item_dependency</name>
+					<name>remove_item_app_dependency</name>
 					<desc>
 						Removes the specified app as a dependence for ''fileId'' and calls the specified ''callback'' when complete (or if failed).\n
 						The ''callback'' has the following signature:\n

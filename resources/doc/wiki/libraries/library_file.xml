@@ -137,25 +137,40 @@
 				</returnValues>
 			</overload>
 		</function>
-		<function type="function">
-			<name>find</name>
-			<desc>Returns two tables. The first table contains all found files, the second table contains the found directories with the specified name.</desc>
-			<lua>
-				local files,dirs = file.find("lua/*.lua",FSYS_SEARCH_ALL)
-				console.print_table(files)
-				console.print_table(dirs)
-			</lua>
-			<overload>
-				<parameters>
-					<arg type="string">path</arg>
-					<arg type="file.SearchMode" default="file.SEARCH_ALL">searchMode</arg>
-				</parameters>
-				<returnValues>
-					<arg type="table" subType="string">files</arg>
-					<arg type="table" subType="string">directories</arg>
-				</returnValues>
-			</overload>
-		</function>
+		<group>
+			<function type="function">
+				<name>find</name>
+				<desc>Returns two tables. The first table contains all found files, the second table contains the found directories with the specified name.</desc>
+				<lua>
+					local files,dirs = file.find("lua/*.lua",FSYS_SEARCH_ALL)
+					console.print_table(files)
+					console.print_table(dirs)
+				</lua>
+				<overload>
+					<parameters>
+						<arg type="string">path</arg>
+						<arg type="file.SearchMode" default="file.SEARCH_ALL">searchMode</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table" subType="string">files</arg>
+						<arg type="table" subType="string">directories</arg>
+					</returnValues>
+				</overload>
+			</function>
+			<function type="function">
+				<name>find_lua_files</name>
+				<desc>Returns a table of all found files within the specified path, including regular lua-files and pre-compiled lua-files. Both will be included with the ".lua" extension.</desc>
+				<overload>
+					<parameters>
+						<arg type="string">path</arg>
+						<arg type="file.SearchMode" default="file.SEARCH_ALL">searchMode</arg>
+					</parameters>
+					<returnValues>
+						<arg type="table" subType="string">files</arg>
+					</returnValues>
+				</overload>
+			</function>
+		</group>
 		<group>
 			<function type="function">
 				<name>get_attributes</name>

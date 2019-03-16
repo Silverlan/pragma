@@ -142,3 +142,6 @@
 [submodule "external_libs/util_pcl"]
 	path = external_libs/util_pcl
 	url = https://github.com/Silverlan/util_pcl.git
+[submodule "external_libs/util_archive"]
+	path = external_libs/util_archive
+	url = https://github.com/Silverlan/util_archive.git

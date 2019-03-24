@@ -413,6 +413,11 @@ void Lua::dds::register_lua_library(Lua::Interface &l)
 
 extern "C"
 {
+	bool PRAGMA_EXPORT pr_dds_initialize()
+	{
+		auto *pSteamworks = steamworks::Manager::InitializeInstance();
+		return (pSteamworks != nullptr) ? true : false;
+	}
 	void PRAGMA_EXPORT pragma_initialize_lua(Lua::Interface &l)
 	{
 		Lua::dds::register_lua_library(l);

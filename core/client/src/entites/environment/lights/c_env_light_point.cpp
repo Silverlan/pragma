@@ -1,7 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/rendering/lighting/c_light_point.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"

@@ -1,7 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/c_entityfactories.h"
-#include "pragma/rendering/lighting/c_light_directional.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/world_environment.hpp"

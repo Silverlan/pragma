@@ -1,7 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/lighting/c_light_directional.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include <prosper_util.hpp>

@@ -925,6 +925,7 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 			Con::cout<<"\t\tType: "<<type<<Con::endl;
 			Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<","<<data.color.a<<")"<<Con::endl;
 			Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
+			Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
 			Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
 			Con::cout<<"\t\tOuter cutoff angle: "<<data.cutoffOuter<<Con::endl;
 			Con::cout<<"\t\tInner cutoff angle: "<<data.cutoffInner<<Con::endl;

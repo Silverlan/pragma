@@ -6,7 +6,6 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
-#include "pragma/rendering/lighting/c_light.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>

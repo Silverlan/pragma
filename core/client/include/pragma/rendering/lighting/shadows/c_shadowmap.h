@@ -4,7 +4,6 @@
 #include "pragma/clientdefinitions.h"
 #include <mathutil/glmutil.h>
 #include "pragma/indexmap.h"
-#include "pragma/rendering/lighting/c_light.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap_depth_buffer_manager.hpp"
 
 namespace prosper {class Framebuffer; class RenderPass;};

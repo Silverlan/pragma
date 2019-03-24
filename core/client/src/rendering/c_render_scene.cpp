@@ -9,7 +9,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/rendering/lighting/c_light.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_shader_blur.hpp>

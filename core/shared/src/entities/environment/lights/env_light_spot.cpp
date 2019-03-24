@@ -23,7 +23,7 @@ void BaseEnvLightSpotComponent::Initialize()
 		else if(ustring::compare(kvData.key,"innercutoff",false))
 			*m_angInnerCutoff = util::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"cone_start_offset",false))
-			*m_coneStartOffset = util::to_float(kvData.value);
+			SetConeStartOffset(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;

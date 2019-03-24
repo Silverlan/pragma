@@ -56,7 +56,6 @@
 #include "pragma/audio/c_sound_efx.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/networking/wvclient.h"
-#include "pragma/rendering/lighting/c_light.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"

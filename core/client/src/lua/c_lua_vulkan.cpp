@@ -111,7 +111,6 @@ namespace Lua
 			DLLCLIENT void GetType(lua_State *l,Image &hImg);
 			DLLCLIENT void GetUsage(lua_State *l,Image &hImg);
 			DLLCLIENT void GetMemoryBlock(lua_State *l,Image &hImg);
-			DLLCLIENT void GetMemoryRequirements(lua_State *l,Image &hImg);
 			DLLCLIENT void GetParentSwapchain(lua_State *l,Image &hImg);
 			DLLCLIENT void GetSubresourceRange(lua_State *l,Image &hImg);
 			DLLCLIENT void GetWidth(lua_State *l,Image &hImg);
@@ -1712,8 +1711,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDescriptorSet)},
 		{"DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eFramebuffer)},
 		{"DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eCommandPool)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSurfaceKhr)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSwapchainKhr)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSurfaceKHR)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSwapchainKHR)},
 
 		{"MEMORY_FEATURE_DEVICE_LOCAL_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::DeviceLocal)},
 		{"MEMORY_FEATURE_HOST_CACHED_BIT",umath::to_integral(prosper::util::MemoryFeatureFlags::HostCached)},
@@ -1997,7 +1996,6 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetType",&Lua::Vulkan::VKImage::GetType);
 	defVkImage.def("GetUsage",&Lua::Vulkan::VKImage::GetUsage);
 	defVkImage.def("GetMemoryBlock",&Lua::Vulkan::VKImage::GetMemoryBlock);
-	//defVkImage.def("GetMemoryRequirements",&Lua::Vulkan::VKImage::GetMemoryRequirements);
 	defVkImage.def("GetSubresourceRange",&Lua::Vulkan::VKImage::GetSubresourceRange);
 	//defVkImage.def("GetParentSwapchain",&Lua::Vulkan::VKImage::GetParentSwapchain);
 	defVkImage.def("GetWidth",&Lua::Vulkan::VKImage::GetWidth);
@@ -2511,7 +2509,7 @@ void Lua::Vulkan::VKImage::GetAspectSubresourceLayout(lua_State *l,Image &hImg,u
 void Lua::Vulkan::VKImage::GetAlignment(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_alignment());
+	Lua::PushInt(l,(*hImg)->get_image_alignment(0u)); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap)
 {
@@ -2536,7 +2534,7 @@ void Lua::Vulkan::VKImage::GetFormat(lua_State *l,Image &hImg)
 void Lua::Vulkan::VKImage::GetMemoryTypes(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_memory_types());
+	Lua::PushInt(l,(*hImg)->get_image_memory_types(0u)); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap)
 {
@@ -2574,7 +2572,7 @@ void Lua::Vulkan::VKImage::GetSharingMode(lua_State *l,Image &hImg)
 void Lua::Vulkan::VKImage::GetStorageSize(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_storage_size());
+	Lua::PushInt(l,(*hImg)->get_image_storage_size(0u)); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetTiling(lua_State *l,Image &hImg)
 {
@@ -2595,11 +2593,6 @@ void Lua::Vulkan::VKImage::GetMemoryBlock(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
 	Lua::Push<Memory*>(l,(*hImg)->get_memory_block());
-}
-void Lua::Vulkan::VKImage::GetMemoryRequirements(lua_State *l,Image &hImg)
-{
-	Lua::CheckVKImage(l,1);
-	(*hImg)->get_memory_requirements(); // prosper TODO
 }
 void Lua::Vulkan::VKImage::GetParentSwapchain(lua_State *l,Image &hImg)
 {

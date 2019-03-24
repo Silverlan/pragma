@@ -6,7 +6,6 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/c_ldef_camera.h"
-#include "pragma/rendering/lighting/c_light.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>

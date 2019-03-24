@@ -10,7 +10,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
-#include "pragma/rendering/lighting/c_light.h"
 #include <wgui/wgui.h>
 #include "pragma/rendering/scene/camera.h"
 #include "pragma/rendering/uniformbinding.h"
@@ -36,9 +35,6 @@
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/opengl/renderhierarchy.h"
 #include <pragma/performancetimer.h>
-#include "pragma/rendering/lighting/c_light_ranged.h"
-#include "pragma/rendering/lighting/c_light_spot.h"
-#include "pragma/rendering/lighting/c_light_point.h"
 #include "luasystem.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_postprocessing.h"
 #include "pragma/gui/widebugdepthtexture.h"

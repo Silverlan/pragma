@@ -6,12 +6,10 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/scene/camera.h"
-#include "pragma/rendering/lighting/c_light.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/math/math_seb.h"
 #include <pragma/model/modelmesh.h>
-#include "pragma/rendering/lighting/c_light_directional.h"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"

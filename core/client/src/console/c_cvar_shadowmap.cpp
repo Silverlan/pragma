@@ -1,7 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/lighting/c_light_ranged.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/shaders/debug/c_shader_debugdepthbuffer.h"

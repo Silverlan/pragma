@@ -2764,20 +2764,19 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	//
 
 	// Skins
-	auto bFirst = true;
+	auto texGroupIdx = 0u;
 	for(auto &skinFamily : mdlInfo.skinFamilies)
 	{
-		if(bFirst == true) // Skip first skin family
-		{
-			bFirst = false;
-			continue;
-		}
-		auto *texGroup = mdl.CreateTextureGroup();
-		texGroup->textures.reserve(skinFamily.size());
+		auto *texGroup = mdl.GetTextureGroup(texGroupIdx++);
+		if(texGroup == nullptr)
+			texGroup = mdl.CreateTextureGroup();
+		auto &textures = texGroup->textures;
+		textures.clear();
+		textures.reserve(skinFamily.size());
 		for(auto idx : skinFamily)
 		{
 			auto texId = textureTranslations.at(idx);
-			texGroup->textures.push_back(texId);
+			textures.push_back(texId);
 		}
 	}
 	//

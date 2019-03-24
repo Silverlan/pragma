@@ -229,7 +229,7 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		auto *el = hPanel->FindDescendantByName(name);
 		if(el == nullptr)
 			return;
-		auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+		auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 		oChild.push(l);
 	}));
 	classDef.def("FindDescendantsByName",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>([](lua_State *l,WIHandle &hPanel,const std::string &name) {
@@ -242,7 +242,7 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		{
 			if(hChild.IsValid() == false)
 				continue;
-			auto oChild = WGUILuaInterface::GetLuaObject(l,hChild.get());
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*hChild.get());
 			Lua::PushInt(l,idx++);
 			oChild.push(l);
 			Lua::SetTableValue(l,t);
@@ -780,7 +780,7 @@ void Lua::WIBase::GetParent(lua_State *l,WIHandle &hPanel)
 	auto *parent = hPanel->GetParent();
 	if(parent == NULL)
 		return;
-	auto o = WGUILuaInterface::GetLuaObject(l,parent);
+	auto o = WGUILuaInterface::GetLuaObject(l,*parent);
 	o.push(l);
 }
 void Lua::WIBase::SetParent(lua_State *l,WIHandle &hPanel,WIHandle &hParent)
@@ -806,7 +806,7 @@ void Lua::WIBase::GetChildren(lua_State *l,WIHandle &hPanel)
 		if(hChild.IsValid())
 		{
 			auto *pChild = hChild.get();
-			auto oChild = WGUILuaInterface::GetLuaObject(l,pChild);
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*pChild);
 			Lua::PushInt(l,c);
 			oChild.push(l);
 			Lua::SetTableValue(l,table);
@@ -828,7 +828,7 @@ void Lua::WIBase::GetChildren(lua_State *l,WIHandle &hPanel,std::string classNam
 			auto *pChild = hChild.get();
 			if(pChild->GetClass() == className)
 			{
-				auto oChild = WGUILuaInterface::GetLuaObject(l,pChild);
+				auto oChild = WGUILuaInterface::GetLuaObject(l,*pChild);
 				Lua::PushInt(l,c);
 				oChild.push(l);
 				Lua::SetTableValue(l,table);
@@ -843,7 +843,7 @@ void Lua::WIBase::GetFirstChild(lua_State *l,WIHandle &hPanel,std::string classN
 	auto *el = hPanel->GetFirstChild(className);
 	if(el == NULL)
 		return;
-	auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+	auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 	oChild.push(l);
 }
 void Lua::WIBase::GetChild(lua_State *l,WIHandle &hPanel,unsigned int idx)
@@ -852,7 +852,7 @@ void Lua::WIBase::GetChild(lua_State *l,WIHandle &hPanel,unsigned int idx)
 	auto *el = hPanel->GetChild(idx);
 	if(el == NULL)
 		return;
-	auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+	auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 	oChild.push(l);
 }
 void Lua::WIBase::GetChild(lua_State *l,WIHandle &hPanel,std::string className,unsigned int idx)
@@ -861,7 +861,7 @@ void Lua::WIBase::GetChild(lua_State *l,WIHandle &hPanel,std::string className,u
 	auto *el = hPanel->GetChild(className,idx);
 	if(el == NULL)
 		return;
-	auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+	auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 	oChild.push(l);
 }
 void Lua::WIBase::PosInBounds(lua_State *l,WIHandle &hPanel,Vector2 pos)
@@ -1054,7 +1054,7 @@ namespace Lua
 						auto n = Lua::GetStackTop(l);
 						auto r = Lua::CallFunction(l,[&o,&hPanel,numArgs,argOffset](lua_State *l) {
 							o.push(l);
-							auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+							auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 							obj.push(l);
 							for(auto i=decltype(numArgs){0};i<numArgs;++i)
 							{
@@ -1139,7 +1139,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,oldText,text](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushString(l,oldText.get());
 				Lua::PushString(l,text.get());
@@ -1155,7 +1155,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,c,mods](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushString(l,std::string(1,static_cast<char>(c)));
 				Lua::PushInt(l,umath::to_integral(mods));
@@ -1171,7 +1171,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,key,action,mods](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushInt(l,umath::to_integral(key));
 				Lua::PushInt(l,umath::to_integral(action));
@@ -1188,7 +1188,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,button,action,mods](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushInt(l,umath::to_integral(button));
 				Lua::PushInt(l,umath::to_integral(action));
@@ -1205,7 +1205,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,&offset](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushNumber(l,offset.x);
 				Lua::PushNumber(l,offset.y);
@@ -1221,7 +1221,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel,bChecked](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushBool(l,bChecked);
 				return Lua::StatusCode::Ok;
@@ -1237,7 +1237,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				o.push(l);
 
 				auto *p = hPanel.get();
-				auto obj = WGUILuaInterface::GetLuaObject(l,p);
+				auto obj = WGUILuaInterface::GetLuaObject(l,*p);
 				obj.push(l);
 
 				auto optIdx = (idx == std::numeric_limits<uint32_t>::max()) ? -1 : static_cast<int32_t>(idx);
@@ -1254,7 +1254,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			auto r = Lua::CallFunction(l,[&o,hPanel,pos,bDrag](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::Push<Vector2i>(l,pos);
 				Lua::PushBool(l,bDrag);
@@ -1277,7 +1277,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				o.push(l);
 
 				auto *p = hPanel.get();
-				auto obj = WGUILuaInterface::GetLuaObject(l,p);
+				auto obj = WGUILuaInterface::GetLuaObject(l,*p);
 				obj.push(l);
 
 				Lua::PushNumber(l,progress);
@@ -1296,7 +1296,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				o.push(l);
 
 				auto *p = hPanel.get();
-				auto obj = WGUILuaInterface::GetLuaObject(l,p);
+				auto obj = WGUILuaInterface::GetLuaObject(l,*p);
 				obj.push(l);
 
 				Lua::PushNumber(l,rawValue);
@@ -1318,7 +1318,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			Lua::CallFunction(l,[&o,hPanel](lua_State *l) {
 				o.push(l);
 
-				auto obj = WGUILuaInterface::GetLuaObject(l,hPanel.get());
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				return Lua::StatusCode::Ok;
 			},0);
@@ -1466,7 +1466,7 @@ void Lua::WIBase::FindChildByName(lua_State *l,WIHandle &hPanel,std::string name
 	auto *el = hPanel->FindChildByName(name);
 	if(el == nullptr)
 		return;
-	auto oChild = WGUILuaInterface::GetLuaObject(l,el);
+	auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 	oChild.push(l);
 }
 void Lua::WIBase::FindChildrenByName(lua_State *l,WIHandle &hPanel,std::string name)
@@ -1482,7 +1482,7 @@ void Lua::WIBase::FindChildrenByName(lua_State *l,WIHandle &hPanel,std::string n
 		if(hChild.IsValid())
 		{
 			auto *pChild = hChild.get();
-			auto oChild = WGUILuaInterface::GetLuaObject(l,pChild);
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*pChild);
 			Lua::PushInt(l,c);
 			oChild.push(l);
 			Lua::SetTableValue(l,table);
@@ -2641,7 +2641,7 @@ void Lua::WITransformable::GetDragArea(lua_State *l,WITransformableHandle &hTran
 	auto *r = hTransformable.get<::WITransformable>()->GetDragArea();
 	if(r == nullptr)
 		return;
-	auto o = WGUILuaInterface::GetLuaObject(l,r);
+	auto o = WGUILuaInterface::GetLuaObject(l,*r);
 	o.push(l);
 }
 
@@ -2654,7 +2654,7 @@ void Lua::WIGridPanel::AddItem(lua_State *l,WIGridPanelHandle &hGridPanel,WIHand
 	auto *pEl = static_cast<::WIGridPanel*>(hGridPanel.get())->AddItem(hEl.get(),row,col);
 	if(pEl != nullptr)
 	{
-		auto o = WGUILuaInterface::GetLuaObject(l,pEl);
+		auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
 		o.push(l);
 	}
 }
@@ -2673,7 +2673,7 @@ void Lua::WITreeList::AddItem(lua_State *l,WITreeListHandle &hTreeList,const std
 	auto *pEl = static_cast<::WITreeList*>(hTreeList.get())->AddItem(text);
 	if(pEl != nullptr)
 	{
-		auto o = WGUILuaInterface::GetLuaObject(l,pEl);
+		auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
 		o.push(l);
 	}
 }
@@ -2693,7 +2693,7 @@ void Lua::WITreeList::GetRootItem(lua_State *l,WITreeListHandle &hTreeList)
 	auto *pRoot = static_cast<::WITreeList*>(hTreeList.get())->GetRootItem();
 	if(pRoot == nullptr)
 		return;
-	auto o = WGUILuaInterface::GetLuaObject(l,pRoot);
+	auto o = WGUILuaInterface::GetLuaObject(l,*pRoot);
 	o.push(l);
 }
 
@@ -2705,7 +2705,7 @@ void Lua::WITreeListElement::AddItem(lua_State *l,WITreeListElementHandle &hElem
 	auto *pEl = static_cast<::WITreeListElement*>(hElement.get())->AddItem(text);
 	if(pEl != nullptr)
 	{
-		auto o = WGUILuaInterface::GetLuaObject(l,pEl);
+		auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
 		o.push(l);
 	}
 }
@@ -2740,7 +2740,7 @@ void Lua::WITreeListElement::GetItems(lua_State *l,WITreeListElementHandle &hEle
 		if(hItem.IsValid() == true)
 		{
 			Lua::PushInt(l,i);
-			auto o = WGUILuaInterface::GetLuaObject(l,hItem.get());
+			auto o = WGUILuaInterface::GetLuaObject(l,*hItem.get());
 			o.push(l);
 
 			Lua::SetTableValue(l,t);
@@ -2842,7 +2842,7 @@ void Lua::WITable::AddRow(lua_State *l,WITableHandle &hTable)
 	auto *row = t->AddRow();
 	if(row != nullptr)
 	{
-		auto oRow = WGUILuaInterface::GetLuaObject(l,row);
+		auto oRow = WGUILuaInterface::GetLuaObject(l,*row);
 		oRow.push(l);
 	}
 }
@@ -2853,7 +2853,7 @@ void Lua::WITable::AddHeaderRow(lua_State *l,WITableHandle &hTable)
 	auto *row = t->AddHeaderRow();
 	if(row != nullptr)
 	{
-		auto oRow = WGUILuaInterface::GetLuaObject(l,row);
+		auto oRow = WGUILuaInterface::GetLuaObject(l,*row);
 		oRow.push(l);
 	}
 }
@@ -2900,7 +2900,7 @@ void Lua::WITable::GetRow(lua_State *l,WITableHandle &hTable,uint32_t rowId)
 	auto *pRow = t->GetRow(rowId);
 	if(pRow == nullptr)
 		return;
-	auto oRow = WGUILuaInterface::GetLuaObject(l,pRow);
+	auto oRow = WGUILuaInterface::GetLuaObject(l,*pRow);
 	oRow.push(l);
 }
 void Lua::WITable::GetSelectedRow(lua_State *l,WITableHandle &hTable)
@@ -2910,7 +2910,7 @@ void Lua::WITable::GetSelectedRow(lua_State *l,WITableHandle &hTable)
 	auto *pRow = t->GetSelectedRow();
 	if(pRow == nullptr)
 		return;
-	auto oRow = WGUILuaInterface::GetLuaObject(l,pRow);
+	auto oRow = WGUILuaInterface::GetLuaObject(l,*pRow);
 	oRow.push(l);
 }
 void Lua::WITable::GetRows(lua_State *l,WITableHandle &hTable)
@@ -2927,7 +2927,7 @@ void Lua::WITable::GetRows(lua_State *l,WITableHandle &hTable)
 		if(pRow != nullptr)
 		{
 			Lua::PushInt(l,rowId++);
-			auto o = WGUILuaInterface::GetLuaObject(l,pRow);
+			auto o = WGUILuaInterface::GetLuaObject(l,*pRow);
 			o.push(l);
 
 			Lua::SetTableValue(l,t);
@@ -2975,7 +2975,7 @@ void Lua::WITableRow::SetValue(lua_State *l,WITableRowHandle &hRow,uint32_t colu
 	auto hText = t->SetValue(column,value);
 	if(!hText.IsValid())
 		return;
-	auto oText = WGUILuaInterface::GetLuaObject(l,hText.get());
+	auto oText = WGUILuaInterface::GetLuaObject(l,*hText.get());
 	oText.push(l);
 }
 void Lua::WITableRow::GetValue(lua_State *l,WITableRowHandle &hRow,uint32_t column)
@@ -3004,7 +3004,7 @@ void Lua::WITableRow::GetCell(lua_State *l,WITableRowHandle &hRow,uint32_t cellI
 	auto *pCell = t->GetCell(cellId);
 	if(pCell == nullptr)
 		return;
-	auto oCell = WGUILuaInterface::GetLuaObject(l,pCell);
+	auto oCell = WGUILuaInterface::GetLuaObject(l,*pCell);
 	oCell.push(l);
 }
 
@@ -3015,7 +3015,7 @@ void Lua::WITableCell::GetFirstElement(lua_State *l,WITableCellHandle &hCell)
 	auto *el = c->GetFirstElement();
 	if(el == nullptr)
 		return;
-	auto oEl = WGUILuaInterface::GetLuaObject(l,el);
+	auto oEl = WGUILuaInterface::GetLuaObject(l,*el);
 	oEl.push(l);
 }
 

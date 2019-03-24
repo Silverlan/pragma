@@ -26,10 +26,9 @@ WILuaBase::~WILuaBase()
 
 void WILuaBase::InitializeHandle()
 {
-	auto *hElement = luabind::object_cast_nothrow<WILuaHandle*>(*m_baseLuaObj).get();
-	hElement->Reset(new PtrWI(this));
-	m_handle = hElement;
-	m_bExternalHandle = true;
+	auto &hElement = *luabind::object_cast_nothrow<WILuaHandle*>(*m_baseLuaObj).get();
+	hElement.Reset(new PtrWI(this));
+	m_handle = std::shared_ptr<WILuaHandle>(&hElement,[](WILuaHandle*) {}); // Empty deleter, Lua will take care of its deletion!
 }
 
 void WILuaBase::Initialize()

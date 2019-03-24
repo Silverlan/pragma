@@ -49,7 +49,7 @@ static void register_gui(Lua::Interface &lua)
 			auto *r = p->FindDescendantByName(name);
 			if(r == nullptr)
 				return 0;
-			auto oChild = WGUILuaInterface::GetLuaObject(l,r);
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*r);
 			oChild.push(l);
 			return 1;
 		})},
@@ -66,7 +66,7 @@ static void register_gui(Lua::Interface &lua)
 				if(hEl.IsValid() == false)
 					continue;
 				Lua::PushInt(l,idx++);
-				auto oChild = WGUILuaInterface::GetLuaObject(l,hEl.get());
+				auto oChild = WGUILuaInterface::GetLuaObject(l,*hEl.get());
 				oChild.push(l);
 				Lua::SetTableValue(l,t);
 			}

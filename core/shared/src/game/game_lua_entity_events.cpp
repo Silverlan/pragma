@@ -1,10 +1,10 @@
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
-#include "pragma/lua/classes/ldef_damageinfo.h"
 #include "pragma/lua/classes/ldef_vector.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
+#include "pragma/lua/classes/ldef_entity.h"
+#include "pragma/lua/classes/ldef_damageinfo.h"
+#include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
@@ -22,7 +22,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &componentHandle = *Lua::Check<BaseEntityComponentHandle*>(l,-1);
+		auto &componentHandle = Lua::Check<BaseEntityComponentHandle>(l,-1);
 		Lua::CheckComponentHandle(l,componentHandle);
 		Lua::Pop(l,1);
 		pragma::CEOnEntityComponentAdded evData{*componentHandle.get()};
@@ -35,7 +35,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &componentHandle = *Lua::Check<BaseEntityComponentHandle*>(l,-1);
+		auto &componentHandle = Lua::Check<BaseEntityComponentHandle>(l,-1);
 		pragma::Lua::check_component(l,componentHandle);
 		Lua::Pop(l,1);
 		pragma::CEOnEntityComponentRemoved evData{*componentHandle.get()};

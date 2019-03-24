@@ -6,6 +6,7 @@
 #include "pragma/lua/classes/ldef_skeleton.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include <smdmodel.h>
+#include <unordered_set>
 #include <sharedutils/util_file.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -249,6 +250,7 @@ int Lua::import::import_wrmi(lua_State *l)
 			auto &meshTriangles = subMesh->GetTriangles();
 			auto &meshWeights = subMesh->GetVertexWeights();
 			auto map = f->ReadString();
+			map += ".wmi";
 			ufile::remove_extension_from_filename(map);
 
 			auto *mat = nw->LoadMaterial(map);
@@ -465,6 +467,16 @@ int Lua::import::import_pmx(lua_State *l)
 	auto *texGroup = mdl->GetTextureGroup(0u);
 	for(auto &tex : mdlData->textures)
 	{
+		auto fTex = FileManager::OpenFile(tex.c_str(),"rb");
+		if(fTex == nullptr)
+			Con::cwar<<"WARNING: Unable to open texture '"<<tex<<"'!"<<Con::endl;
+		else
+		{
+
+		}
+		// Load DDS
+
+
 		mdl->AddTexturePath(ufile::get_path_from_filename(tex));
 		auto texName = ufile::get_file_from_filename(tex);
 		ufile::remove_extension_from_filename(texName);
@@ -586,6 +598,7 @@ int Lua::import::import_pmx(lua_State *l)
 
 	mdl->Update(ModelUpdateFlags::All);
 	mdl->GenerateBindPoseMatrices();
+	Lua::PushBool(l,true);
 	return 1;
 #else
 	Lua::PushBool(l,false);

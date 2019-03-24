@@ -131,7 +131,7 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::RenderP
 		},
 		{
 			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::DONT_CARE,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		}
 	}},outRenderPass,pipelineIdx);
 }

@@ -89,6 +89,7 @@ extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT PhysEnv *c_physEnv = NULL;
 
+#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -178,6 +179,7 @@ CGame::CGame(NetworkState *state)
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender");
 	RegisterCallback<void,CBaseEntity*>("UpdateEntityModel");
+	RegisterCallback<void,WIBase*,WIBase*>("OnGUIFocusChanged");
 
 	auto &staticCallbacks = get_static_client_callbacks();
 	for(auto it=staticCallbacks.begin();it!=staticCallbacks.end();++it)
@@ -216,11 +218,23 @@ CGame::CGame(NetworkState *state)
 		// Add entity to scene
 		m_scene->AddEntity(*static_cast<CBaseEntity*>(ent));
 	}));
+
+	WGUI::GetInstance().SetFocusCallback([this](WIBase *oldFocus,WIBase *newFocus) {
+		CallCallbacks<void,WIBase*,WIBase*>("OnGUIFocusChanged",oldFocus,newFocus);
+
+		auto *l = GetLuaState();
+		if(l == nullptr)
+			return;
+		auto oOldFocus = oldFocus ? WGUILuaInterface::GetLuaObject(l,*oldFocus) : luabind::object{};
+		auto oNewFocus = newFocus ? WGUILuaInterface::GetLuaObject(l,*newFocus) : luabind::object{};
+		CallLuaCallbacks<void,luabind::object,luabind::object>("OnGUIFocusChanged",oOldFocus,oNewFocus);
+	});
 }
 
 CGame::~CGame()
 {
 	c_engine->WaitIdle();
+	WGUI::GetInstance().SetFocusCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
 		m_hCbDrawFrame.Remove();
 	CallCallbacks<void,CGame*>("OnGameEnd",this);
@@ -590,7 +604,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 		if(luabind::object_cast_nothrow<WILuaHandle*>(r))
 		{
 			el = new WILuaBase(r,className);
-			gui.Setup<WILuaBase>(el,parent);
+			gui.Setup<WILuaBase>(*el,parent);
 		}
 		else
 		{
@@ -1233,18 +1247,21 @@ void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 	{
 		std::vector<std::shared_ptr<prosper::Buffer>> uvBuffers {};
 		auto lightMapUvBuffer = pragma::CLightMapComponent::LoadLightMapUvBuffers(lightMapUvCoordinates,uvBuffers);
-		for(auto &uvData : lightMapUvCoordinateRanges)
+		if(lightMapUvBuffer != nullptr)
 		{
-			if(uvData.hEntity.IsValid() == false)
-				continue;
-			auto pLightMapComponent = uvData.hEntity->AddComponent<pragma::CLightMapComponent>();
-			if(pLightMapComponent.expired())
-				continue;
-			std::vector<std::shared_ptr<prosper::Buffer>> entityUvBuffers {};
-			entityUvBuffers.reserve(uvData.numUvSets);
-			for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
-				entityUvBuffers.push_back(uvBuffers.at(i));
-			pLightMapComponent->InitializeLightMapData(lightMap,lightMapUvBuffer,entityUvBuffers);
+			for(auto &uvData : lightMapUvCoordinateRanges)
+			{
+				if(uvData.hEntity.IsValid() == false)
+					continue;
+				auto pLightMapComponent = uvData.hEntity->AddComponent<pragma::CLightMapComponent>();
+				if(pLightMapComponent.expired())
+					continue;
+				std::vector<std::shared_ptr<prosper::Buffer>> entityUvBuffers {};
+				entityUvBuffers.reserve(uvData.numUvSets);
+				for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
+					entityUvBuffers.push_back(uvBuffers.at(i));
+				pLightMapComponent->InitializeLightMapData(lightMap,lightMapUvBuffer,entityUvBuffers);
+			}
 		}
 	}
 
@@ -1656,3 +1673,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

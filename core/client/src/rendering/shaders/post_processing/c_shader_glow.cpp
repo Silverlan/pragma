@@ -58,7 +58,7 @@ void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outR
 		},
 		{
 			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::DONT_CARE,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			Anvil::AttachmentStoreOp::STORE /* depth values have already been written by prepass */,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		}
 	}}},outRenderPass,pipelineIdx);
 }

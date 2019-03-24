@@ -11,6 +11,7 @@
 #endif
 
 using namespace pragma;
+#pragma optimize("",off)
 RenderContext::RenderContext()
 	: prosper::Context(engine_info::get_name(),false)
 	,m_bWindowedMode(true),m_monitor(nullptr),m_aspectRatio(1.f)
@@ -140,3 +141,4 @@ void RenderContext::SetResolution(const Vector2i &sz)
 	changeInfo.height = sz.y;
 }
 float RenderContext::GetAspectRatio() const {return m_aspectRatio;}
+#pragma optimize("",on)

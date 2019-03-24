@@ -47,7 +47,7 @@ void WILuaSkin::Release(WIBase *el)
 
 				Lua::PushRegistryValue(m_lua,m_refVars);
 				//WISkinClass *cl = elClasses[i];
-				auto o = WGUILuaInterface::GetLuaObject(m_lua,el);
+				auto o = WGUILuaInterface::GetLuaObject(m_lua,*el);
 				o.push(m_lua);
 				return Lua::StatusCode::Ok;
 			},0);
@@ -86,7 +86,7 @@ void WILuaSkin::Initialize(WIBase *el)
 
 				Lua::PushRegistryValue(m_lua,m_refVars);
 				//WISkinClass *cl = elClasses[i];
-				auto o = WGUILuaInterface::GetLuaObject(m_lua,el);
+				auto o = WGUILuaInterface::GetLuaObject(m_lua,*el);
 				o.push(m_lua);
 				return Lua::StatusCode::Ok;
 			},0);

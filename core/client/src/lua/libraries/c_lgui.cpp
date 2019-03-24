@@ -39,7 +39,7 @@ int Lua::gui::create(lua_State *l)
 		auto wrapper = std::static_pointer_cast<WILuaHandleWrapper>(data);
 		wrapper->lua = true;
 	}
-	auto obj = WGUILuaInterface::GetLuaObject(l,p);
+	auto obj = WGUILuaInterface::GetLuaObject(l,*p);
 	obj.push(l);
 	return 1;
 }
@@ -63,7 +63,7 @@ int Lua::gui::create_button(lua_State *l)
 		auto y = Lua::CheckInt(l,arg++);
 		pButton->SetPos(x,y);
 	}
-	auto obj = WGUILuaInterface::GetLuaObject(l,pButton);
+	auto obj = WGUILuaInterface::GetLuaObject(l,*pButton);
 	obj.push(l);
 	return 1;
 }
@@ -102,13 +102,13 @@ int Lua::gui::create_checkbox(lua_State *l)
 
 	pContainer->SizeToContents();
 
-	auto oContainer = WGUILuaInterface::GetLuaObject(l,pContainer);
+	auto oContainer = WGUILuaInterface::GetLuaObject(l,*pContainer);
 	oContainer.push(l);
 
-	auto oCheckbox = WGUILuaInterface::GetLuaObject(l,pCheckbox);
+	auto oCheckbox = WGUILuaInterface::GetLuaObject(l,*pCheckbox);
 	oCheckbox.push(l);
 
-	auto oText = WGUILuaInterface::GetLuaObject(l,pText);
+	auto oText = WGUILuaInterface::GetLuaObject(l,*pText);
 	oText.push(l);
 	return 3;
 }
@@ -132,7 +132,7 @@ int Lua::gui::create_label(lua_State *l)
 		auto y = Lua::CheckInt(l,arg++);
 		pText->SetPos(x,y);
 	}
-	auto obj = WGUILuaInterface::GetLuaObject(l,pText);
+	auto obj = WGUILuaInterface::GetLuaObject(l,*pText);
 	obj.push(l);
 	return 1;
 }
@@ -155,7 +155,7 @@ int Lua::gui::get_base_element(lua_State *l)
 	auto *el = WGUI::GetInstance().GetBaseElement();
 	if(el == NULL)
 		return 0;
-	auto o = WGUILuaInterface::GetLuaObject(l,el);
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
 	o.push(l);
 	return 1;
 }
@@ -165,7 +165,7 @@ int Lua::gui::get_focused_element(lua_State *l)
 	auto *el = WGUI::GetInstance().GetFocusedElement();
 	if(el == NULL)
 		return 0;
-	auto o = WGUILuaInterface::GetLuaObject(l,el);
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
 	o.push(l);
 	return 1;
 }

@@ -109,7 +109,7 @@ private:
 protected:
 	std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 	void InitializeGUILua();
-	std::vector<std::function<luabind::object(lua_State*,WIBase*)>> m_guiLuaWrapperFactories;
+	std::vector<std::function<luabind::object(lua_State*,WIBase&)>> m_guiLuaWrapperFactories;
 	
 	virtual void InitializeResourceManager() override;
 
@@ -137,8 +137,8 @@ public:
 	virtual void Close() override;
 	ConVarMap *GetConVarMap();
 	bool IsConnected() const;
-	void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase*)> &f);
-	std::vector<std::function<luabind::object(lua_State*,WIBase*)>> &GetGUILuaWrapperFactories();
+	void AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase&)> &f);
+	std::vector<std::function<luabind::object(lua_State*,WIBase&)>> &GetGUILuaWrapperFactories();
 	virtual MaterialManager &GetMaterialManager() override;
 	virtual ModelSubMesh *CreateSubMesh() const override;
 	virtual ModelMesh *CreateMesh() const override;

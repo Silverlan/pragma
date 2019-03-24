@@ -57,7 +57,7 @@ std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::LoadLightMa
 		requiredBufferSize += prosper::util::get_aligned_size(data.size() *sizeof(data.front()),alignment);
 	bufCreateInfo.size = requiredBufferSize;
 	auto lightMapUvBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,bufCreateInfo,bufCreateInfo.size,0.2f);
-	if(lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
+	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
 		return nullptr;
 	outMeshLightMapUvBuffers.reserve(meshUvData.size());
 	for(auto &data : meshUvData)

@@ -220,10 +220,14 @@ search_lib_recursive(DEPENDENCY_BULLET_DYNAMICS_LIBRARY third_party_libs/bullet/
 search_lib_recursive(DEPENDENCY_BULLET_COLLISION_LIBRARY third_party_libs/bullet/src/BulletCollision/${CMAKE_BUILD_TYPE}/BulletCollision.lib)
 search_lib_recursive(DEPENDENCY_BULLET_SOFTBODY_LIBRARY third_party_libs/bullet/src/BulletSoftBody/${CMAKE_BUILD_TYPE}/BulletSoftBody.lib)
 
+message("Processing core libraries...")
 add_subdirectory(core)
+message("Processing external libraries...")
 add_subdirectory(external_libs)
+message("Processing modules...")
 add_subdirectory(modules)
 
+message("Processing third-party libaries...")
 # include generated headers
 target_include_directories(shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)
 

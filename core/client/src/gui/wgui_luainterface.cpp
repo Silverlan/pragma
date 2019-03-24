@@ -16,7 +16,7 @@ CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
 lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
 
-static void GUI_Callback_OnMouseEvent(WIBase *p,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+static void GUI_Callback_OnMouseEvent(WIBase &p,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
@@ -51,7 +51,7 @@ static void GUI_Callback_OnMouseEvent(WIBase *p,GLFW::MouseButton button,GLFW::K
 	}
 }
 
-static void GUI_Callback_OnKeyEvent(WIBase *p,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+static void GUI_Callback_OnKeyEvent(WIBase &p,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
@@ -86,7 +86,7 @@ static void GUI_Callback_OnKeyEvent(WIBase *p,GLFW::Key key,int scanCode,GLFW::K
 	}
 }
 
-static void GUI_Callback_OnCharEvent(WIBase *p,int c,GLFW::Modifier mods)
+static void GUI_Callback_OnCharEvent(WIBase &p,int c,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
@@ -120,7 +120,7 @@ static void GUI_Callback_OnCharEvent(WIBase *p,int c,GLFW::Modifier mods)
 	}
 }
 
-static void GUI_Callback_OnScroll(WIBase *p,Vector2 offset)
+static void GUI_Callback_OnScroll(WIBase &p,Vector2 offset)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
@@ -166,15 +166,15 @@ void WGUILuaInterface::OnGameLuaReleased(lua_State*)
 	ClearLuaObjects(el);
 }
 
-void WGUILuaInterface::ClearGUILuaObjects(WIBase *el)
+void WGUILuaInterface::ClearGUILuaObjects(WIBase &el)
 {
-	el->SetUserData(nullptr);
-	std::vector<WIHandle> *children = el->GetChildren();
+	el.SetUserData(nullptr);
+	std::vector<WIHandle> *children = el.GetChildren();
 	for(unsigned int i=0;i<children->size();i++)
 	{
 		WIHandle &hChild = (*children)[i];
 		if(hChild.IsValid())
-			ClearGUILuaObjects(hChild.get());
+			ClearGUILuaObjects(*hChild.get());
 	}
 }
 
@@ -190,21 +190,21 @@ void WGUILuaInterface::ClearLuaObjects(WIBase *el)
 	}
 }
 
-void WGUILuaInterface::OnGUIDestroy(WIBase *el)
+void WGUILuaInterface::OnGUIDestroy(WIBase &el)
 {
-	auto userData = el->GetUserData();
+	auto userData = el.GetUserData();
 	if(userData != nullptr)
 	{
 		userData = nullptr;
-		el->SetUserData(nullptr);
+		el.SetUserData(nullptr);
 	}
-	auto userData2 = el->GetUserData2();
+	auto userData2 = el.GetUserData2();
 	if(userData2 != nullptr)
 	{
 		userData2 = nullptr;
 		auto ptr = std::static_pointer_cast<luabind::object>(userData2);
 		if(ptr != nullptr)
-			el->SetUserData2(nullptr);
+			el.SetUserData2(nullptr);
 	}
 }
 
@@ -223,23 +223,23 @@ void WGUILuaInterface::Clear()
 		m_cbLuaReleased.Remove();
 }
 
-void WGUILuaInterface::InitializeGUIElement(WIBase *p)
+void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 {
-	p->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
-		std::bind(&GUI_Callback_OnMouseEvent,p,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)
+	p.AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
+		[&p](GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) {GUI_Callback_OnMouseEvent(p,button,state,mods);}
 	));
-	p->AddCallback("OnKeyEvent",FunctionCallback<void,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::Create(
-		std::bind(&GUI_Callback_OnKeyEvent,p,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4)
+	p.AddCallback("OnKeyEvent",FunctionCallback<void,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::Create(
+		[&p](GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) {GUI_Callback_OnKeyEvent(p,key,scanCode,state,mods);}
 	));
-	p->AddCallback("OnCharEvent",FunctionCallback<void,int,GLFW::Modifier>::Create(
-		std::bind(&GUI_Callback_OnCharEvent,p,std::placeholders::_1,std::placeholders::_2)
+	p.AddCallback("OnCharEvent",FunctionCallback<void,int,GLFW::Modifier>::Create(
+		[&p](int c,GLFW::Modifier mods) {GUI_Callback_OnCharEvent(p,c,mods);}
 	));
-	p->AddCallback("OnScroll",FunctionCallback<void,Vector2>::Create(
-		std::bind(&GUI_Callback_OnScroll,p,std::placeholders::_1)
+	p.AddCallback("OnScroll",FunctionCallback<void,Vector2>::Create(
+		[&p](Vector2 offset) {GUI_Callback_OnScroll(p,offset);}
 	));
 }
 
-luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase *p)
+luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
 {
 	for(auto &f : client->GetGUILuaWrapperFactories())
 	{
@@ -247,108 +247,108 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase *p)
 		if(r)
 			return r;
 	}
-	if(dynamic_cast<WITextEntry*>(p) != nullptr)
+	if(dynamic_cast<WITextEntry*>(&p) != nullptr)
 	{
-		if(dynamic_cast<WINumericEntry*>(p) != nullptr)
-			return luabind::object(l,WINumericEntryHandle(WITextEntryHandle(p->GetHandle())));
-		else if(dynamic_cast<WIDropDownMenu*>(p) != nullptr)
-			return luabind::object(l,WIDropDownMenuHandle(WITextEntryHandle(p->GetHandle())));
-		return luabind::object(l,WITextEntryHandle(p->GetHandle()));
+		if(dynamic_cast<WINumericEntry*>(&p) != nullptr)
+			return luabind::object(l,WINumericEntryHandle(WITextEntryHandle(p.GetHandle())));
+		else if(dynamic_cast<WIDropDownMenu*>(&p) != nullptr)
+			return luabind::object(l,WIDropDownMenuHandle(WITextEntryHandle(p.GetHandle())));
+		return luabind::object(l,WITextEntryHandle(p.GetHandle()));
 	}
-	else if(dynamic_cast<WIText*>(p) != nullptr)
-		return luabind::object(l,WITextHandle(p->GetHandle()));
-	else if(dynamic_cast<WIOutlinedRect*>(p) != nullptr)
-		return luabind::object(l,WIOutlinedRectHandle(p->GetHandle()));
-	else if(dynamic_cast<WIShape*>(p) != nullptr)
+	else if(dynamic_cast<WIText*>(&p) != nullptr)
+		return luabind::object(l,WITextHandle(p.GetHandle()));
+	else if(dynamic_cast<WIOutlinedRect*>(&p) != nullptr)
+		return luabind::object(l,WIOutlinedRectHandle(p.GetHandle()));
+	else if(dynamic_cast<WIShape*>(&p) != nullptr)
 	{
-		if(dynamic_cast<WITexturedShape*>(p) != nullptr)
+		if(dynamic_cast<WITexturedShape*>(&p) != nullptr)
 		{
-			if(dynamic_cast<WIRoundedTexturedRect*>(p) != nullptr)
-				return luabind::object(l,WIRoundedTexturedRectHandle(WITexturedShapeHandle(WIShapeHandle(p->GetHandle()))));
-			else if(dynamic_cast<WIIcon*>(p) != nullptr)
+			if(dynamic_cast<WIRoundedTexturedRect*>(&p) != nullptr)
+				return luabind::object(l,WIRoundedTexturedRectHandle(WITexturedShapeHandle(WIShapeHandle(p.GetHandle()))));
+			else if(dynamic_cast<WIIcon*>(&p) != nullptr)
 			{
-				if(dynamic_cast<WISilkIcon*>(p) != nullptr)
-					return luabind::object(l,WISilkIconHandle(WIIconHandle(WITexturedShapeHandle(WIShapeHandle((p->GetHandle()))))));
-				return luabind::object(l,WIIconHandle(WITexturedShapeHandle(WIShapeHandle(p->GetHandle()))));
+				if(dynamic_cast<WISilkIcon*>(&p) != nullptr)
+					return luabind::object(l,WISilkIconHandle(WIIconHandle(WITexturedShapeHandle(WIShapeHandle((p.GetHandle()))))));
+				return luabind::object(l,WIIconHandle(WITexturedShapeHandle(WIShapeHandle(p.GetHandle()))));
 			}
-			else if(dynamic_cast<WIDebugSSAO*>(p) != nullptr)
-				return luabind::object(l,WIDebugSSAOHandle(WITexturedShapeHandle(WIShapeHandle(p->GetHandle()))));
-			return luabind::object(l,WITexturedShapeHandle(WIShapeHandle(p->GetHandle())));
+			else if(dynamic_cast<WIDebugSSAO*>(&p) != nullptr)
+				return luabind::object(l,WIDebugSSAOHandle(WITexturedShapeHandle(WIShapeHandle(p.GetHandle()))));
+			return luabind::object(l,WITexturedShapeHandle(WIShapeHandle(p.GetHandle())));
 		}
-		else if(dynamic_cast<WIRoundedRect*>(p) != nullptr)
-			return luabind::object(l,WIRoundedRectHandle(WIShapeHandle(p->GetHandle())));
-		else if(dynamic_cast<WICheckbox*>(p) != nullptr)
-			return luabind::object(l,WICheckboxHandle(WIShapeHandle(p->GetHandle())));
-		else if(dynamic_cast<WIArrow*>(p) != nullptr)
-			return luabind::object(l,WIArrowHandle(WIShapeHandle(p->GetHandle())));
-		return luabind::object(l,WIShapeHandle(p->GetHandle()));
+		else if(dynamic_cast<WIRoundedRect*>(&p) != nullptr)
+			return luabind::object(l,WIRoundedRectHandle(WIShapeHandle(p.GetHandle())));
+		else if(dynamic_cast<WICheckbox*>(&p) != nullptr)
+			return luabind::object(l,WICheckboxHandle(WIShapeHandle(p.GetHandle())));
+		else if(dynamic_cast<WIArrow*>(&p) != nullptr)
+			return luabind::object(l,WIArrowHandle(WIShapeHandle(p.GetHandle())));
+		return luabind::object(l,WIShapeHandle(p.GetHandle()));
 	}
-	else if(dynamic_cast<WIContainer*>(p) != nullptr)
+	else if(dynamic_cast<WIContainer*>(&p) != nullptr)
 	{
-		if(dynamic_cast<WITable*>(p) != nullptr)
+		if(dynamic_cast<WITable*>(&p) != nullptr)
 		{
-			if(dynamic_cast<WIGridPanel*>(p) != nullptr)
-				return luabind::object(l,WIGridPanelHandle(WITableHandle(WIContainerHandle(p->GetHandle()))));
-			else if(dynamic_cast<WITreeList*>(p) != nullptr)
-				return luabind::object(l,WITreeListHandle(WITableHandle(WIContainerHandle(p->GetHandle()))));
-			return luabind::object(l,WITableHandle(WIContainerHandle(p->GetHandle())));
+			if(dynamic_cast<WIGridPanel*>(&p) != nullptr)
+				return luabind::object(l,WIGridPanelHandle(WITableHandle(WIContainerHandle(p.GetHandle()))));
+			else if(dynamic_cast<WITreeList*>(&p) != nullptr)
+				return luabind::object(l,WITreeListHandle(WITableHandle(WIContainerHandle(p.GetHandle()))));
+			return luabind::object(l,WITableHandle(WIContainerHandle(p.GetHandle())));
 		}
-		else if(dynamic_cast<WITableRow*>(p) != nullptr)
+		else if(dynamic_cast<WITableRow*>(&p) != nullptr)
 		{
-			if(dynamic_cast<WITreeListElement*>(p) != nullptr)
-				return luabind::object(l,WITreeListElementHandle(WITableRowHandle(WIContainerHandle(p->GetHandle()))));
-			return luabind::object(l,WITableRowHandle(WIContainerHandle(p->GetHandle())));
+			if(dynamic_cast<WITreeListElement*>(&p) != nullptr)
+				return luabind::object(l,WITreeListElementHandle(WITableRowHandle(WIContainerHandle(p.GetHandle()))));
+			return luabind::object(l,WITableRowHandle(WIContainerHandle(p.GetHandle())));
 		}
-		else if(dynamic_cast<WITableCell*>(p) != nullptr)
-			return luabind::object(l,WITableCellHandle(WIContainerHandle(p->GetHandle())));
-		return luabind::object(l,WIContainerHandle(p->GetHandle()));
+		else if(dynamic_cast<WITableCell*>(&p) != nullptr)
+			return luabind::object(l,WITableCellHandle(WIContainerHandle(p.GetHandle())));
+		return luabind::object(l,WIContainerHandle(p.GetHandle()));
 	}
-	else if(dynamic_cast<WIScrollBar*>(p) != nullptr)
-		return luabind::object(l,WIScrollBarHandle(p->GetHandle()));
-	else if(dynamic_cast<WIButton*>(p) != nullptr)
-		return luabind::object(l,WIButtonHandle(p->GetHandle()));
-	else if(dynamic_cast<WILine*>(p) != nullptr)
-		return luabind::object(l,WILineHandle(p->GetHandle()));
-	else if(dynamic_cast<WITransformable*>(p) != nullptr)
+	else if(dynamic_cast<WIScrollBar*>(&p) != nullptr)
+		return luabind::object(l,WIScrollBarHandle(p.GetHandle()));
+	else if(dynamic_cast<WIButton*>(&p) != nullptr)
+		return luabind::object(l,WIButtonHandle(p.GetHandle()));
+	else if(dynamic_cast<WILine*>(&p) != nullptr)
+		return luabind::object(l,WILineHandle(p.GetHandle()));
+	else if(dynamic_cast<WITransformable*>(&p) != nullptr)
 	{
-		if(dynamic_cast<WIFrame*>(p) != nullptr)
-			return luabind::object(l,WIFrameHandle(WITransformableHandle(p->GetHandle())));
-		return luabind::object(l,WITransformableHandle(p->GetHandle()));
+		if(dynamic_cast<WIFrame*>(&p) != nullptr)
+			return luabind::object(l,WIFrameHandle(WITransformableHandle(p.GetHandle())));
+		return luabind::object(l,WITransformableHandle(p.GetHandle()));
 	}
-	else if(dynamic_cast<WIDebugDepthTexture*>(p) != nullptr)
-		return luabind::object(l,WIDebugDepthTextureHandle(p->GetHandle()));
-	else if(dynamic_cast<WIDebugShadowMap*>(p) != nullptr)
-		return luabind::object(l,WIDebugShadowMapHandle(p->GetHandle()));
-	else if(dynamic_cast<WIProgressBar*>(p) != nullptr)
+	else if(dynamic_cast<WIDebugDepthTexture*>(&p) != nullptr)
+		return luabind::object(l,WIDebugDepthTextureHandle(p.GetHandle()));
+	else if(dynamic_cast<WIDebugShadowMap*>(&p) != nullptr)
+		return luabind::object(l,WIDebugShadowMapHandle(p.GetHandle()));
+	else if(dynamic_cast<WIProgressBar*>(&p) != nullptr)
 	{
-		if(dynamic_cast<WISlider*>(p) != nullptr)
-			return luabind::object(l,WISliderHandle(WIProgressBarHandle(p->GetHandle())));
-		return luabind::object(l,WIProgressBarHandle(p->GetHandle()));
+		if(dynamic_cast<WISlider*>(&p) != nullptr)
+			return luabind::object(l,WISliderHandle(WIProgressBarHandle(p.GetHandle())));
+		return luabind::object(l,WIProgressBarHandle(p.GetHandle()));
 	}
-	return luabind::object(l,p->GetHandle());
+	return luabind::object(l,p.GetHandle());
 }
 
-luabind::object WGUILuaInterface::GetLuaObject(lua_State *l,WIBase *p)
+luabind::object WGUILuaInterface::GetLuaObject(lua_State *l,WIBase &p)
 {
 	luabind::object o {};
 	if(l == m_guiLuaState)
 	{
-		auto userData = p->GetUserData();
+		auto userData = p.GetUserData();
 		if(userData == nullptr)
 		{
 			o = CreateLuaObject(l,p);
-			p->SetUserData(std::make_shared<luabind::object>(o));
+			p.SetUserData(std::make_shared<luabind::object>(o));
 		}
 		else
 			o = *static_cast<luabind::object*>(userData.get());
 	}
 	else
 	{
-		auto userData2 = std::static_pointer_cast<luabind::object>(p->GetUserData2());
+		auto userData2 = std::static_pointer_cast<luabind::object>(p.GetUserData2());
 		if(userData2 == nullptr)
 		{
 			o = CreateLuaObject(l,p);
-			p->SetUserData2(std::make_shared<luabind::object>(o));
+			p.SetUserData2(std::make_shared<luabind::object>(o));
 		}
 		else
 			o = *static_cast<luabind::object*>(userData2.get());

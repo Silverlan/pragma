@@ -27,9 +27,10 @@ void WIOptionsList::Initialize()
 	WIBase::Initialize();
 	m_hTable = CreateChild<WITable>();
 	auto *pTable = m_hTable.get<WITable>();
-	pTable->SetAutoAlignToParent(true);
+	pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	pTable->SetRowHeight(32);
 	pTable->SetScrollable(true);
+	pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	auto *pRow = pTable->AddHeaderRow();
 	m_hHeaderRow = pRow->GetHandle();
 }

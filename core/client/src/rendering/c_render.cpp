@@ -67,6 +67,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -485,26 +486,38 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 
 		for(auto *particle : culledParticles)
 		{
-			// Particle buffer barrier
-			prosper::util::record_buffer_barrier(
-				**drawCmd,*particle->GetParticleBuffer(),
-				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
-				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
-			);
+			auto &ptBuffer = particle->GetParticleBuffer();
+			if (ptBuffer != nullptr)
+			{
+				// Particle buffer barrier
+				prosper::util::record_buffer_barrier(
+					**drawCmd, *ptBuffer,
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+				);
+			}
 
-			// Animation start buffer barrier
-			prosper::util::record_buffer_barrier(
-				**drawCmd,*particle->GetAnimationStartBuffer(),
-				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
-				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
-			);
+			auto &animStartBuffer = particle->GetAnimationStartBuffer();
+			if (animStartBuffer != nullptr)
+			{
+				// Animation start buffer barrier
+				prosper::util::record_buffer_barrier(
+					**drawCmd, *animStartBuffer,
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+				);
+			}
 
-			// Animation buffer barrier
-			prosper::util::record_buffer_barrier(
-				**drawCmd,*particle->GetAnimationBuffer(),
-				Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-				Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
-			);
+			auto &animBuffer = particle->GetAnimationBuffer();
+			if (animBuffer != nullptr)
+			{
+				// Animation buffer barrier
+				prosper::util::record_buffer_barrier(
+					**drawCmd, *animBuffer,
+					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::SHADER_READ_BIT
+				);
+			}
 		}
 
 		RenderParticleSystems(drawCmd,culledParticles,interpolation,RenderMode::World,false,&glowInfo.tmpBloomParticles);
@@ -931,3 +944,4 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
+#pragma optimize("",on)

@@ -129,10 +129,12 @@ void WIMainMenu::Initialize()
 {
 	WIBase::Initialize();
 	
+	SetSize(1024,768);
 	m_hBg = CreateChild<WIRect>();
 	WIRect *bg = m_hBg.get<WIRect>();
 	bg->SetColor(0,0,0,0.5f);
-	bg->SetAutoAlignToParent(true);
+	bg->SetSize(GetSize());
+	bg->SetAnchor(0.f,0.f,1.f,1.f);
 
 	bg->SetMouseInputEnabled(true);
 	bg->SetMouseMovementCheckEnabled(true);
@@ -142,7 +144,8 @@ void WIMainMenu::Initialize()
 
 	m_hBgSlideShow = CreateChild<WIImageSlideShow>();
 	auto *pImageSlideShow = m_hBgSlideShow.get<WIImageSlideShow>();
-	pImageSlideShow->SetAutoAlignToParent(true);
+	pImageSlideShow->SetSize(GetWidth(),GetHeight());
+	pImageSlideShow->SetAnchor(0.f,0.f,1.f,1.f);
 	pImageSlideShow->SetColor(0.75f,0.75f,0.75f,1.f);
 	std::vector<std::string> imgFiles;
 	FileManager::FindFiles("screenshots/*.tga",&imgFiles,nullptr);
@@ -154,7 +157,8 @@ void WIMainMenu::Initialize()
 	m_hMain = CreateChild<WIMainMenuBase>();
 	WIMainMenuBase *menu = m_hMain.get<WIMainMenuBase>();
 	menu->SetVisible(false);
-	menu->SetAutoAlignToParent(true);
+	menu->SetSize(GetWidth(),GetHeight());
+	menu->SetAnchor(0.f,0.f,1.f,1.f);
 	menu->AddMenuItem(Locale::GetText("menu_newgame"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hNewGame);
 	}));
@@ -176,13 +180,13 @@ void WIMainMenu::Initialize()
 	menu->AddMenuItem(Locale::GetText("menu_options"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hOptions);
 	}));
-	menu->AddMenuItem(Locale::GetText("menu_credits"),FunctionCallback<>::Create([this]() {
+	/*menu->AddMenuItem(Locale::GetText("menu_credits"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hCredits);
 	}));
 	menu->AddMenuItem(Locale::GetText("menu_addons"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
-	}));
+	}));*/
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen",FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hLoadScreen);
@@ -196,37 +200,43 @@ void WIMainMenu::Initialize()
 	m_hNewGame = CreateChild<WIMainMenuNewGame>();
 	WIMainMenuNewGame *newGame = m_hNewGame.get<WIMainMenuNewGame>();
 	newGame->SetVisible(false);
-	newGame->SetAutoAlignToParent(true);
+	newGame->SetSize(GetWidth(),GetHeight());
+	newGame->SetAnchor(0.f,0.f,1.f,1.f);
 	newGame->SetKeyboardInputEnabled(true);
 
 	m_hOptions = CreateChild<WIMainMenuOptions>();
 	WIMainMenuOptions *options = m_hOptions.get<WIMainMenuOptions>();
 	options->SetVisible(false);
-	options->SetAutoAlignToParent(true);
+	options->SetSize(GetWidth(),GetHeight());
+	options->SetAnchor(0.f,0.f,1.f,1.f);
 	options->SetKeyboardInputEnabled(true);
 
 	m_hMods = CreateChild<WIMainMenuMods>();
 	auto *pMods = m_hMods.get<WIMainMenuMods>();
 	pMods->SetVisible(false);
-	pMods->SetAutoAlignToParent(true);
+	pMods->SetSize(GetWidth(),GetHeight());
+	pMods->SetAnchor(0.f,0.f,1.f,1.f);
 	pMods->SetKeyboardInputEnabled(true);
 
 	m_hCredits = CreateChild<WIMainMenuCredits>();
 	auto *pCredits = m_hCredits.get<WIMainMenuCredits>();
 	pCredits->SetVisible(false);
-	pCredits->SetAutoAlignToParent(true);
+	pCredits->SetSize(GetWidth(),GetHeight());
+	pCredits->SetAnchor(0.f,0.f,1.f,1.f);
 	pCredits->SetKeyboardInputEnabled(true);
 
 	m_hLoad = CreateChild<WIMainMenuLoadGame>();
 	WIMainMenuLoadGame *loadGame = m_hLoad.get<WIMainMenuLoadGame>();
 	loadGame->SetVisible(false);
-	loadGame->SetAutoAlignToParent(true);
+	loadGame->SetSize(GetWidth(),GetHeight());
+	loadGame->SetAnchor(0.f,0.f,1.f,1.f);
 	loadGame->SetKeyboardInputEnabled(true);
 
 	m_hLoadScreen = CreateChild<WILoadScreen>();
 	auto *pLoadScreen = m_hLoadScreen.get<WILoadScreen>();
 	pLoadScreen->SetVisible(false);
-	pLoadScreen->SetAutoAlignToParent(true);
+	pLoadScreen->SetSize(GetWidth(),GetHeight());
+	pLoadScreen->SetAnchor(0.f,0.f,1.f,1.f);
 	pLoadScreen->SetKeyboardInputEnabled(true);
 
 	m_hVersion = CreateChild<WIText>();
@@ -316,7 +326,10 @@ void WIMainMenu::Initialize()
 	}));
 	PlayNextMenuTrack();
 
-	SetAutoAlignToParent(true);
+	auto *pParent = GetParent();
+	if(pParent != nullptr)
+		SetSize(pParent->GetWidth(),pParent->GetHeight());
+	SetAnchor(0.f,0.f,1.f,1.f);
 }
 
 void WIMainMenu::SetActiveMenu(WIHandle &hMenu)

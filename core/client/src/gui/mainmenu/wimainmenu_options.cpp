@@ -305,6 +305,7 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	//
 
 	InitializeOptionsList(pList);
+	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }
 void WIMainMenuOptions::Think()
 {
@@ -922,6 +923,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 
 	InitializeOptionsList(pList);
+	pList->SetAnchor(0.0,0.0,1.f,1.f);
 
 	if(client->GetConVarInt("cl_render_preset") < 0)
 	{
@@ -1042,6 +1044,7 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	//
 
 	InitializeOptionsList(pList);
+	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }
 void WIMainMenuOptions::InitializeControlSettings()
 {
@@ -1235,5 +1238,5 @@ void WIMainMenuOptions::InitializeControlSettings()
 	}
 
 	InitializeOptionsList(pList);
+	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }
-

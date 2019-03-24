@@ -361,6 +361,12 @@ void CGame::RegisterLua()
 	classDefScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
 	classDefScene.def("InitializeRenderTarget",&Lua::Scene::InitializeRenderTarget);
 	classDefScene.def("GetPrepassDepthTexture",&Lua::Scene::GetPrepassDepthTexture);
+	classDefScene.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, std::shared_ptr<::Scene>&)>([](lua_State *l, std::shared_ptr<::Scene> &scene) {
+		auto &depthTex = scene->GetPrepass().textureDepthSampled;
+		if (depthTex == nullptr)
+			return;
+		Lua::Push(l, depthTex);
+	}));
 	classDefScene.def("GetPrepassNormalTexture",&Lua::Scene::GetPrepassNormalTexture);
 	classDefScene.def("GetRenderTarget",&Lua::Scene::GetRenderTarget);
 	classDefScene.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,std::shared_ptr<Scene>&)>([](lua_State *l,std::shared_ptr<Scene> &scene) {

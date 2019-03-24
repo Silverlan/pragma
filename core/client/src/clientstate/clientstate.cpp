@@ -50,37 +50,37 @@ DLLCENGINE CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
 
-WIHandle *WGUIHandleFactory(WIBase *el)
+static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
 {
 	// Class specific handles have to also be defined in CGame::InitializeGUIElement!
-	const std::type_info &info = typeid(*el);
+	const std::type_info &info = typeid(el);
 	if(info == typeid(WIShape))
-		return new WIShapeHandle(new PtrWI(el));
+		return std::make_shared<WIShapeHandle>(new PtrWI(&el));
 	else if(info == typeid(WITexturedShape) || info == typeid(WITexturedRect))
-		return new WITexturedShapeHandle(new PtrWI(el));
+		return std::make_shared<WITexturedShapeHandle>(new PtrWI(&el));
 	else if(info == typeid(WIText))
-		return new WITextHandle(new PtrWI(el));
+		return std::make_shared<WITextHandle>(new PtrWI(&el));
 	else if(info == typeid(WITextEntry))
-		return new WITextEntryHandle(new PtrWI(el));
+		return std::make_shared<WITextEntryHandle>(new PtrWI(&el));
 	else if(info == typeid(WIOutlinedRect))
-		return new WIOutlinedRectHandle(new PtrWI(el));
+		return std::make_shared<WIOutlinedRectHandle>(new PtrWI(&el));
 	else if(info == typeid(WILine))
-		return new WILineHandle(new PtrWI(el));
+		return std::make_shared<WILineHandle>(new PtrWI(&el));
 	else if(info == typeid(WIRoundedRect))
-		return new WIRoundedRectHandle(new PtrWI(el));
+		return std::make_shared<WIRoundedRectHandle>(new PtrWI(&el));
 	else if(info == typeid(WIRoundedTexturedRect))
-		return new WIRoundedTexturedRectHandle(new PtrWI(el));
+		return std::make_shared<WIRoundedTexturedRectHandle>(new PtrWI(&el));
 	else if(info == typeid(WIScrollBar))
-		return new WIScrollBarHandle(new PtrWI(el));
+		return std::make_shared<WIScrollBarHandle>(new PtrWI(&el));
 	else if(info == typeid(WISilkIcon))
-		return new WISilkIconHandle(new PtrWI(el));
+		return std::make_shared<WISilkIconHandle>(new PtrWI(&el));
 	else if(info == typeid(WIDropDownMenu))
-		return new WIDropDownMenuHandle(new PtrWI(el));
+		return std::make_shared<WIDropDownMenuHandle>(new PtrWI(&el));
 	else if(info == typeid(WICheckbox))
-		return new WICheckboxHandle(new PtrWI(el));
+		return std::make_shared<WICheckboxHandle>(new PtrWI(&el));
 	else if(info == typeid(WIButton))
-		return new WIButtonHandle(new PtrWI(el));
-	return NULL;
+		return std::make_shared<WIButtonHandle>(new PtrWI(&el));
+	return std::make_shared<WIHandle>();
 }
 
 ClientState::ClientState()
@@ -91,7 +91,7 @@ ClientState::ClientState()
 	client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 	auto &gui = WGUI::GetInstance();
-	gui.SetHandleFactory(WGUIHandleFactory);
+	gui.SetHandleFactory(wgui_handle_factory);
 	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads",static_cast<fsys::SearchFlags>(FSYS_SEARCH_RESOURCES));
@@ -206,8 +206,8 @@ void ClientState::InitializeGUILua()
 	});
 }
 
-void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase*)> &f) {m_guiLuaWrapperFactories.push_back(f);}
-std::vector<std::function<luabind::object(lua_State*,WIBase*)>> &ClientState::GetGUILuaWrapperFactories() {return m_guiLuaWrapperFactories;}
+void ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua_State*,WIBase&)> &f) {m_guiLuaWrapperFactories.push_back(f);}
+std::vector<std::function<luabind::object(lua_State*,WIBase&)>> &ClientState::GetGUILuaWrapperFactories() {return m_guiLuaWrapperFactories;}
 
 WIMainMenu *ClientState::GetMainMenu()
 {
@@ -269,7 +269,9 @@ void ClientState::Close()
 
 	auto *state = m_luaGUI->GetState();
 	Lua::gui::clear_lua_callbacks(state);
-	WGUILuaInterface::ClearGUILuaObjects(WGUI::GetInstance().GetBaseElement());
+	auto *guiBaseEl = WGUI::GetInstance().GetBaseElement();
+	if(guiBaseEl != nullptr)
+		WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
 	auto identifier = m_luaGUI->GetIdentifier();
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;

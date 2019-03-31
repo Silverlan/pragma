@@ -2,6 +2,7 @@
 #include "pragma/entities/func/s_func_softphysics.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
 

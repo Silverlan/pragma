@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
+#include <boost/system/error_code.hpp>
 
 #undef GetMessage
 

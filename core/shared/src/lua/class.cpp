@@ -650,7 +650,7 @@ void Game::RegisterLuaClasses()
 	entDef.def(luabind::constructor<>());
 	entDef.def(luabind::constructor<EntityHandle>());
 	entDef.def(luabind::tostring(luabind::const_self));
-	entDef.def("Link",static_cast<void(*)(lua_State*,LEntityProperty&,LEntityProperty&)>(Lua::Property::link<LEntityProperty,EntityHandle>));
+	entDef.def("Link",static_cast<void(*)(lua_State*,LEntityProperty&,LEntityProperty&)>(&Lua::Property::link<LEntityProperty,EntityHandle>));
 	modUtil[entDef];
 
 	auto defSplashDamageInfo = luabind::class_<util::SplashDamageInfo>("SplashDamageInfo");

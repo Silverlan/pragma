@@ -5,6 +5,7 @@
 #include <pragma/lua/luaapi.h>
 #include "pragma/entities/entity_property.hpp"
 #include "pragma/lua/classes/lproperty_entity.hpp"
+#include "pragma/lua/lua_call.hpp"
 #include <any>
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_color.hpp>
@@ -175,7 +176,7 @@ public:
 	using LSimplePropertyWrapper<TProperty,T>::LSimplePropertyWrapper;
 	using LSimplePropertyWrapper<TProperty,T>::operator*;
 	using LSimplePropertyWrapper<TProperty,T>::operator->;
-	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(prop.get());}
+	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(this->prop.get());}
 	TLVectorPropertyWrapper<TProperty,T> operator/(float f)
 	{
 		GetProperty() /= f;
@@ -329,19 +330,19 @@ public:
 	using LSimplePropertyWrapper<util::QuatProperty,Quat>::LSimplePropertyWrapper;
 	using LSimplePropertyWrapper<util::QuatProperty,Quat>::operator*;
 	using LSimplePropertyWrapper<util::QuatProperty,Quat>::operator->;
-	virtual util::QuatProperty &GetProperty() const override {return *static_cast<util::QuatProperty*>(prop.get());}
+	virtual util::QuatProperty &GetProperty() const override {return *static_cast<util::QuatProperty*>(this->prop.get());}
 
 	LQuatPropertyWrapper()
-		: LSimplePropertyWrapper(uquat::identity())
+		: LSimplePropertyWrapper<util::QuatProperty,Quat>(uquat::identity())
 	{}
 	LQuatPropertyWrapper(const Quat &v)
-		: LSimplePropertyWrapper(v)
+		: LSimplePropertyWrapper<util::QuatProperty,Quat>(v)
 	{}
 	LQuatPropertyWrapper(float w,float x,float y,float z)
-		: LSimplePropertyWrapper(Quat{w,x,y,z})
+		: LSimplePropertyWrapper<util::QuatProperty,Quat>(Quat{w,x,y,z})
 	{}
 	LQuatPropertyWrapper(const std::string &str)
-		: LSimplePropertyWrapper(uquat::create(str))
+		: LSimplePropertyWrapper<util::QuatProperty,Quat>(uquat::create(str))
 	{}
 	LQuatPropertyWrapper operator/(float f)
 	{
@@ -374,13 +375,13 @@ public:
 	using LSimplePropertyWrapper<util::StringProperty,std::string>::LSimplePropertyWrapper;
 	using LSimplePropertyWrapper<util::StringProperty,std::string>::operator*;
 	using LSimplePropertyWrapper<util::StringProperty,std::string>::operator->;
-	virtual util::StringProperty &GetProperty() const override {return *static_cast<util::StringProperty*>(prop.get());}
+	virtual util::StringProperty &GetProperty() const override {return *static_cast<util::StringProperty*>(this->prop.get());}
 
 	LStringPropertyWrapper()
-		: LSimplePropertyWrapper()
+		: LSimplePropertyWrapper<util::StringProperty,std::string>()
 	{}
 	LStringPropertyWrapper(const std::string &v)
-		: LSimplePropertyWrapper(v)
+		: LSimplePropertyWrapper<util::StringProperty,std::string>(v)
 	{}
 };
 using LStringProperty = LStringPropertyWrapper;
@@ -394,13 +395,13 @@ public:
 	using LSimplePropertyWrapper<TProperty,T>::LSimplePropertyWrapper;
 	using LSimplePropertyWrapper<TProperty,T>::operator*;
 	using LSimplePropertyWrapper<TProperty,T>::operator->;
-	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(prop.get());}
+	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(this->prop.get());}
 
 	TLMatrixPropertyWrapper()
-		: LSimplePropertyWrapper()
+		: LSimplePropertyWrapper<TProperty,T>()
 	{}
 	TLMatrixPropertyWrapper(const T &v)
-		: LSimplePropertyWrapper(v)
+		: LSimplePropertyWrapper<TProperty,T>(v)
 	{}
 };
 using LMatrix2PropertyWrapper = TLMatrixPropertyWrapper<util::Matrix2Property,Mat2>;
@@ -544,7 +545,7 @@ namespace Lua
 			classDef.def("InvokeCallbacks",static_cast<void(*)(lua_State*,TProperty&)>(invoke_callbacks<TProperty,T>));
 		}
 		template<class TProperty,typename T,class TLinkProperty>
-			void link(lua_State *l,TProperty &prop,TLinkProperty &propOther)
+			void link_different(lua_State *l,TProperty &prop,TLinkProperty &propOther)
 		{
 			prop->Link(*propOther);
 		}
@@ -552,7 +553,7 @@ namespace Lua
 		template<class TProperty,typename T>
 			void link(lua_State *l,TProperty &prop,TProperty &propOther)
 		{
-			link<TProperty,T,TProperty>(l,prop,propOther);
+			link_different<TProperty,T,TProperty>(l,prop,propOther);
 		}
 		template<class TWrapper,class TProperty>
 			void push_property(lua_State *l,TProperty &prop)

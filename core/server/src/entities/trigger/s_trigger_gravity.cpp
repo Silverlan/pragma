@@ -9,6 +9,7 @@
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/basetriggergravity.hpp>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

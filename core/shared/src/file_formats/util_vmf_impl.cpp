@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/file_formats/util_vmf.hpp"
 #include "pragma/model/poly.h"
-#include "pragma/model/polyMesh.h"
+#include "pragma/model/polymesh.h"
 
 std::string vmf::impl::DataFileBlock::KeyValue(const std::string &key,int32_t i)
 {

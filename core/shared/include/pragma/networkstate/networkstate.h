@@ -3,6 +3,7 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include <pragma/physics/physapi.h>
+#include <pragma/audio/alenums.hpp>
 #include <sharedutils/callback_handler.h>
 #include <pragma/console/cvar_handler.h>
 #include <sharedutils/chronotime.h>
@@ -10,6 +11,9 @@
 #include <pragma/console/fcvar.h>
 #include <sharedutils/util_cpu_profiler.hpp>
 #include <pragma/input/key_state.hpp>
+#ifdef __linux__
+#include "pragma/audio/soundscript.h"
+#endif
 
 #define GLFW_RELEASE                0
 #define GLFW_PRESS                  1
@@ -22,33 +26,6 @@
 			return ret; \
 		} \
 	}
-
-struct DLLNETWORK SoundCacheInfo
-{
-	SoundCacheInfo()
-		: duration(0.f),mono(false),stereo(false)
-	{}
-	float duration;
-	bool mono;
-	bool stereo;
-};
-
-class ALSound;
-enum class DLLNETWORK ALChannel : uint32_t
-{
-	Auto = 0,
-	Mono,
-	Both
-};
-
-enum class DLLNETWORK ALCreateFlags : uint32_t
-{
-	None = 0,
-	Mono = 1,
-	Stream = Mono<<1,
-	DontTransmit = Stream<<1 // Serverside only
-};
-REGISTER_BASIC_BITWISE_OPERATORS(ALCreateFlags);
 
 class ConConf;
 class ConVar;
@@ -67,6 +44,7 @@ class ModelMesh;
 class ModelSubMesh;
 class MaterialManager;
 class ResourceWatcherManager;
+class ALSound;
 enum class ALSoundType : int32_t;
 namespace Lua {enum class ErrorColorMode : uint32_t;class Interface;};
 namespace util {class Library;};

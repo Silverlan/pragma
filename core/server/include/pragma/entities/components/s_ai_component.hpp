@@ -6,6 +6,8 @@
 #include "pragma/ai/s_factions.h"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/ai/ai_behavior.h"
+#include "pragma/entities/components/s_entity_component.hpp"
+#include <pragma/model/animation/play_animation_flags.hpp>
 #include <pragma/entities/components/base_ai_component.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 

@@ -247,19 +247,19 @@ template<class TProperty,typename T>
 {
 	auto propClassDef = luabind::class_<TProperty,LBasePropertyWrapper>(name);
 	add_arithmetic_operators(propClassDef);
-	add_generic_methods<TProperty,T,luabind::class_<TProperty>>(propClassDef);
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt8Property&)>(link<TProperty,T,LInt8Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt8Property&)>(link<TProperty,T,LUInt8Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt16Property&)>(link<TProperty,T,LInt16Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt16Property&)>(link<TProperty,T,LUInt16Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt32Property&)>(link<TProperty,T,LInt32Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt32Property&)>(link<TProperty,T,LUInt32Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt64Property&)>(link<TProperty,T,LInt64Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt64Property&)>(link<TProperty,T,LUInt64Property>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LFloatProperty&)>(link<TProperty,T,LFloatProperty>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LDoubleProperty&)>(link<TProperty,T,LDoubleProperty>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LLongDoubleProperty&)>(link<TProperty,T,LLongDoubleProperty>));
-	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LBoolProperty&)>(link<TProperty,T,LBoolProperty>));
+	Lua::Property::add_generic_methods<TProperty,T,luabind::class_<TProperty>>(propClassDef);
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt8Property&)>(Lua::Property::link_different<TProperty,T,LInt8Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt8Property&)>(Lua::Property::link_different<TProperty,T,LUInt8Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt16Property&)>(Lua::Property::link_different<TProperty,T,LInt16Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt16Property&)>(Lua::Property::link_different<TProperty,T,LUInt16Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt32Property&)>(Lua::Property::link_different<TProperty,T,LInt32Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt32Property&)>(Lua::Property::link_different<TProperty,T,LUInt32Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LInt64Property&)>(Lua::Property::link_different<TProperty,T,LInt64Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LUInt64Property&)>(Lua::Property::link_different<TProperty,T,LUInt64Property>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LFloatProperty&)>(Lua::Property::link_different<TProperty,T,LFloatProperty>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LDoubleProperty&)>(Lua::Property::link_different<TProperty,T,LDoubleProperty>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LLongDoubleProperty&)>(Lua::Property::link_different<TProperty,T,LLongDoubleProperty>));
+	propClassDef.def("Link",static_cast<void(*)(lua_State*,TProperty&,LBoolProperty&)>(Lua::Property::link_different<TProperty,T,LBoolProperty>));
 	mod[propClassDef];
 }
 
@@ -706,7 +706,7 @@ void Lua::Property::push(lua_State *l,util::Matrix4Property &prop) {push_propert
 
 void Lua::Property::push(lua_State *l,::util::BaseProperty &prop)
 {
-	auto &typeIndex = std::type_index(typeid(prop));
+	auto typeIndex = std::type_index(typeid(prop));
 	if(typeIndex == std::type_index(typeid(::util::Int8Property)))
 		push(l,static_cast<::util::Int8Property&>(prop));
 	else if(typeIndex == std::type_index(typeid(::util::UInt8Property)))

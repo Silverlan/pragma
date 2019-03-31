@@ -6,6 +6,9 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/classes/lproperty.hpp"
+#include "pragma/lua/lua_entity_component.hpp"
+#include "pragma/model/animation/animation_event.h"
+#include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
 extern DLLENGINE Engine *engine;

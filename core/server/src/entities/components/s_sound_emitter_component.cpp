@@ -4,6 +4,7 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

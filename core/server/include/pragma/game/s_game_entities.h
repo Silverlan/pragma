@@ -2,6 +2,7 @@
 #define __S_GAMEENTITIES_H__
 #include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
+#include "pragma/entities/components/s_player_component.hpp"
 
 template<class T>
 	void SGame::GetPlayers(std::vector<T*> *ents)

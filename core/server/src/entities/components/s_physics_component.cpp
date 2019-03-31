@@ -8,6 +8,7 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

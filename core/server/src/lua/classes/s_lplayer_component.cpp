@@ -1,16 +1,9 @@
 #include "stdafx_server.h"
-#include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/entities/player.h"
-#include "luasystem.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
-#include "pragma/entities/components/s_player_component.hpp"
-#include "pragma/entities/components/s_character_component.hpp"
-#include <pragma/lua/classes/lproperty_generic.hpp>
+#include <luasystem.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
-#include <pragma/lua/lua_entity_component.hpp>
 
 namespace Lua
 {

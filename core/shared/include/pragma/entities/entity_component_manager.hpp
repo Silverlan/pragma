@@ -12,6 +12,9 @@
 #include <typeindex>
 #include <mathutil/umath.h>
 #include <sharedutils/functioncallback.h>
+#ifdef __linux__
+#include "pragma/entities/components/base_entity_component.hpp"
+#endif
 
 class BaseEntity;
 namespace pragma
@@ -129,7 +132,7 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentFlags);
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
 	pragma::ComponentId pragma::EntityComponentManager::RegisterComponentType(const std::string &name)
 {
 	auto flags = ComponentFlags::None;
@@ -141,20 +144,20 @@ template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::v
 	},flags,std::type_index(typeid(TComponent)));
 }
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
 	std::shared_ptr<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
 {
-	auto it = m_componentInfos.find(std::type_index(typeid(TComponent)));
+	auto it = std::find(m_componentInfos.begin(),m_componentInfos.end(),std::type_index(typeid(TComponent)));
 	if(it == m_componentInfos.end())
 		throw std::invalid_argument("Attempted to create unregistered entity component!");
-	auto r = it->second.factory(ent);
+	auto r = it->factory(ent);
 	if(r == nullptr)
 		return nullptr;
-	r->m_componentId = it->second.id;
+	r->m_componentId = it->id;
 	return r;
 }
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
 	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const
 {
 	auto it = m_typeIndexToComponentId.find(std::type_index(typeid(TComponent)));

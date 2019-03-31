@@ -149,10 +149,20 @@ static TGenericIntegerHandler<int32_t,util::Int32Property,LGenericIntPropertyWra
 static TGenericIntegerHandler<int64_t,util::Int64Property,LGenericIntPropertyWrapper> s_int64Handler;
 static TGenericIntegerHandler<long double,util::LongDoubleProperty,LGenericFloatPropertyWrapper> s_longDoubleHandler;
 
+static std::string property_check_string(lua_State *l,int32_t idx)
+{
+	return Lua::CheckString(l,idx);
+}
+
+static void property_push_string(lua_State *l,std::string str)
+{
+	Lua::PushString(l,str);
+}
+
 static TGenericPropertyUserClassHandler<
 	std::string,util::StringProperty,LStringProperty,
-	static_cast<std::string(*)(lua_State*,int32_t)>([](lua_State *l,int32_t index) -> std::string {return Lua::CheckString(l,index);}),
-	static_cast<void(*)(lua_State*,std::string)>([](lua_State *l,std::string value) {Lua::PushString(l,value);})
+	property_check_string,
+	property_push_string
 > s_stringHandler;
 
 static TGenericIntegerHandler<uint8_t,util::UInt8Property,LGenericIntPropertyWrapper> s_uint8Handler;

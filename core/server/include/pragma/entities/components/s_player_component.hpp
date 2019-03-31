@@ -6,6 +6,7 @@
 #include <pragma/entities/components/base_player_component.hpp>
 
 class Player;
+namespace boost{namespace asio{namespace ip{class address;};};};
 namespace pragma
 {
 	class DLLSERVER SPlayerComponent final
@@ -34,7 +35,7 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
 		virtual std::string GetClientIP() override;
 		virtual unsigned short GetClientPort() override;
-		boost::asio::ip::address GetClientIPAddress() const;
+		void GetClientIPAddress(boost::asio::ip::address &address) const;
 		void InitializeGlobalNameComponent();
 		bool IsAuthed();
 		void SetAuthed(bool b);

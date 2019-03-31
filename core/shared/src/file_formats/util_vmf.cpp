@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/file_formats/util_vmf.hpp"
 #include "pragma/model/poly.h"
-#include "pragma/model/polyMesh.h"
+#include "pragma/model/polymesh.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/level/level_info.hpp"
 #include <sharedutils/util_file.h>

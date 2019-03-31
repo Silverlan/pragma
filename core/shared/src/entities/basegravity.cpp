@@ -192,7 +192,8 @@ void GravityComponent::ApplyGravity(double dt)
 
 		disp *= dt;
 		auto *pPhysController = pPhysObjController->GetController();
-		pPhysController->SetWalkDirection(pPhysController->GetWalkDirection() +disp);
+		auto walkDir = pPhysController->GetWalkDirection() +disp;
+		pPhysController->SetWalkDirection(walkDir);
 	}
 	else if(pPhys->IsSoftBody())
 	{

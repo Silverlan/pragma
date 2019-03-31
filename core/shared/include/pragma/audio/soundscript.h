@@ -4,8 +4,10 @@
 #include "pragma/audio/alsound.h"
 #include "pragma/audio/soundscript_events.h"
 #include <sharedutils/util_string.h>
+#include <fsys/filesystem.h>
 #include <vector>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 #undef CreateEvent
@@ -68,7 +70,8 @@ template<class TSoundScript>
 			std::string name = it->first;
 			StringToLower(name);
 			// Note: std::shared_ptr<TSoundScript>(new TSoundScript{this,it->first}); causes weird compiler errors for CSoundScript (clientside), but this works
-			auto script = std::static_pointer_cast<TSoundScript>(std::shared_ptr<void>(static_cast<void*>(new TSoundScript{this,it->first})));
+			// auto script = std::static_pointer_cast<TSoundScript>(std::shared_ptr<void>(static_cast<void*>(new TSoundScript{this,it->first}))); // Does not work with gcc
+			auto script = std::shared_ptr<TSoundScript>(new TSoundScript{this,it->first});
 
 			script->InitializeEvents(block);
 			auto it = m_soundScripts.find(name);

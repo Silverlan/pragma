@@ -322,7 +322,7 @@ public:
 	LSimplePropertyWrapper(const std::shared_ptr<TProperty> &v)
 		: LBasePropertyWrapper()
 	{
-		prop = v;
+		this->prop = v;
 	}
 	LSimplePropertyWrapper()
 		: LSimplePropertyWrapper(T{})
@@ -333,16 +333,16 @@ public:
 	bool operator==(const LSimplePropertyWrapper<TProperty,T> &prop) const {return GetProperty() == *prop;}
 
 	const T &GetValue() const {return const_cast<LSimplePropertyWrapper<TProperty,T>*>(this)->GetValue();}
-	T &GetValue() {return **static_cast<TProperty*>(prop.get());}
+	T &GetValue() {return **static_cast<TProperty*>(this->prop.get());}
 
-	void SetValue(const T &v) {*static_cast<TProperty*>(prop.get()) = v;}
+	void SetValue(const T &v) {*static_cast<TProperty*>(this->prop.get()) = v;}
 
 	TProperty &operator*() {return GetProperty();}
 	const TProperty &operator*() const {return const_cast<LSimplePropertyWrapper<TProperty,T>*>(this)->operator*();}
 	TProperty *operator->() {return &GetProperty();}
 	const TProperty *operator->() const {return const_cast<LSimplePropertyWrapper<TProperty,T>*>(this)->operator->();}
 
-	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(prop.get());}
+	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(this->prop.get());}
 };
 	
 template<class TProperty,typename T>
@@ -353,7 +353,7 @@ public:
 	using LSimplePropertyWrapper<TProperty,T>::LSimplePropertyWrapper;
 	using LSimplePropertyWrapper<TProperty,T>::operator*;
 	using LSimplePropertyWrapper<TProperty,T>::operator->;
-	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(prop.get());}
+	virtual TProperty &GetProperty() const override {return *static_cast<TProperty*>(this->prop.get());}
 
 	// Arithmetic
 	TLNumberPropertyWrapper<TProperty,T> operator+(const T &val) const

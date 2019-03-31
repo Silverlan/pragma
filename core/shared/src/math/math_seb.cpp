@@ -1,6 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/math/math_seb.h"
-#include "seb.h"
+#include "Seb.h"
 
 void Seb::Calculate(std::vector<Vector3> &verts,Vector3 &center,float &radius)
 {

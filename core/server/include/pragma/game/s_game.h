@@ -8,6 +8,10 @@
 #include <string>
 #include <optional>
 #include <mathutil/color.h>
+#include <sharedutils/datastream.h>
+#ifdef __linux__
+#include "pragma/cacheinfo.h"
+#endif
 
 struct CacheInfo;
 class WVServerClient;

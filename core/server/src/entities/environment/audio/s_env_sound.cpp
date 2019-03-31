@@ -8,6 +8,7 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/map_component.hpp>
+#include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
 

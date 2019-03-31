@@ -15,6 +15,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_observable_component.hpp>
+#include <boost/asio.hpp>
 
 using namespace pragma;
 
@@ -33,7 +34,7 @@ Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto &mdlComponent = ent.GetModelComponent();
+	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
@@ -46,7 +47,7 @@ std::ostream& SPlayerComponent::print(std::ostream &os)
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto &mdlComponent = ent.GetModelComponent();
+	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
@@ -257,14 +258,19 @@ void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
 void SPlayerComponent::InitializeGlobalNameComponent()
 {
 	auto globalNameComponent = GetEntity().AddComponent<pragma::GlobalNameComponent>();
-	globalNameComponent->SetGlobalName(GetClientIPAddress().to_string());
+	boost::asio::ip::address address;
+	GetClientIPAddress(address);
+	globalNameComponent->SetGlobalName(address.to_string());
 }
 
-boost::asio::ip::address SPlayerComponent::GetClientIPAddress() const
+void SPlayerComponent::GetClientIPAddress(boost::asio::ip::address &address) const
 {
 	if(m_session == nullptr)
-		return boost::asio::ip::address{};
-	return m_session->GetAddress();
+	{
+		address = boost::asio::ip::address{};
+		return;
+	}
+	address = m_session->GetAddress();
 }
 
 std::string SPlayerComponent::GetClientIP()

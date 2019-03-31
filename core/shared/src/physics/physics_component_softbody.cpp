@@ -19,16 +19,16 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	auto &ent = GetEntity();
 	auto *pSoftBodyComponent = static_cast<pragma::BaseSoftBodyComponent*>(ent.AddComponent("softbody").get());
 	if(pSoftBodyComponent == nullptr)
-		return nullptr;
+		return {};
 	ScopeGuard sgSoftBodyComponent([&ent]() {
 		ent.RemoveComponent("softbody");
 	});
 	if(pSoftBodyComponent->InitializeSoftBodyData() == false)
-		return nullptr;
+		return {};
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
-		return nullptr;
+		return {};
 	auto &colMeshes = hMdl->GetCollisionMeshes();
 	std::vector<uint32_t> softBodyMeshes;
 	softBodyMeshes.reserve(colMeshes.size());
@@ -43,7 +43,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	if(softBodyMeshes.empty())
 	{
 		pSoftBodyComponent->ReleaseSoftBodyData();
-		return nullptr;
+		return {};
 	}
 	auto mass = GetPhysicsMass();
 	auto *state = ent.GetNetworkState();
@@ -143,7 +143,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	}
 
 	if(phys == nullptr)
-		return nullptr;
+		return {};
 	m_physObject = phys;
 	m_physObject->Spawn();
 

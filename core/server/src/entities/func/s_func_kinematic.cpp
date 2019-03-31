@@ -6,6 +6,7 @@
 #include <pragma/audio/alsound.h>
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
+#include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
 

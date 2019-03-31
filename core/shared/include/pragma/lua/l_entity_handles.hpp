@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/ldefinitions.h"
+#include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
 #include "pragma/entities/components/base_actor_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/components/base_character_component.hpp"
@@ -111,21 +112,7 @@
 #include "pragma/entities/components/basepointpathnode.h"
 #include "pragma/entities/basefilterentity.h"
 #include "pragma/entities/components/base_debug_component.hpp"
-#include <sharedutils/util_weak_handle.hpp>
 
-struct DLLNETWORK BaseEntityComponentHandleWrapper
-{
-	BaseEntityComponentHandleWrapper(const util::WeakHandle<pragma::BaseEntityComponent> &wh)
-		: handle(wh)
-	{}
-	BaseEntityComponentHandleWrapper()=default;
-	util::WeakHandle<pragma::BaseEntityComponent> handle = {};
-	bool expired() const {return handle.expired();}
-
-	pragma::BaseEntityComponent *operator->() {return get();}
-	const pragma::BaseEntityComponent *get() const {return handle.get();}
-	pragma::BaseEntityComponent *get() {return handle.get();}
-};
 template<class T,class TBase=BaseEntityComponentHandleWrapper>
 	struct TBaseEntityComponentHandleWrapper
 		: public TBase
@@ -137,8 +124,8 @@ template<class T,class TBase=BaseEntityComponentHandleWrapper>
 	const T &operator*() const {return *get();}
 	T &operator*() {return *get();}
 
-	const T *get() const {return static_cast<const T*>(handle.get());}
-	T *get() {return static_cast<T*>(handle.get());}
+	const T *get() const {return static_cast<const T*>(this->handle.get());}
+	T *get() {return static_cast<T*>(this->handle.get());}
 };
 
 using BaseEntityComponentHandle = BaseEntityComponentHandleWrapper;

@@ -11,6 +11,7 @@
 #include <pragma/entities/components/velocity_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 
@@ -63,7 +64,7 @@ void SWeaponComponent::Drop()
 	if(owner != nullptr && owner->IsPlayer())
 	{
 		auto &ent = GetEntity();
-		auto &hEnt = ent.GetHandle();
+		auto hEnt = ent.GetHandle();
 		auto charComponent = ent.GetCharacterComponent();
 		auto sCharComponent = ent.GetComponent<SCharacterComponent>();
 		if(sCharComponent.expired() == false)

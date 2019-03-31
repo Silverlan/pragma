@@ -3,6 +3,9 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/components/base_wheel_component.hpp"
+#ifdef __linux__
+#include "pragma/basevehicle_raycaster.h"
+#endif
 
 #define NET_EVENT_VEHICLE_ADD_WHEEL 50001
 #define NET_EVENT_VEHICLE_SET_DRIVER 50002

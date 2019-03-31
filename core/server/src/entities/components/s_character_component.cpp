@@ -3,6 +3,7 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

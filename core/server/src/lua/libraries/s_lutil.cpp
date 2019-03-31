@@ -6,6 +6,7 @@
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/util/bulletinfo.h>
 #include <pragma/util/util_splash_damage_info.hpp>
+#include <networkmanager/nwm_packet.h>
 
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;

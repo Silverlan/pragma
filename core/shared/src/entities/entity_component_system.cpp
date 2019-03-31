@@ -58,7 +58,7 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 	if(ptrComponent == nullptr)
 	{
 		Con::cwar<<"WARNING: Unable to create entity component of type "<<componentId<<"!"<<this<<Con::endl;
-		return nullptr;
+		return {};
 	}
 	if(m_components.size() == m_components.capacity())
 		m_components.reserve(m_components.size() +5u);
@@ -93,7 +93,7 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
 	{
 		Con::cwar<<"WARNING: Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
-		return nullptr;
+		return {};
 	}
 	return AddComponent(componentId,bForceCreateNew);
 }
@@ -161,7 +161,7 @@ util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(C
 {
 	auto it = m_componentLookupTable.find(componentId);
 	if(it == m_componentLookupTable.end())
-		return nullptr;
+		return {};
 	return it->second.lock();
 }
 util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(const std::string &name) const
@@ -169,6 +169,6 @@ util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(c
 	ComponentId componentId;
 	auto typeIndex = std::type_index(typeid(*this));
 	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
-		return nullptr;
+		return {};
 	return FindComponent(componentId);
 }

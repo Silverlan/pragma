@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 project(external_libs)
 
 function(register_external_lib SUB_PROJ_NAME)
+	message("Processing external library '${SUB_PROJ_NAME}'...")
 	add_subdirectory(${SUB_PROJ_NAME})
 
 	set(SOLUTION_DIR_NAME external_libs)
@@ -43,6 +44,7 @@ register_external_lib(util_pcl external_libs/util)
 register_external_lib(vfilesystem)
 register_external_lib(wgui)
 
+message("Processing external library 'sharedutils-static'...")
 add_subdirectory(sharedutils-static)
 set_target_properties(sharedutils-static PROPERTIES FOLDER external_libs)
 

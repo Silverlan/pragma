@@ -11,6 +11,7 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/physics/physenvironment.h>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

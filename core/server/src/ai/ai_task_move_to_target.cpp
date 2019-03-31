@@ -2,6 +2,7 @@
 #include "pragma/ai/ai_task_move_to_target.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include "pragma/entities/components/s_name_component.hpp"
 
 using namespace pragma;
 

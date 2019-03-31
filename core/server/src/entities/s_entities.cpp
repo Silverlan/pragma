@@ -18,6 +18,7 @@
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
+#include <pragma/entities/components/global_component.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/game/game_lua_entity.hpp>

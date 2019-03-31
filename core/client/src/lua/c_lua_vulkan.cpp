@@ -2509,7 +2509,7 @@ void Lua::Vulkan::VKImage::GetAspectSubresourceLayout(lua_State *l,Image &hImg,u
 void Lua::Vulkan::VKImage::GetAlignment(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_alignment(0u)); // TODO: Plane parameter
+	Lua::PushInt(l,(*hImg)->get_image_alignment()); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap)
 {
@@ -2534,7 +2534,7 @@ void Lua::Vulkan::VKImage::GetFormat(lua_State *l,Image &hImg)
 void Lua::Vulkan::VKImage::GetMemoryTypes(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_memory_types(0u)); // TODO: Plane parameter
+	Lua::PushInt(l,(*hImg)->get_image_memory_types()); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap)
 {
@@ -2572,7 +2572,7 @@ void Lua::Vulkan::VKImage::GetSharingMode(lua_State *l,Image &hImg)
 void Lua::Vulkan::VKImage::GetStorageSize(lua_State *l,Image &hImg)
 {
 	Lua::CheckVKImage(l,1);
-	Lua::PushInt(l,(*hImg)->get_image_storage_size(0u)); // TODO: Plane parameter
+	Lua::PushInt(l,(*hImg)->get_image_storage_size()); // TODO: Plane parameter
 }
 void Lua::Vulkan::VKImage::GetTiling(lua_State *l,Image &hImg)
 {

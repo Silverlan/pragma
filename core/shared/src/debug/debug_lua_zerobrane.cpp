@@ -2,8 +2,8 @@
 #include "pragma/debug/debug_lua_zerobrane.hpp"
 #include <sharedutils/util.h>
 #include <cstdio>
-#include <windows.h>
-#include <tlhelp32.h>
+// #include <windows.h>
+// #include <tlhelp32.h>
 
 void debug::open_file_in_zerobrane(const std::string &fileName,uint32_t lineIdx)
 {

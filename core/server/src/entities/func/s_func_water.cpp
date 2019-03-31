@@ -10,6 +10,7 @@
 #include <pragma/physics/phys_water_surface_simulator.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
 

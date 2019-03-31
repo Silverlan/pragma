@@ -50,6 +50,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
+#include "pragma/entities/info/s_info_landmark.hpp"
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -66,6 +67,7 @@
 extern "C" {
 	#include "bzlib.h"
 }
+
 
 
 
@@ -580,7 +582,8 @@ void SGame::UpdateLuaCache(const std::string &fName)
 	else
 	{
 		auto luaPath = fName.substr(0,fName.length() -4) +"lua";
-		auto s = LoadLuaFile(luaPath.substr(4,luaPath.length()),includeFlags,excludeFlags);
+		auto luaPathNoLuaDir = luaPath.substr(4,luaPath.length());
+		auto s = LoadLuaFile(luaPathNoLuaDir,includeFlags,excludeFlags);
 		if(s == Lua::StatusCode::Ok)
 		{
 			FileManager::CreatePath(ufile::get_path_from_filename(dstPath).c_str());

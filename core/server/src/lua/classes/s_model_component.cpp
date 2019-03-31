@@ -1,7 +1,9 @@
 #include "stdafx_server.h"
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_model_component.hpp"
+#include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/base_model_component_setmodel.hpp>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

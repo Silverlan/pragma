@@ -1,6 +1,8 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <networkmanager/nwm_packet.h>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

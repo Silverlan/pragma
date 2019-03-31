@@ -44,13 +44,19 @@ static void load_autorun_scripts(const std::function<void(const std::string&,std
 		fFindFiles("lua\\autorun\\*.lua",files);
 
 		for(auto &fName : files)
-			game->ExecuteLuaFile("autorun\\" +fName);
+		{
+			auto luaFileName = "autorun\\" +fName;
+			game->ExecuteLuaFile(luaFileName);
+		}
 
 		files.clear();
 		std::string gameDir = game->IsClient() ? "client" : "server";
 		fFindFiles("lua\\autorun\\" +gameDir +"\\*.lua",files);
 		for(auto &fName : files)
-			game->ExecuteLuaFile("autorun\\" +gameDir +'\\' +fName);
+		{
+			auto luaFileName = "autorun\\" +gameDir +'\\' +fName;
+			game->ExecuteLuaFile(luaFileName);
+		}
 	}
 }
 
@@ -198,6 +204,7 @@ std::string AddonInfo::GetAbsolutePath() const
 	std::string ext;
 	if(ufile::get_extension(m_path,&ext) == false)
 		return util::get_program_path() +'\\' +m_path;
+#ifdef _WIN32
 	std::string resolvedPath;
 	auto lnkPath = util::get_program_path() +'\\' +m_path;
 	ufile::remove_extension_from_filename(lnkPath);
@@ -205,6 +212,11 @@ std::string AddonInfo::GetAbsolutePath() const
 	if(r == false)
 		return util::get_program_path() +'\\' +m_path;
 	return resolvedPath;
+#else
+	auto path = util::get_program_path() +'/' +m_path;
+	ufile::remove_extension_from_filename(path);
+	return path;
+#endif
 }
 const std::string &AddonInfo::GetUniqueId() const {return m_uniqueId;}
 const util::Version &AddonInfo::GetVersion() const {return m_version;}

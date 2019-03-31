@@ -2,6 +2,7 @@
 #define __BASE_ENTITY_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_game_object_component.hpp"
+#include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
 #include "pragma/entities/entity_component_event.hpp"
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/util/util_handled.hpp"
@@ -71,15 +72,18 @@ namespace pragma
 		// Only call this method directly if the event has been registered
 		// with the component type! Otherwise callbacks bound through BindEvent
 		// will not be invoked for this event type!
+		util::EventReply InvokeEventCallbacks(ComponentEventId eventId,const ComponentEvent &evData) const;
 		util::EventReply InvokeEventCallbacks(ComponentEventId eventId,ComponentEvent &evData) const;
 		util::EventReply InvokeEventCallbacks(ComponentEventId eventId) const;
 
 		// Broadcasts an event to ALL components of the attached entity.
 		// This will also invoke event callbacks for this component for the specified event.
+		util::EventReply BroadcastEvent(ComponentEventId eventId,const ComponentEvent &evData) const;
 		util::EventReply BroadcastEvent(ComponentEventId eventId,ComponentEvent &evData) const;
 		util::EventReply BroadcastEvent(ComponentEventId eventId) const;
 
 		// Triggers an event for this component only
+		util::EventReply InjectEvent(ComponentEventId eventId,const ComponentEvent &evData);
 		util::EventReply InjectEvent(ComponentEventId eventId,ComponentEvent &evData);
 		util::EventReply InjectEvent(ComponentEventId eventId);
 

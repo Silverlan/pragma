@@ -129,6 +129,10 @@ void BaseEntityComponent::RemoveEventCallback(ComponentEventId eventId,const Cal
 	if(itEv->second.empty())
 		m_eventCallbacks.erase(itEv);
 }
+util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId,const ComponentEvent &evData) const
+{
+	return InvokeEventCallbacks(eventId,const_cast<ComponentEvent&>(evData)); // Hack: This assumes the argument was passed as temporary variable and changing it does not matter
+}
 util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId eventId,ComponentEvent &evData) const
 {
 	auto itEv = m_eventCallbacks.find(eventId);
@@ -156,6 +160,10 @@ util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId even
 	CEGenericComponentEvent ev {};
 	return InvokeEventCallbacks(eventId,ev);
 }
+util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId,const ComponentEvent &evData) const
+{
+	return BroadcastEvent(eventId,const_cast<ComponentEvent&>(evData)); // Hack: This assumes the argument was passed as temporary variable and changing it does not matter
+}
 util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId,ComponentEvent &evData) const
 {
 	auto &ent = GetEntity();
@@ -168,6 +176,7 @@ util::EventReply BaseEntityComponent::BroadcastEvent(ComponentEventId eventId) c
 	CEGenericComponentEvent ev {};
 	return BroadcastEvent(eventId,ev);
 }
+util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId,const ComponentEvent &evData) {return InjectEvent(eventId,const_cast<ComponentEvent&>(evData));}
 util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId,ComponentEvent &evData) {return HandleEvent(eventId,evData);}
 util::EventReply BaseEntityComponent::InjectEvent(ComponentEventId eventId)
 {

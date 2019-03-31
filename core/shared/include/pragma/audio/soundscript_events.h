@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include "pragma/audio/alsound.h"
+#include "pragma/audio/alenums.hpp"
 
 #undef CreateEvent
 

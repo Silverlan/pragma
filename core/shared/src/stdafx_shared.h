@@ -4,7 +4,32 @@
 	#include <Windows.h>
 #endif
 
-#include <pragma/util/boostutil.h>
+#include <deque>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <cmath>
+#include <climits>
+#include <cfloat>
+#include <cassert>
+#include <stdlib.h>
+#include <math.h>
+#include <iostream>
+#include <memory.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <luabind/boost_tuple_extended.hpp>
+#include <luabind/luabind.hpp>
+#include <luabind/operator.hpp>
+#include <fstream>
+#include <cinttypes>
+#include <queue>
+#include <cstring>
+#include <vorbis/vorbisfile.h>
+#include <assert.h>
+#include <dlfcn.h>
+#include <cstdio>
+#include <any>
+
 #include <mathutil/glmutil.h>
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>

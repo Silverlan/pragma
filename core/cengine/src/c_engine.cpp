@@ -14,7 +14,6 @@
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
-#include <pragma/rendering/lighting/c_light.h>
 #include <cmaterialmanager.h>
 #include <pragma/model/c_modelmesh.h>
 #include <cctype>

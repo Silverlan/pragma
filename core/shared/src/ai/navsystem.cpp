@@ -245,15 +245,15 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	auto m_solid = std::shared_ptr<rcHeightfield>(rcAllocHeightfield(),[](rcHeightfield *heightfield) {
 		rcFreeHeightField(heightfield);
 	});
-	if(m_solid == false)
+	if(m_solid == nullptr)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'solid'.");
-		return false;
+		return nullptr;
 	}
 	if(rcCreateHeightfield(ctx.get(),*m_solid,cfg.width,cfg.height,cfg.bmin,cfg.bmax,cfg.cs,cfg.ch) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create solid heightfield.");
-		return false;
+		return nullptr;
 	}
 	
 	// Allocate array that can hold triangle area types.
@@ -292,15 +292,15 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	auto m_chf = std::shared_ptr<rcCompactHeightfield>(rcAllocCompactHeightfield(),[](rcCompactHeightfield *compactHeightfield) {
 		rcFreeCompactHeightfield(compactHeightfield);
 	});
-	if(m_chf == false)
+	if(m_chf == nullptr)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'chf'.");
-		return false;
+		return nullptr;
 	}
 	if(rcBuildCompactHeightfield(ctx.get(),cfg.walkableHeight,cfg.walkableClimb,*m_solid,*m_chf) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build compact data.");
-		return false;
+		return nullptr;
 	}
 	
 	if(keepInterResults == false)
@@ -310,7 +310,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	if(rcErodeWalkableArea(ctx.get(),cfg.walkableRadius,*m_chf) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not erode.");
-		return false;
+		return nullptr;
 	}
 
 	// (Optional) Mark areas.
@@ -374,14 +374,14 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if(rcBuildDistanceField(ctx.get(),*m_chf) == false)
 		{
 			ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build distance field.");
-			return false;
+			return nullptr;
 		}
 		
 		// Partition the walkable surface into simple regions without holes.
 		if(rcBuildRegions(ctx.get(),*m_chf,0,cfg.minRegionArea,cfg.mergeRegionArea) == false)
 		{
 			ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build watershed regions.");
-			return false;
+			return nullptr;
 		}
 	}
 	else if(partitionType == Config::PartitionType::Monotone)
@@ -391,7 +391,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if (rcBuildRegionsMonotone(ctx.get(),*m_chf,0,cfg.minRegionArea,cfg.mergeRegionArea) == false)
 		{
 			ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build monotone regions.");
-			return false;
+			return nullptr;
 		}
 	}
 	else // SAMPLE_PARTITION_LAYERS
@@ -400,7 +400,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if(rcBuildLayerRegions(ctx.get(),*m_chf,0,cfg.minRegionArea) == false)
 		{
 			ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build layer regions.");
-			return false;
+			return nullptr;
 		}
 	}
 	
@@ -415,12 +415,12 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	if(m_cset == nullptr)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'cset'.");
-		return false;
+		return nullptr;
 	}
 	if(rcBuildContours(ctx.get(),*m_chf,cfg.maxSimplificationError,cfg.maxEdgeLen,*m_cset) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create contours.");
-		return false;
+		return nullptr;
 	}
 	
 	//
@@ -434,12 +434,12 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	if(m_pmesh == nullptr)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmesh'.");
-		return false;
+		return nullptr;
 	}
 	if(rcBuildPolyMesh(ctx.get(),*m_cset,cfg.maxVertsPerPoly,*m_pmesh) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not triangulate contours.");
-		return false;
+		return nullptr;
 	}
 	
 	//
@@ -452,13 +452,13 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 	if(m_dmesh == nullptr)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmdtl'.");
-		return false;
+		return nullptr;
 	}
 
 	if(rcBuildPolyMeshDetail(ctx.get(),*m_pmesh,*m_chf,cfg.detailSampleDist,cfg.detailSampleMaxError,*m_dmesh) == false)
 	{
 		ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build detail mesh.");
-		return false;
+		return nullptr;
 	}
 
 	if(keepInterResults == false)
@@ -529,7 +529,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if(dtCreateNavMeshData(&params,&navData,&navDataSize) == false)
 		{
 			ctx->log(RC_LOG_ERROR, "Could not build Detour navmesh.");
-			return false;
+			return nullptr;
 		}
 
 		ScopeGuard sg([navData]() {
@@ -542,7 +542,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if(m_navMesh == nullptr)
 		{
 			ctx->log(RC_LOG_ERROR, "Could not create Detour navmesh");
-			return false;
+			return nullptr;
 		}
 		
 		dtStatus status;
@@ -551,14 +551,14 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 		if(dtStatusFailed(status))
 		{
 			ctx->log(RC_LOG_ERROR, "Could not init Detour navmesh");
-			return false;
+			return nullptr;
 		}
 		sg.dismiss();
 		/*status = m_navQuery->init(m_navMesh, 2048);
 		if (dtStatusFailed(status))
 		{
 			m_ctx->log(RC_LOG_ERROR, "Could not init Detour navmesh query");
-			return false;
+			return nullptr;
 		}*/
 	}
 	
@@ -1212,7 +1212,7 @@ bool pragma::nav::Mesh::RayCast(const Vector3 &start,const Vector3 &end,Vector3 
 std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start,const Vector3 &end)
 {
 	if(m_rcMesh == nullptr)
-		return false;
+		return nullptr;
 	auto &mesh = *m_rcMesh;
 	auto navQuery = std::shared_ptr<dtNavMeshQuery>(dtAllocNavMeshQuery(),[](dtNavMeshQuery *navQuery) {
 		dtFreeNavMeshQuery(navQuery);
@@ -1221,7 +1221,7 @@ std::shared_ptr<RcPathResult> pragma::nav::Mesh::FindPath(const Vector3 &start,c
 	if(dtStatusFailed(status))
 	{
 		//Con::cerr<<"FAILED #1: "<<start.x<<","<<start.y<<","<<start.z<<" => "<<end.x<<","<<end.y<<","<<end.z<<Con::endl;
-		return false;
+		return nullptr;
 	}
 	const Vector3 extents(256.f,256.f,256.f); // TODO
 	dtQueryFilter filter;

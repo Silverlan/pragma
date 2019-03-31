@@ -5,6 +5,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/networking/nwm_util.h>
 
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;

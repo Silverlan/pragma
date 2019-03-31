@@ -4,6 +4,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/lua/libraries/ltimer.h>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

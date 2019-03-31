@@ -3,6 +3,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_generic_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 
 using namespace pragma;

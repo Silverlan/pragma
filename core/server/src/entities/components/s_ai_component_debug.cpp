@@ -6,6 +6,7 @@
 #include "pragma/lua/classes/s_lai_behavior.h"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/debug/debugbehaviortree.h>
+#include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
 

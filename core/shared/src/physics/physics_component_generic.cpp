@@ -76,7 +76,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
-		return NULL;
+		return {};
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	float mass = hMdl->GetMass();
 	auto bStaticMass = (mass == 0.f) ? true : false;
@@ -84,7 +84,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		mass = 1.f;
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
-		return nullptr;
+		return {};
 
 	auto bPhys = false;
 	auto *state = ent.GetNetworkState();
@@ -129,7 +129,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		meshId++;
 	}
 	if(sortedShapes.empty())
-		return nullptr;
+		return {};
 	auto itRoot = sortedShapes.find(meshes.front()->GetBoneParent()); // Find root mesh
 	auto it = itRoot;
 	auto bHasRoot = (it != sortedShapes.end()) ? true : false;
@@ -363,7 +363,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		}
 	}
 	if(bPhys == false)
-		return nullptr;
+		return {};
 	m_physObject->Spawn();
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
 	auto animComponent = ent.GetAnimatedComponent();
@@ -525,7 +525,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 		}
 	}
 	if(bPhys == false)
-		return NULL;
+		return {};
 	if(bDynamic == true)
 	{
 		m_physicsType = PHYSICSTYPE::DYNAMIC;

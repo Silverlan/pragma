@@ -72,6 +72,12 @@ class EntityIterator;
 class DLLNETWORK BaseEntityIterator
 {
 public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = BaseEntity;
+    using difference_type = BaseEntity;
+    using pointer = BaseEntity*;
+    using reference = BaseEntity&;
+	
 	BaseEntityIterator(const std::shared_ptr<EntityIteratorData> &itData,bool bEndIterator);
 	BaseEntityIterator(const BaseEntityIterator &other)=default;
 	BaseEntityIterator &operator=(const BaseEntityIterator &other)=default;
@@ -168,33 +174,6 @@ REGISTER_BASIC_BITWISE_OPERATORS(EntityIterator::FilterFlags)
 #pragma warning(pop)
 
 ///////////////
-
-template<class TFilter,typename... TARGS>
-	void EntityIterator::AttachFilter(TARGS ...args)
-{
-	static_assert(std::is_base_of<IEntityIteratorFilter,TFilter>::value,"TFilter must be a descendant of IEntityIteratorFilter!");
-	if(typeid(*m_iteratorData->entities) == typeid(EntityContainer))
-	{
-		if constexpr (std::is_same_v<EntityIteratorFilterComponent,TFilter>)
-		{
-			// If a component filter was attached, we can optimize by only iterating the components of
-			// that type (instead of iterating over all entities). In this case we don't actually need to
-			// attach a filter.
-			SetBaseComponentType(std::forward<TARGS>(args)...);
-			return;
-		}
-
-		std::optional<std::type_index> componentTypeIndex {};
-		GetIteratorFilterComponentType<TFilter>(componentTypeIndex);
-		if(componentTypeIndex.has_value())
-		{
-			// Same as the block above, but for TEntityIteratorFilterComponent
-			SetBaseComponentType(*componentTypeIndex);
-			return;
-		}
-	}
-	m_iteratorData->filters.emplace_back(std::make_unique<TFilter>(m_iteratorData->game,std::forward<TARGS>(args)...));
-}
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -374,5 +353,32 @@ public:
 private:
 	Game &m_game;
 };
+
+template<class TFilter,typename... TARGS>
+	void EntityIterator::AttachFilter(TARGS ...args)
+{
+	static_assert(std::is_base_of<IEntityIteratorFilter,TFilter>::value,"TFilter must be a descendant of IEntityIteratorFilter!");
+	if(typeid(*m_iteratorData->entities) == typeid(EntityContainer))
+	{
+		if constexpr (std::is_same_v<EntityIteratorFilterComponent,TFilter>)
+		{
+			// If a component filter was attached, we can optimize by only iterating the components of
+			// that type (instead of iterating over all entities). In this case we don't actually need to
+			// attach a filter.
+			SetBaseComponentType(std::forward<TARGS>(args)...);
+			return;
+		}
+
+		std::optional<std::type_index> componentTypeIndex {};
+		GetIteratorFilterComponentType<TFilter>(componentTypeIndex);
+		if(componentTypeIndex.has_value())
+		{
+			// Same as the block above, but for TEntityIteratorFilterComponent
+			SetBaseComponentType(*componentTypeIndex);
+			return;
+		}
+	}
+	m_iteratorData->filters.emplace_back(std::make_unique<TFilter>(m_iteratorData->game,std::forward<TARGS>(args)...));
+}
 
 #endif

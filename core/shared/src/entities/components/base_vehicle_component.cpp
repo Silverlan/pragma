@@ -174,7 +174,7 @@ std::vector<util::WeakHandle<pragma::BaseWheelComponent>> BaseVehicleComponent::
 util::WeakHandle<pragma::BaseWheelComponent> BaseVehicleComponent::GetWheel(UChar wheelId)
 {
 	if(wheelId >= m_wheels.size())
-		return nullptr;
+		return {};
 	return m_wheels[wheelId].hWheel;
 }
 

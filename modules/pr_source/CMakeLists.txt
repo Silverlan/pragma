@@ -12,6 +12,7 @@ link_external_library(util_archive)
 link_external_library(fbxsdk)
 link_external_library(util_smdmodel)
 link_external_library(niftools)
+link_external_library(util_dmx)
 
 add_external_library(fbxsdk)
 add_external_library(lua)

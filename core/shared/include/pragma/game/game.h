@@ -29,6 +29,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #ifdef __linux__
 #include "pragma/lua/lua_script_watcher.h"
+#include "pragma/physics/physenvironment.h"
 #endif
 
 namespace Lua

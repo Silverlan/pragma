@@ -3,6 +3,7 @@
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/ai/ai_task_play_animation.h"
+#include <pragma/model/animation/activities.h>
 
 namespace pragma
 {

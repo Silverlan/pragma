@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/prop/s_prop_base.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
 

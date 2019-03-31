@@ -134,7 +134,11 @@ void Game::LoadLuaEntities(std::string subPath)
 		LoadLuaEntity(subPath,dirs[1]);
 }
 
-bool Game::LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName) {return ExecuteLuaFile(luaFilePath.substr(4));}
+bool Game::LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName)
+{
+	auto luaFilePathNoLuaDir = luaFilePath.substr(4);
+	return ExecuteLuaFile(luaFilePathNoLuaDir);
+}
 
 bool Game::LoadLuaEntity(const std::string &mainPath,const std::string &className)
 {
@@ -180,7 +184,8 @@ bool Game::LoadLuaEntity(std::string path)
 		luaFilePath += '\\' +luaFileName;
 		return ExecuteLuaFile(luaFilePath.substr(4));
 	}*/
-	return ExecuteLuaFile((path +".lua").substr(4));
+	auto pathWithoutLuaDir = (path +".lua").substr(4);
+	return ExecuteLuaFile(pathWithoutLuaDir);
 }
 
 bool Game::LoadLuaComponent(std::string path)
@@ -196,9 +201,11 @@ bool Game::LoadLuaComponent(std::string path)
 	if(FileManager::IsDir(luaFilePath))
 	{
 		luaFilePath += '\\' +luaFileName;
-		return ExecuteLuaFile(luaFilePath.substr(4));
+		auto pathWithoutLuaDir = luaFilePath.substr(4);
+		return ExecuteLuaFile(pathWithoutLuaDir);
 	}
-	return ExecuteLuaFile((path +".lua").substr(4));
+	auto pathWithoutLuaDir = (path +".lua").substr(4);
+	return ExecuteLuaFile(pathWithoutLuaDir);
 }
 
 bool Game::LoadLuaEntityByClass(const std::string &className)

@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_options(/wd4251)
-add_compile_options(/W1)
+include(${CMAKE_CURRENT_LIST_DIR}/cotire.cmake)
+
+if(WIN32)
+	add_compile_options(/wd4251)
+	add_compile_options(/W1)
+endif()
 
 set(INCLUDE_DIRS)
 function(add_include_dir IDENTIFIER)
@@ -92,7 +96,13 @@ endfunction(add_def)
 
 set(BOOST_LIBRARIES)
 function(link_boost_library PROJ_NAME LABEL LIB_NAME)
-	find_library(${LABEL} ${LIB_NAME} HINTS ${DEPENDENCY_BOOST_LIBRARY_LOCATION} NO_DEFAULT_PATH)
+	if(WIN32)
+		set(BOOST_LIB_NAME boost_${LIB_NAME}-vc141-mt-x64-1_69.lib)
+	else()
+		set(BOOST_LIB_NAME libboost_${LIB_NAME}.so.1.69.0)
+	endif()
+
+	find_library(${LABEL} ${BOOST_LIB_NAME} HINTS ${DEPENDENCY_BOOST_LIBRARY_LOCATION} NO_DEFAULT_PATH)
 	target_link_libraries(${PROJ_NAME} ${${LABEL}})
 endfunction(link_boost_library)
 
@@ -117,7 +127,7 @@ function(def_project PROJ_NAME PROJ_TYPE)
 		add_definitions(-D${def})
 	endforeach(def)
 
-	link_boost_library(${PROJ_NAME} DEPENDENCY_BOOST_SYSTEM_LIBRARY boost_system-vc141-mt-x64-1_69.lib)
+	link_boost_library(${PROJ_NAME} DEPENDENCY_BOOST_SYSTEM_LIBRARY system)
 
 	foreach(LIB IN LISTS LIBRARIES)
 		target_link_libraries(${PROJ_NAME} ${${LIB}})
@@ -133,8 +143,8 @@ function(def_project PROJ_NAME PROJ_TYPE)
 
 	set(TARGET_PROPERTIES LINKER_LANGUAGE CXX)
 	if(DEFINED PRECOMPILED_HEADER)
-		set(TARGET_PROPERTIES ${TARGET_PROPERTIES} COMPILE_FLAGS /Yu"${PRECOMPILED_HEADER}.h")
-		set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/src/${PRECOMPILED_HEADER}.cpp" PROPERTIES COMPILE_FLAGS "/Yc${PRECOMPILED_HEADER}.h")
+		set_target_properties(${PROJ_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "src/${PRECOMPILED_HEADER}.h")
 	endif()
+	cotire(${PROJ_NAME})
 	set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
 endfunction(def_project)

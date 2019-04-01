@@ -16,3 +16,5 @@ set(DEPENDENCY_VULKAN_LIBRARY "/media/florian/External1/projects/VulkanSDK/Lib/v
 set(DEPENDENCY_FREETYPE_INCLUDE "/media/florian/External1/projects/freetype/include" CACHE PATH "" FORCE)
 set(DEPENDENCY_UTF8_INCLUDE "/media/florian/External1/projects/utf8_v2_3_4/source" CACHE PATH "" FORCE)
 set(DEPENDENCY_LIBNOISE_INCLUDE "/media/florian/External1/projects/libnoise" CACHE PATH "" FORCE)
+set(DEPENDENCY_LUABIND_LIBRARY "/media/florian/External1/projects/luabind/build_lin64/src/libluabind.a" CACHE PATH "" FORCE)
+set(DEPENDENCY_LIBNOISE_LIBRARY "/media/florian/External1/projects/libnoise/linux/build/src/libnoise_x64.so" CACHE PATH "" FORCE)

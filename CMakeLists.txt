@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -269,7 +271,7 @@ set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib 
 set(DEPENDENCY_VTFLIB_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/sln/vs8/VTFLib/x64/Release/VTFLib CACHE PATH "Path to library.")
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
-set(DEPENDENCY_LUAJIT_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/luajit CACHE PATH "Path to library.")
+search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC)
 set(DEPENDENCY_LUA_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51 CACHE PATH "Path to library.")
 
 set(DEPENDENCY_ALURE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/alure/include CACHE PATH "Path to include directory.")
@@ -601,7 +603,9 @@ macro(get_full_file_name OUT_NAME FILE_NAME FILE_TYPE)
 	if(WIN32)
 		set(FILE_EXT ".dll")
 	else()
-		set(TMP_FILE_NAME lib${TMP_FILE_NAME})
+		if(NOT ${FILE_TYPE} STREQUAL "EXECUTABLE")
+			set(TMP_FILE_NAME lib${TMP_FILE_NAME})
+		endif()
 		set(FILE_EXT ".so")
 	endif()
 	if(${FILE_TYPE} STREQUAL "EXECUTABLE")
@@ -626,7 +630,7 @@ function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 	if(${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 optional_arg)
 	endif()
-	get_full_file_name(FILE_NAME ${FILE_NAME} ${optional_arg})
+	get_full_file_name(FILE_NAME "${FILE_NAME}" ${optional_arg})
 
 	get_filename_component(SRC_PATH "${SRC_PATH}" DIRECTORY)
 	set(SRC_PATH ${SRC_PATH}/${FILE_NAME})
@@ -642,7 +646,6 @@ function(copy_output_file SRC_PATH DST_PATH FILE_NAME)
 	if(${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 optional_arg)
 	endif()
-
 	copy_output_file_abs("${CMAKE_CURRENT_BINARY_DIR}/${SRC_PATH}/${FILE_NAME}" "${DST_PATH}" "${FILE_NAME}" "${optional_arg}")
 endfunction(copy_output_file)
 
@@ -688,7 +691,7 @@ endif()
 copy_output_file(core/pragma/${BINARY_PRAGMA_DIR} "" pragma EXECUTABLE)
 copy_output_file(core/pragma_server/${BINARY_PRAGMA_DIR} "" pragma_server EXECUTABLE)
 if(UNIX)
-	copy_output_file_ext("${DEPENDENCY_LUAJIT_LIBRARY}" ${BINARY_OUTPUT_DIR})
+	# copy_output_file_ext("${DEPENDENCY_LUAJIT_LIBRARY}" ${BINARY_OUTPUT_DIR})
 endif()
 
 copy_output_file(core/client/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} client)

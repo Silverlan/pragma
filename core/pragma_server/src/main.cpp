@@ -64,18 +64,10 @@ static std::string GetAppPath()
 
 int main(int argc,char* argv[]) try
 {
-	#if defined(_M_X64) || defined(__amd64__)
-		#ifdef __linux__
-			const char *library = "libengine_x64.so";
-		#else
-			const char *library = "engine.dll";
-		#endif
+	#ifdef __linux__
+		const char *library = "libengine.so";
 	#else
-		#ifdef __linux__
-			const char *library = "libengine.so";
-		#else
-			const char *library = "engine.dll";
-		#endif
+		const char *library = "engine.dll";
 	#endif
 	#ifdef _WIN32
 		std::string path = GetAppPath();

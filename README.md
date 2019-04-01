@@ -6,7 +6,8 @@ Instructions
 Windows
 
 Build third_party_libs/luajit
-run luajit/src/msvcbuild.bat from a Visual Studio Command Prompt
+setenv /release /x64
+run luajit/src/msvcbuild.bat from a Visual Studio Command Prompt (x64)
 
 
 Linux

@@ -145,3 +145,18 @@
 [submodule "external_libs/util_archive"]
 	path = external_libs/util_archive
 	url = https://github.com/Silverlan/util_archive.git
+[submodule "third_party_libs/luabind"]
+	path = third_party_libs/luabind
+	url = https://github.com/Silverlan/luabind-deboostified.git
+[submodule "third_party_libs/zlib"]
+	path = third_party_libs/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "third_party_libs/vorbis"]
+	path = third_party_libs/vorbis
+	url = https://github.com/xiph/vorbis.git
+[submodule "third_party_libs/ogg"]
+	path = third_party_libs/ogg
+	url = https://github.com/xiph/ogg.git
+[submodule "third_party_libs/bzip2"]
+	path = third_party_libs/bzip2
+	url = https://github.com/sergiud/bzip2.git

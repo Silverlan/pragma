@@ -121,6 +121,7 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	else()
 		add_executable(${PROJ_NAME} WIN32 ${SRC_FILES})
 	endif()
+	target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
 	def_vs_filters("${SRC_FILES}")
 
 	foreach(def IN LISTS DEFINITIONS)

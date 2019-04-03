@@ -1,6 +1,9 @@
 #ifndef __BOOSTUTIL_H__
 #define __BOOSTUTIL_H__
-// Sockets
+
+// Obsolete!
+// Remove this file!
+/*
 #include <deque>
 #pragma warning(disable: 4005)
 #include <boost/bind.hpp>
@@ -13,4 +16,5 @@
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
 //
+*/
 #endif

@@ -5,8 +5,6 @@
 #endif
 
 #include <deque>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <cmath>
 #include <climits>
 #include <cfloat>
@@ -17,7 +15,6 @@
 #include <memory.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <luabind/boost_tuple_extended.hpp>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <fstream>
@@ -26,7 +23,9 @@
 #include <cstring>
 #include <vorbis/vorbisfile.h>
 #include <assert.h>
+#ifdef __linux__
 #include <dlfcn.h>
+#endif
 #include <cstdio>
 #include <any>
 

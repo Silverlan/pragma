@@ -4,10 +4,14 @@
 #ifdef _WIN32
 	#include <windows.h>
 #else
+#define LINUX_THREAD_TEST
 	#include <unistd.h>
 	#include <dlfcn.h>
 	#include <algorithm>
 	#include <iostream>
+#ifdef LINUX_THREAD_TEST
+	#include <thread>
+#endif
 #endif
 /*
 #pragma comment(lib,"vfilesystem.lib")
@@ -97,6 +101,9 @@ int main(int argc,char* argv[]) try
 			sleep(5);
 			return EXIT_FAILURE;
 		}
+#ifdef LINUX_THREAD_TEST
+		std::thread t([]() {std::cout<<"Linux Thread Test";});
+#endif
 		void(*runEngine)(int,char*[]) = (void(*)(int,char*[]))dlsym(hEngine,"RunEngine");
 		if(runEngine != nullptr)
 			runEngine(argc,argv);

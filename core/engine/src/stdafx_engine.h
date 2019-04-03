@@ -4,10 +4,6 @@
 #endif
 
 #include <deque>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
 #include <cmath>
 #include <climits>
 #include <cfloat>
@@ -18,7 +14,6 @@
 #include <memory.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <luabind/boost_tuple_extended.hpp>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <fstream>
@@ -27,7 +22,6 @@
 #include <cstring>
 #include <stack>
 
-#include <pragma/util/boostutil.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>

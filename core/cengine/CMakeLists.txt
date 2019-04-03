@@ -15,9 +15,11 @@ link_external_library(cmaterialsystem)
 link_external_library(wms_shared)
 
 add_external_library(luajit)
-add_external_library(lua)
 add_external_library(libzip)
 add_external_library(util_timeline_scene)
+if(WIN32)
+	add_external_library(lua)
+endif()
 
 add_include_dir(server)
 
@@ -29,7 +31,7 @@ set(PRECOMPILED_HEADER "stdafx_cengine")
 
 def_project(cengine lib)
 
-link_boost_library(cengine DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
-link_boost_library(cengine DEPENDENCY_BOOST_REGEX_LIBRARY regex)
-link_boost_library(cengine DEPENDENCY_BOOST_THREAD_LIBRARY thread)
-link_boost_library(cengine DEPENDENCY_BOOST_CHRONO_LIBRARY chrono)
+# link_boost_library(cengine DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
+# link_boost_library(cengine DEPENDENCY_BOOST_REGEX_LIBRARY regex)
+# link_boost_library(cengine DEPENDENCY_BOOST_THREAD_LIBRARY thread)
+# link_boost_library(cengine DEPENDENCY_BOOST_CHRONO_LIBRARY chrono)

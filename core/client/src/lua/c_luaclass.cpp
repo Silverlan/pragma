@@ -1,6 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/lua/libraries/c_listener.h"
+#include "pragma/entities/c_listener.h"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/lua/classes/c_llistener.h"
 #include "pragma/lua/classes/c_lshaderinfo.h"
@@ -45,6 +45,7 @@
 #include <wgui/fontmanager.h>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
+#include <prosper_command_buffer.hpp>
 #include <luainterface.hpp>
 #include <misc/compute_pipeline_create_info.h>
 
@@ -330,7 +331,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderSceneLit.def("RecordBindScene",&Lua::Shader::SceneLit3D::BindScene);
 	modShader[defShaderSceneLit];
 
-	auto defShaderEntity = luabind::class_<pragma::ShaderEntity COMMA pragma::ShaderSceneLit COMMA pragma::ShaderScene COMMA prosper::ShaderGraphics COMMA prosper::Shader>("ShaderEntity");
+	auto defShaderEntity = luabind::class_<pragma::ShaderEntity COMMA luabind::bases<pragma::ShaderSceneLit COMMA pragma::ShaderScene COMMA prosper::ShaderGraphics COMMA prosper::Shader>>("ShaderEntity");
 	defShaderEntity.def("RecordBindInstanceDescriptorSet",&Lua::Shader::ShaderEntity::BindInstanceDescriptorSet);
 	defShaderEntity.def("RecordBindEntity",&Lua::Shader::ShaderEntity::BindEntity);
 	defShaderEntity.def("RecordBindVertexAnimationOffset",&Lua::Shader::ShaderEntity::BindVertexAnimationOffset);
@@ -340,7 +341,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	}));
 	modShader[defShaderEntity];
 
-	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase COMMA pragma::ShaderEntity COMMA pragma::ShaderSceneLit COMMA pragma::ShaderScene COMMA prosper::ShaderGraphics COMMA prosper::Shader>("TexturedLit3D");
+	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase COMMA luabind::bases<pragma::ShaderEntity COMMA pragma::ShaderSceneLit COMMA pragma::ShaderScene COMMA prosper::ShaderGraphics COMMA prosper::Shader>>("TexturedLit3D");
 	defShaderTextured3D.def("RecordBindMaterial",&Lua::Shader::TexturedLit3D::BindMaterial);
 	defShaderTextured3D.def("RecordBindClipPlane",&Lua::Shader::TexturedLit3D::RecordBindClipPlane);
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderTextured3DBase::PushConstants));
@@ -524,24 +525,24 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	//defShaderComputeModule.def("GetCurrentComputeCommandBuffer",&Lua::Shader::GetCurrentComputeCommandBuffer);
 	modShader[defShaderComputeModule];
 
-	auto defShaderGraphicsBase = luabind::class_<pragma::LuaShaderGraphics COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics> COMMA pragma::LuaShaderBase COMMA prosper::Shader>("BaseGraphics");
-	defShaderGraphicsBase.def(luabind::constructor<>());
+	auto defShaderGraphicsBase = luabind::class_<pragma::LuaShaderGraphics COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics COMMA prosper::Shader> COMMA pragma::LuaShaderBase>("BaseGraphics");
+	//defShaderGraphicsBase.def(luabind::constructor<>());
 	modShader[defShaderGraphicsBase];
 
-	auto defShaderComputeBase = luabind::class_<pragma::LuaShaderCompute COMMA luabind::bases<pragma::LuaShaderComputeBase COMMA prosper::ShaderCompute> COMMA pragma::LuaShaderBase COMMA prosper::Shader>("BaseCompute");
-	defShaderComputeBase.def(luabind::constructor<>());
+	auto defShaderComputeBase = luabind::class_<pragma::LuaShaderCompute COMMA luabind::bases<pragma::LuaShaderComputeBase COMMA prosper::ShaderCompute COMMA prosper::Shader> COMMA pragma::LuaShaderBase>("BaseCompute");
+	//defShaderComputeBase.def(luabind::constructor<>());
 	modShader[defShaderComputeBase];
 
-	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderPostProcessing COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics> COMMA pragma::LuaShaderBase COMMA prosper::Shader>("BasePostProcessing");
-	defShaderPostProcessingBase.def(luabind::constructor<>());
+	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderPostProcessing COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics COMMA prosper::Shader> COMMA pragma::LuaShaderBase>("BasePostProcessing");
+	//defShaderPostProcessingBase.def(luabind::constructor<>());
 	modShader[defShaderPostProcessingBase];
 
-	auto defShaderImageProcessing = luabind::class_<pragma::LuaShaderImageProcessing COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics> COMMA pragma::LuaShaderBase COMMA prosper::Shader>("BaseImageProcessing");
-	defShaderImageProcessing.def(luabind::constructor<>());
+	auto defShaderImageProcessing = luabind::class_<pragma::LuaShaderImageProcessing COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA prosper::ShaderGraphics COMMA prosper::Shader> COMMA pragma::LuaShaderBase>("BaseImageProcessing");
+	//defShaderImageProcessing.def(luabind::constructor<>());
 	modShader[defShaderImageProcessing];
 
-	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderTextured3D COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA pragma::ShaderTextured3DBase> COMMA pragma::LuaShaderBase COMMA prosper::ShaderGraphics COMMA prosper::Shader>("BaseTexturedLit3D");
-	defShaderTextured3DBase.def(luabind::constructor<>());
+	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderTextured3D COMMA luabind::bases<pragma::LuaShaderGraphicsBase COMMA pragma::ShaderTextured3DBase COMMA prosper::ShaderGraphics COMMA prosper::Shader> COMMA pragma::LuaShaderBase>("BaseTexturedLit3D");
+	//defShaderTextured3DBase.def(luabind::constructor<>());
 	defShaderTextured3DBase.def("BindMaterialParameters",&pragma::LuaShaderTextured3D::Lua_BindMaterialParameters,&pragma::LuaShaderTextured3D::Lua_default_BindMaterialParameters);
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelineVertexAttributes,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
 	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelinePushConstantRanges,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);

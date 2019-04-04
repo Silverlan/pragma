@@ -3,6 +3,7 @@
 #include "pragma/ai/s_factions.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_schedule.h"
+#include "pragma/ai/ai_squad.h"
 #include "pragma/entities/player.h"
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"

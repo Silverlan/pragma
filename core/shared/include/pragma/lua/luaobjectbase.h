@@ -44,7 +44,7 @@ template<class T,typename... TARGS>
 		}
 		catch(luabind::error &err)
 		{
-			Lua::HandleLuaError(err.state());
+			Lua::HandleLuaError(o.interpreter());
 		}
 		catch(const luabind::cast_failed&) // No return value was specified, or return value couldn't be cast
 		{

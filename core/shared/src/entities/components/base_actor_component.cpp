@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include <pragma/physics/movetypes.h>
 
@@ -297,7 +298,7 @@ CEOnCharacterKilled::CEOnCharacterKilled(DamageInfo *damageInfo)
 void CEOnCharacterKilled::PushArguments(lua_State *l)
 {
 	if(damageInfo != nullptr)
-		Lua::Push<boost::reference_wrapper<DamageInfo>>(l,boost::reference_wrapper<DamageInfo>(*damageInfo));
+		Lua::Push<std::reference_wrapper<DamageInfo>>(l,std::reference_wrapper<DamageInfo>(*damageInfo));
 	else
 		Lua::PushNil(l);
 }

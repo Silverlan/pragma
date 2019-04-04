@@ -5,6 +5,7 @@
 #include "pragma/networking/wvserverclient.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/damageable_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/util/bulletinfo.h>
 #include <sharedutils/scope_guard.h>
 #include <servermanager/interface/sv_nwm_manager.hpp>

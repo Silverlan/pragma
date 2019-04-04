@@ -7,6 +7,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

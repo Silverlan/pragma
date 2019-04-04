@@ -12,6 +12,8 @@
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/vertex.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
+#include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/modelmesh.h"
 
 extern DLLENGINE Engine *engine;
 

@@ -276,7 +276,7 @@ void GameModeWrapper::default_Tick(GameMode *ptr)
 
 void GameModeWrapper::OnEntityTakeDamage(EntityHandle hEnt,DamageInfo &dmg)
 {
-	CallLuaMember<void,luabind::object,boost::reference_wrapper<DamageInfo>>("OnEntityTakeDamage",*hEnt->GetLuaObject(),boost::ref(dmg));
+	CallLuaMember<void,luabind::object,std::reference_wrapper<DamageInfo>>("OnEntityTakeDamage",*hEnt->GetLuaObject(),std::ref(dmg));
 }
 void GameModeWrapper::LOnEntityTakeDamage(EntityHandle,DamageInfo&) {}
 void GameModeWrapper::default_OnEntityTakeDamage(GameMode *ptr,EntityHandle hEnt,DamageInfo &dmg)
@@ -286,7 +286,7 @@ void GameModeWrapper::default_OnEntityTakeDamage(GameMode *ptr,EntityHandle hEnt
 
 void GameModeWrapper::OnEntityTakenDamage(EntityHandle hEnt,DamageInfo &dmg,unsigned short oldHealth,unsigned short newHealth)
 {
-	CallLuaMember<void,luabind::object,boost::reference_wrapper<DamageInfo>,unsigned short,unsigned short>("OnEntityTakenDamage",*hEnt->GetLuaObject(),boost::ref(dmg),oldHealth,newHealth);
+	CallLuaMember<void,luabind::object,std::reference_wrapper<DamageInfo>,unsigned short,unsigned short>("OnEntityTakenDamage",*hEnt->GetLuaObject(),std::ref(dmg),oldHealth,newHealth);
 }
 void GameModeWrapper::LOnEntityTakenDamage(EntityHandle,DamageInfo&,unsigned short,unsigned short) {}
 void GameModeWrapper::default_OnEntityTakenDamage(GameMode *ptr,EntityHandle hEnt,DamageInfo &dmg,unsigned short oldHealth,unsigned short newHealth)

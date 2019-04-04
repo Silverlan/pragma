@@ -92,12 +92,14 @@ void SGame::RegisterLua()
 	Lua::Entity::Server::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
+	// Obsolete?
 	auto classDefBase = luabind::class_<SLuaEntityHandle COMMA SLuaEntityWrapper COMMA luabind::bases<EntityHandle>>("BaseEntity");
 	classDefBase.def(luabind::tostring(luabind::self));
-	classDefBase.def(luabind::constructor<>());
+	//classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&SLuaEntityWrapper::Initialize,&SLuaEntityWrapper::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];
+	//
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
 	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,LuaBaseEntityComponentWrapper,BaseEntityComponentHandle>("BaseEntityComponent");

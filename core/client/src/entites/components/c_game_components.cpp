@@ -6,6 +6,7 @@
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/game/game_entity_component.hpp>
 #include <pragma/entities/entity_component_manager.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

@@ -906,7 +906,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	modEnts[
 		luabind::def("iterator",static_cast<LuaEntityIterator(*)(lua_State*)>([](lua_State *l) {
 			return LuaEntityIterator{l};
-		}),luabind::return_stl_iterator)
+		}),luabind::return_stl_iterator{})
 	];
 	modEnts[
 		luabind::def("iterator",static_cast<LuaEntityIterator(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object oFilterOrFlags) {
@@ -918,14 +918,14 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 				filterIdx = std::numeric_limits<uint32_t>::max();
 			}
 			return Lua::ents::create_lua_entity_iterator(l,oFilterOrFlags,filterIdx,filterFlags);
-		}),luabind::return_stl_iterator)
+		}),luabind::return_stl_iterator{})
 	];
 	modEnts[
 		luabind::def("iterator",static_cast<LuaEntityIterator(*)(lua_State*,luabind::object,luabind::object)>([](lua_State *l,luabind::object oFilterFlags,luabind::object oFilter) {
 			Lua::CheckInt(l,1);
 			auto filterFlags = static_cast<EntityIterator::FilterFlags>(Lua::CheckInt(l,1));
 			return Lua::ents::create_lua_entity_iterator(l,oFilter,2u,filterFlags);
-		}),luabind::return_stl_iterator)
+		}),luabind::return_stl_iterator{})
 	];
 
 	auto defItFilter = luabind::class_<LuaEntityIteratorFilterBase>("IteratorFilter");

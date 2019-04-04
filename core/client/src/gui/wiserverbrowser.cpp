@@ -83,10 +83,10 @@ void WIServerBrowser::DispatchBatch()
 		header->Write<uint16_t>(static_cast<uint16_t>(0)); // Body Size
 
 		auto *sv = info.get();
-		m_dispatcher->Dispatch(header,info->ip,info->udpPort,[this,sv](boost::system::error_code err,UDPMessageDispatcher::Message *msg) mutable {
+		m_dispatcher->Dispatch(header,info->ip,info->udpPort,[this,sv](nwm::ErrorCode err,UDPMessageDispatcher::Message *msg) mutable {
 			if(!err)
 			{
-				msg->Receive(sizeof(WMSMessageHeader),[this,sv](boost::system::error_code err,DataStream data) {
+				msg->Receive(sizeof(WMSMessageHeader),[this,sv](nwm::ErrorCode err,DataStream data) {
 					if(!err)
 						RemoveQueuedServer(sv,true);
 					else
@@ -230,17 +230,17 @@ void WIServerBrowser::DoRefresh()
 	DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
-	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](boost::system::error_code err,UDPMessageDispatcher::Message*) mutable {
+	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](nwm::ErrorCode err,UDPMessageDispatcher::Message*) mutable {
 		if(!err)
 		{
-			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[this](boost::system::error_code err,UDPMessageDispatcher::Message *msg) {
+			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[this](nwm::ErrorCode err,UDPMessageDispatcher::Message *msg) {
 				if(!err)
 				{
-					msg->Receive(sizeof(WMSMessageHeader),[this,msg](boost::system::error_code err,DataStream data) {
+					msg->Receive(sizeof(WMSMessageHeader),[this,msg](nwm::ErrorCode err,DataStream data) {
 						if(!err)
 						{
 							auto header = data->Read<WMSMessageHeader>();
-							msg->Receive(header.size,[this](boost::system::error_code err,DataStream data) {
+							msg->Receive(header.size,[this](nwm::ErrorCode err,DataStream data) {
 								if(!err)
 								{
 									auto numServers = data->Read<unsigned int>();

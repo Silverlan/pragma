@@ -21,6 +21,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
@@ -162,9 +163,9 @@ int Lua::global::create_from_string(lua_State *l)
 static bool check_valid_lua_object(lua_State *l,int32_t stackIdx)
 {
 	auto o = luabind::object(luabind::from_stack(l,stackIdx));
-	auto pEnt = luabind::object_cast_nothrow<EntityHandle*>(o);
-	if(pEnt != boost::none)
-		return pEnt.get()->IsValid(); // Used frequently, and is faster than looking up "IsValid"
+	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
+	if(pEnt != nullptr)
+		return pEnt->IsValid(); // Used frequently, and is faster than looking up "IsValid"
 	auto bValid = true;
 	try
 	{

@@ -2,6 +2,7 @@
 #include "pragma/entities/info/s_info_landmark.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

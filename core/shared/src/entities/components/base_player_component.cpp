@@ -35,6 +35,7 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 
 using namespace pragma;

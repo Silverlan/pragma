@@ -13,6 +13,8 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 

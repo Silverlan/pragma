@@ -4,6 +4,7 @@
 #include <pragma/model/model.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
 #include <networkmanager/nwm_packet.h>

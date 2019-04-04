@@ -54,7 +54,7 @@ void LuaShaderBase::InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineIn
 	m_currentDescSetIndex = 0u;
 
 	auto it = s_pipelineToShader.insert(std::make_pair(&pipelineInfo,this)).first;
-	CallLuaMember<void,boost::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializePipeline",boost::ref(pipelineInfo),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializePipeline",std::ref(pipelineInfo),pipelineIdx);
 	s_pipelineToShader.erase(it);
 
 	m_currentPipelineInfo = nullptr;
@@ -239,19 +239,19 @@ void LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePip
 bool LuaShaderTextured3D::BindMaterialParameters(CMaterial &mat)
 {
 	auto ret = false;
-	return CallLuaMember<bool,boost::reference_wrapper<Material>>("BindMaterialParameters",&ret,boost::ref(static_cast<Material&>(mat))) == CallbackReturnType::HasReturnValue || ret;
+	return CallLuaMember<bool,std::reference_wrapper<Material>>("BindMaterialParameters",&ret,std::ref(static_cast<Material&>(mat))) == CallbackReturnType::HasReturnValue || ret;
 }
 void LuaShaderTextured3D::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,boost::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineVertexAttributes",boost::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineVertexAttributes",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
 void LuaShaderTextured3D::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,boost::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelinePushConstantRanges",boost::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelinePushConstantRanges",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
 void LuaShaderTextured3D::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,boost::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineDescriptorSets",boost::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineDescriptorSets",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
 void LuaShaderTextured3D::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderTextured3D::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
@@ -336,12 +336,12 @@ void LuaShaderManager::RegisterShader(std::string className,luabind::object &o)
 		Compute
 	};
 	auto shaderType = ShaderType::Graphics;
-	auto oShaderGraphics = luabind::object_cast_nothrow<pragma::LuaShaderGraphicsBase*>(r);
-	auto *shader = oShaderGraphics ? dynamic_cast<LuaShaderBase*>(oShaderGraphics.get()) : nullptr;
+	auto *oShaderGraphics = luabind::object_cast_nothrow<pragma::LuaShaderGraphicsBase*>(r,static_cast<pragma::LuaShaderGraphicsBase*>(nullptr));
+	auto *shader = oShaderGraphics ? dynamic_cast<LuaShaderBase*>(oShaderGraphics) : nullptr;
 	if(shader == nullptr)
 	{
-		auto oShaderCompute = luabind::object_cast_nothrow<pragma::LuaShaderComputeBase*>(r);
-		shader = oShaderCompute ? dynamic_cast<LuaShaderBase*>(oShaderCompute.get()) : nullptr;
+		auto *oShaderCompute = luabind::object_cast_nothrow<pragma::LuaShaderComputeBase*>(r,static_cast<pragma::LuaShaderComputeBase*>(nullptr));
+		shader = oShaderCompute ? dynamic_cast<LuaShaderBase*>(oShaderCompute) : nullptr;
 		if(shader == nullptr)
 		{
 			Con::ccl<<"WARNING: Unable to create lua shader '"<<className<<"': Lua class is not derived from valid shader base!"<<Con::endl;

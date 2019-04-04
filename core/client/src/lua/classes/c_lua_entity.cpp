@@ -16,7 +16,7 @@ void CLuaEntity::Initialize()
 void CLuaEntity::InitializeLuaObject(lua_State*) {}
 void CLuaEntity::InitializeHandle()
 {
-	auto *hEntity = luabind::object_cast_nothrow<CLuaEntityHandle*>(*m_luaObj).get();
+	auto *hEntity = luabind::object_cast_nothrow<CLuaEntityHandle*>(*m_luaObj,static_cast<CLuaEntityHandle*>(nullptr));
 	*hEntity = new PtrEntity(this);
 	m_handle = hEntity;
 	m_bExternalHandle = true;

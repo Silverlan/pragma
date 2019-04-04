@@ -16,6 +16,7 @@
 #include <wgui/wgui.h>
 #include <wgui/types/wirect.h>
 #include <pragma/physics/raytraces.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 

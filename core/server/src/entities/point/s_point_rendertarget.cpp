@@ -5,6 +5,7 @@
 #include <sharedutils/util_string.h>
 #include <networkmanager/nwm_packet.h>
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

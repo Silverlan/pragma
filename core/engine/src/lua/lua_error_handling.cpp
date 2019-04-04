@@ -328,7 +328,7 @@ void Lua::HandleSyntaxError(lua_State *l,Lua::StatusCode r)
 
 void Lua::initialize_error_handler()
 {
-	luabind::set_pcall_callback([](lua_State *l) -> int32_t {
+	luabind::set_pcall_callback([](lua_State *l) -> void {
 		std::stringstream ssMsg;
 		std::string luaMsg = Lua::ToString(l,-1);
 
@@ -393,7 +393,6 @@ void Lua::initialize_error_handler()
 			}
 		}
 		print_lua_error_message(l,ssMsg);
-		return 0;
 	});
 }
 

@@ -15,6 +15,7 @@
 #include <pragma/lua/lentity_components.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
 
@@ -863,7 +864,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		auto &transforms = hAnim->GetProcessedBones();
 		if(boneIdx >= transforms.size())
 			return;
-		Lua::Push<boost::reference_wrapper<Transform>>(l,boost::ref<Transform>(transforms.at(boneIdx)));
+		Lua::Push<std::reference_wrapper<Transform>>(l,std::ref<Transform>(transforms.at(boneIdx)));
 	}));
 	defCAnimated.def("GetBoneBuffer",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);

@@ -30,7 +30,7 @@
 #include <sharedutils/property/util_property_color.hpp>
 #include <sharedutils/property/util_property_vector.h>
 #include <pragma/entities/components/base_transform_component.hpp>
-
+#include <pragma/entities/entity_component_system_t.hpp>
 
 
 extern DLLCLIENT CGame *c_game;

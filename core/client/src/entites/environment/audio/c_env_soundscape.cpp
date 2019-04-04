@@ -11,6 +11,7 @@
 #include <pragma/entities/components/logic_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

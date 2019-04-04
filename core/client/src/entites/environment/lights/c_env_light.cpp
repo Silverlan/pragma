@@ -8,6 +8,7 @@
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>

@@ -5,6 +5,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/audio/alsoundscript.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

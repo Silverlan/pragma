@@ -7,6 +7,7 @@
 #include <pragma/model/model.h>
 #include <se_scene.hpp>
 #include <alsound_buffer.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

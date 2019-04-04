@@ -33,7 +33,7 @@ template<class TLuaEntity,class THandle>
 		return nullptr;
 	}
 	BaseEntity *ent = nullptr;
-	if(luabind::object_cast_nothrow<THandle*>(r))
+	if(luabind::object_cast_nothrow<THandle*>(r,static_cast<THandle*>(nullptr)))
 		ent = new TLuaEntity(r,classname);
 	else
 	{

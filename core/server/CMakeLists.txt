@@ -28,7 +28,7 @@ set(PRECOMPILED_HEADER "stdafx_server")
 
 def_project(server lib)
 
-# link_boost_library(server DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
-# link_boost_library(server DEPENDENCY_BOOST_REGEX_LIBRARY regex)
-# link_boost_library(server DEPENDENCY_BOOST_THREAD_LIBRARY thread)
-# link_boost_library(server DEPENDENCY_BOOST_CHRONO_LIBRARY chrono)
+link_boost_library(server DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
+link_boost_library(server DEPENDENCY_BOOST_REGEX_LIBRARY regex)
+link_boost_library(server DEPENDENCY_BOOST_THREAD_LIBRARY thread)
+link_boost_library(server DEPENDENCY_BOOST_CHRONO_LIBRARY chrono)

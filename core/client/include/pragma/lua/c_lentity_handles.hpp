@@ -83,7 +83,7 @@
 #include "pragma/entities/c_flashlight.h"
 #include "pragma/entities/environment/c_env_weather.h"
 #include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
-#include "pragma/lua/libraries/c_listener.h"
+#include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/components/c_flex_component.hpp"

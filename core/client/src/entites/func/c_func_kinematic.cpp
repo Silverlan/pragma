@@ -5,6 +5,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/util/util_handled.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

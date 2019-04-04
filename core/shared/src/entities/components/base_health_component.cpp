@@ -115,7 +115,7 @@ CEOnTakenDamage::CEOnTakenDamage(DamageInfo &damageInfo,uint16_t oldHealth,uint1
 {}
 void CEOnTakenDamage::PushArguments(lua_State *l)
 {
-	Lua::Push<boost::reference_wrapper<DamageInfo>>(l,boost::reference_wrapper<DamageInfo>(damageInfo));
+	Lua::Push<std::reference_wrapper<DamageInfo>>(l,std::reference_wrapper<DamageInfo>(damageInfo));
 	Lua::PushInt(l,oldHealth);
 	Lua::PushInt(l,newHealth);
 }

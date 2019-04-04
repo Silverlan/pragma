@@ -10,6 +10,7 @@
 #include "pragma/entities/components/s_attachable_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/physics/physenvironment.h>
 #include <pragma/networking/nwm_util.h>
 

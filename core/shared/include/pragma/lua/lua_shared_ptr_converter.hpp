@@ -1,6 +1,9 @@
 #ifndef __LUA_SHARED_PTR_CONVERTER_HPP__
 #define __LUA_SHARED_PTR_CONVERTER_HPP__
 
+// Obsolete
+// TODO: Remove this file
+#if 0
 #include <boost/version.hpp>
 
 #if BOOST_VERSION >= 105300
@@ -34,5 +37,6 @@ namespace tr1 {
 } // namespace std
 
 #endif // if BOOST_VERSION < 105300
+#endif
 
 #endif

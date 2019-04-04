@@ -21,6 +21,7 @@
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
 #include <pragma/entities/components/map_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_lua_entity.hpp>
 
 extern ServerState *server;
@@ -203,7 +204,7 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];
-	if(oType && static_cast<LuaEntityType>(luabind::object_cast_nothrow<int>(oType).get()) == LuaEntityType::Shared)
+	if(oType && static_cast<LuaEntityType>(luabind::object_cast_nothrow<int>(oType,0)) == LuaEntityType::Shared)
 		ent->SetShared(true);
 	else
 		ent->SetShared(false);

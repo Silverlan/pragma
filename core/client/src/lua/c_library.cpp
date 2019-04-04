@@ -81,8 +81,8 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiElementClassDef];
 
 	// Custom Classes
-	auto wiBaseWIElement = luabind::class_<WILuaHandle COMMA WILuaWrapper COMMA luabind::bases<WIHandle>>("Base");
-	wiBaseWIElement.def(luabind::constructor<>());
+	auto wiBaseWIElement = luabind::class_<WILuaHandle,luabind::bases<WIHandle>,WILuaWrapper>("Base");
+	//wiBaseWIElement.def(luabind::constructor<>());
 	wiBaseWIElement.def("OnInitialize",&WILuaWrapper::OnInitialize,&WILuaWrapper::default_OnInitialize);
 	wiBaseWIElement.def("OnThink",&WILuaWrapper::OnThink,&WILuaWrapper::default_OnThink);
 	wiBaseWIElement.def("MouseCallback",&WILuaWrapper::MouseCallback,&WILuaWrapper::default_MouseCallback);

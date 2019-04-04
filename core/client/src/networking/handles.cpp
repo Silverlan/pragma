@@ -13,6 +13,7 @@
 #include <pragma/util/resource_watcher.h>
 #include <pragma/game/gamemode/gamemodemanager.h>
 #include <pragma/entities/components/map_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern "C" {
 	#include "bzlib.h"

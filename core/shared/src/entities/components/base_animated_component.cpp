@@ -5,6 +5,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include <sharedutils/datastream.h>

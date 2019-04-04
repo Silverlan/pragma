@@ -13,6 +13,7 @@
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <alsound_coordinate_system.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

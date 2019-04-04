@@ -3,7 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
-#include <boost/system/error_code.hpp>
+#include <system_error>
 
 #undef GetMessage
 
@@ -12,11 +12,11 @@ class DLLNETWORK ErrorCode
 protected:
 	std::string m_message;
 	int32_t m_value;
-	std::unique_ptr<boost::system::error_code> m_error;
+	std::unique_ptr<std::error_code> m_error;
 public:
 	ErrorCode();
 	ErrorCode(const std::string &msg,int32_t value);
-	ErrorCode(const boost::system::error_code &err);
+	ErrorCode(const std::error_code &err);
 	ErrorCode(const ErrorCode &other);
 	bool IsError() const;
 	std::string GetMessage() const;

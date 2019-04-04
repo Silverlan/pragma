@@ -5,6 +5,7 @@
 #include <pragma/entities/baseentity_handle.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <algorithm>
 
 using namespace pragma;

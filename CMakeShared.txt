@@ -66,7 +66,7 @@ link_external_library(luabind)
 link_external_library(bullet)
 link_external_library(networkmanager)
 add_include_dir(glm)
-add_include_dir(boost)
+# add_include_dir(boost)
 
 function(def_vs_filters FILE_LIST)
 	foreach(source IN LISTS FILE_LIST)
@@ -83,12 +83,12 @@ set(DEFINITIONS
 	UVA_STATIC
 	GLM_FORCE_DEPTH_ZERO_TO_ONE
 	PHYS_ENGINE_BULLET
-	BOOST_ALL_DYN_LINK
 	BT_USE_DOUBLE_PRECISION
 	LUABIND_DYNAMIC_LINK
 	DEBUG_SOCKET
 	ENABLE_MESH_FUNCTIONS
 )
+# BOOST_ALL_DYN_LINK
 
 function(add_def DEF)
 	set(DEFINITIONS ${DEFINITIONS} ${DEF} PARENT_SCOPE)
@@ -144,6 +144,8 @@ function(def_project PROJ_NAME PROJ_TYPE)
 
 	set(TARGET_PROPERTIES LINKER_LANGUAGE CXX)
 	if(DEFINED PRECOMPILED_HEADER)
+		set_target_properties(${PROJ_NAME} PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
+		set_target_properties(${PROJ_NAME} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER TRUE)
 		set_target_properties(${PROJ_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "src/${PRECOMPILED_HEADER}.h")
 	endif()
 	cotire(${PROJ_NAME})

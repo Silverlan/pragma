@@ -11,7 +11,7 @@ namespace Lua
 		void register_base_entity_component(TLuaClass &classDef)
 	{
 		classDef.def(luabind::tostring(luabind::self));
-		classDef.def(luabind::constructor<>());
+		//classDef.def(luabind::constructor<>());
 		classDef.def("SetNetworked",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,bool)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,bool bNetworked) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetNetworked(bNetworked);
@@ -75,7 +75,7 @@ namespace Lua
 			auto hNewComponent = hComponent->GetEntity().AddComponent(name);
 			if(hNewComponent.expired())
 				return;
-			hComponent->BindInitComponentEvent(hNewComponent->GetComponentId(),methodNameOrFunction);
+			hComponent->BindInitComponentEvent(l,hNewComponent->GetComponentId(),methodNameOrFunction);
 		}));
 		classDef.def("OnMemberValueChanged",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t memberIndex) {
 			pragma::Lua::check_component(l,hComponent);

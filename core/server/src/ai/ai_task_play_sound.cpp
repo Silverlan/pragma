@@ -3,6 +3,7 @@
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/audio/alsound_type.h>
 
 using namespace pragma;

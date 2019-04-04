@@ -11,6 +11,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <networkmanager/nwm_packet.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

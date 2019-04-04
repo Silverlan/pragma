@@ -4,6 +4,7 @@
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/audio/alsound_type.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT ClientState *client;
 

@@ -6,6 +6,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseworld.h"
 #include "pragma/entities/output.h"
+#include "pragma/entities/entity_component_system_t.hpp"
 
 pragma::BaseWorldComponent *Game::GetWorld() {return m_worldComponent.get();}
 unsigned int Game::GetEntityCount() {return 0;}

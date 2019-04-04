@@ -5,6 +5,7 @@
 #include <sharedutils/util_file.h>
 #include <util_pad.hpp>
 #include <util_versioned_archive.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern "C" {
 	#include "bzlib.h"

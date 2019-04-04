@@ -6,6 +6,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

@@ -4,6 +4,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include <sharedutils/datastream.h>
 
 using namespace pragma;

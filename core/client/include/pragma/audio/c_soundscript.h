@@ -28,7 +28,6 @@ class DLLCLIENT CSoundScript
 public:
 	friend SoundScriptManager;
 	friend CSoundScriptManager;
-protected:
 	CSoundScript(SoundScriptManager *manager,std::string identifier);
 	virtual ~CSoundScript() override;
 };

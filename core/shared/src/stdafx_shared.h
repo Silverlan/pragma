@@ -1,6 +1,7 @@
 #ifdef _WIN32
-	#pragma message("Compiling precompiled headers.\n")
+	//#pragma message("Compiling precompiled headers.\n")
 	#define _WIN32_WINNT 0x0501
+	#define NOMINMAX
 	#include <Windows.h>
 #endif
 

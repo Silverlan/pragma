@@ -7,6 +7,7 @@
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/networking/nwm_util.h>
 

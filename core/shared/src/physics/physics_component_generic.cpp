@@ -19,6 +19,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/game/game_coordinate_system.hpp"

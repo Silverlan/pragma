@@ -219,7 +219,7 @@ void CGame::CalcView()
 		orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
 
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation));
-	CallLuaCallbacks<void,boost::reference_wrapper<Vector3>,boost::reference_wrapper<Quat>>("CalcView",boost::ref(pos),boost::ref(orientation));
+	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation));
 
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(orientation);
@@ -239,7 +239,7 @@ void CGame::CalcView()
 	}*/
 
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
-	CallLuaCallbacks<void,boost::reference_wrapper<Vector3>,boost::reference_wrapper<Quat>>("CalcViewOffset",boost::ref(pos),boost::ref(orientation));
+	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
 
 	Vector3 forward,right,up;
 	uquat::get_orientation(orientation,&forward,&right,&up);

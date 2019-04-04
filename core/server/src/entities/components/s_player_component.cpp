@@ -15,7 +15,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_observable_component.hpp>
-#include <boost/asio.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 
@@ -258,19 +258,15 @@ void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
 void SPlayerComponent::InitializeGlobalNameComponent()
 {
 	auto globalNameComponent = GetEntity().AddComponent<pragma::GlobalNameComponent>();
-	boost::asio::ip::address address;
-	GetClientIPAddress(address);
-	globalNameComponent->SetGlobalName(address.to_string());
+	auto address = GetClientIPAddress();
+	globalNameComponent->SetGlobalName(address.ToString());
 }
 
-void SPlayerComponent::GetClientIPAddress(boost::asio::ip::address &address) const
+nwm::IPAddress SPlayerComponent::GetClientIPAddress() const
 {
 	if(m_session == nullptr)
-	{
-		address = boost::asio::ip::address{};
-		return;
-	}
-	address = m_session->GetAddress();
+		return {};
+	return m_session->GetAddress();
 }
 
 std::string SPlayerComponent::GetClientIP()

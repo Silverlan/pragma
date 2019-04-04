@@ -4,6 +4,7 @@
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;

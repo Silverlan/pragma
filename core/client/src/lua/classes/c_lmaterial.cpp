@@ -34,7 +34,7 @@ void Lua::Material::Client::GetTexture(lua_State *l,::Material *mat,const std::s
 	auto *tex = mat->GetTextureInfo(textureID);
 	if(tex == nullptr)
 		return;
-	Lua::Push<boost::reference_wrapper<::TextureInfo>>(l,boost::ref(*tex));
+	Lua::Push<std::reference_wrapper<::TextureInfo>>(l,std::ref(*tex));
 }
 
 void Lua::Material::Client::GetData(lua_State *l,::Material *mat)
@@ -49,7 +49,7 @@ void Lua::TextureInfo::GetTexture(lua_State *l,::TextureInfo *tex)
 {
 	if(tex->texture == nullptr)
 		return;
-	Lua::Push<boost::reference_wrapper<Texture>>(l,boost::ref(*static_cast<Texture*>(tex->texture.get())));
+	Lua::Push<std::reference_wrapper<Texture>>(l,std::ref(*static_cast<Texture*>(tex->texture.get())));
 }
 void Lua::TextureInfo::GetSize(lua_State *l,::TextureInfo *tex)
 {

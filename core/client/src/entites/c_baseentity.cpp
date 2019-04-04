@@ -40,6 +40,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 LINK_ENTITY_TO_CLASS(baseentity,CBaseEntity);
 

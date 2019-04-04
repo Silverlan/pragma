@@ -5,6 +5,7 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_render_pass.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 

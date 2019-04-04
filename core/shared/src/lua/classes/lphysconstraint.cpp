@@ -222,14 +222,14 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 		auto *pRotLimitMotor = static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetRotationalLimitMotor(static_cast<pragma::Axis>(axis));
 		if(pRotLimitMotor == nullptr)
 			return;
-		Lua::Push<boost::reference_wrapper<btRotationalLimitMotor2>>(l,boost::ref(*pRotLimitMotor));
+		Lua::Push<std::reference_wrapper<btRotationalLimitMotor2>>(l,std::ref(*pRotLimitMotor));
 	}));
 	doFSprintClassDef.def("GetTranslationalLimitMotor",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
 		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
 		auto *pTransLimitMotor = static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetTranslationalLimitMotor();
 		if(pTransLimitMotor == nullptr)
 			return;
-		Lua::Push<boost::reference_wrapper<btTranslationalLimitMotor2>>(l,boost::ref(*pTransLimitMotor));
+		Lua::Push<std::reference_wrapper<btTranslationalLimitMotor2>>(l,std::ref(*pTransLimitMotor));
 	}));
 	doFSprintClassDef.def("GetCalculatedTransformA",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
 		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);

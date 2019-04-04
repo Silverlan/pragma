@@ -1,9 +1,7 @@
 #ifdef _WIN32
-	#pragma message("Compiling precompiled headers.\n")
-#endif
-#include <pragma/util/boostutil.h>
-#ifdef _WIN32
+	// #pragma message("Compiling precompiled headers.\n")
 	#define _WIN32_WINNT 0x0501
+	#define NOMINMAX
 	#include <Windows.h>
 #endif
 #include <mathutil/glmutil.h>

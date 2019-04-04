@@ -8,8 +8,8 @@ ErrorCode::ErrorCode()
 ErrorCode::ErrorCode(const std::string &msg,int32_t value)
 	: m_message(msg),m_value(value)
 {}
-ErrorCode::ErrorCode(const boost::system::error_code &err)
-	: m_value(0),m_error(new boost::system::error_code(err))
+ErrorCode::ErrorCode(const std::error_code &err)
+	: m_value(0),m_error(new std::error_code(err))
 {}
 
 ErrorCode::ErrorCode(const ErrorCode &other)
@@ -17,7 +17,7 @@ ErrorCode::ErrorCode(const ErrorCode &other)
 	m_value = other.m_value;
 	m_message = other.m_message;
 	if(other.m_error != nullptr)
-		m_error = std::make_unique<boost::system::error_code>(*other.m_error);
+		m_error = std::make_unique<std::error_code>(*other.m_error);
 }
 bool ErrorCode::IsError() const
 {

@@ -212,15 +212,14 @@ namespace Lua
 	{
 		Lua::CheckUserData(l,n);
 		luabind::object o(luabind::from_stack(l,n));
-		boost::optional<T*> pV = luabind::object_cast_nothrow<T*>(o);
-		if(pV == boost::none)
+		auto *pValue = luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr));
+		if(pValue == nullptr)
 		{
 			std::string err = std::string(typeid(T).name()) +" expected, got ";
 			err += lua_gettype(l,n);
 			luaL_argerror(l,n,err.c_str());
 		}
-		T *v = pV.get();
-		return *v;
+		return *pValue;
 	}
 
 	template<typename T>
@@ -229,8 +228,8 @@ namespace Lua
 		if(!lua_isuserdata(l,n))
 			return false;
 		luabind::object o(luabind::from_stack(l,n));
-		boost::optional<T*> pV = luabind::object_cast_nothrow<T*>(o);
-		return (pV != boost::none && pV.get() != NULL) ? true : false;
+		auto *pValue = luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr));
+		return (pValue != nullptr) ? true : false;
 	}
 };
 
@@ -239,30 +238,27 @@ namespace Lua
 	{ \
 		luaL_checkuserdata(l,n); \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<cls*> pV = luabind::object_cast_nothrow<cls*>(o); \
-		if(pV == boost::none) \
+		auto *pValue = luabind::object_cast_nothrow<cls*>(o,static_cast<cls*>(nullptr)); \
+		if(pValue == nullptr) \
 		{ \
 			std::string err = #type " expected, got "; \
 			err += lua_gettype(l,n); \
 			luaL_argerror(l,n,err.c_str()); \
 		} \
-		cls *v = pV.get(); \
-		return v; \
+		return pValue; \
 	} \
 	inline bool _lua_is##type(lua_State *l,int n) \
 	{ \
 		if(!lua_isuserdata(l,n)) \
 			return false; \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<cls*> pV = luabind::object_cast_nothrow<cls*>(o); \
-		return (pV != boost::none) ? true : false; \
+		auto *pValue = luabind::object_cast_nothrow<cls*>(o,static_cast<cls*>(nullptr)); \
+		return (pValue != nullptr) ? true : false; \
 	} \
 	inline cls *_lua_##type##_get(lua_State *l,int n) \
 	{ \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<cls*> pV = luabind::object_cast_nothrow<cls*>(o); \
-		cls *v = pV.get(); \
-		return v; \
+		return luabind::object_cast_nothrow<cls*>(o,static_cast<cls*>(nullptr)); \
 	} \
 	namespace Lua \
 	{ \
@@ -276,30 +272,28 @@ namespace Lua
 	{ \
 		luaL_checkuserdata(l,n); \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<std::shared_ptr<cls>*> pV = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o); \
-		if(pV == boost::none || pV.get() == NULL) \
+		auto *pValue = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o,static_cast<std::shared_ptr<cls>*>(nullptr)); \
+		if(pValue == nullptr || pValue->get() == NULL) \
 		{ \
 			std::string err = #type " expected, got "; \
 			err += lua_gettype(l,n); \
 			luaL_argerror(l,n,err.c_str()); \
 		} \
-		std::shared_ptr<cls> *v = pV.get(); \
-		return v->get(); \
+		return pValue->get(); \
 	} \
 	inline bool _lua_is##type(lua_State *l,int n) \
 	{ \
 		if(!lua_isuserdata(l,n)) \
 			return false; \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<std::shared_ptr<cls>*> pV = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o); \
-		return (pV != boost::none && pV.get() != NULL) ? true : false; \
+		auto *pValue = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o,static_cast<std::shared_ptr<cls>*>(nullptr)); \
+		return (pValue != nullptr && pValue->get() != NULL) ? true : false; \
 	} \
 	inline cls *_lua_##type##_get(lua_State *l,int n) \
 	{ \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<std::shared_ptr<cls>*> pV = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o); \
-		std::shared_ptr<cls> *v = pV.get(); \
-		return v->get(); \
+		auto *pValue = luabind::object_cast_nothrow<std::shared_ptr<cls>*>(o,static_cast<std::shared_ptr<cls>*>(nullptr)); \
+		return pValue->get(); \
 	} \
 	namespace Lua \
 	{ \
@@ -313,30 +307,28 @@ namespace Lua
 	{ \
 		luaL_checkuserdata(l,n); \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<pcls*> pV = luabind::object_cast_nothrow<pcls*>(o); \
-		if(pV == boost::none || pV.get() == NULL) \
+		auto *pValue = luabind::object_cast_nothrow<pcls*>(o,static_cast<pcls*>(nullptr)); \
+		if(pValue == nullptr) \
 		{ \
 			std::string err = #type " expected, got "; \
 			err += lua_gettype(l,n); \
 			luaL_argerror(l,n,err.c_str()); \
 		} \
-		cls *v = pV.get()->get(); \
-		return v; \
+		return pValue; \
 	} \
 	inline bool _lua_is##type(lua_State *l,int n) \
 	{ \
 		if(!lua_isuserdata(l,n)) \
 			return false; \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<pcls*> pV = luabind::object_cast_nothrow<pcls*>(o); \
-		return (pV != boost::none && pV.get() != NULL) ? true : false; \
+		auto *pValue = luabind::object_cast_nothrow<pcls*>(o,static_cast<pcls*>(nullptr)); \
+		return (pValue != nullptr) ? true : false; \
 	} \
 	inline cls *_lua_##type##_get(lua_State *l,int n) \
 	{ \
 		luabind::object o(luabind::from_stack(l,n)); \
-		boost::optional<pcls*> pV = luabind::object_cast_nothrow<pcls*>(o); \
-		cls *v = pV.get()->get(); \
-		return v; \
+		auto *pValue = luabind::object_cast_nothrow<pcls*>(o,static_cast<pcls*>(nullptr)); \
+		return pValue; \
 	} \
 	namespace Lua \
 	{ \
@@ -352,15 +344,14 @@ namespace Lua
 		{ \
 			luaL_checkuserdata(l,n); \
 			luabind::object o(luabind::from_stack(l,n)); \
-			boost::optional<handlename*> pV = luabind::object_cast_nothrow<handlename*>(o); \
-			if(pV == boost::none) \
+			auto *pValue = luabind::object_cast_nothrow<handlename*>(o,static_cast<handlename*>(nullptr)); \
+			if(pValue == nullptr) \
 			{ \
 				std::string err = #classname " expected, got "; \
 				err += lua_gettype(l,n); \
 				luaL_argerror(l,n,err.c_str()); \
 			} \
-			handlename *v = pV.get(); \
-			if(!v->IsValid()) \
+			if(!pValue->IsValid()) \
 			{ \
 				std::string err = "Attempted to use a NULL "; \
 				err += #localname; \
@@ -368,37 +359,36 @@ namespace Lua
 				lua_pushstring(l,err.c_str()); \
 				lua_error(l); \
 			} \
-			return v->get(); \
+			return pValue->get(); \
 		} \
 		static inline handlename *Check##localname##Handle(lua_State *l,int n) \
 		{ \
 			luaL_checkuserdata(l,n); \
 			luabind::object o(luabind::from_stack(l,n)); \
-			boost::optional<handlename*> pV = luabind::object_cast_nothrow<handlename*>(o); \
-			if(pV == boost::none) \
+			auto *pValue = luabind::object_cast_nothrow<handlename*>(o,static_cast<handlename*>(nullptr)); \
+			if(pValue == nullptr) \
 			{ \
 				std::string err = #classname " expected, got "; \
 				err += lua_gettype(l,n); \
 				luaL_argerror(l,n,err.c_str()); \
 			} \
-			return pV.get(); \
+			return pValue; \
 		} \
 		static inline bool Is##localname(lua_State *l,int n) \
 		{ \
 			if(!lua_isuserdata(l,n)) \
 				return false; \
 			luabind::object o(luabind::from_stack(l,n)); \
-			boost::optional<handlename*> pV = luabind::object_cast_nothrow<handlename*>(o); \
-			return (pV != boost::none) ? true : false; \
+			auto *pValue = luabind::object_cast_nothrow<handlename*>(o,static_cast<handlename*>(nullptr)); \
+			return (pValue != nullptr) ? true : false; \
 		} \
 		static inline classname *Get##localname(lua_State *l,int n) \
 		{ \
 			luabind::object o(luabind::from_stack(l,n)); \
-			boost::optional<handlename*> pV = luabind::object_cast_nothrow<handlename*>(o); \
-			handlename *v = pV.get(); \
-			if(v == nullptr) \
+			auto *pValue = luabind::object_cast_nothrow<handlename*>(o,static_cast<handlename*>(nullptr)); \
+			if(pValue == nullptr || pValue->IsValid() == false) \
 				return nullptr; \
-			return v->get(); \
+			return pValue->get(); \
 		} \
 	};
 

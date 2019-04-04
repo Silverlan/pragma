@@ -8,6 +8,7 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/math/intersection.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

@@ -150,16 +150,16 @@ void WVServer::Heartbeat()
 	DataStream header;
 	header->Write<WMSMessageHeader>(msgHeader);
 
-	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](const boost::system::error_code err,UDPMessageDispatcher::Message*) mutable -> void {
+	m_dispatcher->Dispatch(header,GetMasterServerIP(),GetMasterServerPort(),[this,body](const nwm::ErrorCode err,UDPMessageDispatcher::Message*) mutable -> void {
 		if(!err)
 		{
-			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[](const boost::system::error_code err,UDPMessageDispatcher::Message*) -> void {
+			m_dispatcher->Dispatch(body,GetMasterServerIP(),GetMasterServerPort(),[](const nwm::ErrorCode err,UDPMessageDispatcher::Message*) -> void {
 				if(err)
-					Con::cwar<<"WARNING: Unable to reach master server: "<<err.message()<<". The server will not show up in the server browser."<<Con::endl;
+					Con::cwar<<"WARNING: Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
 			});
 		}
 		else
-			Con::cwar<<"WARNING: Unable to reach master server: "<<err.message()<<". The server will not show up in the server browser."<<Con::endl;
+			Con::cwar<<"WARNING: Unable to reach master server: "<<err.Message()<<". The server will not show up in the server browser."<<Con::endl;
 	});
 }
 std::shared_ptr<nwm::ServerClient> WVServer::CreateClient() {return Server::CreateClient<WVServerClient>();}

@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

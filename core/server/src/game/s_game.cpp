@@ -63,6 +63,7 @@
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern "C" {
 	#include "bzlib.h"
@@ -805,7 +806,7 @@ void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
 	if(version != plVersion)
 	{
 		auto address = session->GetAddress();
-		Con::csv<<"Client "<<address.to_string()<<" has a different engine version ("<<plVersion.ToString()<<") from server's. Dropping client..."<<Con::endl;
+		Con::csv<<"Client "<<address.ToString()<<" has a different engine version ("<<plVersion.ToString()<<") from server's. Dropping client..."<<Con::endl;
 		session->Drop(nwm::ClientDropped::Kicked);
 		return;
 	}
@@ -814,14 +815,14 @@ void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
 	if(plEnt == nullptr)
 	{
 		auto address = session->GetAddress();
-		Con::csv<<"Unable to create player entity for client "<<address.to_string()<<". Dropping client..."<<Con::endl;
+		Con::csv<<"Unable to create player entity for client "<<address.ToString()<<". Dropping client..."<<Con::endl;
 		session->Drop(nwm::ClientDropped::Kicked);
 		return;
 	}
 	if(plEnt->IsPlayer() == false)
 	{
 		auto address = session->GetAddress();
-		Con::csv<<"Unable to create player component for client "<<address.to_string()<<". Dropping client..."<<Con::endl;
+		Con::csv<<"Unable to create player component for client "<<address.ToString()<<". Dropping client..."<<Con::endl;
 		plEnt->RemoveSafely();
 		session->Drop(nwm::ClientDropped::Kicked);
 		return;

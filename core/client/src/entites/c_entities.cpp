@@ -6,7 +6,7 @@
 #include "pragma/lua/c_lua_npc.h"
 #include "pragma/lua/c_lua_vehicle.h"
 #include "luasystem.h"
-#include "pragma/lua/libraries/c_listener.h"
+#include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/game/c_game_entities.h"

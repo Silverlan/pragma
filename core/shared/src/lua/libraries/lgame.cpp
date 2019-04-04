@@ -20,6 +20,7 @@
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include "pragma/ai/navsystem.h"
 #include <pragma/math/intersection.h>
 
 extern DLLENGINE Engine *engine;

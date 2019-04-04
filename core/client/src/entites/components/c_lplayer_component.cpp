@@ -7,6 +7,7 @@
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 namespace Lua
 {

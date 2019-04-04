@@ -16,7 +16,7 @@
 #include "pragma/rendering/shaders/c_shader.h"
 //#include "shader_screen.h" // prosper TODO
 #include "pragma/lua/classes/c_ldef_wgui.h"
-#include "pragma/lua/libraries/c_listener.h"
+#include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
@@ -80,6 +80,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -600,7 +601,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 			Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"'!"<<Con::endl;
 			return nullptr;
 		}
-		if(luabind::object_cast_nothrow<WILuaHandle*>(r))
+		if(luabind::object_cast_nothrow<WILuaHandle*>(r,static_cast<WILuaHandle*>(nullptr)))
 		{
 			el = new WILuaBase(r,className);
 			gui.Setup<WILuaBase>(*el,parent);

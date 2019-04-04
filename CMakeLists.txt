@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+if(WIN32)
+	set(BUILD_TYPE RelWithDebInfo)
+else()
+	set(BUILD_TYPE Release)
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
@@ -8,9 +12,9 @@ if(UNIX)
 	set(CONFIG_ENABLE_VMT_SUPPORT OFF CACHE BOOL OFF FORCE) # VTFLib is Windows-only
 endif()
 
-set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
+set(CMAKE_BUILD_TYPE ${BUILD_TYPE} CACHE STRING "" FORCE)
 if(WIN32)
-	set(BINARY_PRAGMA_DIR "RelWithDebInfo" CACHE INTERNAL "" FORCE)
+	set(BINARY_PRAGMA_DIR ${BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
 	set(BINARY_PRAGMA_DIR "" CACHE INTERNAL "" FORCE)
 endif()
@@ -32,7 +36,7 @@ function(search_lib_recursive_full VAR_NAME FILE_PATH)
 
 		set(FILE_PATH_WITH_EXT "${FILE_PATH}${FILE_EXTENSION}")
 	endif()
-	set(${VAR_NAME} ${FILE_PATH_WITH_EXT} CACHE PATH "Path to library.")
+	set(${VAR_NAME} ${FILE_PATH_WITH_EXT} PATH "Path to library.")
 endfunction(search_lib_recursive_full)
 
 function(search_lib_recursive_ext VAR_NAME FILE_NAME)
@@ -63,6 +67,7 @@ endfunction(search_lib_recursive_ext)
 
 function(search_lib_recursive VAR_NAME FILE_PATH LIB_NAME)
 	set(ARG_STATIC_LIBRARY FALSE)
+	set(ROOT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 	set(extra_macro_args ${ARGN})
 
 	list(LENGTH extra_macro_args num_extra_args)
@@ -71,12 +76,16 @@ function(search_lib_recursive VAR_NAME FILE_PATH LIB_NAME)
 		if(${optional_arg} STREQUAL "STATIC")
 			set(ARG_STATIC_LIBRARY "STATIC")
 		endif()
+		if(${num_extra_args} GREATER 1)
+			list(GET extra_macro_args 1 optional_arg)
+			set(ROOT_DIR ${optional_arg})
+		endif()
 	endif()
 
 	if(UNIX)
 		set(LIB_NAME lib${LIB_NAME})
 	endif()
-	search_lib_recursive_full(${VAR_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${FILE_PATH}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
+	search_lib_recursive_full(${VAR_NAME} ${ROOT_DIR}/${FILE_PATH}/${LIB_NAME} ${ARG_STATIC_LIBRARY})
 endfunction(search_lib_recursive)
 
 set(DEPENDENCY_DATASYSTEM_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/datasystem/include CACHE PATH "Path to include directory.")
@@ -165,7 +174,8 @@ set(DEPENDENCY_UTIL_VMF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_vmf
 search_lib_recursive_ext(DEPENDENCY_UTIL_VMF_LIBRARY util_vmf STATIC)
 
 set(DEPENDENCY_UTIL_ZIP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_zip/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY third_party_libs/libzip/lib/${BINARY_PRAGMA_DIR} zip)
+search_lib_recursive(DEPENDENCY_UTIL_ZIP_LIBRARY external_libs/util_zip/${BINARY_PRAGMA_DIR} util_zip)
+search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} zlib)
 
 set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
@@ -200,17 +210,36 @@ search_lib_recursive(DEPENDENCY_ISHARED_LIBRARY modules/interfaces/ishared/${BIN
 set(DEPENDENCY_PR_STEAMWORKS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_steamworks/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_PR_STEAMWORKS_LIBRARY modules/pr_steamworks/${BINARY_PRAGMA_DIR} pr_steamworks)
 
+set(DEPENDENCY_LIBVORBIS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vorbis/include CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_LIBVORBIS_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbis)
+search_lib_recursive(DEPENDENCY_LIBVORBISFILE_LIBRARY third_party_libs/vorbis/lib/${BINARY_PRAGMA_DIR} vorbisfile)
+
+search_lib_recursive(DEPENDENCY_LIBOGG_LIBRARY third_party_libs/ogg/${BINARY_PRAGMA_DIR} ogg)
+set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
+
+set(DEPENDENCY_BZIP2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2 CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} bz2)
+
+set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
+
+set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype2/include CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype2/${BINARY_PRAGMA_DIR} freetype)
+
+set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml CACHE STRING "" FORCE)
+
 set(DEPENDENCY_VULKAN_INCLUDE $ENV{VULKAN_SDK}/Include CACHE PATH "Path to include directory.")
 if(WIN32)
+	search_lib_recursive(DEPENDENCY_SPIRV_TOOLS_LIBRARY third_party_libs/vulkan/spirv-tools/source/${BINARY_PRAGMA_DIR} SPIRV-Tools)
+	search_lib_recursive(DEPENDENCY_SPIRV_TOOLS_OPT_LIBRARY third_party_libs/vulkan/spirv-tools/source/opt/${BINARY_PRAGMA_DIR} SPIRV-Tools-opt)
+	search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY third_party_libs/anvil/deps/glslang/glslang/${BINARY_PRAGMA_DIR} glslang)
+	search_lib_recursive(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY third_party_libs/anvil/deps/glslang/OGLCompilersDLL/${BINARY_PRAGMA_DIR} OGLCompiler)
+	search_lib_recursive(DEPENDENCY_SPIRV_LIBRARY third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPIRV)
+	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY third_party_libs/anvil/deps/glslang/glslang/OSDependent/Windows/${BINARY_PRAGMA_DIR} OSDependent)
+	search_lib_recursive(DEPENDENCY_SPV_REMAPPER_LIBRARY third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPVRemapper)
+	# search_lib_recursive(DEPENDENCY_HLSL_LIBRARY $ENV{VULKAN_SDK}/glslang/${BINARY_PRAGMA_DIR}/hlsl/${BINARY_PRAGMA_DIR}/HLSL)
+
 	search_lib_recursive_full(DEPENDENCY_VULKAN_LIBRARY $ENV{VULKAN_SDK}/Lib/vulkan-1)
-	search_lib_recursive_full(DEPENDENCY_GLSLANG_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/glslang/RelWithDebInfo/glslang)
-	search_lib_recursive_full(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/OGLCompilersDLL/RelWithDebInfo/OGLCompiler)
-	search_lib_recursive_full(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/glslang/OSDependent/Windows/RelWithDebInfo/OSDependent)
-	search_lib_recursive_full(DEPENDENCY_HLSL_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/hlsl/RelWithDebInfo/HLSL)
-	search_lib_recursive_full(DEPENDENCY_SPIRV_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/SPIRV/RelWithDebInfo/SPIRV)
-	search_lib_recursive_full(DEPENDENCY_SPIRV_TOOLS_LIBRARY $ENV{VULKAN_SDK}/spirv-tools/build_x64/source/RelWithDebInfo/SPIRV-Tools)
-	search_lib_recursive_full(DEPENDENCY_SPIRV_TOOLS_OPT_LIBRARY $ENV{VULKAN_SDK}/spirv-tools/build_x64/source/opt/RelWithDebInfo/SPIRV-Tools-opt)
-	search_lib_recursive_full(DEPENDENCY_SPV_REMAPPER_LIBRARY $ENV{VULKAN_SDK}/glslang/build_x64/SPIRV/RelWithDebInfo/SPVRemapper)
 else()
 	search_lib_recursive_full(DEPENDENCY_VULKAN_LIBRARY /usr/lib/x86_64-linux-gnu/libvulkan)
 	# search_lib_recursive_full(DEPENDENCY_GLSLANG_LIBRARY )
@@ -257,10 +286,10 @@ set(DEPENDENCY_LIBZIP_CONF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/li
 search_lib_recursive(DEPENDENCY_LIBZIP_LIBRARY third_party_libs/libzip/lib/${BINARY_PRAGMA_DIR} zip)
 
 set(DEPENDENCY_LPNG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_LPNG_LIBRARY third_party_libs/libpng/${BINARY_PRAGMA_DIR} png16)
+search_lib_recursive(DEPENDENCY_LPNG_LIBRARY third_party_libs/libpng/${BINARY_PRAGMA_DIR} libpng16)
 
 set(DEPENDENCY_RECTANGLEBINPACK_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rectangle_bin_pack CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_RECTANGLEBINPACK_LIBRARY third_party_libs/rectangle_bin_pack rectangle_bin_pack STATIC)
+search_lib_recursive(DEPENDENCY_RECTANGLEBINPACK_LIBRARY third_party_libs/rectangle_bin_pack/${BINARY_PRAGMA_DIR} rectangle_bin_pack STATIC)
 
 set(DEPENDENCY_MINIBALL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/miniball/cpp/main CACHE PATH "Path to include directory.")
 
@@ -268,16 +297,23 @@ set(DEPENDENCY_SQUISH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish 
 set(DEPENDENCY_SQUISH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/lib64/vs9/squish CACHE PATH "Path to library.")
 
 set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib CACHE PATH "Path to include directory.")
-set(DEPENDENCY_VTFLIB_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/sln/vs8/VTFLib/x64/Release/VTFLib CACHE PATH "Path to library.")
+search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/sln/vs8/VTFLib/x64/Release VTFLib DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC)
-set(DEPENDENCY_LUA_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src/lua51 CACHE PATH "Path to library.")
+search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
+search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
 
 set(DEPENDENCY_ALURE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/alure/include CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_LIBSAMPLERATE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src CACHE PATH "Path to include directory.")
-set(DEPENDENCY_LIBSAMPLERATE_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/RelWithDebInfo/samplerate CACHE PATH "Path to library.")
+search_lib_recursive(DEPENDENCY_LIBSAMPLERATE_LIBRARY third_party_libs/libsamplerate/${BINARY_PRAGMA_DIR} samplerate STATIC)
+
+set(DEPENDENCY_UTF8_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/utf8/source CACHE PATH "Path to include directory.")
+
+set(DEPENDENCY_LIBNOISE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libnoise/src CACHE PATH "Path to include directory.")
+set(DEPENDENCY_LIBNOISEUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libnoise/noiseutils CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_LIBNOISE_LIBRARY third_party_libs/libnoise/src/${BINARY_PRAGMA_DIR} noise)
+search_lib_recursive(DEPENDENCY_LIBNOISEUTILS_LIBRARY third_party_libs/libnoise/noiseutils/${BINARY_PRAGMA_DIR} noiseutils-static)
 
 if(WIN32)
 	set(ASSIMP_LIB_NAME assimp-vc140-mt)
@@ -300,8 +336,13 @@ search_lib_recursive(DEPENDENCY_BULLET_SOFTBODY_LIBRARY third_party_libs/bullet/
 
 message("Processing core libraries...")
 add_subdirectory(core)
+
 message("Processing external libraries...")
 add_subdirectory(external_libs)
+
+target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+
 message("Processing modules...")
 add_subdirectory(modules)
 
@@ -323,6 +364,36 @@ function(register_third_party_library LIB_NAME)
 	endif()
 	add_subdirectory(third_party_libs/${LIB_NAME})
 endfunction(register_third_party_library)
+
+# Vulkan
+set(SPIRV_SKIP_EXECUTABLES ON CACHE BOOL ON FORCE)
+set(SPIRV_SKIP_TESTS ON CACHE BOOL ".." FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
+add_subdirectory($ENV{VULKAN_SDK}/spirv-tools third_party_libs/vulkan/spirv-tools)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+set_target_properties(core_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+set_target_properties(enum_string_mapping PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+set_target_properties(extinst_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+set_target_properties(spirv-tools-pkg-config PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+set_target_properties(spirv-tools-shared-pkg-config PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+
+set_target_properties(spirv-tools-build-version PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-debuginfo PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-header-DebugInfo PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-spv-amd-gcn-shader PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-spv-amd-shader-ballot PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-spv-amd-shader-explicit-vertex-parameter PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+set_target_properties(spirv-tools-spv-amd-shader-trinary-minmax PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
+
+set_target_properties(SPIRV-Tools PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+set_target_properties(SPIRV-Tools-link PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+set_target_properties(SPIRV-Tools-opt PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+set_target_properties(SPIRV-Tools-reduce PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+set_target_properties(SPIRV-Tools-shared PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+
+set_target_properties(spirv-tools-vimsyntax PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/utilities)
+#
+
 
 # Openal-soft
 set(ALSOFT_EXAMPLES OFF CACHE BOOL OFF FORCE)
@@ -346,9 +417,9 @@ set_target_properties(openal-info PROPERTIES FOLDER third_party_libs/openal-soft
 # register_third_party_library(alure)
 
 # Assimp
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL OFF FORCE)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL OFF FORCE)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL OFF FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL ".." FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL ".." FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT ON CACHE BOOL ".." FORCE)
 register_third_party_library(assimp)
 set_target_properties(assimp PROPERTIES FOLDER third_party_libs/assimp)
 set_target_properties(IrrXML PROPERTIES FOLDER third_party_libs/assimp)
@@ -356,12 +427,18 @@ set_target_properties(uninstall PROPERTIES FOLDER third_party_libs/assimp)
 if(WIN32)
 	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER third_party_libs/assimp)
 endif()
-# set_target_properties(zlib PROPERTIES FOLDER third_party_libs/assimp)
-# set_target_properties(zlibstatic PROPERTIES FOLDER third_party_libs/assimp)
+target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # LuaJIT
 # register_third_party_library(luajit)
+#
+
+# Luabind
+set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
+set(LUA_LIBRARY ${DEPENDENCY_LUA_LIBRARY} CACHE STRING "" FORCE)
+register_third_party_library(luabind)
+set_target_properties(luabind PROPERTIES FOLDER third_party_libs)
 #
 
 # clip2tri
@@ -390,10 +467,40 @@ register_third_party_library(glfw)
 set_target_properties(glfw PROPERTIES FOLDER third_party_libs/glfw)
 #
 
+# libogg
+set(OGG_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ogg/include CACHE STRING "" FORCE)
+set(DEPENDENCY_LIBOGG_INCLUDE ${OGG_INCLUDE_DIRS} CACHE STRING "" FORCE)
+register_third_party_library(ogg)
+set_target_properties(ogg PROPERTIES FOLDER third_party_libs)
+#
+
+# libvorbis
+register_third_party_library(vorbis)
+set_target_properties(vorbis PROPERTIES FOLDER third_party_libs/vorbis)
+set_target_properties(vorbisenc PROPERTIES FOLDER third_party_libs/vorbis)
+set_target_properties(vorbisfile PROPERTIES FOLDER third_party_libs/vorbis)
+#
+
+# zlib
+register_third_party_library(zlib)
+set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/zlib CACHE STRING "" FORCE)
+set(DEPENDENCY_ZLIB_INCLUDE ${ZLIB_INCLUDE_DIR} CACHE STRING "" FORCE)
+target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+set_target_properties(example PROPERTIES FOLDER third_party_libs/zlib)
+set_target_properties(minigzip PROPERTIES FOLDER third_party_libs/zlib)
+set_target_properties(zlib PROPERTIES FOLDER third_party_libs/zlib)
+set_target_properties(zlibstatic PROPERTIES FOLDER third_party_libs/zlib)
+
+target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+#
+
 # libzip
+set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
 set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
 set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
 register_third_party_library(libzip)
+target_include_directories(zip PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 set_target_properties(add_from_filep PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(can_clone_file PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(check PROPERTIES FOLDER third_party_libs/libzip)
@@ -421,6 +528,26 @@ set_target_properties(ziptool PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(ziptool_regress PROPERTIES FOLDER third_party_libs/libzip)
 #
 
+# bzip2
+register_third_party_library(bzip2)
+set_target_properties(bzip2 PROPERTIES FOLDER third_party_libs/bzip2)
+set_target_properties(bzip2recover PROPERTIES FOLDER third_party_libs/bzip2)
+set_target_properties(libz2 PROPERTIES FOLDER third_party_libs/bzip2)
+#
+
+# libnoise
+set(BUILD_LIBNOISE_EXAMPLES OFF CACHE BOOL ".." FORCE)
+set(BUILD_LIBNOISE_UTILS ON CACHE BOOL ".." FORCE)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+register_third_party_library(libnoise)
+set_target_properties(noise PROPERTIES FOLDER third_party_libs/libnoise)
+set_target_properties(noise-static PROPERTIES FOLDER third_party_libs/libnoise)
+set_target_properties(noiseutils PROPERTIES FOLDER third_party_libs/libnoise)
+set_target_properties(noiseutils-static PROPERTIES FOLDER third_party_libs/libnoise)
+
+target_include_directories(noiseutils-static PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libnoise/src)
+#
+
 # libpng
 register_third_party_library(libpng)
 set_target_properties(genfiles PROPERTIES FOLDER third_party_libs/libpng)
@@ -433,6 +560,8 @@ set_target_properties(pngstest PROPERTIES FOLDER third_party_libs/libpng)
 set_target_properties(pngtest PROPERTIES FOLDER third_party_libs/libpng)
 set_target_properties(pngunknown PROPERTIES FOLDER third_party_libs/libpng)
 set_target_properties(pngvalid PROPERTIES FOLDER third_party_libs/libpng)
+
+target_include_directories(png PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # libsamplerate (required for alsoundsystem with fmod enabled)
@@ -461,14 +590,15 @@ set_target_properties(varispeed-play PROPERTIES FOLDER third_party_libs/libsampl
 #
 
 # anvil
-set(ENABLE_HLSL ON CACHE BOOL ON FORCE)
 # set(ANVIL_INCLUDE_XCB_WINDOW_SYSTEM_SUPPORT OFF CACHE BOOL OFF FORCE)
 set(ANVIL_LINK_STATICALLY_WITH_VULKAN_LIB ON CACHE BOOL ON FORCE)
 set(ANVIL_USE_BUILT_IN_VULKAN_HEADERS OFF CACHE BOOL OFF FORCE)
-set(ENABLE_HLSL ON CACHE BOOL ON FORCE)
+set(ENABLE_HLSL ON CACHE BOOL ".." FORCE)
 set(SKIP_GLSLANG_INSTALL ON CACHE BOOL ON FORCE)
 set(VULKAN_LIBRARY ${DEPENDENCY_VULKAN_LIBRARY} CACHE PATH "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 register_third_party_library(anvil)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 set_target_properties(Anvil PROPERTIES FOLDER third_party_libs/anvil)
 set_target_properties(glslangValidator PROPERTIES FOLDER third_party_libs/anvil/tools)
 set_target_properties(spirv-remap PROPERTIES FOLDER third_party_libs/anvil/tools)
@@ -549,8 +679,16 @@ endif()
 # endif()
 #
 
+# freetype2
+register_third_party_library(freetype2)
+set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
+target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+#
+
 # dependencies
 # add_dependencies(Anvil glslang)
+add_dependencies(png zlib)
+add_dependencies(vorbis ogg)
 add_dependencies(BulletCollision LinearMath)
 add_dependencies(BulletDynamics BulletCollision)
 add_dependencies(util_pad zip)
@@ -562,11 +700,11 @@ add_dependencies(mathutil sharedutils-static)
 add_dependencies(sharedutils mathutil)
 add_dependencies(vfilesystem sharedutils)
 add_dependencies(datasystem vfilesystem)
-add_dependencies(luasystem vfilesystem)
+add_dependencies(luasystem vfilesystem luabind)
 add_dependencies(materialsystem datasystem util_image png)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
-add_dependencies(prosper vfilesystem iglfw Anvil util_image)
+add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
 
 add_dependencies(cmaterialsystem materialsystem prosper)
 add_dependencies(wgui cmaterialsystem)
@@ -580,10 +718,10 @@ add_dependencies(servermanager networkmanager)
 add_dependencies(clientmanager networkmanager)
 add_dependencies(util_pad util_versioned_archive)
 
-add_dependencies(engine materialsystem luasystem networkmanager util_zip util_pragma_doc util_pad wms_shared LinearMath BulletDynamics BulletCollision)
-add_dependencies(shared engine networkmanager BulletSoftBody clip2tri-static clipper-static poly2tri-static util_vmf util_fgd util_mmd util_bsp util_smdmodel util_source_script rectangle_bin_pack assimp Recast Detour util_pad)
+add_dependencies(engine materialsystem luasystem networkmanager util_zip util_pragma_doc util_pad wms_shared LinearMath BulletDynamics BulletCollision BulletSoftBody libz2 bzip2)
+add_dependencies(shared engine networkmanager BulletSoftBody clip2tri-static clipper-static poly2tri-static util_vmf util_fgd util_mmd util_bsp util_smdmodel util_source_script rectangle_bin_pack assimp Recast Detour util_pad noise-static noiseutils-static ogg vorbis vorbisfile)
 add_dependencies(server shared servermanager clientmanager util_bsp util_sound)
-add_dependencies(client shared clientmanager)
+add_dependencies(client shared clientmanager freetype wgui alsoundsystem util_timeline_scene)
 add_dependencies(cengine client util_timeline_scene)
 
 add_dependencies(pragma_server server)
@@ -598,15 +736,20 @@ set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND "${CMAKE_CURRENT_
 set_property(TARGET pragma PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 set_property(TARGET pragma_server PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 
+if(WIN32)
+	set(SHARED_LIB_EXT ".dll")
+else()
+	set(SHARED_LIB_EXT ".so")
+endif()
 macro(get_full_file_name OUT_NAME FILE_NAME FILE_TYPE)
 	set(TMP_FILE_NAME ${FILE_NAME})
 	if(WIN32)
-		set(FILE_EXT ".dll")
+		set(FILE_EXT ${SHARED_LIB_EXT})
 	else()
 		if(NOT ${FILE_TYPE} STREQUAL "EXECUTABLE")
 			set(TMP_FILE_NAME lib${TMP_FILE_NAME})
 		endif()
-		set(FILE_EXT ".so")
+		set(FILE_EXT ${SHARED_LIB_EXT})
 	endif()
 	if(${FILE_TYPE} STREQUAL "EXECUTABLE")
 		if(WIN32)
@@ -661,8 +804,7 @@ function(copy_output_file_ext SRC_PATH DST_PATH)
 		list(GET extra_macro_args 0 optional_arg)
 	endif()
 	get_full_file_name("LIB_NAME" "${LIB_NAME}" "${optional_arg}")
-
-	if(EXISTS "${SRC_FILE_PATH}/${LIB_NAME}")
+	if(EXISTS "${SRC_FILE_PATH}/${LIB_NAME}" AND NOT "${SRC_FILE_PATH}/${LIB_NAME}" STREQUAL "/")
 		configure_file("${SRC_FILE_PATH}/${LIB_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${LIB_NAME}" COPYONLY)
 	endif()
 endfunction(copy_output_file_ext)
@@ -678,7 +820,7 @@ function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 		list(GET extra_macro_args 0 optional_arg)
 	endif()
 	get_full_file_name(DST_FILE_NAME ${DST_FILE_NAME} ${optional_arg})
-	if(EXISTS "${SRC_FILE_PATH}/${DST_FILE_NAME}")
+	if(EXISTS "${SRC_FILE_PATH}/${DST_FILE_NAME}" AND NOT "${SRC_FILE_PATH}/${DST_FILE_NAME}" STREQUAL "/")
 		configure_file("${SRC_FILE_PATH}/${DST_FILE_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/output/${DST_PATH}/${DST_FILE_NAME}" COPYONLY)
 	endif()
 endfunction(copy_output_file_extc)
@@ -724,13 +866,20 @@ copy_output_file(modules/pr_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" pr_pcl)
 copy_output_file_ext("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_LUA_LIBRARY}" ${BINARY_OUTPUT_DIR})
-copy_output_file_ext("${DEPENDENCY_LUABIND_LIBRARY}" ${BINARY_OUTPUT_DIR})
+
+search_lib_recursive(DEPENDENCY_LUABIND_BINARY bin/${BINARY_PRAGMA_DIR} luabind)
+copy_output_file_ext("${DEPENDENCY_LUABIND_BINARY}" ${BINARY_OUTPUT_DIR})
+
 copy_output_file_ext("${DEPENDENCY_LIBVORBIS_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_LIBOGG_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_LIBVORBISFILE_LIBRARY}" ${BINARY_OUTPUT_DIR})
-copy_output_file_ext("${DEPENDENCY_ZLIB_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_LPNG_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_LIBZIP_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_LIBNOISE_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_BZIP2_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_ASSIMP_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_FREETYPE_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext(${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib/${BINARY_PRAGMA_DIR}/zlib1${SHARED_LIB_EXT} ${BINARY_OUTPUT_DIR})
 
 copy_output_file_extc("${DEPENDENCY_FMOD_LIBRARY}" ${BINARY_OUTPUT_DIR} "fmod64")
 copy_output_file_extc("${DEPENDENCY_FMOD_STUDIO_LIBRARY}" ${BINARY_OUTPUT_DIR} "fmodstudio64")

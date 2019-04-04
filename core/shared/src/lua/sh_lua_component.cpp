@@ -282,7 +282,7 @@ void BaseLuaBaseEntityComponent::Initialize()
 	// The underlying handle for the lua object has not yet been assigned to our shared ptr, so we have to do it now.
 	// This has to be done before any Lua member-functions are called, but can't be done inside the constructor, because
 	// at that point the object hasn't been assigned to a shared ptr yet!
-	auto *pHandleWrapper = luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(GetLuaObject()).get();
+	auto *pHandleWrapper = luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(GetLuaObject(),static_cast<BaseLuaBaseEntityComponentHandleWrapper*>(nullptr));
 	if(pHandleWrapper != nullptr)
 		pHandleWrapper->handle = util::WeakHandle<pragma::BaseEntityComponent>(shared_from_this());
 	

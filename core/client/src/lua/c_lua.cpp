@@ -34,11 +34,14 @@
 #include <pragma/lua/sh_lua_component_wrapper.hpp>
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
+#include <pragma/lua/sh_lua_component_t.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/input/inputhelper.h>
 #include <pragma/lua/libraries/lnet.hpp>
 #include <luainterface.hpp>
 #include <pragma/lua/lua_component_event.hpp>
+#include <prosper_descriptor_set_group.hpp>
+#include <image/prosper_render_target.hpp>
 #ifdef PHYS_ENGINE_PHYSX
 #include <PxVisualizationParameter.h>
 #endif
@@ -142,7 +145,7 @@ void CGame::RegisterLua()
 
 	auto classDefBase = luabind::class_<CLuaEntityHandle COMMA CLuaEntityWrapper COMMA luabind::bases<EntityHandle>>("BaseEntity");
 	classDefBase.def(luabind::tostring(luabind::self));
-	classDefBase.def(luabind::constructor<>());
+	// classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&CLuaEntityWrapper::Initialize,&CLuaEntityWrapper::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];

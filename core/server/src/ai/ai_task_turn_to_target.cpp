@@ -5,6 +5,7 @@
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/activities.h>
 
 using namespace pragma;

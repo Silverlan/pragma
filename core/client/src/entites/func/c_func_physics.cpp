@@ -7,6 +7,7 @@
 #include <pragma/physics/physobj.h>
 #include <pragma/networking/nwm_util.h>
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

@@ -4,6 +4,7 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
+#include <pragma/model/modelmesh.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/classes/ldef_quaternion.h>
 #include <pragma/lua/classes/ldef_angle.h>

@@ -59,7 +59,7 @@
 #include "pragma/entities/filter/s_filter_entity_class.h"
 #include "pragma/entities/filter/s_filter_entity_name.h"
 #include "pragma/entities/game_player_spawn.h"
-#include "pragma/lua/classes/s_logic_relay.h"
+#include "pragma/entities/logic/s_logic_relay.h"
 #include "pragma/entities/s_bot.h"
 #include "pragma/entities/point/constraints/s_point_constraint_ballsocket.h"
 #include "pragma/entities/point/constraints/s_point_constraint_conetwist.h"

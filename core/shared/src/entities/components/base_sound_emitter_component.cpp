@@ -3,6 +3,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/logic_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/luacallback.h"
 #include "pragma/lua/luafunction_call.h"
 

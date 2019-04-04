@@ -11,6 +11,7 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/model/model.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

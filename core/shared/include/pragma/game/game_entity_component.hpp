@@ -30,7 +30,7 @@ template<class TComponent>
 		return nullptr;
 	}
 	pragma::BaseEntityComponent *pComponent = nullptr;
-	if(luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(r))
+	if(luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(r,static_cast<BaseLuaBaseEntityComponentHandleWrapper*>(nullptr)))
 		pComponent = new TComponent(ent,r);
 	else
 	{

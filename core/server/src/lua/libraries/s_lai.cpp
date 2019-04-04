@@ -291,10 +291,10 @@ std::shared_ptr<::pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua
 		Con::csv<<"WARNING: Unable to create lua AI Task!"<<Con::endl;
 		return nullptr;
 	}
-	auto ptr = luabind::object_cast_nothrow<AILuaBehaviorNodeWrapper*>(r);
+	auto *ptr = luabind::object_cast_nothrow<AILuaBehaviorNodeWrapper*>(r,static_cast<AILuaBehaviorNodeWrapper*>(nullptr));
 	if(ptr)
 	{
-		auto &luaNode = static_cast<AILuaBehaviorNode&>(ptr.get()->GetTask());
+		auto &luaNode = static_cast<AILuaBehaviorNode&>(ptr->GetTask());
 		luaNode.SetLuaObject(r);//Lua::CreateWeakReference(r)); // TODO: This works if the task is attached to another task, but what if it's not? -> DANGLING REFERENCE!!!
 		luaNode.SetLuaClass(oClass);
 		return std::static_pointer_cast<::pragma::ai::BehaviorNode>(luaNode.shared_from_this());

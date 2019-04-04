@@ -3,7 +3,7 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include "noise/noise.h"
-#include "noise/noiseutils.h"
+#include "noiseutils.h"
 
 lua_registercheck(NoiseModule,std::shared_ptr<noise::module::Module>);
 lua_registercheck(NoiseMap,std::shared_ptr<noise::utils::NoiseMap>);

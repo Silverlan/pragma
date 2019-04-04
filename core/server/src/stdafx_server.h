@@ -1,12 +1,11 @@
 #ifdef _WIN32
-	#pragma message("Compiling precompiled headers.\n")
+	// #pragma message("Compiling precompiled headers.\n")
 	#define _WIN32_WINNT 0x0501
+	#define NOMINMAX
 	#include <Windows.h>
 #endif
 
 #include <deque>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <cmath>
 #include <climits>
 #include <cfloat>
@@ -17,7 +16,6 @@
 #include <memory.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <luabind/boost_tuple_extended.hpp>
 #include <luabind/luabind.hpp>
 #include <luabind/operator.hpp>
 #include <fstream>

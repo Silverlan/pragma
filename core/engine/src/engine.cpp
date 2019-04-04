@@ -12,14 +12,13 @@
 #endif
 #pragma comment(lib,"luabind.lib")
 #pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bzip2.lib")
+#pragma comment(lib,"bz2.lib")
 #pragma comment(lib,"sharedutils.lib")
 #pragma comment(lib,"mathutil.lib")
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"materialsystem.lib")
 #pragma comment(lib,"util_zip.lib")
 #pragma comment(lib,"util_pad.lib")
-#pragma comment(lib,"zip.lib")
 #pragma comment(lib,"util_versioned_archive.lib")
 #pragma comment(lib,"util_pragma_doc.lib")
 /*#ifdef _DEBUG

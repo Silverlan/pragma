@@ -3,6 +3,7 @@
 #include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

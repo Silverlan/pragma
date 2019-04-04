@@ -13,7 +13,7 @@
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/lua/libraries/c_listener.h"
+#include "pragma/entities/c_listener.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
@@ -25,6 +25,7 @@
 #include <pragma/model/model.h>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 

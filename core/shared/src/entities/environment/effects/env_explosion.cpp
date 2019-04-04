@@ -5,6 +5,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/math/intersection.h>
 #include <algorithm>
 

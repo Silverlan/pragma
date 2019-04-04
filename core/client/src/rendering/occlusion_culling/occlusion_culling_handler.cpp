@@ -3,6 +3,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

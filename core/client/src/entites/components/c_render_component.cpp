@@ -14,6 +14,7 @@
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/math/intersection.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

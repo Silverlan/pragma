@@ -79,7 +79,7 @@ void Lua::Shader::GetPipelineInfo(lua_State *l,prosper::Shader &shader,uint32_t 
 	auto *info = shader.GetPipelineInfo(pipelineIdx);
 	if(info == nullptr)
 		return;
-	Lua::Push(l,boost::ref(*info));
+	Lua::Push(l,std::ref(*info));
 }
 void Lua::Shader::GetEntrypointName(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
 {

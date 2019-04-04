@@ -35,7 +35,10 @@ file(GLOB_RECURSE SRC_FILES
 )
 def_vs_filters("${SRC_FILES}")
 add_library(${PROJ_NAME} ${LIB_TYPE} ${SRC_FILES})
-target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
+if(WIN32)
+	target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
+	target_compile_options(${PROJ_NAME} PRIVATE /wd4996)
+endif()
 
 target_link_libraries(${PROJ_NAME} ${DEPENDENCY_MATHUTIL_LIBRARY})
 

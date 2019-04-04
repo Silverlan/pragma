@@ -217,7 +217,7 @@ void ServerState::HandleServerResourceStart(WVServerClient *session,NetPacket &p
 	auto &resTransfer = info->GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().to_string()<<Con::endl;
+		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().ToString()<<Con::endl;
 		return;
 	}
 	bool send = packet->Read<bool>();
@@ -238,7 +238,7 @@ void ServerState::HandleServerResourceFragment(WVServerClient *session)
 	auto &resTransfer = info->GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().to_string()<<Con::endl;
+		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().ToString()<<Con::endl;
 		return;
 	}
 	auto &r = resTransfer[0];

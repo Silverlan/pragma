@@ -7,6 +7,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <datasystem_color.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

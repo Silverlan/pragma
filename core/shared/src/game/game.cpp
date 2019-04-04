@@ -33,6 +33,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/baseworld.h"
+#include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/level/level_info.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/lua/sh_lua_component.hpp"

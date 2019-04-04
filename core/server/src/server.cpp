@@ -3,11 +3,6 @@
 // Link Libraries
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"materialsystem.lib")
-#ifdef _DEBUG
-	#pragma comment(lib,"boost_system-vc141-mt-gd-x64-1_69")
-#else
-	#pragma comment(lib,"boost_system-vc141-mt-x64-1_69")
-#endif
 #pragma comment(lib,"vfilesystem.lib")
 #pragma comment(lib,"datasystem.lib")
 #ifdef USE_LUAJIT
@@ -17,7 +12,7 @@
 #endif
 #pragma comment(lib,"luabind.lib")
 #pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bzip2.lib")
+#pragma comment(lib,"bz2.lib")
 #pragma comment(lib,"shared.lib")
 #pragma comment(lib,"engine.lib")
 #pragma comment(lib,"recast.lib")

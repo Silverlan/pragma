@@ -14,7 +14,7 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/base_physics_component.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

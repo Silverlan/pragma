@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <sharedutils/util_file.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

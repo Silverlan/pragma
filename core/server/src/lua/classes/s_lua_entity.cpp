@@ -26,7 +26,7 @@ bool SLuaEntity::IsScripted() const {return true;}
 void SLuaEntity::InitializeLuaObject(lua_State*) {}
 void SLuaEntity::InitializeHandle()
 {
-	auto *hEntity = luabind::object_cast_nothrow<SLuaEntityHandle*>(*m_luaObj).get();
+	auto *hEntity = luabind::object_cast_nothrow<SLuaEntityHandle*>(*m_luaObj,static_cast<SLuaEntityHandle*>(nullptr));
 	*hEntity = new PtrEntity(this);
 	m_handle = hEntity;
 	m_bExternalHandle = true;

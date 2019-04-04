@@ -8,6 +8,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_system_t.hpp"
 
 using namespace pragma;
 

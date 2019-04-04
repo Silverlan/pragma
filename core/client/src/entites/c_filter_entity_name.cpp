@@ -2,6 +2,7 @@
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

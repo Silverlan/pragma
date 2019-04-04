@@ -10,6 +10,7 @@
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/basetriggergravity.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 

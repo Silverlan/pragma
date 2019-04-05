@@ -134,19 +134,19 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	// fully defined before a derived class is registered, and scoped classes cannot be added AFTER a class was defined.
 	// For this reason all constraint classes are in the 'phys' library instead.
 
-	auto fixedClassDef = luabind::class_<FixedConstraintHandle COMMA ConstraintHandle>("FixedConstraint");
+	auto fixedClassDef = luabind::class_<FixedConstraintHandle,ConstraintHandle>("FixedConstraint");
 
-	auto ballSocketClassDef = luabind::class_<BallSocketConstraintHandle COMMA ConstraintHandle>("BallSocketConstraint");
+	auto ballSocketClassDef = luabind::class_<BallSocketConstraintHandle,ConstraintHandle>("BallSocketConstraint");
 
-	auto hingeClassDef = luabind::class_<HingeConstraintHandle COMMA ConstraintHandle>("HingeConstraint");
+	auto hingeClassDef = luabind::class_<HingeConstraintHandle,ConstraintHandle>("HingeConstraint");
 
-	auto sliderClassDef = luabind::class_<SliderConstraintHandle COMMA ConstraintHandle>("SliderConstraint");
+	auto sliderClassDef = luabind::class_<SliderConstraintHandle,ConstraintHandle>("SliderConstraint");
 
-	auto coneTwistClassDef = luabind::class_<ConeTwistConstraintHandle COMMA ConstraintHandle>("ConeTwistConstraint");
+	auto coneTwistClassDef = luabind::class_<ConeTwistConstraintHandle,ConstraintHandle>("ConeTwistConstraint");
 	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,ConeTwistConstraintHandle&,float,float,float)>(&PhysConeTwistConstraint::SetLimit));
 	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,ConeTwistConstraintHandle&,const EulerAngles&)>(&PhysConeTwistConstraint::SetLimit));
 
-	auto DoFClassDef = luabind::class_<DoFConstraintHandle COMMA ConstraintHandle>("DoFConstraint");
+	auto DoFClassDef = luabind::class_<DoFConstraintHandle,ConstraintHandle>("DoFConstraint");
 	DoFClassDef.def("SetLinearLowerLimit",&PhysDoFConstraint::SetLinearLowerLimit);
 	DoFClassDef.def("SetLinearUpperLimit",&PhysDoFConstraint::SetLinearUpperLimit);
 	DoFClassDef.def("SetLinearLimit",static_cast<void(*)(lua_State*,DoFConstraintHandle&,const Vector3&)>(&PhysDoFConstraint::SetLinearLimit));
@@ -208,7 +208,7 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	DoFClassDef.def("GetCurrentLinearLimit",&PhysDoFConstraint::GetCurrentLinearLimit);
 	DoFClassDef.def("GetCurrentLinearAccumulatedImpulse",&PhysDoFConstraint::GetCurrentLinearAccumulatedImpulse);
 
-	auto doFSprintClassDef = luabind::class_<DoFSpringConstraintHandle COMMA ConstraintHandle>("DoFSpringConstraint");
+	auto doFSprintClassDef = luabind::class_<DoFSpringConstraintHandle,ConstraintHandle>("DoFSpringConstraint");
 	doFSprintClassDef.def("CalculateTransforms",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
 		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
 		static_cast<PhysDoFSpringConstraint*>(constraint.get())->CalculateTransforms();

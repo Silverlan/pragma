@@ -53,15 +53,15 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 	}));
 	mod[classDef];
 
-	auto convexClassDef = luabind::class_<LPhysConvexShape COMMA LPhysShape>("ConvexShape");
+	auto convexClassDef = luabind::class_<LPhysConvexShape,LPhysShape>("ConvexShape");
 	convexClassDef.def("GetCollisionMesh",PhysConvexShape::GetCollisionMesh);
 	mod[convexClassDef];
 
-	auto hullClassDef = luabind::class_<LPhysConvexHullShape COMMA LPhysConvexShape>("ConvexHullShape");
+	auto hullClassDef = luabind::class_<LPhysConvexHullShape,LPhysConvexShape>("ConvexHullShape");
 	hullClassDef.def("AddPoint",PhysConvexHullShape::AddPoint);
 	mod[hullClassDef];
 
-	auto heightfieldClassDef = luabind::class_<LPhysHeightfield COMMA LPhysShape>("Heightfield");
+	auto heightfieldClassDef = luabind::class_<LPhysHeightfield,LPhysShape>("Heightfield");
 	heightfieldClassDef.def("GetHeight",PhysHeightfield::GetHeight);
 	heightfieldClassDef.def("SetHeight",PhysHeightfield::SetHeight);
 	heightfieldClassDef.def("GetWidth",PhysHeightfield::GetWidth);
@@ -70,7 +70,7 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 	heightfieldClassDef.def("GetUpAxis",PhysHeightfield::GetUpAxis);
 	mod[heightfieldClassDef];
 
-	auto triangleShapeClassDef = luabind::class_<LPhysTriangleShape COMMA LPhysShape>("TriangleShape");
+	auto triangleShapeClassDef = luabind::class_<LPhysTriangleShape,LPhysShape>("TriangleShape");
 	triangleShapeClassDef.def("Test",static_cast<void(*)(lua_State*,LPhysTriangleShape&,EntityHandle&,PhysRigidBodyHandle&,std::shared_ptr<::ModelSubMesh>&,const Vector3&,float,float)>([](lua_State *l,LPhysTriangleShape &shape,EntityHandle &hEnt,PhysRigidBodyHandle &hBody,std::shared_ptr<::ModelSubMesh> &subMesh,const Vector3 &origin,float radius,float power) {
 		auto *iva = static_cast<PhysTriangleShape*>(shape.get())->GetBtIndexVertexArray();
 		if(iva == nullptr)

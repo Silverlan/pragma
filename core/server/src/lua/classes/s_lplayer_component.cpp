@@ -11,7 +11,7 @@ namespace Lua
 	{
 		namespace Server
 		{
-			static void register_class(luabind::class_<SPlayerHandle, EntityHandle, luabind::detail::unspecified, luabind::detail::unspecified> &classDef);
+			static void register_class(luabind::class_<SPlayerHandle,EntityHandle> &classDef);
 			static void Respawn(lua_State *l,SPlayerHandle &hEnt);
 			static void SetActionInput(lua_State *l,SPlayerHandle &hPl,UInt32 input,Bool pressed);
 			static void Kick(lua_State *l,SPlayerHandle &hPl,const std::string &reason);

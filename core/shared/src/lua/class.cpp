@@ -220,10 +220,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoiseModule.def("GetValue",&Lua_NoiseModule_GetValue);
 	defNoiseModule.def("SetScale",&Lua_NoiseModule_SetScale);
 	
-	auto defNoiseAbs = luabind::class_<NoiseAbs COMMA NoiseBaseModule>("Abs");
+	auto defNoiseAbs = luabind::class_<NoiseAbs,NoiseBaseModule>("Abs");
 	defNoiseModule.scope[defNoiseAbs];
 
-	auto defNoiseBillow = luabind::class_<NoiseBillow COMMA NoiseBaseModule>("Billow");
+	auto defNoiseBillow = luabind::class_<NoiseBillow,NoiseBaseModule>("Billow");
 	defNoiseBillow.def("GetFrequency",&Lua_BillowNoise_GetFrequency);
 	defNoiseBillow.def("GetLacunarity",&Lua_BillowNoise_GetLacunarity);
 	defNoiseBillow.def("GetNoiseQuality",&Lua_BillowNoise_GetNoiseQuality);
@@ -238,46 +238,46 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoiseBillow.def("SetSeed",&Lua_BillowNoise_SetSeed);
 	defNoiseModule.scope[defNoiseBillow];
 
-	auto defNoiseBlend = luabind::class_<NoiseBlend COMMA NoiseBaseModule>("Blend");
+	auto defNoiseBlend = luabind::class_<NoiseBlend,NoiseBaseModule>("Blend");
 	defNoiseModule.scope[defNoiseBlend];
 
-	auto defNoiseCache = luabind::class_<NoiseCache COMMA NoiseBaseModule>("Cache");
+	auto defNoiseCache = luabind::class_<NoiseCache,NoiseBaseModule>("Cache");
 	defNoiseModule.scope[defNoiseCache];
 
-	auto defNoiseCheckerboard = luabind::class_<NoiseCheckerboard COMMA NoiseBaseModule>("Checkerboard");
+	auto defNoiseCheckerboard = luabind::class_<NoiseCheckerboard,NoiseBaseModule>("Checkerboard");
 	defNoiseModule.scope[defNoiseCheckerboard];
 
-	auto defNoiseClamp = luabind::class_<NoiseClamp COMMA NoiseBaseModule>("Clamp");
+	auto defNoiseClamp = luabind::class_<NoiseClamp,NoiseBaseModule>("Clamp");
 	defNoiseModule.scope[defNoiseClamp];
 
-	auto defNoiseConst = luabind::class_<NoiseConst COMMA NoiseBaseModule>("Const");
+	auto defNoiseConst = luabind::class_<NoiseConst,NoiseBaseModule>("Const");
 	defNoiseModule.scope[defNoiseConst];
 
-	auto defNoiseCurve = luabind::class_<NoiseCurve COMMA NoiseBaseModule>("Curve");
+	auto defNoiseCurve = luabind::class_<NoiseCurve,NoiseBaseModule>("Curve");
 	defNoiseModule.scope[defNoiseCurve];
 
-	auto defNoiseCylinders = luabind::class_<NoiseCylinders COMMA NoiseBaseModule>("Cylinders");
+	auto defNoiseCylinders = luabind::class_<NoiseCylinders,NoiseBaseModule>("Cylinders");
 	defNoiseModule.scope[defNoiseCylinders];
 
-	auto defNoiseDisplace = luabind::class_<NoiseDisplace COMMA NoiseBaseModule>("Displace");
+	auto defNoiseDisplace = luabind::class_<NoiseDisplace,NoiseBaseModule>("Displace");
 	defNoiseModule.scope[defNoiseDisplace];
 
-	auto defNoiseExponent = luabind::class_<NoiseExponent COMMA NoiseBaseModule>("Exponent");
+	auto defNoiseExponent = luabind::class_<NoiseExponent,NoiseBaseModule>("Exponent");
 	defNoiseModule.scope[defNoiseExponent];
 
-	auto defNoiseInvert = luabind::class_<NoiseInvert COMMA NoiseBaseModule>("Invert");
+	auto defNoiseInvert = luabind::class_<NoiseInvert,NoiseBaseModule>("Invert");
 	defNoiseModule.scope[defNoiseInvert];
 
-	auto defNoiseMax = luabind::class_<NoiseMax COMMA NoiseBaseModule>("Max");
+	auto defNoiseMax = luabind::class_<NoiseMax,NoiseBaseModule>("Max");
 	defNoiseModule.scope[defNoiseMax];
 
-	auto defNoiseMin = luabind::class_<NoiseMin COMMA NoiseBaseModule>("Min");
+	auto defNoiseMin = luabind::class_<NoiseMin,NoiseBaseModule>("Min");
 	defNoiseModule.scope[defNoiseMin];
 
-	auto defNoiseMultiply = luabind::class_<NoiseMultiply COMMA NoiseBaseModule>("Multiply");
+	auto defNoiseMultiply = luabind::class_<NoiseMultiply,NoiseBaseModule>("Multiply");
 	defNoiseModule.scope[defNoiseMultiply];
 
-	auto defNoisePerlin = luabind::class_<NoisePerlin COMMA NoiseBaseModule>("Perlin");
+	auto defNoisePerlin = luabind::class_<NoisePerlin,NoiseBaseModule>("Perlin");
 	defNoisePerlin.def("GetFrequency",&Lua_PerlinNoise_GetFrequency);
 	defNoisePerlin.def("GetLacunarity",&Lua_PerlinNoise_GetLacunarity);
 	defNoisePerlin.def("GetNoiseQuality",&Lua_PerlinNoise_GetNoiseQuality);
@@ -292,10 +292,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoisePerlin.def("SetSeed",&Lua_PerlinNoise_SetSeed);
 	defNoiseModule.scope[defNoisePerlin];
 
-	auto defNoisePower = luabind::class_<NoisePower COMMA NoiseBaseModule>("Power");
+	auto defNoisePower = luabind::class_<NoisePower,NoiseBaseModule>("Power");
 	defNoiseModule.scope[defNoisePower];
 
-	auto defNoiseRidgedMulti = luabind::class_<NoiseRidgedMulti COMMA NoiseBaseModule>("RidgedMulti");
+	auto defNoiseRidgedMulti = luabind::class_<NoiseRidgedMulti,NoiseBaseModule>("RidgedMulti");
 	defNoiseRidgedMulti.def("GetFrequency",&Lua_RidgedMultiNoise_GetFrequency);
 	defNoiseRidgedMulti.def("GetLacunarity",&Lua_RidgedMultiNoise_GetLacunarity);
 	defNoiseRidgedMulti.def("GetNoiseQuality",&Lua_RidgedMultiNoise_GetNoiseQuality);
@@ -308,31 +308,31 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoiseRidgedMulti.def("SetSeed",&Lua_RidgedMultiNoise_SetSeed);
 	defNoiseModule.scope[defNoiseRidgedMulti];
 
-	auto defNoiseRotatePoint = luabind::class_<NoiseRotatePoint COMMA NoiseBaseModule>("RotatePoint");
+	auto defNoiseRotatePoint = luabind::class_<NoiseRotatePoint,NoiseBaseModule>("RotatePoint");
 	defNoiseModule.scope[defNoiseRotatePoint];
 
-	auto defNoiseScaleBias = luabind::class_<NoiseScaleBias COMMA NoiseBaseModule>("ScaleBias");
+	auto defNoiseScaleBias = luabind::class_<NoiseScaleBias,NoiseBaseModule>("ScaleBias");
 	defNoiseModule.scope[defNoiseScaleBias];
 
-	auto noiseScalePoint = luabind::class_<NoiseScalePoint COMMA NoiseBaseModule>("ScalePoint");
+	auto noiseScalePoint = luabind::class_<NoiseScalePoint,NoiseBaseModule>("ScalePoint");
 	defNoiseModule.scope[noiseScalePoint];
 
-	auto noiseSelect = luabind::class_<NoiseSelect COMMA NoiseBaseModule>("Select");
+	auto noiseSelect = luabind::class_<NoiseSelect,NoiseBaseModule>("Select");
 	defNoiseModule.scope[noiseSelect];
 
-	auto noiseSpheres = luabind::class_<NoiseSpheres COMMA NoiseBaseModule>("Spheres");
+	auto noiseSpheres = luabind::class_<NoiseSpheres,NoiseBaseModule>("Spheres");
 	defNoiseModule.scope[noiseSpheres];
 
-	auto noiseTerrace = luabind::class_<NoiseTerrace COMMA NoiseBaseModule>("Terrace");
+	auto noiseTerrace = luabind::class_<NoiseTerrace,NoiseBaseModule>("Terrace");
 	defNoiseModule.scope[noiseTerrace];
 
-	auto noiseTransplatePoint = luabind::class_<NoiseTranslatePoint COMMA NoiseBaseModule>("TranslatePoint");
+	auto noiseTransplatePoint = luabind::class_<NoiseTranslatePoint,NoiseBaseModule>("TranslatePoint");
 	defNoiseModule.scope[noiseTransplatePoint];
 
-	auto noiseTurbulance = luabind::class_<NoiseTurbulance COMMA NoiseBaseModule>("Turbulance");
+	auto noiseTurbulance = luabind::class_<NoiseTurbulance,NoiseBaseModule>("Turbulance");
 	defNoiseModule.scope[noiseTurbulance];
 
-	auto noiseVoroni = luabind::class_<NoiseVoronoi COMMA NoiseBaseModule>("Voronoi");
+	auto noiseVoroni = luabind::class_<NoiseVoronoi,NoiseBaseModule>("Voronoi");
 	noiseVoroni.def("GetDisplacement",&Lua_VoronoiNoise_GetDisplacement);
 	noiseVoroni.def("GetFrequency",&Lua_VoronoiNoise_GetFrequency);
 	noiseVoroni.def("GetSeed",&Lua_VoronoiNoise_GetSeed);
@@ -681,7 +681,7 @@ void Game::RegisterLuaClasses()
 	modUtil[defSplashDamageInfo];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
-	auto defGmBase = luabind::class_<GameMode COMMA GameModeWrapper>("Base");
+	auto defGmBase = luabind::class_<GameMode,luabind::no_bases,luabind::default_holder,GameModeWrapper>("Base");
 	defGmBase.def(luabind::constructor<>());
 	defGmBase.def("GetName",&Lua::GameMode::GetName);
 	defGmBase.def("GetIdentifier",&Lua::GameMode::GetIdentifier);
@@ -785,33 +785,33 @@ void Game::RegisterLuaClasses()
 	lua_bind(luabind::class_<PhysXJoint>("PhysXJoint")
 		.def("Release",&Lua_PhysXJoint_Release)
 	);
-	lua_bind(luabind::class_<PhysXFixedJoint COMMA PhysXJoint>("PhysXFixedJoint")
+	lua_bind(luabind::class_<PhysXFixedJoint,PhysXJoint>("PhysXFixedJoint")
 
 	);
-	lua_bind(luabind::class_<PhysXSphericalJoint COMMA PhysXJoint>("PhysXSphericalJoint")
+	lua_bind(luabind::class_<PhysXSphericalJoint,PhysXJoint>("PhysXSphericalJoint")
 		.def("SetLimitCone",static_cast<void(*)(lua_State*,PhysXSphericalJoint&,float,float,float)>(&Lua_PhysXSpericalJoint_SetLimitCone))
 		.def("SetLimitCone",static_cast<void(*)(lua_State*,PhysXSphericalJoint&,float,float)>(&Lua_PhysXSpericalJoint_SetLimitCone))
 		.def("EnableLimit",&Lua_PhysXSpericalJoint_EnableLimit)
 	);
-	lua_bind(luabind::class_<PhysXRevoluteJoint COMMA PhysXJoint>("PhysXRevoluteJoint")
+	lua_bind(luabind::class_<PhysXRevoluteJoint,PhysXJoint>("PhysXRevoluteJoint")
 
 	);
-	lua_bind(luabind::class_<PhysXPrismaticJoint COMMA PhysXJoint>("PhysXPrismaticJoint")
+	lua_bind(luabind::class_<PhysXPrismaticJoint,PhysXJoint>("PhysXPrismaticJoint")
 
 	);
-	lua_bind(luabind::class_<PhysXDistanceJoint COMMA PhysXJoint>("PhysXDistanceJoint")
+	lua_bind(luabind::class_<PhysXDistanceJoint,PhysXJoint>("PhysXDistanceJoint")
 
 	);
 	lua_bind(luabind::class_<PhysXShape>("PhysXShape")
 
 	);
-	lua_bind(luabind::class_<PhysXRigidActor COMMA PhysXActor>("PhysXRigidActor")
+	lua_bind(luabind::class_<PhysXRigidActor,PhysXActor>("PhysXRigidActor")
 		.def("GetPosition",&Lua_PhysXRigidActor_GetPosition)
 		.def("GetOrientation",&Lua_PhysXRigidActor_GetOrientation)
 		.def("SetPosition",&Lua_PhysXRigidActor_SetPosition)
 		.def("SetOrientation",&Lua_PhysXRigidActor_SetOrientation)
 	);
-	lua_bind(luabind::class_<PhysXRigidDynamic COMMA PhysXRigidActor COMMA PhysXActor>("PhysXRigidDynamic")
+	lua_bind(luabind::class_<PhysXRigidDynamic COMMA PhysXRigidActor,PhysXActor>("PhysXRigidDynamic")
 		.def("AddForce",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int,bool)>(&Lua_PhysXRigidDynamic_AddForce))
 		.def("AddForce",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int)>(&Lua_PhysXRigidDynamic_AddForce))
 		.def("AddTorque",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int,bool)>(&Lua_PhysXRigidDynamic_AddTorque))

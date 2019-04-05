@@ -65,22 +65,22 @@ void SGame::RegisterLuaClasses()
 	Lua::BaseCharacter::register_class(charClassDef);
 	modGame[charClassDef];
 
-	auto playerClassDef = luabind::class_<PlayerHandle COMMA EntityHandle>("Player");
+	auto playerClassDef = luabind::class_<PlayerHandle,EntityHandle>("Player");
 	Lua::Player::Server::register_class(playerClassDef);
 	modGame[playerClassDef];
 
-	auto defWeapon = luabind::class_<WeaponHandle COMMA EntityHandle>("Weapon");
+	auto defWeapon = luabind::class_<WeaponHandle,EntityHandle>("Weapon");
 	LUA_CLASS_WEAPON_SHARED(defWeapon);
 	modGame[defWeapon];
 
-	auto npcClassDef = luabind::class_<NPCHandle COMMA EntityHandle>("NPC");
+	auto npcClassDef = luabind::class_<NPCHandle,EntityHandle>("NPC");
 	Lua::NPC::Server::register_class(npcClassDef);
 	modGame[npcClassDef];
 
-	auto vehicleClassDef = luabind::class_<VehicleHandle COMMA EntityHandle>("Vehicle");
+	auto vehicleClassDef = luabind::class_<VehicleHandle,EntityHandle>("Vehicle");
 	Lua::Vehicle::Server::register_class(vehicleClassDef);
 
-	auto vhcWheelClassDef = luabind::class_<VHCWheelHandle COMMA EntityHandle>("Wheel")
+	auto vhcWheelClassDef = luabind::class_<VHCWheelHandle,EntityHandle>("Wheel")
 	LUA_CLASS_VHCWHEEL_SHARED;
 	vhcWheelClassDef.def("SetFrontWheel",&Lua_VHCWheel_SetFrontWheel);
 	vhcWheelClassDef.def("SetChassisConnectionPoint",&Lua_VHCWheel_SetChassisConnectionPoint);
@@ -152,26 +152,26 @@ void SGame::RegisterLuaClasses()
 	modGame[classDefBaseNPC];
 	//
 	
-	auto defEnvParticleSystem = luabind::class_<EnvParticleSystemHandle COMMA EntityHandle>("EnvParticleSystem");
+	auto defEnvParticleSystem = luabind::class_<EnvParticleSystemHandle,EntityHandle>("EnvParticleSystem");
 	modGame[defEnvParticleSystem];
 
-	auto envLightClassDef = luabind::class_<EnvLightHandle COMMA EntityHandle>("EnvLight");
+	auto envLightClassDef = luabind::class_<EnvLightHandle,EntityHandle>("EnvLight");
 	Lua::EnvLight::register_class(envLightClassDef);
 	modGame[envLightClassDef];
 
-	auto envLightSpotClassDef = luabind::class_<EnvLightSpotHandle COMMA EnvLightHandle COMMA EntityHandle>("EnvLightSpot");
+	auto envLightSpotClassDef = luabind::class_<EnvLightSpotHandle COMMA EnvLightHandle,EntityHandle>("EnvLightSpot");
 	Lua::EnvLightSpot::register_class(envLightSpotClassDef);
 	modGame[envLightSpotClassDef];
 
-	auto envLightPointClassDef = luabind::class_<EnvLightPointHandle COMMA EnvLightHandle COMMA EntityHandle>("EnvLightPoint");
+	auto envLightPointClassDef = luabind::class_<EnvLightPointHandle COMMA EnvLightHandle,EntityHandle>("EnvLightPoint");
 	Lua::EnvLightPoint::register_class(envLightPointClassDef);
 	modGame[envLightPointClassDef];
 
-	auto envLightDirectionalClassDef = luabind::class_<EnvLightDirectionalHandle COMMA EnvLightHandle COMMA EntityHandle>("EnvLightDirectional");
+	auto envLightDirectionalClassDef = luabind::class_<EnvLightDirectionalHandle COMMA EnvLightHandle,EntityHandle>("EnvLightDirectional");
 	Lua::EnvLightDirectional::register_class(envLightDirectionalClassDef);
 	modGame[envLightDirectionalClassDef];
 
-	auto funcWaterClassDef = luabind::class_<FuncWaterHandle COMMA EntityHandle>("FuncWater");
+	auto funcWaterClassDef = luabind::class_<FuncWaterHandle,EntityHandle>("FuncWater");
 	Lua::FuncWater::register_class(funcWaterClassDef);
 	modGame[funcWaterClassDef];
 

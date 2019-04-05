@@ -143,9 +143,9 @@ void CGame::RegisterLua()
 	Lua::Entity::Client::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
-	auto classDefBase = luabind::class_<CLuaEntityHandle COMMA CLuaEntityWrapper COMMA luabind::bases<EntityHandle>>("BaseEntity");
+	auto classDefBase = luabind::class_<CLuaEntityHandle,luabind::bases<EntityHandle>,luabind::default_holder,CLuaEntityWrapper>("BaseEntity");
 	classDefBase.def(luabind::tostring(luabind::self));
-	// classDefBase.def(luabind::constructor<>());
+	classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&CLuaEntityWrapper::Initialize,&CLuaEntityWrapper::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];
@@ -180,7 +180,7 @@ void CGame::RegisterLua()
 
 	Game::RegisterLua();
 	/*lua_bind(
-		luabind::class_<ListenerHandle COMMA EntityHandle>("Listener")
+		luabind::class_<ListenerHandle,EntityHandle>("Listener")
 		.def("SetGain",&Lua_Listener_SetGain)
 		.def("GetGain",&Lua_Listener_GetGain)
 	);*/
@@ -419,7 +419,7 @@ void CGame::RegisterLua()
 	RegisterLuaGameClasses(gameMod);
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,LuaBaseEntityComponentWrapper,BaseEntityComponentHandle>("BaseEntityComponent");
+	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
 	Lua::register_base_entity_component(defEntCmp);
 	defEntCmp.def("ReceiveData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet) {
 

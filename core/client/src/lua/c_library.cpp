@@ -81,8 +81,8 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiElementClassDef];
 
 	// Custom Classes
-	auto wiBaseWIElement = luabind::class_<WILuaHandle,luabind::bases<WIHandle>,WILuaWrapper>("Base");
-	//wiBaseWIElement.def(luabind::constructor<>());
+	auto wiBaseWIElement = luabind::class_<WILuaHandle,luabind::bases<WIHandle>,luabind::default_holder,WILuaWrapper>("Base");
+	wiBaseWIElement.def(luabind::constructor<>());
 	wiBaseWIElement.def("OnInitialize",&WILuaWrapper::OnInitialize,&WILuaWrapper::default_OnInitialize);
 	wiBaseWIElement.def("OnThink",&WILuaWrapper::OnThink,&WILuaWrapper::default_OnThink);
 	wiBaseWIElement.def("MouseCallback",&WILuaWrapper::MouseCallback,&WILuaWrapper::default_MouseCallback);
@@ -103,39 +103,39 @@ static void register_gui(Lua::Interface &lua)
 	//
 
 	// Class specific handles have to also be defined in CGame::InitializeGUIElement and WGUIHandleFactory!
-	auto wiShapeClassDef = luabind::class_<WIShapeHandle COMMA WIHandle>("Shape");
+	auto wiShapeClassDef = luabind::class_<WIShapeHandle,WIHandle>("Shape");
 	Lua::WIShape::register_class(wiShapeClassDef);
 	guiMod[wiShapeClassDef];
 
-	auto wiButtonClassDef = luabind::class_<WIButtonHandle COMMA WIHandle>("Button");
+	auto wiButtonClassDef = luabind::class_<WIButtonHandle,WIHandle>("Button");
 	Lua::WIButton::register_class(wiButtonClassDef);
 	guiMod[wiButtonClassDef];
 
-	auto wiTexturedShapeClassDef = luabind::class_<WITexturedShapeHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>>("TexturedShape");
+	auto wiTexturedShapeClassDef = luabind::class_<WITexturedShapeHandle,luabind::bases<WIShapeHandle,WIHandle>>("TexturedShape");
 	Lua::WITexturedShape::register_class(wiTexturedShapeClassDef);
 	guiMod[wiTexturedShapeClassDef];
 
-	auto wiIconClassDef = luabind::class_<WIIconHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>>("Icon");
+	auto wiIconClassDef = luabind::class_<WIIconHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>>("Icon");
 	Lua::WIIcon::register_class(wiIconClassDef);
 	guiMod[wiIconClassDef];
 
-	auto wiSilkIconClassDef = luabind::class_<WISilkIconHandle COMMA luabind::bases<WIIconHandle COMMA WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>>("SilkIcon");
+	auto wiSilkIconClassDef = luabind::class_<WISilkIconHandle,luabind::bases<WIIconHandle,WITexturedShapeHandle,WIShapeHandle,WIHandle>>("SilkIcon");
 	Lua::WISilkIcon::register_class(wiSilkIconClassDef);
 	guiMod[wiSilkIconClassDef];
 
-	auto wiArrowClassDef = luabind::class_<WIArrowHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>>("Arrow");
+	auto wiArrowClassDef = luabind::class_<WIArrowHandle,luabind::bases<WIShapeHandle,WIHandle>>("Arrow");
 	Lua::WIArrow::register_class(wiArrowClassDef);
 	guiMod[wiArrowClassDef];
 
-	auto wiCheckboxClassDef = luabind::class_<WICheckboxHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>>("Checkbox");
+	auto wiCheckboxClassDef = luabind::class_<WICheckboxHandle,luabind::bases<WIShapeHandle,WIHandle>>("Checkbox");
 	Lua::WICheckbox::register_class(wiCheckboxClassDef);
 	guiMod[wiCheckboxClassDef];
 
-	auto wiTransformableClassDef = luabind::class_<WITransformableHandle COMMA WIHandle>("Transformable");
+	auto wiTransformableClassDef = luabind::class_<WITransformableHandle,WIHandle>("Transformable");
 	Lua::WITransformable::register_class(wiTransformableClassDef);
 	guiMod[wiTransformableClassDef];
 
-	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTextureHandle COMMA WIHandle>("DebugDepthTexture");
+	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTextureHandle,WIHandle>("DebugDepthTexture");
 	wiDebugDepthTextureClassDef.def("SetContrastFactor",static_cast<void(*)(lua_State*,WIDebugDepthTextureHandle&,float)>([](lua_State *l,WIDebugDepthTextureHandle &hEl,float contrastFactor) {
 		lua_checkgui(l,hEl);
 		static_cast<::WIDebugDepthTexture*>(hEl.get())->SetContrastFactor(contrastFactor);
@@ -150,7 +150,7 @@ static void register_gui(Lua::Interface &lua)
 	}));
 	guiMod[wiDebugDepthTextureClassDef];
 
-	auto wiDebugShadowMapClassDef = luabind::class_<WIDebugShadowMapHandle COMMA WIHandle>("DebugShadowMap");
+	auto wiDebugShadowMapClassDef = luabind::class_<WIDebugShadowMapHandle,WIHandle>("DebugShadowMap");
 	wiDebugShadowMapClassDef.def("SetContrastFactor",static_cast<void(*)(lua_State*,WIDebugShadowMapHandle&,float)>([](lua_State *l,WIDebugShadowMapHandle &hEl,float contrastFactor) {
 		lua_checkgui(l,hEl);
 		static_cast<::WIDebugShadowMap*>(hEl.get())->SetContrastFactor(contrastFactor);
@@ -170,83 +170,83 @@ static void register_gui(Lua::Interface &lua)
 	}));
 	guiMod[wiDebugShadowMapClassDef];
 
-	auto wiDebugSsaoClassDef = luabind::class_<WIDebugSSAOHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>>("DebugSSAO");
+	auto wiDebugSsaoClassDef = luabind::class_<WIDebugSSAOHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>>("DebugSSAO");
 	wiDebugSsaoClassDef.def("SetUseBlurredSSAOImage",static_cast<void(*)(lua_State*,WIDebugSSAOHandle&,bool)>([](lua_State *l,WIDebugSSAOHandle &hEl,bool useBlurredImage) {
 		lua_checkgui(l,hEl);
 		static_cast<::WIDebugSSAO*>(hEl.get())->SetUseBlurredSSAOImage(useBlurredImage);
 	}));
 	guiMod[wiDebugSsaoClassDef];
 
-	auto wiProgressBarClassDef = luabind::class_<WIProgressBarHandle COMMA WIHandle>("ProgressBar");
+	auto wiProgressBarClassDef = luabind::class_<WIProgressBarHandle,WIHandle>("ProgressBar");
 	Lua::WIProgressBar::register_class(wiProgressBarClassDef);
 	guiMod[wiProgressBarClassDef];
 
-	auto wiSliderClassDef = luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>>("Slider");
+	auto wiSliderClassDef = luabind::class_<WISliderHandle,luabind::bases<WIProgressBarHandle,WIHandle>>("Slider");
 	Lua::WISlider::register_class(wiSliderClassDef);
 	guiMod[wiSliderClassDef];
 
-	auto wiContainerClassDef = luabind::class_<WIContainerHandle COMMA WIHandle>("Container");
+	auto wiContainerClassDef = luabind::class_<WIContainerHandle,WIHandle>("Container");
 	Lua::WIContainer::register_class(wiContainerClassDef);
 	guiMod[wiContainerClassDef];
 
-	auto wiTableClassDef = luabind::class_<WITableHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>>("Table");
+	auto wiTableClassDef = luabind::class_<WITableHandle,luabind::bases<WIContainerHandle,WIHandle>>("Table");
 	Lua::WITable::register_class(wiTableClassDef);
 
-	auto wiTableRowClassDef = luabind::class_<WITableRowHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>>("Row");
+	auto wiTableRowClassDef = luabind::class_<WITableRowHandle,luabind::bases<WIContainerHandle,WIHandle>>("Row");
 	Lua::WITableRow::register_class(wiTableRowClassDef);
 
-	auto wiTableCellClassDef = luabind::class_<WITableCellHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>>("Cell");
+	auto wiTableCellClassDef = luabind::class_<WITableCellHandle,luabind::bases<WIContainerHandle,WIHandle>>("Cell");
 	Lua::WITableCell::register_class(wiTableCellClassDef);
 	wiTableClassDef.scope[wiTableCellClassDef];
 	wiTableClassDef.scope[wiTableRowClassDef];
 	guiMod[wiTableClassDef];
 
-	auto wiGridPanelClassDef = luabind::class_<WIGridPanelHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>>("GridPanel");
+	auto wiGridPanelClassDef = luabind::class_<WIGridPanelHandle,luabind::bases<WITableHandle,WIHandle>>("GridPanel");
 	Lua::WIGridPanel::register_class(wiGridPanelClassDef);
 	guiMod[wiGridPanelClassDef];
 
-	auto wiTreeListClassDef = luabind::class_<WITreeListHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>>("TreeList");
+	auto wiTreeListClassDef = luabind::class_<WITreeListHandle,luabind::bases<WITableHandle,WIHandle>>("TreeList");
 	Lua::WITreeList::register_class(wiTreeListClassDef);
 
-	auto wiTreeListElementClassDef = luabind::class_<WITreeListElementHandle COMMA luabind::bases<WITableRowHandle COMMA WIHandle>>("Element");
+	auto wiTreeListElementClassDef = luabind::class_<WITreeListElementHandle,luabind::bases<WITableRowHandle,WIHandle>>("Element");
 	Lua::WITreeListElement::register_class(wiTreeListElementClassDef);
 	wiTreeListClassDef.scope[wiTreeListElementClassDef];
 	guiMod[wiTreeListClassDef];
 
-	auto wiFrameClassDef = luabind::class_<WIFrameHandle COMMA luabind::bases<WITransformableHandle COMMA WIHandle>>("Frame");
+	auto wiFrameClassDef = luabind::class_<WIFrameHandle,luabind::bases<WITransformableHandle,WIHandle>>("Frame");
 	Lua::WIFrame::register_class(wiFrameClassDef);
 	guiMod[wiFrameClassDef];
 
-	auto wiTextClassDef = luabind::class_<WITextHandle COMMA WIHandle>("Text");
+	auto wiTextClassDef = luabind::class_<WITextHandle,WIHandle>("Text");
 	Lua::WIText::register_class(wiTextClassDef);
 	guiMod[wiTextClassDef];
 
-	auto wiTextEntryClassDef = luabind::class_<WITextEntryHandle COMMA WIHandle>("TextEntry");
+	auto wiTextEntryClassDef = luabind::class_<WITextEntryHandle,WIHandle>("TextEntry");
 	Lua::WITextEntry::register_class(wiTextEntryClassDef);
 	guiMod[wiTextEntryClassDef];
 
-	auto wiOutlinedRectClassDef = luabind::class_<WIOutlinedRectHandle COMMA WIHandle>("OutlinedRect");
+	auto wiOutlinedRectClassDef = luabind::class_<WIOutlinedRectHandle,WIHandle>("OutlinedRect");
 	Lua::WIOutlinedRect::register_class(wiOutlinedRectClassDef);
 
-	auto wiLineClassDef = luabind::class_<WILineHandle COMMA WIHandle>("Line");
+	auto wiLineClassDef = luabind::class_<WILineHandle,WIHandle>("Line");
 	Lua::WILine::register_class(wiLineClassDef);
 
-	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRectHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>>("RoundedRect");
+	auto wiRoundedRectClassDef = luabind::class_<WIRoundedRectHandle,luabind::bases<WIShapeHandle,WIHandle>>("RoundedRect");
 	Lua::WIRoundedRect::register_class(wiRoundedRectClassDef);
 	guiMod[wiRoundedRectClassDef];
 
-	auto wiRoundedTexturedRect = luabind::class_<WIRoundedTexturedRectHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>>("RoundedTexturedRect");
+	auto wiRoundedTexturedRect = luabind::class_<WIRoundedTexturedRectHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>>("RoundedTexturedRect");
 	Lua::WIRoundedTexturedRect::register_class(wiRoundedTexturedRect);
 	guiMod[wiRoundedTexturedRect];
 
-	auto wiScrollBarClassDef = luabind::class_<WIScrollBarHandle COMMA WIHandle>("ScrollBar");
+	auto wiScrollBarClassDef = luabind::class_<WIScrollBarHandle,WIHandle>("ScrollBar");
 	Lua::WIScrollBar::register_class(wiScrollBarClassDef);
 
-	auto wiNumericEntryClassDef = luabind::class_<WINumericEntryHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>>("NumericTextEntry");
+	auto wiNumericEntryClassDef = luabind::class_<WINumericEntryHandle,luabind::bases<WITextEntryHandle,WIHandle>>("NumericTextEntry");
 	Lua::WINumericEntry::register_class(wiNumericEntryClassDef);
 	guiMod[wiNumericEntryClassDef];
 
-	auto wiDropDownMenuClassDef = luabind::class_<WIDropDownMenuHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>>("DropDownMenu");
+	auto wiDropDownMenuClassDef = luabind::class_<WIDropDownMenuHandle,luabind::bases<WITextEntryHandle,WIHandle>>("DropDownMenu");
 	Lua::WIDropDownMenu::register_class(wiDropDownMenuClassDef);
 	guiMod[wiDropDownMenuClassDef];
 

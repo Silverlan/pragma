@@ -83,6 +83,7 @@ Lua::ai::TaskWrapper::TaskWrapper(pragma::ai::BehaviorNode &task)
 Lua::ai::TaskWrapper::TaskWrapper(const std::shared_ptr<pragma::ai::BehaviorNode> &task)
 	: m_task{task}
 {}
+
 pragma::ai::BehaviorNode &Lua::ai::TaskWrapper::GetTask() {return *m_task;}
 const pragma::ai::BehaviorNode &Lua::ai::TaskWrapper::GetTask() const {return *m_task;}
 
@@ -302,7 +303,7 @@ void Lua::AIBehaviorNode::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.add_static_constant("PARAMETER_TYPE_ENTITY",umath::to_integral(pragma::ai::Schedule::Parameter::Type::Entity));
 	mod[classDef];
 
-	auto classDefBehaviorNode = luabind::class_<AILuaBehaviorNodeWrapper,ai::TaskWrapper>("BaseBehaviorTask");
+	auto classDefBehaviorNode = luabind::class_<ai::TaskWrapper,luabind::no_bases,luabind::default_holder,AILuaBehaviorNodeWrapper>("BaseBehaviorTask");
 	classDefBehaviorNode.def(luabind::constructor<uint32_t,uint32_t>());
 	classDefBehaviorNode.def(luabind::constructor<uint32_t>());
 	classDefBehaviorNode.def(luabind::constructor<>());

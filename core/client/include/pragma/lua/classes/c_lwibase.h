@@ -184,14 +184,14 @@ namespace Lua
 
 	namespace WIButton
 	{
-		DLLCLIENT void register_class(luabind::class_<WIButtonHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIButtonHandle,WIHandle> &classDef);
 		DLLCLIENT void SetText(lua_State *l,WIButtonHandle &hPanel,std::string text);
 		DLLCLIENT void GetText(lua_State *l,WIButtonHandle &hPanel);
 	};
 
 	namespace WIProgressBar
 	{
-		DLLCLIENT void register_class(luabind::class_<WIProgressBarHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIProgressBarHandle,WIHandle> &classDef);
 		DLLCLIENT void SetProgress(lua_State *l,WIProgressBarHandle &hBar,float progress);
 		DLLCLIENT void GetProgress(lua_State *l,WIProgressBarHandle &hBar);
 		DLLCLIENT void SetValue(lua_State *l,WIProgressBarHandle &hBar,float v);
@@ -205,12 +205,12 @@ namespace Lua
 
 	namespace WISlider
 	{
-		DLLCLIENT void register_class(luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WISliderHandle,luabind::bases<WIProgressBarHandle,WIHandle>> &classDef);
 	};
 
 	namespace WIShape
 	{
-		DLLCLIENT void register_class(luabind::class_<WIShapeHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIShapeHandle,WIHandle> &classDef);
 		DLLCLIENT void AddVertex(lua_State *l,WIShapeHandle &hPanel,Vector2 v);
 		DLLCLIENT void SetVertexPos(lua_State *l,WIShapeHandle &hPanel,unsigned int vertID,Vector2 v);
 		DLLCLIENT void ClearVertices(lua_State *l,WIShapeHandle &hPanel);
@@ -220,7 +220,7 @@ namespace Lua
 
 	namespace WITexturedShape
 	{
-		DLLCLIENT void register_class(luabind::class_<WITexturedShapeHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITexturedShapeHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetMaterial(lua_State *l,WITexturedShapeHandle &hPanel,std::string mat);
 		DLLCLIENT void SetMaterial(lua_State *l,WITexturedShapeHandle &hPanel,Material *mat);
 		DLLCLIENT void GetMaterial(lua_State *l,WITexturedShapeHandle &hPanel);
@@ -235,7 +235,7 @@ namespace Lua
 
 	namespace WIText
 	{
-		DLLCLIENT void register_class(luabind::class_<WITextHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITextHandle,WIHandle> &classDef);
 		DLLCLIENT void SetText(lua_State *l,WITextHandle &hPanel,std::string text);
 		DLLCLIENT void GetText(lua_State *l,WITextHandle &hPanel);
 		DLLCLIENT void SetFont(lua_State *l,WITextHandle &hPanel,std::string font);
@@ -259,7 +259,7 @@ namespace Lua
 
 	namespace WITextEntry
 	{
-		DLLCLIENT void register_class(luabind::class_<WITextEntryHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITextEntryHandle,WIHandle> &classDef);
 		DLLCLIENT void SetText(lua_State *l,WITextEntryHandle &hPanel,std::string text);
 		DLLCLIENT void GetText(lua_State *l,WITextEntryHandle &hPanel);
 		DLLCLIENT void IsNumeric(lua_State *l,WITextEntryHandle &hPanel);
@@ -273,7 +273,7 @@ namespace Lua
 
 	namespace WINumericEntry
 	{
-		DLLCLIENT void register_class(luabind::class_<WINumericEntryHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WINumericEntryHandle,luabind::bases<WITextEntryHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetMinValue(lua_State *l,WINumericEntryHandle &hPanel,int32_t min);
 		DLLCLIENT void SetMinValue(lua_State *l,WINumericEntryHandle &hPanel);
 		DLLCLIENT void SetMaxValue(lua_State *l,WINumericEntryHandle &hPanel,int32_t max);
@@ -285,14 +285,14 @@ namespace Lua
 
 	namespace WIOutlinedRect
 	{
-		DLLCLIENT void register_class(luabind::class_<WIOutlinedRectHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIOutlinedRectHandle,WIHandle> &classDef);
 		DLLCLIENT void SetOutlineWidth(lua_State *l,WIOutlinedRectHandle &hPanel,int w);
 		DLLCLIENT void GetOutlineWidth(lua_State *l,WIOutlinedRectHandle &hPanel);
 	};
 
 	namespace WILine
 	{
-		DLLCLIENT void register_class(luabind::class_<WILineHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WILineHandle,WIHandle> &classDef);
 		DLLCLIENT void SetLineWidth(lua_State *l,WILineHandle &hPanel,int w);
 		DLLCLIENT void GetLineWidth(lua_State *l,WILineHandle &hPanel);
 		DLLCLIENT void SetStartPos(lua_State *l,WILineHandle &hPanel,Vector2 &pos);
@@ -309,7 +309,7 @@ namespace Lua
 
 	namespace WIRoundedRect
 	{
-		DLLCLIENT void register_class(luabind::class_<WIRoundedRectHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIRoundedRectHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void GetRoundness(lua_State *l,WIRoundedRectHandle &hPanel);
 		DLLCLIENT void SetRoundness(lua_State *l,WIRoundedRectHandle &hPanel,char roundness);
 		DLLCLIENT void SetCornerSize(lua_State *l,WIRoundedRectHandle &hPanel,float cornerSize);
@@ -326,7 +326,7 @@ namespace Lua
 
 	namespace WIRoundedTexturedRect
 	{
-		DLLCLIENT void register_class(luabind::class_<WIRoundedTexturedRectHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIRoundedTexturedRectHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void GetRoundness(lua_State *l,WIRoundedTexturedRectHandle &hPanel);
 		DLLCLIENT void SetRoundness(lua_State *l,WIRoundedTexturedRectHandle &hPanel,char roundness);
 		DLLCLIENT void SetCornerSize(lua_State *l,WIRoundedTexturedRectHandle &hPanel,float cornerSize);
@@ -343,7 +343,7 @@ namespace Lua
 
 	namespace WIScrollBar
 	{
-		DLLCLIENT void register_class(luabind::class_<WIScrollBarHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIScrollBarHandle,WIHandle> &classDef);
 		DLLCLIENT void GetScrollAmount(lua_State *l,WIScrollBarHandle &hPanel);
 		DLLCLIENT void SetScrollAmount(lua_State *l,WIScrollBarHandle &hPanel,int am);
 		DLLCLIENT void GetScrollOffset(lua_State *l,WIScrollBarHandle &hPanel);
@@ -357,19 +357,19 @@ namespace Lua
 
 	namespace WIIcon
 	{
-		DLLCLIENT void register_class(luabind::class_<WIIconHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIIconHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetClipping(lua_State *l,WIIconHandle &hIcon,uint32_t xStart,uint32_t yStart,uint32_t width,uint32_t height);
 	};
 
 	namespace WISilkIcon
 	{
-		DLLCLIENT void register_class(luabind::class_<WISilkIconHandle COMMA luabind::bases<WIIconHandle COMMA WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WISilkIconHandle,luabind::bases<WIIconHandle,WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetIcon(lua_State *l,WISilkIconHandle &hIcon,std::string icon);
 	};
 
 	namespace WIDropDownMenu
 	{
-		DLLCLIENT void register_class(luabind::class_<WIDropDownMenuHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIDropDownMenuHandle,luabind::bases<WITextEntryHandle,WIHandle>> &classDef);
 		DLLCLIENT void SelectOptionByText(lua_State *l,WIDropDownMenuHandle &hDm,const std::string &text);
 		DLLCLIENT void ClearOptions(lua_State *l,WIDropDownMenuHandle &hDm);
 		DLLCLIENT void SelectOption(lua_State *l,WIDropDownMenuHandle &hDm,unsigned int idx);
@@ -391,7 +391,7 @@ namespace Lua
 
 	namespace WICheckbox
 	{
-		DLLCLIENT void register_class(luabind::class_<WICheckboxHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WICheckboxHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetChecked(lua_State *l,WICheckboxHandle &hCheckBox,bool bChecked);
 		DLLCLIENT void IsChecked(lua_State *l,WICheckboxHandle &hCheckBox);
 		DLLCLIENT void Toggle(lua_State *l,WICheckboxHandle &hCheckBox);
@@ -399,13 +399,13 @@ namespace Lua
 
 	namespace WIArrow
 	{
-		DLLCLIENT void register_class(luabind::class_<WIArrowHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIArrowHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetDirection(lua_State *l,WIArrowHandle &hArrow,uint32_t dir);
 	};
 
 	namespace WITransformable
 	{
-		DLLCLIENT void register_class(luabind::class_<WITransformableHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITransformableHandle,WIHandle> &classDef);
 		DLLCLIENT void SetDraggable(lua_State *l,WITransformableHandle &hTransformable,bool b);
 		DLLCLIENT void SetResizable(lua_State *l,WITransformableHandle &hTransformable,bool b);
 		DLLCLIENT void IsDraggable(lua_State *l,WITransformableHandle &hTransformable);
@@ -430,14 +430,14 @@ namespace Lua
 
 	namespace WIGridPanel
 	{
-		DLLCLIENT void register_class(luabind::class_<WIGridPanelHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIGridPanelHandle,luabind::bases<WITableHandle,WIHandle>> &classDef);
 		DLLCLIENT void AddItem(lua_State *l,WIGridPanelHandle &hGridPanel,WIHandle &hEl,uint32_t row,uint32_t col);
 		DLLCLIENT void GetColumnCount(lua_State *l,WIGridPanelHandle &hGridPanel);
 	};
 
 	namespace WITreeList
 	{
-		DLLCLIENT void register_class(luabind::class_<WITreeListHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITreeListHandle,luabind::bases<WITableHandle,WIHandle>> &classDef);
 		DLLCLIENT void AddItem(lua_State *l,WITreeListHandle &hTreeList,const std::string &text);
 		DLLCLIENT void ExpandAll(lua_State *l,WITreeListHandle &hTreeList);
 		DLLCLIENT void CollapseAll(lua_State *l,WITreeListHandle &hTreeList);
@@ -446,7 +446,7 @@ namespace Lua
 
 	namespace WITreeListElement
 	{
-		DLLCLIENT void register_class(luabind::class_<WITreeListElementHandle COMMA luabind::bases<WITableRowHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITreeListElementHandle,luabind::bases<WITableRowHandle,WIHandle>> &classDef);
 		DLLCLIENT void AddItem(lua_State *l,WITreeListElementHandle &hElement,const std::string &text);
 		DLLCLIENT void Expand(lua_State *l,WITreeListElementHandle &hTreeList,bool bAll);
 		DLLCLIENT void Expand(lua_State *l,WITreeListElementHandle &hTreeList);
@@ -457,7 +457,7 @@ namespace Lua
 
 	namespace WIContainer
 	{
-		DLLCLIENT void register_class(luabind::class_<WIContainerHandle COMMA WIHandle> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIContainerHandle,WIHandle> &classDef);
 		DLLCLIENT void SetPadding(lua_State *l,WIContainerHandle &hContainer,int32_t padding);
 		DLLCLIENT void SetPadding(lua_State *l,WIContainerHandle &hContainer,int32_t top,int32_t right,int32_t bottom,int32_t left);
 		DLLCLIENT void SetPaddingTop(lua_State *l,WIContainerHandle &hContainer,int32_t top);
@@ -473,7 +473,7 @@ namespace Lua
 
 	namespace WITable
 	{
-		DLLCLIENT void register_class(luabind::class_<WITableHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITableHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetRowHeight(lua_State *l,WITableHandle &hTable,int height);
 		DLLCLIENT void SetSelectable(lua_State *l,WITableHandle &hTable,bool b);
 		DLLCLIENT void IsSelectable(lua_State *l,WITableHandle &hTable);
@@ -494,7 +494,7 @@ namespace Lua
 
 	namespace WITableRow
 	{
-		DLLCLIENT void register_class(luabind::class_<WITableRowHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITableRowHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef);
 		DLLCLIENT void Select(lua_State *l,WITableRowHandle &hRow);
 		DLLCLIENT void Deselect(lua_State *l,WITableRowHandle &hRow);
 		DLLCLIENT void IsSelected(lua_State *l,WITableRowHandle &hRow);
@@ -508,7 +508,7 @@ namespace Lua
 
 	namespace WITableCell
 	{
-		DLLCLIENT void register_class(luabind::class_<WITableCellHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WITableCellHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef);
 		DLLCLIENT void GetFirstElement(lua_State *l,WITableCellHandle &hCell);
 		DLLCLIENT void GetColSpan(lua_State *l,WITableCellHandle &hCell);
 		DLLCLIENT void GetRowSpan(lua_State *l,WITableCellHandle &hCell);
@@ -518,7 +518,7 @@ namespace Lua
 
 	namespace WIFrame
 	{
-		DLLCLIENT void register_class(luabind::class_<WIFrameHandle COMMA luabind::bases<WITransformableHandle COMMA WIHandle>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<WIFrameHandle,luabind::bases<WITransformableHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetTitle(lua_State *l,WIFrameHandle &hFrame,std::string title);
 		DLLCLIENT void GetTitle(lua_State *l,WIFrameHandle &hFrame);
 	};

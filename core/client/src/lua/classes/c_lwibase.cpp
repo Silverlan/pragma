@@ -278,13 +278,13 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&)>(&Draw));
 }
 
-void Lua::WIButton::register_class(luabind::class_<WIButtonHandle COMMA WIHandle> &classDef)
+void Lua::WIButton::register_class(luabind::class_<WIButtonHandle,WIHandle> &classDef)
 {
 	classDef.def("SetText",&SetText);
 	classDef.def("GetText",&GetText);
 }
 
-void Lua::WIProgressBar::register_class(luabind::class_<WIProgressBarHandle COMMA WIHandle> &classDef)
+void Lua::WIProgressBar::register_class(luabind::class_<WIProgressBarHandle,WIHandle> &classDef)
 {
 	classDef.def("SetProgress",&SetProgress);
 	classDef.def("GetProgress",&GetProgress);
@@ -298,7 +298,7 @@ void Lua::WIProgressBar::register_class(luabind::class_<WIProgressBarHandle COMM
 	//classDef.def("SetValueTranslator",&SetValueTranslator);
 }
 
-void Lua::WISlider::register_class(luabind::class_<WISliderHandle COMMA luabind::bases<WIProgressBarHandle COMMA WIHandle>> &classDef)
+void Lua::WISlider::register_class(luabind::class_<WISliderHandle,luabind::bases<WIProgressBarHandle,WIHandle>> &classDef)
 {
 	classDef.def("IsBeingDragged",static_cast<void(*)(lua_State*,WISliderHandle&)>([](lua_State *l,WISliderHandle &hSlider) {
 		lua_checkgui(l,hSlider);
@@ -306,7 +306,7 @@ void Lua::WISlider::register_class(luabind::class_<WISliderHandle COMMA luabind:
 	}));
 }
 
-void Lua::WIShape::register_class(luabind::class_<WIShapeHandle COMMA WIHandle> &classDef)
+void Lua::WIShape::register_class(luabind::class_<WIShapeHandle,WIHandle> &classDef)
 {
 	classDef.def("AddVertex",&AddVertex);
 	classDef.def("SetVertexPos",&SetVertexPos);
@@ -315,7 +315,7 @@ void Lua::WIShape::register_class(luabind::class_<WIShapeHandle COMMA WIHandle> 
 	classDef.def("InvertVertexPositions",static_cast<void(*)(lua_State*,WIShapeHandle&)>(&InvertVertexPositions));
 }
 
-void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetMaterial",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,std::string)>(&SetMaterial));
 	classDef.def("SetMaterial",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,Material*)>(&SetMaterial));
@@ -329,17 +329,17 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle 
 	classDef.def("InvertVertexUVCoordinates",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>(&InvertVertexUVCoordinates));
 }
 
-void Lua::WIIcon::register_class(luabind::class_<WIIconHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WIIcon::register_class(luabind::class_<WIIconHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetClipping",&SetClipping);
 }
 
-void Lua::WISilkIcon::register_class(luabind::class_<WISilkIconHandle COMMA luabind::bases<WIIconHandle COMMA WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WISilkIcon::register_class(luabind::class_<WISilkIconHandle,luabind::bases<WIIconHandle,WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetIcon",&SetIcon);
 }
 
-void Lua::WIArrow::register_class(luabind::class_<WIArrowHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WIArrow::register_class(luabind::class_<WIArrowHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetDirection",&SetDirection);
 	classDef.add_static_constant("DIRECTION_RIGHT",0);
@@ -348,27 +348,27 @@ void Lua::WIArrow::register_class(luabind::class_<WIArrowHandle COMMA luabind::b
 	classDef.add_static_constant("DIRECTION_UP",3);
 }
 
-void Lua::WICheckbox::register_class(luabind::class_<WICheckboxHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WICheckbox::register_class(luabind::class_<WICheckboxHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetChecked",&SetChecked);
 	classDef.def("IsChecked",&IsChecked);
 	classDef.def("Toggle",&Toggle);
 }
 
-void Lua::WIGridPanel::register_class(luabind::class_<WIGridPanelHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>> &classDef)
+void Lua::WIGridPanel::register_class(luabind::class_<WIGridPanelHandle,luabind::bases<WITableHandle,WIHandle>> &classDef)
 {
 	classDef.def("AddItem",&AddItem);
 	classDef.def("GetColumnCount",&GetColumnCount);
 }
 
-void Lua::WITreeList::register_class(luabind::class_<WITreeListHandle COMMA luabind::bases<WITableHandle COMMA WIHandle>> &classDef)
+void Lua::WITreeList::register_class(luabind::class_<WITreeListHandle,luabind::bases<WITableHandle,WIHandle>> &classDef)
 {
 	classDef.def("AddItem",&AddItem);
 	classDef.def("ExpandAll",&ExpandAll);
 	classDef.def("CollapseAll",&CollapseAll);
 	classDef.def("GetRootItem",&GetRootItem);
 }
-void Lua::WITreeListElement::register_class(luabind::class_<WITreeListElementHandle COMMA luabind::bases<WITableRowHandle COMMA WIHandle>> &classDef)
+void Lua::WITreeListElement::register_class(luabind::class_<WITreeListElementHandle,luabind::bases<WITableRowHandle,WIHandle>> &classDef)
 {
 	classDef.def("AddItem",&AddItem);
 	classDef.def("Expand",static_cast<void(*)(lua_State*,WITreeListElementHandle&,bool)>(&Expand));
@@ -378,7 +378,7 @@ void Lua::WITreeListElement::register_class(luabind::class_<WITreeListElementHan
 	classDef.def("GetItems",&GetItems);
 }
 
-void Lua::WIContainer::register_class(luabind::class_<WIContainerHandle COMMA WIHandle> &classDef)
+void Lua::WIContainer::register_class(luabind::class_<WIContainerHandle,WIHandle> &classDef)
 {
 	classDef.def("SetPadding",static_cast<void(*)(lua_State*,WIContainerHandle&,int32_t,int32_t,int32_t,int32_t)>(&SetPadding));
 	classDef.def("SetPadding",static_cast<void(*)(lua_State*,WIContainerHandle&,int32_t)>(&SetPadding));
@@ -393,7 +393,7 @@ void Lua::WIContainer::register_class(luabind::class_<WIContainerHandle COMMA WI
 	classDef.def("GetPaddingLeft",&GetPaddingLeft);
 }
 
-void Lua::WITable::register_class(luabind::class_<WITableHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef)
+void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetRowHeight",&SetRowHeight);
 	classDef.def("SetSelectable",&SetSelectable);
@@ -413,7 +413,7 @@ void Lua::WITable::register_class(luabind::class_<WITableHandle COMMA luabind::b
 	classDef.def("RemoveRow",&RemoveRow);
 }
 
-void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef)
+void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
 {
 	classDef.def("Select",&Select);
 	classDef.def("Deselect",&Deselect);
@@ -426,7 +426,7 @@ void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle COMMA luab
 	classDef.def("GetCell",&GetCell);
 }
 
-void Lua::WITableCell::register_class(luabind::class_<WITableCellHandle COMMA luabind::bases<WIContainerHandle COMMA WIHandle>> &classDef)
+void Lua::WITableCell::register_class(luabind::class_<WITableCellHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
 {
 	classDef.def("GetFirstElement",&GetFirstElement);
 	classDef.def("GetColSpan",&GetColSpan);
@@ -435,13 +435,13 @@ void Lua::WITableCell::register_class(luabind::class_<WITableCellHandle COMMA lu
 	//classDef.def("SetRowSpan",&SetRowSpan);
 }
 
-void Lua::WIFrame::register_class(luabind::class_<WIFrameHandle COMMA luabind::bases<WITransformableHandle COMMA WIHandle>> &classDef)
+void Lua::WIFrame::register_class(luabind::class_<WIFrameHandle,luabind::bases<WITransformableHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetTitle",&SetTitle);
 	classDef.def("GetTitle",&GetTitle);
 }
 
-void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>> &classDef)
+void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,luabind::bases<WITextEntryHandle,WIHandle>> &classDef)
 {
 	classDef.def("SelectOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,unsigned int)>(&SelectOption));
 	classDef.def("SelectOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,const std::string&)>(&SelectOption));
@@ -462,7 +462,7 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle CO
 	classDef.def("IsMenuOpen",IsMenuOpen);
 }
 
-void Lua::WIText::register_class(luabind::class_<WITextHandle COMMA WIHandle> &classDef)
+void Lua::WIText::register_class(luabind::class_<WITextHandle,WIHandle> &classDef)
 {
 	classDef.def("SetText",&SetText);
 	classDef.def("GetText",&GetText);
@@ -491,7 +491,7 @@ void Lua::WIText::register_class(luabind::class_<WITextHandle COMMA WIHandle> &c
 	classDef.add_static_constant("AUTO_BREAK_WHITESPACE",umath::to_integral(::WIText::AutoBreak::WHITESPACE));
 }
 
-void Lua::WITextEntry::register_class(luabind::class_<WITextEntryHandle COMMA WIHandle> &classDef)
+void Lua::WITextEntry::register_class(luabind::class_<WITextEntryHandle,WIHandle> &classDef)
 {
 	classDef.def("SetText",&SetText);
 	classDef.def("GetText",&GetText);
@@ -506,7 +506,7 @@ void Lua::WITextEntry::register_class(luabind::class_<WITextEntryHandle COMMA WI
 
 ////////////////////////////////////
 
-void Lua::WINumericEntry::register_class(luabind::class_<WINumericEntryHandle COMMA luabind::bases<WITextEntryHandle COMMA WIHandle>> &classDef)
+void Lua::WINumericEntry::register_class(luabind::class_<WINumericEntryHandle,luabind::bases<WITextEntryHandle,WIHandle>> &classDef)
 {
 	classDef.def("SetMinValue",static_cast<void(*)(lua_State*,WINumericEntryHandle&,int32_t)>(&SetMinValue));
 	classDef.def("SetMinValue",static_cast<void(*)(lua_State*,WINumericEntryHandle&)>(&SetMinValue));
@@ -519,13 +519,13 @@ void Lua::WINumericEntry::register_class(luabind::class_<WINumericEntryHandle CO
 
 ////////////////////////////////////
 
-void Lua::WIOutlinedRect::register_class(luabind::class_<WIOutlinedRectHandle COMMA WIHandle> &classDef)
+void Lua::WIOutlinedRect::register_class(luabind::class_<WIOutlinedRectHandle,WIHandle> &classDef)
 {
 	classDef.def("SetOutlineWidth",&SetOutlineWidth);
 	classDef.def("GetOutlineWidth",&GetOutlineWidth);
 }
 
-void Lua::WILine::register_class(luabind::class_<WILineHandle COMMA WIHandle> &classDef)
+void Lua::WILine::register_class(luabind::class_<WILineHandle,WIHandle> &classDef)
 {
 	classDef.def("SetLineWidth",&SetLineWidth);
 	classDef.def("GetLineWidth",&GetLineWidth);
@@ -541,7 +541,7 @@ void Lua::WILine::register_class(luabind::class_<WILineHandle COMMA WIHandle> &c
 	classDef.def("GetEndPosProperty",&GetEndPosProperty);
 }
 
-void Lua::WIRoundedRect::register_class(luabind::class_<WIRoundedRectHandle COMMA luabind::bases<WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WIRoundedRect::register_class(luabind::class_<WIRoundedRectHandle,luabind::bases<WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("GetRoundness",&GetRoundness);
 	classDef.def("SetRoundness",&SetRoundness);
@@ -557,7 +557,7 @@ void Lua::WIRoundedRect::register_class(luabind::class_<WIRoundedRectHandle COMM
 	classDef.def("IsBottomRightRound",&IsBottomRightRound);
 }
 
-void Lua::WIRoundedTexturedRect::register_class(luabind::class_<WIRoundedTexturedRectHandle COMMA luabind::bases<WITexturedShapeHandle COMMA WIShapeHandle COMMA WIHandle>> &classDef)
+void Lua::WIRoundedTexturedRect::register_class(luabind::class_<WIRoundedTexturedRectHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef)
 {
 	classDef.def("GetRoundness",&GetRoundness);
 	classDef.def("SetRoundness",&SetRoundness);
@@ -573,7 +573,7 @@ void Lua::WIRoundedTexturedRect::register_class(luabind::class_<WIRoundedTexture
 	classDef.def("IsBottomRightRound",&IsBottomRightRound);
 }
 
-void Lua::WIScrollBar::register_class(luabind::class_<WIScrollBarHandle COMMA WIHandle> &classDef)
+void Lua::WIScrollBar::register_class(luabind::class_<WIScrollBarHandle,WIHandle> &classDef)
 {
 	classDef.def("GetScrollAmount",&GetScrollAmount);
 	classDef.def("SetScrollAmount",&SetScrollAmount);
@@ -2490,7 +2490,7 @@ void Lua::WICheckbox::Toggle(lua_State *l,WICheckboxHandle &hCheckBox)
 
 ////////////////////////////////////
 
-void Lua::WITransformable::register_class(luabind::class_<WITransformableHandle COMMA WIHandle> &classDef)
+void Lua::WITransformable::register_class(luabind::class_<WITransformableHandle,WIHandle> &classDef)
 {
 	classDef.def("SetDraggable",&SetDraggable);
 	classDef.def("SetResizable",&SetResizable);

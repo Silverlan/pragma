@@ -93,17 +93,17 @@ void SGame::RegisterLua()
 	modEnts[entityClassDef];
 
 	// Obsolete?
-	auto classDefBase = luabind::class_<SLuaEntityHandle COMMA SLuaEntityWrapper COMMA luabind::bases<EntityHandle>>("BaseEntity");
+	auto classDefBase = luabind::class_<SLuaEntityHandle,luabind::bases<EntityHandle>,luabind::default_holder,SLuaEntityWrapper>("BaseEntity");
 	classDefBase.def(luabind::tostring(luabind::self));
-	//classDefBase.def(luabind::constructor<>());
+	classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&SLuaEntityWrapper::Initialize,&SLuaEntityWrapper::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];
 	//
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,LuaBaseEntityComponentWrapper,BaseEntityComponentHandle>("BaseEntityComponent");
-	Lua::register_base_entity_component<luabind::class_<BaseLuaBaseEntityHandle,LuaBaseEntityComponentWrapper,BaseEntityComponentHandle>>(defEntCmp);
+	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
+	Lua::register_base_entity_component<luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>>(defEntCmp);
 	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket,nwm::RecipientFilter)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet,nwm::RecipientFilter rp) {
 		
 	}));

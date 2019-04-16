@@ -146,6 +146,7 @@ namespace pragma
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)=0;
 	private:
 		uint32_t m_currentVertexAttributeLocation = 0u;
+		uint32_t m_currentVertexBinding = 0u;
 	};
 
 	class DLLCLIENT LuaShaderComputeBase

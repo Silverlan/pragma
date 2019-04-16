@@ -20,7 +20,7 @@ link_external_library(util_source_script)
 link_external_library(RectangleBinPack)
 link_external_library(assimp)
 link_external_library(bzip2)
-if($(CONFIG_ENABLE_VMT_SUPPORT))
+if(CONFIG_ENABLE_VTF_SUPPORT)
 	link_external_library(VTFLib)
 endif()
 
@@ -48,11 +48,11 @@ add_def(ENGINE_NETWORK)
 add_def(_ENABLE_EXTENDED_ALIGNED_STORAGE)
 
 set(CONFIG_ENABLE_MIKU_MIKU_DANCE_ASSET_SUPPORT "1" CACHE BOOL "Enable asset support for MikuMikuDance.")
-if($(CONFIG_ENABLE_MIKUMIKUDANCE_ASSET_SUPPORT))
+if(CONFIG_ENABLE_MIKUMIKUDANCE_ASSET_SUPPORT)
 	list(APPEND DEFINITIONS ENABLE_MMD_IMPORT)
 endif()
 
-if($(CONFIG_ENABLE_VMT_SUPPORT))
+if(CONFIG_ENABLE_VTF_SUPPORT)
 	list(APPEND DEFINITIONS ENABLE_VMT_SUPPORT)
 endif()
 

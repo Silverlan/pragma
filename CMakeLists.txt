@@ -9,7 +9,7 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-	set(CONFIG_ENABLE_VMT_SUPPORT OFF CACHE BOOL OFF FORCE) # VTFLib is Windows-only
+	set(CONFIG_ENABLE_VTF_SUPPORT OFF CACHE BOOL OFF FORCE) # VTFLib is Windows-only
 endif()
 
 set(CMAKE_BUILD_TYPE ${BUILD_TYPE} CACHE STRING "" FORCE)
@@ -227,6 +227,7 @@ set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freet
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype2/${BINARY_PRAGMA_DIR} freetype)
 
 set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml CACHE STRING "" FORCE)
+set(DEPENDENCY_GLSLANG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/deps/glslang CACHE STRING "" FORCE)
 
 set(DEPENDENCY_VULKAN_INCLUDE $ENV{VULKAN_SDK}/Include CACHE PATH "Path to include directory.")
 if(WIN32)
@@ -267,6 +268,7 @@ endif()
 search_lib_recursive(DEPENDENCY_GLFW_LIBRARY third_party_libs/glfw/src/${BINARY_PRAGMA_DIR} ${GLFW_LIB_NAME})
 
 set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
+set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_ANVIL_LIBRARY third_party_libs/anvil/${BINARY_PRAGMA_DIR} Anvil STATIC)
 
 set(DEPENDENCY_CLIP2TRI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/clip2tri CACHE PATH "Path to include directory.")

@@ -31,66 +31,66 @@ namespace Lua
 
 		namespace Connection
 		{
-			void Close(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection);
-			void PrepareStatement(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &statement);
-			void PrepareStatement(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &statement,const luabind::object &oAsyncCallback);
-			void OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly);
-			void OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &tableName,const std::string &columnName,int64_t rowId);
-			void OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly);
-			void OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId);
-			void Exec(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &sql,const luabind::object &oCallback);
-			void Exec(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &sql);
-			void GetResult(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection);
-			void GetResultMessage(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection);
-			void IsDatabaseReadOnly(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName);
-			void DatabaseExists(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName);
+			void Close(lua_State *l,::sqlite::Connection &connection);
+			void PrepareStatement(lua_State *l,::sqlite::Connection &connection,const std::string &statement);
+			void PrepareStatement(lua_State *l,::sqlite::Connection &connection,const std::string &statement,const luabind::object &oAsyncCallback);
+			void OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly);
+			void OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &tableName,const std::string &columnName,int64_t rowId);
+			void OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly);
+			void OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId);
+			void Exec(lua_State *l,::sqlite::Connection &connection,const std::string &sql,const luabind::object &oCallback);
+			void Exec(lua_State *l,::sqlite::Connection &connection,const std::string &sql);
+			void GetResult(lua_State *l,::sqlite::Connection &connection);
+			void GetResultMessage(lua_State *l,::sqlite::Connection &connection);
+			void IsDatabaseReadOnly(lua_State *l,::sqlite::Connection &connection,const std::string &dbName);
+			void DatabaseExists(lua_State *l,::sqlite::Connection &connection,const std::string &dbName);
 
-			void CreateFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXFunc);
-			void CreateFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXStep,const luabind::object &oXFinal);
-			void DeleteFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic);
+			void CreateFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXFunc);
+			void CreateFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXStep,const luabind::object &oXFinal);
+			void DeleteFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic);
 		};
 
 		namespace Statement
 		{
-			void Finalize(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void Step(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void Step(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,const luabind::object &oAsynCallback);
-			void Reset(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void GetType(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetBytes(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetDouble(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetInt(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetInt64(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,const luabind::object &oAsyncCallback);
-			void GetCount(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void GetColumnName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
+			void Finalize(lua_State *l,::sqlite::Statement &statement);
+			void Step(lua_State *l,::sqlite::Statement &statement);
+			void Step(lua_State *l,::sqlite::Statement &statement,const luabind::object &oAsynCallback);
+			void Reset(lua_State *l,::sqlite::Statement &statement);
+			void GetType(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetBytes(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetDouble(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetInt(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetInt64(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetText(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetBlob(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetBlob(lua_State *l,::sqlite::Statement &statement,int32_t column,const luabind::object &oAsyncCallback);
+			void GetCount(lua_State *l,::sqlite::Statement &statement);
+			void GetColumnName(lua_State *l,::sqlite::Statement &statement,int32_t column);
 
-			void BindDouble(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,double d);
-			void BindInt(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,int32_t i);
-			void BindInt64(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,int64_t i);
-			void BindNull(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void BindText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,const std::string &text);
-			void BindBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,DataStream &ds);
-			void ClearBindings(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void IsReadOnly(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void GetSQLText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void GetExpandedSQLText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement);
-			void GetDatabaseName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetTableName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
-			void GetOriginName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column);
+			void BindDouble(lua_State *l,::sqlite::Statement &statement,int32_t column,double d);
+			void BindInt(lua_State *l,::sqlite::Statement &statement,int32_t column,int32_t i);
+			void BindInt64(lua_State *l,::sqlite::Statement &statement,int32_t column,int64_t i);
+			void BindNull(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void BindText(lua_State *l,::sqlite::Statement &statement,int32_t column,const std::string &text);
+			void BindBlob(lua_State *l,::sqlite::Statement &statement,int32_t column,DataStream &ds);
+			void ClearBindings(lua_State *l,::sqlite::Statement &statement);
+			void IsReadOnly(lua_State *l,::sqlite::Statement &statement);
+			void GetSQLText(lua_State *l,::sqlite::Statement &statement);
+			void GetExpandedSQLText(lua_State *l,::sqlite::Statement &statement);
+			void GetDatabaseName(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetTableName(lua_State *l,::sqlite::Statement &statement,int32_t column);
+			void GetOriginName(lua_State *l,::sqlite::Statement &statement,int32_t column);
 		};
 
 		namespace Blob
 		{
-			void Close(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob);
-			void GetBytes(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob);
-			void Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int32_t size,int32_t offset);
-			void Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int32_t size,int32_t offset,const luabind::object &oAsyncCallback);
-			void Write(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,DataStream &ds,int32_t size,int32_t offset);
-			void Write(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,DataStream &ds,int32_t size,int32_t offset,const luabind::object &oAsyncCallback);
-			void Reopen(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int64_t rowId);
+			void Close(lua_State *l,::sqlite::Blob &blob);
+			void GetBytes(lua_State *l,::sqlite::Blob &blob);
+			void Read(lua_State *l,::sqlite::Blob &blob,int32_t size,int32_t offset);
+			void Read(lua_State *l,::sqlite::Blob &blob,int32_t size,int32_t offset,const luabind::object &oAsyncCallback);
+			void Write(lua_State *l,::sqlite::Blob &blob,DataStream &ds,int32_t size,int32_t offset);
+			void Write(lua_State *l,::sqlite::Blob &blob,DataStream &ds,int32_t size,int32_t offset,const luabind::object &oAsyncCallback);
+			void Reopen(lua_State *l,::sqlite::Blob &blob,int64_t rowId);
 		};
 
 		namespace Value
@@ -244,29 +244,29 @@ void Lua::sqlite::register_lua_library(Lua::Interface &l)
 	});
 
 	auto &modSqlite = l.RegisterLibrary("sqlite");
-	auto classDefConnection = luabind::class_<std::shared_ptr<::sqlite::Connection>>("Connection");
+	auto classDefConnection = luabind::class_<::sqlite::Connection>("Connection");
 	classDefConnection.def("Close",&Connection::Close);
-	classDefConnection.def("PrepareStatement",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const luabind::object&)>(&Connection::PrepareStatement));
-	classDefConnection.def("PrepareStatement",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&)>(&Connection::PrepareStatement));
-	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const std::string&,int64_t,bool)>(&Connection::OpenBlob));
-	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const std::string&,int64_t)>(&Connection::OpenBlob));
-	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const std::string&,const std::string&,int64_t,bool)>(&Connection::OpenBlob));
-	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const std::string&,const std::string&,int64_t)>(&Connection::OpenBlob));
-	classDefConnection.def("Exec",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,const luabind::object&)>(&Connection::Exec));
-	classDefConnection.def("Exec",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&)>(&Connection::Exec));
+	classDefConnection.def("PrepareStatement",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const luabind::object&)>(&Connection::PrepareStatement));
+	classDefConnection.def("PrepareStatement",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&)>(&Connection::PrepareStatement));
+	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const std::string&,int64_t,bool)>(&Connection::OpenBlob));
+	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const std::string&,int64_t)>(&Connection::OpenBlob));
+	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const std::string&,const std::string&,int64_t,bool)>(&Connection::OpenBlob));
+	classDefConnection.def("OpenBlob",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const std::string&,const std::string&,int64_t)>(&Connection::OpenBlob));
+	classDefConnection.def("Exec",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,const luabind::object&)>(&Connection::Exec));
+	classDefConnection.def("Exec",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&)>(&Connection::Exec));
 	classDefConnection.def("GetResult",&Connection::GetResult);
 	classDefConnection.def("GetResultMessage",&Connection::GetResultMessage);
 	classDefConnection.def("IsDatabaseReadOnly",&Connection::IsDatabaseReadOnly);
 	classDefConnection.def("DatabaseExists",&Connection::DatabaseExists);
-	classDefConnection.def("CreateFunction",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,int32_t,bool,const luabind::object&,const luabind::object&)>(&Connection::CreateFunction));
-	classDefConnection.def("CreateFunction",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Connection>&,const std::string&,int32_t,bool,const luabind::object&)>(&Connection::CreateFunction));
+	classDefConnection.def("CreateFunction",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,int32_t,bool,const luabind::object&,const luabind::object&)>(&Connection::CreateFunction));
+	classDefConnection.def("CreateFunction",static_cast<void(*)(lua_State*,::sqlite::Connection&,const std::string&,int32_t,bool,const luabind::object&)>(&Connection::CreateFunction));
 	classDefConnection.def("DeleteFunction",&Connection::DeleteFunction);
 	modSqlite[classDefConnection];
 
-	auto classDefStatement = luabind::class_<std::shared_ptr<::sqlite::Statement>>("Statement");
+	auto classDefStatement = luabind::class_<::sqlite::Statement>("Statement");
 	classDefStatement.def("Finalize",&Statement::Finalize);
-	classDefStatement.def("Step",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Statement>&,const luabind::object&)>(&Statement::Step));
-	classDefStatement.def("Step",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Statement>&)>(&Statement::Step));
+	classDefStatement.def("Step",static_cast<void(*)(lua_State*,::sqlite::Statement&,const luabind::object&)>(&Statement::Step));
+	classDefStatement.def("Step",static_cast<void(*)(lua_State*,::sqlite::Statement&)>(&Statement::Step));
 	classDefStatement.def("Reset",&Statement::Reset);
 	classDefStatement.def("GetType",&Statement::GetType);
 	classDefStatement.def("GetBytes",&Statement::GetBytes);
@@ -274,8 +274,8 @@ void Lua::sqlite::register_lua_library(Lua::Interface &l)
 	classDefStatement.def("GetInt",&Statement::GetInt);
 	classDefStatement.def("GetInt64",&Statement::GetInt64);
 	classDefStatement.def("GetText",&Statement::GetText);
-	classDefStatement.def("GetBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Statement>&,int32_t,const luabind::object&)>(&Statement::GetBlob));
-	classDefStatement.def("GetBlob",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Statement>&,int32_t)>(&Statement::GetBlob));
+	classDefStatement.def("GetBlob",static_cast<void(*)(lua_State*,::sqlite::Statement&,int32_t,const luabind::object&)>(&Statement::GetBlob));
+	classDefStatement.def("GetBlob",static_cast<void(*)(lua_State*,::sqlite::Statement&,int32_t)>(&Statement::GetBlob));
 	classDefStatement.def("GetCount",&Statement::GetCount);
 	classDefStatement.def("GetColumnName",&Statement::GetColumnName);
 
@@ -294,13 +294,13 @@ void Lua::sqlite::register_lua_library(Lua::Interface &l)
 	classDefStatement.def("GetOriginName",&Statement::GetOriginName);
 	modSqlite[classDefStatement];
 
-	auto classDefBlob = luabind::class_<std::shared_ptr<::sqlite::Blob>>("Blob");
+	auto classDefBlob = luabind::class_<::sqlite::Blob>("Blob");
 	classDefBlob.def("Close",&Blob::Close);
 	classDefBlob.def("GetBytes",&Blob::GetBytes);
-	classDefBlob.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Blob>&,int32_t,int32_t,const luabind::object&)>(&Blob::Read));
-	classDefBlob.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Blob>&,int32_t,int32_t)>(&Blob::Read));
-	classDefBlob.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Blob>&,DataStream&,int32_t,int32_t,const luabind::object&)>(&Blob::Write));
-	classDefBlob.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<::sqlite::Blob>&,DataStream&,int32_t,int32_t)>(&Blob::Write));
+	classDefBlob.def("Read",static_cast<void(*)(lua_State*,::sqlite::Blob&,int32_t,int32_t,const luabind::object&)>(&Blob::Read));
+	classDefBlob.def("Read",static_cast<void(*)(lua_State*,::sqlite::Blob&,int32_t,int32_t)>(&Blob::Read));
+	classDefBlob.def("Write",static_cast<void(*)(lua_State*,::sqlite::Blob&,DataStream&,int32_t,int32_t,const luabind::object&)>(&Blob::Write));
+	classDefBlob.def("Write",static_cast<void(*)(lua_State*,::sqlite::Blob&,DataStream&,int32_t,int32_t)>(&Blob::Write));
 	classDefBlob.def("Reopen",&Blob::Reopen);
 	modSqlite[classDefBlob];
 
@@ -373,12 +373,12 @@ int32_t Lua::sqlite::result_to_string(lua_State *l)
 	return 1;
 }
 
-void Lua::sqlite::Connection::Close(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection)
+void Lua::sqlite::Connection::Close(lua_State *l,::sqlite::Connection &connection)
 {
 	auto r = connection->Close();
 	Lua::PushInt(l,r);
 }
-void Lua::sqlite::Connection::PrepareStatement(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &statement)
+void Lua::sqlite::Connection::PrepareStatement(lua_State *l,::sqlite::Connection &connection,const std::string &statement)
 {
 	int32_t r;
 	auto pStatement = connection->PrepareStatement(statement,r);
@@ -386,7 +386,7 @@ void Lua::sqlite::Connection::PrepareStatement(lua_State *l,std::shared_ptr<::sq
 	if(r == SQLITE_OK)
 		Lua::Push<std::shared_ptr<::sqlite::Statement>>(l,pStatement);
 }
-void Lua::sqlite::Connection::PrepareStatement(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &statement,const luabind::object &oAsyncCallback)
+void Lua::sqlite::Connection::PrepareStatement(lua_State *l,::sqlite::Connection &connection,const std::string &statement,const luabind::object &oAsyncCallback)
 {
 	Lua::CheckFunction(l,3);
 	connection->PrepareStatement(statement,[l,oAsyncCallback](int32_t result,std::shared_ptr<::sqlite::Statement> pStatement) {
@@ -401,7 +401,7 @@ void Lua::sqlite::Connection::PrepareStatement(lua_State *l,std::shared_ptr<::sq
 		ishared::protected_lua_call(l,argCount,0);
 	});
 }
-void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly)
+void Lua::sqlite::Connection::OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly)
 {
 	int32_t r;
 	auto pBlob = connection->OpenBlob(tableName,columnName,rowId,bReadOnly,r);
@@ -409,8 +409,8 @@ void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Co
 	if(r == SQLITE_OK)
 		Lua::Push<std::shared_ptr<::sqlite::Blob>>(l,pBlob);
 }
-void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &tableName,const std::string &columnName,int64_t rowId) {OpenBlob(l,connection,tableName,columnName,rowId,false);}
-void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly)
+void Lua::sqlite::Connection::OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &tableName,const std::string &columnName,int64_t rowId) {OpenBlob(l,connection,tableName,columnName,rowId,false);}
+void Lua::sqlite::Connection::OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId,bool bReadOnly)
 {
 	int32_t r;
 	auto pBlob = connection->OpenBlob(dbName,tableName,columnName,rowId,bReadOnly,r);
@@ -418,8 +418,8 @@ void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Co
 	if(r == SQLITE_OK)
 		Lua::Push<std::shared_ptr<::sqlite::Blob>>(l,pBlob);
 }
-void Lua::sqlite::Connection::OpenBlob(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId) {OpenBlob(l,connection,dbName,tableName,columnName,rowId,false);}
-void Lua::sqlite::Connection::Exec(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &sql,const luabind::object &oCallback)
+void Lua::sqlite::Connection::OpenBlob(lua_State *l,::sqlite::Connection &connection,const std::string &dbName,const std::string &tableName,const std::string &columnName,int64_t rowId) {OpenBlob(l,connection,dbName,tableName,columnName,rowId,false);}
+void Lua::sqlite::Connection::Exec(lua_State *l,::sqlite::Connection &connection,const std::string &sql,const luabind::object &oCallback)
 {
 	Lua::CheckFunction(l,3);
 	std::string errMsg;
@@ -456,16 +456,16 @@ void Lua::sqlite::Connection::Exec(lua_State *l,std::shared_ptr<::sqlite::Connec
 	Lua::PushInt(l,r);
 	Lua::PushString(l,errMsg);
 }
-void Lua::sqlite::Connection::Exec(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &sql)
+void Lua::sqlite::Connection::Exec(lua_State *l,::sqlite::Connection &connection,const std::string &sql)
 {
 	auto r = connection->Exec(sql,nullptr);
 	Lua::PushInt(l,r);
 }
-void Lua::sqlite::Connection::GetResult(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection) {Lua::PushInt(l,connection->GetResult());}
-void Lua::sqlite::Connection::GetResultMessage(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection) {Lua::PushString(l,connection->GetResultMessage());}
-void Lua::sqlite::Connection::IsDatabaseReadOnly(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName) {Lua::PushBool(l,connection->IsDatabaseReadOnly(dbName));}
-void Lua::sqlite::Connection::DatabaseExists(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &dbName) {Lua::PushBool(l,connection->DatabaseExists(dbName));}
-void Lua::sqlite::Connection::CreateFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXFunc)
+void Lua::sqlite::Connection::GetResult(lua_State *l,::sqlite::Connection &connection) {Lua::PushInt(l,connection->GetResult());}
+void Lua::sqlite::Connection::GetResultMessage(lua_State *l,::sqlite::Connection &connection) {Lua::PushString(l,connection->GetResultMessage());}
+void Lua::sqlite::Connection::IsDatabaseReadOnly(lua_State *l,::sqlite::Connection &connection,const std::string &dbName) {Lua::PushBool(l,connection->IsDatabaseReadOnly(dbName));}
+void Lua::sqlite::Connection::DatabaseExists(lua_State *l,::sqlite::Connection &connection,const std::string &dbName) {Lua::PushBool(l,connection->DatabaseExists(dbName));}
+void Lua::sqlite::Connection::CreateFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXFunc)
 {
 	Lua::CheckFunction(l,5);
 	auto r = connection->CreateFunction(funcName,argCount,bDeterministic,[l,oXFunc](sqlite3_context *context,int32_t argc,sqlite3_value **argv) {
@@ -482,7 +482,7 @@ void Lua::sqlite::Connection::CreateFunction(lua_State *l,std::shared_ptr<::sqli
 	});
 	Lua::PushInt(l,r);
 }
-void Lua::sqlite::Connection::CreateFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXStep,const luabind::object &oXFinal)
+void Lua::sqlite::Connection::CreateFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic,const luabind::object &oXStep,const luabind::object &oXFinal)
 {
 	Lua::CheckFunction(l,5);
 	Lua::CheckFunction(l,6);
@@ -503,11 +503,11 @@ void Lua::sqlite::Connection::CreateFunction(lua_State *l,std::shared_ptr<::sqli
 	});
 	Lua::PushInt(l,r);
 }
-void Lua::sqlite::Connection::DeleteFunction(lua_State *l,std::shared_ptr<::sqlite::Connection> &connection,const std::string &funcName,int32_t argCount,bool bDeterministic) {Lua::PushInt(l,connection->DeleteFunction(funcName,argCount,bDeterministic));}
+void Lua::sqlite::Connection::DeleteFunction(lua_State *l,::sqlite::Connection &connection,const std::string &funcName,int32_t argCount,bool bDeterministic) {Lua::PushInt(l,connection->DeleteFunction(funcName,argCount,bDeterministic));}
 
-void Lua::sqlite::Statement::Finalize(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushInt(l,statement->Finalize());}
-void Lua::sqlite::Statement::Step(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushInt(l,statement->Step());}
-void Lua::sqlite::Statement::Step(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,const luabind::object &oAsynCallback)
+void Lua::sqlite::Statement::Finalize(lua_State *l,::sqlite::Statement &statement) {Lua::PushInt(l,statement->Finalize());}
+void Lua::sqlite::Statement::Step(lua_State *l,::sqlite::Statement &statement) {Lua::PushInt(l,statement->Step());}
+void Lua::sqlite::Statement::Step(lua_State *l,::sqlite::Statement &statement,const luabind::object &oAsynCallback)
 {
 	Lua::CheckFunction(l,2);
 	statement->Step([l,oAsynCallback](int32_t result) {
@@ -516,15 +516,15 @@ void Lua::sqlite::Statement::Step(lua_State *l,std::shared_ptr<::sqlite::Stateme
 		ishared::protected_lua_call(l,1,0);
 	});
 }
-void Lua::sqlite::Statement::Reset(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushInt(l,statement->Reset());}
-void Lua::sqlite::Statement::GetType(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushInt(l,statement->GetType(column));}
-void Lua::sqlite::Statement::GetBytes(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushInt(l,statement->GetBytes(column));}
-void Lua::sqlite::Statement::GetDouble(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushNumber(l,statement->GetDouble(column));}
-void Lua::sqlite::Statement::GetInt(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushInt(l,statement->GetInt(column));}
-void Lua::sqlite::Statement::GetInt64(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushInt(l,statement->GetInt64(column));}
-void Lua::sqlite::Statement::GetText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushString(l,statement->GetText(column));}
-void Lua::sqlite::Statement::GetBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::Push<DataStream>(l,statement->GetBlob(column));}
-void Lua::sqlite::Statement::GetBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,const luabind::object &oAsyncCallback)
+void Lua::sqlite::Statement::Reset(lua_State *l,::sqlite::Statement &statement) {Lua::PushInt(l,statement->Reset());}
+void Lua::sqlite::Statement::GetType(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushInt(l,statement->GetType(column));}
+void Lua::sqlite::Statement::GetBytes(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushInt(l,statement->GetBytes(column));}
+void Lua::sqlite::Statement::GetDouble(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushNumber(l,statement->GetDouble(column));}
+void Lua::sqlite::Statement::GetInt(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushInt(l,statement->GetInt(column));}
+void Lua::sqlite::Statement::GetInt64(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushInt(l,statement->GetInt64(column));}
+void Lua::sqlite::Statement::GetText(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushString(l,statement->GetText(column));}
+void Lua::sqlite::Statement::GetBlob(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::Push<DataStream>(l,statement->GetBlob(column));}
+void Lua::sqlite::Statement::GetBlob(lua_State *l,::sqlite::Statement &statement,int32_t column,const luabind::object &oAsyncCallback)
 {
 	Lua::CheckFunction(l,3);
 	statement->GetBlob(column,[l,oAsyncCallback](DataStream ds) {
@@ -533,25 +533,25 @@ void Lua::sqlite::Statement::GetBlob(lua_State *l,std::shared_ptr<::sqlite::Stat
 		ishared::protected_lua_call(l,1,0);
 	});
 }
-void Lua::sqlite::Statement::GetCount(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushInt(l,statement->GetCount());}
-void Lua::sqlite::Statement::GetColumnName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushString(l,statement->GetColumnName(column));}
-void Lua::sqlite::Statement::BindDouble(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,double d) {Lua::PushInt(l,statement->BindDouble(column,d));}
-void Lua::sqlite::Statement::BindInt(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,int32_t i) {Lua::PushInt(l,statement->BindInt(column,i));}
-void Lua::sqlite::Statement::BindInt64(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,int64_t i) {Lua::PushInt(l,statement->BindInt64(column,i));}
-void Lua::sqlite::Statement::BindNull(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushInt(l,statement->BindNull(column));}
-void Lua::sqlite::Statement::BindText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,const std::string &text) {Lua::PushInt(l,statement->BindText(column,text));}
-void Lua::sqlite::Statement::BindBlob(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column,DataStream &ds) {Lua::PushInt(l,statement->BindBlob(column,ds));}
-void Lua::sqlite::Statement::ClearBindings(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushInt(l,statement->ClearBindings());}
-void Lua::sqlite::Statement::IsReadOnly(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushBool(l,statement->IsReadOnly());}
-void Lua::sqlite::Statement::GetSQLText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushString(l,statement->GetSQLText());}
-void Lua::sqlite::Statement::GetExpandedSQLText(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement) {Lua::PushString(l,statement->GetExpandedSQLText());}
-void Lua::sqlite::Statement::GetDatabaseName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushString(l,statement->GetDatabaseName(column));}
-void Lua::sqlite::Statement::GetTableName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushString(l,statement->GetTableName(column));}
-void Lua::sqlite::Statement::GetOriginName(lua_State *l,std::shared_ptr<::sqlite::Statement> &statement,int32_t column) {Lua::PushString(l,statement->GetOriginName(column));}
+void Lua::sqlite::Statement::GetCount(lua_State *l,::sqlite::Statement &statement) {Lua::PushInt(l,statement->GetCount());}
+void Lua::sqlite::Statement::GetColumnName(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushString(l,statement->GetColumnName(column));}
+void Lua::sqlite::Statement::BindDouble(lua_State *l,::sqlite::Statement &statement,int32_t column,double d) {Lua::PushInt(l,statement->BindDouble(column,d));}
+void Lua::sqlite::Statement::BindInt(lua_State *l,::sqlite::Statement &statement,int32_t column,int32_t i) {Lua::PushInt(l,statement->BindInt(column,i));}
+void Lua::sqlite::Statement::BindInt64(lua_State *l,::sqlite::Statement &statement,int32_t column,int64_t i) {Lua::PushInt(l,statement->BindInt64(column,i));}
+void Lua::sqlite::Statement::BindNull(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushInt(l,statement->BindNull(column));}
+void Lua::sqlite::Statement::BindText(lua_State *l,::sqlite::Statement &statement,int32_t column,const std::string &text) {Lua::PushInt(l,statement->BindText(column,text));}
+void Lua::sqlite::Statement::BindBlob(lua_State *l,::sqlite::Statement &statement,int32_t column,DataStream &ds) {Lua::PushInt(l,statement->BindBlob(column,ds));}
+void Lua::sqlite::Statement::ClearBindings(lua_State *l,::sqlite::Statement &statement) {Lua::PushInt(l,statement->ClearBindings());}
+void Lua::sqlite::Statement::IsReadOnly(lua_State *l,::sqlite::Statement &statement) {Lua::PushBool(l,statement->IsReadOnly());}
+void Lua::sqlite::Statement::GetSQLText(lua_State *l,::sqlite::Statement &statement) {Lua::PushString(l,statement->GetSQLText());}
+void Lua::sqlite::Statement::GetExpandedSQLText(lua_State *l,::sqlite::Statement &statement) {Lua::PushString(l,statement->GetExpandedSQLText());}
+void Lua::sqlite::Statement::GetDatabaseName(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushString(l,statement->GetDatabaseName(column));}
+void Lua::sqlite::Statement::GetTableName(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushString(l,statement->GetTableName(column));}
+void Lua::sqlite::Statement::GetOriginName(lua_State *l,::sqlite::Statement &statement,int32_t column) {Lua::PushString(l,statement->GetOriginName(column));}
 
-void Lua::sqlite::Blob::Close(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob) {Lua::PushInt(l,blob->Close());}
-void Lua::sqlite::Blob::GetBytes(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob) {Lua::PushInt(l,blob->GetBytes());}
-void Lua::sqlite::Blob::Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int32_t size,int32_t offset,const luabind::object &oAsyncCallback)
+void Lua::sqlite::Blob::Close(lua_State *l,::sqlite::Blob &blob) {Lua::PushInt(l,blob->Close());}
+void Lua::sqlite::Blob::GetBytes(lua_State *l,::sqlite::Blob &blob) {Lua::PushInt(l,blob->GetBytes());}
+void Lua::sqlite::Blob::Read(lua_State *l,::sqlite::Blob &blob,int32_t size,int32_t offset,const luabind::object &oAsyncCallback)
 {
 	Lua::CheckFunction(l,4);
 	blob->Read(size,offset,[l,oAsyncCallback](int32_t result,DataStream ds) {
@@ -566,7 +566,7 @@ void Lua::sqlite::Blob::Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,
 		ishared::protected_lua_call(l,argCount,0);
 	});
 }
-void Lua::sqlite::Blob::Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int32_t size,int32_t offset)
+void Lua::sqlite::Blob::Read(lua_State *l,::sqlite::Blob &blob,int32_t size,int32_t offset)
 {
 	int32_t result;
 	auto ds = blob->Read(size,offset,result);
@@ -575,7 +575,7 @@ void Lua::sqlite::Blob::Read(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,
 		return;
 	Lua::Push<DataStream>(l,ds);
 }
-void Lua::sqlite::Blob::Write(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,DataStream &ds,int32_t size,int32_t offset,const luabind::object &oAsyncCallback)
+void Lua::sqlite::Blob::Write(lua_State *l,::sqlite::Blob &blob,DataStream &ds,int32_t size,int32_t offset,const luabind::object &oAsyncCallback)
 {
 	Lua::CheckFunction(l,5);
 	blob->Write(ds,size,offset,[l,oAsyncCallback](int32_t result) {
@@ -584,8 +584,8 @@ void Lua::sqlite::Blob::Write(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob
 		ishared::protected_lua_call(l,1,0);
 	});
 }
-void Lua::sqlite::Blob::Write(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,DataStream &ds,int32_t size,int32_t offset) {Lua::PushInt(l,blob->Write(ds,size,offset));}
-void Lua::sqlite::Blob::Reopen(lua_State *l,std::shared_ptr<::sqlite::Blob> &blob,int64_t rowId) {Lua::PushInt(l,blob->Reopen(rowId));}
+void Lua::sqlite::Blob::Write(lua_State *l,::sqlite::Blob &blob,DataStream &ds,int32_t size,int32_t offset) {Lua::PushInt(l,blob->Write(ds,size,offset));}
+void Lua::sqlite::Blob::Reopen(lua_State *l,::sqlite::Blob &blob,int64_t rowId) {Lua::PushInt(l,blob->Reopen(rowId));}
 
 void Lua::sqlite::Value::GetType(lua_State *l,::sqlite::Value &value) {Lua::PushInt(l,value.GetType());}
 void Lua::sqlite::Value::GetNumericType(lua_State *l,::sqlite::Value &value) {Lua::PushInt(l,value.GetNumericType());}

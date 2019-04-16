@@ -16,10 +16,20 @@
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
 std::pair<uint32_t,uint32_t> pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(uint32_t w,uint32_t h)
 {
 	const auto tileSize = pragma::ShaderForwardPLightCulling::TILE_SIZE;
-	return {(w +(w %tileSize)) /tileSize,(h +(h %tileSize)) /tileSize};
+	const auto fCalcWorkGroups = [tileSize](uint32_t v) {
+		auto numGroups = v;
+		if((numGroups %tileSize) == 0)
+			numGroups /= tileSize;
+		else
+			numGroups = (numGroups +(tileSize -(numGroups %tileSize))) /tileSize;
+		return numGroups;
+	};
+
+	return {fCalcWorkGroups(w),fCalcWorkGroups(h)};
 }
 uint32_t pragma::rendering::ForwardPlusInstance::CalcTileCount(uint32_t w,uint32_t h)
 {
@@ -166,3 +176,4 @@ Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCo
 Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_descSetGroupDepthBuffer)->get_descriptor_set(0u);}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
+#pragma optimize("",on)

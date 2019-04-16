@@ -95,14 +95,14 @@ static bool InitializeSocketModule(std::string *err,Lua::Interface &l)
 	ishared::add_callback(lstate,ishared::Callback::Think,instance.thinkCallback);
 
 	auto &modNet = l.RegisterLibrary("net");
-	auto classDefUDPSocket = luabind::class_<std::shared_ptr<LUDPSocket>>("UDPSocket");
-	classDefUDPSocket.def("Send",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&,const std::string&,unsigned short,NetPacket,luabind::object))&Lua::UDPSocket::Send);
-	classDefUDPSocket.def("Send",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&,const udp::endpoint&,NetPacket,luabind::object))&Lua::UDPSocket::Send);
+	auto classDefUDPSocket = luabind::class_<LUDPSocket>("UDPSocket");
+	classDefUDPSocket.def("Send",(void(*)(lua_State*,LUDPSocket&,const std::string&,unsigned short,NetPacket,luabind::object))&Lua::UDPSocket::Send);
+	classDefUDPSocket.def("Send",(void(*)(lua_State*,LUDPSocket&,const udp::endpoint&,NetPacket,luabind::object))&Lua::UDPSocket::Send);
 	classDefUDPSocket.def("Receive",&Lua::UDPSocket::Receive);
-	classDefUDPSocket.def("Bind",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&,const udp::endpoint&))&Lua::UDPSocket::Bind);
-	classDefUDPSocket.def("Bind",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&,const std::string&,unsigned short,luabind::object))&Lua::UDPSocket::Bind);
-	classDefUDPSocket.def("Open",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&,int))&Lua::UDPSocket::Open);
-	classDefUDPSocket.def("Open",(void(*)(lua_State*,std::shared_ptr<LUDPSocket>&))&Lua::UDPSocket::Open);
+	classDefUDPSocket.def("Bind",(void(*)(lua_State*,LUDPSocket&,const udp::endpoint&))&Lua::UDPSocket::Bind);
+	classDefUDPSocket.def("Bind",(void(*)(lua_State*,LUDPSocket&,const std::string&,unsigned short,luabind::object))&Lua::UDPSocket::Bind);
+	classDefUDPSocket.def("Open",(void(*)(lua_State*,LUDPSocket&,int))&Lua::UDPSocket::Open);
+	classDefUDPSocket.def("Open",(void(*)(lua_State*,LUDPSocket&))&Lua::UDPSocket::Open);
 	classDefUDPSocket.def("Close",&Lua::UDPSocket::Close);
 	classDefUDPSocket.def("IsOpen",&Lua::UDPSocket::IsOpen);
 	classDefUDPSocket.def("SetTimeoutDuration",&Lua::UDPSocket::SetTimeoutDuration);
@@ -110,13 +110,13 @@ static bool InitializeSocketModule(std::string *err,Lua::Interface &l)
 	//classDefUDPSocket.def(luabind::self == luabind::other<LUDPSocket>());
 	modNet[classDefUDPSocket];
 
-	auto classDefTCPSocket = luabind::class_<std::shared_ptr<LTCPSocket>>("TCPSocket");
-	classDefTCPSocket.def("Connect",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&,const tcp::endpoint&,luabind::object))&Lua::TCPSocket::Connect);
-	classDefTCPSocket.def("Connect",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&,const std::string&,unsigned short,luabind::object))&Lua::TCPSocket::Connect);
-	classDefTCPSocket.def("Bind",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&,const tcp::endpoint&))&Lua::TCPSocket::Bind);
-	classDefTCPSocket.def("Bind",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&,const std::string&,unsigned short,luabind::object))&Lua::TCPSocket::Bind);
-	classDefTCPSocket.def("Open",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&,int))&Lua::TCPSocket::Open);
-	classDefTCPSocket.def("Open",(void(*)(lua_State*,std::shared_ptr<LTCPSocket>&))&Lua::TCPSocket::Open);
+	auto classDefTCPSocket = luabind::class_<LTCPSocket>("TCPSocket");
+	classDefTCPSocket.def("Connect",(void(*)(lua_State*,LTCPSocket&,const tcp::endpoint&,luabind::object))&Lua::TCPSocket::Connect);
+	classDefTCPSocket.def("Connect",(void(*)(lua_State*,LTCPSocket&,const std::string&,unsigned short,luabind::object))&Lua::TCPSocket::Connect);
+	classDefTCPSocket.def("Bind",(void(*)(lua_State*,LTCPSocket&,const tcp::endpoint&))&Lua::TCPSocket::Bind);
+	classDefTCPSocket.def("Bind",(void(*)(lua_State*,LTCPSocket&,const std::string&,unsigned short,luabind::object))&Lua::TCPSocket::Bind);
+	classDefTCPSocket.def("Open",(void(*)(lua_State*,LTCPSocket&,int))&Lua::TCPSocket::Open);
+	classDefTCPSocket.def("Open",(void(*)(lua_State*,LTCPSocket&))&Lua::TCPSocket::Open);
 	classDefTCPSocket.def("Close",&Lua::TCPSocket::Close);
 	classDefTCPSocket.def("IsOpen",&Lua::TCPSocket::IsOpen);
 	classDefTCPSocket.def("SetTimeoutDuration",&Lua::TCPSocket::SetTimeoutDuration);
@@ -132,7 +132,7 @@ static bool InitializeSocketModule(std::string *err,Lua::Interface &l)
 	//classDefTCPSocket.def(luabind::self == luabind::other<LTCPSocket>());
 	modNet[classDefTCPSocket];
 
-	auto classDefTCPAcceptor = luabind::class_<std::shared_ptr<LTCPAcceptor>>("TCPAcceptor");
+	auto classDefTCPAcceptor = luabind::class_<LTCPAcceptor>("TCPAcceptor");
 	classDefTCPAcceptor.def("Accept",&Lua::TCPAcceptor::Accept);
 	classDefTCPAcceptor.def("Close",&Lua::TCPAcceptor::Close);
 	classDefTCPAcceptor.def("GetLocalEndpoint",&Lua::TCPAcceptor::GetLocalEndpoint);

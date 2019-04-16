@@ -82,13 +82,7 @@ bool LuaShaderGraphicsBase::AttachVertexAttribute(const pragma::LuaVertexBinding
 {
 	if(m_currentPipelineInfo == nullptr)
 		return false;
-	struct AttributeData
-	{
-		uint32_t offset;
-		uint32_t location;
-		Anvil::Format format;
-	};
-	std::vector<AttributeData> attributeData;
+	std::vector<Anvil::VertexInputAttribute> attributeData;
 	attributeData.reserve(attributes.size());
 
 	auto offset = 0u;
@@ -97,30 +91,30 @@ bool LuaShaderGraphicsBase::AttachVertexAttribute(const pragma::LuaVertexBinding
 		auto attrSize = prosper::util::get_byte_size(attr.format);
 		auto attrOffset = (attr.offset != std::numeric_limits<uint32_t>::max()) ? attr.offset : offset;
 		auto attrLocation = (attr.location != std::numeric_limits<uint32_t>::max()) ? attr.location : m_currentVertexAttributeLocation;
-		attributeData.push_back({attrOffset,attrLocation,attr.format});
+		attributeData.push_back({attrLocation,attr.format,attrOffset});
 
 		offset = attrOffset +attrSize;
 		++m_currentVertexAttributeLocation;
 	}
 	auto stride = (binding.stride != std::numeric_limits<uint32_t>::max()) ? binding.stride : offset;
 
-	for(auto &attr : attributeData)
-	{
-		if(static_cast<Anvil::GraphicsPipelineCreateInfo*>(m_currentPipelineInfo)->add_vertex_attribute(
-			attr.location,attr.format,attr.offset,stride,
-			binding.inputRate
-		) == false)
-			return false;
-	}
-	return true;
+	return static_cast<Anvil::GraphicsPipelineCreateInfo*>(m_currentPipelineInfo)->add_vertex_binding(
+		m_currentVertexBinding++,
+		binding.inputRate,
+		stride,
+		attributeData.size(),
+		attributeData.data()
+	);
 }
 void LuaShaderGraphicsBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	m_currentVertexAttributeLocation = 0u;
+	m_currentVertexBinding = 0u;
 
 	InitializePipeline(pipelineInfo,pipelineIdx);
 
 	m_currentVertexAttributeLocation = 0u;
+	m_currentVertexBinding = 0u;
 }
 void LuaShaderGraphicsBase::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

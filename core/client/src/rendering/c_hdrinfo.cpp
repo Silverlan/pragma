@@ -287,8 +287,8 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
 	// We don't really care about the quality of the blur image though, so we're using a smaller
 	// version of the bloom image for post-processing.
-	imgCreateInfo.width = 256;
-	imgCreateInfo.height = 256;
+	imgCreateInfo.width = 1024;
+	imgCreateInfo.height = 1024;
 	auto hdrBloomBlurImg = prosper::util::create_image(dev,imgCreateInfo);
 	bloomBlurTexture = prosper::util::create_texture(dev,texCreateInfo,hdrBloomBlurImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
 	imgCreateInfo.width = width;

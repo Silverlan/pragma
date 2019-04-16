@@ -19,13 +19,14 @@ CSciGPUTimerManager::CSciGPUTimerManager()
 	InitializeQueries();
 
 	// Initialize events
-	SetupEvent(GPUTimerEvent::GUI,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
+	SetupEvent(GPUTimerEvent::GUI,{},defaultStage);
 	SetupEvent(GPUTimerEvent::Frame,{
 		GPUTimerEvent::GUI,
 		GPUTimerEvent::Scene,
 		GPUTimerEvent::PostProcessing,
 		GPUTimerEvent::Present
-	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT,EventFlags::Root);
+	},defaultStage,EventFlags::Root);
 	SetupEvent(GPUTimerEvent::Scene,{
 		GPUTimerEvent::Prepass,
 		GPUTimerEvent::CullLightSources,
@@ -38,37 +39,37 @@ CSciGPUTimerManager::CSciGPUTimerManager()
 		GPUTimerEvent::Debug,
 		GPUTimerEvent::Water,
 		GPUTimerEvent::View
-	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	},defaultStage);
 	SetupEvent(GPUTimerEvent::Prepass,{
 		GPUTimerEvent::PrepassSkybox,
 		GPUTimerEvent::PrepassWorld,
 		GPUTimerEvent::PrepassView
-	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PrepassSkybox,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PrepassWorld,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PrepassView,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::CullLightSources,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Shadows,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::SSAO,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	},defaultStage);
+	SetupEvent(GPUTimerEvent::PrepassSkybox,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PrepassWorld,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PrepassView,{},defaultStage);
+	SetupEvent(GPUTimerEvent::CullLightSources,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Shadows,{},defaultStage);
+	SetupEvent(GPUTimerEvent::SSAO,{},defaultStage);
 	SetupEvent(GPUTimerEvent::PostProcessing,{
 		GPUTimerEvent::PostProcessingFog,
 		GPUTimerEvent::PostProcessingFXAA,
 		GPUTimerEvent::PostProcessingGlow,
 		GPUTimerEvent::PostProcessingBloom,
 		GPUTimerEvent::PostProcessingHDR
-	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PostProcessingFog,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PostProcessingFXAA,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PostProcessingGlow,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PostProcessingBloom,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::PostProcessingHDR,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Present,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Skybox,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::World,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Particles,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Debug,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::Water,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
-	SetupEvent(GPUTimerEvent::View,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	},defaultStage);
+	SetupEvent(GPUTimerEvent::PostProcessingFog,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PostProcessingFXAA,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PostProcessingGlow,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PostProcessingBloom,{},defaultStage);
+	SetupEvent(GPUTimerEvent::PostProcessingHDR,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Present,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Skybox,{},defaultStage);
+	SetupEvent(GPUTimerEvent::World,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Particles,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Debug,{},defaultStage);
+	SetupEvent(GPUTimerEvent::Water,{},defaultStage);
+	SetupEvent(GPUTimerEvent::View,{},defaultStage);
 	static_assert(umath::to_integral(GPUTimerEvent::Count) == 23u,"Timer event has been added, but not set up!");
 }
 void CSciGPUTimerManager::SetupEvent(GPUTimerEvent eventId,const std::vector<GPUTimerEvent> &dependencies,Anvil::PipelineStageFlagBits stage,EventFlags eventFlags)
@@ -291,17 +292,19 @@ void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state,pragma::Ba
 			if(result.has_value() && extended == true)
 			{
 				auto &stats = result->statistics;
-				Con::cout<<t<<"Input Assembly Vertices: "<<stats.inputAssemblyVertices<<Con::endl;
-				Con::cout<<t<<"Input Assembly Primitives: "<<stats.inputAssemblyPrimitives<<Con::endl;
-				Con::cout<<t<<"Vertex Shader Invocations: "<<stats.vertexShaderInvocations<<Con::endl;
-				Con::cout<<t<<"Geometry Shader Invocations: "<<stats.geometryShaderInvocations<<Con::endl;
-				Con::cout<<t<<"Geometry Shader Primitives: "<<stats.geometryShaderPrimitives<<Con::endl;
-				Con::cout<<t<<"Clipping Invocations: "<<stats.clippingInvocations<<Con::endl;
-				Con::cout<<t<<"Clipping Primitives: "<<stats.clippingPrimitives<<Con::endl;
-				Con::cout<<t<<"Fragment Shader Invocations: "<<stats.fragmentShaderInvocations<<Con::endl;
-				Con::cout<<t<<"Tessellation Control Shader Patches: "<<stats.tessellationControlShaderPatches<<Con::endl;
-				Con::cout<<t<<"Tessellation Evaluation Shader Invocations: "<<stats.tessellationEvaluationShaderInvocations<<Con::endl;
-				Con::cout<<t<<"Compute Shader Invocations: "<<stats.computeShaderInvocations<<Con::endl;
+				Con::cout<<t<<"{"<<Con::endl;
+				Con::cout<<t<<"\tInput Assembly Vertices: "<<stats.inputAssemblyVertices<<Con::endl;
+				Con::cout<<t<<"\tInput Assembly Primitives: "<<stats.inputAssemblyPrimitives<<Con::endl;
+				Con::cout<<t<<"\tVertex Shader Invocations: "<<stats.vertexShaderInvocations<<Con::endl;
+				Con::cout<<t<<"\tGeometry Shader Invocations: "<<stats.geometryShaderInvocations<<Con::endl;
+				Con::cout<<t<<"\tGeometry Shader Primitives: "<<stats.geometryShaderPrimitives<<Con::endl;
+				Con::cout<<t<<"\tClipping Invocations: "<<stats.clippingInvocations<<Con::endl;
+				Con::cout<<t<<"\tClipping Primitives: "<<stats.clippingPrimitives<<Con::endl;
+				Con::cout<<t<<"\tFragment Shader Invocations: "<<stats.fragmentShaderInvocations<<Con::endl;
+				Con::cout<<t<<"\tTessellation Control Shader Patches: "<<stats.tessellationControlShaderPatches<<Con::endl;
+				Con::cout<<t<<"\tTessellation Evaluation Shader Invocations: "<<stats.tessellationEvaluationShaderInvocations<<Con::endl;
+				Con::cout<<t<<"\tCompute Shader Invocations: "<<stats.computeShaderInvocations<<Con::endl;
+				Con::cout<<t<<"}"<<Con::endl;
 				Con::cout<<Con::endl;
 			}
 		}

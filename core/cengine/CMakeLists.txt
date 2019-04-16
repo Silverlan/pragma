@@ -13,6 +13,7 @@ link_external_library(util_zip)
 link_external_library(alsoundsystem)
 link_external_library(cmaterialsystem)
 link_external_library(wms_shared)
+link_external_library(glslang)
 
 add_external_library(luajit)
 add_external_library(libzip)
@@ -22,10 +23,12 @@ if(WIN32)
 endif()
 
 add_include_dir(server)
+add_include_dir(anvil_build)
 
 add_def(CENGINE_EXPORTS)
 add_def(DLLCENGINE_EX)
 add_def(ALSYS_LIBRARY_TYPE)
+add_def(ANVIL_VULKAN_CPP)
 
 set(PRECOMPILED_HEADER "stdafx_cengine")
 

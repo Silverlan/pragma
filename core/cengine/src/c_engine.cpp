@@ -728,6 +728,7 @@ void CEngine::Close()
 
 	// Clear all Vulkan resources before closing the context
 	m_stagingRenderTarget = nullptr;
+	m_gpuTimerManager = nullptr;
 
 	pragma::CRenderComponent::ClearBuffers();
 	pragma::CLightComponent::ClearBuffers();

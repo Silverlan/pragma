@@ -210,7 +210,7 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 	Lua::RegisterLibrary(l.GetState(),"dmx",{
 		{"load",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
 			auto &f = *Lua::CheckFile(l,1);
-			auto fd = ::dmx::FileData::Load(f->GetHandle());
+			auto fd = ::dmx::FileData::Load(f.GetHandle());
 			if(fd == nullptr)
 				return 0;
 			auto t = Lua::CreateTable(l);
@@ -232,22 +232,22 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 	});
 
 	auto &modDMX = l.RegisterLibrary("dmx");
-	auto classDefElement = luabind::class_<std::shared_ptr<::dmx::Element>>("Element");
-	classDefElement.def("__tostring",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el) {
+	auto classDefElement = luabind::class_<::dmx::Element>("Element");
+	classDefElement.def("__tostring",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
 		std::stringstream ss;
-		print_element(ss,*el);
+		print_element(ss,el);
 		Lua::PushString(l,ss.str());
 	}));
-	classDefElement.def("GetName",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el) {
-		Lua::PushString(l,el->name);
+	classDefElement.def("GetName",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
+		Lua::PushString(l,el.name);
 	}));
-	classDefElement.def("GetType",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el) {
-		Lua::PushString(l,el->type);
+	classDefElement.def("GetType",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
+		Lua::PushString(l,el.type);
 	}));
-	classDefElement.def("GetAttributes",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el) {
+	classDefElement.def("GetAttributes",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
 		auto t = Lua::CreateTable(l);
 		auto attrId = 1u;
-		for(auto &pair : el->attributes)
+		for(auto &pair : el.attributes)
 		{
 			auto &attr = pair.second;
 			Lua::PushString(l,pair.first);
@@ -255,20 +255,20 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 			Lua::SetTableValue(l,t);
 		}
 	}));
-	classDefElement.def("GetAttribute",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&,const std::string&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el,const std::string &id) {
-		auto it = el->attributes.find(id);
-		if(it == el->attributes.end())
+	classDefElement.def("GetAttribute",static_cast<void(*)(lua_State*,::dmx::Element&,const std::string&)>([](lua_State *l,::dmx::Element &el,const std::string &id) {
+		auto it = el.attributes.find(id);
+		if(it == el.attributes.end())
 			return;
 		Lua::Push<std::shared_ptr<::dmx::Attribute>>(l,it->second);
 	}));
-	classDefElement.def("GetAttributeValue",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Element>&,const std::string&)>([](lua_State *l,std::shared_ptr<::dmx::Element> &el,const std::string &id) {
-		auto it = el->attributes.find(id);
-		if(it == el->attributes.end() || push_attribute_value(l,*it->second) == false)
+	classDefElement.def("GetAttributeValue",static_cast<void(*)(lua_State*,::dmx::Element&,const std::string&)>([](lua_State *l,::dmx::Element &el,const std::string &id) {
+		auto it = el.attributes.find(id);
+		if(it == el.attributes.end() || push_attribute_value(l,*it->second) == false)
 			return;
 	}));
 	modDMX[classDefElement];
 
-	auto classDefAttribute = luabind::class_<std::shared_ptr<::dmx::Attribute>>("Attribute");
+	auto classDefAttribute = luabind::class_<::dmx::Attribute>("Attribute");
 	classDefAttribute.add_static_constant("TYPE_NONE",umath::to_integral(::dmx::AttrType::None));
 	classDefAttribute.add_static_constant("TYPE_ELEMENT",umath::to_integral(::dmx::AttrType::Element));
 	classDefAttribute.add_static_constant("TYPE_INT",umath::to_integral(::dmx::AttrType::Int));
@@ -306,33 +306,33 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 
 	classDefAttribute.add_static_constant("TYPE_INVALID",umath::to_integral(::dmx::AttrType::Invalid));
 
-	classDefAttribute.def("__tostring",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Attribute>&)>([](lua_State *l,std::shared_ptr<::dmx::Attribute> &attr) {
+	classDefAttribute.def("__tostring",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
 		std::stringstream ss;
-		print_attribute(ss,*attr);
+		print_attribute(ss,attr);
 		Lua::PushString(l,ss.str());
 	}));
-	classDefAttribute.def("GetType",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Attribute>&)>([](lua_State *l,std::shared_ptr<::dmx::Attribute> &attr) {
-		Lua::PushInt(l,umath::to_integral(attr->type));
+	classDefAttribute.def("GetType",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
+		Lua::PushInt(l,umath::to_integral(attr.type));
 	}));
-	classDefAttribute.def("IsValid",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Attribute>&)>([](lua_State *l,std::shared_ptr<::dmx::Attribute> &attr) {
-		Lua::PushBool(l,attr->type != ::dmx::AttrType::Invalid);
+	classDefAttribute.def("IsValid",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
+		Lua::PushBool(l,attr.type != ::dmx::AttrType::Invalid);
 	}));
-	classDefAttribute.def("GetValue",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Attribute>&)>([](lua_State *l,std::shared_ptr<::dmx::Attribute> &attr) {
-		push_attribute_value(l,*attr);
+	classDefAttribute.def("GetValue",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
+		push_attribute_value(l,attr);
 	}));
-	classDefAttribute.def("GetValueAsString",static_cast<void(*)(lua_State*,std::shared_ptr<::dmx::Attribute>&)>([](lua_State *l,std::shared_ptr<::dmx::Attribute> &attr) {
-		if(attr->data == nullptr)
+	classDefAttribute.def("GetValueAsString",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
+		if(attr.data == nullptr)
 		{
 			Lua::PushString(l,"");
 			return;
 		}
 		std::stringstream ss;
-		switch(attr->type)
+		switch(attr.type)
 		{
 			case ::dmx::AttrType::Element:
 			{
 				ss<<"Element";
-				auto &wpElement = *static_cast<std::weak_ptr<::dmx::Element>*>(attr->data.get());
+				auto &wpElement = *static_cast<std::weak_ptr<::dmx::Element>*>(attr.data.get());
 				if(wpElement.expired())
 					ss<<" [NULL]";
 				else
@@ -343,57 +343,57 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 				break;
 			}
 			case ::dmx::AttrType::String:
-				ss<<*static_cast<std::string*>(attr->data.get());
+				ss<<*static_cast<std::string*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Int:
-				ss<<*static_cast<int32_t*>(attr->data.get());
+				ss<<*static_cast<int32_t*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Float:
-				ss<<*static_cast<float*>(attr->data.get());
+				ss<<*static_cast<float*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Bool:
-				ss<<*static_cast<bool*>(attr->data.get());
+				ss<<*static_cast<bool*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Vector2:
-				ss<<*static_cast<Vector2*>(attr->data.get());
+				ss<<*static_cast<Vector2*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Vector3:
-				ss<<*static_cast<Vector3*>(attr->data.get());
+				ss<<*static_cast<Vector3*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Angle:
-				ss<<*static_cast<EulerAngles*>(attr->data.get());
+				ss<<*static_cast<EulerAngles*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Vector4:
-				ss<<*static_cast<Vector4*>(attr->data.get());
+				ss<<*static_cast<Vector4*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Quaternion:
-				ss<<*static_cast<Quat*>(attr->data.get());
+				ss<<*static_cast<Quat*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Matrix:
-				ss<<*static_cast<Mat4*>(attr->data.get());
+				ss<<*static_cast<Mat4*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Color:
 			{
-				auto &c = *static_cast<std::array<uint8_t,4>*>(attr->data.get());
+				auto &c = *static_cast<std::array<uint8_t,4>*>(attr.data.get());
 				ss<<c.at(0)<<" "<<c.at(1)<<" "<<c.at(2)<<" "<<c.at(3);
 				break;
 			}
 			case ::dmx::AttrType::Time:
-				ss<<*static_cast<float*>(attr->data.get());
+				ss<<*static_cast<float*>(attr.data.get());
 				break;
 			case ::dmx::AttrType::Binary:
 			{
-				auto &data = *static_cast<std::vector<uint8_t>*>(attr->data.get());
+				auto &data = *static_cast<std::vector<uint8_t>*>(attr.data.get());
 				auto len = data.size();
 				ss<<"Binary ["<<util::get_pretty_bytes(len)<<"]";
 				break;
 			}
 			default:
 			{
-				if(attr->type >= ::dmx::AttrType::ArrayFirst && attr->type <= ::dmx::AttrType::ArrayLast)
+				if(attr.type >= ::dmx::AttrType::ArrayFirst && attr.type <= ::dmx::AttrType::ArrayLast)
 				{
-					auto &vdata = *static_cast<std::vector<std::shared_ptr<::dmx::Attribute>>*>(attr->data.get());
-					ss<<"Array ["<<::dmx::type_to_string(attr->type)<<"]["<<vdata.size()<<" elements]";
+					auto &vdata = *static_cast<std::vector<std::shared_ptr<::dmx::Attribute>>*>(attr.data.get());
+					ss<<"Array ["<<::dmx::type_to_string(attr.type)<<"]["<<vdata.size()<<" elements]";
 				}
 				break;
 			}

@@ -448,9 +448,19 @@ void Lua::GraphicsPipelineCreateInfo::GetVertexAttributeProperties(lua_State *l,
 	uint32_t location,offset,explicitVertexBindingIndex,stride;
 	Anvil::Format format;
 	Anvil::VertexInputRate rate;
-	auto r = pipelineInfo.get_vertex_attribute_properties(iVerexInputAttribute,&location,&format,&offset,&explicitVertexBindingIndex,&stride,&rate);
+	auto numAttributes = 0u;
+	auto r = pipelineInfo.get_vertex_binding_properties(
+		iVerexInputAttribute,&explicitVertexBindingIndex,
+		&stride,&rate,&numAttributes);
 	if(r == false)
 		return;
+	std::vector<const Anvil::VertexInputAttribute*> attributes(numAttributes);
+	r = pipelineInfo.get_vertex_binding_properties(iVerexInputAttribute,nullptr,nullptr,nullptr,nullptr,attributes.data());
+	if(r == false || attributes.empty())
+		return;
+	// TODO: Push all attributes as table?
+	location = attributes.front()->location;
+	format = attributes.front()->format;
 	Lua::PushInt(l,location);
 	Lua::PushInt(l,static_cast<uint32_t>(format));
 	Lua::PushInt(l,stride);

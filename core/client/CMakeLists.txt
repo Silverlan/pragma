@@ -29,6 +29,7 @@ link_external_library(rapidxml)
 link_external_library(bzip2)
 link_external_library(libvorbis)
 link_external_library(libogg)
+link_external_library(glslang)
 
 add_external_library(luajit)
 add_external_library(clientmanager)
@@ -44,11 +45,13 @@ endif()
 add_include_dir(freetype)
 add_include_dir(pr_steamworks)
 add_include_dir(steam_audio)
+add_include_dir(anvil_build)
 
 add_def(DLLCLIENT_EX)
 add_def(WMS_STATIC)
 add_def(ALSYS_LIBRARY_TYPE)
 add_def(ENGINE_CLIENT)
+add_def(ANVIL_VULKAN_CPP)
 
 set(PRECOMPILED_HEADER "stdafx_client")
 

@@ -137,38 +137,38 @@ namespace Lua
 {
 	namespace UDPSocket
 	{
-		void Send(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,const std::string &ip,unsigned short port,NetPacket packet,luabind::object callback);
-		void Send(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,const udp::endpoint &ep,NetPacket packet,luabind::object callback);
-		void Receive(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,unsigned int bytesReceive,luabind::object callback);
-		void Bind(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,const udp::endpoint &ep);
-		void Bind(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,const std::string &ip,unsigned short port,luabind::object callback);
-		void Open(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,int protocol);
-		void Open(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock);
-		void Close(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock);
-		void IsOpen(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock);
-		void SetTimeoutDuration(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock,unsigned int t);
-		void GetTimeoutDuration(lua_State *l,std::shared_ptr<LUDPSocket> &udpSock);
+		void Send(lua_State *l,LUDPSocket &udpSock,const std::string &ip,unsigned short port,NetPacket packet,luabind::object callback);
+		void Send(lua_State *l,LUDPSocket &udpSock,const udp::endpoint &ep,NetPacket packet,luabind::object callback);
+		void Receive(lua_State *l,LUDPSocket &udpSock,unsigned int bytesReceive,luabind::object callback);
+		void Bind(lua_State *l,LUDPSocket &udpSock,const udp::endpoint &ep);
+		void Bind(lua_State *l,LUDPSocket &udpSock,const std::string &ip,unsigned short port,luabind::object callback);
+		void Open(lua_State *l,LUDPSocket &udpSock,int protocol);
+		void Open(lua_State *l,LUDPSocket &udpSock);
+		void Close(lua_State *l,LUDPSocket &udpSock);
+		void IsOpen(lua_State *l,LUDPSocket &udpSock);
+		void SetTimeoutDuration(lua_State *l,LUDPSocket &udpSock,unsigned int t);
+		void GetTimeoutDuration(lua_State *l,LUDPSocket &udpSock);
 	};
 	namespace TCPSocket
 	{
-		void Connect(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,const tcp::endpoint &ep,luabind::object callback);
-		void Connect(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,const std::string &ip,unsigned short port,luabind::object callback);
-		void Send(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,NetPacket packet,luabind::object callback);
-		void Bind(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,const tcp::endpoint &ep);
-		void Bind(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,const std::string &ip,unsigned short port,luabind::object callback);
-		void Open(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,int protocol);
-		void Open(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void Close(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void IsOpen(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void SetTimeoutDuration(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,unsigned int t);
-		void GetTimeoutDuration(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void Receive(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,unsigned int bytesReceive,luabind::object callback);
-		void ReceiveUntil(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,const std::string &target,luabind::object callback);
-		void ReceiveAtLeast(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock,unsigned int szData,luabind::object callback);
-		void Shutdown(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void GetLocalEndpoint(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void GetRemoteEndpoint(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
-		void GetBytesAvailable(lua_State *l,std::shared_ptr<LTCPSocket> &tcpSock);
+		void Connect(lua_State *l,LTCPSocket &tcpSock,const tcp::endpoint &ep,luabind::object callback);
+		void Connect(lua_State *l,LTCPSocket &tcpSock,const std::string &ip,unsigned short port,luabind::object callback);
+		void Send(lua_State *l,LTCPSocket &tcpSock,NetPacket packet,luabind::object callback);
+		void Bind(lua_State *l,LTCPSocket &tcpSock,const tcp::endpoint &ep);
+		void Bind(lua_State *l,LTCPSocket &tcpSock,const std::string &ip,unsigned short port,luabind::object callback);
+		void Open(lua_State *l,LTCPSocket &tcpSock,int protocol);
+		void Open(lua_State *l,LTCPSocket &tcpSock);
+		void Close(lua_State *l,LTCPSocket &tcpSock);
+		void IsOpen(lua_State *l,LTCPSocket &tcpSock);
+		void SetTimeoutDuration(lua_State *l,LTCPSocket &tcpSock,unsigned int t);
+		void GetTimeoutDuration(lua_State *l,LTCPSocket &tcpSock);
+		void Receive(lua_State *l,LTCPSocket &tcpSock,unsigned int bytesReceive,luabind::object callback);
+		void ReceiveUntil(lua_State *l,LTCPSocket &tcpSock,const std::string &target,luabind::object callback);
+		void ReceiveAtLeast(lua_State *l,LTCPSocket &tcpSock,unsigned int szData,luabind::object callback);
+		void Shutdown(lua_State *l,LTCPSocket &tcpSock);
+		void GetLocalEndpoint(lua_State *l,LTCPSocket &tcpSock);
+		void GetRemoteEndpoint(lua_State *l,LTCPSocket &tcpSock);
+		void GetBytesAvailable(lua_State *l,LTCPSocket &tcpSock);
 	};
 };
 

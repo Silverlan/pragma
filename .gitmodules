@@ -133,9 +133,6 @@
 [submodule "external_libs/util_smdmodel"]
 	path = external_libs/util_smdmodel
 	url = https://github.com/Silverlan/util_smdmodel.git
-[submodule "third_party_libs/anvil"]
-	path = third_party_libs/anvil
-	url = https://github.com/Silverlan/Anvil.git
 [submodule "external_libs/util_dmx"]
 	path = external_libs/util_dmx
 	url = https://github.com/Silverlan/util_dmx.git

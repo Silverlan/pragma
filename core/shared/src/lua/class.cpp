@@ -54,10 +54,10 @@
 
 extern DLLENGINE Engine *engine;
 
-static std::ostream &operator<<(std::ostream &out,const std::shared_ptr<ALSound> &snd)
+std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
-	auto state = snd->GetState();
-	out<<"ALSound["<<snd->GetIndex()<<"][";
+	auto state = snd.GetState();
+	out<<"ALSound["<<snd.GetIndex()<<"][";
 	switch(state)
 	{
 		case ALState::Initial:
@@ -74,7 +74,7 @@ static std::ostream &operator<<(std::ostream &out,const std::shared_ptr<ALSound>
 			break;
 	}
 	out<<"][";
-	auto type = snd->GetType();
+	auto type = snd.GetType();
 	auto values = umath::get_power_of_2_values(static_cast<uint64_t>(type));
 	auto bStart = true;
 	for(auto v : values)
@@ -131,7 +131,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	auto &modUtil = lua.RegisterLibrary("util");
 
-	auto defDataBlock = luabind::class_<std::shared_ptr<ds::Block>>("DataBlock");
+	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
 	defDataBlock.def("GetInt",&Lua::DataBlock::GetInt);
 	defDataBlock.def("GetFloat",&Lua::DataBlock::GetFloat);
 	defDataBlock.def("GetBool",&Lua::DataBlock::GetBool);
@@ -343,7 +343,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	modMath[defNoiseModule];
 
-	auto noiseMap = luabind::class_<std::shared_ptr<noise::utils::NoiseMap>>("NoiseMap");
+	auto noiseMap = luabind::class_<noise::utils::NoiseMap>("NoiseMap");
 	noiseMap.def("GetValue",&Lua_NoiseMap_GetValue);
 	noiseMap.def("GetHeight",&Lua_NoiseMap_GetHeight);
 	noiseMap.def("GetWidth",&Lua_NoiseMap_GetWidth);

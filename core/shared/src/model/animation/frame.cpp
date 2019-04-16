@@ -92,6 +92,15 @@ static void get_global_bone_transforms(Animation *anim,Skeleton *skeleton,Frame 
 	get_global_bone_transforms(anim,frame,*skeleton->GetHierarchy(),origin,originRot);
 }
 */
+std::shared_ptr<Frame> Frame::Create(unsigned int numBones)
+{
+	return std::shared_ptr<Frame>(new Frame{numBones});
+}
+std::shared_ptr<Frame> Frame::Create(const Frame &other)
+{
+	return std::shared_ptr<Frame>(new Frame{other});
+}
+
 Frame::Frame(unsigned int numBones)
 	: m_move(nullptr)
 {

@@ -588,12 +588,12 @@ void Lua::GraphicsPipelineCreateInfo::SetStencilTestEnabled(lua_State *l,Anvil::
 
 void Lua::Shader::Graphics::RecordBindVertexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &buffer,uint32_t startBinding,uint32_t offset)
 {
-	Lua::PushBool(l,shader.RecordBindVertexBuffer(buffer->GetAnvilBuffer(),startBinding,offset));
+	Lua::PushBool(l,shader.RecordBindVertexBuffer(buffer.GetAnvilBuffer(),startBinding,offset));
 }
 void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,luabind::object buffers,uint32_t startBinding,luabind::object offsets)
 {
 	auto vBuffers = Lua::get_table_values<Anvil::Buffer*>(l,2,[](lua_State *l,int32_t idx) {
-		return &(*Lua::CheckVKBuffer(l,idx))->GetAnvilBuffer();
+		return &Lua::Check<Lua::Vulkan::Buffer>(l,idx).GetAnvilBuffer();
 	});
 	std::vector<uint64_t> vOffsets;
 	if(Lua::IsSet(l,4))
@@ -606,7 +606,7 @@ void Lua::Shader::Graphics::RecordBindVertexBuffers(lua_State *l,prosper::Shader
 }
 void Lua::Shader::Graphics::RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset)
 {
-	Lua::PushBool(l,shader.RecordBindIndexBuffer(indexBuffer->GetAnvilBuffer(),static_cast<Anvil::IndexType>(indexType),offset));
+	Lua::PushBool(l,shader.RecordBindIndexBuffer(indexBuffer.GetAnvilBuffer(),static_cast<Anvil::IndexType>(indexType),offset));
 }
 void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
 {
@@ -618,12 +618,12 @@ void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphi
 }
 void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
 {
-	if((*hCommandBuffer)->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	Lua::PushBool(l,shader.BeginDraw(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer),pipelineIdx));
+	Lua::PushBool(l,shader.BeginDraw(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
 }
 void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &shader)
 {

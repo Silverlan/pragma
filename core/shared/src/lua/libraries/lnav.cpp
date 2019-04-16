@@ -159,8 +159,8 @@ void Lua::nav::register_library(Lua::Interface &lua)
 	classDefConfig.add_static_constant("PARTITION_TYPE_LAYERS",umath::to_integral(pragma::nav::Config::PartitionType::Layers));
 	modNav[classDefConfig];
 
-	auto classDefMesh = luabind::class_<std::shared_ptr<pragma::nav::Mesh>>("Mesh");
-	classDefMesh.def("Save",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::nav::Mesh>&,const std::string&)>([](lua_State *l,std::shared_ptr<pragma::nav::Mesh> &navMesh,const std::string &fname) {
+	auto classDefMesh = luabind::class_<pragma::nav::Mesh>("Mesh");
+	classDefMesh.def("Save",static_cast<void(*)(lua_State*,pragma::nav::Mesh&,const std::string&)>([](lua_State *l,pragma::nav::Mesh &navMesh,const std::string &fname) {
 		auto outName = fname;
 		if(Lua::file::validate_write_operation(l,outName) == false)
 		{
@@ -169,24 +169,24 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		}
 		auto &nw = *engine->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
-		auto r = navMesh->Save(game,outName);
+		auto r = navMesh.Save(game,outName);
 		Lua::PushBool(l,r);
 	}));
-	/*classDefMesh.def("FindPath",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::nav::Mesh>&,const Vector3&,const Vector3&)>([](lua_State *l,std::shared_ptr<pragma::nav::Mesh> &navMesh,const Vector3 &start,const Vector3 &end) {
+	/*classDefMesh.def("FindPath",static_cast<void(*)(lua_State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
 		auto r = navMesh->FindPath(start,end);
 		Lua::PushBool(l,r != nullptr);
 		// TODO
 	}));*/
-	classDefMesh.def("RayCast",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::nav::Mesh>&,const Vector3&,const Vector3&)>([](lua_State *l,std::shared_ptr<pragma::nav::Mesh> &navMesh,const Vector3 &start,const Vector3 &end) {
+	classDefMesh.def("RayCast",static_cast<void(*)(lua_State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
 		Vector3 hit;
-		auto r = navMesh->RayCast(start,end,hit);
+		auto r = navMesh.RayCast(start,end,hit);
 		if(r == false)
 			Lua::PushBool(l,r);
 		else
 			Lua::Push<Vector3>(l,hit);
 	}));
-	classDefMesh.def("GetConfig",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::nav::Mesh>&)>([](lua_State *l,std::shared_ptr<pragma::nav::Mesh> &navMesh) {
-		auto &config = navMesh->GetConfig();
+	classDefMesh.def("GetConfig",static_cast<void(*)(lua_State*,pragma::nav::Mesh&)>([](lua_State *l,pragma::nav::Mesh &navMesh) {
+		auto &config = navMesh.GetConfig();
 		Lua::Push<pragma::nav::Config>(l,config);
 	}));
 	modNav[classDefMesh];

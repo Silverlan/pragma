@@ -23,16 +23,21 @@
 #pragma warning(disable : 4251)
 class ModelMesh;
 class DLLNETWORK ModelMeshGroup
+	: public std::enable_shared_from_this<ModelMeshGroup>
 {
-private:
-	std::string m_name;
-	std::vector<std::shared_ptr<ModelMesh>> m_meshes;
 public:
-	ModelMeshGroup(const std::string &name);
+	static std::shared_ptr<ModelMeshGroup> Create(const std::string &name);
+	static std::shared_ptr<ModelMeshGroup> Create(const ModelMeshGroup &other);
+	bool operator==(const ModelMeshGroup &other) const;
+	bool operator!=(const ModelMeshGroup &other) const;
 	uint32_t GetMeshCount() const;
 	const std::string &GetName() const;
 	std::vector<std::shared_ptr<ModelMesh>> &GetMeshes();
 	void AddMesh(const std::shared_ptr<ModelMesh> &mesh);
+private:
+	ModelMeshGroup(const std::string &name);
+	std::string m_name;
+	std::vector<std::shared_ptr<ModelMesh>> m_meshes;
 };
 
 struct DLLNETWORK LODInfo

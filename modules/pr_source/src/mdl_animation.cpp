@@ -130,7 +130,7 @@ std::shared_ptr<::Animation> import::mdl::AnimationDesc::CalcAnimation(const imp
 	auto &stdAnimDesc = GetStudioDesc();
 	auto &header = info.header;
 	auto &bones = info.bones;
-	auto anim = std::make_shared<::Animation>();
+	auto anim = ::Animation::Create();
 	anim->SetFPS(stdAnimDesc.fps);
 	anim->ReserveBoneIds(anim->GetBoneCount() +header.numbones);
 	for(auto i=decltype(header.numbones){0};i<header.numbones;++i)
@@ -165,7 +165,7 @@ std::shared_ptr<::Animation> import::mdl::AnimationDesc::CalcAnimation(const imp
 		}
 		frameData = &(*frames)[animIndex];
 			
-		auto frame = std::make_shared<Frame>(header.numbones);
+		auto frame = Frame::Create(header.numbones);
 		for(auto j=decltype(header.numbones){0};j<header.numbones;++j)
 		{
 			auto *stdAnim = (frameData != nullptr) ? &(*frameData)->GetStudioAnim() : nullptr;

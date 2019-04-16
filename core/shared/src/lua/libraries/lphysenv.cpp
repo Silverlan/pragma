@@ -251,12 +251,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
 
-	auto classTreeIkTree = luabind::class_<std::shared_ptr<Tree>>("IKTree");
+	auto classTreeIkTree = luabind::class_<Tree>("IKTree");
 	classTreeIkTree.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 		auto tree = std::make_shared<Tree>();
 		Lua::Push<std::shared_ptr<Tree>>(l,tree);
 	}))];
-	classTreeIkTree.def("Draw",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
+	classTreeIkTree.def("Draw",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
 		auto *game = engine->GetNetworkState(l)->GetGameState();
 		auto fGetLocalTransform = [](const Node* node, btTransform& act) {
 			btVector3 axis = btVector3(node->v.x, node->v.y, node->v.z);
@@ -338,74 +338,74 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			//btVector3 pos = btVector3(targetaa[0].x, targetaa[0].y, targetaa[0].z);
 			//btQuaternion orn(0, 0, 0, 1);
 		};
-		fRenderScene(*tree);
+		fRenderScene(tree);
 	}));
-	classTreeIkTree.def("GetNodeCount",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		Lua::PushInt(l,tree->GetNumNode());
+	classTreeIkTree.def("GetNodeCount",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		Lua::PushInt(l,tree.GetNumNode());
 	}));
-	classTreeIkTree.def("GetEffectorCount",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		Lua::PushInt(l,tree->GetNumEffector());
+	classTreeIkTree.def("GetEffectorCount",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		Lua::PushInt(l,tree.GetNumEffector());
 	}));
-	classTreeIkTree.def("GetJointCount",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		Lua::PushInt(l,tree->GetNumJoint());
+	classTreeIkTree.def("GetJointCount",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		Lua::PushInt(l,tree.GetNumJoint());
 	}));
-	classTreeIkTree.def("Compute",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		tree->Compute();
+	classTreeIkTree.def("Compute",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		tree.Compute();
 	}));
-	classTreeIkTree.def("Init",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		tree->Init();
+	classTreeIkTree.def("Init",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		tree.Init();
 	}));
-	classTreeIkTree.def("UnFreeze",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		tree->UnFreeze();
+	classTreeIkTree.def("UnFreeze",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		tree.UnFreeze();
 	}));
-	classTreeIkTree.def("Print",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		tree->Print();
+	classTreeIkTree.def("Print",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		tree.Print();
 	}));
-	classTreeIkTree.def("InsertRoot",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Tree> &tree,std::shared_ptr<Node> &node) {
-		tree->InsertRoot(node.get());
+	classTreeIkTree.def("InsertRoot",static_cast<void(*)(lua_State*,Tree&,Node&)>([](lua_State *l,Tree &tree,Node &node) {
+		tree.InsertRoot(&node);
 	}));
-	classTreeIkTree.def("InsertLeftChild",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,std::shared_ptr<Node>&,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Tree> &tree,std::shared_ptr<Node> &parent,std::shared_ptr<Node> &child) {
-		tree->InsertLeftChild(parent.get(),child.get());
+	classTreeIkTree.def("InsertLeftChild",static_cast<void(*)(lua_State*,Tree&,Node&,Node&)>([](lua_State *l,Tree &tree,Node &parent,Node &child) {
+		tree.InsertLeftChild(&parent,&child);
 	}));
-	classTreeIkTree.def("InsertRightSibling",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,std::shared_ptr<Node>&,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Tree> &tree,std::shared_ptr<Node> &parent,std::shared_ptr<Node> &child) {
-		tree->InsertRightSibling(parent.get(),child.get());
+	classTreeIkTree.def("InsertRightSibling",static_cast<void(*)(lua_State*,Tree&,Node&,Node&)>([](lua_State *l,Tree &tree,Node &parent,Node &child) {
+		tree.InsertRightSibling(&parent,&child);
 	}));
-	classTreeIkTree.def("GetJoint",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,uint32_t)>([](lua_State *l,std::shared_ptr<Tree> &tree,uint32_t nodeIdx) {
-		auto *node = tree->GetJoint(nodeIdx);
+	classTreeIkTree.def("GetJoint",static_cast<void(*)(lua_State*,Tree&,uint32_t)>([](lua_State *l,Tree &tree,uint32_t nodeIdx) {
+		auto *node = tree.GetJoint(nodeIdx);
 		if(node == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,node->shared_from_this());
 	}));
-	classTreeIkTree.def("GetEffector",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,uint32_t)>([](lua_State *l,std::shared_ptr<Tree> &tree,uint32_t nodeIdx) {
-		auto *node = tree->GetEffector(nodeIdx);
+	classTreeIkTree.def("GetEffector",static_cast<void(*)(lua_State*,Tree&,uint32_t)>([](lua_State *l,Tree &tree,uint32_t nodeIdx) {
+		auto *node = tree.GetEffector(nodeIdx);
 		if(node == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,node->shared_from_this());
 	}));
-	classTreeIkTree.def("GetEffectorPosition",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,uint32_t)>([](lua_State *l,std::shared_ptr<Tree> &tree,uint32_t nodeIdx) {
-		auto &pos = tree->GetEffectorPosition(nodeIdx);
+	classTreeIkTree.def("GetEffectorPosition",static_cast<void(*)(lua_State*,Tree&,uint32_t)>([](lua_State *l,Tree &tree,uint32_t nodeIdx) {
+		auto &pos = tree.GetEffectorPosition(nodeIdx);
 		Lua::Push<Vector3>(l,Vector3(pos.x,pos.y,pos.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}));
-	classTreeIkTree.def("GetRoot",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		auto *root = tree->GetRoot();
+	classTreeIkTree.def("GetRoot",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		auto *root = tree.GetRoot();
 		if(root == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,root->shared_from_this());
 	}));
-	classTreeIkTree.def("GetSuccessor",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Tree> &tree,std::shared_ptr<Node> &node) {
-		auto *successor = tree->GetSuccessor(node.get());
+	classTreeIkTree.def("GetSuccessor",static_cast<void(*)(lua_State*,Tree&,Node&)>([](lua_State *l,Tree &tree,Node &node) {
+		auto *successor = tree.GetSuccessor(&node);
 		if(successor == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,successor->shared_from_this());
 	}));
-	classTreeIkTree.def("GetParent",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Tree> &tree,std::shared_ptr<Node> &node) {
-		auto *parent = tree->GetParent(node.get());
+	classTreeIkTree.def("GetParent",static_cast<void(*)(lua_State*,Tree&,Node&)>([](lua_State *l,Tree &tree,Node &node) {
+		auto *parent = tree.GetParent(&node);
 		if(parent == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,parent->shared_from_this());
 	}));
 
-	auto classTreeIkTreeNode = luabind::class_<std::shared_ptr<Node>>("Node");
+	auto classTreeIkTreeNode = luabind::class_<Node>("Node");
 	classTreeIkTreeNode.add_static_constant("PURPOSE_JOINT",JOINT);
 	classTreeIkTreeNode.add_static_constant("PURPOSE_EFFECTOR",EFFECTOR);
 	classTreeIkTreeNode.scope[luabind::def("Create",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,uint32_t,double,double,double)>([](lua_State *l,const Vector3 &origin,const Vector3 &rotAxis,uint32_t purpose,double minTheta,double maxTheta,double restAngle) {
@@ -416,117 +416,117 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		auto node = std::make_shared<Node>(VectorR3(origin.x,origin.y,origin.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,static_cast<Purpose>(purpose));
 		Lua::Push<std::shared_ptr<Node>>(l,node);
 	}))];
-	classTreeIkTreeNode.def("GetLocalTransform",static_cast<void(*)(lua_State*,std::shared_ptr<Node> &node)>([](lua_State *l,std::shared_ptr<Node> &node) {
+	classTreeIkTreeNode.def("GetLocalTransform",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		PhysTransform t {};
-		util::ik::get_local_transform(*node,t);
+		util::ik::get_local_transform(node,t);
 		Lua::Push<PhysTransform>(l,t);
 	}));
-	classTreeIkTreeNode.def("PrintNode",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->PrintNode();
+	classTreeIkTreeNode.def("PrintNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.PrintNode();
 	}));
-	classTreeIkTreeNode.def("GetRotationAxis",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto &v = node->v;
+	classTreeIkTreeNode.def("GetRotationAxis",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto &v = node.v;
 		Lua::Push<Vector3>(l,Vector3(v.x,v.y,v.z));
 	}));
-	classTreeIkTreeNode.def("SetRotationAxis",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&,const Vector3&)>([](lua_State *l,std::shared_ptr<Node> &node,const Vector3 &axis) {
-		auto &v = node->v;
+	classTreeIkTreeNode.def("SetRotationAxis",static_cast<void(*)(lua_State*,Node&,const Vector3&)>([](lua_State *l,Node &node,const Vector3 &axis) {
+		auto &v = node.v;
 		v = VectorR3(axis.x,axis.y,axis.z);
 	}));
-	classTreeIkTreeNode.def("GetLeftChildNode",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto *left = node->left;
+	classTreeIkTreeNode.def("GetLeftChildNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto *left = node.left;
 		if(left == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,left->shared_from_this());
 	}));
-	classTreeIkTreeNode.def("GetRightChildNode",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto *right = node->right;
+	classTreeIkTreeNode.def("GetRightChildNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto *right = node.right;
 		if(right == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<Node>>(l,right->shared_from_this());
 	}));
-	classTreeIkTreeNode.def("InitNode",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->InitNode();
+	classTreeIkTreeNode.def("InitNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.InitNode();
 	}));
-	classTreeIkTreeNode.def("GetAttach",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto &r = node->GetAttach();
+	classTreeIkTreeNode.def("GetAttach",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto &r = node.GetAttach();
 		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}));
-	classTreeIkTreeNode.def("SetAttach",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&,const Vector3&)>([](lua_State *l,std::shared_ptr<Node> &node,const Vector3 &attach) {
-		node->attach = VectorR3(attach.x,attach.y,attach.z) *PhysEnv::WORLD_SCALE;
+	classTreeIkTreeNode.def("SetAttach",static_cast<void(*)(lua_State*,Node&,const Vector3&)>([](lua_State *l,Node &node,const Vector3 &attach) {
+		node.attach = VectorR3(attach.x,attach.y,attach.z) *PhysEnv::WORLD_SCALE;
 	}));
-	classTreeIkTreeNode.def("GetRelativePosition",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto &r = node->r;
+	classTreeIkTreeNode.def("GetRelativePosition",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto &r = node.r;
 		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}));
-	classTreeIkTreeNode.def("GetTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto theta = node->GetTheta();
+	classTreeIkTreeNode.def("GetTheta",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto theta = node.GetTheta();
 		Lua::PushNumber(l,theta);
 	}));
-	classTreeIkTreeNode.def("AddToTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&,double)>([](lua_State *l,std::shared_ptr<Node> &node,double delta) {
-		auto r = node->AddToTheta(delta);
+	classTreeIkTreeNode.def("AddToTheta",static_cast<void(*)(lua_State*,Node&,double)>([](lua_State *l,Node &node,double delta) {
+		auto r = node.AddToTheta(delta);
 		Lua::PushNumber(l,r);
 	}));
-	classTreeIkTreeNode.def("UpdateTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&,double)>([](lua_State *l,std::shared_ptr<Node> &node,double delta) {
-		auto r = node->UpdateTheta(delta);
+	classTreeIkTreeNode.def("UpdateTheta",static_cast<void(*)(lua_State*,Node&,double)>([](lua_State *l,Node &node,double delta) {
+		auto r = node.UpdateTheta(delta);
 		Lua::PushNumber(l,r);
 	}));
-	classTreeIkTreeNode.def("GetS",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto &s = node->GetS();
+	classTreeIkTreeNode.def("GetS",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto &s = node.GetS();
 		Lua::Push<Vector3>(l,Vector3(s.x,s.y,s.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}));
-	classTreeIkTreeNode.def("GetW",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto &w = node->GetW();
+	classTreeIkTreeNode.def("GetW",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto &w = node.GetW();
 		Lua::Push<Vector3>(l,Vector3(w.x,w.y,w.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
 	}));
-	classTreeIkTreeNode.def("GetMinTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto minTheta = node->GetMinTheta();
+	classTreeIkTreeNode.def("GetMinTheta",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto minTheta = node.GetMinTheta();
 		Lua::PushNumber(l,minTheta);
 	}));
-	classTreeIkTreeNode.def("GetMaxTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto maxTheta = node->GetMaxTheta();
+	classTreeIkTreeNode.def("GetMaxTheta",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto maxTheta = node.GetMaxTheta();
 		Lua::PushNumber(l,maxTheta);
 	}));
-	classTreeIkTreeNode.def("GetRestAngle",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		auto restAngle = node->GetRestAngle();
+	classTreeIkTreeNode.def("GetRestAngle",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		auto restAngle = node.GetRestAngle();
 		Lua::PushNumber(l,restAngle);
 	}));
-	classTreeIkTreeNode.def("SetTheta",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&,double)>([](lua_State *l,std::shared_ptr<Node> &node,double theta) {
-		node->SetTheta(theta);
+	classTreeIkTreeNode.def("SetTheta",static_cast<void(*)(lua_State*,Node&,double)>([](lua_State *l,Node &node,double theta) {
+		node.SetTheta(theta);
 	}));
-	classTreeIkTreeNode.def("ComputeS",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->ComputeS();
+	classTreeIkTreeNode.def("ComputeS",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.ComputeS();
 	}));
-	classTreeIkTreeNode.def("ComputeW",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->ComputeW();
+	classTreeIkTreeNode.def("ComputeW",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.ComputeW();
 	}));
-	classTreeIkTreeNode.def("IsEffector",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		Lua::PushBool(l,node->IsEffector());
+	classTreeIkTreeNode.def("IsEffector",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		Lua::PushBool(l,node.IsEffector());
 	}));
-	classTreeIkTreeNode.def("IsJoint",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		Lua::PushBool(l,node->IsJoint());
+	classTreeIkTreeNode.def("IsJoint",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		Lua::PushBool(l,node.IsJoint());
 	}));
-	classTreeIkTreeNode.def("GetEffectorIndex",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		Lua::PushInt(l,node->GetEffectorNum());
+	classTreeIkTreeNode.def("GetEffectorIndex",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		Lua::PushInt(l,node.GetEffectorNum());
 	}));
-	classTreeIkTreeNode.def("GetJointIndex",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		Lua::PushInt(l,node->GetJointNum());
+	classTreeIkTreeNode.def("GetJointIndex",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		Lua::PushInt(l,node.GetJointNum());
 	}));
-	classTreeIkTreeNode.def("IsFrozen",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		Lua::PushBool(l,node->IsFrozen());
+	classTreeIkTreeNode.def("IsFrozen",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		Lua::PushBool(l,node.IsFrozen());
 	}));
-	classTreeIkTreeNode.def("Freeze",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->Freeze();
+	classTreeIkTreeNode.def("Freeze",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.Freeze();
 	}));
-	classTreeIkTreeNode.def("UnFreeze",static_cast<void(*)(lua_State*,std::shared_ptr<Node>&)>([](lua_State *l,std::shared_ptr<Node> &node) {
-		node->UnFreeze();
+	classTreeIkTreeNode.def("UnFreeze",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
+		node.UnFreeze();
 	}));
 
-	auto classIkJacobian = luabind::class_<std::shared_ptr<Jacobian>>("IKJacobian");
-	classIkJacobian.scope[luabind::def("Create",static_cast<void(*)(lua_State*,std::shared_ptr<Tree>&)>([](lua_State *l,std::shared_ptr<Tree> &tree) {
-		auto jacobian = std::make_shared<Jacobian>(tree.get());
+	auto classIkJacobian = luabind::class_<Jacobian>("IKJacobian");
+	classIkJacobian.scope[luabind::def("Create",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
+		auto jacobian = std::make_shared<Jacobian>(&tree);
 		Lua::Push<std::shared_ptr<Jacobian>>(l,jacobian);
 	}))];
-	classIkJacobian.def("ComputeJacobian",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&,luabind::object)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian,luabind::object o) {
+	classIkJacobian.def("ComputeJacobian",static_cast<void(*)(lua_State*,Jacobian&,luabind::object)>([](lua_State *l,Jacobian &jacobian,luabind::object o) {
 		Lua::CheckTable(l,2);
 		auto numTargets = Lua::GetObjectLength(l,2);
 		std::vector<VectorR3> targets;
@@ -539,60 +539,60 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			targets.push_back(VectorR3(v->x,v->y,v->z) *PhysEnv::WORLD_SCALE);
 			Lua::Pop(l,1);
 		}
-		jacobian->ComputeJacobian(targets.data());
+		jacobian.ComputeJacobian(targets.data());
 	}));
-	classIkJacobian.def("SetJendActive",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->SetJendActive();
+	classIkJacobian.def("SetJendActive",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.SetJendActive();
 	}));
-	classIkJacobian.def("SetJtargetActive",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->SetJtargetActive();
+	classIkJacobian.def("SetJtargetActive",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.SetJtargetActive();
 	}));
-	//classIkJacobian.def("SetJendTrans",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->SetJendTrans();
+	//classIkJacobian.def("SetJendTrans",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.SetJendTrans();
 	//}));
-	//classIkJacobian.def("SetDeltaS",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian,const Vector3 &s) {
-	//	jacobian->SetDeltaS();
+	//classIkJacobian.def("SetDeltaS",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian,const Vector3 &s) {
+	//	jacobian.SetDeltaS();
 	//}));
-	classIkJacobian.def("CalcDeltaThetas",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetas();
+	classIkJacobian.def("CalcDeltaThetas",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetas();
 	}));
-	classIkJacobian.def("ZeroDeltaThetas",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->ZeroDeltaThetas();
+	classIkJacobian.def("ZeroDeltaThetas",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.ZeroDeltaThetas();
 	}));
-	classIkJacobian.def("CalcDeltaThetasTranspose",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetasTranspose();
+	classIkJacobian.def("CalcDeltaThetasTranspose",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetasTranspose();
 	}));
-	classIkJacobian.def("CalcDeltaThetasPseudoinverse",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetasPseudoinverse();
+	classIkJacobian.def("CalcDeltaThetasPseudoinverse",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetasPseudoinverse();
 	}));
-	classIkJacobian.def("CalcDeltaThetasDLS",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetasDLS();
+	classIkJacobian.def("CalcDeltaThetasDLS",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetasDLS();
 	}));
-	//classIkJacobian.def("CalcDeltaThetasDLS2",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->CalcDeltaThetasDLS2();
+	//classIkJacobian.def("CalcDeltaThetasDLS2",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.CalcDeltaThetasDLS2();
 	//}));
-	classIkJacobian.def("CalcDeltaThetasDLSwithSVD",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetasDLSwithSVD();
+	classIkJacobian.def("CalcDeltaThetasDLSwithSVD",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetasDLSwithSVD();
 	}));
-	classIkJacobian.def("CalcDeltaThetasSDLS",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CalcDeltaThetasSDLS();
+	classIkJacobian.def("CalcDeltaThetasSDLS",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CalcDeltaThetasSDLS();
 	}));
-	//classIkJacobian.def("CalcDeltaThetasDLSwithNullspace",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->CalcDeltaThetasDLSwithNullspace();
+	//classIkJacobian.def("CalcDeltaThetasDLSwithNullspace",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.CalcDeltaThetasDLSwithNullspace();
 	//}));
-	classIkJacobian.def("UpdateThetas",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->UpdateThetas();
+	classIkJacobian.def("UpdateThetas",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.UpdateThetas();
 	}));
-	classIkJacobian.def("UpdateThetaDot",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->UpdateThetaDot();
+	classIkJacobian.def("UpdateThetaDot",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.UpdateThetaDot();
 	}));
-	//classIkJacobian.def("UpdateErrorArray",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->UpdateErrorArray();
+	//classIkJacobian.def("UpdateErrorArray",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.UpdateErrorArray();
 	//}));
-	//classIkJacobian.def("GetErrorArray",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->GetErrorArray();
+	//classIkJacobian.def("GetErrorArray",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.GetErrorArray();
 	//}));
-	classIkJacobian.def("UpdatedSClampValue",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&,luabind::object)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian,luabind::object o) {
+	classIkJacobian.def("UpdatedSClampValue",static_cast<void(*)(lua_State*,Jacobian&,luabind::object)>([](lua_State *l,Jacobian &jacobian,luabind::object o) {
 		Lua::CheckTable(l,2);
 		auto numTargets = Lua::GetObjectLength(l,2);
 		std::vector<VectorR3> targets;
@@ -605,64 +605,64 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			targets.push_back(VectorR3(v->x,v->y,v->z) *PhysEnv::WORLD_SCALE);
 			Lua::Pop(l,1);
 		}
-		jacobian->UpdatedSClampValue(targets.data());
+		jacobian.UpdatedSClampValue(targets.data());
 	}));
-	//classIkJacobian.def("SetCurrentMode",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->SetCurrentMode();
+	//classIkJacobian.def("SetCurrentMode",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.SetCurrentMode();
 	//}));
-	//classIkJacobian.def("GetCurrentMode",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->GetCurrentMode();
+	//classIkJacobian.def("GetCurrentMode",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.GetCurrentMode();
 	//}));
-	//classIkJacobian.def("SetDampingDLS",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-	//	jacobian->SetDampingDLS();
+	//classIkJacobian.def("SetDampingDLS",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+	//	jacobian.SetDampingDLS();
 	//}));
-	classIkJacobian.def("Reset",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->Reset();
+	classIkJacobian.def("Reset",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.Reset();
 	}));
-	/*classIkJacobian.def("CompareErrors",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CompareErrors();
+	/*classIkJacobian.def("CompareErrors",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CompareErrors();
 	}));
-	classIkJacobian.def("CountErrors",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		jacobian->CountErrors();
+	classIkJacobian.def("CountErrors",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		jacobian.CountErrors();
 	}));*/
-	classIkJacobian.def("GetRowCount",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		Lua::PushInt(l,jacobian->GetNumRows());
+	classIkJacobian.def("GetRowCount",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		Lua::PushInt(l,jacobian.GetNumRows());
 	}));
-	classIkJacobian.def("GetColumnCount",static_cast<void(*)(lua_State*,std::shared_ptr<Jacobian>&)>([](lua_State *l,std::shared_ptr<Jacobian> &jacobian) {
-		Lua::PushInt(l,jacobian->GetNumCols());
+	classIkJacobian.def("GetColumnCount",static_cast<void(*)(lua_State*,Jacobian&)>([](lua_State *l,Jacobian &jacobian) {
+		Lua::PushInt(l,jacobian.GetNumCols());
 	}));
 	physMod[classIkJacobian];
 
 	classTreeIkTree.scope[classTreeIkTreeNode];
 	physMod[classTreeIkTree];
 
-	auto classIkController = luabind::class_<std::shared_ptr<IKController>>("IKController");
-	classIkController.def("GetEffectorName",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&)>([](lua_State *l,std::shared_ptr<IKController> &ikController) {
-		Lua::PushString(l,ikController->GetEffectorName());
+	auto classIkController = luabind::class_<IKController>("IKController");
+	classIkController.def("GetEffectorName",static_cast<void(*)(lua_State*,IKController&)>([](lua_State *l,IKController &ikController) {
+		Lua::PushString(l,ikController.GetEffectorName());
 	}));
-	classIkController.def("GetChainLength",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&)>([](lua_State *l,std::shared_ptr<IKController> &ikController) {
-		Lua::PushInt(l,ikController->GetChainLength());
+	classIkController.def("GetChainLength",static_cast<void(*)(lua_State*,IKController&)>([](lua_State *l,IKController &ikController) {
+		Lua::PushInt(l,ikController.GetChainLength());
 	}));
-	classIkController.def("GetType",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&)>([](lua_State *l,std::shared_ptr<IKController> &ikController) {
-		Lua::PushString(l,ikController->GetType());
+	classIkController.def("GetType",static_cast<void(*)(lua_State*,IKController&)>([](lua_State *l,IKController &ikController) {
+		Lua::PushString(l,ikController.GetType());
 	}));
-	classIkController.def("SetEffectorName",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,const std::string&)>([](lua_State *l,std::shared_ptr<IKController> &ikController,const std::string &effectorName) {
-		ikController->SetEffectorName(effectorName);
+	classIkController.def("SetEffectorName",static_cast<void(*)(lua_State*,IKController&,const std::string&)>([](lua_State *l,IKController &ikController,const std::string &effectorName) {
+		ikController.SetEffectorName(effectorName);
 	}));
-	classIkController.def("SetChainLength",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,uint32_t)>([](lua_State *l,std::shared_ptr<IKController> &ikController,uint32_t chainLength) {
-		ikController->SetChainLength(chainLength);
+	classIkController.def("SetChainLength",static_cast<void(*)(lua_State*,IKController&,uint32_t)>([](lua_State *l,IKController &ikController,uint32_t chainLength) {
+		ikController.SetChainLength(chainLength);
 	}));
-	classIkController.def("SetType",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,const std::string&)>([](lua_State *l,std::shared_ptr<IKController> &ikController,const std::string &type) {
-		ikController->SetType(type);
+	classIkController.def("SetType",static_cast<void(*)(lua_State*,IKController&,const std::string&)>([](lua_State *l,IKController &ikController,const std::string &type) {
+		ikController.SetType(type);
 	}));
-	classIkController.def("SetMethod",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,uint32_t)>([](lua_State *l,std::shared_ptr<IKController> &ikController,uint32_t method) {
-		ikController->SetMethod(static_cast<util::ik::Method>(method));
+	classIkController.def("SetMethod",static_cast<void(*)(lua_State*,IKController&,uint32_t)>([](lua_State *l,IKController &ikController,uint32_t method) {
+		ikController.SetMethod(static_cast<util::ik::Method>(method));
 	}));
-	classIkController.def("GetMethod",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&)>([](lua_State *l,std::shared_ptr<IKController> &ikController) {
-		Lua::PushInt(l,ikController->GetMethod());
+	classIkController.def("GetMethod",static_cast<void(*)(lua_State*,IKController&)>([](lua_State *l,IKController &ikController) {
+		Lua::PushInt(l,ikController.GetMethod());
 	}));
-	classIkController.def("GetKeyValues",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&)>([](lua_State *l,std::shared_ptr<IKController> &ikController) {
-		auto &ikKeyValues = ikController->GetKeyValues();
+	classIkController.def("GetKeyValues",static_cast<void(*)(lua_State*,IKController&)>([](lua_State *l,IKController &ikController) {
+		auto &ikKeyValues = ikController.GetKeyValues();
 		auto t = Lua::CreateTable(l);
 		for(auto &pair : ikKeyValues)
 		{
@@ -671,9 +671,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			Lua::SetTableValue(l,t);
 		}
 	}));
-	classIkController.def("SetKeyValues",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,luabind::object)>([](lua_State *l,std::shared_ptr<IKController> &ikController,luabind::object o) {
+	classIkController.def("SetKeyValues",static_cast<void(*)(lua_State*,IKController&,luabind::object)>([](lua_State *l,IKController &ikController,luabind::object o) {
 		Lua::CheckTable(l,2);
-		auto &ikKeyValues = ikController->GetKeyValues();
+		auto &ikKeyValues = ikController.GetKeyValues();
 		ikKeyValues.clear();
 		ikKeyValues.reserve(Lua::GetObjectLength(l,2));
 
@@ -686,12 +686,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			Lua::Pop(l,1);
 		}
 	}));
-	classIkController.def("SetKeyValue",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,const std::string&,const std::string&)>([](lua_State *l,std::shared_ptr<IKController> &ikController,const std::string &key,const std::string &value) {
-		auto &ikKeyValues = ikController->GetKeyValues();
+	classIkController.def("SetKeyValue",static_cast<void(*)(lua_State*,IKController&,const std::string&,const std::string&)>([](lua_State *l,IKController &ikController,const std::string &key,const std::string &value) {
+		auto &ikKeyValues = ikController.GetKeyValues();
 		ikKeyValues[key] = value;
 	}));
-	classIkController.def("GetKeyValue",static_cast<void(*)(lua_State*,std::shared_ptr<IKController>&,const std::string&)>([](lua_State *l,std::shared_ptr<IKController> &ikController,const std::string &key) {
-		auto &ikKeyValues = ikController->GetKeyValues();
+	classIkController.def("GetKeyValue",static_cast<void(*)(lua_State*,IKController&,const std::string&)>([](lua_State *l,IKController &ikController,const std::string &key) {
+		auto &ikKeyValues = ikController.GetKeyValues();
 		auto it = ikKeyValues.find(key);
 		if(it == ikKeyValues.end())
 			return;

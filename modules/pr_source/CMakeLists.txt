@@ -17,6 +17,7 @@ link_external_library(util_dmx)
 add_external_library(fbxsdk)
 add_external_library(lua)
 
+add_include_dir(niftools)
 add_include_dir(glm)
 add_include_dir(bullet)
 

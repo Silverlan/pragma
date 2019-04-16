@@ -261,5 +261,5 @@ CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosp
 {}
 void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
-	Lua::Push<Lua::Vulkan::Buffer>(l,buffer);
+	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
 }

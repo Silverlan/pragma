@@ -17,9 +17,23 @@ DEFINE_BASE_HANDLE(DLLNETWORK,Model,Model);
 
 extern DLLENGINE Engine *engine;
 
+std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
+{
+	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
+}
+std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const ModelMeshGroup &other)
+{
+	auto r = std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{other.m_name});
+	r->m_meshes.reserve(other.m_meshes.size());
+	for(auto &mesh : other.m_meshes)
+		r->m_meshes.push_back(mesh->Copy());
+	return r;
+}
 ModelMeshGroup::ModelMeshGroup(const std::string &name)
 	: m_name(name)
 {}
+bool ModelMeshGroup::operator==(const ModelMeshGroup &other) const {return this == &other;}
+bool ModelMeshGroup::operator!=(const ModelMeshGroup &other) const {return !operator==(other);}
 const std::string &ModelMeshGroup::GetName() const {return m_name;}
 std::vector<std::shared_ptr<ModelMesh>> &ModelMeshGroup::GetMeshes() {return m_meshes;}
 void ModelMeshGroup::AddMesh(const std::shared_ptr<ModelMesh> &mesh) {m_meshes.push_back(mesh);}
@@ -41,7 +55,7 @@ Model::MetaInfo::MetaInfo()
 
 Model::Model()
 	: m_handle(new PtrModel(this)),
-	m_reference(std::make_unique<Frame>(0))
+	m_reference(Frame::Create(0))
 {
 	Construct();
 }
@@ -62,22 +76,19 @@ Model::Model(const Model &other)
 	m_collisionMax(other.m_collisionMax),m_renderMin(other.m_renderMin),m_renderMax(other.m_renderMax),m_joints(other.m_joints),
 	m_baseMeshes(other.m_baseMeshes),m_lods(other.m_lods),m_attachments(other.m_attachments),
 	m_materials(other.m_materials),m_textureGroups(other.m_textureGroups),m_skeleton(std::make_unique<Skeleton>(*other.m_skeleton)),
-	m_reference(std::make_unique<Frame>(*other.m_reference)),m_vertexCount(other.m_vertexCount),m_triangleCount(other.m_triangleCount),
+	m_reference(Frame::Create(*other.m_reference)),m_vertexCount(other.m_vertexCount),m_triangleCount(other.m_triangleCount),
 	m_bAllMaterialsLoaded(true),m_flexControllers(other.m_flexControllers),m_flexes(other.m_flexes),m_phonemeMap(other.m_phonemeMap)
 {
 	m_meshGroups.reserve(other.m_meshGroups.size());
 	for(auto &meshGroup : other.m_meshGroups)
-		m_meshGroups.push_back(std::make_shared<ModelMeshGroup>(*meshGroup));
+		m_meshGroups.push_back(ModelMeshGroup::Create(*meshGroup));
 	m_animations.reserve(other.m_animations.size());
 	for(auto &anim : other.m_animations)
-		m_animations.push_back(std::make_shared<Animation>(*anim));
+		m_animations.push_back(Animation::Create(*anim));
 
 	m_vertexAnimations.reserve(other.m_vertexAnimations.size());
 	for(auto &anim : other.m_vertexAnimations)
-	{
-		auto cpy = anim->Copy();
-		m_vertexAnimations.push_back(std::shared_ptr<VertexAnimation>(cpy.release()));
-	}
+		m_vertexAnimations.push_back(anim->Copy());
 
 	m_collisionMeshes.reserve(other.m_collisionMeshes.size());
 	for(auto &mesh : other.m_collisionMeshes)
@@ -979,7 +990,7 @@ std::shared_ptr<ModelMeshGroup> Model::AddMeshGroup(const std::string &meshGroup
 	});
 	if(it == m_meshGroups.end())
 	{
-		auto mg = std::make_shared<ModelMeshGroup>(meshGroup);
+		auto mg = ModelMeshGroup::Create(meshGroup);
 		AddMeshGroup(mg);
 		it = m_meshGroups.end() -1;
 	}

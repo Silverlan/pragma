@@ -11,10 +11,6 @@
 		return; \
 	}
 
-lua_registercheck(Model,std::shared_ptr<::Model>);
-lua_registercheck(ModelSubMesh,std::shared_ptr<::ModelSubMesh>);
-lua_registercheck(ModelMesh,std::shared_ptr<::ModelMesh>);
-
 //LUA_SETUP_HANDLE_CHECK(Model,::Model,ModelHandle);
 
 #endif

@@ -445,10 +445,10 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 	classDefEqualizer.def_readwrite("highCutoff",&al::EfxEqualizer::flHighCutoff);
 	classDefAlEffect.scope[classDefEqualizer];
 
-	auto alSoundClassDef = luabind::class_<std::shared_ptr<ALSound>>("Source");
+	auto alSoundClassDef = luabind::class_<ALSound>("Source");
 	Lua::ALSound::Client::register_class(alSoundClassDef);
 
-	auto alBufferClassDef = luabind::class_<al::PSoundBuffer>("Source");
+	auto alBufferClassDef = luabind::class_<al::SoundBuffer>("Source");
 	Lua::ALSound::Client::register_buffer(alBufferClassDef);
 
 	auto soundMod = luabind::module(lua.GetState(),"sound");

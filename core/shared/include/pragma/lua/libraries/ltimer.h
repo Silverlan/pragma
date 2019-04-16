@@ -63,19 +63,19 @@ public:
 
 #include "pragma/util/timer_handle.h"
 
-DLLNETWORK void Lua_Timer_Start(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_Stop(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_Pause(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_Remove(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_IsValid(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_GetTimeLeft(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_GetTimeInterval(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_SetTimeInterval(lua_State *l,std::shared_ptr<TimerHandle> pTimer,float time);
-DLLNETWORK void Lua_Timer_GetRepetitionsLeft(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l,std::shared_ptr<TimerHandle> pTimer,unsigned int reps);
-DLLNETWORK void Lua_Timer_IsRunning(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_IsPaused(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_Call(lua_State *l,std::shared_ptr<TimerHandle> pTimer);
-DLLNETWORK void Lua_Timer_SetCall(lua_State *l,std::shared_ptr<TimerHandle> pTimer,luabind::object o);
+DLLNETWORK void Lua_Timer_Start(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_Stop(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_Pause(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_Remove(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_IsValid(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_GetTimeLeft(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_GetTimeInterval(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_SetTimeInterval(lua_State *l,TimerHandle &timer,float time);
+DLLNETWORK void Lua_Timer_GetRepetitionsLeft(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l,TimerHandle &timer,unsigned int reps);
+DLLNETWORK void Lua_Timer_IsRunning(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_IsPaused(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_Call(lua_State *l,TimerHandle &timer);
+DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,luabind::object o);
 
 #endif

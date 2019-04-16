@@ -24,8 +24,7 @@ int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
 	auto width = Lua::CheckInt(l,arg++);
 	auto height = Lua::CheckInt(l,arg++);
 	auto *uv = Lua::CheckVector2(l,arg++);
-	auto *cam = hCam->get();
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(cam->GetForward(),cam->GetRight(),cam->GetUp(),cam->GetFOVRad(),cam->GetZNear(),cam->GetZFar(),cam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(hCam->GetForward(),hCam->GetRight(),hCam->GetUp(),hCam->GetFOVRad(),hCam->GetZNear(),hCam->GetZFar(),hCam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }

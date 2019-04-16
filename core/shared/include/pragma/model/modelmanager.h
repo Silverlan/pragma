@@ -89,11 +89,11 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
 	auto mdl = std::shared_ptr<TModel>(new TModel(game->GetNetworkState(),boneCount));
 	auto &skeleton = mdl->GetSkeleton();
-	auto reference = std::make_shared<Animation>();
+	auto reference = Animation::Create();
 
 	if(bAddReference == true)
 	{
-		auto frame = std::make_shared<Frame>(1);
+		auto frame = Frame::Create(1);
 		auto *root = new Bone;
 		root->name = "root";
 		auto rootID = skeleton.AddBone(root);
@@ -105,7 +105,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		frame->SetBonePosition(0,Vector3(0.f,0.f,0.f));
 		frame->SetBoneOrientation(0,uquat::identity());
 
-		auto refFrame = std::make_shared<Frame>(*frame);
+		auto refFrame = Frame::Create(*frame);
 		frame->Localize(*reference,skeleton);
 		reference->AddFrame(frame);
 		mdl->AddAnimation("reference",reference);

@@ -9,6 +9,15 @@ decltype(Animation::s_eventEnumRegister) Animation::s_eventEnumRegister;
 util::EnumRegister &Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
 util::EnumRegister &Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
+std::shared_ptr<Animation> Animation::Create()
+{
+	return std::shared_ptr<Animation>(new Animation{});
+}
+std::shared_ptr<Animation> Animation::Create(const Animation &other,ShareMode share)
+{
+	return std::shared_ptr<Animation>(new Animation{other,share});
+}
+
 Animation::Animation()
 	: m_flags(FAnim::None),m_activity(Activity::Invalid),m_activityWeight(1),m_fps(24),
 	m_fadeIn(nullptr),m_fadeOut(nullptr),m_blendController(nullptr)
@@ -29,7 +38,7 @@ Animation::Animation(const Animation &other,ShareMode share)
 	{
 		m_frames.reserve(other.m_frames.size());
 		for(auto &frame : other.m_frames)
-			m_frames.push_back(std::make_shared<Frame>(*frame));
+			m_frames.push_back(Frame::Create(*frame));
 	}
 
 	if((share &ShareMode::Events) != ShareMode::None)

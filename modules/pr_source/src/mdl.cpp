@@ -875,7 +875,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		mdl.AddBlendController(pp.GetName(),start,end,loop);
 	}
 
-	auto reference = std::make_shared<Animation>();
+	auto reference = Animation::Create();
 	mdl.AddAnimation("reference",reference); // Reference always has to be the first animation!
 	auto bHasReferenceAnim = false;
 
@@ -903,7 +903,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		else // There was already a sequence with this animation; Copy it
 		{
 			anim = anims[animIdx];
-			anim = std::make_shared<Animation>(*anim);//,Animation::ShareMode::Frames);
+			anim = Animation::Create(*anim);//,Animation::ShareMode::Frames);
 		}
 		
 		auto itAct = translateActivities.find(seq.GetActivityName());
@@ -1078,7 +1078,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	if(refId == -1 || bHasReferenceAnim == false)
 	{
 		std::cout<<"WARNING: No reference animation found; Attempting to generate reference from default bone transforms..."<<std::endl;
-		reference = std::make_shared<Animation>();
+		reference = Animation::Create();
 		mdl.AddAnimation("reference",reference);
 	}
 	else
@@ -1095,7 +1095,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		refBoneList.push_back(i);
 	reference->SetBoneList(refBoneList);
 
-	frameReference = std::make_shared<Frame>(header.numbones);
+	frameReference = Frame::Create(header.numbones);
 	for(auto i=decltype(header.numbones){0};i<header.numbones;++i)
 	{
 		const auto fAngToMat = [](const EulerAngles &ang) -> Mat4 {
@@ -2698,7 +2698,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	//
 
 	// Generate reference
-	auto refPose = std::make_shared<Frame>(*frameReference);
+	auto refPose = Frame::Create(*frameReference);
 	for(auto i=decltype(bones.size()){0};i<bones.size();++i)
 	{
 		auto &pos = *refPose->GetBonePosition(i);

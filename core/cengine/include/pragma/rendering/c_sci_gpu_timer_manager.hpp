@@ -2,45 +2,40 @@
 #define __C_SCI_GPU_TIMER_MANAGER_HPP__
 
 #include "pragma/c_enginedefinitions.h"
+#include <queries/prosper_pipeline_statistics_query.hpp>
 #include <array>
+#include <set>
 
-enum class DLLCENGINE GPUTimerEvent : uint32_t
+enum class GPUTimerEvent : uint32_t
 {
 	// Draw
 	GUI = 0,
-	WorldScene,
-	Particles,
-	UpdateExposure,
-	Shadow,
+	Frame,
+	Scene,
+
+	Prepass,
+	PrepassSkybox,
+	PrepassWorld,
+	PrepassView,
+
+	CullLightSources,
+	Shadows,
+	SSAO,
+
+	PostProcessing,
+	PostProcessingFog,
+	PostProcessingFXAA,
+	PostProcessingGlow,
+	PostProcessingBloom,
+	PostProcessingHDR,
+
+	Present,
 	Skybox,
 	World,
-	WorldTranslucent,
-	Water,
+	Particles,
 	Debug,
+	Water,
 	View,
-	ViewParticles,
-	Glow,
-	BlurHDRBloom,
-	GlowAdditive,
-	FinalAdditive,
-	HDR,
-	SceneToScreen,
-	GameRender,
-	Mesh0,
-	Mesh1,
-	Mesh2,
-	Mesh3,
-	Mesh4,
-	Mesh5,
-	Mesh6,
-	Mesh7,
-	Mesh8,
-	DebugMesh,
-	ShadowLayerBlit,
-
-	// Compute
-	ComputeStart,
-	WaterSurface = ComputeStart,
 
 	Count
 };
@@ -50,44 +45,50 @@ namespace prosper
 	class QueryPool;
 	class TimerQuery;
 };
+namespace pragma
+{
+	class GPUSwapchainTimer;
+};
 class DLLCENGINE CSciGPUTimerManager
 {
 public:
+	enum class EventFlags : uint32_t
+	{
+		None = 0u,
+		Root
+	};
+	struct DLLCENGINE EventData
+	{
+		Anvil::PipelineStageFlagBits stage;
+	};
+	struct DLLCENGINE ResultData
+	{
+		std::chrono::nanoseconds duration;
+		prosper::PipelineStatisticsQuery::Statistics statistics;
+	};
+
 	CSciGPUTimerManager();
 	void StartTimer(GPUTimerEvent e);
 	void StopTimer(GPUTimerEvent e);
-	bool IsResultAvailable(GPUTimerEvent e) const;
-	bool GetResult(GPUTimerEvent e,float &v) const;
-	float GetResult(GPUTimerEvent e) const;
-	bool IsTimerActive(GPUTimerEvent e) const;
-	void GetResults(std::vector<float> &results) const;
+	bool GetResult(GPUTimerEvent e,std::chrono::nanoseconds &outDuration) const;
+	void Reset();
+
+	std::vector<std::optional<ResultData>> GetResults() const;
+	const std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> &GetEventDependencies() const;
+	const std::vector<GPUTimerEvent> &GetRootEvents() const;
+	const EventData &GetEventData(GPUTimerEvent eventId) const;
 	static std::string EventToString(GPUTimerEvent e);
 private:
-	enum class DLLCENGINE TimerState : uint32_t
-	{
-		Inactive = 0,
-		Started,
-		Stopped
-	};
-	struct DLLCENGINE Query
-	{
-		struct DLLCENGINE CmdInfo
-		{
-			std::shared_ptr<prosper::TimerQuery> query = nullptr;
-			TimerState state = TimerState::Inactive;
-			uint64_t resultFrame = std::numeric_limits<uint64_t>::max();
-		};
-		std::vector<std::shared_ptr<CmdInfo>> cmdQueries; // Data per swapchain command buffer
-		long double result = 0.L;
-	};
-	uint32_t m_cmdCount = 0;
-	std::shared_ptr<prosper::QueryPool> m_pool = nullptr;
-	std::unordered_map<std::shared_ptr<prosper::CommandBuffer>,std::size_t> m_cmdBufferIndices;
-	std::array<std::shared_ptr<Query>,umath::to_integral(GPUTimerEvent::Count)> m_timerQueries;
-	TimerState GetTimerState(GPUTimerEvent e) const;
+	std::shared_ptr<prosper::QueryPool> m_timerQueryPool = nullptr;
+	std::shared_ptr<prosper::QueryPool> m_statsQueryPool = nullptr;
+	std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> m_eventDependencies = {};
+	std::vector<GPUTimerEvent> m_rootEvents = {};
+	std::array<EventData,umath::to_integral(GPUTimerEvent::Count)> m_eventData = {};
+	std::array<std::shared_ptr<pragma::GPUSwapchainTimer>,umath::to_integral(GPUTimerEvent::Count)> m_timerQueries;
+
+	void SetupEvent(GPUTimerEvent eventId,const std::vector<GPUTimerEvent> &dependencies,Anvil::PipelineStageFlagBits stage,EventFlags eventFlags=EventFlags::None);
 	void InitializeQueries();
-	const prosper::CommandBuffer &GetCommandBuffer(GPUTimerEvent e) const;
-	std::size_t GetCommandBufferIndex(GPUTimerEvent e) const;
 };
+REGISTER_BASIC_BITWISE_OPERATORS(CSciGPUTimerManager::EventFlags)
 
 #endif

@@ -56,7 +56,7 @@ void SGame::RegisterLuaLibraries()
 	});
 	Lua::sound::register_enums(GetLuaState());
 
-	auto alSoundClassDef = luabind::class_<std::shared_ptr<ALSound>>("Source");
+	auto alSoundClassDef = luabind::class_<ALSound>("Source");
 	Lua::ALSound::register_class(alSoundClassDef);
 
 	auto soundMod = luabind::module(GetLuaState(),"sound");

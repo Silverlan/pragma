@@ -9,7 +9,7 @@ namespace Lua
 {
 	namespace WorldEnvironment
 	{
-		DLLCLIENT void register_class(luabind::class_<std::shared_ptr<::WorldEnvironment>> &classDef);
+		DLLCLIENT void register_class(luabind::class_<::WorldEnvironment> &classDef);
 	};
 };
 

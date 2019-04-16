@@ -7,36 +7,36 @@ namespace Lua
 {
 	namespace WorldEnvironment
 	{
-		static void SetAmbientColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,const Vector4 &ambientColor);
-		static void GetAmbientColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
+		static void SetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv,const Vector4 &ambientColor);
+		static void GetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv);
 
-		static void SetShaderQuality(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,int32_t shaderQuality);
-		static void GetShaderQuality(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
+		static void SetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv,int32_t shaderQuality);
+		static void GetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv);
 
-		static void SetUnlit(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,bool bUnlit);
-		static void IsUnlit(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
+		static void SetUnlit(lua_State *l,::WorldEnvironment &worldEnv,bool bUnlit);
+		static void IsUnlit(lua_State *l,::WorldEnvironment &worldEnv);
 
-		static void SetShadowResolution(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,uint32_t shadowResolution);
-		static void GetShadowResolution(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
+		static void SetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv,uint32_t shadowResolution);
+		static void GetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv);
 
 		// Fog
-		static void SetFogStart(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float start);
-		static void SetFogEnd(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float end);
-		static void GetFogStart(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void GetFogEnd(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void SetFogColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,const Color &color);
-		static void GetFogColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void SetFogEnabled(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,bool bEnabled);
-		static void IsFogEnabled(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void SetFogDensity(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float density);
-		static void GetFogDensity(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void SetFogType(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,uint32_t type);
-		static void GetFogType(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
-		static void GetFogFarDistance(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv);
+		static void SetFogStart(lua_State *l,::WorldEnvironment &worldEnv,float start);
+		static void SetFogEnd(lua_State *l,::WorldEnvironment &worldEnv,float end);
+		static void GetFogStart(lua_State *l,::WorldEnvironment &worldEnv);
+		static void GetFogEnd(lua_State *l,::WorldEnvironment &worldEnv);
+		static void SetFogColor(lua_State *l,::WorldEnvironment &worldEnv,const Color &color);
+		static void GetFogColor(lua_State *l,::WorldEnvironment &worldEnv);
+		static void SetFogEnabled(lua_State *l,::WorldEnvironment &worldEnv,bool bEnabled);
+		static void IsFogEnabled(lua_State *l,::WorldEnvironment &worldEnv);
+		static void SetFogDensity(lua_State *l,::WorldEnvironment &worldEnv,float density);
+		static void GetFogDensity(lua_State *l,::WorldEnvironment &worldEnv);
+		static void SetFogType(lua_State *l,::WorldEnvironment &worldEnv,uint32_t type);
+		static void GetFogType(lua_State *l,::WorldEnvironment &worldEnv);
+		static void GetFogFarDistance(lua_State *l,::WorldEnvironment &worldEnv);
 	};
 };
 
-void Lua::WorldEnvironment::register_class(luabind::class_<std::shared_ptr<::WorldEnvironment>> &classDef)
+void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &classDef)
 {
 	classDef.def("SetAmbientColor",&SetAmbientColor);
 	classDef.def("GetAmbientColor",&GetAmbientColor);
@@ -97,106 +97,106 @@ void Lua::WorldEnvironment::register_class(luabind::class_<std::shared_ptr<::Wor
 	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2",umath::to_integral(::WorldEnvironment::Fog::Type::Exponential2));
 }
 
-void Lua::WorldEnvironment::SetAmbientColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,const Vector4 &ambientColor)
+void Lua::WorldEnvironment::SetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv,const Vector4 &ambientColor)
 {
-	worldEnv->SetAmbientColor(ambientColor);
+	worldEnv.SetAmbientColor(ambientColor);
 }
-void Lua::WorldEnvironment::GetAmbientColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	Lua::Push<Vector4>(l,worldEnv->GetAmbientColor());
-}
-
-void Lua::WorldEnvironment::SetShaderQuality(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,int32_t shaderQuality)
-{
-	worldEnv->SetShaderQuality(shaderQuality);
-}
-void Lua::WorldEnvironment::GetShaderQuality(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
-{
-	Lua::PushInt(l,worldEnv->GetShaderQuality());
+	Lua::Push<Vector4>(l,worldEnv.GetAmbientColor());
 }
 
-void Lua::WorldEnvironment::SetUnlit(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,bool bUnlit)
+void Lua::WorldEnvironment::SetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv,int32_t shaderQuality)
 {
-	worldEnv->SetUnlit(bUnlit);
+	worldEnv.SetShaderQuality(shaderQuality);
 }
-void Lua::WorldEnvironment::IsUnlit(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	Lua::PushBool(l,worldEnv->IsUnlit());
+	Lua::PushInt(l,worldEnv.GetShaderQuality());
 }
 
-void Lua::WorldEnvironment::SetShadowResolution(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,uint32_t shadowResolution)
+void Lua::WorldEnvironment::SetUnlit(lua_State *l,::WorldEnvironment &worldEnv,bool bUnlit)
 {
-	worldEnv->SetShadowResolution(shadowResolution);
+	worldEnv.SetUnlit(bUnlit);
 }
-void Lua::WorldEnvironment::GetShadowResolution(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::IsUnlit(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	Lua::PushInt(l,worldEnv->GetShadowResolution());
+	Lua::PushBool(l,worldEnv.IsUnlit());
+}
+
+void Lua::WorldEnvironment::SetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv,uint32_t shadowResolution)
+{
+	worldEnv.SetShadowResolution(shadowResolution);
+}
+void Lua::WorldEnvironment::GetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv)
+{
+	Lua::PushInt(l,worldEnv.GetShadowResolution());
 }
 
 ////////////////////////////////
 
-void Lua::WorldEnvironment::SetFogStart(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float start)
+void Lua::WorldEnvironment::SetFogStart(lua_State *l,::WorldEnvironment &worldEnv,float start)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetStart(start);
 }
-void Lua::WorldEnvironment::SetFogEnd(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float end)
+void Lua::WorldEnvironment::SetFogEnd(lua_State *l,::WorldEnvironment &worldEnv,float end)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetEnd(end);
 }
-void Lua::WorldEnvironment::GetFogStart(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogStart(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l,fog.GetStart());
 }
-void Lua::WorldEnvironment::GetFogEnd(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogEnd(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l,fog.GetEnd());
 }
-void Lua::WorldEnvironment::SetFogColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,const Color &color)
+void Lua::WorldEnvironment::SetFogColor(lua_State *l,::WorldEnvironment &worldEnv,const Color &color)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetColor(color);
 }
-void Lua::WorldEnvironment::GetFogColor(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogColor(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::Push<Color>(l,fog.GetColor());
 }
-void Lua::WorldEnvironment::SetFogEnabled(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,bool bEnabled)
+void Lua::WorldEnvironment::SetFogEnabled(lua_State *l,::WorldEnvironment &worldEnv,bool bEnabled)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetEnabled(bEnabled);
 }
-void Lua::WorldEnvironment::IsFogEnabled(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::IsFogEnabled(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushBool(l,fog.IsEnabled());
 }
-void Lua::WorldEnvironment::SetFogDensity(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,float density)
+void Lua::WorldEnvironment::SetFogDensity(lua_State *l,::WorldEnvironment &worldEnv,float density)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetMaxDensity(density);
 }
-void Lua::WorldEnvironment::GetFogDensity(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogDensity(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l,fog.GetMaxDensity());
 }
-void Lua::WorldEnvironment::SetFogType(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv,uint32_t type)
+void Lua::WorldEnvironment::SetFogType(lua_State *l,::WorldEnvironment &worldEnv,uint32_t type)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	fog.SetType(static_cast<::WorldEnvironment::Fog::Type>(type));
 }
-void Lua::WorldEnvironment::GetFogType(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogType(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushInt(l,umath::to_integral(fog.GetType()));
 }
-void Lua::WorldEnvironment::GetFogFarDistance(lua_State *l,std::shared_ptr<::WorldEnvironment> &worldEnv)
+void Lua::WorldEnvironment::GetFogFarDistance(lua_State *l,::WorldEnvironment &worldEnv)
 {
-	auto &fog = worldEnv->GetFogSettings();
+	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l,fog.GetFarDistance());
 }

@@ -57,7 +57,9 @@ public:
 		SSAOInfo ssaoInfo;
 		pragma::rendering::Prepass prepass;
 		pragma::rendering::ForwardPlusInstance forwardPlusInstance;
-		std::shared_ptr<prosper::RenderTarget> bloomRenderTarget = nullptr;
+		std::shared_ptr<prosper::Texture> bloomTexture = nullptr;
+		std::shared_ptr<prosper::Texture> bloomBlurTexture = nullptr;
+		std::shared_ptr<prosper::RenderTarget> bloomBlurRenderTarget = nullptr;
 		std::shared_ptr<prosper::RenderTarget> hdrRenderTarget = nullptr;
 		std::shared_ptr<prosper::RenderTarget> hdrStagingRenderTarget = nullptr;
 		std::shared_ptr<prosper::RenderTarget> postHdrRenderTarget = nullptr;

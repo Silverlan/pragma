@@ -14,6 +14,7 @@
 #include <pragma/lua/lua_handle.hpp>
 #include <luasystem.h>
 
+#pragma optimize("",off)
 void SGame::HandleLuaNetPacket(WVServerClient *session,NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();
@@ -153,3 +154,4 @@ DLLSERVER int Lua_sv_net_Receive(lua_State *l)
 
 
 DLLSERVER void NET_sv_luanet(WVServerClient *session,NetPacket packet) {server->HandleLuaNetPacket(session,packet);}
+#pragma optimize("",on)

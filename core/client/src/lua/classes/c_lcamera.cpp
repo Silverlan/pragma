@@ -18,122 +18,119 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-void Lua::Scene::GetCamera(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetCamera(lua_State *l,::Scene &scene)
 {
-	auto &cam = scene->camera;
+	auto &cam = scene.camera;
 	Lua::Push<std::shared_ptr<::Camera>>(l,cam);
 }
 
-void Lua::Scene::GetSize(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetSize(lua_State *l,::Scene &scene)
 {
-	Lua::Push<Vector2i>(l,Vector2i{scene->GetWidth(),scene->GetHeight()});
+	Lua::Push<Vector2i>(l,Vector2i{scene.GetWidth(),scene.GetHeight()});
 }
-void Lua::Scene::GetWidth(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetWidth(lua_State *l,::Scene &scene)
 {
-	Lua::PushInt(l,scene->GetWidth());
+	Lua::PushInt(l,scene.GetWidth());
 }
-void Lua::Scene::GetHeight(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetHeight(lua_State *l,::Scene &scene)
 {
-	Lua::PushInt(l,scene->GetHeight());
+	Lua::PushInt(l,scene.GetHeight());
 }
-void Lua::Scene::Resize(lua_State*,std::shared_ptr<::Scene> &scene,uint32_t width,uint32_t height)
+void Lua::Scene::Resize(lua_State*,::Scene &scene,uint32_t width,uint32_t height)
 {
-	scene->Resize(width,height);
+	scene.Resize(width,height);
 }
-void Lua::Scene::BeginDraw(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::BeginDraw(lua_State *l,::Scene &scene)
 {
-	scene->BeginDraw();
+	scene.BeginDraw();
 }
-void Lua::Scene::UpdateBuffers(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<prosper::CommandBuffer> &hCommandBuffer)
+void Lua::Scene::UpdateBuffers(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
 {
-	if(hCommandBuffer->IsPrimary() == false)
+	if(hCommandBuffer.IsPrimary() == false)
 		return;
-	scene->UpdateBuffers(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer));
+	scene.UpdateBuffers(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this()));
 }
-void Lua::Scene::GetWorldEnvironment(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetWorldEnvironment(lua_State *l,::Scene &scene)
 {
-	auto *worldEnv = scene->GetWorldEnvironment();
+	auto *worldEnv = scene.GetWorldEnvironment();
 	if(worldEnv == nullptr)
 		return;
 	Lua::Push<std::shared_ptr<WorldEnvironment>>(l,worldEnv->shared_from_this());
 }
-void Lua::Scene::ClearWorldEnvironment(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::ClearWorldEnvironment(lua_State *l,::Scene &scene)
 {
-	scene->ClearWorldEnvironment();
+	scene.ClearWorldEnvironment();
 }
-void Lua::Scene::SetWorldEnvironment(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<WorldEnvironment> &worldEnv)
+void Lua::Scene::SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironment &worldEnv)
 {
-	scene->SetWorldEnvironment(*worldEnv);
+	scene.SetWorldEnvironment(worldEnv);
 }
-void Lua::Scene::GetPrepassDepthTexture(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetPrepassDepthTexture(lua_State *l,::Scene &scene)
 {
-	auto &depthTex = scene->GetPrepass().textureDepth;
+	auto &depthTex = scene.GetPrepass().textureDepth;
 	if(depthTex == nullptr)
 		return;
 	Lua::Push(l,depthTex);
 }
-void Lua::Scene::GetPrepassNormalTexture(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetPrepassNormalTexture(lua_State *l,::Scene &scene)
 {
-	auto &normalTex = scene->GetPrepass().textureNormals;
+	auto &normalTex = scene.GetPrepass().textureNormals;
 	if(normalTex == nullptr)
 		return;
 	Lua::Push(l,normalTex);
 }
-void Lua::Scene::InitializeRenderTarget(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::InitializeRenderTarget(lua_State *l,::Scene &scene)
 {
-	scene->InitializeRenderTarget();
+	scene.InitializeRenderTarget();
 }
-void Lua::Scene::GetRenderTarget(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetRenderTarget(lua_State *l,::Scene &scene)
 {
-	auto &rt = scene->GetHDRInfo().hdrRenderTarget;
+	auto &rt = scene.GetHDRInfo().hdrRenderTarget;
 	if(rt == nullptr)
 		return;
 	Lua::Push(l,rt);
 }
-void Lua::Scene::BeginRenderPass(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<prosper::CommandBuffer> &hCommandBuffer)
+void Lua::Scene::BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
 {
-	Lua::CheckVKCommandBuffer(l,2);
-	if((*hCommandBuffer)->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer);
-	Lua::PushBool(l,scene->BeginRenderPass(primCmdBuffer));
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,scene.BeginRenderPass(primCmdBuffer));
 }
-void Lua::Scene::BeginRenderPass(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<prosper::CommandBuffer> &hCommandBuffer,std::shared_ptr<prosper::RenderPass> &rp)
+void Lua::Scene::BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp)
 {
-	Lua::CheckVKCommandBuffer(l,2);
-	if((*hCommandBuffer)->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer);
-	Lua::PushBool(l,scene->BeginRenderPass(primCmdBuffer,rp.get()));
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,scene.BeginRenderPass(primCmdBuffer,&rp));
 }
-void Lua::Scene::EndRenderPass(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<prosper::CommandBuffer> &hCommandBuffer)
+void Lua::Scene::EndRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
 {
-	Lua::CheckVKCommandBuffer(l,2);
-	if((*hCommandBuffer)->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer);
-	Lua::PushBool(l,scene->EndRenderPass(primCmdBuffer));
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,scene.EndRenderPass(primCmdBuffer));
 }
-void Lua::Scene::AddLightSource(lua_State *l,std::shared_ptr<::Scene> &scene,CLightHandle &hLight)
+void Lua::Scene::AddLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight)
 {
 	pragma::Lua::check_component(l,hLight);
-	scene->AddLight(hLight.get());
+	scene.AddLight(hLight.get());
 }
-void Lua::Scene::RemoveLightSource(lua_State *l,std::shared_ptr<::Scene> &scene,CLightHandle &hLight)
+void Lua::Scene::RemoveLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight)
 {
 	pragma::Lua::check_component(l,hLight);
-	scene->RemoveLight(hLight.get());
+	scene.RemoveLight(hLight.get());
 }
-void Lua::Scene::SetLightSources(lua_State *l,std::shared_ptr<::Scene> &scene,luabind::object o)
+void Lua::Scene::SetLightSources(lua_State *l,::Scene &scene,luabind::object o)
 {
 	int32_t t = 2;
 	Lua::CheckTable(l,t);
@@ -166,11 +163,11 @@ void Lua::Scene::SetLightSources(lua_State *l,std::shared_ptr<::Scene> &scene,lu
 		}
 		lights.push_back(pLight.get());
 	}
-	scene->SetLights(lights);
+	scene.SetLights(lights);
 }
-void Lua::Scene::GetLightSources(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetLightSources(lua_State *l,::Scene &scene)
 {
-	auto &lightSources = scene->GetLightSources();
+	auto &lightSources = scene.GetLightSources();
 	auto t = Lua::CreateTable(l);
 	int32_t idx = 1;
 	for(auto &hLight : lightSources)
@@ -182,18 +179,18 @@ void Lua::Scene::GetLightSources(lua_State *l,std::shared_ptr<::Scene> &scene)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Scene::LinkLightSources(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<::Scene> &sceneOther) {scene->LinkLightSources(*sceneOther);}
-void Lua::Scene::AddEntity(lua_State *l,std::shared_ptr<::Scene> &scene,EntityHandle &hEnt)
+void Lua::Scene::LinkLightSources(lua_State *l,::Scene &scene,::Scene &sceneOther) {scene.LinkLightSources(sceneOther);}
+void Lua::Scene::AddEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	scene->AddEntity(static_cast<CBaseEntity&>(*hEnt.get()));
+	scene.AddEntity(static_cast<CBaseEntity&>(*hEnt.get()));
 }
-void Lua::Scene::RemoveEntity(lua_State *l,std::shared_ptr<::Scene> &scene,EntityHandle &hEnt)
+void Lua::Scene::RemoveEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	scene->RemoveEntity(static_cast<CBaseEntity&>(*hEnt.get()));
+	scene.RemoveEntity(static_cast<CBaseEntity&>(*hEnt.get()));
 }
-void Lua::Scene::SetEntities(lua_State *l,std::shared_ptr<::Scene> &scene,luabind::object o)
+void Lua::Scene::SetEntities(lua_State *l,::Scene &scene,luabind::object o)
 {
 	int32_t t = 2;
 	Lua::CheckTable(l,t);
@@ -212,11 +209,11 @@ void Lua::Scene::SetEntities(lua_State *l,std::shared_ptr<::Scene> &scene,luabin
 			continue;
 		ents.push_back(ent);
 	}
-	scene->SetEntities(ents);
+	scene.SetEntities(ents);
 }
-void Lua::Scene::GetEntities(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetEntities(lua_State *l,::Scene &scene)
 {
-	auto &entityList = scene->GetEntities();
+	auto &entityList = scene.GetEntities();
 	auto t = Lua::CreateTable(l);
 	int32_t idx = 1;
 	for(auto &hEnt : entityList)
@@ -228,31 +225,31 @@ void Lua::Scene::GetEntities(lua_State *l,std::shared_ptr<::Scene> &scene)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Scene::LinkEntities(lua_State *l,std::shared_ptr<::Scene> &scene,std::shared_ptr<::Scene> &sceneOther) {scene->LinkEntities(*sceneOther);}
-void Lua::Scene::GetPrepassShader(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::LinkEntities(lua_State *l,::Scene &scene,::Scene &sceneOther) {scene.LinkEntities(sceneOther);}
+void Lua::Scene::GetPrepassShader(lua_State *l,::Scene &scene)
 {
-	auto &shader = scene->GetPrepassShader();
+	auto &shader = scene.GetPrepassShader();
 	Lua::shader::push_shader(l,shader);
 }
-void Lua::Scene::GetCameraDescriptorSet(lua_State *l,std::shared_ptr<::Scene> &scene,uint32_t bindPoint)
+void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint)
 {
-	auto &descSet = scene->GetCameraDescriptorSetGroup(static_cast<vk::PipelineBindPoint>(bindPoint));
+	auto &descSet = scene.GetCameraDescriptorSetGroup(static_cast<vk::PipelineBindPoint>(bindPoint));
 	if(descSet == nullptr)
 		return;
 	Lua::Push(l,descSet);
 }
-void Lua::Scene::GetCameraDescriptorSet(lua_State *l,std::shared_ptr<::Scene> &scene) {GetCameraDescriptorSet(l,scene,umath::to_integral(vk::PipelineBindPoint::eGraphics));}
-void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,std::shared_ptr<::Scene> &scene)
+void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene) {GetCameraDescriptorSet(l,scene,umath::to_integral(vk::PipelineBindPoint::eGraphics));}
+void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,::Scene &scene)
 {
-	auto &descSet = scene->GetViewCameraDescriptorSetGroup();
+	auto &descSet = scene.GetViewCameraDescriptorSetGroup();
 	if(descSet == nullptr)
 		return;
 	Lua::Push(l,descSet);
 }
-void Lua::Scene::SetShaderOverride(lua_State *l,std::shared_ptr<::Scene> &scene,const std::string &srcName,const std::string &dstName) {scene->SetShaderOverride(srcName,dstName);}
-void Lua::Scene::ClearShaderOverride(lua_State *l,std::shared_ptr<::Scene> &scene,const std::string &srcName) {scene->ClearShaderOverride(srcName);}
-void Lua::Scene::SetPrepassMode(lua_State *l,std::shared_ptr<::Scene> &scene,uint32_t mode) {scene->SetPrepassMode(static_cast<::Scene::PrepassMode>(mode));}
-void Lua::Scene::GetPrepassMode(lua_State *l,std::shared_ptr<::Scene> &scene) {Lua::PushInt(l,umath::to_integral(scene->GetPrepassMode()));}
+void Lua::Scene::SetShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName,const std::string &dstName) {scene.SetShaderOverride(srcName,dstName);}
+void Lua::Scene::ClearShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName) {scene.ClearShaderOverride(srcName);}
+void Lua::Scene::SetPrepassMode(lua_State *l,::Scene &scene,uint32_t mode) {scene.SetPrepassMode(static_cast<::Scene::PrepassMode>(mode));}
+void Lua::Scene::GetPrepassMode(lua_State *l,::Scene &scene) {Lua::PushInt(l,umath::to_integral(scene.GetPrepassMode()));}
 
 ////////////////////////////////
 
@@ -260,138 +257,138 @@ void Lua::Camera::Create(lua_State *l,float fov,float fovView,float aspectRatio,
 {
 	Lua::Push<std::shared_ptr<::Camera>>(l,::Camera::Create(fov,fovView,aspectRatio,nearZ,farZ));
 }
-void Lua::Camera::Copy(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::Copy(lua_State *l,::Camera &cam)
 {
-	Lua::Push<std::shared_ptr<::Camera>>(l,::Camera::Create(*hCam.get()));
+	Lua::Push<std::shared_ptr<::Camera>>(l,::Camera::Create(cam));
 }
 
-void Lua::Camera::GetProjectionMatrix(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetProjectionMatrix(lua_State *l,::Camera &cam)
 {
-	luabind::object(l,hCam->GetProjectionMatrix()).push(l);
+	luabind::object(l,cam.GetProjectionMatrix()).push(l);
 }
 
-void Lua::Camera::GetViewMatrix(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetViewMatrix(lua_State *l,::Camera &cam)
 {
-	luabind::object(l,hCam->GetViewMatrix()).push(l);
+	luabind::object(l,cam.GetViewMatrix()).push(l);
 }
 
-void Lua::Camera::GetRight(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetRight(lua_State *l,::Camera &cam)
 {
-	luabind::object(l,hCam->GetRight()).push(l);
+	luabind::object(l,cam.GetRight()).push(l);
 }
 
-void Lua::Camera::GetUp(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetUp(lua_State *l,::Camera &cam)
 {
-	luabind::object(l,hCam->GetUp()).push(l);
+	luabind::object(l,cam.GetUp()).push(l);
 }
 
-void Lua::Camera::SetUp(lua_State*,std::shared_ptr<::Camera> &hCam,Vector3 &up)
+void Lua::Camera::SetUp(lua_State*,::Camera &cam,Vector3 &up)
 {
-	hCam->SetUp(up);
+	cam.SetUp(up);
 }
 
-void Lua::Camera::GetPos(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetPos(lua_State *l,::Camera &cam)
 {
-	luabind::object(l,hCam->GetPos()).push(l);
+	luabind::object(l,cam.GetPos()).push(l);
 }
 
-void Lua::Camera::SetPos(lua_State*,std::shared_ptr<::Camera> &hCam,Vector3 &pos)
+void Lua::Camera::SetPos(lua_State*,::Camera &cam,Vector3 &pos)
 {
-	hCam->SetPos(pos);
+	cam.SetPos(pos);
 }
 
-void Lua::Camera::LookAt(lua_State*,std::shared_ptr<::Camera> &hCam,const Vector3 &pos)
+void Lua::Camera::LookAt(lua_State*,::Camera &cam,const Vector3 &pos)
 {
-	auto &camPos = hCam->GetPos();
+	auto &camPos = cam.GetPos();
 	auto dir = pos -camPos;
 	uvec::normalize(&dir);
-	hCam->SetForward(dir);
+	cam.SetForward(dir);
 }
 
-void Lua::Camera::UpdateMatrices(lua_State*,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::UpdateMatrices(lua_State*,::Camera &cam)
 {
-	hCam->UpdateMatrices();
+	cam.UpdateMatrices();
 }
-void Lua::Camera::UpdateViewMatrix(lua_State*,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::UpdateViewMatrix(lua_State*,::Camera &cam)
 {
-	hCam->UpdateViewMatrix();
+	cam.UpdateViewMatrix();
 }
-void Lua::Camera::UpdateProjectionMatrix(lua_State*,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::UpdateProjectionMatrix(lua_State*,::Camera &cam)
 {
-	hCam->UpdateProjectionMatrix();
+	cam.UpdateProjectionMatrix();
 }
-void Lua::Camera::UpdateViewProjectionMatrix(lua_State*,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::UpdateViewProjectionMatrix(lua_State*,::Camera &cam)
 {
-	hCam->UpdateViewProjectionMatrix();
+	cam.UpdateViewProjectionMatrix();
 }
-void Lua::Camera::UpdateProjectionMatrices(lua_State*,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::UpdateProjectionMatrices(lua_State*,::Camera &cam)
 {
-	hCam->UpdateProjectionMatrices();
+	cam.UpdateProjectionMatrices();
 }
-void Lua::Camera::SetFOV(lua_State*,std::shared_ptr<::Camera> &hCam,float fov)
+void Lua::Camera::SetFOV(lua_State*,::Camera &cam,float fov)
 {
-	hCam->SetFOV(fov);
+	cam.SetFOV(fov);
 }
-void Lua::Camera::SetViewFOV(lua_State*,std::shared_ptr<::Camera> &hCam,float fov)
+void Lua::Camera::SetViewFOV(lua_State*,::Camera &cam,float fov)
 {
-	hCam->SetViewFOV(fov);
+	cam.SetViewFOV(fov);
 }
-void Lua::Camera::SetAspectRatio(lua_State*,std::shared_ptr<::Camera> &hCam,float aspectRatio)
+void Lua::Camera::SetAspectRatio(lua_State*,::Camera &cam,float aspectRatio)
 {
-	hCam->SetAspectRatio(aspectRatio);
+	cam.SetAspectRatio(aspectRatio);
 }
-void Lua::Camera::SetZNear(lua_State*,std::shared_ptr<::Camera> &hCam,float nearZ)
+void Lua::Camera::SetZNear(lua_State*,::Camera &cam,float nearZ)
 {
-	hCam->SetZNear(nearZ);
+	cam.SetZNear(nearZ);
 }
-void Lua::Camera::SetZFar(lua_State*,std::shared_ptr<::Camera> &hCam,float farZ)
+void Lua::Camera::SetZFar(lua_State*,::Camera &cam,float farZ)
 {
-	hCam->SetZFar(farZ);
+	cam.SetZFar(farZ);
 }
-void Lua::Camera::SetForward(lua_State*,std::shared_ptr<::Camera> &hCam,Vector3 &forward)
+void Lua::Camera::SetForward(lua_State*,::Camera &cam,Vector3 &forward)
 {
-	hCam->SetForward(forward);
+	cam.SetForward(forward);
 }
-void Lua::Camera::GetViewProjectionMatrix(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetViewProjectionMatrix(lua_State *l,::Camera &cam)
 {
-	Lua::Push<Mat4>(l,hCam->GetViewProjectionMatrix());
+	Lua::Push<Mat4>(l,cam.GetViewProjectionMatrix());
 }
-void Lua::Camera::GetForward(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetForward(lua_State *l,::Camera &cam)
 {
-	Lua::Push<Vector3>(l,hCam->GetForward());
+	Lua::Push<Vector3>(l,cam.GetForward());
 }
-void Lua::Camera::GetFOV(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFOV(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetFOV());
+	Lua::PushNumber(l,cam.GetFOV());
 }
-void Lua::Camera::GetViewFOV(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetViewFOV(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetViewFOV());
+	Lua::PushNumber(l,cam.GetViewFOV());
 }
-void Lua::Camera::GetFOVRad(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFOVRad(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetFOVRad());
+	Lua::PushNumber(l,cam.GetFOVRad());
 }
-void Lua::Camera::GetViewFOVRad(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetViewFOVRad(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetViewFOVRad());
+	Lua::PushNumber(l,cam.GetViewFOVRad());
 }
-void Lua::Camera::GetAspectRatio(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetAspectRatio(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetAspectRatio());
+	Lua::PushNumber(l,cam.GetAspectRatio());
 }
-void Lua::Camera::GetZNear(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetZNear(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetZNear());
+	Lua::PushNumber(l,cam.GetZNear());
 }
-void Lua::Camera::GetZFar(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetZFar(lua_State *l,::Camera &cam)
 {
-	Lua::PushNumber(l,hCam->GetZFar());
+	Lua::PushNumber(l,cam.GetZFar());
 }
-void Lua::Camera::GetFrustumPlanes(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFrustumPlanes(lua_State *l,::Camera &cam)
 {
 	std::vector<Plane> planes;
-	hCam->GetFrustumPlanes(planes);
+	cam.GetFrustumPlanes(planes);
 
 	lua_newtable(l);
 	int top = lua_gettop(l);
@@ -401,18 +398,18 @@ void Lua::Camera::GetFrustumPlanes(lua_State *l,std::shared_ptr<::Camera> &hCam)
 		lua_rawseti(l,top,i +1);
 	}
 }
-void Lua::Camera::GetFarPlaneCenter(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFarPlaneCenter(lua_State *l,::Camera &cam)
 {
-	Lua::Push<Vector3>(l,hCam->GetFarPlaneCenter());
+	Lua::Push<Vector3>(l,cam.GetFarPlaneCenter());
 }
-void Lua::Camera::GetNearPlaneCenter(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetNearPlaneCenter(lua_State *l,::Camera &cam)
 {
-	Lua::Push<Vector3>(l,hCam->GetNearPlaneCenter());
+	Lua::Push<Vector3>(l,cam.GetNearPlaneCenter());
 }
-void Lua::Camera::GetFarPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFarPlaneBoundaries(lua_State *l,::Camera &cam)
 {
 	std::vector<Vector3> farBounds;
-	hCam->GetFarPlaneBoundaries(&farBounds);
+	cam.GetFarPlaneBoundaries(&farBounds);
 
 	lua_newtable(l);
 	int top = lua_gettop(l);
@@ -422,10 +419,10 @@ void Lua::Camera::GetFarPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> &
 		lua_rawseti(l,top,i +1);
 	}
 }
-void Lua::Camera::GetNearPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetNearPlaneBoundaries(lua_State *l,::Camera &cam)
 {
 	std::vector<Vector3> nearBounds;
-	hCam->GetNearPlaneBoundaries(&nearBounds);
+	cam.GetNearPlaneBoundaries(&nearBounds);
 
 	lua_newtable(l);
 	int top = lua_gettop(l);
@@ -435,11 +432,11 @@ void Lua::Camera::GetNearPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> 
 		lua_rawseti(l,top,i +1);
 	}
 }
-void Lua::Camera::GetPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetPlaneBoundaries(lua_State *l,::Camera &cam)
 {
 	std::vector<Vector3> nearBounds;
 	std::vector<Vector3> farBounds;
-	hCam->GetPlaneBoundaries(&nearBounds,&farBounds);
+	cam.GetPlaneBoundaries(&nearBounds,&farBounds);
 
 	lua_newtable(l);
 	int top = lua_gettop(l);
@@ -458,40 +455,40 @@ void Lua::Camera::GetPlaneBoundaries(lua_State *l,std::shared_ptr<::Camera> &hCa
 	}
 }
 
-void Lua::Camera::SetProjectionMatrix(lua_State*,std::shared_ptr<::Camera> &hCam,Mat4 &mat)
+void Lua::Camera::SetProjectionMatrix(lua_State*,::Camera &cam,Mat4 &mat)
 {
-	hCam->SetProjectionMatrix(mat);
+	cam.SetProjectionMatrix(mat);
 }
 
-void Lua::Camera::SetViewMatrix(lua_State*,std::shared_ptr<::Camera> &hCam,Mat4 &mat)
+void Lua::Camera::SetViewMatrix(lua_State*,::Camera &cam,Mat4 &mat)
 {
-	hCam->SetViewMatrix(mat);
+	cam.SetViewMatrix(mat);
 }
-void Lua::Camera::SetViewProjectionMatrix(lua_State*,std::shared_ptr<::Camera> &hCam,Mat4 &mat)
+void Lua::Camera::SetViewProjectionMatrix(lua_State*,::Camera &cam,Mat4 &mat)
 {
-	hCam->SetViewProjectionMatrix(mat);
+	cam.SetViewProjectionMatrix(mat);
 }
 
-void Lua::Camera::GetNearPlaneBounds(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetNearPlaneBounds(lua_State *l,::Camera &cam)
 {
 	float wNear,hNear;
-	hCam->GetNearPlaneBounds(&wNear,&hNear);
+	cam.GetNearPlaneBounds(&wNear,&hNear);
 	Lua::PushNumber(l,wNear);
 	Lua::PushNumber(l,hNear);
 }
 
-void Lua::Camera::GetFarPlaneBounds(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFarPlaneBounds(lua_State *l,::Camera &cam)
 {
 	float wFar,hFar;
-	hCam->GetFarPlaneBounds(&wFar,&hFar);
+	cam.GetFarPlaneBounds(&wFar,&hFar);
 	Lua::PushNumber(l,wFar);
 	Lua::PushNumber(l,hFar);
 }
 
-void Lua::Camera::GetFrustumPoints(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetFrustumPoints(lua_State *l,::Camera &cam)
 {
 	std::vector<Vector3> points;
-	hCam->GetFrustumPoints(points);
+	cam.GetFrustumPoints(points);
 
 	int table = Lua::CreateTable(l);
 	for(unsigned int i=0;i<points.size();i++)
@@ -502,23 +499,23 @@ void Lua::Camera::GetFrustumPoints(lua_State *l,std::shared_ptr<::Camera> &hCam)
 	}
 }
 
-void Lua::Camera::GetNearPlanePoint(lua_State *l,std::shared_ptr<::Camera> &hCam,const Vector2 &uv)
+void Lua::Camera::GetNearPlanePoint(lua_State *l,::Camera &cam,const Vector2 &uv)
 {
-	auto point = hCam->GetNearPlanePoint(uv);
+	auto point = cam.GetNearPlanePoint(uv);
 	Lua::Push<decltype(point)>(l,point);
 }
-void Lua::Camera::GetFarPlanePoint(lua_State *l,std::shared_ptr<::Camera> &hCam,const Vector2 &uv)
+void Lua::Camera::GetFarPlanePoint(lua_State *l,::Camera &cam,const Vector2 &uv)
 {
-	auto point = hCam->GetFarPlanePoint(uv);
+	auto point = cam.GetFarPlanePoint(uv);
 	Lua::Push<decltype(point)>(l,point);
 }
 
-void Lua::Camera::GetFrustumNeighbors(lua_State *l,std::shared_ptr<::Camera> &hCam,int planeID)
+void Lua::Camera::GetFrustumNeighbors(lua_State *l,::Camera &cam,int planeID)
 {
 	if(planeID < 0 || planeID > 5)
 		return;
 	FRUSTUM_PLANE neighborIDs[4];
-	hCam->GetFrustumNeighbors(FRUSTUM_PLANE(planeID),&neighborIDs[0]);
+	cam.GetFrustumNeighbors(FRUSTUM_PLANE(planeID),&neighborIDs[0]);
 	int table = Lua::CreateTable(l);
 	for(unsigned int i=0;i<4;i++)
 	{
@@ -528,7 +525,7 @@ void Lua::Camera::GetFrustumNeighbors(lua_State *l,std::shared_ptr<::Camera> &hC
 	}
 }
 
-void Lua::Camera::GetFrustumPlaneCornerPoints(lua_State *l,std::shared_ptr<::Camera> &hCam,int planeA,int planeB)
+void Lua::Camera::GetFrustumPlaneCornerPoints(lua_State *l,::Camera &cam,int planeA,int planeB)
 {
 	Lua::CheckTable(l,2);
 
@@ -536,16 +533,16 @@ void Lua::Camera::GetFrustumPlaneCornerPoints(lua_State *l,std::shared_ptr<::Cam
 		return;
 
 	FRUSTUM_POINT cornerPoints[2];
-	hCam->GetFrustumPlaneCornerPoints(FRUSTUM_PLANE(planeA),FRUSTUM_PLANE(planeB),&cornerPoints[0]);
+	cam.GetFrustumPlaneCornerPoints(FRUSTUM_PLANE(planeA),FRUSTUM_PLANE(planeB),&cornerPoints[0]);
 
 	Lua::PushInt(l,static_cast<int>(cornerPoints[0]));
 	Lua::PushInt(l,static_cast<int>(cornerPoints[1]));
 }
 
-void Lua::Camera::CreateFrustumKDop(lua_State *l,std::shared_ptr<::Camera> &hCam,const Vector2 &uvStart,const Vector2 &uvEnd)
+void Lua::Camera::CreateFrustumKDop(lua_State *l,::Camera &cam,const Vector2 &uvStart,const Vector2 &uvEnd)
 {
 	std::vector<Plane> kDop;
-	hCam->CreateFrustumKDop(uvStart,uvEnd,kDop);
+	cam.CreateFrustumKDop(uvStart,uvEnd,kDop);
 
 	auto table = Lua::CreateTable(l);
 	auto idx = 1u;
@@ -557,7 +554,7 @@ void Lua::Camera::CreateFrustumKDop(lua_State *l,std::shared_ptr<::Camera> &hCam
 	}
 }
 
-void Lua::Camera::CreateFrustumKDop(lua_State *l,std::shared_ptr<::Camera> &hCam,luabind::object o1,luabind::object o2,Vector3 dir)
+void Lua::Camera::CreateFrustumKDop(lua_State *l,::Camera &cam,luabind::object o1,luabind::object o2,Vector3 dir)
 {
 	Lua::CheckTable(l,2);
 	Lua::CheckTable(l,3);
@@ -585,7 +582,7 @@ void Lua::Camera::CreateFrustumKDop(lua_State *l,std::shared_ptr<::Camera> &hCam
 		return;
 
 	std::vector<Plane> kDop;
-	hCam->CreateFrustumKDop(planes,points,dir,&kDop);
+	cam.CreateFrustumKDop(planes,points,dir,&kDop);
 
 	int table = Lua::CreateTable(l);
 	for(unsigned int i=0;i<kDop.size();i++)
@@ -595,16 +592,16 @@ void Lua::Camera::CreateFrustumKDop(lua_State *l,std::shared_ptr<::Camera> &hCam
 		Lua::SetTableValue(l,table);
 	}
 }
-void Lua::Camera::GetRotation(lua_State *l,std::shared_ptr<::Camera> &hCam)
+void Lua::Camera::GetRotation(lua_State *l,::Camera &cam)
 {
-	Lua::Push<Quat>(l,hCam->GetRotation());
+	Lua::Push<Quat>(l,cam.GetRotation());
 }
 
-void Lua::Camera::CreateFrustumMesh(lua_State *l,std::shared_ptr<::Camera> &hCam,const Vector2 &uvStart,const Vector2 &uvEnd)
+void Lua::Camera::CreateFrustumMesh(lua_State *l,::Camera &cam,const Vector2 &uvStart,const Vector2 &uvEnd)
 {
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> indices;
-	hCam->CreateFrustumMesh(uvStart,uvEnd,verts,indices);
+	cam.CreateFrustumMesh(uvStart,uvEnd,verts,indices);
 	auto t = Lua::CreateTable(l);
 	auto vertIdx = 1u;
 	for(auto &v : verts)

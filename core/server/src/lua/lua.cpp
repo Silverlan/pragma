@@ -123,6 +123,8 @@ void SGame::RegisterLua()
 		{"register_event",Lua::net::register_event}
 		//{"send_resource_file",Lua_sv_net_SendResourceFile}
 	});
+	
+	auto modNet = luabind::module(GetLuaState(),"net");
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
 	netPacketClassDef.def("WritePlayer",static_cast<void(*)(lua_State*,::NetPacket&,util::WeakHandle<pragma::SPlayerComponent>&)>([](lua_State *l,::NetPacket &packet,util::WeakHandle<pragma::SPlayerComponent> &pl) {
@@ -137,7 +139,6 @@ void SGame::RegisterLua()
 			return;
 		pl->PushLuaObject(l);
 	}));
-	auto modNet = luabind::module(GetLuaState(),"net");
 	modNet[netPacketClassDef];
 	Lua::net::RegisterLibraryEnums(GetLuaState());
 

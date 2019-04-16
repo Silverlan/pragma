@@ -26,6 +26,8 @@ public:
 	};
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
+	bool operator==(const ModelSubMesh &other) const;
+	bool operator!=(const ModelSubMesh &other) const;
 	void SetShared(const ModelSubMesh &other,ShareMode mode=ShareMode::All);
 	void ClearTriangles();
 	virtual void Centralize(const Vector3 &origin);
@@ -97,6 +99,8 @@ public:
 	ModelMesh();
 	ModelMesh(const ModelMesh &other);
 	ModelMesh &operator=(const ModelMesh&)=delete;
+	bool operator==(const ModelMesh &other) const;
+	bool operator!=(const ModelMesh &other) const;
 	void Centralize();
 	const Vector3 &GetCenter() const;
 	void SetCenter(const Vector3 &center);

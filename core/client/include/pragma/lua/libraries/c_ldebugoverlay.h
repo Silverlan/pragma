@@ -28,16 +28,16 @@ namespace Lua
 			DLLCLIENT int DrawFrustum(lua_State *l);
 			namespace Object
 			{
-				DLLCLIENT void Remove(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void IsValid(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void SetPos(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const Vector3 &pos);
-				DLLCLIENT void GetPos(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void SetRotation(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const Quat &rot);
-				DLLCLIENT void GetRotation(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void SetAngles(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const EulerAngles &ang);
-				DLLCLIENT void GetAngles(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void IsVisible(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o);
-				DLLCLIENT void SetVisible(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,bool b);
+				DLLCLIENT void Remove(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void IsValid(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void SetPos(lua_State *l,::DebugRenderer::BaseObject &o,const Vector3 &pos);
+				DLLCLIENT void GetPos(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void SetRotation(lua_State *l,::DebugRenderer::BaseObject &o,const Quat &rot);
+				DLLCLIENT void GetRotation(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void SetAngles(lua_State *l,::DebugRenderer::BaseObject &o,const EulerAngles &ang);
+				DLLCLIENT void GetAngles(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void IsVisible(lua_State *l,::DebugRenderer::BaseObject &o);
+				DLLCLIENT void SetVisible(lua_State *l,::DebugRenderer::BaseObject &o,bool b);
 			};
 		};
 	};

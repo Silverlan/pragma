@@ -329,70 +329,73 @@ void Lua::HandleSyntaxError(lua_State *l,Lua::StatusCode r)
 void Lua::initialize_error_handler()
 {
 	luabind::set_pcall_callback([](lua_State *l) -> void {
-		std::stringstream ssMsg;
-		std::string luaMsg = Lua::ToString(l,-1);
+		Lua::PushCFunction(l,[](lua_State *l) -> int32_t {
+			std::stringstream ssMsg;
+			std::string luaMsg = Lua::ToString(l,-1);
 
-		lua_Debug d {};
-		int32_t level = 1;
-		auto bFoundSrc = false;
-		while(bFoundSrc == false && lua_getstack(l,level,&d) == 1)
-		{
-			if(lua_getinfo(l,"Sln",&d) != 0 && (strcmp(d.what,"Lua") == 0 || strcmp(d.what,"main") == 0))
+			lua_Debug d {};
+			int32_t level = 1;
+			auto bFoundSrc = false;
+			while(bFoundSrc == false && lua_getstack(l,level,&d) == 1)
 			{
-				bFoundSrc = true;
-				break;
-			}
-			++level;
-		}
-
-		ssMsg<<"[LUA] ";
-		if(bFoundSrc == true)
-		{
-			if(!luaMsg.empty() && luaMsg.front() != '[')
-			{
-				std::string shortSrc = d.source;
-				strip_path_until_lua_dir(shortSrc);
-				shortSrc = "[string \"" +shortSrc +"\"]";
-
-				std::stringstream ssErrMsg;
-				ssErrMsg<<shortSrc<<":"<<d.currentline<<": "<<luaMsg;
-				luaMsg = ssErrMsg.str();
-			}
-		}
-		transform_path(d,luaMsg);
-		ssMsg<<luaMsg;
-		auto bNl = print_code_snippet(ssMsg,(d.source != nullptr) ? d.source : "",d.currentline,":");
-		if(level != 1)
-		{
-			level = 1;
-			if(bNl == true)
-				ssMsg<<"\n\n";
-			else
-				ssMsg<<":\n";
-			ssMsg<<"    Callstack:";
-			while(lua_getstack(l,level,&d) == 1)
-			{
-				if(lua_getinfo(l,"Sln",&d) != 0)
+				if(lua_getinfo(l,"Sln",&d) != 0 && (strcmp(d.what,"Lua") == 0 || strcmp(d.what,"main") == 0))
 				{
-					std::string t(level *4,' ');
-					if(level >= 10)
-					{
-						ssMsg<<t<<"...";
-						break;
-					}
-					else
-					{
-						std::string src = d.source;
-						strip_path_until_lua_dir(src);
-						transform_path(d,src);
-						src = "[string \"" +src +"\"]";
-						ssMsg<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<src<<":"<<d.currentline;
-					}
+					bFoundSrc = true;
+					break;
 				}
 				++level;
 			}
-		}
-		print_lua_error_message(l,ssMsg);
+
+			ssMsg<<"[LUA] ";
+			if(bFoundSrc == true)
+			{
+				if(!luaMsg.empty() && luaMsg.front() != '[')
+				{
+					std::string shortSrc = d.source;
+					strip_path_until_lua_dir(shortSrc);
+					shortSrc = "[string \"" +shortSrc +"\"]";
+
+					std::stringstream ssErrMsg;
+					ssErrMsg<<shortSrc<<":"<<d.currentline<<": "<<luaMsg;
+					luaMsg = ssErrMsg.str();
+				}
+			}
+			transform_path(d,luaMsg);
+			ssMsg<<luaMsg;
+			auto bNl = print_code_snippet(ssMsg,(d.source != nullptr) ? d.source : "",d.currentline,":");
+			if(level != 1)
+			{
+				level = 1;
+				if(bNl == true)
+					ssMsg<<"\n\n";
+				else
+					ssMsg<<":\n";
+				ssMsg<<"    Callstack:";
+				while(lua_getstack(l,level,&d) == 1)
+				{
+					if(lua_getinfo(l,"Sln",&d) != 0)
+					{
+						std::string t(level *4,' ');
+						if(level >= 10)
+						{
+							ssMsg<<t<<"...";
+							break;
+						}
+						else
+						{
+							std::string src = d.source;
+							strip_path_until_lua_dir(src);
+							transform_path(d,src);
+							src = "[string \"" +src +"\"]";
+							ssMsg<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<src<<":"<<d.currentline;
+						}
+					}
+					++level;
+				}
+			}
+			print_lua_error_message(l,ssMsg);
+			return 0;
+		});
 	});
 }
 

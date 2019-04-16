@@ -1,234 +1,314 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
+#include "pragma/rendering/c_gpu_swapchain_timer.hpp"
 #include <pragma/console/c_cvar.h>
 #include <pragma/console/convars.h>
 #include <pragma/console/c_cvar_global_functions.h>
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_util.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 CSciGPUTimerManager::CSciGPUTimerManager()
-	: m_pool(nullptr)
+	: m_timerQueryPool{nullptr},m_statsQueryPool{nullptr}
 {
 	InitializeQueries();
-}
 
+	// Initialize events
+	SetupEvent(GPUTimerEvent::GUI,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Frame,{
+		GPUTimerEvent::GUI,
+		GPUTimerEvent::Scene,
+		GPUTimerEvent::PostProcessing,
+		GPUTimerEvent::Present
+	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT,EventFlags::Root);
+	SetupEvent(GPUTimerEvent::Scene,{
+		GPUTimerEvent::Prepass,
+		GPUTimerEvent::CullLightSources,
+		GPUTimerEvent::Shadows,
+		GPUTimerEvent::SSAO,
+		
+		GPUTimerEvent::Skybox,
+		GPUTimerEvent::World,
+		GPUTimerEvent::Particles,
+		GPUTimerEvent::Debug,
+		GPUTimerEvent::Water,
+		GPUTimerEvent::View
+	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Prepass,{
+		GPUTimerEvent::PrepassSkybox,
+		GPUTimerEvent::PrepassWorld,
+		GPUTimerEvent::PrepassView
+	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PrepassSkybox,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PrepassWorld,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PrepassView,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::CullLightSources,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Shadows,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::SSAO,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessing,{
+		GPUTimerEvent::PostProcessingFog,
+		GPUTimerEvent::PostProcessingFXAA,
+		GPUTimerEvent::PostProcessingGlow,
+		GPUTimerEvent::PostProcessingBloom,
+		GPUTimerEvent::PostProcessingHDR
+	},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessingFog,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessingFXAA,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessingGlow,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessingBloom,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::PostProcessingHDR,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Present,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Skybox,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::World,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Particles,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Debug,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::Water,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	SetupEvent(GPUTimerEvent::View,{},Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT);
+	static_assert(umath::to_integral(GPUTimerEvent::Count) == 23u,"Timer event has been added, but not set up!");
+}
+void CSciGPUTimerManager::SetupEvent(GPUTimerEvent eventId,const std::vector<GPUTimerEvent> &dependencies,Anvil::PipelineStageFlagBits stage,EventFlags eventFlags)
+{
+	if(dependencies.empty() == false)
+		m_eventDependencies[eventId] = dependencies;
+	m_eventData.at(umath::to_integral(eventId)) = {stage};
+	if(umath::is_flag_set(eventFlags,EventFlags::Root))
+		m_rootEvents.push_back(eventId);
+}
 void CSciGPUTimerManager::InitializeQueries()
 {
-	for(auto &query : m_timerQueries)
-	{
-		if(query == nullptr)
-			query = std::shared_ptr<Query>(new Query());
-	}
-	auto &dev = c_engine->GetDevice();
-	auto setBufferCount = c_engine->GetSwapchainImageCount();
-	auto numBuffersTotal = setBufferCount *2; // Draw command buffers +compute command buffers
-	// prosper TODO: The pool causes a crash on exit?
-	m_pool = nullptr;//prosper::util::create_query_pool(*c_engine,vk::QueryType::eTimestamp,numBuffersTotal *umath::to_integral(GPUTimerEvent::Count) *2); // Each timer query requires two timestamp queries
-	m_cmdBufferIndices.clear();
-	if(m_pool == nullptr)
+	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
-	for(auto i=decltype(setBufferCount){0};i<setBufferCount;++i)
-	{
-		auto &drawCmd = c_engine->GetDrawCommandBuffer(i);
-		m_cmdBufferIndices.insert(decltype(m_cmdBufferIndices)::value_type(drawCmd.get(),m_cmdBufferIndices.size()));
-	}
-	for(auto i=decltype(setBufferCount){0};i<setBufferCount;++i)
-	{
-		//auto &computeCmd = context.GetComputeCmd(i); // prosper TODO
-		//m_cmdBufferIndices.insert(decltype(m_cmdBufferIndices)::value_type(computeCmd.get(),m_cmdBufferIndices.size()));
-	}
-	for(auto &query : m_timerQueries)
-	{
-		query->cmdQueries.resize(numBuffersTotal);
-		for(auto &pair : m_cmdBufferIndices)
-		{
-			auto &cmdInfo = query->cmdQueries.at(pair.second) = std::shared_ptr<Query::CmdInfo>(new Query::CmdInfo());
-			cmdInfo->query = prosper::util::create_timer_query(*m_pool,pair.first,Anvil::PipelineStageFlagBits::TOP_OF_PIPE_BIT);
-		}
-	}
+	auto swapchainImageCount = c_engine->GetSwapchainImageCount();
+	m_timerQueryPool = prosper::util::create_query_pool(*c_engine,vk::QueryType::eTimestamp,m_timerQueries.size() *swapchainImageCount *2); // 2 timestamps per timer
+	m_statsQueryPool = prosper::util::create_query_pool(*c_engine,
+		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_VERTICES_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_PRIMITIVES_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::VERTEX_SHADER_INVOCATIONS_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::GEOMETRY_SHADER_INVOCATIONS_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::GEOMETRY_SHADER_PRIMITIVES_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::CLIPPING_INVOCATIONS_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::CLIPPING_PRIMITIVES_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::FRAGMENT_SHADER_INVOCATIONS_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_CONTROL_SHADER_PATCHES_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT |
+		Anvil::QueryPipelineStatisticFlagBits::COMPUTE_SHADER_INVOCATIONS_BIT,
+		m_timerQueries.size() *swapchainImageCount
+	);
+	if(m_timerQueryPool == nullptr || m_statsQueryPool == nullptr)
+		return;
+	for(auto i=decltype(m_timerQueries.size()){0u};i<m_timerQueries.size();++i)
+		m_timerQueries.at(i) = pragma::GPUSwapchainTimer::Create(*m_timerQueryPool,*m_statsQueryPool,m_eventData.at(i).stage);
 }
-
-std::size_t CSciGPUTimerManager::GetCommandBufferIndex(GPUTimerEvent e) const
-{
-	auto &drawCmd = GetCommandBuffer(e);
-	auto it = std::find_if(m_cmdBufferIndices.begin(),m_cmdBufferIndices.end(),[&drawCmd](const std::pair<std::shared_ptr<prosper::CommandBuffer>,std::size_t> &pair) {
-		return pair.first.get() == &drawCmd;
-	});
-	if(it == m_cmdBufferIndices.end())
-		return std::numeric_limits<std::size_t>::max();
-	return it->second;
-}
-
-const prosper::CommandBuffer &CSciGPUTimerManager::GetCommandBuffer(GPUTimerEvent e) const
-{
-	//auto &drawCmd = (umath::to_integral(e) < umath::to_integral(GPUTimerEvent::ComputeStart)) ? context.GetDrawCmd() : context.GetComputeCmd(); // prosper TODO
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto it = std::find_if(m_cmdBufferIndices.begin(),m_cmdBufferIndices.end(),[&drawCmd](const std::pair<std::shared_ptr<prosper::CommandBuffer>,std::size_t> &pair) {
-		return pair.first.get() == drawCmd.get();
-	});
-	if(it == m_cmdBufferIndices.end())
-		const_cast<CSciGPUTimerManager*>(this)->InitializeQueries(); // Command buffers have been changed, we need to reload all queries
-	return *drawCmd;
-}
-
-bool CSciGPUTimerManager::IsTimerActive(GPUTimerEvent e) const {return (GetTimerState(e) == TimerState::Started) ? true : false;}
-CSciGPUTimerManager::TimerState CSciGPUTimerManager::GetTimerState(GPUTimerEvent e) const {return m_timerQueries.at(umath::to_integral(e))->cmdQueries.at(GetCommandBufferIndex(e))->state;}
-
+const std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> &CSciGPUTimerManager::GetEventDependencies() const {return m_eventDependencies;}
+const std::vector<GPUTimerEvent> &CSciGPUTimerManager::GetRootEvents() const {return m_rootEvents;}
 void CSciGPUTimerManager::StartTimer(GPUTimerEvent e)
 {
-	if(cvTimerQueries->GetBool() == false || m_pool == nullptr)
+	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
 		return;
 	auto idx = umath::to_integral(e);
 	if(idx >= m_timerQueries.size())
 		return;
 	auto &query = m_timerQueries.at(idx);
-	auto &cmdInfo = query->cmdQueries.at(GetCommandBufferIndex(e));
-	if(GetTimerState(e) == TimerState::Stopped)
-	{
-		if(cmdInfo->query->QueryResult(query->result) == false)
-			return;
-		cmdInfo->resultFrame = c_engine->GetLastFrameId();
-	}
-	cmdInfo->state = TimerState::Started;
-	cmdInfo->query->Begin();
+	query->Begin();
 }
 void CSciGPUTimerManager::StopTimer(GPUTimerEvent e)
 {
-	if(cvTimerQueries->GetBool() == false || m_pool == nullptr)
-		return;
-	if(GetTimerState(e) != TimerState::Started)
+	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
 		return;
 	auto idx = umath::to_integral(e);
 	if(idx >= m_timerQueries.size())
 		return;
 	auto &query = m_timerQueries.at(idx);
-	auto &cmdInfo = query->cmdQueries.at(GetCommandBufferIndex(e));
-	cmdInfo->state = TimerState::Stopped;
-	cmdInfo->query->End();
+	query->End();
 }
-
-bool CSciGPUTimerManager::IsResultAvailable(GPUTimerEvent e) const
+void CSciGPUTimerManager::Reset()
 {
-	auto r = 0.f;
-	return GetResult(e,r);
-}
-void CSciGPUTimerManager::GetResults(std::vector<float> &results) const
-{
-	auto count = umath::to_integral(GPUTimerEvent::Count);
-	results.reserve(results.size() +count);
-	for(auto i=decltype(count){0};i<count;++i)
+	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
+		return;
+	for(auto &query : m_timerQueries)
 	{
-		results.push_back(std::numeric_limits<float>::max());
-		GetResult(static_cast<GPUTimerEvent>(i),results.back());
+		if(query == nullptr)
+			continue;
+		query->Reset();
 	}
 }
-bool CSciGPUTimerManager::GetResult(GPUTimerEvent e,float &v) const
+const CSciGPUTimerManager::EventData &CSciGPUTimerManager::GetEventData(GPUTimerEvent eventId) const {return m_eventData.at(umath::to_integral(eventId));}
+bool CSciGPUTimerManager::GetResult(GPUTimerEvent e,std::chrono::nanoseconds &outDuration) const
 {
-	if(cvTimerQueries->GetBool() == false || m_pool == nullptr)
+	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
 		return false;
 	auto idx = umath::to_integral(e);
 	if(idx >= m_timerQueries.size())
 		return false;
 	auto &query = m_timerQueries.at(idx);
-	//auto &cmdInfo = query->cmdQueries.at(GetCommandBufferIndex());
-	//if(cmdInfo->resultFrame == std::numeric_limits<uint64_t>::max())
-	//	return false;
-	v = query->result;
-	return true;
+	return query->GetResult(outDuration);
 }
-float CSciGPUTimerManager::GetResult(GPUTimerEvent e) const
+std::vector<std::optional<CSciGPUTimerManager::ResultData>> CSciGPUTimerManager::GetResults() const
 {
-	auto r = 0.f;
-	GetResult(e,r);
-	return r;
+	std::vector<std::optional<ResultData>> results {};
+	results.resize(m_timerQueries.size());
+	for(auto i=decltype(m_timerQueries.size()){0u};i<m_timerQueries.size();++i)
+	{
+		auto &query = m_timerQueries.at(i);
+		if(query == nullptr)
+			continue;
+		auto &resultData = results.at(i);
+		auto isValid = true;
+		resultData = ResultData{};
+		std::chrono::nanoseconds result;
+		if(query->GetResult(result))
+			resultData->duration = result;
+		else
+			isValid = false;
+		prosper::PipelineStatisticsQuery::Statistics statistics;
+		if(query->GetStatisticsResult(statistics))
+			resultData->statistics = statistics;
+		else
+			isValid = false;
+		if(isValid == false)
+			resultData = {};
+	}
+	return results;
 }
+
 std::string CSciGPUTimerManager::EventToString(GPUTimerEvent e)
 {
 	switch(e)
 	{
 		case GPUTimerEvent::GUI:
 			return "GUI";
-		case GPUTimerEvent::WorldScene:
-			return "WorldScene";
-		case GPUTimerEvent::Particles:
-			return "Particles";
-		case GPUTimerEvent::UpdateExposure:
-			return "UpdateExposure";
-		case GPUTimerEvent::Shadow:
-			return "Shadow";
+		case GPUTimerEvent::Frame:
+			return "Frame";
+		case GPUTimerEvent::Scene:
+			return "Scene";
+		case GPUTimerEvent::Prepass:
+			return "Prepass";
+		case GPUTimerEvent::PrepassSkybox:
+			return "Skybox";
+		case GPUTimerEvent::PrepassWorld:
+			return "World";
+		case GPUTimerEvent::CullLightSources:
+			return "CullLightSources";
+		case GPUTimerEvent::Shadows:
+			return "Shadows";
+		case GPUTimerEvent::SSAO:
+			return "SSAO";
+		case GPUTimerEvent::PostProcessing:
+			return "PostProcessing";
+		case GPUTimerEvent::PostProcessingFog:
+			return "Fog";
+		case GPUTimerEvent::PostProcessingFXAA:
+			return "FXAA";
+		case GPUTimerEvent::PostProcessingGlow:
+			return "Glow";
+		case GPUTimerEvent::PostProcessingBloom:
+			return "Bloom";
+		case GPUTimerEvent::PostProcessingHDR:
+			return "HDR";
+		case GPUTimerEvent::Present:
+			return "Present";
 		case GPUTimerEvent::Skybox:
 			return "Skybox";
 		case GPUTimerEvent::World:
 			return "World";
-		case GPUTimerEvent::WorldTranslucent:
-			return "WorldTranslucent";
-		case GPUTimerEvent::Water:
-			return "Water";
+		case GPUTimerEvent::Particles:
+			return "Particles";
 		case GPUTimerEvent::Debug:
 			return "Debug";
+		case GPUTimerEvent::Water:
+			return "Water";
 		case GPUTimerEvent::View:
 			return "View";
-		case GPUTimerEvent::ViewParticles:
-			return "ViewParticles";
-		case GPUTimerEvent::Glow:
-			return "Glow";
-		case GPUTimerEvent::BlurHDRBloom:
-			return "BlurHDRBloom";
-		case GPUTimerEvent::GlowAdditive:
-			return "GlowAdditive";
-		case GPUTimerEvent::FinalAdditive:
-			return "FinalAdditive";
-		case GPUTimerEvent::HDR:
-			return "HDR";
-		case GPUTimerEvent::SceneToScreen:
-			return "SceneToScreen";
-		case GPUTimerEvent::GameRender:
-			return "GameRender";
-		case GPUTimerEvent::Mesh0:
-			return "Mesh0";
-		case GPUTimerEvent::Mesh1:
-			return "Mesh1";
-		case GPUTimerEvent::Mesh2:
-			return "Mesh2";
-		case GPUTimerEvent::Mesh3:
-			return "Mesh3";
-		case GPUTimerEvent::Mesh4:
-			return "Mesh4";
-		case GPUTimerEvent::Mesh5:
-			return "Mesh5";
-		case GPUTimerEvent::Mesh6:
-			return "Mesh6";
-		case GPUTimerEvent::Mesh7:
-			return "Mesh7";
-		case GPUTimerEvent::Mesh8:
-			return "Mesh8";
-		case GPUTimerEvent::DebugMesh:
-			return "DebugMesh";
-		case GPUTimerEvent::ShadowLayerBlit:
-			return "ShadowLayerBlit";
-		case GPUTimerEvent::WaterSurface:
-			return "WaterSurface";
 		default:
 			return "Invalid";
 	}
+	static_assert(umath::to_integral(GPUTimerEvent::Count) == 23u,"Timer event has been added, but not added to EventToString!");
 }
 
 /////////////////////////
 
 void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
+	auto extended = false;
+	if(argv.empty() == false)
+		extended = util::to_boolean(argv.at(0));
 	Con::cout<<"-------- GPU-Timer Query Results --------"<<Con::endl;
 	auto &manager = c_engine->GetGPUTimerManager();
-	std::vector<float> results;
-	manager.GetResults(results);
-	for(auto i=decltype(results.size()){0};i<results.size();++i)
+	auto results = manager.GetResults();
+	struct ResultData
 	{
-		auto ev = static_cast<GPUTimerEvent>(i);
-		Con::cout<<CSciGPUTimerManager::EventToString(ev)<<": "<<results.at(i)<<Con::endl;
-	}
+		GPUTimerEvent eventId;
+		std::optional<CSciGPUTimerManager::ResultData> data;
+		std::vector<ResultData> children;
+	};
+	std::function<void(ResultData&,const std::vector<GPUTimerEvent>&)> fPopulateResults = nullptr;
+	fPopulateResults = [&fPopulateResults,&results,&manager](ResultData &resultData,const std::vector<GPUTimerEvent> &eventIds) {
+		resultData.children.resize(eventIds.size());
+		for(auto i=decltype(resultData.children.size()){0u};i<resultData.children.size();++i)
+		{
+			auto &childResultData = resultData.children.at(i);
+			auto childEventId = eventIds.at(i);
+			childResultData.data = results.at(umath::to_integral(childEventId));
+			childResultData.eventId = childEventId;
+
+			auto &eventDependencies = manager.GetEventDependencies();
+			auto itDependencies = eventDependencies.find(childEventId);
+			if(itDependencies == eventDependencies.end())
+				continue;
+			fPopulateResults(childResultData,itDependencies->second);
+		}
+		std::sort(resultData.children.begin(),resultData.children.end(),[](const ResultData &a,const ResultData &b) {
+			auto aValue = a.data.has_value() ? a.data->duration : std::chrono::nanoseconds::min();
+			auto bValue = b.data.has_value() ? b.data->duration : std::chrono::nanoseconds::min();
+			return aValue > bValue;
+		});
+	};
+	ResultData rootResult {};
+	fPopulateResults(rootResult,manager.GetRootEvents());
+
+	std::function<void(const ResultData&,const std::string&,bool)> fPrintResults = nullptr;
+	fPrintResults = [&fPrintResults,&manager,extended](const ResultData &resultData,const std::string &t,bool bRoot) {
+		if(bRoot == false)
+		{
+			auto &result = resultData.data;
+			std::string sTime = "Pending";
+			if(result.has_value())
+			{
+				auto t = result->duration.count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count());
+				sTime = util::round_string(t,2) +" ms";
+				sTime += " (" +std::to_string(result->duration.count()) +" ns)";
+			}
+			Con::cout<<t<<CSciGPUTimerManager::EventToString(resultData.eventId)<<": "<<sTime;
+			
+			auto &eventData = manager.GetEventData(resultData.eventId);
+			Con::cout<<" ("<<prosper::util::to_string(eventData.stage)<<")"<<Con::endl;
+
+			if(result.has_value() && extended == true)
+			{
+				auto &stats = result->statistics;
+				Con::cout<<t<<"Input Assembly Vertices: "<<stats.inputAssemblyVertices<<Con::endl;
+				Con::cout<<t<<"Input Assembly Primitives: "<<stats.inputAssemblyPrimitives<<Con::endl;
+				Con::cout<<t<<"Vertex Shader Invocations: "<<stats.vertexShaderInvocations<<Con::endl;
+				Con::cout<<t<<"Geometry Shader Invocations: "<<stats.geometryShaderInvocations<<Con::endl;
+				Con::cout<<t<<"Geometry Shader Primitives: "<<stats.geometryShaderPrimitives<<Con::endl;
+				Con::cout<<t<<"Clipping Invocations: "<<stats.clippingInvocations<<Con::endl;
+				Con::cout<<t<<"Clipping Primitives: "<<stats.clippingPrimitives<<Con::endl;
+				Con::cout<<t<<"Fragment Shader Invocations: "<<stats.fragmentShaderInvocations<<Con::endl;
+				Con::cout<<t<<"Tessellation Control Shader Patches: "<<stats.tessellationControlShaderPatches<<Con::endl;
+				Con::cout<<t<<"Tessellation Evaluation Shader Invocations: "<<stats.tessellationEvaluationShaderInvocations<<Con::endl;
+				Con::cout<<t<<"Compute Shader Invocations: "<<stats.computeShaderInvocations<<Con::endl;
+				Con::cout<<Con::endl;
+			}
+		}
+		for(auto &childResultData : resultData.children)
+			fPrintResults(childResultData,t +(bRoot ? "" : "\t"),false);
+	};
+	fPrintResults(rootResult,"",true);
 	Con::cout<<"-----------------------------------------"<<Con::endl;
 }
+#pragma optimize("",on)

@@ -315,6 +315,9 @@ set(DEPENDENCY_LIBNOISEUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/
 search_lib_recursive(DEPENDENCY_LIBNOISE_LIBRARY third_party_libs/libnoise/src/${BINARY_PRAGMA_DIR} noise)
 search_lib_recursive(DEPENDENCY_LIBNOISEUTILS_LIBRARY third_party_libs/libnoise/noiseutils/${BINARY_PRAGMA_DIR} noiseutils-static)
 
+set(DEPENDENCY_HLLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_HLLIB_LIBRARY third_party_libs/hllib/sln/vs17/HLLib/x64/${BINARY_PRAGMA_DIR} HLLib)
+
 if(WIN32)
 	set(ASSIMP_LIB_NAME assimp-vc140-mt)
 else()
@@ -333,6 +336,9 @@ search_lib_recursive(DEPENDENCY_BULLET_LINEAR_MATH_LIBRARY third_party_libs/bull
 search_lib_recursive(DEPENDENCY_BULLET_DYNAMICS_LIBRARY third_party_libs/bullet/src/BulletDynamics/${BINARY_PRAGMA_DIR} BulletDynamics STATIC)
 search_lib_recursive(DEPENDENCY_BULLET_COLLISION_LIBRARY third_party_libs/bullet/src/BulletCollision/${BINARY_PRAGMA_DIR} BulletCollision STATIC)
 search_lib_recursive(DEPENDENCY_BULLET_SOFTBODY_LIBRARY third_party_libs/bullet/src/BulletSoftBody/${BINARY_PRAGMA_DIR} BulletSoftBody STATIC)
+
+set(DEPENDENCY_NIFTOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/niflib/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_NIFTOOLS_LIBRARY third_party_libs/niflib/${BINARY_PRAGMA_DIR} niflib_static)
 
 message("Processing core libraries...")
 add_subdirectory(core)
@@ -538,8 +544,9 @@ set_target_properties(libz2 PROPERTIES FOLDER third_party_libs/bzip2)
 # libnoise
 set(BUILD_LIBNOISE_EXAMPLES OFF CACHE BOOL ".." FORCE)
 set(BUILD_LIBNOISE_UTILS ON CACHE BOOL ".." FORCE)
-set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+unset(BUILD_SHARED_LIBS CACHE)
 register_third_party_library(libnoise)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 set_target_properties(noise PROPERTIES FOLDER third_party_libs/libnoise)
 set_target_properties(noise-static PROPERTIES FOLDER third_party_libs/libnoise)
 set_target_properties(noiseutils PROPERTIES FOLDER third_party_libs/libnoise)
@@ -685,6 +692,52 @@ set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
+# hllib
+if(WIN32)
+	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
+	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
+endif()
+#
+
+# niflib
+set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory.")
+register_third_party_library(niflib)
+set_target_properties(bslightingshaderproperty_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(missing_link_stack_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(niflib PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(niflib_static PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(ninode_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(numuvsets_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(skin_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(skinpart_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(trishape_test PROPERTIES FOLDER third_party_libs/niflib)
+set_target_properties(write_test PROPERTIES FOLDER third_party_libs/niflib)
+target_include_directories(niflib_static PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/niflib)
+#
+
+# qhull
+register_third_party_library(qhull)
+set_target_properties(libqhull PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qconvex PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qdelaunay PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhalf PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhull PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhull_p PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhull_r PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhullcpp PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhullp PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhullstatic PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qhullstatic_r PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(qvoronoi PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(rbox PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(testqset PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(testqset_r PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(user_eg PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(user_eg2 PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(user_eg3 PROPERTIES FOLDER third_party_libs/qhull)
+set_target_properties(user_egp PROPERTIES FOLDER third_party_libs/qhull)
+#
+
 # dependencies
 # add_dependencies(Anvil glslang)
 add_dependencies(png zlib)
@@ -693,8 +746,10 @@ add_dependencies(BulletCollision LinearMath)
 add_dependencies(BulletDynamics BulletCollision)
 add_dependencies(util_pad zip)
 add_dependencies(pr_pcl util_pcl)
-add_dependencies(pr_source util_archive)
+add_dependencies(niflib_static qhullstatic)
+add_dependencies(pr_source util_archive util_dmx niflib_static)
 add_dependencies(pr_dmx util_dmx)
+add_dependencies(pr_mdleditor util_archive hllib ishared pr_source)
 
 add_dependencies(mathutil sharedutils-static)
 add_dependencies(sharedutils mathutil)
@@ -854,6 +909,10 @@ copy_output_file(external_libs/prosper/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR}
 copy_output_file(external_libs/sharedutils/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} sharedutils)
 copy_output_file(external_libs/vfilesystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} vfilesystem)
 copy_output_file(external_libs/wgui/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} wgui)
+copy_output_file(modules/interfaces/ishared/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} ishared)
+copy_output_file(modules/interfaces/iserver/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} iserver)
+copy_output_file(modules/interfaces/iclient/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} iclient)
+
 copy_output_file(external_libs/util_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" util_pcl)
 copy_output_file(external_libs/util_archive/${BINARY_PRAGMA_DIR} "modules/mount_external" util_archive)
 

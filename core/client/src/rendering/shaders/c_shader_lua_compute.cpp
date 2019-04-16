@@ -16,9 +16,9 @@ void Lua::Shader::Compute::RecordDispatch(lua_State *l,prosper::ShaderCompute &s
 }
 void Lua::Shader::Compute::RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
 {
-	if((*hCommandBuffer)->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 		return;
-	Lua::PushBool(l,shader.BeginCompute(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer),pipelineIdx));
+	Lua::PushBool(l,shader.BeginCompute(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
 }
 void Lua::Shader::Compute::RecordCompute(lua_State *l,prosper::ShaderCompute &shader)
 {

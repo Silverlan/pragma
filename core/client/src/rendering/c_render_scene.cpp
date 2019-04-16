@@ -18,9 +18,11 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/util/profiling_stages.h>
+#include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 
 extern DLLCENGINE CEngine *c_engine;
+#pragma optimize("",off)
 void CGame::RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
 	auto &scene = GetRenderScene();
@@ -96,11 +98,15 @@ static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold
 static auto cvFxaaMinEdgeThreshold = GetClientConVar("cl_render_fxaa_min_edge_threshold");
 void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
+	c_engine->StartGPUTimer(GPUTimerEvent::PostProcessingFog);
 	RenderSceneFog(drawCmd);
+	c_engine->StopGPUTimer(GPUTimerEvent::PostProcessingFog);
+
 	auto &scene = GetRenderScene();
 	auto &hdrInfo = scene->GetHDRInfo();
 	if(static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) == AntiAliasing::FXAA)
 	{
+		c_engine->StartGPUTimer(GPUTimerEvent::PostProcessingFXAA);
 		// HDR needs to be resolved before FXAA is applied
 		// Note: This will be undone by FXAA shader! (because HDR is required for post-processing)
 		auto &descSetGroupHdrResolve = hdrInfo.descSetGroupHdrResolve;
@@ -137,6 +143,7 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 			prosper::util::record_image_barrier(*(*drawCmd),*(*hdrTex->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(*drawCmd);
 		}
+		c_engine->StopGPUTimer(GPUTimerEvent::PostProcessingFXAA);
 	}
 
 	// Glow Effects
@@ -155,6 +162,7 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 		depthTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		auto &tex = glowInfo.renderTarget.GetTexture();
 		tex->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);*/ // prosper TODO
+		c_engine->StartGPUTimer(GPUTimerEvent::PostProcessingGlow);
 		prosper::util::record_begin_render_pass(*(*drawCmd),*glowInfo.renderTarget,{
 			vk::ClearValue{vk::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
 			vk::ClearValue{vk::ClearDepthStencilValue{}}
@@ -188,6 +196,7 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 		}
 
 		prosper::util::record_image_barrier(*(*drawCmd),*(*glowInfo.renderTarget->GetTexture()->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		c_engine->StopGPUTimer(GPUTimerEvent::PostProcessingGlow);
 
 #if 0
 		//drawCmd->ExecuteCommand(m_glowInfo.cmdBufferBlur);
@@ -215,22 +224,17 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 	CallLuaCallbacks("RenderPostProcessing");
 
 	// Bloom
+	c_engine->StartGPUTimer(GPUTimerEvent::PostProcessingBloom);
 	auto bloomTexMsaa = hdrInfo.hdrRenderTarget->GetTexture(1u);
-	auto &bloomImgMsaa = bloomTexMsaa->GetImage();
-	auto blurTex = hdrInfo.bloomBlurSet->GetFinalRenderTarget()->GetTexture();
-	auto &blurImg = *blurTex->GetImage();
-	if(bloomTexMsaa->IsMSAATexture())
-	{
-		static_cast<prosper::MSAATexture&>(*bloomTexMsaa).Resolve(
-			**drawCmd,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-			Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
-		);
-	}
-	else
-		prosper::util::record_image_barrier(*(*drawCmd),(*blurImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	// Blit high-res bloom image into low-res image, which is cheaper to blur
+	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomTexture->GetImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomBlurTexture->GetImage(),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+	prosper::util::record_blit_texture(**drawCmd,*hdrInfo.bloomTexture,**hdrInfo.bloomBlurTexture->GetImage());
+
 	const auto blurSize = 5.f;
 	const auto kernelSize = 9u;
 	const auto blurAmount = 5u;
+	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomBlurTexture->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
 	{
 		prosper::util::record_blur_image(c_engine->GetDevice(),drawCmd,*hdrInfo.bloomBlurSet,{
@@ -239,12 +243,14 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 			kernelSize
 		});
 	}
-	if(bloomTexMsaa->IsMSAATexture() == false)
-		prosper::util::record_image_barrier(*(*drawCmd),*blurImg,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomTexture->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+	c_engine->StopGPUTimer(GPUTimerEvent::PostProcessingBloom);
 	//
 	
+	c_engine->StartGPUTimer(GPUTimerEvent::PostProcessingHDR);
 	auto &descSetGroupHdrResolve = hdrInfo.descSetGroupHdrResolve;
 	RenderSceneResolveHDR(drawCmd,*(*descSetGroupHdrResolve)->get_descriptor_set(0u));
+	c_engine->StopGPUTimer(GPUTimerEvent::PostProcessingHDR);
 }
 
 void CGame::RenderSceneResolveHDR(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Anvil::DescriptorSet &descSetHdrResolve,bool toneMappingOnly)
@@ -259,7 +265,7 @@ void CGame::RenderSceneResolveHDR(std::shared_ptr<prosper::PrimaryCommandBuffer>
 	if(scene->IsMultiSampled() == false) // The resolved images already have the correct layout
 	{
 		prosper::util::record_image_barrier(*(*drawCmd),srcImg,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),srcImgBloom,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		//prosper::util::record_image_barrier(*(*drawCmd),srcImgBloom,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 		prosper::util::record_image_barrier(*(*drawCmd),srcImgGlow,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	}
 	auto &dstTexPostHdr = *hdrInfo.postHdrRenderTarget->GetTexture();
@@ -280,7 +286,7 @@ void CGame::RenderSceneResolveHDR(std::shared_ptr<prosper::PrimaryCommandBuffer>
 	if(scene->IsMultiSampled() == false)
 	{
 		prosper::util::record_image_barrier(*(*drawCmd),srcImg,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),srcImgBloom,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		//prosper::util::record_image_barrier(*(*drawCmd),srcImgBloom,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 		prosper::util::record_image_barrier(*(*drawCmd),srcImgGlow,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
@@ -299,6 +305,7 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 	auto &prepass = scene->GetPrepass();
 	auto bProfiling = c_engine->IsProfilingEnabled();
 	{
+		c_engine->StartGPUTimer(GPUTimerEvent::CullLightSources);
 		auto depthTex = prepass.textureDepth;
 		auto bMultisampled = depthTex->IsMSAATexture();
 		if(depthTex->IsMSAATexture())
@@ -349,9 +356,11 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 		// Don't write to depth image until compute shader has completed reading from it
 		if(!bMultisampled)
 			prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-
+		
 		scene->UpdateLightDescriptorSets(culledLightSources);
+		c_engine->StopGPUTimer(GPUTimerEvent::CullLightSources);
 
+		c_engine->StartGPUTimer(GPUTimerEvent::Shadows);
 		// Update shadows
 		if(bProfiling == true)
 			StartStageProfiling(umath::to_integral(ProfilingStage::ClientGameRenderShadows)); // TODO: Only for main scene
@@ -370,7 +379,7 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
 			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 		);
-
+		
 			RenderSystem::RenderShadows(drawCmd,culledLightSources);
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 			//drawCmd->SetViewport(w,h); // Reset the viewport
@@ -392,6 +401,7 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 
 		//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
 		//imgDepth->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
+		c_engine->StopGPUTimer(GPUTimerEvent::Shadows);
 	}
 }
 
@@ -437,7 +447,7 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 	if(bProfiling == true)
 		EndStageProfiling(umath::to_integral(ProfilingStage::ClientGameRenderShadows));*/
 	scene->UpdateBuffers(drawCmd);
-
+	
 	CallCallbacks<void>("OnPreRender");
 
 	// Render Shadows
@@ -448,7 +458,7 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 	scene->GetOcclusionCullingHandler().PerformCulling(*scene,renderMeshes);
 	if(bProfiling == true)
 		EndStageProfiling(umath::to_integral(ProfilingStage::ClientGameOcclusionCulling));
-
+	
 	/*ScopeGuard resetViewport([&drawCmd]() {
 		auto &context = c_engine->GetRenderContext();
 		auto w = context.GetWidth();
@@ -488,13 +498,16 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 	else
 		renderFlags &= ~FRender::View;
 	//
-
+	
+	auto &gpuTimerManager = c_engine->GetGPUTimerManager();
+	gpuTimerManager.StartTimer(GPUTimerEvent::Scene);
 	// Experimental (Deferred shading)
 	{
 		// Pre-render depths and normals (if SSAO is enabled)
 		auto prepassMode = scene->GetPrepassMode();
 		if(prepassMode != Scene::PrepassMode::NoPrepass)
 		{
+			gpuTimerManager.StartTimer(GPUTimerEvent::Prepass);
 			auto &prepass = scene->GetPrepass();
 			if(prepass.textureDepth->IsMSAATexture())
 				static_cast<prosper::MSAATexture&>(*prepass.textureDepth).Reset();
@@ -540,25 +553,40 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 					shaderDepthStage.BindClipPlane(GetRenderClipPlane());
 					shaderDepthStage.BindSceneCamera(*scene,false);
 					if((renderFlags &FRender::Skybox) != FRender::None)
+					{
+						gpuTimerManager.StartTimer(GPUTimerEvent::PrepassSkybox);
 						RenderSystem::RenderPrepass(drawCmd,*scene->GetCamera(),scene->GetCulledMeshes(),RenderMode::Skybox,bReflection);
+						gpuTimerManager.StopTimer(GPUTimerEvent::PrepassSkybox);
+					}
 					if((renderFlags &FRender::World) != FRender::None)
+					{
+						gpuTimerManager.StartTimer(GPUTimerEvent::PrepassWorld);
 						RenderSystem::RenderPrepass(drawCmd,*scene->GetCamera(),scene->GetCulledMeshes(),RenderMode::World,bReflection);
+						gpuTimerManager.StopTimer(GPUTimerEvent::PrepassWorld);
+					}
 					CallCallbacks<void>("RenderPrepass");
 					CallLuaCallbacks("RenderPrepass");
 
 					shaderDepthStage.BindSceneCamera(*scene,true);
 					if((renderFlags &FRender::View) != FRender::None)
+					{
+						gpuTimerManager.StartTimer(GPUTimerEvent::PrepassView);
 						RenderSystem::RenderPrepass(drawCmd,*scene->GetCamera(),scene->GetCulledMeshes(),RenderMode::View,bReflection);
+						gpuTimerManager.StopTimer(GPUTimerEvent::PrepassView);
+					}
 					shaderDepthStage.EndDraw();
 				}
 			prepass.EndRenderPass(*drawCmd);
+			gpuTimerManager.StopTimer(GPUTimerEvent::Prepass);
 		}
+		
 
 		auto &ssaoInfo = scene->GetSSAOInfo();
 		auto *shaderSSAO = static_cast<pragma::ShaderSSAO*>(ssaoInfo.GetSSAOShader());
 		auto *shaderSSAOBlur = static_cast<pragma::ShaderSSAOBlur*>(ssaoInfo.GetSSAOBlurShader());
 		if(scene->IsSSAOEnabled() == true && shaderSSAO != nullptr && shaderSSAOBlur != nullptr)
 		{
+			gpuTimerManager.StartTimer(GPUTimerEvent::SSAO);
 			// Pre-render depths, positions and normals (Required for SSAO)
 			auto *renderInfo  = scene->GetRenderInfo(RenderMode::World);
 			if(renderInfo != nullptr)
@@ -639,13 +667,13 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 
 				prosper::util::record_image_barrier(*(*drawCmd),*(*ssaoInfo.renderTarget->GetTexture()->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 			}
+			gpuTimerManager.StopTimer(GPUTimerEvent::SSAO);
 		}
 	}
 	//
 
 	// Experimental (Forward+)
 	RenderScenePrepass(drawCmd);
-
 
 		/*scene->BeginRenderPass(drawCmd,clearColor); // prosper TODO
 			//if(drawWorld == 2)
@@ -656,7 +684,7 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 		c_engine->StartGPUTimer(GPUTimerEvent::GameRender);*/
 
 	Render(drawCmd,interpolation,renderFlags); // TODO: Interpolation
-
+	
 	auto &texHdr = hdrInfo.hdrRenderTarget->GetTexture();
 	if(texHdr->IsMSAATexture())
 	{
@@ -665,9 +693,15 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 			Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
 		);
 	}
+	gpuTimerManager.StopTimer(GPUTimerEvent::Scene);
 
+	gpuTimerManager.StartTimer(GPUTimerEvent::PostProcessing);
 	RenderScenePostProcessing(drawCmd,renderFlags);
+	gpuTimerManager.StopTimer(GPUTimerEvent::PostProcessing);
+
+	gpuTimerManager.StartTimer(GPUTimerEvent::Present);
 	RenderScenePresent(drawCmd,*hdrInfo.postHdrRenderTarget->GetTexture(),*rt->GetTexture()->GetImage());
+	gpuTimerManager.StopTimer(GPUTimerEvent::Present);
 	
 	auto bloomTexMsaa = hdrInfo.hdrRenderTarget->GetTexture(1u);
 	if(bloomTexMsaa->IsMSAATexture())
@@ -697,3 +731,4 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 
 //Shader::Base *CGame::GetShaderOverride() {return m_shaderOverride;} // prosper TODO
 //void CGame::SetShaderOverride(Shader::Base *shader) {m_shaderOverride = shader;} // prosper TODO
+#pragma optimize("",on)

@@ -70,7 +70,7 @@ int Lua::engine::get_text_size(lua_State *l)
 	auto *info = _lua_Font_check(l,2);
 	int w = 0;
 	int h = 0;
-	FontManager::GetTextSize(text.c_str(),info->get(),&w,&h);
+	FontManager::GetTextSize(text.c_str(),info,&w,&h);
 	Lua::Push<Vector2i>(l,Vector2i{w,h});
 	return 1;
 }

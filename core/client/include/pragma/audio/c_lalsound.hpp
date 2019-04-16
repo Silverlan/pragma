@@ -11,8 +11,8 @@ namespace Lua
 	{
 		namespace Client
 		{
-			DLLCLIENT void register_class(luabind::class_<std::shared_ptr<::ALSound>> &classDef);
-			DLLCLIENT void register_buffer(luabind::class_<al::PSoundBuffer> &classDef);
+			DLLCLIENT void register_class(luabind::class_<::ALSound> &classDef);
+			DLLCLIENT void register_buffer(luabind::class_<al::SoundBuffer> &classDef);
 		};
 	};
 };

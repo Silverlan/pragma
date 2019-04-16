@@ -5,7 +5,7 @@
 
 const std::vector<std::shared_ptr<VertexAnimation>> &Model::GetVertexAnimations() const {return const_cast<Model*>(this)->GetVertexAnimations();}
 std::vector<std::shared_ptr<VertexAnimation>> &Model::GetVertexAnimations() {return m_vertexAnimations;}
-std::shared_ptr<VertexAnimation> Model::CreateVertexAnimation(const std::string &name) const {return std::make_shared<VertexAnimation>(name);}
+std::shared_ptr<VertexAnimation> Model::CreateVertexAnimation(const std::string &name) const {return VertexAnimation::Create(name);}
 std::vector<std::shared_ptr<VertexAnimation>>::iterator Model::FindVertexAnimation(const std::string &name)
 {
 	return std::find_if(m_vertexAnimations.begin(),m_vertexAnimations.end(),[&name](const std::shared_ptr<VertexAnimation> &anim) {

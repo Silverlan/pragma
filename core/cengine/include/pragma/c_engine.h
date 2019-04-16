@@ -106,8 +106,7 @@ public:
 	// Debug
 	void StartGPUTimer(GPUTimerEvent ev) const;
 	void StopGPUTimer(GPUTimerEvent ev) const;
-	bool GetGPUTimerResult(GPUTimerEvent ev,float &r) const;
-	float GetGPUTimerResult(GPUTimerEvent ev) const;
+	bool GetGPUTimerResult(GPUTimerEvent ev,std::chrono::nanoseconds &r) const;
 	CSciGPUTimerManager &GetGPUTimerManager() const;
 
 	// Config

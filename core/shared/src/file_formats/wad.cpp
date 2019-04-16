@@ -4,10 +4,10 @@
 #include <mathutil/uquat.h>
 #include "pragma/model/animation/fanim.h"
 
-Animation *FWAD::ReadData(unsigned short version,VFilePtr f)
+std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 {
 	m_file = f;
-	Animation *anim = new Animation;
+	auto anim = Animation::Create();
 	//unsigned short ver = Read<unsigned short>();
 	//Con::cout<<"Animation Version: "<<ver<<Con::endl;
 
@@ -94,7 +94,7 @@ Animation *FWAD::ReadData(unsigned short version,VFilePtr f)
 	unsigned int numFrames = Read<unsigned int>();
 	for(unsigned int i=0;i<numFrames;i++)
 	{
-		auto frame = std::make_shared<Frame>(numBones);
+		auto frame = Frame::Create(numBones);
 		for(unsigned int j=0;j<numBones;j++)
 		{
 			auto orientation = uquat::identity(); // TODO: Can't use glm::quat here for some reason
@@ -152,7 +152,7 @@ Animation *FWAD::ReadData(unsigned short version,VFilePtr f)
 	return anim;
 }
 
-Animation *FWAD::Load(unsigned short version,const char *animation)
+std::shared_ptr<Animation> FWAD::Load(unsigned short version,const char *animation)
 {
 	std::string pathCache(animation);
 	std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
@@ -166,6 +166,6 @@ Animation *FWAD::Load(unsigned short version,const char *animation)
 		Con::cout<<"WARNING: Unable to open animation '"<<animation<<"': File not found!"<<Con::endl;
 		return NULL;
 	}
-	Animation *anim = ReadData(version,f);
+	auto anim = ReadData(version,f);
 	return anim;
 }

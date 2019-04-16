@@ -185,7 +185,7 @@ void AILuaBehaviorNode::SetScheduleParameter(uint8_t taskParamId,uint8_t schedul
 }
 
 AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType,uint32_t selectorType)
-	: TaskWrapper(std::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType),static_cast<pragma::ai::SelectorType>(selectorType))),luabind::wrap_base()
+	: BaseBehaviorTask(std::make_shared<AILuaBehaviorNode>(static_cast<pragma::ai::BehaviorNode::Type>(nodeType),static_cast<pragma::ai::SelectorType>(selectorType))),luabind::wrap_base()
 {}
 
 AILuaBehaviorNodeWrapper::AILuaBehaviorNodeWrapper(uint32_t nodeType)
@@ -303,7 +303,7 @@ void Lua::AIBehaviorNode::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.add_static_constant("PARAMETER_TYPE_ENTITY",umath::to_integral(pragma::ai::Schedule::Parameter::Type::Entity));
 	mod[classDef];
 
-	auto classDefBehaviorNode = luabind::class_<ai::TaskWrapper,luabind::no_bases,luabind::default_holder,AILuaBehaviorNodeWrapper>("BaseBehaviorTask");
+	auto classDefBehaviorNode = luabind::class_<ai::BaseBehaviorTask,luabind::bases<ai::TaskWrapper>,luabind::default_holder,AILuaBehaviorNodeWrapper>("BaseBehaviorTask");
 	classDefBehaviorNode.def(luabind::constructor<uint32_t,uint32_t>());
 	classDefBehaviorNode.def(luabind::constructor<uint32_t>());
 	classDefBehaviorNode.def(luabind::constructor<>());

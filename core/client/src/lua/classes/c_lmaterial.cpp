@@ -24,7 +24,7 @@ void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::s
 void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex)
 {
 	auto *cmat = static_cast<CMaterial*>(mat);
-	cmat->SetTexture(textureID,*hTex);
+	cmat->SetTexture(textureID,hTex);
 	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 	cmat->UpdateTextures();
 }

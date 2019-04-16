@@ -908,7 +908,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
 	auto scene = (drawSceneInfo.scene != nullptr) ? drawSceneInfo.scene : c_game->GetRenderScene();
 
-	auto &rt = *Lua::CheckVKRenderTarget(l,2);
+	auto &rt = Lua::Check<Lua::Vulkan::RenderTarget>(l,2);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
 	if(cmdBuffer == nullptr || cmdBuffer->GetAnvilCommandBuffer().get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 		return 0;
@@ -927,7 +927,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	}
 
 	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer);
-	c_game->RenderScene(primCmdBuffer,rt,renderFlags);
+	c_game->RenderScene(primCmdBuffer,rt.shared_from_this(),renderFlags);
 	c_game->SetRenderScene(nullptr);
 	return 0;
 }

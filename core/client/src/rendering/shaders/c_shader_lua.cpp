@@ -3,6 +3,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <misc/compute_pipeline_create_info.h>
 #include <shader/prosper_shader_copy_image.hpp>
+#include <prosper_render_pass.hpp>
 #include <prosper_util.hpp>
 
 using namespace pragma;
@@ -134,7 +135,7 @@ void LuaShaderGraphicsBase::InitializeRenderPass(std::shared_ptr<prosper::Render
 
 		Lua::PushInt(l,1); /* 2 */
 		Lua::GetTableValue(l,t); /* 2 */
-		outRenderPass = *Lua::CheckVKRenderPass(l,-1);
+		outRenderPass = Lua::Check<Lua::Vulkan::RenderPass>(l,-1).shared_from_this();
 		Lua::Pop(l,1); /* 1 */
 
 		Lua::Pop(l,1); /* 0 */

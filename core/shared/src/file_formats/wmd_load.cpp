@@ -8,7 +8,7 @@
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 {
 	auto &skeleton = mdl->GetSkeleton();
-	auto reference = std::make_shared<Animation>();
+	auto reference = Animation::Create();
 	if(!m_bStatic)
 	{
 		reference->ReserveBoneIds(reference->GetBoneCount() +numBones);
@@ -20,7 +20,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 			reference->AddBoneId(i);
 		}
 	}
-	auto frame = std::make_shared<Frame>((numBones == 0) ? 1 : numBones);
+	auto frame = Frame::Create((numBones == 0) ? 1 : numBones);
 	if(numBones == 0)
 	{
 		auto *root = new Bone;
@@ -78,7 +78,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 			ReadChildBones(skeleton,root);
 		}
 	}
-	auto refFrame = std::make_shared<Frame>(*frame);
+	auto refFrame = Frame::Create(*frame);
 	frame->Localize(*reference,skeleton);
 	reference->AddFrame(frame);
 	mdl->AddAnimation("reference",reference);

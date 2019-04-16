@@ -7,7 +7,7 @@
 
 extern DLLSERVER ServerState *server;
 
-void Lua::Model::Server::AddMaterial(lua_State *l,const std::shared_ptr<::Model> &mdl,uint32_t textureGroup,const std::string &name)
+void Lua::Model::Server::AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,const std::string &name)
 {
 	//Lua::CheckModel(l,1);
 	auto *mat = server->LoadMaterial(name);

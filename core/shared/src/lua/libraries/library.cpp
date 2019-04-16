@@ -700,7 +700,7 @@ void Game::RegisterLuaLibraries()
 	});
 
 	auto fileMod = luabind::module(GetLuaState(),"file");
-	auto classDefFile = luabind::class_<std::shared_ptr<LFile>>("File");
+	auto classDefFile = luabind::class_<LFile>("File");
 	classDefFile.def("Close",&Lua_LFile_Close);
 	classDefFile.def("Size",&Lua_LFile_Size);
 	classDefFile.def("ReadLine",&Lua_LFile_ReadLine);
@@ -721,8 +721,8 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("ReadVector2",&Lua_LFile_ReadVector2);
 	classDefFile.def("ReadVector4",&Lua_LFile_ReadVector4);
 	classDefFile.def("ReadAngles",&Lua_LFile_ReadAngles);
-	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,uint32_t)>(&Lua_LFile_ReadString));
-	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&)>(&Lua_LFile_ReadString));
+	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&,uint32_t)>(&Lua_LFile_ReadString));
+	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&)>(&Lua_LFile_ReadString));
 	classDefFile.def("WriteInt32",&Lua_LFile_WriteInt32);
 	classDefFile.def("WriteUInt32",&Lua_LFile_WriteUInt32);
 	classDefFile.def("WriteInt16",&Lua_LFile_WriteInt16);
@@ -740,18 +740,18 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("WriteVector2",&Lua_LFile_WriteVector2);
 	classDefFile.def("WriteVector4",&Lua_LFile_WriteVector4);
 	classDefFile.def("WriteAngles",&Lua_LFile_WriteAngles);
-	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string,bool)>(&Lua_LFile_WriteString));
-	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string)>(&Lua_LFile_WriteString));
+	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string,bool)>(&Lua_LFile_WriteString));
+	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_WriteString));
 	classDefFile.def("Seek",&Lua_LFile_Seek);
 	classDefFile.def("Tell",&Lua_LFile_Tell);
 	classDefFile.def("Eof",&Lua_LFile_Eof);
-	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,std::string,std::string)>(&Lua_LFile_IgnoreComments));
-	classDefFile.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Read",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds,uint32_t)>(&Lua_LFile_Read));
-	classDefFile.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds)>(&Lua_LFile_Write));
-	classDefFile.def("Write",static_cast<void(*)(lua_State*,std::shared_ptr<LFile>&,::DataStream &ds,uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,LFile&)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("IgnoreComments",static_cast<void(*)(lua_State*,LFile&,std::string,std::string)>(&Lua_LFile_IgnoreComments));
+	classDefFile.def("Read",static_cast<void(*)(lua_State*,LFile&,uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Read",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds,uint32_t)>(&Lua_LFile_Read));
+	classDefFile.def("Write",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds)>(&Lua_LFile_Write));
+	classDefFile.def("Write",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds,uint32_t)>(&Lua_LFile_Write));
 	fileMod[classDefFile];
 
 	Lua::RegisterLibrary(GetLuaState(),"time",{
@@ -765,7 +765,7 @@ void Game::RegisterLuaLibraries()
 	});
 
 	auto timeMod = luabind::module(GetLuaState(),"time");
-	auto classDefTimer = luabind::class_<std::shared_ptr<TimerHandle>>("Timer");
+	auto classDefTimer = luabind::class_<TimerHandle>("Timer");
 	classDefTimer.def("Start",&Lua_Timer_Start);
 	classDefTimer.def("Stop",&Lua_Timer_Stop);
 	classDefTimer.def("Pause",&Lua_Timer_Pause);

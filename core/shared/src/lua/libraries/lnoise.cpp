@@ -45,7 +45,7 @@ int Lua_noise_generate_height_map(lua_State *l)
 	auto *upperRight = Lua::CheckVector2(l,4);
 	auto heightMap = std::make_shared<noise::utils::NoiseMap>();
 	noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-	heightMapBuilder.SetSourceModule(*noiseModule->get());
+	heightMapBuilder.SetSourceModule(*noiseModule);
 	heightMapBuilder.SetDestNoiseMap(*heightMap.get());
 	heightMapBuilder.SetDestSize(CInt32(destSize->x),CInt32(destSize->y));
 	heightMapBuilder.SetBounds(bottomLeft->x,upperRight->x,bottomLeft->y,upperRight->y);
@@ -244,16 +244,16 @@ void Lua_BillowNoise_SetSeed(lua_State*,NoiseBillow &billow,int seed)
 //
 
 // Noise Map
-void Lua_NoiseMap_GetValue(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap,int x,int y)
+void Lua_NoiseMap_GetValue(lua_State *l,noise::utils::NoiseMap &noiseMap,int x,int y)
 {
-	Lua::PushNumber(l,noiseMap->GetValue(x,y));
+	Lua::PushNumber(l,noiseMap.GetValue(x,y));
 }
-void Lua_NoiseMap_GetHeight(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap)
+void Lua_NoiseMap_GetHeight(lua_State *l,noise::utils::NoiseMap &noiseMap)
 {
-	Lua::PushNumber(l,noiseMap->GetHeight());
+	Lua::PushNumber(l,noiseMap.GetHeight());
 }
-void Lua_NoiseMap_GetWidth(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap)
+void Lua_NoiseMap_GetWidth(lua_State *l,noise::utils::NoiseMap &noiseMap)
 {
-	Lua::PushNumber(l,noiseMap->GetWidth());
+	Lua::PushNumber(l,noiseMap.GetWidth());
 }
 //

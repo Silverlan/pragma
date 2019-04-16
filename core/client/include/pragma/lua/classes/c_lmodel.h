@@ -11,8 +11,8 @@ namespace Lua
 	{
 		namespace Client
 		{
-			DLLCLIENT void AddMaterial(lua_State *l,const std::shared_ptr<::Model> &mdl,uint32_t textureGroup,const std::string &name);
-			DLLCLIENT void GetVertexAnimationBuffer(lua_State *l,const std::shared_ptr<::Model> &mdl);
+			DLLCLIENT void AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,const std::string &name);
+			DLLCLIENT void GetVertexAnimationBuffer(lua_State *l,::Model &mdl);
 		};
 	};
 };

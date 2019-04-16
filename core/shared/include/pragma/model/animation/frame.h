@@ -13,8 +13,9 @@ class DLLNETWORK Frame
 	: public std::enable_shared_from_this<Frame>
 {
 public:
-	Frame(unsigned int numBones);
-	Frame(const Frame &other);
+	static std::shared_ptr<Frame> Create(unsigned int numBones);
+	static std::shared_ptr<Frame> Create(const Frame &other);
+
 	void SetBonePosition(unsigned int boneID,const Vector3 &pos);
 	void SetBoneOrientation(unsigned int boneID,const Quat &orientation);
 	void SetBoneScale(uint32_t boneId,const Vector3 &scale);
@@ -48,6 +49,8 @@ public:
 	std::vector<OrientedPoint> &GetBoneTransforms();
 	std::vector<Vector3> &GetBoneScales();
 private:
+	Frame(unsigned int numBones);
+	Frame(const Frame &other);
 	std::vector<OrientedPoint> m_bones;
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;

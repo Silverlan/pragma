@@ -246,6 +246,10 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
 	if(sampleCount != Anvil::SampleCountFlagBits::_1_BIT)
 		imgCreateInfo.usage |= Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
+
+	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
+	// We don't really care about the quality of the blur image though, so using a smaller resolution
+	// here works just as well.
 	auto hdrBloomImg = prosper::util::create_image(dev,imgCreateInfo);
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -262,13 +266,13 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	if(resolvedTex->IsMSAATexture())
 		resolvedTex = static_cast<prosper::MSAATexture&>(*resolvedTex).GetResolvedTexture();
 
-	auto hdrBloomTex = prosper::util::create_texture(dev,texCreateInfo,hdrBloomImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
+	bloomTexture = prosper::util::create_texture(dev,texCreateInfo,hdrBloomImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
 	hdrRenderTarget = prosper::util::create_render_target(
-		dev,{hdrTex,hdrBloomTex,prepass.textureDepth},
+		dev,{hdrTex,bloomTexture,prepass.textureDepth},
 		static_cast<prosper::ShaderGraphics*>(wpShader.get())->GetRenderPass(umath::to_integral(pragma::ShaderTextured3D::GetPipelineIndex(sampleCount)))
 	);
 	hdrRenderTarget->SetDebugName("scene_hdr_rt");
-	auto resolvedBloomTex = hdrBloomTex;
+	auto resolvedBloomTex = bloomTexture;
 	if(resolvedBloomTex->IsMSAATexture())
 		resolvedBloomTex = static_cast<prosper::MSAATexture&>(*resolvedBloomTex).GetResolvedTexture();
 
@@ -280,9 +284,18 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	rpCreateInfo.attachments.push_back({imgDepth->GetFormat(),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,Anvil::AttachmentStoreOp::STORE,imgDepth->GetSampleCount(),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL});
 	rpIntermediate = prosper::util::create_render_pass(dev,rpCreateInfo);
 
-	bloomRenderTarget = prosper::util::create_render_target(dev,{resolvedBloomTex},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context,umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
-	bloomRenderTarget->SetDebugName("scene_bloom_rt");
-	bloomBlurSet = prosper::BlurSet::Create(dev,bloomRenderTarget);
+	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
+	// We don't really care about the quality of the blur image though, so we're using a smaller
+	// version of the bloom image for post-processing.
+	imgCreateInfo.width = 256;
+	imgCreateInfo.height = 256;
+	auto hdrBloomBlurImg = prosper::util::create_image(dev,imgCreateInfo);
+	bloomBlurTexture = prosper::util::create_texture(dev,texCreateInfo,hdrBloomBlurImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
+	imgCreateInfo.width = width;
+	imgCreateInfo.height = height;
+	bloomBlurRenderTarget = prosper::util::create_render_target(dev,{bloomBlurTexture},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context,umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
+	bloomBlurRenderTarget->SetDebugName("scene_bloom_rt");
+	bloomBlurSet = prosper::BlurSet::Create(dev,bloomBlurRenderTarget);
 	
 	imgCreateInfo.usage |= Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 	auto hdrImgStaging = prosper::util::create_image(dev,imgCreateInfo);
@@ -293,12 +306,12 @@ bool Scene::HDRInfo::Initialize(Scene &scene,uint32_t width,uint32_t height,Anvi
 	descSetGroupHdrResolve = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *(*descSetGroupHdrResolve)->get_descriptor_set(0u);
 	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*resolvedTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
-	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*resolvedBloomTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
+	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*bloomBlurTexture,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 
 	descSetGroupHdrResolveStaging = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolveStaging = *(*descSetGroupHdrResolveStaging)->get_descriptor_set(0u);
 	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolveStaging,*hdrTexStaging,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
-	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolveStaging,*resolvedBloomTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
+	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolveStaging,*bloomBlurTexture,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 	//prosper::util::set_descriptor_set_binding_texture(descSetHdrResolveStaging,*glowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 
 	descSetGroupHdr = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
@@ -559,12 +572,12 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 
 			hTexture = pTexture->GetHandle();
 		}
-		if(hdrInfo.bloomRenderTarget != nullptr)
+		if(hdrInfo.bloomBlurRenderTarget != nullptr)
 		{
 			auto *pTexture = wgui.Create<WIDebugMSAATexture>(r);
 			pTexture->SetSize(size,size);
 			pTexture->SetX(size *idx++);
-			pTexture->SetTexture(*hdrInfo.bloomRenderTarget->GetTexture());
+			pTexture->SetTexture(*hdrInfo.bloomBlurRenderTarget->GetTexture());
 			pTexture->SetShouldResolveImage(true);
 
 			hBloomTexture = pTexture->GetHandle();

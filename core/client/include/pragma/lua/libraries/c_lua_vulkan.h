@@ -64,31 +64,31 @@ namespace Lua
 			{}
 			vk::ClearValue clearValue {};
 		};
-		using Texture = std::shared_ptr<prosper::Texture>;
-		using Image = std::shared_ptr<prosper::Image>;
-		using ImageView = std::shared_ptr<prosper::ImageView>;
-		using Sampler = std::shared_ptr<prosper::Sampler>;
-		using Framebuffer = std::shared_ptr<prosper::Framebuffer>;
-		using RenderPass = std::shared_ptr<prosper::RenderPass>;
-		using Event = std::shared_ptr<Anvil::Event>;
-		using Fence = std::shared_ptr<Anvil::Fence>;
-		using Semaphore = std::shared_ptr<Anvil::Semaphore>;
+		using Texture = prosper::Texture;
+		using Image = prosper::Image;
+		using ImageView = prosper::ImageView;
+		using Sampler = prosper::Sampler;
+		using Framebuffer = prosper::Framebuffer;
+		using RenderPass = prosper::RenderPass;
+		using Event = Anvil::Event;
+		using Fence = Anvil::Fence;
+		using Semaphore = Anvil::Semaphore;
 		using Memory = Anvil::MemoryBlock;
-		using CommandBuffer = std::shared_ptr<prosper::CommandBuffer>;
-		using Buffer = std::shared_ptr<prosper::Buffer>;
-		using DescriptorSet = std::shared_ptr<prosper::DescriptorSetGroup>;
-		using RenderTarget = std::shared_ptr<prosper::RenderTarget>;
-		using TimestampQuery = std::shared_ptr<prosper::TimestampQuery>;
-		using TimerQuery = std::shared_ptr<prosper::TimerQuery>;
+		using CommandBuffer = prosper::CommandBuffer;
+		using Buffer = prosper::Buffer;
+		using DescriptorSet = prosper::DescriptorSetGroup;
+		using RenderTarget = prosper::RenderTarget;
+		using TimestampQuery = prosper::TimestampQuery;
+		using TimerQuery = prosper::TimerQuery;
 		struct DLLCLIENT RenderPassInfo
 		{
-			RenderPassInfo(const RenderTarget &renderTarget)
+			RenderPassInfo(const std::shared_ptr<RenderTarget> &renderTarget)
 				: renderTarget{renderTarget}
 			{}
-			RenderTarget renderTarget;
+			std::shared_ptr<RenderTarget> renderTarget;
 			std::vector<ClearValue> clearValues = {};
 			std::optional<uint32_t> layerId = {};
-			RenderPass renderPass = nullptr;
+			std::shared_ptr<RenderPass> renderPass = nullptr;
 		};
 	};
 };
@@ -110,35 +110,5 @@ namespace prosper
 		struct ClearImageInfo;
 	};
 };
-
-lua_registercheck(VKTextureCreateInfo,prosper::util::TextureCreateInfo);
-lua_registercheck(VKSamplerCreateInfo,prosper::util::SamplerCreateInfo);
-lua_registercheck(VKRenderTargetCreateInfo,prosper::util::RenderTargetCreateInfo);
-lua_registercheck(VKBufferCreateInfo,prosper::util::BufferCreateInfo);
-lua_registercheck(VKImageCreateInfo,prosper::util::ImageCreateInfo);
-lua_registercheck(VKImageViewCreateInfo,prosper::util::ImageViewCreateInfo);
-lua_registercheck(VKRenderPassCreateInfo,prosper::util::RenderPassCreateInfo);
-lua_registercheck(VKBlitInfo,prosper::util::BlitInfo);
-lua_registercheck(VKCopyInfo,prosper::util::CopyInfo);
-lua_registercheck(VKPipelineBarrierInfo,prosper::util::PipelineBarrierInfo);
-lua_registercheck(VKClearImageInfo,prosper::util::ClearImageInfo);
-
-lua_registercheck(VKClearValue,Lua::Vulkan::ClearValue);
-lua_registercheck(VKTexture,Lua::Vulkan::Texture);
-lua_registercheck(VKImage,Lua::Vulkan::Image);
-lua_registercheck(VKImageView,Lua::Vulkan::ImageView);
-lua_registercheck(VKSampler,Lua::Vulkan::Sampler);
-lua_registercheck(VKFramebuffer,Lua::Vulkan::Framebuffer);
-lua_registercheck(VKRenderPass,Lua::Vulkan::RenderPass);
-lua_registercheck(VKEvent,Lua::Vulkan::Event);
-lua_registercheck(VKFence,Lua::Vulkan::Fence);
-lua_registercheck(VKSemaphore,Lua::Vulkan::Semaphore);
-lua_registercheck(VKMemory,Lua::Vulkan::Memory);
-lua_registercheck(VKCommandBuffer,Lua::Vulkan::CommandBuffer);
-lua_registercheck(VKBuffer,Lua::Vulkan::Buffer);
-lua_registercheck(VKDescriptorSet,Lua::Vulkan::DescriptorSet);
-lua_registercheck(VKRenderTarget,Lua::Vulkan::RenderTarget);
-lua_registercheck(VKTimestampQuery,Lua::Vulkan::TimestampQuery);
-lua_registercheck(VKTimerQuery,Lua::Vulkan::TimerQuery);
 
 #endif

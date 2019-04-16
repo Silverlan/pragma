@@ -994,6 +994,6 @@ CEOnShadowBufferInitialized::CEOnShadowBufferInitialized(prosper::Buffer &shadow
 {}
 void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
-	Lua::Push<Lua::Vulkan::Buffer>(l,shadowBuffer.shared_from_this());
+	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
 #pragma optimize("",on)

@@ -26,13 +26,13 @@ void Lua::ModelSubMesh::Client::CreateSphere(lua_State *l,const Vector3 &origin,
 {
 	Lua::ModelSubMesh::CreateSphere<::CModelSubMesh>(l,origin,radius);
 }
-void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l,::ModelSubMesh &mesh)
 {
-	Lua::Push<std::shared_ptr<::pragma::VkMesh>>(l,static_cast<CModelSubMesh*>(mesh.get())->GetVKMesh());
+	Lua::Push<std::shared_ptr<::pragma::VkMesh>>(l,static_cast<CModelSubMesh&>(mesh).GetVKMesh());
 }
-void Lua::ModelSubMesh::Client::GetTangents(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetTangents(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &verts = mesh->GetVertices();
+	auto &verts = mesh.GetVertices();
 
 	auto tTangents = Lua::CreateTable(l);
 	for(auto i=decltype(verts.size()){0};i<verts.size();++i)
@@ -42,9 +42,9 @@ void Lua::ModelSubMesh::Client::GetTangents(lua_State *l,std::shared_ptr<::Model
 		Lua::SetTableValue(l,tTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &verts = mesh->GetVertices();
+	auto &verts = mesh.GetVertices();
 
 	auto tBiTangents = Lua::CreateTable(l);
 	for(auto i=decltype(verts.size()){0};i<verts.size();++i)
@@ -54,33 +54,33 @@ void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l,std::shared_ptr<::Mod
 		Lua::SetTableValue(l,tBiTangents);
 	}
 }
-void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh*>(mesh.get())->GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
 	auto &buf = vkMesh->GetVertexBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l,buf);
 }
-void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh*>(mesh.get())->GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
 	auto &buf = vkMesh->GetVertexWeightBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l,buf);
 }
-void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh*>(mesh.get())->GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
 	auto &buf = vkMesh->GetAlphaBuffer();
 	if(buf == nullptr)
 		return;
 	Lua::Push(l,buf);
 }
-void Lua::ModelSubMesh::Client::GetIndexBuffer(lua_State *l,std::shared_ptr<::ModelSubMesh> &mesh)
+void Lua::ModelSubMesh::Client::GetIndexBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh*>(mesh.get())->GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
 	auto &buf = vkMesh->GetIndexBuffer();
 	if(buf == nullptr)
 		return;

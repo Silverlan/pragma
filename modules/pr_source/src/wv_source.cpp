@@ -30,7 +30,7 @@
 #pragma comment(lib,"ishared.lib")
 #pragma comment(lib,"materialsystem.lib")
 #pragma comment(lib,"util_archive.lib")
-#pragma comment(lib,"niflib_dll.lib")
+#pragma comment(lib,"niflib_static.lib")
 
 uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name)
 {
@@ -85,7 +85,7 @@ extern "C" {
 				auto &mdl = Lua::Check<std::shared_ptr<Model>>(l,2);
 
 				std::vector<std::string> textures {};
-				auto bSuccess = import::load_fbx(engine->GetNetworkState(l),*mdl,f->GetHandle(),textures);
+				auto bSuccess = import::load_fbx(engine->GetNetworkState(l),*mdl,f.GetHandle(),textures);
 				Lua::PushBool(l,bSuccess);
 				return 1;
 			})},
@@ -170,14 +170,14 @@ extern "C" {
 		for(auto i=decltype(numMeshGroups){0};i<numMeshGroups;++i)
 			mdl->GetBaseMeshes().push_back(i);
 
-		auto refAnim = std::make_shared<Animation>();
+		auto refAnim = Animation::Create();
 		auto &skeleton = mdl->GetSkeleton();
 		auto numBones = skeleton.GetBoneCount();
 		auto &boneList = refAnim->GetBoneList();
 		refAnim->ReserveBoneIds(refAnim->GetBoneCount() +numBones);
 		for(auto i=decltype(numBones){0};i<numBones;++i)
 			refAnim->AddBoneId(i);
-		auto refFrame = std::make_shared<Frame>(mdl->GetReference());
+		auto refFrame = Frame::Create(mdl->GetReference());
 		refAnim->AddFrame(refFrame);
 		mdl->AddAnimation("reference",refAnim);
 		//refFrame->Localize(*refAnim,skeleton);

@@ -21,7 +21,7 @@ static bool get_lua_data(lua_State *l,NetworkState **nw,VFilePtr &f,std::string 
 	if(Lua::IsFile(l,2))
 	{
 		auto *lf = Lua::CheckFile(l,2);
-		f = (*lf)->GetHandle();
+		f = lf->GetHandle();
 	}
 	else
 	{
@@ -30,7 +30,7 @@ static bool get_lua_data(lua_State *l,NetworkState **nw,VFilePtr &f,std::string 
 	}
 	if(f == nullptr)
 		return false;
-	*mdl = Lua::CheckModel(l,3)->get();
+	*mdl = &Lua::Check<Model>(l,3);
 	return true;
 }
 
@@ -116,7 +116,7 @@ int Lua::mde::lib::load_mdl(lua_State *l)
 		std::string ext = Lua::CheckString(l,-1);
 		Lua::Pop(l,1);
 		auto f = *Lua::CheckFile(l,-1);
-		files[ext] = f->GetHandle();
+		files[ext] = f.GetHandle();
 		Lua::Pop(l,1);
 	}
 	auto bCollision = false;

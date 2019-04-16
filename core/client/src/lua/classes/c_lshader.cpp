@@ -176,13 +176,13 @@ void Lua::Shader::RecordBindDescriptorSet(lua_State *l,prosper::Shader &shader,L
 			return static_cast<uint32_t>(Lua::CheckInt(l,idx));
 		});
 	}
-	auto r = record_bind_descriptor_sets(shader,{(*ds)->get_descriptor_set(0u)},firstSet,vDynamicOffsets);
+	auto r = record_bind_descriptor_sets(shader,{ds->get_descriptor_set(0u)},firstSet,vDynamicOffsets);
 	Lua::PushBool(l,r);
 }
 void Lua::Shader::RecordBindDescriptorSets(lua_State *l,prosper::Shader &shader,luabind::object descSets,uint32_t firstSet,luabind::object dynamicOffsets)
 {
 	auto vDescSets = get_table_values<Anvil::DescriptorSet*>(l,2u,[](lua_State *l,int32_t idx) {
-		return (*(*Lua::CheckVKDescriptorSet(l,idx)))->get_descriptor_set(0u);
+		return Lua::Check<Lua::Vulkan::DescriptorSet>(l,idx)->get_descriptor_set(0u);
 	});
 	std::vector<uint32_t> vDynamicOffsets;
 	if(Lua::IsSet(l,4u))

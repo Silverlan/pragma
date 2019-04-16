@@ -117,7 +117,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	mdl->m_meshGroups = m_meshGroups;
 	mdl->m_bodyGroups = m_bodyGroups;
 	mdl->m_hitboxes = m_hitboxes;
-	mdl->m_reference = std::make_unique<Frame>(*m_reference);
+	mdl->m_reference = Frame::Create(*m_reference);
 	mdl->m_name = m_name;
 	mdl->m_bAllMaterialsLoaded = true;
 	mdl->m_animations = m_animations;
@@ -146,7 +146,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	{
 		for(auto &meshGroup : mdl->m_meshGroups)
 		{
-			auto newMeshGroup = std::make_shared<ModelMeshGroup>(meshGroup->GetName());
+			auto newMeshGroup = ModelMeshGroup::Create(meshGroup->GetName());
 			newMeshGroup->GetMeshes() = meshGroup->GetMeshes();
 			for(auto &mesh : newMeshGroup->GetMeshes())
 			{
@@ -161,12 +161,12 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	if((copyFlags &CopyFlags::CopyAnimationsBit) != CopyFlags::None)
 	{
 		for(auto &anim : mdl->m_animations)
-			anim = std::make_shared<Animation>(*anim,Animation::ShareMode::None);
+			anim = Animation::Create(*anim,Animation::ShareMode::None);
 	}
 	if((copyFlags &CopyFlags::CopyVertexAnimationsBit) != CopyFlags::None)
 	{
 		for(auto &vertexAnim : mdl->m_vertexAnimations)
-			vertexAnim = std::make_shared<VertexAnimation>(*vertexAnim);
+			vertexAnim = VertexAnimation::Create(*vertexAnim);
 	}
 	if((copyFlags &CopyFlags::CopyCollisionMeshes) != CopyFlags::None)
 	{

@@ -13,8 +13,8 @@ class DLLNETWORK FWAD
 private:
 	
 public:
-	Animation *ReadData(unsigned short version,VFilePtr f);
-	Animation *Load(unsigned short version,const char *animation);
+	std::shared_ptr<Animation> ReadData(unsigned short version,VFilePtr f);
+	std::shared_ptr<Animation> Load(unsigned short version,const char *animation);
 };
 
 #endif

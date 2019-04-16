@@ -484,7 +484,7 @@ int Lua::DebugRenderer::Client::DrawFrustum(lua_State *l)
 	if(Lua::IsCamera(l,1))
 	{
 		auto *cam = Lua::CheckCamera(l,1);
-		(*cam)->GetFrustumPoints(points);
+		cam->GetFrustumPoints(points);
 	}
 	else
 	{
@@ -509,37 +509,37 @@ int Lua::DebugRenderer::Client::DrawFrustum(lua_State *l)
 	Lua::Push<decltype(r)>(l,r);
 	return 1;
 }
-void Lua::DebugRenderer::Client::Object::Remove(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o)
+void Lua::DebugRenderer::Client::Object::Remove(lua_State *l,::DebugRenderer::BaseObject &o)
 {
-	o->Remove();
+	o.Remove();
 }
-void Lua::DebugRenderer::Client::Object::IsValid(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o)
+void Lua::DebugRenderer::Client::Object::IsValid(lua_State *l,::DebugRenderer::BaseObject &o)
 {
-	Lua::PushBool(l,o->IsValid());
+	Lua::PushBool(l,o.IsValid());
 }
-void Lua::DebugRenderer::Client::Object::SetPos(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const Vector3 &pos)
+void Lua::DebugRenderer::Client::Object::SetPos(lua_State *l,::DebugRenderer::BaseObject &o,const Vector3 &pos)
 {
-	o->SetPos(pos);
+	o.SetPos(pos);
 }
-void Lua::DebugRenderer::Client::Object::GetPos(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o)
+void Lua::DebugRenderer::Client::Object::GetPos(lua_State *l,::DebugRenderer::BaseObject &o)
 {
-	Lua::Push<Vector3>(l,o->GetPos());
+	Lua::Push<Vector3>(l,o.GetPos());
 }
-void Lua::DebugRenderer::Client::Object::SetRotation(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const Quat &rot)
+void Lua::DebugRenderer::Client::Object::SetRotation(lua_State *l,::DebugRenderer::BaseObject &o,const Quat &rot)
 {
-	o->SetRotation(rot);
+	o.SetRotation(rot);
 }
-void Lua::DebugRenderer::Client::Object::GetRotation(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o)
+void Lua::DebugRenderer::Client::Object::GetRotation(lua_State *l,::DebugRenderer::BaseObject &o)
 {
-	Lua::Push<Quat>(l,o->GetRotation());
+	Lua::Push<Quat>(l,o.GetRotation());
 }
-void Lua::DebugRenderer::Client::Object::SetAngles(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,const EulerAngles &ang)
+void Lua::DebugRenderer::Client::Object::SetAngles(lua_State *l,::DebugRenderer::BaseObject &o,const EulerAngles &ang)
 {
-	o->SetAngles(ang);
+	o.SetAngles(ang);
 }
-void Lua::DebugRenderer::Client::Object::GetAngles(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o)
+void Lua::DebugRenderer::Client::Object::GetAngles(lua_State *l,::DebugRenderer::BaseObject &o)
 {
-	Lua::Push<EulerAngles>(l,o->GetAngles());
+	Lua::Push<EulerAngles>(l,o.GetAngles());
 }
-void Lua::DebugRenderer::Client::Object::IsVisible(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o) {Lua::PushBool(l,o->IsVisible());}
-void Lua::DebugRenderer::Client::Object::SetVisible(lua_State *l,std::shared_ptr<::DebugRenderer::BaseObject> &o,bool b) {o->SetVisible(b);}
+void Lua::DebugRenderer::Client::Object::IsVisible(lua_State *l,::DebugRenderer::BaseObject &o) {Lua::PushBool(l,o.IsVisible());}
+void Lua::DebugRenderer::Client::Object::SetVisible(lua_State *l,::DebugRenderer::BaseObject &o,bool b) {o.SetVisible(b);}

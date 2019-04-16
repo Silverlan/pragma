@@ -1,6 +1,18 @@
 #include "stdafx_client.h"
 #include "pragma/model/animation/c_vertex_animation.hpp"
 
+std::shared_ptr<CVertexAnimation> CVertexAnimation::Create()
+{
+	return std::shared_ptr<CVertexAnimation>(new CVertexAnimation{});
+}
+std::shared_ptr<CVertexAnimation> CVertexAnimation::Create(const CVertexAnimation &other)
+{
+	return std::shared_ptr<CVertexAnimation>(new CVertexAnimation{other});
+}
+std::shared_ptr<CVertexAnimation> CVertexAnimation::Create(const std::string &name)
+{
+	return std::shared_ptr<CVertexAnimation>(new CVertexAnimation{name});
+}
 CVertexAnimation::CVertexAnimation()
 	: VertexAnimation()
 {}
@@ -12,7 +24,7 @@ CVertexAnimation::CVertexAnimation(const CVertexAnimation &other)
 CVertexAnimation::CVertexAnimation(const std::string &name)
 	: VertexAnimation(name)
 {}
-std::unique_ptr<VertexAnimation> CVertexAnimation::Copy() const {return std::unique_ptr<VertexAnimation>(new CVertexAnimation(*this));}
+std::shared_ptr<VertexAnimation> CVertexAnimation::Copy() const {return CVertexAnimation::Create(*this);}
 
 void CVertexAnimation::UpdateBuffer()
 {

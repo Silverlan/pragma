@@ -46,6 +46,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 #include <luainterface.hpp>
 #include <misc/compute_pipeline_create_info.h>
 
@@ -135,7 +136,7 @@ namespace pragma
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
-	auto defFontInfo = luabind::class_<std::shared_ptr<const FontInfo>>("FontInfo");
+	auto defFontInfo = luabind::class_<FontInfo>("FontInfo");
 	modEngine[defFontInfo];
 
 #ifdef TEST_LUABIND_SMART_POINTE_DERIVED
@@ -556,7 +557,7 @@ void CGame::RegisterLuaClasses()
 	ClientState::RegisterSharedLuaClasses(GetLuaInterface());
 
 	auto debugMod = luabind::module(GetLuaState(),"debug");
-	auto defDebugRendererObject = luabind::class_<std::shared_ptr<DebugRenderer::BaseObject>>("RendererObject");
+	auto defDebugRendererObject = luabind::class_<DebugRenderer::BaseObject>("RendererObject");
 	defDebugRendererObject.def("Remove",&Lua::DebugRenderer::Client::Object::Remove);
 	defDebugRendererObject.def("IsValid",&Lua::DebugRenderer::Client::Object::IsValid);
 	defDebugRendererObject.def("SetPos",&Lua::DebugRenderer::Client::Object::SetPos);
@@ -577,10 +578,10 @@ void CGame::RegisterLuaClasses()
 	}),static_cast<void(*)(::util::DrawSceneInfo&,const std::shared_ptr<::Scene>&)>([](::util::DrawSceneInfo &drawSceneInfo,const std::shared_ptr<::Scene> &scene) {
 		drawSceneInfo.scene = scene;
 	}));
-	defDrawSceneInfo.property("commandBuffer",static_cast<Lua::Vulkan::CommandBuffer(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Lua::Vulkan::CommandBuffer {
+	defDrawSceneInfo.property("commandBuffer",static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer>(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> {
 		return drawSceneInfo.commandBuffer;
-	}),static_cast<void(*)(::util::DrawSceneInfo&,const Lua::Vulkan::CommandBuffer&)>([](::util::DrawSceneInfo &drawSceneInfo,const Lua::Vulkan::CommandBuffer &commandBuffer) {
-		drawSceneInfo.commandBuffer = commandBuffer;
+	}),static_cast<void(*)(::util::DrawSceneInfo&,Lua::Vulkan::CommandBuffer&)>([](::util::DrawSceneInfo &drawSceneInfo,Lua::Vulkan::CommandBuffer &commandBuffer) {
+		drawSceneInfo.commandBuffer = commandBuffer.shared_from_this();
 	}));
 	defDrawSceneInfo.def_readwrite("renderFlags",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::renderFlags));
 	defDrawSceneInfo.property("clearColor",static_cast<Color(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color {
@@ -590,11 +591,11 @@ void CGame::RegisterLuaClasses()
 	}));
 	modGame[defDrawSceneInfo];
 
-	auto modelMeshClassDef = luabind::class_<std::shared_ptr<ModelMesh>>("Mesh");
+	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Client::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<std::shared_ptr<ModelSubMesh>>("Sub");
+	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.def("GetTangents",&Lua::ModelSubMesh::Client::GetTangents);
 	subModelMeshClassDef.def("GetBiTangents",&Lua::ModelSubMesh::Client::GetBiTangents);
@@ -608,7 +609,7 @@ void CGame::RegisterLuaClasses()
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float,uint32_t)>(&Lua::ModelSubMesh::Client::CreateSphere))];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float)>(&Lua::ModelSubMesh::Client::CreateSphere))];
 
-	auto modelClassDef = luabind::class_<std::shared_ptr<Model>>("Model");
+	auto modelClassDef = luabind::class_<Model>("Model");
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
 	modelClassDef.def("AddMaterial",&Lua::Model::Client::AddMaterial);
 	modelClassDef.def("GetVertexAnimationBuffer",&Lua::Model::Client::GetVertexAnimationBuffer);
@@ -713,7 +714,7 @@ void CGame::RegisterLuaClasses()
 	_G["Entity"] = _G["ents"]["Entity"];
 	_G["BaseEntity"] = _G["ents"]["BaseEntity"];
 
-	auto worldEnvClassDef = luabind::class_<std::shared_ptr<::WorldEnvironment>>("WorldEnvironment");
+	auto worldEnvClassDef = luabind::class_<::WorldEnvironment>("WorldEnvironment");
 	Lua::WorldEnvironment::register_class(worldEnvClassDef);
 	modGame[worldEnvClassDef];
 }

@@ -1843,7 +1843,6 @@ void Lua::WITexturedShape::GetMaterial(lua_State *l,WITexturedShapeHandle &hPane
 void Lua::WITexturedShape::SetTexture(lua_State *l,WITexturedShapeHandle &hPanel,std::shared_ptr<prosper::Texture> &tex)
 {
 	lua_checkgui(l,hPanel);
-	Lua::CheckVKTexture(l,2);
 	hPanel.get<::WITexturedShape>()->SetTexture(*tex);
 }
 

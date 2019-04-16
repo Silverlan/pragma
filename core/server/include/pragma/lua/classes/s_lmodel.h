@@ -12,7 +12,7 @@ namespace Lua
 	{
 		namespace Server
 		{
-			DLLSERVER void AddMaterial(lua_State *l,const std::shared_ptr<::Model> &mdl,uint32_t textureGroup,const std::string &name);
+			DLLSERVER void AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,const std::string &name);
 		};
 	};
 };

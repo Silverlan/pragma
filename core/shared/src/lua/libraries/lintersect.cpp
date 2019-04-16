@@ -7,6 +7,7 @@
 #include "pragma/lua/classes/ldef_plane.h"
 #include "pragma/lua/classes/ldef_model.h"
 #include "luasystem.h"
+#include <pragma/model/modelmesh.h>
 #include <pragma/math/intersection.h>
 
 int Lua::intersect::aabb_with_aabb(lua_State *l)
@@ -131,20 +132,20 @@ int Lua::intersect::line_mesh(lua_State *l)
 
 	std::vector<uint32_t> bodyGroups;
 	uint32_t lod = 0;
-	if(Lua::IsModelMesh(l,arg) == true)
+	if(Lua::IsType<ModelMesh>(l,arg) == true)
 	{
 		type = 0;
-		tgt = Lua::CheckModelMesh(l,arg++)->get();
+		tgt = &Lua::Check<ModelMesh>(l,arg++);
 	}
-	else if(Lua::IsModelSubMesh(l,arg) == true)
+	else if(Lua::IsType<ModelSubMesh>(l,arg) == true)
 	{
 		type = 1;
-		tgt = Lua::CheckModelSubMesh(l,arg++)->get();
+		tgt = &Lua::Check<ModelSubMesh>(l,arg++);
 	}
 	else
 	{
 		type = 2;
-		tgt = Lua::CheckModel(l,arg++)->get();
+		tgt = &Lua::Check<Model>(l,arg++);
 
 		if(Lua::IsTable(l,arg) == true)
 		{

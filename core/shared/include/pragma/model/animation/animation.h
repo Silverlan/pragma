@@ -22,26 +22,8 @@ struct DLLNETWORK AnimationBlendController
 };
 
 class DLLNETWORK Animation
+	: public std::enable_shared_from_this<Animation>
 {
-private:
-	static util::EnumRegister s_activityEnumRegister;
-	static util::EnumRegister s_eventEnumRegister;
-
-	std::vector<std::shared_ptr<Frame>> m_frames;
-	// Contains a list of model bone Ids which are used by this animation
-	std::vector<uint32_t> m_boneIds;
-	std::vector<float> m_boneWeights;
-	// Maps a model bone id to a local bone id (m_boneIds index)
-	std::unordered_map<uint32_t,uint32_t> m_boneIdMap;
-	std::unordered_map<unsigned int,std::vector<std::shared_ptr<AnimationEvent>>> m_events;
-	FAnim m_flags;
-	Activity m_activity;
-	unsigned char m_activityWeight;
-	unsigned char m_fps;
-	std::pair<Vector3,Vector3> m_renderBounds;
-	std::unique_ptr<AnimationBlendController> m_blendController;
-	std::unique_ptr<float> m_fadeIn;
-	std::unique_ptr<float> m_fadeOut;
 public:
 	static util::EnumRegister &GetActivityEnumRegister();
 	static util::EnumRegister &GetEventEnumRegister();
@@ -51,8 +33,8 @@ public:
 		Frames = 1,
 		Events = 2,
 	};
-	Animation();
-	Animation(const Animation &other,ShareMode share=ShareMode::None);
+	static std::shared_ptr<Animation> Create();
+	static std::shared_ptr<Animation> Create(const Animation &other,ShareMode share=ShareMode::None);
 	const std::pair<Vector3,Vector3> &GetRenderBounds() const;
 	void SetRenderBounds(const Vector3 &min,const Vector3 &max);
 	void CalcRenderBounds(Model &mdl);
@@ -103,6 +85,27 @@ public:
 	bool GetBoneWeight(uint32_t boneId,float &weight) const;
 	const std::vector<float> &GetBoneWeights() const;
 	std::vector<float> &GetBoneWeights();
+private:
+	static util::EnumRegister s_activityEnumRegister;
+	static util::EnumRegister s_eventEnumRegister;
+	Animation();
+	Animation(const Animation &other,ShareMode share=ShareMode::None);
+
+	std::vector<std::shared_ptr<Frame>> m_frames;
+	// Contains a list of model bone Ids which are used by this animation
+	std::vector<uint32_t> m_boneIds;
+	std::vector<float> m_boneWeights;
+	// Maps a model bone id to a local bone id (m_boneIds index)
+	std::unordered_map<uint32_t,uint32_t> m_boneIdMap;
+	std::unordered_map<unsigned int,std::vector<std::shared_ptr<AnimationEvent>>> m_events;
+	FAnim m_flags;
+	Activity m_activity;
+	unsigned char m_activityWeight;
+	unsigned char m_fps;
+	std::pair<Vector3,Vector3> m_renderBounds;
+	std::unique_ptr<AnimationBlendController> m_blendController;
+	std::unique_ptr<float> m_fadeIn;
+	std::unique_ptr<float> m_fadeOut;
 };
 
 REGISTER_BASIC_ARITHMETIC_OPERATORS(Animation::ShareMode)

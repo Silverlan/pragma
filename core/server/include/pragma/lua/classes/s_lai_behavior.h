@@ -116,8 +116,21 @@ namespace Lua
 	};
 };
 
+namespace Lua
+{
+	namespace ai
+	{
+		class BaseBehaviorTask
+			: public ai::TaskWrapper
+		{
+		public:
+			using ai::TaskWrapper::TaskWrapper;
+		};
+	};
+};
+
 struct DLLSERVER AILuaBehaviorNodeWrapper
-	: public Lua::ai::TaskWrapper,luabind::wrap_base
+	: public Lua::ai::BaseBehaviorTask,luabind::wrap_base
 {
 public:
 	AILuaBehaviorNodeWrapper(uint32_t nodeType,uint32_t selectorType);

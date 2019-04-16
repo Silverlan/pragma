@@ -51,10 +51,11 @@ class DLLNETWORK VertexAnimation
 	: public std::enable_shared_from_this<VertexAnimation>
 {
 public:
-	VertexAnimation()=default;
-	VertexAnimation(const VertexAnimation &other);
-	VertexAnimation(const std::string &name);
-	virtual std::unique_ptr<VertexAnimation> Copy() const;
+	static std::shared_ptr<VertexAnimation> Create();
+	static std::shared_ptr<VertexAnimation> Create(const VertexAnimation &other);
+	static std::shared_ptr<VertexAnimation> Create(const std::string &name);
+
+	virtual std::shared_ptr<VertexAnimation> Copy() const;
 	virtual ~VertexAnimation()=default;
 
 	std::shared_ptr<MeshVertexFrame> AddMeshFrame(ModelMesh &mesh,ModelSubMesh &subMesh);
@@ -71,6 +72,9 @@ public:
 	void SetName(const std::string &name);
 	const std::string &GetName() const;
 protected:
+	VertexAnimation()=default;
+	VertexAnimation(const VertexAnimation &other);
+	VertexAnimation(const std::string &name);
 	std::string m_name;
 	std::vector<std::shared_ptr<MeshVertexAnimation>> m_meshAnims;
 };

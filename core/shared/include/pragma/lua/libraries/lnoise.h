@@ -5,8 +5,8 @@
 #include "noise/noise.h"
 #include "noiseutils.h"
 
-lua_registercheck(NoiseModule,std::shared_ptr<noise::module::Module>);
-lua_registercheck(NoiseMap,std::shared_ptr<noise::utils::NoiseMap>);
+lua_registercheck(NoiseModule,noise::module::Module);
+lua_registercheck(NoiseMap,noise::utils::NoiseMap);
 
 class DLLNETWORK NoiseBaseModule
 	: public std::shared_ptr<noise::module::Module>
@@ -108,8 +108,8 @@ DLLNETWORK void Lua_BillowNoise_SetOctaveCount(lua_State *l,NoiseBillow &billow,
 DLLNETWORK void Lua_BillowNoise_SetPersistence(lua_State *l,NoiseBillow &billow,double persistence);
 DLLNETWORK void Lua_BillowNoise_SetSeed(lua_State *l,NoiseBillow &billow,int seed);
 
-DLLNETWORK void Lua_NoiseMap_GetValue(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap,int x,int y);
-DLLNETWORK void Lua_NoiseMap_GetHeight(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap);
-DLLNETWORK void Lua_NoiseMap_GetWidth(lua_State *l,std::shared_ptr<noise::utils::NoiseMap> &noiseMap);
+DLLNETWORK void Lua_NoiseMap_GetValue(lua_State *l,noise::utils::NoiseMap &noiseMap,int x,int y);
+DLLNETWORK void Lua_NoiseMap_GetHeight(lua_State *l,noise::utils::NoiseMap &noiseMap);
+DLLNETWORK void Lua_NoiseMap_GetWidth(lua_State *l,noise::utils::NoiseMap &noiseMap);
 
 #endif

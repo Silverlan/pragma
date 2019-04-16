@@ -41,6 +41,8 @@
 #include <luainterface.hpp>
 #include <pragma/lua/lua_component_event.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
+#include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
 #ifdef PHYS_ENGINE_PHYSX
 #include <PxVisualizationParameter.h>
@@ -155,6 +157,7 @@ void CGame::RegisterLua()
 		{"receive",Lua_cl_net_Receive},
 		{"register_event",Lua::net::register_event}
 	});
+
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Client::register_class(netPacketClassDef);
 	netPacketClassDef.def("WritePlayer",static_cast<void(*)(lua_State*,::NetPacket&,util::WeakHandle<pragma::CPlayerComponent>&)>([](lua_State *l,::NetPacket &packet,util::WeakHandle<pragma::CPlayerComponent> &pl) {
@@ -268,7 +271,7 @@ void CGame::RegisterLua()
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");
-	auto classDefCamera = luabind::class_<std::shared_ptr<Camera>>("Camera");
+	auto classDefCamera = luabind::class_<Camera>("Camera");
 	classDefCamera.scope[luabind::def("Create",&Lua::Camera::Create)];
 	classDefCamera.def("Copy",&Lua::Camera::Copy);
 	classDefCamera.def("GetProjectionMatrix",&Lua::Camera::GetProjectionMatrix);
@@ -312,46 +315,46 @@ void CGame::RegisterLua()
 	classDefCamera.def("GetNearPlaneBounds",&Lua::Camera::GetNearPlaneBounds);
 	classDefCamera.def("GetFrustumNeighbors",&Lua::Camera::GetFrustumNeighbors);
 	classDefCamera.def("GetFrustumPlaneCornerPoints",&Lua::Camera::GetFrustumPlaneCornerPoints);
-	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,std::shared_ptr<::Camera>&,luabind::object,luabind::object,Vector3)>(&Lua::Camera::CreateFrustumKDop));
-	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,std::shared_ptr<::Camera>&,const Vector2&,const Vector2&)>(&Lua::Camera::CreateFrustumKDop));
+	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,::Camera&,luabind::object,luabind::object,Vector3)>(&Lua::Camera::CreateFrustumKDop));
+	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,::Camera&,const Vector2&,const Vector2&)>(&Lua::Camera::CreateFrustumKDop));
 	classDefCamera.def("GetFrustumPoints",&Lua::Camera::GetFrustumPoints);
 	classDefCamera.def("GetNearPlanePoint",&Lua::Camera::GetNearPlanePoint);
 	classDefCamera.def("GetFarPlanePoint",&Lua::Camera::GetFarPlanePoint);
 	classDefCamera.def("GetRotation",&Lua::Camera::GetRotation);
 	classDefCamera.def("CreateFrustumMesh",&Lua::Camera::CreateFrustumMesh);
-	classDefCamera.def("GetProjectionMatrixProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetProjectionMatrixProperty());
+	classDefCamera.def("GetProjectionMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetProjectionMatrixProperty());
 	}));
-	classDefCamera.def("GetViewProjectionMatrixProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetViewProjectionMatrixProperty());
+	classDefCamera.def("GetViewProjectionMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetViewProjectionMatrixProperty());
 	}));
-	classDefCamera.def("GetViewMatrixProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetViewMatrixProperty());
+	classDefCamera.def("GetViewMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetViewMatrixProperty());
 	}));
-	classDefCamera.def("GetUpProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetUpProperty());
+	classDefCamera.def("GetUpProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetUpProperty());
 	}));
-	classDefCamera.def("GetForwardProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetForwardProperty());
+	classDefCamera.def("GetForwardProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetForwardProperty());
 	}));
-	classDefCamera.def("GetPosProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetPosProperty());
+	classDefCamera.def("GetPosProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetPosProperty());
 	}));
-	classDefCamera.def("GetNearZProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetNearZProperty());
+	classDefCamera.def("GetNearZProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetNearZProperty());
 	}));
-	classDefCamera.def("GetFarZProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetFarZProperty());
+	classDefCamera.def("GetFarZProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetFarZProperty());
 	}));
-	classDefCamera.def("GetFOVProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetFOVProperty());
+	classDefCamera.def("GetFOVProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetFOVProperty());
 	}));
-	classDefCamera.def("GetViewFOVProperty",static_cast<void(*)(lua_State*,std::shared_ptr<Camera>&)>([](lua_State *l,std::shared_ptr<Camera> &pCam) {
-		Lua::Property::push(l,*pCam->GetViewFOVProperty());
+	classDefCamera.def("GetViewFOVProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
+		Lua::Property::push(l,*pCam.GetViewFOVProperty());
 	}));
 	gameMod[classDefCamera];
 
-	auto classDefScene = luabind::class_<std::shared_ptr<Scene>>("Scene");
+	auto classDefScene = luabind::class_<Scene>("Scene");
 	classDefScene.def("GetCamera",&Lua::Scene::GetCamera);
 	classDefScene.def("GetWidth",&Lua::Scene::GetWidth);
 	classDefScene.def("GetHeight",&Lua::Scene::GetHeight);
@@ -364,29 +367,29 @@ void CGame::RegisterLua()
 	classDefScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
 	classDefScene.def("InitializeRenderTarget",&Lua::Scene::InitializeRenderTarget);
 	classDefScene.def("GetPrepassDepthTexture",&Lua::Scene::GetPrepassDepthTexture);
-	classDefScene.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, std::shared_ptr<::Scene>&)>([](lua_State *l, std::shared_ptr<::Scene> &scene) {
-		auto &depthTex = scene->GetPrepass().textureDepthSampled;
+	classDefScene.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, ::Scene&)>([](lua_State *l,::Scene &scene) {
+		auto &depthTex = scene.GetPrepass().textureDepthSampled;
 		if (depthTex == nullptr)
 			return;
 		Lua::Push(l, depthTex);
 	}));
 	classDefScene.def("GetPrepassNormalTexture",&Lua::Scene::GetPrepassNormalTexture);
 	classDefScene.def("GetRenderTarget",&Lua::Scene::GetRenderTarget);
-	classDefScene.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,std::shared_ptr<Scene>&)>([](lua_State *l,std::shared_ptr<Scene> &scene) {
-		auto &rt = scene->GetHDRInfo().hdrStagingRenderTarget;
+	classDefScene.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,Scene&)>([](lua_State *l,Scene &scene) {
+		auto &rt = scene.GetHDRInfo().hdrStagingRenderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt);
 	}));
-	classDefScene.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,std::shared_ptr<Scene>&)>([](lua_State *l,std::shared_ptr<Scene> &scene) {
-		auto &dsg = scene->GetHDRInfo().descSetGroupHdr;
+	classDefScene.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,Scene&)>([](lua_State *l,Scene &scene) {
+		auto &dsg = scene.GetHDRInfo().descSetGroupHdr;
 		if(dsg == nullptr)
 			return;
 		Lua::Push(l,dsg);
 	}));
 
-	classDefScene.def("BeginRenderPass",static_cast<void(*)(lua_State*,std::shared_ptr<::Scene>&,std::shared_ptr<prosper::CommandBuffer>&,std::shared_ptr<prosper::RenderPass>&)>(&Lua::Scene::BeginRenderPass));
-	classDefScene.def("BeginRenderPass",static_cast<void(*)(lua_State*,std::shared_ptr<::Scene>&,std::shared_ptr<prosper::CommandBuffer>&)>(&Lua::Scene::BeginRenderPass));
+	classDefScene.def("BeginRenderPass",static_cast<void(*)(lua_State*,::Scene&,prosper::CommandBuffer&,prosper::RenderPass&)>(&Lua::Scene::BeginRenderPass));
+	classDefScene.def("BeginRenderPass",static_cast<void(*)(lua_State*,::Scene&,prosper::CommandBuffer&)>(&Lua::Scene::BeginRenderPass));
 	classDefScene.def("EndRenderPass",&Lua::Scene::EndRenderPass);
 	classDefScene.def("SetLightSources",&Lua::Scene::SetLightSources);
 	classDefScene.def("GetLightSources",&Lua::Scene::GetLightSources);
@@ -394,8 +397,8 @@ void CGame::RegisterLua()
 	classDefScene.def("SetEntities",&Lua::Scene::SetEntities);
 	classDefScene.def("GetEntities",&Lua::Scene::GetEntities);
 	classDefScene.def("LinkEntities",&Lua::Scene::LinkEntities);
-	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,std::shared_ptr<::Scene>&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
-	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,std::shared_ptr<::Scene>&)>(&Lua::Scene::GetCameraDescriptorSet));
+	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
+	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&)>(&Lua::Scene::GetCameraDescriptorSet));
 	classDefScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
 	classDefScene.def("SetShaderOverride",&Lua::Scene::SetShaderOverride);
 	classDefScene.def("ClearShaderOverride",&Lua::Scene::ClearShaderOverride);

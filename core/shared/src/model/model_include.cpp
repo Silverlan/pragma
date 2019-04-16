@@ -112,7 +112,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				// TODO: Make missing bones always use transformations of reference animation, then this won't be necessary anymore!
 				shareMode |= Animation::ShareMode::Frames;
 			}
-			auto anim = std::make_shared<Animation>(*animOther,shareMode);
+			auto anim = Animation::Create(*animOther,shareMode);
 			auto &boneList = anim->GetBoneList();
 			for(auto idx=decltype(boneList.size()){0};idx<boneList.size();++idx)
 				anim->SetBoneId(idx,boneTranslations.at(boneList.at(idx)));

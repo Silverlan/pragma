@@ -13,12 +13,12 @@ namespace Lua
 {
 	namespace DataBlock
 	{
-		DLLNETWORK void GetInt(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &val);
-		DLLNETWORK void GetFloat(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &val);
-		DLLNETWORK void GetBool(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &val);
-		DLLNETWORK void GetString(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &val);
-		DLLNETWORK void GetData(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &val);
-		DLLNETWORK void SetValue(lua_State *l,std::shared_ptr<ds::Block> &data,const std::string &type,const std::string &key,const std::string &val);
+		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetFloat(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetBool(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetString(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetData(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void SetValue(lua_State *l,ds::Block &data,const std::string &type,const std::string &key,const std::string &val);
 	};
 };
 

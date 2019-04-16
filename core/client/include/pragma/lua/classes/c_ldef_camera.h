@@ -3,6 +3,6 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/rendering/scene/camera.h"
 
-lua_registercheck(Camera,std::shared_ptr<::Camera>);
+lua_registercheck(Camera,::Camera);
 
 #endif

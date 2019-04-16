@@ -27,7 +27,7 @@ void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto &scene = c_game->GetScene();
-	auto &bloomTexture = scene->GetHDRInfo().bloomRenderTarget->GetTexture();
+	auto &bloomTexture = scene->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
 	auto &imgSrc = bloomTexture->GetImage();
 	auto &imgDst = m_renderTarget->GetTexture()->GetImage();
 		

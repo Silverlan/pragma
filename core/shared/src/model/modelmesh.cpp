@@ -11,6 +11,8 @@ ModelMesh::ModelMesh(const ModelMesh &other)
 	m_numTriangleVerts(other.m_numTriangleVerts),m_center(other.m_center),
 	m_subMeshes(other.m_subMeshes)
 {}
+bool ModelMesh::operator==(const ModelMesh &other) const {return this == &other;}
+bool ModelMesh::operator!=(const ModelMesh &other) const {return !operator==(other);}
 std::shared_ptr<ModelMesh> ModelMesh::Copy() const {return std::make_shared<ModelMesh>(*this);}
 void ModelMesh::Rotate(const Quat &rot)
 {
@@ -133,6 +135,8 @@ ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
 	m_vertexWeights(other.m_vertexWeights),m_min(other.m_min),m_max(other.m_max)
 {}
+bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
+bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy() const {return std::make_shared<ModelSubMesh>(*this);}
 uint32_t ModelSubMesh::GetReferenceId() const {return m_referenceId;}
 void ModelSubMesh::SetReferenceId(uint32_t refId) {m_referenceId = refId;}

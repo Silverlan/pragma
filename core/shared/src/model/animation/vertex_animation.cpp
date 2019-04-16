@@ -57,6 +57,18 @@ std::shared_ptr<MeshVertexFrame> MeshVertexAnimation::AddFrame()
 
 /////////////////////
 
+std::shared_ptr<VertexAnimation> VertexAnimation::Create()
+{
+	return std::shared_ptr<VertexAnimation>(new VertexAnimation{});
+}
+std::shared_ptr<VertexAnimation> VertexAnimation::Create(const VertexAnimation &other)
+{
+	return std::shared_ptr<VertexAnimation>(new VertexAnimation{other});
+}
+std::shared_ptr<VertexAnimation> VertexAnimation::Create(const std::string &name)
+{
+	return std::shared_ptr<VertexAnimation>(new VertexAnimation{name});
+}
 VertexAnimation::VertexAnimation(const std::string &name)
 	: m_name(name)
 {}
@@ -110,7 +122,7 @@ MeshVertexFrame *VertexAnimation::GetMeshFrame(ModelSubMesh &subMesh,uint32_t fr
 	return m_meshAnims.at(animId)->GetFrame(frameId);
 }
 
-std::unique_ptr<VertexAnimation> VertexAnimation::Copy() const {return std::make_unique<VertexAnimation>(*this);}
+std::shared_ptr<VertexAnimation> VertexAnimation::Copy() const {return VertexAnimation::Create(*this);}
 
 void VertexAnimation::SetName(const std::string &name) {m_name = name;}
 const std::string &VertexAnimation::GetName() const {return m_name;}

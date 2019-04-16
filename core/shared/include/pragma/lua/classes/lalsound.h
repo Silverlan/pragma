@@ -11,8 +11,9 @@ namespace Lua
 {
 	namespace ALSound
 	{
-		DLLNETWORK void register_class(luabind::class_<std::shared_ptr<::ALSound>> &classDef);
+		DLLNETWORK void register_class(luabind::class_<::ALSound> &classDef);
 	};
 };
+std::ostream &operator<<(std::ostream &out,const ::ALSound &snd);
 
 #endif

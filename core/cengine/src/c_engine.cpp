@@ -82,8 +82,7 @@ void CEngine::Release()
 
 void CEngine::StartGPUTimer(GPUTimerEvent ev) const {m_gpuTimerManager->StartTimer(ev);}
 void CEngine::StopGPUTimer(GPUTimerEvent ev) const {m_gpuTimerManager->StopTimer(ev);}
-bool CEngine::GetGPUTimerResult(GPUTimerEvent ev,float &r) const {return m_gpuTimerManager->GetResult(ev,r);}
-float CEngine::GetGPUTimerResult(GPUTimerEvent ev) const {return m_gpuTimerManager->GetResult(ev);}
+bool CEngine::GetGPUTimerResult(GPUTimerEvent ev,std::chrono::nanoseconds &r) const {return m_gpuTimerManager->GetResult(ev,r);}
 CSciGPUTimerManager &CEngine::GetGPUTimerManager() const {return *m_gpuTimerManager;}
 
 void CEngine::DumpDebugInformation(ZIPFile &zip) const
@@ -749,6 +748,10 @@ void CEngine::UpdateFPS(float t)
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
 void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
 {
+	auto &gpuTimerManager = GetGPUTimerManager();
+	gpuTimerManager.Reset();
+	StartGPUTimer(GPUTimerEvent::Frame);
+
 	auto ptrDrawCmd = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd.shared_from_this());
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
 
@@ -903,6 +906,7 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 	t.End();
 	std::cout<<"#5: "<<t.GetDeltaTimeMs()<<std::endl;
 #endif
+	StopGPUTimer(GPUTimerEvent::Frame);
 }
 
 void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)

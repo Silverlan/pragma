@@ -86,7 +86,7 @@ static void generate_reference(SMDModel &smd,Model &mdl)
 	auto animId = mdl.LookupAnimation("reference");
 	if(animId == -1)
 	{
-		mdl.AddAnimation("reference",std::make_shared<Animation>());
+		mdl.AddAnimation("reference",Animation::Create());
 		animId = mdl.LookupAnimation("reference");
 	}
 
@@ -95,7 +95,7 @@ static void generate_reference(SMDModel &smd,Model &mdl)
 	auto frame = anim->GetFrame(0);
 	if(frame == nullptr)
 	{
-		frame = std::make_shared<Frame>(smdFrame.transforms.size());
+		frame = Frame::Create(smdFrame.transforms.size());
 		anim->AddFrame(frame);
 	}
 
@@ -120,7 +120,7 @@ static void generate_reference(SMDModel &smd,Model &mdl)
 		mdl.SetBindPoseBoneMatrix(boneId,glm::inverse(m));
 	}
 	update_skeletal_hierarchy(smd,skeleton);
-	auto refFrame = std::make_shared<Frame>(*frame);
+	auto refFrame = Frame::Create(*frame);
 	frame->Localize(*anim,mdl.GetSkeleton());
 	mdl.SetReference(refFrame);
 }
@@ -168,7 +168,7 @@ static void generate_animation(SMDModel &smd,Model &mdl,Animation &anim)
 	auto &nodes = smd.GetNodes();
 	for(auto &smdFrame : smdFrames)
 	{
-		auto frame = std::make_shared<Frame>(numBones);
+		auto frame = Frame::Create(numBones);
 		for(auto i=decltype(smdFrame.transforms.size()){0};i<smdFrame.transforms.size();++i)
 		{
 			auto &node = nodes[i];
@@ -286,7 +286,7 @@ bool import::load_smd(NetworkState *nw,const std::string &name,Model &mdl,SMDMod
 	}
 	else
 	{
-		auto anim = std::make_shared<Animation>();
+		auto anim = Animation::Create();
 		add_nodes_to_skeleton(smd,mdl.GetSkeleton(),anim.get());
 		generate_animation(smd,mdl,*anim);
 		mdl.AddAnimation(name,anim);

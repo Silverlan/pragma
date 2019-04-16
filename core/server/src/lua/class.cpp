@@ -25,6 +25,7 @@
 #include "pragma/physics/physcollisionobject.h"
 #include "pragma/lua/classes/s_lmodelmesh.h"
 #include <pragma/entities/func/basefuncwater.h>
+#include <pragma/model/modelmesh.h>
 #include <luainterface.hpp>
 
 void SGame::RegisterLuaClasses()
@@ -36,18 +37,18 @@ void SGame::RegisterLuaClasses()
 	Lua::Material::register_class(materialClassDef);
 	modGame[materialClassDef];
 
-	auto modelMeshClassDef = luabind::class_<std::shared_ptr<ModelMesh>>("Mesh");
+	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);
 	modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Server::Create)];
 
-	auto subModelMeshClassDef = luabind::class_<std::shared_ptr<ModelSubMesh>>("Sub");
+	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("Create",&Lua::ModelSubMesh::Server::Create)];
 	subModelMeshClassDef.scope[luabind::def("CreateBox",&Lua::ModelSubMesh::Server::CreateBox)];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float,uint32_t)>(&Lua::ModelSubMesh::Server::CreateSphere))];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float)>(&Lua::ModelSubMesh::Server::CreateSphere))];
 
-	auto modelClassDef = luabind::class_<std::shared_ptr<Model>>("Model");
+	auto modelClassDef = luabind::class_<Model>("Model");
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
 	modelClassDef.def("AddMaterial",&Lua::Model::Server::AddMaterial);
 	modGame[modelClassDef];

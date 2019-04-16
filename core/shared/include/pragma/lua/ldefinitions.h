@@ -70,10 +70,9 @@ namespace Lua
 		return; \
 	}
 
-#define lua_checktimer(l,pTimer) \
+#define lua_checktimer(l,hTimer) \
 	{ \
-		TimerHandle *hTimer = pTimer.get(); \
-		if(hTimer == NULL || !hTimer->IsValid()) \
+		if(hTimer.IsValid() == false) \
 		{ \
 			lua_pushstring(l,"Attempted to use a NULL timer"); \
 			lua_error(l); \

@@ -115,44 +115,44 @@ void LFile::IgnoreComments(std::string start,std::string end)
 
 ////////////////////////////////////
 
-DLLNETWORK void Lua_LFile_Close(lua_State*,std::shared_ptr<LFile> &f) {f->Close();}
+DLLNETWORK void Lua_LFile_Close(lua_State*,LFile &f) {f.Close();}
 
-DLLNETWORK void Lua_LFile_Size(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_Size(lua_State *l,LFile &f)
 {
-	long long size = f->Size();
+	long long size = f.Size();
 	Lua::PushInt<long long>(l,size);
 }
 
-DLLNETWORK void Lua_LFile_ReadLine(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_ReadLine(lua_State *l,LFile &f)
 {
-	Lua::PushString(l,f->ReadLine());
+	Lua::PushString(l,f.ReadLine());
 }
 
-DLLNETWORK void Lua_LFile_ReadString(lua_State *l,std::shared_ptr<LFile> &f,uint32_t len)
+DLLNETWORK void Lua_LFile_ReadString(lua_State *l,LFile &f,uint32_t len)
 {
-	if(!f->IsValid())
+	if(!f.IsValid())
 		return;
 	std::string out;
 	out.resize(len);
-	f->Read(&out[0],len);
+	f.Read(&out[0],len);
 	Lua::PushString(l,out);
 
 }
 
-DLLNETWORK void Lua_LFile_ReadString(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_ReadString(lua_State *l,LFile &f)
 {
-	if(!f->IsValid())
+	if(!f.IsValid())
 		return;
-	auto file = f->GetHandle();
+	auto file = f.GetHandle();
 	std::string str = file->ReadString();
 	lua_pushstring(l,str.c_str());
 }
 
-DLLNETWORK void Lua_LFile_WriteString(lua_State*,std::shared_ptr<LFile> &f,std::string str,bool bNullTerminated)
+DLLNETWORK void Lua_LFile_WriteString(lua_State*,LFile &f,std::string str,bool bNullTerminated)
 {
-	if(!f->IsValid())
+	if(!f.IsValid())
 		return;
-	auto file = f->GetHandle();
+	auto file = f.GetHandle();
 	if(file->GetType() != VFILE_LOCAL)
 		return;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(file);
@@ -162,118 +162,118 @@ DLLNETWORK void Lua_LFile_WriteString(lua_State*,std::shared_ptr<LFile> &f,std::
 		freal->Write(str.data(),str.length());
 }
 
-DLLNETWORK void Lua_LFile_WriteString(lua_State *l,std::shared_ptr<LFile> &f,std::string str)
+DLLNETWORK void Lua_LFile_WriteString(lua_State *l,LFile &f,std::string str)
 {
 	Lua_LFile_WriteString(l,f,str,true);
 }
 
-void Lua_LFile_ReadVector(lua_State *l,std::shared_ptr<LFile> &f)
+void Lua_LFile_ReadVector(lua_State *l,LFile &f)
 {
-	float x = f->Read<float>();
-	float y = f->Read<float>();
-	float z = f->Read<float>();
+	float x = f.Read<float>();
+	float y = f.Read<float>();
+	float z = f.Read<float>();
 	luabind::object(l,Vector3(x,y,z)).push(l);
 }
 
-void Lua_LFile_WriteVector2(lua_State*,std::shared_ptr<LFile> &f,const Vector2 &v)
+void Lua_LFile_WriteVector2(lua_State*,LFile &f,const Vector2 &v)
 {
-	f->Write<float>(v.x);
-	f->Write<float>(v.y);
+	f.Write<float>(v.x);
+	f.Write<float>(v.y);
 }
 
-void Lua_LFile_ReadVector2(lua_State *l,std::shared_ptr<LFile> &f)
+void Lua_LFile_ReadVector2(lua_State *l,LFile &f)
 {
-	auto x = f->Read<float>();
-	auto y = f->Read<float>();
+	auto x = f.Read<float>();
+	auto y = f.Read<float>();
 	luabind::object(l,Vector2(x,y)).push(l);
 }
 
-void Lua_LFile_WriteVector4(lua_State*,std::shared_ptr<LFile> &f,const Vector4 &v)
+void Lua_LFile_WriteVector4(lua_State*,LFile &f,const Vector4 &v)
 {
-	f->Write<float>(v.x);
-	f->Write<float>(v.y);
-	f->Write<float>(v.z);
-	f->Write<float>(v.w);
+	f.Write<float>(v.x);
+	f.Write<float>(v.y);
+	f.Write<float>(v.z);
+	f.Write<float>(v.w);
 }
 
-void Lua_LFile_ReadVector4(lua_State *l,std::shared_ptr<LFile> &f)
+void Lua_LFile_ReadVector4(lua_State *l,LFile &f)
 {
-	auto x = f->Read<float>();
-	auto y = f->Read<float>();
-	auto z = f->Read<float>();
-	auto w = f->Read<float>();
+	auto x = f.Read<float>();
+	auto y = f.Read<float>();
+	auto z = f.Read<float>();
+	auto w = f.Read<float>();
 	luabind::object(l,Vector4(x,y,z,w)).push(l);
 }
 
-void Lua_LFile_WriteVector(lua_State*,std::shared_ptr<LFile> &f,const Vector3 &v)
+void Lua_LFile_WriteVector(lua_State*,LFile &f,const Vector3 &v)
 {
-	f->Write<float>(v.x);
-	f->Write<float>(v.y);
-	f->Write<float>(v.z);
+	f.Write<float>(v.x);
+	f.Write<float>(v.y);
+	f.Write<float>(v.z);
 }
 
-DLLNETWORK void Lua_LFile_ReadAngles(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_ReadAngles(lua_State *l,LFile &f)
 {
-	float p = f->Read<float>();
-	float y = f->Read<float>();
-	float r = f->Read<float>();
+	float p = f.Read<float>();
+	float y = f.Read<float>();
+	float r = f.Read<float>();
 	luabind::object(l,EulerAngles(p,y,r)).push(l);
 }
 
-DLLNETWORK void Lua_LFile_WriteAngles(lua_State*,std::shared_ptr<LFile> &f,EulerAngles ang)
+DLLNETWORK void Lua_LFile_WriteAngles(lua_State*,LFile &f,EulerAngles ang)
 {
-	f->Write<float>(ang.p);
-	f->Write<float>(ang.y);
-	f->Write<float>(ang.r);
+	f.Write<float>(ang.p);
+	f.Write<float>(ang.y);
+	f.Write<float>(ang.r);
 }
 
-DLLNETWORK void Lua_LFile_Seek(lua_State*,std::shared_ptr<LFile> &f,uint32_t pos) {f->Seek(pos);}
+DLLNETWORK void Lua_LFile_Seek(lua_State*,LFile &f,uint32_t pos) {f.Seek(pos);}
 
-DLLNETWORK void Lua_LFile_Tell(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_Tell(lua_State *l,LFile &f)
 {
-	long long pos = f->Tell();
+	long long pos = f.Tell();
 	Lua::PushNumber<long long>(l,pos);
 }
 
-DLLNETWORK void Lua_LFile_Eof(lua_State *l,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_Eof(lua_State *l,LFile &f)
 {
-	Lua::PushBool(l,f->Eof());
+	Lua::PushBool(l,f.Eof());
 }
 
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,std::shared_ptr<LFile> &f)
+DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,LFile &f)
 {
-	f->IgnoreComments();
+	f.IgnoreComments();
 }
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,std::shared_ptr<LFile> &f,std::string start)
+DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,LFile &f,std::string start)
 {
-	f->IgnoreComments(start);
+	f.IgnoreComments(start);
 }
-DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,std::shared_ptr<LFile> &f,std::string start,std::string end)
+DLLNETWORK void Lua_LFile_IgnoreComments(lua_State*,LFile &f,std::string start,std::string end)
 {
-	f->IgnoreComments(start,end);
+	f.IgnoreComments(start,end);
 }
-void Lua_LFile_Read(lua_State *l,std::shared_ptr<LFile> &f,uint32_t size)
+void Lua_LFile_Read(lua_State *l,LFile &f,uint32_t size)
 {
 	DataStream ds;
 	ds->Resize(size);
-	f->Read(ds->GetData(),size);
+	f.Read(ds->GetData(),size);
 	Lua::Push<DataStream>(l,ds);
 }
-void Lua_LFile_Read(lua_State*,std::shared_ptr<LFile> &f,::DataStream &ds,uint32_t size)
+void Lua_LFile_Read(lua_State*,LFile &f,::DataStream &ds,uint32_t size)
 {
 	auto offset = ds->GetOffset();
 	ds->Resize(offset +size);
-	f->Read(ds->GetData() +offset,size);
+	f.Read(ds->GetData() +offset,size);
 }
-void Lua_LFile_Write(lua_State*,std::shared_ptr<LFile> &f,::DataStream &ds)
+void Lua_LFile_Write(lua_State*,LFile &f,::DataStream &ds)
 {
 	auto offset = ds->GetOffset();
-	f->Write(ds->GetData() +offset,ds->GetInternalSize() -offset);
+	f.Write(ds->GetData() +offset,ds->GetInternalSize() -offset);
 }
-void Lua_LFile_Write(lua_State*,std::shared_ptr<LFile> &f,::DataStream &ds,uint32_t size)
+void Lua_LFile_Write(lua_State*,LFile &f,::DataStream &ds,uint32_t size)
 {
 	auto offset = ds->GetOffset();
-	f->Write(ds->GetData() +offset,size -offset);
+	f.Write(ds->GetData() +offset,size -offset);
 }
 
 ////////////////////////////////////

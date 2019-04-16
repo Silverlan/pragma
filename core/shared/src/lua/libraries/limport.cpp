@@ -23,33 +23,33 @@ int Lua::import::import_wad(lua_State *l)
 	auto &f = *Lua::CheckFile(l,1);
 	auto &skeleton = *Lua::CheckSkeleton(l,2);
 	std::array<uint8_t,3> header;
-	f->Read(header.data(),header.size() *sizeof(header.front()));
+	f.Read(header.data(),header.size() *sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'A' || header.at(2) != 'D')
 	{
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto anim = std::make_shared<Animation>();
-	auto version = f->Read<uint16_t>();
-	auto flags = f->Read<uint32_t>();
-	auto numBones = f->Read<uint32_t>();
+	auto anim = Animation::Create();
+	auto version = f.Read<uint16_t>();
+	auto flags = f.Read<uint32_t>();
+	auto numBones = f.Read<uint32_t>();
 	std::vector<uint32_t> boneList;
 	boneList.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
-		auto boneName = f->ReadString();
+		auto boneName = f.ReadString();
 		auto boneId = skeleton.LookupBone(boneName);
 		boneList.push_back(boneId);
 	}
 	anim->SetBoneList(boneList);
-	auto numFrames = f->Read<uint32_t>();
+	auto numFrames = f.Read<uint32_t>();
 	for(auto i=decltype(numFrames){0};i<numFrames;++i)
 	{
-		auto frame = std::make_shared<Frame>(numBones);
+		auto frame = Frame::Create(numBones);
 		for(auto j=decltype(numBones){0};j<numBones;++j)
 		{
-			auto rot = f->Read<Quat>();
-			auto pos = f->Read<Vector3>();
+			auto rot = f.Read<Quat>();
+			auto pos = f.Read<Vector3>();
 			frame->SetBonePosition(j,pos);
 			frame->SetBoneOrientation(j,rot);
 		}
@@ -62,56 +62,56 @@ int Lua::import::import_wad(lua_State *l)
 int Lua::import::import_wrci(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
-	auto &mdl = *Lua::CheckModel(l,2);
+	auto &mdl = Lua::Check<Model>(l,2);
 	std::array<uint8_t,4> header;
-	f->Read(header.data(),header.size() *sizeof(header.front()));
+	f.Read(header.data(),header.size() *sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'C' || header.at(3) != 'I')
 	{
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto version = f->Read<uint16_t>();
-	auto numBones = f->Read<uint32_t>();
+	auto version = f.Read<uint16_t>();
+	auto numBones = f.Read<uint32_t>();
 	std::vector<std::string> boneNames;
 	boneNames.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
-		auto name = f->ReadString();
+		auto name = f.ReadString();
 		boneNames.push_back(name);
 	}
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
-		auto pos = f->Read<Vector3>();
-		auto rot = f->Read<Quat>();
+		auto pos = f.Read<Vector3>();
+		auto rot = f.Read<Quat>();
 
 	}
 	auto *game = engine->GetNetworkState(l)->GetGameState();
-	auto numMeshes = f->Read<uint8_t>();
+	auto numMeshes = f.Read<uint8_t>();
 	for(auto i=decltype(numMeshes){0};i<numMeshes;++i)
 	{
 		auto colMesh = CollisionMesh::Create(game);
-		auto parentId = f->Read<int32_t>();
-		auto numVerts = f->Read<uint64_t>();
+		auto parentId = f.Read<int32_t>();
+		auto numVerts = f.Read<uint64_t>();
 		if(parentId != -1)
 		{
 			auto &boneName = boneNames.at(parentId);
-			colMesh->SetBoneParent(mdl->LookupBone(boneName));
+			colMesh->SetBoneParent(mdl.LookupBone(boneName));
 		}
 		auto &verts = colMesh->GetVertices();
 		verts.reserve(numVerts);
 		for(auto j=decltype(numVerts){0};j<numVerts;++j)
 		{
-			auto v = f->Read<Vector3>();
+			auto v = f.Read<Vector3>();
 			verts.push_back(v);
 		}
 		auto &tris = colMesh->GetTriangles();
-		auto numFaces = f->Read<uint64_t>();
+		auto numFaces = f.Read<uint64_t>();
 		tris.reserve(numFaces *3u);
 		for(auto j=decltype(numFaces){0};j<numFaces;++j)
 		{
-			auto idx0 = f->Read<uint64_t>();
-			auto idx1 = f->Read<uint64_t>();
-			auto idx2 = f->Read<uint64_t>();
+			auto idx0 = f.Read<uint64_t>();
+			auto idx1 = f.Read<uint64_t>();
+			auto idx2 = f.Read<uint64_t>();
 			if(version < 0x0002)
 			{
 				// Version 1 has incorrect indices (offset by 1), we need to correct them here
@@ -123,62 +123,62 @@ int Lua::import::import_wrci(lua_State *l)
 			tris.push_back(idx1);
 			tris.push_back(idx2);
 		}
-		mdl->AddCollisionMesh(colMesh);
+		mdl.AddCollisionMesh(colMesh);
 		colMesh->Update(ModelUpdateFlags::All);
 	}
-	mdl->Update();
+	mdl.Update();
 	Lua::PushBool(l,true);
 	return 1;
 }
 int Lua::import::import_wrmi(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
-	auto &mdl = *Lua::CheckModel(l,2);
+	auto &mdl = Lua::Check<Model>(l,2);
 	std::array<uint8_t,4> header;
-	f->Read(header.data(),header.size() *sizeof(header.front()));
+	f.Read(header.data(),header.size() *sizeof(header.front()));
 	if(header.at(0) != 'W' || header.at(1) != 'R' || header.at(2) != 'M' || header.at(3) != 'I')
 	{
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto meshGroup = mdl->GetMeshGroup(0u);
+	auto meshGroup = mdl.GetMeshGroup(0u);
 	if(meshGroup == nullptr) // TODO
 	{
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto version = f->Read<uint16_t>();
-	auto offData = f->Read<uint64_t>();
-	auto offBones = f->Read<uint64_t>();
-	auto offMeshes = f->Read<uint64_t>();
-	auto numBones = f->Read<uint32_t>();
+	auto version = f.Read<uint16_t>();
+	auto offData = f.Read<uint64_t>();
+	auto offBones = f.Read<uint64_t>();
+	auto offMeshes = f.Read<uint64_t>();
+	auto numBones = f.Read<uint32_t>();
 
-	auto &skeleton = mdl->GetSkeleton();
+	auto &skeleton = mdl.GetSkeleton();
 	skeleton.GetBones().clear();
 	skeleton.GetRootBones().clear();
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
-		auto name = f->ReadString();
+		auto name = f.ReadString();
 		auto *bone = new Bone();
 		bone->name = name;
 		skeleton.AddBone(bone);
 	}
-	auto &reference = mdl->GetReference(); // TODO: Update skeleton stuff if already exists
+	auto &reference = mdl.GetReference(); // TODO: Update skeleton stuff if already exists
 	reference.SetBoneCount(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
-		auto rot = f->Read<Quat>();
-		auto pos = f->Read<Vector3>();
+		auto rot = f.Read<Quat>();
+		auto pos = f.Read<Vector3>();
 		reference.SetBonePosition(i,pos);
 		reference.SetBoneOrientation(i,rot);
 	}
 
 	std::function<void(std::shared_ptr<Bone>&)> fReadChildBones = nullptr;
 	fReadChildBones = [&f,&fReadChildBones,&skeleton](std::shared_ptr<Bone> &parent) {
-		auto numChildren = f->Read<uint32_t>();
+		auto numChildren = f.Read<uint32_t>();
 		for(auto i=decltype(numChildren){0};i<numChildren;++i)
 		{
-			auto boneId = f->Read<uint32_t>();
+			auto boneId = f.Read<uint32_t>();
 			auto child = skeleton.GetBone(boneId).lock();
 			parent->children.insert(std::make_pair(boneId,child));
 			child->parent = parent;
@@ -186,10 +186,10 @@ int Lua::import::import_wrmi(lua_State *l)
 		}
 	};
 	auto &rootBones = skeleton.GetRootBones();
-	auto numRoot = f->Read<uint32_t>();
+	auto numRoot = f.Read<uint32_t>();
 	for(auto i=decltype(numRoot){0};i<numRoot;++i)
 	{
-		auto boneId = f->Read<uint32_t>();
+		auto boneId = f.Read<uint32_t>();
 		auto bone = skeleton.GetBone(boneId).lock();
 		rootBones.insert(std::make_pair(boneId,bone));
 		fReadChildBones(bone);
@@ -197,38 +197,38 @@ int Lua::import::import_wrmi(lua_State *l)
 	auto *nw = engine->GetNetworkState(l);
 	auto mesh = std::shared_ptr<ModelMesh>(nw->CreateMesh());
 	meshGroup->AddMesh(mesh);
-	auto numMeshes = f->Read<uint32_t>();
-	auto &meta = mdl->GetMetaInfo();
-	auto &texGroup = *mdl->GetTextureGroup(0); // TODO
+	auto numMeshes = f.Read<uint32_t>();
+	auto &meta = mdl.GetMetaInfo();
+	auto &texGroup = *mdl.GetTextureGroup(0); // TODO
 	for(auto i=decltype(numMeshes){0};i<numMeshes;++i)
 	{
-		auto parentId = f->Read<int32_t>();
-		auto numVerts = f->Read<uint64_t>();
+		auto parentId = f.Read<int32_t>();
+		auto numVerts = f.Read<uint64_t>();
 		std::vector<std::pair<Vector3,Vector3>> verts(numVerts);
 		for(auto j=decltype(numVerts){0};j<numVerts;++j)
 		{
 			auto &v = verts.at(j);
-			v.first = f->Read<Vector3>();
-			v.second = f->Read<Vector3>();
+			v.first = f.Read<Vector3>();
+			v.second = f.Read<Vector3>();
 		}
-		auto numBonesMesh = f->Read<uint32_t>();
+		auto numBonesMesh = f.Read<uint32_t>();
 		std::vector<VertexWeight> boneWeights(numVerts);
 		for(auto j=decltype(numBonesMesh){0};j<numBonesMesh;++j)
 		{
 
 			// TODO
-			auto boneId = f->Read<uint32_t>();
+			auto boneId = f.Read<uint32_t>();
 			//auto bValidBone = false;//(boneId < model.bones.size()) ? true : false;
-			auto numBoneVerts = f->Read<uint64_t>();
+			auto numBoneVerts = f.Read<uint64_t>();
 			/*if(bValidBone == false)
 			{
-				f->Seek(f->Tell() +(sizeof(uint64_t) +sizeof(float)) *numBoneVerts);
+				f.Seek(f.Tell() +(sizeof(uint64_t) +sizeof(float)) *numBoneVerts);
 				continue;
 			}*/
 			for(auto k=decltype(numBoneVerts){0};k<numBoneVerts;++k)
 			{
-				auto vertexId = f->Read<uint64_t>();
-				auto weight = f->Read<Float>();
+				auto vertexId = f.Read<uint64_t>();
+				auto weight = f.Read<Float>();
 
 				auto &vw = boneWeights.at(vertexId);
 				for(auto i=0u;i<4u;++i)
@@ -242,25 +242,25 @@ int Lua::import::import_wrmi(lua_State *l)
 			}
 		}
 
-		auto numMaps = f->Read<uint32_t>();
+		auto numMaps = f.Read<uint32_t>();
 		for(auto j=decltype(numMaps){0};j<numMaps;++j)
 		{
 			auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
 			auto &meshVerts = subMesh->GetVertices();
 			auto &meshTriangles = subMesh->GetTriangles();
 			auto &meshWeights = subMesh->GetVertexWeights();
-			auto map = f->ReadString();
+			auto map = f.ReadString();
 			map += ".wmi";
 			ufile::remove_extension_from_filename(map);
 
 			auto *mat = nw->LoadMaterial(map);
-			mdl->AddMaterial(j,mat);
+			mdl.AddMaterial(j,mat);
 
 			//meta.textures.push_back(map); // TODO: Only if not exists yet
 			//texGroup.textures.push_back(meta.textures.size() -1u);
 			subMesh->SetTexture(j);
 
-			auto numFaces = f->Read<uint32_t>();
+			auto numFaces = f.Read<uint32_t>();
 			meshTriangles.reserve(numFaces *3u);
 			meshVerts.reserve(numFaces *3u);
 			meshWeights.reserve(numFaces *3u);
@@ -269,10 +269,10 @@ int Lua::import::import_wrmi(lua_State *l)
 				auto triIdx = k *3u;
 				for(auto l=0u;l<3u;++l)
 				{
-					auto vertId = f->Read<uint64_t>();
+					auto vertId = f.Read<uint64_t>();
 					meshTriangles.push_back(meshVerts.size());
-					auto u = f->Read<float>();
-					auto v = 1.f -f->Read<float>();
+					auto u = f.Read<float>();
+					auto v = 1.f -f.Read<float>();
 
 					auto &vertData = verts.at(vertId);
 					meshVerts.push_back({});
@@ -287,8 +287,8 @@ int Lua::import::import_wrmi(lua_State *l)
 			mesh->AddSubMesh(subMesh);
 		}
 	}
-	mdl->Update(ModelUpdateFlags::All);
-	mdl->GenerateBindPoseMatrices();
+	mdl.Update(ModelUpdateFlags::All);
+	mdl.GenerateBindPoseMatrices();
 	Lua::PushBool(l,true);
 	return 1;
 }
@@ -297,7 +297,7 @@ int Lua::import::import_smd(lua_State *l)
 {
 	/*auto &f = *Lua::CheckFile(l,1);
 	auto &skeleton = *Lua::CheckSkeleton(l,2);
-	auto smd = SMDModel::Load(f->GetHandle());
+	auto smd = SMDModel::Load(f.GetHandle());
 	if(smd == nullptr)
 		return 0;
 	auto group = std::make_unique<MeshGroup>(model,meshName);
@@ -390,8 +390,8 @@ int Lua::import::import_obj(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
 
-	std::vector<uint8_t> data(f->Size());
-	f->Read(data.data(),data.size() *sizeof(data.front()));
+	std::vector<uint8_t> data(f.Size());
+	f.Read(data.data(),data.size() *sizeof(data.front()));
 	Assimp::Importer importer;
 	auto *aiScene = importer.ReadFileFromMemory(data.data(),data.size() *sizeof(data.front()),0u);
 	if(aiScene == nullptr)
@@ -439,15 +439,15 @@ int Lua::import::import_pmx(lua_State *l)
 {
 #ifdef ENABLE_MMD_IMPORT
 	auto &f = *Lua::CheckFile(l,1);
-	auto &mdl = *Lua::CheckModel(l,2);
-	auto fptr = f->GetHandle();
+	auto &mdl = Lua::Check<Model>(l,2);
+	auto fptr = f.GetHandle();
 	auto mdlData = mmd::pmx::load(fptr);
 	if(mdlData == nullptr)
 	{
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto meshGroup = mdl->GetMeshGroup(0u);
+	auto meshGroup = mdl.GetMeshGroup(0u);
 	if(meshGroup == nullptr)
 	{
 		Lua::PushBool(l,false);
@@ -464,7 +464,7 @@ int Lua::import::import_pmx(lua_State *l)
 
 	std::vector<uint32_t> texIds;
 	texIds.reserve(mdlData->textures.size());
-	auto *texGroup = mdl->GetTextureGroup(0u);
+	auto *texGroup = mdl.GetTextureGroup(0u);
 	for(auto &tex : mdlData->textures)
 	{
 		auto fTex = FileManager::OpenFile(tex.c_str(),"rb");
@@ -477,7 +477,7 @@ int Lua::import::import_pmx(lua_State *l)
 		// Load DDS
 
 
-		mdl->AddTexturePath(ufile::get_path_from_filename(tex));
+		mdl.AddTexturePath(ufile::get_path_from_filename(tex));
 		auto texName = ufile::get_file_from_filename(tex);
 		ufile::remove_extension_from_filename(texName);
 		auto localMatPath = matPath +'\\' +texName;
@@ -497,7 +497,7 @@ int Lua::import::import_pmx(lua_State *l)
 			}
 		}
 		auto *mat = nw->LoadMaterial(localMatPath);
-		auto texId = mdl->AddTexture(texName,mat);
+		auto texId = mdl.AddTexture(texName,mat);
 		if(texGroup != nullptr)
 			texGroup->textures.push_back(texId);
 		texIds.push_back(texId);
@@ -550,9 +550,9 @@ int Lua::import::import_pmx(lua_State *l)
 
 		mesh->AddSubMesh(it->second);
 	}
-	mdl->AddTexturePath(matPath);
+	mdl.AddTexturePath(matPath);
 
-	auto &skeleton = mdl->GetSkeleton();
+	auto &skeleton = mdl.GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	bones.clear();
 	for(auto &bone : mdlData->bones)
@@ -565,7 +565,7 @@ int Lua::import::import_pmx(lua_State *l)
 	}
 	auto &rootBones = skeleton.GetRootBones();
 	rootBones.clear();
-	auto &reference = mdl->GetReference();
+	auto &reference = mdl.GetReference();
 	reference.SetBoneCount(mdlData->bones.size());
 	auto boneId = 0u;
 	for(auto &bone : mdlData->bones)
@@ -587,7 +587,7 @@ int Lua::import::import_pmx(lua_State *l)
 	auto frame = std::make_shared<Frame>(reference);
 	auto anim = std::make_shared<Animation>();
 	anim->AddFrame(frame);
-	mdl->AddAnimation("reference",anim);
+	mdl.AddAnimation("reference",anim);
 
 	auto numBones = mdlData->bones.size();
 	std::vector<uint32_t> boneList(numBones);
@@ -596,8 +596,8 @@ int Lua::import::import_pmx(lua_State *l)
 	anim->SetBoneList(boneList);
 	anim->Localize(skeleton);
 
-	mdl->Update(ModelUpdateFlags::All);
-	mdl->GenerateBindPoseMatrices();
+	mdl.Update(ModelUpdateFlags::All);
+	mdl.GenerateBindPoseMatrices();
 	Lua::PushBool(l,true);
 	return 1;
 #else

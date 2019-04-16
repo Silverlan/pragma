@@ -9,127 +9,127 @@ namespace Lua
 {
 	namespace ALSound
 	{
-		static void GetFlags(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetFlags(lua_State *l,std::shared_ptr<::ALSound> pAl,unsigned int flags);
-		static void AddFlags(lua_State *l,std::shared_ptr<::ALSound> pAl,unsigned int flags);
-		static void RemoveFlags(lua_State *l,std::shared_ptr<::ALSound> pAl,unsigned int flags);
+		static void GetFlags(lua_State *l,::ALSound &snd);
+		static void SetFlags(lua_State *l,::ALSound &snd,unsigned int flags);
+		static void AddFlags(lua_State *l,::ALSound &snd,unsigned int flags);
+		static void RemoveFlags(lua_State *l,::ALSound &snd,unsigned int flags);
 
-		static void Play(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void Stop(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetOffset(lua_State *l,std::shared_ptr<::ALSound> pAl,float offset);
-		static void GetOffset(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetPitch(lua_State *l,std::shared_ptr<::ALSound> pAl,float pitch);
-		static void GetPitch(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetLooping(lua_State *l,std::shared_ptr<::ALSound> pAl,bool loop);
-		static void IsLooping(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void IsPlaying(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void IsStopped(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetState(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void Rewind(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void Pause(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void IsPaused(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetGain(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetGain(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetPos(lua_State *l,std::shared_ptr<::ALSound> pAl,Vector3 pos);
-		static void GetPos(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetVelocity(lua_State *l,std::shared_ptr<::ALSound> pAl,Vector3 vel);
-		static void GetVelocity(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetDirection(lua_State *l,std::shared_ptr<::ALSound> pAl,Vector3 dir);
-		static void GetDirection(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetRelativeToListener(lua_State *l,std::shared_ptr<::ALSound> pAl,bool b);
-		static void IsRelativeToListener(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetSecOffset(lua_State *l,std::shared_ptr<::ALSound> pAl,float sec);
-		static void GetSecOffset(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetDuration(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void CallOnStateChanged(lua_State *l,std::shared_ptr<::ALSound> pAl,luabind::object o);
-		static void SetPriority(lua_State *l,std::shared_ptr<::ALSound> pAl,unsigned char priority);
-		static void GetPriority(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void FadeIn(lua_State *l,std::shared_ptr<::ALSound> pAl,int time);
-		static void FadeOut(lua_State *l,std::shared_ptr<::ALSound> pAl,int time);
+		static void Play(lua_State *l,::ALSound &snd);
+		static void Stop(lua_State *l,::ALSound &snd);
+		static void SetOffset(lua_State *l,::ALSound &snd,float offset);
+		static void GetOffset(lua_State *l,::ALSound &snd);
+		static void SetPitch(lua_State *l,::ALSound &snd,float pitch);
+		static void GetPitch(lua_State *l,::ALSound &snd);
+		static void SetLooping(lua_State *l,::ALSound &snd,bool loop);
+		static void IsLooping(lua_State *l,::ALSound &snd);
+		static void IsPlaying(lua_State *l,::ALSound &snd);
+		static void IsStopped(lua_State *l,::ALSound &snd);
+		static void GetState(lua_State *l,::ALSound &snd);
+		static void Rewind(lua_State *l,::ALSound &snd);
+		static void Pause(lua_State *l,::ALSound &snd);
+		static void IsPaused(lua_State *l,::ALSound &snd);
+		static void SetGain(lua_State *l,::ALSound &snd,float gain);
+		static void GetGain(lua_State *l,::ALSound &snd);
+		static void SetPos(lua_State *l,::ALSound &snd,Vector3 pos);
+		static void GetPos(lua_State *l,::ALSound &snd);
+		static void SetVelocity(lua_State *l,::ALSound &snd,Vector3 vel);
+		static void GetVelocity(lua_State *l,::ALSound &snd);
+		static void SetDirection(lua_State *l,::ALSound &snd,Vector3 dir);
+		static void GetDirection(lua_State *l,::ALSound &snd);
+		static void SetRelativeToListener(lua_State *l,::ALSound &snd,bool b);
+		static void IsRelativeToListener(lua_State *l,::ALSound &snd);
+		static void SetSecOffset(lua_State *l,::ALSound &snd,float sec);
+		static void GetSecOffset(lua_State *l,::ALSound &snd);
+		static void GetDuration(lua_State *l,::ALSound &snd);
+		static void CallOnStateChanged(lua_State *l,::ALSound &snd,luabind::object o);
+		static void SetPriority(lua_State *l,::ALSound &snd,unsigned char priority);
+		static void GetPriority(lua_State *l,::ALSound &snd);
+		static void FadeIn(lua_State *l,::ALSound &snd,int time);
+		static void FadeOut(lua_State *l,::ALSound &snd,int time);
 
-		static void GetReferenceDistance(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetReferenceDistance(lua_State *l,std::shared_ptr<::ALSound> pAl,float dist);
-		static void GetRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float rolloff);
-		static void GetRoomRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetRoomRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float rolloff);
-		static void GetMaxDistance(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetMaxDistance(lua_State *l,std::shared_ptr<::ALSound> pAl,float dist);
-		static void GetMinGain(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetMinGain(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetMaxGain(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetMaxGain(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetConeInnerAngle(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetConeInnerAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang);
-		static void GetConeOuterAngle(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetConeOuterAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang);
-		static void GetConeOuterGain(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetConeOuterGain(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetConeOuterGainHF(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetConeOuterGainHF(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetType(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetType(lua_State *l,std::shared_ptr<::ALSound> pAl,int type);
-		static void AddType(lua_State *l,std::shared_ptr<::ALSound> pAl,int type);
+		static void GetReferenceDistance(lua_State *l,::ALSound &snd);
+		static void SetReferenceDistance(lua_State *l,::ALSound &snd,float dist);
+		static void GetRolloffFactor(lua_State *l,::ALSound &snd);
+		static void SetRolloffFactor(lua_State *l,::ALSound &snd,float rolloff);
+		static void GetRoomRolloffFactor(lua_State *l,::ALSound &snd);
+		static void SetRoomRolloffFactor(lua_State *l,::ALSound &snd,float rolloff);
+		static void GetMaxDistance(lua_State *l,::ALSound &snd);
+		static void SetMaxDistance(lua_State *l,::ALSound &snd,float dist);
+		static void GetMinGain(lua_State *l,::ALSound &snd);
+		static void SetMinGain(lua_State *l,::ALSound &snd,float gain);
+		static void GetMaxGain(lua_State *l,::ALSound &snd);
+		static void SetMaxGain(lua_State *l,::ALSound &snd,float gain);
+		static void GetConeInnerAngle(lua_State *l,::ALSound &snd);
+		static void SetConeInnerAngle(lua_State *l,::ALSound &snd,float ang);
+		static void GetConeOuterAngle(lua_State *l,::ALSound &snd);
+		static void SetConeOuterAngle(lua_State *l,::ALSound &snd,float ang);
+		static void GetConeOuterGain(lua_State *l,::ALSound &snd);
+		static void SetConeOuterGain(lua_State *l,::ALSound &snd,float gain);
+		static void GetConeOuterGainHF(lua_State *l,::ALSound &snd);
+		static void SetConeOuterGainHF(lua_State *l,::ALSound &snd,float gain);
+		static void GetType(lua_State *l,::ALSound &snd);
+		static void SetType(lua_State *l,::ALSound &snd,int type);
+		static void AddType(lua_State *l,::ALSound &snd,int type);
 
-		static void GetMaxAudibleDistance(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetSoundIntensity(lua_State *l,std::shared_ptr<::ALSound> pAl,const Vector3 &origin);
+		static void GetMaxAudibleDistance(lua_State *l,::ALSound &snd);
+		static void GetSoundIntensity(lua_State *l,::ALSound &snd,const Vector3 &origin);
 
-		static void GetSource(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetSource(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetSource(lua_State *l,std::shared_ptr<::ALSound> pAl,EntityHandle &hEnt);
+		static void GetSource(lua_State *l,::ALSound &snd);
+		static void SetSource(lua_State *l,::ALSound &snd);
+		static void SetSource(lua_State *l,::ALSound &snd,EntityHandle &hEnt);
 
-		static void SetRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float start,float end);
-		static void ClearRange(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void HasRange(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetRange(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetRangeOffsets(lua_State *l,std::shared_ptr<::ALSound> pAl);
+		static void SetRange(lua_State *l,::ALSound &snd,float start,float end);
+		static void ClearRange(lua_State *l,::ALSound &snd);
+		static void HasRange(lua_State *l,::ALSound &snd);
+		static void GetRange(lua_State *l,::ALSound &snd);
+		static void GetRangeOffsets(lua_State *l,::ALSound &snd);
 
-		static void SetFadeInDuration(lua_State *l,std::shared_ptr<::ALSound> pAl,float t);
-		static void SetFadeOutDuration(lua_State *l,std::shared_ptr<::ALSound> pAl,float t);
-		static void GetFadeInDuration(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetFadeOutDuration(lua_State *l,std::shared_ptr<::ALSound> pAl);
+		static void SetFadeInDuration(lua_State *l,::ALSound &snd,float t);
+		static void SetFadeOutDuration(lua_State *l,::ALSound &snd,float t);
+		static void GetFadeInDuration(lua_State *l,::ALSound &snd);
+		static void GetFadeOutDuration(lua_State *l,::ALSound &snd);
 
-		static void SetOrientation(lua_State *l,std::shared_ptr<::ALSound> pAl,const Vector3 &at,const Vector3 &up);
-		static void GetOrientation(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetDopplerFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float factor);
-		static void GetDopplerFactor(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetLeftStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang);
-		static void GetLeftStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetRightStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang);
-		static void GetRightStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetAirAbsorptionFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float airAbsorption);
-		static void GetAirAbsorptionFactor(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl,bool directHF,bool send,bool sendHF);
-		static void GetGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain,float gainHF,float gainLF);
-		static void SetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain);
-		static void GetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void AddEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain,float gainHF,float gainLF);
-		static void AddEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain);
-		static void RemoveEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name);
-		static void SetEffectParameters(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain,float gainHF,float gainLF);
-		static void SetEffectParameters(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain);
+		static void SetOrientation(lua_State *l,::ALSound &snd,const Vector3 &at,const Vector3 &up);
+		static void GetOrientation(lua_State *l,::ALSound &snd);
+		static void SetDopplerFactor(lua_State *l,::ALSound &snd,float factor);
+		static void GetDopplerFactor(lua_State *l,::ALSound &snd);
+		static void SetLeftStereoAngle(lua_State *l,::ALSound &snd,float ang);
+		static void GetLeftStereoAngle(lua_State *l,::ALSound &snd);
+		static void SetRightStereoAngle(lua_State *l,::ALSound &snd,float ang);
+		static void GetRightStereoAngle(lua_State *l,::ALSound &snd);
+		static void SetAirAbsorptionFactor(lua_State *l,::ALSound &snd,float airAbsorption);
+		static void GetAirAbsorptionFactor(lua_State *l,::ALSound &snd);
+		static void SetGainAuto(lua_State *l,::ALSound &snd,bool directHF,bool send,bool sendHF);
+		static void GetGainAuto(lua_State *l,::ALSound &snd);
+		static void SetDirectFilter(lua_State *l,::ALSound &snd,float gain,float gainHF,float gainLF);
+		static void SetDirectFilter(lua_State *l,::ALSound &snd,float gain);
+		static void GetDirectFilter(lua_State *l,::ALSound &snd);
+		static void AddEffect(lua_State *l,::ALSound &snd,const std::string &name,float gain,float gainHF,float gainLF);
+		static void AddEffect(lua_State *l,::ALSound &snd,const std::string &name,float gain);
+		static void RemoveEffect(lua_State *l,::ALSound &snd,const std::string &name);
+		static void SetEffectParameters(lua_State *l,::ALSound &snd,const std::string &name,float gain,float gainHF,float gainLF);
+		static void SetEffectParameters(lua_State *l,::ALSound &snd,const std::string &name,float gain);
 
-		static void SetGainRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float minGain,float maxGain);
-		static void GetGainRange(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetDistanceRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float refDist,float maxDist);
-		static void GetDistanceRange(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetConeAngles(lua_State *l,std::shared_ptr<::ALSound> pAl,float inner,float outer);
-		static void GetConeAngles(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetOuterConeGains(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetStereoAngles(lua_State *l,std::shared_ptr<::ALSound> pAl,float leftAng,float rightAng);
-		static void GetStereoAngles(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetOuterConeGains(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain,float gainHF);
-		static void GetDirectGainHFAuto(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetSendGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void GetSendGainHFAuto(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetEffectGain(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain);
-		static void GetRolloffFactors(lua_State *l,std::shared_ptr<::ALSound> pAl);
-		static void SetRolloffFactors(lua_State *l,std::shared_ptr<::ALSound> pAl,float factor,float roomFactor);
+		static void SetGainRange(lua_State *l,::ALSound &snd,float minGain,float maxGain);
+		static void GetGainRange(lua_State *l,::ALSound &snd);
+		static void SetDistanceRange(lua_State *l,::ALSound &snd,float refDist,float maxDist);
+		static void GetDistanceRange(lua_State *l,::ALSound &snd);
+		static void SetConeAngles(lua_State *l,::ALSound &snd,float inner,float outer);
+		static void GetConeAngles(lua_State *l,::ALSound &snd);
+		static void GetOuterConeGains(lua_State *l,::ALSound &snd);
+		static void SetStereoAngles(lua_State *l,::ALSound &snd,float leftAng,float rightAng);
+		static void GetStereoAngles(lua_State *l,::ALSound &snd);
+		static void SetOuterConeGains(lua_State *l,::ALSound &snd,float gain,float gainHF);
+		static void GetDirectGainHFAuto(lua_State *l,::ALSound &snd);
+		static void GetSendGainAuto(lua_State *l,::ALSound &snd);
+		static void GetSendGainHFAuto(lua_State *l,::ALSound &snd);
+		static void SetEffectGain(lua_State *l,::ALSound &snd,const std::string &name,float gain);
+		static void GetRolloffFactors(lua_State *l,::ALSound &snd);
+		static void SetRolloffFactors(lua_State *l,::ALSound &snd,float factor,float roomFactor);
 	};
 };
 
-void Lua::ALSound::register_class(luabind::class_<std::shared_ptr<::ALSound>> &classDef)
+void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("Play",&Lua::ALSound::Play);
@@ -190,8 +190,8 @@ void Lua::ALSound::register_class(luabind::class_<std::shared_ptr<::ALSound>> &c
 	classDef.def("GetMaxAudibleDistance",&Lua::ALSound::GetMaxAudibleDistance);
 	classDef.def("GetIntensity",&Lua::ALSound::GetSoundIntensity);
 	classDef.def("GetSource",&Lua::ALSound::GetSource);
-	classDef.def("SetSource",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,EntityHandle&)>(&Lua::ALSound::SetSource));
-	classDef.def("SetSource",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>)>(&Lua::ALSound::SetSource));
+	classDef.def("SetSource",static_cast<void(*)(lua_State*,::ALSound&,EntityHandle&)>(&Lua::ALSound::SetSource));
+	classDef.def("SetSource",static_cast<void(*)(lua_State*,::ALSound&)>(&Lua::ALSound::SetSource));
 	classDef.def("SetRange",&Lua::ALSound::SetRange);
 	classDef.def("ClearRange",&Lua::ALSound::ClearRange);
 	classDef.def("HasRange",&Lua::ALSound::HasRange);
@@ -214,14 +214,14 @@ void Lua::ALSound::register_class(luabind::class_<std::shared_ptr<::ALSound>> &c
 	classDef.def("GetAirAbsorptionFactor",&Lua::ALSound::GetAirAbsorptionFactor);
 	classDef.def("SetGainAuto",&Lua::ALSound::SetGainAuto);
 	classDef.def("GetGainAuto",&Lua::ALSound::GetGainAuto);
-	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,float,float,float)>(&Lua::ALSound::SetDirectFilter));
-	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,float)>(&Lua::ALSound::SetDirectFilter));
+	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,::ALSound&,float,float,float)>(&Lua::ALSound::SetDirectFilter));
+	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,::ALSound&,float)>(&Lua::ALSound::SetDirectFilter));
 	classDef.def("GetDirectFilter",&Lua::ALSound::GetDirectFilter);
-	classDef.def("AddEffect",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,const std::string&,float,float,float)>(&Lua::ALSound::AddEffect));
-	classDef.def("AddEffect",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,const std::string&,float)>(&Lua::ALSound::AddEffect));
+	classDef.def("AddEffect",static_cast<void(*)(lua_State*,::ALSound&,const std::string&,float,float,float)>(&Lua::ALSound::AddEffect));
+	classDef.def("AddEffect",static_cast<void(*)(lua_State*,::ALSound&,const std::string&,float)>(&Lua::ALSound::AddEffect));
 	classDef.def("RemoveEffect",&Lua::ALSound::RemoveEffect);
-	classDef.def("SetEffectParameters",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,const std::string&,float,float,float)>(&Lua::ALSound::AddEffect));
-	classDef.def("SetEffectParameters",static_cast<void(*)(lua_State*,std::shared_ptr<::ALSound>,const std::string&,float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetEffectParameters",static_cast<void(*)(lua_State*,::ALSound&,const std::string&,float,float,float)>(&Lua::ALSound::AddEffect));
+	classDef.def("SetEffectParameters",static_cast<void(*)(lua_State*,::ALSound&,const std::string&,float)>(&Lua::ALSound::AddEffect));
 
 	classDef.def("SetGainRange",&Lua::ALSound::SetGainRange);
 	classDef.def("GetGainRange",&Lua::ALSound::GetGainRange);
@@ -241,515 +241,459 @@ void Lua::ALSound::register_class(luabind::class_<std::shared_ptr<::ALSound>> &c
 	classDef.def("SetRolloffFactors",&Lua::ALSound::SetRolloffFactors);
 }
 
-void Lua::ALSound::GetFlags(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetFlags(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushInt(l,snd->GetFlags());
+	Lua::PushInt(l,snd.GetFlags());
 }
 
-void Lua::ALSound::SetFlags(lua_State*,std::shared_ptr<::ALSound> pAl,unsigned int flags)
+void Lua::ALSound::SetFlags(lua_State*,::ALSound &snd,unsigned int flags)
 {
-	pAl.get()->SetFlags(flags);
+	snd.SetFlags(flags);
 }
 
-void Lua::ALSound::AddFlags(lua_State*,std::shared_ptr<::ALSound> pAl,unsigned int flags)
+void Lua::ALSound::AddFlags(lua_State*,::ALSound &snd,unsigned int flags)
 {
-	pAl.get()->AddFlags(flags);
+	snd.AddFlags(flags);
 }
 
-void Lua::ALSound::RemoveFlags(lua_State*,std::shared_ptr<::ALSound> pAl,unsigned int flags)
+void Lua::ALSound::RemoveFlags(lua_State*,::ALSound &snd,unsigned int flags)
 {
-	pAl.get()->RemoveFlags(flags);
+	snd.RemoveFlags(flags);
 }
 
-void Lua::ALSound::Play(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::Play(lua_State*,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	snd->Play();
+	snd.Play();
 }
 
-void Lua::ALSound::Stop(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::Stop(lua_State*,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	snd->Stop();
+	snd.Stop();
 }
 
-void Lua::ALSound::SetOffset(lua_State*,std::shared_ptr<::ALSound> pAl,float offset)
+void Lua::ALSound::SetOffset(lua_State*,::ALSound &snd,float offset)
 {
-	auto *snd = pAl.get();
-	snd->SetOffset(offset);
+	snd.SetOffset(offset);
 }
 
-void Lua::ALSound::GetOffset(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetOffset(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetOffset());
+	Lua::PushNumber(l,snd.GetOffset());
 }
 
-void Lua::ALSound::SetPitch(lua_State*,std::shared_ptr<::ALSound> pAl,float pitch)
+void Lua::ALSound::SetPitch(lua_State*,::ALSound &snd,float pitch)
 {
-	auto *snd = pAl.get();
-	snd->SetPitch(pitch);
+	snd.SetPitch(pitch);
 }
 
-void Lua::ALSound::GetPitch(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetPitch(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetPitch());
+	Lua::PushNumber(l,snd.GetPitch());
 }
 
-void Lua::ALSound::SetLooping(lua_State*,std::shared_ptr<::ALSound> pAl,bool loop)
+void Lua::ALSound::SetLooping(lua_State*,::ALSound &snd,bool loop)
 {
-	auto *snd = pAl.get();
-	snd->SetLooping(loop);
+	snd.SetLooping(loop);
 }
 
-void Lua::ALSound::IsLooping(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::IsLooping(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	lua_pushboolean(l,snd->IsLooping());
+	lua_pushboolean(l,snd.IsLooping());
 }
 
-void Lua::ALSound::IsPlaying(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::IsPlaying(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	lua_pushboolean(l,snd->IsPlaying());
+	lua_pushboolean(l,snd.IsPlaying());
 }
 
-void Lua::ALSound::IsStopped(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushBool(l,pAl->IsStopped());}
+void Lua::ALSound::IsStopped(lua_State *l,::ALSound &snd) {Lua::PushBool(l,snd.IsStopped());}
 
-void Lua::ALSound::GetState(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetState(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushInt(l,snd->GetState());
+	Lua::PushInt(l,snd.GetState());
 }
 
-void Lua::ALSound::Rewind(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::Rewind(lua_State*,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	snd->Rewind();
+	snd.Rewind();
 }
 
-void Lua::ALSound::Pause(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::Pause(lua_State*,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	snd->Pause();
+	snd.Pause();
 }
 
-void Lua::ALSound::IsPaused(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::IsPaused(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	lua_pushboolean(l,snd->IsPaused());
+	lua_pushboolean(l,snd.IsPaused());
 }
 
-void Lua::ALSound::SetGain(lua_State*,std::shared_ptr<::ALSound> pAl,float gain)
+void Lua::ALSound::SetGain(lua_State*,::ALSound &snd,float gain)
 {
-	auto *snd = pAl.get();
-	snd->SetGain(gain);
+	snd.SetGain(gain);
 }
 
-void Lua::ALSound::GetGain(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetGain(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetGain());
+	Lua::PushNumber(l,snd.GetGain());
 }
 
-void Lua::ALSound::SetPos(lua_State*,std::shared_ptr<::ALSound> pAl,Vector3 pos)
+void Lua::ALSound::SetPos(lua_State*,::ALSound &snd,Vector3 pos)
 {
-	auto *snd = pAl.get();
-	snd->SetPosition(pos);
+	snd.SetPosition(pos);
 }
 
-void Lua::ALSound::GetPos(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetPos(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Vector3 pos = snd->GetPosition();
+	Vector3 pos = snd.GetPosition();
 	luabind::object(l,pos).push(l);
 }
 
-void Lua::ALSound::SetVelocity(lua_State*,std::shared_ptr<::ALSound> pAl,Vector3 vel)
+void Lua::ALSound::SetVelocity(lua_State*,::ALSound &snd,Vector3 vel)
 {
-	auto *snd = pAl.get();
-	snd->SetVelocity(vel);
+	snd.SetVelocity(vel);
 }
 
-void Lua::ALSound::GetVelocity(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetVelocity(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Vector3 vel = snd->GetVelocity();
+	Vector3 vel = snd.GetVelocity();
 	luabind::object(l,vel).push(l);
 }
 
-void Lua::ALSound::SetDirection(lua_State*,std::shared_ptr<::ALSound> pAl,Vector3 dir)
+void Lua::ALSound::SetDirection(lua_State*,::ALSound &snd,Vector3 dir)
 {
-	auto *snd = pAl.get();
-	snd->SetDirection(dir);
+	snd.SetDirection(dir);
 }
 
-void Lua::ALSound::GetDirection(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetDirection(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Vector3 dir = snd->GetDirection();
+	Vector3 dir = snd.GetDirection();
 	luabind::object(l,dir).push(l);
 }
 
-void Lua::ALSound::SetRelativeToListener(lua_State*,std::shared_ptr<::ALSound> pAl,bool b)
+void Lua::ALSound::SetRelativeToListener(lua_State*,::ALSound &snd,bool b)
 {
-	auto *snd = pAl.get();
-	snd->SetRelative(b);
+	snd.SetRelative(b);
 }
 
-void Lua::ALSound::IsRelativeToListener(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::IsRelativeToListener(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	lua_pushboolean(l,snd->IsRelative());
+	lua_pushboolean(l,snd.IsRelative());
 }
 
-void Lua::ALSound::SetSecOffset(lua_State*,std::shared_ptr<::ALSound> pAl,float sec)
+void Lua::ALSound::SetSecOffset(lua_State*,::ALSound &snd,float sec)
 {
-	auto *snd = pAl.get();
-	snd->SetTimeOffset(sec);
+	snd.SetTimeOffset(sec);
 }
 
-void Lua::ALSound::GetSecOffset(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetSecOffset(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetTimeOffset());
+	Lua::PushNumber(l,snd.GetTimeOffset());
 }
 
-void Lua::ALSound::GetDuration(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetDuration(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetDuration());
+	Lua::PushNumber(l,snd.GetDuration());
 }
 
-void Lua::ALSound::CallOnStateChanged(lua_State *l,std::shared_ptr<::ALSound> pAl,luabind::object o)
+void Lua::ALSound::CallOnStateChanged(lua_State *l,::ALSound &snd,luabind::object o)
 {
 	Lua::CheckFunction(l,2);
-	auto *snd = pAl.get();
-	auto hCallback = snd->AddLuaCallback("OnStateChanged",o);
+	auto hCallback = snd.AddLuaCallback("OnStateChanged",o);
 	Lua::Push<CallbackHandle>(l,hCallback);
 }
 
-void Lua::ALSound::SetPriority(lua_State*,std::shared_ptr<::ALSound> pAl,unsigned char)
+void Lua::ALSound::SetPriority(lua_State*,::ALSound &snd,unsigned char)
 {
-	//auto *snd = pAl.get();
-	//snd->SetPriority(priority); // TODO
+	//snd.SetPriority(priority); // TODO
 }
 
-void Lua::ALSound::GetPriority(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetPriority(lua_State*,::ALSound &snd)
 {
-	//auto *snd = pAl.get();
-	//Lua::PushNumber(l,snd->GetPriority()); // TODO
+	//Lua::PushNumber(l,snd.GetPriority()); // TODO
 }
 
-void Lua::ALSound::FadeIn(lua_State*,std::shared_ptr<::ALSound> pAl,int time)
+void Lua::ALSound::FadeIn(lua_State*,::ALSound &snd,int time)
 {
-	auto *snd = pAl.get();
-	snd->FadeIn(CFloat(time));
+	snd.FadeIn(CFloat(time));
 }
 
-void Lua::ALSound::FadeOut(lua_State*,std::shared_ptr<::ALSound> pAl,int time)
+void Lua::ALSound::FadeOut(lua_State*,::ALSound &snd,int time)
 {
-	auto *snd = pAl.get();
-	snd->FadeOut(CFloat(time));
+	snd.FadeOut(CFloat(time));
 }
 
-void Lua::ALSound::GetReferenceDistance(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetReferenceDistance(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetReferenceDistance());
+	Lua::PushNumber(l,snd.GetReferenceDistance());
 }
 
-void Lua::ALSound::SetReferenceDistance(lua_State*,std::shared_ptr<::ALSound> pAl,float dist)
+void Lua::ALSound::SetReferenceDistance(lua_State*,::ALSound &snd,float dist)
 {
-	auto *snd = pAl.get();
-	snd->SetReferenceDistance(dist);
+	snd.SetReferenceDistance(dist);
 }
 
-void Lua::ALSound::GetRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetRolloffFactor(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetRolloffFactor());
+	Lua::PushNumber(l,snd.GetRolloffFactor());
 }
 
-void Lua::ALSound::SetRolloffFactor(lua_State*,std::shared_ptr<::ALSound> pAl,float rolloff)
+void Lua::ALSound::SetRolloffFactor(lua_State*,::ALSound &snd,float rolloff)
 {
-	auto *snd = pAl.get();
-	snd->SetRolloffFactor(rolloff);
+	snd.SetRolloffFactor(rolloff);
 }
 
-void Lua::ALSound::GetRoomRolloffFactor(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetRoomRolloffFactor(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetRoomRolloffFactor());
+	Lua::PushNumber(l,snd.GetRoomRolloffFactor());
 }
 
-void Lua::ALSound::SetRoomRolloffFactor(lua_State*,std::shared_ptr<::ALSound> pAl,float rolloff)
+void Lua::ALSound::SetRoomRolloffFactor(lua_State*,::ALSound &snd,float rolloff)
 {
-	auto *snd = pAl.get();
-	snd->SetRoomRolloffFactor(rolloff);
+	snd.SetRoomRolloffFactor(rolloff);
 }
 
-void Lua::ALSound::GetMaxDistance(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetMaxDistance(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetMaxDistance());
+	Lua::PushNumber(l,snd.GetMaxDistance());
 }
 
-void Lua::ALSound::SetMaxDistance(lua_State*,std::shared_ptr<::ALSound> pAl,float dist)
+void Lua::ALSound::SetMaxDistance(lua_State*,::ALSound &snd,float dist)
 {
-	auto *snd = pAl.get();
-	snd->SetMaxDistance(dist);
+	snd.SetMaxDistance(dist);
 }
 
-void Lua::ALSound::GetMinGain(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetMinGain(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetMinGain());
+	Lua::PushNumber(l,snd.GetMinGain());
 }
 
-void Lua::ALSound::SetMinGain(lua_State*,std::shared_ptr<::ALSound> pAl,float gain)
+void Lua::ALSound::SetMinGain(lua_State*,::ALSound &snd,float gain)
 {
-	auto *snd = pAl.get();
-	snd->SetMinGain(gain);
+	snd.SetMinGain(gain);
 }
 
-void Lua::ALSound::GetMaxGain(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetMaxGain(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetMaxGain());
+	Lua::PushNumber(l,snd.GetMaxGain());
 }
 
-void Lua::ALSound::SetMaxGain(lua_State*,std::shared_ptr<::ALSound> pAl,float gain)
+void Lua::ALSound::SetMaxGain(lua_State*,::ALSound &snd,float gain)
 {
-	auto *snd = pAl.get();
-	snd->SetMaxGain(gain);
+	snd.SetMaxGain(gain);
 }
 
-void Lua::ALSound::GetConeInnerAngle(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetConeInnerAngle(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetInnerConeAngle());
+	Lua::PushNumber(l,snd.GetInnerConeAngle());
 }
 
-void Lua::ALSound::SetConeInnerAngle(lua_State*,std::shared_ptr<::ALSound> pAl,float ang)
+void Lua::ALSound::SetConeInnerAngle(lua_State*,::ALSound &snd,float ang)
 {
-	auto *snd = pAl.get();
-	snd->SetInnerConeAngle(ang);
+	snd.SetInnerConeAngle(ang);
 }
 
-void Lua::ALSound::GetConeOuterAngle(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetConeOuterAngle(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetOuterConeAngle());
+	Lua::PushNumber(l,snd.GetOuterConeAngle());
 }
 
-void Lua::ALSound::SetConeOuterAngle(lua_State*,std::shared_ptr<::ALSound> pAl,float ang)
+void Lua::ALSound::SetConeOuterAngle(lua_State*,::ALSound &snd,float ang)
 {
-	auto *snd = pAl.get();
-	snd->SetOuterConeAngle(ang);
+	snd.SetOuterConeAngle(ang);
 }
 
-void Lua::ALSound::GetConeOuterGain(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetConeOuterGain(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetOuterConeGain());
+	Lua::PushNumber(l,snd.GetOuterConeGain());
 }
 
-void Lua::ALSound::SetConeOuterGain(lua_State*,std::shared_ptr<::ALSound> pAl,float gain)
+void Lua::ALSound::SetConeOuterGain(lua_State*,::ALSound &snd,float gain)
 {
-	auto *snd = pAl.get();
-	snd->SetOuterConeGain(gain);
+	snd.SetOuterConeGain(gain);
 }
 
-void Lua::ALSound::GetConeOuterGainHF(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetConeOuterGainHF(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetOuterConeGainHF());
+	Lua::PushNumber(l,snd.GetOuterConeGainHF());
 }
-void Lua::ALSound::SetConeOuterGainHF(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain)
+void Lua::ALSound::SetConeOuterGainHF(lua_State *l,::ALSound &snd,float gain)
 {
-	auto *snd = pAl.get();
-	snd->SetOuterConeGainHF(gain);
+	snd.SetOuterConeGainHF(gain);
 }
 
-void Lua::ALSound::GetType(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetType(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushInt(l,CInt32(snd->GetType()));
+	Lua::PushInt(l,CInt32(snd.GetType()));
 }
 
-void Lua::ALSound::SetType(lua_State*,std::shared_ptr<::ALSound> pAl,int type)
+void Lua::ALSound::SetType(lua_State*,::ALSound &snd,int type)
 {
-	auto *snd = pAl.get();
-	snd->SetType(static_cast<ALSoundType>(type));
+	snd.SetType(static_cast<ALSoundType>(type));
 }
 
-void Lua::ALSound::AddType(lua_State*,std::shared_ptr<::ALSound> pAl,int type)
+void Lua::ALSound::AddType(lua_State*,::ALSound &snd,int type)
 {
-	auto *snd = pAl.get();
-	snd->AddType(static_cast<ALSoundType>(type));
+	snd.AddType(static_cast<ALSoundType>(type));
 }
 
-void Lua::ALSound::GetMaxAudibleDistance(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetMaxAudibleDistance(lua_State *l,::ALSound &snd)
 {
-	auto *snd = pAl.get();
-	Lua::PushNumber(l,snd->GetMaxAudibleDistance());
+	Lua::PushNumber(l,snd.GetMaxAudibleDistance());
 }
 
-void Lua::ALSound::GetSoundIntensity(lua_State *l,std::shared_ptr<::ALSound> pAl,const Vector3 &origin)
+void Lua::ALSound::GetSoundIntensity(lua_State *l,::ALSound &snd,const Vector3 &origin)
 {
-	Lua::PushNumber(l,pAl->GetSoundIntensity(origin));
+	Lua::PushNumber(l,snd.GetSoundIntensity(origin));
 }
-void Lua::ALSound::GetSource(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetSource(lua_State *l,::ALSound &snd)
 {
-	auto *entSrc = pAl->GetSource();
+	auto *entSrc = snd.GetSource();
 	if(entSrc == nullptr)
 		return;
 	entSrc->GetLuaObject()->push(l);
 }
-void Lua::ALSound::SetSource(lua_State*,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetSource(lua_State*,::ALSound &snd)
 {
-	pAl->SetSource(nullptr);
+	snd.SetSource(nullptr);
 }
-void Lua::ALSound::SetSource(lua_State *l,std::shared_ptr<::ALSound> pAl,EntityHandle &hEnt)
+void Lua::ALSound::SetSource(lua_State *l,::ALSound &snd,EntityHandle &hEnt)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	pAl->SetSource(hEnt.get());
+	snd.SetSource(hEnt.get());
 }
-void Lua::ALSound::SetRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float start,float end)
+void Lua::ALSound::SetRange(lua_State *l,::ALSound &snd,float start,float end)
 {
-	pAl->SetRange(start,end);
+	snd.SetRange(start,end);
 }
-void Lua::ALSound::ClearRange(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::ClearRange(lua_State *l,::ALSound &snd)
 {
-	pAl->ClearRange();
+	snd.ClearRange();
 }
-void Lua::ALSound::HasRange(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::HasRange(lua_State *l,::ALSound &snd)
 {
-	Lua::PushBool(l,pAl->HasRange());
+	Lua::PushBool(l,snd.HasRange());
 }
-void Lua::ALSound::GetRange(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetRange(lua_State *l,::ALSound &snd)
 {
-	auto range = pAl->GetRange();
+	auto range = snd.GetRange();
 	Lua::PushNumber(l,range.first);
 	Lua::PushNumber(l,range.second);
 }
-void Lua::ALSound::GetRangeOffsets(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetRangeOffsets(lua_State *l,::ALSound &snd)
 {
-	auto range = pAl->GetRangeOffsets();
+	auto range = snd.GetRangeOffsets();
 	Lua::PushNumber(l,range.first);
 	Lua::PushNumber(l,range.second);
 }
-void Lua::ALSound::SetFadeInDuration(lua_State *l,std::shared_ptr<::ALSound> pAl,float t)
+void Lua::ALSound::SetFadeInDuration(lua_State *l,::ALSound &snd,float t)
 {
-	pAl->SetFadeInDuration(t);
+	snd.SetFadeInDuration(t);
 }
-void Lua::ALSound::SetFadeOutDuration(lua_State *l,std::shared_ptr<::ALSound> pAl,float t)
+void Lua::ALSound::SetFadeOutDuration(lua_State *l,::ALSound &snd,float t)
 {
-	pAl->SetFadeOutDuration(t);
+	snd.SetFadeOutDuration(t);
 }
-void Lua::ALSound::GetFadeInDuration(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetFadeInDuration(lua_State *l,::ALSound &snd)
 {
-	Lua::PushNumber(l,pAl->GetFadeInDuration());
+	Lua::PushNumber(l,snd.GetFadeInDuration());
 }
-void Lua::ALSound::GetFadeOutDuration(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetFadeOutDuration(lua_State *l,::ALSound &snd)
 {
-	Lua::PushNumber(l,pAl->GetFadeOutDuration());
+	Lua::PushNumber(l,snd.GetFadeOutDuration());
 }
-void Lua::ALSound::SetOrientation(lua_State *l,std::shared_ptr<::ALSound> pAl,const Vector3 &at,const Vector3 &up) {pAl->SetOrientation(at,up);}
-void Lua::ALSound::GetOrientation(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetOrientation(lua_State *l,::ALSound &snd,const Vector3 &at,const Vector3 &up) {snd.SetOrientation(at,up);}
+void Lua::ALSound::GetOrientation(lua_State *l,::ALSound &snd)
 {
-	auto orientation = pAl->GetOrientation();
+	auto orientation = snd.GetOrientation();
 	Lua::Push<Vector3>(l,orientation.first);
 	Lua::Push<Vector3>(l,orientation.second);
 }
-void Lua::ALSound::SetDopplerFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float factor) {pAl->SetDopplerFactor(factor);}
-void Lua::ALSound::GetDopplerFactor(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushNumber(l,pAl->GetDopplerFactor());}
-void Lua::ALSound::SetLeftStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang) {pAl->SetLeftStereoAngle(ang);}
-void Lua::ALSound::GetLeftStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushNumber(l,pAl->GetLeftStereoAngle());}
-void Lua::ALSound::SetRightStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl,float ang) {pAl->SetRightStereoAngle(ang);}
-void Lua::ALSound::GetRightStereoAngle(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushNumber(l,pAl->GetRightStereoAngle());}
-void Lua::ALSound::SetAirAbsorptionFactor(lua_State *l,std::shared_ptr<::ALSound> pAl,float airAbsorption) {pAl->SetAirAbsorptionFactor(airAbsorption);}
-void Lua::ALSound::GetAirAbsorptionFactor(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushNumber(l,pAl->GetAirAbsorptionFactor());}
-void Lua::ALSound::SetGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl,bool directHF,bool send,bool sendHF) {pAl->SetGainAuto(directHF,send,sendHF);}
-void Lua::ALSound::GetGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetDopplerFactor(lua_State *l,::ALSound &snd,float factor) {snd.SetDopplerFactor(factor);}
+void Lua::ALSound::GetDopplerFactor(lua_State *l,::ALSound &snd) {Lua::PushNumber(l,snd.GetDopplerFactor());}
+void Lua::ALSound::SetLeftStereoAngle(lua_State *l,::ALSound &snd,float ang) {snd.SetLeftStereoAngle(ang);}
+void Lua::ALSound::GetLeftStereoAngle(lua_State *l,::ALSound &snd) {Lua::PushNumber(l,snd.GetLeftStereoAngle());}
+void Lua::ALSound::SetRightStereoAngle(lua_State *l,::ALSound &snd,float ang) {snd.SetRightStereoAngle(ang);}
+void Lua::ALSound::GetRightStereoAngle(lua_State *l,::ALSound &snd) {Lua::PushNumber(l,snd.GetRightStereoAngle());}
+void Lua::ALSound::SetAirAbsorptionFactor(lua_State *l,::ALSound &snd,float airAbsorption) {snd.SetAirAbsorptionFactor(airAbsorption);}
+void Lua::ALSound::GetAirAbsorptionFactor(lua_State *l,::ALSound &snd) {Lua::PushNumber(l,snd.GetAirAbsorptionFactor());}
+void Lua::ALSound::SetGainAuto(lua_State *l,::ALSound &snd,bool directHF,bool send,bool sendHF) {snd.SetGainAuto(directHF,send,sendHF);}
+void Lua::ALSound::GetGainAuto(lua_State *l,::ALSound &snd)
 {
-	auto gainAuto = pAl->GetGainAuto();
+	auto gainAuto = snd.GetGainAuto();
 	Lua::PushBool(l,std::get<0>(gainAuto));
 	Lua::PushBool(l,std::get<1>(gainAuto));
 	Lua::PushBool(l,std::get<2>(gainAuto));
 }
-void Lua::ALSound::SetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain,float gainHF,float gainLF) {pAl->SetDirectFilter({gain,gainHF,gainLF});}
-void Lua::ALSound::SetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain) {pAl->SetDirectFilter({gain});}
-void Lua::ALSound::GetDirectFilter(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetDirectFilter(lua_State *l,::ALSound &snd,float gain,float gainHF,float gainLF) {snd.SetDirectFilter({gain,gainHF,gainLF});}
+void Lua::ALSound::SetDirectFilter(lua_State *l,::ALSound &snd,float gain) {snd.SetDirectFilter({gain});}
+void Lua::ALSound::GetDirectFilter(lua_State *l,::ALSound &snd)
 {
-	auto &filter = pAl->GetDirectFilter();
+	auto &filter = snd.GetDirectFilter();
 	Lua::PushNumber(l,filter.gain);
 	Lua::PushNumber(l,filter.gainHF);
 	Lua::PushNumber(l,filter.gainLF);
 }
-void Lua::ALSound::AddEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain,float gainHF,float gainLF)
+void Lua::ALSound::AddEffect(lua_State *l,::ALSound &snd,const std::string &name,float gain,float gainHF,float gainLF)
 {
-	auto r = pAl->AddEffect(name,{gain,gainHF,gainLF});
+	auto r = snd.AddEffect(name,{gain,gainHF,gainLF});
 	Lua::PushBool(l,r);
 }
-void Lua::ALSound::AddEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain)
+void Lua::ALSound::AddEffect(lua_State *l,::ALSound &snd,const std::string &name,float gain)
 {
-	auto r = pAl->AddEffect(name,{gain});
+	auto r = snd.AddEffect(name,{gain});
 	Lua::PushBool(l,r);
 }
-void Lua::ALSound::RemoveEffect(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name)
+void Lua::ALSound::RemoveEffect(lua_State *l,::ALSound &snd,const std::string &name)
 {
-	pAl->RemoveEffect(name);
+	snd.RemoveEffect(name);
 }
-void Lua::ALSound::SetEffectParameters(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain,float gainHF,float gainLF) {pAl->SetEffectParameters(name,{gain,gainHF,gainLF});}
-void Lua::ALSound::SetEffectParameters(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain) {pAl->SetEffectParameters(name,{gain});}
+void Lua::ALSound::SetEffectParameters(lua_State *l,::ALSound &snd,const std::string &name,float gain,float gainHF,float gainLF) {snd.SetEffectParameters(name,{gain,gainHF,gainLF});}
+void Lua::ALSound::SetEffectParameters(lua_State *l,::ALSound &snd,const std::string &name,float gain) {snd.SetEffectParameters(name,{gain});}
 
-void Lua::ALSound::SetGainRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float minGain,float maxGain) {pAl->SetGainRange(minGain,maxGain);}
-void Lua::ALSound::GetGainRange(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetGainRange(lua_State *l,::ALSound &snd,float minGain,float maxGain) {snd.SetGainRange(minGain,maxGain);}
+void Lua::ALSound::GetGainRange(lua_State *l,::ALSound &snd)
 {
-	auto range = pAl->GetGainRange();
+	auto range = snd.GetGainRange();
 	Lua::PushNumber(l,range.first);
 	Lua::PushNumber(l,range.second);
 }
-void Lua::ALSound::SetDistanceRange(lua_State *l,std::shared_ptr<::ALSound> pAl,float refDist,float maxDist) {pAl->SetDistanceRange(refDist,maxDist);}
-void Lua::ALSound::GetDistanceRange(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetDistanceRange(lua_State *l,::ALSound &snd,float refDist,float maxDist) {snd.SetDistanceRange(refDist,maxDist);}
+void Lua::ALSound::GetDistanceRange(lua_State *l,::ALSound &snd)
 {
-	auto range = pAl->GetDistanceRange();
+	auto range = snd.GetDistanceRange();
 	Lua::PushNumber(l,range.first);
 	Lua::PushNumber(l,range.second);
 }
-void Lua::ALSound::SetConeAngles(lua_State *l,std::shared_ptr<::ALSound> pAl,float inner,float outer) {pAl->SetConeAngles(inner,outer);}
-void Lua::ALSound::GetConeAngles(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetConeAngles(lua_State *l,::ALSound &snd,float inner,float outer) {snd.SetConeAngles(inner,outer);}
+void Lua::ALSound::GetConeAngles(lua_State *l,::ALSound &snd)
 {
-	auto angles = pAl->GetConeAngles();
+	auto angles = snd.GetConeAngles();
 	Lua::PushNumber(l,angles.first);
 	Lua::PushNumber(l,angles.second);
 }
-void Lua::ALSound::GetOuterConeGains(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::GetOuterConeGains(lua_State *l,::ALSound &snd)
 {
-	auto gains = pAl->GetOuterConeGains();
+	auto gains = snd.GetOuterConeGains();
 	Lua::PushNumber(l,gains.first);
 	Lua::PushNumber(l,gains.second);
 }
-void Lua::ALSound::SetStereoAngles(lua_State *l,std::shared_ptr<::ALSound> pAl,float leftAng,float rightAng) {pAl->SetStereoAngles(leftAng,rightAng);}
-void Lua::ALSound::GetStereoAngles(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetStereoAngles(lua_State *l,::ALSound &snd,float leftAng,float rightAng) {snd.SetStereoAngles(leftAng,rightAng);}
+void Lua::ALSound::GetStereoAngles(lua_State *l,::ALSound &snd)
 {
-	auto angles = pAl->GetStereoAngles();
+	auto angles = snd.GetStereoAngles();
 	Lua::PushNumber(l,angles.first);
 	Lua::PushNumber(l,angles.second);
 }
-void Lua::ALSound::SetOuterConeGains(lua_State *l,std::shared_ptr<::ALSound> pAl,float gain,float gainHF) {pAl->SetOuterConeGains(gain,gainHF);}
-void Lua::ALSound::GetDirectGainHFAuto(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushBool(l,pAl->GetDirectGainHFAuto());}
-void Lua::ALSound::GetSendGainAuto(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushBool(l,pAl->GetSendGainAuto());}
-void Lua::ALSound::GetSendGainHFAuto(lua_State *l,std::shared_ptr<::ALSound> pAl) {Lua::PushBool(l,pAl->GetSendGainHFAuto());}
-void Lua::ALSound::SetEffectGain(lua_State *l,std::shared_ptr<::ALSound> pAl,const std::string &name,float gain) {pAl->SetEffectGain(name,gain);}
-void Lua::ALSound::GetRolloffFactors(lua_State *l,std::shared_ptr<::ALSound> pAl)
+void Lua::ALSound::SetOuterConeGains(lua_State *l,::ALSound &snd,float gain,float gainHF) {snd.SetOuterConeGains(gain,gainHF);}
+void Lua::ALSound::GetDirectGainHFAuto(lua_State *l,::ALSound &snd) {Lua::PushBool(l,snd.GetDirectGainHFAuto());}
+void Lua::ALSound::GetSendGainAuto(lua_State *l,::ALSound &snd) {Lua::PushBool(l,snd.GetSendGainAuto());}
+void Lua::ALSound::GetSendGainHFAuto(lua_State *l,::ALSound &snd) {Lua::PushBool(l,snd.GetSendGainHFAuto());}
+void Lua::ALSound::SetEffectGain(lua_State *l,::ALSound &snd,const std::string &name,float gain) {snd.SetEffectGain(name,gain);}
+void Lua::ALSound::GetRolloffFactors(lua_State *l,::ALSound &snd)
 {
-	auto factors = pAl->GetRolloffFactors();
+	auto factors = snd.GetRolloffFactors();
 	Lua::PushNumber(l,factors.first);
 	Lua::PushNumber(l,factors.second);
 }
-void Lua::ALSound::SetRolloffFactors(lua_State *l,std::shared_ptr<::ALSound> pAl,float factor,float roomFactor) {pAl->SetRolloffFactors(factor,roomFactor);}
+void Lua::ALSound::SetRolloffFactors(lua_State *l,::ALSound &snd,float factor,float roomFactor) {snd.SetRolloffFactors(factor,roomFactor);}

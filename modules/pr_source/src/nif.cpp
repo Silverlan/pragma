@@ -27,11 +27,6 @@
 #include <obj/BSLightingShaderProperty.h>
 #include <obj/BSShaderPPLightingProperty.h>
 #include <obj/BSShaderTextureSet.h>
-#include <obj/BSSubIndexTriShape.h>
-#include <obj/BSMeshLODTriShape.h>
-#include <obj/BSTriShape.h>
-#include <obj/BSSkin__Instance.h>
-#include <obj/BSSkin__BoneData.h>
 #include <obj/NiTexturingProperty.h>
 #include <obj/NiMaterialProperty.h>
 #include <obj/NiSourceTexture.h>
@@ -208,7 +203,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 		}
 		auto refAnim = mdl->GetAnimation(0);
 		auto reference = refAnim->GetFrame(0);
-		auto anim = std::make_shared<Animation>();
+		auto anim = Animation::Create();
 		auto &bones = skeleton.GetBones();
 		auto numBones = reference->GetBoneCount();//skeleton.GetBoneCount();
 		anim->ReserveBoneIds(anim->GetBoneCount() +numBones);
@@ -221,7 +216,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 			{
 				for(auto i=frames.size();i<=frameId;++i)
 				{
-					frames.push_back(std::make_shared<Frame>(*reference));
+					frames.push_back(Frame::Create(*reference));
 					anim->AddFrame(frames.back());
 				}
 			}
@@ -483,7 +478,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 		for(auto &o : triObjects)
 		{
 			std::vector<Niflib::Ref<Niflib::NiNode>> bones {};
-			if(o.bsGeometry == true)
+			/*if(o.bsGeometry == true)
 			{
 				auto *triShape = static_cast<Niflib::BSTriShape*>(o.object);
 				auto skin = triShape->GetSkin();
@@ -494,7 +489,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 						bones = skinInstance->GetBones();
 				}
 			}
-			else
+			else*/ // TODO
 			{
 				auto *geometry = static_cast<Niflib::NiGeometry*>(o.object);
 				auto skin = geometry->GetSkinInstance();
@@ -527,7 +522,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 		std::vector<Niflib::TexCoord> texCoords {};
 		std::vector<Niflib::Triangle> triangles {};
 		int32_t geoMatId = -1;
-		if(o.bsGeometry == true)
+		/*if(o.bsGeometry == true)
 		{
 			auto *triShape = static_cast<Niflib::BSTriShape*>(o.object);
 			auto *subTriShape = dynamic_cast<Niflib::BSSubIndexTriShape*>(triShape);
@@ -566,7 +561,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 			catch(...) {}
 			geoMatId = 0; // TODO
 		}
-		else
+		else*/ // TODO
 		{
 			auto *geometry = static_cast<Niflib::NiGeometry*>(o.object);
 			auto data = static_cast<Niflib::NiTriShapeData*>(static_cast<Niflib::NiGeometryData*>(geometry->GetData()));
@@ -700,8 +695,6 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 	//auto numBonesSk = skeleton.GetBoneCount();
 	for(auto &o : triObjects)
 	{
-		if(o.object->IsSkin() == true)
-			o.object->NormalizeSkinWeights();
 		auto &mesh = o.mesh;
 		auto &subMesh = mesh->GetSubMeshes().front();
 		auto &meshVertWeights = subMesh->GetVertexWeights();
@@ -711,18 +704,28 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 		std::vector<Niflib::Ref<Niflib::NiNode>> bones {};
 		if(o.bsGeometry == true)
 		{
-			auto *triShape = static_cast<Niflib::BSTriShape*>(o.object);
-			auto skin = triShape->GetSkin();
-			if(skin != nullptr)
+			auto *pGeometry = dynamic_cast<Niflib::NiGeometry*>(o.object);
+			if(pGeometry != nullptr)
 			{
-				auto *skinInstance = dynamic_cast<Niflib::BSSkin__Instance*>(static_cast<Niflib::NiObject*>(skin));
-				if(skinInstance != nullptr)
+				if(pGeometry->IsSkin() == true)
+					pGeometry->NormalizeSkinWeights();
+				auto pSkinInstance = pGeometry->GetSkinInstance();
+				if(pSkinInstance)
 				{
-					bones = skinInstance->GetBones();
-					for(auto i=decltype(vertCount){0};i<vertCount;++i)
+					bones = pSkinInstance->GetBones();
+					auto skinData = pSkinInstance->GetSkinData();
+					if(skinData)
 					{
-						auto &vw = meshVertWeights.at(i);
-						triShape->GetBoneWeights(i,&vw.weights[0],&vw.boneIds[0]);
+						for(auto i=decltype(vertCount){0};i<vertCount;++i)
+						{
+							auto &vw = meshVertWeights.at(i);
+							auto skinWeights = skinData->GetBoneWeights(i);
+							for(auto i=decltype(skinWeights.size()){0u};i<umath::min(skinWeights.size(),static_cast<size_t>(4));++i)
+							{
+								vw.weights[i] = skinWeights.at(i).weight;
+								vw.boneIds[i] = skinWeights.at(i).index;
+							}
+						}
 					}
 				}
 			}

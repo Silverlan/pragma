@@ -172,3 +172,12 @@
 [submodule "third_party_libs/rapidxml"]
 	path = third_party_libs/rapidxml
 	url = https://github.com/discordapp/rapidxml.git
+[submodule "third_party_libs/hllib"]
+	path = third_party_libs/hllib
+	url = https://github.com/Silverlan/hllib.git
+[submodule "third_party_libs/niflib"]
+	path = third_party_libs/niflib
+	url = https://github.com/niftools/niflib.git
+[submodule "third_party_libs/qhull"]
+	path = third_party_libs/qhull
+	url = https://github.com/qhull/qhull.git

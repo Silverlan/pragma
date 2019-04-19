@@ -11,7 +11,6 @@ LINK_WGUI_TO_CLASS(WITransformable,WITransformable);
 #define WIFRAME_DRAG_OFFSET_BORDER 5
 #define WIFRAME_RESIZE_OFFSET_BORDER 5
 
-#pragma optimize("",off)
 WITransformable::WITransformable()
 	: WIBase()
 {
@@ -554,4 +553,3 @@ void WITransformable::SetResizable(bool b)
 }
 bool WITransformable::IsDraggable() {return umath::is_flag_set(m_stateFlags,StateFlags::Draggable);}
 bool WITransformable::IsResizable() {return umath::is_flag_set(m_stateFlags,StateFlags::Resizable);}
-#pragma optimize("",on)

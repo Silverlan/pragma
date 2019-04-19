@@ -26,7 +26,6 @@ struct ShadowRenderInfo
 };
 static std::vector<ShadowRenderInfo> s_shadowRenderMeshInfos {};
 
-#pragma optimize("",off)
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 static void render_csm_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool bDrawParticleShadows)
 {
@@ -755,4 +754,3 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 		render_shadows(drawCmd,*light);
 	}
 }
-#pragma optimize("",on)

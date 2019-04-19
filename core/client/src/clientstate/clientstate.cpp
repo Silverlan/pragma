@@ -359,8 +359,7 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 
 void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
-	static auto skip = false;
-	if(m_game != nullptr && skip == false)
+	if(m_game != nullptr)
 		m_game->RenderScenes(drawCmd,rt);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
 	{
@@ -372,13 +371,7 @@ void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,s
 			vk::AccessFlagBits::eColorAttachmentWrite,vk::AccessFlagBits::eTransferRead
 		);
 	}*/
-	static auto bDraw = false;
-	if(bDraw == false)
-	{
-		bDraw = true;
-		CallCallbacks("Draw"); // Don't call this more than once to prevent infinite loops
-		bDraw = false;
-	}
+	CallCallbacks("Draw"); // Don't call this more than once to prevent infinite loops
 }
 
 void ClientState::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)

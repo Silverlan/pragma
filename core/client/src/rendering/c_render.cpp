@@ -63,7 +63,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -270,10 +270,6 @@ static CVar cvDrawGlow = GetClientConVar("render_draw_glow");
 static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float interpolation,FRender renderFlags)
 {
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int renderTimer = PerformanceTimer::InitializeTimer("CGame::Render");
-	PerformanceTimer::StartMeasurement(renderTimer);
-#endif
 	if(m_renderScene == nullptr)
 		return;
 	
@@ -394,17 +390,18 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 	if(scene->BeginRenderPass(drawCmd) == false)
 		return;
 
+	StartProfilingStage(CPUProfilingPhase::RenderWorld);
 	auto bGlow = cvDrawGlow->GetBool();
 	auto bTranslucent = cvDrawTranslucent->GetBool();
 	auto bReflection = (renderFlags &FRender::Reflection) != FRender::None;
 	//c_engine->StartGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
 	if((renderFlags &FRender::Skybox) != FRender::None)
 	{
-		c_engine->StartGPUTimer(GPUTimerEvent::Skybox);
+		StartProfilingStage(GPUProfilingPhase::Skybox);
 		CallCallbacks("PreRenderSkybox");
 		RenderSystem::Render(drawCmd,RenderMode::Skybox,bReflection);
 		CallCallbacks("PostRenderSkybox");
-		c_engine->StopGPUTimer(GPUTimerEvent::Skybox);
+		StopProfilingStage(GPUProfilingPhase::Skybox);
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
 
@@ -448,7 +445,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 //#ifdef _DEBUG
 //#error "Handle this via RenderMode, not renderflags!"
 //#endif
-		c_engine->StartGPUTimer(GPUTimerEvent::World);
+		StartProfilingStage(GPUProfilingPhase::World);
 		CallCallbacks("PreRenderWorld");
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::World); // prosper TODO
@@ -462,7 +459,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 		//c_engine->StopGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 
 		CallCallbacks("PostRenderWorld");
-		c_engine->StopGPUTimer(GPUTimerEvent::World);
+		StopProfilingStage(GPUProfilingPhase::World);
 	}
 
 	// Start particle sub-pass
@@ -473,7 +470,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 	//c_engine->StartGPUTimer(GPUTimerEvent::Particles); // prosper TODO
 	if(bShouldDrawParticles)
 	{
-		c_engine->StartGPUTimer(GPUTimerEvent::Particles);
+		StartProfilingStage(GPUProfilingPhase::Particles);
 		CallCallbacks("PreRenderParticles");
 
 		auto &glowInfo = m_scene->GetGlowInfo();
@@ -528,7 +525,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 			glowInfo.bGlowScheduled = true;
 
 		CallCallbacks("PostRenderParticles");
-		c_engine->StopGPUTimer(GPUTimerEvent::Particles);
+		StopProfilingStage(GPUProfilingPhase::Particles);
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::Particles); // prosper TODO
 	
@@ -538,7 +535,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 	//c_engine->StartGPUTimer(GPUTimerEvent::Debug); // prosper TODO
 	if((renderFlags &FRender::Debug) == FRender::Debug)
 	{
-		c_engine->StartGPUTimer(GPUTimerEvent::Debug);
+		StartProfilingStage(GPUProfilingPhase::Debug);
 		CallCallbacks("PreRenderDebug");
 
 		DebugRenderer::Render(drawCmd,cam);
@@ -552,13 +549,13 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 #endif
 		}
 		CallCallbacks("PostRenderDebug");
-		c_engine->StopGPUTimer(GPUTimerEvent::Debug);
+		StopProfilingStage(GPUProfilingPhase::Debug);
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::Debug); // prosper TODO
 
 	if((renderFlags &FRender::Water) != FRender::None)
 	{
-		c_engine->StartGPUTimer(GPUTimerEvent::Water);
+		StartProfilingStage(GPUProfilingPhase::Water);
 		CallCallbacks("PreRenderWater");
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::Water); // prosper TODO
@@ -576,7 +573,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 			//prepass.textureDepth->Reset(); // prosper TODO
 			//prepass.textureDepth->Resolve(); // prosper TODO
 		}
-		c_engine->StopGPUTimer(GPUTimerEvent::Water);
+		StopProfilingStage(GPUProfilingPhase::Water);
 	}
 
 	if((renderFlags &FRender::View) != FRender::None)
@@ -584,7 +581,7 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 		auto *pl = GetLocalPlayer();
 		if(pl != nullptr && pl->IsInFirstPersonMode())
 		{
-			c_engine->StartGPUTimer(GPUTimerEvent::View);
+			StartProfilingStage(GPUProfilingPhase::View);
 			CallCallbacks("PreRenderView");
 
 			//c_engine->StartGPUTimer(GPUTimerEvent::View); // prosper TODO
@@ -606,10 +603,11 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 			//RenderGlowMeshes(cam,true);
 
 			CallCallbacks("PostRenderView");
-			c_engine->StopGPUTimer(GPUTimerEvent::View);
+			StopProfilingStage(GPUProfilingPhase::View);
 		}
 	}
 	scene->EndRenderPass(drawCmd);
+	StopProfilingStage(CPUProfilingPhase::RenderWorld);
 	/*
 		At this point:
 		* m_renderTextures[0] contains the actual scene rendering
@@ -675,9 +673,6 @@ void CGame::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float
 
 	//m_shaderScreen->Render(m_renderTexture,m_renderScreenVertexBuffer);
 	*/ // Vulkan TODO
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(renderTimer);
-#endif
 }
 WVBtIDebugDraw *CGame::GetPhysicsDebugInterface() {return m_btDebugDraw;}
 
@@ -952,4 +947,3 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
-#pragma optimize("",on)

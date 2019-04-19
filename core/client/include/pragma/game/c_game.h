@@ -59,6 +59,7 @@ namespace GLFW
 
 namespace pragma
 {
+	namespace debug {class GPUProfilingStage;};
 	class LuaShaderManager;
 	class CPlayerComponent;
 	class CViewModelComponent;
@@ -123,6 +124,48 @@ public:
 
 		Count
 	};
+	enum class CPUProfilingPhase : uint32_t
+	{
+		Present = 0u,
+		OcclusionCulling,
+		PrepareRendering,
+		Prepass,
+		SSAO,
+		CullLightSources,
+		Shadows,
+		RenderWorld,
+		PostProcessing,
+
+		Count
+	};
+	enum class GPUProfilingPhase : uint32_t
+	{
+		Scene = 0u,
+		Prepass,
+		PrepassSkybox,
+		PrepassWorld,
+		PrepassView,
+		SSAO,
+		PostProcessing,
+		Present,
+
+		Skybox,
+		World,
+		Particles,
+		Debug,
+		Water,
+		View,
+
+		PostProcessingFog,
+		PostProcessingFXAA,
+		PostProcessingGlow,
+		PostProcessingBloom,
+		PostProcessingHDR,
+		CullLightSources,
+		Shadows,
+
+		Count
+	};
 
 	void ReloadSoundCache(bool bReloadBakedCache=false,SoundCacheFlags cacheFlags=SoundCacheFlags::All,float spacing=1'024.f);
 	void ClearSoundCache();
@@ -163,9 +206,17 @@ public:
 	virtual std::shared_ptr<Model> LoadModel(const std::string &mdl,bool bReload=false) override;
 	virtual std::unordered_map<std::string,std::shared_ptr<Model>> &GetModels() const override;
 
+	bool StartProfilingStage(GPUProfilingPhase stage);
+	bool StopProfilingStage(GPUProfilingPhase stage);
+	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase> *GetGPUProfilingStageManager();
+
 	template<class TEfxProperties>
 		std::shared_ptr<al::Effect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
 	std::shared_ptr<al::Effect> GetAuxEffect(const std::string &name);
+
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
 
 	// Config
 	Bool RawMouseInput(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
@@ -356,6 +407,11 @@ private:
 	std::array<bool,umath::to_integral(RenderMode::Count)> m_renderModesEnabled;
 	bool m_bFrameDepthBufferSamplingRequired = false;
 	CallbackHandle m_hCbDrawFrame = {};
+
+	CallbackHandle m_cbGPUProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
+	CallbackHandle m_cbProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 
 	std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 

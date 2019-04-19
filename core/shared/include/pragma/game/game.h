@@ -336,6 +336,17 @@ public:
 	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
 #endif
 public:
+//
+	enum class CPUProfilingPhase : uint32_t
+	{
+		Tick = 0u,
+		Physics,
+		PhysicsSimulation,
+		GameObjectLogic,
+		Timers,
+
+		Count
+	};
 	Game(NetworkState *state);
 	virtual ~Game();
 	virtual bool IsServer();
@@ -435,9 +446,9 @@ public:
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f)=0;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f)=0;
 	virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f)=0;
-
-	const util::CPUProfiler::Stage &StartStageProfiling(uint32_t stage);
-	std::chrono::nanoseconds EndStageProfiling(uint32_t stage,bool addDuration=false);
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
 protected:
 	GameFlags m_flags = GameFlags::InitialTick;
 	std::vector<BaseEntity*> m_baseEnts;
@@ -469,6 +480,8 @@ protected:
 	util::WeakHandle<pragma::BaseWorldComponent> m_worldComponent = {};
 	pragma::NetEventManager m_entNetEventManager = {};
 	GameModeInfo *m_gameMode = nullptr;
+	CallbackHandle m_cbProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 	std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;
 	std::unique_ptr<AmmoTypeManager> m_ammoTypes = nullptr;
 	std::unique_ptr<LuaEntityManager> m_luaEnts = nullptr;

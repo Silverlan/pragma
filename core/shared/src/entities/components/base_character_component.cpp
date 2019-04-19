@@ -33,7 +33,6 @@ extern DLLENGINE Engine *engine;
 
 //////////////////
 
-#pragma optimize("",off)
 #ifdef PHYS_ENGINE_BULLET
 void BaseCharacterComponent::InitializeController()
 {
@@ -1054,4 +1053,3 @@ void CEViewRotation::PushArguments(lua_State *l)
 {
 	Lua::Push<Quat>(l,rotation);
 }
-#pragma optimize("",on)

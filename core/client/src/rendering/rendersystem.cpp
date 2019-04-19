@@ -33,7 +33,6 @@ extern DLLCLIENT CGame *c_game;
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
 
-#pragma optimize("",off)
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -283,7 +282,6 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 						for(auto &pair : matContainer->containers)
 						{
 							auto *ent = pair.first;
-							GPUTimerEvent ev;
 							if(ent != entLast || shader != shaderLast)
 							{
 								if(shader->BindEntity(*ent) == false)
@@ -389,4 +387,3 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 	//vao->Unbind();
 	return numShaderInvocations;
 }
-#pragma optimize("",on)

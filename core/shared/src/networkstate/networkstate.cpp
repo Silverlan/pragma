@@ -51,6 +51,21 @@ NetworkState::NetworkState()
 
 	RegisterCallback<void,std::reference_wrapper<struct ISteamworks>>("OnSteamworksInitialized");
 	RegisterCallback<void>("OnSteamworksShutdown");
+
+	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		std::string postFix = IsClient() ? " (CL)" : " (SV)";
+		auto &cpuProfiler = engine->GetProfiler();
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"UpdateSounds" +postFix,&engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Think))
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 1u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 }
 NetworkState::~NetworkState()
 {
@@ -72,6 +87,8 @@ NetworkState::~NetworkState()
 		if(m_tickCallbacks[i].IsValid())
 			m_tickCallbacks[i].Remove();
 	}
+	if(m_cbProfilingHandle.IsValid())
+		m_cbProfilingHandle.Remove();
 	for(unsigned int i=0;i<m_libHandles.size();i++)
 	{
 		auto *ptrDetach = m_libHandles[i]->FindSymbolAddress<void(*)()>("pragma_detach");
@@ -94,6 +111,9 @@ bool NetworkState::ShouldRemoveSound(ALSound &snd) {return snd.IsPlaying() == fa
 
 void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 {
+	static auto bskip = false;
+	if(bskip)
+		return;
 	for(auto it=sounds.begin();it!=sounds.end();)
 	{
 		auto &psnd = *it;
@@ -627,6 +647,16 @@ ConCommand *NetworkState::CreateConCommand(const std::string &scmd,LuaFunction f
 	return cmd;
 }
 
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,NetworkState::CPUProfilingPhase> *NetworkState::GetProfilingStageManager() {return m_profilingStageManager.get();}
+bool NetworkState::StartProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
+}
+bool NetworkState::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
+}
+
 const double MS_THOUSAND = 1000;
 void NetworkState::Think()
 {
@@ -638,12 +668,9 @@ void NetworkState::Think()
 		Con::cwar<<"WARNING: Delta time surpassed 0.5 seconds. Clamping..."<<Con::endl;
 		m_tDelta = 0.5f;
 	}
-	auto bProfiling = engine->IsProfilingEnabled();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStateSoundUpdate : ProfilingStage::ServerStateSoundUpdate));
+	StartProfilingStage(CPUProfilingPhase::UpdateSounds);
 	UpdateSounds();
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStateSoundUpdate : ProfilingStage::ServerStateSoundUpdate));
+	StopProfilingStage(CPUProfilingPhase::UpdateSounds);
 	/*if(m_ioservice != NULL)
 	{
 		m_ioservice->poll();
@@ -680,13 +707,4 @@ void NetworkState::AddThinkCallback(CallbackHandle callback)
 void NetworkState::AddTickCallback(CallbackHandle callback)
 {
 	m_tickCallbacks.push_back(callback);
-}
-
-const util::CPUProfiler::Stage &NetworkState::StartStageProfiling(uint32_t stage)
-{
-	return engine->StartStageProfiling(stage);
-}
-std::chrono::nanoseconds NetworkState::EndStageProfiling(uint32_t stage,bool addDuration)
-{
-	return engine->EndStageProfiling(stage,addDuration);
 }

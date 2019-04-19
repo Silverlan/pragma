@@ -465,11 +465,11 @@ void PhysRigidBody::SetMassProps(float mass,const Vector3 &inertia)
 	m_inertia = inertia;
 	SetCollisionFlags(GetCollisionFlags() &~btCollisionObject::CF_STATIC_OBJECT);
 
-	// Note: CF_STATIC_OBJECT mustn't be set, otherwise soft-body objects will not collide with static rigid bodies! (Cause unknown)
-	/*if(mass != 0.f)
+	// BUG: If CF_STATIC_OBJECT is set, soft-body objects will not collide with static rigid bodies! (Cause unknown)
+	if(mass != 0.f)
 		SetCollisionFlags(GetCollisionFlags() &~btCollisionObject::CF_STATIC_OBJECT);
 	else
-		SetCollisionFlags(GetCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);*/
+		SetCollisionFlags(GetCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 }
 
 void PhysRigidBody::SetKinematic(bool bKinematic)

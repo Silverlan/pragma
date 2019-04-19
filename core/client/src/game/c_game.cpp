@@ -81,6 +81,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -89,7 +90,6 @@ extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT PhysEnv *c_physEnv = NULL;
 
-#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -229,6 +229,70 @@ CGame::CGame(NetworkState *state)
 		auto oNewFocus = newFocus ? WGUILuaInterface::GetLuaObject(l,*newFocus) : luabind::object{};
 		CallLuaCallbacks<void,luabind::object,luabind::object>("OnGUIFocusChanged",oOldFocus,oNewFocus);
 	});
+
+	m_cbGPUProfilingHandle = c_engine->AddGPUProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_gpuProfilingStageManager = nullptr;
+			return;
+		}
+		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>>();
+		auto &gpuProfiler = c_engine->GetGPUProfiler();
+		const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
+		auto &stageDrawScene = c_engine->GetGPUProfilingStageManager()->GetProfilerStage(CEngine::GPUProfilingPhase::DrawScene);
+		auto stageScene = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Scene",defaultStage,&stageDrawScene);
+		auto stagePrepass = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Prepass",defaultStage,stageScene.get());
+		auto stagePostProcessing = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessing",defaultStage,&stageDrawScene);
+		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,{
+			stageScene,
+			stagePrepass,
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassSkybox",defaultStage,stagePrepass.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassWorld",defaultStage,stagePrepass.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassView",defaultStage,stagePrepass.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"SSAO",defaultStage,stageScene.get()),
+			stagePostProcessing,
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Present",defaultStage,&stageDrawScene),
+
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Skybox",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"World",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Particles",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Debug",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Water",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"View",defaultStage,stageScene.get()),
+
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingFog",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingFXAA",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingGlow",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingBloom",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PostProcessingHDR",defaultStage,stagePostProcessing.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"CullLightSources",defaultStage,stageScene.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Shadows",defaultStage,stageScene.get())
+		});
+		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 21u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
+	m_cbProfilingHandle = c_engine->AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		auto &cpuProfiler = c_engine->GetProfiler();
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		auto &stageThink = c_engine->Engine::GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Think);
+		auto &stageDrawFrame = c_engine->GetProfilingStageManager()->GetProfilerStage(CEngine::CPUProfilingPhase::DrawFrame);
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Present",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"OcclusionCulling",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"PrepareRendering",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Prepass",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"SSAO",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"CullLightSources",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Shadows",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"RenderWorld",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"PostProcessing",&stageDrawFrame)
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 9u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 }
 
 CGame::~CGame()
@@ -237,6 +301,10 @@ CGame::~CGame()
 	WGUI::GetInstance().SetFocusCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
 		m_hCbDrawFrame.Remove();
+	if(m_cbGPUProfilingHandle.IsValid())
+		m_cbGPUProfilingHandle.Remove();
+	if(m_cbProfilingHandle.IsValid())
+		m_cbProfilingHandle.Remove();
 	CallCallbacks<void,CGame*>("OnGameEnd",this);
 	while(!m_luaGUIObjects.empty())
 	{
@@ -289,6 +357,26 @@ CGame::~CGame()
 #endif
 
 	ClearSoundCache();
+}
+
+bool CGame::StartProfilingStage(GPUProfilingPhase stage)
+{
+	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage);
+}
+bool CGame::StopProfilingStage(GPUProfilingPhase stage)
+{
+	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(stage);
+}
+pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,CGame::GPUProfilingPhase> *CGame::GetGPUProfilingStageManager() {return m_gpuProfilingStageManager.get();}
+
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CGame::CPUProfilingPhase> *CGame::GetProfilingStageManager() {return m_profilingStageManager.get();}
+bool CGame::StartProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
+}
+bool CGame::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
 }
 
 std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponentManager() {return std::make_shared<pragma::CEntityComponentManager>();;}
@@ -931,10 +1019,6 @@ void CGame::ReloadRenderFrameBuffer()
 
 void CGame::Think()
 {
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int thinkTimer = PerformanceTimer::InitializeTimer("CGame::Think");
-	PerformanceTimer::StartMeasurement(thinkTimer);
-#endif
 	Game::Think();
 	auto &scene = GetRenderScene();
 	auto &cam = scene->camera;
@@ -1029,18 +1113,11 @@ void CGame::Think()
 	//
 
 	PostThink();
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(thinkTimer);
-#endif
 }
 
 static CVar cvUpdateRate = GetClientConVar("cl_updaterate");
 void CGame::Tick()
 {
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int tickTimer = PerformanceTimer::InitializeTimer("CGame::Tick");
-	PerformanceTimer::StartMeasurement(tickTimer);
-#endif
 	Game::Tick();
 	//HandlePlayerMovement();
 	auto &t = RealTime();
@@ -1053,9 +1130,6 @@ void CGame::Tick()
 	CallCallbacks<void>("Tick");
 	CallLuaCallbacks("Tick");
 	PostTick();
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(tickTimer);
-#endif
 }
 
 static CVar cvSimEnabled = GetClientConVar("cl_physics_simulation_enabled");
@@ -1673,4 +1747,3 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
-#pragma optimize("",on)

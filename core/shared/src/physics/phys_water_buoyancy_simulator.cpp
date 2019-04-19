@@ -14,7 +14,6 @@
 #include <pragma/physics/movetypes.h>
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
-#pragma optimize("",off)
 PhysWaterBuoyancySimulator::PhysWaterBuoyancySimulator()
 {}
 
@@ -617,4 +616,3 @@ Vector3 PhysWaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume) *umath::pow2(lenPolyhedron)) *-bodyAngularVelocity;
 }
-#pragma optimize("",on)

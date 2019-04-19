@@ -44,6 +44,13 @@ private:
 
 	// Map
 	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
+public:
+	enum class CPUProfilingPhase : uint32_t
+	{
+		Snapshot = 0u,
+
+		Count
+	};
 protected:
 	template<class T>
 		void GetPlayers(std::vector<T*> *ents);
@@ -72,6 +79,8 @@ protected:
 	std::vector<std::string> m_gameResources;
 
 	uint64_t m_nextUniqueEntityIndex;
+	CallbackHandle m_cbProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 public:
 	using Game::LoadLuaComponent;
 	virtual void InitializeLua() override;
@@ -102,6 +111,10 @@ public:
 	bool IsValidGameResource(const std::string &fileName);
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname) override;
+
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
 
 	void ChangeLevel(const std::string &mapName,const std::string &landmarkName="");
 

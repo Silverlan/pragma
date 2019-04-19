@@ -15,7 +15,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 Lua::Interface &Game::GetLuaInterface() {return *m_lua;}
 lua_State *Game::GetLuaState() {return (m_lua != nullptr) ? m_lua->GetState() : nullptr;}
 
@@ -326,4 +325,3 @@ DLLNETWORK void IncludeLuaEntityBaseClasses(lua_State *l,int refEntities,int obj
 	}
 	Lua::Pop(l,1);
 }
-#pragma optimize("",on)

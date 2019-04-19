@@ -8,8 +8,6 @@
 #include "pragma/gui/widebugdepthtexture.h"
 #include <wgui/types/wirect.h>
 
-#define ENABLE_PERFORMANCE_TIMER 0
-
 REGISTER_PARTICLE_RENDERER(blob,CParticleRendererBlob);
 
 extern DLLCENGINE CEngine *c_engine;
@@ -339,9 +337,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIn
 	if(m_lastFrame == frameId)
 		return;
 	m_lastFrame = frameId;
-#if ENABLE_PERFORMANCE_TIMER == 1
-	auto tStart = std::chrono::high_resolution_clock::now();
-#endif
+
 	auto &particles = m_particleSystem->GetRenderParticleData();
 	auto numParticles = m_particleSystem->GetRenderParticleCount();
 
@@ -484,12 +480,6 @@ void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIn
 	}
 	//
 	UpdateDebugNeighborLinks();
-
-#if ENABLE_PERFORMANCE_TIMER == 1
-	auto tEnd = std::chrono::high_resolution_clock::now();
-	auto tDelta = std::chrono::duration_cast<std::chrono::nanoseconds>(tEnd -tStart).count() /1'000'000'000.0;
-	Con::cout<<"Blob update execution time: "<<tDelta<<Con::endl;
-#endif
 }
 */ // prosper TODO
 void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)

@@ -1,7 +1,6 @@
 #include "stdafx_engine.h"
 #include "pragma/math/intersection.h"
 
-#pragma optimize("",off)
 // Source: http://stackoverflow.com/a/1568551/2482983
 double Geometry::calc_volume_of_triangle(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2)
 {
@@ -489,4 +488,3 @@ std::optional<std::vector<uint32_t>> Geometry::get_outline_vertices(const std::v
 	outlineList.erase(outlineList.end() -1);
 	return outlineList;
 }
-#pragma optimize("",on)

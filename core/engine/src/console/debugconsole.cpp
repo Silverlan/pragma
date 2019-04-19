@@ -5,7 +5,6 @@
 #include <sharedutils/util_string.h>
 #include <pragma/console/convars.h>
 
-#pragma optimize("",off)
 extern Engine *engine;
 static bool bCheckInput = true;
 static void KeyboardInput()
@@ -134,4 +133,3 @@ bool Engine::RunConsoleCommand(std::string cmd,std::vector<std::string> &argv,Ke
 	}
 	return true;
 }
-#pragma optimize("",on)

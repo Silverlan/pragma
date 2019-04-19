@@ -12,7 +12,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(env_light_spot_vol,CEnvLightSpotVol);
 
 extern DLLCLIENT ClientState *client;
@@ -155,4 +154,3 @@ void CEnvLightSpotVol::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLightSpotVolComponent>();
 }
-#pragma optimize("",on)

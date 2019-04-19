@@ -475,6 +475,27 @@ Game::Game(NetworkState *state)
 		exit(EXIT_FAILURE);
 	}
 #endif
+
+	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		std::string postFix = IsClient() ? " (CL)" : " (SV)";
+		auto &cpuProfiler = engine->GetProfiler();
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		auto stageTick = pragma::debug::ProfilingStage::Create(cpuProfiler,"Tick" +postFix,&engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick));
+		auto stagePhysics = pragma::debug::ProfilingStage::Create(cpuProfiler,"Physics" +postFix,stageTick.get());
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			stageTick,
+			stagePhysics,
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"PhysicsSimulation" +postFix,stagePhysics.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"GameObjectLogic" +postFix,stageTick.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Timers" +postFix,stageTick.get())
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 5u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 }
 
 Game::~Game()
@@ -494,6 +515,8 @@ Game::~Game()
 	pragma::BaseLuaBaseEntityComponent::ClearMembers(state);
 	m_lua = nullptr;
 	GetNetworkState()->DeregisterLuaModules(state,identifier); // Has to be called AFTER Lua instance has been released!
+	if(m_cbProfilingHandle.IsValid())
+		m_cbProfilingHandle.Remove();
 #ifdef PHYS_ENGINE_BULLET
 	m_physEnvironment = nullptr;
 #elif PHYS_ENGINE_PHYSX
@@ -651,16 +674,17 @@ void Game::PostThink()
 double &Game::GetLastThink() {return m_tLast;}
 double &Game::GetLastTick() {return m_tLastTick;}
 
-std::string Game::GetMapName() {return m_mapInfo.name;}
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,Game::CPUProfilingPhase> *Game::GetProfilingStageManager() {return m_profilingStageManager.get();}
+bool Game::StartProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
+}
+bool Game::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
+}
 
-const util::CPUProfiler::Stage &Game::StartStageProfiling(uint32_t stage)
-{
-	return GetNetworkState()->StartStageProfiling(stage);
-}
-std::chrono::nanoseconds Game::EndStageProfiling(uint32_t stage,bool addDuration)
-{
-	return GetNetworkState()->EndStageProfiling(stage,addDuration);
-}
+std::string Game::GetMapName() {return m_mapInfo.name;}
 
 const std::vector<BaseEntity*> &Game::GetBaseEntities() const {return const_cast<Game*>(this)->GetBaseEntities();}
 std::vector<BaseEntity*> &Game::GetBaseEntities() {return m_baseEnts;}
@@ -670,6 +694,7 @@ void Game::ScheduleEntityForRemoval(BaseEntity &ent) {m_entsScheduledForRemoval.
 
 void Game::Tick()
 {
+	StartProfilingStage(CPUProfilingPhase::Tick);
 	if((m_flags &GameFlags::InitialTick) != GameFlags::None)
 	{
 		m_flags &= ~GameFlags::InitialTick;
@@ -682,10 +707,8 @@ void Game::Tick()
 		if(ent != nullptr && ent->IsSpawned())
 			ent->ResetStateChangeFlags();
 	}
-	auto bProfiling = engine->IsProfilingEnabled();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsUpdate : ProfilingStage::ServerStatePhysicsUpdate));
 
+	StartProfilingStage(CPUProfilingPhase::Physics);
 	static std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> physComponents {};
 	EntityIterator entItPhysics {*this};
 	entItPhysics.AttachFilter<EntityIteratorFilterComponent>("physics");
@@ -703,13 +726,9 @@ void Game::Tick()
 	if(idx < physComponents.size())
 		physComponents.at(idx) = {};
 
-	if(bProfiling == true)
+	for(auto i=decltype(idx){0u};i<idx;++i)
 	{
-		EndStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsUpdate : ProfilingStage::ServerStatePhysicsUpdate));
-		StartStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsSimulate : ProfilingStage::ServerStatePhysicsSimulate));
-	}
-	for(auto physComponent : physComponents)
-	{
+		auto &physComponent = physComponents.at(i);
 		if(physComponent.expired())
 			continue;
 		physComponent->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
@@ -717,6 +736,7 @@ void Game::Tick()
 
 	CallCallbacks("PrePhysicsSimulate");
 	CallLuaCallbacks("PrePhysicsSimulate");
+	StartProfilingStage(CPUProfilingPhase::PhysicsSimulation);
 #ifdef PHYS_ENGINE_BULLET
 	if(IsPhysicsSimulationEnabled() == true)
 	{
@@ -728,25 +748,18 @@ void Game::Tick()
 	m_pxScene->simulate(m_tDeltaTick);
 	m_pxScene->fetchResults(true);
 #endif
+	StopProfilingStage(CPUProfilingPhase::PhysicsSimulation);
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
-	for(auto physComponent : physComponents)
+	for(auto i=decltype(idx){0u};i<idx;++i)
 	{
+		auto &physComponent = physComponents.at(i);
 		if(physComponent.expired())
 			continue;
 		physComponent->PostPhysicsSimulate();
 		physComponent->UpdatePhysicsData(); // Has to be before Think (Requires updated physics).
 	}
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsUpdate : ProfilingStage::ServerStatePhysicsUpdate));
-
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsUpdate : ProfilingStage::ServerStatePhysicsUpdate),true);
-	if(bProfiling == true)
-	{
-		EndStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStatePhysicsSimulate : ProfilingStage::ServerStatePhysicsSimulate));
-		StartStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStateEntityThink : ProfilingStage::ServerStateEntityThink));
-	}
+	StopProfilingStage(CPUProfilingPhase::Physics);
 
 	while(m_entsScheduledForRemoval.empty() == false)
 	{
@@ -757,7 +770,7 @@ void Game::Tick()
 		m_entsScheduledForRemoval.pop();
 	}
 
-
+	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
 	static std::vector<util::WeakHandle<pragma::LogicComponent>> logicComponents {};
 	EntityIterator entItLogic {*this};
 	entItLogic.AttachFilter<TEntityIteratorFilterComponent<pragma::LogicComponent>>();
@@ -781,12 +794,14 @@ void Game::Tick()
 			continue;
 		logicComponent->PostThink();
 	}
+	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
 
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(IsClient() ? ProfilingStage::ClientStateEntityThink : ProfilingStage::ServerStateEntityThink));
+	StartProfilingStage(CPUProfilingPhase::Timers);
 	UpdateTimers();
+	StopProfilingStage(CPUProfilingPhase::Timers);
 	//if(GetNetworkState()->IsClient())
 	//	return;
+	StopProfilingStage(CPUProfilingPhase::Tick);
 }
 void Game::PostTick()
 {

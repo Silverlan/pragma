@@ -1,5 +1,6 @@
 #include "stdafx_engine.h"
-#include "pragma/util/profiling_stages.h"
+// TODO: Remove this file
+/*#include "pragma/util/profiling_stages.h"
 
 std::string profiling_stage_to_string(ProfilingStage stage)
 {
@@ -57,4 +58,4 @@ std::string profiling_stage_to_string(ProfilingStage stage)
 			return "[GUI] Draw";
 	};
 	return "Unknown";
-}
+}*/

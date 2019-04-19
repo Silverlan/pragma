@@ -21,37 +21,6 @@
 #pragma comment(lib,"util_pad.lib")
 #pragma comment(lib,"util_versioned_archive.lib")
 #pragma comment(lib,"util_pragma_doc.lib")
-/*#ifdef _DEBUG
-#ifdef PHYS_ENGINE_BULLET
-	#pragma comment(lib,"BulletDynamics_Debug.lib")
-	#pragma comment(lib,"BulletCollision_Debug.lib")
-	#pragma comment(lib,"BulletSoftBody_Debug.lib")
-	#pragma comment(lib,"LinearMath_Debug.lib")
-#endif
-#ifdef PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3CHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3CommonCHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3CookingCHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3ExtensionsCHECKED.lib")
-	#pragma comment(lib,"PhysX3VehicleCHECKED.lib")
-	#pragma comment(lib,"PhysXVisualDebuggerSDKCHECKED.lib")
-#endif
-#else
-#ifdef PHYS_ENGINE_BULLET
-	#pragma comment(lib,"BulletDynamics.lib")
-	#pragma comment(lib,"BulletCollision.lib")
-	#pragma comment(lib,"BulletSoftBody.lib")
-	#pragma comment(lib,"LinearMath_RelWithDebugInfo.lib")
-#endif
-#ifdef PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3_x86.lib")
-	#pragma comment(lib,"PhysX3Common_x86.lib")
-	#pragma comment(lib,"PhysX3Cooking_x86.lib")
-	#pragma comment(lib,"PhysX3Extensions.lib")
-	#pragma comment(lib,"PhysX3Vehicle.lib")
-	//#pragma comment(lib,"PhysXVisualDebuggerSDK.lib")
-#endif
-#endif*/
 //
 
 #include "pragma/engine.h"
@@ -66,6 +35,7 @@
 #include "pragma/util/profiling_stages.h"
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <sharedutils/util.h>
 #include <util_zip.h>
 #include <pragma/game/game_resources.hpp>
@@ -84,7 +54,7 @@ extern "C"
 		en = nullptr;
 	}
 }
-#pragma optimize("",off)
+
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle Engine::GetConVarHandle(std::string scvar)
@@ -122,6 +92,45 @@ Engine::Engine(int,char*[])
 	pragma::register_engine_activities();
 
 	RegisterCallback<void>("Think");
+	
+	m_cpuProfiler = pragma::debug::CPUProfiler::Create<pragma::debug::CPUProfiler>();
+	AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		auto stageFrame = pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Frame");
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		m_profilingStageManager->InitializeProfilingStageManager(*m_cpuProfiler,{
+			stageFrame,
+			pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Think",stageFrame.get()),
+			pragma::debug::ProfilingStage::Create(*m_cpuProfiler,"Tick",stageFrame.get())
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
+}
+
+CallbackHandle Engine::AddProfilingHandler(const std::function<void(bool)> &handler)
+{
+	auto hCb = FunctionCallback<void,bool>::Create(handler);
+	m_profileHandlers.push_back(hCb);
+	return hCb;
+}
+
+void Engine::SetProfilingEnabled(bool bEnabled)
+{
+	for(auto it=m_profileHandlers.begin();it!=m_profileHandlers.end();)
+	{
+		auto &hCb = *it;
+		if(hCb.IsValid() == false)
+		{
+			it = m_profileHandlers.erase(it);
+			continue;
+		}
+		hCb(bEnabled);
+		++it;
+	}
 }
 
 upad::PackageManager *Engine::GetPADPackageManager() const {return m_padPackageManager;}
@@ -177,25 +186,29 @@ void Engine::SetMountExternalGameResources(bool b)
 }
 bool Engine::ShouldMountExternalGameResources() const {return m_bMountExternalGameResources;}
 
-static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
-bool Engine::IsProfilingEnabled() const
+pragma::debug::CPUProfiler &Engine::GetProfiler() const {return *m_cpuProfiler;}
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,Engine::CPUProfilingPhase> *Engine::GetProfilingStageManager() {return m_profilingStageManager.get();}
+bool Engine::StartProfilingStage(CPUProfilingPhase stage)
 {
-	return cvProfiling->GetBool();
+	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
+bool Engine::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
+}
+
 void Engine::Tick()
 {
 	m_ctTick.Update();
 	ProcessConsoleInput();
+
+	StartProfilingStage(CPUProfilingPhase::Tick);
+	StartProfilingStage(CPUProfilingPhase::ServerTick);
 	auto *sv = GetServerState();
 	if(sv != NULL)
-	{
-		auto bProfiling = cvProfiling->GetBool();
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ServerStateTick));
 		sv->Tick();
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ServerStateTick));
-	}
+	StopProfilingStage(CPUProfilingPhase::ServerTick);
+	StopProfilingStage(CPUProfilingPhase::Tick);
 }
 
 ConVarMap *Engine::GetConVarMap() {return console_system::engine::get_convar_map();}
@@ -465,27 +478,24 @@ void Engine::Start()
 	long long nextTick = GetTickCount();
 	int loops;
 	do {
-		auto bProfiling = cvProfiling->GetBool();
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::EngineLoop));
-
+		StartProfilingStage(CPUProfilingPhase::Think);
 		Think();
+		StopProfilingStage(CPUProfilingPhase::Think);
+
 		loops = 0;
 		auto tickRate = GetTickRate();
-		auto skipTicks = static_cast<long long>(1000 /tickRate);
+		auto skipTicks = static_cast<long long>(1'000 /tickRate);
 		const long long &t = GetTickCount();
 		while(t > nextTick && loops < MAX_FRAMESKIP)
 		{
 			Tick();
+
 			m_lastTick = static_cast<long long>(m_ctTick());
 			nextTick += skipTicks;//SKIP_TICKS);
 			loops++;
 		}
 		if(t > nextTick)
 			nextTick = t; // This should only happen after loading times
-
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::EngineLoop));
 	}
 	while(IsRunning());
 	Close();
@@ -531,14 +541,7 @@ void Engine::Think()
 	CallCallbacks<void>("Think");
 	auto *sv = GetServerState();
 	if(sv != NULL)
-	{
-		auto bProfiling = cvProfiling->GetBool();
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ServerStateThink));
 		sv->Think();
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ServerStateThink));
-	}
 }
 
 ServerState *Engine::OpenServerState()
@@ -577,4 +580,8 @@ Engine::~Engine()
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 }
 
-#pragma optimize("",on)
+REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*,bool,bool enabled) {
+	if(engine == nullptr)
+		return;
+	engine->SetProfilingEnabled(enabled);
+});

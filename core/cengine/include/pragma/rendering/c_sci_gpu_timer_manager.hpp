@@ -3,10 +3,11 @@
 
 #include "pragma/c_enginedefinitions.h"
 #include <queries/prosper_pipeline_statistics_query.hpp>
+#include <pragma/debug/debug_performance_profiler.hpp>
 #include <array>
 #include <set>
-
-enum class GPUTimerEvent : uint32_t
+/*
+enum class GPUProfilingStage : uint32_t
 {
 	// Draw
 	GUI = 0,
@@ -39,7 +40,7 @@ enum class GPUTimerEvent : uint32_t
 
 	Count
 };
-
+*/
 namespace prosper
 {
 	class QueryPool;
@@ -47,48 +48,50 @@ namespace prosper
 };
 namespace pragma
 {
-	class GPUSwapchainTimer;
+	namespace debug
+	{
+		class GPUSwapchainTimer;
+		struct DLLCENGINE GPUProfilerResult
+			: public pragma::debug::ProfilerResult
+		{
+			std::optional<prosper::PipelineStatisticsQuery::Statistics> statistics;
+		};
+
+		class GPUProfiler;
+		class DLLCENGINE GPUProfilingStage
+			: public ProfilingStage
+		{
+		public:
+			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler,const std::string &name,Anvil::PipelineStageFlagBits stage,GPUProfilingStage *parent=nullptr);
+			const GPUSwapchainTimer &GetTimer() const;
+			GPUSwapchainTimer &GetTimer();
+
+			Anvil::PipelineStageFlagBits GetPipelineStage() const;
+		private:
+			using ProfilingStage::ProfilingStage;
+			virtual void InitializeTimer() override;
+			GPUProfiler &GetProfiler();
+			GPUProfilingStage *GetParent();
+			Anvil::PipelineStageFlagBits m_stage;
+		};
+
+		class DLLCENGINE GPUProfiler
+			: public Profiler
+		{
+		public:
+			virtual void Initialize() override;
+			void Reset();
+			std::shared_ptr<Timer> CreateTimer(Anvil::PipelineStageFlagBits stage);
+		private:
+			GPUProfiler();
+			std::shared_ptr<prosper::QueryPool> m_timerQueryPool = nullptr;
+			std::shared_ptr<prosper::QueryPool> m_statsQueryPool = nullptr;
+
+			void InitializeQueries();
+			template<class TProfiler>
+				friend std::shared_ptr<TProfiler> Profiler::Create();
+		};
+	};
 };
-class DLLCENGINE CSciGPUTimerManager
-{
-public:
-	enum class EventFlags : uint32_t
-	{
-		None = 0u,
-		Root
-	};
-	struct DLLCENGINE EventData
-	{
-		Anvil::PipelineStageFlagBits stage;
-	};
-	struct DLLCENGINE ResultData
-	{
-		std::chrono::nanoseconds duration;
-		prosper::PipelineStatisticsQuery::Statistics statistics;
-	};
-
-	CSciGPUTimerManager();
-	void StartTimer(GPUTimerEvent e);
-	void StopTimer(GPUTimerEvent e);
-	bool GetResult(GPUTimerEvent e,std::chrono::nanoseconds &outDuration) const;
-	void Reset();
-
-	std::vector<std::optional<ResultData>> GetResults() const;
-	const std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> &GetEventDependencies() const;
-	const std::vector<GPUTimerEvent> &GetRootEvents() const;
-	const EventData &GetEventData(GPUTimerEvent eventId) const;
-	static std::string EventToString(GPUTimerEvent e);
-private:
-	std::shared_ptr<prosper::QueryPool> m_timerQueryPool = nullptr;
-	std::shared_ptr<prosper::QueryPool> m_statsQueryPool = nullptr;
-	std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> m_eventDependencies = {};
-	std::vector<GPUTimerEvent> m_rootEvents = {};
-	std::array<EventData,umath::to_integral(GPUTimerEvent::Count)> m_eventData = {};
-	std::array<std::shared_ptr<pragma::GPUSwapchainTimer>,umath::to_integral(GPUTimerEvent::Count)> m_timerQueries;
-
-	void SetupEvent(GPUTimerEvent eventId,const std::vector<GPUTimerEvent> &dependencies,Anvil::PipelineStageFlagBits stage,EventFlags eventFlags=EventFlags::None);
-	void InitializeQueries();
-};
-REGISTER_BASIC_BITWISE_OPERATORS(CSciGPUTimerManager::EventFlags)
 
 #endif

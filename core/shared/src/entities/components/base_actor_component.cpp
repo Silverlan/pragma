@@ -16,7 +16,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId,const Vector3 &_offset)
 	: boneId(_boneId),offset(_offset)
 {}
@@ -302,4 +301,3 @@ void CEOnCharacterKilled::PushArguments(lua_State *l)
 	else
 		Lua::PushNil(l);
 }
-#pragma optimize("",on)

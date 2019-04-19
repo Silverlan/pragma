@@ -5,7 +5,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void SPointAtTargetComponent::Initialize()
 {
 	BasePointAtTargetComponent::Initialize();
@@ -24,4 +23,3 @@ void SPointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 	nwm::write_entity(p,ent);
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetPointAtTarget,p);
 }
-#pragma optimize("",on)

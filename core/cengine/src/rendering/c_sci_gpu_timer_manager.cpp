@@ -9,83 +9,62 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 
+using namespace pragma::debug;
+
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
-CSciGPUTimerManager::CSciGPUTimerManager()
+
+std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler,const std::string &name,Anvil::PipelineStageFlagBits stage,GPUProfilingStage *parent)
+{
+	auto result = ProfilingStage::Create<GPUProfilingStage>(profiler,name,parent);
+	if(result == nullptr)
+		return nullptr;
+	result->m_stage = stage;
+	return result;
+}
+
+GPUProfiler &GPUProfilingStage::GetProfiler() {return static_cast<GPUProfiler&>(ProfilingStage::GetProfiler());}
+GPUProfilingStage *GPUProfilingStage::GetParent() {return static_cast<GPUProfilingStage*>(ProfilingStage::GetParent());}
+const GPUSwapchainTimer &GPUProfilingStage::GetTimer() const {return const_cast<GPUProfilingStage*>(this)->GetTimer();}
+GPUSwapchainTimer &GPUProfilingStage::GetTimer() {return static_cast<GPUSwapchainTimer&>(ProfilingStage::GetTimer());}
+Anvil::PipelineStageFlagBits GPUProfilingStage::GetPipelineStage() const {return m_stage;}
+
+void GPUProfilingStage::InitializeTimer()
+{
+	m_timer = GetProfiler().CreateTimer(m_stage);
+}
+
+GPUProfiler::GPUProfiler()
 	: m_timerQueryPool{nullptr},m_statsQueryPool{nullptr}
 {
 	InitializeQueries();
-
-	// Initialize events
-	const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
-	SetupEvent(GPUTimerEvent::GUI,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Frame,{
-		GPUTimerEvent::GUI,
-		GPUTimerEvent::Scene,
-		GPUTimerEvent::PostProcessing,
-		GPUTimerEvent::Present
-	},defaultStage,EventFlags::Root);
-	SetupEvent(GPUTimerEvent::Scene,{
-		GPUTimerEvent::Prepass,
-		GPUTimerEvent::CullLightSources,
-		GPUTimerEvent::Shadows,
-		GPUTimerEvent::SSAO,
-		
-		GPUTimerEvent::Skybox,
-		GPUTimerEvent::World,
-		GPUTimerEvent::Particles,
-		GPUTimerEvent::Debug,
-		GPUTimerEvent::Water,
-		GPUTimerEvent::View
-	},defaultStage);
-	SetupEvent(GPUTimerEvent::Prepass,{
-		GPUTimerEvent::PrepassSkybox,
-		GPUTimerEvent::PrepassWorld,
-		GPUTimerEvent::PrepassView
-	},defaultStage);
-	SetupEvent(GPUTimerEvent::PrepassSkybox,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PrepassWorld,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PrepassView,{},defaultStage);
-	SetupEvent(GPUTimerEvent::CullLightSources,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Shadows,{},defaultStage);
-	SetupEvent(GPUTimerEvent::SSAO,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessing,{
-		GPUTimerEvent::PostProcessingFog,
-		GPUTimerEvent::PostProcessingFXAA,
-		GPUTimerEvent::PostProcessingGlow,
-		GPUTimerEvent::PostProcessingBloom,
-		GPUTimerEvent::PostProcessingHDR
-	},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessingFog,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessingFXAA,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessingGlow,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessingBloom,{},defaultStage);
-	SetupEvent(GPUTimerEvent::PostProcessingHDR,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Present,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Skybox,{},defaultStage);
-	SetupEvent(GPUTimerEvent::World,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Particles,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Debug,{},defaultStage);
-	SetupEvent(GPUTimerEvent::Water,{},defaultStage);
-	SetupEvent(GPUTimerEvent::View,{},defaultStage);
-	static_assert(umath::to_integral(GPUTimerEvent::Count) == 23u,"Timer event has been added, but not set up!");
 }
-void CSciGPUTimerManager::SetupEvent(GPUTimerEvent eventId,const std::vector<GPUTimerEvent> &dependencies,Anvil::PipelineStageFlagBits stage,EventFlags eventFlags)
+void GPUProfiler::Initialize()
 {
-	if(dependencies.empty() == false)
-		m_eventDependencies[eventId] = dependencies;
-	m_eventData.at(umath::to_integral(eventId)) = {stage};
-	if(umath::is_flag_set(eventFlags,EventFlags::Root))
-		m_rootEvents.push_back(eventId);
+	m_rootStage = GPUProfilingStage::Create(*this,"root",Anvil::PipelineStageFlagBits::NONE);
 }
-void CSciGPUTimerManager::InitializeQueries()
+std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(Anvil::PipelineStageFlagBits stage)
+{
+	return pragma::debug::GPUSwapchainTimer::Create(*m_timerQueryPool,*m_statsQueryPool,stage);
+}
+void GPUProfiler::Reset()
+{
+	for(auto &wpStage : GetStages())
+	{
+		if(wpStage.expired())
+			continue;
+		static_cast<GPUProfilingStage*>(wpStage.lock().get())->GetTimer().Reset();
+	}
+}
+void GPUProfiler::InitializeQueries()
 {
 	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
 	auto swapchainImageCount = c_engine->GetSwapchainImageCount();
-	m_timerQueryPool = prosper::util::create_query_pool(*c_engine,vk::QueryType::eTimestamp,m_timerQueries.size() *swapchainImageCount *2); // 2 timestamps per timer
+	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
+	const auto maxStatisticsQueryCount = 100u;
+	m_timerQueryPool = prosper::util::create_query_pool(*c_engine,vk::QueryType::eTimestamp,maxTimestampQueryCount);
 	m_statsQueryPool = prosper::util::create_query_pool(*c_engine,
 		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_VERTICES_BIT |
 		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_PRIMITIVES_BIT |
@@ -98,137 +77,8 @@ void CSciGPUTimerManager::InitializeQueries()
 		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_CONTROL_SHADER_PATCHES_BIT |
 		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT |
 		Anvil::QueryPipelineStatisticFlagBits::COMPUTE_SHADER_INVOCATIONS_BIT,
-		m_timerQueries.size() *swapchainImageCount
+		maxStatisticsQueryCount
 	);
-	if(m_timerQueryPool == nullptr || m_statsQueryPool == nullptr)
-		return;
-	for(auto i=decltype(m_timerQueries.size()){0u};i<m_timerQueries.size();++i)
-		m_timerQueries.at(i) = pragma::GPUSwapchainTimer::Create(*m_timerQueryPool,*m_statsQueryPool,m_eventData.at(i).stage);
-}
-const std::unordered_map<GPUTimerEvent,std::vector<GPUTimerEvent>> &CSciGPUTimerManager::GetEventDependencies() const {return m_eventDependencies;}
-const std::vector<GPUTimerEvent> &CSciGPUTimerManager::GetRootEvents() const {return m_rootEvents;}
-void CSciGPUTimerManager::StartTimer(GPUTimerEvent e)
-{
-	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
-		return;
-	auto idx = umath::to_integral(e);
-	if(idx >= m_timerQueries.size())
-		return;
-	auto &query = m_timerQueries.at(idx);
-	query->Begin();
-}
-void CSciGPUTimerManager::StopTimer(GPUTimerEvent e)
-{
-	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
-		return;
-	auto idx = umath::to_integral(e);
-	if(idx >= m_timerQueries.size())
-		return;
-	auto &query = m_timerQueries.at(idx);
-	query->End();
-}
-void CSciGPUTimerManager::Reset()
-{
-	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
-		return;
-	for(auto &query : m_timerQueries)
-	{
-		if(query == nullptr)
-			continue;
-		query->Reset();
-	}
-}
-const CSciGPUTimerManager::EventData &CSciGPUTimerManager::GetEventData(GPUTimerEvent eventId) const {return m_eventData.at(umath::to_integral(eventId));}
-bool CSciGPUTimerManager::GetResult(GPUTimerEvent e,std::chrono::nanoseconds &outDuration) const
-{
-	if(cvTimerQueries->GetBool() == false || m_timerQueryPool == nullptr)
-		return false;
-	auto idx = umath::to_integral(e);
-	if(idx >= m_timerQueries.size())
-		return false;
-	auto &query = m_timerQueries.at(idx);
-	return query->GetResult(outDuration);
-}
-std::vector<std::optional<CSciGPUTimerManager::ResultData>> CSciGPUTimerManager::GetResults() const
-{
-	std::vector<std::optional<ResultData>> results {};
-	results.resize(m_timerQueries.size());
-	for(auto i=decltype(m_timerQueries.size()){0u};i<m_timerQueries.size();++i)
-	{
-		auto &query = m_timerQueries.at(i);
-		if(query == nullptr)
-			continue;
-		auto &resultData = results.at(i);
-		auto isValid = true;
-		resultData = ResultData{};
-		std::chrono::nanoseconds result;
-		if(query->GetResult(result))
-			resultData->duration = result;
-		else
-			isValid = false;
-		prosper::PipelineStatisticsQuery::Statistics statistics;
-		if(query->GetStatisticsResult(statistics))
-			resultData->statistics = statistics;
-		else
-			isValid = false;
-		if(isValid == false)
-			resultData = {};
-	}
-	return results;
-}
-
-std::string CSciGPUTimerManager::EventToString(GPUTimerEvent e)
-{
-	switch(e)
-	{
-		case GPUTimerEvent::GUI:
-			return "GUI";
-		case GPUTimerEvent::Frame:
-			return "Frame";
-		case GPUTimerEvent::Scene:
-			return "Scene";
-		case GPUTimerEvent::Prepass:
-			return "Prepass";
-		case GPUTimerEvent::PrepassSkybox:
-			return "Skybox";
-		case GPUTimerEvent::PrepassWorld:
-			return "World";
-		case GPUTimerEvent::CullLightSources:
-			return "CullLightSources";
-		case GPUTimerEvent::Shadows:
-			return "Shadows";
-		case GPUTimerEvent::SSAO:
-			return "SSAO";
-		case GPUTimerEvent::PostProcessing:
-			return "PostProcessing";
-		case GPUTimerEvent::PostProcessingFog:
-			return "Fog";
-		case GPUTimerEvent::PostProcessingFXAA:
-			return "FXAA";
-		case GPUTimerEvent::PostProcessingGlow:
-			return "Glow";
-		case GPUTimerEvent::PostProcessingBloom:
-			return "Bloom";
-		case GPUTimerEvent::PostProcessingHDR:
-			return "HDR";
-		case GPUTimerEvent::Present:
-			return "Present";
-		case GPUTimerEvent::Skybox:
-			return "Skybox";
-		case GPUTimerEvent::World:
-			return "World";
-		case GPUTimerEvent::Particles:
-			return "Particles";
-		case GPUTimerEvent::Debug:
-			return "Debug";
-		case GPUTimerEvent::Water:
-			return "Water";
-		case GPUTimerEvent::View:
-			return "View";
-		default:
-			return "Invalid";
-	}
-	static_assert(umath::to_integral(GPUTimerEvent::Count) == 23u,"Timer event has been added, but not added to EventToString!");
 }
 
 /////////////////////////
@@ -238,80 +88,53 @@ void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state,pragma::Ba
 	auto extended = false;
 	if(argv.empty() == false)
 		extended = util::to_boolean(argv.at(0));
-	Con::cout<<"-------- GPU-Timer Query Results --------"<<Con::endl;
-	auto &manager = c_engine->GetGPUTimerManager();
-	auto results = manager.GetResults();
-	struct ResultData
-	{
-		GPUTimerEvent eventId;
-		std::optional<CSciGPUTimerManager::ResultData> data;
-		std::vector<ResultData> children;
-	};
-	std::function<void(ResultData&,const std::vector<GPUTimerEvent>&)> fPopulateResults = nullptr;
-	fPopulateResults = [&fPopulateResults,&results,&manager](ResultData &resultData,const std::vector<GPUTimerEvent> &eventIds) {
-		resultData.children.resize(eventIds.size());
-		for(auto i=decltype(resultData.children.size()){0u};i<resultData.children.size();++i)
-		{
-			auto &childResultData = resultData.children.at(i);
-			auto childEventId = eventIds.at(i);
-			childResultData.data = results.at(umath::to_integral(childEventId));
-			childResultData.eventId = childEventId;
-
-			auto &eventDependencies = manager.GetEventDependencies();
-			auto itDependencies = eventDependencies.find(childEventId);
-			if(itDependencies == eventDependencies.end())
-				continue;
-			fPopulateResults(childResultData,itDependencies->second);
-		}
-		std::sort(resultData.children.begin(),resultData.children.end(),[](const ResultData &a,const ResultData &b) {
-			auto aValue = a.data.has_value() ? a.data->duration : std::chrono::nanoseconds::min();
-			auto bValue = b.data.has_value() ? b.data->duration : std::chrono::nanoseconds::min();
-			return aValue > bValue;
-		});
-	};
-	ResultData rootResult {};
-	fPopulateResults(rootResult,manager.GetRootEvents());
-
-	std::function<void(const ResultData&,const std::string&,bool)> fPrintResults = nullptr;
-	fPrintResults = [&fPrintResults,&manager,extended](const ResultData &resultData,const std::string &t,bool bRoot) {
+	Con::cout<<"-------- GPU-Profiler Query Results --------"<<Con::endl;
+	std::function<void(pragma::debug::ProfilingStage&,const std::string&,bool)> fPrintResults = nullptr;
+	fPrintResults = [&fPrintResults,extended](pragma::debug::ProfilingStage &stage,const std::string &t,bool bRoot) {
 		if(bRoot == false)
 		{
-			auto &result = resultData.data;
 			std::string sTime = "Pending";
-			if(result.has_value())
+			auto result = stage.GetResult();
+			if(result && result->duration.has_value())
 			{
-				auto t = result->duration.count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count());
+				auto t = result->duration->count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count());
 				sTime = util::round_string(t,2) +" ms";
-				sTime += " (" +std::to_string(result->duration.count()) +" ns)";
+				sTime += " (" +std::to_string(result->duration->count()) +" ns)";
 			}
-			Con::cout<<t<<CSciGPUTimerManager::EventToString(resultData.eventId)<<": "<<sTime;
-			
-			auto &eventData = manager.GetEventData(resultData.eventId);
-			Con::cout<<" ("<<prosper::util::to_string(eventData.stage)<<")"<<Con::endl;
+			Con::cout<<t<<stage.GetName()<<": "<<sTime;
+			Con::cout<<" ("<<prosper::util::to_string(static_cast<pragma::debug::GPUProfilingStage&>(stage).GetPipelineStage())<<")"<<Con::endl;
 
-			if(result.has_value() && extended == true)
+			if(result && extended == true)
 			{
-				auto &stats = result->statistics;
-				Con::cout<<t<<"{"<<Con::endl;
-				Con::cout<<t<<"\tInput Assembly Vertices: "<<stats.inputAssemblyVertices<<Con::endl;
-				Con::cout<<t<<"\tInput Assembly Primitives: "<<stats.inputAssemblyPrimitives<<Con::endl;
-				Con::cout<<t<<"\tVertex Shader Invocations: "<<stats.vertexShaderInvocations<<Con::endl;
-				Con::cout<<t<<"\tGeometry Shader Invocations: "<<stats.geometryShaderInvocations<<Con::endl;
-				Con::cout<<t<<"\tGeometry Shader Primitives: "<<stats.geometryShaderPrimitives<<Con::endl;
-				Con::cout<<t<<"\tClipping Invocations: "<<stats.clippingInvocations<<Con::endl;
-				Con::cout<<t<<"\tClipping Primitives: "<<stats.clippingPrimitives<<Con::endl;
-				Con::cout<<t<<"\tFragment Shader Invocations: "<<stats.fragmentShaderInvocations<<Con::endl;
-				Con::cout<<t<<"\tTessellation Control Shader Patches: "<<stats.tessellationControlShaderPatches<<Con::endl;
-				Con::cout<<t<<"\tTessellation Evaluation Shader Invocations: "<<stats.tessellationEvaluationShaderInvocations<<Con::endl;
-				Con::cout<<t<<"\tCompute Shader Invocations: "<<stats.computeShaderInvocations<<Con::endl;
-				Con::cout<<t<<"}"<<Con::endl;
-				Con::cout<<Con::endl;
+				auto &statistics = static_cast<pragma::debug::GPUProfilerResult&>(*result).statistics;
+				if(statistics.has_value())
+				{
+					auto &stats = *statistics;
+					Con::cout<<t<<"{"<<Con::endl;
+					Con::cout<<t<<"\tInput Assembly Vertices: "<<stats.inputAssemblyVertices<<Con::endl;
+					Con::cout<<t<<"\tInput Assembly Primitives: "<<stats.inputAssemblyPrimitives<<Con::endl;
+					Con::cout<<t<<"\tVertex Shader Invocations: "<<stats.vertexShaderInvocations<<Con::endl;
+					Con::cout<<t<<"\tGeometry Shader Invocations: "<<stats.geometryShaderInvocations<<Con::endl;
+					Con::cout<<t<<"\tGeometry Shader Primitives: "<<stats.geometryShaderPrimitives<<Con::endl;
+					Con::cout<<t<<"\tClipping Invocations: "<<stats.clippingInvocations<<Con::endl;
+					Con::cout<<t<<"\tClipping Primitives: "<<stats.clippingPrimitives<<Con::endl;
+					Con::cout<<t<<"\tFragment Shader Invocations: "<<stats.fragmentShaderInvocations<<Con::endl;
+					Con::cout<<t<<"\tTessellation Control Shader Patches: "<<stats.tessellationControlShaderPatches<<Con::endl;
+					Con::cout<<t<<"\tTessellation Evaluation Shader Invocations: "<<stats.tessellationEvaluationShaderInvocations<<Con::endl;
+					Con::cout<<t<<"\tCompute Shader Invocations: "<<stats.computeShaderInvocations<<Con::endl;
+					Con::cout<<t<<"}"<<Con::endl;
+					Con::cout<<Con::endl;
+				}
 			}
 		}
-		for(auto &childResultData : resultData.children)
-			fPrintResults(childResultData,t +(bRoot ? "" : "\t"),false);
+		for(auto &wpChild : stage.GetChildren())
+		{
+			if(wpChild.expired())
+				continue;
+			fPrintResults(*wpChild.lock(),t +(bRoot ? "" : "\t"),false);
+		}
 	};
-	fPrintResults(rootResult,"",true);
-	Con::cout<<"-----------------------------------------"<<Con::endl;
+	auto &profiler = c_engine->GetGPUProfiler();
+	fPrintResults(profiler.GetRootStage(),"",true);
+	Con::cout<<"--------------------------------------------"<<Con::endl;
 }
-#pragma optimize("",on)

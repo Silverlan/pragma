@@ -13,7 +13,6 @@ extern DLLCENGINE CEngine *c_engine;
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
 
-#pragma optimize("",off)
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = Anvil::Format::D32_SFLOAT;
 decltype(ShaderShadow::VERTEX_BINDING_BONE_WEIGHT) ShaderShadow::VERTEX_BINDING_BONE_WEIGHT = {Anvil::VertexInputRate::VERTEX};
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
@@ -702,5 +701,3 @@ void ShadowCSMStatic::InitializePipelineLayout(const Vulkan::Context &context,st
 	}));
 }
 #endif
-
-#pragma optimize("",on)

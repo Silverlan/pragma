@@ -125,8 +125,13 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
 	def_vs_filters("${SRC_FILES}")
 
+	set(CONFIG_ENABLE_BULLET_PROFILING "0" CACHE BOOL "Enable profiling for bullet physics.")
+	if(CONFIG_ENABLE_BULLET_PROFILING)
+		target_compile_definitions(${PROJ_NAME} PUBLIC BT_ENABLE_PROFILE)
+	endif()
+
 	foreach(def IN LISTS DEFINITIONS)
-		add_definitions(-D${def})
+		target_compile_definitions(${PROJ_NAME} PUBLIC ${def})
 	endforeach(def)
 
 	link_boost_library(${PROJ_NAME} DEPENDENCY_BOOST_SYSTEM_LIBRARY system)

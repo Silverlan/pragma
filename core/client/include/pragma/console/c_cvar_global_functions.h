@@ -39,12 +39,6 @@ DLLCLIENT void CMD_cl_dump_sounds(NetworkState *state,pragma::BasePlayerComponen
 DLLCLIENT void CMD_cl_dump_netmessages(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 #endif
 
-#ifdef ENABLE_PERFORMANCE_TIMER
-DLLCLIENT void CMD_pftimer_save(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
-DLLCLIENT void CMD_pftimer_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
-DLLCLIENT void CMD_pftimer_reset(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
-#endif
-
 namespace Console
 {
 	namespace commands

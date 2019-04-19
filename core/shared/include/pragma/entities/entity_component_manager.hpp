@@ -132,7 +132,7 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentFlags);
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename>
 	pragma::ComponentId pragma::EntityComponentManager::RegisterComponentType(const std::string &name)
 {
 	auto flags = ComponentFlags::None;
@@ -144,7 +144,7 @@ template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::v
 	},flags,std::type_index(typeid(TComponent)));
 }
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename>
 	std::shared_ptr<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
 {
 	auto it = std::find(m_componentInfos.begin(),m_componentInfos.end(),std::type_index(typeid(TComponent)));
@@ -157,7 +157,7 @@ template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::v
 	return r;
 }
 
-template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<pragma::BaseEntityComponent,TComponent>::value>>
+template<class TComponent,typename>
 	bool pragma::EntityComponentManager::GetComponentTypeId(ComponentId &outId) const
 {
 	auto it = m_typeIndexToComponentId.find(std::type_index(typeid(TComponent)));

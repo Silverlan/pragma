@@ -143,6 +143,20 @@ SGame::SGame(NetworkState *state)
 	m_taskManager->RegisterTask(typeid(pragma::ai::TaskEvent),[]() {
 		return std::make_shared<pragma::ai::TaskEvent>();
 	}); // These have to correspond with ai::Task enums (See ai_task.h)
+
+	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		auto &cpuProfiler = engine->GetProfiler();
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Snapshot",&engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick))
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 1u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 }
 
 SGame::~SGame()
@@ -159,6 +173,8 @@ SGame::~SGame()
 	}
 	ModelManager::MarkAllForDeletion();
 	server->GetMaterialManager().ClearUnused();
+	if(m_cbProfilingHandle.IsValid())
+		m_cbProfilingHandle.Remove();
 #ifdef PHYS_ENGINE_BULLET
 	s_physEnv = NULL;
 #endif
@@ -415,38 +431,36 @@ pragma::ai::TaskManager &SGame::GetAITaskManager() const {return *m_taskManager;
 
 void SGame::Think()
 {
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int thinkTimer = PerformanceTimer::InitializeTimer("SGame::Think");
-	PerformanceTimer::StartMeasurement(thinkTimer);
-#endif
-	static bool bSkip = false;
-	if(bSkip == true)
-		return;
 	Game::Think();
 	CallCallbacks<void>("Think");
 	CallLuaCallbacks("Think");
 	PostThink();
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(thinkTimer);
-#endif
 }
 
 void SGame::ChangeLevel(const std::string &mapName,const std::string &landmarkName) {m_changeLevelInfo = {mapName,landmarkName};}
 
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,SGame::CPUProfilingPhase> *SGame::GetProfilingStageManager() {return m_profilingStageManager.get();}
+bool SGame::StartProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
+}
+bool SGame::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
+}
+
 void SGame::Tick()
 {
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int tickTimer = PerformanceTimer::InitializeTimer("SGame::Tick");
-	PerformanceTimer::StartMeasurement(tickTimer);
-#endif
 	Game::Tick();
+
+	StartProfilingStage(CPUProfilingPhase::Snapshot);
 	SendSnapshot();
+	StopProfilingStage(CPUProfilingPhase::Snapshot);
+
 	CallCallbacks<void>("Tick");
 	CallLuaCallbacks("Tick");
 	PostTick();
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(tickTimer);
-#endif
+
 	if(m_changeLevelInfo.has_value())
 	{
 		// Write entity state of all entities that have a global name component

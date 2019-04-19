@@ -19,7 +19,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 CLightComponent::MeshInfo::MeshInfo(CModelSubMesh *_mesh,uint32_t _renderFlags)
 	: mesh(_mesh),renderFlags(_renderFlags)
 {}
@@ -996,4 +995,3 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
-#pragma optimize("",on)

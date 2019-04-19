@@ -9,7 +9,7 @@
 #include "pragma/debug/mdump.h"
 #include "pragma/input/key_state.hpp"
 #include "pragma/engine_info.hpp"
-#include <sharedutils/util_cpu_profiler.hpp>
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <materialmanager.h>
 #include <thread>
 #include <sharedutils/callback_handler.h>
@@ -29,8 +29,7 @@ class NetPacket;
 class ZIPFile;
 namespace upad {class PackageManager;};
 class DLLENGINE Engine
-	: public CVarHandler,public util::CPUProfiler,
-	public CallbackHandler
+	: public CVarHandler,public CallbackHandler
 {
 public:
 	static const uint32_t DEFAULT_TICK_RATE;
@@ -54,6 +53,15 @@ protected:
 public:
 	Engine(int argc,char* argv[]);
 	virtual ~Engine();
+
+	enum class CPUProfilingPhase : uint32_t
+	{
+		Think = 0u,
+		Tick,
+		ServerTick,
+
+		Count
+	};
 protected:
 	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
 	void WriteServerConfig(VFilePtrReal f);
@@ -79,9 +87,12 @@ protected:
 	long long m_lastTick;
 	std::shared_ptr<VFilePtrInternalReal> m_logFile;
 
+	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
+	std::vector<CallbackHandle> m_profileHandlers = {};
+	
 	bool m_bVerbose = false;
-
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 
 	// Init
 	bool m_bRunning;
@@ -109,11 +120,18 @@ public:
 	virtual bool Initialize(int argc,char *argv[]);
 	virtual void Start();
 	void AddLaunchConVar(std::string cvar,std::string val);
-	bool IsProfilingEnabled() const;
 	virtual void DumpDebugInformation(ZIPFile &zip) const;
 	virtual void Close();
 	virtual void Release();
 	void ClearCache();
+
+	// Debug
+	pragma::debug::CPUProfiler &GetProfiler() const;
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	CallbackHandle AddProfilingHandler(const std::function<void(bool)> &handler);
+	void SetProfilingEnabled(bool bEnabled);
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
 
 	upad::PackageManager *GetPADPackageManager() const;
 

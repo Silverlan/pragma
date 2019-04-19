@@ -17,7 +17,6 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 static WIHandle hGUIShadowmap;
 static int numShadowmapTargets = 0;
 static int shadowmapTargetIdx = -1;
@@ -161,4 +160,3 @@ static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(NetworkState *state,
 	CMD_debug_light_shadowmap(state,nullptr,argv);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_pssm_split_count,CVAR_CALLBACK_cl_render_shadow_pssm_split_count);
-#pragma optimize("",on)

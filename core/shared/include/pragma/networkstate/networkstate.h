@@ -58,6 +58,11 @@ protected:
 public:
 	virtual std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &GetConVarPtrs()=0;
 //
+	enum class CPUProfilingPhase : uint32_t
+	{
+		UpdateSounds = 0u,
+		Count
+	};
 protected:
 	static UInt8 STATE_COUNT;
 	std::unique_ptr<MapInfo> m_mapInfo = nullptr;
@@ -74,6 +79,8 @@ protected:
 	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
 	std::vector<CallbackHandle> m_thinkCallbacks;
 	std::vector<CallbackHandle> m_tickCallbacks;
+	CallbackHandle m_cbProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 
 	std::vector<std::shared_ptr<util::Library>> m_libHandles;
 	std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
@@ -91,6 +98,11 @@ public:
 	void TerminateLuaModules(lua_State *l);
 	void DeregisterLuaModules(void *l,const std::string &identifier);
 	virtual bool ShouldRemoveSound(ALSound &snd);
+
+	// Debug
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
 
 	ResourceWatcherManager &GetResourceWatcher();
 
@@ -183,9 +195,6 @@ public:
 
 	virtual bool IsTCPOpen() const=0;
 	virtual bool IsUDPOpen() const=0;
-
-	const util::CPUProfiler::Stage &StartStageProfiling(uint32_t stage);
-	std::chrono::nanoseconds EndStageProfiling(uint32_t stage,bool addDuration=false);
 };
 
 #endif

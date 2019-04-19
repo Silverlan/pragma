@@ -558,23 +558,6 @@ void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>
 	Con::cout<<"FPS: "<<c_engine->GetFPS()<<Con::endl<<"Frame Time: "<<c_engine->GetFrameTime()<<"ms"<<Con::endl;
 }
 
-#ifdef ENABLE_PERFORMANCE_TIMER
-DLLCLIENT void CMD_pftimer_save(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	PerformanceTimer::SaveResults();
-}
-
-DLLCLIENT void CMD_pftimer_print(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	PerformanceTimer::PrintResults();
-}
-
-DLLCLIENT void CMD_pftimer_reset(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
-{
-	PerformanceTimer::Reset();
-}
-#endif
-
 void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	prosper::debug::dump_limits(*c_engine,"vk_limits.txt");

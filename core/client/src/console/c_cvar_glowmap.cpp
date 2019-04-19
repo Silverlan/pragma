@@ -3,7 +3,6 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 void CMD_debug_glow_bloom(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
 {
 	auto &wgui = WGUI::GetInstance();
@@ -28,4 +27,3 @@ void CMD_debug_glow_bloom(NetworkState*,pragma::BasePlayerComponent*,std::vector
 	pEl->SetSize(256,256);
 	pEl->Update();
 }
-#pragma optimize("",on)

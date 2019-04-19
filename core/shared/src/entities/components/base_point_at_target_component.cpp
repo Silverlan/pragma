@@ -7,7 +7,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 BasePointAtTargetComponent::BasePointAtTargetComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_pointAtTarget{pragma::EntityProperty::Create()}
 {}
@@ -66,4 +65,3 @@ void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 	});
 }
 BaseEntity *BasePointAtTargetComponent::GetPointAtTarget() const {return m_pointAtTarget->GetValue().get();}
-#pragma optimize("",on)

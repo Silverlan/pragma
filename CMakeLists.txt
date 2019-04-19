@@ -649,6 +649,25 @@ set_target_properties(ConvexDecomposition PROPERTIES FOLDER third_party_libs/bul
 set_target_properties(GIMPACTUtils PROPERTIES FOLDER third_party_libs/bullet)
 set_target_properties(HACD PROPERTIES FOLDER third_party_libs/bullet)
 set_target_properties(LinearMath PROPERTIES FOLDER third_party_libs/bullet)
+
+if(CONFIG_ENABLE_BULLET_PROFILING)
+	target_compile_definitions(Bullet2FileLoader PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(Bullet3Collision PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(Bullet3Common PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(Bullet3Dynamics PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(Bullet3Geometry PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(Bullet3OpenCL_clew PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletCollision PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletDynamics PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletFileLoader PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletInverseDynamics PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletInverseDynamicsUtils PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletRobotics PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletSoftBody PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletWorldImporter PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(BulletXmlWorldImporter PUBLIC BT_ENABLE_PROFILE)
+	target_compile_definitions(LinearMath PUBLIC BT_ENABLE_PROFILE)
+endif()
 #
 
 # recastnavigation

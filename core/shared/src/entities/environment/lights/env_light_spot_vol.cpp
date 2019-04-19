@@ -9,7 +9,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void BaseEnvLightSpotVolComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -69,4 +68,3 @@ void BaseEnvLightSpotVolComponent::OnEntityComponentAdded(BaseEntityComponent &c
 	if(pRenderComponent != nullptr)
 		pRenderComponent->SetCastShadows(false);
 }
-#pragma optimize("",on)

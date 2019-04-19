@@ -6,7 +6,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void BaseRenderComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -47,4 +46,3 @@ void BaseRenderComponent::Load(DataStream &ds,uint32_t version)
 	BaseEntityComponent::Load(ds,version);
 	m_renderFlags = ds->Read<decltype(m_renderFlags)>();
 }
-#pragma optimize("",on)

@@ -18,7 +18,6 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 CWaterObject::WaterScene::~WaterScene()
 {
 	if(hRenderScene.IsValid())
@@ -400,4 +399,3 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return CallbackReturnType::NoReturnValue;
 	}));
 }
-#pragma optimize("",on)

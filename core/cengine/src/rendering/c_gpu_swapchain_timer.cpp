@@ -1,12 +1,13 @@
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_gpu_swapchain_timer.hpp"
+#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+using namespace pragma::debug;
 
-using namespace pragma;
+extern DLLCENGINE CEngine *c_engine;
 
 std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage)
 {
@@ -15,20 +16,6 @@ std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::QueryPool 
 GPUSwapchainTimer::GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage)
 	: m_stage{stage},m_wpTimerQueryPool{timerQueryPool.shared_from_this()},m_wpStatsQueryPool{statsQueryPool.shared_from_this()}
 {}
-bool GPUSwapchainTimer::GetResult(std::chrono::nanoseconds &outDuration) const
-{
-	if(m_lastTimeResult.has_value() == false)
-		return false;
-	outDuration = *m_lastTimeResult;
-	return true;
-}
-bool GPUSwapchainTimer::GetStatisticsResult(prosper::PipelineStatisticsQuery::Statistics &outStatistics) const
-{
-	if(m_lastStatsResult.has_value() == false)
-		return false;
-	outStatistics = *m_lastStatsResult;
-	return true;
-}
 void GPUSwapchainTimer::UpdateResult()
 {
 	auto *pTimerQuery = GetTimerQuery();
@@ -40,16 +27,7 @@ void GPUSwapchainTimer::UpdateResult()
 	m_lastTimeResult = result;
 	m_lastStatsResult = stats;
 }
-bool GPUSwapchainTimer::Reset()
-{
-	auto *pTimerQuery = GetTimerQuery();
-	auto *pStatsQuery = GetStatisticsQuery();
-	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
-		return false;
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	return pTimerQuery->Reset(**drawCmd) && pStatsQuery->Reset(**drawCmd);
-}
-bool GPUSwapchainTimer::Begin()
+bool GPUSwapchainTimer::Start()
 {
 	if(m_bHasStartedAtLeastOnce)
 		UpdateResult();
@@ -63,14 +41,30 @@ bool GPUSwapchainTimer::Begin()
 		m_bHasStartedAtLeastOnce = true;
 	return r;
 }
-bool GPUSwapchainTimer::End()
+bool GPUSwapchainTimer::Stop()
 {
 	auto *pTimerQuery = GetTimerQuery();
 	auto *pStatsQuery = GetStatisticsQuery();
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	return pTimerQuery->End(**drawCmd) && pStatsQuery->RecordEnd(**drawCmd);;
+	return pTimerQuery->End(**drawCmd) && pStatsQuery->RecordEnd(**drawCmd);
+}
+bool GPUSwapchainTimer::Reset()
+{
+	auto *pTimerQuery = GetTimerQuery();
+	auto *pStatsQuery = GetStatisticsQuery();
+	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
+		return false;
+	auto &drawCmd = c_engine->GetDrawCommandBuffer();
+	return pTimerQuery->Reset(**drawCmd) && pStatsQuery->Reset(**drawCmd);
+}
+std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
+{
+	auto result = std::make_unique<pragma::debug::GPUProfilerResult>();
+	result->duration = m_lastTimeResult.has_value() ? *m_lastTimeResult : std::optional<std::chrono::nanoseconds>{};
+	result->statistics = m_lastStatsResult.has_value() ? *m_lastStatsResult : std::optional<prosper::PipelineStatisticsQuery::Statistics>{};
+	return result;
 }
 
 prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()

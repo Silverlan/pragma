@@ -14,6 +14,7 @@
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
 #include <BulletSoftBody/btDefaultSoftBodySolver.h>
 #include <BulletSoftBody/btSoftBodyHelpers.h>
+#include <BulletCollision/BroadphaseCollision/btAxisSweep3.h>
 #include "pragma/physics/bt_physenvironment.h"
 #include "pragma/physics/physoverlapfiltercallback.h"
 #include "pragma/audio/alsound_type.h"
@@ -24,11 +25,18 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 
+enum class BulletBroadphaseType : uint32_t
+{
+	Dbvt = 0u, // Should be more efficient than AxisSweep3_32Bit, but causes massive performance drop for some unknown reason
+	AxisSweep3_32Bit
+};
+
 const double PhysEnv::WORLD_SCALE = util::units_to_metres(1.0);
 const double PhysEnv::WORLD_SCALE_SQR = umath::pow(PhysEnv::WORLD_SCALE,2.0);
 const float PhysEnv::CCD_MOTION_THRESHOLD = 4.f *static_cast<float>(WORLD_SCALE);
 const float PhysEnv::CCD_SWEPT_SPHERE_RADIUS = 2.f *static_cast<float>(WORLD_SCALE);
 static const float PHYS_CONSTRAINT_DEBUG_DRAW_SIZE = 100.f;
+static const auto PHYS_BULLET_BROADPHASE_TYPE = BulletBroadphaseType::AxisSweep3_32Bit;
 
 extern void btInitCustomMaterialCombinerCallback();
 DLLNETWORK PhysEnv *g_simEnvironment = nullptr;
@@ -258,7 +266,21 @@ PhysEnv::PhysEnv(NetworkState *state)
 	else
 		m_btCollisionConfiguration = std::make_unique<btDefaultCollisionConfiguration>();
 	m_btDispatcher = std::make_unique<btCollisionDispatcher>(m_btCollisionConfiguration.get());
-	m_btOverlappingPairCache = std::make_unique<btDbvtBroadphase>();
+
+	switch(PHYS_BULLET_BROADPHASE_TYPE)
+	{
+		case BulletBroadphaseType::Dbvt:
+			m_btOverlappingPairCache = std::make_unique<btDbvtBroadphase>();
+			break;
+		case BulletBroadphaseType::AxisSweep3_32Bit:
+		{
+			auto min = uvec::create_bt(Vector3{-16'384.f,-16'384.f,-16'384.f});
+			auto max = uvec::create_bt(Vector3{16'384.f,16'384.f,16'384.f});
+			m_btOverlappingPairCache = std::make_unique<bt32BitAxisSweep3>(min,max);
+			break;
+		}
+	}
+
 	m_btGhostPairCallback = std::make_unique<btGhostPairCallback>();
 	m_btOverlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(m_btGhostPairCallback.get());
 	m_overlapFilterCallback = std::make_unique<PhysOverlapFilterCallback>();
@@ -565,6 +587,7 @@ static btSoftBody *createSoftBody(const PhysSoftBodyInfo &sbInfo,btSoftRigidDyna
 }
 PhysSoftBody *PhysEnv::CreateSoftBody(const PhysSoftBodyInfo &info,float mass,btAlignedObjectArray<btVector3> &vtx,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)
 {
+#if PHYS_USE_SOFT_RIGID_DYNAMICS_WORLD == 1
 	{
 		std::vector<Vector3d> sbVerts;
 		sbVerts.reserve(vtx.size());
@@ -786,6 +809,7 @@ PhysSoftBody *PhysEnv::CreateSoftBody(const PhysSoftBodyInfo &info,float mass,bt
 	softBody->Initialize();
 	AddSoftBody(softBody);
 	return softBody;*/
+#endif
 }
 PhysSoftBody *PhysEnv::CreateSoftBody(const PhysSoftBodyInfo &info,float mass,const std::vector<Vector3> &verts,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)
 {

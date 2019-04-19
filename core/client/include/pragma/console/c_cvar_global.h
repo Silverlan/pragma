@@ -49,12 +49,6 @@ REGISTER_CONCOMMAND_CL(fps,CMD_fps,ConVarFlags::None,"Prints the current fps to 
 REGISTER_CONCOMMAND_CL(debug_audio_aux_effect,Console::commands::debug_audio_aux_effect,ConVarFlags::None,"Applies a global DSP effect. Usage: debug_audio_aux_effect <dspName> <gain>");
 REGISTER_CONCOMMAND_CL(debug_audio_sounds,Console::commands::debug_audio_sounds,ConVarFlags::None,"Prints information about all active server- and clientside sounds to the console.");
 
-#ifdef ENABLE_PERFORMANCE_TIMER
-REGISTER_CONCOMMAND_CL(pftimer_save,CMD_pftimer_save,ConVarFlags::None,"Saves the rendering performance timer results.");
-REGISTER_CONCOMMAND_CL(pftimer_print,CMD_pftimer_print,ConVarFlags::None,"Prints the rendering performance timer results to the console.");
-REGISTER_CONCOMMAND_CL(pftimer_reset,CMD_pftimer_reset,ConVarFlags::None,"Resets the rendering performance timer.");
-#endif
-
 REGISTER_CONCOMMAND_CL(vk_dump_limits,Console::commands::vk_dump_limits,ConVarFlags::None,"Dumps all vulkan limitations to 'vk_limits.txt'.");
 REGISTER_CONCOMMAND_CL(vk_dump_features,Console::commands::vk_dump_features,ConVarFlags::None,"Dumps all vulkan features to 'vk_features.txt'.");
 REGISTER_CONCOMMAND_CL(vk_dump_format_properties,Console::commands::vk_dump_format_properties,ConVarFlags::None,"Dumps all vulkan format properties to 'vk_format_properties.txt'.");

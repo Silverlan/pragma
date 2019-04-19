@@ -71,6 +71,23 @@ CEngine::CEngine(int argc,char* argv[])
 	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PreDrawGUI");
 	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PostDrawGUI");
 	RegisterCallback<void>("Draw");
+
+	AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		auto &cpuProfiler = c_engine->GetProfiler();
+		m_cpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		auto stageFrame = pragma::debug::ProfilingStage::Create(cpuProfiler,"DrawFrame",&Engine::GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Think));
+		m_cpuProfilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			stageFrame,
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"GUI",stageFrame.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"ClientTick",&Engine::GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick))
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 }
 
 void CEngine::Release()
@@ -80,10 +97,15 @@ void CEngine::Release()
 	pragma::RenderContext::Release();
 }
 
-void CEngine::StartGPUTimer(GPUTimerEvent ev) const {m_gpuTimerManager->StartTimer(ev);}
-void CEngine::StopGPUTimer(GPUTimerEvent ev) const {m_gpuTimerManager->StopTimer(ev);}
-bool CEngine::GetGPUTimerResult(GPUTimerEvent ev,std::chrono::nanoseconds &r) const {return m_gpuTimerManager->GetResult(ev,r);}
-CSciGPUTimerManager &CEngine::GetGPUTimerManager() const {return *m_gpuTimerManager;}
+pragma::debug::GPUProfiler &CEngine::GetGPUProfiler() const {return *m_gpuProfiler;}
+pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,CEngine::GPUProfilingPhase> *CEngine::GetGPUProfilingStageManager() {return m_gpuProfilingStageManager.get();}
+pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CEngine::CPUProfilingPhase> *CEngine::GetProfilingStageManager() {return m_cpuProfilingStageManager.get();}
+
+static auto cvGPUProfiling = GetClientConVar("cl_gpu_timer_queries_enabled");
+bool CEngine::IsGPUProfilingEnabled() const
+{
+	return cvGPUProfiling->GetBool();
+}
 
 void CEngine::DumpDebugInformation(ZIPFile &zip) const
 {
@@ -529,7 +551,25 @@ bool CEngine::Initialize(int argc,char *argv[])
 	m_speedCamMouse = 0.2f;
 	
 	InitializeStagingTarget();
-	m_gpuTimerManager = std::make_unique<CSciGPUTimerManager>();
+
+	m_gpuProfiler = pragma::debug::GPUProfiler::Create<pragma::debug::GPUProfiler>();
+	AddGPUProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_gpuProfilingStageManager = nullptr;
+			return;
+		}
+		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>>();
+		auto &gpuProfiler = *m_gpuProfiler;
+		const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
+		auto stageFrame = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Frame",defaultStage);
+		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,{
+			stageFrame,
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"DrawScene",defaultStage,stageFrame.get()),
+			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"GUI",defaultStage,stageFrame.get())
+		});
+		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
 
 	InitializeSoundEngine();
 
@@ -551,6 +591,26 @@ bool CEngine::Initialize(int argc,char *argv[])
 #endif
 	return true;
 }
+CallbackHandle CEngine::AddGPUProfilingHandler(const std::function<void(bool)> &handler)
+{
+	auto hCb = FunctionCallback<void,bool>::Create(handler);
+	m_gpuProfileHandlers.push_back(hCb);
+	return hCb;
+}
+void CEngine::SetGPUProfilingEnabled(bool bEnabled)
+{
+	for(auto it=m_gpuProfileHandlers.begin();it!=m_gpuProfileHandlers.end();)
+	{
+		auto &hCb = *it;
+		if(hCb.IsValid() == false)
+		{
+			it = m_gpuProfileHandlers.erase(it);
+			continue;
+		}
+		hCb(bEnabled);
+		++it;
+	}
+}
 void CEngine::OnWindowInitialized()
 {
 	pragma::RenderContext::OnWindowInitialized();
@@ -564,6 +624,22 @@ void CEngine::OnWindowInitialized()
 	window.SetDropCallback(std::bind(&CEngine::OnFilesDropped,this,std::placeholders::_1,std::placeholders::_2));
 }
 void CEngine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetClientState());}
+bool CEngine::StartProfilingStage(CPUProfilingPhase stage)
+{
+	return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StartProfilerStage(stage);
+}
+bool CEngine::StopProfilingStage(CPUProfilingPhase stage)
+{
+	return m_cpuProfilingStageManager && m_cpuProfilingStageManager->StopProfilerStage(stage);
+}
+bool CEngine::StartProfilingStage(GPUProfilingPhase stage)
+{
+	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage);
+}
+bool CEngine::StopProfilingStage(GPUProfilingPhase stage)
+{
+	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(stage);
+}
 bool CEngine::GetControllersEnabled() const {return m_bControllersEnabled;}
 void CEngine::SetControllersEnabled(bool b)
 {
@@ -728,7 +804,7 @@ void CEngine::Close()
 
 	// Clear all Vulkan resources before closing the context
 	m_stagingRenderTarget = nullptr;
-	m_gpuTimerManager = nullptr;
+	m_gpuProfiler = {};
 
 	pragma::CRenderComponent::ClearBuffers();
 	pragma::CLightComponent::ClearBuffers();
@@ -749,28 +825,18 @@ void CEngine::UpdateFPS(float t)
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
 void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
 {
-	auto &gpuTimerManager = GetGPUTimerManager();
-	gpuTimerManager.Reset();
-	StartGPUTimer(GPUTimerEvent::Frame);
+	m_gpuProfiler->Reset();
+	StartProfilingStage(GPUProfilingPhase::Frame);
 
 	auto ptrDrawCmd = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd.shared_from_this());
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
 
 	static_cast<CMaterialManager&>(*m_clInstance->materialManager).Update(); // Requires active command buffer
-#if DEBUG_TIMER_ENABLED == 1
-	CPUTimer t;
-	t.Begin();
-#endif
-#if DEBUG_TIMER_ENABLED == 1
-	t.End();
-	std::cout<<"#1: "<<t.GetDeltaTimeMs()<<std::endl;
-#endif
-#if DEBUG_TIMER_ENABLED == 1
-	t.End();
-	std::cout<<"#2: "<<t.GetDeltaTimeMs()<<std::endl;
-#endif
+
+	StartProfilingStage(CPUProfilingPhase::GUI);
 	auto &gui = WGUI::GetInstance();
 	gui.Think();
+	StopProfilingStage(CPUProfilingPhase::GUI);
 
 	auto &stagingRt = m_stagingRenderTarget;
 	if(m_bFirstFrame == true)
@@ -894,20 +960,7 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 	}
 	///
 
-#if DEBUG_TIMER_ENABLED == 1
-	t.End();
-	std::cout<<"#3: "<<t.GetDeltaTimeMs()<<std::endl;
-#endif
-
-#if DEBUG_TIMER_ENABLED == 1
-	t.End();
-	std::cout<<"#4: "<<t.GetDeltaTimeMs()<<std::endl;
-#endif
-#if DEBUG_TIMER_ENABLED == 1
-	t.End();
-	std::cout<<"#5: "<<t.GetDeltaTimeMs()<<std::endl;
-#endif
-	StopGPUTimer(GPUTimerEvent::Frame);
+	StopProfilingStage(GPUProfilingPhase::Frame);
 }
 
 void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
@@ -917,42 +970,25 @@ void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 	auto tStart = std::chrono::steady_clock::now();
 	if(cl != nullptr)
 	{
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ClientStateDraw));
+		StartProfilingStage(GPUProfilingPhase::DrawScene);
 
 		cl->Render(drawCmd,rt);
 
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ClientStateDraw));
+		StopProfilingStage(GPUProfilingPhase::DrawScene);
 	}
-	auto tEnd = std::chrono::steady_clock::now();
-	auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(tEnd -tStart);
-
-
-	//std::cout<<"Duration in ms: "<<dur.count()<<std::endl; // Vulkan TODO
-	/*auto w = framebuffer->GetWidth();
-	auto h = framebuffer->GetHeight();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(ProfilingStage::GUIDraw));
-	drawCmd->BeginRenderPass(*targetRenderPass,*targetFramebuffer,w,h,1.f);//,vk::SubpassContents::eSecondaryCommandBuffers);
-	*/
-
 
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
 	prosper::util::record_begin_render_pass(*(*drawCmd),*rt);
 	if(c_game != nullptr)
 		c_game->PreGUIDraw();
 	
-	StartGPUTimer(GPUTimerEvent::GUI);
+	StartProfilingStage(GPUProfilingPhase::GUI);
 		auto &gui = WGUI::GetInstance();
 		gui.Draw();
-	StopGPUTimer(GPUTimerEvent::GUI);
+	StopProfilingStage(GPUProfilingPhase::GUI);
 
 	prosper::util::record_end_render_pass(*(*drawCmd));
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
-
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(ProfilingStage::GUIDraw));
 
 	if(c_game != nullptr)
 		c_game->PostGUIDraw();
@@ -974,90 +1010,47 @@ void CEngine::Think()
 	m_tLastFrame = tNow;
 	const auto sToNs = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)).count());
 	UpdateFPS(static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(m_tDeltaFrameTime).count() /sToNs));
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int thinkTimer = PerformanceTimer::InitializeTimer("CEngine::Think");
-	PerformanceTimer::StartMeasurement(thinkTimer);
-#endif
-	auto bProfiling = cvProfiling->GetBool();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(ProfilingStage::EngineThink));
 	//auto tStart = std::chrono::high_resolution_clock::now();
 
 	Engine::Think();
 
 	auto *cl = GetClientState();
 	if(cl != NULL)
-	{
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ClientStateThink));
 		cl->Think(); // Draw?
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ClientStateThink));
-	}
 	//if(m_stateClient == NULL || !m_stateClient->IsGameActive())
 	//	OpenGL::Clear(GL_COLOR_BUFFER_BIT);
 	//WGUI::Draw();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(ProfilingStage::EngineDraw));
 
+	StartProfilingStage(CPUProfilingPhase::DrawFrame);
 	pragma::RenderContext::DrawFrame();
 	CallCallbacks("Draw");
+	StopProfilingStage(CPUProfilingPhase::DrawFrame);
 	GLFW::poll_events(); // Needs to be called AFTER rendering!
-
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(ProfilingStage::EngineDraw));
 
 	//auto tEnd = std::chrono::high_resolution_clock::now();
 	//auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>(tEnd -tStart);
 	//UpdateFPS(static_cast<float>(dur.count() /1'000'000'000.0));
 	EndFrame();
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(thinkTimer);
-#endif
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(ProfilingStage::EngineThink));
 }
 
 void CEngine::Tick()
 {
-	auto bProfiling = cvProfiling->GetBool();
-	if(bProfiling == true)
-		StartStageProfiling(umath::to_integral(ProfilingStage::EngineTick));
-#ifdef ENABLE_PERFORMANCE_TIMER
-	static unsigned int tickTimer = PerformanceTimer::InitializeTimer("CEngine::Tick");
-	PerformanceTimer::StartMeasurement(tickTimer);
-#endif
 	ProcessConsoleInput();
-
+	Engine::StartProfilingStage(Engine::CPUProfilingPhase::Tick);
 	// The client tick has to run BEFORE the server tick!!!
 	// This is to avoid issues in singleplayer, where the client would use data it received from the server and apply the same calculations on the already modified data.
+	StartProfilingStage(CPUProfilingPhase::ClientTick);
 	auto *cl = GetClientState();
 	if(cl != NULL)
-	{
-		auto bProfiling = cvProfiling->GetBool();
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ClientStateTick));
 		cl->Tick();
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ClientStateTick));
-	}
+	StopProfilingStage(CPUProfilingPhase::ClientTick);
 
+	Engine::StartProfilingStage(Engine::CPUProfilingPhase::ServerTick);
 	auto *sv = GetServerState();
 	if(sv != NULL)
-	{
-		auto bProfiling = cvProfiling->GetBool();
-		if(bProfiling == true)
-			StartStageProfiling(umath::to_integral(ProfilingStage::ServerStateTick));
 		sv->Tick();
-		if(bProfiling == true)
-			EndStageProfiling(umath::to_integral(ProfilingStage::ServerStateTick));
-	}
-
-#ifdef ENABLE_PERFORMANCE_TIMER
-	PerformanceTimer::EndMeasurement(tickTimer);
-#endif
-	if(bProfiling == true)
-		EndStageProfiling(umath::to_integral(ProfilingStage::EngineTick));
+	Engine::StopProfilingStage(Engine::CPUProfilingPhase::ServerTick);
+	Engine::StopProfilingStage(Engine::CPUProfilingPhase::Tick);
 }
 
 bool CEngine::IsServerOnly() {return false;}
@@ -1115,4 +1108,10 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution,[](NetworkState*,ConVar*,std::s
 	if(menu == nullptr)
 		return;
 	menu->SetSize(x,y);
+})
+
+REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar*,bool,bool enabled) {
+	if(c_engine == nullptr)
+		return;
+	c_engine->SetGPUProfilingEnabled(enabled);
 })

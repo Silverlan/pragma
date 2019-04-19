@@ -3,7 +3,6 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 
-#pragma optimize("",off)
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
 	auto numBones = frameToSubtract.GetBoneCount(); // TODO
@@ -298,4 +297,3 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		}
 	}
 }
-#pragma optimize("",on)

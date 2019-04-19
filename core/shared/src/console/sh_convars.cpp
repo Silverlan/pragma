@@ -13,6 +13,9 @@
 #include <pragma/util/profiling_stages.h>
 #include <pragma/lua/lua_doc.hpp>
 #include <map>
+#ifdef BT_ENABLE_PROFILE
+#include <LinearMath/btQuickprof.h>
+#endif
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <wv_steamworks.hpp>
@@ -292,27 +295,110 @@ REGISTER_ENGINE_CONCOMMAND(version,[](NetworkState*,pragma::BasePlayerComponent*
 	Con::cout<<get_pretty_engine_version()<<Con::endl;
 },ConVarFlags::None,"Prints the current engine version to the console.");
 
-struct ProfilingDuration
+static void debug_profiling_print(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	ProfilingDuration(ProfilingStage s,double d)
-		: stage(s),duration(d)
-	{}
-	ProfilingStage stage;
-	double duration;
-};
+	Con::cout<<"-------- CPU-Profiler Query Results --------"<<Con::endl;
+	std::function<void(pragma::debug::ProfilingStage&,const std::string&,bool)> fPrintResults = nullptr;
+	fPrintResults = [&fPrintResults](pragma::debug::ProfilingStage &stage,const std::string &t,bool bRoot) {
+		if(bRoot == false)
+		{
+			std::string sTime = "Pending";
+			auto result = stage.GetResult();
+			if(result && result->duration.has_value())
+			{
+				auto t = result->duration->count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count());
+				sTime = util::round_string(t,2) +" ms";
+				sTime += " (" +std::to_string(result->duration->count()) +" ns)";
+			}
+			Con::cout<<t<<stage.GetName()<<": "<<sTime<<Con::endl;
+		}
+		for(auto &wpChild : stage.GetChildren())
+		{
+			if(wpChild.expired())
+				continue;
+			fPrintResults(*wpChild.lock(),t +(bRoot ? "" : "\t"),false);
+		}
+	};
+	auto &profiler = engine->GetProfiler();
+	fPrintResults(profiler.GetRootStage(),"",true);
+	Con::cout<<"--------------------------------------------"<<Con::endl;
+}
+REGISTER_ENGINE_CONCOMMAND(debug_profiling_print,debug_profiling_print,ConVarFlags::None,"Prints the last profiled times.");
 
-REGISTER_ENGINE_CONCOMMAND(debug_profiling_print,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
-	auto &stages = engine->GetProfilingStages();
-	std::vector<ProfilingDuration> durations;
-	durations.reserve(stages.size());
-	for(auto &it : stages)
-		durations.push_back(ProfilingDuration{static_cast<ProfilingStage>(it.first),static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(it.second->duration).count()) /1'000'000.0});
-	std::sort(durations.begin(),durations.end(),[](const ProfilingDuration &a,const ProfilingDuration &b) {
-		return (a.duration > b.duration) ? true : false;
-	});
-	for(auto &d : durations)
-		Con::cout<<profiling_stage_to_string(d.stage)<<": "<<d.duration<<"ms"<<Con::endl;
-},ConVarFlags::None,"Prints the last profiled times.");
+#ifdef BT_ENABLE_PROFILE
+static void bt_profile_manager_dump_recursive(CProfileIterator* profileIterator, int spacing)
+{
+	profileIterator->First();
+	if (profileIterator->Is_Done())
+		return;
+
+	float accumulated_time = 0, parent_time = profileIterator->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : profileIterator->Get_Current_Parent_Total_Time();
+	int i;
+	int frames_since_reset = CProfileManager::Get_Frame_Count_Since_Reset();
+	for (i = 0; i < spacing; i++) Con::cout<<".";
+	Con::cout<<"----------------------------------\n";
+	for (i = 0; i < spacing; i++) Con::cout<<".";
+	Con::cout<<"Profiling: "<<profileIterator->Get_Current_Parent_Name()<<" (total running time: "<<parent_time<<" ms) ---\n";
+	float totalTime = 0.f;
+
+	int numChildren = 0;
+
+	for (i = 0; !profileIterator->Is_Done(); i++, profileIterator->Next())
+	{
+		numChildren++;
+		float current_total_time = profileIterator->Get_Current_Total_Time();
+		accumulated_time += current_total_time;
+		float fraction = parent_time > SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0.f;
+		{
+			int i;
+			for (i = 0; i < spacing; i++) Con::cout<<".";
+		}
+		Con::cout<<i<<" -- "<<profileIterator->Get_Current_Name()<<" ("<<fraction<<" %%) :: "<<(current_total_time / (double)frames_since_reset)<<" ms / frame ("<<profileIterator->Get_Current_Total_Calls()<<" calls)\n";
+		totalTime += current_total_time;
+		//recurse into children
+	}
+
+	if (parent_time < accumulated_time)
+	{
+		//printf("what's wrong\n");
+	}
+	for (i = 0; i < spacing; i++) Con::cout<<".";
+	Con::cout<<"Unaccounted: ("<<(parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f)<<" %%) :: "<<(parent_time - accumulated_time)<<" ms\n";
+
+	for (i = 0; i < numChildren; i++)
+	{
+		profileIterator->Enter_Child(i);
+		bt_profile_manager_dump_recursive(profileIterator, spacing + 3);
+		profileIterator->Enter_Parent();
+	}
+}
+
+static void bt_profile_manager_dump_all()
+{
+	CProfileIterator* profileIterator = 0;
+	profileIterator = CProfileManager::Get_Iterator();
+
+	bt_profile_manager_dump_recursive(profileIterator, 0);
+
+	CProfileManager::Release_Iterator(profileIterator);
+}
+
+static void debug_profiling_physics_start(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+{
+	btSetCustomEnterProfileZoneFunc(CProfileManager::Start_Profile);
+	btSetCustomLeaveProfileZoneFunc(CProfileManager::Stop_Profile);
+}
+REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_start,debug_profiling_physics_start,ConVarFlags::None,"Prints physics profiling information for the last simulation step.");
+
+static void debug_profiling_physics_end(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+{
+	Con::cout<<"-------- Physics Profiler Results --------"<<Con::endl;
+	// CProfileManager::dumpAll(); // dumpAll uses printf, which we can't use
+	bt_profile_manager_dump_all(); // Same as CProfileManager::dumpAll, but uses Con::cout instead of printf
+	Con::cout<<"------------------------------------------"<<Con::endl;
+}
+REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end,debug_profiling_physics_end,ConVarFlags::None,"Prints physics profiling information for the last simulation step.");
+#endif
 
 //////////////// SERVER ////////////////
 

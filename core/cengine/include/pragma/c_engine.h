@@ -5,11 +5,10 @@
 #include <pragma/engine.h>
 #include "pragma/launchparameters.h"
 #include "pragma/rendering/c_render_context.hpp"
+#include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
 #include <unordered_map>
 
-enum class GPUTimerEvent : uint32_t;
-class CSciGPUTimerManager;
 class ClientState;
 namespace GLFW {class Joystick;};
 namespace al {class SoundSystem;class Effect;};
@@ -26,6 +25,23 @@ public:
 	static const unsigned int MAX_STEREO_SOURCES = 64;
 	// Threshold at which axis value represents a key press
 	static const float AXIS_PRESS_THRESHOLD;
+
+	enum class GPUProfilingPhase : uint32_t
+	{
+		Frame = 0u,
+		DrawScene,
+		GUI,
+
+		Count
+	};
+	enum class CPUProfilingPhase : uint32_t
+	{
+		DrawFrame = 0u,
+		GUI,
+		ClientTick,
+
+		Count
+	};
 private:
 	struct DLLCENGINE ConVarInfo
 	{
@@ -48,6 +64,9 @@ private:
 
 	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;
 
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_cpuProfilingStageManager = nullptr;
+
 	bool m_bControllersEnabled = false;
 	float m_speedCam;
 	float m_speedCamMouse;
@@ -59,7 +78,9 @@ private:
 	bool m_bFirstFrame = true;
 	bool m_bUniformBlocksInitialized;
 	bool m_bVulkanValidationEnabled = false;
-	mutable std::unique_ptr<CSciGPUTimerManager> m_gpuTimerManager;
+
+	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
+	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
 
 	float m_rawInputJoystickMagnitude = 0.f;
 	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
@@ -83,7 +104,18 @@ protected:
 	void InitializeStagingTarget();
 public:
 	using pragma::RenderContext::DrawFrame;
+	
+	// Debug
 	virtual void DumpDebugInformation(ZIPFile &zip) const override;
+	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase> *GetGPUProfilingStageManager();
+	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
+	bool StartProfilingStage(CPUProfilingPhase stage);
+	bool StopProfilingStage(CPUProfilingPhase stage);
+	bool StartProfilingStage(GPUProfilingPhase stage);
+	bool StopProfilingStage(GPUProfilingPhase stage);
+	CallbackHandle AddGPUProfilingHandler(const std::function<void(bool)> &handler);
+	void SetGPUProfilingEnabled(bool bEnabled);
+
 	virtual bool Initialize(int argc,char *argv[]) override;
 	StateInstance &GetClientStateInstance();
 	virtual void OnResolutionChanged(uint32_t width,uint32_t height) override;
@@ -104,10 +136,8 @@ public:
 	void SetVulkanValidationLayersEnabled(bool b);
 
 	// Debug
-	void StartGPUTimer(GPUTimerEvent ev) const;
-	void StopGPUTimer(GPUTimerEvent ev) const;
-	bool GetGPUTimerResult(GPUTimerEvent ev,std::chrono::nanoseconds &r) const;
-	CSciGPUTimerManager &GetGPUTimerManager() const;
+	pragma::debug::GPUProfiler &GetGPUProfiler() const;
+	bool IsGPUProfilingEnabled() const;
 
 	// Config
 	void LoadClientConfig();

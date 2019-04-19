@@ -297,7 +297,7 @@ CEOnCharacterKilled::CEOnCharacterKilled(DamageInfo *damageInfo)
 void CEOnCharacterKilled::PushArguments(lua_State *l)
 {
 	if(damageInfo != nullptr)
-		Lua::Push<std::reference_wrapper<DamageInfo>>(l,std::reference_wrapper<DamageInfo>(*damageInfo));
+		Lua::Push<DamageInfo*>(l,damageInfo);
 	else
 		Lua::PushNil(l);
 }

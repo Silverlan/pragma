@@ -42,5 +42,5 @@ CEOnTakeDamage::CEOnTakeDamage(DamageInfo &damageInfo)
 {}
 void CEOnTakeDamage::PushArguments(lua_State *l)
 {
-	Lua::Push<std::reference_wrapper<DamageInfo>>(l,std::reference_wrapper<DamageInfo>(damageInfo));
+	Lua::Push<DamageInfo*>(l,&damageInfo);
 }

@@ -263,7 +263,7 @@ void Lua::CollisionMesh::GetSoftBodyInfo(lua_State *l,::CollisionMesh &mesh)
 	auto *sbInfo = mesh.GetSoftBodyInfo();
 	if(sbInfo == nullptr)
 		return;
-	Lua::Push<std::reference_wrapper<PhysSoftBodyInfo>>(l,std::ref(*sbInfo));
+	Lua::Push<PhysSoftBodyInfo*>(l,sbInfo);
 }
 void Lua::CollisionMesh::GetSoftBodyTriangles(lua_State *l,::CollisionMesh &mesh)
 {

@@ -274,6 +274,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	/*int32_t mode = 0;
 	if(!argv.empty())
 		mode = atoi(argv.front().c_str());*/
+	FileManager::CreateDirectory("screenshot");
 	std::string map;
 	if(game == nullptr)
 		map = engine_info::get_identifier();

@@ -241,7 +241,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classDefTransform.def("GetBasis",static_cast<void(*)(lua_State*,PhysTransform&)>([](lua_State *l,PhysTransform &t) {
 		auto &m = t.GetBasis();
-		Lua::Push<std::reference_wrapper<Mat3>>(l,std::ref(m));
+		Lua::Push<Mat3*>(l,&m);
 	}));
 	classDefTransform.def("SetBasis",static_cast<void(*)(lua_State*,PhysTransform&,const Mat3&)>([](lua_State *l,PhysTransform &t,const Mat3 &m) {
 		t.SetBasis(m);

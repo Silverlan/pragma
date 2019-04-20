@@ -490,7 +490,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		else
 			presentMode = Anvil::PresentModeKHR::MAILBOX_KHR;
 	}
-	ChangePresentMode(presentMode);
+	contextCreateInfo.presentMode = presentMode;
 
 	// Initialize Window context
 	pragma::RenderContext::Initialize(contextCreateInfo);
@@ -801,7 +801,13 @@ void CEngine::Close()
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
 	c_engine = nullptr;
+	pragma::RenderContext::Close();
 
+	Engine::Close();
+}
+
+void CEngine::OnClose()
+{
 	// Clear all Vulkan resources before closing the context
 	m_stagingRenderTarget = nullptr;
 	m_gpuProfiler = {};
@@ -810,8 +816,6 @@ void CEngine::Close()
 	pragma::CLightComponent::ClearBuffers();
 	CModelSubMesh::ClearBuffers();
 	pragma::CParticleSystemComponent::ClearBuffers();
-
-	Engine::Close();
 }
 
 void CEngine::UpdateFPS(float t)
@@ -1026,6 +1030,8 @@ void CEngine::Think()
 	CallCallbacks("Draw");
 	StopProfilingStage(CPUProfilingPhase::DrawFrame);
 	GLFW::poll_events(); // Needs to be called AFTER rendering!
+	if(GetWindow().ShouldClose())
+		ShutDown();
 
 	//auto tEnd = std::chrono::high_resolution_clock::now();
 	//auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>(tEnd -tStart);

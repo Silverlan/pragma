@@ -36,39 +36,10 @@ void ShadowMapDepthBufferManager::Initialize()
 	m_whShadowShader = c_engine->GetShader("shadow");
 	m_descSetGroup = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
 
-	/*{
-		// Test
-		auto dsInfo = Anvil::DescriptorSetInfo::create();
-		dsInfo->add_binding(
-			0u,static_cast<VkDescriptorType>(Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER),20u,
-			static_cast<VkShaderStageFlags>(Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT)
-		);
-		// TODO: Should this be binding 1, or binding 20?
-		// -> Arrays of resources only take one binding? (But not e.g. uniform blocks) -> Check this
-		dsInfo->add_binding(
-			1u,static_cast<VkDescriptorType>(Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER),20u,
-			static_cast<VkShaderStageFlags>(Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT)
-		);
-		std::vector<std::unique_ptr<Anvil::DescriptorSetInfo>> descSetInfos;
-		descSetInfos.emplace_back(std::move(dsInfo));
-		auto descSetGroup = Anvil::DescriptorSetGroup::create(&c_engine->GetDevice(),descSetInfos,true);
-		descSetGroup->get_descriptor_set(0u);
-		Con::cout<<"Test"<<Con::endl;
-	}*/
-
 	auto *descSet = (*m_descSetGroup)->get_descriptor_set(0u);
 	auto *descSetLayout = (*m_descSetGroup)->get_descriptor_set_layout(0u);
 	auto &info = *descSetLayout->get_create_info();
-	/*auto arraySize = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 	
-	auto &dummyTex = c_engine->GetDummyCubemapTexture();
-	std::vector<Anvil::DescriptorSet::CombinedImageSamplerBindingElement> bindingElements(arraySize,Anvil::DescriptorSet::CombinedImageSamplerBindingElement{
-		static_cast<VkImageLayout>(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL),
-		dummyTex->GetImageView().get(),dummyTex->GetSampler().get()
-	});
-	auto arrayOffset = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowMaps)).descriptorArraySize;
-	descSet->set_binding_array_items(arrayOffset,{0u,arraySize},bindingElements.data());*/
-
 	// Shadow map descriptor bindings need to be bound to dummy images.
 	// For normal shadow maps this is already taken care of, but cubemaps are a special case
 	// that needs to be dealt with

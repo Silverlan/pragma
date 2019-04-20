@@ -348,6 +348,8 @@ add_subdirectory(core)
 message("Processing external libraries...")
 add_subdirectory(external_libs)
 
+set_target_properties(wgui PROPERTIES FOLDER external_libs/wgui)
+set_target_properties(sample_application PROPERTIES FOLDER external_libs/wgui)
 target_include_directories(util_image PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 

@@ -101,6 +101,7 @@ protected:
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
 	virtual void DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
+	virtual void OnClose() override;
 	void InitializeStagingTarget();
 public:
 	using pragma::RenderContext::DrawFrame;

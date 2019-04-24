@@ -51,6 +51,8 @@ const util::PFloatProperty &WIProgressBar::GetProgressProperty() const {return m
 void WIProgressBar::SetProgress(float progress)
 {
 	progress = UpdateProgress(progress);
+	if(progress == *m_progress)
+		return;
 	*m_progress = progress;
 	auto w = GetWidth();
 	if(m_hProgress.IsValid())
@@ -87,7 +89,7 @@ float WIProgressBar::UpdateProgress(float progress)
 		return progress;
 	auto dt = m_max -m_min;
 	float v = m_min +progress *dt;
-	v -= fmod(v,m_stepSize);
+	v -= std::remainderf(v,m_stepSize);
 	return (dt != 0.f) ? ((v -m_min) /dt) : 0.f;
 }
 void WIProgressBar::UpdateOptions()
@@ -137,4 +139,3 @@ float WIProgressBar::GetValue() const
 }
 void WIProgressBar::GetValue(std::string &str) {str = util::round_string(GetValue(),m_numDecimals);}
 void WIProgressBar::SetPostFix(const std::string &postfix) {m_postfix = postfix;}
-

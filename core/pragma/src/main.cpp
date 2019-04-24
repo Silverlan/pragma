@@ -1,7 +1,6 @@
 #include "stdafx_weave.h"
 #include <string>
 #include <sstream>
-//#include <stdlib.h>
 
 // If gDEbugger Support is enabled, all .dll-files will have to be copied to the .exe directory!
 #define ENABLE_GDEBUGGER_SUPPORT 0
@@ -19,19 +18,6 @@
 	#include <algorithm>
 	#include <iostream>
 #endif
-
-/*
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"cengine.lib")
-#pragma comment(lib,"engine.lib")
-#pragma comment(lib,"opengl32.lib")
-#pragma comment(lib,"glfw3dll.lib")
-#pragma comment(lib,"lua530.lib")
-#pragma comment(lib,"OpenAL32.lib")
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bz2-sgd-x86.lib")
-*/
 
 static std::string GetAppPath()
 {

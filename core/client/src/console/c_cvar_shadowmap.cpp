@@ -118,23 +118,17 @@ static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragm
 
 void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
 {
+	auto &wgui = WGUI::GetInstance();
+	auto *pRoot = wgui.GetBaseElement();
+	const std::string name = "debug_shadowmap";
+	auto *pEl = pRoot->FindDescendantByName(name);
+	if(pEl != nullptr)
+		pEl->Remove();
+
 	pragma::CLightComponent *light;
 	if(get_shadow_map(nw,argv,&light) == false)
 		return;
-	auto &wgui = WGUI::GetInstance();
-	auto *pRoot = wgui.GetBaseElement();
 	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
-		return;
-	const std::string name = "debug_shadowmap";
-	auto *pEl = pRoot->FindDescendantByName(name);
-	auto v = util::to_int(argv.front());
-	if(v == 0)
-	{
-		if(pEl != nullptr)
-			pEl->Remove();
-		return;
-	}
-	if(pEl != nullptr)
 		return;
 	auto *pElSm = wgui.Create<WIDebugShadowMap>();
 	if(pElSm == nullptr)

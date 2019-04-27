@@ -5,11 +5,11 @@
 	#include <windows.h>
 #else
 #define LINUX_THREAD_TEST
+#ifdef LINUX_THREAD_TEST
 	#include <unistd.h>
 	#include <dlfcn.h>
 	#include <algorithm>
 	#include <iostream>
-#ifdef LINUX_THREAD_TEST
 	#include <thread>
 #endif
 #endif

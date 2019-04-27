@@ -240,7 +240,7 @@ search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY third_party_libs/anvil/deps/glsl
 set(DEPENDENCY_LUA_INCLUDE ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 
 if(UNIX)
-	set(VULKAN_SDK "" CACHE INTERNAL "Path to Vulkan SDK.")
+	set(VULKAN_SDK "" CACHE PATH "Path to Vulkan SDK.")
 	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY third_party_libs/anvil/deps/glslang/glslang/OSDependent/Unix OSDependent STATIC)
 else()
 	set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE INTERNAL "Path to Vulkan SDK.")

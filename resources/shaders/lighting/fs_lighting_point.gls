@@ -21,13 +21,13 @@ vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3
 		float dist = (distToLight -u_renderSettings.nearZ) /(u_renderSettings.farZ -u_renderSettings.nearZ);
 		
 #if ENABLE_LIGHT_DEBUG == 1
-		if((u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
 			float zFar = light.position.w;
 			float shadow = texture(shadowCubemaps[pointIdx],fragPosWs -light.position.xyz).r;
 			fragLightColor += vec3(shadow,shadow,shadow);
 		}
-		else if((u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+		else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
 		{
 			float shadow = length(fragPosWs -light.position.xyz) /light.position.w;
 			fragLightColor += vec3(shadow,shadow,shadow);

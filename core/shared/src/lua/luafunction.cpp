@@ -1,5 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/luafunction.h"
+#include "pragma/lua/luafunction_call.h"
 
 LuaFunction::LuaFunction(const luabind::object &o)
 	: m_luaFunction(new luabind::object(o))

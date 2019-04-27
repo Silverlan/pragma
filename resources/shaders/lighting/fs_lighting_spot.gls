@@ -21,13 +21,12 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 		// Shadow
 		if(cos_cur_angle > cos_outer_cone_angle) // Within the cone
 		{
-			//float distScale = clamp(1.0 -(length(posFromWorldSpace) /light.position.w),0.0,1.0);
 			float distScale = calc_light_falloff(length(posFromWorldSpace),light.position.w);
 			distScale = pow(distScale,light.falloffExponent);
 
-			if(distScale != 0.0) // In range
+			if(distScale != 0.0 && length(posFromWorldSpace) > light.direction.w) // In range
 			{
-//#if ENABLE_LIGHT_DEBUG == 1
+#if ENABLE_LIGHT_DEBUG == 1
 				if(false)//(u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 				{
 					float zFar = light.position.w;
@@ -44,7 +43,7 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 					//fragLightColor += vec3(shadow,shadow,shadow);
 				}
 				else
-//#endif
+#endif
 				{
 					vec4 depthCoord = get_light_vertex_position(lightIdx);
 					depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()

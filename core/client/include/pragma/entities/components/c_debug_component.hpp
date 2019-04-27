@@ -3,8 +3,14 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/debug/c_debugoverlay.h"
+#include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_color_component.hpp"
+#include <pragma/entities/components/logic_component.hpp>
 #include <pragma/entities/components/base_debug_component.hpp>
+#include <pragma/entities/baseentity.h>
 
+class CDebugTextComponentHandleWrapper;
 namespace pragma
 {
 	template<class TBaseComponent>
@@ -16,13 +22,13 @@ namespace pragma
 		virtual void Initialize() override
 		{
 			TBaseComponent::Initialize();
-			auto &ent = GetEntity();
-			ent.AddComponent<LogicComponent>();
+			auto &ent = this->GetEntity();
+			ent.template AddComponent<LogicComponent>();
 
-			BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+			this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 				ReloadDebugObject();
 			});
-			BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+			this->BindEventUnhandled(CToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 				ReloadDebugObject();
 			});
 		}
@@ -36,7 +42,7 @@ namespace pragma
 			TBaseComponent::OnRemove();
 			m_debugObject = nullptr;
 		}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override {return BaseEntityComponent::InitializeLuaObject<CDebugTextComponentHandleWrapper>(l);}
+		virtual luabind::object InitializeLuaObject(lua_State *l) override {return BaseEntityComponent::template InitializeLuaObject<CDebugTextComponentHandleWrapper>(l);}
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override
 		{
@@ -76,14 +82,14 @@ namespace pragma
 		void ReloadDebugObject()
 		{
 			m_debugObject = nullptr;
-			auto &ent = GetEntity();
-			auto pToggleComponent = ent.GetComponent<CToggleComponent>();
+			auto &ent = this->GetEntity();
+			auto pToggleComponent = ent.template GetComponent<CToggleComponent>();
 			if(pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false)
 				return;
 			auto color = Color::White;
 			auto pos = Vector3{};
-			auto pColorComponent = ent.GetComponent<CColorComponent>();
-			auto pTrComponent = ent.GetComponent<CTransformComponent>();
+			auto pColorComponent = ent.template GetComponent<CColorComponent>();
+			auto pTrComponent = ent.template GetComponent<CTransformComponent>();
 			if(pColorComponent.valid())
 				color = pColorComponent->GetColor();
 			if(pTrComponent.valid())

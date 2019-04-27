@@ -12,6 +12,7 @@ layout(set = 0,binding = 0) uniform sampler2D u_depthTexture;
 layout(push_constant) uniform Depth {
 	float near;
 	float far;
+	float contrastFactor;
 } u_depth;
 
 layout(location = 0) out vec4 fs_color;
@@ -19,5 +20,6 @@ layout(location = 0) out vec4 fs_color;
 void main()
 {
 	float d = texture(u_depthTexture,vs_vert_uv).r;//get_linearized_depth(u_depthTexture,vs_vert_uv,u_depth.near,u_depth.far);
+	d = pow(d,u_depth.contrastFactor);
 	fs_color = vec4(d,d,d,1.0);
 }

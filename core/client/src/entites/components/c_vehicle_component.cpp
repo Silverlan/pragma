@@ -128,7 +128,7 @@ void CVehicleComponent::SetCamera(bool bFirstPerson)
 	if(!ent->IsPlayer() || !ent->GetPlayerComponent()->IsLocalPlayer() || m_bFirstPersonCamera == bFirstPerson)
 		return;
 	m_bFirstPersonCamera = bFirstPerson;
-	auto &plComponent = ent->GetPlayerComponent();
+	auto plComponent = ent->GetPlayerComponent();
 	plComponent->SetObserverCameraLocked(bFirstPerson);
 	plComponent->SetObserverMode(bFirstPerson ? OBSERVERMODE::FIRSTPERSON : OBSERVERMODE::THIRDPERSON);
 }

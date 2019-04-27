@@ -927,7 +927,8 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	}
 
 	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer);
-	c_game->RenderScene(primCmdBuffer,rt.shared_from_this(),renderFlags);
+	auto pRenderTarget = rt.shared_from_this();
+	c_game->RenderScene(primCmdBuffer,pRenderTarget,renderFlags);
 	c_game->SetRenderScene(nullptr);
 	return 0;
 }

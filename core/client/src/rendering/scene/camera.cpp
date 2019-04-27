@@ -120,7 +120,7 @@ void Camera::GetFarPlaneBounds(float *wFar,float *hFar) const
 
 void Camera::GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *wFar,float *hFar) const
 {
-	auto &boundaries = umath::frustum::get_far_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_farZ,m_aspectRatio,wFar,hFar);
+	auto boundaries = umath::frustum::get_far_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_farZ,m_aspectRatio,wFar,hFar);
 	vec->reserve(boundaries.size());
 	for(auto &v : boundaries)
 		vec->push_back(v);
@@ -128,7 +128,7 @@ void Camera::GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *wFar,float *
 
 void Camera::GetNearPlaneBoundaries(std::vector<Vector3> *vec,float *wNear,float *hNear) const
 {
-	auto &boundaries = umath::frustum::get_near_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_nearZ,m_aspectRatio,wNear,hNear);
+	auto boundaries = umath::frustum::get_near_plane_boundaries(*m_pos,*m_forward,*m_up,m_fovRad,*m_nearZ,m_aspectRatio,wNear,hNear);
 	vec->reserve(boundaries.size());
 	for(auto &v : boundaries)
 		vec->push_back(v);

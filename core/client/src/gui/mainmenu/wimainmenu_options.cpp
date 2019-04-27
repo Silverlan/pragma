@@ -61,25 +61,35 @@ void WIMainMenuOptions::ApplyOptions()
 	{
 		auto *pChoice = static_cast<WIChoiceList*>(m_hAntiAliasing.get())->GetSelectedChoice();
 		if(pChoice->value == "fxaa")
-			client->RunConsoleCommand("cl_render_anti_aliasing",std::vector<std::string>{std::to_string(umath::to_integral(AntiAliasing::FXAA))});
+		{
+			std::vector<std::string> argv{std::to_string(umath::to_integral(AntiAliasing::FXAA))};
+			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
+		}
 		else if(ustring::substr(pChoice->value,0,4) == "msaa")
 		{
+			std::string mssaaSamples = "1";
 			if(pChoice->value == "msaa2")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(1)});
+				mssaaSamples = "1";
 			else if(pChoice->value == "msaa4")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(2)});
+				mssaaSamples = "2";
 			else if(pChoice->value == "msaa8")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(3)});
+				mssaaSamples = "3";
 			else if(pChoice->value == "msaa16")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(4)});
+				mssaaSamples = "4";
 			else if(pChoice->value == "msaa32")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(5)});
+				mssaaSamples = "5";
 			else if(pChoice->value == "msaa64")
-				client->RunConsoleCommand("cl_render_msaa_samples",std::vector<std::string>{std::to_string(6)});
-			client->RunConsoleCommand("cl_render_anti_aliasing",std::vector<std::string>{std::to_string(umath::to_integral(AntiAliasing::MSAA))});
+				mssaaSamples = "6";
+			std::vector<std::string> argv {mssaaSamples};
+			client->RunConsoleCommand("cl_render_msaa_samples",argv);
+			argv = {std::to_string(umath::to_integral(AntiAliasing::MSAA))};
+			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
 		}
 		else
-			client->RunConsoleCommand("cl_render_anti_aliasing",std::vector<std::string>{std::to_string(umath::to_integral(AntiAliasing::None))});
+		{
+			std::vector<std::string> argv {std::to_string(umath::to_integral(AntiAliasing::None))};
+			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
+		}
 	}
 	//ApplyWindowSize();
 }

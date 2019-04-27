@@ -14,6 +14,10 @@ namespace pragma
 #pragma pack(push,1)
 		struct DLLCLIENT PushConstants
 		{
+			// Required due to gcc bug (see https://stackoverflow.com/q/46866686)
+			PushConstants() {};
+			~PushConstants() {};
+
 			float subPixelAliasingRemoval = 0.75f;
 			float edgeThreshold = 0.166f;
 			float minEdgeThreshold = 0.0833f;
@@ -21,7 +25,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPPFXAA(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetTexture,const PushConstants &pushConstants={});
+		bool Draw(Anvil::DescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

@@ -5,9 +5,10 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/util/util_handled.hpp>
+#include <pragma/math/deltaoffset.h>
+#include <pragma/math/deltatransform.h>
 
 class CBaseEntity;
-struct DeltaOffset;
 struct DeltaTransform;
 namespace pragma
 {

@@ -11,10 +11,6 @@
 
 #undef PlaySound
 
-namespace boost{namespace system{
-	class error_code;
-}}
-
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT ServerInfo

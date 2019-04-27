@@ -10,7 +10,7 @@ struct LightSourceData
 {
 	vec4 position; // position.w = distance
 	vec4 color;
-	vec4 direction; // direction.w is unused
+	vec4 direction; // direction.w = start offset for spotlights
 	uint shadowIndex;
 	
 	// Spotlights

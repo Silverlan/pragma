@@ -9,7 +9,7 @@ template<class TComponent,typename>
 {
 	ComponentId componentId;
 	if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
-		return nullptr;
+		return {};
 	auto whComponent = AddComponent(componentId,bForceCreateNew);
 	if(whComponent.expired())
 		return {};

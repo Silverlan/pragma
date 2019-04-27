@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
 

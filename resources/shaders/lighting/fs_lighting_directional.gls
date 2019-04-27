@@ -25,7 +25,7 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 		int layer = get_csm_cascade_index();
 		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
 #if ENABLE_LIGHT_DEBUG == 1
-		if((u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
 			vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
 			float shadow = 1.0;
@@ -38,7 +38,7 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 			}
 			fragLightColor += vec3(shadow,shadow,shadow);
 		}
-		else if((u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+		else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
 		{
 			vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
 			float shadow = shadowCoord.z;

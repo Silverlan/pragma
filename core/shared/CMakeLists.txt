@@ -37,6 +37,7 @@ if(WIN32)
 	add_external_library(lua)
 endif()
 
+add_include_dir(libogg_build)
 add_include_dir(pr_steamworks)
 add_include_dir(eigen)
 add_include_dir(miniball)

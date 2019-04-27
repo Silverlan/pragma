@@ -60,7 +60,7 @@ static void cl_render_vr_enabled(bool b)
 		return;
 	Locale::Load("vr.txt");
 	std::string err;
-	if(client->InitializeLibrary(OPENVR_MODULE_PATH,&err) == false)
+	if(client->InitializeLibrary(OPENVR_MODULE_PATH,&err) == nullptr)
 	{
 		lastMessage = Locale::GetText("vr_msg_error_load",std::vector<std::string>{err});
 		Con::cerr<<lastMessage<<Con::endl;

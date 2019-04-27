@@ -56,7 +56,7 @@ void main()
 	mat4 invVp = inverse(u_camera.VP);
 	vec3 fragPos = (u_camera.V *vec4(calc_position_from_depth(d,vs_vert_uv,invVp),1.0)).xyz;
 
-	vec3 normal = texture(u_normalBuffer,vs_vert_uv).rgb;
+	vec3 normal = vec3(0,0,0);//texture(u_normalBuffer,vs_vert_uv).rgb;
 	vec3 randomVec = texture(u_noiseTexture,vs_vert_uv *noiseScale).xyz;
 
 	vec3 tangent = normalize(randomVec -normal *dot(randomVec,normal));

@@ -14,6 +14,7 @@ if(WIN32)
 	add_external_library(lua)
 endif()
 
+add_include_dir(libogg_build)
 add_include_dir(bzip2)
 
 add_external_library(servermanager)

@@ -200,7 +200,7 @@ bool CParticleSystemComponent::SetupParticleSystem(std::string fname,CParticleSy
 	if(it == s_particleData.end())
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle system '"<<fname<<"'!"<<Con::endl;
-		return nullptr;
+		return false;
 	}
 	auto &data = it->second;
 	auto r = SetupParticleSystem(data->settings,parent,bRecordKeyValues);
@@ -1302,7 +1302,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 				const Vector3 minExtents = {-1.f,-1.f,-1.f};
 				const Vector3 maxExtents = {1.f,1.f,1.f};
 				auto r = p.GetExtent();
-				auto &ptPos = Vector3{data.position.x,data.position.y,data.position.z};
+				auto ptPos = Vector3{data.position.x,data.position.y,data.position.z};
 				auto minBounds = ptPos +minExtents *r;
 				auto maxBounds = ptPos +maxExtents *r;
 

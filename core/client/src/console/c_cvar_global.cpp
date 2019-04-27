@@ -460,7 +460,7 @@ void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std:
 			Con::cout<<" (Graphics)";
 		else
 			Con::cout<<" (Unknown)";
-		auto &shaderSources = shader->GetSourceFilePaths();
+		auto shaderSources = shader->GetSourceFilePaths();
 		for(auto &src : shaderSources)
 			Con::cout<<" ("<<src<<")";
 		Con::cout<<Con::endl;
@@ -642,8 +642,8 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		if(deviceLocalTypes.empty() == false)
 			assert(type.heap_trp->size() == memProps.types.at(deviceLocalTypes.front()).heap_ptr->size());
 		deviceLocalTypes.push_back(i);
-		auto allocatedSize = 0ull;
-		auto totalSize = 0ull;
+		uint64_t allocatedSize = 0ull;
+		uint64_t totalSize = 0ull;
 		memTracker.GetMemoryStats(*c_engine,i,allocatedSize,totalSize);
 		allocatedDeviceLocalSize += allocatedSize;
 	}
@@ -669,8 +669,8 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		std::vector<const prosper::MemoryTracker::Resource*> resources {};
 		for(auto idx : deviceLocalTypes)
 		{
-			auto allocatedSize = 0ull;
-			auto totalSize = 0ull;
+			uint64_t allocatedSize = 0ull;
+			uint64_t totalSize = 0ull;
 			memTracker.GetMemoryStats(*c_engine,idx,allocatedSize,totalSize,pair.first);
 			allocatedSizeOfType += allocatedSize;
 

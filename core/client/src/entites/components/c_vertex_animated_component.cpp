@@ -137,8 +137,8 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			//auto frameId = umath::min(static_cast<uint32_t>(umath::floor(cycle)),static_cast<uint32_t>(frames.size() -1));
 			auto nextFrameId = umath::min(static_cast<uint32_t>(frameId +1),static_cast<uint32_t>(frames.size() -1));
 
-			auto srcFrameOffset = 0ull;
-			auto dstFrameOffset = 0ull;
+			uint64_t srcFrameOffset = 0ull;
+			uint64_t dstFrameOffset = 0ull;
 			if(
 				static_cast<CModel&>(*mdl).GetVertexAnimationBufferFrameOffset(vaId,static_cast<CModelSubMesh&>(*subMesh),frameId,srcFrameOffset) == false ||
 				static_cast<CModel&>(*mdl).GetVertexAnimationBufferFrameOffset(vaId,static_cast<CModelSubMesh&>(*subMesh),nextFrameId,dstFrameOffset) == false

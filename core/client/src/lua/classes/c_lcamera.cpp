@@ -48,7 +48,8 @@ void Lua::Scene::UpdateBuffers(lua_State *l,::Scene &scene,prosper::CommandBuffe
 {
 	if(hCommandBuffer.IsPrimary() == false)
 		return;
-	scene.UpdateBuffers(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this()));
+	auto pCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	scene.UpdateBuffers(pCmdBuffer);
 }
 void Lua::Scene::GetWorldEnvironment(lua_State *l,::Scene &scene)
 {

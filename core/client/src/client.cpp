@@ -8,8 +8,6 @@
 #pragma comment(lib,"cengine.lib")
 #pragma comment(lib,"cmaterialsystem.lib")
 #pragma comment(lib,"materialsystem.lib")
-#pragma comment(lib,"networkmanager.lib")
-#pragma comment(lib,"clientmanager.lib")
 #pragma comment(lib,"wgui.lib")
 #pragma comment(lib,"vfilesystem.lib")
 #pragma comment(lib,"glfw3dll.lib")
@@ -31,6 +29,8 @@
 #pragma comment(lib,"util_pad.lib")
 #pragma comment(lib,"util_timeline_scene.lib")
 #pragma comment(lib,"util_source_script.lib")
+#pragma comment(lib,"clientmanager.lib")
+#pragma comment(lib,"networkmanager.lib")
 #ifdef _DEBUG
 	#ifdef PHYS_ENGINE_BULLET
 		#pragma comment(lib,"BulletDynamics_Debug.lib")

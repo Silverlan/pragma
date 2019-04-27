@@ -78,7 +78,7 @@ void pragma::CurlQueryHandler::Initialize()
 	s_bInitialized = true;
 	std::string err;
 	const std::string curlPath = "curl/wv_curl.dll";
-	if(client->InitializeLibrary(curlPath,&err) == false)
+	if(client->InitializeLibrary(curlPath,&err) == nullptr)
 	{
 		Con::cerr<<"ERROR: Unable to load 'curl' library: "<<err<<Con::endl;
 		return;

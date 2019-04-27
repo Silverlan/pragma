@@ -92,6 +92,7 @@ bool util::set_console_color(ConsoleColorFlags flags)
 	}
 	std::cout<<"\033["<<colorCode<<"m"; // Background color
 #endif
+	return true;
 }
 bool util::reset_console_color()
 {

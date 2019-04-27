@@ -86,24 +86,24 @@ void Lua::Shader::GetEntrypointName(lua_State *l,prosper::Shader &shader,uint32_
 	auto *ep = shader.GetModuleStageEntryPoint(static_cast<Anvil::ShaderStage>(shaderStage),pipelineIdx);
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
-	switch(static_cast<vk::ShaderStageFlagBits>(shaderStage))
+	switch(shaderStage)
 	{
-		case Anvil::ShaderStageFlagBits::FRAGMENT_BIT:
+		case umath::to_integral(Anvil::ShaderStageFlagBits::FRAGMENT_BIT):
 			Lua::PushString(l,ep->shader_module_ptr->get_fs_entrypoint_name());
 			break;
-		case Anvil::ShaderStageFlagBits::VERTEX_BIT:
+		case umath::to_integral(Anvil::ShaderStageFlagBits::VERTEX_BIT):
 			Lua::PushString(l,ep->shader_module_ptr->get_vs_entrypoint_name());
 			break;
-		case Anvil::ShaderStageFlagBits::GEOMETRY_BIT:
+		case umath::to_integral(Anvil::ShaderStageFlagBits::GEOMETRY_BIT):
 			Lua::PushString(l,ep->shader_module_ptr->get_gs_entrypoint_name());
 			break;
-		case vk::ShaderStageFlagBits::eTessellationControl:
+		case umath::to_integral(vk::ShaderStageFlagBits::eTessellationControl):
 			Lua::PushString(l,ep->shader_module_ptr->get_tc_entrypoint_name());
 			break;
-		case vk::ShaderStageFlagBits::eTessellationEvaluation:
+		case umath::to_integral(vk::ShaderStageFlagBits::eTessellationEvaluation):
 			Lua::PushString(l,ep->shader_module_ptr->get_te_entrypoint_name());
 			break;
-		case Anvil::ShaderStageFlagBits::COMPUTE_BIT:
+		case umath::to_integral(Anvil::ShaderStageFlagBits::COMPUTE_BIT):
 			Lua::PushString(l,ep->shader_module_ptr->get_cs_entrypoint_name());
 			break;
 	}

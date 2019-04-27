@@ -8,6 +8,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
+#include "pragma/lua/luafunction_call.h"
 #include <sharedutils/datastream.h>
 
 #define DEBUG_VERBOSE_ANIMATION 0

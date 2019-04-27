@@ -32,7 +32,7 @@ namespace pragma
 		: public EntityComponentManager
 	{
 	public:
-		static const auto INVALID_COMPONENT = std::numeric_limits<ComponentId>::max();
+		static const ComponentId INVALID_COMPONENT;
 
 		const std::vector<ComponentId> &GetServerComponentIdToClientComponentIdTable() const;
 		std::vector<ComponentId> &GetServerComponentIdToClientComponentIdTable();

@@ -1,7 +1,13 @@
 #ifndef F_FS_WORLD_GLS
 #define F_FS_WORLD_GLS
 
+#ifndef ENABLE_LIGHT_DEBUG
 #define ENABLE_LIGHT_DEBUG 0
+#endif
+
+#if ENABLE_LIGHT_DEBUG == 1
+#include "../debug/fs_debug_info.gls"
+#endif
 
 #include "sh_vertex_data.gls"
 #include "sh_normalmapping.gls"

@@ -3,6 +3,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
+#define ENABLE_LIGHT_DEBUG 1
+
 #include "../debug/fs_debug_csm.gls"
 #include "../modules/fs_world.gls"
 #include "../modules/sh_csm.gls"

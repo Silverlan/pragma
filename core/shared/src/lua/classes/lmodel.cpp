@@ -1042,7 +1042,8 @@ void Lua::Model::AddMeshGroup(lua_State *l,::Model &mdl,const std::string &name)
 void Lua::Model::AddMeshGroup(lua_State*,::Model &mdl,::ModelMeshGroup &meshGroup)
 {
 	//Lua::CheckModel(l,1);
-	mdl.AddMeshGroup(meshGroup.shared_from_this());
+	auto pMeshGroup = meshGroup.shared_from_this();
+	mdl.AddMeshGroup(pMeshGroup);
 }
 
 void Lua::Model::UpdateCollisionBounds(lua_State*,::Model &mdl)

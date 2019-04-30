@@ -117,11 +117,16 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	    "${CMAKE_CURRENT_LIST_DIR}/include/*.h"
 	    "${CMAKE_CURRENT_LIST_DIR}/include/*.hpp"
 	)
+
 	if(${PROJ_TYPE} MATCHES "lib")
 		add_library(${PROJ_NAME} SHARED ${SRC_FILES})
+		set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 	else()
 		add_executable(${PROJ_NAME} WIN32 ${SRC_FILES})
+		set_target_properties(${PROJ_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN/lib")
 	endif()
+
+	# set_target_properties(${PROJ_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/lib;$ORIGIN")
 	if(WIN32)
 		target_compile_options(${PROJ_NAME} PRIVATE /wd4251)
 	endif()

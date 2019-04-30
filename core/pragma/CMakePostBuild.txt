@@ -1,0 +1,235 @@
+if(WIN32)
+	set(SHARED_LIB_EXT ".dll")
+else()
+	set(SHARED_LIB_EXT ".so")
+endif()
+macro(get_full_file_name OUT_NAME FILE_NAME FILE_TYPE)
+	set(TMP_FILE_NAME ${FILE_NAME})
+	if(WIN32)
+		set(FILE_EXT ${SHARED_LIB_EXT})
+	else()
+		if(NOT ${FILE_TYPE} STREQUAL "EXECUTABLE")
+			string(SUBSTRING "${TMP_FILE_NAME}" 0 3 TMP_FILE_NAME_PREFIX)
+			if(NOT "${TMP_FILE_NAME_PREFIX}" STREQUAL "lib")
+				set(TMP_FILE_NAME lib${TMP_FILE_NAME})
+			endif()
+		endif()
+		set(FILE_EXT ${SHARED_LIB_EXT})
+	endif()
+	if(${FILE_TYPE} STREQUAL "EXECUTABLE")
+		if(WIN32)
+			set(FILE_EXT ".exe")
+		else()
+			set(FILE_EXT "")
+		endif()
+	elseif(${FILE_TYPE} STREQUAL "DYNAMIC")
+
+	else()
+		set(FILE_EXT "")
+	endif()
+
+	set(${OUT_NAME} ${TMP_FILE_NAME}${FILE_EXT})
+endmacro()
+
+function(create_path FILE_NAME)
+	get_filename_component(SRC_PATH "${FILE_NAME}" DIRECTORY)
+	add_custom_command(
+	  TARGET GenerateOutput
+	  POST_BUILD
+	  COMMAND mkdir -p "${SRC_PATH}"
+	)
+endfunction()
+
+function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
+	set(optional_arg "DYNAMIC")
+	set(extra_macro_args ${ARGN})
+	list(LENGTH extra_macro_args num_extra_args)
+	if(${num_extra_args} GREATER 0)
+		list(GET extra_macro_args 0 optional_arg)
+	endif()
+	get_full_file_name(FILE_NAME "${FILE_NAME}" ${optional_arg})
+
+	get_filename_component(SRC_PATH "${SRC_PATH}" DIRECTORY)
+	set(SRC_PATH ${SRC_PATH}/${FILE_NAME})
+
+	get_filename_component(SRC_PATH "${SRC_PATH}" REALPATH)
+	get_filename_component(FILE_NAME "${SRC_PATH}" NAME)
+
+	# message("copy_abs: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${FILE_NAME}")
+	if(EXISTS "${SRC_PATH}")
+		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${FILE_NAME}")
+		create_path(${DST_PATH})
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMENT "Copying ${FILE_NAME}..."
+		)
+	endif()
+endfunction(copy_output_file_abs)
+
+function(copy_output_file SRC_PATH DST_PATH FILE_NAME)
+	set(optional_arg "DYNAMIC")
+	set(extra_macro_args ${ARGN})
+	list(LENGTH extra_macro_args num_extra_args)
+	if(${num_extra_args} GREATER 0)
+		list(GET extra_macro_args 0 optional_arg)
+	endif()
+	copy_output_file_abs("${CMAKE_CURRENT_BINARY_DIR}/../../${SRC_PATH}/${FILE_NAME}" "${DST_PATH}" "${FILE_NAME}" "${optional_arg}")
+endfunction(copy_output_file)
+
+function(copy_output_file_ext SRC_PATH DST_PATH)
+	# get_filename_component(SRC_FILE_NAME "${SRC_PATH}" NAME_WE)
+	get_filename_component(SRC_FILE_NAME "${SRC_PATH}" NAME)
+	get_filename_component(SRC_FILE_PATH "${SRC_PATH}" DIRECTORY)
+
+	set(LIB_NAME ${SRC_FILE_NAME})
+	set(optional_arg "DYNAMIC")
+	set(extra_macro_args ${ARGN})
+	list(LENGTH extra_macro_args num_extra_args)
+	if(${num_extra_args} GREATER 0)
+		list(GET extra_macro_args 0 optional_arg)
+	endif()
+	# get_full_file_name("LIB_NAME" "${LIB_NAME}" "${optional_arg}")
+
+	get_filename_component(SRC_PATH "${SRC_FILE_PATH}/${LIB_NAME}" REALPATH)
+	get_filename_component(LIB_NAME "${SRC_PATH}" NAME)
+
+	# message("copy_ext:" "${SRC_PATH}" -> "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${LIB_NAME}")
+	if(EXISTS "${SRC_PATH}" AND NOT "${SRC_PATH}" STREQUAL "/")
+		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${LIB_NAME}")
+		create_path(${DST_PATH})
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMENT "Copying ${LIB_NAME}..."
+		)
+	endif()
+endfunction(copy_output_file_ext)
+
+function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
+	get_filename_component(SRC_FILE_NAME "${SRC_PATH}" NAME_WE)
+	get_filename_component(SRC_FILE_PATH "${SRC_PATH}" DIRECTORY)
+
+	set(optional_arg "DYNAMIC")
+	set(extra_macro_args ${ARGN})
+	list(LENGTH extra_macro_args num_extra_args)
+	if(${num_extra_args} GREATER 0)
+		list(GET extra_macro_args 0 optional_arg)
+	endif()
+	get_full_file_name(DST_FILE_NAME ${DST_FILE_NAME} ${optional_arg})
+
+	get_filename_component(SRC_PATH "${SRC_FILE_PATH}/${DST_FILE_NAME}" REALPATH)
+	get_filename_component(DST_FILE_NAME "${SRC_PATH}" NAME)
+
+	# message("copy_extc: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${DST_FILE_NAME}")
+	if(EXISTS "${SRC_PATH}" AND NOT "${SRC_PATH}" STREQUAL "/")
+		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${DST_FILE_NAME}")
+		create_path(${DST_PATH})
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMENT "Copying ${DST_FILE_NAME}..."
+		)
+	endif()
+endfunction(copy_output_file_extc)
+
+if(WIN32)
+	set(BINARY_OUTPUT_DIR "bin")
+else()
+	set(BINARY_OUTPUT_DIR "lib")
+endif()
+copy_output_file(core/pragma/${BINARY_PRAGMA_DIR} "" pragma EXECUTABLE)
+copy_output_file(core/pragma_server/${BINARY_PRAGMA_DIR} "" pragma_server EXECUTABLE)
+if(UNIX)
+	# copy_output_file_ext("${DEPENDENCY_LUAJIT_LIBRARY}" ${BINARY_OUTPUT_DIR})
+endif()
+
+copy_output_file(core/client/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} client)
+copy_output_file(core/server/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} server)
+copy_output_file(core/engine/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} engine)
+copy_output_file(core/cengine/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} cengine)
+copy_output_file(core/shared/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} shared)
+copy_output_file(external_libs/alsoundsystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} alsoundsystem)
+copy_output_file(external_libs/datasystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} datasystem)
+copy_output_file(external_libs/iglfw/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} iglfw)
+copy_output_file(external_libs/luasystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} luasystem)
+copy_output_file(external_libs/materialsystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} materialsystem)
+copy_output_file(external_libs/materialsystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} cmaterialsystem)
+copy_output_file(external_libs/mathutil/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} mathutil)
+copy_output_file(external_libs/networkmanager/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} clientmanager)
+copy_output_file(external_libs/networkmanager/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} servermanager)
+copy_output_file(external_libs/prosper/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} prosper)
+copy_output_file(external_libs/sharedutils/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} sharedutils)
+copy_output_file(external_libs/vfilesystem/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} vfilesystem)
+copy_output_file(external_libs/wgui/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} wgui)
+copy_output_file(modules/interfaces/ishared/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} ishared)
+copy_output_file(modules/interfaces/iserver/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} iserver)
+copy_output_file(modules/interfaces/iclient/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} iclient)
+
+copy_output_file(external_libs/util_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" util_pcl)
+copy_output_file(external_libs/util_archive/${BINARY_PRAGMA_DIR} "modules/mount_external" util_archive)
+
+copy_output_file(modules/pr_source/${BINARY_PRAGMA_DIR} "modules/mount_external" pr_mount_external)
+copy_output_file(modules/pr_dmx/${BINARY_PRAGMA_DIR} "modules" pr_dmx)
+copy_output_file(modules/pr_dds/${BINARY_PRAGMA_DIR} "modules" pr_dds)
+copy_output_file(modules/pr_steamworks/${BINARY_PRAGMA_DIR} "modules/steamworks" pr_steamworks)
+copy_output_file(modules/pr_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" pr_pcl)
+
+copy_output_file_ext("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" ${BINARY_OUTPUT_DIR})
+# copy_output_file_ext("${DEPENDENCY_LUA_LIBRARY}" ${BINARY_OUTPUT_DIR})
+
+copy_output_file_ext("${DEPENDENCY_LUABIND_BINARY}" ${BINARY_OUTPUT_DIR})
+
+copy_output_file_ext("${DEPENDENCY_LIBVORBIS_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_LIBOGG_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_LIBVORBISFILE_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_LPNG_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_LIBZIP_LIBRARY}" ${BINARY_OUTPUT_DIR})
+# copy_output_file_ext("${DEPENDENCY_LIBNOISE_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_BZIP2_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_ASSIMP_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_FREETYPE_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_GEOMETRIC_TOOLS_LIBRARY}" ${BINARY_OUTPUT_DIR})
+copy_output_file_ext(${CMAKE_CURRENT_BINARY_DIR}/../../third_party_libs/zlib/${BINARY_PRAGMA_DIR}/zlib1${SHARED_LIB_EXT} ${BINARY_OUTPUT_DIR})
+copy_output_file_ext("${DEPENDENCY_HLLIB_LIBRARY}" "modules/mount_external")
+
+if(WIN32)
+	copy_output_file_extc("${DEPENDENCY_FMOD_LIBRARY}" ${BINARY_OUTPUT_DIR} "fmod64")
+	copy_output_file_extc("${DEPENDENCY_FMOD_STUDIO_LIBRARY}" ${BINARY_OUTPUT_DIR} "fmodstudio64")
+	copy_output_file_extc("${DEPENDENCY_GLFW_LIBRARY}" ${BINARY_OUTPUT_DIR} "glfw3")
+else()
+	copy_output_file_ext("${DEPENDENCY_FMOD_LIBRARY}" ${BINARY_OUTPUT_DIR})
+	copy_output_file_ext("${DEPENDENCY_FMOD_STUDIO_LIBRARY}" ${BINARY_OUTPUT_DIR})
+	copy_output_file_ext("${DEPENDENCY_GLFW_LIBRARY}" ${BINARY_OUTPUT_DIR})
+endif()
+
+get_filename_component(STEAM_AUDIO_SRC_PATH "${DEPENDENCY_STEAM_AUDIO_LIBRARY}" DIRECTORY)
+if(WIN32)
+	copy_output_file_abs("${STEAM_AUDIO_SRC_PATH}/../../../bin/Windows/x64/phonon" ${BINARY_OUTPUT_DIR} "phonon")
+else()
+	copy_output_file_abs("${STEAM_AUDIO_SRC_PATH}/../../../lib/Linux/x64/phonon" ${BINARY_OUTPUT_DIR} "phonon")
+endif()
+
+get_filename_component(STEAMWORKS_DLL_DIRECTORY "${DEPENDENCY_STEAMWORKS_LIBRARY}" DIRECTORY)
+get_filename_component(STEAMWORKS_DLL_NAME "${DEPENDENCY_STEAMWORKS_LIBRARY}" NAME_WE)
+copy_output_file_abs("${STEAMWORKS_DLL_DIRECTORY}/${STEAMWORKS_DLL_NAME}" "modules/steamworks" "${STEAMWORKS_DLL_NAME}")
+
+set(PCL_BINARY_DIRECTORY "" CACHE PATH "Path to PCL binary files.")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_common_release" "modules/pcl" "pcl_common_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_features_release" "modules/pcl" "pcl_features_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_filters_release" "modules/pcl" "pcl_filters_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_io_ply_release" "modules/pcl" "pcl_io_ply_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_io_release" "modules/pcl" "pcl_io_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_kdtree_release" "modules/pcl" "pcl_kdtree_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_octree_release" "modules/pcl" "pcl_octree_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_sample_consensus_release" "modules/pcl" "pcl_sample_consensus_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_search_release" "modules/pcl" "pcl_search_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_segmentation_release" "modules/pcl" "pcl_segmentation_release")
+copy_output_file_abs("${PCL_BINARY_DIRECTORY}/pcl_surface_release" "modules/pcl" "pcl_surface_release")
+
+# zip.dll
+# libsamplerate-0.dll

@@ -2,7 +2,7 @@
 #define __VR_CONTROLLER_STATE_HPP__
 
 #include <openvr.h>
-#include <glfw_keys.h>
+#include <iglfw/glfw_keys.h>
 
 namespace openvr
 {

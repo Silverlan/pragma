@@ -1,3 +1,6 @@
+#include <datasystem.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
+#include <pragma/level/mapinfo.h>
 #include <util_dmx.hpp>
 #include <fsys/filesystem.h>
 #include <pragma/networkstate/networkstate.h>

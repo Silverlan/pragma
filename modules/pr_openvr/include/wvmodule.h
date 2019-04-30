@@ -4,11 +4,11 @@
 #define LOPENVR_VERBOSE 0
 
 #ifdef MODULE_SERVER
-	#include "iserver.h"
+	#include "pragma/iserver.h"
 	#define IState iserver
 	#pragma comment(lib,"IServer.lib")
 #else
-	#include "iclient.h"
+	#include "pragma/iclient.h"
 	#define IState iclient
 	#pragma comment(lib,"IClient.lib")
 #endif

@@ -85,7 +85,8 @@ extern "C" {
 				auto &mdl = Lua::Check<std::shared_ptr<Model>>(l,2);
 
 				std::vector<std::string> textures {};
-				auto bSuccess = import::load_fbx(engine->GetNetworkState(l),*mdl,f.GetHandle(),textures);
+				auto fHandle = f.GetHandle();
+				auto bSuccess = import::load_fbx(engine->GetNetworkState(l),*mdl,fHandle,textures);
 				Lua::PushBool(l,bSuccess);
 				return 1;
 			})},

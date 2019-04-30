@@ -432,51 +432,58 @@ bool NetworkState::RunConsoleCommand(std::string scmd,std::vector<std::string> &
 	return true;
 }
 
-std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::string *err)
-{
-	auto libPath = "modules\\" +FileManager::GetCanonicalizedPath(lib);
-	std::string ext {};
-#ifdef _WIN32
-	if(ufile::get_extension(libPath,&ext) == false || ustring::compare(ext,"dll",false) == false)
-		libPath += ".dll";
-#else
-	if(ufile::get_extension(libPath,&ext) == false || ustring::compare(ext,"so",false) == false)
-		libPath += ".so";
-#endif
-	std::string lpath;
-	if(FileManager::FindAbsolutePath(libPath,lpath) == false)
-		lpath = libPath;
-	return util::Library::Load(lpath,additionalSearchDirectories,err);
-}
-
 static std::string get_library_name(const NetworkState *nw,const std::string &lib)
 {
-	auto r = "modules\\" +FileManager::GetCanonicalizedPath(lib);
+	auto r = FileManager::GetCanonicalizedPath(lib);
+	std::replace(r.begin(),r.end(),'\\','/');
+	if(ustring::substr(r,0,8) != "modules/")
+		r = "modules/" +r;
+	std::string ext;
+	if(ufile::get_extension(r,&ext))
+		return r;
 #ifdef _WIN32
 	r += ".dll";
 #else
 	r += ".so";
 #endif
-	auto brLast = r.find_last_of('\\');
-
-	auto fGetFileName = [&brLast](const std::string &name,const std::string &prefixRepl="") -> std::string {
+	auto brLast = r.find_last_of("\\/");
+	auto fGetFileName = [&brLast](const std::string &name,std::string &outName,const std::string &prefixRepl="") -> bool {
 		auto r = name;
 		auto prefix = r.substr(brLast +1,3);
 		if(prefix != prefixRepl)
 			r = r.substr(0,brLast +1) +prefixRepl +r.substr(brLast +1,r.length());
-		return r;
+		outName = r;
+		std::replace(outName.begin(),outName.end(),'\\','/');
+		return FileManager::Exists(outName);
 	};
-	auto namePlain = fGetFileName(r);
-	if(FileManager::Exists(namePlain) == false)
+	std::string outName;
+	if(
+		fGetFileName(r,outName) == false &&
+		(nw->IsClient() == false || fGetFileName(r,outName,"cl_") == false) &&
+		(nw->IsServer() == false || fGetFileName(r,outName,"sv_") == false)
+#ifdef __linux__
+		&&
+		fGetFileName(r,outName,"lib") == false &&
+		(nw->IsClient() == false || fGetFileName(r,outName,"libcl_") == false) &&
+		(nw->IsServer() == false || fGetFileName(r,outName,"libsv_") == false)
+#endif
+	)
 	{
-		if(nw->IsClient())
-			r = fGetFileName(r,"cl_");
-		else
-			r = fGetFileName(r,"sv_");
+		fGetFileName(r,outName);
 	}
-	else
-		r = namePlain;
-	return r;
+	return outName;
+}
+
+std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::string *err)
+{
+	auto libPath = get_library_name(this,lib);
+	std::string lpath;
+	if(FileManager::FindAbsolutePath(libPath,lpath) == false)
+		lpath = libPath;
+#ifdef __linux__
+	std::replace(lpath.begin(),lpath.end(),'\\','/');
+#endif
+	return util::Library::Load(lpath,additionalSearchDirectories,err);
 }
 
 std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string &library) const

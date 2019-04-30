@@ -1,7 +1,7 @@
 #ifndef __VR_INSTANCE_HPP__
 #define __VR_INSTANCE_HPP__
 
-#include <glfw.h>
+#include <iglfw/glfw.h>
 #include <openvr.h>
 #include <string>
 #include <cinttypes>

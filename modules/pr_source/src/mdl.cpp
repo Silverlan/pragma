@@ -1,3 +1,6 @@
+#include <datasystem.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
+#include <pragma/level/mapinfo.h>
 #include "mdl.h"
 #include "mdl_sequence.h"
 #include "mdl_attachment.h"

@@ -3,11 +3,99 @@ include("../../CMakeShared.txt")
 set(PRECOMPILED_HEADER "stdafx_weave")
 def_project(pragma exe)
 
+add_custom_target(GenerateOutput ALL)
+add_dependencies(GenerateOutput pragma)
+include("CMakePostBuild.txt")
 if(UNIX)
 	target_link_libraries(pragma "dl")
 	target_link_libraries(pragma "pthread")
-	# target_compile_options(pragma PRIVATE -Wl,-rpath,$ORIGIN/lib)
-	# SET_TARGET_PROPERTIES(pragma PROPERTIES INSTALL_RPATH "$ORIGIN/lib")
+
+	function(get_soname LIB_FILE OUT_VAR_NAME)
+		execute_process(
+			COMMAND bash "-c" "objdump -p ${LIB_FILE} | grep SONAME"
+		   OUTPUT_VARIABLE LIB_SONAME
+		)
+		string(FIND ${LIB_SONAME} "SONAME" LIB_SONAME_POS)
+		MATH(EXPR LIB_SONAME_POS "${LIB_SONAME_POS}+6")
+		string(LENGTH ${LIB_SONAME} LIB_SONAME_LENGTH)
+		string(SUBSTRING ${LIB_SONAME} ${LIB_SONAME_POS} ${LIB_SONAME_LENGTH} LIB_SONAME)
+		string(STRIP "${LIB_SONAME}" LIB_SONAME)
+		set (${OUT_VAR_NAME} ${LIB_SONAME} PARENT_SCOPE)
+	endfunction()
+
+	function(patch_library LIBRARY_NAME OUTPUT_DIR)
+		get_filename_component(LIBRARY_FILENAME ${LIBRARY_NAME} NAME)
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND patchelf --set-rpath '$$ORIGIN' '${LIBRARY_FILENAME}'
+		  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}"
+		  COMMENT "Updating library runpath for library ${LIBRARY_FILENAME}..."
+		)
+
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND sh normalize_library_name.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}/${LIBRARY_FILENAME}"
+		  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+		  COMMENT ""
+		)
+	endfunction()
+	# file(GLOB_RECURSE LIB_FILES
+	#    "${CMAKE_CURRENT_BINARY_DIR}/../../output/lib/*.so"
+	# )
+	set(LIB_FILES
+		libalsoundsystem.so
+		libassimp.so.4.1.0
+		libboost_date_time.so.1.69.0
+		libboost_system.so.1.69.0
+		libbz2.so.1
+		libcengine.so
+		libclient.so
+		libcmaterialsystem.so
+		libdatasystem.so
+		libengine.so
+		libfmod.so.10.5
+		libfmodstudio.so.10.5
+		libfreetype.so.6.16.0
+		libglfw.so.3.3
+		libgtengine.so.3.24
+		libiglfw.so
+		libluabind.so
+		libluajit-5.1.so.2
+		libluasystem.so
+		libmaterialsystem.so
+		libmathutil.so
+		libogg.so.0.8.3
+		libphonon.so
+		libpng16.so.16.37.0
+		libprosper.so
+		libserver.so
+		libshared.so
+		libsharedutils.so
+		libvfilesystem.so
+		libvorbis.so.0.4.8
+		libvorbisfile.so.3.3.7
+		libwgui.so
+		libzip.so.5.0
+	)
+	foreach(LIBNAME ${LIB_FILES})
+		patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/lib/${LIBNAME}" lib)
+	endforeach()
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/mount_external/libhl.so.2.3.0" modules/mount_external)
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/mount_external/libpr_mount_external.so" modules/mount_external)
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/mount_external/libutil_archive.so" modules/mount_external)
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/steamworks/libpr_steamworks.so" modules/steamworks)
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/steamworks/libsteam_api.so" modules/steamworks)
+	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/pr_dmx/libpr_dmx.so" modules)
+
+	add_custom_command(
+	  TARGET GenerateOutput
+	  POST_BUILD
+	  COMMAND patchelf --set-rpath '$ORIGIN/lib' 'pragma'
+	  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../output"
+	  COMMENT "Updating pragma runpath..."
+	)
 else()
 	set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 endif()

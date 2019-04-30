@@ -1,3 +1,6 @@
+#include <datasystem.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
+#include <pragma/level/mapinfo.h>
 #include "nif.hpp"
 #include <pragma/networkstate/networkstate.h>
 #include <mathutil/uvec.h>

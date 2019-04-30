@@ -1,3 +1,6 @@
+#include <datasystem.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
+#include <pragma/level/mapinfo.h>
 #include <pragma/networkstate/networkstate.h>
 #include <pragma/physics/physenvironment.h>
 #include "ani.h"
@@ -53,7 +56,7 @@ bool import::mdl::load_ani(const VFilePtr &f,const MdlInfo &mdlInfo)
 				f->Read(stdIks.data(),stdAnimDesc.ikRuleCount *sizeof(stdIks.front()));
 			}
 			if(stdAnimDesc.animBlock == 0 && stdAnimDesc.localHierarchyCount > 0)
-				throw std::exception("");
+				throw std::runtime_error("Unknown error.");
 		}
 		if(stdAnimDesc.movementCount > 0)
 		{

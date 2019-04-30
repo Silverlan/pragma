@@ -3,7 +3,7 @@
 
 #include <openvr.h>
 #include <mathutil/umat.h>
-#include <iscene.h>
+#include <pragma/iscene.h>
 
 namespace prosper {class RenderTarget; class Image; class PrimaryCommandBuffer; class Fence;};
 namespace openvr

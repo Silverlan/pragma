@@ -219,4 +219,3 @@ static void cl_vr_mirror_window_enabled(bool val)
 REGISTER_CONVAR_CALLBACK_CL(cl_vr_mirror_window_enabled,[](NetworkState*,ConVar*,bool,bool val) {
 	cl_vr_mirror_window_enabled(val);
 })
-

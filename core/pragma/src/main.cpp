@@ -75,7 +75,6 @@ int main(int argc,char* argv[]) try
 		const char *library = "cengine.dll";
 	#endif
 	#ifdef _WIN32
-
 		// Check if Vulkan drivers are installed
 		auto bt = IDTRYAGAIN;
 		while(bt == IDTRYAGAIN)
@@ -93,7 +92,6 @@ int main(int argc,char* argv[]) try
 				break;
 		}
 		//
-
 #if ENABLE_GDEBUGGER_SUPPORT == 1
 		HINSTANCE hEngine = LoadLibrary("cengine.dll");
 #else

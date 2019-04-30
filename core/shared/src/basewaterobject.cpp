@@ -5,7 +5,7 @@ void BaseWaterObject::GetWaterPlane(Vector3 &n,double &d) const
 {
 	n = m_waterPlane.GetNormal();
 	d = m_waterPlane.GetDistance();
-	//d += m_kvMaxWaveHeight;
+	// d += m_kvMaxWaveHeight;
 }
 void BaseWaterObject::GetWaterPlaneWs(Vector3 &n,double &d) const
 {

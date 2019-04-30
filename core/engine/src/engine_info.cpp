@@ -44,4 +44,3 @@ const std::vector<std::string> engine_info::get_supported_audio_formats()
 		"ogg","wav","mp3"
 	};
 }
-

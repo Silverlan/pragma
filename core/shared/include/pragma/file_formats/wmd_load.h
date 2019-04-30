@@ -14,7 +14,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	TModel *FWMD::Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
 	std::string pathCache(model);
-	std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
+	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
 
 	std::string path = "models\\";
 	path += model;
@@ -186,7 +186,10 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		auto inc = ReadString();
 		meta.includes.push_back(inc);
 		auto mdlOther = loadModel(inc);
-		mdl->Merge(*mdlOther);
+		if(mdlOther == nullptr)
+			Con::cwar<<"WARNING: Model '"<<model<<"' has include reference to model '"<<inc<<"', but that model is invalid! Ignoring..."<<Con::endl;
+		else
+			mdl->Merge(*mdlOther);
 	}
 	m_file.reset();
 

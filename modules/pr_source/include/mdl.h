@@ -14,6 +14,7 @@
 #include "mdl_flexdesc.h"
 #include "mdl_flexcontroller.h"
 #include "mdl_flexrule.h"
+#include "mdl_optimize.h"
 #include <pragma/model/animation/animation.h>
 #include <pragma/pragma_module.hpp>
 

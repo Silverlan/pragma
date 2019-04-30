@@ -7,13 +7,13 @@
 #include <sharedutils/scope_guard.h>
 #include <array>
 #include <GLFW/glfw3.h>
-#include <prosper_render_target.hpp>
+#include <image/prosper_render_target.hpp>
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_fence.hpp>
-#include <prosper_shader.hpp>
+#include <shader/prosper_shader.hpp>
 #include <prosper_util.hpp>
-#include <iscene.h>
+#include <pragma/iscene.h>
 #include <sharedutils/util_string.h>
 #ifdef _DEBUG
 #include <iostream>

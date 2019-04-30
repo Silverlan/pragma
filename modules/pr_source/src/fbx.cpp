@@ -1,3 +1,6 @@
+#include <datasystem.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
+#include <pragma/level/mapinfo.h>
 #include "fbx.h"
 #include "fbxfile.h"
 #include "wv_source.hpp"

@@ -853,18 +853,6 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 		);
 	}
 
-#if 0
-	auto &drawCmdPrimary = static_cast<Anvil::PrimaryCommandBuffer&>(*drawCmd);
-	drawCmdPrimary.record_begin_render_pass(
-		1, /* in_n_clear_values */
-		&attachment_clear_value,
-		m_fbos[n_current_swapchain_image].get(),
-		render_area,
-		m_renderPass.get(),
-		VK_SUBPASS_CONTENTS_INLINE
-	);
-#endif
-
 	DrawScene(ptrDrawCmd,stagingRt);
 
 	auto &finalImg = *stagingRt->GetTexture()->GetImage();

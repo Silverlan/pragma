@@ -210,7 +210,8 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 	Lua::RegisterLibrary(l.GetState(),"dmx",{
 		{"load",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
 			auto &f = *Lua::CheckFile(l,1);
-			auto fd = ::dmx::FileData::Load(f.GetHandle());
+			auto hFile = f.GetHandle();
+			auto fd = ::dmx::FileData::Load(hFile);
 			if(fd == nullptr)
 				return 0;
 			auto t = Lua::CreateTable(l);

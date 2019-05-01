@@ -32,13 +32,21 @@ macro(get_full_file_name OUT_NAME FILE_NAME FILE_TYPE)
 endmacro()
 
 function(create_path FILE_NAME)
-	get_filename_component(SRC_PATH "${FILE_NAME}" DIRECTORY)
-	add_custom_command(
-	  TARGET GenerateOutput
-	  POST_BUILD
-	  COMMAND mkdir -p "${SRC_PATH}"
-	)
+	if(UNIX)
+		get_filename_component(SRC_PATH "${FILE_NAME}" DIRECTORY)
+		add_custom_command(
+		  TARGET GenerateOutput
+		  POST_BUILD
+		  COMMAND mkdir -p "${SRC_PATH}"
+		)
+	endif()
 endfunction()
+
+if(WIN32)
+	set(COPY_CMD copy)
+else()
+	set(COPY_CMD cp)
+endif()
 
 function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 	set(optional_arg "DYNAMIC")
@@ -55,14 +63,18 @@ function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 	get_filename_component(SRC_PATH "${SRC_PATH}" REALPATH)
 	get_filename_component(FILE_NAME "${SRC_PATH}" NAME)
 
-	# message("copy_abs: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${FILE_NAME}")
+	message("copy_abs: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${FILE_NAME}")
 	if(EXISTS "${SRC_PATH}")
 		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${FILE_NAME}")
 		create_path(${DST_PATH})
+		if(WIN32)
+			string(REPLACE "/" "\\" SRC_PATH ${SRC_PATH})
+			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
+		endif()
 		add_custom_command(
 		  TARGET GenerateOutput
 		  POST_BUILD
-		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${FILE_NAME}..."
 		)
 	endif()
@@ -95,14 +107,18 @@ function(copy_output_file_ext SRC_PATH DST_PATH)
 	get_filename_component(SRC_PATH "${SRC_FILE_PATH}/${LIB_NAME}" REALPATH)
 	get_filename_component(LIB_NAME "${SRC_PATH}" NAME)
 
-	# message("copy_ext:" "${SRC_PATH}" -> "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${LIB_NAME}")
+	message("copy_ext:" "${SRC_PATH}" -> "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${LIB_NAME}")
 	if(EXISTS "${SRC_PATH}" AND NOT "${SRC_PATH}" STREQUAL "/")
 		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${LIB_NAME}")
 		create_path(${DST_PATH})
+		if(WIN32)
+			string(REPLACE "/" "\\" SRC_PATH ${SRC_PATH})
+			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
+		endif()
 		add_custom_command(
 		  TARGET GenerateOutput
 		  POST_BUILD
-		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${LIB_NAME}..."
 		)
 	endif()
@@ -123,14 +139,18 @@ function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 	get_filename_component(SRC_PATH "${SRC_FILE_PATH}/${DST_FILE_NAME}" REALPATH)
 	get_filename_component(DST_FILE_NAME "${SRC_PATH}" NAME)
 
-	# message("copy_extc: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${DST_FILE_NAME}")
+	message("copy_extc: ${SRC_PATH} -> ${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${DST_FILE_NAME}")
 	if(EXISTS "${SRC_PATH}" AND NOT "${SRC_PATH}" STREQUAL "/")
 		set(DST_PATH "${CMAKE_CURRENT_BINARY_DIR}/../../output/${DST_PATH}/${DST_FILE_NAME}")
 		create_path(${DST_PATH})
+		if(WIN32)
+			string(REPLACE "/" "\\" SRC_PATH ${SRC_PATH})
+			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
+		endif()
 		add_custom_command(
 		  TARGET GenerateOutput
 		  POST_BUILD
-		  COMMAND cp "${SRC_PATH}" "${DST_PATH}"
+		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${DST_FILE_NAME}..."
 		)
 	endif()

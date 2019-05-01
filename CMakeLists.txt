@@ -41,21 +41,23 @@ function(search_lib_recursive_full VAR_NAME FILE_PATH)
 		get_filename_component(FILE_PATH_WITH_EXT "${FILE_PATH_WITH_EXT}" REALPATH)
 	endif()
 
-	# Find library file
-	get_filename_component(FILE_PATH_DIRECTORY "${FILE_PATH_WITH_EXT}" DIRECTORY)
-	get_filename_component(FILE_PATH_NAME "${FILE_PATH_WITH_EXT}" NAME)
-	execute_process(
-		COMMAND find ./ -name "${FILE_PATH_NAME}*"
-		WORKING_DIRECTORY "${FILE_PATH_DIRECTORY}"
-		OUTPUT_VARIABLE FOUND_RESULT
-	)
-	if(NOT ${FOUND_RESULT} STREQUAL "")
-		get_filename_component(FOUND_RESULT "${FOUND_RESULT}" NAME)
-		string(STRIP ${FOUND_RESULT} FOUND_RESULT)
-		# message("FIND: ${FILE_PATH_DIRECTORY}/${FILE_PATH_NAME}* -> ${FOUND_RESULT}")
-		set(FILE_PATH_WITH_EXT "${FILE_PATH_DIRECTORY}/${FOUND_RESULT}")
+	if(UNIX)
+		# Find actual library file name
+		get_filename_component(FILE_PATH_DIRECTORY "${FILE_PATH_WITH_EXT}" DIRECTORY)
+		get_filename_component(FILE_PATH_NAME "${FILE_PATH_WITH_EXT}" NAME)
+		execute_process(
+			COMMAND find ./ -name "${FILE_PATH_NAME}*"
+			WORKING_DIRECTORY "${FILE_PATH_DIRECTORY}"
+			OUTPUT_VARIABLE FOUND_RESULT
+		)
+		if(NOT ${FOUND_RESULT} STREQUAL "")
+			get_filename_component(FOUND_RESULT "${FOUND_RESULT}" NAME)
+			string(STRIP ${FOUND_RESULT} FOUND_RESULT)
+			# message("FIND: ${FILE_PATH_DIRECTORY}/${FILE_PATH_NAME}* -> ${FOUND_RESULT}")
+			set(FILE_PATH_WITH_EXT "${FILE_PATH_DIRECTORY}/${FOUND_RESULT}")
+		endif()
+		#
 	endif()
-	#
 
 	set(${VAR_NAME} ${FILE_PATH_WITH_EXT} CACHE PATH "Path to library." FORCE)
 endfunction(search_lib_recursive_full)

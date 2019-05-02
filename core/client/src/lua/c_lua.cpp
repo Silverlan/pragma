@@ -371,7 +371,7 @@ void CGame::RegisterLua()
 		auto &depthTex = scene.GetPrepass().textureDepthSampled;
 		if (depthTex == nullptr)
 			return;
-		Lua::Push(l, depthTex);
+		Lua::Push(l,depthTex);
 	}));
 	classDefScene.def("GetPrepassNormalTexture",&Lua::Scene::GetPrepassNormalTexture);
 	classDefScene.def("GetRenderTarget",&Lua::Scene::GetRenderTarget);

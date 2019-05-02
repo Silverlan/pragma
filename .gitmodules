@@ -106,9 +106,6 @@
 [submodule "third_party_libs/squish"]
 	path = third_party_libs/squish
 	url = https://github.com/Cavewhere/squish.git
-[submodule "third_party_libs/vtflib"]
-	path = third_party_libs/vtflib
-	url = https://github.com/azuisleet/VTFLib.git
 [submodule "third_party_libs/openal-soft"]
 	path = third_party_libs/openal-soft
 	url = https://github.com/kcat/openal-soft.git

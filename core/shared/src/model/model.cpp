@@ -596,11 +596,11 @@ void Model::AddTexturePath(const std::string &path)
 	if(path.empty())
 		return;
 	auto npath = path;
-	if(npath.back() != '/' && npath.back() != '\\')
-		npath += '\\';
 	npath = FileManager::GetCanonicalizedPath(npath);
 	if(npath.empty())
 		return;
+	if(npath.back() != '/' && npath.back() != '\\')
+		npath += '\\';
 	auto it = std::find_if(m_metaInfo.texturePaths.begin(),m_metaInfo.texturePaths.end(),[&npath](const std::string &pathOther) {
 		return ustring::compare(npath,pathOther,false);
 	});

@@ -10,7 +10,6 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-	set(CONFIG_ENABLE_VTF_SUPPORT OFF CACHE BOOL OFF FORCE) # VTFLib is Windows-only
 endif()
 
 set(CMAKE_BUILD_TYPE ${BUILD_TYPE} CACHE STRING "" FORCE)
@@ -360,8 +359,9 @@ set(DEPENDENCY_MINIBALL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/minib
 set(DEPENDENCY_SQUISH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish CACHE PATH "Path to include directory.")
 set(DEPENDENCY_SQUISH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/lib64/vs9/squish CACHE PATH "Path to library.")
 
-set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/sln/vs8/VTFLib/x64/Release VTFLib DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
+set(DEPENDENCY_VTFLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/${BINARY_PRAGMA_DIR}/src VTFLib13)
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
@@ -826,6 +826,12 @@ set_target_properties(SPIRV PROPERTIES FOLDER third_party_libs/anvil/glslang)
 set_target_properties(SPVRemapper PROPERTIES FOLDER third_party_libs/anvil/glslang)
 #
 
+# vtflib
+set(USE_LIBTXC_DXTN OFF CACHE BOOL OFF FORCE)
+register_third_party_library(vtflib)
+# set_target_properties(vtflib PROPERTIES FOLDER third_party_libs)
+#
+
 # bullet
 set(USE_DOUBLE_PRECISION ON CACHE BOOL ON FORCE)
 set(BUILD_BULLET2_DEMOS OFF CACHE BOOL OFF FORCE)
@@ -888,13 +894,6 @@ set_target_properties(Detour PROPERTIES FOLDER third_party_libs/recast)
 set_target_properties(DetourCrowd PROPERTIES FOLDER third_party_libs/recast)
 set_target_properties(DetourTileCache PROPERTIES FOLDER third_party_libs/recast)
 set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
-#
-
-# vtflib
-if(WIN32)
-	include_external_msproject(vtflib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/sln/vs8/VTFLib/VTFLib.vcproj)
-	set_target_properties(vtflib PROPERTIES FOLDER third_party_libs)
-endif()
 #
 
 # squish

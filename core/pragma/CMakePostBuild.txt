@@ -216,6 +216,7 @@ copy_output_file_ext("${DEPENDENCY_FREETYPE_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_GEOMETRIC_TOOLS_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext(${CMAKE_CURRENT_BINARY_DIR}/../../third_party_libs/zlib/${BINARY_PRAGMA_DIR}/zlib1${SHARED_LIB_EXT} ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_HLLIB_LIBRARY}" "modules/mount_external")
+copy_output_file_ext("${DEPENDENCY_VTFLIB_LIBRARY}" ${BINARY_OUTPUT_DIR})
 
 if(WIN32)
 	copy_output_file_extc("${DEPENDENCY_FMOD_LIBRARY}" ${BINARY_OUTPUT_DIR} "fmod64")

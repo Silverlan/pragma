@@ -54,7 +54,7 @@ CWaterSurfaceComponent::~CWaterSurfaceComponent()
 void CWaterSurfaceComponent::SetWaterObject(CWaterComponent *ent)
 {
 	m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : util::WeakHandle<CWaterComponent>{};
-	if(ent != nullptr)
+	if(ent != nullptr && ent->IsWaterSceneValid())
 		InitializeWaterScene(ent->GetWaterScene());
 }
 

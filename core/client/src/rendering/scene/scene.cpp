@@ -173,6 +173,9 @@ Scene::~Scene()
 	auto it = std::find(s_scenes.begin(),s_scenes.end(),this);
 	if(it != s_scenes.end())
 		s_scenes.erase(it);
+
+	m_occlusionCullingHandler = nullptr;
+	m_occlusionOctree = nullptr;
 }
 
 bool Scene::IsSSAOEnabled() const {return m_bSSAOEnabled;}

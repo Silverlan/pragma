@@ -28,8 +28,8 @@ if(UNIX)
 		add_custom_command(
 		  TARGET GenerateOutput
 		  POST_BUILD
-		  COMMAND patchelf --set-rpath '$$ORIGIN' '${LIBRARY_FILENAME}'
-		  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}"
+		  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}/${LIBRARY_FILENAME}" '$$ORIGIN'
+		  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
 		  COMMENT "Updating library runpath for library ${LIBRARY_FILENAME}..."
 		)
 
@@ -92,9 +92,17 @@ if(UNIX)
 	add_custom_command(
 	  TARGET GenerateOutput
 	  POST_BUILD
-	  COMMAND patchelf --set-rpath '$ORIGIN/lib' 'pragma'
-	  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../output"
+	  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/pragma" '$$ORIGIN/lib'
+	  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
 	  COMMENT "Updating pragma runpath..."
+	)
+
+	add_custom_command(
+	  TARGET GenerateOutput
+	  POST_BUILD
+	  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/pragma_server" '$$ORIGIN/lib'
+	  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+	  COMMENT "Updating pragma_server runpath..."
 	)
 else()
 	set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")

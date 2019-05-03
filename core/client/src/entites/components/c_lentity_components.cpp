@@ -700,14 +700,20 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_func_water_component_methods<luabind::class_<CWaterHandle,BaseEntityComponentHandle>,CWaterHandle>(l,defCWater);
 	defCWater.def("GetReflectionScene",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
 		pragma::Lua::check_component(l,hEnt);
+		if(hEnt->IsWaterSceneValid() == false)
+			return;
 		Lua::Push<std::shared_ptr<Scene>>(l,hEnt->GetWaterScene().sceneReflection);
 	}));
 	defCWater.def("GetWaterSceneTexture",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
 		pragma::Lua::check_component(l,hEnt);
+		if(hEnt->IsWaterSceneValid() == false)
+			return;
 		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt->GetWaterScene().texScene);
 	}));
 	defCWater.def("GetWaterSceneDepthTexture",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
 		pragma::Lua::check_component(l,hEnt);
+		if(hEnt->IsWaterSceneValid() == false)
+			return;
 		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt->GetWaterScene().texSceneDepth);
 	}));
 	entsMod[defCWater];

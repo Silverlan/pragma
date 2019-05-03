@@ -68,6 +68,7 @@ public:
 		// Debug
 		mutable std::shared_ptr<DebugRenderer::BaseObject> m_debugObject;
 	};
+	virtual ~BaseOcclusionOctree();
 	// If set to true, only one reference of a object can exist in the tree at a time.
 	// This is better for performance, but might not be accurate in all cases.
 	void SetSingleReferenceMode(bool b);

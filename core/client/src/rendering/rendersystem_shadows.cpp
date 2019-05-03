@@ -17,6 +17,8 @@
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
+
+#pragma optimize("",off)
 struct ShadowRenderInfo
 {
 	const CBaseEntity *entity = nullptr;
@@ -435,7 +437,6 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 			}
 		}
 	};
-
 	auto &smRt = shadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
 	if(tex != nullptr)
@@ -471,9 +472,15 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 		auto numLayers = shadowMap->GetLayerCount();
 
 		// Clear all layers
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-		prosper::util::record_clear_image(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,1.f);
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		//TODO: Clearing image seems to cause problems? Check if everything's in order
+		//Try clearing attachment!!!
+		//Is clearing even required? Should it not already be cleared later? What is this exactly?
+
+		// Not needed, since layers are already cleared in renderpass below?
+		//prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+		//prosper::util::record_clear_image(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,1.f);
+		//prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 		//auto layout = img->GetLayout(); // prosper TODO
 		for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
@@ -527,7 +534,6 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 
 			//drawCmd->SetImageLayout(img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,0u,1u,layerId,1); // prosper TODO
 			//img->SetInternalLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
-
 			vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
 			if(prosper::util::record_begin_render_pass(*(*drawCmd),*smRt,layerId,&clearVal) == true)
 			{
@@ -754,3 +760,4 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 		render_shadows(drawCmd,*light);
 	}
 }
+#pragma optimize("",on)

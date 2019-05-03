@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 if(WIN32)
 	set(BUILD_TYPE RelWithDebInfo)
 else()
-	# set(BUILD_TYPE Release)
-	set(BUILD_TYPE RelWithDebInfo)
+	set(BUILD_TYPE Release)
+	# set(BUILD_TYPE RelWithDebInfo)
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -361,7 +361,7 @@ set(DEPENDENCY_SQUISH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/
 
 set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
 set(DEPENDENCY_VTFLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/${BINARY_PRAGMA_DIR}/src VTFLib13)
+search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/src/${BINARY_PRAGMA_DIR} VTFLib13)
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
@@ -538,8 +538,8 @@ if(UNIX)
 	resolve_links(DEPENDENCY_WMS_SHARED_LIBRARY)
 	resolve_links(DEPENDENCY_ZLIB_LIBRARY)
 endif()
-set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory.")
-set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory.")
+set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
+set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
 #
 
 message("Processing core libraries...")
@@ -991,7 +991,7 @@ add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
 
-add_dependencies(cmaterialsystem materialsystem prosper)
+add_dependencies(cmaterialsystem materialsystem prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem freetype glslang)
 
 if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)

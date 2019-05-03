@@ -124,7 +124,7 @@ bool ShaderWater::BindEntity(CBaseEntity &ent)
 	if(ShaderTextured3DBase::BindEntity(ent) == false)
 		return false;
 	auto *descSetEffect = whWaterComponent->GetEffectDescriptorSet();
-	if(descSetEffect == nullptr)
+	if(descSetEffect == nullptr || whWaterComponent->IsWaterSceneValid() == false)
 		return false;
 	auto &waterScene = whWaterComponent->GetWaterScene();
 	auto &sceneReflection = waterScene.sceneReflection;

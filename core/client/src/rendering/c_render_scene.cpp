@@ -335,21 +335,25 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
 			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 		);
-		fp.Compute(*drawCmd,*(*depthTex->GetImage()),*scene->GetCameraDescriptorSetCompute());
-		auto &lightBits = fp.GetShadowLightBits();
-		for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
+		auto *worldEnv = scene->GetWorldEnvironment();
+		if(worldEnv->IsUnlit() == false)
 		{
-			auto &intVal = lightBits.at(i);
-			const auto numBits = 32u;
-			for(auto j=0u;j<numBits;++j)
+			fp.Compute(*drawCmd,*(*depthTex->GetImage()),*scene->GetCameraDescriptorSetCompute());
+			auto &lightBits = fp.GetShadowLightBits();
+			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
 			{
-				if(!(intVal &(1<<j))) // If bit is set, this light is visible on screen
-					continue;
-				auto shadowIdx = i *numBits +j;
-				auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-				if(l == nullptr || scene->HasLightSource(*l) == false)
-					continue;
-				culledLightSources.push_back(l);
+				auto &intVal = lightBits.at(i);
+				const auto numBits = 32u;
+				for(auto j=0u;j<numBits;++j)
+				{
+					if(!(intVal &(1<<j))) // If bit is set, this light is visible on screen
+						continue;
+					auto shadowIdx = i *numBits +j;
+					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
+					if(l == nullptr || scene->HasLightSource(*l) == false)
+						continue;
+					culledLightSources.push_back(l);
+				}
 			}
 		}
 
@@ -380,6 +384,7 @@ void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 		);
 		
+		if(worldEnv->IsUnlit() == false)
 			RenderSystem::RenderShadows(drawCmd,culledLightSources);
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 			//drawCmd->SetViewport(w,h); // Reset the viewport

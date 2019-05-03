@@ -5,6 +5,7 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/math/intersection.h>
 
+#pragma optimize("",off)
 BaseOcclusionOctree::Node::Node(BaseOcclusionOctree *tree,Node *parent)
 	: m_tree(tree),m_parent((parent != nullptr) ? parent->shared_from_this() : std::weak_ptr<BaseOcclusionOctree::Node>{})
 {}
@@ -62,9 +63,11 @@ void BaseOcclusionOctree::Node::InitializeChildren(bool bPopulateChildren)
 {
 	if(m_children != nullptr || m_bIsFinal == true)
 		return;
+	// THIS CAUSES ERROR
 	m_children = std::make_shared<std::array<std::shared_ptr<Node>,8>>();
 	for(auto &c : *m_children)
 		c = m_tree->CreateNode(this);
+	//
 
 	auto dim = GetChildDimensions();
 	auto minNodeSize = m_tree->GetMinNodeSize();
@@ -189,6 +192,11 @@ void BaseOcclusionOctree::Node::DebugDraw(bool b,bool applyToChildren,uint32_t d
 BaseOcclusionOctree::BaseOcclusionOctree(float minNodeSize,float maxNodeSize,float initialBounds)
 	: m_minNodeSize(minNodeSize),m_maxNodeSize(maxNodeSize),m_initialBounds(initialBounds)
 {}
+
+BaseOcclusionOctree::~BaseOcclusionOctree()
+{
+	m_root = nullptr; // Make sure tree is destroyed before everything else
+}
 
 void BaseOcclusionOctree::Initialize()
 {
@@ -329,3 +337,4 @@ const typename BaseOcclusionOctree::Node &BaseOcclusionOctree::GetRootNode() con
 float BaseOcclusionOctree::GetMinNodeSize() const {return m_minNodeSize;}
 float BaseOcclusionOctree::GetMaxNodeSize() const {return m_maxNodeSize;}
 void BaseOcclusionOctree::DebugPrint() const {m_root->DebugPrint();}
+#pragma optimize("",on)

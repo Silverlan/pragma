@@ -178,3 +178,6 @@
 [submodule "third_party_libs/vtflib"]
 	path = third_party_libs/vtflib
 	url = https://github.com/panzi/VTFLib.git
+[submodule "third_party_libs/luajit"]
+	path = third_party_libs/luajit
+	url = https://github.com/LuaJIT/LuaJIT.git

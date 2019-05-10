@@ -178,3 +178,6 @@
 [submodule "third_party_libs/niflib"]
 	path = third_party_libs/niflib
 	url = https://github.com/Silverlan/niflib.git
+[submodule "third_party_libs/luajit"]
+	path = third_party_libs/luajit
+	url = https://github.com/Silverlan/LuaJIT.git

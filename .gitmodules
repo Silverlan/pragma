@@ -94,9 +94,6 @@
 [submodule "third_party_libs/libzip"]
 	path = third_party_libs/libzip
 	url = https://github.com/nih-at/libzip.git
-[submodule "third_party_libs/libpng"]
-	path = third_party_libs/libpng
-	url = git://git.code.sf.net/p/libpng/code
 [submodule "third_party_libs/rectangle_bin_pack"]
 	path = third_party_libs/rectangle_bin_pack
 	url = https://github.com/juj/RectangleBinPack.git

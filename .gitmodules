@@ -178,3 +178,6 @@
 [submodule "third_party_libs/luajit"]
 	path = third_party_libs/luajit
 	url = https://github.com/LuaJIT/LuaJIT.git
+[submodule "third_party_libs/libpng"]
+	path = third_party_libs/libpng
+	url = https://github.com/glennrp/libpng.git

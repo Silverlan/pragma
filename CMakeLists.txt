@@ -545,6 +545,8 @@ set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory
 message("Processing core libraries...")
 add_subdirectory(core)
 
+set_target_properties(build_core PROPERTIES FOLDER core)
+
 message("Processing external libraries...")
 add_subdirectory(external_libs)
 
@@ -684,7 +686,6 @@ target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OGRE_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MS3D_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_COB_IMPORTER)
-target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BLEND_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_NDO_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_IFC_IMPORTER)
@@ -696,8 +697,9 @@ target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_C4D_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3MF_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X3D_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MMD_IMPORTER)
-target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_IMPORTER)
 if(UNIX)
+	target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_IMPORTER)
+	target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BLEND_IMPORTER)
 	target_compile_options(assimp PUBLIC -Os)
 endif()
 set_target_properties(assimp PROPERTIES FOLDER third_party_libs/assimp)
@@ -897,7 +899,7 @@ set_target_properties(SPVRemapper PROPERTIES FOLDER third_party_libs/anvil/glsla
 # vtflib
 set(USE_LIBTXC_DXTN OFF CACHE BOOL OFF FORCE)
 register_third_party_library(vtflib)
-# set_target_properties(vtflib PROPERTIES FOLDER third_party_libs)
+set_target_properties(VTFLib13 PROPERTIES FOLDER third_party_libs)
 #
 
 # bullet

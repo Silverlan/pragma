@@ -379,7 +379,7 @@
 			<group>
 				<function type="method" shared="1">
 					<name>ApplyForce</name>
-					<desc>Adds the specified force to the entity's physics objects. If ''relativeOrigin'' is specified, the force will be applied at that position.</desc>
+					<desc>Adds the specified force to the entity's physics objects. If ''relativeOrigin'' is specified, the force will be applied at that position. This does NOT work for character controllers, use phys.Object:AddLinearVelocity for them instead!</desc>
 					<lua></lua>
 					<overload>
 						<parameters>
@@ -395,7 +395,7 @@
 				</function>
 				<function type="method" shared="1">
 					<name>ApplyImpulse</name>
-					<desc>Adds the specified impulse to the entity's physics objects. If ''relativeOrigin'' is specified, the impulse will be applied at that position.</desc>
+					<desc>Adds the specified impulse to the entity's physics objects. If ''relativeOrigin'' is specified, the impulse will be applied at that position. This does NOT work for character controllers, use phys.Object:AddLinearVelocity for them instead!</desc>
 					<lua></lua>
 					<overload>
 						<parameters>

@@ -296,6 +296,8 @@ public:
 
 	void UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
 	const std::shared_ptr<prosper::Buffer> &GetRenderSettingsBuffer() const;
+	pragma::RenderSettings &GetRenderSettings();
+	const pragma::RenderSettings &GetRenderSettings() const;
 	const std::shared_ptr<prosper::Buffer> &GetCameraBuffer() const;
 	const std::shared_ptr<prosper::Buffer> &GetViewCameraBuffer() const;
 	const std::shared_ptr<prosper::Buffer> &GetFogBuffer() const;
@@ -309,6 +311,8 @@ public:
 	WorldEnvironment *GetWorldEnvironment() const;
 	void SetWorldEnvironment(WorldEnvironment &env);
 	void ClearWorldEnvironment();
+
+	void UpdateTileSize();
 
 	bool BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass=nullptr);
 	bool EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);

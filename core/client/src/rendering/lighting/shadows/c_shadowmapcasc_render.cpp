@@ -68,11 +68,15 @@ void ShadowMapCasc::FreeRenderTarget() {}
 //} // prosper TODO
 const std::shared_ptr<prosper::RenderPass> &ShadowMapCasc::GetRenderPass(pragma::CLightComponent::RenderPass rp) const
 {
-	return m_textureSets[umath::to_integral(rp)].renderTarget->GetRenderPass();
+	auto &set = m_textureSets[umath::to_integral(rp)];
+	static std::shared_ptr<prosper::RenderPass> nptr = nullptr;
+	return set.renderTarget ? set.renderTarget->GetRenderPass() : nptr;
 }
 const std::shared_ptr<prosper::Texture> &ShadowMapCasc::GetDepthTexture(pragma::CLightComponent::RenderPass rp) const
 {
-	return m_textureSets[umath::to_integral(rp)].renderTarget->GetTexture();
+	auto &set = m_textureSets.at(umath::to_integral(rp));
+	static std::shared_ptr<prosper::Texture> nptr = nullptr;
+	return set.renderTarget ? set.renderTarget->GetTexture() : nptr;
 }
 const std::shared_ptr<prosper::Texture> &ShadowMapCasc::GetDepthTexture() const {return GetDepthTexture(pragma::CLightComponent::RenderPass::Dynamic);}
 const std::shared_ptr<prosper::RenderTarget> &ShadowMapCasc::GetRenderTarget(pragma::CLightComponent::RenderPass rp) const

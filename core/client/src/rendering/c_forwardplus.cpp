@@ -6,6 +6,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
+#include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -17,9 +18,28 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
+static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
+{
+	if(c_game == NULL)
+		return;
+	auto &scene = c_game->GetScene();
+	if(scene == nullptr)
+		return;
+	auto &fp = scene->GetForwardPlusInstance();
+	auto &prepass = scene->GetPrepass();
+	c_engine->WaitIdle();
+	fp.Initialize(*c_engine,scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth,*scene->GetCamera());
+	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
+	scene->UpdateTileSize();
+	c_engine->ReloadShader("forwardp_light_culling");
+}
+REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size,cmd_forwardplus_tile_size);
+
+static auto cvTileSize = GetClientConVar("render_forwardplus_tile_size");
 std::pair<uint32_t,uint32_t> pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(uint32_t w,uint32_t h)
 {
-	const auto tileSize = pragma::ShaderForwardPLightCulling::TILE_SIZE;
+	const auto tileSize = cvTileSize->GetInt();
 	const auto fCalcWorkGroups = [tileSize](uint32_t v) {
 		auto numGroups = v;
 		if((numGroups %tileSize) == 0)
@@ -176,3 +196,4 @@ Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCo
 Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_descSetGroupDepthBuffer)->get_descriptor_set(0u);}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
+#pragma optimize("",on)

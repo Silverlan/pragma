@@ -35,6 +35,7 @@
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
+#pragma optimize("",off)
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 	//: descBuffer(nullptr) // prosper TODO
 {
@@ -220,8 +221,8 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.farZ = GetZFar();
 	m_renderSettings.viewportW = w;
 	m_renderSettings.viewportH = h;
-	m_renderSettings.numberOfTilesX = pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(w,h).first;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
+	UpdateTileSize();
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
@@ -231,6 +232,12 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
+}
+void Scene::UpdateTileSize()
+{
+	auto &tileInfo = m_renderSettings.tileInfo;
+	tileInfo = static_cast<uint32_t>(pragma::ShaderForwardPLightCulling::TILE_SIZE)<<16;
+	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(),GetHeight()).first);
 }
 void Scene::InitializeCameraBuffer()
 {
@@ -373,6 +380,8 @@ void Scene::InitializeSwapDescriptorBuffers()
 	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*m_fogDescSetGroup)->get_descriptor_set(0u),*m_fogBuffer,0u);
 }
 const std::shared_ptr<prosper::Buffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
+pragma::RenderSettings &Scene::GetRenderSettings() {return m_renderSettings;}
+const pragma::RenderSettings &Scene::GetRenderSettings() const {return const_cast<Scene*>(this)->GetRenderSettings();}
 const std::shared_ptr<prosper::Buffer> &Scene::GetCameraBuffer() const {return m_cameraBuffer;}
 const std::shared_ptr<prosper::Buffer> &Scene::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
 const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint) const
@@ -912,3 +921,4 @@ float Scene::GetAspectRatio() {return camera->GetAspectRatio();}
 float Scene::GetZNear() {return camera->GetZNear();}
 float Scene::GetZFar() {return camera->GetZFar();}
 const std::shared_ptr<Camera> &Scene::GetCamera() const {return camera;}
+#pragma optimize("",on)

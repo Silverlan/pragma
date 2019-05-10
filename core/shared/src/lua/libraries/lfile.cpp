@@ -400,12 +400,20 @@ int Lua::file::GetFlags(lua_State *l)
 int32_t Lua::file::find_external_game_resource_files(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);
-	auto dllHandle = engine->GetNetworkState(l)->LoadLibraryModule("wv_mde");
+	auto dllHandle = engine->GetNetworkState(l)->LoadLibraryModule("mount_external/pr_mount_external");
 	if(dllHandle == nullptr)
-		return 0;
+	{
+		Lua::CreateTable(l);
+		Lua::CreateTable(l);
+		return 2;
+	}
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void(*)(const std::string&,std::vector<std::string>*,std::vector<std::string>*)>("find_files");
 	if(fFindFiles == nullptr)
-		return 0;
+	{
+		Lua::CreateTable(l);
+		Lua::CreateTable(l);
+		return 2;
+	}
 	std::vector<std::string> files {};
 	std::vector<std::string> directories {};
 	fFindFiles(path,&files,&directories);

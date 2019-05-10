@@ -46,6 +46,7 @@ extern "C"
 	}
 }
 
+#pragma optimize("",off)
 DLLCENGINE CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -1109,3 +1110,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

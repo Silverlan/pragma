@@ -35,7 +35,7 @@ function(create_path FILE_NAME)
 	if(UNIX)
 		get_filename_component(SRC_PATH "${FILE_NAME}" DIRECTORY)
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND mkdir -p "${SRC_PATH}"
 		)
@@ -72,7 +72,7 @@ function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
 		endif()
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${FILE_NAME}..."
@@ -116,7 +116,7 @@ function(copy_output_file_ext SRC_PATH DST_PATH)
 			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
 		endif()
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${LIB_NAME}..."
@@ -148,7 +148,7 @@ function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 			string(REPLACE "/" "\\" DST_PATH ${DST_PATH})
 		endif()
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
 		  COMMENT "Copying ${DST_FILE_NAME}..."

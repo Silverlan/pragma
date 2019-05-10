@@ -13,7 +13,7 @@ namespace pragma
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 
-		static const uint32_t TILE_SIZE;
+		static uint32_t TILE_SIZE;
 
 		enum class CameraBinding : uint32_t
 		{

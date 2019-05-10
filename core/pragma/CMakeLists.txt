@@ -3,8 +3,9 @@ include("../../CMakeShared.txt")
 set(PRECOMPILED_HEADER "stdafx_weave")
 def_project(pragma exe)
 
-add_custom_target(GenerateOutput ALL)
-add_dependencies(GenerateOutput pragma)
+add_custom_target(build_core ALL DEPENDS shared server engine client cengine)
+add_dependencies(pragma pragma_server)
+add_dependencies(build_core pragma)
 include("CMakePostBuild.txt")
 if(UNIX)
 	target_link_libraries(pragma "dl")
@@ -26,7 +27,7 @@ if(UNIX)
 	function(patch_library LIBRARY_NAME OUTPUT_DIR)
 		get_filename_component(LIBRARY_FILENAME ${LIBRARY_NAME} NAME)
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}/${LIBRARY_FILENAME}" '$$ORIGIN'
 		  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
@@ -34,7 +35,7 @@ if(UNIX)
 		)
 
 		add_custom_command(
-		  TARGET GenerateOutput
+		  TARGET build_core
 		  POST_BUILD
 		  COMMAND sh normalize_library_name.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/${OUTPUT_DIR}/${LIBRARY_FILENAME}"
 		  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
@@ -90,7 +91,7 @@ if(UNIX)
 	patch_library("${CMAKE_CURRENT_BINARY_DIR}/../../output/modules/pr_dmx/libpr_dmx.so" modules)
 
 	add_custom_command(
-	  TARGET GenerateOutput
+	  TARGET build_core
 	  POST_BUILD
 	  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/pragma" '$$ORIGIN/lib'
 	  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
@@ -98,7 +99,7 @@ if(UNIX)
 	)
 
 	add_custom_command(
-	  TARGET GenerateOutput
+	  TARGET build_core
 	  POST_BUILD
 	  COMMAND sh patch_library.sh "${CMAKE_CURRENT_BINARY_DIR}/../../output/pragma_server" '$$ORIGIN/lib'
 	  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"

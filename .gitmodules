@@ -109,9 +109,6 @@
 [submodule "third_party_libs/openal-soft"]
 	path = third_party_libs/openal-soft
 	url = https://github.com/kcat/openal-soft.git
-[submodule "third_party_libs/luajit"]
-	path = third_party_libs/luajit
-	url = http://luajit.org/git/luajit-2.0.git
 [submodule "third_party_libs/alure"]
 	path = third_party_libs/alure
 	url = https://github.com/kcat/alure.git

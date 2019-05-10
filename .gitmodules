@@ -178,3 +178,6 @@
 [submodule "third_party_libs/libpng"]
 	path = third_party_libs/libpng
 	url = https://github.com/glennrp/libpng.git
+[submodule "third_party_libs/qhull"]
+	path = third_party_libs/qhull
+	url = https://github.com/qhull/qhull.git

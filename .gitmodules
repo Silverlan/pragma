@@ -163,9 +163,6 @@
 [submodule "third_party_libs/hllib"]
 	path = third_party_libs/hllib
 	url = https://github.com/Silverlan/hllib.git
-[submodule "third_party_libs/niflib"]
-	path = third_party_libs/niflib
-	url = https://github.com/niftools/niflib.git
 [submodule "third_party_libs/anvil"]
 	path = third_party_libs/anvil
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/Anvil.git

@@ -1102,13 +1102,8 @@ add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
 
-<<<<<<< HEAD
 add_dependencies(cmaterialsystem materialsystem prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem freetype glslang util_formatted_text)
-=======
-add_dependencies(cmaterialsystem materialsystem prosper)
-add_dependencies(wgui cmaterialsystem freetype glslang)
->>>>>>> 7a33d98fe14e9da214a5a4271855de63cbec3091
 
 if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)
 	add_dependencies(alsoundsystem OpenAL)

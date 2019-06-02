@@ -154,9 +154,6 @@
 [submodule "third_party_libs/libnoise"]
 	path = third_party_libs/libnoise
 	url = https://github.com/qknight/libnoise.git
-[submodule "third_party_libs/freetype2"]
-	path = third_party_libs/freetype2
-	url = git://git.sv.nongnu.org/freetype/freetype2.git
 [submodule "third_party_libs/rapidxml"]
 	path = third_party_libs/rapidxml
 	url = https://github.com/discordapp/rapidxml.git

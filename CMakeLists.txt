@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.8)
 
 if(WIN32)
-	set(BUILD_TYPE RelWithDebInfo)
+	set(CONFIG_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Build Type")
 else()
-	set(BUILD_TYPE Release)
-	# set(BUILD_TYPE RelWithDebInfo)
+	set(CONFIG_BUILD_TYPE "Release" CACHE STRING "Build Type")
 endif()
+set_property(CACHE CONFIG_BUILD_TYPE PROPERTY STRINGS RelWithDebInfo Release Debug)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(UNIX)
 	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(CMAKE_BUILD_TYPE ${BUILD_TYPE} CACHE STRING "" FORCE)
+set(CMAKE_BUILD_TYPE ${CONFIG_BUILD_TYPE} CACHE STRING "" FORCE)
 if(WIN32)
-	set(BINARY_PRAGMA_DIR ${BUILD_TYPE} CACHE INTERNAL "" FORCE)
+	set(BINARY_PRAGMA_DIR ${CONFIG_BUILD_TYPE} CACHE INTERNAL "" FORCE)
 else()
 	set(BINARY_PRAGMA_DIR "" CACHE INTERNAL "" FORCE)
 endif()
@@ -267,8 +267,8 @@ search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PR
 set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
 
-set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype2/include CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype2/${BINARY_PRAGMA_DIR} freetype)
+set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
 
 set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml CACHE STRING "" FORCE)
 set(DEPENDENCY_GLSLANG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/deps/glslang CACHE STRING "" FORCE)
@@ -374,11 +374,12 @@ set(DEPENDENCY_VTFLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs
 search_lib_recursive(DEPENDENCY_VTFLIB_LIBRARY third_party_libs/vtflib/src/${BINARY_PRAGMA_DIR} VTFLib13)
 
 set(DEPENDENCY_LUAJIT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luajit/src CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
 if(WIN32)
+	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
 	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src lua51 STATIC ${CMAKE_CURRENT_LIST_DIR})
 else()
-	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit STATIC ${CMAKE_CURRENT_LIST_DIR})
+	search_lib_recursive(DEPENDENCY_LUAJIT_LIBRARY third_party_libs/luajit/src luajit DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
+	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
 set(DEPENDENCY_ALURE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/alure/include CACHE PATH "Path to include directory.")
@@ -423,8 +424,16 @@ search_lib_recursive(DEPENDENCY_BULLET_SOFTBODY_LIBRARY third_party_libs/bullet/
 set(DEPENDENCY_NIFTOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/niflib/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_NIFTOOLS_LIBRARY third_party_libs/niflib/${BINARY_PRAGMA_DIR} niflib_static STATIC)
 
-# Resolve links
 if(UNIX)
+	set(DEPENDENCY_BOOST_CHRONO_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_chrono.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_DATE_TIME_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_date_time.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_FILESYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_filesystem.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_IOSTREAMS_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_iostreams.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_REGEX_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_regex.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_SYSTEM_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_system.a CACHE PATH "Path to library." FORCE)
+	set(DEPENDENCY_BOOST_THREAD_LIBRARY ${DEPENDENCY_BOOST_LIBRARY_LOCATION}/libboost_thread.a CACHE PATH "Path to library." FORCE)
+
+	# Resolve links
 	function(resolve_links ID)
 		get_filename_component(TMP_${ID} "${${ID}}" REALPATH)
 		set(${ID} ${TMP_${ID}} CACHE PATH "Path to library." FORCE)
@@ -548,10 +557,10 @@ if(UNIX)
 	resolve_links(DEPENDENCY_WGUI_LIBRARY)
 	resolve_links(DEPENDENCY_WMS_SHARED_LIBRARY)
 	resolve_links(DEPENDENCY_ZLIB_LIBRARY)
+	#
 endif()
 set(BOOST_INCLUDEDIR ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
 set(BOOST_ROOT ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
-#
 
 message("Processing core libraries...")
 add_subdirectory(core)
@@ -709,8 +718,8 @@ target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_3MF_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_X3D_IMPORTER)
 target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_MMD_IMPORTER)
 if(UNIX)
-	target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_IMPORTER)
-	target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BLEND_IMPORTER)
+	# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_STEP_IMPORTER)
+	# target_compile_definitions(assimp PUBLIC ASSIMP_BUILD_NO_BLEND_IMPORTER)
 	target_compile_options(assimp PUBLIC -Os)
 endif()
 set_target_properties(assimp PROPERTIES FOLDER third_party_libs/assimp)
@@ -1012,7 +1021,7 @@ endif()
 #
 
 # freetype2
-register_third_party_library(freetype2)
+register_third_party_library(freetype)
 set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
 target_include_directories(freetype PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
@@ -1065,6 +1074,8 @@ set_target_properties(user_egp PROPERTIES FOLDER third_party_libs/qhull)
 # dependencies
 # add_dependencies(Anvil glslang)
 add_dependencies(png zlib)
+add_dependencies(freetype zlib)
+add_dependencies(zip zlib)
 add_dependencies(vorbis ogg)
 add_dependencies(BulletCollision LinearMath)
 add_dependencies(BulletDynamics BulletCollision)
@@ -1086,18 +1097,23 @@ add_dependencies(sharedutils mathutil)
 add_dependencies(vfilesystem sharedutils)
 add_dependencies(datasystem vfilesystem)
 add_dependencies(luasystem vfilesystem luabind)
-add_dependencies(materialsystem datasystem util_image png)
+add_dependencies(materialsystem datasystem util_image png VTFLib13)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
 
+<<<<<<< HEAD
 add_dependencies(cmaterialsystem materialsystem prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem freetype glslang util_formatted_text)
+=======
+add_dependencies(cmaterialsystem materialsystem prosper)
+add_dependencies(wgui cmaterialsystem freetype glslang)
+>>>>>>> 7a33d98fe14e9da214a5a4271855de63cbec3091
 
 if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)
 	add_dependencies(alsoundsystem OpenAL)
 endif()
-add_dependencies(alsoundsystem vfilesystem util_sound samplerate)
+add_dependencies(alsoundsystem vorbis vfilesystem util_sound samplerate)
 
 add_dependencies(servermanager networkmanager)
 add_dependencies(clientmanager networkmanager)

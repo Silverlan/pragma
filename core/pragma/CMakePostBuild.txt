@@ -75,6 +75,7 @@ function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
+		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
 		  COMMENT "Copying ${FILE_NAME}..."
 		)
 	endif()
@@ -119,6 +120,7 @@ function(copy_output_file_ext SRC_PATH DST_PATH)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
+		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
 		  COMMENT "Copying ${LIB_NAME}..."
 		)
 	endif()
@@ -151,6 +153,7 @@ function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
+		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
 		  COMMENT "Copying ${DST_FILE_NAME}..."
 		)
 	endif()
@@ -164,7 +167,7 @@ endif()
 copy_output_file(core/pragma/${BINARY_PRAGMA_DIR} "" pragma EXECUTABLE)
 copy_output_file(core/pragma_server/${BINARY_PRAGMA_DIR} "" pragma_server EXECUTABLE)
 if(UNIX)
-	# copy_output_file_ext("${DEPENDENCY_LUAJIT_LIBRARY}" ${BINARY_OUTPUT_DIR})
+	copy_output_file_ext("${DEPENDENCY_LUAJIT_LIBRARY}" ${BINARY_OUTPUT_DIR})
 endif()
 
 copy_output_file(core/client/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT_DIR} client)

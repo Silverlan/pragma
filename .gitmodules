@@ -187,3 +187,6 @@
 [submodule "external_libs/util_formatted_text"]
 	path = external_libs/util_formatted_text
 	url = https://github.com/Silverlan/util_formatted_text.git
+[submodule "third_party_libs/freetype"]
+	path = third_party_libs/freetype
+	url = https://github.com/aseprite/freetype2.git

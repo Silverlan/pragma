@@ -8,18 +8,17 @@ Engine::LaunchCommand::LaunchCommand(const std::string &cmd,const std::vector<st
 
 std::stringstream LaunchParaMap::LAUNCHPARAMETERS_HELP;
 
-void LaunchParaMap::GetParameters(std::unordered_map<std::string,void(*)(int,char*[])> **parameters) {*parameters = &m_parameters;}
-
-void LaunchParaMap::RegisterParameter(std::string name,void(*function)(int,char*[]))
+const std::unordered_map<std::string,std::function<void(const std::vector<std::string>&)>> &LaunchParaMap::GetParameters() const {return m_parameters;}
+void LaunchParaMap::RegisterParameter(const std::string &name,const std::function<void(const std::vector<std::string>&)> &f)
 {
-	m_parameters.insert(std::unordered_map<std::string,void(*)(int,char*[])>::value_type(name,function));
+	m_parameters.insert(std::make_pair(name,f));
 }
 
 DLLENGINE LaunchParaMap *g_LaunchParameters = NULL;
 
 DLLENGINE LaunchParaMap *GetLaunchParaMap() {return g_LaunchParameters;}
 
-DLLENGINE void RegisterLaunchParameter(std::string name,void(*function)(int,char*[]))
+DLLENGINE void RegisterLaunchParameter(std::string name,const std::function<void(const std::vector<std::string>&)> &function)
 {
 	if(g_LaunchParameters == NULL)
 	{
@@ -29,7 +28,7 @@ DLLENGINE void RegisterLaunchParameter(std::string name,void(*function)(int,char
 	g_LaunchParameters->RegisterParameter(name,function);
 }
 
-DLLENGINE void RegisterLaunchParameterHelp(std::string name,void(*function)(int,char*[]),std::string descCmd,std::string descHelp)
+DLLENGINE void RegisterLaunchParameterHelp(std::string name,const std::function<void(const std::vector<std::string>&)> &function,std::string descCmd,std::string descHelp)
 {
 	RegisterLaunchParameter(name,function);
 	std::stringstream pre;
@@ -48,89 +47,95 @@ DLLENGINE void RegisterLaunchParameterHelp(std::string name,void(*function)(int,
 
 void Engine::InitLaunchOptions(int argc,char *argv[])
 {
-	std::unordered_map<std::string,void(*)(int,char*[])> *parameters;
-	g_LaunchParameters->GetParameters(&parameters);
-	int pargcprev = argc -1;
-	for(int i=argc-1;i>=0;i--)
+	auto &parameters = g_LaunchParameters->GetParameters();
+	std::vector<std::string> launchCmdArgs {};
+	for(auto i=argc -1;i>0;--i)
 	{
-		std::string argraw(argv[i]);
-		std::string arg(argraw);
-		std::transform(arg.begin(),arg.end(),arg.begin(),::tolower);
-		if(arg.front() == '+')
+		std::string arg = argv[i];
+		if(arg.empty())
+			continue;
+		auto token = arg.front();
+		if(token != '-' && token != '+')
 		{
-			std::vector<std::string> cmdArgs;
-			cmdArgs.reserve(pargcprev -i);
-			for(auto k=i+1;k<=pargcprev;k++)
-				cmdArgs.push_back(argv[k]);
-			m_launchCommands.push_back({arg.substr(1),cmdArgs});
+			launchCmdArgs.insert(launchCmdArgs.begin(),arg);
+			continue;
 		}
-		else
+		ustring::to_lower(arg);
+		switch(token)
 		{
-			auto j = parameters->find(arg);
-			if(j != parameters->end())
+			case '-':
 			{
-				char *pargv[16];
-				int pargc = pargcprev -i;
-				int narg = 0;
-				for(int k=i+1;k<=pargcprev;k++)
+				auto it = parameters.find(arg);
+				if(it != parameters.end())
 				{
-					pargv[narg] = argv[k];
-					narg++;
+					auto &f = it->second;
+					f(launchCmdArgs);
 				}
-				j->second(pargc,pargv);
-				pargcprev = i-1;
+				break;
 			}
+			case '+':
+				m_launchCommands.push_back({arg.substr(1),launchCmdArgs});
+				break;
 		}
+		launchCmdArgs.clear();
 	}
 }
 
 //////////////////////////////
 
 extern Engine *engine;
-DLLENGINE void LPARAM_console(int,char*[]) {engine->OpenConsole();}
+DLLENGINE void LPARAM_console(const std::vector<std::string> &argv)
+{
+	if(argv.empty() == false && ustring::compare(argv[0],"external"))
+	{
+		engine->Engine::OpenConsole();
+		return;
+	}
+	engine->OpenConsole();
+}
 
-DLLENGINE void LPARAM_log(int argc,char *argv[])
+DLLENGINE void LPARAM_log(const std::vector<std::string> &argv)
 {
 	std::string log;
-	if(argc == 2)
+	if(argv.size() == 2)
 		log = argv[1];
 	else log = "3";
-	if(argc > 0)
+	if(argv.empty() == false)
 		engine->AddLaunchConVar("log_file",argv[0]);
 	engine->AddLaunchConVar("log_enabled",log);
 }
 
 std::string __lp_map = "";
 std::string __lp_gamemode = "";
-DLLENGINE void LPARAM_map(int argc,char *argv[])
+DLLENGINE void LPARAM_map(const std::vector<std::string> &argv)
 {
-	if(argc == 0) return;
+	if(argv.empty()) return;
 	__lp_map = argv[0];
 }
 
-DLLENGINE void LPARAM_gamemode(int argc, char *argv[])
+DLLENGINE void LPARAM_gamemode(const std::vector<std::string> &argv)
 {
-	if(argc == 0) return;
+	if(argv.empty()) return;
 	__lp_gamemode = argv[0];
 }
 
-DLLENGINE void LPARAM_tcpport(int argc,char *argv[])
+DLLENGINE void LPARAM_tcpport(const std::vector<std::string> &argv)
 {
-	if(argc == 0) return;
+	if(argv.empty()) return;
 	engine->AddLaunchConVar("net_port_tcp",argv[0]);//WEAVETODO
 }
 
-DLLENGINE void LPARAM_udpport(int argc,char *argv[])
+DLLENGINE void LPARAM_udpport(const std::vector<std::string> &argv)
 {
-	if(argc == 0) return;
+	if(argv.empty()) return;
 	engine->AddLaunchConVar("net_port_udp",argv[0]); //WEAVETODO
 }
 
-DLLENGINE void LPARAM_tcponly(int,char*[]) {}//m_bTCPOnly = true;}//WEAVETODO
+DLLENGINE void LPARAM_tcponly(const std::vector<std::string> &argv) {}//m_bTCPOnly = true;}//WEAVETODO
 
-DLLENGINE void LPARAM_connect(int argc,char *argv[])
+DLLENGINE void LPARAM_connect(const std::vector<std::string> &argv)
 {
-	if(argc == 0) return;
+	if(argv.empty()) return;
 	std::string arg = argv[0];
 	std::string ip,port;
 	size_t i = arg.find(':');
@@ -147,7 +152,7 @@ DLLENGINE void LPARAM_connect(int argc,char *argv[])
 	//Connect(ip,port);//WEAVETODO
 }
 
-DLLENGINE void LPARAM_help(int,char*[])
+DLLENGINE void LPARAM_help(const std::vector<std::string> &argv)
 {
 	engine->OpenConsole();
 	LaunchParaMap *map = GetLaunchParaMap();
@@ -156,13 +161,13 @@ DLLENGINE void LPARAM_help(int,char*[])
 	Con::cout<<"Available parameters:"<<Con::endl<<map->LAUNCHPARAMETERS_HELP.str()<<Con::endl;
 }
 
-static void LPARAM_luaext(int argc,char *argv[])
+static void LPARAM_luaext(const std::vector<std::string> &argv)
 {
 	Lua::set_extended_lua_modules_enabled(true);
 	// Lua::set_precompiled_files_enabled(false);
 }
 
-static void LPARAM_verbose(int argc,char *argv[])
+static void LPARAM_verbose(const std::vector<std::string> &argv)
 {
 	engine->SetVerbose(true);
 }

@@ -16,37 +16,73 @@ extern DLLENGINE Engine *engine;
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
 	auto colorMode = Lua::GetErrorColorMode(l);
-#ifdef _WIN32
 	switch(colorMode)
 	{
 		case Lua::ErrorColorMode::White:
-			Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			break;
 		case Lua::ErrorColorMode::Cyan:
-			Con::attr(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
 			break;
 		case Lua::ErrorColorMode::Magenta:
-			Con::attr(FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
 			break;
 	}
-#else
-	switch(colorMode)
-	{
-		case Lua::ErrorColorMode::White:
-			std::cout<<"\033[37;1m";
-			break;
-		case Lua::ErrorColorMode::Cyan:
-			std::cout<<"\033[36;1m";
-			break;
-		case Lua::ErrorColorMode::Magenta:
-			std::cout<<"\033[35;1m";
-			break;
-	}
-#endif
 	Con::cout<<ssMsg.str()<<Con::endl;
 }
 
 static auto cvOpenEditorOnError = GetConVar("lua_open_editor_on_error");
+std::optional<std::string> Lua::GetLuaFilePath(const std::string &fname)
+{
+	std::string fullLocalPath;
+	if(FileManager::FindLocalPath(fname,fullLocalPath) == false)
+		fullLocalPath = fname;
+	fullLocalPath = util::get_program_path() +'/' +fullLocalPath;
+	if(FileManager::ExistsSystem(fullLocalPath) == false)
+		return {};
+	return fullLocalPath;
+}
+void Lua::OpenFileInZeroBrane(const std::string &fname,uint32_t lineId)
+{
+	struct ZBFileInfo
+	{
+		ZBFileInfo(const std::string &fileName,uint32_t lineId)
+			: fileName(fileName),lineId(lineId),
+			tp(std::chrono::high_resolution_clock::now())
+		{}
+		std::string fileName;
+		uint32_t lineId;
+		std::chrono::high_resolution_clock::time_point tp;
+	};
+	static std::vector<ZBFileInfo> zbFileInfo;
+	static std::chrono::high_resolution_clock::time_point tLastFileOpened {};
+	auto t = std::chrono::high_resolution_clock::now();
+	if(std::chrono::duration_cast<std::chrono::seconds>(t -tLastFileOpened).count() > 5)
+	{
+		for(auto it=zbFileInfo.begin();it!=zbFileInfo.end();)
+		{
+			auto &info = *it;
+			if(std::chrono::duration_cast<std::chrono::seconds>(t -info.tp).count() > 90)
+				it = zbFileInfo.erase(it);
+			else
+				++it;
+		}
+		auto it = std::find_if(zbFileInfo.begin(),zbFileInfo.end(),[&fname,lineId](const ZBFileInfo &info) {
+			return ustring::compare(info.fileName,fname,false) && info.lineId == lineId;
+		});
+		if(it == zbFileInfo.end())
+		{
+			if(it != zbFileInfo.end())
+				zbFileInfo.erase(it);
+			zbFileInfo.push_back({fname,lineId});
+
+			tLastFileOpened = t;
+			auto fullLocalPath = GetLuaFilePath(fname);
+			if(fullLocalPath.has_value())
+				debug::open_file_in_zerobrane(*fullLocalPath,lineId);
+		}
+	}
+}
 static bool print_code_snippet(std::stringstream &ssMsg,std::string fname,uint32_t lineId,const std::string &prefix="")
 {
 	std::string ext;
@@ -66,51 +102,8 @@ static bool print_code_snippet(std::stringstream &ssMsg,std::string fname,uint32
 	if(f != nullptr)
 	{
 		// Attempt to open file in ZeroBrane
-		if(cvOpenEditorOnError->GetBool())
-		{
-			struct ZBFileInfo
-			{
-				ZBFileInfo(const std::string &fileName,uint32_t lineId)
-					: fileName(fileName),lineId(lineId),
-					tp(std::chrono::high_resolution_clock::now())
-				{}
-				std::string fileName;
-				uint32_t lineId;
-				std::chrono::high_resolution_clock::time_point tp;
-			};
-			static std::vector<ZBFileInfo> zbFileInfo;
-			static std::chrono::high_resolution_clock::time_point tLastFileOpened {};
-			auto t = std::chrono::high_resolution_clock::now();
-			if(std::chrono::duration_cast<std::chrono::seconds>(t -tLastFileOpened).count() > 5)
-			{
-				for(auto it=zbFileInfo.begin();it!=zbFileInfo.end();)
-				{
-					auto &info = *it;
-					if(std::chrono::duration_cast<std::chrono::seconds>(t -info.tp).count() > 90)
-						it = zbFileInfo.erase(it);
-					else
-						++it;
-				}
-				auto it = std::find_if(zbFileInfo.begin(),zbFileInfo.end(),[&fname,lineId](const ZBFileInfo &info) {
-					return ustring::compare(info.fileName,fname,false) && info.lineId == lineId;
-				});
-				if(it == zbFileInfo.end())
-				{
-					if(it != zbFileInfo.end())
-						zbFileInfo.erase(it);
-					zbFileInfo.push_back({fname,lineId});
-
-					tLastFileOpened = t;
-					std::string fullLocalPath;
-					if(FileManager::FindLocalPath(fname,fullLocalPath) == false)
-						fullLocalPath = fname;
-					debug::open_file_in_zerobrane(util::get_program_path() +'/' +fullLocalPath,lineId);
-				}
-			}
-			//auto hWndForeground = GetForegroundWindow();
-			//auto hWndConsole = GetConsoleWindow();
-			//if(hWndForeground == hWndConsole)
-		}
+		//if(cvOpenEditorOnError->GetBool())
+		//	open_lua_file(fname,lineId);
 
 		char c = 0;
 		uint32_t curLineId = 1;
@@ -157,12 +150,12 @@ static void strip_path_until_lua_dir(std::string &shortSrc)
 	}
 	if(bFound == false)
 		return;
-	shortSrc = ustring::sub(shortSrc,offset +luaPath.length());
+	shortSrc = ustring::substr(shortSrc,offset +luaPath.length());
 	if(shortSrc.length() > maxLuaPathLen)
 		shortSrc = "..." +shortSrc.substr(shortSrc.size() -maxLuaPathLen);
 }
 
-static void transform_path(const lua_Debug &d,std::string &errPath)
+static void transform_path(const lua_Debug &d,std::string &errPath,int32_t currentLine)
 {
 	auto start = errPath.find("[string \"");
 	if(start == std::string::npos)
@@ -186,6 +179,9 @@ static void transform_path(const lua_Debug &d,std::string &errPath)
 		strip_path_until_lua_dir(path);
 		if(path.length() > maxLuaPathLen)
 			path = "..." +path.substr(path.size() -maxLuaPathLen);
+
+		if(Lua::GetLuaFilePath("lua/" +path))
+			path = "{[l#luafile:,\"" +path +"\"," +std::to_string(currentLine) +"]}" +path +"{[/l]}";
 		errPath = ustring::substr(errPath,0,qt0 +1) +path +ustring::substr(errPath,qt1);
 	}
 }
@@ -228,16 +224,18 @@ int Lua::HandleTracebackError(lua_State *l)
 			}
 			if(bFound == true)
 			{
-				shortSrc = ustring::sub(shortSrc,offset);
+				shortSrc = ustring::substr(shortSrc,offset);
 				if(shortSrc.length() > maxLuaPathLen)
 					shortSrc = "..." +shortSrc.substr(shortSrc.size() -maxLuaPathLen);
 				shortSrc = "[string \"" +shortSrc +"\"]";
+				//open_lua_file(fname,lineId);
+
 			}
 			std::stringstream ssErrMsg;
 			ssErrMsg<<shortSrc<<":"<<d.currentline<<": "<<errMsg;
 			errMsg = ssErrMsg.str();
 		}
-		transform_path(d,errMsg);
+		transform_path(d,errMsg,d.currentline);
 		ssMsg<<errMsg;
 		bNl = print_code_snippet(ssMsg,d.source,d.currentline,":");
 	}
@@ -268,7 +266,28 @@ int Lua::HandleTracebackError(lua_State *l)
 		}
 	}
 	print_lua_error_message(l,ssMsg);
-	Lua::doc::print_documentation("ents:ApplyViewRotationOffset(0.5)"); // TODO
+
+	std::string cause {};
+	const std::string errMsgIdentifier = "No matching overload found";
+	auto posErrOverload = errMsg.find(errMsgIdentifier);
+	if(posErrOverload != std::string::npos)
+	{
+		// Luabind error, try to retrieve function name
+		auto posEnd = errMsg.find('(',posErrOverload +errMsgIdentifier.length());
+		auto pos = errMsg.rfind(' ',posEnd);
+		if(pos != std::string::npos && posEnd != std::string::npos)
+			cause = ustring::substr(errMsg,pos +1,posEnd -pos -1);
+	}
+	else
+	{
+		auto pos = errMsg.find('\'');
+		auto posEnd = errMsg.find('\'',pos +1);
+		if(posEnd != std::string::npos)
+			cause = ustring::substr(errMsg,pos +1,posEnd -pos -1);
+	}
+	if(cause.empty() == false)
+		Lua::doc::print_documentation(cause);
+
 	util::reset_console_color();
 	Con::cout<<"You can use the console command 'lua_help <name>' to get more information about a specific function/library/etc."<<Con::endl;
 	Con::cout<<Con::endl;
@@ -296,7 +315,7 @@ static void handle_syntax_error(lua_State *l,Lua::StatusCode r,const std::string
 			{
 				std::string errWithFullPath = {};
 				if(fileName != nullptr)
-					errWithFullPath = err.substr(0,qSt +1u) +ustring::sub(*fileName,4) +err.substr(qEn);
+					errWithFullPath = err.substr(0,qSt +1u) +ustring::substr(*fileName,4) +err.substr(qEn);
 				else
 					errWithFullPath = err;
 				auto f = (fileName != nullptr) ? *fileName : err.substr(qSt +1,qEn -qSt -1);
@@ -360,7 +379,7 @@ void Lua::initialize_error_handler()
 					luaMsg = ssErrMsg.str();
 				}
 			}
-			transform_path(d,luaMsg);
+			transform_path(d,luaMsg,d.currentline);
 			ssMsg<<luaMsg;
 			auto bNl = print_code_snippet(ssMsg,(d.source != nullptr) ? d.source : "",d.currentline,":");
 			if(level != 1)
@@ -385,7 +404,7 @@ void Lua::initialize_error_handler()
 						{
 							std::string src = d.source;
 							strip_path_until_lua_dir(src);
-							transform_path(d,src);
+							transform_path(d,src,d.currentline);
 							src = "[string \"" +src +"\"]";
 							ssMsg<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<src<<":"<<d.currentline;
 						}
@@ -398,4 +417,3 @@ void Lua::initialize_error_handler()
 		});
 	});
 }
-

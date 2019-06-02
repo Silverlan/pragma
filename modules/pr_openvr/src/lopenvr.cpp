@@ -3,12 +3,12 @@
 #include <wrappers/image.h>
 #include <optional>
 #include <unordered_map>
-#include <ldef_color.h>
+#include <pragma/lua/classes/ldef_color.h>
 #include <sharedutils/datastream.h>
-#include <c_lua_vulkan.h>
+#include <pragma/lua/libraries/c_lua_vulkan.h>
 #include <luainterface.hpp>
 #include <sharedutils/functioncallback.h>
-#include <pragma_module.hpp>
+#include <pragma/pragma_module.hpp>
 #include "vr_instance.hpp"
 #include "vr_eye.hpp"
 #include "lopenvr.h"
@@ -446,27 +446,27 @@ int Lua::openvr::lib::set_skybox_override(lua_State *l)
 	if(s_vrInstance == nullptr)
 		return 0;
 	int32_t arg = 1;
-	auto *img = Lua::CheckVKImage(l,arg++);
+	auto &img = Lua::Check<Lua::Vulkan::Image>(l,arg++);
 	if(Lua::IsSet(l,arg) == false)
 	{
-		auto err = s_vrInstance->SetSkyboxOverride(**img);
+		auto err = s_vrInstance->SetSkyboxOverride(img);
 		Lua::PushInt(l,umath::to_integral(err));
 		return 1;
 	}
-	auto *img2 = Lua::CheckVKImage(l,arg++);
+	auto &img2 = Lua::Check<Lua::Vulkan::Image>(l,arg++);
 	if(Lua::IsSet(l,arg) == false)
 	{
-		auto err = s_vrInstance->SetSkyboxOverride(**img,**img2);
+		auto err = s_vrInstance->SetSkyboxOverride(img,img2);
 		Lua::PushInt(l,umath::to_integral(err));
 		return 1;
 	}
-	auto *front = img;
-	auto *back = img2;
-	auto *left = Lua::CheckVKImage(l,arg++);
-	auto *right = Lua::CheckVKImage(l,arg++);
-	auto *top = Lua::CheckVKImage(l,arg++);
-	auto *bottom = Lua::CheckVKImage(l,arg++);
-	auto err = s_vrInstance->SetSkyboxOverride(**front,**back,**left,**right,**top,**bottom);
+	auto &front = img;
+	auto &back = img2;
+	auto &left = Lua::Check<Lua::Vulkan::Image>(l,arg++);
+	auto &right = Lua::Check<Lua::Vulkan::Image>(l,arg++);
+	auto &top = Lua::Check<Lua::Vulkan::Image>(l,arg++);
+	auto &bottom = Lua::Check<Lua::Vulkan::Image>(l,arg++);
+	auto err = s_vrInstance->SetSkyboxOverride(front,back,left,right,top,bottom);
 	Lua::PushInt(l,umath::to_integral(err));
 	return 1;
 }

@@ -18,9 +18,19 @@ static void KeyboardInput()
 	}
 }
 
-void Engine::ConsoleInput(const std::string &line) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
+void Engine::ConsoleInput(const std::string_view &line) // TODO: Make sure input-thread and engine don't access m_consoleInput at the same time?
 {
-	m_consoleInput.push(line);
+	m_consoleInput.push(std::string{line});
+}
+
+void Engine::ToggleConsole()
+{
+	if(IsConsoleOpen())
+	{
+		CloseConsole();
+		return;
+	}
+	OpenConsole();
 }
 
 void Engine::OpenConsole()
@@ -44,7 +54,7 @@ void Engine::CloseConsole()
 	delete m_consoleThread;
 }
 
-bool Engine::IsConsoleOpen() {return m_console != NULL;}
+bool Engine::IsConsoleOpen() const {return m_console != NULL;}
 DebugConsole *Engine::GetConsole() {return m_console;}
 
 void Engine::ProcessConsoleInput(KeyState pressState)
@@ -53,24 +63,18 @@ void Engine::ProcessConsoleInput(KeyState pressState)
 	{
 		auto &l = m_consoleInput.front();
 
-#ifdef _WIN32
-		Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-#else
-		Con::cout<<"\033[1m";
-#endif
+		util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 		Con::cout<<"> "<<l<<Con::endl;
-#ifndef _WIN32
-		Con::cout<<"\033[0m";
-#endif
+		util::reset_console_color();
 		ProcessConsoleInput(l,pressState);
 
 		m_consoleInput.pop();
 	}
 }
 
-void Engine::ProcessConsoleInput(const std::string &line,KeyState pressState,float magnitude)
+void Engine::ProcessConsoleInput(const std::string_view &line,KeyState pressState,float magnitude)
 {
-	ustring::get_sequence_commands(line,[pressState,magnitude](std::string cmd,std::vector<std::string> &argv) {
+	ustring::get_sequence_commands(std::string{line},[pressState,magnitude](std::string cmd,std::vector<std::string> &argv) {
 		engine->RunConsoleCommand(cmd,argv,pressState,magnitude);
 	});
 }

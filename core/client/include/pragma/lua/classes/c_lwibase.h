@@ -16,6 +16,7 @@ class WIScrollBarHandle;
 class WISilkIconHandle;
 class WIIconHandle;
 class WIDropDownMenuHandle;
+class WIConsoleHandle;
 class WICheckboxHandle;
 class WIArrowHandle;
 class WIButtonHandle;
@@ -174,6 +175,7 @@ namespace Lua
 		DLLCLIENT void GetAttachmentPosProperty(lua_State *l,WIHandle &hPanel,const std::string &name);
 
 		DLLCLIENT void SetAnchor(lua_State *l,WIHandle &hPanel,float left,float top,float right,float bottom);
+		DLLCLIENT void SetAnchor(lua_State *l,WIHandle &hPanel,float left,float top,float right,float bottom,uint32_t refWidth,uint32_t refHeight);
 		DLLCLIENT void SetAnchorLeft(lua_State *l,WIHandle &hPanel,float f);
 		DLLCLIENT void SetAnchorRight(lua_State *l,WIHandle &hPanel,float f);
 		DLLCLIENT void SetAnchorTop(lua_State *l,WIHandle &hPanel,float f);

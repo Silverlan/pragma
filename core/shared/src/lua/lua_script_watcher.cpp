@@ -78,7 +78,8 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 	});
 	if(it != includeCache.end())
 	{
-		m_game->ExecuteLuaFile(*it);
+		auto lpath = *it;
+		m_game->ExecuteLuaFile(lpath);
 		return;
 	}
 }

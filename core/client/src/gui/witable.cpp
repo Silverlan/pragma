@@ -88,9 +88,11 @@ void WITable::Sort(bool bAsc,unsigned int col)
 void WITable::OnRowCellCreated(WITableCell *cell)
 {
 	cell->SetMouseInputEnabled(true);
-	m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed",FunctionCallback<>::Create(
-		std::bind(&WITable::OnHeaderCellPressed,cell)
-	)));
+	m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,cell](util::EventReply *reply) -> CallbackReturnType {
+		*reply = util::EventReply::Handled;
+		OnHeaderCellPressed(cell);
+		return CallbackReturnType::HasReturnValue;
+	})));
 }
 
 void WITable::OnHeaderCellPressed(WITableCell *cell)
@@ -193,9 +195,11 @@ void WITable::SetSortable(bool b)
 		if(cell != nullptr)
 		{
 			cell->SetMouseInputEnabled(true);
-			m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed",FunctionCallback<>::Create(
-				std::bind(&WITable::OnHeaderCellPressed,cell)
-			)));
+			m_sortCallbacks.push_back(cell->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,cell](util::EventReply *reply) -> CallbackReturnType {
+				*reply = util::EventReply::Handled;
+				OnHeaderCellPressed(cell);
+				return CallbackReturnType::HasReturnValue;
+			})));
 		}
 	}
 	m_sortCallbacks.push_back(row->AddCallback("OnCellCreated",FunctionCallback<void,WITableCell*>::Create(
@@ -592,11 +596,13 @@ void WITableRow::SetCellWidth(unsigned int col,int width)
 	m_cellWidths[col] = width;
 	ScheduleUpdate();
 }
-void WITableRow::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WITableRow::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIBase::MouseCallback(button,state,mods);
+	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(button == GLFW::MouseButton::Left && state == GLFW::KeyState::Press)
 		Select();
+	return util::EventReply::Handled;
 }
 unsigned int WITableRow::GetCellCount() const {return CUInt32(m_cells.size());}
 WITableCell *WITableRow::GetCell(unsigned int id) const

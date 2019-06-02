@@ -39,9 +39,10 @@ void WISlider::Think()
 
 bool WISlider::IsBeingDragged() const {return m_bMoveSlider;}
 
-void WISlider::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WISlider::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIProgressBar::MouseCallback(button,state,mods);
+	if(WIProgressBar::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(button == GLFW::MouseButton::Left)
 	{
 		if(state == GLFW::KeyState::Press)
@@ -49,4 +50,5 @@ void WISlider::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW:
 		else
 			m_bMoveSlider = false;
 	}
+	return util::EventReply::Handled;
 }

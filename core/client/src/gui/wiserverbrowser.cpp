@@ -167,33 +167,39 @@ void WIServerBrowser::Initialize()
 	if(buttonRefresh != nullptr)
 	{
 		buttonRefresh->SetText(Locale::GetText("refresh"));
-		buttonRefresh->AddCallback("OnPressed",FunctionCallback<>::Create(std::bind([](WIHandle hServerBrowser) {
+		auto hServerBrowser = GetHandle();
+		buttonRefresh->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
-				return;
+				return CallbackReturnType::HasReturnValue;
 			auto *sb = hServerBrowser.get<WIServerBrowser>();
 			sb->Refresh();
-		},this->GetHandle())));
+			return CallbackReturnType::HasReturnValue;
+		}));
 	}
 	m_hConnect = CreateChild<WIButton>();
 	WIButton *buttonConnect = m_hConnect.get<WIButton>();
 	if(buttonConnect != nullptr)
 	{
 		buttonConnect->SetText(Locale::GetText("connect"));
-		buttonConnect->AddCallback("OnPressed",FunctionCallback<>::Create(std::bind([this](WIHandle hServerBrowser) {
+		auto hServerBrowser = GetHandle();
+		buttonConnect->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hServerBrowser](util::EventReply *reply) -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
-				return;
+				return CallbackReturnType::HasReturnValue;
 			auto *sb = hServerBrowser.get<WIServerBrowser>();
 			if(!sb->m_hServerList.IsValid())
-				return;
+				return CallbackReturnType::HasReturnValue;
 			WITable *t = sb->m_hServerList.get<WITable>();
 			if(t == nullptr)
-				return;
+				return CallbackReturnType::HasReturnValue;
 			WITableRow *row = t->GetSelectedRow();
 			if(row == nullptr)
-				return;
+				return CallbackReturnType::HasReturnValue;
 			auto data = std::static_pointer_cast<int32_t>(row->GetUserData3());
 			OnServerDoubleClick(*data);
-		},this->GetHandle())));
+			return CallbackReturnType::HasReturnValue;
+		}));
 	}
 	SetSize(800,400);
 	SetMinSize(400,300);
@@ -311,11 +317,14 @@ void WIServerBrowser::AddServer(std::unique_ptr<WMServerData> &data)
 		info->row = row->GetHandle();
 		int idx = CInt32(m_servers.size() -1);
 		row->SetUserData3(std::make_shared<int32_t>(idx));
-		row->AddCallback("OnDoubleClick",FunctionCallback<>::Create(std::bind([this,idx](WIHandle hTableRow) {
+		auto hTableRow = row->GetHandle();
+		row->AddCallback("OnDoubleClick",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hTableRow,idx](util::EventReply *reply) -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
 			if(!hTableRow.IsValid())
-				return;
+				return CallbackReturnType::HasReturnValue;
 			OnServerDoubleClick(idx);
-		},row->GetHandle())));
+			return CallbackReturnType::HasReturnValue;
+		}));
 		auto &data = info->info;
 		if(data->password == true)
 		{

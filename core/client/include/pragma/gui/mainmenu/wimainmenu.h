@@ -21,7 +21,7 @@ public:
 	void SetNewGameMenu();
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
-	virtual void KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
 
 	void OpenNewGameMenu();
 	void OpenLoadGameMenu();

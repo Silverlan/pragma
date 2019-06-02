@@ -17,7 +17,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 	if(se::read_script(f,root) != se::ResultCode::Ok)
 		return false;
 	auto outPath = util::IMPORT_PATH +FileManager::GetCanonicalizedPath(path);
-	if(ustring::sub(outPath,0,8) == std::string("scripts") +FileManager::GetDirectorySeparator())
+	if(ustring::substr(outPath,0,8) == std::string("scripts") +FileManager::GetDirectorySeparator())
 		outPath = "scripts/sounds/" +outPath.substr(8);
 	FileManager::CreatePath(ufile::get_path_from_filename(outPath).c_str());
 	auto fOut = FileManager::OpenFile<VFilePtrReal>(outPath.c_str(),"w");

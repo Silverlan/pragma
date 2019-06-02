@@ -27,11 +27,6 @@ REGISTER_ENGINE_CONCOMMAND(log,[](NetworkState*,pragma::BasePlayerComponent*,std
 	if(argv.empty()) return;
 	engine->WriteToLog(argv[0]);
 },ConVarFlags::None,"Adds the specified message to the engine log. Usage: log <msg>.");
-REGISTER_ENGINE_CONCOMMAND(lua_help,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
-	if(argv.empty())
-		return;
-	Lua::doc::print_documentation(argv.front());
-},ConVarFlags::None,"Prints information about the specified function, library or enum (or the closest candiate). Usage: lua_help <function/library/enum>.");
 REGISTER_ENGINE_CONCOMMAND(clear_cache,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
 	if(argv.empty())
 		return;
@@ -252,12 +247,6 @@ REGISTER_SHARED_CONCOMMAND(find,[](NetworkState *state,pragma::BasePlayerCompone
 		Con::cout<<"- "<<name<<Con::endl;
 },ConVarFlags::None,"Finds similar console commands to whatever was given as argument.");
 
-REGISTER_SHARED_CONCOMMAND(exec,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
-	if(argv.empty())
-		return;
-	engine->ExecConfig(argv[0]);
-},ConVarFlags::None,"Executes a config file. Usage exec <fileName>");
-
 REGISTER_ENGINE_CONCOMMAND(listmaps,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
 	std::vector<std::string> resFiles;
 	FileManager::FindFiles("maps\\*.wld",&resFiles,nullptr);
@@ -267,7 +256,7 @@ REGISTER_ENGINE_CONCOMMAND(listmaps,[](NetworkState*,pragma::BasePlayerComponent
 },ConVarFlags::None,"");
 
 REGISTER_ENGINE_CONCOMMAND(clear,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
-	std::system("cls");
+	engine->ClearConsole();
 },ConVarFlags::None,"Clears everything in the console.");
 
 REGISTER_ENGINE_CONCOMMAND(help,[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {

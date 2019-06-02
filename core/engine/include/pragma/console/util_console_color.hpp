@@ -2,6 +2,8 @@
 #define __UTIL_CONSOLE_COLOR_HPP__
 
 #include <mathutil/umath.h>
+#include <mathutil/color.h>
+#include <optional>
 
 namespace util
 {
@@ -32,6 +34,9 @@ namespace util
 	};
 	DLLENGINE bool set_console_color(ConsoleColorFlags flags);
 	DLLENGINE bool reset_console_color();
+	DLLENGINE ConsoleColorFlags get_active_console_color_flags();
+	DLLENGINE std::optional<Color> console_color_flags_to_color(ConsoleColorFlags flags);
+	DLLENGINE ConsoleColorFlags color_to_console_color_flags(const Color &color);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(util::ConsoleColorFlags);
 

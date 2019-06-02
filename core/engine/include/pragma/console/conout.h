@@ -1,8 +1,11 @@
 #ifndef __CONOUT_H__
 #define __CONOUT_H__
 #include "pragma/definitions.h"
+#include "pragma/console/util_console_color.hpp"
 #include <iostream>
 #include <sstream>
+#include <functional>
+#include <string_view>
 #ifdef _WIN32
 	#include <Windows.h>
 #else
@@ -17,6 +20,7 @@
 	#define BACKGROUND_INTENSITY 128
 #endif
 
+struct Color;
 namespace Con {class c_crit;};
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t);
 namespace Con
@@ -48,7 +52,35 @@ namespace Con
 	DLLENGINE void WriteToLog(std::stringstream &ss);
 	DLLENGINE void WriteToLog(std::string str);
 	DLLENGINE int GetLogLevel();
+
+	enum class MessageFlags : uint8_t
+	{
+		None = 0u,
+		Generic = 1u,
+		Warning = Generic<<1u,
+		Error = Warning<<1u,
+		Critical = Error<<1u,
+
+		ServerSide = Critical<<1u,
+		ClientSide = ServerSide<<1u
+	};
+	DLLENGINE void set_output_callback(const std::function<void(const std::string_view&,MessageFlags,const ::Color*)> &callback);
+	DLLENGINE const std::function<void(const std::string_view&,MessageFlags,const ::Color*)> &get_output_callback();
+	DLLENGINE void print(const std::string_view &sv,const ::Color &color,MessageFlags flags=MessageFlags::None);
+	DLLENGINE void print(const std::string_view &sv,MessageFlags flags=MessageFlags::None);
+	template<typename T>
+		inline void invoke_output_callback(const T &value,MessageFlags flags)
+	{
+		auto &outputCallback = Con::get_output_callback();
+		if(outputCallback == nullptr)
+			return;
+		auto color = util::console_color_flags_to_color(util::get_active_console_color_flags());
+		std::stringstream ss;
+		ss<<value;
+		outputCallback(ss.str(),flags,color.has_value() ? &(*color) : nullptr);
+	}
 };
+REGISTER_BASIC_BITWISE_OPERATORS(Con::MessageFlags)
 
 // c_cout
 template <class T> Con::c_cout& operator<<(Con::c_cout &con,const T &t)
@@ -60,6 +92,7 @@ template <class T> Con::c_cout& operator<<(Con::c_cout &con,const T &t)
 		ss<<t;
 		Con::WriteToLog(ss);
 	}
+	invoke_output_callback(t,Con::MessageFlags::Generic);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -69,19 +102,15 @@ DLLENGINE Con::c_cout& operator<<(Con::c_cout& con,conmanipulator manipulator);
 // c_cwar
 template <class T> Con::c_cwar& operator<< (Con::c_cwar &con,const T &t)
 {
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hOut,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	util::set_console_color(util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity);
 	std::cout<<t;
-#else
-	std::cout<<"\033[33;1m"<<t;
-#endif
 	if(Con::GetLogLevel() >= 2)
 	{
 		std::stringstream ss;
 		ss<<t;
 		Con::WriteToLog(ss);
 	}
+	invoke_output_callback(t,Con::MessageFlags::Warning);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -91,19 +120,15 @@ DLLENGINE Con::c_cwar& operator<<(Con::c_cwar &con,conmanipulator manipulator);
 // c_cerr
 template <class T> Con::c_cerr& operator<< (Con::c_cerr &con,const T &t)
 {
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hOut,FOREGROUND_RED | FOREGROUND_INTENSITY);
+	util::set_console_color(util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Intensity);
 	std::cout<<t;
-#else
-	std::cout<<"\033[31;1m"<<t;
-#endif
 	if(Con::GetLogLevel() >= 1)
 	{
 		std::stringstream ss;
 		ss<<t;
 		Con::WriteToLog(ss);
 	}
+	invoke_output_callback(t,Con::MessageFlags::Error);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -113,17 +138,12 @@ DLLENGINE Con::c_cerr& operator<<(Con::c_cerr &con,conmanipulator manipulator);
 // c_crit
 template <class T> Con::c_crit& operator<< (Con::c_crit &con,const T &t)
 {
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hOut,BACKGROUND_RED | BACKGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-	std::cout<<t;
-#else
-	std::cout<<"\033[41;37;1m"<<t;
-#endif
+	util::set_console_color(util::ConsoleColorFlags::BackgroundRed | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::White);
 	std::stringstream ss;
 	ss<<t;
 	if(Con::GetLogLevel() >= 1)
 		Con::WriteToLog(ss);
+	invoke_output_callback(t,Con::MessageFlags::Critical);
 	Con::crit.m_bActivated = true;
 	Con::crit.m_message<<t;
 	return con;
@@ -135,19 +155,15 @@ DLLENGINE Con::c_crit& operator<<(Con::c_crit &con,conmanipulator manipulator);
 // c_csv
 template <class T> Con::c_csv& operator<< (Con::c_csv &con,const T &t)
 {
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hOut,FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
 	std::cout<<t;
-#else
-	std::cout<<"\033[36;1m"<<t;
-#endif
 	if(Con::GetLogLevel() >= 2)
 	{
 		std::stringstream ss;
 		ss<<t;
 		Con::WriteToLog(ss);
 	}
+	invoke_output_callback(t,Con::MessageFlags::ServerSide);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);
@@ -157,19 +173,15 @@ DLLENGINE Con::c_csv& operator<<(Con::c_csv &con,conmanipulator manipulator);
 // c_ccl
 template <class T> Con::c_ccl& operator<< (Con::c_ccl &con,const T &t)
 {
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hOut,FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
 	std::cout<<t;
-#else
-	std::cout<<"\033[35;1m"<<t;
-#endif
 	if(Con::GetLogLevel() >= 2)
 	{
 		std::stringstream ss;
 		ss<<t;
 		Con::WriteToLog(ss);
 	}
+	invoke_output_callback(t,Con::MessageFlags::ClientSide);
 	return con;
 }
 typedef std::ostream& (*conmanipulator) (std::ostream&);

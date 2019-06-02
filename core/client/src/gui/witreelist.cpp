@@ -118,10 +118,12 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 		pArrow->SetPos(m_xOffset,3);
 		pArrow->SetDirection(WIArrow::Direction::Down);
 		auto hThis = GetHandle();
-		pArrow->AddCallback("OnMousePressed",FunctionCallback<>::Create([hThis]() {
+		pArrow->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hThis](util::EventReply *reply) -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
 			if(hThis.IsValid() == false)
-				return;
+				return CallbackReturnType::HasReturnValue;
 			static_cast<WITreeListElement*>(hThis.get())->Toggle();
+			return CallbackReturnType::HasReturnValue;
 		}));
 		InsertElement(0,pArrow);
 	}
@@ -205,10 +207,12 @@ WITreeListElement *WITreeList::AddItem(const std::string &text)
 		return nullptr;
 	return static_cast<WITreeListElement*>(m_pRoot.get())->AddItem(text);
 }
-void WITreeList::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WITreeList::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WITable::MouseCallback(button,state,mods);
+	if(WITable::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	RequestFocus();
+	return util::EventReply::Handled;
 }
 void WITreeList::SetSize(int x,int y)
 {

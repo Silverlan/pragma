@@ -9,7 +9,7 @@ DLLENGINE void WVPxErrorCallback::reportError(physx::PxErrorCode::Enum code,cons
 {
 	std::stringstream ss;
 	ss<<"[PHYSX] "<<message<<" ("<<code<<") in file "<<file<<" (Line "<<line<<")";
-	Con::attr(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
 	Con::cout<<ss.str()<<Con::endl;
 	if(Con::GetLogLevel() >= 2)
 		Con::WriteToLog(ss);

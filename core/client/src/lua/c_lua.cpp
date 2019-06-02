@@ -56,6 +56,8 @@
 #undef NEAR
 #undef FAR
 
+extern DLLCENGINE CEngine *c_engine;
+
 void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
@@ -63,23 +65,25 @@ void CGame::RegisterLua()
 	auto &modEngine = GetLuaInterface().RegisterLibrary("engine",{
 		{"bind_key",Lua::engine::bind_key},
 		{"unbind_key",Lua::engine::unbind_key},
-		{"load_library",&Lua_engine_LoadLibrary},
+		{"load_library",&Lua::engine::LoadLibrary},
 		{"create_font",&Lua::engine::create_font},
 		{"get_font",&Lua::engine::get_font},
 		{"get_text_size",&Lua::engine::get_text_size},
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
-		{"get_tick_count",&Lua_engine_GetTickCount}
+		{"get_tick_count",&Lua::engine::GetTickCount},
+		{"set_record_console_output",&Lua::engine::set_record_console_output},
+		{"poll_console_output",&Lua::engine::poll_console_output}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"game",{
 		LUA_LIB_GAME_SHARED
-		//{"create_light",Lua_engine_CreateLight},
-		//{"remove_lights",Lua_engine_RemoveLights},
-		//{"create_sprite",Lua_engine_CreateSprite},
+		//{"create_light",Lua::engine::CreateLight},
+		//{"remove_lights",Lua::engine::RemoveLights},
+		//{"create_sprite",Lua::engine::CreateSprite},
 		{"precache_model",Lua::engine::precache_model},
 		{"precache_material",Lua::engine::precache_material},
-		{"load_sound_scripts",Lua_engine_LoadSoundScripts},
+		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
 		{"load_material",Lua::engine::load_material},
 		//{"create_texture",&Lua::engine::create_texture},
 		{"create_material",Lua::engine::create_material},

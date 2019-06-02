@@ -1,9 +1,11 @@
 #include "stdafx_engine.h"
 #include "pragma/console/util_console_color.hpp"
 
+static util::ConsoleColorFlags s_activeConsoleColorFlags = util::ConsoleColorFlags::None;
 bool util::set_console_color(ConsoleColorFlags flags)
 {
 	reset_console_color();
+	s_activeConsoleColorFlags = flags;
 #ifdef _WIN32
 	auto hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(!hOut)
@@ -97,6 +99,7 @@ bool util::set_console_color(ConsoleColorFlags flags)
 bool util::reset_console_color()
 {
 	std::cout.flush();
+	s_activeConsoleColorFlags = util::ConsoleColorFlags::None;
 #ifdef _WIN32
 	auto hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(!hOut)
@@ -109,3 +112,46 @@ bool util::reset_console_color()
 	return true;
 }
 
+util::ConsoleColorFlags util::get_active_console_color_flags() {return s_activeConsoleColorFlags;}
+
+const std::unordered_map<util::ConsoleColorFlags,Color> colorMap = {
+	{util::ConsoleColorFlags::Red | util::ConsoleColorFlags::Intensity,Color{209,17,65}},
+	{util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity,Color{0,177,89}},
+	{util::ConsoleColorFlags::Blue | util::ConsoleColorFlags::Intensity,Color{0,174,219}},
+	{util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity,Color{255,196,37}},
+	{util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity,Color{132,193,255}},
+	{util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity,Color{255,51,119}},
+	{util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity,Color{255,255,255}},
+
+	{util::ConsoleColorFlags::Red,Color{209 /2,17 /2,65 /2}},
+	{util::ConsoleColorFlags::Green,Color{0 /2,177 /2,89 /2}},
+	{util::ConsoleColorFlags::Blue,Color{0 /2,174 /2,219 /2}},
+	{util::ConsoleColorFlags::Yellow,Color{255 /2,196 /2,37 /2}},
+	{util::ConsoleColorFlags::Cyan,Color{132 /2,193 /2,255 /2}},
+	{util::ConsoleColorFlags::Magenta,Color{255 /2,51 /2,119 /2}},
+	{util::ConsoleColorFlags::White,Color{255 /2,255 /2,255 /2}}
+};
+std::optional<Color> util::console_color_flags_to_color(ConsoleColorFlags flags)
+{
+	auto foregroundFlags = flags &(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	auto it = colorMap.find(foregroundFlags);
+	if(it != colorMap.end())
+		return it->second;
+	return {};
+}
+
+util::ConsoleColorFlags util::color_to_console_color_flags(const Color &color)
+{
+	auto smallestDiff = std::numeric_limits<uint16_t>::max();
+	auto bestCandidate = util::ConsoleColorFlags::None;
+	for(auto &pair : colorMap)
+	{
+		auto &colOther = pair.second;
+		auto diff = static_cast<uint16_t>(umath::abs(color.r -colOther.r) +umath::abs(color.g -colOther.g) +umath::abs(color.b -colOther.b));
+		if(diff > smallestDiff)
+			continue;
+		smallestDiff = diff;
+		bestCandidate = pair.first;
+	}
+	return bestCandidate;
+}

@@ -309,6 +309,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_register(lua.GetState(),"print",Lua_print);
 	Lua::RegisterLibrary(lua.GetState(),"console",{
 		{"print",Lua_print},
+		{"printc",Lua_MsgC},
 		{"print_table",Lua_PrintTable},
 		{"print_message",Lua_Msg},
 		{"print_messageln",Lua_MsgN},
@@ -441,6 +442,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	utilMod[callbackHandlerClassDef];
 
 	auto defColor = luabind::class_<Color>("Color");
+	defColor.scope[luabind::def("CreateFromHexColor",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &hexColor) {
+		Lua::Push<Color>(l,Color::CreateFromHexColor(hexColor));
+	}))];
 	defColor.def(luabind::constructor<>());
 	defColor.def(luabind::constructor<short,short,short>());
 	defColor.def(luabind::constructor<short,short,short,short>());
@@ -464,6 +468,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("Lerp",&Lua::Color::Lerp);
 	defColor.def("ToVector4",&Lua::Color::ToVector4);
 	defColor.def("ToVector",&Lua::Color::ToVector);
+	defColor.def("ToHexColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::PushString(l,color.ToHexColor());
+	}));
 	utilMod[defColor];
 
 	auto _G = luabind::globals(lua.GetState());

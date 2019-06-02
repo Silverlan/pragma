@@ -3,7 +3,8 @@
 #include <Windows.h> // Required for FreeConsole
 #endif
 #define DEBUGCONSOLE \
-	void OpenConsole(); \
-	void CloseConsole(); \
-	bool IsConsoleOpen(); \
+	virtual void OpenConsole(); \
+	virtual void CloseConsole(); \
+	void ToggleConsole(); \
+	virtual bool IsConsoleOpen() const; \
 	DebugConsole *GetConsole();

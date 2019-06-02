@@ -17,10 +17,11 @@ public:
 	virtual ~WIFrame() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
+	using WITransformable::SetSize;
 	void SetTitle(std::string title);
 	std::string GetTitle() const;
 	void SetCloseButtonEnabled(bool b);
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 };
 
 #endif

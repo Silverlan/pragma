@@ -102,6 +102,7 @@ protected:
 	virtual void InitializeExternalArchiveManager() override;
 	virtual void DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
 	virtual void OnClose() override;
+	virtual void RegisterConsoleCommands() override;
 	void InitializeStagingTarget();
 public:
 	using pragma::RenderContext::DrawFrame;
@@ -122,6 +123,10 @@ public:
 	virtual void OnResolutionChanged(uint32_t width,uint32_t height) override;
 	virtual void Start() override;
 	virtual void Close() override;
+	virtual void ClearConsole() override;
+	virtual void OpenConsole() override;
+	virtual void CloseConsole() override;
+	virtual bool IsConsoleOpen() const override;
 	void UseFullbrightShader(bool b);
 	uint32_t GetFPSLimit() const;
 	virtual void EndGame() override;

@@ -22,6 +22,7 @@
 #include "pragma/networking/wvclient.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/gui/wifps.h"
+#include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
 #include <pragma/lua/lua_error_handling.hpp>
@@ -180,7 +181,7 @@ void ClientState::InitializeGUILua()
 	m_luaGUI->SetIdentifier("gui");
 	Lua::initialize_lua_state(GetGUILuaInterface());
 
-	Lua::RegisterLibrary(GetGUILuaState(),"util",{});
+	Lua::RegisterLibrary(GetGUILuaState(),"util",{REGISTER_SHARED_UTIL_GENERIC});
 	NetworkState::RegisterSharedLuaClasses(GetGUILuaInterface());
 	NetworkState::RegisterSharedLuaLibraries(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaClasses(*m_luaGUI,true);
@@ -196,7 +197,9 @@ void ClientState::InitializeGUILua()
 
 	Lua::RegisterLibrary(GetGUILuaState(),"engine",{
 		{"create_font",&Lua::engine::create_font},
-		{"get_font",&Lua::engine::get_font}
+		{"get_font",&Lua::engine::get_font},
+		{"set_record_console_output",&Lua::engine::set_record_console_output},
+		{"poll_console_output",&Lua::engine::poll_console_output}
 	});
 
 	WGUILuaInterface::Initialize();

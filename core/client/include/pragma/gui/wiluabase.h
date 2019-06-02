@@ -48,10 +48,10 @@ public:
 	virtual void Initialize() override;
 	virtual void InitializeHandle() override;
 	virtual void Think() override;
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
-	virtual void KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
-	virtual void CharCallback(unsigned int c,GLFW::Modifier mods=GLFW::Modifier::None) override;
-	virtual void ScrollCallback(Vector2 offset) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply CharCallback(unsigned int c,GLFW::Modifier mods=GLFW::Modifier::None) override;
+	virtual util::EventReply ScrollCallback(Vector2 offset) override;
 	virtual void SetSize(int x,int y) override;
 	virtual void OnVisibilityChanged(bool bVisible) override;
 	virtual void SetColor(float r,float g,float b,float a=1.f) override;

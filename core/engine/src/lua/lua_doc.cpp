@@ -40,6 +40,14 @@ struct DocInfo
 	}
 };
 static DocInfo s_docInfo {};
+inline std::string wrap_link(const std::string &arg)
+{
+	return "{[l:lua_help \"" +arg +"\"]}" +arg +"{[/l]}";
+}
+inline std::string wrap_web_link(const std::string &arg)
+{
+	return "{[l:url \"" +arg +"\"]}" +arg +"{[/l]}";
+}
 static void initialize_pragma_documentation()
 {
 	static auto initialized = false;
@@ -65,9 +73,8 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 	s_docInfo.ReloadLookupTable();
 	return true;
 }
-void Lua::doc::print_documentation(const std::string &name)
+void Lua::doc::find_candidates(const std::string &name,std::vector<const pragma::doc::BaseCollectionObject*> &outCandidates,uint32_t candidateLimit)
 {
-	const auto MAX_SIMILAR_CANDIDATES = 20u;
 	initialize_pragma_documentation();
 	std::vector<std::pair<const pragma::doc::BaseCollectionObject*,float>> similarCandidates {};
 	for(auto &pair : s_docInfo.lookupTable)
@@ -83,21 +90,30 @@ void Lua::doc::print_documentation(const std::string &name)
 			bInserted = true;
 			break;
 		}
-		if(similarCandidates.size() > MAX_SIMILAR_CANDIDATES)
-			similarCandidates.resize(MAX_SIMILAR_CANDIDATES);
-		if(bInserted == false && similarCandidates.size() < MAX_SIMILAR_CANDIDATES)
+		if(similarCandidates.size() > candidateLimit)
+			similarCandidates.resize(candidateLimit);
+		if(bInserted == false && similarCandidates.size() < candidateLimit)
 			similarCandidates.push_back(std::pair<const pragma::doc::BaseCollectionObject*,float>{pair.second,percentage});
 	}
+	outCandidates.reserve(similarCandidates.size());
+	for(auto &pair : similarCandidates)
+		outCandidates.push_back(pair.first);
+}
+void Lua::doc::print_documentation(const std::string &name)
+{
+	const auto MAX_SIMILAR_CANDIDATES = 20u;
+	std::vector<const pragma::doc::BaseCollectionObject*> similarCandidates {};
+	Lua::doc::find_candidates(name,similarCandidates,MAX_SIMILAR_CANDIDATES);
 	if(similarCandidates.empty() == false)
 	{
 		Con::cout<<Con::endl;
 		util::set_console_color(util::ConsoleColorFlags::Yellow | util::ConsoleColorFlags::Intensity);
 		Con::cout<<"Were you looking for the following";
-		auto *pFunction = dynamic_cast<const pragma::doc::Function*>(similarCandidates.front().first);
-		auto *pMember = dynamic_cast<const pragma::doc::Member*>(similarCandidates.front().first);
-		auto *pEnum = dynamic_cast<const pragma::doc::Enum*>(similarCandidates.front().first);
-		auto *pEnumSet = dynamic_cast<const pragma::doc::EnumSet*>(similarCandidates.front().first);
-		auto *pCollection = dynamic_cast<const pragma::doc::Collection*>(similarCandidates.front().first);
+		auto *pFunction = dynamic_cast<const pragma::doc::Function*>(similarCandidates.front());
+		auto *pMember = dynamic_cast<const pragma::doc::Member*>(similarCandidates.front());
+		auto *pEnum = dynamic_cast<const pragma::doc::Enum*>(similarCandidates.front());
+		auto *pEnumSet = dynamic_cast<const pragma::doc::EnumSet*>(similarCandidates.front());
+		auto *pCollection = dynamic_cast<const pragma::doc::Collection*>(similarCandidates.front());
 		if(pFunction != nullptr)
 			Con::cout<<" function";
 		else if(pMember != nullptr)
@@ -131,7 +147,7 @@ void Lua::doc::print_documentation(const std::string &name)
 			Con::cout<<"Other similar items:"<<Con::endl;
 			util::reset_console_color();
 			for(auto it=similarCandidates.begin() +1u;it<similarCandidates.end();++it)
-				Con::cout<<" - "<<it->first->GetFullName()<<Con::endl;
+				Con::cout<<" - "<<wrap_link((*it)->GetFullName())<<Con::endl;
 		}
 	}
 }
@@ -175,7 +191,7 @@ void print_member_documentation(const pragma::doc::Member &member)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Wiki URL: ";
 	util::reset_console_color();
-	Con::cout<<member.GetWikiURL()<<Con::endl;
+	Con::cout<<wrap_web_link(member.GetWikiURL())<<Con::endl;
 
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Type: ";
@@ -207,7 +223,7 @@ void print_collection(const pragma::doc::Collection &collection)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Wiki URL: ";
 	util::reset_console_color();
-	Con::cout<<collection.GetWikiURL()<<Con::endl;
+	Con::cout<<wrap_web_link(collection.GetWikiURL())<<Con::endl;
 	
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Type: ";
@@ -236,7 +252,7 @@ void print_collection(const pragma::doc::Collection &collection)
 				Con::cout<<"- ";
 				bFirst = false;
 			}
-			Con::cout<<df.GetName();
+			Con::cout<<wrap_link(df.GetName());
 		}
 		Con::cout<<Con::endl<<Con::endl;
 	}
@@ -265,7 +281,7 @@ void print_collection(const pragma::doc::Collection &collection)
 			auto &member = members.at(idx);
 			Con::cout<<"- ";
 			util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-			Con::cout<<"["<<member.GetType()<<"] ";
+			Con::cout<<"["<<wrap_link(member.GetType())<<"] ";
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			Con::cout<<member.GetFullName()<<Con::endl;
 		}
@@ -282,7 +298,7 @@ void print_collection(const pragma::doc::Collection &collection)
 		{
 			Con::cout<<"- ";
 			util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-			Con::cout<<"["<<enumSet->GetUnderlyingType()<<"] ";
+			Con::cout<<"["<<wrap_link(enumSet->GetUnderlyingType())<<"] ";
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			Con::cout<<enumSet->GetFullName()<<Con::endl;
 		}
@@ -314,7 +330,7 @@ void print_collection(const pragma::doc::Collection &collection)
 		{
 			auto &fc = typeFunctions.at(idx);
 			Con::cout<<"- ";
-			Con::cout<<fc->GetName()<<Con::endl;;
+			Con::cout<<wrap_link(fc->GetName())<<Con::endl;;
 		}
 		Con::cout<<Con::endl;
 	};
@@ -339,7 +355,7 @@ void print_collection(const pragma::doc::Collection &collection)
 		{
 			auto &child = children.at(idx);
 			Con::cout<<"- ";
-			Con::cout<<child->GetName()<<Con::endl;
+			Con::cout<<wrap_link(child->GetName())<<Con::endl;
 		}
 		Con::cout<<Con::endl;
 	}
@@ -360,7 +376,7 @@ void print_enum_set_documentation(const pragma::doc::EnumSet &enumSet)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Wiki URL: ";
 	util::reset_console_color();
-	Con::cout<<enumSet.GetWikiURL()<<Con::endl;
+	Con::cout<<wrap_web_link(enumSet.GetWikiURL())<<Con::endl;
 	
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Values:"<<Con::endl;
@@ -403,7 +419,7 @@ void print_enum_documentation(const pragma::doc::Enum &e)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Wiki URL: ";
 	util::reset_console_color();
-	Con::cout<<e.GetWikiURL()<<Con::endl;
+	Con::cout<<wrap_web_link(e.GetWikiURL())<<Con::endl;
 	
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Type: ";
@@ -447,7 +463,7 @@ void print_function_documentation(const pragma::doc::Function &function)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Wiki URL: ";
 	util::reset_console_color();
-	Con::cout<<function.GetWikiURL()<<Con::endl;
+	Con::cout<<wrap_web_link(function.GetWikiURL())<<Con::endl;
 
 	auto type = function.GetType();
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
@@ -517,7 +533,7 @@ void print_function_documentation(const pragma::doc::Function &function)
 				else
 					bFirst = false;
 				util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-				Con::cout<<"["<<returnValue.GetFullType()<<"]";
+				Con::cout<<"["<<wrap_link(returnValue.GetFullType())<<"]";
 			}
 		}
 		else
@@ -535,7 +551,7 @@ void print_function_documentation(const pragma::doc::Function &function)
 				bFirst = false;
 
 			util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-			Con::cout<<"["<<param.GetFullType()<<"]";
+			Con::cout<<"["<<wrap_link(param.GetFullType())<<"]";
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			Con::cout<<" "<<param.GetName();
 			auto &def = param.GetDefault();

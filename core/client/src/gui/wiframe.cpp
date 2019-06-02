@@ -25,14 +25,15 @@ void WIFrame::Initialize()
 	SetResizable(true);
 
 	m_hBg = CreateChild<WIRect>();
+	m_hBg->SetName("background");
 	m_hBg->SetAutoAlignToParent(true);
 	m_hBg->GetColorProperty()->Link(*GetColorProperty());
 	WITransformable::Initialize();
 	if(m_hMoveRect.IsValid())
 	{
 		auto &gui = WGUI::GetInstance();
-		m_hTitleBar = gui.Create<WIRect>(m_hMoveRect.get())->GetHandle();
-		WIRect *pTitleBar = m_hTitleBar.get<WIRect>();
+		m_hTitleBar = gui.Create<WIBase>(m_hMoveRect.get())->GetHandle();
+		WIBase *pTitleBar = m_hTitleBar.get<WIBase>();
 		pTitleBar->AddStyleClass("frame_titlebar");
 		pTitleBar->SetAutoAlignToParent(true);
 		auto hFrame = GetHandle();
@@ -42,7 +43,7 @@ void WIFrame::Initialize()
 			auto *pFrame = hFrame.get<WIFrame>();
 			if(!pFrame->m_hTitleBar.IsValid())
 				return;
-			auto *pTitleBar = pFrame->m_hTitleBar.get<WIRect>();
+			auto *pTitleBar = pFrame->m_hTitleBar.get<WIBase>();
 			if(pFrame->m_hClose.IsValid())
 			{
 				WIButton *pButton = pFrame->m_hClose.get<WIButton>();
@@ -66,14 +67,20 @@ void WIFrame::Initialize()
 		m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
 		WIButton *pButton = m_hClose.get<WIButton>();
 		pButton->SetText("X");
-		pButton->AddCallback("OnPressed",FunctionCallback<>::Create(std::bind(&WIFrame::OnCloseButtonPressed,this)));
+		pButton->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
+			*reply = util::EventReply::Handled;
+			OnCloseButtonPressed();
+			return CallbackReturnType::HasReturnValue;
+		}));
 		pButton->SetSize(20,20);
 	}
 }
-void WIFrame::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WIFrame::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WITransformable::MouseCallback(button,state,mods);
+	if(WITransformable::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	RequestFocus();
+	return util::EventReply::Handled;
 }
 void WIFrame::SetCloseButtonEnabled(bool b)
 {

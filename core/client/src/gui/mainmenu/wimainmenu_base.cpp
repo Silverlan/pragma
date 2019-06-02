@@ -31,24 +31,28 @@ void WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
 }
-void WIMainMenuBase::MouseCallback(GLFW::MouseButton,GLFW::KeyState state,GLFW::Modifier)
+util::EventReply WIMainMenuBase::MouseCallback(GLFW::MouseButton,GLFW::KeyState state,GLFW::Modifier)
 {
 	if(state != GLFW::KeyState::Press)
-		return;
+		return util::EventReply::Handled;
+	return util::EventReply::Handled;
 }
-void WIMainMenuBase::KeyboardCallback(GLFW::Key key,int,GLFW::KeyState state,GLFW::Modifier)
+util::EventReply WIMainMenuBase::KeyboardCallback(GLFW::Key key,int,GLFW::KeyState state,GLFW::Modifier)
 {
-	if(state != GLFW::KeyState::Press)
-		return;
-	if(key == GLFW::Key::S || key == GLFW::Key::Down) SelectNextItem();
-	else if(key == GLFW::Key::W || key == GLFW::Key::Up) SelectPreviousItem();
 	if(key == GLFW::Key::Enter)
 	{
 		WIMainMenuElement *el = GetSelectedElement();
 		if(el == NULL)
-			return;
-		el->Activate();
+			return util::EventReply::Handled;
+		if(state == GLFW::KeyState::Press)
+			el->Activate();
+		return util::EventReply::Handled;
 	}
+	if(state != GLFW::KeyState::Press)
+		return util::EventReply::Unhandled;
+	if(key == GLFW::Key::S || key == GLFW::Key::Down) SelectNextItem();
+	else if(key == GLFW::Key::W || key == GLFW::Key::Up) SelectPreviousItem();
+	return util::EventReply::Unhandled;
 }
 void WIMainMenuBase::SelectItem(int i)
 {
@@ -275,12 +279,13 @@ void WIMainMenuElement::Activate()
 	onActivated(this);
 }
 
-void WIMainMenuElement::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WIMainMenuElement::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	WIBase::MouseCallback(button,state,mods);
 	if(state != GLFW::KeyState::Press)
-		return;
+		return util::EventReply::Handled;
 	Activate();
+	return util::EventReply::Handled;
 }
 
 void WIMainMenuElement::OnCursorEntered() {Select();}

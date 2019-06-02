@@ -3,44 +3,44 @@
 #include "pragma/c_engine.h"
 
 extern DLLCENGINE CEngine *c_engine;
-static void LPARAM_windowed(int,char*[])
+static void LPARAM_windowed(const std::vector<std::string> &argv)
 {
 	c_engine->SetWindowedMode(true);
 }
 
-static void LPARAM_refresh(int argc,char *argv[])
+static void LPARAM_refresh(const std::vector<std::string> &argv)
 {
-	if(argc == 0)
+	if(argv.empty())
 		return;
-	int freq = atoi(argv[0]);
+	int freq = atoi(argv[0].c_str());
 	if(freq > 0)
 		c_engine->SetRefreshRate(freq);
 }
 
-static void LPARAM_noborder(int,char*[])
+static void LPARAM_noborder(const std::vector<std::string> &argv)
 {
 	c_engine->SetNoBorder(true);
 }
 
-static void LPARAM_w(int argc,char *argv[])
+static void LPARAM_w(const std::vector<std::string> &argv)
 {
-	if(argc == 0)
+	if(argv.empty())
 		return;
 	auto sz = c_engine->GetWindowSize();
-	c_engine->SetResolution(Vector2i(atoi(argv[0]),sz.at(1)));
+	c_engine->SetResolution(Vector2i(atoi(argv[0].c_str()),sz.at(1)));
 }
 
-static void LPARAM_h(int argc,char *argv[])
+static void LPARAM_h(const std::vector<std::string> &argv)
 {
-	if(argc == 0)
+	if(argv.empty())
 		return;
 	auto sz = c_engine->GetWindowSize();
-	c_engine->SetResolution(Vector2i(sz.at(0),atoi(argv[0])));
+	c_engine->SetResolution(Vector2i(sz.at(0),atoi(argv[0].c_str())));
 }
 
-static void LPARAM_fullbright(int,char*[]) {c_engine->UseFullbrightShader(true);}
+static void LPARAM_fullbright(const std::vector<std::string> &argv) {c_engine->UseFullbrightShader(true);}
 
-static void LPARAM_vk_enable_validation(int argc,char *argv[])
+static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv)
 {
 	c_engine->SetValidationEnabled(true);
 }

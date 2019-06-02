@@ -850,10 +850,10 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		// We'll strip it here if it's in one of our known texture paths.
 		auto texPath = FileManager::GetCanonicalizedPath(tex);
 		auto it = std::find_if(texPaths.begin(),texPaths.end(),[&texPath](const std::string &path) {
-			return (ustring::sub(texPath,0,path.length()) == path) ? true : false;
+			return (ustring::substr(texPath,0,path.length()) == path) ? true : false;
 		});
 		if(it != texPaths.end())
-			texPath = ustring::sub(texPath,it->length());
+			texPath = ustring::substr(texPath,it->length());
 		textureTranslations.push_back(import::util::add_texture(*nw,mdl,texPath));
 	}
 

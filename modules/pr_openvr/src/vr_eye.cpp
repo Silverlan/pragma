@@ -3,10 +3,10 @@
 #include "vr_instance.hpp"
 #include "wvmodule.h"
 #include <prosper_context.hpp>
-#include <prosper_image.hpp>
+#include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
-#include <prosper_sampler.hpp>
-#include <prosper_render_target.hpp>
+#include <image/prosper_sampler.hpp>
+#include <image/prosper_render_target.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
 

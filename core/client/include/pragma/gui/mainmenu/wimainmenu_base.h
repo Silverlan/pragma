@@ -20,8 +20,8 @@ protected:
 public:
 	WIMainMenuBase();
 	virtual void Initialize() override;
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
-	virtual void KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
 	void SelectItem(int i);
 	void SelectNextItem();
 	void SelectPreviousItem();
@@ -49,7 +49,7 @@ public:
 	void Select();
 	void Deselect();
 	void SetText(std::string &text);
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual void OnCursorEntered() override;
 	virtual void OnCursorExited() override;
 	void Activate();

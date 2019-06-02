@@ -8,6 +8,8 @@
 #include <pragma/performancetimer.h>
 #include "pragma/gui/wiimageslideshow.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
+#include "pragma/gui/wiconsole.hpp"
+#include "pragma/gui/wiframe.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include <pragma/util/profiling_stages.h>
@@ -33,6 +35,9 @@
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
+#include <wgui/types/wicontextmenu.hpp>
+#include <wgui/types/witext.h>
+#include <wgui/types/witext_tags.hpp>
 
 extern "C"
 {
@@ -46,7 +51,6 @@ extern "C"
 	}
 }
 
-#pragma optimize("",off)
 DLLCENGINE CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -210,12 +214,12 @@ void CEngine::EndGame()
 
 void CEngine::Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude)
 {
-	if(key == static_cast<int>(GLFW::Key::Apostrophe))
+	if(key == static_cast<int>(GLFW::Key::GraveAccent))
 	{
 		if(pressState == GLFW::KeyState::Press)
 		{
 			if(IsConsoleOpen())
-				;//CloseConsole();
+				CloseConsole();
 			else
 				OpenConsole();
 		}
@@ -547,6 +551,37 @@ bool CEngine::Initialize(int argc,char *argv[])
 		std::this_thread::sleep_for(std::chrono::seconds(5));
 		return false;
 	}
+	WIContextMenu::SetKeyBindHandler([this](GLFW::Key key,const std::string &cmd) -> std::string {
+		std::string keyStr;
+		auto b = KeyToText(umath::to_integral(key),&keyStr);
+		short c;
+		if(StringToKey(keyStr,&c))
+			MapKey(c,cmd);
+		return keyStr;
+	},[this](const std::string &cmd) -> std::optional<std::string> {
+		std::vector<GLFW::Key> keys;
+		GetMappedKeys(cmd,keys);
+		if(keys.empty())
+			return {};
+		std::string strKey {};
+		KeyToText(umath::to_integral(keys.front()),&strKey);
+		return strKey;
+	});
+	WITextTagLink::set_link_handler([this](const std::string &arg) {
+		std::vector<std::string> args {};
+		ustring::explode_whitespace(arg,args);
+		if(args.empty())
+			return;
+		auto cmd = args.front();
+		args.erase(args.begin());
+		if(ustring::compare(cmd,"url",false))
+		{
+			if(args.empty() == false)
+				util::open_url_in_browser(args.front());
+			return;
+		}
+		RunConsoleCommand(cmd,args);
+	});
 
 	m_speedCam = 1600.0f;
 	m_speedCamMouse = 0.2f;
@@ -591,6 +626,34 @@ bool CEngine::Initialize(int argc,char *argv[])
 	}
 #endif
 	return true;
+}
+void CEngine::ClearConsole()
+{
+	auto *pConsole = WIConsole::GetConsole();
+	if(pConsole == nullptr)
+	{
+		Engine::ClearConsole();
+		return;
+	}
+	pConsole->Clear();
+}
+void CEngine::OpenConsole()
+{
+	if(WGUI::IsOpen())
+		WIConsole::Open();
+	// Engine::OpenConsole();
+}
+void CEngine::CloseConsole()
+{
+	WIConsole::Close();
+	// Engine::CloseConsole();
+}
+bool CEngine::IsConsoleOpen() const
+{
+	auto *pConsole = WIConsole::GetConsole();
+	auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
+	return pFrame && pFrame->IsVisible();
+	// Engine::IsConsoleOpen();
 }
 CallbackHandle CEngine::AddGPUProfilingHandler(const std::function<void(bool)> &handler)
 {
@@ -1110,4 +1173,3 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
-#pragma optimize("",on)

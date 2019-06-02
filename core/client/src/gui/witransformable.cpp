@@ -1,7 +1,9 @@
 #include "stdafx_client.h"
 #include "pragma/gui/witransformable.h"
+#include "pragma/gui/wisnaparea.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
+#include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -112,6 +114,10 @@ Vector2i WITransformable::GetConfinedMousePos()
 		pos.y = hViewport -WIFRAME_DRAG_OFFSET_BORDER;
 	return pos;
 }
+void WITransformable::AddSnapTarget(WISnapArea &target)
+{
+	m_snapTargets.push_back(target.GetHandle());
+}
 void WITransformable::StartDrag()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true)
@@ -136,6 +142,7 @@ void WITransformable::EndDrag()
 	if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == false)
 		return;
 	umath::set_flag(m_stateFlags,StateFlags::Dragging,false);
+	umath::set_flag(m_stateFlags,StateFlags::WasDragged);
 }
 void WITransformable::StartResizing()
 {
@@ -173,8 +180,9 @@ void WITransformable::SetResizeMode(ResizeMode mode)
 		break;
 	};
 	m_resizeMode = mode;
-	WGUI::GetInstance().SetCursor(cursor);
+	SetCursor(cursor);
 }
+void WITransformable::SetRemoveOnClose(bool remove) {m_bRemoveOnClose = remove;}
 void WITransformable::OnCloseButtonPressed()
 {
 	Close();
@@ -182,7 +190,10 @@ void WITransformable::OnCloseButtonPressed()
 void WITransformable::Close()
 {
 	//SetVisible(false);
-	RemoveSafely();
+	if(m_bRemoveOnClose)
+		RemoveSafely();
+	else
+		SetVisible(false);
 	CallCallbacks<void>("OnClose");
 }
 WIBase *WITransformable::GetDragArea() const {return m_hMoveRect.get();}
@@ -196,13 +207,17 @@ void WITransformable::Initialize()
 	auto *pMoveRect = m_hMoveRect.get();
 	pMoveRect->AddStyleClass("move_rect");
 	pMoveRect->SetMouseInputEnabled(umath::is_flag_set(m_stateFlags,StateFlags::Draggable));
-	pMoveRect->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
-		std::bind(&WITransformable::OnTitleBarMouseEvent,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)
-	));
+	pMoveRect->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[this](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		OnTitleBarMouseEvent(button,state,mods);
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
+	}));
 }
-void WITransformable::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WITransformable::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIBase::MouseCallback(button,state,mods);
+	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(button == GLFW::MouseButton::Left)
 	{
 		if(state == GLFW::KeyState::Press)
@@ -213,12 +228,23 @@ void WITransformable::MouseCallback(GLFW::MouseButton button,GLFW::KeyState stat
 		else if(state == GLFW::KeyState::Release)
 			EndResizing();
 	}
+	return util::EventReply::Handled;
 }
 void WITransformable::OnCursorMoved(int x,int y)
 {
 	WIBase::OnCursorMoved(x,y);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::Resizing) == true || umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true)
 		return;
+	const auto fValidateCursorOverlap = [this]() {
+		auto &wgui = WGUI::GetInstance();
+		auto *pElCursor = wgui.GetCursorGUIElement(wgui.GetBaseElement(),[](WIBase *el) -> bool {return true;});
+		if(pElCursor != nullptr && pElCursor != this && pElCursor->IsDescendantOf(this) == false)
+		{
+			SetResizeMode(ResizeMode::none);
+			return false;
+		}
+		return true;
+	};
 	if(x < -WIFRAME_RESIZE_OFFSET_BORDER || y < -WIFRAME_RESIZE_OFFSET_BORDER)
 	{
 		SetResizeMode(ResizeMode::none);
@@ -232,6 +258,8 @@ void WITransformable::OnCursorMoved(int x,int y)
 	}
 	if(y <= WIFRAME_RESIZE_OFFSET_BORDER)
 	{
+		if(fValidateCursorOverlap() == false)
+			return;
 		if(x <= WIFRAME_RESIZE_OFFSET_BORDER)
 			SetResizeMode(ResizeMode::nwse);
 		else if(x >= size.x -WIFRAME_RESIZE_OFFSET_BORDER)
@@ -241,6 +269,8 @@ void WITransformable::OnCursorMoved(int x,int y)
 	}
 	else if(y >= size.y -WIFRAME_RESIZE_OFFSET_BORDER)
 	{
+		if(fValidateCursorOverlap() == false)
+			return;
 		if(x <= WIFRAME_RESIZE_OFFSET_BORDER)
 			SetResizeMode(ResizeMode::swne);
 		else if(x >= size.x -WIFRAME_RESIZE_OFFSET_BORDER)
@@ -249,9 +279,17 @@ void WITransformable::OnCursorMoved(int x,int y)
 			SetResizeMode(ResizeMode::sn);
 	}
 	else if(x <= WIFRAME_RESIZE_OFFSET_BORDER)
+	{
+		if(fValidateCursorOverlap() == false)
+			return;
 		SetResizeMode(ResizeMode::ew);
+	}
 	else if(x >= size.x -WIFRAME_RESIZE_OFFSET_BORDER)
+	{
+		if(fValidateCursorOverlap() == false)
+			return;
 		SetResizeMode(ResizeMode::we);
+	}
 	else
 		SetResizeMode(ResizeMode::none);
 }
@@ -418,6 +456,67 @@ void WITransformable::Think()
 		CallCallbacks<void,std::reference_wrapper<Vector2i>,bool>("TranslateTransformPosition",std::ref(curPos),true);
 		SetPos(curPos);
 	}
+	auto bDragging = umath::is_flag_set(m_stateFlags,StateFlags::Dragging);
+	if(bDragging == false && umath::is_flag_set(m_stateFlags,StateFlags::WasDragged) == false)
+		return;
+	auto itSnapTarget = std::find_if(m_snapTargets.begin(),m_snapTargets.end(),[](const WIHandle &hSnapTarget) {
+		if(hSnapTarget.IsValid() == false)
+			return false;
+		auto *pTriggerArea = static_cast<WISnapArea*>(hSnapTarget.get())->GetTriggerArea();
+		return pTriggerArea && pTriggerArea->MouseInBounds();
+	});
+	ScopeGuard sgSnapGhost = [this,bDragging]() {
+		if(bDragging)
+			return;
+		umath::set_flag(m_stateFlags,StateFlags::WasDragged,false);
+		if(m_snapGhost.IsValid() && m_snapGhost->IsVisible())
+			SnapToTarget(*m_snapGhost.get());
+		DestroySnapTargetGhost();
+	};
+	if(itSnapTarget == m_snapTargets.end())
+	{
+		if(m_snapGhost.IsValid())
+			m_snapGhost->SetVisible(false);
+		return;
+	}
+	auto &snapTarget = static_cast<WISnapArea&>(*itSnapTarget->get());
+	InitializeSnapTargetGhost(snapTarget);
+	if(m_snapGhost.IsValid() == false)
+		return;
+	m_snapGhost->SetVisible(true);
+	auto pos = snapTarget.GetAbsolutePos();
+	auto sz = snapTarget.GetSize();
+	m_snapGhost->SetPos(pos);
+	m_snapGhost->SetSize(sz);
+}
+
+void WITransformable::SnapToTarget(WIBase &el)
+{
+	SetAbsolutePos(el.GetPos());
+	SetSize(el.GetSize());
+}
+
+void WITransformable::InitializeSnapTargetGhost(WISnapArea &snapArea)
+{
+	if(m_snapGhost.IsValid())
+		return;
+	auto &wgui = WGUI::GetInstance();
+	auto *pSnapGhost = wgui.Create<WIRect>();
+	m_snapGhost = pSnapGhost->GetHandle();
+	pSnapGhost->SetColor(Color{255,255,255,100});
+
+	auto *pOutline = wgui.Create<WIOutlinedRect>(pSnapGhost);
+	pOutline->SetAutoAlignToParent(true);
+	pOutline->SetOutlineWidth(2);
+	pOutline->SetColor(Color::Black);
+
+	RemoveOnRemoval(pSnapGhost);
+	pSnapGhost->SetZPos(10'000);
+}
+void WITransformable::DestroySnapTargetGhost()
+{
+	if(m_snapGhost.IsValid())
+		m_snapGhost->Remove();
 }
 void WITransformable::SetSize(int x,int y)
 {
@@ -541,10 +640,15 @@ void WITransformable::SetResizable(bool b)
 	resizeRect->SetMouseInputEnabled(true);
 	resizeRect->SetVisible(IsVisible());
 	resizeRect->SetZPos(GetZPos());
-	resizeRect->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create([hThis](GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) {
+	resizeRect->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[hThis](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
 		if(hThis.IsValid() == false)
-			return;
-		hThis.get()->MouseCallback(button,state,mods);
+		{
+			*reply = util::EventReply::Handled;
+			return CallbackReturnType::HasReturnValue;
+		}
+		*reply = hThis.get()->MouseCallback(button,state,mods);
+		return CallbackReturnType::HasReturnValue;
 	}));
 	RemoveOnRemoval(resizeRect);
 	m_hResizeRect = resizeRect->GetHandle();

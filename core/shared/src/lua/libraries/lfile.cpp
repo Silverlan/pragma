@@ -288,7 +288,7 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
 		return false;
 	}
 	auto br = fname.find(FileManager::GetDirectorySeparator(),8);
-	auto prefix = ustring::sub(fname,0,br +1);
+	auto prefix = ustring::substr(fname,0,br +1);
 	path = prefix +path;
 	return true;
 }

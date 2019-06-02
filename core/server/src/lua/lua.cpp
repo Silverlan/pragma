@@ -40,17 +40,19 @@ void SGame::RegisterLua()
 	lua_setglobal(GetLuaState(),"CLIENT");
 
 	Lua::RegisterLibrary(GetLuaState(),"engine",{
-		{"load_library",&Lua_engine_LoadLibrary},
-		{"get_tick_count",&Lua_engine_GetTickCount}
+		{"load_library",&Lua::engine::LoadLibrary},
+		{"get_tick_count",&Lua::engine::GetTickCount},
+		{"set_record_console_output",&Lua::engine::set_record_console_output},
+		{"poll_console_output",&Lua::engine::poll_console_output}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"game",{
 		LUA_LIB_GAME_SHARED
-		//{"create_light",Lua_engine_CreateLight},
-		//{"remove_lights",Lua_engine_RemoveLights},
-		//{"create_sprite",Lua_engine_CreateSprite},
-		{"precache_model",Lua_engine_PrecacheModel_sv},
-		{"load_sound_scripts",Lua_engine_LoadSoundScripts},
+		//{"create_light",Lua::engine::CreateLight},
+		//{"remove_lights",Lua::engine::RemoveLights},
+		//{"create_sprite",Lua::engine::CreateSprite},
+		{"precache_model",Lua::engine::PrecacheModel_sv},
+		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
 		{"load_material",Lua_sv_engine_LoadMaterial},
 
 		{"set_gravity",Lua::game::Server::set_gravity},

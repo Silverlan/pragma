@@ -49,25 +49,37 @@ void WILuaBase::Think()
 	CallLuaMember("OnThink");
 }
 
-void WILuaBase::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIBase::MouseCallback(button,state,mods);
-	CallLuaMember<void,int,int,int>("MouseCallback",static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods));
+	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	CallLuaMember<uint32_t,int,int,int>("MouseCallback",&reply,static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods));
+	return static_cast<util::EventReply>(reply);
 }
-void WILuaBase::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WILuaBase::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIBase::KeyboardCallback(key,scanCode,state,mods);
-	CallLuaMember<void,int,int,int,int>("KeyboardCallback",static_cast<int>(key),scanCode,static_cast<int>(state),static_cast<int>(mods));
+	if(WIBase::KeyboardCallback(key,scanCode,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	CallLuaMember<uint32_t,int,int,int,int>("KeyboardCallback",&reply,static_cast<int>(key),scanCode,static_cast<int>(state),static_cast<int>(mods));
+	return static_cast<util::EventReply>(reply);
 }
-void WILuaBase::CharCallback(unsigned int c,GLFW::Modifier mods)
+util::EventReply WILuaBase::CharCallback(unsigned int c,GLFW::Modifier mods)
 {
-	WIBase::CharCallback(c);
-	CallLuaMember<void,unsigned int,uint32_t>("CharCallback",c,umath::to_integral(mods));
+	if(WIBase::CharCallback(c) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	CallLuaMember<uint32_t,unsigned int,uint32_t>("CharCallback",&reply,c,umath::to_integral(mods));
+	return static_cast<util::EventReply>(reply);
 }
-void WILuaBase::ScrollCallback(Vector2 offset)
+util::EventReply WILuaBase::ScrollCallback(Vector2 offset)
 {
-	WIBase::ScrollCallback(offset);
-	CallLuaMember<void,double,double>("ScrollCallback",offset.x,offset.y);
+	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+	CallLuaMember<uint32_t,double,double>("ScrollCallback",&reply,offset.x,offset.y);
+	return static_cast<util::EventReply>(reply);
 }
 
 void WILuaBase::SetSize(int x,int y)

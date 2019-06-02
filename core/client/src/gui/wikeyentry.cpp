@@ -23,9 +23,9 @@ WIKeyEntry::~WIKeyEntry()
 		m_hMouseTrap->Remove();
 }
 
-void WIKeyEntry::OnTextChanged(const std::string &oldText,const std::string &text)
+void WIKeyEntry::OnTextChanged(const std::string &text)
 {
-	WITextEntryBase::OnTextChanged(oldText,text);
+	WITextEntryBase::OnTextChanged(text);
 	if(!m_hText.IsValid())
 		return;
 	WIText *t = m_hText.get<WIText>();
@@ -45,10 +45,10 @@ void WIKeyEntry::Initialize()
 	if(m_hText.IsValid())
 	{
 		auto hThis = GetHandle();
-		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> oldText,std::reference_wrapper<const std::string> newText) {
+		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> newText) {
 			if(!hThis.IsValid())
 				return;
-			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(oldText,newText);
+			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(newText);
 		}));
 	}
 	ApplyKey(static_cast<GLFW::Key>(-1));
@@ -60,23 +60,27 @@ void WIKeyEntry::SetSize(int x,int y)
 	if(!m_hText.IsValid())
 		return;
 	WIText *t = m_hText.get<WIText>();
-	OnTextChanged(t->GetText(),t->GetText());
+	OnTextChanged(t->GetText());
 }
 
-void WIKeyEntry::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WIKeyEntry::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIBase::KeyboardCallback(key,scanCode,state,mods);
+	if(WIBase::KeyboardCallback(key,scanCode,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(state != GLFW::KeyState::Press)
-		return;
+		return util::EventReply::Handled;
 	ApplyKey(key);
+	return util::EventReply::Handled;
 }
-void WIKeyEntry::ScrollCallback(Vector2 offset)
+util::EventReply WIKeyEntry::ScrollCallback(Vector2 offset)
 {
-	WIBase::ScrollCallback(offset);
+	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(offset.y >= 0.f)
 		ApplyKey(static_cast<GLFW::Key>(GLFW_CUSTOM_KEY_SCRL_UP));
 	else
 		ApplyKey(static_cast<GLFW::Key>(GLFW_CUSTOM_KEY_SCRL_DOWN));
+	return util::EventReply::Handled;
 }
 void WIKeyEntry::SetKey(GLFW::Key key)
 {
@@ -102,9 +106,9 @@ void WIKeyEntry::ApplyKey(GLFW::Key key)
 	KillFocus();
 	CallCallbacks<void,GLFW::Key,GLFW::Key>("OnKeyChanged",prevKey,key);
 }
-void WIKeyEntry::CharCallback(unsigned int c,GLFW::Modifier mods)
+util::EventReply WIKeyEntry::CharCallback(unsigned int c,GLFW::Modifier mods)
 {
-	WIBase::CharCallback(c,mods);
+	return WIBase::CharCallback(c,mods);
 }
 void WIKeyEntry::OnFocusGained()
 {
@@ -121,21 +125,32 @@ void WIKeyEntry::OnFocusGained()
 	pRect->SetScrollInputEnabled(true);
 	auto hKeyEntry = GetHandle();
 	auto hRect = pRect->GetHandle();
-	pRect->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create([hRect,hKeyEntry](GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier) {
+	pRect->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[hRect,hKeyEntry](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier) -> CallbackReturnType {
 		if(state != GLFW::KeyState::Press || !hKeyEntry.IsValid())
-			return;
+		{
+			*reply = util::EventReply::Handled;
+			return CallbackReturnType::HasReturnValue;
+		}
 		auto *pKeyEntry = hKeyEntry.get<WIKeyEntry>();
 		pKeyEntry->ApplyKey(static_cast<GLFW::Key>(static_cast<uint32_t>(button) +static_cast<uint32_t>(GLFW::Key::Last)));
 		if(hRect.IsValid())
 			hRect.get()->RemoveSafely();
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
 	}));
-	pRect->AddCallback("OnScroll",FunctionCallback<void,Vector2>::Create([hRect,hKeyEntry](Vector2 offset) {
+	pRect->AddCallback("OnScroll",FunctionCallback<util::EventReply,Vector2>::CreateWithOptionalReturn([hRect,hKeyEntry](util::EventReply *reply,Vector2 offset) -> CallbackReturnType {
 		if(!hKeyEntry.IsValid())
-			return;
+		{
+			*reply = util::EventReply::Handled;
+			return CallbackReturnType::HasReturnValue;
+		}
 		auto *pKeyEntry = hKeyEntry.get<WIKeyEntry>();
 		pKeyEntry->ApplyKey(static_cast<GLFW::Key>((offset.y >= 0.f) ? GLFW_CUSTOM_KEY_SCRL_UP : GLFW_CUSTOM_KEY_SCRL_DOWN));
 		if(hRect.IsValid())
 			hRect.get()->RemoveSafely();
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
 	}));
 	m_bKeyPressed = false;
 }

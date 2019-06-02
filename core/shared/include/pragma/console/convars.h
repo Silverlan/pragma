@@ -73,15 +73,25 @@ class DLLNETWORK ConCommand
 {
 public:
 	ConCommand(const ConCommand &cv);
-	ConCommand(const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
-	ConCommand(const LuaFunction &function,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
+	ConCommand(
+		const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function,
+		ConVarFlags flags=ConVarFlags::None,const std::string &help="",
+		const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback=nullptr
+	);
+	ConCommand(
+		const LuaFunction &function,ConVarFlags flags=ConVarFlags::None,const std::string &help="",
+		const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback=nullptr
+	);
 private:
 	std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> m_function;
 	LuaFunction m_functionLua;
+	std::function<void(const std::string&,std::vector<std::string>&)> m_autoCompleteCallback = nullptr;
 public:
 	void GetFunction(LuaFunction &function) const;
 	void GetFunction(std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function) const;
 	void SetFunction(const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function);
+	const std::function<void(const std::string&,std::vector<std::string>&)> &GetAutoCompleteCallback() const;
+	void SetAutoCompleteCallback(const std::function<void(const std::string&,std::vector<std::string>&)> &callback);
 	ConConf *Copy();
 };
 
@@ -135,6 +145,31 @@ public:
 	CvarCallbackFunction *GetFunction();
 };
 
+struct DLLNETWORK ConVarCreateInfo
+{
+	ConVarCreateInfo()=default;
+	ConVarCreateInfo(const std::string &name,const std::string &defaultValue,ConVarFlags flags={},const std::string &helpText="")
+		: name{name},defaultValue{defaultValue},flags{flags},helpText{helpText}
+	{}
+	std::string name = {};
+	std::string defaultValue = {};
+	ConVarFlags flags = {};
+	std::string helpText = {};
+};
+
+struct DLLNETWORK ConCommandCreateInfo
+{
+	ConCommandCreateInfo()=default;
+	ConCommandCreateInfo(const std::string &name,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function,ConVarFlags flags={},const std::string &helpText={},const std::function<void(const std::string&,std::vector<std::string>&)> &autoComplete=nullptr)
+		: callbackFunction{function},name{name},flags{flags},helpText{helpText},autoComplete{autoComplete}
+	{}
+	std::string name = {};
+	std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> callbackFunction = nullptr;
+	ConVarFlags flags = {};
+	std::string helpText = {};
+	std::function<void(const std::string&,std::vector<std::string>&)> autoComplete = nullptr;
+};
+
 class DLLNETWORK ConVarMap
 {
 public:
@@ -149,8 +184,17 @@ public:
 	std::shared_ptr<ConCommand> PreRegisterConCommand(const std::string &scmd,ConVarFlags flags,const std::string &help="");
 	void PreRegisterConVarCallback(const std::string &scvar);
 
-	std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="");
-	std::shared_ptr<ConCommand> RegisterConCommand(const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,ConVarFlags flags,const std::string &help="");
+	std::shared_ptr<ConVar> RegisterConVar(
+		const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="",
+		std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction=nullptr
+	);
+	std::shared_ptr<ConVar> RegisterConVar(const ConVarCreateInfo &createInfo);
+	std::shared_ptr<ConCommand> RegisterConCommand(
+		const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,
+		ConVarFlags flags,const std::string &help="",const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback=nullptr
+	);
+	std::shared_ptr<ConCommand> RegisterConCommand(const ConCommandCreateInfo &createInfo);
+
 	void RegisterConVarCallback(const std::string &scvar,const std::function<void(NetworkState*,ConVar*,int,int)> &function);
 	void RegisterConVarCallback(const std::string &scvar,const std::function<void(NetworkState*,ConVar*,std::string,std::string)> &function);
 	void RegisterConVarCallback(const std::string &scvar,const std::function<void(NetworkState*,ConVar*,float,float)> &function);

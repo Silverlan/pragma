@@ -92,10 +92,12 @@ void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
 	buttonStart->SetText(Locale::GetText("start_game"));
 	buttonStart->SizeToContents();
 	buttonStart->SetAutoCenterToParent(true);
-	buttonStart->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(std::bind(
-		&WIMainMenuNewGame::OnStartGame,
-		this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3
-	)));
+	buttonStart->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[this](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		OnStartGame(button,state,mods);
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
+	}));
 	pRow->InsertElement(1,buttonStart);
 	WIMainMenuBase::InitializeOptionsList(pList);
 }

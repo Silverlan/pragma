@@ -16,11 +16,12 @@ CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
 lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
 
-static void GUI_Callback_OnMouseEvent(WIBase &p,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
 		luaStates[1] = c_game->GetLuaState();
+	std::optional<util::EventReply> reply {};
 	for(char i=0;i<2;i++)
 	{
 		if(luaStates[i] != NULL)
@@ -34,28 +35,36 @@ static void GUI_Callback_OnMouseEvent(WIBase &p,GLFW::MouseButton button,GLFW::K
 			if(Lua::IsFunction(lua,-1))
 			{
 				auto functionIdx = Lua::GetStackTop(lua);
-				Lua::CallFunction(lua,[functionIdx,&o,button,state,mods](lua_State *l) {
+				if(Lua::CallFunction(lua,[functionIdx,&o,button,state,mods](lua_State *l) {
 					Lua::PushValue(l,functionIdx);
 					o.push(l);
 					Lua::PushInt(l,button);
 					Lua::PushInt(l,state);
 					Lua::PushInt(l,mods);
 					return Lua::StatusCode::Ok;
-				},0);
+				},1) == Lua::StatusCode::Ok)
+				{
+					reply = static_cast<util::EventReply>(Lua::CheckInt(lua,-1));
+					Lua::Pop(lua,1);
+				}
 				Lua::Pop(lua,1); /* 1 */
 			}
 			else
 				Lua::Pop(lua,1); /* 1 */
 			Lua::Pop(lua,1); /* 0 */
+			if(reply.has_value())
+				return reply;
 		}
 	}
+	return reply;
 }
 
-static void GUI_Callback_OnKeyEvent(WIBase &p,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnKeyEvent(WIBase &p,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
 		luaStates[1] = c_game->GetLuaState();
+	std::optional<util::EventReply> reply {};
 	for(char i=0;i<2;i++)
 	{
 		if(luaStates[i] != NULL)
@@ -68,7 +77,7 @@ static void GUI_Callback_OnKeyEvent(WIBase &p,GLFW::Key key,int scanCode,GLFW::K
 			if(Lua::IsFunction(lua,-1))
 			{
 				auto functionIdx = Lua::GetStackTop(lua);
-				Lua::CallFunction(lua,[functionIdx,&o,key,scanCode,state,mods](lua_State *l) {
+				if(Lua::CallFunction(lua,[functionIdx,&o,key,scanCode,state,mods](lua_State *l) {
 					Lua::PushValue(l,functionIdx);
 					o.push(l);
 					Lua::PushInt(l,key);
@@ -76,21 +85,29 @@ static void GUI_Callback_OnKeyEvent(WIBase &p,GLFW::Key key,int scanCode,GLFW::K
 					Lua::PushInt(l,state);
 					Lua::PushInt(l,mods);
 					return Lua::StatusCode::Ok;
-				},0);
+				},1) == Lua::StatusCode::Ok)
+				{
+					reply = static_cast<util::EventReply>(Lua::CheckInt(lua,-1));
+					Lua::Pop(lua,1);
+				}
 				Lua::Pop(lua,1); /* 1 */
 			}
 			else
 				Lua::Pop(lua,1); /* 1 */
 			Lua::Pop(lua,1); /* 0 */
+			if(reply.has_value())
+				return reply;
 		}
 	}
+	return reply;
 }
 
-static void GUI_Callback_OnCharEvent(WIBase &p,int c,GLFW::Modifier mods)
+static std::optional<util::EventReply> GUI_Callback_OnCharEvent(WIBase &p,int c,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
 		luaStates[1] = c_game->GetLuaState();
+	std::optional<util::EventReply> reply {};
 	for(char i=0;i<2;i++)
 	{
 		if(luaStates[i] != NULL)
@@ -103,28 +120,36 @@ static void GUI_Callback_OnCharEvent(WIBase &p,int c,GLFW::Modifier mods)
 			if(Lua::IsFunction(lua,-1))
 			{
 				auto functionIdx = Lua::GetStackTop(lua);
-				Lua::CallFunction(lua,[functionIdx,&o,c,mods](lua_State *l) {
+				if(Lua::CallFunction(lua,[functionIdx,&o,c,mods](lua_State *l) {
 					Lua::PushValue(l,functionIdx);
 					o.push(l);
 					char ch = CInt8(c);
 					Lua::PushString(l,std::string(&ch,1));
 					Lua::PushInt(l,umath::to_integral(mods));
 					return Lua::StatusCode::Ok;
-				},0);
+				},1) == Lua::StatusCode::Ok)
+				{
+					reply = static_cast<util::EventReply>(Lua::CheckInt(lua,-1));
+					Lua::Pop(lua,1);
+				}
 				Lua::Pop(lua,1); /* 1 */
 			}
 			else
 				Lua::Pop(lua,1); /* 1 */
 			Lua::Pop(lua,1); /* 0 */
+			if(reply.has_value())
+				return reply;
 		}
 	}
+	return reply;
 }
 
-static void GUI_Callback_OnScroll(WIBase &p,Vector2 offset)
+static std::optional<util::EventReply> GUI_Callback_OnScroll(WIBase &p,Vector2 offset)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
 	if(c_game != NULL)
 		luaStates[1] = c_game->GetLuaState();
+	std::optional<util::EventReply> reply {};
 	for(char i=0;i<2;i++)
 	{
 		if(luaStates[i] != NULL)
@@ -137,20 +162,27 @@ static void GUI_Callback_OnScroll(WIBase &p,Vector2 offset)
 			if(Lua::IsFunction(lua,-1))
 			{
 				auto functionIdx = Lua::GetStackTop(lua);
-				Lua::CallFunction(lua,[functionIdx,&o,&offset](lua_State *l) {
+				if(Lua::CallFunction(lua,[functionIdx,&o,&offset](lua_State *l) {
 					Lua::PushValue(l,functionIdx);
 					o.push(l);
 					Lua::PushNumber(l,offset.x);
 					Lua::PushNumber(l,offset.y);
 					return Lua::StatusCode::Ok;
-				},0);
+				},1) == Lua::StatusCode::Ok)
+				{
+					reply = static_cast<util::EventReply>(Lua::CheckInt(lua,-1));
+					Lua::Pop(lua,1);
+				}
 				Lua::Pop(lua,1); /* 1 */
 			}
 			else
 				Lua::Pop(lua,1); /* 1 */
 			Lua::Pop(lua,1); /* 0 */
+			if(reply.has_value())
+				return reply;
 		}
 	}
+	return reply;
 }
 
 void WGUILuaInterface::OnGameStart()
@@ -225,18 +257,44 @@ void WGUILuaInterface::Clear()
 
 void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 {
-	p.AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
-		[&p](GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) {GUI_Callback_OnMouseEvent(p,button,state,mods);}
-	));
-	p.AddCallback("OnKeyEvent",FunctionCallback<void,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::Create(
-		[&p](GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) {GUI_Callback_OnKeyEvent(p,key,scanCode,state,mods);}
-	));
-	p.AddCallback("OnCharEvent",FunctionCallback<void,int,GLFW::Modifier>::Create(
-		[&p](int c,GLFW::Modifier mods) {GUI_Callback_OnCharEvent(p,c,mods);}
-	));
-	p.AddCallback("OnScroll",FunctionCallback<void,Vector2>::Create(
-		[&p](Vector2 offset) {GUI_Callback_OnScroll(p,offset);}
-	));
+	p.AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[&p](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		auto r = GUI_Callback_OnMouseEvent(p,button,state,mods);
+		if(r.has_value())
+		{
+			*reply = *r;
+			return CallbackReturnType::HasReturnValue;
+		}
+		return CallbackReturnType::NoReturnValue;
+	}));
+	p.AddCallback("OnKeyEvent",FunctionCallback<util::EventReply,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[&p](util::EventReply *reply,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		auto r = GUI_Callback_OnKeyEvent(p,key,scanCode,state,mods);
+		if(r.has_value())
+		{
+			*reply = *r;
+			return CallbackReturnType::HasReturnValue;
+		}
+		return CallbackReturnType::NoReturnValue;
+	}));
+	p.AddCallback("OnCharEvent",FunctionCallback<util::EventReply,int,GLFW::Modifier>::CreateWithOptionalReturn([&p](util::EventReply *reply,int c,GLFW::Modifier mods) -> CallbackReturnType {
+		auto r = GUI_Callback_OnCharEvent(p,c,mods);
+		if(r.has_value())
+		{
+			*reply = *r;
+			return CallbackReturnType::HasReturnValue;
+		}
+		return CallbackReturnType::NoReturnValue;
+	}));
+	p.AddCallback("OnScroll",FunctionCallback<util::EventReply,Vector2>::CreateWithOptionalReturn([&p](util::EventReply *reply,Vector2 offset) -> CallbackReturnType {
+		auto r = GUI_Callback_OnScroll(p,offset);
+		if(r.has_value())
+		{
+			*reply = *r;
+			return CallbackReturnType::HasReturnValue;
+		}
+		return CallbackReturnType::NoReturnValue;
+	}));
 }
 
 luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
@@ -253,6 +311,8 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
 			return luabind::object(l,WINumericEntryHandle(WITextEntryHandle(p.GetHandle())));
 		else if(dynamic_cast<WIDropDownMenu*>(&p) != nullptr)
 			return luabind::object(l,WIDropDownMenuHandle(WITextEntryHandle(p.GetHandle())));
+		else if(dynamic_cast<WICommandLineEntry*>(&p) != nullptr)
+			return luabind::object(l,WICommandLineEntryHandle(WITextEntryHandle(p.GetHandle())));
 		return luabind::object(l,WITextEntryHandle(p.GetHandle()));
 	}
 	else if(dynamic_cast<WIText*>(&p) != nullptr)
@@ -305,10 +365,16 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
 	}
 	else if(dynamic_cast<WIScrollBar*>(&p) != nullptr)
 		return luabind::object(l,WIScrollBarHandle(p.GetHandle()));
+	else if(dynamic_cast<WISnapArea*>(&p) != nullptr)
+		return luabind::object(l,WISnapAreaHandle(p.GetHandle()));
 	else if(dynamic_cast<WIButton*>(&p) != nullptr)
 		return luabind::object(l,WIButtonHandle(p.GetHandle()));
 	else if(dynamic_cast<WILine*>(&p) != nullptr)
 		return luabind::object(l,WILineHandle(p.GetHandle()));
+	else if(dynamic_cast<WIScrollContainer*>(&p) != nullptr)
+		return luabind::object(l,WIScrollContainerHandle(p.GetHandle()));
+	else if(dynamic_cast<WIConsole*>(&p) != nullptr)
+		return luabind::object(l,WIConsoleHandle(p.GetHandle()));
 	else if(dynamic_cast<WITransformable*>(&p) != nullptr)
 	{
 		if(dynamic_cast<WIFrame*>(&p) != nullptr)

@@ -47,7 +47,7 @@ public:
 	WITreeList();
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual WITableRow *AddRow() override;
 	WITreeListElement *AddItem(const std::string &text);
 	virtual void Update() override;

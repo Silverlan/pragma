@@ -90,14 +90,11 @@ namespace Lua
 	}
 };
 
-#define REGISTER_SHARED_UTIL \
+#define REGISTER_SHARED_UTIL_GENERIC \
 	{"get_date_time",Lua::util::date_time}, \
 	{"is_table",Lua::util::is_table}, \
-	{"is_valid_entity",Lua::util::is_valid_entity}, \
 	{"is_valid",Lua::util::is_valid}, \
 	{"register_class",Lua::util::register_class}, \
-	{"splash_damage",Lua::util::splash_damage}, \
-	{"shake_screen",Lua::util::shake_screen}, \
 	{"get_faded_time_factor",Lua::util::get_faded_time_factor}, \
 	{"get_scale_factor",Lua::util::get_scale_factor}, \
 	{"local_to_world",Lua::util::local_to_world}, \
@@ -106,8 +103,14 @@ namespace Lua
 	{"get_pretty_duration",Lua::util::get_pretty_duration}, \
 	{"units_to_metres",Lua::util::units_to_metres}, \
 	{"metres_to_units",Lua::util::metres_to_units}, \
-	{"read_scene_file",Lua::util::read_scene_file}, \
 	{"fade_property",Lua::util::fade_property}, \
 	{"round_string",Lua::util::round_string},
+
+#define REGISTER_SHARED_UTIL \
+	REGISTER_SHARED_UTIL_GENERIC \
+	{"is_valid_entity",Lua::util::is_valid_entity}, \
+	{"splash_damage",Lua::util::splash_damage}, \
+	{"shake_screen",Lua::util::shake_screen}, \
+	{"read_scene_file",Lua::util::read_scene_file},
 
 #endif

@@ -35,7 +35,7 @@
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 	//: descBuffer(nullptr) // prosper TODO
 {
@@ -921,4 +921,3 @@ float Scene::GetAspectRatio() {return camera->GetAspectRatio();}
 float Scene::GetZNear() {return camera->GetZNear();}
 float Scene::GetZFar() {return camera->GetZFar();}
 const std::shared_ptr<Camera> &Scene::GetCamera() const {return camera;}
-#pragma optimize("",on)

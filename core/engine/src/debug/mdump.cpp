@@ -91,7 +91,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 			char szScratch [_MAX_PATH];
 
 			// ask the user if they want to save a dump file
-			if (::MessageBox( NULL, "A terminal error has occurred in the program. Would you like to save a diagnostic file?", m_szAppName, MB_YESNO )==IDYES)
+			if (::MessageBox( NULL, "A terminal error has occurred in the program. Would you like to save a diagnostic file? This file contains information about your system and the state of the game at the time of the crash and can be utilized by a developer to fix the underlying problem.", m_szAppName, MB_YESNO )==IDYES)
 			{
 				// create the file
 				HANDLE hFile = ::CreateFile( szDumpPath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
@@ -148,7 +148,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 								std::remove(szDumpPath.c_str());
 							}
 							zipFile = nullptr;
-							sprintf(szScratch,"Saved dump file to '%s'. Please send it to %s, along with a description of what you did to trigger the error.",zipName.c_str(),engine_info::get_author_mail_address().c_str());
+							sprintf(szScratch,"Saved dump file to '%s'. Please send it to a developer, along with a description of what you did to trigger the error.",zipName.c_str()/*,engine_info::get_author_mail_address().c_str()*/);
 							szResult = szScratch;
 							retval = EXCEPTION_EXECUTE_HANDLER;
 						}

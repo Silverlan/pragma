@@ -744,7 +744,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		int32_t brushModelId = -1;
 		auto brushModel = fGetKeyValue("model");
 		if(brushModel.size() > 1 && brushModel.front() == '*')
-			brushModelId = util::to_int(ustring::sub(brushModel,1));
+			brushModelId = util::to_int(ustring::substr(brushModel,1));
 
 		if(ustring::compare(className,"func_detail",false) == true)
 		{

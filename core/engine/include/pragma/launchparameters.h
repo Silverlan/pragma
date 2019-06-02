@@ -3,6 +3,7 @@
 #include "pragma/definitions.h"
 #include <sstream>
 #include <string>
+#include <functional>
 #include <unordered_map>
 
 #pragma warning(push)
@@ -11,16 +12,16 @@ class DLLENGINE LaunchParaMap
 {
 public:
 private:
-	std::unordered_map<std::string,void(*)(int,char*[])> m_parameters;
+	std::unordered_map<std::string,std::function<void(const std::vector<std::string>&)>> m_parameters;
 public:
 	static std::stringstream LAUNCHPARAMETERS_HELP;
-	void GetParameters(std::unordered_map<std::string,void(*)(int,char*[])> **parameters);
-	void RegisterParameter(std::string name,void(*function)(int,char*[]));
+	const std::unordered_map<std::string,std::function<void(const std::vector<std::string>&)>> &GetParameters() const;
+	void RegisterParameter(const std::string &name,const std::function<void(const std::vector<std::string>&)> &f);
 };
 #pragma warning(pop)
 DLLENGINE LaunchParaMap *GetLaunchParaMap();
-DLLENGINE void RegisterLaunchParameter(std::string name,void(*function)(int,char*[]));
-DLLENGINE void RegisterLaunchParameterHelp(std::string name,void(*function)(int,char*[]),std::string descCmd,std::string descHelp);
+DLLENGINE void RegisterLaunchParameter(std::string name,const std::function<void(const std::vector<std::string>&)> &function);
+DLLENGINE void RegisterLaunchParameterHelp(std::string name,const std::function<void(const std::vector<std::string>&)> &function,std::string descCmd,std::string descHelp);
 
 #define REGISTER_LAUNCH_PARAMETER__(lpName,function,identifier) \
 	class LPM##function##identifier \

@@ -18,7 +18,7 @@ public:
 	void SetChecked(bool bChecked);
 	bool IsChecked();
 	void Toggle();
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual void SetSize(int x,int y) override;
 };
 

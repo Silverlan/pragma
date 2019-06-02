@@ -11,6 +11,9 @@ namespace Lua
 	// If the file name is truncated, this will not work! To be sure, define the third parameter as the actual file name.
 	DLLENGINE void HandleSyntaxError(lua_State *l,Lua::StatusCode r);
 	DLLENGINE void HandleSyntaxError(lua_State *l,Lua::StatusCode r,const std::string &fileName);
+
+	DLLENGINE void OpenFileInZeroBrane(const std::string &fname,uint32_t lineId);
+	DLLENGINE std::optional<std::string> GetLuaFilePath(const std::string &fname);
 };
 
 #endif

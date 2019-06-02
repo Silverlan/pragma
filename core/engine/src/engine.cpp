@@ -92,6 +92,14 @@ Engine::Engine(int,char*[])
 	pragma::register_engine_activities();
 
 	RegisterCallback<void>("Think");
+
+	Con::set_output_callback([this](const std::string_view &output,Con::MessageFlags flags,const Color *color) {
+		if(m_bRecordConsoleOutput == false)
+			return;
+		m_consoleOutputMutex.lock();
+			m_consoleOutput.push({std::string{output},flags,color ? std::make_shared<Color>(*color) : nullptr});
+		m_consoleOutputMutex.unlock();
+	});
 	
 	m_cpuProfiler = pragma::debug::CPUProfiler::Create<pragma::debug::CPUProfiler>();
 	AddProfilingHandler([this](bool profilingEnabled) {
@@ -109,6 +117,36 @@ Engine::Engine(int,char*[])
 		});
 		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
+}
+
+void Engine::ClearConsole()
+{
+	std::system("cls");
+}
+
+std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
+{
+	if(m_bRecordConsoleOutput == false)
+		return {};
+	m_consoleOutputMutex.lock();
+		if(m_consoleOutput.empty())
+		{
+			m_consoleOutputMutex.unlock();
+			return {};
+		}
+		auto r = m_consoleOutput.front();
+		m_consoleOutput.pop();
+	m_consoleOutputMutex.unlock();
+	return r;
+}
+void Engine::SetRecordConsoleOutput(bool record)
+{
+	if(record == m_bRecordConsoleOutput)
+		return;
+	m_consoleOutputMutex.lock();
+		m_bRecordConsoleOutput = record;
+		m_consoleOutput = {};
+	m_consoleOutputMutex.unlock();
 }
 
 CallbackHandle Engine::AddProfilingHandler(const std::function<void(bool)> &handler)
@@ -154,6 +192,7 @@ void Engine::Close()
 	EndLogging();
 
 	util::close_external_archive_manager();
+	Con::set_output_callback(nullptr);
 }
 
 void Engine::ClearCache()
@@ -226,6 +265,8 @@ void Engine::Release()
 bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
 {
 	CVarHandler::Initialize();
+	RegisterConsoleCommands();
+
 	// Initialize Server Instance
 	auto matManager = std::make_shared<MaterialManager>();
 	auto *matErr = matManager->Load("error");

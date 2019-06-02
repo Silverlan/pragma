@@ -139,7 +139,7 @@ public:
 	bool GetValue(uint32_t col,std::string &val) const;
 	WITableCell *InsertElement(unsigned int col,WIBase *el);
 	WITableCell *InsertElement(unsigned int col,WIHandle hElement);
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	void Select();
 	void Deselect();
 	bool IsSelected();

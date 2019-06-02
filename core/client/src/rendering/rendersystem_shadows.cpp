@@ -18,7 +18,6 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 struct ShadowRenderInfo
 {
 	const CBaseEntity *entity = nullptr;
@@ -760,4 +759,3 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 		render_shadows(drawCmd,*light);
 	}
 }
-#pragma optimize("",on)

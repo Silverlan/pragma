@@ -42,11 +42,13 @@ void WICheckbox::SetChecked(bool bChecked)
 }
 bool WICheckbox::IsChecked() {return m_bChecked;}
 void WICheckbox::Toggle() {SetChecked(!m_bChecked);}
-void WICheckbox::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WICheckbox::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	WIRect::MouseCallback(button,state,mods);
+	if(WIRect::MouseCallback(button,state,mods) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(button == GLFW::MouseButton::Left && state == GLFW::KeyState::Press)
 		Toggle();
+	return util::EventReply::Handled;
 }
 void WICheckbox::SetSize(int x,int y)
 {

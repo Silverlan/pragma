@@ -11,6 +11,7 @@
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
+#include "pragma/gui/wiconsole.hpp"
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/ai/c_lai.hpp"
@@ -70,6 +71,32 @@ static void register_gui(Lua::Interface &lua)
 				oChild.push(l);
 				Lua::SetTableValue(l,t);
 			}
+			return 1;
+		})},
+		{"get_console",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *pConsole = WIConsole::GetConsole();
+			if(pConsole == nullptr)
+				return 0;
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*pConsole);
+			oChild.push(l);
+			return 1;
+		})},
+		{"open_console",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *pConsole = WIConsole::Open();
+			if(pConsole == nullptr)
+				return 0;
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*pConsole);
+			oChild.push(l);
+			return 1;
+		})},
+		{"close_console",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			WIConsole::Close();
+			return 0;
+		})},
+		{"is_console_open",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *pConsole = WIConsole::GetConsole();
+			auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
+			Lua::PushBool(l,pFrame ? pFrame->IsVisible() : false);
 			return 1;
 		})}
 	});
@@ -135,6 +162,17 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WITransformable::register_class(wiTransformableClassDef);
 	guiMod[wiTransformableClassDef];
 
+	auto wiSnapAreaClassDef = luabind::class_<WISnapAreaHandle,WIHandle>("SnapArea");
+	wiSnapAreaClassDef.def("GetTriggerArea",static_cast<void(*)(lua_State*,WISnapAreaHandle&)>([](lua_State *l,WISnapAreaHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pTriggerArea = static_cast<::WISnapArea*>(hEl.get())->GetTriggerArea();
+		if(pTriggerArea == nullptr)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*pTriggerArea);
+		o.push(l);
+	}));
+	guiMod[wiSnapAreaClassDef];
+
 	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTextureHandle,WIHandle>("DebugDepthTexture");
 	wiDebugDepthTextureClassDef.def("SetContrastFactor",static_cast<void(*)(lua_State*,WIDebugDepthTextureHandle&,float)>([](lua_State *l,WIDebugDepthTextureHandle &hEl,float contrastFactor) {
 		lua_checkgui(l,hEl);
@@ -185,6 +223,17 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WISlider::register_class(wiSliderClassDef);
 	guiMod[wiSliderClassDef];
 
+	auto wiScrollContainerClassDef = luabind::class_<WIScrollContainerHandle,WIHandle>("ScrollContainer");
+	wiScrollContainerClassDef.def("SetAutoStickToBottom",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,bool)>([](lua_State *l,WIScrollContainerHandle &hEl,bool stick) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetAutoStickToBottom(stick);
+	}));
+	wiScrollContainerClassDef.def("ShouldAutoStickToBottom",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushBool(l,static_cast<::WIScrollContainer*>(hEl.get())->ShouldAutoStickToBottom());
+	}));
+	guiMod[wiScrollContainerClassDef];
+
 	auto wiContainerClassDef = luabind::class_<WIContainerHandle,WIHandle>("Container");
 	Lua::WIContainer::register_class(wiContainerClassDef);
 	guiMod[wiContainerClassDef];
@@ -223,7 +272,26 @@ static void register_gui(Lua::Interface &lua)
 
 	auto wiTextEntryClassDef = luabind::class_<WITextEntryHandle,WIHandle>("TextEntry");
 	Lua::WITextEntry::register_class(wiTextEntryClassDef);
+	wiTextEntryClassDef.def("GetCaretElement",static_cast<void(*)(lua_State*,WITextEntryHandle&)>([](lua_State *l,WITextEntryHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pCaretElement = static_cast<::WITextEntry*>(hEl.get())->GetCaretElement();
+		if(pCaretElement == nullptr)
+			return;
+		auto oChild = WGUILuaInterface::GetLuaObject(l,*pCaretElement);
+		oChild.push(l);
+	}));
 	guiMod[wiTextEntryClassDef];
+
+	auto wiCommandLineEntryClassDef = luabind::class_<WICommandLineEntryHandle,luabind::bases<WITextEntryHandle,WIHandle>>("CommandLineEntry");
+	wiCommandLineEntryClassDef.def("SetAutoCompleteEntryLimit",static_cast<void(*)(lua_State*,WICommandLineEntryHandle&,uint32_t)>([](lua_State *l,WICommandLineEntryHandle &hEl,uint32_t limit) {
+		lua_checkgui(l,hEl);
+		static_cast<::WICommandLineEntry*>(hEl.get())->SetAutoCompleteEntryLimit(limit);
+	}));
+	wiCommandLineEntryClassDef.def("GetAutoCompleteEntryLimit",static_cast<void(*)(lua_State*,WICommandLineEntryHandle&)>([](lua_State *l,WICommandLineEntryHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushInt(l,static_cast<::WICommandLineEntry*>(hEl.get())->GetAutoCompleteEntryLimit());
+	}));
+	guiMod[wiCommandLineEntryClassDef];
 
 	auto wiOutlinedRectClassDef = luabind::class_<WIOutlinedRectHandle,WIHandle>("OutlinedRect");
 	Lua::WIOutlinedRect::register_class(wiOutlinedRectClassDef);
@@ -245,10 +313,61 @@ static void register_gui(Lua::Interface &lua)
 	auto wiNumericEntryClassDef = luabind::class_<WINumericEntryHandle,luabind::bases<WITextEntryHandle,WIHandle>>("NumericTextEntry");
 	Lua::WINumericEntry::register_class(wiNumericEntryClassDef);
 	guiMod[wiNumericEntryClassDef];
-
+	
 	auto wiDropDownMenuClassDef = luabind::class_<WIDropDownMenuHandle,luabind::bases<WITextEntryHandle,WIHandle>>("DropDownMenu");
 	Lua::WIDropDownMenu::register_class(wiDropDownMenuClassDef);
 	guiMod[wiDropDownMenuClassDef];
+
+	auto wiConsoleClassDef = luabind::class_<WIConsoleHandle,WIHandle>("Console");
+	wiConsoleClassDef.def("GetCommandLineEntryElement",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pCommandLineEntry = static_cast<::WIConsole*>(hEl.get())->GetCommandLineEntryElement();
+		if(pCommandLineEntry == nullptr)
+			return;
+		auto oChild = WGUILuaInterface::GetLuaObject(l,*pCommandLineEntry);
+		oChild.push(l);
+	}));
+	wiConsoleClassDef.def("GetTextLogElement",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pLog = static_cast<::WIConsole*>(hEl.get())->GetTextLogElement();
+		if(pLog == nullptr)
+			return;
+		auto oChild = WGUILuaInterface::GetLuaObject(l,*pLog);
+		oChild.push(l);
+	}));
+	wiConsoleClassDef.def("GetFrame",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pFrame = static_cast<::WIConsole*>(hEl.get())->GetFrame();
+		if(pFrame == nullptr)
+			return;
+		auto oChild = WGUILuaInterface::GetLuaObject(l,*pFrame);
+		oChild.push(l);
+	}));
+	wiConsoleClassDef.def("GetText",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushString(l,static_cast<::WIConsole*>(hEl.get())->GetText());
+	}));
+	wiConsoleClassDef.def("SetText",static_cast<void(*)(lua_State*,WIConsoleHandle&,const std::string&)>([](lua_State *l,WIConsoleHandle &hEl,const std::string &text) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIConsole*>(hEl.get())->SetText(text);
+	}));
+	wiConsoleClassDef.def("AppendText",static_cast<void(*)(lua_State*,WIConsoleHandle&,const std::string&)>([](lua_State *l,WIConsoleHandle &hEl,const std::string &text) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIConsole*>(hEl.get())->AppendText(text);
+	}));
+	wiConsoleClassDef.def("Clear",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIConsole*>(hEl.get())->Clear();
+	}));
+	wiConsoleClassDef.def("SetMaxLogLineCount",static_cast<void(*)(lua_State*,WIConsoleHandle&,uint32_t)>([](lua_State *l,WIConsoleHandle &hEl,uint32_t maxLogLineCount) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIConsole*>(hEl.get())->SetMaxLogLineCount(maxLogLineCount);
+	}));
+	wiConsoleClassDef.def("GetMaxLogLineCount",static_cast<void(*)(lua_State*,WIConsoleHandle&)>([](lua_State *l,WIConsoleHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushInt(l,static_cast<::WIConsole*>(hEl.get())->GetMaxLogLineCount());
+	}));
+	guiMod[wiConsoleClassDef];
 
 	guiMod[wiOutlinedRectClassDef];
 	guiMod[wiLineClassDef];

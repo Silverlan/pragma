@@ -60,6 +60,9 @@ Vector2i WIScrollContainer::GetContentSize()
 	return Vector2i(GetContentWidth(),GetContentHeight());
 }
 
+void WIScrollContainer::SetAutoStickToBottom(bool autoStick) {m_bAutoStickToBottom = autoStick;}
+bool WIScrollContainer::ShouldAutoStickToBottom() const {return m_bAutoStickToBottom;}
+
 int WIScrollContainer::GetScrollBarWidthV()
 {
 	if(!m_hScrollBarV.IsValid() || !m_hScrollBarV->IsVisible())
@@ -113,6 +116,8 @@ void WIScrollContainer::Initialize()
 
 	m_hWrapper = CreateChild<WIBase>();
 	WIBase *pWrapper = m_hWrapper.get();
+
+	// pWrapper->SetAutoAlignToParent(true);
 	m_hChildAdded = pWrapper->AddCallback("OnChildAdded",FunctionCallback<void,WIBase*>::Create(
 		std::bind(&WIScrollContainer::OnWrapperChildAdded,this,std::placeholders::_1)
 	));
@@ -120,13 +125,15 @@ void WIScrollContainer::Initialize()
 		std::bind(&WIScrollContainer::OnWrapperChildRemoved,this,std::placeholders::_1)
 	));
 }
-void WIScrollContainer::ScrollCallback(Vector2 offset)
+util::EventReply WIScrollContainer::ScrollCallback(Vector2 offset)
 {
-	WIBase::ScrollCallback(offset);
+	if(WIBase::ScrollCallback(offset) == util::EventReply::Handled)
+		return util::EventReply::Handled;
 	if(m_hScrollBarH.IsValid())
 		m_hScrollBarH.get<WIScrollBar>()->ScrollCallback(Vector2(offset.x,0.f));
 	if(m_hScrollBarV.IsValid())
 		m_hScrollBarV.get<WIScrollBar>()->ScrollCallback(Vector2(0.f,offset.y));
+	return util::EventReply::Handled;
 }
 WIScrollBar *WIScrollContainer::GetHorizontalScrollBar() {return static_cast<WIScrollBar*>(m_hScrollBarH.get());}
 WIScrollBar *WIScrollContainer::GetVerticalScrollBar() {return static_cast<WIScrollBar*>(m_hScrollBarV.get());}
@@ -197,57 +204,62 @@ void WIScrollContainer::OnChildRemoved(WIBase *child)
 {
 	WIBase::OnChildRemoved(child);
 }
+
+void WIScrollContainer::ScrollToBottom()
+{
+	WIScrollBar *pScrollBar = m_hScrollBarV.get<WIScrollBar>();
+	if(pScrollBar == nullptr)
+		return;
+	pScrollBar->SetScrollOffset(pScrollBar->GetElementCount());
+}
+
 void WIScrollContainer::Update()
 {
-	WIBase::Update();
-	if(!m_hWrapper.IsValid())
-		return;
-	WIBase *pWrapper = m_hWrapper.get();
-	int w = 0;
-	int h = 0;
-	std::vector<WIHandle> *children = pWrapper->GetChildren();
-	std::vector<WIHandle>::iterator it;
-	for(it=children->begin();it!=children->end();it++)
+	if(m_hWrapper.IsValid())
 	{
-		WIHandle &hChild = *it;
-		if(hChild.IsValid())
+		WIBase *pWrapper = m_hWrapper.get();
+		int w = 0;
+		int h = 0;
+		std::vector<WIHandle> *children = pWrapper->GetChildren();
+		std::vector<WIHandle>::iterator it;
+		for(it=children->begin();it!=children->end();it++)
 		{
-			const Vector2i &posChild = hChild->GetPos();
-			const Vector2i &sizeChild = hChild->GetSize();
-			if(posChild.x +sizeChild.x > w)
-				w = posChild.x +sizeChild.x;
-			if(posChild.y +sizeChild.y > h)
-				h = posChild.y +sizeChild.y;
+			WIHandle &hChild = *it;
+			if(hChild.IsValid())
+			{
+				const Vector2i &posChild = hChild->GetPos();
+				const Vector2i &sizeChild = hChild->GetSize();
+				if(posChild.x +sizeChild.x > w)
+					w = posChild.x +sizeChild.x;
+				if(posChild.y +sizeChild.y > h)
+					h = posChild.y +sizeChild.y;
+			}
 		}
-	}
-	Vector2i size = GetSize();
-	pWrapper->SetSize(w,h);
-	if(m_hScrollBarH.IsValid())
-	{
-		WIScrollBar *pScrollBar = m_hScrollBarH.get<WIScrollBar>();
-		if(w <= size.x)
-			pScrollBar->SetVisible(false); // set scroll offset to 0
-		else
+		Vector2i size = GetSize();
+		pWrapper->SetSize(w,h);
+		if(m_hScrollBarH.IsValid())
 		{
-			pScrollBar->SetVisible(true);
+			WIScrollBar *pScrollBar = m_hScrollBarH.get<WIScrollBar>();
 			pScrollBar->SetUp(size.x,w);
 			pScrollBar->SetScrollAmount(10);
 			pScrollBar->SetSize(GetWidth(),10);
 			pScrollBar->SetY(GetHeight() -pScrollBar->GetHeight());
+			pScrollBar->SetVisible(w > size.x); // set scroll offset to 0
 		}
-	}
-	if(m_hScrollBarV.IsValid())
-	{
-		WIScrollBar *pScrollBar = m_hScrollBarV.get<WIScrollBar>();
-		if(h <= size.y)
-			pScrollBar->SetVisible(false);
-		else
+		if(m_hScrollBarV.IsValid())
 		{
-			pScrollBar->SetVisible(true);
+			WIScrollBar *pScrollBar = m_hScrollBarV.get<WIScrollBar>();
+			auto bAtBottom = pScrollBar->GetBottomScrollOffset() == pScrollBar->GetElementCount();
+				
 			pScrollBar->SetUp(size.y,h);
-			pScrollBar->SetScrollAmount(10);
+			pScrollBar->SetScrollAmount(10u);
 			pScrollBar->SetSize(10,GetHeight());
 			pScrollBar->SetX(GetWidth() -pScrollBar->GetWidth());
+
+			if(bAtBottom == true && ShouldAutoStickToBottom())
+				ScrollToBottom();
+			pScrollBar->SetVisible(h > size.y);
 		}
 	}
+	WIBase::Update();
 }

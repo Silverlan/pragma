@@ -14,6 +14,7 @@ link_external_library(alsoundsystem)
 link_external_library(cmaterialsystem)
 link_external_library(wms_shared)
 link_external_library(glslang)
+link_external_library(util_formatted_text)
 
 add_external_library(luajit)
 add_external_library(libzip)
@@ -24,6 +25,7 @@ endif()
 
 add_include_dir(server)
 add_include_dir(anvil_build)
+add_include_dir(freetype)
 
 add_def(CENGINE_EXPORTS)
 add_def(DLLCENGINE_EX)

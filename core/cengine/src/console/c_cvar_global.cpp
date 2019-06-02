@@ -42,25 +42,6 @@ DLLCENGINE void CMD_lua_run_cl(NetworkState *state,pragma::BasePlayerComponent*,
 	game->RunLua(lua);
 }
 
-DLLCENGINE void CMD_lua_exec_cl(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
-{
-	if(argv.empty() || !state->IsGameActive()) return;
-	Game *game = state->GetGameState();
-	if(game == NULL)
-		return;
-	Lua::set_ignore_include_cache(true);
-		game->ExecuteLuaFile(argv[0]);
-	Lua::set_ignore_include_cache(false);
-}
-
-void CMD_lua_exec_gui(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
-{
-	if(argv.empty()) return;
-	Lua::set_ignore_include_cache(true);
-	//client->LoadGUILuaFile(argv.front());
-	Lua::set_ignore_include_cache(false);
-}
-
 DLLCENGINE void CMD_lua_reload_entity(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
 {
 	if(argv.empty())

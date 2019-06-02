@@ -13,7 +13,6 @@ extern DLLCLIENT CGame *c_game;
 
 LINK_WGUI_TO_CLASS(widebugdepthtexture,WIDebugDepthTexture);
 
-#pragma optimize("",off)
 WIDebugDepthTexture::WIDebugDepthTexture()
 	: WIBase(),m_imageLayer(0)
 {
@@ -314,4 +313,3 @@ void WIDebugDepthTexture::Update()
 	auto &cam = scene->camera;
 	Update(cam->GetZNear(),cam->GetZFar());
 }
-#pragma optimize("",on)

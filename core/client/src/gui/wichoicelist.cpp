@@ -24,19 +24,23 @@ void WIChoiceList::Initialize()
 	WIHandle hChoiceList = GetHandle();
 	auto *buttonPrev = m_buttonPrev.get<WIButton>();
 	buttonPrev->SetText("<");
-	buttonPrev->AddCallback("OnPressed",FunctionCallback<>::Create([hChoiceList]() {
+	buttonPrev->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) -> CallbackReturnType {
+		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
-			return;
+			return CallbackReturnType::HasReturnValue;
 		hChoiceList.get<WIChoiceList>()->SelectPrevious();
+		return CallbackReturnType::HasReturnValue;
 	}));
 
 	m_buttonNext = CreateChild<WIButton>();
 	auto *buttonNext = m_buttonNext.get<WIButton>();
 	buttonNext->SetText(">");
-	buttonNext->AddCallback("OnPressed",FunctionCallback<>::Create([hChoiceList]() {
+	buttonNext->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) -> CallbackReturnType {
+		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
-			return;
+			return CallbackReturnType::HasReturnValue;
 		hChoiceList.get<WIChoiceList>()->SelectNext();
+		return CallbackReturnType::HasReturnValue;
 	}));
 }
 

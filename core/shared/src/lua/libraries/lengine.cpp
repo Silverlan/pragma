@@ -7,8 +7,12 @@
 #include "pragma/file_formats/wmd_load.h"
 #include "luasystem.h"
 #include "pragma/model/modelmesh.h"
+#include <pragma/lua/lua_call.hpp>
+#include <mathutil/color.h>
+
 extern DLLENGINE Engine *engine;
-DLLNETWORK int Lua_engine_CreateLight(lua_State *l)
+
+int Lua::engine::CreateLight(lua_State *l)
 {
 	Vector3 *pos = _lua_Vector_check(l,1);
 	UNUSED(pos);
@@ -20,13 +24,13 @@ DLLNETWORK int Lua_engine_CreateLight(lua_State *l)
 	return 0;
 }
 
-DLLNETWORK int Lua_engine_RemoveLights(lua_State*)
+int Lua::engine::RemoveLights(lua_State*)
 {
 	//engine->RemoveLights(); // WEAVETODO
 	return 0;
 }
 
-DLLNETWORK int Lua_engine_CreateSprite(lua_State*)
+int Lua::engine::CreateSprite(lua_State*)
 {
 	/*float scale = luaL_checknumber(l,1);
 	Vector3 *pos = _lua_Vector_check(l,2);
@@ -35,10 +39,10 @@ DLLNETWORK int Lua_engine_CreateSprite(lua_State*)
 	return 0;
 }
 
-DLLNETWORK int Lua_engine_PrecacheModel_sv(lua_State *l)
+int Lua::engine::PrecacheModel_sv(lua_State *l)
 {
 	std::string mdl = luaL_checkstring(l,1);
-	auto *nw = engine->GetNetworkState(l);
+	auto *nw = ::engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<Model,ModelMesh,ModelSubMesh>(
 		nw->GetGameState(),mdl.c_str(),[nw](const std::string &matName,bool bReload) -> Material* {
@@ -50,9 +54,9 @@ DLLNETWORK int Lua_engine_PrecacheModel_sv(lua_State *l)
 	return 0;
 }
 
-DLLNETWORK int Lua_engine_LoadSoundScripts(lua_State *l)
+int Lua::engine::LoadSoundScripts(lua_State *l)
 {
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = ::engine->GetNetworkState(l);
 	std::string file = luaL_checkstring(l,1);
 	bool bPrecache = false;
 	if(Lua::IsSet(l,2))
@@ -61,10 +65,10 @@ DLLNETWORK int Lua_engine_LoadSoundScripts(lua_State *l)
 	return 0;
 }
 
-DLLNETWORK int Lua_engine_LoadLibrary(lua_State *l)
+int Lua::engine::LoadLibrary(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);
-	NetworkState *state = engine->GetNetworkState(l);
+	NetworkState *state = ::engine->GetNetworkState(l);
 	std::string err;
 	bool b = state->InitializeLibrary(path,&err,l) != nullptr;
 	if(b == true)
@@ -74,9 +78,30 @@ DLLNETWORK int Lua_engine_LoadLibrary(lua_State *l)
 	return 1;
 }
 
-int Lua_engine_GetTickCount(lua_State *l)
+int Lua::engine::GetTickCount(lua_State *l)
 {
-	auto tick = engine->GetTickCount();
+	auto tick = ::engine->GetTickCount();
 	Lua::PushInt(l,tick);
 	return 1;
+}
+
+int32_t Lua::engine::set_record_console_output(lua_State *l)
+{
+	auto record = Lua::CheckBool(l,1);
+	::engine->SetRecordConsoleOutput(record);
+	return 0;
+}
+int32_t Lua::engine::poll_console_output(lua_State *l)
+{
+	auto output = ::engine->PollConsoleOutput();
+	if(output.has_value() == false)
+		return 0;
+	Lua::PushString(l,output->output);
+	Lua::PushInt(l,umath::to_integral(output->messageFlags));
+	if(output->color)
+	{
+		Lua::Push<Color>(l,*output->color);
+		return 3;
+	}
+	return 2;
 }

@@ -8,7 +8,29 @@ class WIScrollBar;
 class DLLCLIENT WIScrollContainer
 	: public WIBase
 {
+public:
+	WIScrollContainer();
+	virtual ~WIScrollContainer() override;
+	virtual void Initialize() override;
+	virtual void SetSize(int x,int y) override;
+	virtual void Update() override;
+	virtual void Think() override;
+	virtual util::EventReply ScrollCallback(Vector2 offset) override;
+	virtual void SizeToContents() override;
+	WIScrollBar *GetHorizontalScrollBar();
+	WIScrollBar *GetVerticalScrollBar();
+	int GetScrollBarWidthV();
+	int GetScrollBarHeightH();
+	int GetContentWidth();
+	int GetContentHeight();
+	Vector2i GetContentSize();
+
+	void ScrollToBottom();
+
+	void SetAutoStickToBottom(bool autoStick);
+	bool ShouldAutoStickToBottom() const;
 protected:
+	bool m_bAutoStickToBottom = false;
 	WIHandle m_hScrollBarH = {};
 	WIHandle m_hScrollBarV = {};
 	WIHandle m_hWrapper = {};
@@ -24,22 +46,6 @@ protected:
 	void OnWrapperChildRemoved(WIBase *child);
 	static void OnChildReleased(WIBase *child);
 	static void OnChildSetSize(WIBase *child);
-public:
-	WIScrollContainer();
-	virtual ~WIScrollContainer() override;
-	virtual void Initialize() override;
-	virtual void SetSize(int x,int y) override;
-	virtual void Update() override;
-	virtual void Think() override;
-	virtual void ScrollCallback(Vector2 offset) override;
-	virtual void SizeToContents() override;
-	WIScrollBar *GetHorizontalScrollBar();
-	WIScrollBar *GetVerticalScrollBar();
-	int GetScrollBarWidthV();
-	int GetScrollBarHeightH();
-	int GetContentWidth();
-	int GetContentHeight();
-	Vector2i GetContentSize();
 };
 
 #endif

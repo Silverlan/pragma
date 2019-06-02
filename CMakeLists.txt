@@ -179,6 +179,9 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_FGD_LIBRARY util_fgd STATIC)
 set(DEPENDENCY_UTIL_MMD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_mmd/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_MMD_LIBRARY util_mmd STATIC)
 
+set(DEPENDENCY_UTIL_FORMATTED_TEXT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_formatted_text/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY util_formatted_text STATIC)
+
 set(DEPENDENCY_UTIL_DMX_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_dmx/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_DMX_LIBRARY util_dmx STATIC)
 
@@ -215,6 +218,7 @@ else()
 	set(ZLIB_LIB_NAME "z" CACHE INTERNAL "" FORCE)
 endif()
 search_lib_recursive(DEPENDENCY_ZLIB_LIBRARY third_party_libs/zlib/${BINARY_PRAGMA_DIR} ${ZLIB_LIB_NAME})
+set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
@@ -332,6 +336,11 @@ search_lib_recursive(DEPENDENCY_CLIP2TRI_LIBRARY third_party_libs/clip2tri/${BIN
 search_lib_recursive(DEPENDENCY_CLIPPER_LIBRARY third_party_libs/clip2tri/clipper/${BINARY_PRAGMA_DIR} clipper-static STATIC)
 search_lib_recursive(DEPENDENCY_POLY2TRI_LIBRARY third_party_libs/clip2tri/poly2tri/${BINARY_PRAGMA_DIR} poly2tri-static STATIC)
 
+set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
+
+set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_BSA_LIBRARY third_party_libs/libbsa/${BINARY_PRAGMA_DIR} bsa)
+
 set(DEPENDENCY_RECAST_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Recast/Include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_RECAST_LIBRARY third_party_libs/recastnavigation/Recast/${BINARY_PRAGMA_DIR} Recast STATIC)
 
@@ -344,6 +353,7 @@ set(DEPENDENCY_LIBZIP_CONF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/li
 search_lib_recursive(DEPENDENCY_LIBZIP_LIBRARY third_party_libs/libzip/lib/${BINARY_PRAGMA_DIR} zip)
 
 set(DEPENDENCY_LPNG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
+set(DEPENDENCY_LPNG_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/libpng CACHE PATH "Path to include directory.")
 if(WIN32)
 	set(LIBPNG_LIB_NAME "libpng16" CACHE INTERNAL "" FORCE)
 else()
@@ -386,7 +396,7 @@ search_lib_recursive(DEPENDENCY_LIBNOISEUTILS_LIBRARY third_party_libs/libnoise/
 set(DEPENDENCY_HLLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib CACHE PATH "Path to include directory.")
 
 if(WIN32)
-	search_lib_recursive(DEPENDENCY_HLLIB_LIBRARY third_party_libs/hllib/sln/vs17/HLLib/x64/${BINARY_PRAGMA_DIR} HLLib)
+	search_lib_recursive_custom(DEPENDENCY_HLLIB_LIBRARY HLLib "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/x64/Release")
 else()
 	search_lib_recursive_custom(DEPENDENCY_HLLIB_LIBRARY hl "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/HLLib")
 endif()
@@ -521,6 +531,7 @@ if(UNIX)
 	resolve_links(DEPENDENCY_UTIL_FGD_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_IMAGE_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_MMD_LIBRARY)
+	resolve_links(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_PAD_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_PCL_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_PRAGMA_DOC_LIBRARY)
@@ -709,6 +720,22 @@ if(WIN32)
 	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER third_party_libs/assimp)
 endif()
 target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+#
+
+# libbsa
+set(PROJECT_STATIC_RUNTIME OFF CACHE BOOL OFF FORCE)
+set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
+register_third_party_library(libbsa)
+set_target_properties(bsa PROPERTIES FOLDER third_party_libs/libbsa)
+set_target_properties(tests PROPERTIES FOLDER third_party_libs/libbsa)
+set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
+#
+
+# ba2lib
+if(WIN32)
+	include_external_msproject(ba2lib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib/BA2Lib.vcxproj)
+	set_target_properties(ba2lib PROPERTIES FOLDER third_party_libs/libbsa)
+endif()
 #
 
 # LuaJIT
@@ -900,6 +927,7 @@ set_target_properties(SPVRemapper PROPERTIES FOLDER third_party_libs/anvil/glsla
 set(USE_LIBTXC_DXTN OFF CACHE BOOL OFF FORCE)
 register_third_party_library(vtflib)
 set_target_properties(VTFLib13 PROPERTIES FOLDER third_party_libs)
+target_include_directories(VTFLib13 PUBLIC ${DEPENDENCY_LIBZIP_CONF_INCLUDE})
 #
 
 # bullet
@@ -1043,9 +1071,11 @@ add_dependencies(BulletDynamics BulletCollision)
 add_dependencies(util_pad zip)
 add_dependencies(pr_pcl util_pcl)
 add_dependencies(niflib_static qhullstatic)
+add_dependencies(util_archive bsa)
 add_dependencies(pr_source util_archive util_dmx niflib_static)
 add_dependencies(pr_dmx util_dmx)
 add_dependencies(pr_mdleditor util_archive ishared pr_source)
+add_dependencies(pr_openvr iclient)
 
 if(WIN32)
 	add_dependencies(pr_mdleditor hllib)
@@ -1062,7 +1092,7 @@ add_dependencies(iglfw vfilesystem)
 add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
 
 add_dependencies(cmaterialsystem materialsystem prosper VTFLib13)
-add_dependencies(wgui cmaterialsystem freetype glslang)
+add_dependencies(wgui cmaterialsystem freetype glslang util_formatted_text)
 
 if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)
 	add_dependencies(alsoundsystem OpenAL)

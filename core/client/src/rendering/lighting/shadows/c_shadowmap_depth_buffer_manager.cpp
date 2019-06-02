@@ -12,7 +12,6 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 ShadowMapDepthBufferManager::ShadowMapDepthBufferManager()
 {
 	m_genericSet.limit = umath::to_integral(GameLimits::MaxActiveShadowMaps);
@@ -129,4 +128,3 @@ void ShadowMapDepthBufferManager::FreeRenderTarget(const RenderTarget &rt)
 		return;
 	set.freeBuffers.push(it -set.buffers.begin());
 }
-#pragma optimize("",on)

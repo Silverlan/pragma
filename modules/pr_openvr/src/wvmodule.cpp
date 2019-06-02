@@ -5,31 +5,9 @@
 #include "vr_instance.hpp"
 #include <sharedutils/functioncallback.h>
 #include <luainterface.hpp>
-#include <pragma_module.hpp>
+#include <pragma/pragma_module.hpp>
 #ifdef _DEBUG
 #include <iostream>
-#endif
-
-#pragma comment(lib,"lua51.lib")
-#pragma comment(lib,"luasystem.lib")
-#pragma comment(lib,"openvr_api.lib")
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"sharedutils.lib")
-#pragma comment(lib,"mathutil.lib")
-#pragma comment(lib,"prosper.lib")
-#pragma comment(lib,"anvil.lib")
-#pragma comment(lib,"vulkan-1.lib")
-
-#ifdef USE_OPENGL_OFFSCREEN_CONTEXT
-#pragma comment(lib,"glfw3dll.lib")
-#ifdef _DEBUG
-#pragma comment(lib,"glew64sd.lib")
-#else
-#pragma comment(lib,"glew64s.lib")
-#endif
-#pragma comment(lib,"opengl32.lib")
-//#pragma comment(lib,"glu32.lib")
 #endif
 
 extern std::unique_ptr<::openvr::Instance> s_vrInstance;

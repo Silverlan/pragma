@@ -4,6 +4,7 @@
 #include "pragma/clientdefinitions.h"
 #include <wgui/wibase.h>
 
+class WISnapArea;
 class DLLCLIENT WITransformable
 	: public WIBase
 {
@@ -15,7 +16,8 @@ public:
 		Resizable = Draggable<<1u,
 		Dragging = Resizable<<1u,
 		Resizing = Dragging<<1u,
-		ResizeRatioLocked = Resizing<<1u
+		ResizeRatioLocked = Resizing<<1u,
+		WasDragged = ResizeRatioLocked<<1u
 	};
 	WITransformable();
 	virtual ~WITransformable() override;
@@ -33,7 +35,7 @@ public:
 	bool IsDraggable();
 	bool IsResizable();
 	virtual void Think() override;
-	virtual void MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual void OnCursorMoved(int x,int y) override;
 	void SetMinWidth(int w);
 	void SetMinHeight(int h);
@@ -51,6 +53,7 @@ public:
 	const Vector2i &GetMaxSize() const;
 	void Close();
 	virtual void Update() override;
+	void SnapToTarget(WIBase &el);
 
 	void SetResizeRatioLocked(bool bLocked);
 	bool IsResizeRatioLocked() const;
@@ -60,6 +63,9 @@ public:
 
 	void SetDragBounds(const Vector2i &min,const Vector2i &max);
 	std::pair<Vector2i,Vector2i> GetDragBounds() const;
+
+	void AddSnapTarget(WISnapArea &target);
+	void SetRemoveOnClose(bool remove);
 protected:
 	enum class ResizeMode
 	{
@@ -77,8 +83,13 @@ protected:
 	WIHandle m_hResizeRect = {};
 	StateFlags m_stateFlags = StateFlags::None;
 	ResizeMode m_resizeMode = ResizeMode::none;
+	WIHandle m_snapGhost = {};
 	Vector2i m_resizeLastPos = {};
 	Vector2i m_dragCursorOffset = {};
+	bool m_bRemoveOnClose = true;
+	std::vector<WIHandle> m_snapTargets = {};
+	void InitializeSnapTargetGhost(WISnapArea &snapArea);
+	void DestroySnapTargetGhost();
 	void StartDrag();
 	void EndDrag();
 	void SetResizeMode(ResizeMode mode);

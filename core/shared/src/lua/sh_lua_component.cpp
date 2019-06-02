@@ -44,7 +44,7 @@ static std::string get_member_variable_name(const std::string &memberName)
 	if(memberName.empty())
 		return "";
 	std::stringstream ss {};
-	ss<<"m_"<<std::string(1,tolower(memberName.front()))<<ustring::sub(memberName,1ull);
+	ss<<"m_"<<std::string(1,tolower(memberName.front()))<<ustring::substr(memberName,1ull);
 	return ss.str();
 }
 static std::any string_to_any(Game &game,const std::string &value,util::VarType type)

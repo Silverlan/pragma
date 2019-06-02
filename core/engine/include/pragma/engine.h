@@ -12,6 +12,8 @@
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include <materialmanager.h>
 #include <thread>
+#include <atomic>
+#include <mutex>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/scope_guard.h>
 
@@ -27,6 +29,9 @@ class VFilePtrInternalReal;
 class PtrConVar;
 class NetPacket;
 class ZIPFile;
+class ConVarMap;
+struct Color;
+namespace Con {enum class MessageFlags : uint8_t;};
 namespace upad {class PackageManager;};
 class DLLENGINE Engine
 	: public CVarHandler,public CallbackHandler
@@ -46,10 +51,19 @@ public:
 		std::shared_ptr<MaterialManager> materialManager;
 		std::unique_ptr<NetworkState> state;
 	};
+	struct DLLENGINE ConsoleOutput
+	{
+		std::string output;
+		Con::MessageFlags messageFlags;
+		std::shared_ptr<Color> color;
+	};
 protected:
 	bool ExecConfig(const std::string &cfg,const std::function<void(std::string&,std::vector<std::string>&)> &callback);
 	std::unique_ptr<StateInstance> m_svInstance;
 	bool m_bMountExternalGameResources = true;
+
+	std::atomic<bool> m_bRecordConsoleOutput = false;
+	std::mutex m_consoleOutputMutex = {};
 public:
 	Engine(int argc,char* argv[]);
 	virtual ~Engine();
@@ -66,6 +80,8 @@ protected:
 	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
+	void RegisterSharedConsoleCommands(ConVarMap &map);
+	virtual void RegisterConsoleCommands();
 	struct DLLENGINE LaunchCommand
 	{
 		LaunchCommand(const std::string &cmd,const std::vector<std::string> &args);
@@ -80,6 +96,8 @@ protected:
 	std::queue<std::string> m_consoleInput;
 	DebugConsole *m_console;
 	std::thread *m_consoleThread;
+
+	std::queue<ConsoleOutput> m_consoleOutput = {};
 	void ProcessConsoleInput(KeyState pressState=KeyState::Press);
 
 	unsigned int m_tickRate;
@@ -123,6 +141,7 @@ public:
 	virtual void DumpDebugInformation(ZIPFile &zip) const;
 	virtual void Close();
 	virtual void Release();
+	virtual void ClearConsole();
 	void ClearCache();
 
 	// Debug
@@ -139,8 +158,8 @@ public:
 	bool IsVerbose() const;
 
 	// Console
-	void ConsoleInput(const std::string &line);
-	void ProcessConsoleInput(const std::string &line,KeyState pressState=KeyState::Press,float magnitude=1.f);
+	void ConsoleInput(const std::string_view &line);
+	void ProcessConsoleInput(const std::string_view &line,KeyState pressState=KeyState::Press,float magnitude=1.f);
 	// Lua
 	virtual NetworkState *GetNetworkState(lua_State *l);
 	virtual Lua::Interface *GetLuaInterface(lua_State *l);
@@ -190,6 +209,9 @@ public:
 	virtual NetworkState *GetActiveState();
 
 	StateInstance &GetServerStateInstance();
+
+	std::optional<ConsoleOutput> PollConsoleOutput();
+	void SetRecordConsoleOutput(bool record);
 
 	bool IsMultiPlayer() const;
 	bool IsSinglePlayer() const;

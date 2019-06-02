@@ -17,7 +17,6 @@ IndexMap<ShadowMap> ShadowMap::m_shadowMaps;
 
 decltype(ShadowMap::s_shadowBufferManager) ShadowMap::s_shadowBufferManager = {};
 
-#pragma optimize("",off)
 static void reload_all_shadow_maps()
 {
 	auto &shadowMaps = ShadowMap::GetAll();
@@ -201,4 +200,3 @@ bool ShadowMap::HasRenderTarget() const {return !m_shadowRt.expired();}
 bool ShadowMap::IsValid() const {return m_bValid;}
 
 bool ShadowMap::ShouldUpdateLayer(uint32_t) const {return true;}
-#pragma optimize("",on)

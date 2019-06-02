@@ -579,8 +579,8 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 		auto name = o.object->GetName();
 
 		const auto fConvertTextureName = [](std::string &tex) -> std::string {
-			if(ustring::sub(tex,0,9) == "textures\\")
-				tex = ustring::sub(tex,9);
+			if(ustring::substr(tex,0,9) == "textures\\")
+				tex = ustring::substr(tex,9);
 			auto path = ufile::get_path_from_filename(tex);
 			tex = ufile::get_file_from_filename(tex);
 			ufile::remove_extension_from_filename(tex);

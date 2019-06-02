@@ -3,6 +3,7 @@
 #include <pragma/console/conout.h>
 #include "pragma/lua/ldefinitions.h"
 #include <pragma/engine.h>
+#include <mathutil/color.h>
 #include "luasystem.h"
 
 static bool lua_value_to_string(lua_State *L,int arg,int *r,std::string *val)
@@ -100,21 +101,12 @@ DLLNETWORK int Lua_Msg(lua_State *l,int st)
 	if(argc > 0)
 	{
 		NetworkState *state = engine->GetNetworkState(l);
-#ifdef _WIN32
 		if(state == NULL)
-			Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 		else if(state->IsServer())
-			Con::attr(FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			util::set_console_color(util::ConsoleColorFlags::Cyan | util::ConsoleColorFlags::Intensity);
 		else
-			Con::attr(FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-#else
-		if(state == NULL)
-			std::cout<<"\033[37;1m";
-		else if(state->IsServer())
-			std::cout<<"\033[36;1m";
-		else
-			std::cout<<"\033[35;1m";
-#endif
+			util::set_console_color(util::ConsoleColorFlags::Magenta | util::ConsoleColorFlags::Intensity);
 	}
 	for(int i=st;i<=argc;i++)
 	{
@@ -138,6 +130,24 @@ DLLNETWORK int Lua_MsgN(lua_State *l)
 
 DLLNETWORK int Lua_MsgC(lua_State *l)
 {
+	if(Lua::IsType<Color>(l,1))
+	{
+		auto &col = Lua::Check<Color>(l,1);
+
+		auto argc = lua_gettop(l);
+		std::stringstream ss {};
+		for(int i=2;i<=argc;i++)
+		{
+			auto status = -1;
+			std::string val;
+			if(lua_value_to_string(l,i,&status,&val) == false)
+				return status;
+			ss<<val;
+		}
+
+		Con::print(ss.str(),col);
+		return 0;
+	}
 	int flags = Lua::CheckInt<int>(l,1);
 	Con::attr(flags);
 	Lua_Msg(l,2);
@@ -168,7 +178,7 @@ DLLNETWORK int Lua_MsgE(lua_State *l)
 	int argc = lua_gettop(l);
 	if(argc == 0)
 		return 0;
-	Con::cwar<<"ERROR: ";
+	Con::cerr<<"ERROR: ";
 	for(int i=1;i<=argc;i++)
 	{
 		auto status = -1;

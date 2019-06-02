@@ -35,17 +35,6 @@ DLLSERVER void CMD_lua_run(NetworkState *state,pragma::BasePlayerComponent*,std:
 	game->RunLua(lua);
 }
 
-DLLSERVER void CMD_lua_exec(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
-{
-	if(argv.empty() || !state->IsGameActive()) return;
-	Game *game = state->GetGameState();
-	if(game == NULL)
-		return;
-	Lua::set_ignore_include_cache(true);
-		game->ExecuteLuaFile(argv[0]);
-	Lua::set_ignore_include_cache(false);
-}
-
 void CMD_drop(NetworkState*,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
 {
 	if(pl == nullptr)
@@ -137,17 +126,6 @@ void CMD_list_maps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vect
 		Con::cout<<f<<Con::endl;
 	}
 	Con::cout<<Con::endl;
-}
-
-DLLSERVER void CMD_map(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
-{
-	if(argv.empty())
-	{
-		Con::cout<<state->GetMap()<<Con::endl;
-		return;
-	}
-	state->EndGame();
-	state->LoadMap(argv[0].c_str());
 }
 
 DLLSERVER void CMD_status_sv(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)

@@ -71,7 +71,15 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		{"BACKGROUND_BLUE",BACKGROUND_BLUE},
 		{"BACKGROUND_GREEN",BACKGROUND_GREEN},
 		{"BACKGROUND_RED",BACKGROUND_RED},
-		{"BACKGROUND_INTENSITY",BACKGROUND_INTENSITY}
+		{"BACKGROUND_INTENSITY",BACKGROUND_INTENSITY},
+
+		{"MESSAGE_FLAG_NONE",umath::to_integral(Con::MessageFlags::None)},
+		{"MESSAGE_FLAG_BIT_GENERIC",umath::to_integral(Con::MessageFlags::Generic)},
+		{"MESSAGE_FLAG_BIT_WARNING",umath::to_integral(Con::MessageFlags::Warning)},
+		{"MESSAGE_FLAG_BIT_ERROR",umath::to_integral(Con::MessageFlags::Error)},
+		{"MESSAGE_FLAG_BIT_CRITICAL",umath::to_integral(Con::MessageFlags::Critical)},
+		{"MESSAGE_FLAG_BIT_SERVER_SIDE",umath::to_integral(Con::MessageFlags::ServerSide)},
+		{"MESSAGE_FLAG_BIT_CLIENT_SIDE",umath::to_integral(Con::MessageFlags::ClientSide)}
 	});
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"console",{

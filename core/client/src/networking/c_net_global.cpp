@@ -596,7 +596,7 @@ DLLCLIENT void NET_cl_cvar_set(NetPacket packet)
 	std::string val = packet->ReadString();
 	auto flags = client->GetConVarFlags(cvar);
 	if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
-		std::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<std::endl;
+		Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
 	if((flags &ConVarFlags::Replicated) == ConVarFlags::None)
 		return;
 	client->SetConVar(cvar,val);

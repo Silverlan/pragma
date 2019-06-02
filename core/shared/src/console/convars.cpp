@@ -15,11 +15,7 @@ ConVarFlags ConConf::GetFlags() const {return m_flags;}
 void ConConf::Print(const std::string &name)
 {
 	auto type = GetType();
-#ifdef _WIN32
-	Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-#else
-	std::cout<<"\033[37;1m";
-#endif
+	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	if(type == ConType::Var)
 	{
 		ConVar *cvar = static_cast<ConVar*>(this);
@@ -27,11 +23,7 @@ void ConConf::Print(const std::string &name)
 		auto flags = cvar->GetFlags();
 		if(flags > ConVarFlags::None)
 		{
-#ifdef _WIN32
-			Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-#else
-			std::cout<<"\033[37;1m";
-#endif
+			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			if((flags &ConVarFlags::Cheat) == ConVarFlags::Cheat)
 				Con::cout<<" cheat";
 			if((flags &ConVarFlags::Singleplayer) == ConVarFlags::Singleplayer)
@@ -49,11 +41,7 @@ void ConConf::Print(const std::string &name)
 	}
 	else
 		Con::cout<<"\""<<name<<"\""<<Con::endl;
-#ifdef _WIN32
-	Con::attr(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-#else
-	std::cout<<"\033[37;1m";
-#endif
+	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<GetHelpText()<<Con::endl;
 }
 
@@ -95,18 +83,25 @@ ConConf *ConVar::Copy()
 
 //////////////////////////////////
 
-ConCommand::ConCommand(const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function,ConVarFlags flags,const std::string &help)
-	: ConConf(flags),m_function(function),m_functionLua(nullptr)
+ConCommand::ConCommand(
+	const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function,
+	ConVarFlags flags,const std::string &help,const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback
+)
+	: ConConf(flags),m_function(function),m_functionLua(nullptr),m_autoCompleteCallback{autoCompleteCallback}
 {
 	m_help = help;
 	m_type = ConType::Cmd;
 }
-ConCommand::ConCommand(const LuaFunction &function,ConVarFlags flags,const std::string &help)
-	: ConConf(flags),m_function(nullptr),m_functionLua(function)
+ConCommand::ConCommand(
+	const LuaFunction &function,ConVarFlags flags,const std::string &help,const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback
+)
+	: ConConf(flags),m_function(nullptr),m_functionLua(function),m_autoCompleteCallback{autoCompleteCallback}
 {
 	m_help = help;
 	m_type = ConType::LuaCmd;
 }
+const std::function<void(const std::string&,std::vector<std::string>&)> &ConCommand::GetAutoCompleteCallback() const {return m_autoCompleteCallback;}
+void ConCommand::SetAutoCompleteCallback(const std::function<void(const std::string&,std::vector<std::string>&)> &callback) {m_autoCompleteCallback = callback;}
 void ConCommand::GetFunction(LuaFunction &function) const {function = m_functionLua;}
 void ConCommand::GetFunction(std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function) const {function = m_function;}
 void ConCommand::SetFunction(const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &function) {m_type = ConType::Cmd; m_function = function;}
@@ -114,9 +109,9 @@ ConConf *ConCommand::Copy()
 {
 	ConCommand *cmd;
 	if(GetType() == ConType::Cmd)
-		cmd = new ConCommand(m_function,m_flags,m_help);
+		cmd = new ConCommand(m_function,m_flags,m_help,m_autoCompleteCallback);
 	else
-		cmd = new ConCommand(m_functionLua,m_flags,m_help);
+		cmd = new ConCommand(m_functionLua,m_flags,m_help,m_autoCompleteCallback);
 	cmd->m_ID = m_ID;
 	return static_cast<ConConf*>(cmd);
 }
@@ -312,7 +307,7 @@ ConVarMap::ConVarMap()
 	: m_conVarID(1)
 {}
 
-std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help)
+std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help,std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
@@ -325,6 +320,11 @@ std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const std::string &scmd,const 
 	m_conVarIdentifiers.insert(std::unordered_map<unsigned int,std::string>::value_type(m_conVarID,lscmd));
 	m_conVarID++;
 	return cv;
+}
+
+std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const ConVarCreateInfo &createInfo)
+{
+	return RegisterConVar(createInfo.name,createInfo.defaultValue,createInfo.flags,createInfo.helpText);
 }
 
 template<class T>
@@ -401,7 +401,10 @@ void ConVarMap::PreRegisterConVarCallback(const std::string &scvar)
 	it->second.push_back(std::make_shared<CvarCallbackFunction>());
 }
 
-std::shared_ptr<ConCommand> ConVarMap::RegisterConCommand(const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,ConVarFlags flags,const std::string &help)
+std::shared_ptr<ConCommand> ConVarMap::RegisterConCommand(
+	const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,
+	ConVarFlags flags,const std::string &help,const std::function<void(const std::string&,std::vector<std::string>&)> &autoCompleteCallback
+)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
@@ -415,13 +418,18 @@ std::shared_ptr<ConCommand> ConVarMap::RegisterConCommand(const std::string &scm
 		}
 		return nullptr;
 	}
-	auto cmd = std::make_shared<ConCommand>(fc,flags,help);
+	auto cmd = std::make_shared<ConCommand>(fc,flags,help,autoCompleteCallback);
 	cmd->m_ID = m_conVarID;
 	m_conVars.insert(decltype(m_conVars)::value_type(lscmd,cmd));
 	m_conVarIDs.insert(decltype(m_conVarIDs)::value_type(lscmd,m_conVarID));
 	m_conVarIdentifiers.insert(decltype(m_conVarIdentifiers)::value_type(m_conVarID,lscmd));
 	m_conVarID++;
 	return cmd;
+}
+
+std::shared_ptr<ConCommand> ConVarMap::RegisterConCommand(const ConCommandCreateInfo &createInfo)
+{
+	return RegisterConCommand(createInfo.name,createInfo.callbackFunction,createInfo.flags,createInfo.helpText,createInfo.autoComplete);
 }
 
 std::shared_ptr<ConConf> ConVarMap::GetConVar(const std::string &scmd)

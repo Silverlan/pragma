@@ -8,7 +8,7 @@
 #include "pragma/gui/mainmenu/wimainmenu_credits.hpp"
 #include "pragma/gui/wiloadscreen.h"
 #include <wgui/types/witext.h>
-#include "pragma/gui/wiconsole.h"
+#include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiimageslideshow.h"
 #include "pragma/gui/wiserverbrowser.h"
 #include "pragma/clientstate/clientstate.h"
@@ -58,11 +58,11 @@ WIMainMenu::~WIMainMenu()
 		m_cbOnSteamworksShutdown.Remove();
 }
 
-void WIMainMenu::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
+util::EventReply WIMainMenu::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	if(!m_hActive.IsValid())
-		return;
-	m_hActive->KeyboardCallback(key,scanCode,state,mods);
+		return util::EventReply::Handled;
+	return m_hActive->KeyboardCallback(key,scanCode,state,mods);
 }
 
 void WIMainMenu::OnVisibilityChanged(bool bVisible)
@@ -283,8 +283,9 @@ void WIMainMenu::Initialize()
 	pIcon->SetMaterial("wgui/patreon_logo");
 	pIcon->SetSize(64,64);
 	pIcon->SetMouseInputEnabled(true);
-	pIcon->AddCallback("OnMousePressed",FunctionCallback<void>::Create([]() {
+	pIcon->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::Create([]() -> util::EventReply {
 		ShellExecute(0,0,engine_info::get_patreon_url().c_str(),0,0,SW_SHOW);
+		return util::EventReply::Handled;
 	}));
 #endif
 

@@ -42,9 +42,9 @@ WIMainMenuOptions::~WIMainMenuOptions()
 void WIMainMenuOptions::ApplyWindowSize()
 {
 	WIDropDownMenu *resMenu = m_hResolutionList.get<WIDropDownMenu>();
-	std::string text = resMenu->GetText();
+	auto text = resMenu->GetText();
 	std::vector<std::string> res;
-	ustring::explode(text,"x",res);
+	ustring::explode(std::string{text},"x",res);
 	if(res.size() < 2)
 		return;
 	int w = atoi(res[0].c_str());
@@ -235,9 +235,12 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonReset->SetText(Locale::GetText("reset_defaults"));
 	buttonReset->SizeToContents();
 	buttonReset->SetAutoCenterToParent(true);
-	buttonReset->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
-		std::bind(&WIMainMenuOptions::ResetDefaults,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)
-	));
+	buttonReset->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[this](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		ResetDefaults(button,state,mods);
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
+	}));
 	m_hButtonReset = buttonReset->GetHandle();
 	pRow->InsertElement(0,buttonReset);
 	
@@ -245,9 +248,12 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 	buttonApply->SetText(Locale::GetText("apply"));
 	buttonApply->SizeToContents();
 	buttonApply->SetAutoCenterToParent(true);
-	buttonApply->AddCallback("OnMouseEvent",FunctionCallback<void,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create(
-		std::bind(&WIMainMenuOptions::Apply,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)
-	));
+	buttonApply->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+		[this](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		Apply(button,state,mods);
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
+	}));
 	m_hButtonApply = buttonApply->GetHandle();
 	pRow->InsertElement(1,buttonApply);
 	WIMainMenuBase::InitializeOptionsList(pList);

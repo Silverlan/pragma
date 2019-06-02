@@ -63,7 +63,7 @@ if(UNIX)
 		libgtengine.so.3.24
 		libiglfw.so
 		libluabind.so
-		libluajit-5.1.so.2
+		libluajit.so
 		libluasystem.so
 		libmaterialsystem.so
 		libmathutil.so

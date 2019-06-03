@@ -14,6 +14,7 @@ extern DLLENGINE Engine *engine;
 decltype(AddonSystem::m_addons) AddonSystem::m_addons;
 decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;
 
+#pragma optimize("",off)
 upad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
 {
 	auto it = std::find_if(m_addons.begin(),m_addons.end(),[&path](const AddonInfo &addon) {
@@ -71,6 +72,8 @@ static bool is_addon_mounted(const std::string &addonPath,const std::vector<Addo
 
 static bool mount_directory_addon(const std::string &addonPath,std::vector<AddonInfo> &outAddons,bool silent=true)
 {
+	if(addonPath.find_first_of("\\/") != std::string::npos)
+		return false; // This is not a top-level directory (i.e. it's not an addon, but the sub-directory of an addon)
 	if(is_addon_mounted(addonPath,outAddons))
 		return true;
 	auto path = "addons\\" +addonPath;
@@ -220,3 +223,4 @@ std::string AddonInfo::GetAbsolutePath() const
 }
 const std::string &AddonInfo::GetUniqueId() const {return m_uniqueId;}
 const util::Version &AddonInfo::GetVersion() const {return m_version;}
+#pragma optimize("",on)

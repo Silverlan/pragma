@@ -6,11 +6,6 @@
 #include "fs_shadow.gls"
 #include "sh_light_sources.gls"
 
-float lookup_csm_texture(int index,vec2 uv)
-{
-	return texture(csmTextures[index],uv).r;
-}
-
 vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta)
 {
 	LightSourceData light = get_light_source(lightIdx);
@@ -25,6 +20,8 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 		int layer = get_csm_cascade_index();
 		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
 #if ENABLE_LIGHT_DEBUG == 1
+
+#if SHADOW_PCF_ENABLED == 0
 		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
 			vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
@@ -34,7 +31,7 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 				shadowCoord.w = shadowCoord.z *0.5 +0.5;
 				shadowCoord.x = shadowCoord.x *0.5 +0.5;
 				shadowCoord.y = shadowCoord.y *0.5 +0.5;
-				shadow = lookup_csm_texture(layer,vec2(shadowCoord.x,shadowCoord.y));
+				shadow = texture(csmTextures[layer],vec2(shadowCoord.x,shadowCoord.y)).r;
 			}
 			fragLightColor += vec3(shadow,shadow,shadow);
 		}
@@ -46,9 +43,11 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 		}
 		else
 #endif
+
+#endif
 		{
 			fragLightColor += fragColor *light.color.a *cosTheta *lambertTerm +specularColor;
-			float bias = 0.0;//max(0.001 *tan(acos(cosTheta)),0.00001);
+			float bias = 0.0; // Bias is already applied in shader pipeline
 			vec4 shadowCoord = lightVertPos;
 			float shadow = 1.0;
 			if(layer != -1 && light.shadowIndex != 0)

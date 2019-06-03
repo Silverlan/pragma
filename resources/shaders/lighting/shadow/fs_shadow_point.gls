@@ -6,18 +6,25 @@
 #include "../../modules/sh_rendersettings.gls"
 #include "sh_shadow.gls"
 
-float get_shadow_value(samplerCube shadowMap,vec3 c,float fragDepth)
-{
-	float d = texture(shadowMap,c).r;
-	return (d < fragDepth) ? 0.0 : 1.0;
-}
+#if SHADOW_PCF_ENABLED == 1
+	float get_shadow_value(shadowCubeMapSamplerType shadowMap,vec3 c,float fragDepth)
+	{
+		return texture(shadowMap,vec4(c,fragDepth)).r;
+	}
+#else
+	float get_shadow_value(shadowCubeMapSamplerType shadowMap,vec3 c,float fragDepth)
+	{
+		float d = texture(shadowMap,c).r;
+		return (d < fragDepth) ? 0.0 : 1.0;
+	}
+#endif
 
 float exp_scale_factor(float v,float e) // Grows more quickly the closer it comes to 1
 {
 	return 1.0 -pow((1.0 -v),e);
 }
 
-float calculate_point_shadow(vec3 fragPosWs,samplerCube shadowMap,float fragDepth,vec3 lightPosition,float bias,const float maxSampleOffset,const int samples)
+float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition,float bias,const float maxSampleOffset,const int samples)
 {
 	vec3 lightVec = normalize(fragPosWs -lightPosition);
 
@@ -41,7 +48,7 @@ float calculate_point_shadow(vec3 fragPosWs,samplerCube shadowMap,float fragDept
 	return shadow;
 }
 
-float calculate_point_shadow(vec3 fragPosWs,samplerCube shadowMap,float fragDepth,vec3 lightPosition)
+float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition)
 {
 	float bias = 0.01 *exp_scale_factor(fragDepth,0.9);
 	float maxSampleOffset = 0.0;
@@ -54,7 +61,7 @@ float calculate_point_shadow(vec3 fragPosWs,samplerCube shadowMap,float fragDept
 		numPoissonSamples = 2;
 		if(quality > 5)
 		{
-			maxSampleOffset = 0.004;
+			maxSampleOffset = MIN_SHADOW_CUBE_SAMPLE_OFFSET;//0.004;
 			if(quality > 7)
 			{
 				if(quality == 10)

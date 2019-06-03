@@ -22,20 +22,20 @@
 #include "shadow/fs_shadow_point.gls"
 #include "shadow/fs_shadow_csm.gls"
 
-layout(set = SHADER_UNIFORM_SHADOW_MAPS_SET,binding = SHADER_UNIFORM_SHADOW_MAPS_BINDING) uniform sampler2D shadowMaps[MAX_SHADOW_MAPS];
-layout(set = SHADER_UNIFORM_SHADOW_CUBE_MAPS_SET,binding = SHADER_UNIFORM_SHADOW_CUBE_MAPS_BINDING) uniform samplerCube shadowCubemaps[MAX_SHADOW_CUBE_MAPS];
+layout(set = SHADER_UNIFORM_SHADOW_MAPS_SET,binding = SHADER_UNIFORM_SHADOW_MAPS_BINDING) uniform shadowMapSamplerType shadowMaps[MAX_SHADOW_MAPS];
+layout(set = SHADER_UNIFORM_SHADOW_CUBE_MAPS_SET,binding = SHADER_UNIFORM_SHADOW_CUBE_MAPS_BINDING) uniform shadowCubeMapSamplerType shadowCubemaps[MAX_SHADOW_CUBE_MAPS];
 
-float calculate_shadow(sampler2D shadowMap,vec4 shadowCoord,float bias)
+float calculate_shadow(shadowMapSamplerType shadowMap,vec4 shadowCoord,float bias)
 {
 	return calculate_spot_shadow(shadowMap,shadowCoord,bias);
 }
 
-float calculate_shadow(vec3 fragPosWs,samplerCube shadowMap,float fragDepth,vec3 lightPosition)
+float calculate_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition)
 {
 	return calculate_point_shadow(fragPosWs,shadowMap,fragDepth,lightPosition);
 }
 
-float calculate_shadow(sampler2D shadowMap,mat4 vp,vec4 worldCoord,float bias)
+float calculate_shadow(shadowMapSamplerType shadowMap,mat4 vp,vec4 worldCoord,float bias)
 {
 	return calculate_csm_shadow(shadowMap,vp,worldCoord,bias);
 }

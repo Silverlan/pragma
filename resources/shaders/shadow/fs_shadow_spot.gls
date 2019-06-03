@@ -6,7 +6,7 @@
 float get_linearized_depth(float depth)
 {
   float n = 1.0;
-  float f = u_pushConstants.lightPos.w;
+  float f = fs_in.light_pos_ws.w;//u_pushConstants.lightPos.w;
   float z = depth;
   return (2.0 *n) /(f +n -z *(f -n));	
 }

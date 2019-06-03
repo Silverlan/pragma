@@ -259,21 +259,6 @@ REGISTER_ENGINE_CONCOMMAND(clear,[](NetworkState*,pragma::BasePlayerComponent*,s
 	engine->ClearConsole();
 },ConVarFlags::None,"Clears everything in the console.");
 
-REGISTER_ENGINE_CONCOMMAND(help,[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
-	if(argv.empty())
-	{
-		Con::cout<<"Usage: help <cvarname>"<<Con::endl;
-		return;
-	}
-	ConConf *cv = state->GetConVar(argv[0]);
-	if(cv == NULL)
-	{
-		Con::cout<<"help: no cvar or command named "<<argv[0]<<Con::endl;
-		return;
-	}
-	cv->Print(argv[0]);
-},ConVarFlags::None," - Find help about a convar/concommand.");
-
 REGISTER_ENGINE_CONCOMMAND(credits,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
 	Con::cout<<"Florian Weischer aka Silverlan"<<Con::endl;
 	Con::cout<<"Contact: "<<engine_info::get_author_mail_address()<<Con::endl;

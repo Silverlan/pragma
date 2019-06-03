@@ -30,8 +30,9 @@ bool is_fragment_in_shadow() // Only for spot-lights for the time being
 	if(is_unlit() == true)
 		return false;
 	ivec2 location = ivec2(gl_FragCoord.xy);
-	ivec2 tileID = location / ivec2(16, 16);
-	uint index = tileID.y * u_renderSettings.numberOfTilesX + tileID.x;
+	uint tileSize = get_tile_size();
+	ivec2 tileID = location / ivec2(tileSize, tileSize);
+	uint index = tileID.y * get_number_of_tiles_x() + tileID.x;
 	uint offset = index * MAX_SCENE_LIGHTS;
 	for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++) {
 		uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
@@ -118,8 +119,9 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 	}
 
 	ivec2 location = ivec2(gl_FragCoord.xy);
-	ivec2 tileID = location / ivec2(16, 16);
-	uint index = tileID.y * u_renderSettings.numberOfTilesX + tileID.x;
+	uint tileSize = get_tile_size();
+	ivec2 tileID = location / ivec2(tileSize, tileSize);
+	uint index = tileID.y * get_number_of_tiles_x() + tileID.x;
 	uint offset = index * MAX_SCENE_LIGHTS;
 	for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++) {
 		uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
@@ -131,8 +133,9 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 	if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
 	{
 		ivec2 location = ivec2(gl_FragCoord.xy);
-		ivec2 tileID = location /ivec2(FORWARDP_TILE_SIZE,FORWARDP_TILE_SIZE);
-		uint index = tileID.y *u_renderSettings.numberOfTilesX +tileID.x;
+		uint tileSize = get_tile_size();
+		ivec2 tileID = location /ivec2(tileSize,tileSize);
+		uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
 		uint offset = index *MAX_SCENE_LIGHTS;
 		uint numLights = 0;
 		for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
@@ -145,7 +148,7 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 		if(numLights > 0)
 		{
 			const float dbgIntensity = 0.95;
-			finalColor.rgb = (vec3(tileID.x /float(FORWARDP_TILE_SIZE),tileID.y /float(FORWARDP_TILE_SIZE),0) *(numLights /float(20))) *dbgIntensity
+			finalColor.rgb = (vec3(tileID.x /float(tileSize),tileID.y /float(tileSize),0) *(numLights /float(5))) *pow(1.0,dbgIntensity *1.0)
 					+finalColor.rgb *(1.0 -dbgIntensity);
 		}
 	}

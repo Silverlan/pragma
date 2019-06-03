@@ -86,7 +86,7 @@ void Engine::InitLaunchOptions(int argc,char *argv[])
 extern Engine *engine;
 DLLENGINE void LPARAM_console(const std::vector<std::string> &argv)
 {
-	if(argv.empty() == false && ustring::compare(argv[0],"external"))
+	if(argv.empty() == false && (ustring::compare(argv[0],"external") || ustring::compare(argv[0],"terminal")))
 	{
 		engine->Engine::OpenConsole();
 		return;

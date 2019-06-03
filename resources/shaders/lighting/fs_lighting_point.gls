@@ -21,6 +21,8 @@ vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3
 		float dist = (distToLight -u_renderSettings.nearZ) /(u_renderSettings.farZ -u_renderSettings.nearZ);
 		
 #if ENABLE_LIGHT_DEBUG == 1
+
+#if SHADOW_PCF_ENABLED == 0
 		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
 			float zFar = light.position.w;
@@ -34,6 +36,8 @@ vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3
 		}
 		else
 #endif
+
+#endif
 		{
 			vec4 depthCoord = get_light_vertex_position(lightIdx);
 			depthCoord.z = length(fragPosWs -light.position.xyz) /light.position.w;
@@ -43,19 +47,6 @@ vec3 calculate_point_lighting(int lightIdx,int pointIdx,vec3 fragLightColor,vec3
 				depthCoord.z,
 				light.position.xyz
 			) : 1.0;
-			/*float shadow = calculate_shadow(
-				fragPosWs,
-				shadowCubemaps[0],
-				depthCoord.z,
-				light.position.xyz
-			);*/
-			/*float shadow = (light.castShadows == 1) ? calculate_shadow(
-				fragPosWs,
-				shadowCubemaps[pointIdx],
-				depthCoord.z,
-				light.position.xyz
-			) : 1.0;*/
-			//float shadow = 1.0;
 
 			float shadowAmbient = 0.8;
 			shadow *= shadowAmbient;

@@ -3,6 +3,7 @@
 
 #include "sh_uniform_locations.gls"
 #include "sh_limits.gls"
+#include "../lighting/shadow/sh_shadow.gls"
 
 layout(std140,set = SHADER_UNIFORM_CSM_SET,binding = SHADER_UNIFORM_CSM_BINDING) uniform CSM
 {
@@ -11,12 +12,7 @@ layout(std140,set = SHADER_UNIFORM_CSM_SET,binding = SHADER_UNIFORM_CSM_BINDING)
 	int count;
 } u_csm;
 #ifdef GLS_FRAGMENT_SHADER
-	layout(set = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_SET,binding = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_BINDING) uniform sampler2D csmTextures[MAX_CSM_CASCADES];
-
-	float get_shadow_csm(int i,vec2 uv)
-	{
-		return texture(csmTextures[i],uv).r;
-	}
+	layout(set = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_SET,binding = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_BINDING) uniform shadowMapSamplerType csmTextures[MAX_CSM_CASCADES];
 
 	int get_csm_cascade_index()
 	{

@@ -35,7 +35,7 @@ void main()
 	else
 	{
 		vec3 colBloom = texture(u_bloom,vs_vert_uv).rgb;
-		//col.rgb += colBloom *u_renderSettings.bloomScale;
+		col.rgb += colBloom *u_renderSettings.bloomScale;
 
 		vec3 colGlow = texture(u_glow,vs_vert_uv).rgb;
 		col.rgb += colGlow *u_renderSettings.glowScale;

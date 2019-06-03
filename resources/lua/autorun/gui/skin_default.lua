@@ -180,7 +180,7 @@ skin["wibutton"] = {
 				end)
 				add_skin_element(pElement,cbSetSize)
 				
-				pElement:SetColor(Color(255,255,255,255))
+				pElement:SetColorRGB(Color(255,255,255,255))
 				pElement:SetText(pElement:GetText():upper())
 				pElement:SizeToContents()
 			end,
@@ -193,7 +193,7 @@ skin["wibutton"] = {
 ------------ WIFrame ------------
 skin["wiframe"] = {
 	Initialize = function(GUI,pElement)
-		pElement:SetColor(GUI.BACKGROUND_COLOR_DEFAULT)
+		pElement:SetColorRGB(GUI.BACKGROUND_COLOR_DEFAULT)
 	end,
 	children = {
 		["move_rect"] = {
@@ -203,14 +203,14 @@ skin["wiframe"] = {
 		},
 		["frame_titlebar"] = {
 			Initialize = function(GUI,pElement)
-				pElement:SetColor(GUI.BACKGROUND_COLOR_DEFAULT)
+				pElement:SetColorRGB(GUI.BACKGROUND_COLOR_DEFAULT)
 				local pFrame = pElement:GetParent()
 				if(pFrame:IsValid()) then pFrame:ScheduleUpdate() end
 			end
 		},
 		["frame_title"] = {
 			Initialize = function(GUI,pElement)
-				pElement:SetColor(Color(255,255,255,255))
+				pElement:SetColorRGB(Color(255,255,255,255))
 			end
 		}
 	}
@@ -284,7 +284,7 @@ skin["table_row_header"] = {
 		},
 		["witext"] = {
 			Initialize = function(GUI,pElement)
-				pElement:SetColor(Color(255,255,255,255))
+				pElement:SetColorRGB(Color(255,255,255,255))
 			end
 		}
 	}
@@ -303,7 +303,7 @@ skin["table_row"] = {
 			local bg = pElement:FindChildByName("background")
 			if(bg ~= nil and bg:IsValid()) then
 				bg:SetVisible(true)
-				bg:SetColor(GUI.TABLE_ROW_COLOR_HOVER)
+				bg:SetColorRGB(GUI.TABLE_ROW_COLOR_HOVER)
 			end
 		end)
 		local cbCursorExited = pElement:AddCallback("OnCursorExited",function()
@@ -317,7 +317,7 @@ skin["table_row"] = {
 			local bg = pElement:FindChildByName("background")
 			if(bg ~= nil and bg:IsValid()) then
 				bg:SetVisible(true)
-				bg:SetColor(GUI.TABLE_ROW_COLOR_SELECTED)
+				bg:SetColorRGB(GUI.TABLE_ROW_COLOR_SELECTED)
 			end
 		end)
 		local cbDeselected = pElement:AddCallback("OnDeselected",function()
@@ -342,7 +342,7 @@ skin["table_row"] = {
 			Initialize = function(GUI,pElement)
 				local pCell = pElement:GetParent()
 				if(not pCell:IsValid() or (pCell:GetClass() ~= "widropdownmenu" and pCell:GetClass() ~= "witextentrybase")) then
-					pElement:SetColor(Color(255,255,255,255))
+					pElement:SetColorRGB(Color(255,255,255,255))
 				end
 			end,
 			Release = clear_element
@@ -402,7 +402,7 @@ skin["wimainmenuelement"] = {
 			
 			pText:EnableShadow(true)
 			pText:SetFont(GUI:MENU_ITEM_FONT())
-			pText:SetColor(GUI.MENU_ITEM_COLOR)
+			pText:SetColorRGB(GUI.MENU_ITEM_COLOR)
 			pText:SizeToContents()
 			
 			pElement.m_bSelected = false
@@ -415,7 +415,7 @@ skin["wimainmenuelement"] = {
 				pElement.m_bTransition = true
 				sound.play(GUI:MENU_ITEM_SELECT_SOUND(),sound.TYPE_GUI,1,1)
 				if(pText:IsValid()) then
-					pText:SetColor(GUI.MENU_ITEM_SELECTED_COLOR)
+					pText:SetColorRGB(GUI.MENU_ITEM_SELECTED_COLOR)
 				end
 				if(hThink ~= nil and hThink:IsValid()) then hThink:Remove() end
 				hThink = pElement:AddCallback("Think",function()
@@ -439,7 +439,7 @@ skin["wimainmenuelement"] = {
 						local offsetStart = Vector2(2,2)
 						local offsetEnd = Vector2(0,0)
 						pText:SetShadowColor(colStart +(colEnd -colStart) *scale)
-						pText:SetShadowBlurSize(blurScale)
+						-- pText:SetShadowBlurSize(blurScale)
 						pText:SetShadowOffset(offsetStart +(offsetEnd -offsetStart) *scale)
 					end
 				end)
@@ -449,7 +449,7 @@ skin["wimainmenuelement"] = {
 				pElement.m_tSelected = time.real_time()
 				pElement.m_bTransition = true
 				if(pText:IsValid()) then
-					pText:SetColor(GUI.MENU_ITEM_COLOR)
+					pText:SetColorRGB(GUI.MENU_ITEM_COLOR)
 				end
 			end)
 		end
@@ -461,14 +461,14 @@ skin["wiprogressbar"] = {
 	children = {
 		["progressbar_label_overlay"] = {
 			Initialize = function(GUI,pElement)
-				pElement:SetColor(GUI.PROGRESS_BAR_LABEL_OVERLAY_COLOR)
+				pElement:SetColorRGB(GUI.PROGRESS_BAR_LABEL_OVERLAY_COLOR)
 			end
 		}
 	},
 	Initialize = function(GUI,pElement)
 		local pOutline = gui.create("WIOutlinedRect",pElement)
 		pOutline:SetAutoAlignToParent(true)
-		pOutline:SetColor(Color.Black)
+		pOutline:SetColorRGB(Color.Black)
 	end
 }
 skin["wislider"] = skin["wiprogressbar"]
@@ -478,7 +478,7 @@ skin["witooltip"] = {
 	Initialize = function(GUI,pElement)
 		local pText = pElement:GetFirstChild("witext")
 		if(pText == nil) then return end
-		pText:SetColor(Color.LightGrey)
+		pText:SetColorRGB(Color.LightGrey)
 		local gradient = GUI:BACKGROUND_GRADIENT()
 		if(gradient ~= nil) then
 			local pRect = gui.create("WITexturedRect",pElement)
@@ -506,7 +506,7 @@ skin["witooltip"] = {
 ------------- WIOptionsList -------------
 skin["wioptionslist"] = {
 	Initialize = function(GUI,pElement)
-		pElement:SetWidth(600)
+		--pElement:SetWidth(600)
 		pElement:SizeToContents()
 	end
 }
@@ -517,7 +517,7 @@ skin["window_frame"] = {
 	Initialize = function(GUI,pElement)
 		local bg = gui.create("WIRect",pElement)
 		bg:SetZPos(-2)
-		bg:SetColor(GUI.BACKGROUND_COLOR_DEFAULT)
+		bg:SetColorRGB(GUI.BACKGROUND_COLOR_DEFAULT)
 		bg:SetName("background")
 		bg:SetAutoAlignToParent(true)
 		add_skin_element(pElement,bg)
@@ -528,7 +528,7 @@ skin["window_frame"] = {
 			Initialize = function(GUI,pElement)
 				local pParent = pElement:GetParent()
 				if(not pParent:IsValid() or (pParent:GetClass() ~= "widropdownmenu" and pParent:GetClass() ~= "witextentrybase")) then
-					pElement:SetColor(Color.White)
+					pElement:SetColorRGB(Color.White)
 				end
 			end
 		}

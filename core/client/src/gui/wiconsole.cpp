@@ -51,6 +51,24 @@ WIConsole *WIConsole::Open()
 	pConsole->UpdateConsoleMode();
 	pConsole->RequestFocus();
 	s_hConsole = pConsole->GetHandle();
+
+	pConsole->SetText(
+		"{[c:c2003b]}"
+		"     _____ ____  _   _  _____  ____  _      ______ \n"
+		"   / ____/ __ \\| \\ | |/ ____|/ __ \\| |    |  ____|\n"
+		"  | |   | |  | |  \\| | (___ | |  | | |    | |__   \n"
+		"  | |   | |  | | . ` |\\___ \\| |  | | |    |  __|  \n"
+		"  | |___| |__| | |\\  |____) | |__| | |____| |____ \n"
+		"   \\_____\\____/|_| \\_|_____/ \\____/|______|______|{[/c]}\n"
+		"\n"
+		"\nTo toggle the console, press the '`'-key on your keyboard.\n"
+		"Here are some useful console commands to get you started:\n"
+		"- {[l:list]}{[c:fde4f2]}list{[/c]}{[/l]}: Lists all available console commands.\n"
+		"- {[c:f9cee7]}help{[/c]} <cvarName>: Prints a description for a particular console command or variable.\n"
+		"- {[c:f4b8da]}lua_help{[/c]} <query>: Prints information about a particular Lua class/library/function/enum.\n"
+		"- {[c:eea1cd]}map{[/c]} <mapName>: Disconnects from the current game and starts a new game with the specified map.\n"
+		"- {[c:e68bbe]}exit{[/c]}: Exits the engine\n\n"
+	);
 	return pConsole;
 }
 void WIConsole::Close()

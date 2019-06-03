@@ -22,6 +22,10 @@ function ai.TaskMoveToPosition:SetMoveDistance(d)
 	self:SetParameterFloat(self.PARAM_MOVE_DISTANCE,d)
 end
 
+function ai.TaskMoveToPosition:SetMoveActivity(act)
+	self:SetParameterInt(self.PARAM_MOVE_ACTIVITY,act)
+end
+
 function ai.TaskMoveToPosition:GetMovePosition(schedule,npc)
 	local pos = self:GetParameterVector(schedule,self.PARAM_MOVE_TARGET)
 	local physComponent = npc:GetEntity():GetComponent(ents.COMPONENT_PHYSICS)

@@ -5,6 +5,7 @@
 #include <pragma/lua/libraries/lutil.h>
 #include <sharedutils/util_file.h>
 #include <util_pragma_doc.hpp>
+#include <unordered_set>
 
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
@@ -23,6 +24,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		}
 	});
 }
+
 void Engine::RegisterConsoleCommands()
 {
 	auto &conVarMap = *console_system::server::get_convar_map();
@@ -37,12 +39,23 @@ void Engine::RegisterConsoleCommands()
 		state->LoadMap(argv[0].c_str());
 	},ConVarFlags::None,"Loads the given map immediately. Usage: map <mapName>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
-		FileManager::FindFiles(("maps\\" +arg +"*.wld").c_str(),&resFiles,nullptr);
-		autoCompleteOptions.reserve(resFiles.size());
-		for(auto &mapName : resFiles)
+		FileManager::FindFiles("maps\\*.wld",&resFiles,nullptr);
+		auto it = resFiles.begin();
+		std::vector<std::string_view> similarCandidates {};
+		ustring::gather_similar_elements(arg,[&it,&resFiles]() -> std::optional<std::string_view> {
+			if(it == resFiles.end())
+				return {};
+			auto &name = *it;
+			++it;
+			return name;
+		},similarCandidates,15);
+
+		autoCompleteOptions.reserve(similarCandidates.size());
+		for(auto &candidate : similarCandidates)
 		{
-			ufile::remove_extension_from_filename(mapName);
-			autoCompleteOptions.push_back(mapName);
+			auto strOption = std::string{candidate};
+			ufile::remove_extension_from_filename(strOption);
+			autoCompleteOptions.push_back(strOption);
 		}
 	});
 	conVarMap.RegisterConCommand("lua_exec",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
@@ -68,7 +81,6 @@ void Engine::RegisterConsoleCommands()
 		}
 	});
 
-	auto &enConVarMap = *console_system::engine::get_convar_map();
 	conVarMap.RegisterConCommand("lua_help",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 			return;
@@ -79,5 +91,57 @@ void Engine::RegisterConsoleCommands()
 		autoCompleteOptions.reserve(candidates.size());
 		for(auto *pCandidate : candidates)
 			autoCompleteOptions.push_back(pCandidate->GetFullName());
+	});
+
+	conVarMap.RegisterConCommand("help",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cout<<"Usage: help <cvarname>"<<Con::endl;
+			return;
+		}
+		ConConf *cv = state->GetConVar(argv[0]);
+		if(cv == NULL)
+		{
+			Con::cout<<"help: no cvar or command named "<<argv[0]<<Con::endl;
+			return;
+		}
+		cv->Print(argv[0]);
+	},ConVarFlags::None,"Find help about a convar/concommand.",[this](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+		auto *cvMap = GetConVarMap();
+		std::vector<std::string_view> similarCandidates {};
+		std::vector<float> similarities {};
+		std::unordered_set<std::string_view> iteratedCvars = {};
+		auto fItConVarMap = [&arg,&similarCandidates,&similarities,&iteratedCvars](ConVarMap &cvMap) {
+			auto &conVars = cvMap.GetConVars();
+			auto it = conVars.begin();
+
+			ustring::gather_similar_elements(arg,[&it,&conVars,&iteratedCvars]() -> std::optional<std::string_view> {
+				if(it == conVars.end())
+					return {};
+				auto itIterated = iteratedCvars.find(it->first);
+				while(itIterated != iteratedCvars.end() && it != conVars.end())
+				{
+					++it;
+					itIterated = iteratedCvars.find(it->first);
+				}
+				if(it == conVars.end())
+					return {};
+				auto &pair = *it;
+				++it;
+				iteratedCvars.insert(pair.first);
+				return pair.first;
+			},similarCandidates,15,&similarities);
+		};
+		fItConVarMap(*cvMap);
+		auto *svState = GetServerNetworkState();
+		if(svState)
+			fItConVarMap(*svState->GetConVarMap());
+		auto *clState = GetClientState();
+		if(clState)
+			fItConVarMap(*clState->GetConVarMap());
+
+		autoCompleteOptions.reserve(similarCandidates.size());
+		for(auto &candidate : similarCandidates)
+			autoCompleteOptions.push_back(std::string{candidate});
 	});
 }

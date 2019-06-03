@@ -27,7 +27,9 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 			if(distScale != 0.0 && length(posFromWorldSpace) > light.direction.w) // In range
 			{
 #if ENABLE_LIGHT_DEBUG == 1
-				if(false)//(u_debug.lights &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+
+#if SHADOW_PCF_ENABLED == 0
+				if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 				{
 					float zFar = light.position.w;
 					vec4 depthCoord = get_light_vertex_position(lightIdx);
@@ -35,14 +37,16 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 					float shadow = texture(shadowMaps[spotIdx],depthCoord.st).r;
 					fragLightColor += vec3(shadow,shadow,shadow);
 				}
-				else if(false)//(u_debug.lights &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+				else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
 				{
 					vec4 shadowCoord = get_light_vertex_position(lightIdx);
 					fragLightColor += vec3(shadowCoord.z,shadowCoord.z,shadowCoord.z);
-					//float shadow = length(get_vertex_position_ws() -light.position) /light.position.w;
-					//fragLightColor += vec3(shadow,shadow,shadow);
+					float shadow = length(get_vertex_position_ws() -light.position.xyz) /light.position.w;
+					fragLightColor += vec3(shadow,shadow,shadow);
 				}
 				else
+#endif
+
 #endif
 				{
 					vec4 depthCoord = get_light_vertex_position(lightIdx);
@@ -53,6 +57,7 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 								depthCoord,
 								0.0 /* bias is 0, since it's already been applied in the shader pipeline */
 					) : 1.0;
+
 					float falloff = distScale *lambertTerm;
 					vec3 diffuseLight = (light.color.rgb *falloff) *light.color.a;
 

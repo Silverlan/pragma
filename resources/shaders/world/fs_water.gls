@@ -23,7 +23,7 @@ vec3 calc_light_specular(vec3 normal,vec3 viewVector)
 
 	ivec2 location = ivec2(gl_FragCoord.xy);
 	ivec2 tileID = location / ivec2(16, 16);
-	uint index = tileID.y * u_renderSettings.numberOfTilesX + tileID.x;
+	uint index = tileID.y * get_number_of_tiles_x() + tileID.x;
 	uint offset = index * MAX_SCENE_LIGHTS;
 	for(uint i=0;i<MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset +i].index!=-1;i++)
 	{

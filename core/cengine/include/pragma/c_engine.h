@@ -53,58 +53,19 @@ private:
 		std::vector<ConVarInfo> cvars;
 		ConVarInfo *find(const std::string &cmd);
 	};
-	// Sound
-	std::shared_ptr<al::SoundSystem> m_soundSystem = nullptr;
-
-	// FPS
-	UInt32 m_fps;
-	Float m_tFPSTime;
-	std::chrono::high_resolution_clock::time_point m_tLastFrame;
-	std::chrono::high_resolution_clock::duration m_tDeltaFrameTime;
-
-	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;
-
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_cpuProfilingStageManager = nullptr;
-
-	bool m_bControllersEnabled = false;
-	float m_speedCam;
-	float m_speedCamMouse;
-	float m_nearZ,m_farZ;
-	bool m_bFullbright;
-	bool m_bWindowFocused;
-	std::unique_ptr<StateInstance> m_clInstance;
-	std::shared_ptr<prosper::RenderTarget> m_stagingRenderTarget = nullptr;
-	bool m_bFirstFrame = true;
-	bool m_bUniformBlocksInitialized;
-	bool m_bVulkanValidationEnabled = false;
-
-	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
-	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
-
-	float m_rawInputJoystickMagnitude = 0.f;
-	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
-	std::unordered_map<short,KeyBind> m_keyMappings;
-	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
-
-	virtual void Think() override;
-	virtual void Tick() override;
-	void Input(int key,GLFW::KeyState state,GLFW::Modifier mods={},float magnitude=1.f);
-	void Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude=1.f);
-	void UpdateFPS(float t);
-	void MapKey(short c,std::unordered_map<std::string,std::vector<std::string>> &binds);
-protected:
-	void DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
-	void WriteClientConfig(VFilePtrReal f);
-	void PreloadClientConfig();
-	virtual void OnWindowInitialized() override;
-	virtual void LoadConfig() override;
-	virtual void InitializeExternalArchiveManager() override;
-	virtual void DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
-	virtual void OnClose() override;
-	virtual void RegisterConsoleCommands() override;
-	void InitializeStagingTarget();
 public:
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		ControllersEnabled = 1u,
+		Fullbright = ControllersEnabled<<1u,
+		WindowFocused = Fullbright<<1u,
+		FirstFrame = WindowFocused<<1u,
+		UniformBlocksInitialized = FirstFrame<<1u,
+		VulkanValidationEnabled = UniformBlocksInitialized<<1u,
+		ConsoleOpen = VulkanValidationEnabled<<1u
+	};
+
 	using pragma::RenderContext::DrawFrame;
 	
 	// Debug
@@ -211,7 +172,55 @@ public:
 	Double GetDeltaFrameTime() const;
 	UInt32 GetFPS() const;
 	UInt32 GetFrameTime() const;
+protected:
+	void DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
+	void WriteClientConfig(VFilePtrReal f);
+	void PreloadClientConfig();
+	virtual void OnWindowInitialized() override;
+	virtual void LoadConfig() override;
+	virtual void InitializeExternalArchiveManager() override;
+	virtual void DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
+	virtual void OnClose() override;
+	virtual void RegisterConsoleCommands() override;
+	void InitializeStagingTarget();
+private:
+	// Sound
+	std::shared_ptr<al::SoundSystem> m_soundSystem = nullptr;
+
+	// FPS
+	UInt32 m_fps;
+	Float m_tFPSTime;
+	std::chrono::high_resolution_clock::time_point m_tLastFrame;
+	std::chrono::high_resolution_clock::duration m_tDeltaFrameTime;
+
+	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;
+
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_cpuProfilingStageManager = nullptr;
+
+	StateFlags m_stateFlags = StateFlags::FirstFrame;
+	float m_speedCam;
+	float m_speedCamMouse;
+	float m_nearZ,m_farZ;
+	std::unique_ptr<StateInstance> m_clInstance;
+	std::shared_ptr<prosper::RenderTarget> m_stagingRenderTarget = nullptr;
+
+	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
+	std::vector<CallbackHandle> m_gpuProfileHandlers = {};
+
+	float m_rawInputJoystickMagnitude = 0.f;
+	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
+	std::unordered_map<short,KeyBind> m_keyMappings;
+	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
+
+	virtual void Think() override;
+	virtual void Tick() override;
+	void Input(int key,GLFW::KeyState state,GLFW::Modifier mods={},float magnitude=1.f);
+	void Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude=1.f);
+	void UpdateFPS(float t);
+	void MapKey(short c,std::unordered_map<std::string,std::vector<std::string>> &binds);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)
 
 template<class TEfxProperties>
 	std::shared_ptr<al::Effect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)

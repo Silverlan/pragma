@@ -585,6 +585,56 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	auto &leaves = bsp->GetLeaves();
 	auto &leafBrushes = bsp->GetLeafBrushes();
 
+	// Extract files
+	std::string mapName = ufile::get_file_from_filename(path);
+	ufile::remove_extension_from_filename(mapName);
+	auto mapMatPath = "materials/maps/" +mapName +'/';
+
+	if(messageLogger)
+		messageLogger("Extracing BSP files...");
+	uint32_t numExtracted = 0;
+	uint32_t numSkippedLump = 0;
+	uint32_t numSkippedMapMats = 0;
+	for(auto &fName : bsp->GetFilenames())
+	{
+		if(ustring::compare(fName.c_str(),"lumps/",false,6))
+		{
+			++numSkippedLump;
+			continue;
+		}
+		if(ustring::compare(fName.c_str(),mapMatPath.c_str(),false,mapMatPath.length()))
+		{
+			++numSkippedMapMats;
+			continue;
+		}
+		std::vector<uint8_t> data;
+		if(bsp->ReadFile(fName,data) == false)
+		{
+			if(messageLogger)
+				messageLogger("WARNING: Unable to extract file '" +fName +"' from BSP!");
+		}
+		else
+		{
+			if(messageLogger)
+				messageLogger("Extracting file '" +fName +"'...");
+			std::string extractPath = "addons/imported/" +fName;
+			auto relPath = ufile::get_path_from_filename(extractPath);
+			FileManager::CreatePath(relPath.c_str());
+			auto fOut = FileManager::OpenFile<VFilePtrReal>(extractPath.c_str(),"wb");
+			if(fOut == nullptr)
+			{
+				if(messageLogger)
+					messageLogger("WARNING: Unable to extract file '" +fName +"' from BSP: Cannot write output file!");
+				continue;
+			}
+			fOut->Write(data.data(),data.size() *sizeof(data.front()));
+			++numExtracted;
+		}
+	}
+	if(messageLogger)
+		messageLogger(std::to_string(numExtracted) +" files have been extracted! " +std::to_string(numSkippedLump) +" lump files and " +std::to_string(numSkippedMapMats) +" map material files have been skipped!");
+	//
+
 	std::unordered_map<uint32_t,std::pair<uint32_t,uint32_t>> staticPropLeafRanges {};
 	auto &staticPropData = bsp->GetStaticPropData();
 	for(auto &lump : staticPropData.staticPropLumps)

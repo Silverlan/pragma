@@ -1,3 +1,5 @@
 #version 400
 
+#define USE_VERTEX_COLOR
+
 #include "fs_wgui_text_cheap_base.gls"

@@ -29,11 +29,25 @@ function gui.WIBaseEditor:OnInitialize()
 		self:Close()
 	end)
 end
+
+function gui.WIBaseEditor:GetMenuBar() return self.m_menuBar end
+function gui.WIBaseEditor:CreateWindow(class)
+	local pFrame = gui.create("WIFrame")
+	if(pFrame == nil) then return end
+	local p = gui.create(class or "WIEditorWindow",pFrame)
+	if(p == nil) then
+		pFrame:Remove()
+		return
+	end
+	p:SetFrame(pFrame)
+	return p
+end
 function gui.WIBaseEditor:OnSizeChanged(w,h)
 	if(util.is_valid(self.m_menuBar) == true) then
 		self.m_menuBar:SetWidth(w)
 	end
 end
+
 function gui.WIBaseEditor:Close()
 	self:SetVisible(false)
 end

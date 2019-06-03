@@ -43,6 +43,10 @@ layout(push_constant) uniform LightInfo
 
 layout(set = SHADER_UNIFORM_DEPTH_MAP_SET,binding = SHADER_UNIFORM_DEPTH_MAP_BINDING) uniform sampler2D u_sceneDepth;
 
+// Specialization constants not supported on some GPUs?
+// layout(constant_id = 1) const uint FORWARDP_TILE_SIZE = 16;
+#define FORWARDP_TILE_SIZE 16
+
 // Shared values between all the threads in the group
 shared uint minDepthInt;
 shared uint maxDepthInt;
@@ -124,7 +128,7 @@ bool is_light_in_frustum(vec4 lightPosition,ViewFrustum frustum)
 	{
 		if(dot(lightPos,frustum.planes[i].xyz) +frustum.planes[i].w  < -lightDist)
 		{
-			result = false;
+			result = false;	
 			break;
 		}
 	}

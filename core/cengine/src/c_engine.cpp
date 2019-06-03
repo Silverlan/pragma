@@ -64,9 +64,8 @@ static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
 	m_nearZ(1.f),//10.0f), //0.1f
-	m_farZ(32768.0f),
+	m_farZ(32'768.0f),
 	m_fps(0),m_tFPSTime(0.f),
-	m_bUniformBlocksInitialized(false),
 	m_tLastFrame(std::chrono::high_resolution_clock::now()),m_tDeltaFrameTime(0)
 {
 	c_engine = this;
@@ -176,7 +175,7 @@ void CEngine::InitializeStagingTarget()
 		}}}
 		//prosper::util::RenderPassCreateInfo{vk::Format::eD32Sfloat,vk::ImageLayout::eDepthStencilAttachmentOptimal,vk::AttachmentLoadOp::eClear}
 	);
-	m_bFirstFrame = true;
+	umath::set_flag(m_stateFlags,StateFlags::FirstFrame);
 	m_stagingRenderTarget = prosper::util::create_render_target(dev,{stagingTex},rp);//,finalDepthTex},rp);
 	m_stagingRenderTarget->SetDebugName("engine_staging_rt");
 	// Vulkan TODO: Resize when window resolution was changed
@@ -412,7 +411,7 @@ void CEngine::ScrollInput(GLFW::Window &window,Vector2 offset)
 
 void CEngine::OnWindowFocusChanged(GLFW::Window &window,bool bFocused)
 {
-	m_bWindowFocused = bFocused;
+	umath::set_flag(m_stateFlags,StateFlags::WindowFocused,bFocused);
 	if(client != nullptr)
 		client->UpdateSoundVolume();
 }
@@ -422,7 +421,7 @@ void CEngine::OnFilesDropped(GLFW::Window &window,std::vector<std::string> &file
 		return;
 	client->OnFilesDropped(files);
 }
-bool CEngine::IsWindowFocused() const {return m_bWindowFocused;}
+bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,StateFlags::WindowFocused);}
 void CEngine::LoadMap(const char *cmap)
 {
 	Engine::LoadMap(cmap);
@@ -610,6 +609,10 @@ bool CEngine::Initialize(int argc,char *argv[])
 	InitializeSoundEngine();
 
 	auto *cl = OpenClientState();
+
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ConsoleOpen))
+		OpenConsole(); // GUI Console mustn't be opened before client has been created!
+
 	RunLaunchCommands();
 	if(cl != nullptr)
 		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
@@ -641,12 +644,14 @@ void CEngine::OpenConsole()
 {
 	if(WGUI::IsOpen())
 		WIConsole::Open();
+	umath::set_flag(m_stateFlags,StateFlags::ConsoleOpen,true);
 	// Engine::OpenConsole();
 }
 void CEngine::CloseConsole()
 {
 	WIConsole::Close();
 	// Engine::CloseConsole();
+	umath::set_flag(m_stateFlags,StateFlags::ConsoleOpen,false);
 }
 bool CEngine::IsConsoleOpen() const
 {
@@ -704,12 +709,12 @@ bool CEngine::StopProfilingStage(GPUProfilingPhase stage)
 {
 	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StopProfilerStage(stage);
 }
-bool CEngine::GetControllersEnabled() const {return m_bControllersEnabled;}
+bool CEngine::GetControllersEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::ControllersEnabled);}
 void CEngine::SetControllersEnabled(bool b)
 {
-	if(m_bControllersEnabled == b)
+	if(GetControllersEnabled() == b)
 		return;
-	m_bControllersEnabled = b;
+	umath::set_flag(m_stateFlags,StateFlags::ControllersEnabled,b);
 	if(b == false)
 	{
 		GLFW::set_joysticks_enabled(false);
@@ -907,8 +912,8 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 	StopProfilingStage(CPUProfilingPhase::GUI);
 
 	auto &stagingRt = m_stagingRenderTarget;
-	if(m_bFirstFrame == true)
-		m_bFirstFrame = false;
+	if(umath::is_flag_set(m_stateFlags,StateFlags::FirstFrame))
+		umath::set_flag(m_stateFlags,StateFlags::FirstFrame,false);
 	else
 	{
 		prosper::util::record_image_barrier(
@@ -1113,7 +1118,7 @@ void CEngine::Tick()
 
 bool CEngine::IsServerOnly() {return false;}
 
-void CEngine::UseFullbrightShader(bool b) {m_bFullbright = b;}
+void CEngine::UseFullbrightShader(bool b) {umath::set_flag(m_stateFlags,StateFlags::Fullbright,b);}
 
 void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 {

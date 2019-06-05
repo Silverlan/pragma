@@ -14,7 +14,6 @@ extern DLLENGINE Engine *engine;
 decltype(AddonSystem::m_addons) AddonSystem::m_addons;
 decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;
 
-#pragma optimize("",off)
 upad::PADPackage *AddonSystem::LoadPADPackage(const std::string &path)
 {
 	auto it = std::find_if(m_addons.begin(),m_addons.end(),[&path](const AddonInfo &addon) {
@@ -223,4 +222,3 @@ std::string AddonInfo::GetAbsolutePath() const
 }
 const std::string &AddonInfo::GetUniqueId() const {return m_uniqueId;}
 const util::Version &AddonInfo::GetVersion() const {return m_version;}
-#pragma optimize("",on)

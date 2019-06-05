@@ -1300,9 +1300,10 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 	}
 	else if(name == "oncharevent")
 	{
-		hCallback = FunctionCallback<::util::EventReply,int,GLFW::Modifier>::Create([l,hPanel,o](int c,GLFW::Modifier mods) -> ::util::EventReply {
+		hCallback = FunctionCallback<::util::EventReply,int,GLFW::Modifier>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply,int c,GLFW::Modifier mods) -> CallbackReturnType {
 			if(!hPanel.IsValid())
-				return ::util::EventReply::Unhandled;
+				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(l,[&o,hPanel,c,mods](lua_State *l) {
 				o.push(l);
 
@@ -1313,18 +1314,22 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				return Lua::StatusCode::Ok;
 			},1) == Lua::StatusCode::Ok)
 			{
-				auto result = Lua::CheckInt(l,-1);
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
-				return static_cast<::util::EventReply>(l,result);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
 			}
-			return ::util::EventReply::Unhandled;
+			return CallbackReturnType::NoReturnValue;
 		});
 	}
 	else if(name == "onkeyevent")
 	{
-		hCallback = FunctionCallback<::util::EventReply,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::Create([l,hPanel,o](GLFW::Key key,int,GLFW::KeyState action,GLFW::Modifier mods) -> ::util::EventReply {
+		hCallback = FunctionCallback<::util::EventReply,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply,GLFW::Key key,int,GLFW::KeyState action,GLFW::Modifier mods) -> CallbackReturnType {
 			if(!hPanel.IsValid())
-				return ::util::EventReply::Unhandled;
+				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(l,[&o,hPanel,key,action,mods](lua_State *l) {
 				o.push(l);
 
@@ -1336,18 +1341,22 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				return Lua::StatusCode::Ok;
 			},1) == Lua::StatusCode::Ok)
 			{
-				auto result = Lua::CheckInt(l,-1);
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
-				return static_cast<::util::EventReply>(l,result);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
 			}
-			return ::util::EventReply::Unhandled;
+			return CallbackReturnType::NoReturnValue;
 		});
 	}
 	else if(name == "onmouseevent")
 	{
-		hCallback = FunctionCallback<::util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::Create([l,hPanel,o](GLFW::MouseButton button,GLFW::KeyState action,GLFW::Modifier mods) -> ::util::EventReply {
+		hCallback = FunctionCallback<::util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState action,GLFW::Modifier mods) -> CallbackReturnType {
 			if(!hPanel.IsValid())
-				return ::util::EventReply::Unhandled;
+				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(l,[&o,hPanel,button,action,mods](lua_State *l) {
 				o.push(l);
 
@@ -1359,18 +1368,176 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				return Lua::StatusCode::Ok;
 			},1) == Lua::StatusCode::Ok)
 			{
-				auto result = Lua::CheckInt(l,-1);
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
-				return static_cast<::util::EventReply>(l,result);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
 			}
-			return ::util::EventReply::Unhandled;
+			return CallbackReturnType::NoReturnValue;
+		});
+	}
+	else if(name == "oncursormoved")
+	{
+		hCallback = FunctionCallback<void,int32_t,int32_t>::Create(
+			[l,hPanel,o](int32_t x,int32_t y) {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l,[&o,hPanel,x,y](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				Lua::PushInt(l,x);
+				Lua::PushInt(l,y);
+				return Lua::StatusCode::Ok;
+			});
+		});
+	}
+	else if(name == "onchildadded")
+	{
+		hCallback = FunctionCallback<void,::WIBase*>::Create(
+			[l,hPanel,o](::WIBase *el) {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l,[&o,hPanel,el](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				if(el)
+				{
+					auto objEl = WGUILuaInterface::GetLuaObject(l,*el);
+					objEl.push(l);
+				}
+				return Lua::StatusCode::Ok;
+			});
+		});
+	}
+	else if(name == "onchildremoved")
+	{
+		hCallback = FunctionCallback<void,::WIBase*>::Create(
+			[l,hPanel,o](::WIBase *el) {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l,[&o,hPanel,el](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				if(el)
+				{
+					auto objEl = WGUILuaInterface::GetLuaObject(l,*el);
+					objEl.push(l);
+				}
+				return Lua::StatusCode::Ok;
+			});
+		});
+	}
+	else if(name == "onmousepressed")
+	{
+		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply) -> CallbackReturnType {
+			if(!hPanel.IsValid())
+				return CallbackReturnType::NoReturnValue;
+			if(Lua::CallFunction(l,[&o,hPanel](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				return Lua::StatusCode::Ok;
+			},1) == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
+				Lua::Pop(l,1);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
+			}
+			return CallbackReturnType::NoReturnValue;
+		});
+	}
+	else if(name == "onmousereleased")
+	{
+		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply) -> CallbackReturnType {
+			if(!hPanel.IsValid())
+				return CallbackReturnType::NoReturnValue;
+			if(Lua::CallFunction(l,[&o,hPanel](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				return Lua::StatusCode::Ok;
+			},1) == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
+				Lua::Pop(l,1);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
+			}
+			return CallbackReturnType::NoReturnValue;
+		});
+	}
+	else if(name == "ondoubleclick")
+	{
+		hCallback = FunctionCallback<::util::EventReply>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply) -> CallbackReturnType {
+			if(!hPanel.IsValid())
+				return CallbackReturnType::NoReturnValue;
+			if(Lua::CallFunction(l,[&o,hPanel](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				return Lua::StatusCode::Ok;
+			},1) == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
+				Lua::Pop(l,1);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
+			}
+			return CallbackReturnType::NoReturnValue;
+		});
+	}
+	else if(name == "onjoystickevent")
+	{
+		hCallback = FunctionCallback<::util::EventReply,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>::CreateWithOptionalReturn(
+			[l,hPanel,o](::util::EventReply *reply,std::reference_wrapper<const GLFW::Joystick> joystick,uint32_t key,GLFW::KeyState state) -> CallbackReturnType {
+			if(!hPanel.IsValid())
+				return CallbackReturnType::NoReturnValue;
+			if(Lua::CallFunction(l,[&o,hPanel,key,state](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				Lua::PushInt(l,key);
+				Lua::PushInt(l,umath::to_integral(state));
+				return Lua::StatusCode::Ok;
+			},1) == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
+				Lua::Pop(l,1);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
+			}
+			return CallbackReturnType::NoReturnValue;
 		});
 	}
 	else if(name == "onscroll")
 	{
-		hCallback = FunctionCallback<::util::EventReply,Vector2>::Create([l,hPanel,o](Vector2 offset) -> ::util::EventReply {
+		hCallback = FunctionCallback<::util::EventReply,Vector2>::CreateWithOptionalReturn([l,hPanel,o](::util::EventReply *reply,Vector2 offset) -> CallbackReturnType {
 			if(!hPanel.IsValid())
-				return ::util::EventReply::Unhandled;
+				return CallbackReturnType::NoReturnValue;
 			if(Lua::CallFunction(l,[&o,hPanel,&offset](lua_State *l) {
 				o.push(l);
 
@@ -1381,11 +1548,14 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				return Lua::StatusCode::Ok;
 			},1) == Lua::StatusCode::Ok)
 			{
-				auto result = Lua::CheckInt(l,-1);
+				if(Lua::IsSet(l,-1) == false)
+					return CallbackReturnType::NoReturnValue;
+				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
-				return static_cast<::util::EventReply>(l,result);
+				*reply = result;
+				return CallbackReturnType::HasReturnValue;
 			}
-			return ::util::EventReply::Unhandled;
+			return CallbackReturnType::NoReturnValue;
 		});
 	}
 	else if(name == "onchange" && dynamic_cast<::WICheckbox*>(hPanel.get()) != nullptr)
@@ -1402,9 +1572,9 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				return Lua::StatusCode::Ok;
 			},1) == Lua::StatusCode::Ok)
 			{
-				auto result = Lua::CheckInt(l,-1);
+				auto result = Lua::IsSet(l,-1) ? static_cast<::util::EventReply>(Lua::CheckInt(l,-1)) : ::util::EventReply::Unhandled;
 				Lua::Pop(l,1);
-				return static_cast<::util::EventReply>(l,result);
+				return result;
 			}
 			return ::util::EventReply::Unhandled;
 		});

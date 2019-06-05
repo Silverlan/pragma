@@ -7,7 +7,7 @@
 
 #define ENGINE_VERSION_MAJOR 0
 #define ENGINE_VERSION_MINOR 5
-#define ENGINE_VERSION_REVISION 0
+#define ENGINE_VERSION_REVISION 1
 
 namespace util
 {

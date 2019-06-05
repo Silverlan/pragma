@@ -671,8 +671,16 @@ void Game::RegisterLuaLibraries()
 		auto _G = luabind::globals(l);
 		_G["Animation"][name.get()] = id;
 	};
-	nw->GetLuaEnumRegisterCallbacks().push_back(::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum));
-	nw->GetLuaEnumRegisterCallbacks().push_back(::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum));
+	auto cbAct = ::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum);
+	auto cbEv = ::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum);
+	nw->GetLuaEnumRegisterCallbacks().push_back(cbAct);
+	nw->GetLuaEnumRegisterCallbacks().push_back(cbEv);
+	AddCallback("OnLuaReleased",FunctionCallback<void>::Create([cbAct,cbEv]() mutable {
+		if(cbAct.IsValid())
+			cbAct.Remove();
+		if(cbEv.IsValid())
+			cbEv.Remove();
+	}));
 
 	/*static const luaL_Reg funcs_recast[] = {
 		{"Test",Lua_recast_Test},

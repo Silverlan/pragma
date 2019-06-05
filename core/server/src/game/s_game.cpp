@@ -279,7 +279,9 @@ void SGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 			if(version < 4)
 				offsetToEndOfEntity += sizeof(uint64_t);
 		}
-		f->Seek(f->Tell() +sizeof(uint64_t) *2); // Don't need offset to the entity meshes or leaves
+		f->Seek(f->Tell() +sizeof(uint64_t)); // Don't need offset to the entity meshes
+		if(version >= 9)
+			f->Seek(f->Tell() +sizeof(uint64_t)); // Don't need offset to the entity leaves
 
 		auto bClientsideEntity = false;
 		if(version >= 4)

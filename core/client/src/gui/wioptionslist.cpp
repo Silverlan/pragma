@@ -74,7 +74,7 @@ void WIOptionsList::SizeToContents()
 		auto h = pTable->GetHeight();
 		if(h > 512)
 			h = 512;
-		pTable->SetWidth(GetWidth());
+		pTable->SetSize(GetWidth(),h);
 		SetHeight(h);
 	}
 }

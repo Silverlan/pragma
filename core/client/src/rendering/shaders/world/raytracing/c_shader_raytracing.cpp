@@ -9,7 +9,7 @@ extern DLLCENGINE CEngine *c_engine;
 #pragma optimize("",off)
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE) ShaderRayTracing::DESCRIPTOR_SET_IMAGE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Depth Map
+		prosper::Shader::DescriptorSetInfo::Binding { // Image
 			Anvil::DescriptorType::STORAGE_IMAGE,
 			Anvil::ShaderStageFlagBits::COMPUTE_BIT
 		}

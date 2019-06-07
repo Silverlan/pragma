@@ -37,6 +37,7 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
+#include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
@@ -82,6 +83,8 @@ void CGame::InitShaders()
 
 	shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
+
+	shaderManager.RegisterShader("raytracing",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	shaderManager.RegisterShader("wireframe",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});

@@ -386,6 +386,9 @@ int Lua::util::register_class(lua_State *l)
 
 	auto nParentClasses = Lua::GetStackTop(l) -1;
 
+	auto restorePreviousGlobalValue = slibs.empty() == false;
+	if(restorePreviousGlobalValue)
+		Lua::GetGlobal(l,className); /* +1 */
 	std::stringstream ss;
 	ss<<"return class '"<<className<<"'";
 	auto r = Lua::RunString(l,ss.str(),1,"internal"); /* 1 */
@@ -413,6 +416,10 @@ int Lua::util::register_class(lua_State *l)
 			Lua::SetGlobal(l,className); /* 0 */
 		}
 	}
+
+	if(restorePreviousGlobalValue)
+		Lua::SetGlobal(l,className); /* -1 */
+
 	Lua::PushBool(l,true);
 	return 1;
 }

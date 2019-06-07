@@ -299,8 +299,19 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 	prosper::util::record_image_barrier(*(*drawCmd),*outImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 }
 
+#include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 void CGame::RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
+	/*{
+		auto &shaderRaytracing = *static_cast<pragma::ShaderRayTracing*>(c_engine->GetShader("raytracing").get());
+		if(shaderRaytracing.BeginCompute(drawCmd))
+		{
+			shaderRaytracing.ComputeTest();
+			shaderRaytracing.EndCompute();
+		}
+	}*/
+
+
 	auto &scene = GetRenderScene();
 	auto &prepass = scene->GetPrepass();
 	{

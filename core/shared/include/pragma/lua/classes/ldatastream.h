@@ -45,6 +45,22 @@ namespace Lua
 			ds->Resize(0,true);
 		}
 		template<class TDataStream>
+			void ToBinaryString(lua_State *l,TDataStream &ds)
+		{
+			auto currentOffset = ds->GetOffset();
+			ds->SetOffset(0);
+			ReadBinaryString(l,ds,ds->GetSize());
+			ds->SetOffset(currentOffset);
+		}
+		template<class TDataStream>
+			void ReadBinaryString(lua_State *l,TDataStream &ds,uint32_t size)
+		{
+			std::string binaryString {};
+			binaryString.resize(size);
+			ds->Read(binaryString.data(),size);
+			Lua::PushString(l,binaryString);
+		}
+		template<class TDataStream>
 			void WriteString(lua_State*,TDataStream &ds,const std::string &str)
 		{
 			ds->WriteString(str);
@@ -53,6 +69,37 @@ namespace Lua
 			void WriteString(lua_State*,TDataStream &ds,const std::string &str,Bool bNullterminated)
 		{
 			ds->WriteString(str,bNullterminated);
+		}
+		template<class TDataStream>
+			void WriteBinaryString(lua_State*,TDataStream &ds,const std::string &str)
+		{
+			ds->Write(reinterpret_cast<const uint8_t*>(str.data()),str.size());
+		}
+		template<class TDataStream>
+			void WriteBinary(lua_State*,TDataStream &ds,TDataStream &dsOther,uint32_t offset,uint32_t size)
+		{
+			auto *pData = dsOther->GetData() +offset;
+			ds->Write(pData,size);
+		}
+		template<class TDataStream>
+			void WriteBinary(lua_State *l,TDataStream &ds,TDataStream &dsOther)
+		{
+			ds->Write<uint32_t>(dsOther->GetSize());
+			WriteBinary(l,ds,dsOther,0,dsOther->GetSize());
+		}
+		template<class TDataStream>
+			void ReadBinary(lua_State *l,TDataStream &ds,uint32_t size)
+		{
+			TDataStream newDs {};
+			newDs->Write(ds->GetData() +ds->GetOffset(),size);
+			ds->SetOffset(ds->GetOffset() +size);
+			Lua::Push<TDataStream>(l,newDs);
+		}
+		template<class TDataStream>
+			void ReadBinary(lua_State *l,TDataStream &ds)
+		{
+			auto size = ds->Read<uint32_t>();
+			ReadBinary(l,ds,size);
 		}
 		template<class TDataStream>
 			void ReadString(lua_State *l,TDataStream &ds)
@@ -113,12 +160,18 @@ namespace Lua
 			classDef.def("Resize",&Lua::DataStream::Resize<TClass>);
 			classDef.def("Reserve",&Lua::DataStream::Reserve<TClass>);
 			classDef.def("Clear",&Lua::DataStream::Clear<TClass>);
+			classDef.def("ReadBinaryString",static_cast<void(*)(lua_State*,TClass&,uint32_t)>(&Lua::DataStream::ReadBinaryString<TClass>));
+			classDef.def("ToBinaryString",static_cast<void(*)(lua_State*,TClass&)>(&Lua::DataStream::ToBinaryString<TClass>));
 			classDef.def("WriteString",static_cast<void(*)(lua_State*,TClass&,const std::string&)>(&Lua::DataStream::WriteString<TClass>));
 			classDef.def("WriteString",static_cast<void(*)(lua_State*,TClass&,const std::string&,Bool)>(&Lua::DataStream::WriteString<TClass>));
 			classDef.def("ReadString",static_cast<void(*)(lua_State*,TClass&)>(&Lua::DataStream::ReadString<TClass>));
 			classDef.def("ReadString",static_cast<void(*)(lua_State*,TClass&,unsigned int)>(&Lua::DataStream::ReadString<TClass>));
 			classDef.def("ReadStringUntil",&Lua::DataStream::ReadStringUntil<TClass>);
 			classDef.def("ReadLine",&Lua::DataStream::ReadLine<TClass>);
+			classDef.def("WriteBinary",static_cast<void(*)(lua_State*,TClass&,TClass&,uint32_t,uint32_t)>(&Lua::DataStream::WriteBinary<TClass>));
+			classDef.def("WriteBinary",static_cast<void(*)(lua_State*,TClass&,TClass&)>(&Lua::DataStream::WriteBinary<TClass>));
+			classDef.def("ReadBinary",static_cast<void(*)(lua_State*,TClass&,uint32_t)>(&Lua::DataStream::ReadBinary<TClass>));
+			classDef.def("ReadBinary",static_cast<void(*)(lua_State*,TClass&)>(&Lua::DataStream::ReadBinary<TClass>));
 			classDef.def("WriteBool",&Lua::DataStream::Write<TClass,bool>);
 			classDef.def("ReadBool",&Lua::DataStream::Read<TClass,bool>);
 			classDef.def("WriteInt64",&Lua::DataStream::Write<TClass,int64_t>);

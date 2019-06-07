@@ -62,6 +62,12 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		Lua::PushBool(l,b);
 		return 1;
 	}));
+	lua_register(lua.GetState(),"toint",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		std::string v = Lua::CheckString(l,1);
+		auto i = util::to_int(v);
+		Lua::PushInt(l,i);
+		return 1;
+	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"console",{
 		{"FOREGROUND_BLUE",FOREGROUND_BLUE},

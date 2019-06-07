@@ -45,20 +45,20 @@ namespace Lua
 			ds->Resize(0,true);
 		}
 		template<class TDataStream>
-			void ToBinaryString(lua_State *l,TDataStream &ds)
-		{
-			auto currentOffset = ds->GetOffset();
-			ds->SetOffset(0);
-			ReadBinaryString(l,ds,ds->GetSize());
-			ds->SetOffset(currentOffset);
-		}
-		template<class TDataStream>
 			void ReadBinaryString(lua_State *l,TDataStream &ds,uint32_t size)
 		{
 			std::string binaryString {};
 			binaryString.resize(size);
 			ds->Read(binaryString.data(),size);
 			Lua::PushString(l,binaryString);
+		}
+		template<class TDataStream>
+			void ToBinaryString(lua_State *l,TDataStream &ds)
+		{
+			auto currentOffset = ds->GetOffset();
+			ds->SetOffset(0);
+			ReadBinaryString(l,ds,ds->GetSize());
+			ds->SetOffset(currentOffset);
 		}
 		template<class TDataStream>
 			void WriteString(lua_State*,TDataStream &ds,const std::string &str)
@@ -84,7 +84,7 @@ namespace Lua
 		template<class TDataStream>
 			void WriteBinary(lua_State *l,TDataStream &ds,TDataStream &dsOther)
 		{
-			ds->Write<uint32_t>(dsOther->GetSize());
+			ds->template Write<uint32_t>(dsOther->GetSize());
 			WriteBinary(l,ds,dsOther,0,dsOther->GetSize());
 		}
 		template<class TDataStream>
@@ -98,7 +98,7 @@ namespace Lua
 		template<class TDataStream>
 			void ReadBinary(lua_State *l,TDataStream &ds)
 		{
-			auto size = ds->Read<uint32_t>();
+			auto size = ds->template Read<uint32_t>();
 			ReadBinary(l,ds,size);
 		}
 		template<class TDataStream>

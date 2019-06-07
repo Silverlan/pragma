@@ -737,7 +737,7 @@ set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include d
 register_third_party_library(libbsa)
 set_target_properties(bsa PROPERTIES FOLDER third_party_libs/libbsa)
 set_target_properties(tests PROPERTIES FOLDER third_party_libs/libbsa)
-set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
+# set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
 #
 
 # ba2lib

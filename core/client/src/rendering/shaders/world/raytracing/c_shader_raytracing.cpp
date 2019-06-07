@@ -152,22 +152,14 @@ void ShaderRayTracing::Test()
 	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.height = 512;
-	imgCreateInfo.width = 512;
+	imgCreateInfo.height = 1024;
+	imgCreateInfo.width = 1024;
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
 	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::STORAGE_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 	imgCreateInfo.usage |= Anvil::ImageUsageFlagBits::SAMPLED_BIT;
 
-	
-	std::vector<std::array<uint8_t,4>> imgData;
-	imgData.resize(512 *512);
-	for(auto &px : imgData)
-	{
-		px.at(1) = 255;
-		px.at(3) = 255;
-	}
-	auto img = prosper::util::create_image(dev,imgCreateInfo,reinterpret_cast<uint8_t*>(imgData.data()));
+	auto img = prosper::util::create_image(dev,imgCreateInfo);
 	
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -175,7 +167,7 @@ void ShaderRayTracing::Test()
 	rtxTest.texture = tex;
 
 	auto descSetImage = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_IMAGE);
-	prosper::util::set_descriptor_set_binding_storage_image(*(*descSetImage)->get_descriptor_set(0),*tex,0u,0u);
+	prosper::util::set_descriptor_set_binding_storage_image(*(*descSetImage)->get_descriptor_set(0),*tex,0u);
 	rtxTest.dsgImage = descSetImage;
 
 	std::vector<rtx::Planee> planes;
@@ -223,7 +215,7 @@ bool ShaderRayTracing::ComputeTest()
 		auto &wgui = WGUI::GetInstance();
 		auto *p = wgui.Create<WITexturedRect>();
 		p->SetTexture(*rtxTest.texture);
-		p->SetSize(512,512);
+		p->SetSize(1024,1024);
 	}
 
 	prosper::util::record_image_barrier(
@@ -233,8 +225,8 @@ bool ShaderRayTracing::ComputeTest()
 		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
 	);
 
-	auto swapChainWidth = 512;
-	auto swapChainHeight = 512;
+	auto swapChainWidth = 1024;
+	auto swapChainHeight = 1024;
 	auto result = RecordBindDescriptorSet(*rtxTest.dsgImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0),DESCRIPTOR_SET_IMAGE.setIndex) &&
 		RecordBindDescriptorSet(*rtxTest.dsgBuffers->GetAnvilDescriptorSetGroup().get_descriptor_set(0),DESCRIPTOR_SET_BUFFERS.setIndex) &&
 		RecordDispatch(swapChainWidth, swapChainHeight);

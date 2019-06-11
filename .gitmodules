@@ -190,3 +190,6 @@
 [submodule "third_party_libs/freetype"]
 	path = third_party_libs/freetype
 	url = https://github.com/aseprite/freetype2.git
+[submodule "external_libs/util_video_recorder"]
+	path = external_libs/util_video_recorder
+	url = https://github.com/Silverlan/util_video_recorder.git

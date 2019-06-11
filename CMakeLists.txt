@@ -185,6 +185,9 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_FORMATTED_TEXT_LIBRARY util_formatted_t
 set(DEPENDENCY_UTIL_DMX_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_dmx/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_DMX_LIBRARY util_dmx STATIC)
 
+set(DEPENDENCY_UTIL_VIDEO_RECORDER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_video_recorder/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_VIDEO_RECORDER_LIBRARY util_video_recorder STATIC)
+
 set(DEPENDENCY_UTIL_SMDMODEL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_smdmodel/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_SMDMODEL_LIBRARY util_smdmodel STATIC)
 
@@ -1085,6 +1088,7 @@ add_dependencies(niflib_static qhullstatic)
 add_dependencies(util_archive bsa)
 add_dependencies(pr_source util_archive util_dmx niflib_static)
 add_dependencies(pr_dmx util_dmx)
+add_dependencies(pr_video_recorder util_video_recorder)
 add_dependencies(pr_mdleditor util_archive ishared pr_source)
 add_dependencies(pr_openvr iclient)
 

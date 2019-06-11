@@ -13,6 +13,13 @@ namespace pragma
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_IMAGE;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_BUFFERS;
 
+#pragma pack(push,1)
+		struct PushConstants
+		{
+			uint32_t numTris;
+		};
+#pragma pack(pop)
+
 		ShaderRayTracing(prosper::Context &context,const std::string &identifier);
 		bool Compute(Anvil::DescriptorSet &descSetImage,Anvil::DescriptorSet &descSetBuffers,uint32_t workGroupsX,uint32_t workGroupsY);
 

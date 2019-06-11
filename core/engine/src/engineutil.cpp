@@ -12,8 +12,8 @@ std::string Engine::GetDate(const std::string &format)
 	return util::get_date_time(format);
 }
 
-const long long Engine::GetTickCount() {return CUInt64(m_ctTick.GetTime());}
-double Engine::GetTickTime() {return CDouble(m_ctTick());}
+uint64_t Engine::GetTickCount() const {return CUInt64(m_ctTick.GetTime());}
+double Engine::GetTickTime() const {return CDouble(m_ctTick());}
 UInt32 Engine::GetTickRate() const {return m_tickRate;}
 void Engine::SetTickRate(UInt32 tickRate)
 {

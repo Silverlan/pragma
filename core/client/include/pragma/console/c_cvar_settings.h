@@ -8,7 +8,8 @@ REGISTER_CONVAR_CL(cl_language,"en",ConVarFlags::Archive,"Game language.");
 
 REGISTER_CONVAR_CL(cl_render_lod_bias,"0",ConVarFlags::Archive,"Model LOD-bias. Higher values means higher LOD-Models will be used at lower distance (=Lower quality).");
 REGISTER_CONVAR_CL(cl_render_vsync_enabled,"1",ConVarFlags::Archive,"Turns vertical sync on or off.");
-REGISTER_CONVAR_CL(cl_render_resolution,"1280x1024",ConVarFlags::Archive,"Changes the window resolution.");
+REGISTER_CONVAR_CL(cl_window_resolution,"1280x1024",ConVarFlags::Archive,"Changes the window resolution.");
+REGISTER_CONVAR_CL(cl_render_resolution,"",ConVarFlags::Archive,"Changes the internal rendering resolution. If left empty, the resolution will be the same as the window resolution!");
 REGISTER_CONVAR_CL(cl_render_monitor,"0",ConVarFlags::Archive,"Which monitor to use in fullscreen mode.");
 REGISTER_CONVAR_CL(cl_gpu_device,"",ConVarFlags::Archive,"The unique identifier for the GPU vendor and device to use. If empty (or invalid), the first detected device will be used. Usage: <vendorId,deviceId>");
 REGISTER_CONVAR_CL(cl_render_window_mode,"0",ConVarFlags::Archive,"0 = Fullscreen, 1 = Windowed, 2 = Windowed no-border.");

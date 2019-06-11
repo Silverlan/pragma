@@ -51,6 +51,7 @@ extern "C"
 	}
 }
 
+#pragma optimize("",off)
 DLLCENGINE CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -159,11 +160,12 @@ void CEngine::InitializeStagingTarget()
 {
 	c_engine->WaitIdle();
 	auto &dev = GetDevice();
+	auto resolution = GetRenderResolution();
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT;
 	createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	createInfo.width = GetWindowWidth();
-	createInfo.height = GetWindowHeight();
+	createInfo.width = resolution.x;
+	createInfo.height = resolution.y;
 	createInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 	auto stagingImg = prosper::util::create_image(dev,createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
@@ -179,6 +181,25 @@ void CEngine::InitializeStagingTarget()
 	m_stagingRenderTarget = prosper::util::create_render_target(dev,{stagingTex},rp);//,finalDepthTex},rp);
 	m_stagingRenderTarget->SetDebugName("engine_staging_rt");
 	// Vulkan TODO: Resize when window resolution was changed
+}
+
+const std::shared_ptr<prosper::RenderTarget> &CEngine::GetStagingRenderTarget() const {return m_stagingRenderTarget;}
+
+void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
+{
+	if(m_renderResolution == resolution)
+		return;
+	m_renderResolution = resolution;
+
+	resolution = GetRenderResolution();
+	OnRenderResolutionChanged(resolution->x,resolution->y);
+}
+Vector2i CEngine::GetRenderResolution() const
+{
+	if(m_renderResolution.has_value())
+		return *m_renderResolution;
+	auto &windowCreateInfo = GetWindowCreationInfo();
+	return Vector2i{windowCreateInfo.width,windowCreateInfo.height};
 }
 
 UInt32 CEngine::GetFPS() const {return m_fps;}
@@ -438,7 +459,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	Engine::Initialize(argc,argv,false);
 
 	auto &cmds = *m_preloadedConfig.get();
-	auto res = cmds.find("cl_render_resolution");
+	auto res = cmds.find("cl_window_resolution");
 	pragma::RenderContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
@@ -453,6 +474,22 @@ bool CEngine::Initialize(int argc,char *argv[])
 		}
 	}
 	SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
+
+	res = cmds.find("cl_render_resolution");
+	if(res != nullptr && !res->argv.empty())
+	{
+		std::vector<std::string> vals;
+		ustring::explode(res->argv[0],"x",vals);
+		if(vals.size() >= 2)
+		{
+			m_renderResolution = {
+				util::to_int(vals[0]),
+				util::to_int(vals[1])
+			};
+		}
+	}
+	//
+
 	res = cmds.find("cl_render_window_mode");
 	int mode = 0;
 	if(res != nullptr && !res->argv.empty())
@@ -525,7 +562,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	//
 
 	auto &gui = WGUI::Open(*this,matManager);
-	auto r = gui.Initialize();
+	auto r = gui.Initialize(GetRenderResolution());
 	if(r != WGUI::ResultCode::Ok)
 	{
 		Con::cerr<<"ERROR: Unable to initialize GUI library: ";
@@ -1063,11 +1100,22 @@ void CEngine::Think()
 	GLFW::poll_joystick_events();
 
 	auto tNow = std::chrono::high_resolution_clock::now();
-	auto tDelta = tNow -m_tLastFrame;
+
+	std::chrono::nanoseconds tDelta;
+	if(m_fixedFrameDeltaTimeInterpretation.has_value() == false)
+		tDelta = tNow -m_tLastFrame;
+	else
+	{
+		tDelta = *m_fixedFrameDeltaTimeInterpretation;
+		static auto fixedFrameCount = 0ull;
+		++fixedFrameCount;
+		std::cout<<"";
+	}
 	auto maxFps = GetFPSLimit();
 	if(maxFps > 0 && std::chrono::duration_cast<std::chrono::nanoseconds>(tDelta).count() /1'000'000.0 < 1'000.0 /maxFps)
 		return;
 	m_tDeltaFrameTime = tDelta;
+
 	m_tLastFrame = tNow;
 	const auto sToNs = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)).count());
 	UpdateFPS(static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(m_tDeltaFrameTime).count() /sToNs));
@@ -1094,6 +1142,29 @@ void CEngine::Think()
 	//auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>(tEnd -tStart);
 	//UpdateFPS(static_cast<float>(dur.count() /1'000'000'000.0));
 	EndFrame();
+}
+
+void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime)
+{
+	m_fixedFrameDeltaTimeInterpretation = frameDeltaTime;
+}
+void CEngine::SetFixedFrameDeltaTimeInterpretationByFPS(uint16_t fps)
+{
+	SetFixedFrameDeltaTimeInterpretation(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds{1}) /fps);
+}
+void CEngine::SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate)
+{
+	umath::set_flag(m_stateFlags,StateFlags::TickDeltaTimeTiedToFrameRate,tieToFrameRate);
+}
+
+void CEngine::UpdateTickCount()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::TickDeltaTimeTiedToFrameRate) == false)
+	{
+		Engine::UpdateTickCount();
+		return;
+	}
+	m_ctTick.UpdateByDelta(m_tDeltaFrameTime.count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds{1}).count()));
 }
 
 void CEngine::Tick()
@@ -1123,6 +1194,10 @@ void CEngine::UseFullbrightShader(bool b) {umath::set_flag(m_stateFlags,StateFla
 void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 {
 	prosper::Context::OnResolutionChanged(width,height);
+}
+
+void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
+{
 	InitializeStagingTarget();
 
 	auto &wgui = WGUI::GetInstance();
@@ -1150,7 +1225,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode,[](NetworkState*,ConVar*,int32
 	c_engine->SetNoBorder(val == 2);
 })
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
+REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
 	std::vector<std::string> vals;
 	ustring::explode(val,"x",vals);
 	if(vals.size() < 2)
@@ -1173,8 +1248,23 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution,[](NetworkState*,ConVar*,std::s
 	menu->SetSize(x,y);
 })
 
+REGISTER_CONVAR_CALLBACK_CL(cl_render_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
+	std::vector<std::string> vals;
+	ustring::explode(val,"x",vals);
+	if(vals.size() < 2)
+	{
+		c_engine->SetRenderResolution({});
+		return;
+	}
+	auto x = util::to_int(vals[0]);
+	auto y = util::to_int(vals[1]);
+	Vector2i resolution(x,y);
+	c_engine->SetRenderResolution(resolution);
+})
+
 REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar*,bool,bool enabled) {
 	if(c_engine == nullptr)
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

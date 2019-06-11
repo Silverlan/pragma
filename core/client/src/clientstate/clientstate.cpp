@@ -196,10 +196,7 @@ void ClientState::InitializeGUILua()
 	});
 
 	Lua::RegisterLibrary(GetGUILuaState(),"engine",{
-		{"create_font",&Lua::engine::create_font},
-		{"get_font",&Lua::engine::get_font},
-		{"set_record_console_output",&Lua::engine::set_record_console_output},
-		{"poll_console_output",&Lua::engine::poll_console_output}
+		LUA_SHARED_CL_ENGINE_FUNCTIONS
 	});
 
 	WGUILuaInterface::Initialize();

@@ -653,7 +653,7 @@ static void InitializeJoint(physx::PxJoint *joint)
 
 NetworkState *Game::GetNetworkState() {return m_stateNetwork;}
 
-void Game::Think()
+void Game::UpdateTime()
 {
 	float timeScale = GetTimeScale();
 	m_ctCur.Update(timeScale);
@@ -662,6 +662,10 @@ void Game::Think()
 	m_tReal = CDouble(m_ctReal());
 	m_tDelta = CDouble(m_tCur -m_tLast);
 	m_tDeltaReal = CDouble(m_tReal -m_tLastReal);
+}
+void Game::Think()
+{
+	UpdateTime();
 
 	m_scriptWatcher->Poll(); // TODO: Don't do this every frame?
 }

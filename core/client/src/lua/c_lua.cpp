@@ -63,17 +63,14 @@ void CGame::RegisterLua()
 	GetLuaInterface().SetIdentifier("cl");
 
 	auto &modEngine = GetLuaInterface().RegisterLibrary("engine",{
+		LUA_SHARED_CL_ENGINE_FUNCTIONS
 		{"bind_key",Lua::engine::bind_key},
 		{"unbind_key",Lua::engine::unbind_key},
 		{"load_library",&Lua::engine::LoadLibrary},
-		{"create_font",&Lua::engine::create_font},
-		{"get_font",&Lua::engine::get_font},
 		{"get_text_size",&Lua::engine::get_text_size},
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
-		{"get_tick_count",&Lua::engine::GetTickCount},
-		{"set_record_console_output",&Lua::engine::set_record_console_output},
-		{"poll_console_output",&Lua::engine::poll_console_output}
+		{"get_tick_count",&Lua::engine::GetTickCount}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"game",{

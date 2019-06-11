@@ -600,7 +600,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			res += std::to_string(videoMode.height);
 			pMenu->AddOption(res,res);
 		}
-	},"cl_render_resolution");
+	},"cl_window_resolution");
 	m_hResolutionList = resMenu->GetHandle();
 	resMenu->SizeToContents();
 	//

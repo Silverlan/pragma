@@ -526,7 +526,8 @@ void Engine::Start()
 		loops = 0;
 		auto tickRate = GetTickRate();
 		auto skipTicks = static_cast<long long>(1'000 /tickRate);
-		const long long &t = GetTickCount();
+
+		auto t = GetTickCount();
 		while(t > nextTick && loops < MAX_FRAMESKIP)
 		{
 			Tick();
@@ -540,6 +541,11 @@ void Engine::Start()
 	}
 	while(IsRunning());
 	Close();
+}
+
+void Engine::UpdateTickCount()
+{
+	m_ctTick.Update();
 }
 
 void Engine::DumpDebugInformation(ZIPFile &zip) const
@@ -571,14 +577,14 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 	zip.AddFile("engine.txt",engineInfo.str());
 }
 
-const long long &Engine::GetLastTick() {return m_lastTick;}
+const long long &Engine::GetLastTick() const {return m_lastTick;}
 
-long long Engine::GetDeltaTick() {return GetTickCount() -m_lastTick;}
+long long Engine::GetDeltaTick() const {return GetTickCount() -m_lastTick;}
 
 void Engine::Think()
 {
 	AddonSystem::Poll(); // Required for dynamic mounting of addons
-	m_ctTick.Update();
+	UpdateTickCount();
 	CallCallbacks<void>("Think");
 	auto *sv = GetServerState();
 	if(sv != NULL)

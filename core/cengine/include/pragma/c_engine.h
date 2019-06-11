@@ -63,7 +63,8 @@ public:
 		FirstFrame = WindowFocused<<1u,
 		UniformBlocksInitialized = FirstFrame<<1u,
 		VulkanValidationEnabled = UniformBlocksInitialized<<1u,
-		ConsoleOpen = VulkanValidationEnabled<<1u
+		ConsoleOpen = VulkanValidationEnabled<<1u,
+		TickDeltaTimeTiedToFrameRate = ConsoleOpen<<1u
 	};
 
 	using pragma::RenderContext::DrawFrame;
@@ -101,6 +102,10 @@ public:
 	bool GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyState &inOutState) const;
 
 	void SetVulkanValidationLayersEnabled(bool b);
+	const std::shared_ptr<prosper::RenderTarget> &GetStagingRenderTarget() const;
+
+	void SetRenderResolution(std::optional<Vector2i> resolution);
+	Vector2i GetRenderResolution() const;
 
 	// Debug
 	pragma::debug::GPUProfiler &GetGPUProfiler() const;
@@ -172,10 +177,22 @@ public:
 	Double GetDeltaFrameTime() const;
 	UInt32 GetFPS() const;
 	UInt32 GetFrameTime() const;
+
+	// If specified, 'frameDeltaTime' will be used as the delta time between
+	// frames, regardless of the actual delta time. This can be used to make the game think
+	// it's running at a different framerate than it actually is.
+	void SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime);
+	void SetFixedFrameDeltaTimeInterpretationByFPS(uint16_t fps);
+	// If set to true, the tick-rate will become dependent on the frame-rate. A lower frame-rate
+	// will cause the game to slow down, a faster frame-rate to speed up. This should only be
+	// used for offline rendering (i.e. recording).
+	void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 protected:
 	void DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
+	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
+	virtual void UpdateTickCount() override;
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
@@ -192,6 +209,7 @@ private:
 	Float m_tFPSTime;
 	std::chrono::high_resolution_clock::time_point m_tLastFrame;
 	std::chrono::high_resolution_clock::duration m_tDeltaFrameTime;
+	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;
 
@@ -204,6 +222,7 @@ private:
 	float m_nearZ,m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
 	std::shared_ptr<prosper::RenderTarget> m_stagingRenderTarget = nullptr;
+	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;
 	std::vector<CallbackHandle> m_gpuProfileHandlers = {};

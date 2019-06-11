@@ -397,6 +397,7 @@ protected:
 	template<class T>
 		void GetVehicles(std::vector<T*> *ents);
 
+	virtual void UpdateTime() override;
 	virtual void OnEntityCreated(BaseEntity *ent) override;
 	virtual unsigned int GetFreeEntityIndex() override;
 	virtual void SetupEntity(BaseEntity *ent,unsigned int idx) override;

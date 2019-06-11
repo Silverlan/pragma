@@ -35,7 +35,7 @@ extern DLLENGINE Engine *engine;
 NetworkState::NetworkState()
 	: CallbackHandler(),CVarHandler()
 {
-	m_ctReal.Reset(engine->GetTickCount());
+	m_ctReal.Reset(static_cast<int64_t>(engine->GetTickCount()));
 	m_tReal = CDouble(m_ctReal());
 	m_tLast = m_tReal;
 	m_tDelta = 0;

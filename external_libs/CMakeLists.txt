@@ -42,6 +42,7 @@ register_external_lib(util_dmx external_libs/util)
 register_external_lib(util_smdmodel external_libs/util)
 register_external_lib(util_pcl external_libs/util)
 register_external_lib(util_formatted_text external_libs/util)
+register_external_lib(util_video_recorder external_libs/util)
 register_external_lib(vfilesystem)
 register_external_lib(wgui)
 

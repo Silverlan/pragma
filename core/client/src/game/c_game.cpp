@@ -90,6 +90,7 @@ extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT PhysEnv *c_physEnv = NULL;
 
+#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -359,6 +360,19 @@ CGame::~CGame()
 	ClearSoundCache();
 }
 
+void CGame::UpdateTime()
+{
+	// TODO: This also has to be applied serverside?
+	auto dt = c_engine->GetDeltaFrameTime();
+	float timeScale = GetTimeScale();
+	m_ctCur.UpdateByDelta(dt *timeScale);
+	m_ctReal.UpdateByDelta(dt);
+	m_tCur = CDouble(m_ctCur());
+	m_tReal = CDouble(m_ctReal());
+	m_tDelta = CDouble(m_tCur -m_tLast);
+	m_tDeltaReal = CDouble(m_tReal -m_tLastReal);
+}
+
 bool CGame::StartProfilingStage(GPUProfilingPhase stage)
 {
 	return m_gpuProfilingStageManager && m_gpuProfilingStageManager->StartProfilerStage(stage);
@@ -575,7 +589,8 @@ void CGame::Initialize()
 
 	InitializeWorldEnvironment();
 
-	m_scene = Scene::Create(Scene::CreateInfo{c_engine->GetWindowWidth(),c_engine->GetWindowHeight(),GetConVarFloat("cl_render_fov"),GetConVarFloat("cl_fov_viewmodel")/*,c_engine->GetAspectRatio()*/,c_engine->GetNearZ(),c_engine->GetFarZ()});
+	auto resolution = c_engine->GetRenderResolution();
+	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y),GetConVarFloat("cl_render_fov"),GetConVarFloat("cl_fov_viewmodel")/*,c_engine->GetAspectRatio()*/,c_engine->GetNearZ(),c_engine->GetFarZ()});
 	m_scene->SetWorldEnvironment(GetWorldEnvironment());
 	m_scene->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
 
@@ -1747,3 +1762,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

@@ -200,6 +200,7 @@ copy_output_file(modules/pr_dmx/${BINARY_PRAGMA_DIR} "modules" pr_dmx)
 copy_output_file(modules/pr_dds/${BINARY_PRAGMA_DIR} "modules" pr_dds)
 copy_output_file(modules/pr_steamworks/${BINARY_PRAGMA_DIR} "modules/steamworks" pr_steamworks)
 copy_output_file(modules/pr_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" pr_pcl)
+copy_output_file(modules/pr_video_recorder/${BINARY_PRAGMA_DIR} "modules/video_recorder" pr_video_recorder)
 
 copy_output_file_ext("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" ${BINARY_OUTPUT_DIR})
 copy_output_file_ext("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" ${BINARY_OUTPUT_DIR})

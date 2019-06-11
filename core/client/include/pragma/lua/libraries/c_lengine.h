@@ -23,7 +23,25 @@ namespace Lua
 		DLLCLIENT int save_frame_buffer_as_tga(lua_State *l);
 		DLLCLIENT int save_texture_as_tga(lua_State *l);
 		DLLCLIENT int create_texture(lua_State *l);
+		DLLCLIENT int get_staging_render_target(lua_State *l);
+		DLLCLIENT int set_fixed_frame_delta_time_interpretation(lua_State *l);
+		DLLCLIENT int clear_fixed_frame_delta_time_interpretation(lua_State *l);
+		DLLCLIENT int set_tick_delta_time_tied_to_frame_rate(lua_State *l);
+		DLLCLIENT int get_window_resolution(lua_State *l);
+		DLLCLIENT int get_render_resolution(lua_State *l);
 	};
 };
+
+#define LUA_SHARED_CL_ENGINE_FUNCTIONS \
+	{"create_font",&Lua::engine::create_font}, \
+	{"get_font",&Lua::engine::get_font}, \
+	{"set_record_console_output",&Lua::engine::set_record_console_output}, \
+	{"poll_console_output",&Lua::engine::poll_console_output}, \
+	{"get_staging_render_target",&Lua::engine::get_staging_render_target}, \
+	{"set_fixed_frame_delta_time_interpretation",&Lua::engine::set_fixed_frame_delta_time_interpretation}, \
+	{"clear_fixed_frame_delta_time_interpretation",&Lua::engine::clear_fixed_frame_delta_time_interpretation}, \
+	{"set_tick_delta_time_tied_to_frame_rate",&Lua::engine::set_tick_delta_time_tied_to_frame_rate}, \
+	{"get_window_resolution",&Lua::engine::get_window_resolution}, \
+	{"get_render_resolution",&Lua::engine::get_render_resolution},
 
 #endif

@@ -20,6 +20,8 @@ extern DLLCLIENT ClientState *client;
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()
 {
+	if(true)
+		return nullptr;
 	if(s_hConsole.IsValid())
 	{
 		auto *pConsole = static_cast<WIConsole*>(s_hConsole.get());

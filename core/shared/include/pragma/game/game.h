@@ -450,6 +450,8 @@ public:
 	bool StartProfilingStage(CPUProfilingPhase stage);
 	bool StopProfilingStage(CPUProfilingPhase stage);
 protected:
+	virtual void UpdateTime();
+
 	GameFlags m_flags = GameFlags::InitialTick;
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;

@@ -76,62 +76,6 @@ public:
 
 		Count
 	};
-protected:
-	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
-	void WriteServerConfig(VFilePtrReal f);
-	void WriteEngineConfig(VFilePtrReal f);
-	void RegisterSharedConsoleCommands(ConVarMap &map);
-	virtual void RegisterConsoleCommands();
-	struct DLLENGINE LaunchCommand
-	{
-		LaunchCommand(const std::string &cmd,const std::vector<std::string> &args);
-		std::string command;
-		std::vector<std::string> args;
-	};
-	std::vector<LaunchCommand> m_launchCommands;
-	void RunLaunchCommands();
-	virtual void InitializeExternalArchiveManager();
-
-	// Console
-	std::queue<std::string> m_consoleInput;
-	DebugConsole *m_console;
-	std::thread *m_consoleThread;
-
-	std::queue<ConsoleOutput> m_consoleOutput = {};
-	void ProcessConsoleInput(KeyState pressState=KeyState::Press);
-
-	unsigned int m_tickRate;
-	ChronoTime m_ctTick;
-	long long m_lastTick;
-	std::shared_ptr<VFilePtrInternalReal> m_logFile;
-
-	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
-	std::vector<CallbackHandle> m_profileHandlers = {};
-	
-	bool m_bVerbose = false;
-	mutable upad::PackageManager *m_padPackageManager = nullptr;
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
-
-	// Init
-	bool m_bRunning;
-	bool m_bInitialized;
-
-	std::unordered_map<std::string,std::function<void(int,char*[])>> m_launchOptions;
-
-	void InitLaunchOptions(int argc,char *argv[]);
-	virtual void Think();
-	virtual void Tick();
-
-#ifdef PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxPhysics *m_physics;
-	physx::PxFoundation *m_pxFoundation;
-	physx::PxCooking *m_pxCooking;
-
-#ifdef _DEBUG
-	physx::debugger::comm::PvdConnection *m_pxPvdConnection;
-#endif
-#endif
 public:
 	DEBUGCONSOLE;
 	bool Initialize(int argc,char *argv[],bool bRunLaunchCommands);
@@ -185,10 +129,10 @@ public:
 	// Util
 	bool IsRunning();
 	std::string GetDate(const std::string &format="%Y-%m-%d %X");
-	const long long GetTickCount();
-	double GetTickTime();
-	const long long &GetLastTick();
-	long long GetDeltaTick();
+	uint64_t GetTickCount() const;
+	double GetTickTime() const;
+	const long long &GetLastTick() const;
+	long long GetDeltaTick() const;
 	UInt32 GetTickRate() const;
 	void SetTickRate(UInt32 tickRate);
 	bool IsGameActive();
@@ -238,6 +182,64 @@ public:
 	int32_t GetRemoteDebugging() const;
 
 	void ShutDown();
+protected:
+	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
+	void WriteServerConfig(VFilePtrReal f);
+	void WriteEngineConfig(VFilePtrReal f);
+	void RegisterSharedConsoleCommands(ConVarMap &map);
+	virtual void RegisterConsoleCommands();
+	virtual void UpdateTickCount();
+	struct DLLENGINE LaunchCommand
+	{
+		LaunchCommand(const std::string &cmd,const std::vector<std::string> &args);
+		std::string command;
+		std::vector<std::string> args;
+	};
+	std::vector<LaunchCommand> m_launchCommands;
+	void RunLaunchCommands();
+	virtual void InitializeExternalArchiveManager();
+
+	// Console
+	std::queue<std::string> m_consoleInput;
+	DebugConsole *m_console;
+	std::thread *m_consoleThread;
+
+	std::queue<ConsoleOutput> m_consoleOutput = {};
+	void ProcessConsoleInput(KeyState pressState=KeyState::Press);
+
+	unsigned int m_tickRate;
+	ChronoTime m_ctTick;
+	long long m_lastTick;
+	uint64_t m_tickCount = 0;
+	std::shared_ptr<VFilePtrInternalReal> m_logFile;
+
+	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
+	std::vector<CallbackHandle> m_profileHandlers = {};
+	
+	bool m_bVerbose = false;
+	mutable upad::PackageManager *m_padPackageManager = nullptr;
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
+
+	// Init
+	bool m_bRunning;
+	bool m_bInitialized;
+
+	std::unordered_map<std::string,std::function<void(int,char*[])>> m_launchOptions;
+
+	void InitLaunchOptions(int argc,char *argv[]);
+	virtual void Think();
+	virtual void Tick();
+
+#ifdef PHYS_ENGINE_PHYSX
+	// PhysX
+	physx::PxPhysics *m_physics;
+	physx::PxFoundation *m_pxFoundation;
+	physx::PxCooking *m_pxCooking;
+
+#ifdef _DEBUG
+	physx::debugger::comm::PvdConnection *m_pxPvdConnection;
+#endif
+#endif
 };
 
 template<class T>

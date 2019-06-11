@@ -28,6 +28,14 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_BUFFERS) ShaderRayTracing::DESCRIPTOR_
 		prosper::Shader::DescriptorSetInfo::Binding { // Uniform App
 			Anvil::DescriptorType::UNIFORM_BUFFER,
 			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Vertex Buffer
+			Anvil::DescriptorType::STORAGE_BUFFER,
+			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Index Buffer
+			Anvil::DescriptorType::STORAGE_BUFFER,
+			Anvil::ShaderStageFlagBits::COMPUTE_BIT
 		}
 	}
 };
@@ -41,6 +49,8 @@ void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
+
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::COMPUTE_BIT);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IMAGE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_BUFFERS);
@@ -108,6 +118,8 @@ struct RTXTest
 
 	std::shared_ptr<prosper::DescriptorSetGroup> dsgImage;
 	std::shared_ptr<prosper::DescriptorSetGroup> dsgBuffers;
+
+	uint32_t numTris;
 };
 
 static void InitGameObjects(std::vector<rtx::Planee> &planes, std::vector<rtx::Sphere> &spheres)
@@ -146,14 +158,107 @@ static void InitGameObjects(std::vector<rtx::Planee> &planes, std::vector<rtx::S
 	AddPlanee(front, Vector3(0.8, 0.8, 0.8), 1);
 }
 
+#include "pragma/model/c_model.h"
+#include "pragma/model/c_modelmesh.h"
+#include "pragma/model/vk_mesh.h"
+
+static std::pair<std::shared_ptr<prosper::Buffer>,std::shared_ptr<prosper::Buffer>> create_box_mesh(const Vector3 &cmin,const Vector3 &cmax,uint32_t &outNumTris)
+{
+	auto min = cmin;
+	auto max = cmax;
+	uvec::to_min_max(min,max);
+	//auto mesh = std::make_shared<CModelSubMesh>();
+	std::vector<Vector3> uniqueVertices {
+		min, // 0
+		Vector3(max.x,min.y,min.z), // 1
+		Vector3(max.x,min.y,max.z), // 2
+		Vector3(max.x,max.y,min.z), // 3
+		max, // 4
+		Vector3(min.x,max.y,min.z), // 5
+		Vector3(min.x,min.y,max.z), // 6
+		Vector3(min.x,max.y,max.z) // 7
+	};
+	std::vector<Vector3> verts {
+		uniqueVertices[0],uniqueVertices[6],uniqueVertices[7], // 1
+		uniqueVertices[0],uniqueVertices[7],uniqueVertices[5], // 1
+		uniqueVertices[3],uniqueVertices[0],uniqueVertices[5], // 2
+		uniqueVertices[3],uniqueVertices[1],uniqueVertices[0], // 2
+		uniqueVertices[2],uniqueVertices[0],uniqueVertices[1], // 3
+		uniqueVertices[2],uniqueVertices[6],uniqueVertices[0], // 3
+		uniqueVertices[7],uniqueVertices[6],uniqueVertices[2], // 4
+		uniqueVertices[4],uniqueVertices[7],uniqueVertices[2], // 4
+		uniqueVertices[4],uniqueVertices[1],uniqueVertices[3], // 5
+		uniqueVertices[1],uniqueVertices[4],uniqueVertices[2], // 5
+		uniqueVertices[4],uniqueVertices[3],uniqueVertices[5], // 6
+		uniqueVertices[4],uniqueVertices[5],uniqueVertices[7], // 6
+	};
+	std::vector<Vector3> faceNormals {
+		Vector3(-1,0,0),Vector3(-1,0,0),
+		Vector3(0,0,-1),Vector3(0,0,-1),
+		Vector3(0,-1,0),Vector3(0,-1,0),
+		Vector3(0,0,1),Vector3(0,0,1),
+		Vector3(1,0,0),Vector3(1,0,0),
+		Vector3(0,1,0),Vector3(0,1,0)
+	};
+	std::vector<::Vector2> uvs {
+		::Vector2(0,1),::Vector2(1,1),::Vector2(1,0), // 1
+		::Vector2(0,1),::Vector2(1,0),::Vector2(0,0), // 1
+		::Vector2(0,0),::Vector2(1,1),::Vector2(1,0), // 2
+		::Vector2(0,0),::Vector2(0,1),::Vector2(1,1), // 2
+		::Vector2(0,1),::Vector2(1,0),::Vector2(0,0), // 3
+		::Vector2(0,1),::Vector2(1,1),::Vector2(1,0), // 3
+		::Vector2(0,0),::Vector2(0,1),::Vector2(1,1), // 4
+		::Vector2(1,0),::Vector2(0,0),::Vector2(1,1), // 4
+		::Vector2(0,0),::Vector2(1,1),::Vector2(1,0), // 5
+		::Vector2(1,1),::Vector2(0,0),::Vector2(0,1), // 5
+		::Vector2(1,1),::Vector2(1,0),::Vector2(0,0), // 6
+		::Vector2(1,1),::Vector2(0,0),::Vector2(0,1) // 6
+	};
+	for(auto &uv : uvs)
+		uv.y = 1.f -uv.y;
+
+	std::vector<Vector4> meshVerts {};
+	std::vector<uint16_t> meshTris {};
+	for(auto i=decltype(verts.size()){0};i<verts.size();i+=3)
+	{
+		auto &n = faceNormals[i /3];
+		//mesh->AddVertex(::Vertex{verts[i],uvs[i],n});
+		//mesh->AddVertex(::Vertex{verts[i +1],uvs[i +1],n});
+		//mesh->AddVertex(::Vertex{verts[i +2],uvs[i +2],n});
+		meshVerts.push_back({verts[i].x,verts[i].y,verts[i].z,0.f});
+		meshVerts.push_back({verts[i +1].x,verts[i +1].y,verts[i +1].z,0.f});
+		meshVerts.push_back({verts[i +2].x,verts[i +2].y,verts[i +2].z,0.f});
+
+		//mesh->AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
+		meshTris.push_back(i);
+		meshTris.push_back(i +1);
+		meshTris.push_back(i +2);
+	}
+	//mesh->SetTexture(0);
+	//mesh->Update();
+
+	prosper::util::BufferCreateInfo createInfo {};
+	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
+	createInfo.size = meshVerts.size() *sizeof(meshVerts.front());
+	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	auto vertexBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,meshVerts.data());
+
+	createInfo.size = meshTris.size() *sizeof(meshTris.front());
+	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	auto indexBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,meshTris.data());
+
+	outNumTris = meshTris.size() /3;
+	return {vertexBuffer,indexBuffer};
+}
+
 RTXTest rtxTest {};
 void ShaderRayTracing::Test()
 {
 	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.height = 1024;
-	imgCreateInfo.width = 1024;
+	imgCreateInfo.height = 256;
+	imgCreateInfo.width = 256;
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
 	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::STORAGE_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
@@ -201,6 +306,18 @@ void ShaderRayTracing::Test()
 	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*planeBuffer,1);
 	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*descSetBuffers)->get_descriptor_set(0),*uniformBuffer,2);
 	rtxTest.dsgBuffers = descSetBuffers;
+
+	// Model test
+	auto mdl = c_engine->GetClientState()->GetGameState()->LoadModel("player/soldier.wmd");
+	//auto &subMesh = mdl->GetMeshGroup(0)->GetMeshes().at(0)->GetSubMeshes().at(0);
+	static auto buffers = create_box_mesh({-1.f,-1.f,-1.f},{1.f,1.f,1.f},rtxTest.numTris);
+	//subMesh->Update(ModelUpdateFlags::UpdateBuffers);
+	//auto &vkMesh = static_cast<CModelSubMesh*>(subMesh.get())->GetVKMesh();
+	auto &vertBuffer = buffers.first;//vkMesh->GetVertexBuffer();
+	auto &indexBuffer = buffers.second;//vkMesh->GetIndexBuffer();
+
+	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*vertBuffer,3);
+	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*indexBuffer,4);
 }
 
 #include <wgui/wgui.h>
@@ -225,10 +342,13 @@ bool ShaderRayTracing::ComputeTest()
 		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
 	);
 
-	auto swapChainWidth = 1024;
-	auto swapChainHeight = 1024;
+	PushConstants pushConstants {rtxTest.numTris};
+
+	auto swapChainWidth = 256;
+	auto swapChainHeight = 256;
 	auto result = RecordBindDescriptorSet(*rtxTest.dsgImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0),DESCRIPTOR_SET_IMAGE.setIndex) &&
 		RecordBindDescriptorSet(*rtxTest.dsgBuffers->GetAnvilDescriptorSetGroup().get_descriptor_set(0),DESCRIPTOR_SET_BUFFERS.setIndex) &&
+		RecordPushConstants(pushConstants) &&
 		RecordDispatch(swapChainWidth, swapChainHeight);
 
 	prosper::util::record_image_barrier(

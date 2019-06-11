@@ -16,6 +16,7 @@
 #include "pragma/entities/components/c_lentity_components.hpp"
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
+#include <image/prosper_render_target.hpp>
 
 #define WPT_VERSION 0x0001
 
@@ -667,5 +668,39 @@ int Lua::engine::create_texture(lua_State *l)
 	if(tex == nullptr)
 		return 0;
 	Lua::Push<Texture*>(l,tex);*/ // Vulkan TODO
+	return 1;
+}
+int Lua::engine::get_staging_render_target(lua_State *l)
+{
+	auto &stagingRt = c_engine->GetStagingRenderTarget();
+	Lua::Push<std::shared_ptr<prosper::RenderTarget>>(l,stagingRt);
+	return 1;
+}
+int Lua::engine::set_fixed_frame_delta_time_interpretation(lua_State *l)
+{
+	auto fps = Lua::CheckInt(l,1);
+	c_engine->SetFixedFrameDeltaTimeInterpretationByFPS(fps);
+	return 0;
+}
+int Lua::engine::clear_fixed_frame_delta_time_interpretation(lua_State *l)
+{
+	c_engine->SetFixedFrameDeltaTimeInterpretation({});
+	return 0;
+}
+int Lua::engine::set_tick_delta_time_tied_to_frame_rate(lua_State *l)
+{
+	auto tieToFrameRate = Lua::CheckBool(l,1);
+	c_engine->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate);
+	return 0;
+}
+int Lua::engine::get_window_resolution(lua_State *l)
+{
+	auto &createInfo = c_engine->GetWindowCreationInfo();
+	Lua::Push<Vector2i>(l,Vector2i{createInfo.width,createInfo.height});
+	return 1;
+}
+int Lua::engine::get_render_resolution(lua_State *l)
+{
+	Lua::Push<Vector2i>(l,c_engine->GetRenderResolution());
 	return 1;
 }

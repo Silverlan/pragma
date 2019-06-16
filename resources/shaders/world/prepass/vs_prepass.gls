@@ -15,7 +15,7 @@ layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
 
 void main()
 {
-	vec3 vertPos = in_vert_pos;
+	vec3 vertPos = in_vert_pos.xyz;
 	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
 	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
 	for(uint i=0;i<vertexAnimCount;++i)
@@ -44,6 +44,6 @@ void main()
 	else
 		gl_ClipDistance[0] = 1.0;
 
-	vec3 normal = normalize((mBone *vec4(in_vert_normal,0.0)).xyz);
+	vec3 normal = normalize((mBone *vec4(in_vert_normal.xyz,0.0)).xyz);
 	vs_out.vert_normal_cs = (u_camera.V *mdlMatrix *vec4(normal,0)).xyz;
 }

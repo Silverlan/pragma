@@ -24,6 +24,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 static std::string invert_x_axis(std::string str)
 {
 	if(str.empty())
@@ -972,6 +973,24 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		NoChop = 0x400,
 		Hitbox = 0x8000
 	};
+	const std::unordered_map<SurfFlags,std::string> surfFlagBitToName = {
+		{SurfFlags::Light,"Light"},
+		{SurfFlags::Sky2D,"Sky2D"},
+		{SurfFlags::Sky,"Sky"},
+		{SurfFlags::Warp,"Warp"},
+		{SurfFlags::Trans,"Trans"},
+		{SurfFlags::NoPortal,"NoPortal"},
+		{SurfFlags::Trigger,"Trigger"},
+		{SurfFlags::Nodraw,"Nodraw"},
+		{SurfFlags::Hint,"Hint"},
+		{SurfFlags::Skip,"Skip"},
+		{SurfFlags::NoLight,"NoLight"},
+		{SurfFlags::BumpLight,"BumpLight"},
+		{SurfFlags::NoShadows,"NoShadows"},
+		{SurfFlags::NoDecals,"NoDecals"},
+		{SurfFlags::NoChop,"NoChop"},
+		{SurfFlags::Hitbox,"Hitbox"}
+	};
 	auto itWorld = std::find_if(outEntities.begin(),outEntities.end(),[](const std::shared_ptr<EntityData> entData) {
 		return ustring::compare(entData->className,"world",false);
 	});
@@ -1009,7 +1028,16 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 				entSkybox->faceIndices.push_back(faceIndex);
 			}
 			else if(outEntity != nullptr)
-				outEntity->faceIndices.push_back(faceIndex);
+			{
+				// TODO: Is 'Warp' surface flag a reliable way of determining
+				// whether this is a water face?
+				auto skipFlags = umath::to_integral(SurfFlags::Warp) | 
+					umath::to_integral(SurfFlags::Skip) | 
+					umath::to_integral(SurfFlags::Hint) | 
+					umath::to_integral(SurfFlags::Nodraw);
+				if((faceTexInfo.flags &skipFlags) == 0)
+					outEntity->faceIndices.push_back(faceIndex);
+			}
 		}
 	}
 
@@ -1529,3 +1557,4 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	return false;
 #endif
 }
+#pragma optimize("",on)

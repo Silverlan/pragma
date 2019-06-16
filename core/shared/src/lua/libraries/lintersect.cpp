@@ -127,28 +127,36 @@ int Lua::intersect::line_mesh(lua_State *l)
 	auto *rayStart = Lua::CheckVector(l,arg++);
 	auto *rayDir = Lua::CheckVector(l,arg++);
 
-	uint8_t type = 0;
+	enum class Type : uint8_t
+	{
+		Mesh,
+		SubMesh,
+		Model
+	};
+	auto type = Type::Mesh;
 	void *tgt = nullptr;
 
 	std::vector<uint32_t> bodyGroups;
+	auto useBodyGroups = false;
 	uint32_t lod = 0;
 	if(Lua::IsType<ModelMesh>(l,arg) == true)
 	{
-		type = 0;
+		type = Type::Mesh;
 		tgt = &Lua::Check<ModelMesh>(l,arg++);
 	}
 	else if(Lua::IsType<ModelSubMesh>(l,arg) == true)
 	{
-		type = 1;
+		type = Type::SubMesh;
 		tgt = &Lua::Check<ModelSubMesh>(l,arg++);
 	}
 	else
 	{
-		type = 2;
+		type = Type::Model;
 		tgt = &Lua::Check<Model>(l,arg++);
 
 		if(Lua::IsTable(l,arg) == true)
 		{
+			useBodyGroups = true;
 			Lua::PushValue(l,arg); /* 1 */
 			Lua::PushNil(l); /* 2 */
 			bodyGroups.reserve(Lua::GetObjectLength(l,arg));
@@ -185,35 +193,65 @@ int Lua::intersect::line_mesh(lua_State *l)
 	if(Lua::IsSet(l,arg) == true)
 		bPrecise = Lua::CheckBool(l,arg++);
 
-	auto t = 0.f;
-	auto *pt = (bPrecise == true) ? &t : nullptr;
-	auto r = Intersection::Result::NoIntersection;
+	Intersection::LineMeshResult res {};
 	switch(type)
 	{
-		case 0:
+		case Type::Mesh:
 		{
-			r = Intersection::LineMesh(*rayStart,*rayDir,*static_cast<ModelMesh*>(tgt),&origin,&rot,pt);
+			Intersection::LineMesh(*rayStart,*rayDir,*static_cast<ModelMesh*>(tgt),res,bPrecise,&origin,&rot);
 			break;
 		}
-		case 1:
+		case Type::SubMesh:
 		{
-			r = Intersection::LineMesh(*rayStart,*rayDir,*static_cast<ModelSubMesh*>(tgt),&origin,&rot,pt);
+			Intersection::LineMesh(*rayStart,*rayDir,*static_cast<ModelSubMesh*>(tgt),res,bPrecise,&origin,&rot);
 			break;
 		}
 		default:
 		{
-			r = Intersection::LineMesh(*rayStart,*rayDir,*static_cast<Model*>(tgt),bodyGroups,lod,origin,rot,pt);
+			Intersection::LineMesh(*rayStart,*rayDir,*static_cast<Model*>(tgt),res,bPrecise,useBodyGroups ? &bodyGroups : nullptr,lod,origin,rot);
 			break;
 		}
 	}
 	if(bPrecise == true)
 	{
-		Lua::PushInt(l,umath::to_integral(r));
-		Lua::PushNumber(l,t);
+		Lua::PushInt(l,umath::to_integral(res.result));
+		auto t = Lua::CreateTable(l);
+		
+		if(type == Type::Model)
+		{
+			Lua::PushString(l,"meshGroupIdx");
+			Lua::PushInt(l,res.meshGroupIndex);
+			Lua::SetTableValue(l,t);
+
+			Lua::PushString(l,"meshIdx");
+			Lua::PushInt(l,res.meshIdx);
+			Lua::SetTableValue(l,t);
+		}
+		if(type == Type::Mesh || type == Type::Model)
+		{
+			Lua::PushString(l,"subMeshIdx");
+			Lua::PushInt(l,res.subMeshIdx);
+			Lua::SetTableValue(l,t);
+		}
+		Lua::PushString(l,"triIdx");
+		Lua::PushInt(l,res.triIdx);
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"hitPos");
+		Lua::Push<Vector3>(l,res.hitPos);
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"hitValue");
+		Lua::PushNumber(l,res.hitValue);
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"barycentricCoords");
+		Lua::Push<Vector3>(l,Vector3{static_cast<float>(res.t),static_cast<float>(res.u),static_cast<float>(res.v)});
+		Lua::SetTableValue(l,t);
 		return 2;
 	}
 	else
-		Lua::PushBool(l,r == Intersection::Result::Intersect);
+		Lua::PushBool(l,res.result == Intersection::Result::Intersect);
 	return 1;
 }
 

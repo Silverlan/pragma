@@ -392,7 +392,9 @@ public:
 	uint32_t GetTriangleCount() const;
 	// Textures
 	uint32_t AddTexture(const std::string &tex,Material *mat);
+	bool SetTexture(uint32_t texIdx,const std::string &tex,Material *mat);
 	uint32_t AddMaterial(uint32_t skin,Material *mat);
+	bool SetMaterial(uint32_t texIdx,Material *mat);
 	void RemoveTexture(uint32_t idx);
 	void ClearTextures();
 	void LoadMaterials(const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
@@ -402,7 +404,6 @@ public:
 	const std::vector<MaterialHandle> &GetMaterials() const;
 	Material *GetMaterial(uint32_t texID);
 	Material *GetMaterial(uint32_t texGroup,uint32_t texID);
-	void SetMaterial(uint32_t texId,Material *mat);
 	void PrecacheTexture(uint32_t texId,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false);
 	std::vector<TextureGroup> &GetTextureGroups();

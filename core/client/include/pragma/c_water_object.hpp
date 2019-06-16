@@ -43,12 +43,13 @@ public:
 	virtual const Vector3 &GetPosition() const=0;
 	virtual const Quat &GetOrientation() const=0;
 	virtual CMaterial *GetWaterMaterial() const=0;
-	void InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal);
+	void InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax);
 	void InitializeWaterScene(const WaterScene &scene);
 	bool IsWaterSceneValid() const;
 protected:
 	std::unique_ptr<WaterScene> m_waterScene = nullptr;
 	uint8_t m_reflectionRendered = 0;
+	std::pair<Vector3,Vector3> m_waterAabbBounds = {};
 };
 
 #endif

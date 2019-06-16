@@ -254,7 +254,9 @@ void CWaterComponent::SetupWater()
 		return;
 	auto *meshSurface = static_cast<CModelSubMesh*>(m_waterMesh.lock().get());
 	auto *mat = static_cast<CMaterial*>(mats.at(meshSurface->GetTexture()).get());
-	InitializeWaterScene(meshSurface->GetVertexPosition(0),meshSurface->GetVertexNormal(0));
+	Vector3 min,max;
+	mdl->GetCollisionBounds(min,max);
+	InitializeWaterScene(meshSurface->GetVertexPosition(0),meshSurface->GetVertexNormal(0),min,max);
 }
 
 void CWaterComponent::ReloadSurfaceSimulator()

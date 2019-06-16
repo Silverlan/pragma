@@ -11,6 +11,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
 
 #ifdef ENABLE_MMD_IMPORT
 #include <util_mmd.hpp>
@@ -18,6 +20,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 int Lua::import::import_wad(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
@@ -389,13 +392,86 @@ int Lua::import::import_smd(lua_State *l)
 int Lua::import::import_obj(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
+	return import_model_asset(l);
+}
 
-	std::vector<uint8_t> data(f.Size());
-	f.Read(data.data(),data.size() *sizeof(data.front()));
-	Assimp::Importer importer;
-	auto *aiScene = importer.ReadFileFromMemory(data.data(),data.size() *sizeof(data.front()),0u);
-	if(aiScene == nullptr)
+class AssimpPragmaIOStream
+	: public Assimp::IOStream
+{
+public:
+	AssimpPragmaIOStream(const VFilePtr &f)
+		: m_file{f}
+	{}
+    virtual size_t Read(void* pvBuffer,size_t pSize,size_t pCount) override {return m_file->Read(pvBuffer,pSize *pCount);}
+    virtual size_t Write(const void* pvBuffer,size_t pSize,size_t pCount) override
+	{
+		if(m_file->GetType() != VFILE_LOCAL)
+			return 0;
+		return std::static_pointer_cast<VFilePtrInternalReal>(m_file)->Write(pvBuffer,pSize *pCount);
+	}
+
+    virtual aiReturn Seek(size_t pOffset,aiOrigin pOrigin) override
+	{
+		m_file->Seek(pOffset,pOrigin);
+		return aiReturn::aiReturn_SUCCESS;
+	}
+
+    virtual size_t Tell() const override {return m_file->Tell();}
+    virtual size_t FileSize() const override {return m_file->GetSize();}
+    virtual void Flush() override {}
+private:
+	VFilePtr m_file = nullptr;
+};
+
+class AssimpPragmaIo
+    : public Assimp::IOSystem
+{
+public:
+    AssimpPragmaIo(VFilePtr f)
+		: m_rootFile{f}
+	{};
+    virtual ~AssimpPragmaIo() override=default;
+    virtual bool Exists(const char* pFile) const override {return ustring::compare(pFile,"__rootAssetFile",15) || FileManager::ExistsSystem(pFile);}
+	virtual char getOsSeparator() const override {return '/';}
+
+    virtual Assimp::IOStream* Open(const char* pFile,const char* pMode = "rb") override
+	{
+		if(ustring::compare(pFile,"__rootAssetFile",15))
+		{
+			m_rootFile->Seek(0);
+			return new AssimpPragmaIOStream{m_rootFile};
+		}
+		auto f = FileManager::OpenSystemFile(pFile,pMode);
+		if(f == nullptr)
+			return nullptr;
+		return new AssimpPragmaIOStream{f};
+	}
+
+    virtual void Close(Assimp::IOStream* pFile) override {delete pFile;}
+private:
+	VFilePtr m_rootFile = nullptr;
+};
+
+int Lua::import::import_model_asset(lua_State *l)
+{
+	auto &f = *Lua::CheckFile(l,1);
+	auto hFile = f.GetHandle();
+	if(hFile->GetType() != VFILE_LOCAL)
 		return 0;
+	auto hFileLocal = std::static_pointer_cast<VFilePtrInternalReal>(hFile);
+
+	Assimp::Importer importer;
+	//importer.SetIOHandler(new AssimpPragmaIo{hFile});
+	auto *aiScene = importer.ReadFile(
+		hFileLocal->GetPath(),
+		aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_FindDegenerates | aiProcess_FindInvalidData | aiProcess_LimitBoneWeights | aiProcess_GenSmoothNormals
+	);
+	if(aiScene == nullptr)
+	{
+		auto *error = importer.GetErrorString();
+		Con::cwar<<"WARNING: Unable to import model asset: '"<<error<<"'!"<<Con::endl;
+		return 0;
+	}
 	auto t = Lua::CreateTable(l);
 	auto *nw = engine->GetNetworkState(l);
 	for(auto i=decltype(aiScene->mNumMeshes){0};i<aiScene->mNumMeshes;++i)
@@ -408,14 +484,20 @@ int Lua::import::import_obj(lua_State *l)
 		{
 			auto &aiVert = mesh->mVertices[j];
 			//mesh->mNumUVComponents
-			auto &aiUvw = mesh->mTextureCoords[0][j];
-			auto &aiNormal = mesh->mNormals[j];
 
 			verts.push_back({});
 			auto &v = verts.back();
 			v.position = {aiVert.x,aiVert.y,aiVert.z};
-			v.uv = {aiUvw.x,-aiUvw.y};
-			v.normal = {aiNormal.x,aiNormal.y,aiNormal.z};
+			if(mesh->mTextureCoords && mesh->mTextureCoords[0])
+			{
+				auto &aiUvw = mesh->mTextureCoords[0][j];
+				v.uv = {aiUvw.x,-aiUvw.y};
+			}
+			if(mesh->mNormals)
+			{
+				auto &aiNormal = mesh->mNormals[j];
+				v.normal = {aiNormal.x,aiNormal.y,aiNormal.z};
+			}
 		}
 
 		auto &triangles = subMesh->GetTriangles();
@@ -428,11 +510,94 @@ int Lua::import::import_obj(lua_State *l)
 			triangles.push_back(face.mIndices[1]);
 			triangles.push_back(face.mIndices[2]);
 		}
+		subMesh->SetTexture(mesh->mMaterialIndex);
+
 		Lua::PushInt(l,i +1);
 		Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);
 		Lua::SetTableValue(l,t);
 	}
-	return 1;
+	std::vector<std::string> importedTextures {};
+	auto rfile = std::static_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+	auto texturesImported = false;
+	std::optional<std::string> filePath = rfile ? rfile->GetPath() : std::optional<std::string>{};
+	if(filePath.has_value())
+	{
+		auto modelName = ufile::get_file_from_filename(*filePath);
+		ufile::remove_extension_from_filename(modelName);
+
+		auto matPath = "models/" +FileManager::GetCanonicalizedPath(modelName);
+		auto dstMatPath = "addons/imported/materials/" +matPath;
+		if(FileManager::CreatePath(dstMatPath.c_str()) == false)
+			Con::cwar<<"WARNING: Unable to create material output path '"<<dstMatPath<<"'! Textures will not be imported."<<Con::endl;
+		else
+		{
+			texturesImported = true;
+			auto srcMatPath = ufile::get_path_from_filename(*filePath);
+			importedTextures.reserve(aiScene->mNumMaterials);
+			for(auto i=decltype(aiScene->mNumMaterials){0u};i<aiScene->mNumMaterials;++i)
+			{
+				auto *mat = aiScene->mMaterials[i];
+				std::string matName = mat->GetName().C_Str();
+
+				auto dstPath = dstMatPath +'/' +matName;
+				importedTextures.push_back(dstPath);
+
+				auto matPath = srcMatPath +matName;
+				std::vector<std::string> files {};
+				FileManager::FindSystemFiles((matPath +".*").c_str(),&files,nullptr);
+				auto &suportedFormats = MaterialManager::get_supported_image_formats();
+				auto foundSupportedImageFile = false;
+				for(auto &fName : files)
+				{
+					std::string ext = "";
+					ufile::get_extension(fName,&ext);
+					ext = '.' +ext;
+					auto it = std::find_if(suportedFormats.begin(),suportedFormats.end(),[&ext](const MaterialManager::ImageFormat &format) {
+						return ustring::compare(format.extension,ext,false);
+					});
+					if(it != suportedFormats.end())
+					{
+						if(FileManager::Exists(dstPath))
+							Con::cout<<"Texture '"<<dstPath<<"' already exists and will not be imported!"<<Con::endl;
+						else
+						{
+							if(FileManager::CopySystemFile((srcMatPath +fName).c_str(),(FileManager::GetProgramPath() +'/' +dstMatPath +'/' +fName).c_str()) == false)
+								Con::cwar<<"WARNING: Unable to copy texture file '"<<fName<<"'! Texture will not be imported."<<Con::endl;
+							else
+								Con::cout<<"Imported texture '"<<dstPath<<"'!"<<Con::endl;
+						}
+						foundSupportedImageFile = true;
+						break;
+					}
+				}
+				if(foundSupportedImageFile == false)
+				{
+					Con::cwar<<"WARNING: Could not find texture file '"<<matName<<"' with supported format! Texture will not be imported."<<Con::endl;
+					continue;
+				}
+			}
+		}
+	}
+	if(texturesImported == false)
+	{
+		auto srcMatPath = ufile::get_path_from_filename(*filePath);
+		importedTextures.reserve(aiScene->mNumMaterials);
+		for(auto i=decltype(aiScene->mNumMaterials){0u};i<aiScene->mNumMaterials;++i)
+		{
+			auto *mat = aiScene->mMaterials[i];
+			std::string matName = mat->GetName().C_Str();
+			importedTextures.push_back(matName);
+		}
+	}
+	auto tTextures = Lua::CreateTable(l);
+	for(auto i=decltype(importedTextures.size()){0};i<importedTextures.size();++i)
+	{
+		auto &tex = importedTextures.at(i);
+		Lua::PushInt(l,i +1);
+		Lua::PushString(l,tex);
+		Lua::SetTableValue(l,tTextures);
+	}
+	return 2;
 }
 
 int Lua::import::import_pmx(lua_State *l)
@@ -605,3 +770,4 @@ int Lua::import::import_pmx(lua_State *l)
 	return 1;
 #endif
 }
+#pragma optimize("",on)

@@ -14,10 +14,12 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <pragma/math/intersection.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 CWaterObject::WaterScene::~WaterScene()
 {
 	if(hRenderScene.IsValid())
@@ -57,27 +59,45 @@ void CWaterObject::InitializeWaterScene(const WaterScene &scene)
 	m_waterScene->reflectiveIntensity = scene.reflectiveIntensity;
 }
 
-static void is_camera_submerged(const Camera &cam,const Vector3 &n,float planeDist,bool &bCameraSubmerged,bool &bCameraFullySubmerged)
+static void is_camera_submerged(const Camera &cam,const Vector3 &n,float planeDist,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax,bool &bCameraSubmerged,bool &bCameraFullySubmerged)
 {
 	bCameraSubmerged = false;
 	bCameraFullySubmerged = true;
 	std::vector<Vector3> nearPlaneBounds;
 	nearPlaneBounds.reserve(4);
 	cam.GetNearPlaneBoundaries(&nearPlaneBounds);
+
+	auto isPointInAabb = false;
 	for(auto &p : nearPlaneBounds)
 	{
+		if(isPointInAabb == false && Intersection::VectorInBounds(p,waterAabbMin,waterAabbMax))
+			isPointInAabb = true;
+
 		auto dot = glm::dot(Vector4(p.x,p.y,p.z,1.f),Vector4(-n.x,-n.y,-n.z,-planeDist));
 		if(dot > 0.f)
 			bCameraSubmerged = true;
 		else
 			bCameraFullySubmerged = false;
 	}
+	if(bCameraSubmerged == false)
+		return; // Camera is above water plane; we can skip the remaining checks altogether
+
+	// Camera is intersecting or very close to water bounds; Do a more precise check to be certain
+	// For now we assume the water is a simple axis-aligned box. Since the near plane corner points are
+	// very close to each other, we'll also assume the water mesh is large enough so it cannot be enclosed within
+	// the near plane bounds. This way we can just check if one of the near plane corner points is within the
+	// water AABB.
+	if(isPointInAabb == true)
+		return;
+	bCameraSubmerged = false;
+	bCameraFullySubmerged = false;
 }
 
 static auto cvReflectionQuality = GetClientConVar("cl_render_reflection_quality");
 static auto cvDrawWater = GetClientConVar("render_draw_water");
-void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal)
+void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax)
 {
+	m_waterAabbBounds = {waterAabbMin,waterAabbMax};
 	auto *mat = GetWaterMaterial();
 	if(mat == nullptr || pragma::ShaderWater::DESCRIPTOR_SET_WATER.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
@@ -265,7 +285,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 		auto bCameraSubmerged = false;
 		auto bCameraFullySubmerged = true;
-		is_camera_submerged(camGame,n,planeDist,bCameraSubmerged,bCameraFullySubmerged);
+		is_camera_submerged(camGame,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,bCameraSubmerged,bCameraFullySubmerged);
 		if(bCameraSubmerged == true)
 		{
 			auto &hdrInfo = scene->GetHDRInfo();
@@ -399,3 +419,4 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return CallbackReturnType::NoReturnValue;
 	}));
 }
+#pragma optimize("",on)

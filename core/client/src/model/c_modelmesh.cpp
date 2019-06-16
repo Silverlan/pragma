@@ -2,15 +2,18 @@
 #include "pragma/model/c_modelmesh.h"
 #include <mathutil/umath.h>
 #include "pragma/model/vk_mesh.h"
+#include "pragma/model/c_vertex_buffer_data.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 
-// 256 MiB
-#define MODEL_MESH_VERTEX_BUFFER_SIZE 268'435'456
-// 32 MiB
-#define MODEL_MESH_INDEX_BUFFER_SIZE 33'554'432
+static constexpr uint64_t MEGABYTE = 1'024 *1'024;
+static constexpr uint64_t GLOBAL_MESH_VERTEX_BUFFER_SIZE = MEGABYTE *256; // 13'107 instances per MiB
+static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE *32; // 32'768 instances per MiB
+static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE *16; // 131'072 instances per MiB
+static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE *32; // 524'288 instances per MiB
 
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 CModelMesh::CModelMesh()
 	: ModelMesh()
 {}
@@ -25,7 +28,11 @@ void CModelMesh::AddSubMesh(const std::shared_ptr<CModelSubMesh> &subMesh) {m_su
 
 ///////////////////////////////////////////
 
+// These have to be separate buffers, because the base alignment of the sub-buffers has to match
+// the underlying data structure (otherwise the buffers would not be usable as storage buffers).
 static std::shared_ptr<prosper::DynamicResizableBuffer> s_vertexBuffer = nullptr;
+static std::shared_ptr<prosper::DynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
+static std::shared_ptr<prosper::DynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::DynamicResizableBuffer> s_indexBuffer = nullptr;
 CModelSubMesh::CModelSubMesh()
 	: ModelSubMesh(),NormalMesh(),m_vkMesh(std::make_shared<pragma::VkMesh>())
@@ -34,27 +41,59 @@ CModelSubMesh::CModelSubMesh()
 CModelSubMesh::CModelSubMesh(const CModelSubMesh &other)
 	: ModelSubMesh(other),m_vkMesh(std::make_shared<pragma::VkMesh>(*other.m_vkMesh))
 {}
+const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() {return s_vertexBuffer;}
+const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
+const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() {return s_alphaBuffer;}
+const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() {return s_indexBuffer;}
 std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy() const {return std::make_shared<CModelSubMesh>(*this);}
 
 void CModelSubMesh::InitializeBuffers()
 {
 	if(s_vertexBuffer != nullptr)
 		return;
+	// Initialize global vertex buffer
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-	createInfo.size = MODEL_MESH_VERTEX_BUFFER_SIZE;
+	createInfo.size = GLOBAL_MESH_VERTEX_BUFFER_SIZE;
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
 	s_vertexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
 
-	createInfo.size = MODEL_MESH_INDEX_BUFFER_SIZE;
+	// Initialize global vertex weight buffer
+	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
+	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
+	s_vertexWeightBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
+	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
+
+	// Initialize global alpha buffer
+	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
+	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
+	s_alphaBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
+	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
+
+	// Initialize global index buffer
+	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::INDEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
 	s_indexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
 }
 void CModelSubMesh::ClearBuffers()
 {
 	s_vertexBuffer = nullptr;
+	s_vertexWeightBuffer = nullptr;
+	s_alphaBuffer = nullptr;
 	s_indexBuffer = nullptr;
 }
 
@@ -63,7 +102,15 @@ const std::shared_ptr<pragma::VkMesh> &CModelSubMesh::GetVKMesh() const {return 
 void CModelSubMesh::UpdateVertexBuffer()
 {
 	m_vkMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
-	auto vertexBuffer = s_vertexBuffer->AllocateBuffer(m_vertices->size() *sizeof(Vertex),m_vertices->data());
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	std::vector<VertexType> vertexBufferData {};
+	vertexBufferData.reserve(m_vertices->size());
+	for(auto &v : *m_vertices)
+		vertexBufferData.push_back({v});
+#else
+	auto &vertexBufferData = *m_vertices;
+#endif
+	auto vertexBuffer = s_vertexBuffer->AllocateBuffer(vertexBufferData.size() *sizeof(vertexBufferData.front()),vertexBufferData.data());
 	m_vkMesh->SetVertexBuffer(std::move(vertexBuffer));
 }
 
@@ -88,7 +135,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	if((flags &ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None)
 	{
 		m_vkMesh->SetIndexBuffer(nullptr); // Clear the old index buffer
-		auto indexBuffer = s_indexBuffer->AllocateBuffer(m_triangles->size() *sizeof(uint16_t),m_triangles->data());
+		auto indexBuffer = s_indexBuffer->AllocateBuffer(m_triangles->size() *sizeof(IndexType),m_triangles->data());
 		m_vkMesh->SetIndexBuffer(std::move(indexBuffer));
 	}
 	if((flags &ModelUpdateFlags::UpdateVertexBuffer) != ModelUpdateFlags::None)
@@ -102,13 +149,14 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 
 	if(bAnimated == true && (flags &ModelUpdateFlags::UpdateWeightBuffer) != ModelUpdateFlags::None)
 	{
-		auto weightBuffer = s_vertexBuffer->AllocateBuffer(m_vertexWeights->size() *sizeof(VertexWeight),m_vertexWeights->data());
+		auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() *sizeof(VertexWeightType),m_vertexWeights->data());
 		m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
 	}
 	
 	if(bHasAlphas == true && (flags &ModelUpdateFlags::UpdateAlphaBuffer) != ModelUpdateFlags::None)
 	{
-		auto alphaBuffer = s_vertexBuffer->AllocateBuffer(m_alphas->size() *sizeof(Vector2),m_alphas->data());
+		auto alphaBuffer = s_alphaBuffer->AllocateBuffer(m_alphas->size() *sizeof(AlphaType),m_alphas->data());
 		m_vkMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}
 }
+#pragma optimize("",on)

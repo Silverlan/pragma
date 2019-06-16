@@ -11,16 +11,21 @@
 #if USE_INSTANCE_UNIFORM_BUFFER == 1
 
 // Change per Entity
-layout(std140,set = SHADER_UNIFORM_INSTANCE_SET,binding = SHADER_UNIFORM_INSTANCE_BINDING) uniform Instance
+struct EntityInstanceData
 {
 	mat4 M;
 	vec4 color;
-	uint flags;
+	ivec4 flags; // flags.x = flags, rest is padding
+};
+
+layout(std140,set = SHADER_UNIFORM_INSTANCE_SET,binding = SHADER_UNIFORM_INSTANCE_BINDING) uniform Instance
+{
+	EntityInstanceData data;
 } u_instance;
 
-mat4 get_model_matrix() {return u_instance.M;}
-bool is_weighted() {return (u_instance.flags &FINSTANCE_WEIGHTED) != 0;}
-vec4 get_instance_color() {return u_instance.color;}
+mat4 get_model_matrix() {return u_instance.data.M;}
+bool is_weighted() {return (u_instance.data.flags.x &FINSTANCE_WEIGHTED) != 0;}
+vec4 get_instance_color() {return u_instance.data.color;}
 
 #endif
 

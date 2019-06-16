@@ -15,6 +15,8 @@ link_external_library(materialsystem)
 link_external_library(cmaterialsystem)
 
 add_include_dir(glm)
+add_include_dir(lpng_build)
+add_include_dir(zlib_build)
 
 add_external_library(luajit)
 add_external_library(lua)

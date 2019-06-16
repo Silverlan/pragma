@@ -1,0 +1,66 @@
+#ifndef F_GAME_SCENE_DATA_GLS
+#define F_GAME_SCENE_DATA_GLS
+
+#include "/modules/sh_math.gls"
+#include "/modules/sh_entity_info.gls"
+
+#define INVALID_ARRAY_INDEX MAX_UINT
+#define INVALID_BUFFER_INDEX MAX_UINT
+
+// TODO
+#define MAX_BONES 256
+
+#define FSUB_MESH_VISIBLE 1
+
+struct MaterialInfo
+{
+	uint diffuseTextureArrayIndex;
+	uint specularTextureArrayIndex;
+	uint normalTextureArrayIndex;
+	uint padding;
+};
+
+struct SubMeshInfoData
+{
+	vec4 aabbMin;
+	vec4 aabbMax;
+
+	uint flags;
+	uint materialArrayIndex;
+	uint vertexBufferStartIndex;
+	uint indexBufferStartIndex;
+
+	uint vertexWeightBufferIndex;
+	uint entityBufferIndex;
+	uint boneBufferStartIndex;
+	uint numTriangles;
+};
+
+layout(set=2,binding=0) uniform sampler2D u_textures[2048];
+
+layout (std430,set=2,binding=1) buffer MaterialInfoBuffer
+{
+	MaterialInfo data[];
+} materialInfoBuffer;
+
+layout (std430,set=2,binding=2) buffer SubMeshInfoBuffer
+{
+	SubMeshInfoData data[];
+} subMeshInfoBuffer;
+
+layout (std430,set=2,binding=3) buffer EntityInstanceBuffer
+{
+	EntityInstanceData data[];
+} entityInstanceBuffer;
+
+struct EntityBoneMatrixData
+{
+	mat4 matrices[MAX_BONES];
+};
+
+layout(std430,set = 2,binding = 4) buffer Bones
+{
+	EntityBoneMatrixData data[];
+} boneMatrixBuffer;
+
+#endif

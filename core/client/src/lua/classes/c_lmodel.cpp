@@ -15,6 +15,12 @@ void Lua::Model::Client::AddMaterial(lua_State *l,::Model &mdl,uint32_t textureG
 	auto *mat = client->LoadMaterial(name);
 	Lua::Model::AddMaterial(l,mdl,textureGroup,mat);
 }
+void Lua::Model::Client::SetMaterial(lua_State *l,::Model &mdl,uint32_t texIdx,const std::string &name)
+{
+	//Lua::CheckModel(l,1);
+	auto *mat = client->LoadMaterial(name);
+	Lua::Model::SetMaterial(l,mdl,texIdx,mat);
+}
 void Lua::Model::Client::GetVertexAnimationBuffer(lua_State *l,::Model &mdl)
 {
 	auto &buf = static_cast<CModel&>(mdl).GetVertexAnimationBuffer();

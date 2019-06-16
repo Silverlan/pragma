@@ -51,6 +51,7 @@ void SGame::RegisterLuaClasses()
 	auto modelClassDef = luabind::class_<Model>("Model");
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
 	modelClassDef.def("AddMaterial",&Lua::Model::Server::AddMaterial);
+	modelClassDef.def("SetMaterial",&Lua::Model::Server::SetMaterial);
 	modGame[modelClassDef];
 	auto _G = luabind::globals(GetLuaState());
 	_G["Model"] = _G["game"]["Model"];

@@ -36,12 +36,25 @@ namespace Intersection
 	DLLENGINE Result LineAABB(const Vector3 &o,const Vector3 &d,const Vector3 &min,const Vector3 &max,float *tMinRes,float *tMaxRes=NULL);
 	DLLENGINE Result LinePlane(const Vector3 &o,const Vector3 &d,const Vector3 &nPlane,float distPlane,float *t=NULL);
 	DLLENGINE bool LineOBB(const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max,float *dist=nullptr,const Vector3 &origin={},const Quat &rot={});
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,ModelMesh &mesh,const Vector3 *origin=nullptr,const Quat *rot=nullptr,float *t=nullptr);
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,ModelSubMesh &subMesh,const Vector3 *origin=nullptr,const Quat *rot=nullptr,float *t=nullptr);
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,const std::vector<uint32_t> &bodyGroups,uint32_t lod,const Vector3 &origin,const Quat &rot,float *t=nullptr);
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,uint32_t lod,const Vector3 &origin,const Quat &rot,float *t=nullptr);
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,const std::vector<uint32_t> &bodyGroups,const Vector3 &origin,const Quat &rot,float *t=nullptr);
-	DLLENGINE Result LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,const Vector3 &origin,const Quat &rot,float *t=nullptr);
+	struct DLLENGINE LineMeshResult
+	{
+		Result result = Result::NoIntersection;
+		uint32_t meshGroupIndex = std::numeric_limits<uint32_t>::max();
+		uint32_t meshIdx = std::numeric_limits<uint32_t>::max();
+		uint32_t subMeshIdx = std::numeric_limits<uint32_t>::max();
+		uint64_t triIdx = std::numeric_limits<uint64_t>::max();
+		Vector3 hitPos = {};
+		double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
+		double t = 0.0;
+		double u = 0.0;
+		double v = 0.0;
+	};
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelMesh &mesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelSubMesh &subMesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const std::vector<uint32_t> *bodyGroups,uint32_t lod,const Vector3 &origin,const Quat &rot);
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,uint32_t lod,const Vector3 &origin,const Quat &rot);
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const std::vector<uint32_t> &bodyGroups,const Vector3 &origin,const Quat &rot);
+	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const Vector3 &origin,const Quat &rot);
 	DLLENGINE bool SphereSphere(const Vector3 &originA,float rA,const Vector3 &originB,float rB);
 	DLLENGINE bool AABBSphere(const Vector3 &min,const Vector3 &max,const Vector3 &origin,float r);
 	DLLENGINE bool PointInPlaneMesh(const Vector3 &vec,const std::vector<Plane> &planes);

@@ -58,14 +58,14 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	else
 		gl_ClipDistance[0] = 1.0;
 
-	vec3 normal = normalize((mBone *vec4(in_vert_normal,0.0)).xyz);
+	vec3 normal = normalize((mBone *vec4(in_vert_normal.xyz,0.0)).xyz);
 	vs_out.vert_pos_ws = vposWs.xyz;
 	//vs_out.vert_pos_cs = (u_camera.V *vposWs).xyz;
 
 	vs_out.vert_normal = normal;
 	vs_out.vert_normal_cs = (u_camera.V *mdlMatrix *vec4(normal,0)).xyz;
 	
-	vs_out.vert_uv = in_vert_uv;
+	vs_out.vert_uv = in_vert_uv.xy;
 
 #if ENABLE_TANGENT_SPACE_NORMALS == 1
 	vs_out.vert_tangent = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
@@ -100,6 +100,6 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 
 void export_world_fragment_data(vec3 vertPos) {export_world_fragment_data(get_model_matrix(),vertPos);}
 
-void export_world_fragment_data() {export_world_fragment_data(in_vert_pos);}
+void export_world_fragment_data() {export_world_fragment_data(in_vert_pos.xyz);}
 
 #endif

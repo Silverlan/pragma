@@ -348,12 +348,36 @@ uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 	}
 	return static_cast<uint32_t>(meta.textures.size() -1);
 }
+bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
+{
+	auto &meta = GetMetaInfo();
+	if(texIdx < meta.textures.size())
+		meta.textures.at(texIdx) = tex;
+	if(mat == nullptr)
+		m_materials.at(texIdx) = {};
+	else if(texIdx < m_materials.size())
+	{
+		m_bAllMaterialsLoaded = false;
+		
+		m_materials.at(texIdx) = mat->GetHandle();
+		auto cb = mat->CallOnLoaded([this]() {
+			OnMaterialLoaded();
+		});
+		if(cb.IsValid() == true)
+			m_matLoadCallbacks.push_back(cb);
+	}
+	else
+		return false;
+	return true;
+}
 uint32_t Model::AddMaterial(uint32_t skin,Material *mat)
 {
 	auto texName = mat->GetName();
 	AddTexturePath(ufile::get_path_from_filename(texName));
 	texName = ufile::get_file_from_filename(texName);
-	ufile::remove_extension_from_filename(texName);
+	std::string ext;
+	if(ufile::get_extension(texName,&ext) == true && (ustring::compare(ext,"wmi",false) || ustring::compare(ext,"vmt",false)))
+		ufile::remove_extension_from_filename(texName);
 	auto r = AddTexture(texName,mat);
 	if(skin < m_textureGroups.size())
 	{
@@ -363,6 +387,14 @@ uint32_t Model::AddMaterial(uint32_t skin,Material *mat)
 			textures.push_back(r);
 	}
 	return r;
+}
+bool Model::SetMaterial(uint32_t texIdx,Material *mat)
+{
+	auto texName = mat->GetName();
+	AddTexturePath(ufile::get_path_from_filename(texName)); // TODO: Remove previous texture path if it is not in use anymore
+	texName = ufile::get_file_from_filename(texName);
+	ufile::remove_extension_from_filename(texName);
+	return SetTexture(texIdx,texName,mat);
 }
 void Model::RemoveTexture(uint32_t idx)
 {
@@ -622,14 +654,6 @@ std::vector<MaterialHandle> &Model::GetMaterials() {return m_materials;}
 const std::vector<MaterialHandle> &Model::GetMaterials() const {return m_materials;}
 std::vector<std::string> &Model::GetTextures() {return m_metaInfo.textures;}
 std::vector<TextureGroup> &Model::GetTextureGroups() {return m_textureGroups;}
-void Model::SetMaterial(uint32_t texId,Material *mat)
-{
-	if(texId >= m_materials.size())
-		return;
-	m_materials.at(texId) = mat;
-	if(texId < m_metaInfo.textures.size())
-		m_metaInfo.textures.at(texId) = mat->GetName();
-}
 Material *Model::GetMaterial(uint32_t texID)
 {
 	if(texID >= m_materials.size())

@@ -15,10 +15,11 @@ enum class GameLimits : uint32_t
 	MaxActiveShadowCubeMaps = 20, // Point lights
 
 	MaxMeshVertices = 1'872'457,
-	MaxWorldDistance = 1'048'576, // Maximum reasonable distance; Used for traces among other things
+	MaxWorldDistance = 1'048'576, // Maximum reasonable distance; Used for raycasts, among other things
 	MaxRayCastRange = 65'536,
 
-	MaxBones = 256 // Maximum number of bones per entity; Has to be the same as the value used in shaders
+	MaxBones = 256, // Maximum number of bones per entity; Has to be the same as the value used in shaders
+	MaxImageArrayLayers = 2'048 // https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxImageArrayLayers
 };
 REGISTER_BASIC_ARITHMETIC_OPERATORS(GameLimits);
 

@@ -24,7 +24,6 @@
 #include <pragma/input/inputhelper.h>
 #include <fsys/directory_watcher.h>
 #include <pragma/game/game_resources.hpp>
-#include <impl_texture_formats.h>
 #include <sharedutils/util_file.h>
 #include <pragma/engine_info.hpp>
 #include <prosper_util.hpp>
@@ -545,7 +544,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	matManager->GetTextureManager().SetTextureFileHandler([this](const std::string &fpath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
 		{
-			static auto formats = get_perferred_image_format_order();
+			auto &formats = MaterialManager::get_supported_image_formats();
 			auto *cl = GetClientState();
 			auto path = fpath;
 			ufile::remove_extension_from_filename(path);
@@ -1105,12 +1104,7 @@ void CEngine::Think()
 	if(m_fixedFrameDeltaTimeInterpretation.has_value() == false)
 		tDelta = tNow -m_tLastFrame;
 	else
-	{
 		tDelta = *m_fixedFrameDeltaTimeInterpretation;
-		static auto fixedFrameCount = 0ull;
-		++fixedFrameCount;
-		std::cout<<"";
-	}
 	auto maxFps = GetFPSLimit();
 	if(maxFps > 0 && std::chrono::duration_cast<std::chrono::nanoseconds>(tDelta).count() /1'000'000.0 < 1'000.0 /maxFps)
 		return;

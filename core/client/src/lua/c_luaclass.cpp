@@ -612,6 +612,7 @@ void CGame::RegisterLuaClasses()
 	auto modelClassDef = luabind::class_<Model>("Model");
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
 	modelClassDef.def("AddMaterial",&Lua::Model::Client::AddMaterial);
+	modelClassDef.def("SetMaterial",&Lua::Model::Client::SetMaterial);
 	modelClassDef.def("GetVertexAnimationBuffer",&Lua::Model::Client::GetVertexAnimationBuffer);
 	modGame[modelClassDef];
 	auto _G = luabind::globals(GetLuaState());

@@ -19,8 +19,8 @@ void export_light_fragment_data(vec4 vertPosWs
 		MV3 *bitangent,
 		MV3 *normal
 	));*/
-	vec3 tangent = normalize((mBone *vec4(-in_vert_tangent,0.0)).xyz);
-	vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+	vec3 tangent = normalize((mBone *vec4(-in_vert_tangent.xyz,0.0)).xyz);
+	vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent.xyz,0.0)).xyz);
 	mat3 V = mat3(get_view_matrix());
 	mat3 TBN = transpose(V *mat3(
 		normalize((mdlMatrix *vec4(tangent,0.0)).xyz),

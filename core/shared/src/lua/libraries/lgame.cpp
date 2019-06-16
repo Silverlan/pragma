@@ -365,6 +365,7 @@ int Lua::game::raycast(lua_State *l)
 	auto group = data.GetCollisionFilterGroup();
 	auto *dataFilter = data.GetFilter();
 	auto filter = (dataFilter != nullptr) ? std::shared_ptr<PhysClosestRayResultCallback>(new PhysClosestRayResultCallback(dataFilter->CreateClosestRayCallbackFilter(flags,group,mask,btOrigin,btEnd))) : nullptr;
+	Intersection::LineMeshResult meshResult {};
 	for(auto *ent : *ents)
 	{
 		if(ent == nullptr || ent->IsSpawned() == false)
@@ -376,11 +377,7 @@ int Lua::game::raycast(lua_State *l)
 			continue;
 		if(dataFilter != nullptr && filter->ShouldPass(ent,nullptr,nullptr) == false)
 			continue;
-		auto t = 0.f;
-		if(Intersection::LineMesh(start,end -start,*hMdl,pTrComponent->GetPosition(),pTrComponent->GetOrientation(),&t) == Intersection::Result::Intersect || t < 0.f || t > tClosest)
-			continue;
-		tClosest = t;
-		entClosest = ent;
+		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetOrientation());
 	}
 	if(entClosest != nullptr)
 	{

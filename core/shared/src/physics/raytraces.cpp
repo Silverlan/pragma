@@ -43,24 +43,23 @@ void TraceResult::InitializeMeshes()
 	uvec::world_to_local(origin,rot,dir);
 	dir *= maxDist;
 
-	auto tClosest = std::numeric_limits<float>::max();
+	Intersection::LineMeshResult res{};
 	for(auto &mesh : m_meshInfo->meshes)
 	{
 		Vector3 min,max;
 		mesh->GetBounds(min,max);
-		auto dist = umath::min(maxDist,tClosest);
+		auto dist = umath::min(maxDist,static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > dist)
+		if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes)
 		{
 			subMesh->GetBounds(min,max);
-			if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > dist)
+			if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 				continue;
-			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,nullptr,nullptr,&t) != Intersection::Result::Intersect || umath::abs(t) > dist)
+			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,res,true,nullptr,nullptr) == false || umath::abs(res.hitValue) > (dist /maxDist))
 				continue;
-			tClosest = umath::abs(t);
 			m_meshInfo->mesh = mesh.get();
 			m_meshInfo->subMesh = subMesh.get();
 		}

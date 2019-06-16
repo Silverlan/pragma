@@ -128,6 +128,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(),"string","join",Lua::string::join);
 	lua_pushtablecfunction(lua.GetState(),"string","remove_whitespace",Lua::string::remove_whitespace);
 	lua_pushtablecfunction(lua.GetState(),"string","remove_quotes",Lua::string::remove_quotes);
+	lua_pushtablecfunction(lua.GetState(),"string","replace",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		std::string subject = Lua::CheckString(l,1);
+		std::string from = Lua::CheckString(l,2);
+		std::string to = Lua::CheckString(l,3);
+		ustring::replace(subject,from,to);
+		Lua::PushString(l,subject);
+		return 1;
+	}));
 
 	auto &modUtil = lua.RegisterLibrary("util");
 

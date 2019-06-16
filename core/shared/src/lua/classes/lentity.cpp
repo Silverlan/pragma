@@ -109,10 +109,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		if(hEnt->GetTransformComponent().expired())
 		{
-			Lua::Push<EulerAngles>(l,EulerAngles{});
+			Lua::Push<Quat>(l,Quat{});
 			return;
 		}
-		Lua::Push<EulerAngles>(l,hEnt->GetTransformComponent()->GetAngles());
+		Lua::Push<Quat>(l,hEnt->GetTransformComponent()->GetOrientation());
 	}));
 	classDef.def("SetRotation",static_cast<void(*)(lua_State*,EntityHandle&,const Quat&)>([](lua_State *l,EntityHandle &hEnt,const Quat &rot) {
 		LUA_CHECK_ENTITY(l,hEnt);

@@ -89,6 +89,7 @@
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include "pragma/entities/components/c_debug_component.hpp"
 #include "pragma/entities/components/c_bsp_component.hpp"
@@ -193,6 +194,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CViewModel);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CFlex);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CSoftBody);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CVertexAnimated);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRaytracing);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CLightMap);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CBSP);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CBSPLeaf);

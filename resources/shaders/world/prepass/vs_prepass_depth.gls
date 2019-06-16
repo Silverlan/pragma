@@ -11,7 +11,7 @@ layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
 void main()
 {
-	vec3 vertPos = in_vert_pos;
+	vec3 vertPos = in_vert_pos.xyz;
 	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
 	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
 	for(uint i=0;i<vertexAnimCount;++i)

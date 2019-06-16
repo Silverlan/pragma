@@ -851,7 +851,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	}));
 	entsMod[defCVertexAnimated];
 
-	
+	auto defCRaytracing = luabind::class_<CRaytracingHandle,BaseEntityComponentHandle>("RaytracingComponent");
+	entsMod[defCRaytracing];
+
 	auto defCBSPLeaf = luabind::class_<CBSPLeafHandle,BaseEntityComponentHandle>("BSPLeafComponent");
 	entsMod[defCBSPLeaf];
 

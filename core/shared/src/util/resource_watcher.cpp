@@ -91,6 +91,14 @@ void ResourceWatcherManager::CallChangeCallbacks(EResourceWatcherCallbackType ty
 		m_callbacks.erase(it);
 }
 
+static bool is_image_format(const std::string &ext)
+{
+	auto &supportedFormats = MaterialManager::get_supported_image_formats();
+	return std::find_if(supportedFormats.begin(),supportedFormats.end(),[&ext](const MaterialManager::ImageFormat &format) {
+		return ustring::compare(ustring::substr(format.extension,1),ext,false);
+	}) != supportedFormats.end();
+}
+
 void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std::string &ext)
 {
 	auto *nw = m_networkState;
@@ -140,7 +148,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 		ReloadMaterial(path);
 		CallChangeCallbacks(EResourceWatcherCallbackType::Material,path,ext);
 	}
-	else if(ext == "dds" || ext == "vtf" || ext == "png" || ext == "tga" || ext == "ktx")
+	else if(is_image_format(ext))
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto texPath = "materials\\" +path;

@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
+#include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
@@ -35,6 +36,9 @@ void pragma::initialize_articulated_buffers()
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize *maxInstanceCount;
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
 	s_instanceBoneBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 }

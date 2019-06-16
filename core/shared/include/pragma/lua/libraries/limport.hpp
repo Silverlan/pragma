@@ -14,6 +14,7 @@ namespace Lua
 		DLLNETWORK int import_smd(lua_State *l);
 		DLLNETWORK int import_obj(lua_State *l);
 		DLLNETWORK int import_pmx(lua_State *l);
+		DLLNETWORK int import_model_asset(lua_State *l);
 	};
 };
 

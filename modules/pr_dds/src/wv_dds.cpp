@@ -181,7 +181,7 @@ static int32_t convert_dds(lua_State *l)
 	FileManager::CreatePath(ufile::get_path_from_filename(dstFile).c_str());
 	dstFile = util::get_program_path() +"\\" +dstFile;
 
-	auto image = uimg::load_image(srcFile->GetHandle(),imgFormat);
+	auto image = uimg::load_image(srcFile.GetHandle(),imgFormat);
 	if(image == nullptr)
 	{
 		Lua::PushBool(l,false);
@@ -415,8 +415,7 @@ extern "C"
 {
 	bool PRAGMA_EXPORT pr_dds_initialize()
 	{
-		auto *pSteamworks = steamworks::Manager::InitializeInstance();
-		return (pSteamworks != nullptr) ? true : false;
+		return true;
 	}
 	void PRAGMA_EXPORT pragma_initialize_lua(Lua::Interface &l)
 	{

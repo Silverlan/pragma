@@ -6,6 +6,7 @@
 #include <memory>
 
 namespace pragma {class VkMesh;};
+struct VertexBufferData;
 class DLLCLIENT CModelSubMesh
 	: public ModelSubMesh,public NormalMesh
 {
@@ -18,10 +19,18 @@ public:
 	virtual std::shared_ptr<ModelSubMesh> Copy() const override;
 	static void InitializeBuffers();
 	static void ClearBuffers();
+
+	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalVertexBuffer();
+	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalVertexWeightBuffer();
+	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalAlphaBuffer();
+	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalIndexBuffer();
+
+	using VertexType = VertexBufferData;
+	using VertexWeightType = VertexWeight;
+	using IndexType = uint16_t;
+	using AlphaType = Vector2;
 private:
 	std::shared_ptr<pragma::VkMesh> m_vkMesh;
-	//static Vulkan::Buffer s_vertexBuffer; // prosper TODO
-	//static Vulkan::Buffer s_indexBuffer; // prosper TODO
 	void UpdateVertexBuffer();
 };
 

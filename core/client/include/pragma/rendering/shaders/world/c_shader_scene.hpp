@@ -152,6 +152,7 @@ namespace pragma
 			Mat4 modelMatrix;
 			Vector4 color;
 			RenderFlags renderFlags;
+			Vector3 padding;
 		};
 #pragma pack(pop)
 

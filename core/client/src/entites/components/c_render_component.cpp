@@ -5,6 +5,7 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/lua/classes/ldef_mat4.h>
 #include <pragma/model/model.h>
 #include <pragma/entities/parentinfo.h>
@@ -26,6 +27,7 @@ namespace pragma
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
@@ -56,6 +58,9 @@ void CRenderComponent::InitializeBuffers()
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize *instanceCount;
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+#endif
 	s_instanceBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 
@@ -603,3 +608,4 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
+#pragma optimize("",on)

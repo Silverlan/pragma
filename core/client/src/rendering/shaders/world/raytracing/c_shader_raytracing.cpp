@@ -18,30 +18,6 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRI
 		}
 	}
 };
-decltype(ShaderRayTracing::DESCRIPTOR_SET_BUFFERS) ShaderRayTracing::DESCRIPTOR_SET_BUFFERS = {
-	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Spheres
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Planes
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Uniform App
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Vertex Buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Index Buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
-		}
-	}
-};
 decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding { // Textures
@@ -107,7 +83,6 @@ void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::COMPUTE_BIT);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IMAGE_OUTPUT);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_BUFFERS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_GAME_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
@@ -362,11 +337,11 @@ void ShaderRayTracing::Test()
 	auto uniformBuffer = prosper::util::create_buffer(dev,bufCreateInfo,&app);
 	rtxTest.uniformBuffer = uniformBuffer;
 
-	auto descSetBuffers = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_BUFFERS);
+	/*auto descSetBuffers = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_BUFFERS);
 	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*sphereBuffer,0);
 	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*planeBuffer,1);
 	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*descSetBuffers)->get_descriptor_set(0),*uniformBuffer,2);
-	rtxTest.dsgBuffers = descSetBuffers;
+	rtxTest.dsgBuffers = descSetBuffers;*/
 
 	// Model test
 	auto mdl = c_engine->GetClientState()->GetGameState()->LoadModel("player/soldier.wmd");
@@ -378,8 +353,8 @@ void ShaderRayTracing::Test()
 	auto &indexBuffer = vkMesh->GetIndexBuffer();
 
 	rtxTest.numTris = subMesh->GetTriangleCount();
-	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*vertBuffer,3);
-	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*indexBuffer,4);
+	//prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*vertBuffer,3);
+	//prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetBuffers)->get_descriptor_set(0),*indexBuffer,4);
 }
 
 #include <wgui/wgui.h>
@@ -389,7 +364,7 @@ bool ShaderRayTracing::ComputeTest()
 {
 	if(CRaytracingComponent::IsRaytracingEnabled() == false)
 		return false;
-	if(rtxTest.dsgBuffers == nullptr)
+	if(rtxTest.uniformBuffer == nullptr)
 	{
 		Test();
 
@@ -406,7 +381,11 @@ bool ShaderRayTracing::ComputeTest()
 		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
 	);
 
-	PushConstants pushConstants {pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount()};
+	auto extents = rtxTest.texture->GetImage()->GetExtents();
+	PushConstants pushConstants {
+		pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount(),
+		extents.width,extents.height,static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene()->GetCamera()->GetFOVRad()
+	};
 
 #if 0
 	static auto *mat = static_cast<CMaterial*>(c_engine->GetClientState()->LoadMaterial("models/player/soldier/soldier_d.wmi"));
@@ -450,7 +429,7 @@ bool ShaderRayTracing::ComputeTest()
 	auto swapChainHeight = 256;
 	auto result = RecordBindDescriptorSets({
 		rtxTest.dsgImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0),
-		rtxTest.dsgBuffers->GetAnvilDescriptorSetGroup().get_descriptor_set(0),
+		//rtxTest.dsgBuffers->GetAnvilDescriptorSetGroup().get_descriptor_set(0),
 		dsgGameScene->GetAnvilDescriptorSetGroup().get_descriptor_set(0),
 		dsgCam->GetAnvilDescriptorSetGroup().get_descriptor_set(0),
 		dsgLights->GetAnvilDescriptorSetGroup().get_descriptor_set(0)

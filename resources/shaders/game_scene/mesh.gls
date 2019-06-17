@@ -1,0 +1,22 @@
+#ifndef F_MESH_GLS
+#define F_MESH_GLS
+
+#define FSUB_MESH_VISIBLE 1
+
+struct SubMeshInfoData
+{
+	vec4 aabbMin;
+	vec4 aabbMax;
+
+	uint flags;
+	uint materialArrayIndex;
+	uint vertexBufferStartIndex;
+	uint indexBufferStartIndex;
+
+	uint vertexWeightBufferIndex;
+	uint entityBufferIndex;
+	uint boneBufferStartIndex;
+	uint numTriangles;
+};
+
+#endif

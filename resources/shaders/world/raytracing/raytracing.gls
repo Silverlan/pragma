@@ -1,35 +1,34 @@
 #version 450
 
-// Source: https://github.com/LifeIsGoodMI/Vulkan-GPU-Ray-Tracer/blob/master/VulkanRayTracer/VulkanRayTracer/shaders/raytracing.comp
-
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-layout (local_size_x = 4, local_size_y = 4) in;
-layout (set=0,binding = 0, rgba8) uniform image2D computeImage;
+layout (local_size_x = 4,local_size_y = 4) in;
 
-#define SHADER_UNIFORM_CAMERA_SET 3
+#define SHADER_OUTPUT_IMAGE_SET 0
+#define SHADER_OUTPUT_IMAGE_BINDING 0
+
+#define SHADER_GAME_SCENE_SET 1
+#define SHADER_GAME_SCENE_BINDING 0
+
+#define SHADER_UNIFORM_CAMERA_SET 2
 #define SHADER_UNIFORM_CAMERA_BINDING 0
 
-#define SHADER_UNIFORM_RENDER_SETTINGS_SET 3
+#define SHADER_UNIFORM_RENDER_SETTINGS_SET 2
 #define SHADER_UNIFORM_RENDER_SETTINGS_BINDING 1
 
-#define SHADER_UNIFORM_LIGHT_SOURCES_SET 4
+#define SHADER_UNIFORM_LIGHT_SOURCES_SET 3
 #define SHADER_UNIFORM_LIGHT_SOURCES_BINDING 0
+
+layout(set = SHADER_OUTPUT_IMAGE_SET,binding = SHADER_OUTPUT_IMAGE_BINDING,rgba8) uniform image2D raytracedImage;
+
 #include "/modules/sh_camera_info.gls"
 #include "/modules/sh_rendersettings.gls"
 #include "/modules/sh_math.gls"
 #include "/modules/sh_light_source.gls"
+#include "/math/camera.gls"
+#include "/math/intersection.gls"
 #include "game_scene_data.gls"
-
-
-#define PI 3.141592
-#define Inf 1000000.0
-#define Epsilon 0.0001
-
-#define MaxBounces 4
-#define SHADOW 0.35
-
 
 struct Ray
 {
@@ -37,539 +36,150 @@ struct Ray
 	vec3 direction;
 };
 
-struct Material
-{
-	vec3 color;
-	int type;
-};
-
-
-struct Plane
-{
-	vec3 normal;
-	float leng;
-
-	Material mat;
-};
-
-struct Sphere
-{
-	vec3 position;
-	float radius;
-
-	Material mat;
-};
-
-
-layout (std430,set=1,binding = 0) buffer Spheres
-{
-	Sphere spheres[ ];
-};
-
-layout (std430,set=1,binding = 1) buffer Planes
-{
-	Plane planes[ ];
-};
-
-layout (set=1,binding = 2) uniform App
-{
-	float time;
-} app;
-
-struct Vertex
-{
-	vec4 position;
-	vec4 normal;
-	vec4 tangent;
-	vec4 biTangent;
-	vec4 uv;
-};
-
-layout (std430,set=2,binding = 5) buffer VertexBuffer
-{
-	Vertex verts[ ];
-} vertexBuffer;
-
-Vertex get_vertex(uint index)
-{
-	return vertexBuffer.verts[index];
-}
-
-layout (std430,set=2,binding = 6) buffer IndexBuffer
-{
-	uint indices[];
-} indexBuffer;
-
-struct VertexWeight
-{
-	ivec4 boneIds;
-	vec4 weights;
-};
-
-layout (std430,set=2,binding = 7) buffer VertexWeightBuffer
-{
-	VertexWeight weights[ ];
-} vertexWeightBuffer;
-
-layout (std430,set=2,binding = 8) buffer AlphaBuffer
-{
-	vec2 alpha[ ];
-} alphaBuffer;
-
 layout(std430,set = SHADER_UNIFORM_LIGHT_SOURCES_SET,binding = SHADER_UNIFORM_LIGHT_SOURCES_BINDING) readonly buffer LightBuffer {
 	LightSourceData data[];
 } lightBuffer;
 
-uint get_triangle_vertex_index(uint index)
-{
-	uint indexBufferIndex = indexBuffer.indices[index /2];
-	if((index %2) != 0)
-		indexBufferIndex = indexBufferIndex>>16;
-	else
-		indexBufferIndex = (indexBufferIndex<<16)>>16;
-	return indexBufferIndex;
-}
-
 //////////////////////////////
-
-vec3 CameraTest (in float x, in float y)
-{
-	ivec2 dimensions = imageSize(computeImage);
-	float w = dimensions.x;
-	float h = dimensions.y;
-
-	float fovX = PI / 4;
-	float fovY = (h / w) * fovX;
-
-	float _x = ((2 * x - w) / w) * tan(fovX);
-	float _y = -((2 * y - h) / h) * tan(fovY);
-
-	return vec3(_x, _y, -1.0);
-}
-
-
-float PlaneIntersection (in Ray ray, in Plane plane)
-{
-	float d0 = dot(plane.normal, ray.direction);
-	
-	if (d0 != 0)
-	{
-		float t = -1 * (((dot(plane.normal, ray.origin)) + plane.leng) / d0);
-		return (t > Epsilon) ? t : 0;
-	}
-
-	return 0;
-}
-
-float SphereIntersection (in Ray ray, in Sphere sphere)
-{
-	vec3 delta = ray.origin - sphere.position;
-	float b = dot((delta * 2), ray.direction);
-	float c = dot(delta, delta) - (sphere.radius * sphere.radius);
-
-	float disc = b * b - 4 * c;
-	if (disc < 0)
-		return 0;
-	else
-		disc = sqrt(disc);
-
-	// Always 2 solutions when pulling the square root.
-	float result1 = -b + disc;
-	float result2 = -b - disc;
-
-	return (result2 > Epsilon) ? result2 / 2 : ((result1 > Epsilon) ? result1 / 2 : 0);
-}
-
-vec3 GetSphereNormal (in vec3 hitPos, in Sphere sphere)
-{
-	return (hitPos - sphere.position) / sphere.radius;
-}
-
-bool TryGetIntersection (in Ray ray, out int id, out float distance, out bool sphere)
-{
-	id = -1;
-	distance = Inf;
-	
-	for (int i = 0; i < planes.length(); i++)
-	{
-		Plane p = planes[i];
-		float dist = PlaneIntersection (ray, p);
-		if (dist > Epsilon && dist < distance)
-		{
-			distance = dist;
-			id = i;
-			sphere = false;
-		}
-	}
-	
-	for (int i = 0; i < spheres.length(); i++)
-	{
-		Sphere s = spheres[i];
-		float dist = SphereIntersection(ray, s);
-		if (dist > Epsilon && dist < distance)
-		{
-			distance = dist;
-			id = i;
-			sphere = true;
-		}
-	}
-
-	return (id > -1) ? true : false;
-}
-
-float GetShadow (in Ray ray, in int id, in bool isSphere, in float maxDist)
-{
-	float distance = Inf;
-
-	for (int i = 0; i < planes.length(); i++)
-	{
-		Plane p = planes[i];
-		if (!isSphere && i == id)
-			continue;
-
-		float dist = PlaneIntersection (ray, p);
-		if (dist > Epsilon && dist < distance)
-		{
-			distance = dist;
-		}
-	}
-	for (int i = 0; i < spheres.length(); i++)
-	{
-		Sphere s = spheres[i];
-		if (isSphere && i == id)
-			continue;
-
-		float dist = SphereIntersection(ray, s);
-		if (dist > Epsilon && dist < distance)
-		{
-			distance = dist;
-		}
-	}
-
-	if (distance < maxDist)
-		return SHADOW;
-
-	return 1.0;
-}
-
-
-void ReflectRay(inout Ray ray, in vec3 hitNormal, in Material mat)
-{
-	// Specular BRDF
-	if (mat.type == 2)
-	{
-		float cost = dot(ray.direction, hitNormal);
-		vec3 direction = (ray.direction - hitNormal * (cost * 2));
-		ray.direction = normalize(direction);
-	}
-}
-
-
-vec3 lightPos ()
-{
-	return vec3(0, 2.95, -3.2);
-}
-
-
-vec3 Light(in vec3 hitPoint)
-{
-	if ((abs(hitPoint.y - 2.95) < 0.1) && hitPoint.x >= -0.6 && hitPoint.x <= 0.6
-		&& hitPoint.z <= -3.05 && hitPoint.z >= -3.45)
-		return vec3(50, 50, 50);
-
-	return vec3(0, 0, 0);
-}
-
-#include "../../math/intersection.gls"
 
 layout(push_constant) uniform PushConstants {
 	uint numMeshes;
 	uint numLights;
+	uint width;
+	uint height;
+	float fov;
 } u_pushConstants;
 
-vec2 barycentric_to_uv(in vec3 v0,in vec3 v1,in vec3 v2,in vec2 uv0,in vec2 uv1,in vec2 uv2,in vec3 tuv)
+// See https://de45xmedrsdbp.cloudfront.net/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf ("Real Shading in Unreal Engine 4" - Lighting Model)
+float calc_light_falloff(in float distance,in float radius)
 {
-	// calculate vectors from point f to vertices p1, p2 and p3:
-	vec3 f1 = v0-tuv;
-	vec3 f2 = v1-tuv;
-	vec3 f3 = v2-tuv;
-	// calculate the areas and factors (order of parameters doesn't matter):
-	float a = length(cross(v0-v1, v0-v2)); // main triangle area a
-	float a1 = length(cross(f2, f3)) / a; // p1's triangle area / a
-	float a2 = length(cross(f3, f1)) / a; // p2's triangle area / a 
-	float a3 = length(cross(f1, f2)) / a; // p3's triangle area / a
-	// find the uv corresponding to point f (uv1/uv2/uv3 are associated to p1/p2/p3):
-	return uv0 *a1 +uv1 *a2 +uv2 *a3;
+	float falloff = 0;
+	float fDistOverRadius = pow4(distance /radius);
+	falloff = pow2(clamp(1.0 -fDistOverRadius,0.0,1.0));
+	falloff /= pow2(units_to_meters(distance)) +1.0;
+	return falloff;
+}
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = M_PI * denom * denom;
+
+    return nom / max(denom, 0.001); // prevent divide by zero for roughness=0.0 and NdotH=1.0
+}
+// ----------------------------------------------------------------------------
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+
+    return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
+}
+// ----------------------------------------------------------------------------
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+void calculate_point_lighting(in vec3 rayDir,in vec3 worldPos,in vec3 normal,in LightSourceData light,in MaterialInfo matInfo,in vec2 uv,float distToLightSource,inout vec3 fragColor)
+{
+	vec3 albedo = texture(u_textures[matInfo.albedoTextureArrayIndex],vec2(uv)).rgb;
+	albedo = vec3(pow(albedo.r,2.2),pow(albedo.g,2.2),pow(albedo.b,2.2));
+	float ao = pow(texture(u_textures[matInfo.ambientOcclusionTextureArrayIndex],vec2(uv)).r,2.2);
+	float metallic = texture(u_textures[matInfo.metallicTextureArrayIndex],vec2(uv)).r;
+	float roughness = texture(u_textures[matInfo.roughnessTextureArrayIndex],vec2(uv)).r;
+
+	vec3 F0 = vec3(0.04); 
+	F0 = mix(F0, albedo, metallic);
+	vec3 Lo = vec3(0.0);
+
+	vec3 V = -rayDir;
+	vec3 N = normal;
+	//float distScale = calc_light_falloff(distToLightSource,light.position.w);
+	//distScale = pow(distScale,light.falloffExponent);
+
+		vec3 L = normalize(light.position.xyz -worldPos);
+		vec3 H = normalize(V + L);
+		float attenuation = 1.0 / (distToLightSource * distToLightSource);
+		vec3 radiance = light.color.rgb *light.color.a *1000 * attenuation; // ???
+
+        // Cook-Torrance BRDF
+        float NDF = DistributionGGX(N, H, roughness);   
+        float G   = GeometrySmith(N, V, L, roughness);      
+        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+           
+        vec3 nominator    = NDF * G * F; 
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+        vec3 specular = nominator / max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
+        
+        // kS is equal to Fresnel
+        vec3 kS = F;
+        // for energy conservation, the diffuse and specular light can't
+        // be above 1.0 (unless the surface emits light); to preserve this
+        // relationship the diffuse component (kD) should equal 1.0 - kS.
+        vec3 kD = vec3(1.0) - kS;
+        // multiply kD by the inverse metalness such that only non-metals 
+        // have diffuse lighting, or a linear blend if partly metal (pure metals
+        // have no diffuse light).
+        kD *= 1.0 - metallic;	  
+
+        // scale light by NdotL
+        float NdotL = max(dot(N, L), 0.0);        
+
+        // add to outgoing radiance Lo
+Lo += (kD * albedo / M_PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+
+    // ambient lighting (note that the next IBL tutorial will replace 
+    // this ambient lighting with environment lighting).
+    vec3 ambient = vec3(0.03) * albedo * ao;
+
+    vec3 color = ambient + Lo;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
+
+	fragColor = color;//light.color.rgb *attenuation;//color;
 }
 
-vec3 barycentric_to_pos(in vec3 v0,in vec3 v1,in vec3 v2,in vec3 p0,in vec3 p1,in vec3 p2,in vec3 tuv)
+void calculate_raycast_lighting(in vec3 rayDir,in vec3 hitPoint,in vec3 hitNormal,in MaterialInfo matInfo,in vec2 uv,inout vec3 fragColor)
 {
-	// calculate vectors from point f to vertices p1, p2 and p3:
-	vec3 f1 = v0-tuv;
-	vec3 f2 = v1-tuv;
-	vec3 f3 = v2-tuv;
-	// calculate the areas and factors (order of parameters doesn't matter):
-	float a = length(cross(v0-v1, v0-v2)); // main triangle area a
-	float a1 = length(cross(f2, f3)) / a; // p1's triangle area / a
-	float a2 = length(cross(f3, f1)) / a; // p2's triangle area / a 
-	float a3 = length(cross(f1, f2)) / a; // p3's triangle area / a
-	// find the uv corresponding to point f (uv1/uv2/uv3 are associated to p1/p2/p3):
-	return p0 *a1 +p1 *a2 +p2 *a3;
-}
-
-bool LineTriangle(in vec3 lineOrigin,in vec3 lineDir,in vec3 v0,in vec3 v1,in vec3 v2,out float t,out float u,out float v,in bool bCull)
-{
-	float EPSILON = 0.000001;
-	t = 0.0;
-	u = 0.0;
-	v = 0.0;
-	vec3 edge1 = v1 -v0;
-	vec3 edge2 = v2 -v0;
-	vec3 pvec = cross(lineDir,edge2);
-
-	float det = dot(edge1,pvec);
-
-	if(bCull == true)
+	for(int i=0;i<u_pushConstants.numLights;++i)
 	{
-		if(det < EPSILON)
-			return false;
-		vec3 tvec = lineOrigin -v0;
-		u = dot(tvec,pvec);
-		if(u < 0.0 || u > det)
-			return false;
-		vec3 qvec = cross(tvec,edge1);
-		v = dot(lineDir,qvec);
-		if(v < 0.0 || (u +v) > det)
-			return false;
-		t = dot(edge2,qvec);
-		float invDet = 1.0 /det;
-		t *= invDet;
-		u *= invDet;
-		v *= invDet;
-	}
-	else
-	{
-		if(det > -EPSILON && det < EPSILON)
-			return false;
-		float invDet = 1.0 /det;
-		vec3 tvec = lineOrigin -v0;
-		u = dot(tvec,pvec) *invDet;
-		if(u < 0.0 || u > 1.0)
-			return false;
-		vec3 qvec = cross(tvec,edge1);
-		v = dot(lineDir,qvec) *invDet;
-		if(v < 0.0 || (u +v) > 1.0)
-			return false;
-		t = dot(edge2,qvec) *invDet;
-	}
-	return true;
-}
-#if 0
-vec3 RayMeshIntersection (in Ray ray,ivec2 uv,inout float fragDepth)
-{
-	vec3 origin = vec3(0,0,0);
-
-	mat4 matTranslation = mat4(
-		1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		1092.41943,-193.533966,628.313477,1
-	);
-	origin = (matTranslation *vec4(origin,1.0)).xyz;
-	mat4 matRotation = mat4(
-		-0.0100618601,0.000000000,0.999949396,0.000000000,
-		0,1,0,0,
-		-0.999949396,0,-0.0100618601,0.000000000,
-		0,0,0,1
-	);
-	mat4 matTransformation = mat4(
-		-0.0100618601,0.000000000,0.999949396,0,
-		0,1,0,0,
-		-0.999949396,0,-0.0100618601,0,
-		1112.41846,-193.533966,628.514709,1.00000000
-	);
-	vec3 meshMin = vec3(-18.7964401,-2.38540220,-7.20599365);
-	vec3 meshMax = vec3(17.2156773,70.8886032,12.7236824);
-
-	vec3 rayOrigin = ray.origin;
-	vec3 rayDir = ray.direction;
-	rayOrigin -= origin;
-	rayOrigin = (vec4(rayOrigin,1.0) *inverse(matRotation)).xyz;
-	rayDir = normalize((vec4(rayDir,0.0) *inverse(matRotation)).xyz);
-	//rayDir = (vec4(rayDir,1.0) *matRotation).xyz;
-	//rayOrigin = ray.origin -origin;
-	vec3 rayDirInv = vec3(
-		(rayDir.x != 0) ? (1.0 /rayDir.x) : 0.0,
-		(rayDir.y != 0) ? (1.0 /rayDir.y) : 0.0,
-		(rayDir.z != 0) ? (1.0 /rayDir.z) : 0.0
-	);
-	vec3 outColor = vec3(0,0,0);
-	//rayOrigin = (vec4(rayOrigin,1.0) *inverse(matRotation)).xyz;
-	if(test_ray_aabb(rayOrigin,rayDirInv,meshMin,meshMax))
-	{
-		// TODO: Compare against depth buffer?
-		//finalColor = vec3(0,0,0);
-
-		/*vec3 v0 = origin +vec3(-18.7964401,-2.38540220,-7.20599365) *scale;
-		vec3 v1 = origin +vec3(17.2156773,70.8886032,12.7236824) *scale;
-		vec3 v2 = origin +vec3(13.2156773,25.8886032,6.7236824) *scale;
-	v0 += ray.origin;
-	v1 += ray.origin;
-	v2 += ray.origin;
-
-		vec3 res = test_ray_tri(ray.origin,ray.direction,v0,v1,v2);
-		if(res.x > 0.0)
+		LightSourceData light = lightBuffer.data[i];
+		uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
+		if((light.flags &flags) == flags)
 		{
-			finalColor = vec3(0,0,0);
-		}*/
-
-		vec3 testOrigin = rayOrigin;
-		uint numTris = u_pushConstants.numTris;
-		for(uint i=0;i<numTris;++i)
-		{
-			uint triVertexOffset = i *3;
-			uint idx0 = get_triangle_vertex_index(triVertexOffset);
-			uint idx1 = get_triangle_vertex_index(triVertexOffset +1);
-			uint idx2 = get_triangle_vertex_index(triVertexOffset +2);
-
-			Vertex v0 = get_vertex(idx0);
-			Vertex v1 = get_vertex(idx1);
-			Vertex v2 = get_vertex(idx2);
-
-			vec3 pos0 = v0.position.xyz;
-			vec3 pos1 = v1.position.xyz;
-			vec3 pos2 = v2.position.xyz;
-
-			pos0.z = -pos0.z;
-			pos1.z = -pos1.z;
-			pos2.z = -pos2.z;
-
-			float t;
-			float u;
-			float v;
-			//bool rayTriIntersection = rayTriangleIntersect(ray.origin,ray.direction,origin +pos0,origin +pos1,origin +pos2,t,u,v);
-			vec3 tuv = test_ray_tri(testOrigin,rayDir,pos0,pos1,pos2);
-			if(tuv.x > 0.0)
-			{
-				{
-					u = tuv.y;
-					v = tuv.z;
-					t = 1.0 -(u +v);
-					vec3 hitPoint = pos0.xyz *t +pos1.xyz *u +pos2.xyz *v;
-					float depth = length_sqr(hitPoint -testOrigin);
-					if(depth >= fragDepth)
-						continue;
-					fragDepth = depth;
-
-		//vec3 emission = Light(hitPoint);
-		//if (length(emission) > Epsilon)
-			//return finalColor * emission;
-					//vec3 emission = Light(origin);
-					vec2 uv = v0.uv.xy *t +v1.uv.xy *u +v2.uv.xy *v;
-					vec4 smp = texture(u_textures,vec3(uv,1));
-					outColor = smp.xyz;
-
-					vec3 normal = normalize(v0.normal.xyz *t +v1.normal.xyz *u +v2.normal.xyz *v);
-					for(int i=0;i<u_pushConstants.numLights;++i)
-					{
-						LightSourceData light = lightBuffer.data[i];
-						uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
-						if((light.flags &flags) == flags)
-						{
-							outColor.x = 0;
-						}
-					}
-				}
-			}
+			float d = distance(hitPoint,light.position.xyz);
+			calculate_point_lighting(rayDir,hitPoint,hitNormal,light,matInfo,uv,d,fragColor);
 		}
 	}
-	return outColor;
 }
 
-//////////////////////////////
-
-
-vec3 Trace (inout Ray ray, out vec3 hitNormal)
-{
-	vec3 finalColor = vec3(1.0);
-
-	for (int i = 0; i < MaxBounces; i++)
-	{
-		int id;
-		float dist;
-		bool isSphere; // Is the hitted object a sphere, or a plane ?
-		bool intersection = TryGetIntersection(ray, id, dist, isSphere);
-		if (!intersection)
-		{
-			finalColor *= vec3(1.0);
-			break;
-		}
-
-		
-		Sphere s = spheres[id];
-		Plane p = planes[id];
-		vec3 hitPoint = ray.origin + ray.direction * dist;
-		ray.origin = hitPoint;
-		hitNormal = (isSphere) ? GetSphereNormal(hitPoint, s) : p.normal;
-
-		Material mat = (isSphere) ? s.mat : p.mat;
-
-
-		vec3 emission = Light(hitPoint);
-		if (length(emission) > Epsilon)
-			return finalColor * emission;
-
-		ReflectRay(ray, hitNormal, mat);
-
-		if (mat.type == 1)
-		{
-			vec3 lightDir = normalize(lightPos() - hitPoint);
-			float lightAttenuation = clamp(dot(hitNormal, lightDir), 0.1, 1.0);
-
-			finalColor = finalColor * lightAttenuation * mat.color;
-
-			// Shadow Ray
-			Ray shadowRay;
-			shadowRay.origin = hitPoint;
-			shadowRay.direction = lightDir;
-			float maxDist = length(lightPos() - hitPoint);
-			
-			finalColor *= GetShadow(shadowRay, id, isSphere, maxDist);
-			//
-
-			break;
-		}
-	}
-
-	return finalColor;
-}
-#endif
-
-void RayCastMesh(
+void raycast_mesh_detail(
 	in vec3 rayOrigin,in vec3 rayDir,
 	in EntityInstanceData instanceData,in SubMeshInfoData subMeshInfo,in MaterialInfo matInfo,
 	inout float fragDepth,inout vec3 fragColor
 )
 {
-	// TODO: Compare against depth buffer?
-	//finalColor = vec3(0,0,0);
-
-	/*vec3 v0 = origin +vec3(-18.7964401,-2.38540220,-7.20599365) *scale;
-	vec3 v1 = origin +vec3(17.2156773,70.8886032,12.7236824) *scale;
-	vec3 v2 = origin +vec3(13.2156773,25.8886032,6.7236824) *scale;
-v0 += ray.origin;
-v1 += ray.origin;
-v2 += ray.origin;
-
-	vec3 res = test_ray_tri(ray.origin,ray.direction,v0,v1,v2);
-	if(res.x > 0.0)
-	{
-		finalColor = vec3(0,0,0);
-	}*/
-
-
-	// TODO: Vertex buffer, index buffer from storage
-	vec3 testOrigin = rayOrigin;
 	uint numTris = subMeshInfo.numTriangles;
 	for(uint i=0;i<numTris;++i)
 	{
@@ -620,7 +230,7 @@ v2 += ray.origin;
 		float u;
 		float v;
 		//bool rayTriIntersection = rayTriangleIntersect(ray.origin,ray.direction,origin +pos0,origin +pos1,origin +pos2,t,u,v);
-		vec3 tuv = test_ray_tri(testOrigin,rayDir,pos0,pos1,pos2);
+		vec3 tuv = intersect_ray_triangle(rayOrigin,rayDir,pos0,pos1,pos2);
 		if(tuv.x > 0.0)
 		{
 			{
@@ -628,7 +238,7 @@ v2 += ray.origin;
 				v = tuv.z;
 				t = 1.0 -(u +v);
 				vec3 hitPoint = pos0.xyz *t +pos1.xyz *u +pos2.xyz *v;
-				float depth = length_sqr(hitPoint -testOrigin);
+				float depth = length_sqr(hitPoint -rayOrigin);
 				if(depth >= fragDepth)
 					continue;
 				fragDepth = depth;
@@ -638,39 +248,22 @@ v2 += ray.origin;
 		//return finalColor * emission;
 				//vec3 emission = Light(origin);
 				vec2 uv = v0.uv.xy *t +v1.uv.xy *u +v2.uv.xy *v;
-				vec4 smp = texture(u_textures[matInfo.diffuseTextureArrayIndex],vec2(uv));
-				fragColor = smp.xyz;
 
 				vec3 normal = normalize(v0.normal.xyz *t +v1.normal.xyz *u +v2.normal.xyz *v);
-				/*for(int i=0;i<u_pushConstants.numLights;++i)
-				{
-					LightSourceData light = lightBuffer.data[i];
-					uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
-					if((light.flags &flags) == flags)
-					{
-						fragColor.x = 0;
-					}
-				}*/
+				// TODO: Normal map
+				calculate_raycast_lighting(rayDir,hitPoint,normal,matInfo,uv,fragColor);
 			}
 		}
 	}
 }
 
-void RayMeshIntersection (
+void raycast_mesh(
 	in Ray ray,
 	in EntityInstanceData instanceData,in SubMeshInfoData subMeshInfo,in MaterialInfo matInfo,
 	ivec2 uv,inout float fragDepth,inout vec3 fragColor
 )
 {
-	vec3 origin = vec3(0,0,0);
-
-	mat4 matTranslation = mat4(
-		1.0,0.0,0.0,0.0,
-		0.0,1.0,0.0,0.0,
-		0.0,0.0,1.0,0.0,
-		0,0,0,1//instanceData.M[3][0],instanceData.M[3][1],instanceData.M[3][2],1.0
-	);
-	origin = (matTranslation *vec4(origin,1.0)).xyz;
+	vec3 origin = vec3(instanceData.M[3][0],instanceData.M[3][1],instanceData.M[3][2]);
 	mat4 matRotation = mat4(
 		instanceData.M[0][0],instanceData.M[0][1],instanceData.M[0][2],0.0,
 		instanceData.M[1][0],instanceData.M[1][1],instanceData.M[1][2],0.0,
@@ -685,80 +278,44 @@ void RayMeshIntersection (
 	rayOrigin -= origin;
 	rayOrigin = (vec4(rayOrigin,1.0) *matRotation).xyz;
 	rayDir = normalize((vec4(rayDir,0.0) *matRotation).xyz);
-	//rayDir = (vec4(rayDir,1.0) *matRotation).xyz;
-	//rayOrigin = ray.origin -origin;
 	vec3 rayDirInv = vec3(
 		(rayDir.x != 0) ? (1.0 /rayDir.x) : 0.0,
 		(rayDir.y != 0) ? (1.0 /rayDir.y) : 0.0,
 		(rayDir.z != 0) ? (1.0 /rayDir.z) : 0.0
 	);
 	vec3 outColor = vec3(0,0,0);
-	//rayOrigin = (vec4(rayOrigin,1.0) *inverse(matRotation)).xyz;
-	if(test_ray_aabb(rayOrigin,rayDirInv,meshMin,meshMax))
-	{
-		RayCastMesh(rayOrigin,rayDir,instanceData,subMeshInfo,matInfo,fragDepth,fragColor);
+	if(intersect_ray_aabb(rayOrigin,rayDirInv,meshMin,meshMax) == false)
 		return;
-	}
-	//fragColor = vec3(1,0,0);//outColor;
-}
-
-
-vec3 get_far_plane_center(in vec3 camOrigin,in vec3 forward,in float farZ) {return camOrigin +forward *farZ;}
-
-vec2 get_far_plane_size(in float fov,in float farZ,in float aspectRatio)
-{
-	float y = (-(2.0 *tan(fov /2.0) *farZ)) *2.0;
-	return vec2(
-		y,
-		y//y *aspectRatio
-	);
-}
-
-vec3 calc_far_plane_point(in vec3 camOrigin,in vec3 forward,in vec3 right,in vec3 up,in float fov,float farZ,float aspectRatio,in vec2 uv)
-{
-	vec3 center = get_far_plane_center(camOrigin,forward,farZ);
-	vec2 planeBounds = get_far_plane_size(fov,farZ,aspectRatio);
-	center += right *-(planeBounds.x /2.0 *(uv.x -0.5)) +up *(planeBounds.y /2.0 *(uv.y -0.5));
-	return center;
+	raycast_mesh_detail(rayOrigin,rayDir,instanceData,subMeshInfo,matInfo,fragDepth,fragColor);
 }
 
 void main()
 {
-	ivec2 pxCoords = ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
-
-	// https://www.shadertoy.com/view/MlGcDz
+	ivec2 fragCoords = ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
 
 	Ray ray;
-	ray.origin = vec3(0, 0, 0.0);
-	ray.origin = vec3(0,0,0.0);
-	vec3 cam = CameraTest(pxCoords.x,pxCoords.y);
-
 	ray.origin = u_renderSettings.posCam;
-	uint width = 640;
-	uint height = 512;
 	vec3 rayEndPoint = calc_far_plane_point(
 		ray.origin, // camPos
 		vec3(0,0,1),vec3(-1,0,0),vec3(0,1,0), // forward, right, up
-		radians(90), // fov
+		u_pushConstants.fov, // fov
 		u_renderSettings.farZ, // farPlane
-		float(height) /float(width), // aspectRatio
-		vec2(pxCoords.x /float(width),pxCoords.y /float(height)) // uv
+		float(u_pushConstants.height) /float(u_pushConstants.width), // aspectRatio
+		vec2(fragCoords.x /float(u_pushConstants.width),fragCoords.y /float(u_pushConstants.height)) // uv
 	);
-	cam = rayEndPoint;
 
-	ray.direction = normalize( (cam - ray.origin));
+	ray.direction = normalize(rayEndPoint -ray.origin);
+
+	// Apply camera rotation
 	ray.direction = (vec4(-ray.direction.x,ray.direction.y,-ray.direction.z,0.0) *u_camera.V).xyz;
 	ray.direction = normalize(ray.direction);
 
-	vec3 finalColor = vec3(0.0);
+	vec3 fragColor = vec3(0.0);
 	vec3 hitNormal;
-	//finalColor = Trace(ray, hitNormal);	
 
-	float depth = FLT_MAX;
-	/*finalColor = RayMeshIntersection(ray,pxCoords,depth);
-*/
+	float fragDepth = FLT_MAX;
 
-	// Iterate scene
+	// Iterate scene geometry
 	uint numMeshes = u_pushConstants.numMeshes;
 	for(uint i=0;i<numMeshes;++i)
 	{
@@ -767,32 +324,10 @@ void main()
 			continue;
 		MaterialInfo matInfo = materialInfoBuffer.data[subMeshInfo.materialArrayIndex];
 		EntityInstanceData entData = entityInstanceBuffer.data[subMeshInfo.entityBufferIndex];
-		RayMeshIntersection(ray,entData,subMeshInfo,matInfo,pxCoords,depth,finalColor);
-
-		/*uint vertexBufferStartOffset = subMeshInfo.vertexBufferStartIndex;
-		uint indexBufferStartOffset = subMeshInfo.indexBufferStartIndex;
-		for(uint i=0;i<subMeshInfo.numTriangles;++i)
-		{
-
-			// Offset = indexBufferStart +i
-		}*/
-		// TODO
-
-
-/*
-	uint materialArrayIndex;
-	uint vertexBufferIndex;
-	uint indexBufferIndex;
-	uint vertexWeightBufferStartIndex;
-	uint entityBufferIndex;
-	uint boneBufferStartIndex;
-	uint flags;
-
-	vec3 aabbMin;
-	vec3 aabbMax;
-	*/
+		if(subMeshInfo.entityBufferIndex == 0) // TODO: This condition is for testing only
+			raycast_mesh(ray,entData,subMeshInfo,matInfo,fragCoords,fragDepth,fragColor);
 	}
-	finalColor = vec3(clamp(finalColor.x, 0.0, 1.0), clamp(finalColor.y, 0.0, 1.0), clamp(finalColor.z, 0.0, 1.0));
+	fragColor = vec3(clamp(fragColor.x,0.0,1.0),clamp(fragColor.y,0.0,1.0),clamp(fragColor.z,0.0,1.0));
 
-	imageStore(computeImage, pxCoords, vec4(finalColor, 1.0));
+	imageStore(raytracedImage,fragCoords,vec4(fragColor,1.0));
 }

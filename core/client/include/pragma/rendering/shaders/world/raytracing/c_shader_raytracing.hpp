@@ -11,7 +11,6 @@ namespace pragma
 	{
 	public:
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_BUFFERS;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_GAME_SCENE;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
@@ -35,6 +34,9 @@ namespace pragma
 		{
 			uint32_t numMeshes;
 			uint32_t lightCount;
+			uint32_t width;
+			uint32_t height;
+			float fov;
 		};
 #pragma pack(pop)
 

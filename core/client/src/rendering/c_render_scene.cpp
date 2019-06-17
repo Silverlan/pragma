@@ -234,6 +234,7 @@ void CGame::RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuf
 	const auto blurSize = 5.f;
 	const auto kernelSize = 9u;
 	const auto blurAmount = 5u;
+
 	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomBlurTexture->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
 	{

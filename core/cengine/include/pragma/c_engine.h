@@ -90,7 +90,7 @@ public:
 	virtual void CloseConsole() override;
 	virtual bool IsConsoleOpen() const override;
 	void UseFullbrightShader(bool b);
-	uint32_t GetFPSLimit() const;
+	float GetFPSLimit() const;
 	virtual void EndGame() override;
 	virtual bool IsClientConnected() override;
 	bool IsWindowFocused() const;

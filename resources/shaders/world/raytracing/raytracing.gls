@@ -34,6 +34,7 @@ struct Ray
 {
 	vec3 origin;
 	vec3 direction;
+	float distSqr;
 };
 
 layout(std430,set = SHADER_UNIFORM_LIGHT_SOURCES_SET,binding = SHADER_UNIFORM_LIGHT_SOURCES_BINDING) readonly buffer LightBuffer {
@@ -98,86 +99,25 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
-void calculate_point_lighting(in vec3 rayDir,in vec3 worldPos,in vec3 normal,in LightSourceData light,in MaterialInfo matInfo,in vec2 uv,float distToLightSource,inout vec3 fragColor)
+
+struct RaycastHit
 {
-	vec3 albedo = texture(u_textures[matInfo.albedoTextureArrayIndex],vec2(uv)).rgb;
-	albedo = vec3(pow(albedo.r,2.2),pow(albedo.g,2.2),pow(albedo.b,2.2));
-	float ao = pow(texture(u_textures[matInfo.ambientOcclusionTextureArrayIndex],vec2(uv)).r,2.2);
-	float metallic = texture(u_textures[matInfo.metallicTextureArrayIndex],vec2(uv)).r;
-	float roughness = texture(u_textures[matInfo.roughnessTextureArrayIndex],vec2(uv)).r;
-
-	vec3 F0 = vec3(0.04); 
-	F0 = mix(F0, albedo, metallic);
-	vec3 Lo = vec3(0.0);
-
-	vec3 V = -rayDir;
-	vec3 N = normal;
-	//float distScale = calc_light_falloff(distToLightSource,light.position.w);
-	//distScale = pow(distScale,light.falloffExponent);
-
-		vec3 L = normalize(light.position.xyz -worldPos);
-		vec3 H = normalize(V + L);
-		float attenuation = 1.0 / (distToLightSource * distToLightSource);
-		vec3 radiance = light.color.rgb *light.color.a *1000 * attenuation; // ???
-
-        // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, roughness);   
-        float G   = GeometrySmith(N, V, L, roughness);      
-        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
-           
-        vec3 nominator    = NDF * G * F; 
-        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-        vec3 specular = nominator / max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
-        
-        // kS is equal to Fresnel
-        vec3 kS = F;
-        // for energy conservation, the diffuse and specular light can't
-        // be above 1.0 (unless the surface emits light); to preserve this
-        // relationship the diffuse component (kD) should equal 1.0 - kS.
-        vec3 kD = vec3(1.0) - kS;
-        // multiply kD by the inverse metalness such that only non-metals 
-        // have diffuse lighting, or a linear blend if partly metal (pure metals
-        // have no diffuse light).
-        kD *= 1.0 - metallic;	  
-
-        // scale light by NdotL
-        float NdotL = max(dot(N, L), 0.0);        
-
-        // add to outgoing radiance Lo
-Lo += (kD * albedo / M_PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
-
-    vec3 color = ambient + Lo;
-
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
-
-	fragColor = color;//light.color.rgb *attenuation;//color;
-}
-
-void calculate_raycast_lighting(in vec3 rayDir,in vec3 hitPoint,in vec3 hitNormal,in MaterialInfo matInfo,in vec2 uv,inout vec3 fragColor)
-{
-	for(int i=0;i<u_pushConstants.numLights;++i)
-	{
-		LightSourceData light = lightBuffer.data[i];
-		uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
-		if((light.flags &flags) == flags)
-		{
-			float d = distance(hitPoint,light.position.xyz);
-			calculate_point_lighting(rayDir,hitPoint,hitNormal,light,matInfo,uv,d,fragColor);
-		}
-	}
-}
+	float fragDepth;
+	Vertex v0;
+	Vertex v1;
+	Vertex v2;
+	vec3 faceP0;
+	vec3 faceP1;
+	vec3 faceP2;
+	vec3 hitPoint;
+	vec3 tuv;
+	MaterialInfo material;
+};
 
 void raycast_mesh_detail(
 	in vec3 rayOrigin,in vec3 rayDir,
 	in EntityInstanceData instanceData,in SubMeshInfoData subMeshInfo,in MaterialInfo matInfo,
-	inout float fragDepth,inout vec3 fragColor
+	inout RaycastHit hitResult
 )
 {
 	uint numTris = subMeshInfo.numTriangles;
@@ -239,28 +179,38 @@ void raycast_mesh_detail(
 				t = 1.0 -(u +v);
 				vec3 hitPoint = pos0.xyz *t +pos1.xyz *u +pos2.xyz *v;
 				float depth = length_sqr(hitPoint -rayOrigin);
-				if(depth >= fragDepth)
+				if(depth >= hitResult.fragDepth)
 					continue;
-				fragDepth = depth;
+				hitResult.fragDepth = depth;
+				hitResult.hitPoint = hitPoint;
+				hitResult.material = matInfo;
+				hitResult.v0 = v0;
+				hitResult.v1 = v1;
+				hitResult.v2 = v2;
+				hitResult.faceP0 = pos0;
+				hitResult.faceP1 = pos1;
+				hitResult.faceP2 = pos2;
+				hitResult.tuv = vec3(t,u,v);
 
 	//vec3 emission = Light(hitPoint);
 	//if (length(emission) > Epsilon)
 		//return finalColor * emission;
 				//vec3 emission = Light(origin);
-				vec2 uv = v0.uv.xy *t +v1.uv.xy *u +v2.uv.xy *v;
+				//vec2 uv = v0.uv.xy *t +v1.uv.xy *u +v2.uv.xy *v;
 
-				vec3 normal = normalize(v0.normal.xyz *t +v1.normal.xyz *u +v2.normal.xyz *v);
+				//vec3 normal = normalize(v0.normal.xyz *t +v1.normal.xyz *u +v2.normal.xyz *v);
 				// TODO: Normal map
-				calculate_raycast_lighting(rayDir,hitPoint,normal,matInfo,uv,fragColor);
+				//calculate_raycast_lighting(rayDir,hitPoint,normal,matInfo,uv,fragColor);
 			}
 		}
 	}
+
 }
 
 void raycast_mesh(
 	in Ray ray,
 	in EntityInstanceData instanceData,in SubMeshInfoData subMeshInfo,in MaterialInfo matInfo,
-	ivec2 uv,inout float fragDepth,inout vec3 fragColor
+	inout RaycastHit hitResult
 )
 {
 	vec3 origin = vec3(instanceData.M[3][0],instanceData.M[3][1],instanceData.M[3][2]);
@@ -270,8 +220,8 @@ void raycast_mesh(
 		instanceData.M[2][0],instanceData.M[2][1],instanceData.M[2][2],0.0,
 		0.0,0.0,0.0,1.0
 	);
-	vec3 meshMin = subMeshInfo.aabbMin.xyz;
-	vec3 meshMax = subMeshInfo.aabbMax.xyz;
+	vec3 meshMin = subMeshInfo.aabbMin.xyz -vec3(1);
+	vec3 meshMax = subMeshInfo.aabbMax.xyz +vec3(1);
 
 	vec3 rayOrigin = ray.origin;
 	vec3 rayDir = ray.direction;
@@ -286,7 +236,225 @@ void raycast_mesh(
 	vec3 outColor = vec3(0,0,0);
 	if(intersect_ray_aabb(rayOrigin,rayDirInv,meshMin,meshMax) == false)
 		return;
-	raycast_mesh_detail(rayOrigin,rayDir,instanceData,subMeshInfo,matInfo,fragDepth,fragColor);
+	raycast_mesh_detail(rayOrigin,rayDir,instanceData,subMeshInfo,matInfo,hitResult);
+}
+
+void raycast_scene(inout Ray ray,inout RaycastHit hitResult)
+{
+	float fragDepth = hitResult.fragDepth;
+	uint numMeshes = u_pushConstants.numMeshes;
+	for(uint i=0;i<numMeshes;++i)
+	{
+		SubMeshInfoData subMeshInfo = subMeshInfoBuffer.data[i];
+		if((subMeshInfo.flags &FSUB_MESH_VISIBLE) == 0 || subMeshInfo.materialArrayIndex == INVALID_ARRAY_INDEX || subMeshInfo.entityBufferIndex == INVALID_ARRAY_INDEX)
+			continue;
+		MaterialInfo matInfo = materialInfoBuffer.data[subMeshInfo.materialArrayIndex];
+		EntityInstanceData entData = entityInstanceBuffer.data[subMeshInfo.entityBufferIndex];
+		if(subMeshInfo.entityBufferIndex == 0) // TODO: This condition is for testing only
+			raycast_mesh(ray,entData,subMeshInfo,matInfo,hitResult);
+	}
+}
+
+RaycastHit raycast_scene(inout Ray ray)
+{
+	RaycastHit hitResult;
+	hitResult.fragDepth = ray.distSqr;
+	raycast_scene(ray,hitResult);
+	return hitResult;
+}
+
+void calculate_raycast_lighting(in Ray ray,in RaycastHit hitResult,inout vec3 fragColor)
+{
+	/*for(int i=0;i<u_pushConstants.numLights;++i)
+	{
+		LightSourceData light = lightBuffer.data[i];
+		uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
+		if((light.flags &flags) == flags)
+		{
+			float d = distance(hitPoint,light.position.xyz);
+			calculate_point_lighting(rayDir,hitPoint,hitNormal,light,matInfo,uv,d,fragColor);
+		}
+	}*/
+	float t = hitResult.tuv.x;
+	float u = hitResult.tuv.y;
+	float v = hitResult.tuv.z;
+	Vertex v0 = hitResult.v0;
+	Vertex v1 = hitResult.v1;
+	Vertex v2 = hitResult.v2;
+	vec2 uv = v0.uv.xy *t +v1.uv.xy *u +v2.uv.xy *v;
+
+	vec3 albedo = texture(u_textures[hitResult.material.albedoTextureArrayIndex],vec2(uv)).rgb;
+	vec3 texNormal = texture(u_textures[hitResult.material.normalTextureArrayIndex],vec2(uv)).rgb *2.0 -1.0; // TODO: Make sure normal exists!
+	albedo = vec3(pow(albedo.r,2.2),pow(albedo.g,2.2),pow(albedo.b,2.2));
+	if(true)
+	{
+
+		vec3 hitNormal = normalize(v0.normal.xyz *t +v1.normal.xyz *u +v2.normal.xyz *v);
+		vec3 tangent = normalize(v0.tangent.xyz *t +v1.tangent.xyz *u +v2.tangent.xyz *v);
+		vec3 biTangent = normalize(v0.biTangent.xyz *t +v1.biTangent.xyz *u +v2.biTangent.xyz *v);
+		/*vec3 tangent = cross(hitNormal,vec3(0,1,0));
+		float l = length(tangent);
+		if(l <= 0.001)
+		{
+			tangent = cross(hitNormal,vec3(0,0,1));
+			l = length(tangent);
+		}
+		tangent /= l;
+		vec3 biTangent = normalize(cross(hitNormal,tangent));
+//VEC3    t = vec3_cross(worldnormal, new_vec3(0.0, 1.0, 0.0)); 
+//b = vec3_normalize((vec3_cross(worldnormal, t)));
+*/
+		mat3 tbn = mat3(tangent,biTangent,hitNormal);
+		hitNormal = normalize(tbn *texNormal);
+		// TODO
+
+		//vec3 t = v0.tangent.xyz *t +v1.tangent.xyz *u +v2.tangent.xyz *v;
+		//mat3 tbn = mat3();
+
+
+		float ao = pow(texture(u_textures[hitResult.material.ambientOcclusionTextureArrayIndex],vec2(uv)).r,2.2);
+		float metallic = texture(u_textures[hitResult.material.metallicTextureArrayIndex],vec2(uv)).r;
+		float roughness = texture(u_textures[hitResult.material.roughnessTextureArrayIndex],vec2(uv)).r;
+
+		vec3 F0 = vec3(0.04); 
+		F0 = mix(F0, albedo, metallic);
+		vec3 Lo = vec3(0.0);
+
+		vec3 V = -ray.direction;
+		vec3 N = hitNormal;
+
+		for(int i=0;i<u_pushConstants.numLights;++i)
+		{
+			LightSourceData light = lightBuffer.data[i];
+			uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
+			if((light.flags &flags) != flags)
+				continue;
+			vec3 L = normalize(light.position.xyz -hitResult.hitPoint);
+			float distToLightSourceSqr = length_sqr(hitResult.hitPoint -light.position.xyz);
+			/*vec3 L = normalize(light.position.xyz -hitResult.hitPoint);
+			float lightIntensity = light.color.a *10000; // TODO
+
+			// Attenuation
+			float distToLightSourceSqr = length_sqr(hitResult.hitPoint -light.position.xyz);
+			lightIntensity /= 4 *M_PI *distToLightSourceSqr +1.0;
+
+
+			fragColor += albedo / M_PI * light.color.rgb *lightIntensity * max(0.0, dot(normal,L)); 
+*/
+			Ray ray;
+			ray.origin = hitResult.hitPoint +hitNormal *1.0; // TODO: Bias?
+			ray.direction = normalize(L);
+			ray.distSqr = distToLightSourceSqr;
+			RaycastHit shadowRayResult = raycast_scene(ray);
+			if(shadowRayResult.fragDepth < distToLightSourceSqr)
+			{
+				fragColor *= 0.0;
+			}
+			else
+			{
+				vec3 H = normalize(V + L);
+				float attenuation = 1.0 / distToLightSourceSqr;
+				vec3 radiance = light.color.rgb *light.color.a *18000 * attenuation; // ???
+
+		        // Cook-Torrance BRDF
+		        float NDF = DistributionGGX(N, H, roughness);   
+		        float G   = GeometrySmith(N, V, L, roughness);      
+		        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+		           
+		        vec3 nominator    = NDF * G * F; 
+		        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+		        vec3 specular = nominator / max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
+		        
+		        // kS is equal to Fresnel
+		        vec3 kS = F;
+		        // for energy conservation, the diffuse and specular light can't
+		        // be above 1.0 (unless the surface emits light); to preserve this
+		        // relationship the diffuse component (kD) should equal 1.0 - kS.
+		        vec3 kD = vec3(1.0) - kS;
+		        // multiply kD by the inverse metalness such that only non-metals 
+		        // have diffuse lighting, or a linear blend if partly metal (pure metals
+		        // have no diffuse light).
+		        kD *= 1.0 - metallic;	  
+
+		        // scale light by NdotL
+		        float NdotL = max(dot(N, L), 0.0);        
+
+		        // add to outgoing radiance Lo
+				Lo += (kD * albedo / M_PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+			}
+		}
+	    // ambient lighting (note that the next IBL tutorial will replace 
+	    // this ambient lighting with environment lighting).
+	    vec3 ambient = vec3(0.03) * albedo * ao;
+
+	    vec3 color = ambient + Lo;
+
+	    // HDR tonemapping
+	    color = color / (color + vec3(1.0));
+	    // gamma correct
+	   // color = pow(color, vec3(1.0/2.2)); 
+
+		fragColor = color;//light.color.rgb *attenuation;//color;
+		return;
+	}
+
+
+/*
+
+	//float distScale = calc_light_falloff(distToLightSource,light.position.w);
+	//distScale = pow(distScale,light.falloffExponent);
+	for(int i=0;i<u_pushConstants.numLights;++i)
+	{
+		LightSourceData light = lightBuffer.data[i];
+		uint flags = FLIGHT_TURNED_ON | FLIGHT_TYPE_POINT;
+		if((light.flags &flags) != flags)
+			continue;
+		float distToLightSource = distance(hitPos,light.position.xyz);
+		vec3 L = normalize(light.position.xyz -hitPos);
+		vec3 H = normalize(V + L);
+		float attenuation = 1.0 / (distToLightSource * distToLightSource);
+		vec3 radiance = light.color.rgb *light.color.a *1000 * attenuation; // ???
+
+        // Cook-Torrance BRDF
+        float NDF = DistributionGGX(N, H, roughness);   
+        float G   = GeometrySmith(N, V, L, roughness);      
+        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+           
+        vec3 nominator    = NDF * G * F; 
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+        vec3 specular = nominator / max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
+        
+        // kS is equal to Fresnel
+        vec3 kS = F;
+        // for energy conservation, the diffuse and specular light can't
+        // be above 1.0 (unless the surface emits light); to preserve this
+        // relationship the diffuse component (kD) should equal 1.0 - kS.
+        vec3 kD = vec3(1.0) - kS;
+        // multiply kD by the inverse metalness such that only non-metals 
+        // have diffuse lighting, or a linear blend if partly metal (pure metals
+        // have no diffuse light).
+        kD *= 1.0 - metallic;	  
+
+        // scale light by NdotL
+        float NdotL = max(dot(N, L), 0.0);        
+
+        // add to outgoing radiance Lo
+		Lo += (kD * albedo / M_PI + specular) * radiance * NdotL; // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+	}
+
+    // ambient lighting (note that the next IBL tutorial will replace 
+    // this ambient lighting with environment lighting).
+    vec3 ambient = vec3(0.03) * albedo * ao;
+
+    vec3 color = ambient + Lo;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
+
+	fragColor = color;//light.color.rgb *attenuation;//color;
+	*/
 }
 
 void main()
@@ -295,6 +463,7 @@ void main()
 
 	Ray ray;
 	ray.origin = u_renderSettings.posCam;
+	ray.distSqr = FLT_MAX;
 	vec3 rayEndPoint = calc_far_plane_point(
 		ray.origin, // camPos
 		vec3(0,0,1),vec3(-1,0,0),vec3(0,1,0), // forward, right, up
@@ -305,28 +474,68 @@ void main()
 	);
 
 	ray.direction = normalize(rayEndPoint -ray.origin);
-
 	// Apply camera rotation
 	ray.direction = (vec4(-ray.direction.x,ray.direction.y,-ray.direction.z,0.0) *u_camera.V).xyz;
 	ray.direction = normalize(ray.direction);
 
-	vec3 fragColor = vec3(0.0);
-	vec3 hitNormal;
 
-	float fragDepth = FLT_MAX;
+	vec3 fragColor = vec3(0.0);
 
 	// Iterate scene geometry
-	uint numMeshes = u_pushConstants.numMeshes;
-	for(uint i=0;i<numMeshes;++i)
+	uint reflectionDepth = 0;
+	uint maxReflectionDepth = 1;
+	while(reflectionDepth < maxReflectionDepth)
 	{
-		SubMeshInfoData subMeshInfo = subMeshInfoBuffer.data[i];
-		if((subMeshInfo.flags &FSUB_MESH_VISIBLE) == 0 || subMeshInfo.materialArrayIndex == INVALID_ARRAY_INDEX || subMeshInfo.entityBufferIndex == INVALID_ARRAY_INDEX)
-			continue;
-		MaterialInfo matInfo = materialInfoBuffer.data[subMeshInfo.materialArrayIndex];
-		EntityInstanceData entData = entityInstanceBuffer.data[subMeshInfo.entityBufferIndex];
-		if(subMeshInfo.entityBufferIndex == 0) // TODO: This condition is for testing only
-			raycast_mesh(ray,entData,subMeshInfo,matInfo,fragCoords,fragDepth,fragColor);
+		++reflectionDepth;
+		RaycastHit hitResult = raycast_scene(ray);
+		if(hitResult.fragDepth == FLT_MAX)
+			break; // Nothing has been hit
+		calculate_raycast_lighting(ray,hitResult,fragColor);
+
+		if(hitResult.fragDepth != FLT_MAX)
+		{
+			vec3 normal = normalize(hitResult.v0.normal.xyz *hitResult.tuv.x +hitResult.v1.normal.xyz *hitResult.tuv.y +hitResult.v2.normal.xyz *hitResult.tuv.z);
+			ray.origin = hitResult.hitPoint;
+			ray.direction = reflect(ray.direction,normal);
+			ray.distSqr = FLT_MAX;
+			hitResult = raycast_scene(ray);
+			vec3 reflectedColor = vec3(0.0);
+			calculate_raycast_lighting(ray,hitResult,reflectedColor);
+
+
+			/*if(hitResult.fragDepth != FLT_MAX)
+			{
+				vec3 normal = normalize(hitResult.v0.normal.xyz *hitResult.tuv.x +hitResult.v1.normal.xyz *hitResult.tuv.y +hitResult.v2.normal.xyz *hitResult.tuv.z);
+				ray.origin = hitResult.hitPoint;
+				ray.direction = reflect(ray.direction,normal);
+				ray.distSqr = FLT_MAX;
+				hitResult = raycast_scene(ray);
+				vec3 reflectedColor2 = vec3(0.0);
+				calculate_raycast_lighting(ray,hitResult,reflectedColor2);
+
+
+				
+				reflectedColor += reflectedColor2 *0.2;
+			}*/
+
+
+			fragColor += reflectedColor *0.4;
+		}
 	}
+	
+		
+
+
+
+
+	/*if(hitResult.fragDepth == fragDepth)
+		return; // Ray hasn't hit anything
+	vec3 refl = reflect(ray.direction,vec3(0,1,0));
+	raycast_scene(ray,hitResult);
+hitColor += 0.8 * castRay(hitPoint + hitNormal * options.bias, R, objects, lights, options, depth + 1); 
+*/
+
+
 	fragColor = vec3(clamp(fragColor.x,0.0,1.0),clamp(fragColor.y,0.0,1.0),clamp(fragColor.z,0.0,1.0));
 
 	imageStore(raytracedImage,fragCoords,vec4(fragColor,1.0));

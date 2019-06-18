@@ -206,7 +206,7 @@ UInt32 CEngine::GetFrameTime() const {return CUInt32(m_tFPSTime *1000.f);}
 Double CEngine::GetDeltaFrameTime() const {return std::chrono::duration_cast<std::chrono::nanoseconds>(m_tDeltaFrameTime).count() /1'000'000'000.0;}
 
 static auto cvFrameLimit = GetClientConVar("cl_max_fps");
-uint32_t CEngine::GetFPSLimit() const {return cvFrameLimit->GetInt();}
+float CEngine::GetFPSLimit() const {return cvFrameLimit->GetFloat();}
 
 unsigned int CEngine::GetStereoSourceCount() {return 0;}
 unsigned int CEngine::GetMonoSourceCount() {return 0;}
@@ -1106,8 +1106,19 @@ void CEngine::Think()
 	else
 		tDelta = *m_fixedFrameDeltaTimeInterpretation;
 	auto maxFps = GetFPSLimit();
-	if(maxFps > 0 && std::chrono::duration_cast<std::chrono::nanoseconds>(tDelta).count() /1'000'000.0 < 1'000.0 /maxFps)
+	if(maxFps >= 0.f && (maxFps == 0.f || std::chrono::duration_cast<std::chrono::nanoseconds>(tDelta).count() /1'000'000.0 < 1'000.0 /maxFps))
+	{
+		if(maxFps < 1.f)
+		{
+			// FPS < 1 are a special case, used for testing only.
+			// Since it may take a while before the next frame is executed,
+			// we need to process console input here, otherwise we may have
+			// to wait a long time before our console inputs are
+			// executed (indefinitely if max fps is 0).
+			ProcessConsoleInput();
+		}
 		return;
+	}
 	m_tDeltaFrameTime = tDelta;
 
 	m_tLastFrame = tNow;

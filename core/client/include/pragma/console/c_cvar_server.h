@@ -31,5 +31,5 @@ REGISTER_CONCOMMAND_CL(cl_debug_netmessages,CMD_cl_debug_netmessages,ConVarFlags
 REGISTER_CONVAR_CL(cl_port_tcp,sci::DEFAULT_PORT_TCP,ConVarFlags::Archive | ConVarFlags::Userinfo,"Port used for TCP transmissions.");
 REGISTER_CONVAR_CL(cl_port_udp,sci::DEFAULT_PORT_UDP,ConVarFlags::Archive | ConVarFlags::Userinfo,"Port used for UDP transmissions.");
 
-REGISTER_CONVAR_CL(cl_max_fps,"0",ConVarFlags::Archive,"FPS will be clamped at this value. A value of 0 deactivates the limit.");
+REGISTER_CONVAR_CL(cl_max_fps,"-1",ConVarFlags::Archive,"FPS will be clamped at this value. A value of < 0 deactivates the limit.");
 #endif

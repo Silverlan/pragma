@@ -293,8 +293,8 @@ void ShaderRayTracing::Test()
 	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.width = 640;
-	imgCreateInfo.height = 512;
+	imgCreateInfo.width = 1280;
+	imgCreateInfo.height = 1024;
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
 	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::STORAGE_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;

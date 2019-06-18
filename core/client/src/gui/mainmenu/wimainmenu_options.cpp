@@ -667,7 +667,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// FPS Limit
 	pList->AddChoiceList(Locale::GetText("fps_limit"),[](WIChoiceList *pList) {
-		pList->AddChoice(Locale::GetText("no_limit"),"0");
+		pList->AddChoice(Locale::GetText("no_limit"),"-1");
 		pList->AddChoice("30 FPS","30");
 		pList->AddChoice("60 FPS","60");
 		pList->AddChoice("90 FPS","90");

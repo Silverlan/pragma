@@ -42,12 +42,12 @@ namespace pragma
 
 		ShaderRayTracing(prosper::Context &context,const std::string &identifier);
 		bool Compute(
-			Anvil::DescriptorSet &descSetImage,Anvil::DescriptorSet &descSetBuffers,
-			Anvil::DescriptorSet &descSetMat,Anvil::DescriptorSet &descSetCamera,
+			const PushConstants &pushConstants,
+			Anvil::DescriptorSet &descSetOutputImage,Anvil::DescriptorSet &descSetGameScene,
+			Anvil::DescriptorSet &descSetCamera,Anvil::DescriptorSet &descSetLightSources,
 			uint32_t workGroupsX,uint32_t workGroupsY
 		);
 
-		void Test();
 		bool ComputeTest();
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

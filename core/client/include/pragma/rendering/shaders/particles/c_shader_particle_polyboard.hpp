@@ -5,6 +5,7 @@
 
 namespace pragma
 {
+	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderParticlePolyboard
 		: public ShaderParticle2DBase
 	{
@@ -29,7 +30,7 @@ namespace pragma
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(Scene &scene,const pragma::CParticleSystemComponent &ps,prosper::Buffer &vertexBuffer,prosper::Buffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
+		bool Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::Buffer &vertexBuffer,prosper::Buffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:

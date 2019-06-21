@@ -47,8 +47,6 @@ namespace pragma
 			Anvil::DescriptorSet &descSetCamera,Anvil::DescriptorSet &descSetLightSources,
 			uint32_t workGroupsX,uint32_t workGroupsY
 		);
-
-		bool ComputeTest();
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

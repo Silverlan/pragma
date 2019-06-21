@@ -6,24 +6,8 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 
-bool Scene::BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass)
-{
-	auto &hdrInfo = GetHDRInfo();
-	auto &tex = hdrInfo.hdrRenderTarget->GetTexture();
-	if(tex->IsMSAATexture())
-		static_cast<prosper::MSAATexture&>(*tex).Reset();
-	return hdrInfo.BeginRenderPass(drawCmd,customRenderPass);
-}
-bool Scene::EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
-{
-	auto &hdrInfo = GetHDRInfo();
-	return hdrInfo.EndRenderPass(drawCmd);
-}
-bool Scene::ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
-{
-	auto &hdrInfo = GetHDRInfo();
-	return hdrInfo.ResolveRenderPass(drawCmd);
-}
+
+// TODO: Remove this file
 /*
 void Scene::BeginRenderPass(Vulkan::CommandBufferObject *drawCmd,const Color *clearColor)
 {

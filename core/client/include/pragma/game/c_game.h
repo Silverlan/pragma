@@ -178,10 +178,7 @@ public:
 	void EnableRenderMode(RenderMode renderMode);
 	void DisableRenderMode(RenderMode renderMode);
 	bool IsRenderModeEnabled(RenderMode renderMode) const;
-	 // prosper TODO
-	void RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All,const Color *clearColor=nullptr);//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd,FRender renderFlags=FRender::All,const Color *clearColor=nullptr);
-	 // prosper TODO
-	void RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All);//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd,FRender renderFlags=FRender::All,const Color *clearColor=nullptr);
+
 	std::shared_ptr<prosper::PrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
 	void InitializeLua();
 	void SetupLua();
@@ -238,7 +235,6 @@ public:
 	double &ServerTime();
 	void SetServerTime(double t);
 	// Entities
-	std::vector<CBaseEntity*> &GetOccludedEntities();
 	CBaseEntity *CreateLuaEntity(std::string classname,bool bLoadIfNotExists=false);
 	CBaseEntity *CreateLuaEntity(std::string classname,unsigned int idx,bool bLoadIfNotExists=false);
 	CBaseEntity *GetEntity(unsigned int idx);
@@ -300,7 +296,6 @@ public:
 	//const Vulkan::Std140LayoutBlockData *GetUniformBlockLayout(UniformBinding id) const; // prosper TODO
 	void SetMaterialOverride(Material *mat);
 	Material *GetMaterialOverride();
-	void SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup);
 	void SetColorScale(const Vector4 &col);
 	Vector4 &GetColorScale();
 	void SetAlphaScale(float a);
@@ -329,6 +324,9 @@ public:
 	pragma::CViewBodyComponent *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
+	void RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All,const Color *clearColor=nullptr);
+	void RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All);
+
 	// GUI
 	void PreGUIDraw();
 	void PostGUIDraw();
@@ -338,11 +336,6 @@ public:
 	Float GetHDRExposure() const;
 	Float GetMaxHDRExposure() const;
 	void SetMaxHDRExposure(Float exposure);
-
-	// If this flag is set, the prepass depth buffer will be blitted into a sampleable buffer
-	// before rendering, which can then be used as shader sampler input. This flag will be reset once
-	// rendering has finished.
-	void SetFrameDepthBufferSamplingRequired();
 
 	WIBase *CreateGUIElement(std::string name,WIBase *parent=NULL);
 	WIBase *CreateGUIElement(std::string name,WIHandle *hParent);
@@ -381,11 +374,6 @@ public:
 	Anvil::DescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 protected:
-	// Render
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float interpolation,FRender renderFlags);
-	void GetRenderEntities(std::vector<CBaseEntity*> &entsRender);
-	void RenderParticleSystems(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,float interpolation,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
-
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 
 	template<class T>
@@ -406,7 +394,6 @@ private:
 	std::queue<WIHandle> m_luaGUIObjects = {};
 	double m_tLastClientUpdate = 0.0;
 	std::array<bool,umath::to_integral(RenderMode::Count)> m_renderModesEnabled;
-	bool m_bFrameDepthBufferSamplingRequired = false;
 	CallbackHandle m_hCbDrawFrame = {};
 
 	CallbackHandle m_cbGPUProfilingHandle = {};
@@ -455,12 +442,7 @@ private:
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::PrimaryCommandBuffer> m_currentDrawCmd = {};
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
-	void RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-	void RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
-	void RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-	void RenderSceneResolveHDR(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Anvil::DescriptorSet &descSetHdrResolve,bool toneMappingOnly=false);
 	void RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImg);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
@@ -476,8 +458,6 @@ private:
 	Vector3 *m_camPosOverride = nullptr;
 	Quat *m_camRotOverride = nullptr;
 	void UpdateShaderTimeData();
-	// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
-	void RenderGlowMeshes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const Scene &scene,RenderMode renderMode);
 
 	// Entities
 	std::vector<CBaseEntity*> m_ents;
@@ -503,7 +483,7 @@ private:
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	void InitializeWorldEnvironment();
 #ifdef PHYS_ENGINE_BULLET
-	WVBtIDebugDraw *m_btDebugDraw = nullptr;
+	std::unique_ptr<WVBtIDebugDraw> m_btDebugDraw = nullptr;
 #endif
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags);

@@ -5,7 +5,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-void OcclusionCullingHandlerCHC::PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerCHC::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto *entWorld = static_cast<pragma::CWorldComponent*>(c_game->GetWorld()); // TODO
 	if(entWorld == nullptr)

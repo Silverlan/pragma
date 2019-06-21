@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebughdrbloom.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
@@ -27,7 +28,10 @@ void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto &scene = c_game->GetScene();
-	auto &bloomTexture = scene->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
+	auto *renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
+	if(renderer == nullptr)
+		return;
+	auto &bloomTexture = renderer->GetHDRInfo().bloomBlurRenderTarget->GetTexture();
 	auto &imgSrc = bloomTexture->GetImage();
 	auto &imgDst = m_renderTarget->GetTexture()->GetImage();
 		

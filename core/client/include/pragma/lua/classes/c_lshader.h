@@ -15,6 +15,7 @@ namespace pragma
 	struct LuaVertexBinding;
 	struct LuaVertexAttribute;
 	struct LuaDescriptorSetInfo;
+	namespace rendering {class RasterizationRenderer;};
 };
 
 namespace Lua
@@ -180,14 +181,14 @@ namespace Lua
 		namespace Scene3D
 		{
 			DLLCLIENT void GetRenderPass(lua_State *l,uint32_t pipelineIdx);
-			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<::Scene> &scene,bool bView);
+			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSet);
 		};
 
 		namespace SceneLit3D
 		{
 			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSetShadowMaps,std::shared_ptr<Anvil::DescriptorSetGroup> &descSetLightSources);
-			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<::Scene> &scene,bool bView);
+			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 		};
 
 		namespace ShaderEntity

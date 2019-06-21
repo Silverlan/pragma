@@ -2,6 +2,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/console/c_cvar.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -241,7 +242,8 @@ static void render_csm_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 				return bRetTranslucent;
 			};
 			auto &scene = c_game->GetRenderScene();
-			if(shaderCsm.BeginDraw(drawCmd) == true)
+			auto *renderer = scene->GetRenderer();
+			if(renderer && renderer->IsRasterizationRenderer() && shaderCsm.BeginDraw(drawCmd) == true)
 			{
 				shaderCsm.BindLight(*pLightComponent);
 				auto bHasTranslucents = fDraw(shaderCsm,false);
@@ -255,7 +257,7 @@ static void render_csm_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 					{
 						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
-							p->RenderShadow(drawCmd,*scene,pLightComponent.get(),layer);
+							p->RenderShadow(drawCmd,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),pLightComponent.get(),layer);
 					}
 				}
 
@@ -363,7 +365,11 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 			//const std::function<void(const CModelMesh*,uint32_t)> &meshCallback,
 			const std::function<void(const Model&,const CModelSubMesh*,uint32_t)> &subMeshCallback
 		) {
-		auto &octree = c_game->GetScene()->GetOcclusionOctree();
+		auto &scene = c_game->GetScene();
+		auto *renderer = scene->GetRenderer();
+		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+			return;
+		auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
 		octree.IterateObjects([&lightPos,&lightDist](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
 			auto &bounds = node.GetWorldBounds();
 			return Intersection::AABBSphere(bounds.first,bounds.second,lightPos,lightDist);
@@ -533,8 +539,11 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 
 			//drawCmd->SetImageLayout(img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,0u,1u,layerId,1); // prosper TODO
 			//img->SetInternalLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
+
+			auto &scene = c_game->GetScene();
+			auto *renderer = scene->GetRenderer();
 			vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
-			if(prosper::util::record_begin_render_pass(*(*drawCmd),*smRt,layerId,&clearVal) == true)
+			if(renderer != nullptr && renderer->IsRasterizationRenderer() && prosper::util::record_begin_render_pass(*(*drawCmd),*smRt,layerId,&clearVal) == true)
 			{
 				//prosper::util::record_clear_attachment(*(*drawCmd),*(*img),1.f,layerId);
 				// Render entities
@@ -627,7 +636,7 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 					{
 						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
-							p->RenderShadow(drawCmd,*scene,&lightBase,layerId);
+							p->RenderShadow(drawCmd,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&lightBase,layerId);
 					}
 				}
 				prosper::util::record_end_render_pass(*(*drawCmd));

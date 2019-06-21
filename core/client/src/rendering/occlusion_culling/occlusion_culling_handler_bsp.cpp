@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
@@ -25,9 +26,9 @@ bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &p
 {
 	return ShouldPass(mesh,pos) && OcclusionCullingHandlerOctTree::ShouldExamine(mesh,pos,bViewModel,numMeshes,planes);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(const Scene &scene,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
-	return ShouldPass(cent) && OcclusionCullingHandlerOctTree::ShouldExamine(scene,cent,outViewModel,outPlanes);
+	return ShouldPass(cent) && OcclusionCullingHandlerOctTree::ShouldExamine(renderer,cent,outViewModel,outPlanes);
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 {
@@ -85,10 +86,10 @@ const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const util::
 }
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return FindLeafNode(m_bspTree->GetRootNode(),point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}
-void OcclusionCullingHandlerBSP::PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerBSP::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
-	Update(scene.camera->GetPos());
-	return OcclusionCullingHandlerOctTree::PerformCulling(scene,culledMeshesOut);
+	Update(renderer.GetScene().camera->GetPos());
+	return OcclusionCullingHandlerOctTree::PerformCulling(renderer,culledMeshesOut);
 }
 void OcclusionCullingHandlerBSP::SetCurrentNodeLocked(bool bLocked) {m_bLockCurrentNode = bLocked;}
 bool OcclusionCullingHandlerBSP::IsCurrentNodeLocked() const {return m_bLockCurrentNode;}
@@ -98,9 +99,11 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	if(scene == nullptr)
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto *pHandler = dynamic_cast<OcclusionCullingHandlerBSP*>(&scene->GetOcclusionCullingHandler());
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto *pHandler = dynamic_cast<OcclusionCullingHandlerBSP*>(&rasterizer->GetOcclusionCullingHandler());
 	if(pHandler == nullptr)
 	{
 		Con::cwar<<"WARNING: Scene does not have BSP occlusion culling handler!"<<Con::endl;
@@ -254,17 +257,22 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	}
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_bsp_nodes,debug_bsp_nodes);
-REGISTER_CONVAR_CALLBACK_CL(debug_bsp_lock,[](NetworkState*,ConVar*,int32_t,int32_t val) {
+
+static void debug_bsp_lock_callback(NetworkState*,ConVar*,int32_t,int32_t val)
+{
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	if(scene == nullptr)
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto *pHandler = dynamic_cast<OcclusionCullingHandlerBSP*>(&scene->GetOcclusionCullingHandler());
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto *pHandler = dynamic_cast<OcclusionCullingHandlerBSP*>(&rasterizer->GetOcclusionCullingHandler());
 	if(pHandler == nullptr)
 	{
 		Con::cwar<<"WARNING: Scene does not have BSP occlusion culling handler!"<<Con::endl;
 		return;
 	}
 	pHandler->SetCurrentNodeLocked(val != 0);
-});
+}
+REGISTER_CONVAR_CALLBACK_CL(debug_bsp_lock,debug_bsp_lock_callback);

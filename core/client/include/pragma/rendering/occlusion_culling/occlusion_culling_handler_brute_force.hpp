@@ -11,7 +11,7 @@ namespace pragma
 	{
 	public:
 		OcclusionCullingHandlerBruteForce()=default;
-		virtual void PerformCulling(const Scene &scene,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut) override;
+		virtual void PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut) override;
 	private:
 	};
 };

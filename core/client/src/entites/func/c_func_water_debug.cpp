@@ -10,6 +10,7 @@
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>
@@ -52,8 +53,11 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return WIHandle{};
 				auto &waterScene = pWaterComponent->GetWaterScene();
+				auto *renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(waterScene.sceneReflection->GetRenderer());
+				if(renderer == nullptr)
+					return WIHandle{};
 				// Debug GUI
-				auto &hdrInfo = waterScene.sceneReflection->GetHDRInfo();
+				auto &hdrInfo = renderer->GetHDRInfo();
 				auto *pReflection = wgui.Create<WITexturedRect>(r);
 				pReflection->SetSize(size,size);
 				pReflection->SetTexture(*hdrInfo.hdrRenderTarget->GetTexture());

@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugssao.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <image/prosper_render_target.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -21,7 +22,10 @@ void WIDebugSSAO::Update()
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	auto &ssaoInfo = scene->GetSSAOInfo();
+	auto *renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
+	if(renderer == nullptr)
+		return;
+	auto &ssaoInfo = renderer->GetSSAOInfo();
 	if(m_bUseBlurVariant == false)
 		SetTexture(*ssaoInfo.renderTarget->GetTexture());
 	else

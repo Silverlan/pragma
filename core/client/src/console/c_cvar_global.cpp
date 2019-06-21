@@ -15,6 +15,7 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/winetgraph.h"
 #include "pragma/util/util_tga.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>
@@ -28,6 +29,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_memory_tracker.hpp>
 #include <prosper_command_buffer.hpp>
+#include <image/prosper_image.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -271,6 +273,10 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	auto *game = client->GetGameState();
 	if(game == nullptr)
 		return;
+	auto scene = game->GetScene();
+	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+	if(renderer == nullptr)
+		return;
 	/*int32_t mode = 0;
 	if(!argv.empty())
 		mode = atoi(argv.front().c_str());*/
@@ -292,8 +298,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 	while(FileManager::Exists(path.c_str()/*,fsys::SearchFlags::Local*/));
 
-	auto scene = game->GetScene();
-	auto rt = (scene != nullptr) ? scene->GetHDRInfo().postHdrRenderTarget : nullptr;
+	auto rt = renderer->GetHDRInfo().postHdrRenderTarget;
 	if(rt == nullptr)
 		return;
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");

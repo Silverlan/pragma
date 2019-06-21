@@ -28,7 +28,7 @@ namespace pragma
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
 		// These are unused
-		virtual bool BindSceneCamera(const Scene &scene,bool bView) override {return false;}
+		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
 		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}

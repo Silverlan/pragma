@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugglowbloom.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
@@ -27,7 +28,10 @@ void WIDebugGlowBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto &scene = c_game->GetScene();
-	auto &glowTexture = scene->GetGlowInfo().renderTarget->GetTexture();
+	auto *renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
+	if(renderer == nullptr)
+		return;
+	auto &glowTexture = renderer->GetGlowInfo().renderTarget->GetTexture();
 	auto &imgSrc = glowTexture->GetImage();
 	auto &imgDst = m_renderTarget->GetTexture()->GetImage();
 		

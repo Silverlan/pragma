@@ -30,7 +30,7 @@ namespace pragma
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) override;
-		virtual bool BindSceneCamera(const Scene &scene,bool bView) override;
+		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;

@@ -3,6 +3,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/physics/raytraces.h>
@@ -26,7 +27,10 @@ void CLightSpotVolComponent::Initialize()
 	if(pRenderComponent.valid())
 	{
 		FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			c_game->SetFrameDepthBufferSamplingRequired();
+			auto &scene = c_game->GetScene();
+			auto *renderer = scene->GetRenderer();
+			if(renderer != nullptr && renderer->IsRasterizationRenderer())
+				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetFrameDepthBufferSamplingRequired();
 		}),CallbackType::Entity);
 	}
 }

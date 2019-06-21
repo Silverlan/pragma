@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
 
@@ -28,9 +29,10 @@ template<class T>
 		iterate_occlusion_tree(static_cast<typename OcclusionOctree<T>::Node&>(*c),culledMeshes,planes,fObjectCallback);
 }
 
-void OcclusionCullingHandlerOctTree::PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	// TODO: Is this function still being used somewhere? If not, get rid of it!
+	auto &scene = renderer.GetScene();
 	auto &cam = scene.camera;
 	auto &posCam = cam->GetPos();
 	auto d = uvec::distance(m_lastLodCamPos,posCam);
@@ -46,10 +48,10 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const Scene &scene,std::vect
 			culledMeshesOut.push_back({*static_cast<CBaseEntity*>(&pRenderComponent->GetEntity()),*static_cast<CModelMesh*>(mesh.get())});
 	}
 
-	auto &dynOctree = scene.GetOcclusionOctree();
+	auto &dynOctree = renderer.GetOcclusionOctree();
 	auto &root = dynOctree.GetRootNode();
 	// TODO: Planes
-	iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,scene.GetFrustumPlanes(),[this,&scene,&bUpdateLod,&posCam,&culledMeshesOut](const CBaseEntity *cent) {
+	iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,renderer.GetFrustumPlanes(),[this,&renderer,&scene,&bUpdateLod,&posCam,&culledMeshesOut](const CBaseEntity *cent) {
 		auto *ent = const_cast<CBaseEntity*>(cent);
 		assert(ent != nullptr);
 		if(ent == nullptr)
@@ -63,7 +65,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const Scene &scene,std::vect
 			return;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
-		if(ShouldExamine(scene,*ent,bViewModel,&planes) == false)
+		if(ShouldExamine(renderer,*ent,bViewModel,&planes) == false)
 			return;
 		auto pRenderComponent = ent->GetRenderComponent();
 		if(pRenderComponent.expired())
@@ -101,7 +103,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const Scene &scene,std::vect
 			auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
 			auto bViewModel = false;
 			std::vector<Plane> *planes = nullptr;
-			if(ShouldExamine(scene,entWorld,bViewModel,&planes) == true)
+			if(ShouldExamine(renderer,entWorld,bViewModel,&planes) == true)
 			{
 				auto &root = wrldTree->GetRootNode();
 				auto pTrComponent = entWorld.GetTransformComponent();

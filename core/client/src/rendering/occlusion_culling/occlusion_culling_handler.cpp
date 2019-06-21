@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
@@ -23,7 +24,7 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 	max += pos;
 	return (Intersection::AABBInPlaneMesh(min,max,planes) != INTERSECT_OUTSIDE) ? true : false;
 }
-bool OcclusionCullingHandler::ShouldExamine(const Scene &scene,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
 	auto &cam = *c_game->GetRenderCamera();
 	auto pRenderComponent = ent.GetRenderComponent();
@@ -41,17 +42,18 @@ bool OcclusionCullingHandler::ShouldExamine(const Scene &scene,CBaseEntity &ent,
 	min += pos;
 	max += pos;
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&scene.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&scene.GetClippedFrustumPlanes());
+	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&renderer.GetClippedFrustumPlanes());
 	outViewModel = (pRenderComponent->GetRenderMode() == RenderMode::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
 	return (outViewModel == true || (Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) != INTERSECT_OUTSIDE && Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE)) ? true : false;
 }
-void OcclusionCullingHandler::PerformCulling(const Scene &scene,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	particlesOut.reserve(entIt.GetCount());
 	particlesOut.clear();
-	auto &frustumPlanes = scene.GetFrustumPlanes();
+	auto &scene = renderer.GetScene();
+	auto &frustumPlanes = renderer.GetFrustumPlanes();
 	for(auto *ent : entIt)
 	{
 		auto hPt = ent->GetComponent<pragma::CParticleSystemComponent>();
@@ -61,8 +63,9 @@ void OcclusionCullingHandler::PerformCulling(const Scene &scene,std::vector<prag
 			particlesOut.push_back(hPt.get());
 	}
 }
-void OcclusionCullingHandler::PerformCulling(const Scene &scene,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
+void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
 {
+	auto &scene = renderer.GetScene();
 	auto &cam = scene.camera;
 	auto &pos = cam->GetPos();
 	std::vector<float> distances;
@@ -70,7 +73,7 @@ void OcclusionCullingHandler::PerformCulling(const Scene &scene,const std::vecto
 	lightsOut.clear();
 	lightsOut.reserve(sz);
 	distances.reserve(sz);
-	auto &frustumPlanes = scene.GetFrustumPlanes();
+	auto &frustumPlanes = renderer.GetFrustumPlanes();
 	for(auto it=lightsIn.begin();it!=lightsIn.end();++it)
 	{
 		auto *light = *it;
@@ -148,10 +151,11 @@ void OcclusionCullingHandler::PerformCulling(const Scene &scene,const std::vecto
 	if(lightsOut.size() > static_cast<uint32_t>(GameLimits::MaxAbsoluteLights))
 		lightsOut.resize(static_cast<uint32_t>(GameLimits::MaxAbsoluteLights));
 }
-void OcclusionCullingHandler::PerformCulling(const Scene &scene,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto &cam = *c_game->GetRenderCamera();
 	auto &posCam = cam.GetPos();
+	auto &scene = renderer.GetScene();
 	auto &ents = scene.GetEntities();
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();
@@ -190,10 +194,16 @@ void OcclusionCullingHandler::PerformCulling(const Scene &scene,const Vector3 &o
 	}
 }
 
-REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling,[](NetworkState*,ConVar*,int,int val) {
+static void cl_render_occlusion_culling_callback(NetworkState*,ConVar*,int,int val)
+{
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
 	if(scene != nullptr)
-		scene->ReloadOcclusionCullingHandler();
-});
+	{
+		auto *renderer = scene->GetRenderer();
+		if(renderer && renderer->IsRasterizationRenderer())
+			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->ReloadOcclusionCullingHandler();
+	}
+}
+REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling,cl_render_occlusion_culling_callback);

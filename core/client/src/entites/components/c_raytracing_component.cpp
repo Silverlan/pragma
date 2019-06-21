@@ -17,7 +17,6 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-
 #pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
@@ -25,8 +24,10 @@ static std::shared_ptr<MaterialDescriptorArrayManager> s_materialDescriptorArray
 static std::shared_ptr<prosper::DescriptorSetGroup> s_gameSceneDsg = nullptr;
 static bool s_allResourcesInitialized = false;
 void CRaytracingComponent::RegisterEvents(pragma::EntityComponentManager &componentManager) {}
-void CRaytracingComponent::InitializeBuffers()
+bool CRaytracingComponent::InitializeBuffers()
 {
+	if(s_allResourcesInitialized)
+		return false;
 	auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
 	auto instanceCount = 32'768;
 	auto maxInstanceCount = instanceCount *10u;
@@ -52,6 +53,7 @@ void CRaytracingComponent::InitializeBuffers()
 	prosper::util::set_descriptor_set_binding_storage_buffer(ds,*CModelSubMesh::GetGlobalAlphaBuffer(),umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::AlphaBuffer));
 
 	s_allResourcesInitialized = s_entityMeshInfoBuffer && s_materialDescriptorArrayManager && s_gameSceneDsg;
+	return s_allResourcesInitialized;
 }
 void CRaytracingComponent::ClearBuffers()
 {

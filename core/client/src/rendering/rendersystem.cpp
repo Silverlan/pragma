@@ -13,6 +13,8 @@
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug_normals.h"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/rendering/uniformbinding.h"
 #include "textureinfo.h"
@@ -162,9 +164,12 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 	if(translucentMeshes.empty())
 		return;
 	auto &scene = c_game->GetRenderScene();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
 	//auto &lights = scene->GetCulledLights();
-
-	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(scene->GetSampleCount(),bReflection);
+	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	pragma::ShaderTextured3D *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	for(auto it=translucentMeshes.rbegin();it!=translucentMeshes.rend();++it) // Render back-to-front
@@ -188,7 +193,7 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 			) == false)
 				continue;
 			shaderPrev = shader;
-			if(shader->BindScene(*scene,renderMode == RenderMode::View) == false)
+			if(shader->BindScene(rasterizer,renderMode == RenderMode::View) == false)
 			{
 				shaderPrev = nullptr;
 				continue;
@@ -244,16 +249,19 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 {
 	auto &debugInfo = get_render_debug_info();
 	auto &scene = c_game->GetRenderScene();
-
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return 0;
+	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto numShaderInvocations = 0u;
 
-	auto *renderInfo = scene->GetRenderInfo(renderMode);
+	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return numShaderInvocations;
 	auto &containers = renderInfo->containers;
 	auto &processed = renderInfo->processed;
 
-	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(scene->GetSampleCount(),bReflection);
+	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
 	pragma::ShaderTextured3D *shaderLast = nullptr;
@@ -269,7 +277,7 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 			) == true
 		)
 		{
-			if(shader->BindScene(*scene,bView) == true)
+			if(shader->BindScene(rasterizer,bView) == true)
 			{
 				++debugInfo.shaderCount;
 				for(auto itMat=shaderContainer->containers.begin();itMat!=shaderContainer->containers.end();itMat++)

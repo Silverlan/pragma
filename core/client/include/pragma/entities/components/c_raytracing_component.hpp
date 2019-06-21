@@ -13,7 +13,7 @@ namespace pragma
 	{
 	public:
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
-		static void InitializeBuffers();
+		static bool InitializeBuffers();
 		static void ClearBuffers();
 		static bool IsRaytracingEnabled();
 

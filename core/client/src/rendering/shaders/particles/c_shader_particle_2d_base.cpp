@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
@@ -194,7 +195,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 }
 
 prosper::Shader::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
-bool ShaderParticle2DBase::BindParticleMaterial(Scene &scene,const pragma::CParticleSystemComponent &ps)
+bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps)
 {
 	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
 	if(mat == nullptr)
@@ -205,17 +206,18 @@ bool ShaderParticle2DBase::BindParticleMaterial(Scene &scene,const pragma::CPart
 	if(descSetGroupMat == nullptr)
 		return false;
 	auto &descSetTexture = *(*descSetGroupMat)->get_descriptor_set(0u); // prosper TODO: Use dummy descriptor set when not animated
-	auto *descSetDepth = scene.GetDepthDescriptorSet();
+	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
 	auto &animDescSet = GetAnimationDescriptorSet(const_cast<pragma::CParticleSystemComponent&>(ps));
 	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(Scene &scene,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,bool bloom)
+bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,bool bloom)
 {
-	if(BindParticleMaterial(scene,ps) == false)
+	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
+	auto &scene = renderer.GetScene();
 	auto &cam = *scene.GetCamera();
 	auto texIntensity = (bloom == true) ? ps.GetBloomScale() : ps.GetIntensity();
 	auto renderFlags = GetRenderFlags(ps);

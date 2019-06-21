@@ -8,6 +8,7 @@
 
 namespace pragma
 {
+	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
 		public ShaderTexturedBase
@@ -69,7 +70,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindSceneCamera(const Scene &scene,bool bView);
+		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView);
 		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings);
 	protected:
 		ShaderScene(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
@@ -113,7 +114,7 @@ namespace pragma
 #pragma pack(pop)
 
 		virtual bool BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources);
-		virtual bool BindScene(const Scene &scene,bool bView);
+		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual uint32_t GetLightDescriptorSetIndex() const=0;
@@ -159,7 +160,7 @@ namespace pragma
 		bool BindInstanceDescriptorSet(Anvil::DescriptorSet &descSet);
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
-		virtual bool BindScene(const Scene &scene,bool bView) override;
+		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh);
 		virtual void EndDraw() override;
 	protected:

@@ -3,7 +3,9 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include <misc/compute_pipeline_create_info.h>
+#include <wgui/types/wirect.h>
 
 using namespace pragma;
 
@@ -101,149 +103,5 @@ bool ShaderRayTracing::Compute(
 		&descSetCamera,
 		&descSetLightSources
 	}) && RecordPushConstants(pushConstants) && RecordDispatch(workGroupsX,workGroupsY);
-}
-
-////////////////////////
-
-#include <image/prosper_sampler.hpp>
-#include <prosper_descriptor_set_group.hpp>
-
-#include "pragma/model/c_model.h"
-#include "pragma/model/c_modelmesh.h"
-#include "pragma/model/vk_mesh.h"
-
-namespace pragma::rendering
-{
-	class BaseRenderer
-	{
-	public:
-		template<class TRenderer>
-			static std::unique_ptr<TRenderer> Create(uint32_t width,uint32_t height);
-		virtual void Render(Scene &scene)=0;
-		void Resize(uint32_t width,uint32_t height);
-	protected:
-		virtual bool Initialize(uint32_t width,uint32_t height)=0;
-		BaseRenderer()=default;
-	};
-
-	class RaytracingRenderer
-		: public BaseRenderer
-	{
-	public:
-
-		const std::shared_ptr<prosper::Texture> &GetOutputTexture() const;
-		Anvil::DescriptorSet &GetOutputImageDescriptorSet();
-
-		virtual void Render(Scene &scene) override;
-	private:
-		friend BaseRenderer;
-		RaytracingRenderer()=default;
-		virtual bool Initialize(uint32_t width,uint32_t height) override;
-		std::shared_ptr<prosper::Texture> m_outputTexture = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_dsgOutputImage = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_dsgLights = nullptr;
-		util::WeakHandle<prosper::Shader> m_whShader = {};
-	};
-};
-
-template<class TRenderer>
-	std::unique_ptr<TRenderer> pragma::rendering::BaseRenderer::Create(uint32_t width,uint32_t height)
-{
-	auto res = std::unique_ptr<TRenderer>{new TRenderer{}};
-	if(res->Initialize(width,height) == false)
-		return nullptr;
-	return res;
-}
-
-#include <wgui/wgui.h>
-#include <wgui/types/wirect.h>
-#include <prosper_command_buffer.hpp>
-void pragma::rendering::RaytracingRenderer::Render(Scene &scene)
-{
-	if(m_whShader.expired())
-		return;
-	auto &imgOutput = GetOutputTexture()->GetImage();
-	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	prosper::util::record_image_barrier(
-		**drawCmd,**imgOutput,
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::GENERAL,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
-	);
-
-	auto &cam = *scene.GetCamera();
-	auto extents = imgOutput->GetExtents();
-	ShaderRayTracing::PushConstants pushConstants {
-		pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount(),
-		extents.width,extents.height,cam.GetFOVRad()
-	};
-
-	auto &dsgCam = scene.GetCameraDescriptorSetGroup(vk::PipelineBindPoint::eCompute);
-	auto dsgGameScene = CRaytracingComponent::GetGameSceneDescriptorSetGroup();
-
-	auto swapChainWidth = 256;
-	auto swapChainHeight = 256;
-	auto &shader = static_cast<ShaderRayTracing&>(*m_whShader);
-	shader.Compute(
-		pushConstants,GetOutputImageDescriptorSet(),
-		*(*dsgGameScene)->get_descriptor_set(0),*(*dsgCam)->get_descriptor_set(0),
-		*(*m_dsgLights)->get_descriptor_set(0),
-		swapChainWidth,swapChainHeight
-	);
-
-	prosper::util::record_image_barrier(
-		**drawCmd,**imgOutput,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::ImageLayout::GENERAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
-	);
-}
-
-bool pragma::rendering::RaytracingRenderer::Initialize(uint32_t width,uint32_t height)
-{
-	auto &dev = c_engine->GetDevice();
-	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.width = width;
-	imgCreateInfo.height = height;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::STORAGE_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
-	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	m_outputTexture = prosper::util::create_texture(dev,prosper::util::TextureCreateInfo{},img,&imgViewCreateInfo,&samplerCreateInfo);
-	auto descSetImage = prosper::util::create_descriptor_set_group(dev,ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
-	prosper::util::set_descriptor_set_binding_storage_image(*(*descSetImage)->get_descriptor_set(0),*m_outputTexture,0u);
-	m_dsgOutputImage = descSetImage;
-
-	m_dsgLights = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_dsgLights)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
-	);
-
-	m_whShader = c_engine->GetShader("raytracing");
-	return m_whShader.valid();
-}
-const std::shared_ptr<prosper::Texture> &pragma::rendering::RaytracingRenderer::GetOutputTexture() const {return m_outputTexture;}
-Anvil::DescriptorSet &pragma::rendering::RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0);}
-
-bool ShaderRayTracing::ComputeTest()
-{
-	if(CRaytracingComponent::IsRaytracingEnabled() == false)
-		return false;
-	static auto rtxScene = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(1280,1024);
-	static auto initialized = false;
-	if(initialized == false)
-	{
-		initialized = true;
-		auto &wgui = WGUI::GetInstance();
-		auto *p = wgui.Create<WITexturedRect>();
-		p->SetTexture(*rtxScene->GetOutputTexture());
-		p->SetSize(1280,1024);
-	}
-	rtxScene->Render(*static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene());
-	return true;
 }
 #pragma optimize("",on)

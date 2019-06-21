@@ -24,14 +24,8 @@ namespace Lua
 		DLLCLIENT void GetWorldEnvironment(lua_State *l,::Scene &scene);
 		DLLCLIENT void ClearWorldEnvironment(lua_State *l,::Scene &scene);
 		DLLCLIENT void SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironment &worldEnv);
-		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetRenderTarget(lua_State *l,::Scene &scene);
 
 		DLLCLIENT void InitializeRenderTarget(lua_State *l,::Scene &scene);
-		DLLCLIENT void BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp);
-		DLLCLIENT void EndRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer);
 
 		DLLCLIENT void AddLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight);
 		DLLCLIENT void RemoveLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight);
@@ -45,17 +39,26 @@ namespace Lua
 		DLLCLIENT void GetEntities(lua_State *l,::Scene &scene);
 		DLLCLIENT void LinkEntities(lua_State *l,::Scene &scene,::Scene &sceneOther);
 
-		DLLCLIENT void GetPrepassShader(lua_State *l,::Scene &scene);
-
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene);
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint);
 		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,::Scene &scene);
+	};
+	namespace RasterizationRenderer
+	{
+		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 
-		DLLCLIENT void SetShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName,const std::string &dstName);
-		DLLCLIENT void ClearShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName);
+		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp);
+		DLLCLIENT void EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer);
+		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 
-		DLLCLIENT void SetPrepassMode(lua_State *l,::Scene &scene,uint32_t mode);
-		DLLCLIENT void GetPrepassMode(lua_State *l,::Scene &scene);
+		DLLCLIENT void SetShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName,const std::string &dstName);
+		DLLCLIENT void ClearShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName);
+
+		DLLCLIENT void SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode);
+		DLLCLIENT void GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 	};
 	namespace Camera
 	{

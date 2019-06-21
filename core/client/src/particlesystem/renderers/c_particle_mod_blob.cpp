@@ -482,7 +482,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIn
 	UpdateDebugNeighborLinks();
 }
 */ // prosper TODO
-void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)
+void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	/*if(s_dsParticles == nullptr || m_adjacentBlobBuffer == nullptr)
 		return;
@@ -505,7 +505,7 @@ void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommand
 	s_shader->EndDraw();*/ // prosper TODO
 }
 
-void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
 	auto &context = c_engine->GetRenderContext();

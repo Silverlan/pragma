@@ -84,15 +84,19 @@ public:
 ///////////////////////
 
 class Scene;
-namespace pragma {class CLightComponent;};
+namespace pragma
+{
+	class CLightComponent;
+	namespace rendering {class RasterizationRenderer;};
+};
 class DLLCLIENT CParticleRenderer
 	: public CParticleModifier
 {
 public:
 	CParticleRenderer(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 	virtual ~CParticleRenderer() override;
-	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)=0;
-	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent &light,uint32_t layerId=0)=0;
+	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)=0;
+	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;
 };

@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
@@ -28,11 +29,11 @@ ShaderLightCone::ShaderLightCone(prosper::Context &context,const std::string &id
 	umath::set_flag(m_stateFlags,StateFlags::ShouldUseLightMap,false);
 }
 
-bool ShaderLightCone::BindSceneCamera(const Scene &scene,bool bView)
+bool ShaderLightCone::BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
-	if(ShaderTextured3DBase::BindSceneCamera(scene,bView) == false)
+	if(ShaderTextured3DBase::BindSceneCamera(renderer,bView) == false)
 		return false;
-	auto *descSetDepth = scene.GetDepthDescriptorSet();
+	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
 	return RecordBindDescriptorSet(*descSetDepth,DESCRIPTOR_SET_DEPTH_MAP.setIndex);

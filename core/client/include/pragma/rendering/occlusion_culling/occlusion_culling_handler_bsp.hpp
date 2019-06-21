@@ -21,13 +21,13 @@ namespace pragma
 		const util::BSPTree::Node *FindLeafNode(const util::BSPTree::Node &node,const Vector3 &point) const;
 		const util::BSPTree::Node *GetCurrentNode() const;
 		virtual void Update(const Vector3 &camPos) override;
-		virtual void PerformCulling(const Scene &scene,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut) override;
+		virtual void PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut) override;
 
 		void SetCurrentNodeLocked(bool bLocked);
 		bool IsCurrentNodeLocked() const;
 	protected:
 		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> &planes) const override;
-		virtual bool ShouldExamine(const Scene &scene,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const override;
+		virtual bool ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const override;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		bool m_bLockCurrentNode = false;
 

@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -104,8 +105,9 @@ bool ShaderScene::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings
 {
 	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
 }
-bool ShaderScene::BindSceneCamera(const Scene &scene,bool bView)
+bool ShaderScene::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
 {
+	auto &scene = renderer.GetScene();
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
 }
@@ -157,10 +159,10 @@ bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::D
 		&descSetLightSources,&descSetShadowMaps,ShadowMap::GetDescriptorSet()
 	},GetLightDescriptorSetIndex());
 }
-bool ShaderSceneLit::BindScene(const Scene &scene,bool bView)
+bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
 {
-	return BindSceneCamera(scene,bView) &&
-		BindLights(*scene.GetCSMDescriptorSet(),*const_cast<Scene&>(scene).GetForwardPlusInstance().GetDescriptorSetGraphics());
+	return BindSceneCamera(renderer,bView) &&
+		BindLights(*renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
 }
 
 /////////////////////
@@ -231,9 +233,9 @@ bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
 	return RecordPushConstants(sizeof(offset),&offset,pushConstantOffset);
 }
 
-bool ShaderEntity::BindScene(const Scene &scene,bool bView)
+bool ShaderEntity::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
 {
-	return ShaderSceneLit::BindScene(scene,bView) &&
+	return ShaderSceneLit::BindScene(renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }
 

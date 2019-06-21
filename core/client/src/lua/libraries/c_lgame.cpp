@@ -7,6 +7,7 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/c_ldef_camera.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -14,6 +15,7 @@
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_texture.hpp>
+#include <image/prosper_image.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
 #include <util_timeline_impl.hpp>
@@ -907,6 +909,9 @@ int Lua::game::Client::draw_scene(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
 	auto scene = (drawSceneInfo.scene != nullptr) ? drawSceneInfo.scene : c_game->GetRenderScene();
+	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+	if(renderer == nullptr)
+		return 0;
 
 	auto &rt = Lua::Check<Lua::Vulkan::RenderTarget>(l,2);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
@@ -919,7 +924,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	if(clearColor != nullptr)
 	{
 		auto clearCol = clearColor->ToVector4();
-		auto &hdrInfo = scene->GetHDRInfo();
+		auto &hdrInfo = renderer->GetHDRInfo();
 		auto &hdrImg = hdrInfo.hdrRenderTarget->GetTexture()->GetImage();
 		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 		prosper::util::record_clear_image(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});

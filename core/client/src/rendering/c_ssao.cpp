@@ -2,6 +2,7 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/debug/widebugssao.hpp"
@@ -89,8 +90,12 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 	pEl->SetName(name);
 
 	auto &scene = c_game->GetScene();
-	auto &ssaoInfo = scene->GetSSAOInfo();
-	auto &prepass = scene->GetPrepass();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &ssaoInfo = rasterizer->GetSSAOInfo();
+	auto &prepass = rasterizer->GetPrepass();
 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;

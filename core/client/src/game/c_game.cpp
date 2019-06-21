@@ -31,6 +31,8 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_postprocessing.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include "pragma/physics/c_physdebug.h"
@@ -134,7 +136,7 @@ CGame::CGame(NetworkState *state)
 	m_matOverride(NULL),m_colScale(1,1,1,1),
 	//m_shaderOverride(NULL), // prosper TODO
 #ifdef PHYS_ENGINE_BULLET
-	m_btDebugDraw(NULL),
+	m_btDebugDraw{nullptr},
 #endif
 	m_matLoad(),m_scene(nullptr),m_camPosOverride(nullptr),m_camRotOverride(nullptr),
 	/*m_dummyVertexBuffer(nullptr),*/m_tLastClientUpdate(0.0), // prosper TODO
@@ -191,10 +193,10 @@ CGame::CGame(NetworkState *state)
 	}
 #ifdef PHYS_ENGINE_BULLET
 	c_physEnv = m_physEnvironment.get();
-	m_btDebugDraw = new WVBtIDebugDraw;
+	m_btDebugDraw = std::make_unique<WVBtIDebugDraw>();
 	m_btDebugDraw->setDebugMode(btIDebugDraw::DBG_NoDebug);//btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
 	auto *world = m_physEnvironment->GetWorld();
-	world->setDebugDrawer(m_btDebugDraw);
+	world->setDebugDrawer(m_btDebugDraw.get());
 #endif
 
 	LoadAuxEffects("fx_generic.txt");
@@ -352,8 +354,7 @@ CGame::~CGame()
 	ShadowMap::ClearShadowMapDepthBuffers();
 
 #ifdef PHYS_ENGINE_BULLET
-	if(m_btDebugDraw != NULL)
-		delete m_btDebugDraw;
+	m_btDebugDraw = nullptr;
 	c_physEnv = NULL;
 #endif
 
@@ -591,8 +592,12 @@ void CGame::Initialize()
 
 	auto resolution = c_engine->GetRenderResolution();
 	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y),GetConVarFloat("cl_render_fov"),GetConVarFloat("cl_fov_viewmodel")/*,c_engine->GetAspectRatio()*/,c_engine->GetNearZ(),c_engine->GetFarZ()});
+	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(*m_scene);
+	//auto renderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*m_scene);
+	m_scene->SetRenderer(renderer);
 	m_scene->SetWorldEnvironment(GetWorldEnvironment());
-	m_scene->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+	if(renderer && renderer->IsRasterizationRenderer())
+		renderer->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
 
 	SetRenderScene(m_scene);
 
@@ -799,8 +804,6 @@ uint32_t CGame::GetLOD(float dist,uint32_t maxLod) const
 		lod = maxLod;
 	return static_cast<uint32_t>(lod);
 }
-
-void CGame::SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 
 void CGame::CreateGiblet(const GibletCreateInfo &info,pragma::CParticleSystemComponent **particle)
 {
@@ -1173,9 +1176,23 @@ std::shared_ptr<Model> CGame::LoadModel(const std::string &mdl,bool bReload)
 }
 std::unordered_map<std::string,std::shared_ptr<Model>> &CGame::GetModels() const {return CModelManager::GetModels();}
 
-Float CGame::GetHDRExposure() const {return m_scene->GetHDRExposure();}
-Float CGame::GetMaxHDRExposure() const {return m_scene->GetMaxHDRExposure();}
-void CGame::SetMaxHDRExposure(Float exposure) {m_scene->SetMaxHDRExposure(exposure);}
+Float CGame::GetHDRExposure() const
+{
+	auto *renderer = m_scene->GetRenderer();
+	return renderer && renderer->IsRasterizationRenderer() ? static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRExposure() : 0.f;
+}
+Float CGame::GetMaxHDRExposure() const
+{
+	auto *renderer = m_scene->GetRenderer();
+	return renderer && renderer->IsRasterizationRenderer() ? static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetMaxHDRExposure() : 0.f;
+}
+void CGame::SetMaxHDRExposure(Float exposure)
+{
+	auto *renderer = m_scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetMaxHDRExposure(exposure);
+}
 
 bool CGame::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
@@ -1373,11 +1390,13 @@ void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 	}
 
 	auto &scene = GetScene();
-	if(scene != nullptr)
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer != nullptr && renderer->IsRasterizationRenderer())
 	{
-		scene->ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
+		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+		rasterizer->ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 		if(lightMap != nullptr)
-			scene->SetLightMap(lightMap);
+			rasterizer->SetLightMap(lightMap);
 	}
 }
 

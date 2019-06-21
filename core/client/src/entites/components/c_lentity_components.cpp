@@ -4,6 +4,7 @@
 #include "pragma/entities/components/c_lentity_components.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -542,11 +543,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->Simulate(tDelta);
 	}));
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::CommandBuffer>&,std::shared_ptr<::Scene>&,bool)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::CommandBuffer> &drawCmd,std::shared_ptr<::Scene> &scene,bool bBloom) {
+	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::CommandBuffer>&,pragma::rendering::RasterizationRenderer&,bool)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::CommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,bool bBloom) {
 		pragma::Lua::check_component(l,hComponent);
 		if(drawCmd->IsPrimary() == false)
 			return;
-		hComponent->Render(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd),*scene,bBloom);
+		hComponent->Render(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd),renderer,bBloom);
 	}));
 	defCParticleSystem.def("GetRenderParticleCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);

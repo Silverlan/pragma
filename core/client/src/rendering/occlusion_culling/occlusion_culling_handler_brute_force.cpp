@@ -1,11 +1,13 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 
 using namespace pragma;
 
-void OcclusionCullingHandlerBruteForce::PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerBruteForce::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
+	auto &scene = renderer.GetScene();
 	auto &cam = scene.camera;
 	auto &posCam = cam->GetPos();
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
@@ -23,7 +25,7 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(const Scene &scene,std::v
 			continue;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
-		if((ShouldExamine(scene,*ent,bViewModel,&planes) == true))
+		if((ShouldExamine(renderer,*ent,bViewModel,&planes) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
 			pRenderComponent->GetModelComponent()->UpdateLOD(posCam);

@@ -10,6 +10,7 @@
 #include "pragma/lua/classes/c_ldef_light.hpp"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_command_buffer.hpp>
@@ -42,7 +43,10 @@ void Lua::Scene::Resize(lua_State*,::Scene &scene,uint32_t width,uint32_t height
 }
 void Lua::Scene::BeginDraw(lua_State *l,::Scene &scene)
 {
-	scene.BeginDraw();
+	/*auto *renderer = scene.GetRenderer();
+	if(renderer == nullptr)
+		return;
+	renderer->BeginRendering();*/
 }
 void Lua::Scene::UpdateBuffers(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
 {
@@ -66,60 +70,9 @@ void Lua::Scene::SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironmen
 {
 	scene.SetWorldEnvironment(worldEnv);
 }
-void Lua::Scene::GetPrepassDepthTexture(lua_State *l,::Scene &scene)
-{
-	auto &depthTex = scene.GetPrepass().textureDepth;
-	if(depthTex == nullptr)
-		return;
-	Lua::Push(l,depthTex);
-}
-void Lua::Scene::GetPrepassNormalTexture(lua_State *l,::Scene &scene)
-{
-	auto &normalTex = scene.GetPrepass().textureNormals;
-	if(normalTex == nullptr)
-		return;
-	Lua::Push(l,normalTex);
-}
 void Lua::Scene::InitializeRenderTarget(lua_State *l,::Scene &scene)
 {
 	scene.InitializeRenderTarget();
-}
-void Lua::Scene::GetRenderTarget(lua_State *l,::Scene &scene)
-{
-	auto &rt = scene.GetHDRInfo().hdrRenderTarget;
-	if(rt == nullptr)
-		return;
-	Lua::Push(l,rt);
-}
-void Lua::Scene::BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
-{
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,scene.BeginRenderPass(primCmdBuffer));
-}
-void Lua::Scene::BeginRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp)
-{
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,scene.BeginRenderPass(primCmdBuffer,&rp));
-}
-void Lua::Scene::EndRenderPass(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
-{
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,scene.EndRenderPass(primCmdBuffer));
 }
 void Lua::Scene::AddLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight)
 {
@@ -227,11 +180,6 @@ void Lua::Scene::GetEntities(lua_State *l,::Scene &scene)
 	}
 }
 void Lua::Scene::LinkEntities(lua_State *l,::Scene &scene,::Scene &sceneOther) {scene.LinkEntities(sceneOther);}
-void Lua::Scene::GetPrepassShader(lua_State *l,::Scene &scene)
-{
-	auto &shader = scene.GetPrepassShader();
-	Lua::shader::push_shader(l,shader);
-}
 void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint)
 {
 	auto &descSet = scene.GetCameraDescriptorSetGroup(static_cast<vk::PipelineBindPoint>(bindPoint));
@@ -247,10 +195,69 @@ void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,::Scene &scene)
 		return;
 	Lua::Push(l,descSet);
 }
-void Lua::Scene::SetShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName,const std::string &dstName) {scene.SetShaderOverride(srcName,dstName);}
-void Lua::Scene::ClearShaderOverride(lua_State *l,::Scene &scene,const std::string &srcName) {scene.ClearShaderOverride(srcName);}
-void Lua::Scene::SetPrepassMode(lua_State *l,::Scene &scene,uint32_t mode) {scene.SetPrepassMode(static_cast<::Scene::PrepassMode>(mode));}
-void Lua::Scene::GetPrepassMode(lua_State *l,::Scene &scene) {Lua::PushInt(l,umath::to_integral(scene.GetPrepassMode()));}
+
+////////////////////////////////
+
+void Lua::RasterizationRenderer::GetPrepassDepthTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
+{
+	auto &depthTex = renderer.GetPrepass().textureDepth;
+	if(depthTex == nullptr)
+		return;
+	Lua::Push(l,depthTex);
+}
+void Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
+{
+	auto &normalTex = renderer.GetPrepass().textureNormals;
+	if(normalTex == nullptr)
+		return;
+	Lua::Push(l,normalTex);
+}
+void Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
+{
+	auto &rt = renderer.GetHDRInfo().hdrRenderTarget;
+	if(rt == nullptr)
+		return;
+	Lua::Push(l,rt);
+}
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer)
+{
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	{
+		Lua::PushBool(l,false);
+		return;
+	}
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer));
+}
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp)
+{
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	{
+		Lua::PushBool(l,false);
+		return;
+	}
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer,&rp));
+}
+void Lua::RasterizationRenderer::EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer)
+{
+	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	{
+		Lua::PushBool(l,false);
+		return;
+	}
+	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	Lua::PushBool(l,renderer.EndRenderPass(primCmdBuffer));
+}
+void Lua::RasterizationRenderer::GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
+{
+	auto &shader = renderer.GetPrepassShader();
+	Lua::shader::push_shader(l,shader);
+}
+void Lua::RasterizationRenderer::SetShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName,const std::string &dstName) {renderer.SetShaderOverride(srcName,dstName);}
+void Lua::RasterizationRenderer::ClearShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName) {renderer.ClearShaderOverride(srcName);}
+void Lua::RasterizationRenderer::SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode) {renderer.SetPrepassMode(static_cast<pragma::rendering::RasterizationRenderer::PrepassMode>(mode));}
+void Lua::RasterizationRenderer::GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {Lua::PushInt(l,umath::to_integral(renderer.GetPrepassMode()));}
 
 ////////////////////////////////
 

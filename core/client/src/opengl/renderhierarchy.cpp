@@ -13,6 +13,7 @@
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/game/c_game_createguielement.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 
@@ -1271,7 +1272,11 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BaseP
 {
 	if(c_game == nullptr)
 		return;
-	auto &octree = c_game->GetScene()->GetOcclusionOctree();
+	auto &scene = c_game->GetScene();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
 	octree.DebugPrint();
 }
 
@@ -1315,7 +1320,11 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 {
 	if(c_game == nullptr)
 		return;
-	auto &octree = c_game->GetScene()->GetOcclusionOctree();
+	auto &scene = c_game->GetScene();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);

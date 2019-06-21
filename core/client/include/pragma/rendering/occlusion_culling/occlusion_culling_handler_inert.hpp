@@ -11,8 +11,8 @@ namespace pragma
 	{
 	public:
 		OcclusionCullingHandlerInert()=default;
-		virtual void PerformCulling(const Scene &scene,std::vector<pragma::CParticleSystemComponent*> &particlesOut) override;
-		virtual void PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut) override;
+		virtual void PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut) override;
+		virtual void PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut) override;
 	};
 };
 

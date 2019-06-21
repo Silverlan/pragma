@@ -6,6 +6,7 @@
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <wgui/types/wirect.h>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -161,8 +162,12 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 	pEl->SetName(name);
 
 	auto &scene = c_game->GetScene();
-	auto &ssaoInfo = scene->GetSSAOInfo();
-	auto &prepass = scene->GetPrepass();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &ssaoInfo = rasterizer->GetSSAOInfo();
+	auto &prepass = rasterizer->GetPrepass();
 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;

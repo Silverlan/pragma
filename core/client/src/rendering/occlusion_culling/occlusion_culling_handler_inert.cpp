@@ -1,4 +1,5 @@
 #include "stdafx_client.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_iterator.hpp>
@@ -7,7 +8,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-void OcclusionCullingHandlerInert::PerformCulling(const Scene &scene,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
@@ -16,8 +17,9 @@ void OcclusionCullingHandlerInert::PerformCulling(const Scene &scene,std::vector
 	for(auto *ent : entIt)
 		particlesOut.push_back(ent->GetComponent<pragma::CParticleSystemComponent>().get());
 }
-void OcclusionCullingHandlerInert::PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
+	auto &scene = renderer.GetScene();
 	auto &cam = scene.camera;
 	auto &posCam = cam->GetPos();
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);

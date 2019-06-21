@@ -4,6 +4,7 @@
 #include "pragma/particlesystem/renderers/c_particle_mod_beam.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard_shadow.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
@@ -101,24 +102,24 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)
+void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticlePolyboard*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem()) == false)
 		return;
-	auto &descSetLightSources = *scene.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	auto &descSetShadows = *scene.GetCSMDescriptorSet();
+	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
+	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
 	shader->BindLights(descSetShadows,descSetLightSources);
-	shader->BindSceneCamera(scene,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->Draw(scene,m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,m_particleSystem.GetRadius(),m_curvature); // TODO: bloom
+	shader->Draw(renderer,m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,m_particleSystem.GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();
 }
 
 
-void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())

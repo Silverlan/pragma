@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <buffers/prosper_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -31,11 +32,11 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(Anvil::GraphicsPipelineCreat
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticlePolyboard::Draw(Scene &scene,const pragma::CParticleSystemComponent &ps,prosper::Buffer &vertexBuffer,prosper::Buffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
+bool ShaderParticlePolyboard::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::Buffer &vertexBuffer,prosper::Buffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
 {
-	if(BindParticleMaterial(scene,ps) == false)
+	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
-	auto &cam = *scene.GetCamera();
+	auto &cam = *renderer.GetScene().GetCamera();
 	if(RecordPushConstants(GeometryPushConstants{
 				cam.GetPos(),radius,curvature
 			}) == false ||

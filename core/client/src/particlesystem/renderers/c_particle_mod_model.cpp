@@ -4,6 +4,7 @@
 #include "pragma/particlesystem/renderers/c_particle_mod_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/scene/scene.h"
@@ -186,7 +187,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	if(m_shader.expired())
 		return;
@@ -200,10 +201,10 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 		shader->BindParticleSystem(m_particleSystem) == false
 	)
 		return;
-	auto &descSetShadowmps = *scene.GetCSMDescriptorSet();
-	auto &descSetLightSources = *scene.GetForwardPlusInstance().GetDescriptorSetGraphics();
+	auto &descSetShadowmps = *renderer.GetCSMDescriptorSet();
+	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	shader->BindLights(descSetShadowmps,descSetLightSources);
-	shader->BindSceneCamera(*c_game->GetRenderScene(),(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
 	auto mdlComponent = m_particleSystem.GetEntity().GetModelComponent();
@@ -250,7 +251,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 	shader->EndDraw();
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

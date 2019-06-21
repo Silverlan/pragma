@@ -139,7 +139,7 @@ static void draw_vr(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pros
 
 	auto &scene = c_game->GetRenderScene();
 	//auto &tex = scene->GetRenderTexture();
-	scene->BeginDraw();
+	//scene->BeginRendering();
 	//auto &img = tex->GetImage();
 	//img->SetDrawLayout(vk::ImageLayout::ePresentSrcKHR); // prosper TODO
 	WGUI::GetInstance().Think();

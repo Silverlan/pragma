@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/c_water_object.hpp"
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -104,11 +105,12 @@ void ShaderWater::EndDraw()
 	m_boundScene = {};
 }
 
-bool ShaderWater::BindSceneCamera(const Scene &scene,bool bView)
+bool ShaderWater::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
 {
-	auto r = ShaderTextured3DBase::BindSceneCamera(scene,bView);
+	auto r = ShaderTextured3DBase::BindSceneCamera(renderer,bView);
 	if(r == false)
 		return false;
+	auto &scene = renderer.GetScene();
 	auto &cam = *scene.GetCamera();
 	auto m = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 	m_boundScene = const_cast<Scene&>(scene).shared_from_this();

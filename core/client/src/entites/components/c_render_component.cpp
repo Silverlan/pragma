@@ -546,6 +546,7 @@ void CRenderComponent::ClearBuffers()
 {
 	s_instanceBuffer = nullptr;
 	pragma::clear_articulated_buffers();
+	CRaytracingComponent::ClearBuffers();
 }
 
 /////////////////

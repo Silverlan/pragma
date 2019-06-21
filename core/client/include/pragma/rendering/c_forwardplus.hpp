@@ -27,10 +27,11 @@ namespace pragma
 {
 	namespace rendering
 	{
+		class RasterizationRenderer;
 		class DLLCLIENT ForwardPlusInstance
 		{
 		public:
-			ForwardPlusInstance();
+			ForwardPlusInstance(RasterizationRenderer &rasterizer);
 			bool Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture,const Camera &cam);
 
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
@@ -47,6 +48,7 @@ namespace pragma
 			static std::pair<uint32_t,uint32_t> CalcWorkGroupCount(uint32_t w,uint32_t h);
 			static uint32_t CalcTileCount(uint32_t w,uint32_t h);
 		private:
+			RasterizationRenderer &m_rasterizer;
 			uint32_t m_workGroupCountX = 0u;
 			uint32_t m_workGroupCountY = 0u;
 			uint32_t m_tileCount = 0u;

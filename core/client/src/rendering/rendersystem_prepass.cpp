@@ -1,6 +1,8 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
@@ -14,7 +16,11 @@ extern DLLCLIENT CGame *c_game;
 void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode,bool bReflection)
 {
 	auto &scene = c_game->GetRenderScene();
-	auto *renderInfo = scene->GetRenderInfo(renderMode);
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto *renderInfo = rasterizer->GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return;
 	auto &containers = renderInfo->containers;
@@ -23,7 +29,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 
 	//shaderDepthStage.BindLights(lights,descSetShadowmps,descSetLightSources);
 	CBaseEntity *entPrev = nullptr;
-	auto &shaderDepthStage = scene->GetPrepass().GetShader();
+	auto &shaderDepthStage = rasterizer->GetPrepass().GetShader();
 	for(auto &meshInfo : containers)
 	{
 		for(auto &matMeshInfo : meshInfo->containers)

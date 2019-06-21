@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -64,10 +65,10 @@ bool ShaderSkybox::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer
 {
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags);
 }
-bool ShaderSkybox::BindSceneCamera(const Scene &scene,bool bView)
+bool ShaderSkybox::BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
-	return ShaderTextured3DBase::BindSceneCamera(scene,bView) == true &&
-		RecordPushConstants(PushConstants{scene.GetCamera()->GetPos()}) == true;
+	return ShaderTextured3DBase::BindSceneCamera(renderer,bView) == true &&
+		RecordPushConstants(PushConstants{renderer.GetScene().GetCamera()->GetPos()}) == true;
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) {return true;}

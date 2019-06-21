@@ -934,7 +934,7 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom)
+void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	m_tLastEmission = c_game->RealTime();
 	if(IsActiveOrPaused() == false)
@@ -949,7 +949,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryComm
 		if(hChild.expired() || hChild->IsActiveOrPaused() == false)
 			continue;
 		numRenderParticles += hChild->GetRenderParticleCount();
-		hChild->Render(drawCmd,scene,bloom);
+		hChild->Render(drawCmd,renderer,bloom);
 	}
 	if(numRenderParticles == 0)
 	{
@@ -959,21 +959,21 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryComm
 	}
 
 	for(auto &r : m_renderers)
-		r->Render(drawCmd,scene,bloom);
+		r->Render(drawCmd,renderer,bloom);
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
-void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent *light,uint32_t layerId)
+void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
 {
 	if(!IsActiveOrPaused() || m_numRenderParticles == 0)
 		return;
 	for(auto &hChild : m_childSystems)
 	{
 		if(hChild.valid() && hChild->IsActiveOrPaused())
-			hChild->RenderShadow(drawCmd,scene,light,layerId);
+			hChild->RenderShadow(drawCmd,renderer,light,layerId);
 	}
 	for(auto &r : m_renderers)
-		r->RenderShadow(drawCmd,scene,*light,layerId);
+		r->RenderShadow(drawCmd,renderer,*light,layerId);
 }
 
 void CParticleSystemComponent::CreateParticle(uint32_t idx)

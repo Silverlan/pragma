@@ -9,17 +9,13 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
+#include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
@@ -37,26 +33,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
-	//: descBuffer(nullptr) // prosper TODO
-{
-	//static auto hShaderShadow = c_engine->GetShader("shadowcsmstatic");
-	/*if(hShaderShadow.IsValid())
-	{
-		auto &shaderShadow = static_cast<Shader::ShadowCSMStatic&>(*hShaderShadow.get());
-		shaderShadow.GenerateSwapDescriptorBuffer(umath::to_integral(Shader::ShadowCSMStatic::DescSet::DepthMatrix),Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT,sizeof(Mat4),descBuffer);
-	}*/ // prosper TODO
-}
-
-///////////////////////////
-
-REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,[](NetworkState*,ConVar*,bool,bool val) {
-	if(c_game == nullptr)
-		return;
-	auto &scene = c_game->GetScene();
-	if(scene == nullptr)
-		return;
-	scene->SetSSAOEnabled(val);
-});
+{}
 
 ///////////////////////////
 
@@ -124,47 +101,16 @@ std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo)
 Scene::Scene(const CreateInfo &createInfo)
 	: std::enable_shared_from_this<Scene>(),
 	camera(Camera::Create(createInfo.fov,createInfo.fovView,static_cast<float>(createInfo.width) /static_cast<float>(createInfo.height),createInfo.nearZ,createInfo.farZ)),
-	m_width(createInfo.width),m_height(createInfo.height),m_hdrInfo(),m_glowInfo(),//m_renderTarget(nullptr),m_descSetScreen(nullptr), // prosper TODO
-	m_bDepthResolved(false),m_bBloomResolved(false),m_bRenderResolved(false),
+	m_width(createInfo.width),m_height(createInfo.height),
 	m_lightSources(std::make_shared<LightListInfo>()),
-	m_entityList(std::make_shared<EntityListInfo>()),
-	m_sampleCount{createInfo.sampleCount}
+	m_entityList(std::make_shared<EntityListInfo>())
 {
 	for(auto i=decltype(ShadowMapCasc::MAX_CASCADE_COUNT){0};i<ShadowMapCasc::MAX_CASCADE_COUNT;++i)
 		m_csmDescriptors.push_back(std::unique_ptr<CSMCascadeDescriptor>(new CSMCascadeDescriptor()));
-	InitializeLightDescriptorSets();
-	InitializeRenderSettingsBuffer();
 	InitializeCameraBuffer();
 	InitializeFogBuffer();
 	InitializeDescriptorSetLayouts();
-	InitializeSwapDescriptorBuffers();
-	Resize(createInfo.width,createInfo.height);
 	s_scenes.push_back(this);
-
-	m_whShaderWireframe = c_engine->GetShader("wireframe");
-
-	ReloadOcclusionCullingHandler();
-	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity*>>(256.f,1'073'741'824.f,4096.f,[](const CBaseEntity *ent,Vector3 &min,Vector3 &max) {
-		auto pRenderComponent = ent->GetRenderComponent();
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pRenderComponent.valid())
-			pRenderComponent->GetRenderBounds(&min,&max);
-		else
-		{
-			min = {};
-			max = {};
-		}
-		if(pTrComponent.expired())
-			return;
-		auto &pos = pTrComponent->GetPosition();
-		min += pos;
-		max += pos;
-	});
-	m_occlusionOctree->Initialize();
-	m_occlusionOctree->SetSingleReferenceMode(true);
-	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string {
-		return ent->GetClass() +" " +std::to_string(ent->GetIndex());
-	});
 }
 
 Scene::~Scene()
@@ -174,33 +120,6 @@ Scene::~Scene()
 	auto it = std::find(s_scenes.begin(),s_scenes.end(),this);
 	if(it != s_scenes.end())
 		s_scenes.erase(it);
-
-	m_occlusionCullingHandler = nullptr;
-	m_occlusionOctree = nullptr;
-}
-
-bool Scene::IsSSAOEnabled() const {return m_bSSAOEnabled;}
-void Scene::SetSSAOEnabled(bool b)
-{
-	m_bSSAOEnabled = b;
-	UpdateRenderSettings();
-	ReloadRenderTarget();
-	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
-	if(b == true)
-	{
-		auto &context = c_engine->GetRenderContext();
-		m_hdrInfo.ssaoInfo.Initialize(context,GetWidth(),GetHeight(),static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount()),m_hdrInfo.prepass.texturePositions,m_hdrInfo.prepass.textureNormals,m_hdrInfo.prepass.textureDepth);
-	}
-	else
-		m_hdrInfo.ssaoInfo.Clear();
-	UpdateRenderSettings();*/
-}
-
-void Scene::BeginDraw()
-{
-	m_bDepthResolved = false;
-	m_bBloomResolved = false;
-	m_bRenderResolved = false;
 }
 
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
@@ -222,7 +141,9 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.viewportW = w;
 	m_renderSettings.viewportH = h;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
-	UpdateTileSize();
+
+	if(m_renderer)
+		m_renderer->UpdateRenderSettings(m_renderSettings);
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
@@ -232,12 +153,6 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
-}
-void Scene::UpdateTileSize()
-{
-	auto &tileInfo = m_renderSettings.tileInfo;
-	tileInfo = static_cast<uint32_t>(pragma::ShaderForwardPLightCulling::TILE_SIZE)<<16;
-	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(),GetHeight()).first);
 }
 void Scene::InitializeCameraBuffer()
 {
@@ -269,40 +184,6 @@ void Scene::InitializeFogBuffer()
 	m_fogBuffer->SetDebugName("fog_buf");
 }
 const std::shared_ptr<prosper::Buffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
-void Scene::SetShaderOverride(const std::string &srcShaderId,const std::string &shaderOverrideId)
-{
-	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
-		return;
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3D*>(hSrcShader.get());
-	if(srcShader == nullptr)
-		return;
-	auto hDstShader = c_engine->GetShader(shaderOverrideId);
-	auto dstShader = dynamic_cast<pragma::ShaderTextured3D*>(hDstShader.get());
-	if(dstShader == nullptr)
-		return;
-	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
-}
-pragma::ShaderTextured3D *Scene::GetShaderOverride(pragma::ShaderTextured3D *srcShader)
-{
-	if(srcShader == nullptr)
-		return nullptr;
-	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
-	if(it == m_shaderOverrides.end())
-		return srcShader;
-	return static_cast<pragma::ShaderTextured3D*>(it->second.get());
-}
-void Scene::ClearShaderOverride(const std::string &srcShaderId)
-{
-	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3D*>(hSrcShader.get());
-	if(srcShader == nullptr)
-		return;
-	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
-	if(it == m_shaderOverrides.end())
-		return;
-	m_shaderOverrides.erase(it);
-}
 void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView)
 {
 	auto &cam = *GetCamera();
@@ -313,8 +194,8 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 	m_cameraData.P = p;
 	m_cameraData.VP = p *v;
 
-	if(bView == false)
-		UpdateFrustumPlanes();
+	if(bView == false && m_renderer)
+		m_renderer->UpdateCameraData(m_cameraData);
 
 	prosper::util::record_update_buffer(**drawCmd,*bufCam,0ull,m_cameraData);
 }
@@ -460,42 +341,6 @@ void Scene::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
-void Scene::UpdateRenderSettings()
-{
-	if(m_worldEnvironment == nullptr)
-		return;
-	auto &unlitProperty = m_worldEnvironment->GetUnlitProperty();
-	auto flags = FRenderSetting::None;
-	if(unlitProperty->GetValue() == true)
-		flags |= FRenderSetting::Unlit;
-	if(IsSSAOEnabled() == true)
-		flags |= FRenderSetting::SSAOEnabled;
-	m_renderSettings.flags = umath::to_integral(flags);
-}
-void Scene::ClearWorldEnvironment()
-{
-	for(auto &hCb : m_envCallbacks)
-	{
-		if(hCb.IsValid())
-			hCb.Remove();
-	}
-	m_envCallbacks.clear();
-	if(m_cbFogCallback.IsValid() == true)
-		m_cbFogCallback.Remove();
-	m_worldEnvironment = nullptr;
-}
-
-/*Vulkan::Texture &Scene::ResolveRenderTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.texture->Resolve(cmdBuffer));}
-Vulkan::Texture &Scene::ResolveDepthTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->Resolve(cmdBuffer));}
-Vulkan::Texture &Scene::ResolveBloomTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.textureBloom->Resolve(cmdBuffer));}*/ // prosper TODO
-
-void Scene::Resize(uint32_t width,uint32_t height)
-{
-	m_width = width;
-	m_height = height;
-	ReloadRenderTarget();
-}
-
 void Scene::SetLights(const std::vector<pragma::CLightComponent*> &lights)
 {
 	auto &info = *m_lightSources;
@@ -522,6 +367,49 @@ void Scene::SetLights(const std::shared_ptr<LightListInfo> &lights)
 }
 void Scene::AddLight(pragma::CLightComponent *light) {m_lightSources->AddLightSource(*light);}
 void Scene::RemoveLight(pragma::CLightComponent *light) {m_lightSources->RemoveLightSource(*light);}
+const std::shared_ptr<Scene::LightListInfo> &Scene::GetLightSourceListInfo() const {return m_lightSources;}
+const std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() const {return const_cast<Scene&>(*this).GetLightSources();}
+std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() {return m_lightSources->lightSources;}
+bool Scene::HasLightSource(pragma::CLightComponent &lightSource) const
+{
+	auto it = m_lightSources->lightSourceLookupTable.find(&lightSource);
+	return it != m_lightSources->lightSourceLookupTable.end();
+}
+void Scene::UpdateRenderSettings()
+{
+	if(m_worldEnvironment == nullptr)
+		return;
+	auto &unlitProperty = m_worldEnvironment->GetUnlitProperty();
+	auto flags = FRenderSetting::None;
+	if(unlitProperty->GetValue() == true)
+		flags |= FRenderSetting::Unlit;\
+	m_renderSettings.flags = umath::to_integral(flags);
+	if(m_renderer)
+		m_renderer->UpdateRenderSettings(m_renderSettings);
+}
+void Scene::ClearWorldEnvironment()
+{
+	for(auto &hCb : m_envCallbacks)
+	{
+		if(hCb.IsValid())
+			hCb.Remove();
+	}
+	m_envCallbacks.clear();
+	if(m_cbFogCallback.IsValid() == true)
+		m_cbFogCallback.Remove();
+	m_worldEnvironment = nullptr;
+}
+
+/*Vulkan::Texture &Scene::ResolveRenderTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.texture->Resolve(cmdBuffer));}
+Vulkan::Texture &Scene::ResolveDepthTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->Resolve(cmdBuffer));}
+Vulkan::Texture &Scene::ResolveBloomTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.textureBloom->Resolve(cmdBuffer));}*/ // prosper TODO
+
+void Scene::Resize(uint32_t width,uint32_t height)
+{
+	m_width = width;
+	m_height = height;
+	ReloadRenderTarget();
+}
 void Scene::LinkEntities(Scene &other) {m_entityList = other.m_entityList;}
 void Scene::LinkLightSources(Scene &other) {m_lightSources = other.m_lightSources;}
 void Scene::LinkWorldEnvironment(Scene &other)
@@ -543,14 +431,15 @@ void Scene::LinkWorldEnvironment(Scene &other)
 	fogSettings.GetStartProperty()->Link(*fogSettingsOther.GetStartProperty());
 	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
 }
-const std::shared_ptr<Scene::LightListInfo> &Scene::GetLightSourceListInfo() const {return m_lightSources;}
-const std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() const {return const_cast<Scene&>(*this).GetLightSources();}
-std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() {return m_lightSources->lightSources;}
-bool Scene::HasLightSource(pragma::CLightComponent &lightSource) const
+
+void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
 {
-	auto it = m_lightSources->lightSourceLookupTable.find(&lightSource);
-	return it != m_lightSources->lightSourceLookupTable.end();
+	m_renderer = renderer;
+	InitializeRenderSettingsBuffer();
+	InitializeSwapDescriptorBuffers();
+	Resize(m_width,m_height);
 }
+pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
 
 void Scene::SetEntities(const std::vector<CBaseEntity*> &ents)
 {
@@ -592,75 +481,8 @@ void Scene::AddEntity(CBaseEntity &ent)
 	});
 	ent.CallOnRemove(cb);
 
-	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>::Create(nullptr);
-	auto callbacks = std::make_shared<std::vector<CallbackHandle>>();
-	callbacks->push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
-	auto fInsertOctreeObject = [this,callbacks](CBaseEntity *ent) {
-		m_occlusionOctree->InsertObject(ent);
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pTrComponent.valid())
-		{
-			callbacks->push_back(pTrComponent->GetPosProperty()->AddCallback([this,ent](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-		}
-		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
-		if(pGenericComponent.valid())
-		{
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,callbacks,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->RemoveObject(ent);
-				m_occlusionOctree->IterateObjects([](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
-
-					return true;
-				},[&](const CBaseEntity *entOther) {
-					if(entOther == ent)
-						throw std::runtime_error("!!");
-				});
-				for(auto &cb : *callbacks)
-				{
-					if(cb.IsValid() == false)
-						continue;
-					cb.Remove();
-				}
-			}));
-		}
-	};
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
-		return;
-	static_cast<Callback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,callbacks,wpScene,cbRenderMode](std::reference_wrapper<const RenderMode> old,std::reference_wrapper<const RenderMode> newMode) mutable {
-		if(wpScene.expired())
-		{
-			if(cbRenderMode.IsValid())
-				cbRenderMode.Remove();
-			return;
-		}
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetRenderMode() : RenderMode::None;
-		auto &occlusionTree = GetOcclusionOctree();
-		if(renderMode == RenderMode::World || renderMode == RenderMode::Skybox || renderMode == RenderMode::Water)
-		{
-			if(occlusionTree.ContainsObject(&ent) == false)
-				fInsertOctreeObject(&ent);
-		}
-		else
-			occlusionTree.RemoveObject(&ent);
-	});
-	pRenderComponent->GetRenderModeProperty()->AddCallback(cbRenderMode);
-	auto renderMode = pRenderComponent->GetRenderMode();
-	if(renderMode != RenderMode::World && renderMode != RenderMode::Skybox && renderMode != RenderMode::Water)
-		return;
-	fInsertOctreeObject(&ent);
+	if(m_renderer)
+		m_renderer->OnEntityAddedToScene(ent);
 }
 void Scene::RemoveEntity(CBaseEntity &ent) {m_entityList->RemoveEntity(ent);}
 const std::shared_ptr<Scene::EntityListInfo> &Scene::GetEntityListInfo() const {return m_entityList;}
@@ -671,249 +493,25 @@ bool Scene::HasEntity(CBaseEntity &ent) const
 	auto it = m_entityList->entityLookupTable.find(&ent);
 	return it != m_entityList->entityLookupTable.end();
 }
-const OcclusionOctree<CBaseEntity*> &Scene::GetOcclusionOctree() const {return const_cast<Scene*>(this)->GetOcclusionOctree();}
-OcclusionOctree<CBaseEntity*> &Scene::GetOcclusionOctree() {return *m_occlusionOctree;}
-
-const std::vector<pragma::OcclusionMeshInfo> &Scene::GetCulledMeshes() const {return m_culledMeshes;}
-std::vector<pragma::OcclusionMeshInfo> &Scene::GetCulledMeshes() {return m_culledMeshes;}
-const std::vector<pragma::CParticleSystemComponent*> &Scene::GetCulledParticles() const {return m_culledParticles;}
-std::vector<pragma::CParticleSystemComponent*> &Scene::GetCulledParticles() {return m_culledParticles;}
-
-void Scene::SetPrepassMode(PrepassMode mode)
-{
-	auto &prepass = GetPrepass();
-	switch(static_cast<PrepassMode>(mode))
-	{
-		case PrepassMode::NoPrepass:
-			m_bPrepassEnabled = false;
-			break;
-		case PrepassMode::DepthOnly:
-			m_bPrepassEnabled = true;
-			prepass.SetUseExtendedPrepass(false);
-			break;
-		case PrepassMode::Extended:
-			m_bPrepassEnabled = true;
-			prepass.SetUseExtendedPrepass(true);
-			break;
-	}
-}
-Scene::PrepassMode Scene::GetPrepassMode() const
-{
-	if(m_bPrepassEnabled == false)
-		return PrepassMode::NoPrepass;
-	auto &prepass = const_cast<Scene*>(this)->GetPrepass();
-	return prepass.IsExtended() ? PrepassMode::Extended : PrepassMode::DepthOnly;
-}
 
 bool Scene::IsValid() const {return m_bValid;}
 
-pragma::ShaderPrepassBase &Scene::GetPrepassShader() const {return const_cast<Scene*>(this)->GetPrepass().GetShader();}
-
-void Scene::UpdateLightDescriptorSets(const std::vector<pragma::CLightComponent*> &lightSources)
-{
-	auto *descSetShadowMaps = GetCSMDescriptorSet();
-	if(descSetShadowMaps == nullptr)
-		return;
-	auto numLights = lightSources.size();
-	for(auto i=decltype(numLights){0};i<numLights;++i)
-	{
-		auto &light = *lightSources.at(i);
-		auto type = LightType::Invalid;
-		auto *pLight = light.GetLight(type);
-		if(type != LightType::Directional)
-			continue;
-		auto *shadowMap = light.GetShadowMap();
-		auto texture = (shadowMap != nullptr) ? shadowMap->GetDepthTexture() : nullptr;
-		if(texture != nullptr)
-		{
-			auto numLayers = shadowMap->GetLayerCount();
-			for(auto i=decltype(numLayers){0};i<numLayers;++i)
-			{
-				prosper::util::set_descriptor_set_binding_array_texture(
-					*descSetShadowMaps,*texture,0u,i,i
-				);
-			}
-		}
-		break;
-	}
-}
-
-void Scene::InitializeLightDescriptorSets()
-{
-	if(pragma::ShaderTextured3D::DESCRIPTOR_SET_CSM.IsValid())
-		m_descSetGroupCSM = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3D::DESCRIPTOR_SET_CSM);
-}
-
-Anvil::DescriptorSet *Scene::GetCSMDescriptorSet() const {return (*m_descSetGroupCSM)->get_descriptor_set(0u);}
-
-Scene::HDRInfo &Scene::GetHDRInfo() {return m_hdrInfo;}
-Scene::GlowInfo &Scene::GetGlowInfo() {return m_glowInfo;}
-SSAOInfo &Scene::GetSSAOInfo() {return m_hdrInfo.ssaoInfo;}
-pragma::rendering::Prepass &Scene::GetPrepass() {return m_hdrInfo.prepass;}
-pragma::rendering::ForwardPlusInstance &Scene::GetForwardPlusInstance() {return m_hdrInfo.forwardPlusInstance;}
-
 uint32_t Scene::GetWidth() const {return m_width;}
 uint32_t Scene::GetHeight() const {return m_height;}
-
-Float Scene::GetHDRExposure() const {return m_hdrInfo.exposure;}
-Float Scene::GetMaxHDRExposure() const {return m_hdrInfo.max_exposure;}
-void Scene::SetMaxHDRExposure(Float exposure) {m_hdrInfo.max_exposure = exposure;}
 
 //const Vulkan::DescriptorSet &Scene::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
 void Scene::ReloadRenderTarget()
 {
 	m_bValid = false;
-	//auto &context = c_engine->GetRenderContext(); // prosper TODO
 
-	auto width = GetWidth();
-	auto height = GetHeight();
-	auto bSsao = IsSSAOEnabled();
-	if(
-		m_hdrInfo.Initialize(*this,width,height,m_sampleCount,bSsao) == false || 
-		m_glowInfo.Initialize(width,height,m_hdrInfo) == false ||
-		m_hdrInfo.InitializeDescriptorSets() == false
-	)
+	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget() == false)
 		return;
 
-	auto &descSetHdrResolve = *(*m_hdrInfo.descSetGroupHdrResolve)->get_descriptor_set(0u);
-	auto resolvedGlowTex = GetGlowInfo().renderTarget->GetTexture();
-	if(resolvedGlowTex->IsMSAATexture())
-		resolvedGlowTex = static_cast<prosper::MSAATexture&>(*resolvedGlowTex).GetResolvedTexture();
-	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
-
-	auto &descSetCam = *(*m_camDescSetGroupGraphics)->get_descriptor_set(0u);
-	auto &descSetCamView = *(*m_camViewDescSetGroup)->get_descriptor_set(0u);
-	if(bSsao == true)
-	{
-		auto &ssaoInfo = GetSSAOInfo();
-		auto ssaoBlurTexResolved = ssaoInfo.renderTargetBlur->GetTexture();
-		if(ssaoBlurTexResolved->IsMSAATexture())
-			ssaoBlurTexResolved = static_cast<prosper::MSAATexture&>(*ssaoBlurTexResolved).GetResolvedTexture();
-		prosper::util::set_descriptor_set_binding_texture(descSetCam,*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
-		prosper::util::set_descriptor_set_binding_texture(descSetCamView,*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
-	}
-	auto &dummyTex = c_engine->GetDummyTexture();
-	prosper::util::set_descriptor_set_binding_texture(descSetCam,*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	prosper::util::set_descriptor_set_binding_texture(descSetCamView,*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	/*auto layoutBloomGlow = Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT}, // Bloom
-		{Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // Glow
-	});
-	m_descSetBloomGlow = Vulkan::DescriptorSet::Create(context,context.GetDescriptorPool(Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER),layoutBloomGlow);
-	m_descSetBloomGlow->Update(umath::to_integral(Shader::PPHDR::Binding::Bloom),m_hdrInfo.blurBuffer.tmpBlurTexture);
-	m_descSetBloomGlow->Update(umath::to_integral(Shader::PPHDR::Binding::Glow),m_glowInfo.renderTarget.GetTexture());
-
-	auto numTiles = static_cast<uint32_t>(m_hdrInfo.forwardPlusInstance.GetWorkGroupCount().first);
-	m_renderSettingsData.Write(umath::to_integral(UB_RENDER_SETTINGS_OFFSET::NUMBER_OF_TILES_X),sizeof(numTiles),&numTiles);
-
-	// Update scene descriptor set (Include blurred ssao map and fog buffer)
-	if(m_hdrInfo.ssaoInfo.rtOcclusionBlur != nullptr)
-	{
-		auto &texSSAO = m_hdrInfo.ssaoInfo.rtOcclusionBlur->GetTexture();
-		if(texSSAO != nullptr)
-		{
-			auto numDescSets = m_swapDescBufferCamGraphics->GetDescriptorCount();
-			for(auto i=decltype(numDescSets){0};i<numDescSets;++i)
-			{
-				auto &descSetCam = *m_swapDescBufferCamGraphics->GetDescriptorSet(i);
-				auto &descSetViewCam = *m_swapDescBufferViewCam->GetDescriptorSet(i);
-
-				descSetCam->Update(umath::to_integral(Shader::TexturedBase3D::Binding::SSAOMap),texSSAO);
-				descSetViewCam->Update(umath::to_integral(Shader::TexturedBase3D::Binding::SSAOMap),texSSAO);
-			}
-		}
-	}*/ // prosper TODO
-	//
-	//if(m_renderTarget != nullptr) // prosper TODO
-	//	InitializeRenderTarget(); // prosper TODO
 	m_bValid = true;
 }
 
-const pragma::OcclusionCullingHandler &Scene::GetOcclusionCullingHandler() const {return const_cast<Scene*>(this)->GetOcclusionCullingHandler();}
-pragma::OcclusionCullingHandler &Scene::GetOcclusionCullingHandler() {return *m_occlusionCullingHandler;}
-void Scene::SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler) {m_occlusionCullingHandler = handler;}
-void Scene::ReloadOcclusionCullingHandler()
-{
-	auto occlusionCullingMode = c_game->GetConVarInt("cl_render_occlusion_culling");
-	switch(occlusionCullingMode)
-	{
-		case 1: /* Brute-force */
-			m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBruteForce>();
-			break;
-		case 2: /* CHC++ */
-			m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerCHC>();
-			break;
-		case 4: /* BSP */
-		{
-			auto itWorld = std::find_if(m_entityList->entities.begin(),m_entityList->entities.end(),[](const EntityHandle &hEnt) {
-				return hEnt.IsValid() && hEnt.get()->IsWorld();
-			});
-			if(itWorld != m_entityList->entities.end())
-			{
-				auto *entWorld = itWorld->get();
-				auto pWorldComponent = entWorld->GetComponent<pragma::CWorldComponent>();
-				auto bspTree = pWorldComponent.valid() ? pWorldComponent->GetBSPTree() : nullptr;
-				if(bspTree != nullptr && bspTree->GetNodes().size() > 1u)
-				{
-					m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBSP>(bspTree);
-					break;
-				}
-			}
-		}
-		case 3: /* Octtree */
-			m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerOctTree>();
-			break;
-		case 0: /* Off */
-		default:
-			m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerInert>();
-			break;
-	}
-	m_occlusionCullingHandler->Initialize();
-}
-
-void Scene::InitializeRenderTarget()
-{
-	/*auto &context = c_engine->GetRenderContext();
-	auto width = GetWidth();
-	auto height = GetHeight();
-	m_renderTarget = Vulkan::RenderTarget::Create(context,width,height,Anvil::Format::R8G8B8A8_UNORM,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags&) {
-		info.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	});
-	static auto hShaderScreen = ShaderSystem::get_shader("screen");
-	if(hShaderScreen.IsValid())
-	{
-		if(m_descSetScreen == nullptr)
-		{
-			auto &shaderScreen = static_cast<Shader::Screen&>(*hShaderScreen.get());
-			shaderScreen.InitializeInstance(m_descSetScreen);
-		}
-		m_descSetScreen->Update(m_renderTarget->GetTexture());
-	}*/ // prosper TODO
-}
-
-Anvil::DescriptorSet *Scene::GetDepthDescriptorSet() const {return (m_hdrInfo.descSetGroupDepth != nullptr) ? (*m_hdrInfo.descSetGroupDepth)->get_descriptor_set(0u) : nullptr;}
-/*const Vulkan::DescriptorSet &Scene::GetRenderDepthDescriptorSet() const {return m_hdrInfo.descSetDepth;}
-const Vulkan::DescriptorSet &Scene::GetScreenDescriptorSet() const {return m_descSetScreen;}
-const Vulkan::Texture &Scene::GetRenderDepthBuffer() const {return m_hdrInfo.prepass.textureDepth->GetTexture();}
-const Vulkan::Texture &Scene::GetRenderTexture() const {return m_hdrInfo.GetRenderTexture();}
-const Vulkan::Texture &Scene::GetBloomTexture() const {return m_hdrInfo.GetTargetBloomTexture();}
-const Vulkan::RenderTarget &Scene::GetRenderTarget() const {return m_renderTarget;}
-const Vulkan::Texture &Scene::GetGlowTexture() const {return m_glowInfo.renderTarget.GetTexture();}
-Vulkan::Texture &Scene::GetDepthTexture() {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->GetTexture());}
-
-const Vulkan::DescriptorSet *Scene::GetCSMShadowDescriptorSet(uint32_t layer,uint32_t swapIdx)
-{
-	if(layer >= m_csmDescriptors.size())
-		return nullptr;
-	return m_csmDescriptors[layer]->descBuffer->GetDescriptorSet(swapIdx);
-}
-const Vulkan::Buffer *Scene::GetCSMShadowBuffer(uint32_t layer,uint32_t swapIdx)
-{
-	if(layer >= m_csmDescriptors.size())
-		return nullptr;
-	return m_csmDescriptors[layer]->descBuffer->GetBuffer(0,swapIdx);
-}*/ // prosper TODO
+void Scene::InitializeRenderTarget() {}
 
 float Scene::GetFOV() {return camera->GetFOV();}
 float Scene::GetViewFOV() {return camera->GetViewFOV();}

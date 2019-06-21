@@ -5,6 +5,7 @@
 
 namespace pragma
 {
+	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderLightCone
 		: public ShaderTextured3DBase
 	{
@@ -19,7 +20,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderLightCone(prosper::Context &context,const std::string &identifier);
-		virtual bool BindSceneCamera(const Scene &scene,bool bView) override;
+		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:

@@ -25,15 +25,19 @@ struct DLLCLIENT IParticleModelComponent
 ///////////////////////
 #endif
 
-namespace pragma {class CAnimatedComponent; class CLightComponent;};
+namespace pragma
+{
+	class CAnimatedComponent;
+	class CLightComponent;
+};
 class DLLCLIENT CParticleRendererModel
 	: public CParticleRenderer
 {
 public:
 	CParticleRendererModel(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 	virtual ~CParticleRendererModel() override;
-	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,bool bloom) override;
-	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Scene &scene,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
+	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual void Initialize(CParticle &particle) override;
 

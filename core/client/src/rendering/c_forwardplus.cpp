@@ -6,6 +6,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
@@ -23,14 +24,17 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 	if(c_game == NULL)
 		return;
 	auto &scene = c_game->GetScene();
-	if(scene == nullptr)
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto &fp = scene->GetForwardPlusInstance();
-	auto &prepass = scene->GetPrepass();
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &fp = rasterizer->GetForwardPlusInstance();
+	auto &prepass = rasterizer->GetPrepass();
 	c_engine->WaitIdle();
 	fp.Initialize(*c_engine,scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth,*scene->GetCamera());
+
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	scene->UpdateTileSize();
+	rasterizer->UpdateRenderSettings(scene->GetRenderSettings());
 	c_engine->ReloadShader("forwardp_light_culling");
 }
 REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size,cmd_forwardplus_tile_size);
@@ -62,7 +66,8 @@ static constexpr uint32_t get_shadow_integer_count()
 	return umath::to_integral(GameLimits::MaxAbsoluteShadowLights) /32u +1u;
 }
 
-pragma::rendering::ForwardPlusInstance::ForwardPlusInstance()
+pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRenderer &rasterizer)
+	: m_rasterizer{rasterizer}
 {
 	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::COMPUTE,m_cmdBufferQueueFamilyIndex);
 
@@ -157,14 +162,14 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 	
 	// Visible light tile index buffer
 	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
+		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
 		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
 		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
 	);
 
 	// Visible light index buffer
 	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
 		Anvil::PipelineStageFlagBits::HOST_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
 		Anvil::AccessFlagBits::HOST_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
 	);
@@ -175,7 +180,7 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 
 	// Visible light index buffer
 	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*c_game->GetRenderScene()->GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
 		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::HOST_BIT,
 		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::HOST_READ_BIT
 	);

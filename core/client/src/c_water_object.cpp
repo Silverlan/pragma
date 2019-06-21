@@ -8,6 +8,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_renderflags.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <glm/gtx/projection.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
@@ -102,20 +103,19 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	if(mat == nullptr || pragma::ShaderWater::DESCRIPTOR_SET_WATER.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
 	auto whShader = mat->GetPrimaryShader();
-	if(whShader.expired())
+	auto &scene = c_game->GetScene();
+	auto renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
+	if(whShader.expired() || renderer == nullptr)
 		return;
 	auto *shader = dynamic_cast<pragma::ShaderWater*>(whShader.get());
-	if(shader == nullptr)
-		return;
 	auto whShaderPPWater = c_engine->GetShader("pp_water");
-	if(whShaderPPWater.expired())
+	if(shader == nullptr || whShaderPPWater.expired())
 		return;
 	auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
 
-	auto &scene = c_game->GetScene();
 	auto &cam = c_game->GetSceneCamera();
-	auto width = scene->GetWidth() /2u;//512;//2048;
-	auto height = scene->GetHeight() /2u;//512;//2048; // TODO
+	auto width = scene->GetWidth() /2u;
+	auto height = scene->GetHeight() /2u;
 	auto fov = cam.GetFOV();
 	auto fovView = cam.GetViewFOV();
 	auto nearZ = cam.GetZNear();
@@ -151,7 +151,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 	if(m_waterScene->texScene == nullptr)
 	{
-		auto &sceneImg = c_game->GetScene()->GetHDRInfo().hdrRenderTarget->GetTexture()->GetImage();
+		auto &sceneImg = renderer->GetHDRInfo().hdrRenderTarget->GetTexture()->GetImage();
 		auto extents = sceneImg->GetExtents();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
@@ -167,7 +167,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	}
 	if(m_waterScene->texSceneDepth == nullptr)
 	{
-		auto &sceneDepthImg = c_game->GetScene()->GetPrepass().textureDepth->GetImage();
+		auto &sceneDepthImg = renderer->GetPrepass().textureDepth->GetImage();
 		auto extents = sceneDepthImg->GetExtents();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
@@ -183,7 +183,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	}
 
 	auto &descSetEffects = *(*m_waterScene->descSetGroupTexEffects)->get_descriptor_set(0u);
-	auto &reflectionTex = m_waterScene->sceneReflection->GetHDRInfo().hdrRenderTarget->GetTexture();
+	auto &reflectionTex = renderer->GetHDRInfo().hdrRenderTarget->GetTexture();
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*reflectionTex,umath::to_integral(pragma::ShaderWater::WaterBinding::ReflectionMap));
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texScene,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texSceneDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
@@ -221,10 +221,13 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		auto &scene = c_game->GetRenderScene();
 		if(scene != c_game->GetScene())
 			return;
+		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		if(renderer == nullptr)
+			return;
 		auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-		scene->EndRenderPass(drawCmd); // The current render pass needs to be ended so we can blit the scene texture and depth texture
+		renderer->EndRenderPass(drawCmd); // The current render pass needs to be ended so we can blit the scene texture and depth texture
 
-		auto &hdrInfo = scene->GetHDRInfo();
+		auto &hdrInfo = renderer->GetHDRInfo();
 		auto &tex = hdrInfo.hdrRenderTarget->GetTexture();
 		//auto &tex = hdrInfo.texture->GetTexture();
 
@@ -245,7 +248,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		//tex->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL); // prosper TODO
 
 		// Depth
-		auto &prepass = scene->GetPrepass();
+		auto &prepass = renderer->GetPrepass();
 		auto &depthTex = *prepass.textureDepth;
 
 		// We need the depth buffer in the water shader, but the water shader has depth write enabled, so we need to copy
@@ -268,7 +271,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		//waterScene.texScene->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
 		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
 		//depthTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
-		scene->BeginRenderPass(drawCmd,prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(*c_engine).get()); // Restart the render pass
+		renderer->BeginRenderPass(drawCmd,prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(*c_engine).get()); // Restart the render pass
 	}));
 	m_waterScene->hPostProcessing = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,FRender>::Create([this,waterNormal,waterPlaneDist,whShaderPPWater](FRender renderFlags) {
 		if(cvDrawWater->GetBool() == false || (renderFlags &FRender::Water) == FRender::None)
@@ -276,6 +279,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		if(c_game->GetRenderScene() != c_game->GetScene())
 			return;
 		auto &scene = c_game->GetRenderScene();
+		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		if(renderer == nullptr)
+			return;
 		auto &waterScene = *m_waterScene;
 
 		//scene->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
@@ -288,7 +294,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		is_camera_submerged(camGame,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,bCameraSubmerged,bCameraFullySubmerged);
 		if(bCameraSubmerged == true)
 		{
-			auto &hdrInfo = scene->GetHDRInfo();
+			auto &hdrInfo = renderer->GetHDRInfo();
 
 			auto &descSetHdr = *(*hdrInfo.descSetGroupHdr)->get_descriptor_set(0u);
 			auto *imgTex = prosper::util::get_descriptor_set_image(descSetHdr,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
@@ -300,7 +306,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
 			if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.hdrStagingRenderTarget) == true)
 			{
-				auto &prepass = scene->GetPrepass();
+				auto &prepass = renderer->GetPrepass();
 				//auto &texDepth = prepass.textureDepth->Resolve(); // prosper TODO
 				//texDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
 
@@ -376,44 +382,48 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			if(bRenderReflection == true)
 			{
 				auto &sceneReflection = m_waterScene->sceneReflection;
-				auto &rtReflection = sceneReflection->GetHDRInfo().hdrRenderTarget;
-				auto &camReflection = *sceneReflection->GetCamera();
+				auto *renderer = sceneReflection ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(sceneReflection->GetRenderer()) : nullptr;
+				if(renderer)
+				{
+					auto &rtReflection = renderer->GetHDRInfo().hdrRenderTarget;
+					auto &camReflection = *sceneReflection->GetCamera();
 
-				camReflection.SetPos(camPos);
-				camReflection.SetForward(camGame.GetForward());
-				camReflection.SetUp(camGame.GetUp());
-				camReflection.UpdateMatrices();
+					camReflection.SetPos(camPos);
+					camReflection.SetForward(camGame.GetForward());
+					camReflection.SetUp(camGame.GetUp());
+					camReflection.UpdateMatrices();
 
-				camReflection.SetProjectionMatrix(matProj);
-				auto matReflView = camReflection.GetViewMatrix();
-				matReflView *= matReflect;
-				camReflection.SetViewMatrix(matReflView);
+					camReflection.SetProjectionMatrix(matProj);
+					auto matReflView = camReflection.GetViewMatrix();
+					matReflView *= matReflect;
+					camReflection.SetViewMatrix(matReflView);
 
-				// Reflect camera position (Has to be done AFTER matrices have been updated!)
-				auto posReflected = Vector4(camPos.x,camPos.y,camPos.z,1.f);
-				posReflected = glm::inverse(camGame.GetViewMatrix()) *matReflView *posReflected;
-				camReflection.SetPos({posReflected.x,posReflected.y,posReflected.z});
+					// Reflect camera position (Has to be done AFTER matrices have been updated!)
+					auto posReflected = Vector4(camPos.x,camPos.y,camPos.z,1.f);
+					posReflected = glm::inverse(camGame.GetViewMatrix()) *matReflView *posReflected;
+					camReflection.SetPos({posReflected.x,posReflected.y,posReflected.z});
 
-				auto renderFlags = FRender::World | FRender::Skybox | FRender::Reflection;
-				if(reflectionQuality == 0 || reflectionQuality > 1)
-					renderFlags |= FRender::Glow;
-				if(reflectionQuality > 1)
-					renderFlags |= FRender::Particles;
-				//rtReflection->GetTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL); // prosper TODO
-				//sceneReflection->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
+					auto renderFlags = FRender::World | FRender::Skybox | FRender::Reflection;
+					if(reflectionQuality == 0 || reflectionQuality > 1)
+						renderFlags |= FRender::Glow;
+					if(reflectionQuality > 1)
+						renderFlags |= FRender::Particles;
+					//rtReflection->GetTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL); // prosper TODO
+					//sceneReflection->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
 
-				auto &imgReflection = *rtReflection->GetTexture()->GetImage();
-				prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+					auto &imgReflection = *rtReflection->GetTexture()->GetImage();
+					prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 
-				c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
-					c_game->SetRenderScene(sceneReflection);
-						c_game->RenderScene(drawCmd,rtReflection,renderFlags);
-					c_game->SetRenderScene(nullptr);
-				c_game->SetRenderClipPlane({});
+					c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
+						c_game->SetRenderScene(sceneReflection);
+							c_game->RenderScene(drawCmd,rtReflection,renderFlags);
+						c_game->SetRenderScene(nullptr);
+					c_game->SetRenderClipPlane({});
 
-				prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+					prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 
-				m_reflectionRendered = (bRenderDynamic == true) ? 1 : 2;
+					m_reflectionRendered = (bRenderDynamic == true) ? 1 : 2;
+				}
 			}
 		}
 		return CallbackReturnType::NoReturnValue;

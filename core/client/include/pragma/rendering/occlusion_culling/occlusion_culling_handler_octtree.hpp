@@ -11,7 +11,7 @@ namespace pragma
 	{
 	public:
 		OcclusionCullingHandlerOctTree()=default;
-		virtual void PerformCulling(const Scene &scene,std::vector<OcclusionMeshInfo> &culledMeshesOut) override;
+		virtual void PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut) override;
 	private:
 		Vector3 m_lastLodCamPos {};
 	};

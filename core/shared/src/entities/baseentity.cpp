@@ -439,6 +439,20 @@ Vector3 BaseEntity::GetCenter() const
 		return GetPosition();
 	return physComponent->GetCenter();
 }
+const Quat &BaseEntity::GetRotation() const
+{
+	auto trComponent = GetTransformComponent();
+	if(trComponent.expired())
+		return uquat::UNIT;
+	return trComponent->GetOrientation();
+}
+void BaseEntity::SetRotation(const Quat &rot)
+{
+	auto trComponent = GetTransformComponent();
+	if(trComponent.expired())
+		return;
+	trComponent->SetOrientation(rot);
+}
 
 void BaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {

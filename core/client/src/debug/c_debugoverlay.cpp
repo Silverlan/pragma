@@ -3,8 +3,8 @@
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/math/icosphere.h"
-#include "pragma/rendering/scene/e_frustum.h"
 #include <pragma/math/util_hermite.h>
+#include <pragma/math/e_frustum.h>
 #include <wgui/types/witext.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -381,11 +381,11 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el,const Vec
 	auto *ptrO = o.get();
 	auto hEl = el->GetHandle();
 	auto cb = c_game->AddCallback("Render",FunctionCallback<>::Create([pos,szUnits,hEl,ptrO]() {
-		if(!hEl.IsValid())
+		auto *cam = c_game->GetRenderCamera();
+		if(!hEl.IsValid() || cam == nullptr)
 			return;
 		auto *el = static_cast<WIText*>(hEl.get());
-		auto &cam = *c_game->GetRenderCamera();
-		auto rot = cam.GetRotation();
+		auto rot = cam->GetEntity().GetRotation();
 		ptrO->SetRotation(rot);
 
 		auto m = umat::identity();
@@ -394,7 +394,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el,const Vec
 		m = glm::scale(m,matScale);
 		m = ptrO->GetModelMatrix() *m;
 		m = glm::scale(m,Vector3{szUnits.x,szUnits.y,1.f});
-		m = cam.GetProjectionMatrix() *cam.GetViewMatrix() *m;
+		m = cam->GetProjectionMatrix() *cam->GetViewMatrix() *m;
 
 		auto *ds = ptrO->GetTextDescriptorSet();
 		if(ds != nullptr)
@@ -631,13 +631,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	// Near
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)),
+			points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+			points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
 		},
 		col,duration
 	));
@@ -645,13 +645,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	col = Color(0,255,0,a);
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarTopRight)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT))
+			points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomLeft))
 		},
 		col,duration
 	));
@@ -659,13 +659,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	col = Color(0,0,255,a);
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT))
+			points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomLeft))
 		},
 		col,duration
 	));
@@ -673,13 +673,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	col = Color(255,255,0,a);
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+			points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT))
+			points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomRight))
 		},
 		col,duration
 	));
@@ -687,13 +687,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	col = Color(255,0,255,a);
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)),
+			points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+			points.at(umath::to_integral(FrustumPoint::FarTopRight)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_TOP_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT))
+			points.at(umath::to_integral(FrustumPoint::FarTopRight)),
+			points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
+			points.at(umath::to_integral(FrustumPoint::NearTopLeft))
 		},
 		col,duration
 	));
@@ -701,13 +701,13 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std:
 	col = Color(0,255,255,a);
 	r->AddObject(DrawMesh(
 		{
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+			points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
 
-			points.at(umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_RIGHT)),
-			points.at(umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT))
+			points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
+			points.at(umath::to_integral(FrustumPoint::NearBottomLeft))
 		},
 		col,duration
 	));
@@ -741,7 +741,7 @@ void DebugRenderer::ClearObjects()
 	for(auto &it : s_debugObjects)
 		it.second.clear();
 }
-void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam)
+void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(s_debugObjects.empty())
 		return;

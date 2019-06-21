@@ -92,8 +92,10 @@ bool ShaderWater::UpdateBindFogDensity()
 	if(whWaterComponent.expired())
 		return true;
 	auto &scene = *m_boundScene.lock();
-	auto &cam = *scene.GetCamera();
-	auto &pos = cam.GetPos();
+	auto &cam = scene.GetActiveCamera();
+	if(cam.expired())
+		return false;
+	auto &pos = cam->GetEntity().GetPosition();
 	if(whWaterComponent->IsPointBelowWaterPlane(pos) == true)
 		fogIntensity = 0.f;
 	return RecordPushConstants(fogIntensity,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,waterFogIntensity));
@@ -111,8 +113,10 @@ bool ShaderWater::BindSceneCamera(const rendering::RasterizationRenderer &render
 	if(r == false)
 		return false;
 	auto &scene = renderer.GetScene();
-	auto &cam = *scene.GetCamera();
-	auto m = cam.GetProjectionMatrix() *cam.GetViewMatrix();
+	auto &cam = scene.GetActiveCamera();
+	if(cam.expired())
+		return false;
+	auto m = cam->GetProjectionMatrix() *cam->GetViewMatrix();
 	m_boundScene = const_cast<Scene&>(scene).shared_from_this();
 	return UpdateBindFogDensity() &&
 		RecordPushConstants(m,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,reflectionVp));

@@ -1,5 +1,4 @@
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/e_frustum.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/c_lengine.h"
@@ -31,6 +30,7 @@
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/lua/classes/c_lentity.h"
 #include "pragma/lua/classes/c_lua_entity.h"
+#include <pragma/math/e_frustum.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/sh_lua_component_wrapper.hpp>
@@ -59,6 +59,7 @@
 #undef FAR
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 void CGame::RegisterLua()
 {
@@ -106,7 +107,7 @@ void CGame::RegisterLua()
 		{"get_render_scene",Lua::game::Client::get_render_scene},
 		{"get_render_scene_camera",Lua::game::Client::get_render_scene_camera},
 		{"get_scene",Lua::game::Client::get_scene},
-		{"get_scene_camera",Lua::game::Client::get_scene_camera},
+		{"get_primary_camera",Lua::game::Client::get_scene_camera},
 		{"get_draw_command_buffer",Lua::game::Client::get_draw_command_buffer},
 		{"get_setup_command_buffer",Lua::game::Client::get_setup_command_buffer},
 		{"flush_setup_command_buffer",Lua::game::Client::flush_setup_command_buffer},
@@ -141,7 +142,19 @@ void CGame::RegisterLua()
 		{"get_instance_buffer",Lua::ents::Client::get_instance_buffer},
 		{"get_instance_bone_buffer",Lua::ents::Client::get_instance_bone_buffer},
 		{"register_component",Lua::ents::register_component<pragma::CLuaBaseEntityComponent>},
-		{"register_component_event",Lua::ents::register_component_event}
+		{"register_component_event",Lua::ents::register_component_event},
+		{"create_camera",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto width = Lua::CheckNumber(l,1);
+			auto height = Lua::CheckNumber(l,2);
+			auto fov = Lua::CheckNumber(l,3);
+			auto nearZ = Lua::CheckNumber(l,4);
+			auto farZ = Lua::CheckNumber(l,5);
+			auto *cam = c_game->CreateCamera(width,height,fov,nearZ,farZ);
+			if(cam == nullptr)
+				return 0;
+			cam->PushLuaObject(l);
+			return 1;
+		})}
 	});
 
 	auto entityClassDef = luabind::class_<EntityHandle>("Entity");
@@ -226,22 +239,22 @@ void CGame::RegisterLua()
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"geometry",{
-		{"FRUSTUM_PLANE_LEFT",umath::to_integral(FRUSTUM_PLANE::LEFT)},
-		{"FRUSTUM_PLANE_RIGHT",umath::to_integral(FRUSTUM_PLANE::RIGHT)},
-		{"FRUSTUM_PLANE_TOP",umath::to_integral(FRUSTUM_PLANE::TOP)},
-		{"FRUSTUM_PLANE_BOTTOM",umath::to_integral(FRUSTUM_PLANE::BOTTOM)},
-		{"FRUSTUM_PLANE_NEAR",umath::to_integral(FRUSTUM_PLANE::NEAR)},
-		{"FRUSTUM_PLANE_FAR",umath::to_integral(FRUSTUM_PLANE::FAR)},
-		{"FRUSTUM_PLANE_COUNT",umath::to_integral(FRUSTUM_PLANE::COUNT)},
+		{"FrustumPlane_LEFT",umath::to_integral(FrustumPlane::Left)},
+		{"FrustumPlane_RIGHT",umath::to_integral(FrustumPlane::Right)},
+		{"FrustumPlane_TOP",umath::to_integral(FrustumPlane::Top)},
+		{"FrustumPlane_BOTTOM",umath::to_integral(FrustumPlane::Bottom)},
+		{"FrustumPlane_NEAR",umath::to_integral(FrustumPlane::Near)},
+		{"FrustumPlane_FAR",umath::to_integral(FrustumPlane::Far)},
+		{"FrustumPlane_COUNT",umath::to_integral(FrustumPlane::Count)},
 
-		{"FRUSTUM_POINT_FAR_BOTTOM_LEFT",umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_LEFT)},
-		{"FRUSTUM_POINT_FAR_TOP_LEFT",umath::to_integral(FRUSTUM_POINT::FAR_TOP_LEFT)},
-		{"FRUSTUM_POINT_FAR_TOP_RIGHT",umath::to_integral(FRUSTUM_POINT::FAR_TOP_RIGHT)},
-		{"FRUSTUM_POINT_FAR_BOTTOM_RIGHT",umath::to_integral(FRUSTUM_POINT::FAR_BOTTOM_RIGHT)},
-		{"FRUSTUM_POINT_NEAR_BOTTOM_LEFT",umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)},
-		{"FRUSTUM_POINT_NEAR_TOP_LEFT",umath::to_integral(FRUSTUM_POINT::NEAR_TOP_LEFT)},
-		{"FRUSTUM_POINT_NEAR_TOP_RIGHT",umath::to_integral(FRUSTUM_POINT::NEAR_TOP_RIGHT)},
-		{"FRUSTUM_POINT_NEAR_BOTTOM_RIGHT",umath::to_integral(FRUSTUM_POINT::NEAR_BOTTOM_RIGHT)}
+		{"FrustumPoint_FarBottomLeft",umath::to_integral(FrustumPoint::FarBottomLeft)},
+		{"FrustumPoint_FAR_TOP_LEFT",umath::to_integral(FrustumPoint::FarTopLeft)},
+		{"FrustumPoint_FAR_TOP_RIGHT",umath::to_integral(FrustumPoint::FarTopRight)},
+		{"FrustumPoint_FAR_BOTTOM_RIGHT",umath::to_integral(FrustumPoint::FarBottomRight)},
+		{"FrustumPoint_NearBottomLeft",umath::to_integral(FrustumPoint::NearBottomLeft)},
+		{"FrustumPoint_NearTopLeft",umath::to_integral(FrustumPoint::NearTopLeft)},
+		{"FrustumPoint_NearTopRight",umath::to_integral(FrustumPoint::NearTopRight)},
+		{"FrustumPoint_NearBottomRight",umath::to_integral(FrustumPoint::NearBottomRight)}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"gui",{
@@ -274,88 +287,6 @@ void CGame::RegisterLua()
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");
-	auto classDefCamera = luabind::class_<Camera>("Camera");
-	classDefCamera.scope[luabind::def("Create",&Lua::Camera::Create)];
-	classDefCamera.def("Copy",&Lua::Camera::Copy);
-	classDefCamera.def("GetProjectionMatrix",&Lua::Camera::GetProjectionMatrix);
-	classDefCamera.def("GetViewMatrix",&Lua::Camera::GetViewMatrix);
-	classDefCamera.def("GetRight",&Lua::Camera::GetRight);
-	classDefCamera.def("GetUp",&Lua::Camera::GetUp);
-	classDefCamera.def("SetUp",&Lua::Camera::SetUp);
-	classDefCamera.def("GetPos",&Lua::Camera::GetPos);
-	classDefCamera.def("SetPos",&Lua::Camera::SetPos);
-	classDefCamera.def("LookAt",&Lua::Camera::LookAt);
-	classDefCamera.def("UpdateMatrices",&Lua::Camera::UpdateMatrices);
-	classDefCamera.def("UpdateViewMatrix",&Lua::Camera::UpdateViewMatrix);
-	classDefCamera.def("UpdateProjectionMatrix",&Lua::Camera::UpdateProjectionMatrix);
-	classDefCamera.def("UpdateViewProjectionMatrix",&Lua::Camera::UpdateViewProjectionMatrix);
-	classDefCamera.def("UpdateProjectionMatrices",&Lua::Camera::UpdateProjectionMatrices);
-	classDefCamera.def("SetFOV",&Lua::Camera::SetFOV);
-	classDefCamera.def("SetViewFOV",&Lua::Camera::SetViewFOV);
-	classDefCamera.def("SetAspectRatio",&Lua::Camera::SetAspectRatio);
-	classDefCamera.def("SetNearZ",&Lua::Camera::SetZNear);
-	classDefCamera.def("SetFarZ",&Lua::Camera::SetZFar);
-	classDefCamera.def("SetForward",&Lua::Camera::SetForward);
-	classDefCamera.def("GetViewProjectionMatrix",&Lua::Camera::GetViewProjectionMatrix);
-	classDefCamera.def("GetForward",&Lua::Camera::GetForward);
-	classDefCamera.def("GetFOV",&Lua::Camera::GetFOV);
-	classDefCamera.def("GetViewFOV",&Lua::Camera::GetViewFOV);
-	classDefCamera.def("GetFOVRad",&Lua::Camera::GetFOVRad);
-	classDefCamera.def("GetViewFOVRad",&Lua::Camera::GetViewFOVRad);
-	classDefCamera.def("GetAspectRatio",&Lua::Camera::GetAspectRatio);
-	classDefCamera.def("GetNearZ",&Lua::Camera::GetZNear);
-	classDefCamera.def("GetFarZ",&Lua::Camera::GetZFar);
-	classDefCamera.def("GetFrustumPlanes",&Lua::Camera::GetFrustumPlanes);
-	classDefCamera.def("GetFarPlaneCenter",&Lua::Camera::GetFarPlaneCenter);
-	classDefCamera.def("GetNearPlaneCenter",&Lua::Camera::GetNearPlaneCenter);
-	classDefCamera.def("GetFarPlanePoints",&Lua::Camera::GetFarPlaneBoundaries);
-	classDefCamera.def("GetNearPlanePoints",&Lua::Camera::GetNearPlaneBoundaries);
-	classDefCamera.def("GetPlanePoints",&Lua::Camera::GetPlaneBoundaries);
-	classDefCamera.def("SetProjectionMatrix",&Lua::Camera::SetProjectionMatrix);
-	classDefCamera.def("SetViewMatrix",&Lua::Camera::SetViewMatrix);
-	classDefCamera.def("SetViewProjectionMatrix",&Lua::Camera::SetViewProjectionMatrix);
-	classDefCamera.def("GetFarPlaneBounds",&Lua::Camera::GetFarPlaneBounds);
-	classDefCamera.def("GetNearPlaneBounds",&Lua::Camera::GetNearPlaneBounds);
-	classDefCamera.def("GetFrustumNeighbors",&Lua::Camera::GetFrustumNeighbors);
-	classDefCamera.def("GetFrustumPlaneCornerPoints",&Lua::Camera::GetFrustumPlaneCornerPoints);
-	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,::Camera&,luabind::object,luabind::object,Vector3)>(&Lua::Camera::CreateFrustumKDop));
-	classDefCamera.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,::Camera&,const Vector2&,const Vector2&)>(&Lua::Camera::CreateFrustumKDop));
-	classDefCamera.def("GetFrustumPoints",&Lua::Camera::GetFrustumPoints);
-	classDefCamera.def("GetNearPlanePoint",&Lua::Camera::GetNearPlanePoint);
-	classDefCamera.def("GetFarPlanePoint",&Lua::Camera::GetFarPlanePoint);
-	classDefCamera.def("GetRotation",&Lua::Camera::GetRotation);
-	classDefCamera.def("CreateFrustumMesh",&Lua::Camera::CreateFrustumMesh);
-	classDefCamera.def("GetProjectionMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetProjectionMatrixProperty());
-	}));
-	classDefCamera.def("GetViewProjectionMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetViewProjectionMatrixProperty());
-	}));
-	classDefCamera.def("GetViewMatrixProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetViewMatrixProperty());
-	}));
-	classDefCamera.def("GetUpProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetUpProperty());
-	}));
-	classDefCamera.def("GetForwardProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetForwardProperty());
-	}));
-	classDefCamera.def("GetPosProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetPosProperty());
-	}));
-	classDefCamera.def("GetNearZProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetNearZProperty());
-	}));
-	classDefCamera.def("GetFarZProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetFarZProperty());
-	}));
-	classDefCamera.def("GetFOVProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetFOVProperty());
-	}));
-	classDefCamera.def("GetViewFOVProperty",static_cast<void(*)(lua_State*,Camera&)>([](lua_State *l,Camera &pCam) {
-		Lua::Property::push(l,*pCam.GetViewFOVProperty());
-	}));
-	gameMod[classDefCamera];
 
 	auto classDefBaseRenderer = luabind::class_<pragma::rendering::BaseRenderer>("BaseRenderer");
 	gameMod[classDefBaseRenderer];
@@ -399,7 +330,7 @@ void CGame::RegisterLua()
 	gameMod[classDefRaytracingRenderer];
 
 	auto classDefScene = luabind::class_<Scene>("Scene");
-	classDefScene.def("GetCamera",&Lua::Scene::GetCamera);
+	classDefScene.def("GetActiveCamera",&Lua::Scene::GetCamera);
 	classDefScene.def("GetWidth",&Lua::Scene::GetWidth);
 	classDefScene.def("GetHeight",&Lua::Scene::GetHeight);
 	classDefScene.def("GetSize",&Lua::Scene::GetSize);

@@ -65,8 +65,8 @@ public:
 class ModelMesh;
 class CBaseEntity;
 class EntityHandle;
-struct Camera;
 class WIHandle;
+namespace pragma {class CCameraComponent;};
 class DLLCLIENT CHC
 {
 public:
@@ -75,7 +75,7 @@ private:
 #ifdef CHC_DEBUGGING_ENABLED
 	// Overhead
 	unsigned int m_debugFrustumBuffer;
-	std::shared_ptr<Camera> m_debugQueryDepthOverheadCamera;
+	util::WeakHandle<pragma::CCameraComponent> m_debugQueryDepthOverheadCamera = {};
 	//
 	unsigned int m_debugMeshVertexBuffer;
 	bool m_bDrawDebugTexture;
@@ -105,7 +105,7 @@ private:
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;
 	CallbackHandle m_cbOnNodeDestroyed;
-	std::shared_ptr<Camera> m_cam;
+	util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 	void TraverseNode(CHCNode *cNode);
 	void PullUpVisibility(CHCNode *cNode);
 	void QueryPreviouslyInvisibleNode(CHCNode *cNode);
@@ -124,7 +124,7 @@ private:
 protected:
 	CHCNode *GetNode(uint32_t idx);
 public:
-	CHC(Camera &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
+	CHC(pragma::CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
 	~CHC();
 	void Reset(const std::shared_ptr<BaseOcclusionOctree> &octree);
 #ifdef CHC_DEBUGGING_ENABLED

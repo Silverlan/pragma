@@ -1,7 +1,6 @@
 #ifndef __SCENE_H__
 #define __SCENE_H__
 
-#include "pragma/rendering/scene/camera.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/c_prepass.hpp"
@@ -28,7 +27,7 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma {class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
+namespace pragma {class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
 class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
 {
@@ -58,13 +57,9 @@ public:
 
 	struct DLLCLIENT CreateInfo
 	{
-		CreateInfo(uint32_t width,uint32_t height,float fov,float fovView,float nearZ,float farZ);
+		CreateInfo(uint32_t width,uint32_t height);
 		uint32_t width;
 		uint32_t height;
-		float fov;
-		float fovView;
-		float nearZ;
-		float farZ;
 		Anvil::SampleCountFlagBits sampleCount;
 	};
 
@@ -76,13 +71,11 @@ public:
 	Scene &operator=(const Scene&)=delete;
 	//const Vulkan::DescriptorSet *GetCSMShadowDescriptorSet(uint32_t layer,uint32_t swapIdx=0); // prosper TODO
 	//const Vulkan::Buffer *GetCSMShadowBuffer(uint32_t layer,uint32_t swapIdx=0); // prosper TODO
-	float GetFOV();
-	float GetViewFOV();
-	float GetAspectRatio();
-	float GetZNear();
-	float GetZFar();
-	const std::shared_ptr<Camera> &GetCamera() const;
-	std::shared_ptr<Camera> camera;
+
+	const util::WeakHandle<pragma::CCameraComponent> &GetActiveCamera() const;
+	util::WeakHandle<pragma::CCameraComponent> &GetActiveCamera();
+	void SetActiveCamera(pragma::CCameraComponent &cam);
+	void SetActiveCamera();
 
 	void SetLights(const std::vector<pragma::CLightComponent*> &lights);
 	void SetLights(const std::shared_ptr<LightListInfo> &lights);
@@ -155,6 +148,7 @@ private:
 	std::shared_ptr<prosper::DescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
 	std::shared_ptr<prosper::DescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 
+	util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 	std::shared_ptr<prosper::Buffer> m_cameraBuffer = nullptr;
 	std::shared_ptr<prosper::Buffer> m_cameraViewBuffer = nullptr;
 

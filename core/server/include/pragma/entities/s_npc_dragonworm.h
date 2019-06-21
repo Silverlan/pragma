@@ -3,7 +3,6 @@
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/basenpcdragonworm.h"
-#include "pragma/lua/def_luaentity.h"
 
 namespace pragma
 {

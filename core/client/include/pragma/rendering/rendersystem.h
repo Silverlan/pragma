@@ -11,7 +11,6 @@
 class DLLCLIENT RenderSystem;
 //class DLLCLIENT RenderWrapper;
 class Material;
-struct Camera;
 class CBaseEntity;
 /*
 class DLLCLIENT RenderList
@@ -96,7 +95,7 @@ struct DLLCLIENT EntityMeshContainer
 */
 
 namespace prosper {class Shader; class PrimaryCommandBuffer;};
-namespace pragma {class CLightComponent;};
+namespace pragma {class CLightComponent; class CCameraComponent;};
 class CModelMesh;
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -121,9 +120,9 @@ public:
 		float distance;
 	};
 public:
-	static void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes);
+	static void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes);
 	static uint32_t Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode=RenderMode::World,bool bReflection=false);
-	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode=RenderMode::World,bool bReflection=false);
+	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode=RenderMode::World,bool bReflection=false);
 	static void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CLightComponent*> &lights);
 };
 #pragma warning(pop)

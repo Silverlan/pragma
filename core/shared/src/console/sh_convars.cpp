@@ -10,7 +10,6 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 #include <pragma/engine_version.h>
-#include <pragma/util/profiling_stages.h>
 #include <pragma/lua/lua_doc.hpp>
 #include <map>
 #ifdef BT_ENABLE_PROFILE

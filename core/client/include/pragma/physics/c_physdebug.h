@@ -28,7 +28,7 @@ public:
 	bool dynamic = false;
 	std::shared_ptr<prosper::Buffer> lineBuffer = nullptr;
 	std::shared_ptr<prosper::Buffer> colorBuffer = nullptr;
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam);
+	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 	void UpdateBuffer();
 private:
 	WVBtIDebugObject();
@@ -36,6 +36,7 @@ private:
 	std::shared_ptr<prosper::Buffer> m_instanceBuffer = nullptr;
 };
 
+namespace pragma {class CCameraComponent;};
 class DLLCLIENT WVBtIDebugDraw
 	: public btIDebugDraw
 {
@@ -54,7 +55,7 @@ private:
 public:
 	WVBtIDebugDraw();
 	virtual ~WVBtIDebugDraw() override;
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam);
+	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 	virtual void drawLine(const btVector3 &from,const btVector3 &to,const btVector3 &color) override;
 	virtual void drawLine(const btVector3 &from,const btVector3 &to,const btVector3 &fromColor,const btVector3 &toColor) override;
 	virtual void drawContactPoint(const btVector3 &PointOnB,const btVector3 &normalOnB,btScalar distance,int lifeTime,const btVector3 &color) override;

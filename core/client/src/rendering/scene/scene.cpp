@@ -32,6 +32,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -86,8 +87,8 @@ void Scene::EntityListInfo::RemoveEntity(CBaseEntity &ent)
 
 ///////////////////////////
 
-Scene::CreateInfo::CreateInfo(uint32_t width,uint32_t height,float fov,float fovView,float nearZ,float farZ)
-	: width{width},height{height},fov{fov},fovView{fovView},nearZ{nearZ},farZ{farZ},sampleCount{static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount())}
+Scene::CreateInfo::CreateInfo(uint32_t width,uint32_t height)
+	: width{width},height{height},sampleCount{static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount())}
 {}
 
 ///////////////////////////
@@ -100,7 +101,6 @@ std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo)
 
 Scene::Scene(const CreateInfo &createInfo)
 	: std::enable_shared_from_this<Scene>(),
-	camera(Camera::Create(createInfo.fov,createInfo.fovView,static_cast<float>(createInfo.width) /static_cast<float>(createInfo.height),createInfo.nearZ,createInfo.farZ)),
 	m_width(createInfo.width),m_height(createInfo.height),
 	m_lightSources(std::make_shared<LightListInfo>()),
 	m_entityList(std::make_shared<EntityListInfo>())
@@ -136,8 +136,6 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.flags = umath::to_integral(FRenderSetting::None);
 	m_renderSettings.shadowRatioX = 1.f /szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
-	m_renderSettings.nearZ = GetZNear();
-	m_renderSettings.farZ = GetZFar();
 	m_renderSettings.viewportW = w;
 	m_renderSettings.viewportH = h;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
@@ -186,10 +184,12 @@ void Scene::InitializeFogBuffer()
 const std::shared_ptr<prosper::Buffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
 void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView)
 {
-	auto &cam = *GetCamera();
+	auto &cam = GetActiveCamera();
+	if(cam.expired())
+		return;
 	auto &bufCam = (bView == true) ? GetViewCameraBuffer() : GetCameraBuffer();
-	auto &v = cam.GetViewMatrix();
-	auto &p = (bView == true) ? cam.GetViewProjectionMatrix() : cam.GetProjectionMatrix();
+	auto &v = cam->GetViewMatrix();
+	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOV(),cam->GetAspectRatio(),cam->GetNearZ(),cam->GetFarZ()) : cam->GetProjectionMatrix();
 	m_cameraData.V = v;
 	m_cameraData.P = p;
 	m_cameraData.VP = p *v;
@@ -201,13 +201,13 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 }
 void Scene::UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
-	auto &cam = *GetCamera();
 	UpdateCameraBuffer(drawCmd,false);
 	UpdateCameraBuffer(drawCmd,true);
 
 	// Update Render Buffer
-	auto &pos = cam.GetPos();
-	m_renderSettings.posCam = pos;
+	auto &cam = GetActiveCamera();
+	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
+	m_renderSettings.posCam = camPos;
 
 	prosper::util::record_update_buffer(**drawCmd,*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
@@ -513,9 +513,13 @@ void Scene::ReloadRenderTarget()
 
 void Scene::InitializeRenderTarget() {}
 
-float Scene::GetFOV() {return camera->GetFOV();}
-float Scene::GetViewFOV() {return camera->GetViewFOV();}
-float Scene::GetAspectRatio() {return camera->GetAspectRatio();}
-float Scene::GetZNear() {return camera->GetZNear();}
-float Scene::GetZFar() {return camera->GetZFar();}
-const std::shared_ptr<Camera> &Scene::GetCamera() const {return camera;}
+const util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() const {return const_cast<Scene*>(this)->GetActiveCamera();}
+util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() {return m_camera;}
+void Scene::SetActiveCamera(pragma::CCameraComponent &cam)
+{
+	m_camera = cam.GetHandle<pragma::CCameraComponent>();
+	m_renderSettings.nearZ = cam.GetNearZ();
+	m_renderSettings.farZ = cam.GetFarZ();
+}
+void Scene::SetActiveCamera() {m_camera = {};}
+#pragma optimize("",on)

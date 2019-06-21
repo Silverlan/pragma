@@ -3,12 +3,6 @@
 
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
-#include <pragma/game/game.h>
-#include <pragma/input/inkeys.h>
-#include <mathutil/color.h>
-#include <pragma/util/bulletinfo.h>
-#include <queue>
-#include <wgui/wihandle.h>
 #include "pragma/entities/c_world.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/lua/c_lua_gui_manager.h"
@@ -16,6 +10,13 @@
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/lua/c_listener_handle.hpp"
+#include <pragma/game/game.h>
+#include <pragma/input/inkeys.h>
+#include <mathutil/color.h>
+#include <pragma/util/bulletinfo.h>
+#include <queue>
+#include <wgui/wihandle.h>
+#include <sharedutils/property/util_property.hpp>
 
 #define LOD_SWAP_DISTANCE 500.f
 
@@ -37,7 +38,6 @@ class CBrushMesh;
 class CModelMesh;
 class CSide;
 class CBaseLuaEntity;
-struct Camera;
 class CMaterial;
 enum class ShadowType : uint8_t;
 class Scene;
@@ -68,6 +68,7 @@ namespace pragma
 	class CListenerComponent;
 	class CParticleSystemComponent;
 	class CLightDirectionalComponent;
+	class CCameraComponent;
 };
 namespace prosper {class DescriptorSetGroup; class Image;};
 #pragma warning(push)
@@ -310,8 +311,9 @@ public:
 	// Returns the number of lost snapshot packets within the last second
 	uint32_t GetLostPacketCount();
 
-	std::shared_ptr<Scene> &GetScene();
-	Camera &GetSceneCamera() const;
+	pragma::CCameraComponent *CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ);
+	pragma::CCameraComponent *GetPrimaryCamera() const;
+	const std::shared_ptr<Scene> &GetScene() const;
 	const WorldEnvironment &GetWorldEnvironment() const;
 	WorldEnvironment &GetWorldEnvironment();
 
@@ -346,6 +348,12 @@ public:
 	void Initialize();
 	void InitializeGame();
 
+	void SetViewModelFOV(float fov);
+	const util::PFloatProperty &GetViewModelFOVProperty() const;
+	float GetViewModelFOV() const;
+	float GetViewModelFOVRad() const;
+	Mat4 GetViewModelProjectionMatrix() const;
+
 	// Shaders
 	//Shader::Base *GetShaderOverride(); // prosper TODO
 	//void SetShaderOverride(Shader::Base *shader=NULL); // prosper TODO
@@ -365,7 +373,7 @@ public:
 
 	void SetRenderScene(const std::shared_ptr<Scene> &scene);
 	std::shared_ptr<Scene> &GetRenderScene();
-	Camera *GetRenderCamera() const;
+	pragma::CCameraComponent *GetRenderCamera() const;
 	// If set to NULL, it will use the default camera position
 	void SetCameraPosition(Vector3 *pos,Quat *rot);
 	// If set to NULL, it will use the default camera orientation
@@ -433,6 +441,9 @@ private:
 	void LoadLuaShader(std::string file);
 	MaterialHandle m_matLoad = {};
 
+	// FOV used for view-models
+	util::PFloatProperty m_viewFov = nullptr;
+
 	// Sound
 	bool LoadAuxEffects(const std::string &fname);
 
@@ -469,6 +480,7 @@ private:
 	util::WeakHandle<pragma::CPlayerComponent> m_plLocal = {};
 	util::WeakHandle<pragma::CViewModelComponent> m_viewModel = {};
 	util::WeakHandle<pragma::CViewBodyComponent> m_viewBody = {};
+	util::WeakHandle<pragma::CCameraComponent> m_primaryCamera = {};
 
 	std::shared_ptr<Scene> m_renderScene = nullptr;
 

@@ -58,13 +58,16 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 
 void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly)
 {
-	auto &scene = c_game->GetScene();
-	auto &cam = scene->camera;
-	auto &forward = cam->GetForward();
-	auto &up = cam->GetUp();
+	auto &scene = c_game->GetRenderScene();
+	auto cam = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
+	if(cam.expired())
+		return;
+	auto trComponent = cam->GetEntity().GetTransformComponent();
+	auto &forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
+	auto &up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
 	if(bYawOnly == false)
 	{
-		pos = cam->GetPos();
+		pos = cam->GetEntity().GetPosition();
 		auto right = uvec::cross(forward,up);
 		rot = uquat::create(forward,right,up);
 	}
@@ -83,7 +86,7 @@ void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::Ba
 		}
 
 		auto &rotRef = pl.GetOrientationAxesRotation();
-		auto viewRot = rotRef *cam->GetRotation();//pl->GetViewOrientation();
+		auto viewRot = rotRef *cam->GetEntity().GetRotation();//pl->GetViewOrientation();
 		auto viewAng = EulerAngles(viewRot);
 		auto viewYaw = viewAng.y;
 

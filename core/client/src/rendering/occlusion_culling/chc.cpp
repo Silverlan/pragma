@@ -6,7 +6,6 @@
 #include <pragma/math/intersection.h>
 #include "pragma/rendering/shaders/c_shader.h"
 #include "pragma/opengl/renderhierarchy.h"
-#include "pragma/rendering/scene/e_frustum.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/c_shader_occlusion.h"
@@ -29,8 +28,8 @@ static const uint32_t maxPrevInvisNodeBatchSize = 50;
 static CHC *chc_debug_draw = nullptr;
 #endif
 
-CHC::CHC(Camera &cam,const std::shared_ptr<BaseOcclusionOctree> &octree)
-	: m_cam(cam.shared_from_this()),m_frameID(0),m_octree(octree),
+CHC::CHC(pragma::CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree)
+	: m_cam(cam.GetHandle<pragma::CCameraComponent>()),m_frameID(0),m_octree(octree),
 	m_cbOnNodeCreated(),m_cbOnNodeDestroyed()
 #ifdef CHC_DEBUGGING_ENABLED
 	,m_bDrawDebugTexture(false),m_hGUIDebug(),m_debugMeshVertexBuffer(0),m_debugCallback(),
@@ -350,8 +349,8 @@ void CHC::UpdateFrustum()
 		float farZ = m_cam->GetZFar();
 		if(fogDist < farZ)
 			farZ = fogDist;
-		Plane &farPlane = m_frustumPlanes[static_cast<int>(FRUSTUM_PLANE::FAR)];
-		Vector3 &start = m_frustumPlanes[static_cast<int>(FRUSTUM_PLANE::NEAR)].GetCenterPos();
+		Plane &farPlane = m_frustumPlanes[static_cast<int>(FrustumPlane::Far)];
+		Vector3 &start = m_frustumPlanes[static_cast<int>(FrustumPlane::Near)].GetCenterPos();
 		Vector3 dir = farPlane.GetCenterPos() -start;
 		uvec::normalize(&dir);
 		farPlane.MoveToPos(start +dir *farZ); // TODO Checkme
@@ -597,10 +596,10 @@ std::vector<pragma::OcclusionMeshInfo> &CHC::PerformCulling()
 		cam->GetFrustumPoints(&points,cam->GetZNear(),cam->GetZFar(),cam->GetFOVRad(),cam->GetAspectRatio(),cam->GetPos(),viewDir);
 
 		Vector3 verts[4] = {
-			points[static_cast<int>(FRUSTUM_POINT::NEAR_TOP_LEFT)],
-			points[static_cast<int>(FRUSTUM_POINT::FAR_TOP_LEFT)],
-			points[static_cast<int>(FRUSTUM_POINT::FAR_TOP_RIGHT)],
-			points[static_cast<int>(FRUSTUM_POINT::NEAR_TOP_RIGHT)]
+			points[static_cast<int>(FrustumPoint::NearTopLeft)],
+			points[static_cast<int>(FrustumPoint::FarTopLeft)],
+			points[static_cast<int>(FrustumPoint::FarTopRight)],
+			points[static_cast<int>(FrustumPoint::NearTopRight)]
 		};
 		verts[1].y = verts[0].y;
 		verts[2].y = verts[0].y;

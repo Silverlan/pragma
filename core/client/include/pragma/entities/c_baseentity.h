@@ -11,7 +11,6 @@ class NetPacket;
 enum class RenderMode : uint32_t;
 class RenderInstance;
 class RenderObject;
-struct Camera;
 class Material;
 namespace pragma
 {

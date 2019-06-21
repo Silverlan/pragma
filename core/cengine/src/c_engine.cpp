@@ -5,14 +5,12 @@
 #include "pragma/console/c_cvar.h"
 #include <pragma/serverstate/serverstate.h>
 #include <texturemanager/texturemanager.h>
-#include <pragma/performancetimer.h>
 #include "pragma/gui/wiimageslideshow.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiframe.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
-#include <pragma/util/profiling_stages.h>
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
@@ -30,6 +28,7 @@
 #include <image/prosper_render_target.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/environment/env_camera.h>
 #include <pragma/entities/components/c_render_component.hpp>
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
@@ -60,11 +59,10 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;
-
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
-	m_nearZ(1.f),//10.0f), //0.1f
-	m_farZ(32'768.0f),
+	m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z),//10.0f), //0.1f
+	m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z),
 	m_fps(0),m_tFPSTime(0.f),
 	m_tLastFrame(std::chrono::high_resolution_clock::now()),m_tDeltaFrameTime(0)
 {

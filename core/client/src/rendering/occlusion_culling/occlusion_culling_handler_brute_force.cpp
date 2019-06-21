@@ -8,8 +8,8 @@ using namespace pragma;
 void OcclusionCullingHandlerBruteForce::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto &scene = renderer.GetScene();
-	auto &cam = scene.camera;
-	auto &posCam = cam->GetPos();
+	auto &cam = scene.GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();

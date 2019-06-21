@@ -1520,7 +1520,254 @@ namespace Lua
 
 	template<class TLuaClass,class THandle>
 		void register_base_env_camera_component_methods(lua_State *l,TLuaClass &def)
-	{}
+{
+		def.def("GetProjectionMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Push<Mat4>(l,hComponent->GetProjectionMatrix());
+		}));
+		def.def("GetViewMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Push<Mat4>(l,hComponent->GetViewMatrix());
+		}));
+		def.def("GetViewMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Push<Mat4>(l,hComponent->GetViewMatrix());
+		}));
+		def.def("LookAt",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &lookAtPos) {
+			pragma::Lua::check_component(l,hComponent);
+			auto &trComponent = hComponent->GetEntity().GetTransformComponent();
+			if(trComponent.expired())
+				return;
+			auto &camPos = trComponent->GetPosition();
+			auto dir = lookAtPos -camPos;
+			uvec::normalize(&dir);
+			trComponent->SetOrientation(uquat::create_look_rotation(lookAtPos,trComponent->GetUp()));
+		}));
+		def.def("UpdateMatrices",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->UpdateMatrices();
+		}));
+		def.def("UpdateViewMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->UpdateViewMatrix();
+		}));
+		def.def("UpdateProjectionMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->UpdateProjectionMatrix();
+		}));
+		def.def("SetFOV",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float fov) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetFOV(fov);
+		}));
+		def.def("SetAspectRatio",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float aspectRatio) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetAspectRatio(aspectRatio);
+		}));
+		def.def("SetNearZ",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float nearZ) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetNearZ(nearZ);
+		}));
+		def.def("SetFarZ",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float farZ) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetFarZ(farZ);
+		}));
+		def.def("GetFOV",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetFOV());
+		}));
+		def.def("GetFOVRad",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetFOVRad());
+		}));
+		def.def("GetAspectRatio",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetAspectRatio());
+		}));
+		def.def("GetNearZ",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetNearZ());
+		}));
+		def.def("GetFarZ",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetFarZ());
+		}));
+		def.def("GetFrustumPlanes",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Plane> planes;
+			hComponent->GetFrustumPlanes(planes);
+
+			lua_newtable(l);
+			int top = lua_gettop(l);
+			for(unsigned int i=0;i<planes.size();i++)
+			{
+				Lua::Push<Plane>(l,planes[i]);
+				lua_rawseti(l,top,i +1);
+			}
+		}));
+		def.def("GetFarPlaneCenter",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Push<Vector3>(l,hComponent->GetFarPlaneCenter());
+		}));
+		def.def("GetNearPlaneCenter",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Push<Vector3>(l,hComponent->GetNearPlaneCenter());
+		}));
+		def.def("GetFarPlaneBoundaries",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Vector3> farBounds;
+			hComponent->GetFarPlaneBoundaries(&farBounds);
+
+			lua_newtable(l);
+			int top = lua_gettop(l);
+			for(unsigned int i=0;i<farBounds.size();i++)
+			{
+				Lua::Push<Vector3>(l,farBounds[i]);
+				lua_rawseti(l,top,i +1);
+			}
+		}));
+		def.def("GetNearPlaneBoundaries",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Vector3> nearBounds;
+			hComponent->GetNearPlaneBoundaries(&nearBounds);
+
+			lua_newtable(l);
+			int top = lua_gettop(l);
+			for(unsigned int i=0;i<nearBounds.size();i++)
+			{
+				Lua::Push<Vector3>(l,nearBounds[i]);
+				lua_rawseti(l,top,i +1);
+			}
+		}));
+		def.def("GetPlaneBoundaries",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Vector3> nearBounds;
+			std::vector<Vector3> farBounds;
+			hComponent->GetPlaneBoundaries(&nearBounds,&farBounds);
+
+			lua_newtable(l);
+			int top = lua_gettop(l);
+			for(unsigned int i=0;i<nearBounds.size();i++)
+			{
+				Lua::Push<Vector3>(l,nearBounds[i]);
+				lua_rawseti(l,top,i +1);
+			}
+
+			lua_newtable(l);
+			top = lua_gettop(l);
+			for(unsigned int i=0;i<farBounds.size();i++)
+			{
+				Lua::Push<Vector3>(l,farBounds[i]);
+				lua_rawseti(l,top,i +1);
+			}
+		}));
+		def.def("SetProjectionMatrix",static_cast<void(*)(lua_State*,THandle&,const Mat4&)>([](lua_State *l,THandle &hComponent,const Mat4 &mat) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetProjectionMatrix(mat);
+		}));
+		def.def("SetViewMatrix",static_cast<void(*)(lua_State*,THandle&,const Mat4&)>([](lua_State *l,THandle &hComponent,const Mat4 &mat) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetViewMatrix(mat);
+		}));
+		def.def("GetNearPlaneBounds",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			float wNear,hNear;
+			hComponent->GetNearPlaneBounds(&wNear,&hNear);
+			Lua::PushNumber(l,wNear);
+			Lua::PushNumber(l,hNear);
+		}));
+		def.def("GetFarPlaneBounds",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			float wNear,hNear;
+			hComponent->GetFarPlaneBounds(&wNear,&hNear);
+			Lua::PushNumber(l,wNear);
+			Lua::PushNumber(l,hNear);
+		}));
+		def.def("GetFrustumPoints",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Vector3> points;
+			hComponent->GetFrustumPoints(points);
+
+			int table = Lua::CreateTable(l);
+			for(unsigned int i=0;i<points.size();i++)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::Push<Vector3>(l,points[i]);
+				Lua::SetTableValue(l,table);
+			}
+		}));
+		def.def("GetNearPlanePoint",static_cast<void(*)(lua_State*,THandle&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uv) {
+			pragma::Lua::check_component(l,hComponent);
+			auto point = hComponent->GetNearPlanePoint(uv);
+			Lua::Push<decltype(point)>(l,point);
+		}));
+		def.def("GetFarPlanePoint",static_cast<void(*)(lua_State*,THandle&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uv) {
+			pragma::Lua::check_component(l,hComponent);
+			auto point = hComponent->GetFarPlanePoint(uv);
+			Lua::Push<decltype(point)>(l,point);
+		}));
+		def.def("GetFrustumNeighbors",static_cast<void(*)(lua_State*,THandle&,int)>([](lua_State *l,THandle &hComponent,int planeID) {
+			pragma::Lua::check_component(l,hComponent);
+			if(planeID < 0 || planeID > 5)
+				return;
+			FrustumPlane neighborIDs[4];
+			hComponent->GetFrustumNeighbors(FrustumPlane(planeID),&neighborIDs[0]);
+			int table = Lua::CreateTable(l);
+			for(unsigned int i=0;i<4;i++)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::PushInt(l,static_cast<int>(neighborIDs[i]));
+				Lua::SetTableValue(l,table);
+			}
+		}));
+		def.def("GetFrustumPlaneCornerPoints",static_cast<void(*)(lua_State*,THandle&,int,int)>([](lua_State *l,THandle &hComponent,int planeA,int planeB) {
+			pragma::Lua::check_component(l,hComponent);
+			if(planeA < 0 || planeB < 0 || planeA > 5 || planeB > 5)
+				return;
+
+			FrustumPoint cornerPoints[2];
+			hComponent->GetFrustumPlaneCornerPoints(FrustumPlane(planeA),FrustumPlane(planeB),&cornerPoints[0]);
+
+			Lua::PushInt(l,static_cast<int>(cornerPoints[0]));
+			Lua::PushInt(l,static_cast<int>(cornerPoints[1]));
+		}));
+		def.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,THandle&,const Vector2&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uvStart,const Vector2 &uvEnd) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Plane> kDop;
+			hComponent->CreateFrustumKDop(uvStart,uvEnd,kDop);
+
+			auto table = Lua::CreateTable(l);
+			auto idx = 1u;
+			for(auto &plane : kDop)
+			{
+				Lua::PushInt(l,idx++);
+				Lua::Push<Plane>(l,plane);
+				Lua::SetTableValue(l,table);
+			}
+		}));
+		def.def("CreateFrustumMesh",static_cast<void(*)(lua_State*,THandle&,const Vector2&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uvStart,const Vector2 &uvEnd) {
+			pragma::Lua::check_component(l,hComponent);
+			std::vector<Vector3> verts;
+			std::vector<uint16_t> indices;
+			hComponent->CreateFrustumMesh(uvStart,uvEnd,verts,indices);
+			auto t = Lua::CreateTable(l);
+			auto vertIdx = 1u;
+			for(auto &v : verts)
+			{
+				Lua::PushInt(l,vertIdx++);
+				Lua::Push<Vector3>(l,v);
+				Lua::SetTableValue(l,t);
+			}
+
+			t = Lua::CreateTable(l);
+			auto idx = 1u;
+			for(auto i : indices)
+			{
+				Lua::PushInt(l,idx++);
+				Lua::PushInt(l,i);
+				Lua::SetTableValue(l,t);
+			}
+		}));
+	}
 
 	template<class TLuaClass,class THandle>
 		void register_base_env_explosion_component_methods(lua_State *l,TLuaClass &def)

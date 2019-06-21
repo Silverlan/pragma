@@ -88,11 +88,11 @@ namespace pragma
 
 		void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
-			float &nearZ,float &farZ,const Material *material=nullptr,const Camera *cam=nullptr
+			float &nearZ,float &farZ,const Material *material=nullptr,const pragma::CCameraComponent *cam=nullptr
 		) const;
 		virtual void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,
-			float &nearZ,float &farZ,const Material *material=nullptr,const Camera *cam=nullptr
+			float &nearZ,float &farZ,const Material *material=nullptr,const pragma::CCameraComponent *cam=nullptr
 		) const;
 	};
 };

@@ -481,9 +481,9 @@ int Lua::DebugRenderer::Client::DrawFrustum(lua_State *l)
 {
 	std::vector<Vector3> points {};
 	points.reserve(8u);
-	if(Lua::IsCamera(l,1))
+	if(Lua::IsCCamera(l,1))
 	{
-		auto *cam = Lua::CheckCamera(l,1);
+		auto &cam = *Lua::CheckCCamera(l,1);
 		cam->GetFrustumPoints(points);
 	}
 	else

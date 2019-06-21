@@ -14,7 +14,6 @@ class RenderList;
 class RenderInstance;
 class Material;
 class GLMesh;
-struct Camera;
 class DLLCLIENT RenderObject
 {
 public:

@@ -36,9 +36,9 @@ bool ShaderParticlePolyboard::Draw(const rendering::RasterizationRenderer &rende
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
-	auto &cam = *renderer.GetScene().GetCamera();
+	auto &cam = renderer.GetScene().GetActiveCamera();
 	if(RecordPushConstants(GeometryPushConstants{
-				cam.GetPos(),radius,curvature
+		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},radius,curvature
 			}) == false ||
 		RecordPushConstants(FragmentPushConstants{
 			static_cast<int32_t>(GetRenderFlags(ps)),

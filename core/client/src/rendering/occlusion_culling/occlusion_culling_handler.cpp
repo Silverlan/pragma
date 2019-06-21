@@ -26,9 +26,10 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 }
 bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
-	auto &cam = *c_game->GetRenderCamera();
+	auto *cam = c_game->GetPrimaryCamera();
+	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(ent.IsSpawned() == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(cam.GetPos()) == false)
+	if(ent.IsSpawned() == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
 		return false;
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -66,8 +67,8 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
 {
 	auto &scene = renderer.GetScene();
-	auto &cam = scene.camera;
-	auto &pos = cam->GetPos();
+	auto &cam = scene.GetActiveCamera();
+	auto &pos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	std::vector<float> distances;
 	auto sz = lightsIn.size();
 	lightsOut.clear();
@@ -153,8 +154,8 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 }
 void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
-	auto &cam = *c_game->GetRenderCamera();
-	auto &posCam = cam.GetPos();
+	auto *cam = c_game->GetPrimaryCamera();
+	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto &scene = renderer.GetScene();
 	auto &ents = scene.GetEntities();
 	auto radiusSqr = umath::pow(radius,2.f);

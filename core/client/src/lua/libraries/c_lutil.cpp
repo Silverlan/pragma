@@ -18,13 +18,17 @@ extern DLLCLIENT CGame *c_game;
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
 {
 	int32_t arg = 1;
-	if(!Lua::IsCamera(l,arg))
+	if(!Lua::IsCCamera(l,arg))
 		return Lua::util::calc_world_direction_from_2d_coordinates(l);
-	auto *hCam = Lua::CheckCamera(l,arg++);
+	auto &hCam = *Lua::CheckCCamera(l,arg++);
+	auto trComponent = hCam->GetEntity().GetTransformComponent();
+	auto &forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
+	auto &right = trComponent.valid() ? trComponent->GetRight() : uvec::RIGHT;
+	auto &up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
 	auto width = Lua::CheckInt(l,arg++);
 	auto height = Lua::CheckInt(l,arg++);
 	auto *uv = Lua::CheckVector2(l,arg++);
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(hCam->GetForward(),hCam->GetRight(),hCam->GetUp(),hCam->GetFOVRad(),hCam->GetZNear(),hCam->GetZFar(),hCam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }

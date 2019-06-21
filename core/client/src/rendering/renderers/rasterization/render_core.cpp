@@ -38,7 +38,7 @@ void RasterizationRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer
 	// pos += velocity *interpolation;
 	// Re-Implement interpolation
 	auto &scene = GetScene();
-	auto &cam = *scene.camera.get();
+	auto &cam = scene.GetActiveCamera();
 	//bool bWorld = (renderFlags &FRENDER_WORLD) == FRENDER_WORLD;
 	bool bShadows = (renderFlags &FRender::Shadows) == FRender::Shadows;
 	//Scene *scene = GetRenderScene();
@@ -215,8 +215,8 @@ void RasterizationRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 		auto *renderInfo = GetRenderInfo(RenderMode::World);
-		if(renderInfo != nullptr)
-			RenderSystem::Render(drawCmd,cam,RenderMode::World,bReflection,renderInfo->translucentMeshes);
+		if(renderInfo != nullptr && cam.valid())
+			RenderSystem::Render(drawCmd,*cam,RenderMode::World,bReflection,renderInfo->translucentMeshes);
 		//c_engine->StopGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 
 		c_game->CallCallbacks("PostRenderWorld");
@@ -299,13 +299,14 @@ void RasterizationRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Debug);
 		c_game->CallCallbacks("PreRenderDebug");
 
-		DebugRenderer::Render(drawCmd,cam);
+		if(cam.valid())
+			DebugRenderer::Render(drawCmd,*cam);
 		if(cvRenderPhysics->GetBool())
 		{
 #ifdef PHYS_ENGINE_BULLET
 			auto *physDebugInterface = c_game->GetPhysicsDebugInterface();
-			if(physDebugInterface)
-				physDebugInterface->Render(drawCmd,cam);
+			if(physDebugInterface && cam.valid())
+				physDebugInterface->Render(drawCmd,*cam);
 #elif PHYS_ENGINE_PHYSX
 			const physx::PxRenderBuffer &pxRenderBuffer = GetPhysXScene()->getRenderBuffer();
 			PxVisualizer::RenderScene(pxRenderBuffer);
@@ -962,7 +963,7 @@ bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandB
 
 	// Render Shadows
 	auto &scene = GetScene();
-	auto &cam = scene.camera;
+	auto &cam = scene.GetActiveCamera();
 	auto &renderMeshes = GetCulledMeshes();
 	GetOcclusionCullingHandler().PerformCulling(*this,renderMeshes);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
@@ -1063,13 +1064,15 @@ bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandB
 				if((renderFlags &FRender::Skybox) != FRender::None)
 				{
 					c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
-					RenderSystem::RenderPrepass(drawCmd,*scene.GetCamera(),GetCulledMeshes(),RenderMode::Skybox,bReflection);
+					if(cam.valid())
+						RenderSystem::RenderPrepass(drawCmd,*cam,GetCulledMeshes(),RenderMode::Skybox,bReflection);
 					c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
 				}
 				if((renderFlags &FRender::World) != FRender::None)
 				{
 					c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
-					RenderSystem::RenderPrepass(drawCmd,*scene.GetCamera(),GetCulledMeshes(),RenderMode::World,bReflection);
+					if(cam.valid())
+						RenderSystem::RenderPrepass(drawCmd,*cam,GetCulledMeshes(),RenderMode::World,bReflection);
 					c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
 				}
 				c_game->CallCallbacks<void>("RenderPrepass");
@@ -1079,7 +1082,8 @@ bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandB
 				if((renderFlags &FRender::View) != FRender::None)
 				{
 					c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassView);
-					RenderSystem::RenderPrepass(drawCmd,*scene.GetCamera(),GetCulledMeshes(),RenderMode::View,bReflection);
+					if(cam.valid())
+						RenderSystem::RenderPrepass(drawCmd,*cam,GetCulledMeshes(),RenderMode::View,bReflection);
 					c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassView);
 				}
 				shaderDepthStage.EndDraw();
@@ -1232,7 +1236,8 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,bool bUpdateT
 		it = m_renderInfo.insert(decltype(m_renderInfo)::value_type(renderMode,std::make_shared<CulledMeshData>())).first;
 
 	auto &renderInfo = it->second;
-	auto &posCam = GetScene().GetCamera()->GetPos();
+	auto &cam = GetScene().GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 
 	auto drawWorld = cvDrawWorld->GetInt();
 	auto *matLoad = c_game->GetLoadMaterial();

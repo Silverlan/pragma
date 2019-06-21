@@ -16,7 +16,6 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/util/resource_watcher.h"
 #include "pragma/entities/components/base_player_component.hpp"
-#include <pragma/util/profiling_stages.h>
 #include <pragma/console/s_cvar_global_functions.h>
 #include <luasystem.h>
 #include <luainterface.hpp>

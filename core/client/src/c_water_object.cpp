@@ -60,7 +60,7 @@ void CWaterObject::InitializeWaterScene(const WaterScene &scene)
 	m_waterScene->reflectiveIntensity = scene.reflectiveIntensity;
 }
 
-static void is_camera_submerged(const Camera &cam,const Vector3 &n,float planeDist,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax,bool &bCameraSubmerged,bool &bCameraFullySubmerged)
+static void is_camera_submerged(const pragma::CCameraComponent &cam,const Vector3 &n,float planeDist,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax,bool &bCameraSubmerged,bool &bCameraFullySubmerged)
 {
 	bCameraSubmerged = false;
 	bCameraFullySubmerged = true;
@@ -113,24 +113,26 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return;
 	auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
 
-	auto &cam = c_game->GetSceneCamera();
+	auto *cam = c_game->GetPrimaryCamera();
 	auto width = scene->GetWidth() /2u;
 	auto height = scene->GetHeight() /2u;
-	auto fov = cam.GetFOV();
-	auto fovView = cam.GetViewFOV();
-	auto nearZ = cam.GetZNear();
-	auto farZ = cam.GetZFar(); // TODO: shared Property?
-
+	auto fov = cam ? cam->GetFOV() : pragma::BaseEnvCameraComponent::DEFAULT_FOV;
+	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z; // TODO: shared Property?
+	auto *camReflection = c_game->CreateCamera(width,height,fov,nearZ,farZ);
+	if(camReflection == nullptr)
+		return;
 	auto &dev = c_engine->GetDevice();
 	m_waterScene = std::make_unique<WaterScene>();
 	m_waterScene->descSetGroupTexEffects = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWater::DESCRIPTOR_SET_WATER);
-	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{width,height,fov,fovView,nearZ,farZ});
+	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{width,height});
 	sceneReflection->InitializeRenderTarget();
-	auto &camReflection = sceneReflection->camera;
-	camReflection->GetFOVProperty()->Link(*cam.GetFOVProperty());
-	camReflection->GetViewFOVProperty()->Link(*cam.GetViewFOVProperty());
-	camReflection->GetNearZProperty()->Link(*cam.GetNearZProperty());
-	camReflection->GetFarZProperty()->Link(*cam.GetFarZProperty());
+	if(cam)
+	{
+		camReflection->GetFOVProperty()->Link(*cam->GetFOVProperty());
+		camReflection->GetNearZProperty()->Link(*cam->GetNearZProperty());
+		camReflection->GetFarZProperty()->Link(*cam->GetFarZProperty());
+	}
 	sceneReflection->SetWorldEnvironment(*scene->GetWorldEnvironment());
 	sceneReflection->LinkLightSources(*scene);
 	sceneReflection->LinkEntities(*scene);
@@ -280,18 +282,18 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			return;
 		auto &scene = c_game->GetRenderScene();
 		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
-		if(renderer == nullptr)
+		auto camScene = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
+		if(renderer == nullptr || camScene.expired())
 			return;
 		auto &waterScene = *m_waterScene;
 
 		//scene->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
-		auto &camGame = *scene->GetCamera();
 		auto &n = *waterNormal;
 		auto &planeDist = *waterPlaneDist;
 
 		auto bCameraSubmerged = false;
 		auto bCameraFullySubmerged = true;
-		is_camera_submerged(camGame,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,bCameraSubmerged,bCameraFullySubmerged);
+		is_camera_submerged(*camScene,n,planeDist,m_waterAabbBounds.first,m_waterAabbBounds.second,bCameraSubmerged,bCameraFullySubmerged);
 		if(bCameraSubmerged == true)
 		{
 			auto &hdrInfo = renderer->GetHDRInfo();
@@ -362,10 +364,12 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		}
 
 		auto &scene = c_game->GetRenderScene();
-		auto &camGame = *scene->GetCamera();
-		auto &matView = camGame.GetViewMatrix();
-		auto &matProj = camGame.GetProjectionMatrix();
-		auto &camPos = camGame.GetPos();
+		auto &camScene = scene->GetActiveCamera();
+		if(camScene.expired())
+			return CallbackReturnType::NoReturnValue;
+		auto &matView = camScene->GetViewMatrix();
+		auto &matProj = camScene->GetProjectionMatrix();
+		auto &camPos = camScene->GetEntity().GetPosition();
 		auto camProj = uvec::project_to_plane(camPos,n,-planeDist);
 		auto dot = uvec::dot(n,camPos -camProj);
 		auto bBelowSurface = (dot < 0.f) ? true : false;
@@ -386,22 +390,23 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				if(renderer)
 				{
 					auto &rtReflection = renderer->GetHDRInfo().hdrRenderTarget;
-					auto &camReflection = *sceneReflection->GetCamera();
+					auto &camReflection = sceneReflection->GetActiveCamera();
+					if(camReflection.valid())
+					{
+						camReflection->GetEntity().SetPosition(camPos);
+						camReflection->GetEntity().SetRotation(camScene->GetEntity().GetRotation());
+						camReflection->UpdateMatrices();
 
-					camReflection.SetPos(camPos);
-					camReflection.SetForward(camGame.GetForward());
-					camReflection.SetUp(camGame.GetUp());
-					camReflection.UpdateMatrices();
+						camReflection->SetProjectionMatrix(matProj);
+						auto matReflView = camReflection->GetViewMatrix();
+						matReflView *= matReflect;
+						camReflection->SetViewMatrix(matReflView);
 
-					camReflection.SetProjectionMatrix(matProj);
-					auto matReflView = camReflection.GetViewMatrix();
-					matReflView *= matReflect;
-					camReflection.SetViewMatrix(matReflView);
-
-					// Reflect camera position (Has to be done AFTER matrices have been updated!)
-					auto posReflected = Vector4(camPos.x,camPos.y,camPos.z,1.f);
-					posReflected = glm::inverse(camGame.GetViewMatrix()) *matReflView *posReflected;
-					camReflection.SetPos({posReflected.x,posReflected.y,posReflected.z});
+						// Reflect camera position (Has to be done AFTER matrices have been updated!)
+						auto posReflected = Vector4(camPos.x,camPos.y,camPos.z,1.f);
+						posReflected = glm::inverse(camScene->GetViewMatrix()) *matReflView *posReflected;
+						camReflection->GetEntity().SetPosition({posReflected.x,posReflected.y,posReflected.z});
+					}
 
 					auto renderFlags = FRender::World | FRender::Skybox | FRender::Reflection;
 					if(reflectionQuality == 0 || reflectionQuality > 1)

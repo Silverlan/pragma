@@ -329,9 +329,10 @@ void RasterizationRenderer::UpdateFrustumPlanes()
 	m_frustumPlanes.clear();
 	m_clippedFrustumPlanes.clear();
 	auto &scene = GetScene();
-	if(scene.camera == nullptr)
+	auto &cam = scene.GetActiveCamera();
+	if(cam.expired())
 		return;
-	scene.camera->GetFrustumPlanes(m_frustumPlanes);
+	cam->GetFrustumPlanes(m_frustumPlanes);
 	m_clippedFrustumPlanes = m_frustumPlanes;
 /*	auto forward = camera->GetForward();
 	auto up = camera->GetUp();
@@ -362,8 +363,8 @@ void RasterizationRenderer::UpdateFrustumPlanes()
 		float farZ = cam->GetZFar();
 		if(fogDist < farZ)
 			farZ = fogDist;
-		Plane &farPlane = planesClipped[static_cast<int>(FRUSTUM_PLANE::FAR)];
-		Vector3 &start = planesClipped[static_cast<int>(FRUSTUM_PLANE::NEAR)].GetCenterPos();
+		Plane &farPlane = planesClipped[static_cast<int>(FrustumPlane::Far)];
+		Vector3 &start = planesClipped[static_cast<int>(FrustumPlane::Near)].GetCenterPos();
 		Vector3 dir = farPlane.GetCenterPos() -start;
 		uvec::normalize(&dir);
 		farPlane.MoveToPos(start +dir *farZ); // TODO Checkme

@@ -52,11 +52,11 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 	);
 
 	auto &scene = GetScene();
-	auto &cam = *scene.GetCamera();
+	auto &cam = scene.GetActiveCamera();
 	auto extents = imgOutput->GetExtents();
 	ShaderRayTracing::PushConstants pushConstants {
 		pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount(),
-		extents.width,extents.height,cam.GetFOVRad()
+		extents.width,extents.height,cam.valid() ? cam->GetFOVRad() : umath::deg_to_rad(pragma::CCameraComponent::DEFAULT_FOV)
 	};
 
 	auto &dsgCam = scene.GetCameraDescriptorSetGroup(vk::PipelineBindPoint::eCompute);

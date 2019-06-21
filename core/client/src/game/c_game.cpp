@@ -44,7 +44,6 @@
 #include "pragma/opengl/renderhierarchy.h"
 #include "pragma/rendering/occlusion_culling/chc.hpp"
 #include "pragma/rendering/scene/scene.h"
-#include <pragma/performancetimer.h>
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include "textureinfo.h"
@@ -140,7 +139,8 @@ CGame::CGame(NetworkState *state)
 #endif
 	m_matLoad(),m_scene(nullptr),m_camPosOverride(nullptr),m_camRotOverride(nullptr),
 	/*m_dummyVertexBuffer(nullptr),*/m_tLastClientUpdate(0.0), // prosper TODO
-	m_snapshotTracker{},m_userInputTracker{}
+	m_snapshotTracker{},m_userInputTracker{},
+	m_viewFov{util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}
 {
 	std::fill(m_renderModesEnabled.begin(),m_renderModesEnabled.end(),true);
 	c_game = this;
@@ -591,7 +591,8 @@ void CGame::Initialize()
 	InitializeWorldEnvironment();
 
 	auto resolution = c_engine->GetRenderResolution();
-	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y),GetConVarFloat("cl_render_fov"),GetConVarFloat("cl_fov_viewmodel")/*,c_engine->GetAspectRatio()*/,c_engine->GetNearZ(),c_engine->GetFarZ()});
+	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y)});
+	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
 	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(*m_scene);
 	//auto renderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*m_scene);
 	m_scene->SetRenderer(renderer);
@@ -604,6 +605,34 @@ void CGame::Initialize()
 	Resize();
 
 	m_matLoad = client->LoadMaterial("loading",CallbackHandle{},false,true);
+}
+
+void CGame::SetViewModelFOV(float fov) {*m_viewFov = fov;}
+const util::PFloatProperty &CGame::GetViewModelFOVProperty() const {return m_viewFov;}
+float CGame::GetViewModelFOV() const {return *m_viewFov;}
+float CGame::GetViewModelFOVRad() const {return umath::deg_to_rad(*m_viewFov);}
+Mat4 CGame::GetViewModelProjectionMatrix() const
+{
+	auto *cam = GetPrimaryCamera();
+	auto aspectRatio = cam ? cam->GetAspectRatio() : 1.f;
+	auto nearZ = cam ? cam->GetNearZ() : pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = cam ? cam->GetFarZ() : pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
+	return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(*m_viewFov,aspectRatio,nearZ,farZ);
+}
+
+pragma::CCameraComponent *CGame::CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ)
+{
+	auto *cam = CreateEntity<CEnvCamera>();
+	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : util::WeakHandle<pragma::CCameraComponent>{};
+	if(whCamComponent.expired())
+		return nullptr;
+	auto *pCameraComponent = whCamComponent.get();
+	pCameraComponent->SetAspectRatio(width /static_cast<float>(height));
+	pCameraComponent->SetFOV(fov);
+	pCameraComponent->SetNearZ(nearZ);
+	pCameraComponent->SetFarZ(farZ);
+	pCameraComponent->UpdateMatrices();
+	return pCameraComponent;
 }
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
@@ -621,6 +650,14 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	m_surfaceMaterials.Load("scripts\\physics\\materials.txt");
 
 	c_engine->SavePipelineCache();
+
+	auto *cam = CreateCamera(
+		m_scene->GetWidth(),m_scene->GetHeight(),
+		GetConVarFloat("cl_render_fov"),
+		c_engine->GetNearZ(),c_engine->GetFarZ()
+	);
+	if(cam)
+		m_scene->SetActiveCamera(*cam);
 
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
@@ -642,12 +679,12 @@ void CGame::RequestResource(const std::string &fileName)
 
 void CGame::Resize()
 {
-	if(m_scene == nullptr)
-		return;
 	ReloadRenderFrameBuffer();
-	auto &cam = GetSceneCamera();
-	cam.SetAspectRatio(c_engine->GetAspectRatio());
-	cam.UpdateMatrices();
+	auto *cam = GetPrimaryCamera();
+	if(cam == nullptr)
+		return;
+	cam->SetAspectRatio(c_engine->GetAspectRatio());
+	cam->UpdateMatrices();
 }
 
 void CGame::PreGUIDraw()
@@ -668,12 +705,13 @@ void CGame::SetRenderScene(const std::shared_ptr<Scene> &scene)
 	m_renderScene = scene;
 }
 std::shared_ptr<Scene> &CGame::GetRenderScene() {return m_renderScene;}
-Camera *CGame::GetRenderCamera() const
+pragma::CCameraComponent *CGame::GetRenderCamera() const
 {
 	if(m_renderScene == nullptr)
 		return nullptr;
-	return m_renderScene->camera.get();
+	return m_renderScene->GetActiveCamera().get();
 }
+pragma::CCameraComponent *CGame::GetPrimaryCamera() const {return m_primaryCamera.get();}
 
 void CGame::SetMaterialOverride(Material *mat) {m_matOverride = mat;}
 Material *CGame::GetMaterialOverride() {return m_matOverride;}
@@ -1039,8 +1077,9 @@ void CGame::Think()
 {
 	Game::Think();
 	auto &scene = GetRenderScene();
-	auto &cam = scene->camera;
-	cam->UpdateFrustumPlanes();
+	auto *cam = GetPrimaryCamera();
+	if(cam)
+		cam->UpdateFrustumPlanes();
 	//m_entsOccluded.clear();
 	//GetOccludedEntities(m_entsOccluded);
 

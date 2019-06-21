@@ -26,7 +26,7 @@ bool ShaderParticleRotational::BindWorldRotationBuffer(Anvil::Buffer &buffer) {r
 
 void ShaderParticleRotational::GetParticleSystemOrientationInfo(
 	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,
-	float &nearZ,float &farZ,const Material *material,const Camera *cam
+	float &nearZ,float &farZ,const Material *material,const pragma::CCameraComponent *cam
 ) const
 {
 	auto orType = particle.GetOrientationType();

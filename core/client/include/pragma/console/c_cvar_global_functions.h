@@ -3,7 +3,6 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/networkdefinitions.h"
-#include <pragma/performancetimer.h>
 
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&);
 DLLCLIENT void CMD_setpos(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&);

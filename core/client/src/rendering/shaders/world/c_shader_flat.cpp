@@ -140,8 +140,8 @@ bool ShaderFlat::Draw(CModelSubMesh &mesh)
 	}
 
 	auto &scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
-	auto &cam = scene->GetCamera();
-	auto mvp = cam->GetProjectionMatrix() *cam->GetViewMatrix();
+	auto &cam = scene->GetActiveCamera();
+	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
 	RecordBindVertexBuffer(vertexBuffer->GetAnvilBuffer());
 	RecordBindIndexBuffer(indexBuffer->GetAnvilBuffer(),Anvil::IndexType::UINT16);
 	RecordDrawIndexed(mesh.GetTriangleVertexCount());

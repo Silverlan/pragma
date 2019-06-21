@@ -524,14 +524,14 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes();
 }
-bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,Camera *cam,pragma::ShaderTextured3DBase *shader,Material *mat)
+bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat)
 {
 	auto pRenderComponent = ent->GetRenderComponent();
 	return pRenderComponent.valid() && pRenderComponent->RenderCallback(o,cam,shader,mat);
 }
-bool CRenderComponent::RenderCallback(RenderObject*,Camera *cam,pragma::ShaderTextured3DBase*,Material*)
+bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
 {
-	return ShouldDraw(cam->GetPos());
+	return ShouldDraw(cam->GetEntity().GetPosition());
 }
 void CRenderComponent::PreRender()
 {

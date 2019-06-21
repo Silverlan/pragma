@@ -307,9 +307,8 @@ float WIDebugDepthTexture::GetContrastFactor() const {return m_contrastFactor;}
 
 void WIDebugDepthTexture::Update()
 {
-	auto &scene = c_game->GetRenderScene();
-	if(scene == nullptr)
+	auto *cam = c_game->GetPrimaryCamera();
+	if(cam == nullptr)
 		return;
-	auto &cam = scene->camera;
-	Update(cam->GetZNear(),cam->GetZFar());
+	Update(cam->GetNearZ(),cam->GetFarZ());
 }

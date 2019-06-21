@@ -909,10 +909,9 @@ int Lua::game::Client::draw_scene(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
 	auto scene = (drawSceneInfo.scene != nullptr) ? drawSceneInfo.scene : c_game->GetRenderScene();
-	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
-	if(renderer == nullptr)
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
-
 	auto &rt = Lua::Check<Lua::Vulkan::RenderTarget>(l,2);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
 	if(cmdBuffer == nullptr || cmdBuffer->GetAnvilCommandBuffer().get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
@@ -924,7 +923,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	if(clearColor != nullptr)
 	{
 		auto clearCol = clearColor->ToVector4();
-		auto &hdrInfo = renderer->GetHDRInfo();
+		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
 		auto &hdrImg = hdrInfo.hdrRenderTarget->GetTexture()->GetImage();
 		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 		prosper::util::record_clear_image(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
@@ -939,19 +938,15 @@ int Lua::game::Client::draw_scene(lua_State *l)
 }
 int Lua::game::Client::create_scene(lua_State *l)
 {
-	auto width = Lua::CheckInt(l,1);
-	auto height = Lua::CheckInt(l,2);
-	auto fov = Lua::CheckNumber(l,3);
-	auto fovView = Lua::CheckNumber(l,4);
-	auto nearZ = Lua::CheckNumber(l,5);
-	auto farZ = Lua::CheckNumber(l,6);
+	auto argIdx = 1;
+	auto width = Lua::CheckInt(l,argIdx++);
+	auto height = Lua::CheckInt(l,argIdx++);
+	auto fov = Lua::CheckNumber(l,argIdx++);
 	::Scene::CreateInfo createInfo {
-		static_cast<uint32_t>(width),static_cast<uint32_t>(height),
-		static_cast<float>(fov),static_cast<float>(fovView),
-		static_cast<float>(nearZ),static_cast<float>(farZ)
+		static_cast<uint32_t>(width),static_cast<uint32_t>(height)
 	};
-	if(Lua::IsSet(l,7))
-		createInfo.sampleCount = static_cast<Anvil::SampleCountFlagBits>(Lua::CheckInt(l,7));
+	if(Lua::IsSet(l,argIdx))
+		createInfo.sampleCount = static_cast<Anvil::SampleCountFlagBits>(Lua::CheckInt(l,argIdx++));
 	auto scene = ::Scene::Create(createInfo);
 	if(scene == nullptr)
 		return 0;
@@ -967,8 +962,10 @@ int Lua::game::Client::get_render_scene(lua_State *l)
 int Lua::game::Client::get_render_scene_camera(lua_State *l)
 {
 	auto &scene = c_game->GetRenderScene();
-	auto &cam = scene->GetCamera();
-	Lua::Push<std::shared_ptr<::Camera>>(l,cam);
+	auto &cam = scene->GetActiveCamera();
+	if(cam.expired())
+		return 0;
+	cam->PushLuaObject(l);
 	return 1;
 }
 int Lua::game::Client::get_scene(lua_State *l)
@@ -979,8 +976,10 @@ int Lua::game::Client::get_scene(lua_State *l)
 }
 int Lua::game::Client::get_scene_camera(lua_State *l)
 {
-	auto &cam = c_game->GetSceneCamera();
-	Lua::Push<std::shared_ptr<::Camera>>(l,cam.shared_from_this());
+	auto *cam = c_game->GetPrimaryCamera();
+	if(cam == nullptr)
+		return 0;
+	cam->PushLuaObject(l);
 	return 1;
 }
 
@@ -1003,9 +1002,15 @@ int Lua::game::Client::flush_setup_command_buffer(lua_State *l)
 }
 int Lua::game::Client::get_camera_position(lua_State *l)
 {
-	auto &cam = c_game->GetSceneCamera();
-	Lua::Push<Vector3>(l,cam.GetPos());
-	Lua::Push<Quat>(l,cam.GetRotation());
+	auto *cam = c_game->GetPrimaryCamera();
+	if(cam == nullptr)
+	{
+		Lua::Push<Vector3>(l,Vector3{});
+		Lua::Push<Quat>(l,Quat{});
+		return 2;
+	}
+	Lua::Push<Vector3>(l,cam->GetEntity().GetPosition());
+	Lua::Push<Quat>(l,cam->GetEntity().GetRotation());
 	return 2;
 }
 int Lua::game::Client::get_render_clip_plane(lua_State *l)

@@ -472,6 +472,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		Con::cwar<<"WARNING: Unable to import model asset: '"<<error<<"'!"<<Con::endl;
 		return 0;
 	}
+
 	auto t = Lua::CreateTable(l);
 	auto *nw = engine->GetNetworkState(l);
 	for(auto i=decltype(aiScene->mNumMeshes){0};i<aiScene->mNumMeshes;++i)
@@ -597,6 +598,20 @@ int Lua::import::import_model_asset(lua_State *l)
 		Lua::PushString(l,tex);
 		Lua::SetTableValue(l,tTextures);
 	}
+
+	// Build skeleton
+	// http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
+	/*aiScene->mRootNode;
+	for(auto i=decltype(aiScene->mNumAnimations){0};i<aiScene->mNumAnimations;++i)
+	{
+		//aiScene->
+		auto *anim = aiScene->mAnimations[i];
+		anim->mDuration;
+		anim->mTicksPerSecond;
+		anim->mChannels;
+		anim->
+	}*/
+
 	return 2;
 }
 

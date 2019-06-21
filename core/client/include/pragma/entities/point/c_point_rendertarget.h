@@ -8,7 +8,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <texturemanager/texture.h>
 
-struct Camera;
 namespace pragma
 {
 	class DLLCLIENT CRenderTargetComponent final
@@ -48,7 +47,7 @@ namespace pragma
 		float m_refreshRate = 0.f;
 		double m_tLastRefresh;
 		unsigned int m_curDepth = 0u;
-		std::unique_ptr<Camera> m_cam = nullptr;
+		util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 	};
 };
 

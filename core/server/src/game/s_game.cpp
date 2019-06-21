@@ -21,7 +21,6 @@
 #include <pragma/ai/navsystem.h>
 #include <pragma/physics/physenvironment.h>
 #include <pragma/lua/luacallback.h>
-#include <pragma/performancetimer.h>
 #include <pragma/networking/nwm_util.h>
 #include <mathutil/umath.h>
 #include <pragma/console/convars.h>

@@ -92,6 +92,10 @@ public:
 	void SetPosition(const Vector3 &pos);
 	Vector3 GetCenter() const;
 
+	// Returns unit quaternion if entity has no transform component
+	const Quat &GetRotation() const;
+	void SetRotation(const Quat &rot);
+
 	// Helper functions
 	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;

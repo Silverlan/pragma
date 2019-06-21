@@ -164,11 +164,11 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 
 bool CParticleRendererModel::Update()
 {
-	if(m_rotationalBuffer.Update() == false)
+	auto *cam = c_game->GetRenderCamera();
+	if(m_rotationalBuffer.Update() == false || cam == nullptr)
 		return false;
 	// Update meshes
-	auto &cam = *c_game->GetRenderCamera();
-	auto &posCam = cam.GetPos();
+	auto &posCam = cam->GetEntity().GetPosition();
 	auto &renderBounds = m_particleSystem.GetRenderBounds();
 	Vector3 p;
 	Geometry::ClosestPointOnAABBToPoint(renderBounds.first,renderBounds.second,posCam,&p);

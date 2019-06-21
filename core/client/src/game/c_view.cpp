@@ -241,13 +241,10 @@ void CGame::CalcView()
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
 	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset",std::ref(pos),std::ref(orientation));
 
-	Vector3 forward,right,up;
-	uquat::get_orientation(orientation,&forward,&right,&up);
-
-	auto &scene = c_game->GetScene();
-	auto &cam = scene->camera;
-	cam->SetPos(pos);
-	cam->SetUp(up);
-	cam->SetForward(forward);
+	auto *cam = c_game->GetRenderCamera();
+	if(cam == nullptr)
+		return;
+	cam->GetEntity().SetPosition(pos);
+	cam->GetEntity().SetRotation(orientation);
 	cam->UpdateViewMatrix();
 }

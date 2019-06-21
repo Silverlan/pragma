@@ -3,6 +3,7 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/rendering/scene/camera.h"
 
-lua_registercheck(Camera,::Camera);
+// TODO :Remove this file
+//lua_registercheck(Camera,::Camera);
 
 #endif

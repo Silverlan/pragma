@@ -102,8 +102,8 @@ DLLCLIENT void CMD_getcampos(NetworkState *state,pragma::BasePlayerComponent *pl
 	auto *game = static_cast<CGame*>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera();
 	if(pCam == nullptr)
-		pCam = &game->GetSceneCamera();
-	auto &pos = pCam->GetPos();
+		return;
+	auto &pos = pCam->GetEntity().GetPosition();
 	Con::cout<<pos.x<<" "<<pos.y<<" "<<pos.z<<Con::endl;
 }
 
@@ -147,8 +147,8 @@ DLLCLIENT void CMD_getcamang(NetworkState *state,pragma::BasePlayerComponent *pl
 	auto *game = static_cast<CGame*>(state->GetGameState());
 	auto *pCam = game->GetRenderCamera();
 	if(pCam == nullptr)
-		pCam = &game->GetSceneCamera();
-	auto ang = EulerAngles{pCam->GetRotation()};
+		return;
+	auto ang = EulerAngles{pCam->GetEntity().GetRotation()};
 	Con::cout<<ang.p<<" "<<ang.y<<" "<<ang.r<<Con::endl;
 }
 

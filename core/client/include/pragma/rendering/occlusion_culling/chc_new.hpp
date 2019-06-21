@@ -46,7 +46,7 @@ namespace pragma
 	class DLLCLIENT CHC
 	{
 	public:
-		CHC(Camera &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
+		CHC(CCameraComponent &cam,const std::shared_ptr<BaseOcclusionOctree> &octree=nullptr);
 		~CHC();
 		void Reset(const std::shared_ptr<BaseOcclusionOctree> &octree);
 	#ifdef CHC_DEBUGGING_ENABLED
@@ -64,7 +64,7 @@ namespace pragma
 		std::queue<WPCHCNode> m_invisQueue;
 		std::vector<Plane> m_frustumPlanes;
 		std::vector<PCHCNode> m_nodes;
-		std::shared_ptr<Camera> m_cam;
+		util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 		void TraverseNode(CHCNode &cNode);
 		void PullUpVisibility(CHCNode &cNode);
 		void QueryPreviouslyInvisibleNode(CHCNode &cNode);

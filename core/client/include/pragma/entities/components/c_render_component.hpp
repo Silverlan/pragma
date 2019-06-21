@@ -85,8 +85,8 @@ namespace pragma
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ClearRenderObjects();
-		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,Camera *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		virtual bool RenderCallback(RenderObject *o,Camera *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
+		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
+		virtual bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
 		virtual void UpdateRenderMeshes();
 
 		void ClearRenderBuffers();

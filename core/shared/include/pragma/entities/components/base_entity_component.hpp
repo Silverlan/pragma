@@ -1,7 +1,6 @@
 #ifndef __BASE_ENTITY_COMPONENT_HPP__
 #define __BASE_ENTITY_COMPONENT_HPP__
 
-#include "pragma/entities/components/base_game_object_component.hpp"
 #include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
 #include "pragma/entities/entity_component_event.hpp"
 #include "pragma/entities/entity_component_info.hpp"

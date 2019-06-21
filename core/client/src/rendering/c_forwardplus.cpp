@@ -31,7 +31,7 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto &fp = rasterizer->GetForwardPlusInstance();
 	auto &prepass = rasterizer->GetPrepass();
 	c_engine->WaitIdle();
-	fp.Initialize(*c_engine,scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth,*scene->GetCamera());
+	fp.Initialize(*c_engine,scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
 
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
 	rasterizer->UpdateRenderSettings(scene->GetRenderSettings());
@@ -75,7 +75,7 @@ pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRendere
 	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");
 }
 
-bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture,const Camera &cam)
+bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;

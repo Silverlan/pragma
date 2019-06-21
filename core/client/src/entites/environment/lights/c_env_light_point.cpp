@@ -115,15 +115,19 @@ void CLightPointComponent::UpdateFrustumPlanes()
 	auto radius = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f;
 	for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 	{
-		auto cam = Camera::Create(
-			90.f /* fov */,90.f /* viewFov */,1.f /* aspectRatio */,
-			2.f /* nearZ */,radius /* farZ */
+		auto &trComponent = GetEntity().GetTransformComponent();
+		auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
+		m_frustumPlanes.at(i).clear();
+		pragma::CCameraComponent::GetFrustumPlanes(
+			m_frustumPlanes.at(i),
+			2.f /* nearZ */,
+			radius /* farZ */,
+			90.f /* fov */,
+			1.f /* aspectRatio */,
+			pos,
+			directions.at(i),
+			upDirs.at(i)
 		);
-		cam->SetForward(directions.at(i));
-		cam->SetUp(upDirs.at(i));
-		cam->UpdateViewMatrix();
-		cam->UpdateFrustumPlanes();
-		m_frustumPlanes.at(i) = cam->GetFrustumPlanes();
 	}
 }
 void CLightPointComponent::UpdateProjectionMatrix()

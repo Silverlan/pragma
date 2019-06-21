@@ -50,8 +50,8 @@ public:
 	void SetMaxDistance(float dist);
 	float GetMaxDistance();
 	unsigned int GetSplitCount();
-	void UpdateFrustum(uint32_t splitId,Camera &cam,const Mat4 &matView,const Vector3 &dir);
-	void UpdateFrustum(Camera &cam,const Mat4 &matView,const Vector3 &dir);
+	void UpdateFrustum(uint32_t splitId,pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir);
+	void UpdateFrustum(pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir);
 	float *GetSplitFarDistances();
 	Frustum *GetFrustumSplit(unsigned int splitId);
 	//const Vulkan::DescriptorSet &GetDescriptorSet() const; // prosper TODO

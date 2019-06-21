@@ -40,7 +40,6 @@
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <util_bsp.hpp>
-#include <pragma/util/profiling_stages.h>
 #include <luainterface.hpp>
 
 #pragma optimize("",off)

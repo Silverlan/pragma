@@ -67,8 +67,10 @@ bool ShaderSkybox::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer
 }
 bool ShaderSkybox::BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
+	auto &scene = renderer.GetScene();
+	auto &cam = scene.GetActiveCamera();
 	return ShaderTextured3DBase::BindSceneCamera(renderer,bView) == true &&
-		RecordPushConstants(PushConstants{renderer.GetScene().GetCamera()->GetPos()}) == true;
+		RecordPushConstants(PushConstants{cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN}) == true;
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) {return true;}

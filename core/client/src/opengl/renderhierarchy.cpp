@@ -1,5 +1,4 @@
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/e_frustum.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
@@ -408,10 +407,10 @@ void RenderOctTree::DebugRender()
 	camScene->GetFrustumPoints(&points,camScene->GetZNear(),camScene->GetZFar(),camScene->GetFOVRad(),camScene->GetAspectRatio(),camScene->GetPos(),viewDir);
 
 	Vector3 verts[4] = {
-		points[static_cast<int>(FRUSTUM_POINT::NEAR_TOP_LEFT)],
-		points[static_cast<int>(FRUSTUM_POINT::FAR_TOP_LEFT)],
-		points[static_cast<int>(FRUSTUM_POINT::FAR_TOP_RIGHT)],
-		points[static_cast<int>(FRUSTUM_POINT::NEAR_TOP_RIGHT)]
+		points[static_cast<int>(FrustumPoint::NearTopLeft)],
+		points[static_cast<int>(FrustumPoint::FarTopLeft)],
+		points[static_cast<int>(FrustumPoint::FarTopRight)],
+		points[static_cast<int>(FrustumPoint::NearTopRight)]
 	};
 	verts[1].y = verts[0].y;
 	verts[2].y = verts[0].y;
@@ -458,7 +457,7 @@ void RenderOctTree::DebugRender()
 	c_game->SetRenderTarget(cam);*/ // Vulkan TODO
 }
 
-Camera *RenderOctTree::GetDebugCamera() {return m_debugCamera.get();}
+pragma::CCameraComponent *RenderOctTree::GetDebugCamera() {return m_debugCamera.get();}
 
 void RenderOctTree::GetNodeDebugInfo(RenderNode *node)
 {

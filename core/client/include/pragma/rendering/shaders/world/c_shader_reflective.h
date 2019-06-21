@@ -4,7 +4,6 @@
 #if 0
 #include "pragma/rendering/shaders/world/c_shader_textured.h"
 
-struct Camera;
 class Texture;
 namespace Shader
 {

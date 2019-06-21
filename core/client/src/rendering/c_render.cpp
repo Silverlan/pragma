@@ -34,7 +34,6 @@
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/opengl/renderhierarchy.h"
-#include <pragma/performancetimer.h>
 #include "luasystem.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_postprocessing.h"
 #include "pragma/gui/widebugdepthtexture.h"
@@ -54,7 +53,6 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <textureinfo.h>
-#include <pragma/util/profiling_stages.h>
 #include <sharedutils/scope_guard.h>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>

@@ -25,6 +25,7 @@ namespace prosper
 #pragma warning(disable : 4251)
 namespace pragma
 {
+	class CCameraComponent;
 	namespace rendering
 	{
 		class RasterizationRenderer;
@@ -32,7 +33,7 @@ namespace pragma
 		{
 		public:
 			ForwardPlusInstance(RasterizationRenderer &rasterizer);
-			bool Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture,const Camera &cam);
+			bool Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture);
 
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
 			uint32_t GetTileCount() const;

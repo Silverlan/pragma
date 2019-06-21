@@ -159,7 +159,7 @@ DLLCLIENT uint32_t s_shadowIndexCount = 0;
 DLLCLIENT uint32_t s_shadowTriangleCount = 0;
 DLLCLIENT uint32_t s_shadowVertexCount = 0;
 #endif
-void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes)
+void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes)
 {
 	if(translucentMeshes.empty())
 		return;

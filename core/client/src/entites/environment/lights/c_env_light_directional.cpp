@@ -316,12 +316,11 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto *shadowMap = pLightComponent->GetShadowMap();
 	if(shadowMap->GetType() != ShadowMap::Type::Cascaded)
 		return;
+	auto *cam = c_game->GetPrimaryCamera();
 	auto *csm = static_cast<ShadowMapCasc*>(shadowMap);
-	if(csm->IsValid() == false)
+	if(csm->IsValid() == false || cam == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	auto &cam = scene->camera;
-	csm->UpdateFrustum(frustumId,*cam.get(),GetViewMatrix(),pTrComponent->GetForward());
+	csm->UpdateFrustum(frustumId,*cam,GetViewMatrix(),pTrComponent->GetForward());
 }
 
 void CLightDirectionalComponent::UpdateFrustum()
@@ -335,10 +334,9 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto *shadowMap = pLightComponent->GetShadowMap();
 	if(shadowMap->GetType() != ShadowMap::Type::Cascaded)
 		return;
+	auto *cam = c_game->GetPrimaryCamera();
 	auto *csm = static_cast<ShadowMapCasc*>(shadowMap);
-	if(csm->IsValid() == false)
+	if(csm->IsValid() == false || cam == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	auto &cam = scene->camera;
-	csm->UpdateFrustum(*cam.get(),GetViewMatrix(),pTrComponent->GetForward());
+	csm->UpdateFrustum(*cam,GetViewMatrix(),pTrComponent->GetForward());
 }

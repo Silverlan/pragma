@@ -141,7 +141,7 @@ bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) {retur
 
 void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,pragma::CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
-	float &nearZ,float &farZ,const Material *material,const Camera *cam
+	float &nearZ,float &farZ,const Material *material,const pragma::CCameraComponent *cam
 ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
@@ -149,8 +149,8 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 
 	if(cam != nullptr)
 	{
-		nearZ = cam->GetZNear();
-		farZ = cam->GetZFar();
+		nearZ = cam->GetNearZ();
+		farZ = cam->GetFarZ();
 	}
 	else
 	{
@@ -185,7 +185,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 
 void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,
-	float &nearZ,float &farZ,const Material *material,const Camera *cam
+	float &nearZ,float &farZ,const Material *material,const pragma::CCameraComponent *cam
 ) const
 {
 	return GetParticleSystemOrientationInfo(
@@ -218,7 +218,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
 	auto &scene = renderer.GetScene();
-	auto &cam = *scene.GetCamera();
+	auto &cam = scene.GetActiveCamera();
 	auto texIntensity = (bloom == true) ? ps.GetBloomScale() : ps.GetIntensity();
 	auto renderFlags = GetRenderFlags(ps);
 
@@ -234,15 +234,19 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		umath::to_integral(orientationType),
 		Vector3{}, /* camUpWs */
 		float{}, /* nearZ */
-		cam.GetPos(),
+		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},
 		float{}, /* farZ */
 		viewportSize,
 		texIntensity,
 		umath::to_integral(renderFlags),
 		umath::to_integral(ps.GetAlphaMode())
 	};
-	auto &v = cam.GetViewMatrix();
-	auto vp = cam.GetProjectionMatrix() *v;
+	Mat4 vp;
+	if(cam.valid())
+	{
+		auto &v = cam->GetViewMatrix();
+		vp = cam->GetProjectionMatrix() *v;
+	}
 	GetParticleSystemOrientationInfo(vp,ps,pushConstants.camUpWs,pushConstants.camRightWs,pushConstants.nearZ,pushConstants.farZ,ps.GetMaterial());
 
 	if(RecordPushConstants(pushConstants) == false)

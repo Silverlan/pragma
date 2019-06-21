@@ -50,7 +50,7 @@ WVBtIDebugObject::~WVBtIDebugObject()
 		s_shaderDebug = {};
 }
 
-void WVBtIDebugObject::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam)
+void WVBtIDebugObject::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(s_shaderDebug.expired())
 		return;
@@ -137,7 +137,7 @@ void WVBtIDebugDraw::draw3dText(const btVector3&,const char*)
 }
 int WVBtIDebugDraw::getDebugMode() const {return m_debugMode;}
 
-void WVBtIDebugDraw::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Camera &cam)
+void WVBtIDebugDraw::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	auto maxDist = 1'000.f *static_cast<float>(PhysEnv::WORLD_SCALE);
 	Vector3 posPl {};

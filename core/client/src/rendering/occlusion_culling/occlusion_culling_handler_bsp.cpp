@@ -88,7 +88,9 @@ const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}
 void OcclusionCullingHandlerBSP::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
-	Update(renderer.GetScene().camera->GetPos());
+	auto &cam = renderer.GetScene().GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	Update(posCam);
 	return OcclusionCullingHandlerOctTree::PerformCulling(renderer,culledMeshesOut);
 }
 void OcclusionCullingHandlerBSP::SetCurrentNodeLocked(bool bLocked) {m_bLockCurrentNode = bLocked;}
@@ -117,7 +119,8 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	}
 	auto &bspTree = pHandler->GetBSPTree();
 	auto &clusterVisibility = bspTree.GetClusterVisibility();
-	auto &camPos = scene->camera->GetPos();
+	auto &cam = scene->GetActiveCamera();
+	auto &camPos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	Con::cout<<"Camera position: ("<<camPos.x<<" "<<camPos.y<<" "<<camPos.z<<")"<<Con::endl;
 	Con::cout<<"Leaf cluster id: "<<pCurrentNode->cluster<<Con::endl;
 	if(pCurrentNode->cluster >= clusterVisibility.size())

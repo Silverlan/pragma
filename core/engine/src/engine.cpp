@@ -32,7 +32,6 @@
 #include <pragma/networking/wvlocalclient.h>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
-#include "pragma/util/profiling_stages.h"
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"

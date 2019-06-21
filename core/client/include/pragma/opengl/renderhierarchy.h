@@ -123,7 +123,6 @@ public:
 };
 
 class WIHandle;
-struct Camera;
 class DLLCLIENT RenderOctTree
 {
 public:
@@ -137,7 +136,7 @@ private:
 	WIHandle m_hGUIDebug = {};
 	unsigned int m_debugFrustumBuffer = 0u;
     unsigned int m_vertElementBuffer = 0u;
-	std::shared_ptr<Camera> m_debugCamera = nullptr;
+	util::WeakHandle<pragma::CCameraComponent> m_debugCamera = {};
 	CallbackHandle m_debugCallback = {};
 	std::vector<DebugRenderNodeInfo*> m_debugInfo;
 	std::unordered_map<CBaseEntity*,std::vector<NodeMeshInfo*>> m_entNodes;
@@ -162,7 +161,7 @@ public:
 	RenderOctTree();
 	~RenderOctTree();
 	void AddDebugRenderCallback(const CallbackHandle &hCb);
-	Camera *GetDebugCamera();
+	pragma::CCameraComponent *GetDebugCamera();
 	unsigned int GetVertexIndexBuffer();
 	unsigned int GetDebugFrameBuffer();
 	RenderNode *GetRoot();

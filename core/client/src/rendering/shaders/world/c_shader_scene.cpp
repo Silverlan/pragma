@@ -265,8 +265,8 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 	}
 
 	auto &scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
-	auto &cam = scene->GetCamera();
-	auto mvp = cam->GetProjectionMatrix() *cam->GetViewMatrix();
+	auto &cam = scene->GetActiveCamera();
+	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
 	std::vector<Anvil::Buffer*> vertexBuffers;
 	vertexBuffers.reserve(2u);
 	if(bUseVertexWeightBuffer == true)

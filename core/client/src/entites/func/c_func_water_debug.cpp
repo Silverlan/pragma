@@ -92,7 +92,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				if(hDepthTex.IsValid() && cam != nullptr)
 				{
 					auto *pDepthTex = static_cast<WIDebugDepthTexture*>(hDepthTex.get());
-					pDepthTex->Update(cam->GetZNear(),cam->GetZFar());
+					pDepthTex->Update(cam->GetNearZ(),cam->GetFarZ());
 				}
 			}));
 

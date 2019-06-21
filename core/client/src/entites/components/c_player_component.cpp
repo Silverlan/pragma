@@ -477,9 +477,7 @@ void CPlayerComponent::UpdateViewFOV()
 	auto *vm = c_game->GetViewModel();
 	if(vm == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	scene->camera->SetViewFOV(vm->GetViewFOV());
-	scene->camera->UpdateViewProjectionMatrix();
+	c_game->SetViewModelFOV(vm->GetViewFOV());
 }
 
 void CPlayerComponent::SetLocalPlayer(bool b)

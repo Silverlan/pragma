@@ -48,8 +48,6 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::PrimaryComma
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	auto &scene = renderer.GetScene();
-	auto &cam = *scene.GetCamera();
 	shader->BindLights(descSetShadows,descSetLightSources);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);

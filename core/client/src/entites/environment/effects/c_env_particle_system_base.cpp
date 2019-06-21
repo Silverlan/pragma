@@ -1072,15 +1072,14 @@ void CParticleSystemComponent::OnComplete()
 
 void CParticleSystemComponent::Simulate(double tDelta)
 {
-	if(!IsActiveOrPaused())
+	auto *cam = c_game->GetPrimaryCamera();
+	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())
 		tDelta *= pTsComponent->GetTimeScale();
 	m_tLifeTime += tDelta;
 
-	auto &scene = c_game->GetScene();
-	auto &cam = scene->camera;
 	m_numParticles = 0;
 	m_numRenderParticles = 0;
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
@@ -1120,6 +1119,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto bMoving = (umath::is_flag_set(m_flags,Flags::MoveWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::PositionChanged))
 		|| (umath::is_flag_set(m_flags,Flags::RotateWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags,Flags::HasMovingParticles,bMoving);
+	auto &posCam = cam->GetEntity().GetPosition();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{
 		auto &p = m_particles[i];
@@ -1155,7 +1155,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 				if(umath::is_flag_set(m_flags,Flags::HasMovingParticles) == false && uvec::length_sqr(vel) > 0.f)
 					umath::set_flag(m_flags,Flags::HasMovingParticles,true);
 			}
-			p.SetCameraDistance(glm::length2(pos -cam->GetPos()));
+			p.SetCameraDistance(glm::length2(pos -posCam));
 			for(auto &op : m_operators)
 				op->PostSimulate(p,tDelta);
 			//numRender++;

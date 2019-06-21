@@ -1,5 +1,4 @@
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/e_frustum.h"
 #include "pragma/c_engine.h"
 #include <mathutil/umath.h>
 #include <mathutil/umat.h>
@@ -15,6 +14,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
+#include <pragma/math/e_frustum.h>
 #include <sharedutils/scope_guard.h>
 #include <pragma/model/model.h>
 #include <buffers/prosper_buffer.hpp>
@@ -189,36 +189,40 @@ void ShadowMapCasc::SetFrustumUpdateCallback(const std::function<void(void)> &f)
 static CVar cvUpdateFrequency = GetClientConVar("cl_render_shadow_update_frequency");
 static CVar cvUpdateFrequencyOffset = GetClientConVar("cl_render_shadow_pssm_update_frequency_offset");
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-void ShadowMapCasc::UpdateFrustum(uint32_t splitId,Camera &cam,const Mat4 &matView,const Vector3 &dir)
+void ShadowMapCasc::UpdateFrustum(uint32_t splitId,pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)
 {
 	auto &frustumSplit = m_frustums.at(splitId);
 	m_pendingInfo.prevVpMatrices.at(splitId) = m_vpMatrices.at(splitId);
 	m_pendingInfo.prevProjectionMatrices.at(splitId) = frustumSplit.projection;
 
-	auto zNear = cam.GetZNear();
-	auto zFar = cam.GetZFar();
+	auto zNear = cam.GetNearZ();
+	auto zFar = cam.GetFarZ();
 
 	// Update points and planes
 	frustumSplit.points.clear();
 	frustumSplit.planes.clear();
 	auto &split = frustumSplit.split;
-	cam.SetZNear(split.neard);
-	cam.SetZFar(split.fard);
+	auto &entCam = cam.GetEntity();
+	auto trCam = entCam.GetTransformComponent();
+	cam.SetNearZ(split.neard);
+	cam.SetFarZ(split.fard);
 	cam.GetFrustumPlanes(frustumSplit.planes);
 	cam.GetFrustumPoints(
 		frustumSplit.points,
 		split.neard,split.fard,
 		cam.GetFOVRad(),cam.GetAspectRatio(),
-		cam.GetPos(),cam.GetForward(),cam.GetUp()
+		entCam.GetPosition(),
+		trCam.valid() ? trCam->GetForward() : uvec::FORWARD,
+		trCam.valid() ? trCam->GetUp() : uvec::UP
 	);
 
-	cam.SetZNear(zNear);
-	cam.SetZFar(zFar);
+	cam.SetNearZ(zNear);
+	cam.SetFarZ(zFar);
 
-	auto &ftr = frustumSplit.points[static_cast<int>(FRUSTUM_POINT::FAR_TOP_RIGHT)];
-	auto &fbl = frustumSplit.points[static_cast<int>(FRUSTUM_POINT::FAR_BOTTOM_LEFT)];
-	auto &nbl = frustumSplit.points[static_cast<int>(FRUSTUM_POINT::NEAR_BOTTOM_LEFT)];
-	auto &ntr = frustumSplit.points[static_cast<int>(FRUSTUM_POINT::NEAR_TOP_RIGHT)];
+	auto &ftr = frustumSplit.points[static_cast<int>(FrustumPoint::FarTopRight)];
+	auto &fbl = frustumSplit.points[static_cast<int>(FrustumPoint::FarBottomLeft)];
+	auto &nbl = frustumSplit.points[static_cast<int>(FrustumPoint::NearBottomLeft)];
+	auto &ntr = frustumSplit.points[static_cast<int>(FrustumPoint::NearTopRight)];
 
 	std::vector<Vector3> trapezoid = {ftr,fbl,nbl,ntr};
 	auto &center = frustumSplit.center;
@@ -313,7 +317,7 @@ void ShadowMapCasc::InitializeTextureSet(TextureSet &set,pragma::CLightComponent
 	set.renderTarget = prosper::util::create_render_target(dev,{tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
-void ShadowMapCasc::UpdateFrustum(Camera &cam,const Mat4 &matView,const Vector3 &dir)
+void ShadowMapCasc::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)
 {
 	auto numCascades = GetSplitCount();
 	for(auto i=decltype(numCascades){0};i<numCascades;++i)
@@ -522,8 +526,8 @@ void ShadowMapCasc::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuffer> &
 			}
 		prosper::util::record_end_render_pass(*(*drawCmd));
 	}
-	auto &cam = *c_game->GetRenderCamera();
-	auto &camPos = cam.GetPos();
+	auto *cam = c_game->GetPrimaryCamera();
+	auto camPos = cam ? cam->GetEntity().GetPosition() : Vector3{};
 	for(auto layer=decltype(numLayers){0};layer<numLayers;++layer)
 	{
 		auto &meshesInfo = info.meshes.at(layer);

@@ -18,7 +18,6 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_msaa_texture.hpp>
-#include <pragma/util/profiling_stages.h>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 

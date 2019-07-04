@@ -32,33 +32,4 @@
 #pragma comment(lib,"clip2tri-static.lib")
 #pragma comment(lib,"clipper-static.lib")
 #pragma comment(lib,"poly2tri-static.lib")
-
-#ifdef _DEBUG
-#ifdef PHYS_ENGINE_BULLET
-	#pragma comment(lib,"BulletDynamics_Debug.lib")
-	#pragma comment(lib,"BulletCollision_Debug.lib")
-	#pragma comment(lib,"BulletSoftBody_Debug.lib")
-	#pragma comment(lib,"LinearMath_Debug.lib")
-#endif
-#ifdef PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3CHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3CharacterKinematicCHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3CommonCHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3ExtensionsCHECKED.lib")
-	#pragma comment(lib,"PhysX3VehicleCHECKED.lib")
-#endif
-#else
-#ifdef PHYS_ENGINE_BULLET
-	#pragma comment(lib,"BulletDynamics.lib")
-	#pragma comment(lib,"BulletCollision.lib")
-	#pragma comment(lib,"BulletSoftBody.lib")
-	#pragma comment(lib,"LinearMath.lib")
-#elif PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3_x86.lib")
-	#pragma comment(lib,"PhysX3CharacterKinematic_x86.lib")
-	#pragma comment(lib,"PhysX3Common_x86.lib")
-	#pragma comment(lib,"PhysX3Extensions.lib")
-	#pragma comment(lib,"PhysX3Vehicle.lib")
-#endif
-#endif
 //

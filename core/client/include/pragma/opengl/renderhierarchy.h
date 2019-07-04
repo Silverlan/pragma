@@ -27,7 +27,7 @@ public:
 protected:
 	NodeMeshInfo(RenderNode *node,CBaseEntity *ent,ModelMesh *mesh);
 	~NodeMeshInfo();
-	EntityHandle *m_hEnt = nullptr;
+	EntityHandle m_hEnt = {};
 	ModelMesh *m_mesh = nullptr;
 	RenderNode *m_node = nullptr;
 	double m_tLastUpdate = 0.0;

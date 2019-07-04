@@ -14,7 +14,7 @@ namespace pragma
 	public:
 		SLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o);
 
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet) override;
 		virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl) override;
 		virtual bool ShouldTransmitNetData() const override;

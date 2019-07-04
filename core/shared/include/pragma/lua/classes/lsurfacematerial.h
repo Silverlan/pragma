@@ -10,8 +10,11 @@ namespace Lua
 	{
 		DLLNETWORK void GetName(lua_State *l,::SurfaceMaterial &mat);
 		DLLNETWORK void GetIndex(lua_State *l,::SurfaceMaterial &mat);
-		DLLNETWORK void GetFriction(lua_State *l,::SurfaceMaterial &mat);
 		DLLNETWORK void SetFriction(lua_State *l,::SurfaceMaterial &mat,Float friction);
+		DLLNETWORK void SetStaticFriction(lua_State *l,::SurfaceMaterial &mat,Float friction);
+		DLLNETWORK void SetDynamicFriction(lua_State *l,::SurfaceMaterial &mat,Float friction);
+		DLLNETWORK void GetStaticFriction(lua_State *l,::SurfaceMaterial &mat);
+		DLLNETWORK void GetDynamicFriction(lua_State *l,::SurfaceMaterial &mat);
 		DLLNETWORK void GetRestitution(lua_State *l,::SurfaceMaterial &mat);
 		DLLNETWORK void SetRestitution(lua_State *l,::SurfaceMaterial &mat,Float restitution);
 		DLLNETWORK void GetFootstepType(lua_State *l,::SurfaceMaterial &mat);

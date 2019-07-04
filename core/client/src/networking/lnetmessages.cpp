@@ -3,6 +3,7 @@
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/classes/ldef_netpacket.h"
+#include <pragma/networking/enums.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 
 void CGame::HandleLuaNetPacket(NetPacket &packet)
@@ -45,10 +46,10 @@ int Lua_cl_net_Send(lua_State *l)
 	switch(protocol)
 	{
 		case nwm::Protocol::TCP:
-			client->SendPacketTCP("luanet",packetNew);
+			client->SendPacket("luanet",packetNew,pragma::networking::Protocol::SlowReliable);
 			break;
 		case nwm::Protocol::UDP:
-			client->SendPacketUDP("luanet",packetNew);
+			client->SendPacket("luanet",packetNew,pragma::networking::Protocol::FastUnreliable);
 			break;
 	}
 	return 0;

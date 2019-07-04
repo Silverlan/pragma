@@ -4,6 +4,7 @@
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -14,7 +15,7 @@ void SLightSpotVolComponent::Initialize()
 	BaseEnvLightSpotVolComponent::Initialize();
 	static_cast<SBaseEntity&>(GetEntity()).SetSynchronized(false);
 }
-void SLightSpotVolComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLightSpotVolComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_coneAngle);
 	packet->Write<float>(m_coneStartOffset);
@@ -26,7 +27,7 @@ void SLightSpotVolComponent::SetSpotlightTarget(BaseEntity &ent)
 	BaseEnvLightSpotVolComponent::SetSpotlightTarget(ent);
 	NetPacket p {};
 	nwm::write_entity(p,&ent);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetSpotlightTarget,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetSpotlightTarget,p,pragma::networking::Protocol::SlowReliable);
 }
 
 luabind::object SLightSpotVolComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightSpotVolComponentHandleWrapper>(l);}

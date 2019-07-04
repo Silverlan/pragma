@@ -35,10 +35,11 @@ namespace pragma
 
 			void DebugPrint(const std::unordered_map<std::string,uint32_t> &inMsgs,const std::unordered_map<std::string,uint32_t> &outMsgs);
 			void DebugDump(const std::string &dumpFileName,const std::unordered_map<std::string,uint32_t> &inMsgs,const std::unordered_map<std::string,uint32_t> &outMsgs);
+
+			void MemorizeNetMessage(MessageType mt,uint32_t id,const NWMEndpoint &ep,const NetPacket &packet);
 		protected:
 			MessageTracker();
 			std::pair<std::deque<MessageInfo>&,std::unique_ptr<const ScopeGuard>> GetTrackedMessages(MessageType mt);
-			void MemorizeNetMessage(MessageType mt,uint32_t id,const NWMEndpoint &ep,const NetPacket &packet);
 			std::deque<MessageInfo> m_trackedMessagesIn;
 			std::deque<MessageInfo> m_trackedMessagesOut;
 		private:

@@ -2,6 +2,7 @@
 #include "pragma/console/c_cvar_movement.h"
 #include "pragma/game/c_game.h"
 #include "pragma/clientstate/clientstate.h"
+#include <pragma/networking/enums.hpp>
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -234,28 +235,28 @@ void Console::commands::noclip(NetworkState *state,pragma::BasePlayerComponent*,
 {
 	CHECK_CHEATS("noclip",state,);
 	ClientState *client = static_cast<ClientState*>(state);
-	client->SendPacketTCP("noclip");
+	client->SendPacket("noclip",pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::notarget(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	CHECK_CHEATS("notarget",state,);
 	ClientState *client = static_cast<ClientState*>(state);
-	client->SendPacketTCP("notarget");
+	client->SendPacket("notarget",pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::godmode(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	CHECK_CHEATS("godmode",state,);
 	auto *client = static_cast<ClientState*>(state);
-	client->SendPacketTCP("godmode");
+	client->SendPacket("godmode",pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::suicide(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	CHECK_CHEATS("suicide",state,);
 	auto *client = static_cast<ClientState*>(state);
-	client->SendPacketTCP("suicide");
+	client->SendPacket("suicide",pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::hurtme(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &args)
@@ -265,7 +266,7 @@ void Console::commands::hurtme(NetworkState *state,pragma::BasePlayerComponent*,
 	NetPacket p;
 	p->Write<uint16_t>(static_cast<uint16_t>(dmg));
 	auto *client = static_cast<ClientState*>(state);
-	client->SendPacketTCP("hurtme",p);
+	client->SendPacket("hurtme",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::give_weapon(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -275,19 +276,19 @@ void Console::commands::give_weapon(NetworkState *state,pragma::BasePlayerCompon
 	CHECK_CHEATS("give_weapon",state,);
 	NetPacket p;
 	p->WriteString(argv.front());
-	client->SendPacketTCP("give_weapon",p);
+	client->SendPacket("give_weapon",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::next_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args)
 {
 	auto *client = static_cast<ClientState*>(state);
-	client->SendPacketUDP("weapon_next");
+	client->SendPacket("weapon_next",pragma::networking::Protocol::FastUnreliable);
 }
 
 void Console::commands::previous_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args)
 {
 	auto *client = static_cast<ClientState*>(state);
-	client->SendPacketUDP("weapon_previous");
+	client->SendPacket("weapon_previous",pragma::networking::Protocol::FastUnreliable);
 }
 
 void Console::commands::give_ammo(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -299,7 +300,7 @@ void Console::commands::give_ammo(NetworkState *state,pragma::BasePlayerComponen
 	NetPacket p;
 	p->WriteString(argv.front());
 	p->Write<uint32_t>(amount);
-	client->SendPacketTCP("give_ammo",p);
+	client->SendPacket("give_ammo",p,pragma::networking::Protocol::SlowReliable);
 }
 
 const float defaultTurnSpeed = 3.f;

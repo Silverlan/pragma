@@ -7,6 +7,7 @@
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
+#include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_library.hpp>
@@ -22,7 +23,7 @@ void ClientState::StartResourceTransfer()
 		m_client->SetTimeoutDuration(0.0); // Disable timeout until resource transfer has been completed
 	NetPacket resourceReq;
 	resourceReq->Write<bool>(GetConVarBool("cl_allowdownload"));
-	SendPacketTCP("resource_begin",resourceReq);
+	SendPacket("resource_begin",resourceReq,pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientResource(NetPacket &packet)
@@ -32,7 +33,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 	{
 		NetPacket response;
 		response->Write<bool>(false);
-		SendPacketTCP("resourceinfo_response",response);
+		SendPacket("resourceinfo_response",response,pragma::networking::Protocol::SlowReliable);
 		return;
 	}
 	auto bDefaultPath = true;
@@ -82,7 +83,7 @@ void ClientState::HandleClientResource(NetPacket &packet)
 			m_resDownload = std::make_unique<ResourceDownload>(std::static_pointer_cast<VFilePtrInternalReal>(f),fileDst,CUInt32(size));
 		}
 	}
-	SendPacketTCP("resourceinfo_response",response);
+	SendPacket("resourceinfo_response",response,pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientResourceFragment(NetPacket &packet)
@@ -112,7 +113,7 @@ void ClientState::HandleClientResourceFragment(NetPacket &packet)
 			Con::ccl<<"File '"<<resName<<"' successfully received... Requesting next..."<<Con::endl;
 	}
 	else resourceReq->Write<bool>(false);
-	SendPacketTCP("resource_request",resourceReq);
+	SendPacket("resource_request",resourceReq,pragma::networking::Protocol::SlowReliable);
 }
 
 ////////////////////

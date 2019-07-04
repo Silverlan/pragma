@@ -32,7 +32,7 @@ namespace pragma
 		virtual void SetSteeringAngle(Float ang) override;
 		virtual void SetWheelRotation(Float rot) override;
 		virtual void SetRollInfluence(Float influence) override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual bool ShouldTransmitSnapshotData() const override {return true;}

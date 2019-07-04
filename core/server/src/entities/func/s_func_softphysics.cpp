@@ -9,7 +9,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(func_physics_softbody,FuncSoftPhysics);
 
-void SFuncSoftPhysicsComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SFuncSoftPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<PhysSoftBodyInfo>(m_softBodyInfo);
 }

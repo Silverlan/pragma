@@ -1,12 +1,13 @@
 #include "stdafx_client.h"
 #include "pragma/particlesystem/operators/c_particle_mod_physics.h"
-#include <pragma/physics/physenvironment.h>
-#include <pragma/physics/physshape.h>
+#include <pragma/physics/environment.hpp>
+#include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>
+#include <pragma/physics/collision_object.hpp>
 #include <pragma/model/model.h>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCLIENT PhysEnv *c_physEnv;
+extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;
 
 CParticleOperatorPhysics::CParticleOperatorPhysics(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 	: CParticleOperator(pSystem,values)
@@ -51,10 +52,10 @@ void CParticleOperatorPhysics::Initialize()
 	m_physicsObjects.resize(maxParticles);
 	for(auto i=decltype(maxParticles){0};i<maxParticles;++i)
 	{
-		auto *rigidBody = c_physEnv->CreateRigidBody(mass,shape,localInertia);
+		auto rigidBody = c_physEnv->CreateRigidBody(mass,*shape,localInertia);
 		if(rigidBody != nullptr)
 		{
-			m_physicsObjects[i] = std::shared_ptr<PhysRigidBody>(rigidBody);
+			m_physicsObjects[i] = rigidBody;
 			rigidBody->SetCollisionFilterGroup(CollisionMask::Particle);
 			rigidBody->SetCollisionFilterMask(CollisionMask::All &~CollisionMask::Particle);
 			rigidBody->DisableSimulation();
@@ -80,13 +81,13 @@ void CParticleOperatorPhysics::Initialize(CParticle &particle)
 	auto pos = m_posOffset;
 	auto rot = m_rotOffset;
 	uvec::local_to_world(particle.GetPosition(),particle.GetWorldRotation(),pos,rot);
-	auto *rigidBody = hPhys.get();
+	auto *rigidBody = hPhys.Get();
 	rigidBody->EnableSimulation();
 	rigidBody->SetPos(pos);
 	rigidBody->SetRotation(rot);
 	rigidBody->SetLinearVelocity(particle.GetVelocity());
 	rigidBody->SetAngularVelocity(particle.GetAngularVelocity());
-	rigidBody->Activate();
+	rigidBody->WakeUp();
 }
 void CParticleOperatorPhysics::Destroy(CParticle &particle)
 {
@@ -146,9 +147,9 @@ CParticleOperatorPhysicsSphere::CParticleOperatorPhysicsSphere(pragma::CParticle
 	}
 }
 
-std::shared_ptr<PhysShape> CParticleOperatorPhysicsSphere::CreateShape()
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsSphere::CreateShape()
 {
-	return c_physEnv->CreateSphereShape(m_radius);
+	return c_physEnv->CreateSphereShape(m_radius,c_physEnv->GetGenericMaterial());
 }
 
 //////////////////////////////
@@ -165,9 +166,9 @@ CParticleOperatorPhysicsBox::CParticleOperatorPhysicsBox(pragma::CParticleSystem
 	}
 }
 
-std::shared_ptr<PhysShape> CParticleOperatorPhysicsBox::CreateShape()
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsBox::CreateShape()
 {
-	return c_physEnv->CreateBoxShape({m_extent,m_extent,m_extent});
+	return c_physEnv->CreateBoxShape({m_extent,m_extent,m_extent},c_physEnv->GetGenericMaterial());
 }
 
 //////////////////////////////
@@ -186,9 +187,9 @@ CParticleOperatorPhysicsCylinder::CParticleOperatorPhysicsCylinder(pragma::CPart
 	}
 }
 
-std::shared_ptr<PhysShape> CParticleOperatorPhysicsCylinder::CreateShape()
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsCylinder::CreateShape()
 {
-	return c_physEnv->CreateCylinderShape(m_radius,m_height);
+	return c_physEnv->CreateCylinderShape(m_radius,m_height,c_physEnv->GetGenericMaterial());
 }
 
 //////////////////////////////
@@ -216,12 +217,12 @@ void CParticleOperatorPhysicsModel::Initialize(CParticle &particle)
 	particle.SetOrigin(m_model->GetOrigin());
 }
 
-std::shared_ptr<PhysShape> CParticleOperatorPhysicsModel::CreateShape()
+std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsModel::CreateShape()
 {
 	if(m_model == nullptr)
 		return nullptr;
 	auto &colMeshes = m_model->GetCollisionMeshes();
-	std::vector<std::shared_ptr<PhysShape>> shapes;
+	std::vector<pragma::physics::IShape*> shapes;
 	shapes.reserve(colMeshes.size());
 	for(auto &colMesh : colMeshes)
 	{
@@ -230,7 +231,7 @@ std::shared_ptr<PhysShape> CParticleOperatorPhysicsModel::CreateShape()
 			continue;
 		if(colMeshes.size() == 1)
 			return shape;
-		shapes.push_back(shape);
+		shapes.push_back(shape.get());
 	}
 	return c_physEnv->CreateCompoundShape(shapes);
 }

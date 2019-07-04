@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/basevehicle_raycaster.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/input/inkeys.h"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -10,6 +10,8 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/physics/raytraces.h"
+
+//#define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
 
@@ -26,6 +28,7 @@ PhysVehicleRaycaster::~PhysVehicleRaycaster()
 {}
 void *PhysVehicleRaycaster::castRay(const btVector3 &from,const btVector3 &to, btVehicleRaycasterResult &result)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 #if USE_CONVEX_WHEELS == 1
 	const auto axisRot = static_cast<float>(umath::sin(umath::deg_to_rad(45.0)));
 	const auto shapeRot = uquat::create(EulerAngles(0.f,0.f,90.f));//Quat{axisRot,0.f,0.f,axisRot}; // 90 degree rotation
@@ -44,7 +47,7 @@ void *PhysVehicleRaycaster::castRay(const btVector3 &from,const btVector3 &to, b
 #else
 	auto r = m_game->RayCast(trData);
 #endif
-	if(r.hit == true && r.collisionObj != nullptr)
+	if(r.hit == true && r.collisionObj.IsValid())
 	{
 		auto *body = btRigidBody::upcast(r.collisionObj->GetCollisionObject());
 		if(body != nullptr && body->hasContactResponse())
@@ -65,15 +68,18 @@ void *PhysVehicleRaycaster::castRay(const btVector3 &from,const btVector3 &to, b
 		}
 	}
 	return 0;
+#else
+	return nullptr;
+#endif
 }
 
 BaseVehicleComponent::WheelData::WheelData()
 	: hWheel()
 {}
 
-#ifdef PHYS_ENGINE_BULLET
 void BaseVehicleComponent::OnPhysicsInitialized()
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
@@ -99,10 +105,12 @@ void BaseVehicleComponent::OnPhysicsInitialized()
 	physWorld->addVehicle(m_vhcRaycast.get());
 
 	InitializeWheels();
+#endif
 }
 
 void BaseVehicleComponent::OnPhysicsDestroyed()
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_vhcRaycast != nullptr)
 	{
 		auto &ent = GetEntity();
@@ -114,13 +122,8 @@ void BaseVehicleComponent::OnPhysicsDestroyed()
 	}
 	m_vhcRaycast = nullptr;
 	m_vhcRayCaster = nullptr;
-}
-#elif PHYS_ENGINE_PHYSX
-void BaseVehicleComponent::OnSpawn()
-{
-	unsigned char numWheels = GetWheelCount();
-}
 #endif
+}
 
 BaseVehicleComponent::BaseVehicleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_wheelInfo(),m_engineForce(0.f),
@@ -132,6 +135,7 @@ BaseVehicleComponent::BaseVehicleComponent(BaseEntity &ent)
 
 BaseVehicleComponent::~BaseVehicleComponent()
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_cbSteeringWheel.IsValid())
 		m_cbSteeringWheel.Remove();
 	auto &ent = GetEntity();
@@ -144,6 +148,7 @@ BaseVehicleComponent::~BaseVehicleComponent()
 		auto *vhc = m_vhcRaycast.get();
 		physWorld->removeVehicle(vhc);
 	}
+#endif
 }
 
 bool BaseVehicleComponent::IsFirstPersonCameraEnabled() const {return m_bFirstPersonCameraEnabled;}
@@ -158,9 +163,13 @@ Float BaseVehicleComponent::GetBrakeForce() const {return m_brakeForce;}
 Float BaseVehicleComponent::GetMaxTurnAngle() const {return m_maxTurnAngle;}
 Float BaseVehicleComponent::GetSpeedKmh() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_vhcRaycast == nullptr)
 		return 0.f;
 	return CFloat(m_vhcRaycast->getCurrentSpeedKmHour());
+#else
+	return 0.f;
+#endif
 }
 
 std::vector<util::WeakHandle<pragma::BaseWheelComponent>> BaseVehicleComponent::GetWheels() const
@@ -190,7 +199,9 @@ void BaseVehicleComponent::AttachWheel(UChar wheelId,pragma::BaseWheelComponent 
 	InitializeWheelEntity(wheel,m_wheels[wheelId]);
 }
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 btRaycastVehicle *BaseVehicleComponent::GetBtVehicle() {return (m_vhcRaycast != nullptr) ? m_vhcRaycast.get() : nullptr;}
+#endif
 
 void BaseVehicleComponent::DetachWheel(UChar wheelId)
 {
@@ -259,6 +270,7 @@ Bool BaseVehicleComponent::HasDriver() const {return m_driver.IsValid();}
 
 void BaseVehicleComponent::InitializeWheel(const WheelData &data)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_vhcRaycast == nullptr)
 		return;
 	auto &connectionPoint = data.connectionPoint;
@@ -276,6 +288,7 @@ void BaseVehicleComponent::InitializeWheel(const WheelData &data)
 		m_tuning,bIsFrontWheel
 	);
 	UNUSED(info);
+#endif
 }
 void BaseVehicleComponent::InitializeWheels()
 {
@@ -325,6 +338,7 @@ void BaseVehicleComponent::SetMaxTurnAngle(Float ang) {m_maxTurnAngle = ang;}
 
 void BaseVehicleComponent::Think(double tDelta)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_vhcRaycast == nullptr)
 		return;
 	m_vhcRaycast->updateVehicle(tDelta);
@@ -415,8 +429,9 @@ void BaseVehicleComponent::Think(double tDelta)
 			}
 		}
 	}
+#endif
 }
-
+#ifdef ENABLE_DEPRECATED_PHYSICS
 btWheelInfo *BaseVehicleComponent::GetWheelInfo(int wheel)
 {
 	if(m_vhcRaycast == nullptr)
@@ -425,23 +440,27 @@ btWheelInfo *BaseVehicleComponent::GetWheelInfo(int wheel)
 		return nullptr;
 	return &m_vhcRaycast->getWheelInfo(wheel);
 }
-
+#endif
 void BaseVehicleComponent::SetEngineForce(Float force)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_engineForce = force;
 	if(m_vhcRaycast == nullptr)
 		return;
 	for(auto i=0;i<m_vhcRaycast->getNumWheels();i++)
 		m_vhcRaycast->applyEngineForce(force *PhysEnv::WORLD_SCALE,i);
+#endif
 }
 
 void BaseVehicleComponent::SetBrakeForce(Float force)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_brakeForce = force;
 	if(m_vhcRaycast == nullptr)
 		return;
 	for(auto i=0;i<m_vhcRaycast->getNumWheels();i++)
 		m_vhcRaycast->setBrake(force *PhysEnv::WORLD_SCALE,i);
+#endif
 }
 
 void BaseVehicleComponent::Initialize()

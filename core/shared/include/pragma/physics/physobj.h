@@ -3,8 +3,6 @@
 
 #include "pragma/networkdefinitions.h"
 #include <pragma/physics/physapi.h>
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include "pragma/physics/physkinematiccharactercontroller.h"
 #include <mathutil/glmutil.h>
 #include <memory>
 #include <vector>
@@ -13,11 +11,11 @@
 #include <sharedutils/def_handle.h>
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/physics/controllerhitdata.h"
-#include "pragma/physics/phystransform.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/transform.hpp"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/phys_contact_info.hpp"
 #ifdef __linux__
-#include "pragma/physics/physcontroller.h"
+#include "pragma/physics/controller.hpp"
 #endif
 
 class DLLNETWORK PhysObj;
@@ -27,51 +25,32 @@ DECLARE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
 #define PHYS_KEEP_SIMULATION_TRANSFORM 0
 
 class EntityHandle;
-class PhysRigidBody;
-class PhysConvexShape;
-class PhysController;
-class PhysGhostObject;
-namespace pragma {class BaseEntityComponent;};
+namespace pragma
+{
+	class BaseEntityComponent;
+	namespace physics
+	{
+		class IController;
+		class IGhostObject;
+	};
+};
 enum class CollisionMask : uint32_t;
 class DLLNETWORK PhysObj
 {
-protected:
-	PhysObj(pragma::BaseEntityComponent *owner);
-#ifdef PHYS_ENGINE_PHYSX
-	std::vector<physx::PxRigidActor*> m_actors;
-	PhysObj(BaseEntity *owner,physx::PxRigidActor *actor);
-	PhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors);
-#endif
-#ifdef PHYS_ENGINE_BULLET
-	Vector3 m_velocity = {};
-	std::vector<PhysCollisionObjectHandle> m_collisionObjects;
-#endif
-	util::WeakHandle<pragma::BaseEntityComponent> m_owner = {};
-	NetworkState *m_networkState;
-	bool m_bAsleep = true;
-	bool m_bDisabled = false;
-	bool m_bTrigger = false;
-	bool m_bSpawned = false;
-	CollisionMask m_collisionFilterGroup = {};
-	CollisionMask m_collisionFilterMask = {};
-	PhysObjHandle m_handle = {};
-	void UpdateCCD();
 public:
-#ifdef PHYS_ENGINE_BULLET
-	PhysObj(pragma::BaseEntityComponent *owner,PhysCollisionObject *object);
-	PhysObj(pragma::BaseEntityComponent *owner,std::vector<PhysCollisionObject*> *objects);
-#endif
+	template<class TPhysObj,typename... TARGS>
+		static std::unique_ptr<TPhysObj> Create(pragma::BaseEntityComponent &owner,TARGS ...args);
+	template<class TPhysObj,typename... TARGS>
+		static std::unique_ptr<TPhysObj> Create(pragma::BaseEntityComponent &owner,const std::vector<pragma::physics::ICollisionObject*> &objects,TARGS ...args);
 	virtual ~PhysObj();
 	virtual void Spawn();
 	virtual void UpdateVelocity();
 	PhysObjHandle GetHandle();
-	PhysObjHandle *CreateHandle();
 	virtual pragma::BaseEntityComponent *GetOwner();
 	NetworkState *GetNetworkState();
 	virtual void Enable();
 	virtual void Disable();
-	void SetTrigger(bool b);
-	bool IsTrigger();
+	bool IsTrigger() const;
 	void GetAABB(Vector3 &min,Vector3 &max) const;
 	bool IsDisabled() const;
 	virtual bool IsStatic() const;
@@ -91,17 +70,12 @@ public:
 	CollisionMask GetCollisionFilterMask();
 	void GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filterMask);
 
-#ifdef PHYS_ENGINE_PHYSX
-	// Returns the first actor
-	virtual void AddActor(physx::PxRigidActor *actor);
-	physx::PxRigidActor *GetActor();
-	std::vector<physx::PxRigidActor*> *GetActors();
-#endif
-#ifdef PHYS_ENGINE_BULLET
-	virtual void AddCollisionObject(PhysCollisionObject *o);
-	PhysCollisionObject *GetCollisionObject();
-	std::vector<PhysCollisionObjectHandle> &GetCollisionObjects();
-#endif
+	virtual void AddCollisionObject(pragma::physics::ICollisionObject &o);
+	const pragma::physics::ICollisionObject *GetCollisionObject() const;
+	pragma::physics::ICollisionObject *GetCollisionObject();
+	const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects() const;
+	std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects();
+
 	virtual Vector3 GetLinearVelocity();
 	virtual void SetLinearVelocity(const Vector3 &vel);
 	void AddLinearVelocity(const Vector3 &vel);
@@ -149,41 +123,72 @@ public:
 	virtual float GetLinearSleepingThreshold() const;
 	virtual float GetAngularSleepingThreshold() const;
 	std::pair<float,float> GetSleepingThreshold() const;
+protected:
+	PhysObj(pragma::BaseEntityComponent *owner,pragma::physics::ICollisionObject &object);
+	PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::physics::ICollisionObject*> &objects);
+	PhysObj(pragma::BaseEntityComponent *owner);
+	bool Initialize();
+
+	Vector3 m_velocity = {};
+	std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> m_collisionObjects;
+
+	util::WeakHandle<pragma::BaseEntityComponent> m_owner = {};
+	NetworkState *m_networkState;
+	bool m_bAsleep = true;
+	bool m_bDisabled = false;
+	bool m_bSpawned = false;
+	CollisionMask m_collisionFilterGroup = {};
+	CollisionMask m_collisionFilterMask = {};
+	PhysObjHandle m_handle = {};
 };
+
+template<class TPhysObj,typename... TARGS>
+	std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner,TARGS ...args)
+{
+	auto physObj = std::unique_ptr<TPhysObj>{new TPhysObj{&owner}};
+	if(physObj->Initialize(args...) == false)
+		return nullptr;
+	return physObj;
+}
+
+template<class TPhysObj,typename... TARGS>
+	std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner,const std::vector<pragma::physics::ICollisionObject*> &objects,TARGS ...args)
+{
+	auto physObj = std::unique_ptr<TPhysObj>{new TPhysObj{&owner}};
+	if(physObj->Initialize(args...) == false)
+		return nullptr;
+	for(auto *o : objects)
+		physObj->AddCollisionObject(*o);
+	return physObj;
+}
 
 ////////////////////////////////////
 
 class DLLNETWORK PhysObjDynamic
 {
+public:
+	friend PhysObj;
+	virtual void PreSimulate();
+	virtual void PostSimulate();
 protected:
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
-#ifdef PHYS_ENGINE_BULLET
 	std::vector<PhysTransform> m_offsets;
-#elif PHYS_ENGINE_PHYSX
-	std::vector<physx::PxTransform> m_offsets;
-#endif
 public:
 	Vector3 GetSimulationOffset(unsigned int idx=0);
 	Quat GetSimulationRotation(unsigned int idx=0);
 #endif
-public:
-	virtual void PreSimulate();
-	virtual void PostSimulate();
 };
 
 ////////////////////////////////////
 
 class DLLNETWORK PhysObjKinematic
 {
-protected:
-	bool m_bKinematic = false;
-#ifdef PHYS_ENGINE_PHYSX
-	void SetKinematic(bool b,std::vector<physx::PxRigidActor*> &actors);
-#endif
 public:
-	PhysObjKinematic();
 	virtual void SetKinematic(bool b)=0;
 	bool IsKinematic();
+protected:
+	PhysObjKinematic();
+	bool m_bKinematic = false;
 };
 
 ////////////////////////////////////
@@ -191,16 +196,14 @@ public:
 class DLLNETWORK SoftBodyPhysObj
 	: public PhysObj,public PhysObjDynamic
 {
-protected:
-	std::vector<PhysSoftBodyHandle> m_softBodies;
 public:
-	SoftBodyPhysObj(pragma::BaseEntityComponent *owner,PhysSoftBody *body);
-	SoftBodyPhysObj(pragma::BaseEntityComponent *owner,std::vector<PhysSoftBody*> *bodies);
-	std::vector<PhysSoftBodyHandle> &GetSoftBodies();
-	PhysSoftBody *GetSoftBody() const;
+	friend PhysObj;
+	std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &GetSoftBodies();
+	const pragma::physics::ISoftBody *GetSoftBody() const;
+	pragma::physics::ISoftBody *GetSoftBody();
 	virtual bool IsStatic() const override;
 	virtual bool IsSoftBody() const override;
-	virtual void AddCollisionObject(PhysCollisionObject *o) override;
+	virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
 	virtual void SetLinearVelocity(const Vector3 &vel) override;
 	virtual pragma::BaseEntityComponent *GetOwner() override;
 
@@ -212,6 +215,11 @@ public:
 	virtual bool IsSleeping() override;
 
 	virtual void ApplyForce(const Vector3 &force) override;
+protected:
+	SoftBodyPhysObj(pragma::BaseEntityComponent *owner);
+	bool Initialize(pragma::physics::ISoftBody &body);
+	bool Initialize(const std::vector<pragma::physics::ISoftBody*> &bodies);
+	std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> m_softBodies;
 };
 
 ////////////////////////////////////
@@ -219,19 +227,14 @@ public:
 class DLLNETWORK RigidPhysObj
 	: public PhysObj,public PhysObjKinematic,public PhysObjDynamic
 {
-protected:
-	std::vector<PhysRigidBodyHandle> m_rigidBodies;
-	float m_mass = 0.f;
-	bool m_bStatic = false;
-	void ApplyMass(float mass);
 public:
-	RigidPhysObj(pragma::BaseEntityComponent *owner,PhysRigidBody *body);
-	RigidPhysObj(pragma::BaseEntityComponent *owner,std::vector<PhysRigidBody*> *bodies);
+	friend PhysObj;
 	virtual ~RigidPhysObj() override;
-	std::vector<PhysRigidBodyHandle> &GetRigidBodies();
+	std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> &GetRigidBodies();
 	virtual void UpdateVelocity() override;
-	virtual void AddCollisionObject(PhysCollisionObject *o) override;
-	PhysRigidBody *GetRigidBody() const;
+	virtual void AddCollisionObject(pragma::physics::ICollisionObject &o) override;
+	const pragma::physics::IRigidBody *GetRigidBody() const;
+	pragma::physics::IRigidBody *GetRigidBody();
 	virtual bool IsStatic() const override;
 	virtual void SetStatic(bool b) override;
 	virtual float GetMass() const override;
@@ -275,6 +278,14 @@ public:
 	virtual void SetSleepingThresholds(float linear,float angular) override;
 	virtual float GetLinearSleepingThreshold() const override;
 	virtual float GetAngularSleepingThreshold() const override;
+protected:
+	RigidPhysObj(pragma::BaseEntityComponent *owner);
+	bool Initialize(pragma::physics::IRigidBody &body);
+	bool Initialize(const std::vector<pragma::physics::IRigidBody*> &bodies);
+	std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_rigidBodies;
+	float m_mass = 0.f;
+	bool m_bStatic = false;
+	void ApplyMass(float mass);
 };
 
 ////////////////////////////////////
@@ -282,48 +293,13 @@ public:
 class DLLNETWORK ControllerPhysObj
 	: public PhysObj,public PhysObjKinematic,public PhysObjDynamic
 {
-protected:
-	struct GroundInfo
-	{
-		GroundInfo(const btManifoldPoint &contactPoint,int8_t controllerIndex)
-			: contactInfo{contactPoint,controllerIndex}
-		{}
-		PhysContactInfo contactInfo;
-		bool groundWalkable = false;
-		double contactDistance = std::numeric_limits<double>::max(); // Distance on XZ plane; Used to determine best contact point candidate
-		double minContactDistance = std::numeric_limits<double>::max(); // Minimum XZ distance for ALL contact points (in this tick)
-	};
-	std::optional<GroundInfo> m_groundInfo {};
-	ControllerHitData m_hitData = {};
-	Vector3 m_offset = {};
-	double m_tLastMove = 0.0;
-	Float m_currentFriction = 1.f;
-#ifdef PHYS_ENGINE_BULLET
-	std::unique_ptr<PhysController> m_controller = nullptr;
-	PhysGhostObject *m_ghostObject = nullptr;
-	Vector3 m_posLast = {0.f,0.f,0.f};
-	Vector3 m_originLast = {0.f,0.f,0.f};
-	float m_stepHeight = 0.f;
-	ControllerPhysObj(pragma::BaseEntityComponent *owner);
-#elif PHYS_ENGINE_PHYSX
-	physx::PxController *m_controller = nullptr;
-	physx::PxVec3 m_velocity;
-	physx::PxVec3 m_posLast;
-	ControllerPhysObj(BaseEntity *owner,physx::PxController *controller);
-#endif
 public:
+	friend PhysObj;
 	virtual ~ControllerPhysObj() override;
-#ifdef PHYS_ENGINE_BULLET
-	PhysController *GetController();
-	PhysGhostObject *GetGhostObject();
-#elif PHYS_ENGINE_PHYSX
-	unsigned int Move(const Vector3 &disp,float elapsedTime,float minDist,const physx::PxControllerFilters &filters);
-	virtual physx::PxController *GetController() override;
-#endif
+	pragma::physics::IController *GetController();
+	pragma::physics::ICollisionObject *GetCollisionObject();
 	virtual void PostSimulate() override;
 	float GetStepHeight();
-	void SetMaxSlope(float ang);
-	float GetMaxSlope();
 	virtual void SetKinematic(bool b) override;
 	virtual void SetLinearVelocity(const Vector3 &vel) override;
 	Vector3 &GetOffset();
@@ -350,7 +326,8 @@ public:
 	BaseEntity *GetGroundEntity() const;
 	PhysObj *GetGroundPhysObject() const;
 	int32_t GetGroundSurfaceMaterial() const;
-	PhysCollisionObject *GetGroundPhysCollisionObject() const;
+	const pragma::physics::ICollisionObject *GetGroundPhysCollisionObject() const;
+	pragma::physics::ICollisionObject *GetGroundPhysCollisionObject();
 	// The velocity affecting this controller originating from the ground object
 	Vector3 GetGroundVelocity() const;
 
@@ -361,49 +338,54 @@ public:
 	Float GetCurrentFriction() const;
 
 	// These are called by the simulation; Don't call these manually!
-	bool SetGroundContactPoint(const btManifoldPoint &contactPoint,int32_t idx,const btCollisionObject *o,const btCollisionObject *oOther);
+	bool SetGroundContactPoint(int32_t idx,const pragma::physics::ICollisionObject *o,const pragma::physics::ICollisionObject *oOther);
 	void ClearGroundContactPoint();
+protected:
+	struct GroundInfo
+	{
+		GroundInfo(int8_t controllerIndex)
+			: contactInfo{controllerIndex}
+		{}
+		PhysContactInfo contactInfo;
+		bool groundWalkable = false;
+		double contactDistance = std::numeric_limits<double>::max(); // Distance on XZ plane; Used to determine best contact point candidate
+		double minContactDistance = std::numeric_limits<double>::max(); // Minimum XZ distance for ALL contact points (in this tick)
+	};
+	std::optional<GroundInfo> m_groundInfo {};
+	ControllerHitData m_hitData = {};
+	Vector3 m_offset = {};
+	double m_tLastMove = 0.0;
+	Float m_currentFriction = 1.f;
+
+	util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
+	util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
+	Vector3 m_posLast = {0.f,0.f,0.f};
+	Vector3 m_originLast = {0.f,0.f,0.f};
+	float m_stepHeight = 0.f;
+	ControllerPhysObj(pragma::BaseEntityComponent *owner);
 };
 
 class DLLNETWORK BoxControllerPhysObj
 	: public ControllerPhysObj
 {
-protected:
-#if PHYS_ENGINE_PHYSX
-	physx::PxBoxController *m_boxController;
-#endif
-	Vector3 m_halfExtents = {};
 public:
-#ifdef PHYS_ENGINE_BULLET
-	BoxControllerPhysObj(pragma::BaseEntityComponent *owner,const Vector3 &halfExtents,unsigned int stepHeight);
-#elif PHYS_ENGINE_PHYSX
-	BoxControllerPhysObj(BaseEntity *owner,physx::PxBoxController *controller);
-	physx::PxBoxController *GetController();
-#endif
+	friend PhysObj;
 	Vector3 &GetHalfExtents();
 	void SetCollisionBounds(const Vector3 &min,const Vector3 &max);
 	void GetCollisionBounds(Vector3 *min,Vector3 *max);
 	virtual void SetPosition(const Vector3 &pos) override;
 	virtual Vector3 GetPosition() override;
+protected:
+	BoxControllerPhysObj(pragma::BaseEntityComponent *owner);
+	bool Initialize(const Vector3 &halfExtents,unsigned int stepHeight,float maxSlopeDeg=45.f);
+	Vector3 m_halfExtents = {};
 };
 
 class DLLNETWORK CapsuleControllerPhysObj
 	: public ControllerPhysObj
 {
-protected:
-#ifdef PHYS_ENGINE_BULLET
-	float m_width = 0.f;
-	float m_height = 0.f;
-#elif PHYS_ENGINE_PHYSX
-	physx::PxCapsuleController *m_capsuleController;
-#endif
 public:
-#ifdef PHYS_ENGINE_BULLET
-	CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner,unsigned int width,unsigned int height,unsigned int stepHeight);
-#elif PHYS_ENGINE_PHYSX
-	CapsuleControllerPhysObj(BaseEntity *owner,physx::PxCapsuleController *controller);
-	physx::PxCapsuleController *GetController();
-#endif
+	friend PhysObj;
 	float GetWidth() const;
 	float GetHeight() const;
 	void SetHeight(float height);
@@ -412,66 +394,11 @@ public:
 	void GetCollisionBounds(Vector3 *min,Vector3 *max);
 	virtual void SetPosition(const Vector3 &pos) override;
 	virtual Vector3 GetPosition() override;
-};
-
-////////////////////////////////////
-
-#ifdef PHYS_ENGINE_PHYSX
-class DLLNETWORK DynamicActorInfo
-{
 protected:
-	physx::PxRigidDynamic *m_actor;
-	int m_bone;
-public:
-	DynamicActorInfo(physx::PxRigidDynamic *actor,int bone=0);
-	physx::PxRigidDynamic *GetActor();
-	int GetBoneID();
+	CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner);
+	bool Initialize(unsigned int width,unsigned int height,unsigned int stepHeight,float maxSlopeDeg=45.f);
+	float m_width = 0.f;
+	float m_height = 0.f;
 };
-
-class DLLNETWORK DynamicPhysObj
-	: public PhysObj,public PhysObjKinematic,public PhysObjDynamic
-{
-private:
-	std::vector<DynamicActorInfo> m_actorInfos;
-	virtual void AddActor(physx::PxRigidActor *actor) override;
-public:
-	DynamicPhysObj(BaseEntity *owner,physx::PxRigidDynamic *actor,int bone=0);
-	DynamicPhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors);
-	unsigned int AddActor(physx::PxRigidDynamic *actor,int bone);
-	unsigned int AddActor(physx::PxRigidDynamic *actor);
-	int GetBoneID(physx::PxRigidDynamic *actor);
-	virtual ~DynamicPhysObj() override;
-
-	virtual void SetKinematic(bool b) override;
-	DynamicActorInfo *GetActorInfo(unsigned int idx);
-	std::vector<DynamicActorInfo> &GetActorInfo();
-	void PutToSleep();
-	void WakeUp();
-	void Simulate(double tDelta,bool bIgnoreGravity=false);
-	BaseEntity *GetOwner();
-
-	Vector3 GetLinearVelocity();
-	void SetLinearVelocity(const Vector3 &vel);
-	void AddLinearVelocity(const Vector3 &vel);
-	Vector3 GetAngularVelocity();
-	void SetAngularVelocity(const Vector3 &vel);
-	void AddAngularVelocity(const Vector3 &vel);
-};
-
-class DLLNETWORK StaticPhysObj
-	: public PhysObj
-{
-private:
-	std::vector<physx::PxRigidStatic*> m_staticActors;
-public:
-	StaticPhysObj(BaseEntity *owner,physx::PxRigidStatic *actor);
-	StaticPhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors);
-	StaticPhysObj(BaseEntity *owner,btCollisionObject *object);
-	StaticPhysObj(BaseEntity *owner,std::vector<btCollisionObject*> *objects);
-	bool IsStatic();
-	void Enable();
-	void Disable();
-};
-#endif
 
 #endif

@@ -2,7 +2,6 @@
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include "pragma/rendering/occlusion_culling/chc.hpp"
-#include "pragma/rendering/scene/camera.h"
 #include <pragma/math/intersection.h>
 #include "pragma/rendering/shaders/c_shader.h"
 #include "pragma/opengl/renderhierarchy.h"

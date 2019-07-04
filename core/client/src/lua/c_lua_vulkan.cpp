@@ -7,7 +7,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
 #include <pragma/lua/classes/ldatastream.h>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>

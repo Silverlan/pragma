@@ -28,7 +28,7 @@ void SBrushComponent::OnEntitySpawn()
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	UpdateSurfaceMaterial(s_game);
 }
-void SBrushComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SBrushComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<bool>(m_kvSolid);
 	packet->WriteString(m_kvSurfaceMaterial);

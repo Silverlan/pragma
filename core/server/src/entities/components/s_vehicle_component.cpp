@@ -11,8 +11,9 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -54,7 +55,7 @@ void SVehicleComponent::ClearDriver()
 		m_playerAction.Remove();
 	NetPacket p;
 	nwm::write_entity(p,nullptr);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(NET_EVENT_VEHICLE_SET_DRIVER,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(NET_EVENT_VEHICLE_SET_DRIVER,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::OnActionInput(Action action, bool b)
 {
@@ -109,9 +110,10 @@ void SVehicleComponent::SetDriver(BaseEntity *ent)
 		return;
 	NetPacket p;
 	nwm::write_entity(p,ent);
-	entThis.SendNetEventTCP(NET_EVENT_VEHICLE_SET_DRIVER,p);
+	entThis.SendNetEvent(NET_EVENT_VEHICLE_SET_DRIVER,p,pragma::networking::Protocol::SlowReliable);
 }
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 void SVehicleComponent::WriteWheelInfo(NetPacket &p,WheelData &data,btWheelInfo *info)
 {
 	auto conPoint = info->m_chassisConnectionPointCS /PhysEnv::WORLD_SCALE;
@@ -129,8 +131,9 @@ void SVehicleComponent::WriteWheelInfo(NetPacket &p,WheelData &data,btWheelInfo 
 	p->Write<Vector3>(data.modelTranslation);
 	p->Write<Quat>(data.modelRotation);
 }
+#endif
 
-void SVehicleComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SVehicleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<Float>(GetMaxEngineForce());
 	packet->Write<Float>(GetMaxReverseEngineForce());
@@ -155,11 +158,13 @@ void SVehicleComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 	nwm::write_entity(packet,GetSteeringWheel());
 	auto numWheels = GetWheelCount();
 	packet->Write<UChar>(numWheels);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	for(UChar i=0;i<numWheels;i++)
 	{
 		auto *info = GetWheelInfo(i);
 		WriteWheelInfo(packet,m_wheels[i],info);
 	}
+#endif
 }
 
 BaseEntity *SVehicleComponent::AddWheel(const std::string &mdl,const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset,const Quat &mdlRotOffset)
@@ -216,7 +221,7 @@ void SVehicleComponent::SetSteeringWheelModel(const std::string &mdl)
 		InitializeSteeringWheel();
 		NetPacket p;
 		nwm::write_entity(p,ent);
-		entThis.SendNetEventTCP(NET_EVENT_VEHICLE_SET_STEERING_WHEEL,p);
+		entThis.SendNetEvent(NET_EVENT_VEHICLE_SET_STEERING_WHEEL,p,pragma::networking::Protocol::SlowReliable);
 		return;
 	}
 	BaseVehicleComponent::SetSteeringWheelModel(mdl);
@@ -234,13 +239,15 @@ Bool SVehicleComponent::AddWheel(const Vector3 &connectionPoint,const Vector3 &w
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared() && ent.IsSpawned())
 	{
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		auto *info = GetWheelInfo(GetWheelCount() -1);
 		if(info != nullptr)
 		{
 			NetPacket p;
 			WriteWheelInfo(p,m_wheels.back(),info);
-			ent.SendNetEventTCP(NET_EVENT_VEHICLE_ADD_WHEEL,p);
+			ent.SendNetEvent(NET_EVENT_VEHICLE_ADD_WHEEL,p,pragma::networking::Protocol::SlowReliable);
 		}
+#endif
 	}
 	return true;
 }
@@ -253,7 +260,7 @@ void SVehicleComponent::SetMaxEngineForce(Float force)
 		return;
 	NetPacket p;
 	p->Write<Float>(force);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_MAX_ENGINE_FORCE,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_ENGINE_FORCE,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetMaxReverseEngineForce(Float force)
 {
@@ -263,7 +270,7 @@ void SVehicleComponent::SetMaxReverseEngineForce(Float force)
 		return;
 	NetPacket p;
 	p->Write<Float>(force);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_MAX_REVERSE_ENGINE_FORCE,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_REVERSE_ENGINE_FORCE,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetMaxBrakeForce(Float force)
 {
@@ -273,7 +280,7 @@ void SVehicleComponent::SetMaxBrakeForce(Float force)
 		return;
 	NetPacket p;
 	p->Write<Float>(force);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_MAX_BRAKE_FORCE,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_BRAKE_FORCE,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetAcceleration(Float acc)
 {
@@ -283,7 +290,7 @@ void SVehicleComponent::SetAcceleration(Float acc)
 		return;
 	NetPacket p;
 	p->Write<Float>(acc);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_ACCELERATION,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_ACCELERATION,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetTurnSpeed(Float speed)
 {
@@ -293,7 +300,7 @@ void SVehicleComponent::SetTurnSpeed(Float speed)
 		return;
 	NetPacket p;
 	p->Write<Float>(speed);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_TURN_SPEED,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_TURN_SPEED,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetMaxTurnAngle(Float ang)
 {
@@ -303,7 +310,7 @@ void SVehicleComponent::SetMaxTurnAngle(Float ang)
 		return;
 	NetPacket p;
 	p->Write<Float>(ang);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_MAX_TURN_ANGLE,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_TURN_ANGLE,p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SVehicleComponent::SetFirstPersonCameraEnabled(bool b)
@@ -314,7 +321,7 @@ void SVehicleComponent::SetFirstPersonCameraEnabled(bool b)
 		return;
 	NetPacket p;
 	p->Write<bool>(b);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_SET_FIRST_PERSON_CAMERA_ENABLED,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_SET_FIRST_PERSON_CAMERA_ENABLED,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::SetThirdPersonCameraEnabled(bool b)
 {
@@ -324,7 +331,7 @@ void SVehicleComponent::SetThirdPersonCameraEnabled(bool b)
 		return;
 	NetPacket p;
 	p->Write<bool>(b);
-	ent.SendNetEventTCP(NET_EVENT_VEHICLE_SET_THIRD_PERSON_CAMERA_ENABLED,p);
+	ent.SendNetEvent(NET_EVENT_VEHICLE_SET_THIRD_PERSON_CAMERA_ENABLED,p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SVehicleComponent::OnPostSpawn()

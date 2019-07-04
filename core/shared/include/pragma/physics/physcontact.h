@@ -9,7 +9,7 @@
 
 class BaseEntity;
 class PhysObj;
-class PhysCollisionObject;
+namespace pragma::physics {class ICollisionObject;};
 class DLLNETWORK PhysContact
 {
 public:
@@ -18,8 +18,8 @@ public:
 	BaseEntity *entB = nullptr;
 	PhysObj *physA = nullptr;
 	PhysObj* physB = nullptr;
-	PhysCollisionObject *objA = nullptr;
-	PhysCollisionObject *objB = nullptr;
+	pragma::physics::ICollisionObject *objA = nullptr;
+	pragma::physics::ICollisionObject *objB = nullptr;
 	Vector3 posA = {};
 	Vector3 posB = {};
 	Vector3 hitNormal = {};

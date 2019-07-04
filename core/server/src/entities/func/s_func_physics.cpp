@@ -20,7 +20,7 @@ void SFuncPhysicsComponent::Initialize()
 		static_cast<SBaseEntity&>(GetEntity()).SetSynchronized(false);
 }
 
-void SFuncPhysicsComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SFuncPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvMass);
 	packet->WriteString(m_kvSurfaceMaterial);

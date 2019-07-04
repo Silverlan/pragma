@@ -6,13 +6,14 @@
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
 luabind::object SSoundEmitterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSoundEmitterComponentHandleWrapper>(l);}
-void SSoundEmitterComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundEmitterComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	auto &sounds = m_sounds;
 	auto offset = packet->GetOffset();
@@ -59,7 +60,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<unsigned int>(snd->GetIndex());
-		server->BroadcastUDP("ent_sound",p);
+		server->SendPacket("ent_sound",p,pragma::networking::Protocol::FastUnreliable);
 	}
 	return ptrSnd;
 }

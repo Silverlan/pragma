@@ -29,8 +29,6 @@ public:
 	LuaObj();
 	virtual ~LuaObj() override;
 	THandle GetHandle() const;
-	// Same as GetHandle, but has to be destructed with the delete operator
-	THandle *CreateHandle() const;
 };
 
 template<class THandle>
@@ -48,8 +46,6 @@ template<class THandle>
 
 template<class THandle>
 	THandle LuaObj<THandle>::GetHandle() const {return *m_handle;}
-template<class THandle>
-	THandle *LuaObj<THandle>::CreateHandle() const {return m_handle->Copy();}
 
 template<class THandle>
 	void LuaObj<THandle>::InitializeLuaObject(lua_State *lua) {InitializeLuaObject<THandle>(lua);}

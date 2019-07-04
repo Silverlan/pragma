@@ -11,7 +11,6 @@
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
-#include "pragma/rendering/scene/camera.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
@@ -24,11 +23,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
-#ifdef PHYS_ENGINE_BULLET
-#include "pragma/physics/c_physdebug.h"
-#elif PHYS_ENGINE_PHYSX
-#include "pragma/physics/pxvisualizer.h"
-#endif
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/rendersystem.h"
 #include <pragma/lua/luacallback.h>
@@ -57,6 +51,7 @@
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/physics/visual_debugger.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -68,7 +63,7 @@ static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val
 }
 REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled,CVAR_CALLBACK_render_vsync_enabled);
 
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
 static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
@@ -79,23 +74,25 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 		cbDrawPhysicsEnd.Remove();
 	if(c_game == NULL)
 		return;
-	PhysEnv *physEnv = c_game->GetPhysicsEnvironment();
-	if(physEnv == NULL)
-		return;
-	WVBtIDebugDraw *debugDraw = c_game->GetPhysicsDebugInterface();
-	if(debugDraw == NULL)
+	auto *physEnv = c_game->GetPhysicsEnvironment();
+	auto *debugDraw = physEnv ? physEnv->InitializeVisualDebugger() : nullptr;
+	if(debugDraw == nullptr)
 		return;
 	if(val == 0)
 	{
-		debugDraw->setDebugMode(btIDebugDraw::DBG_NoDebug);
+		debugDraw->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
 		return;
 	}
 	cbDrawPhysics = c_game->AddCallback("Think",FunctionCallback<>::Create([]() {
-		auto *debugDraw = c_game->GetPhysicsDebugInterface();
+		auto *physEnv = c_game->GetPhysicsEnvironment();
+		auto *debugDraw = physEnv ? physEnv->InitializeVisualDebugger() : nullptr;
+		if(debugDraw == nullptr)
+			return;
 		auto &vehicles = pragma::CVehicleComponent::GetAll();
 		for(auto it=vehicles.begin();it!=vehicles.end();++it)
 		{
 			auto *vhc = *it;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 			auto *btVhc = vhc->GetBtVehicle();
 			if(btVhc != nullptr)
 			{
@@ -111,127 +108,23 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 					}
 				}
 			}
+#endif
 		}
 	}));
 	cbDrawPhysicsEnd = c_game->AddCallback("OnGameEnd",FunctionCallback<>::Create([]() {
 		cbDrawPhysics.Remove();
 		cbDrawPhysicsEnd.Remove();
 	}));
-	auto mode = btIDebugDraw::DBG_DrawAabb |
-		btIDebugDraw::DBG_DrawConstraintLimits |
-		btIDebugDraw::DBG_DrawConstraints |
-		btIDebugDraw::DBG_DrawContactPoints |
-		btIDebugDraw::DBG_DrawFeaturesText |
-		btIDebugDraw::DBG_DrawFrames |
-		btIDebugDraw::DBG_DrawNormals |
-		btIDebugDraw::DBG_DrawText |
-		btIDebugDraw::DBG_DrawWireframe |
-		btIDebugDraw::DBG_EnableCCD;
+	auto mode = pragma::physics::IVisualDebugger::DebugMode::All;
 	if(val == 2)
-		mode = btIDebugDraw::DBG_DrawWireframe;
+		mode = pragma::physics::IVisualDebugger::DebugMode::Wireframe;
 	else if(val == 3)
-		mode = btIDebugDraw::DBG_DrawConstraints;
+		mode = pragma::physics::IVisualDebugger::DebugMode::Constraints;
 	else if(val == 4)
-		mode = btIDebugDraw::DBG_DrawNormals;
-	debugDraw->setDebugMode(mode);
+		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
+	debugDraw->SetDebugMode(mode);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,CVAR_CALLBACK_debug_physics_draw);
-
-#ifdef PHYS_ENGINE_PHYSX
-static void GetPhysXDebugColor(physx::PxU32 eCol,float *col)
-{
-	switch(eCol)
-	{
-	case physx::PxDebugColor::Enum::eARGB_BLACK:
-		{
-			col[0] = 0.f;
-			col[1] = 0.f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_RED:
-		{
-			col[0] = 1.f;
-			col[1] = 0.f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_GREEN:
-		{
-			col[0] = 0.f;
-			col[1] = 1.f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_BLUE:
-		{
-			col[0] = 0.f;
-			col[1] = 0.f;
-			col[2] = 1.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_YELLOW:
-		{
-			col[0] = 1.f;
-			col[1] = 1.f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_MAGENTA:
-		{
-			col[0] = 1.f;
-			col[1] = 0.f;
-			col[2] = 1.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_CYAN:
-		{
-			col[0] = 0.f;
-			col[1] = 1.f;
-			col[2] = 1.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_GREY:
-		{
-			col[0] = 0.5f;
-			col[1] = 0.5f;
-			col[2] = 0.5f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_DARKRED:
-		{
-			col[0] = 0.345f;
-			col[1] = 0.f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_DARKGREEN:
-		{
-			col[0] = 0.f;
-			col[1] = 0.345f;
-			col[2] = 0.f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_DARKBLUE:
-		{
-			col[0] = 0.f;
-			col[1] = 0.f;
-			col[2] = 0.345f;
-			break;
-		}
-	case physx::PxDebugColor::Enum::eARGB_WHITE:
-	default:
-		{
-			col[0] = 1.f;
-			col[1] = 1.f;
-			col[2] = 1.f;
-			break;
-		}
-	};
-}
-#endif
-
-WVBtIDebugDraw *CGame::GetPhysicsDebugInterface() {return m_btDebugDraw.get();}
 
 static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,bool val)
 {

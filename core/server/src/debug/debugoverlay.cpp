@@ -1,5 +1,6 @@
 #include "stdafx_server.h"
 #include "pragma/debug/debugoverlay.h"
+#include <pragma/networking/enums.hpp>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/math/angle/wvangle.h>
 #include <pragma/networking/nwm_util.h>
@@ -11,13 +12,13 @@ void SDebugRenderer::DrawPoint(const Vector3 &pos,const Color &color,float durat
 {
 	NetPacket p;
 	p<<pos<<color<<duration;
-	server->BroadcastUDP("debug_drawpoint",p);
+	server->SendPacket("debug_drawpoint",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration)
 {
 	NetPacket p;
 	p<<start<<end<<color<<duration;
-	server->BroadcastUDP("debug_drawline",p);
+	server->SendPacket("debug_drawline",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawBox(const Vector3 &start,const Vector3 &end,const Color &color,float duration)
 {
@@ -31,13 +32,13 @@ void SDebugRenderer::DrawBox(const Vector3 &center,const Vector3 &min,const Vect
 {
 	NetPacket p;
 	p<<center<<min<<max<<ang<<color<<true<<colorOutline<<duration;
-	server->BroadcastUDP("debug_drawbox",p);
+	server->SendPacket("debug_drawbox",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawBox(const Vector3 &center,const Vector3 &min,const Vector3 &max,const EulerAngles &ang,const Color &color,float duration)
 {
 	NetPacket p;
 	p<<center<<min<<max<<ang<<color<<false<<duration;
-	server->BroadcastUDP("debug_drawbox",p);
+	server->SendPacket("debug_drawbox",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,const Color &colorOutline,float duration)
 {
@@ -54,82 +55,82 @@ void SDebugRenderer::DrawText(const std::string &text,const Vector3 &pos,const V
 	NetPacket p;
 	p->WriteString(text);
 	p<<pos<<true<<worldSize<<true<<color<<duration;
-	server->BroadcastUDP("debug_drawtext",p);
+	server->SendPacket("debug_drawtext",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawText(const std::string &text,const Vector3 &pos,float sizeScale,const Color &color,float duration)
 {
 	NetPacket p;
 	p->WriteString(text);
 	p<<pos<<false<<sizeScale<<true<<color<<duration;
-	server->BroadcastUDP("debug_drawtext",p);
+	server->SendPacket("debug_drawtext",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawText(const std::string &text,const Vector3 &pos,const Vector2 &worldSize,float duration)
 {
 	NetPacket p;
 	p->WriteString(text);
 	p<<pos<<true<<worldSize<<false<<duration;
-	server->BroadcastUDP("debug_drawtext",p);
+	server->SendPacket("debug_drawtext",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawText(const std::string &text,const Vector3 &pos,float sizeScale,float duration)
 {
 	NetPacket p;
 	p->WriteString(text);
 	p<<pos<<false<<sizeScale<<false<<duration;
-	server->BroadcastUDP("debug_drawtext",p);
+	server->SendPacket("debug_drawtext",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawSphere(const Vector3 &origin,float radius,const Color &color,const Color &outlineColor,float duration,uint32_t recursionLevel)
 {
 	NetPacket p;
 	p<<origin<<radius<<color<<duration<<recursionLevel<<true<<outlineColor;
-	server->BroadcastUDP("debug_drawsphere",p);
+	server->SendPacket("debug_drawsphere",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawSphere(const Vector3 &origin,float radius,const Color &color,float duration,uint32_t recursionLevel)
 {
 	NetPacket p;
 	p<<origin<<radius<<color<<duration<<recursionLevel<<false;
-	server->BroadcastUDP("debug_drawsphere",p);
+	server->SendPacket("debug_drawsphere",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawTruncatedCone(const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,const Color &color,const Color &outlineColor,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<startRadius<<dir<<dist<<endRadius<<color<<duration<<segmentCount<<true<<outlineColor;
-	server->BroadcastUDP("debug_drawtruncatedcone",p);
+	server->SendPacket("debug_drawtruncatedcone",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawTruncatedCone(const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,const Color &color,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<startRadius<<dir<<dist<<endRadius<<color<<duration<<segmentCount<<false;
-	server->BroadcastUDP("debug_drawtruncatedcone",p);
+	server->SendPacket("debug_drawtruncatedcone",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawCylinder(const Vector3 &origin,const Vector3 &dir,float dist,float radius,const Color &color,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<dir<<dist<<radius<<color<<duration<<segmentCount<<false;
-	server->BroadcastUDP("debug_drawcylinder",p);
+	server->SendPacket("debug_drawcylinder",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawCylinder(const Vector3 &origin,const Vector3 &dir,float dist,float radius,const Color &color,const Color &outlineColor,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<dir<<dist<<radius<<color<<duration<<segmentCount<<true<<outlineColor;
-	server->BroadcastUDP("debug_drawcylinder",p);
+	server->SendPacket("debug_drawcylinder",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawCone(const Vector3 &origin,const Vector3 &dir,float dist,float angle,const Color &color,const Color &outlineColor,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<dir<<dist<<angle<<color<<duration<<segmentCount<<true<<outlineColor;
-	server->BroadcastUDP("debug_drawcone",p);
+	server->SendPacket("debug_drawcone",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawCone(const Vector3 &origin,const Vector3 &dir,float dist,float angle,const Color &color,float duration,uint32_t segmentCount)
 {
 	NetPacket p;
 	p<<origin<<dir<<dist<<angle<<color<<duration<<segmentCount<<false;
-	server->BroadcastUDP("debug_drawcone",p);
+	server->SendPacket("debug_drawcone",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawAxis(const Vector3 &origin,const EulerAngles &ang,float duration)
 {
 	NetPacket p;
 	p<<origin<<ang<<duration;
-	server->BroadcastUDP("debug_drawaxis",p);
+	server->SendPacket("debug_drawaxis",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawAxis(const Vector3 &origin,float duration)
 {
@@ -142,7 +143,7 @@ void SDebugRenderer::DrawPath(const std::vector<Vector3> &path,const Color &colo
 	for(auto &v : path)
 		p->Write<Vector3>(v);
 	p<<color<<duration;
-	server->BroadcastUDP("debug_drawpath",p);
+	server->SendPacket("debug_drawpath",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawSpline(const std::vector<Vector3> &path,const Color &color,uint32_t segmentCount,float curvature,float duration)
 {
@@ -151,7 +152,7 @@ void SDebugRenderer::DrawSpline(const std::vector<Vector3> &path,const Color &co
 	for(auto &v : path)
 		p->Write<Vector3>(v);
 	p<<color<<segmentCount<<curvature<<duration;
-	server->BroadcastUDP("debug_drawspline",p);
+	server->SendPacket("debug_drawspline",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawPlane(const Vector3 &n,float dist,const Color &color,float duration)
 {
@@ -160,6 +161,6 @@ void SDebugRenderer::DrawPlane(const Vector3 &n,float dist,const Color &color,fl
 	p->Write<float>(dist);
 	p->Write<Color>(color);
 	p->Write<float>(duration);
-	server->BroadcastUDP("debug_drawplane",p);
+	server->SendPacket("debug_drawplane",p,pragma::networking::Protocol::FastUnreliable);
 }
 void SDebugRenderer::DrawPlane(const Plane &plane,const Color &color,float duration) {DrawPlane(const_cast<Plane&>(plane).GetNormal(),static_cast<float>(plane.GetDistance()),color,duration);}

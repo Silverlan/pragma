@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include <pragma/definitions.h>
 #include "pragma/lua/libraries/lstring.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 int32_t Lua::string::calc_levenshtein_distance(lua_State *l)
 {

@@ -6,7 +6,7 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/entities/components/base_physics_component.hpp"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -179,7 +179,7 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 			Lua::PushNumber(l,0.0);
 			return;
 		}
-		Lua::PushNumber(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetMinGroundXZContactDistance() /PhysEnv::WORLD_SCALE);
+		Lua::PushNumber(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetMinGroundXZContactDistance());
 	}));
 	classDef.def("GetGroundVelocity",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
 		LUA_CHECK_PHYSOBJ(l,hPhysObj);
@@ -290,7 +290,7 @@ void Lua::PhysObj::GetCollisionObjects(lua_State *l,PhysObjHandle &hPhysObj)
 		auto &o = *it;
 		if(o.IsValid())
 		{
-			o->GetLuaObject()->push(l);
+			o->Push(l);
 			lua_rawseti(l,top,n);
 			n++;
 		}
@@ -471,38 +471,3 @@ void Lua::PhysObj::IsOnGround(lua_State *l,PhysObjHandle &hPhysObj)
 	}
 	Lua::PushBool(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->IsOnGround());
 }
-
-#ifdef PHYS_ENGINE_PHYSX
-#include "physxptrs.h"
-void Lua::PhysObj::GetActor(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	physx::PxRigidActor *actor = hPhysObj->GetActor();
-	switch(actor->getType())
-	{
-	case physx::PxActorType::eRIGID_DYNAMIC:
-		Lua::Push<PhysXRigidDynamic>(l,PhysXRigidDynamic(static_cast<physx::PxRigidDynamic*>(actor)));
-	default:
-		Lua::Push<PhysXRigidActor>(l,PhysXRigidActor(actor));
-	}
-}
-void Lua::PhysObj::GetActors(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	std::vector<physx::PxRigidActor*> *actors = hPhysObj->GetActors();
-	Lua::CreateTable(l);
-	int top = Lua::GetStackTop(l);
-	for(unsigned int i=0;i<actors->size();i++)
-	{
-		switch((*actors)[i]->getType())
-		{
-		case physx::PxActorType::eRIGID_DYNAMIC:
-			Lua::Push<PhysXRigidDynamic>(l,PhysXRigidDynamic(static_cast<physx::PxRigidDynamic*>((*actors)[i])));
-			break;
-		default:
-			Lua::Push<PhysXActor>(l,PhysXActor((*actors)[i]));
-		}
-		Lua::SetTableValue(l,top,i +1);
-	}
-}
-#endif

@@ -7,7 +7,7 @@
 #include "pragma/networking/wvserver.h"
 
 extern DLLENGINE Engine *engine;;
-bool ServerState::HandlePacket(WVServerClient *session,NetPacket &packet)
+bool ServerState::HandlePacket(pragma::networking::IServerClient &session,NetPacket &packet)
 {
 	unsigned int ID = packet.GetMessageID();
 	SVNetMessage *msg = GetNetMessage(ID);

@@ -10,13 +10,25 @@ void Lua::SurfaceMaterial::GetIndex(lua_State *l,::SurfaceMaterial &mat)
 {
 	Lua::PushInt(l,mat.GetIndex());
 }
-void Lua::SurfaceMaterial::GetFriction(lua_State *l,::SurfaceMaterial &mat)
-{
-	Lua::PushNumber(l,mat.GetFriction());
-}
-void Lua::SurfaceMaterial::SetFriction(lua_State*,::SurfaceMaterial &mat,Float friction)
+void Lua::SurfaceMaterial::SetFriction(lua_State *l,::SurfaceMaterial &mat,Float friction)
 {
 	mat.SetFriction(friction);
+}
+void Lua::SurfaceMaterial::SetStaticFriction(lua_State *l,::SurfaceMaterial &mat,Float friction)
+{
+	mat.SetStaticFriction(friction);
+}
+void Lua::SurfaceMaterial::SetDynamicFriction(lua_State *l,::SurfaceMaterial &mat,Float friction)
+{
+	mat.SetDynamicFriction(friction);
+}
+void Lua::SurfaceMaterial::GetStaticFriction(lua_State *l,::SurfaceMaterial &mat)
+{
+	Lua::PushNumber(l,mat.GetStaticFriction());
+}
+void Lua::SurfaceMaterial::GetDynamicFriction(lua_State *l,::SurfaceMaterial &mat)
+{
+	Lua::PushNumber(l,mat.GetDynamicFriction());
 }
 void Lua::SurfaceMaterial::GetRestitution(lua_State *l,::SurfaceMaterial &mat)
 {

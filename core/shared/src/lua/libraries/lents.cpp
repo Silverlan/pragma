@@ -8,7 +8,7 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
@@ -41,11 +41,11 @@ int Lua::ents::create_trigger(lua_State *l)
 	Vector3 *min = nullptr;
 	Vector3 *max = nullptr;
 	EulerAngles *ang = nullptr;
-	LPhysShape *lshape = nullptr;
+	pragma::physics::IShape *lshape = nullptr;
 	if(Lua::IsNumber(l,2) == true)
 		radius = Lua::CheckNumber(l,2);
-	else if(Lua::IsPhysShape(l,2) == true)
-		lshape = Lua::CheckPhysShape(l,2);
+	else if(Lua::IsType<pragma::physics::IShape>(l,2))
+		lshape = &Lua::Check<pragma::physics::IShape>(l,2);
 	else
 	{
 		min = Lua::CheckVector(l,2);
@@ -55,25 +55,25 @@ int Lua::ents::create_trigger(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *phys = game->GetPhysicsEnvironment();
-	std::shared_ptr<::PhysConvexShape> shape = nullptr;
+	std::shared_ptr<pragma::physics::IConvexShape> shape = nullptr;
 	if(min != nullptr)
 	{
 		auto extents = (*max) -(*min);
 		auto center = ((*max) +(*min)) *0.5f;
 		origin += center;
-		shape = phys->CreateBoxShape(extents *0.5f);
+		shape = phys->CreateBoxShape(extents *0.5f,phys->GetGenericMaterial());
 	}
 	else if(lshape != nullptr)
 	{
-		if(lshape->GetSharedPointer()->IsConvex() == false)
+		if(lshape->IsConvex() == false)
 		{
 			Con::cwar<<"WARNING: Cannot create trigger_touch entity with non-convex physics shape!"<<Con::endl;
 			return 0;
 		}
-		shape = std::static_pointer_cast<::PhysConvexShape>(lshape->GetSharedPointer());
+		shape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(lshape->shared_from_this());
 	}
 	else
-		shape = phys->CreateSphereShape(radius);
+		shape = phys->CreateSphereShape(radius,phys->GetGenericMaterial());
 	auto *ent = game->CreateEntity("trigger_touch");
 	if(ent == nullptr)
 		return 0;

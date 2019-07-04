@@ -1,8 +1,8 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_actor_component.hpp"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
@@ -183,50 +183,52 @@ void BaseActorComponent::Respawn()
 
 void BaseActorComponent::OnPhysicsInitialized()
 {
-	m_hitboxData.clear();
 	auto &ent = GetEntity();
+	auto *nw = ent.GetNetworkState();
+	auto *game = nw->GetGameState();
+	auto *physEnv = game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return;
+	m_hitboxData.clear();
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(hMdl != nullptr)
+	if(hMdl == nullptr)
+		return;
+	auto hitboxBones = hMdl->GetHitboxBones();
+	auto pTrComponent = ent.GetTransformComponent();
+	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+
+	auto &hitboxes = hMdl->GetHitboxes();
+	std::vector<pragma::physics::ICollisionObject*> physHitboxes;
+	physHitboxes.reserve(hitboxes.size());
+	m_hitboxData.reserve(hitboxes.size());
+	for(auto &it : hitboxes)
 	{
-		auto *nw = ent.GetNetworkState();
-		auto *game = nw->GetGameState();
-		auto *physEnv = game->GetPhysicsEnvironment();
-		auto hitboxBones = hMdl->GetHitboxBones();
-		auto pTrComponent = ent.GetTransformComponent();
-		auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+		auto &hb = it.second;
+		auto min = hb.min *scale;
+		auto max = hb.max *scale;
+		auto extents = (max -min) *0.5f;
+		auto shape = physEnv->CreateBoxShape(extents,physEnv->GetGenericMaterial());
+		auto col = physEnv->CreateGhostObject(*shape);
+		col->SetCollisionsEnabled(false); // Disable collisions
+		physHitboxes.push_back(col.Get());
 
-		auto &hitboxes = hMdl->GetHitboxes();
-		std::vector<PhysCollisionObject*> physHitboxes;
-		physHitboxes.reserve(hitboxes.size());
-		m_hitboxData.reserve(hitboxes.size());
-		for(auto &it : hitboxes)
-		{
-			auto &hb = it.second;
-			auto min = hb.min *scale;
-			auto max = hb.max *scale;
-			auto extents = (max -min) *0.5f;
-			auto *col = physEnv->CreateGhostObject(physEnv->CreateBoxShape(extents));
-			col->SetCollisionFlags(col->GetCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE); // Disable collisions
-			physHitboxes.push_back(col);
-
-			// Physics object origin is in the center of the hitbox bounds, but the origin of the actual hitbox may not be; We need to calculate the offset between them and rotate it later when updating (See BaseActorComponent::UpdateHitboxPhysics)
-			auto offset = max -extents; // Offset between bone origin and physics object origin
-			m_hitboxData.push_back({it.first,offset});
-		}
-		m_physHitboxes = std::make_unique<PhysObj>(this,&physHitboxes);
-		auto collisionMask = ent.IsPlayer() ? CollisionMask::PlayerHitbox : CollisionMask::NPCHitbox;
-		m_physHitboxes->SetCollisionFilter(collisionMask,collisionMask); // Required for raytraces
-		m_physHitboxes->Spawn();
+		// Physics object origin is in the center of the hitbox bounds, but the origin of the actual hitbox may not be; We need to calculate the offset between them and rotate it later when updating (See BaseActorComponent::UpdateHitboxPhysics)
+		auto offset = max -extents; // Offset between bone origin and physics object origin
+		m_hitboxData.push_back({it.first,offset});
 	}
+	m_physHitboxes = PhysObj::Create<PhysObj>(*this,physHitboxes);
+	auto collisionMask = ent.IsPlayer() ? CollisionMask::PlayerHitbox : CollisionMask::NPCHitbox;
+	m_physHitboxes->SetCollisionFilter(collisionMask,collisionMask); // Required for raytraces
+	m_physHitboxes->Spawn();
 }
-bool BaseActorComponent::FindHitgroup(const PhysCollisionObject &phys,HitGroup &hitgroup) const
+bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &phys,HitGroup &hitgroup) const
 {
 	if(m_physHitboxes == nullptr)
 		return false;
 	auto &colObjs = m_physHitboxes->GetCollisionObjects();
-	auto it = std::find_if(colObjs.begin(),colObjs.end(),[&phys](const PhysCollisionObjectHandle &hPhys) {
-		return (hPhys.get() == &phys) ? true : false;
+	auto it = std::find_if(colObjs.begin(),colObjs.end(),[&phys](const util::TSharedHandle<pragma::physics::ICollisionObject> &hPhys) {
+		return (hPhys.Get() == &phys) ? true : false;
 	});
 	if(it == colObjs.end())
 		return false;
@@ -266,7 +268,7 @@ void BaseActorComponent::UpdateHitboxPhysics()
 		if(i >= numColObjs)
 			break;
 		auto &hitboxInfo = m_hitboxData[i];
-		auto *col = static_cast<PhysGhostObject*>(colObjs[i].get());
+		auto *col = colObjs[i]->GetGhostObject();
 		if(col != nullptr)
 		{
 			Vector3 min,max,origin;

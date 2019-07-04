@@ -31,7 +31,7 @@ namespace pragma
 		bool IsAlive() const;
 		bool IsDead() const;
 		void Ragdolize();
-		bool FindHitgroup(const PhysCollisionObject &phys,HitGroup &hitgroup) const;
+		bool FindHitgroup(const physics::ICollisionObject &phys,HitGroup &hitgroup) const;
 		PhysObjHandle GetHitboxPhysicsObject() const;
 
 		const util::PBoolProperty &GetFrozenProperty() const;

@@ -1,4 +1,3 @@
-#ifdef PHYS_ENGINE_BULLET
 #define LINK_NETWORKED_PHYSICS_ENTITIES \
 	LINK_NETWORKED_ENTITY(PointConstraintBallSocket,CPointConstraintBallSocket); \
 	LINK_NETWORKED_ENTITY(PointConstraintConeTwist,CPointConstraintConeTwist); \
@@ -7,15 +6,6 @@
 	LINK_NETWORKED_ENTITY(PointConstraintDoF,CPointConstraintDoF); \
 	LINK_NETWORKED_ENTITY(PointConstraintFixed,CPointConstraintFixed); \
 	LINK_NETWORKED_ENTITY(FuncSoftPhysics,CFuncSoftPhysics);
-#elif PHYS_ENGINE_PHYSX
-#define LINK_NETWORKED_PHYSICS_ENTITIES \
-	LINK_NETWORKED_ENTITY(PointJointFixed,CPointJointFixed); \
-	LINK_NETWORKED_ENTITY(PointJointSpherical,CPointJointSpherical); \
-	LINK_NETWORKED_ENTITY(PointJointRevolute,CPointJointRevolute); \
-	LINK_NETWORKED_ENTITY(PointJointPrismatic,CPointJointPrismatic); \
-	LINK_NETWORKED_ENTITY(PointJointD6,CPointJointD6); \
-	LINK_NETWORKED_ENTITY(PointJointDistance,CPointJointDistance);
-#endif
 
 #define LINK_NETWORKED_ENTITIES \
 	LINK_NETWORKED_ENTITY(World,CWorld); \
@@ -99,7 +89,6 @@
 	#include "pragma/entities/trigger/s_trigger_touch.h"
 	#include "pragma/entities/func/s_func_physics.h"
 	#include "pragma/entities/prop/s_prop_dynamic.hpp"
-#ifdef PHYS_ENGINE_BULLET
 	#include "pragma/entities/point/constraints/s_point_constraint_fixed.h"
 	#include "pragma/entities/point/constraints/s_point_constraint_ballsocket.h"
 	#include "pragma/entities/point/constraints/s_point_constraint_conetwist.h"
@@ -107,14 +96,6 @@
 	#include "pragma/entities/point/constraints/s_point_constraint_hinge.h"
 	#include "pragma/entities/point/constraints/s_point_constraint_dof.h"
 	#include "pragma/entities/func/s_func_softphysics.hpp"
-#elif PHYS_ENGINE_PHYSX
-	#include "pragma/entities/point/joints/s_point_joint_fixed.h"
-	#include "pragma/entities/point/joints/s_point_joint_distance.h"
-	#include "pragma/entities/point/joints/s_point_joint_spherical.h"
-	#include "pragma/entities/point/joints/s_point_joint_revolute.h"
-	#include "pragma/entities/point/joints/s_point_joint_prismatic.h"
-	#include "pragma/entities/point/joints/s_point_joint_d6.h"
-#endif
 	#include "pragma/entities/environment/audio/s_env_soundscape.h"
 	#include "pragma/entities/func/s_func_brush.h"
 	#include "pragma/entities/environment/s_env_microphone.h"
@@ -160,7 +141,6 @@
 	#include "pragma/entities/trigger/c_trigger_touch.h"
 	#include "pragma/entities/func/c_func_physics.h"
 	#include "pragma/entities/prop/c_prop_dynamic.hpp"
-#ifdef PHYS_ENGINE_BULLET
 	#include "pragma/entities/point/constraints/c_point_constraint_fixed.h"
 	#include "pragma/entities/point/constraints/c_point_constraint_ballsocket.h"
 	#include "pragma/entities/point/constraints/c_point_constraint_conetwist.h"
@@ -168,14 +148,6 @@
 	#include "pragma/entities/point/constraints/c_point_constraint_hinge.h"
 	#include "pragma/entities/point/constraints/c_point_constraint_dof.h"
 	#include "pragma/entities/func/c_func_softphysics.hpp"
-#elif PHYS_ENGINE_PHYSX
-	#include "pragma/entities/point/joints/c_point_joint_fixed.h"
-	#include "pragma/entities/point/joints/c_point_joint_distance.h"
-	#include "pragma/entities/point/joints/c_point_joint_spherical.h"
-	#include "pragma/entities/point/joints/c_point_joint_revolute.h"
-	#include "pragma/entities/point/joints/c_point_joint_prismatic.h"
-	#include "pragma/entities/point/joints/c_point_joint_d6.h"
-#endif
 	#include "pragma/entities/environment/audio/c_env_soundscape.h"
 	#include "pragma/entities/func/c_func_brush.h"
 	#include "pragma/entities/environment/c_env_microphone.h"

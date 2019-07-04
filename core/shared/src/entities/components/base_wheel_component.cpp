@@ -1,17 +1,23 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_wheel_component.hpp"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_generic_component.hpp"
 #include <sharedutils/scope_guard.h>
 
+//#define ENABLE_DEPRECATED_PHYSICS
+
 using namespace pragma;
 
 WheelInfo::WheelInfo()
 	: bFrontWheel(false),wheelAxle(1.f,0.f,0.f),
-	wheelDirection(0.f,-1.f,0.f),suspensionLength(static_cast<float>(0.6f /PhysEnv::WORLD_SCALE)),
-	suspensionCompression(static_cast<float>(1.f /PhysEnv::WORLD_SCALE)),wheelRadius(15.f),
+	wheelDirection(0.f,-1.f,0.f),
+#ifdef ENABLE_DEPRECATED_PHYSICS
+	suspensionLength(static_cast<float>(0.6f /PhysEnv::WORLD_SCALE)),
+	suspensionCompression(static_cast<float>(1.f /PhysEnv::WORLD_SCALE)),
+#endif
+	wheelRadius(15.f),
 	suspensionStiffness(50.f),wheelDampingCompression(0.2f),
 	frictionSlip(0.8f),steeringAngle(0.f),wheelRotation(0.f),
 	rollInfluence(1.f),connectionPoint(0.f,0.f,0.f),
@@ -101,6 +107,7 @@ void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 		fAttachWheel();
 	//
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
@@ -117,6 +124,7 @@ void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 	info->m_steering = umath::deg_to_rad(m_wheelInfo.steeringAngle);
 	info->m_rotation = m_wheelInfo.wheelRotation;
 	info->m_rollInfluence = m_wheelInfo.rollInfluence;
+#endif
 }
 
 void BaseWheelComponent::Detach()
@@ -136,6 +144,7 @@ Quat &BaseWheelComponent::GetModelRotation() {return m_modelRotation;}
 
 void BaseWheelComponent::UpdateWheel()
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
@@ -155,6 +164,7 @@ void BaseWheelComponent::UpdateWheel()
 		pTrComponent->SetPosition(origin);
 		pTrComponent->SetOrientation(rotation);
 	}
+#endif
 }
 
 void BaseWheelComponent::Think(double)
@@ -163,216 +173,284 @@ void BaseWheelComponent::Think(double)
 }
 
 Bool BaseWheelComponent::IsAttached() const {return m_vehicle.valid();}
-
+#ifdef ENABLE_DEPRECATED_PHYSICS
 btWheelInfo *BaseWheelComponent::GetWheelInfo() const
 {
 	if(!IsAttached())
 		return nullptr;
 	return const_cast<BaseVehicleComponent*>(m_vehicle.get())->GetWheelInfo(m_wheelId);
 }
-
+#endif
 util::WeakHandle<pragma::BaseVehicleComponent> BaseWheelComponent::GetVehicle() {return m_vehicle;}
 
 Bool BaseWheelComponent::IsFrontWheel() const {return m_wheelInfo.bFrontWheel;}
 void BaseWheelComponent::SetFrontWheel(Bool b)
 {
 	m_wheelInfo.bFrontWheel = b;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_bIsFrontWheel = b;
+#endif
 }
 Vector3 &BaseWheelComponent::GetChassisConnectionPoint() {return m_wheelInfo.connectionPoint;}
 void BaseWheelComponent::SetChassisConnectionPoint(const Vector3 &p)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_wheelInfo.connectionPoint = p;
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_chassisConnectionPointCS = btVector3(p.x,p.y,p.z) *PhysEnv::WORLD_SCALE;
+#endif
 }
 Vector3 &BaseWheelComponent::GetWheelAxle() {return m_wheelInfo.wheelAxle;}
 void BaseWheelComponent::SetWheelAxle(const Vector3 &axis)
 {
 	m_wheelInfo.wheelAxle = axis;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_wheelAxleCS = btVector3(axis.x,axis.y,axis.z);
+#endif
 }
 Vector3 &BaseWheelComponent::GetWheelDirection() {return m_wheelInfo.wheelDirection;}
 void BaseWheelComponent::SetWheelDirection(const Vector3 &dir)
 {
 	m_wheelInfo.wheelDirection = dir;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_wheelDirectionCS = btVector3(dir.x,dir.y,dir.z);
+#endif
 }
 Float BaseWheelComponent::GetMaxSuspensionLength() const {return m_wheelInfo.suspensionLength;}
 void BaseWheelComponent::SetMaxSuspensionLength(Float len)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_wheelInfo.suspensionLength = len;
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_suspensionRestLength1 = len *PhysEnv::WORLD_SCALE;
+#endif
 }
 Float BaseWheelComponent::GetMaxSuspensionCompression() const {return m_wheelInfo.suspensionCompression;}
 void BaseWheelComponent::SetMaxSuspensionCompression(Float cmp)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_wheelInfo.suspensionCompression = cmp;
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_maxSuspensionTravelCm = cmp *PhysEnv::WORLD_SCALE;
+#endif
 }
 Float BaseWheelComponent::GetMaxDampingRelaxation() const {return m_wheelInfo.dampingRelaxation;}
 void BaseWheelComponent::SetMaxDampingRelaxation(Float damping)
 {
 	m_wheelInfo.dampingRelaxation = damping;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_wheelsDampingRelaxation = damping;
+#endif
 }
 Float BaseWheelComponent::GetWheelRadius() const {return m_wheelInfo.wheelRadius;}
 void BaseWheelComponent::SetWheelRadius(Float radius)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	m_wheelInfo.wheelRadius = radius;
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_wheelsRadius = radius *PhysEnv::WORLD_SCALE;
+#endif
 }
 Float BaseWheelComponent::GetSuspensionStiffness() const {return m_wheelInfo.suspensionStiffness;}
 void BaseWheelComponent::SetSuspensionStiffness(Float stiffness)
 {
 	m_wheelInfo.suspensionStiffness = stiffness;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_suspensionStiffness = stiffness;
+#endif
 }
 Float BaseWheelComponent::GetWheelDampingCompression() const {return m_wheelInfo.wheelDampingCompression;}
 void BaseWheelComponent::SetWheelDampingCompression(Float cmp)
 {
 	m_wheelInfo.wheelDampingCompression = cmp;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_wheelsDampingCompression = cmp;
+#endif
 }
 Float BaseWheelComponent::GetFrictionSlip() const {return m_wheelInfo.frictionSlip;}
 void BaseWheelComponent::SetFrictionSlip(Float slip)
 {
 	m_wheelInfo.frictionSlip = slip;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_frictionSlip = slip;
+#endif
 }
 Float BaseWheelComponent::GetSteeringAngle() const {return m_wheelInfo.steeringAngle;}
 void BaseWheelComponent::SetSteeringAngle(Float ang)
 {
 	m_wheelInfo.steeringAngle = ang;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_steering = umath::deg_to_rad(ang);
+#endif
 }
 Float BaseWheelComponent::GetWheelRotation() const {return m_wheelInfo.wheelRotation;}
 void BaseWheelComponent::SetWheelRotation(Float rot)
 {
 	m_wheelInfo.wheelRotation = rot;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_rotation = rot;
+#endif
 }
 Float BaseWheelComponent::GetRollInfluence() const {return m_wheelInfo.rollInfluence;}
 void BaseWheelComponent::SetRollInfluence(Float influence)
 {
 	m_wheelInfo.rollInfluence = influence;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	info->m_rollInfluence = influence;
+#endif
 }
 Float BaseWheelComponent::GetRelativeSuspensionSpeed() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return 0.f;
 	return static_cast<float>(info->m_suspensionRelativeVelocity /PhysEnv::WORLD_SCALE);
+#else
+	return 0.f;
+#endif
 }
 Float BaseWheelComponent::GetSuspensionForce() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return 0.f;
 	return static_cast<float>(info->m_wheelsSuspensionForce /PhysEnv::WORLD_SCALE);
+#else
+	return 0.f;
+#endif
 }
 Float BaseWheelComponent::GetSkidGrip() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return 0.f;
 	return static_cast<float>(info->m_skidInfo);
+#else
+	return 0.f;
+#endif
 }
 Vector3 BaseWheelComponent::GetContactNormal() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	auto &n = info->m_raycastInfo.m_contactNormalWS;
 	return Vector3(n.x(),n.y(),n.z());
+#else
+	return Vector3{};
+#endif
 }
 Vector3 BaseWheelComponent::GetContactPoint() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	auto p = info->m_raycastInfo.m_contactPointWS /PhysEnv::WORLD_SCALE;
 	return Vector3(p.x(),p.y(),p.z());
+#else
+	return Vector3{};
+#endif
 }
 Bool BaseWheelComponent::IsInContact() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return false;
 	return info->m_raycastInfo.m_isInContact;
+#else
+	return false;
+#endif
 }
 Float BaseWheelComponent::GetSuspensionLength() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return 0.f;
 	return static_cast<float>(info->m_raycastInfo.m_suspensionLength /PhysEnv::WORLD_SCALE);
+#else
+	return 0.f;
+#endif
 }
 Vector3 BaseWheelComponent::GetWorldSpaceWheelAxle() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	auto &axle = info->m_raycastInfo.m_wheelAxleWS;
 	return Vector3(axle.x(),axle.y(),axle.z());
+#else
+	return Vector3{};
+#endif
 }
 Vector3 BaseWheelComponent::GetWorldSpaceWheelDirection() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	auto &dir = info->m_raycastInfo.m_wheelDirectionWS;
 	return Vector3(dir.x(),dir.y(),dir.z());
+#else
+	return Vector3{};
+#endif
 }
-PhysCollisionObject *BaseWheelComponent::GetGroundObject() const
+pragma::physics::ICollisionObject *BaseWheelComponent::GetGroundObject() const
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return nullptr;
 	auto *o = static_cast<btCollisionObject*>(info->m_raycastInfo.m_groundObject);
 	if(o == nullptr)
 		return nullptr;
-	return static_cast<PhysCollisionObject*>(o->getUserPointer());
+	return static_cast<pragma::physics::ICollisionObject*>(o->getUserPointer());
+#else
+	return nullptr;
+#endif
 }

@@ -5,12 +5,13 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <networkmanager/nwm_packet.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_environment,EnvLightDirectional);
 
-void SLightDirectionalComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLightDirectionalComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<short>((*m_ambientColor)->r);
 	packet->Write<short>((*m_ambientColor)->g);
@@ -26,7 +27,7 @@ void SLightDirectionalComponent::SetAmbientColor(const Color &color)
 	p->Write<short>(color.g);
 	p->Write<short>(color.b);
 	p->Write<short>(color.a);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetAmbientColor,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetAmbientColor,p,pragma::networking::Protocol::SlowReliable);
 }
 
 luabind::object SLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightDirectionalComponentHandleWrapper>(l);}

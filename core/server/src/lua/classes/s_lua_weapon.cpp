@@ -1,7 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/lua/classes/s_lua_weapon.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 /*
 DEFINE_LUA_ENTITY_HANDLE(SLuaWeapon);
 
@@ -23,7 +23,7 @@ void SLuaWeapon::OnPickedUp(BaseEntity *ent)
 	CallLuaMember<void,luabind::object>("OnPickedUp",(ent != nullptr) ? *ent->GetLuaObject() : luabind::object{});
 }
 
-void SLuaWeapon::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLuaWeapon::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseWeapon::SendData(packet,rp);
 	SLuaBaseEntity::ImplSendData(packet,rp);

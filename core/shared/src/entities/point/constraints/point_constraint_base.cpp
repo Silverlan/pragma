@@ -1,6 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/point/constraints/point_constraint_base.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/constraint.hpp"
 #include <algorithm>
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
@@ -49,7 +49,7 @@ void BasePointConstraintComponent::OnRemove()
 		m_cbGameLoaded.Remove();
 }
 
-std::vector<ConstraintHandle> &BasePointConstraintComponent::GetConstraints() {return m_constraints;}
+std::vector<util::TSharedHandle<physics::IConstraint>> &BasePointConstraintComponent::GetConstraints() {return m_constraints;}
 
 util::EventReply BasePointConstraintComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {
@@ -66,24 +66,18 @@ void BasePointConstraintComponent::OnTurnOn()
 {
 	for(unsigned int i=0;i<m_constraints.size();i++)
 	{
-		ConstraintHandle &hConstraint = m_constraints[i];
+		auto &hConstraint = m_constraints[i];
 		if(hConstraint.IsValid())
-		{
-			PhysConstraint *constraint = hConstraint.get();
-			constraint->SetEnabled(true);
-		}
+			hConstraint->SetEnabled(true);
 	}
 }
 void BasePointConstraintComponent::OnTurnOff()
 {
 	for(unsigned int i=0;i<m_constraints.size();i++)
 	{
-		ConstraintHandle &hConstraint = m_constraints[i];
+		auto &hConstraint = m_constraints[i];
 		if(hConstraint.IsValid())
-		{
-			PhysConstraint *constraint = hConstraint.get();
-			constraint->SetEnabled(false);
-		}
+			hConstraint->SetEnabled(false);
 	}
 }
 
@@ -99,7 +93,7 @@ void BasePointConstraintComponent::InitializeConstraint()
 	RigidPhysObj *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == NULL)
 		return;
-	PhysRigidBody *bodySrc = physSrc->GetRigidBody();
+	auto *bodySrc = physSrc->GetRigidBody();
 	if(bodySrc == NULL)
 		return;
 	for(unsigned int i=0;i<entsTgt.size();i++)
@@ -128,9 +122,9 @@ void BasePointConstraintComponent::ClearConstraint()
 {
 	for(unsigned int i=0;i<m_constraints.size();i++)
 	{
-		ConstraintHandle &c = m_constraints[i];
+		auto &c = m_constraints[i];
 		if(c.IsValid())
-			c->Remove();
+			c.Remove();
 	}
 	m_constraints.clear();
 }

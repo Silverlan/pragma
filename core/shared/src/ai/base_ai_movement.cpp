@@ -9,7 +9,8 @@
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/controller.hpp"
+#include "pragma/physics/shape.hpp"
 #include <pragma/physics/movetypes.h>
 #include <glm/gtx/projection.hpp>
 
@@ -465,7 +466,6 @@ void BaseAIComponent::PathStep(float)
 	ResolvePathObstruction(dir);
 	m_moveInfo.moveDir = dir;
 }
-
 void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 {
 	if(m_moveInfo.moving == false)
@@ -488,7 +488,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto dstPos = pos +dir *(pPhysComponent.valid() ? (pPhysComponent->GetCollisionRadius() *1.1f) : 0.f);
 
 	const auto fCheckForObstruction = [this,&pTrComponent,&dir,t](TraceResult &r) -> bool {
-		if(r.hit == true && (r.entity.IsValid() == false || IsObstruction(*r.entity.get()))) // Obstructed
+		if(r.hitType != RayCastHitType::None && (r.entity.IsValid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 		{
 			m_obstruction.pathObstructed = true;
 			auto aimDir = pTrComponent->GetForward();
@@ -506,7 +506,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 #if AI_OBSTRUCTION_CHECK_RAYCAST_TYPE == AI_OBSTRUCTION_CHECK_RAYCAST_TYPE_RAY
 	TraceData data {};
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(FTRACE::FILTER_INVERT);
+	data.SetFlags(RayCastFlags::InvertFilter);
 	if(pPhysComponent.valid())
 	{
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
@@ -538,11 +538,17 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 			return;
 	}
 #else
+	auto *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	if(physObj == nullptr || physObj->IsController() == false)
+		return;
+	auto *physController = static_cast<ControllerPhysObj*>(physObj);
+	auto *shape = physController->GetController()->GetShape();
+	if(shape == nullptr)
+		return;
 	// If the NPC's physics object is a capsule shape (which is very likely), we'll have to offset the position
 	// so that the capsule sweep isn't inside the ground (since a capsule's origin is at its center, not near the feet, but the NPCs
 	// position is always at the feet).
-	auto *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(physObj != nullptr && physObj->IsController() && static_cast<ControllerPhysObj*>(physObj)->IsCapsule())
+	if(physController->IsCapsule())
 	{
 		auto *capsuleController = static_cast<CapsuleControllerPhysObj*>(physObj);
 		auto rot = physObj->GetOrientation();
@@ -551,21 +557,24 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		pos += offset;
 		dstPos += offset;
 	}
-
+	
 	TraceData data {};
 	data.SetSource(pos);
-	data.SetSource(&ent);
+	data.SetShape(*shape);
 	data.SetTarget(dstPos);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(FTRACE::FILTER_INVERT);
+#endif
+	data.SetFlags(RayCastFlags::InvertFilter);
 	if(pPhysComponent.valid())
 	{
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 	}
 	
-	auto r = game->Sweep(data);
-	fCheckForObstruction(r);
+	TraceResult result;
+	auto r = game->Sweep(data,&result);
+	fCheckForObstruction(result);
 #endif
 }
 

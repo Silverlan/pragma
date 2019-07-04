@@ -9,7 +9,7 @@
 
 using namespace pragma;
 
-void SEnvTimescaleComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SEnvTimescaleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvTimescale);
 	packet->Write<float>(m_kvInnerRadius);

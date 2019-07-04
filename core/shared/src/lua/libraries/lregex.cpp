@@ -1,6 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lregex.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 DLLNETWORK std::ostream &operator<<(std::ostream &out,const std::match_results<const char*> &match)
 {

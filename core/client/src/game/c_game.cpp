@@ -35,8 +35,7 @@
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/physics/c_physdebug.h"
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -47,6 +46,7 @@
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include "textureinfo.h"
+#include "pragma/networking/iclient.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/game/c_game_callback.h"
@@ -74,6 +74,7 @@
 #include <alsound_effect.hpp>
 #include <alsoundsystem.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
@@ -89,7 +90,7 @@ extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
-DLLCLIENT PhysEnv *c_physEnv = NULL;
+DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
 
 #pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
@@ -134,9 +135,6 @@ CGame::CGame(NetworkState *state)
 	m_tServer(0),m_renderScene(NULL),
 	m_matOverride(NULL),m_colScale(1,1,1,1),
 	//m_shaderOverride(NULL), // prosper TODO
-#ifdef PHYS_ENGINE_BULLET
-	m_btDebugDraw{nullptr},
-#endif
 	m_matLoad(),m_scene(nullptr),m_camPosOverride(nullptr),m_camRotOverride(nullptr),
 	/*m_dummyVertexBuffer(nullptr),*/m_tLastClientUpdate(0.0), // prosper TODO
 	m_snapshotTracker{},m_userInputTracker{},
@@ -191,13 +189,6 @@ CGame::CGame(NetworkState *state)
 		auto &hCallback = it->second;
 		AddCallback(name,hCallback);
 	}
-#ifdef PHYS_ENGINE_BULLET
-	c_physEnv = m_physEnvironment.get();
-	m_btDebugDraw = std::make_unique<WVBtIDebugDraw>();
-	m_btDebugDraw->setDebugMode(btIDebugDraw::DBG_NoDebug);//btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-	auto *world = m_physEnvironment->GetWorld();
-	world->setDebugDrawer(m_btDebugDraw.get());
-#endif
 
 	LoadAuxEffects("fx_generic.txt");
 	for(auto &rsnd : client->GetSounds())
@@ -353,10 +344,7 @@ CGame::~CGame()
 
 	ShadowMap::ClearShadowMapDepthBuffers();
 
-#ifdef PHYS_ENGINE_BULLET
-	m_btDebugDraw = nullptr;
-	c_physEnv = NULL;
-#endif
+	c_physEnv = nullptr;
 
 	ClearSoundCache();
 }
@@ -647,7 +635,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	materialManager.ReloadMaterialShaders();
-	m_surfaceMaterials.Load("scripts\\physics\\materials.txt");
+	m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 
 	c_engine->SavePipelineCache();
 
@@ -673,7 +661,7 @@ void CGame::RequestResource(const std::string &fileName)
 	m_requestedResources.push_back(fName);
 	NetPacket p;
 	p->WriteString(fName);
-	client->SendPacketTCP("query_resource",p);
+	client->SendPacket("query_resource",p,pragma::networking::Protocol::SlowReliable);
 	Con::ccl<<"[CGame] Request sent!"<<Con::endl;
 }
 
@@ -1516,7 +1504,7 @@ void CGame::SendUserInput()
 		for(auto v : actionValues)
 			p->Write<float>(pl->GetActionInputAxisMagnitude(static_cast<Action>(v)));
 	}
-	client->SendPacketUDP("userinput",p);
+	client->SendPacket("userinput",p,pragma::networking::Protocol::FastUnreliable);
 }
 
 double &CGame::ServerTime() {return m_tServer;}
@@ -1638,11 +1626,11 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 								auto l = uvec::length_sqr(angVel);
 								if(l > 0.0)
 									rot = uquat::create(EulerAngles(umath::rad_to_deg(angVel.x),umath::rad_to_deg(angVel.y),umath::rad_to_deg(angVel.z)) *tDelta) *rot; // TODO: Check if this is correct
-								auto *o = static_cast<PhysCollisionObject*>(hObj.get());
+								auto *o = hObj.Get();
 								o->SetRotation(rot);
 								if(o->IsRigid())
 								{
-									auto *rigid = static_cast<PhysRigidBody*>(o);
+									auto *rigid = o->GetRigidBody();
 
 									//auto correctionVel = pos -rigid->GetPos();
 									//auto l = uvec::length_sqr(correctionVel);
@@ -1777,6 +1765,7 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 {
 	DebugRenderer::DrawPlane(n,dist,color,duration);
 }
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam) {}
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {

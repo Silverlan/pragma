@@ -11,7 +11,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(point_constraint_conetwist,PointConstraintConeTwist);
 
-void SPointConstraintConeTwistComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SPointConstraintConeTwistComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSource);
 	packet->WriteString(m_kvTarget);

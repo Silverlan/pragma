@@ -4,6 +4,8 @@
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/lua/classes/s_lai_behavior.h"
+#include "pragma/networking/recipient_filter.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/networking/nwm_util.h>
@@ -35,7 +37,9 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 		p->Write<Vector3>(node);
 		nodePrev = node;
 	}
-	server->SendPacketTCP("debug_ai_navigation",p,pl.GetClientSession());
+	auto *session = pl.GetClientSession();
+	if(session)
+		server->SendPacket("debug_ai_navigation",p,pragma::networking::Protocol::SlowReliable,*session);
 }
 
 void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl,std::shared_ptr<DebugBehaviorTreeNode> &dbgTree,std::shared_ptr<::ai::Schedule> &aiSchedule,float &tLastSchedUpdate)
@@ -50,7 +54,9 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl,std::shar
 			{
 				NetPacket p {};
 				p->Write<uint8_t>(static_cast<uint8_t>(0));
-				server->SendPacketTCP("debug_ai_schedule_tree",p,pl.GetClientSession());
+				auto *session = pl.GetClientSession();
+				if(session)
+					server->SendPacket("debug_ai_schedule_tree",p,pragma::networking::Protocol::SlowReliable,*session);
 				aiSchedule = nullptr;
 			}
 		}
@@ -177,10 +183,12 @@ void SAIComponent::_debugSendScheduleInfo(pragma::SPlayerComponent &pl,std::shar
 
 		dbgTree = dbgRootNode;
 	}
-	server->SendPacketTCP("debug_ai_schedule_tree",p,pl.GetClientSession());
+	auto *session = pl.GetClientSession();
+	if(session)
+		server->SendPacket("debug_ai_schedule_tree",p,pragma::networking::Protocol::SlowReliable,*session);
 }
 
-void NET_sv_debug_ai_navigation(WVServerClient *session,NetPacket packet)
+void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;

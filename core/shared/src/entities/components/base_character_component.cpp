@@ -25,7 +25,7 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_trace.hpp"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 
 using namespace pragma;
 
@@ -33,7 +33,6 @@ extern DLLENGINE Engine *engine;
 
 //////////////////
 
-#ifdef PHYS_ENGINE_BULLET
 void BaseCharacterComponent::InitializeController()
 {
 	//auto &ent = GetEntity();
@@ -61,38 +60,6 @@ void BaseCharacterComponent::SetUpDirection(const Vector3 &direction)
 	//	return;
 	
 }
-#elif PHYS_ENGINE_PHYSX
-void BaseCharacterComponent::SetUpDirection(const Vector3 &direction)
-{
-	m_upDirection = direction;
-	Vector3::normalize(&m_upDirection);
-
-	m_axRot = Vector3::getRotation(Vector3(0.f,1.f,0.f),m_upDirection);
-	m_axRot.Normalize();
-	m_axForward = Vector3(0.f,0.f,1.f) *m_axRot;
-	m_axRight = Vector3(-1.f,0.f,0.f) *m_axRot;
-
-	PhysObj *phys = m_entity->GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
-		return;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-	physx::PxController *controller = physController->GetController();
-	controller->setUpDirection(physx::PxVec3(m_upDirection.x,m_upDirection.y,m_upDirection.z));
-}
-void BaseCharacterComponent::InitializeController()
-{
-	PhysObj *phys = m_entity->GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
-		return;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-	physController->SetSlopeLimit(GetSlopeLimit());
-	physController->SetStepOffset(GetStepOffset());
-	physx::PxController *controller = physController->GetController();
-	controller->setNonWalkableMode(physx::PxControllerNonWalkableMode::ePREVENT_CLIMBING_AND_FORCE_SLIDING);
-	Vector3 &upDirection = m_upDirection;
-	controller->setUpDirection(physx::PxVec3(upDirection.x,upDirection.y,upDirection.z));
-}
-#endif
 
 ComponentEventId BaseCharacterComponent::EVENT_ON_FOOT_STEP = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED = INVALID_COMPONENT_ID;
@@ -192,11 +159,6 @@ void BaseCharacterComponent::Initialize()
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
 	ent.AddComponent<LogicComponent>();
-
-#ifdef PHYS_ENGINE_PHYSX
-	m_entity->SetCollisionCallbacksEnabled(true);
-	m_entity->SetCollisionContactReportEnabled(true);
-#endif
 }
 
 const Vector3 &BaseCharacterComponent::GetUpDirection() const {return *m_upDirection;}
@@ -216,14 +178,16 @@ float BaseCharacterComponent::GetSlopeLimit() const {return *m_slopeLimit;}
 void BaseCharacterComponent::SetSlopeLimit(float limit)
 {
 	*m_slopeLimit = limit;
-	auto &ent = GetEntity();
+
+	// Slope limit cannot be changed dynamically in PhysX!
+	/*auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != NULL && phys->IsController())
 	{
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
 		physController->SetMaxSlope(limit);
-	}
+	}*/
 }
 float BaseCharacterComponent::GetStepOffset() const {return *m_stepOffset;}
 void BaseCharacterComponent::SetStepOffset(float offset)
@@ -470,8 +434,9 @@ bool BaseCharacterComponent::UpdateMovement()
 				//if(owner->GetNetworkState()->IsClient())
 				if(ent.IsNPC() || ent.GetNetworkState()->IsClient())
 				{
-				auto angVel = static_cast<PhysRigidBody*>(groundObject)->GetAngularVelocity() *static_cast<float>(tDelta);
-				auto ang = EulerAngles(umath::rad_to_deg(angVel.x),umath::rad_to_deg(angVel.y),umath::rad_to_deg(angVel.z));
+				// TODO: Rotate with ground object?
+				//auto angVel = static_cast<PhysRigidBody*>(groundObject)->GetAngularVelocity() *static_cast<float>(tDelta);
+				//auto ang = EulerAngles(umath::rad_to_deg(angVel.x),umath::rad_to_deg(angVel.y),umath::rad_to_deg(angVel.z));
 				//owner->SetAngles(owner->GetAngles() +ang);
 				//SetViewAngles(GetViewAngles() +ang);
 				}
@@ -551,12 +516,12 @@ bool BaseCharacterComponent::UpdateMovement()
 	uvec::rotate(&localVel,viewRot);
 	if(
 		vel.y <= 0.1f && physController->IsGroundWalkable() &&
-		(pGroundContactInfo != nullptr && pGroundContactInfo->contactPoint.getDistance() >= threshold) &&
+		(pGroundContactInfo != nullptr && pGroundContactInfo->contactDistance >= threshold) &&
 		mv == MOVETYPE::WALK
 	)
 	{
 		auto &info = *pGroundContactInfo;
-		auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
+		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
 		auto n = -info.GetContactNormal();
 		//ent.GetNetworkState()->GetGameState()->DrawLine(
 		//	pos,pos -n *100.f,Color::Red,5.f

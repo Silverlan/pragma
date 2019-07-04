@@ -1,7 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/lua/c_lua_weapon.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/entities/c_viewmodel.h"
 
 /*DEFINE_LUA_ENTITY_HANDLE(CLuaWeapon);

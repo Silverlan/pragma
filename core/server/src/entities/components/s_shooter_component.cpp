@@ -4,6 +4,8 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/wvserverclient.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/util/bulletinfo.h>
@@ -106,25 +108,31 @@ void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmg
 		data.SetTarget(dst);
 		dstPositions.push_back(dst);
 
-		auto result = s_game->RayCast(data);
-		outHitTargets.push_back(result);
-		if(result.hit && result.entity.IsValid())
+		auto offset = outHitTargets.size();
+		auto hit = s_game->RayCast(data,&outHitTargets);
+		if(hit)
 		{
-			auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
-			if(pDamageableComponent.valid())
+			for(auto i=offset;i<outHitTargets.size();++i)
 			{
-				auto hitGroup = HitGroup::Generic;
-				if(result.collisionObj.IsValid())
+				auto &result = outHitTargets.at(i);
+				if(result.entity.IsValid() == false)
+					continue;
+				auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
+				if(pDamageableComponent.valid())
 				{
-					auto charComponent = result.entity.get()->GetCharacterComponent();
-					if(charComponent.valid())
-						charComponent->FindHitgroup(*result.collisionObj.get(),hitGroup);
+					auto hitGroup = HitGroup::Generic;
+					if(result.collisionObj.IsValid())
+					{
+						auto charComponent = result.entity.get()->GetCharacterComponent();
+						if(charComponent.valid())
+							charComponent->FindHitgroup(*result.collisionObj.Get(),hitGroup);
+					}
+					dmgInfo.SetHitGroup(hitGroup);
+					dmgInfo.SetForce(bulletDir *dmgInfo.GetForce().x);
+					dmgInfo.SetHitPosition(result.position);
+					if((fCallback == nullptr || fCallback(dmgInfo,result.entity.get()) == true) && pDamageableComponent.valid())
+						pDamageableComponent->TakeDamage(dmgInfo);
 				}
-				dmgInfo.SetHitGroup(hitGroup);
-				dmgInfo.SetForce(bulletDir *dmgInfo.GetForce().x);
-				dmgInfo.SetHitPosition(result.position);
-				if((fCallback == nullptr || fCallback(dmgInfo,result.entity.get()) == true) && pDamageableComponent.valid())
-					pDamageableComponent->TakeDamage(dmgInfo);
 			}
 		}
 	}
@@ -139,14 +147,13 @@ void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmg
 		if(bMaster == false)
 		{
 			auto *session = static_cast<pragma::SPlayerComponent*>(pl)->GetClientSession();
-			nwm::RecipientFilter rp {};
-			rp.SetFilterType(nwm::RecipientFilter::Type::Exclude);
-			if(session != nullptr)
-				rp.Add(session);
-			ent.SendNetEventUDP(m_netEvFireBullets,p,rp);
+			ent.SendNetEvent(
+				m_netEvFireBullets,p,pragma::networking::Protocol::FastUnreliable,
+				session ? pragma::networking::ClientRecipientFilter{*session,pragma::networking::ClientRecipientFilter::FilterType::Exclude} : pragma::networking::ClientRecipientFilter{}
+			);
 		}
 		else
-			ent.SendNetEventUDP(m_netEvFireBullets,p);
+			ent.SendNetEvent(m_netEvFireBullets,p,pragma::networking::Protocol::FastUnreliable);
 	}
 
 	CEOnBulletsFired evData {bulletInfo,outHitTargets};

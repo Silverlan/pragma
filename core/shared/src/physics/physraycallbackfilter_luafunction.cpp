@@ -5,7 +5,7 @@
 BasePhysRayCallbackFilterLuaFunction::BasePhysRayCallbackFilterLuaFunction(const LuaFunction &filter,FTRACE flags,CollisionMask group,CollisionMask mask)
 	: BasePhysRayCallbackFilter(flags,group,mask),m_filter(filter)
 {}
-bool BasePhysRayCallbackFilterLuaFunction::ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col)
+bool BasePhysRayCallbackFilterLuaFunction::ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *col)
 {
 	if(BasePhysRayCallbackFilter::ShouldPass(ent,phys,col) == false)
 		return false;

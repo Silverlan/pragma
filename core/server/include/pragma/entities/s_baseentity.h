@@ -8,7 +8,10 @@ class EntityHandle;
 class Engine;
 class NetPacket;
 class TimerHandle;
-namespace nwm {class RecipientFilter;};
+namespace pragma
+{
+	namespace networking {enum class Protocol : uint8_t; class ClientRecipientFilter;};
+};
 class DLLSERVER SBaseEntity
 	: public BaseEntity
 {
@@ -18,15 +21,13 @@ protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
 	void EraseFunction(int function);
-	// COMPONENT TODO
-	//virtual uint32_t RegisterNetworkedVariableName(const std::string &name) override;
 public:
 	virtual void DoSpawn() override;
 
 	virtual void Remove() override;
 	virtual void Initialize() override;
 	virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl);
-	virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp);
+	virtual void SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp);
 	bool IsShared() const;
 	void SetShared(bool b);
 	Bool IsNetworked();
@@ -55,61 +56,14 @@ public:
 	virtual bool IsVehicle() const override;
 	virtual bool IsNPC() const override;
 
-	// COMPONENT TODO
-	/*
-	template<typename T>
-		bool SetNetworkedVariable(const std::string &name,NetworkedVariable::Type type,T val,const std::function<bool()> &baseSetVar,bool bTCP);
-	bool SetNetworkedBool(const std::string &name,bool v,bool bTCP);
-	bool SetNetworkedChar(const std::string &name,char v,bool bTCP);
-	bool SetNetworkedDouble(const std::string &name,double v,bool bTCP);
-	bool SetNetworkedFloat(const std::string &name,float v,bool bTCP);
-	bool SetNetworkedInt8(const std::string &name,int8_t v,bool bTCP);
-	bool SetNetworkedInt16(const std::string &name,int16_t v,bool bTCP);
-	bool SetNetworkedInt32(const std::string &name,int32_t v,bool bTCP);
-	bool SetNetworkedInt64(const std::string &name,int64_t v,bool bTCP);
-	bool SetNetworkedLongDouble(const std::string &name,long double v,bool bTCP);
-	bool SetNetworkedString(const std::string &name,const std::string &v,bool bTCP);
-	bool SetNetworkedUInt8(const std::string &name,uint8_t v,bool bTCP);
-	bool SetNetworkedUInt16(const std::string &name,uint16_t v,bool bTCP);
-	bool SetNetworkedUInt32(const std::string &name,uint32_t v,bool bTCP);
-	bool SetNetworkedUInt64(const std::string &name,uint64_t v,bool bTCP);
-	bool SetNetworkedAngles(const std::string &name,const EulerAngles &v,bool bTCP);
-	bool SetNetworkedColor(const std::string &name,const Color &v,bool bTCP);
-	bool SetNetworkedVector(const std::string &name,const Vector3 &v,bool bTCP);
-	bool SetNetworkedVector2(const std::string &name,const Vector2 &v,bool bTCP);
-	bool SetNetworkedVector4(const std::string &name,const Vector4 &v,bool bTCP);
-	bool SetNetworkedEntity(const std::string &name,const BaseEntity *ent,bool bTCP);
-
-	virtual bool SetNetworkedBool(const std::string &name,bool v) override;
-	virtual bool SetNetworkedChar(const std::string &name,char v) override;
-	virtual bool SetNetworkedDouble(const std::string &name,double v) override;
-	virtual bool SetNetworkedFloat(const std::string &name,float v) override;
-	virtual bool SetNetworkedInt8(const std::string &name,int8_t v) override;
-	virtual bool SetNetworkedInt16(const std::string &name,int16_t v) override;
-	virtual bool SetNetworkedInt32(const std::string &name,int32_t v) override;
-	virtual bool SetNetworkedInt64(const std::string &name,int64_t v) override;
-	virtual bool SetNetworkedLongDouble(const std::string &name,long double v) override;
-	virtual bool SetNetworkedString(const std::string &name,const std::string &v) override;
-	virtual bool SetNetworkedUInt8(const std::string &name,uint8_t v) override;
-	virtual bool SetNetworkedUInt16(const std::string &name,uint16_t v) override;
-	virtual bool SetNetworkedUInt32(const std::string &name,uint32_t v) override;
-	virtual bool SetNetworkedUInt64(const std::string &name,uint64_t v) override;
-	virtual bool SetNetworkedAngles(const std::string &name,const EulerAngles &v) override;
-	virtual bool SetNetworkedColor(const std::string &name,const Color &v) override;
-	virtual bool SetNetworkedVector(const std::string &name,const Vector3 &v) override;
-	virtual bool SetNetworkedVector2(const std::string &name,const Vector2 &v) override;
-	virtual bool SetNetworkedVector4(const std::string &name,const Vector4 &v) override;
-	virtual bool SetNetworkedEntity(const std::string &name,const BaseEntity *ent) override;
-	*/
 	pragma::NetEventId RegisterNetEvent(const std::string &name) const;
 
 	// Net Events
-	void SendNetEventTCP(pragma::NetEventId eventId,NetPacket &data) const;
-	void SendNetEventTCP(pragma::NetEventId eventId,NetPacket &data,nwm::RecipientFilter &rp) const;
-	void SendNetEventTCP(pragma::NetEventId eventId) const;
-	void SendNetEventUDP(pragma::NetEventId eventId,NetPacket &data) const;
-	void SendNetEventUDP(pragma::NetEventId eventId,NetPacket &data,nwm::RecipientFilter &rp) const;
-	void SendNetEventUDP(pragma::NetEventId eventId) const;
+	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol,const pragma::networking::ClientRecipientFilter &rf);
+	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol);
+	void SendNetEvent(pragma::NetEventId eventId,NetPacket &packet);
+	void SendNetEvent(pragma::NetEventId eventId,pragma::networking::Protocol protocol);
+
 	virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet);
 	//
 };

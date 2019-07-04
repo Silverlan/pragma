@@ -2,6 +2,7 @@
 #include "pragma/entities/components/c_shooter_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/physics/raytraces.h>
+#include <pragma/physics/environment.hpp>
 #include <sharedutils/scope_guard.h>
 
 using namespace pragma;
@@ -12,6 +13,10 @@ extern DLLCLIENT ClientState *client;
 luabind::object CShooterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShooterComponentHandleWrapper>(l);}
 void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &origin,const Vector3 &effectsOrigins,const std::vector<Vector3> &destPositions,bool bTransmitToServer,std::vector<TraceResult> &outHitTargets)
 {
+	auto *physEnv = c_game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return;
+
 	auto numBullets = destPositions.size();
 	NetPacket p {};
 	if(bTransmitToServer == true)
@@ -24,62 +29,68 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &
 		data.SetSource(origin);
 		data.SetTarget(destPositions[i]);
 
-		auto result = c_game->RayCast(data);
-		outHitTargets.push_back(result);
-		auto &hitPos = result.position;
-		auto bulletDir = hitPos -origin;
-		auto l = uvec::length(bulletDir);
-		if(l > 0.f)
-			bulletDir /= l;
-		uvec::normalize(&bulletDir);
-		if(bTransmitToServer == true)
-			p->Write<Vector3>(destPositions[i]);
-		const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
-		if(bulletInfo.tracerCount > 0 && (i %bulletInfo.tracerCount) == 0 && l > minTracerDistance)
-			c_game->CreateParticleTracer(effectsOrigins,hitPos,bulletInfo.tracerRadius,bulletInfo.tracerColor,bulletInfo.tracerLength,bulletInfo.tracerSpeed,bulletInfo.tracerMaterial,bulletInfo.tracerBloom);
-		if(result.hit == true)
+		auto offset = outHitTargets.size();
+		auto hit = physEnv->RayCast(data,&outHitTargets);
+		if(outHitTargets.size() == offset)
+			outHitTargets.push_back(TraceResult {data}); // Empty trace result
+		for(auto j=offset;j<outHitTargets.size();++j)
 		{
-			auto *col = result.collisionObj.get();
-			if(col != nullptr)
+			auto &result = outHitTargets.at(j);
+			auto &hitPos = result.position;
+			auto bulletDir = hitPos -origin;
+			auto l = uvec::length(bulletDir);
+			if(l > 0.f)
+				bulletDir /= l;
+			uvec::normalize(&bulletDir);
+			if(bTransmitToServer == true)
+				p->Write<Vector3>(destPositions[i]);
+			const auto minTracerDistance = 80.f; // Don't show a tracer if the distance is less than this, otherwise the tracer might look odd when close to a wall.
+			if(bulletInfo.tracerCount > 0 && (i %bulletInfo.tracerCount) == 0 && l > minTracerDistance)
+				c_game->CreateParticleTracer(effectsOrigins,hitPos,bulletInfo.tracerRadius,bulletInfo.tracerColor,bulletInfo.tracerLength,bulletInfo.tracerSpeed,bulletInfo.tracerMaterial,bulletInfo.tracerBloom);
+			if(result.hitType != RayCastHitType::None)
 			{
-				auto surfaceMaterialId = col->GetSurfaceMaterial();
-				auto *surfaceMaterial = (surfaceMaterialId != -1) ? c_game->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
-				auto *surfaceMaterialGeneric = c_game->GetSurfaceMaterial(0);
-				if(surfaceMaterial != nullptr || surfaceMaterialGeneric != nullptr)
+				auto *col = result.collisionObj.Get();
+				if(col != nullptr)
 				{
-					auto particleEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetImpactParticleEffect() : "";
-					if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
-						particleEffect = surfaceMaterialGeneric->GetImpactParticleEffect();
-					if(!particleEffect.empty())
+					auto surfaceMaterialId = col->GetSurfaceMaterial();
+					auto *surfaceMaterial = (surfaceMaterialId != -1) ? c_game->GetSurfaceMaterial(surfaceMaterialId) : nullptr;
+					auto *surfaceMaterialGeneric = c_game->GetSurfaceMaterial(0);
+					if(surfaceMaterial != nullptr || surfaceMaterialGeneric != nullptr)
 					{
-						auto *pt = CParticleSystemComponent::Create(particleEffect);
-						if(pt != nullptr)
+						auto particleEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetImpactParticleEffect() : "";
+						if(particleEffect.empty() && surfaceMaterialGeneric != nullptr)
+							particleEffect = surfaceMaterialGeneric->GetImpactParticleEffect();
+						if(!particleEffect.empty())
 						{
-							auto pTrComponent = pt->GetEntity().GetTransformComponent();
-							if(pTrComponent.valid())
+							auto *pt = CParticleSystemComponent::Create(particleEffect);
+							if(pt != nullptr)
 							{
-								pTrComponent->SetPosition(result.position);
+								auto pTrComponent = pt->GetEntity().GetTransformComponent();
+								if(pTrComponent.valid())
+								{
+									pTrComponent->SetPosition(result.position);
 
-								auto ang = uvec::to_angle(result.normal);
-								auto rot = uquat::create(ang);
-								pTrComponent->SetOrientation(rot);
+									auto ang = uvec::to_angle(result.normal);
+									auto rot = uquat::create(ang);
+									pTrComponent->SetOrientation(rot);
+								}
+								pt->SetRemoveOnComplete(true);
+								pt->GetEntity().Spawn();
+								pt->Start();
 							}
-							pt->SetRemoveOnComplete(true);
-							pt->GetEntity().Spawn();
-							pt->Start();
 						}
-					}
 
-					auto sndEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetBulletImpactSound() : "";
-					if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
-						sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
-					if(!sndEffect.empty())
-					{
-						auto snd = client->CreateSound(sndEffect,ALSoundType::Effect | ALSoundType::Physics,ALCreateFlags::Mono);
-						if(snd != nullptr)
+						auto sndEffect = (surfaceMaterial != nullptr) ? surfaceMaterial->GetBulletImpactSound() : "";
+						if(sndEffect.empty() && surfaceMaterialGeneric != nullptr)
+							sndEffect = surfaceMaterialGeneric->GetBulletImpactSound();
+						if(!sndEffect.empty())
 						{
-							snd->SetPosition(result.position);
-							snd->Play();
+							auto snd = client->CreateSound(sndEffect,ALSoundType::Effect | ALSoundType::Physics,ALCreateFlags::Mono);
+							if(snd != nullptr)
+							{
+								snd->SetPosition(result.position);
+								snd->Play();
+							}
 						}
 					}
 				}

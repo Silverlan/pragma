@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
+#include <queue>
 #include <mathutil/umath.h>
 #include <sharedutils/functioncallback.h>
 #ifdef __linux__

@@ -31,7 +31,7 @@ bool SSoundDspFlangerComponent::OnSetKeyValue(const std::string &key,const std::
 	return true;
 }
 
-void SSoundDspFlangerComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspFlangerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<int>(m_kvWaveform);
 	packet->Write<int>(m_kvPhase);

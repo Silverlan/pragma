@@ -55,12 +55,14 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 	UChar wheelId = 0;
 	if(AddWheel(conPoint,axle,bFrontWheel,&wheelId,translation,rotation) == false)
 		return;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo(wheelId);
 	if(info == nullptr)
 		return;
 	info->m_wheelDirectionCS = btVector3(wheelDir.x,wheelDir.y,wheelDir.z);
 	info->m_suspensionRestLength1 = suspensionRest;
 	info->m_wheelsRadius = radius;
+#endif
 }
 
 void CVehicleComponent::ReceiveData(NetPacket &packet)

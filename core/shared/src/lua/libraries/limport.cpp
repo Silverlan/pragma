@@ -600,6 +600,42 @@ int Lua::import::import_model_asset(lua_State *l)
 	}
 
 	// Build skeleton
+	auto skeleton = std::make_shared<Skeleton>();
+	auto referencePose = Frame::Create(1);
+	std::function<std::shared_ptr<Bone>(aiNode&,Bone*)> fIterateTree = nullptr;
+	fIterateTree = [&fIterateTree,&skeleton,&referencePose](aiNode &node,Bone *parent) -> std::shared_ptr<Bone> {
+		auto *bone = new Bone{};
+		bone->name = node.mName.C_Str();
+		auto boneIdx = skeleton->AddBone(bone);
+		if(parent)
+			parent->children.insert(std::make_pair(boneIdx,skeleton->GetBone(boneIdx).lock()));
+
+		aiVector3D scale;
+		aiQuaternion rot;
+		aiVector3D pos;
+		auto t = node.mTransformation;
+		// t.Inverse();
+		t.Decompose(scale,rot,pos);
+		referencePose->SetBonePosition(boneIdx,Vector3{pos.x,pos.y,pos.z});
+		referencePose->SetBoneOrientation(boneIdx,Quat{rot.w,rot.x,rot.y,rot.z});
+		if(scale.x != 1.f || scale.y != 1.f || scale.z != 1.f)
+			referencePose->SetBoneScale(boneIdx,Vector3{scale.x,scale.y,scale.z});
+
+		auto numBones = skeleton->GetBones().size() +node.mNumChildren;
+		skeleton->GetBones().reserve(numBones);
+		referencePose->SetBoneCount(numBones);
+		for(auto i=decltype(node.mNumChildren){0};i<node.mNumChildren;++i)
+		{
+			auto &child = *node.mChildren[i];
+			fIterateTree(child,bone);
+		}
+		return skeleton->GetBone(boneIdx).lock();
+	};
+	if(aiScene->mRootNode)
+	{
+		auto rootBone = fIterateTree(*aiScene->mRootNode,nullptr);
+		skeleton->GetRootBones().insert(std::make_pair(rootBone->ID,rootBone));
+	}
 	// http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
 	/*aiScene->mRootNode;
 	for(auto i=decltype(aiScene->mNumAnimations){0};i<aiScene->mNumAnimations;++i)
@@ -612,7 +648,10 @@ int Lua::import::import_model_asset(lua_State *l)
 		anim->
 	}*/
 
-	return 2;
+	Lua::Push<std::shared_ptr<Skeleton>>(l,skeleton);
+	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
+
+	return 4;
 }
 
 int Lua::import::import_pmx(lua_State *l)

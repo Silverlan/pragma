@@ -1,6 +1,7 @@
 #include "stdafx_engine.h"
 #include "pragma/engine.h"
 #include "pragma/lua/lua_doc.hpp"
+#include "pragma/console/conout.h"
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <sharedutils/util_file.h>

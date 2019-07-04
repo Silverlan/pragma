@@ -31,17 +31,4 @@
 #pragma comment(lib,"util_source_script.lib")
 #pragma comment(lib,"clientmanager.lib")
 #pragma comment(lib,"networkmanager.lib")
-#ifdef _DEBUG
-	#ifdef PHYS_ENGINE_BULLET
-		#pragma comment(lib,"BulletDynamics_Debug.lib")
-		#pragma comment(lib,"BulletCollision_Debug.lib")
-		#pragma comment(lib,"LinearMath_Debug.lib")
-	#endif
-#else
-	#ifdef PHYS_ENGINE_BULLET
-		#pragma comment(lib,"BulletDynamics.lib")
-		#pragma comment(lib,"BulletCollision.lib")
-		#pragma comment(lib,"LinearMath.lib")
-	#endif
-#endif
 //

@@ -1,30 +1,43 @@
 #ifndef __RAYTRACES_H__
 #define __RAYTRACES_H__
-struct TraceResult;
-#define ENGINE_RAYTRACES \
-	public: \
-		bool TraceRay(Vector3 &start,Vector3 &dir,unsigned int flags,std::deque<std::shared_ptr<TraceResult>> *res,std::vector<Entity*> *filter=NULL); \
-		bool TraceAABB(Vector3 &start,Vector3 &dir,Vector3 &mins,Vector3 &maxs,unsigned int flags,std::deque<std::shared_ptr<TraceResult>> *res,std::vector<Entity*> *filter=NULL); \
-		bool TraceOBB(); \
-		bool TraceSphere();
+
 #include <mathutil/glmutil.h>
 #include <pragma/physics/physapi.h>
-#include "pragma/physics/phystransform.h"
+#include "pragma/physics/transform.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/physics/physobj.h"
 #include "pragma/physics/raycallback/physraycallback.hpp"
 #include "pragma/physics/raycallback/physraycallback_contact.hpp"
 #include <memory>
 
-enum class DLLNETWORK FTRACE
+enum class RayCastFlags : uint32_t
 {
-	ALL_HITS = 1,
-	FILTER_INVERT = 2,
-	IGNORE_DYNAMIC = 256,
-	IGNORE_STATIC = 512
-};
-REGISTER_BASIC_BITWISE_OPERATORS(FTRACE);
+	None = 0u,
+	ReportHitPosition = 1u,
+	ReportHitNormal = ReportHitPosition<<1u,
+	ReportHitUV = ReportHitNormal<<1u,
+	ReportAllResults = ReportHitUV<<1u,
+	ReportAnyResult = ReportAllResults<<1u,
+	ReportBackFaceHits = ReportAnyResult<<1u,
+	Precise = ReportBackFaceHits<<1u,
 
+	IgnoreDynamic = Precise<<1u,
+	IgnoreStatic = IgnoreDynamic<<1u,
+	InvertFilter = IgnoreStatic<<1u,
+
+	Default = ReportHitPosition | ReportHitNormal | ReportHitUV
+};
+REGISTER_BASIC_BITWISE_OPERATORS(RayCastFlags);
+
+enum class RayCastHitType : uint8_t
+{
+	None = 0,
+	Touch,
+	Block
+};
+
+// #define ENABLE_DEPRECATED_PHYSICS
+#ifdef ENABLE_DEPRECATED_PHYSICS
 class PhysEnv;
 class BaseEntity;
 class PhysObj;
@@ -33,9 +46,9 @@ class DLLNETWORK TraceFilterBase
 {
 public:
 	virtual TraceFilterBase *Copy() const=0;
-	virtual PhysClosestRayResultCallback CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const=0;
-	virtual PhysAllHitsRayResultCallback CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const=0;
-	virtual PhysClosestConvexResultCallback CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const=0;
+	virtual PhysClosestRayResultCallback CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const=0;
+	virtual PhysAllHitsRayResultCallback CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const=0;
+	virtual PhysClosestConvexResultCallback CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const=0;
 	virtual PhysContactResultCallback CreateContactCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask) const=0;
 };
 template<class T>
@@ -47,43 +60,24 @@ private:
 public:
 	TraceFilter(T t);
 	virtual TraceFilterBase *Copy() const override;
-	virtual PhysClosestRayResultCallback CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const override;
-	virtual PhysAllHitsRayResultCallback CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const override;
-	virtual PhysClosestConvexResultCallback CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const override;
+	virtual PhysClosestRayResultCallback CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const override;
+	virtual PhysAllHitsRayResultCallback CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const override;
+	virtual PhysClosestConvexResultCallback CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const override;
 	virtual PhysContactResultCallback CreateContactCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask) const override;
 };
-
+#endif
+namespace pragma::physics {class IConvexShape; class IRayCastFilterCallback;};
 class DLLNETWORK TraceData
 {
 public:
-	friend PhysEnv;
-private:
-	PhysTransform m_tStart;
-	PhysTransform m_tEnd;
-	void *m_target;
-	PhysObjHandle m_phys;
-	EntityHandle m_entity;
-	UChar m_targetType;
-	FTRACE m_flags;
-	bool m_bHasTarget;
-	CollisionMask m_filterMask;
-	CollisionMask m_filterGroup;
-	std::shared_ptr<TraceFilterBase> m_filter;
-protected:
-	const btConvexShape *GetShape() const;
-	const PhysObj *GetPhysObj() const;
-	const PhysCollisionObject *GetCollisionObject() const;
-	Bool GetCollisionObjects(std::vector<PhysCollisionObject*> &objs) const;
-	Bool GetShapes(std::vector<btConvexShape*> &shapes) const;
-	const BaseEntity *GetEntity() const;
-	bool HasTarget() const;
-public:
 	TraceData();
 	TraceData(const TraceData &other);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	const TraceFilterBase *GetFilter() const;
-	FTRACE GetFlags() const;
-	const PhysTransform &GetSource() const;
-	const PhysTransform &GetTarget() const;
+#endif
+	RayCastFlags GetFlags() const;
+	const pragma::physics::Transform &GetSource() const;
+	const pragma::physics::Transform &GetTarget() const;
 	Vector3 GetSourceOrigin() const;
 	Quat GetSourceRotation() const;
 	Vector3 GetTargetOrigin() const;
@@ -92,49 +86,64 @@ public:
 	float GetDistance() const;
 	CollisionMask GetCollisionFilterMask() const;
 	CollisionMask GetCollisionFilterGroup() const;
-	void SetSource(btConvexShape *shape);
-	void SetSource(PhysObj *obj);
-	void SetSource(PhysCollisionObject *obj);
+	void SetShape(const pragma::physics::IConvexShape &shape);
+	const pragma::physics::IConvexShape *GetShape() const;
 	void SetSource(const Vector3 &origin);
-	void SetSource(BaseEntity *ent);
 	void SetSourceRotation(const Quat &rot);
-	void SetSource(const PhysTransform &t);
+	void SetSource(const pragma::physics::Transform &t);
 	void SetTarget(const Vector3 &target);
 	void SetTargetRotation(const Quat &rot);
-	void SetTarget(const PhysTransform &t);
+	void SetTarget(const pragma::physics::Transform &t);
 	void SetRotation(const Quat &rot);
-	void SetFlags(FTRACE flags);
+	void SetFlags(RayCastFlags flags);
 	void SetCollisionFilterMask(CollisionMask mask);
 	void SetCollisionFilterGroup(CollisionMask group);
+	void SetFilter(const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &filter);
+	const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &GetFilter() const;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	template<class T>
 		void SetFilter(const T &filter);
-	bool HasFlag(FTRACE flag) const;
-};
+#endif
+	bool HasFlag(RayCastFlags flag) const;
+protected:
+	bool HasTarget() const;
+private:
+	pragma::physics::Transform m_tStart;
+	pragma::physics::Transform m_tEnd;
 
+	RayCastFlags m_flags;
+	bool m_bHasTarget = false;
+	CollisionMask m_filterMask;
+	CollisionMask m_filterGroup;
+	std::shared_ptr<pragma::physics::IRayCastFilterCallback> m_filter = nullptr;
+	util::TWeakSharedHandle<pragma::physics::IConvexShape> m_shape = {};
+#ifdef ENABLE_DEPRECATED_PHYSICS
+	std::shared_ptr<TraceFilterBase> m_filter = nullptr;
+#endif
+};
+#ifdef ENABLE_DEPRECATED_PHYSICS
 template<class T>
 	void TraceData::SetFilter(const T &filter)
 {
 	m_filter = std::shared_ptr<TraceFilter<T>>(new TraceFilter<T>(filter)); // c++14 std::make_unique<TraceFilter<T>>(filter);
 }
-
+#endif
+class ModelMesh;
+class ModelSubMesh;
+class Material;
 class PhysObj;
 struct DLLNETWORK TraceResult
 {
 	TraceResult()
-#ifdef PHYS_ENGINE_PHYSX
-		: flags(0),actor(NULL),shape(NULL)
-#endif
 	{}
-	bool hit = false;
+	TraceResult(const TraceData &data);
+	RayCastHitType hitType = RayCastHitType::None;
 	EntityHandle entity = {};
-	PhysCollisionObjectHandle collisionObj = {};
+	util::TWeakSharedHandle<pragma::physics::ICollisionObject> collisionObj = {};
+	std::weak_ptr<pragma::physics::IShape> shape = {};
 	PhysObjHandle physObj = {};
 	float fraction = 0.f;
-#ifdef PHYS_ENGINE_PHYSX
-	physx::PxRigidActor *actor;
-	physx::PxHitFlags flags;
-	physx::PxShape *shape;
-#endif
+
 	float distance = 0.f;
 	Vector3 normal = {};
 	Vector3 position = {};
@@ -154,6 +163,7 @@ private:
 	void InitializeMeshes();
 };
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 template<class T>
 	TraceFilter<T>::TraceFilter(T t)
 		: m_data(t)
@@ -164,17 +174,17 @@ template<class T>
 	return new TraceFilter<T>(m_data);
 }
 template<class T>
-	PhysClosestRayResultCallback TraceFilter<T>::CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const
+	PhysClosestRayResultCallback TraceFilter<T>::CreateClosestRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const
 {
 	return PhysClosestRayResultCallback(a,b,flags,group,mask,m_data);
 }
 template<class T>
-	PhysAllHitsRayResultCallback TraceFilter<T>::CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const
+	PhysAllHitsRayResultCallback TraceFilter<T>::CreateAllHitsRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const
 	{
 		return PhysAllHitsRayResultCallback(a,b,flags,group,mask,m_data);
 	}
 template<class T>
-	PhysClosestConvexResultCallback TraceFilter<T>::CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const btVector3 &a,const btVector3 &b) const
+	PhysClosestConvexResultCallback TraceFilter<T>::CreateClosestConvexCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask,const Vector3 &a,const Vector3 &b) const
 	{
 		return PhysClosestConvexResultCallback(a,b,flags,group,mask,m_data);
 	}
@@ -183,5 +193,6 @@ template<class T>
 	{
 		return PhysContactResultCallback(flags,group,mask,m_data);
 	}
+#endif
 
 #endif

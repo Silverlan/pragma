@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include <pragma/definitions.h>
 #include "pragma/lua/libraries/los.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 int Lua::os::time_since_epoch(lua_State *l)
 {

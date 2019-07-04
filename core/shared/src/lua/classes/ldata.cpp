@@ -1,6 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/ldata.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <datasystem.h>
 
 void Lua::DataBlock::GetInt(lua_State *l,ds::Block &data,const std::string &val) {Lua::PushInt(l,data.GetInt(val));}

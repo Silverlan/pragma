@@ -7,13 +7,14 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
 #include <networkmanager/nwm_packet.h>
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(func_kinematic,FuncKinematic);
 
-void SKinematicComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SKinematicComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvFirstNode);
 	packet->Write<float>(m_kvMoveSpeed);
@@ -23,13 +24,13 @@ void SKinematicComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 void SKinematicComponent::StartForward()
 {
 	BaseFuncKinematicComponent::StartForward();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvStartForward);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvStartForward,pragma::networking::Protocol::SlowReliable);
 }
 
 void SKinematicComponent::StartBackward()
 {
 	BaseFuncKinematicComponent::StartBackward();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvStartBackward);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvStartBackward,pragma::networking::Protocol::SlowReliable);
 }
 
 luabind::object SKinematicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SKinematicComponentHandleWrapper>(l);}

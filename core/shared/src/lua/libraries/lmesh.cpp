@@ -2,7 +2,7 @@
 #include "pragma/lua/libraries/lmesh.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include <mathutil/umesh.h>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 int Lua::mesh::generate_convex_hull(lua_State *l)
 {

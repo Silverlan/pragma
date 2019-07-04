@@ -836,12 +836,12 @@ void CEngine::ReloadShaderPipelines()
 
 CEngine::~CEngine() {}
 
-extern DLLCLIENT ClientState *client;
 void CEngine::HandleLocalPlayerClientPacket(NetPacket &p)
 {
+	auto *client = GetClientState();
 	if(client == nullptr)
 		return;
-	client->HandlePacket(p);
+	static_cast<ClientState*>(client)->HandlePacket(p);
 }
 
 void CEngine::Connect(const std::string &ip,const std::string &port)

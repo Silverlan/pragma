@@ -1,3 +1,5 @@
+#ifdef ENABLE_DEPRECATED_PHYSICS
+
 #include "stdafx_shared.h"
 #include "pragma/physics/raycallback/physraycallbackfilter_function.hpp"
 #include "pragma/physics/raycallback/physraycallbackfilter_entity.hpp"
@@ -5,7 +7,7 @@
 #include "pragma/physics/raycallback/physraycallbackfilter_collisionobject.hpp"
 #include "pragma/physics/raycallback/physraycallbackfilter_luafunction.hpp"
 #include "pragma/physics/raycallback/physraycallback_contact.hpp"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 
 PhysContactResultCallback::PhysContactResultCallback(FTRACE,CollisionMask,CollisionMask)
@@ -20,21 +22,21 @@ PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask 
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
 	m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask));
 }
-PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &filter)
+PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &filter)
 	: PhysContactResultCallback(flags,group,mask)
 {
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
 	m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask));
 	m_filter = std::make_shared<BasePhysRayCallbackFilterFunction>(filter,flags,group,mask);
 }
-PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter)
+PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter)
 	: PhysContactResultCallback(flags,group,mask)
 {
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
 	m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask));
 	m_filter = nullptr;
 }
-PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter)
+PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter)
 	: PhysContactResultCallback(flags,group,mask)
 {
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
@@ -69,14 +71,14 @@ PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask 
 	m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask));
 	m_filter = std::make_shared<BasePhysRayCallbackFilterPhysObj>(filter,flags,group,mask);
 }
-PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysCollisionObject*> &filter)
+PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<pragma::physics::ICollisionObject*> &filter)
 	: PhysContactResultCallback(flags,group,mask)
 {
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
 	m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask));
 	m_filter = std::make_shared<BasePhysRayCallbackFilterCollisionObject>(filter,flags,group,mask);
 }
-PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,PhysCollisionObject *filter)
+PhysContactResultCallback::PhysContactResultCallback(FTRACE flags,CollisionMask group,CollisionMask mask,pragma::physics::ICollisionObject *filter)
 	: PhysContactResultCallback(flags,group,mask)
 {
 	m_collisionFilterGroup = static_cast<int16_t>(umath::to_integral(get_collision_group(group,mask)));
@@ -95,7 +97,7 @@ btScalar PhysContactResultCallback::addSingleResult(btManifoldPoint &cp,const bt
 	auto *obj = colObj1Wrap->getCollisionObject();
 	if(m_filter != nullptr)
 	{
-		auto *colObj = static_cast<PhysCollisionObject*>(obj->getUserPointer());
+		auto *colObj = static_cast<pragma::physics::ICollisionObject*>(obj->getUserPointer());
 		if(colObj != nullptr)
 		{
 			auto *physObj = static_cast<PhysObj*>(colObj->userData);
@@ -115,3 +117,4 @@ btScalar PhysContactResultCallback::addSingleResult(btManifoldPoint &cp,const bt
 	m_colObj = obj;
 	return 0.0;
 }
+#endif

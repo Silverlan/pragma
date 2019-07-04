@@ -23,10 +23,16 @@ namespace pragma
 		{
 			SurfaceSimulation = 2048
 		};
+		struct LocalRayResult
+		{
+			float fraction;
+			float friction;
+			Vector3 hitNormalLocal;
+		};
 
 		virtual void Initialize() override;
 
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result);
+		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result);
 
 		const Vector3 &GetWaterVelocity() const;
 		void SetWaterVelocity(const Vector3 &velocity);
@@ -59,7 +65,7 @@ namespace pragma
 
 		Vector3 ProjectToSurface(const Vector3 &pos) const;
 		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT=nullptr,double *outU=nullptr,double *outV=nullptr,bool bCull=false) const;
-		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,btVector3 &rayFromWorld,btVector3 &rayToWorld,btVector3 &hitNormalWorld,btVector3 &hitPointWorld,btCollisionWorld::LocalRayResult &rayResult);
+		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual void OnEntitySpawn() override;
 	protected:

@@ -7,6 +7,8 @@
 #include <pragma/ai/navsystem.h>
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvserver.h"
+#include <pragma/networking/enums.hpp>
+#include <pragma/networking/iserver.hpp>
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
@@ -26,7 +28,7 @@ DLLSERVER void CMD_sv_send(NetworkState*,pragma::BasePlayerComponent*,std::vecto
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		server->BroadcastTCP("sv_send",packet);
+		server->SendPacket("sv_send",packet,pragma::networking::Protocol::SlowReliable);
 	else
 	{
 		/*server->
@@ -46,7 +48,7 @@ DLLSERVER void CMD_sv_send_udp(NetworkState*,pragma::BasePlayerComponent*,std::v
 	NetPacket packet;
 	packet->WriteString(argv[(argv.size() == 1) ? 0 : 1]);
 	if(argv.size() == 1)
-		server->BroadcastUDP("sv_send",packet);
+		server->SendPacket("sv_send",packet,pragma::networking::Protocol::FastUnreliable);
 	else
 	{
 		/*ClientSession *cs = GetSessionByPlayerID(atoi(argv[0]));
@@ -175,10 +177,12 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 	TraceData trData;
 	trData.SetSource(origin);
 	trData.SetTarget(origin +dir *std::numeric_limits<Float>::max());
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	trData.SetFilter(ent.GetHandle());
-	trData.SetFlags(FTRACE::FILTER_INVERT | FTRACE::IGNORE_DYNAMIC);
+#endif
+	trData.SetFlags(RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
 	auto r = s_game->RayCast(trData);
-	if(r.hit == false)
+	if(r.hitType == RayCastHitType::None)
 	{
 		Con::cwar<<"WARNING: No place to spawn entity!"<<Con::endl;
 		return;

@@ -2,6 +2,7 @@
 #include "pragma/lua/lua_doc.hpp"
 #include "pragma/console/debugconsole.h"
 #include "pragma/console/util_console_color.hpp"
+#include "pragma/console/conout.h"
 #include <sharedutils/util_string.h>
 #include <util_pragma_doc.hpp>
 

@@ -65,7 +65,7 @@ bool SSoundDspEAXReverbComponent::OnSetKeyValue(const std::string &key,const std
 	return true;
 }
 
-void SSoundDspEAXReverbComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspEAXReverbComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvDensity);
 	packet->Write<float>(m_kvDiffusion);

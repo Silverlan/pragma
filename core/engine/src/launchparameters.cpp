@@ -1,6 +1,7 @@
 #include "stdafx_engine.h"
 #include "pragma/launchparameters.h"
 #include "pragma/engine.h"
+#include "pragma/console/conout.h"
 
 Engine::LaunchCommand::LaunchCommand(const std::string &cmd,const std::vector<std::string> &_args)
 	: command(cmd),args(_args)

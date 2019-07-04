@@ -58,9 +58,9 @@ void CSoundScapeComponent::Initialize()
 					TraceData tr;
 					tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
 					tr.SetTarget(pTrComponent->GetPosition());
-					tr.SetFlags(FTRACE::IGNORE_DYNAMIC);
+					tr.SetFlags(RayCastFlags::IgnoreDynamic);
 					auto result = c_game->RayCast(tr);
-					if(!result.hit)
+					if(result.hitType == RayCastHitType::None)
 						StartSoundScape();
 				}
 			}

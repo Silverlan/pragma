@@ -2,12 +2,13 @@
 #include "pragma/entities/components/s_render_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
-void SRenderComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SRenderComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<decltype(m_renderFlags)>(m_renderFlags);
 }
@@ -21,7 +22,7 @@ void SRenderComponent::SetUnlit(bool b)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<bool>(b);
-	server->BroadcastTCP("ent_setunlit",p);
+	server->SendPacket("ent_setunlit",p,pragma::networking::Protocol::SlowReliable);
 }
 void SRenderComponent::SetCastShadows(bool b)
 {
@@ -32,5 +33,5 @@ void SRenderComponent::SetCastShadows(bool b)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<bool>(b);
-	server->BroadcastTCP("ent_setcastshadows",p);
+	server->SendPacket("ent_setcastshadows",p,pragma::networking::Protocol::SlowReliable);
 }

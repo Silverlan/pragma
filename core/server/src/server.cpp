@@ -23,17 +23,4 @@
 #pragma comment(lib,"servermanager.lib")
 #pragma comment(lib,"clientmanager.lib")
 #pragma comment(lib,"wms_shared.lib")
-#ifdef _DEBUG
-#ifdef PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3CHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3CommonCHECKED_x86.lib")
-	#pragma comment(lib,"PhysX3ExtensionsCHECKED.lib")
-#endif
-#else
-#ifdef PHYS_ENGINE_PHYSX
-	#pragma comment(lib,"PhysX3_x86.lib")
-	#pragma comment(lib,"PhysX3Common_x86.lib")
-	#pragma comment(lib,"PhysX3Extensions.lib")
-#endif
-#endif
 //

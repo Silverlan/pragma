@@ -5,14 +5,14 @@
 #include <pragma/entities/entity_component_manager.hpp>
 
 class NetPacket;
-namespace nwm {class RecipientFilter;};
 namespace pragma
 {
+	namespace networking {class ClientRecipientFilter;};
 	class DLLSERVER SBaseNetComponent
 		: public BaseNetComponent
 	{
 	public:
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp)=0;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)=0;
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet) {return false;}
 	};
 

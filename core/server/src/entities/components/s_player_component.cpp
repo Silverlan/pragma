@@ -9,6 +9,10 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_health_component.hpp"
 #include "pragma/networking/s_nwm_util.h"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include <pragma/networking/enums.hpp>
+#include <pragma/networking/error.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/model/model.h>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -73,13 +77,10 @@ SPlayerComponent::~SPlayerComponent()
 
 bool SPlayerComponent::SendResource(const std::string &fileName) const
 {
-	if(m_session == nullptr)
+	if(m_session.expired())
 		return false;
-	auto *info = m_session->GetSessionInfo();
-	if(info == nullptr)
-		return false;
-	auto r = info->AddResource(fileName);
-	server->InitResourceTransfer(m_session);
+	auto r = m_session->AddResource(fileName);
+	server->InitResourceTransfer(*m_session);
 	return r;
 }
 
@@ -123,7 +124,7 @@ void SPlayerComponent::OnRespawn()
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
 	SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 
-	ent.SendNetEventTCP(m_netEvRespawn);
+	ent.SendNetEvent(m_netEvRespawn,pragma::networking::Protocol::SlowReliable);
 }
 
 void SPlayerComponent::PrintMessage(std::string message,MESSAGE type)
@@ -135,16 +136,19 @@ void SPlayerComponent::PrintMessage(std::string message,MESSAGE type)
 	p->WriteString(message);
 	p->Write<std::underlying_type_t<decltype(type)>>(umath::to_integral(type));
 
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
-	ent.SendNetEventUDP(m_netEvPrintMessage,p,rp);
+	auto *session = GetClientSession();
+	if(session)
+		ent.SendNetEvent(m_netEvPrintMessage,p,pragma::networking::Protocol::FastUnreliable,{*session});
 }
 
 void SPlayerComponent::Kick(const std::string&)
 {
 	auto *session = GetClientSession();
 	if(session != nullptr)
-		session->Drop(nwm::ClientDropped::Kicked); // Player will be removed automatically
+	{
+		pragma::networking::Error err;
+		session->Drop(pragma::networking::DropReason::Kicked,err); // Player will be removed automatically
+	}
 	else
 	{
 		auto &ent = static_cast<SBaseEntity&>(GetEntity());
@@ -165,7 +169,9 @@ void SPlayerComponent::SetObserverMode(OBSERVERMODE mode)
 		nwm::write_entity(p,&ent);
 		p->Write<UChar>(CUChar(mode));
 
-		server->SendPacketTCP("pl_observermode",p,GetClientSession());
+		auto *session = GetClientSession();
+		if(session)
+			server->SendPacket("pl_observermode",p,pragma::networking::Protocol::SlowReliable,*session);
 	}
 }
 
@@ -178,9 +184,9 @@ void SPlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
 	NetPacket p {};
 	nwm::write_entity(p,&ent->GetEntity());
 
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
-	entThis.SendNetEventTCP(m_netEvSetObserverTarget,p,rp);
+	auto *session = GetClientSession();
+	if(session)
+		entThis.SendNetEvent(m_netEvSetObserverTarget,p,pragma::networking::Protocol::SlowReliable,*session);
 }
 void SPlayerComponent::SetObserverCameraOffset(const Vector3 &offset)
 {
@@ -191,9 +197,9 @@ void SPlayerComponent::SetObserverCameraOffset(const Vector3 &offset)
 	NetPacket p {};
 	p->Write<Vector3>(offset);
 
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
-	ent.SendNetEventTCP(m_netEvSetObserverCameraOffset,p,rp);
+	auto *session = GetClientSession();
+	if(session)
+		ent.SendNetEvent(m_netEvSetObserverCameraOffset,p,pragma::networking::Protocol::SlowReliable,*session);
 }
 void SPlayerComponent::SetObserverCameraLocked(bool b)
 {
@@ -204,9 +210,9 @@ void SPlayerComponent::SetObserverCameraLocked(bool b)
 	NetPacket p {};
 	p->Write<bool>(b);
 
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
-	ent.SendNetEventTCP(m_netEvSetObserverCameraLocked,p,rp);
+	auto *session = GetClientSession();
+	if(session)
+		ent.SendNetEvent(m_netEvSetObserverCameraLocked,p,pragma::networking::Protocol::SlowReliable,*session);
 }
 
 void SPlayerComponent::OnEntitySpawn()
@@ -246,13 +252,14 @@ void SPlayerComponent::ApplyViewRotationOffset(const EulerAngles &ang,float dur)
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
+	auto *session = GetClientSession();
+	if(session == nullptr)
+		return;
 
 	NetPacket p;
 	nwm::write_angles(p,ang);
 	p->Write<float>(dur);
-	ent.SendNetEventTCP(m_netEvApplyViewRotationOffset,p,rp);
+	ent.SendNetEvent(m_netEvApplyViewRotationOffset,p,pragma::networking::Protocol::SlowReliable,*session);
 }
 
 void SPlayerComponent::InitializeGlobalNameComponent()
@@ -264,23 +271,26 @@ void SPlayerComponent::InitializeGlobalNameComponent()
 
 nwm::IPAddress SPlayerComponent::GetClientIPAddress() const
 {
-	if(m_session == nullptr)
+	if(m_session.expired())
 		return {};
-	return m_session->GetAddress();
+	auto ipAddress = m_session->GetIPAddress();
+	return ipAddress.has_value() ? *ipAddress : nwm::IPAddress{};
 }
 
 std::string SPlayerComponent::GetClientIP()
 {
-	if(m_session == nullptr)
+	if(m_session.expired())
 		return BasePlayerComponent::GetClientIP();
-	return m_session->GetIP();
+	auto ip = m_session->GetIP();
+	return ip.has_value() ? *ip : BasePlayerComponent::GetClientIP();
 }
 
 unsigned short SPlayerComponent::GetClientPort()
 {
-	if(m_session == NULL)
+	if(m_session.expired())
 		return BasePlayerComponent::GetClientPort();
-	return m_session->GetPort();
+	auto port = m_session->GetPort();
+	return port.has_value() ? *port : BasePlayerComponent::GetClientPort();
 }
 
 void SPlayerComponent::Initialize()
@@ -300,7 +310,7 @@ void SPlayerComponent::OnSetSlopeLimit(float limit)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(limit);
-		server->BroadcastTCP("pl_slopelimit",p);
+		server->SendPacket("pl_slopelimit",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::OnSetStepOffset(float offset)
@@ -311,11 +321,11 @@ void SPlayerComponent::OnSetStepOffset(float offset)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(offset);
-		server->BroadcastTCP("pl_stepoffset",p);
+		server->SendPacket("pl_stepoffset",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void SPlayerComponent::SetClientSession(WVServerClient *session) {m_session = session;}
+void SPlayerComponent::SetClientSession(networking::IServerClient &session) {m_session = session.shared_from_this();}
 
 void SPlayerComponent::UpdateViewOrientation(const Quat &rot)
 {
@@ -329,17 +339,17 @@ void SPlayerComponent::OnSetViewOrientation(const Quat &orientation)
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
-	nwm::RecipientFilter rp {};
-	rp.Add(GetClientSession());
-
+	auto *session = GetClientSession();
+	if(session == nullptr)
+		return;
 	NetPacket p;
 	p->Write<Quat>(orientation);
-	ent.SendNetEventUDP(m_netEvSetViewOrientation,p,rp);
+	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::FastUnreliable,*session);
 }
 
-WVServerClient *SPlayerComponent::GetClientSession() {return m_session;}
+networking::IServerClient *SPlayerComponent::GetClientSession() {return m_session.get();}
 
-void SPlayerComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SPlayerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(GetPlayerName());
 	packet->Write<double>(ConnectionTime());
@@ -361,7 +371,7 @@ void SPlayerComponent::SetWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(speed);
-		server->BroadcastTCP("pl_speed_walk",p);
+		server->SendPacket("pl_speed_walk",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -374,7 +384,7 @@ void SPlayerComponent::SetRunSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(speed);
-		server->BroadcastTCP("pl_speed_run",p);
+		server->SendPacket("pl_speed_run",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -387,7 +397,7 @@ void SPlayerComponent::SetCrouchedWalkSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(speed);
-		server->BroadcastTCP("pl_speed_crouch_walk",p);
+		server->SendPacket("pl_speed_crouch_walk",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -400,7 +410,7 @@ void SPlayerComponent::SetStandHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(height);
-		server->BroadcastTCP("pl_height_stand",p);
+		server->SendPacket("pl_height_stand",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchHeight(float height)
@@ -412,7 +422,7 @@ void SPlayerComponent::SetCrouchHeight(float height)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(height);
-		server->BroadcastTCP("pl_height_crouch",p);
+		server->SendPacket("pl_height_crouch",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetStandEyeLevel(float eyelevel)
@@ -424,7 +434,7 @@ void SPlayerComponent::SetStandEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(eyelevel);
-		server->BroadcastTCP("pl_eyelevel_stand",p);
+		server->SendPacket("pl_eyelevel_stand",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
@@ -436,7 +446,7 @@ void SPlayerComponent::SetCrouchEyeLevel(float eyelevel)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(eyelevel);
-		server->BroadcastTCP("pl_eyelevel_crouch",p);
+		server->SendPacket("pl_eyelevel_crouch",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -456,7 +466,7 @@ void SPlayerComponent::SetSprintSpeed(float speed)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<float>(speed);
-		server->BroadcastTCP("pl_speed_sprint",p);
+		server->SendPacket("pl_speed_sprint",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePlayerComponent));}

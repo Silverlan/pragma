@@ -2,8 +2,9 @@
 #include "pragma/physics/collisionmesh.h"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
+#include "pragma/physics/environment.hpp"
 #include "pragma/model/modelmesh.h"
 
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(Game *game) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(game));}
@@ -68,18 +69,27 @@ void CollisionMesh::Translate(const Vector3 &t)
 	m_min += t;
 	m_max += t;
 }
-std::shared_ptr<PhysShape> CollisionMesh::CreateShape(const Vector3 &scale) const
+std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector3 &scale) const
 {
-	if(IsSoftBody())
+	auto *physEnv = m_game->GetPhysicsEnvironment();
+	if(IsSoftBody() || physEnv == nullptr)
 		return nullptr;
 	auto &materials = m_game->GetSurfaceMaterials();
 	auto bConvex = IsConvex();
-	std::shared_ptr<PhysShape> shape = nullptr;
+	std::shared_ptr<pragma::physics::IShape> shape = nullptr;
 	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
+
+	pragma::physics::IMaterial *mat = nullptr;
+	if(materials.empty())
+		mat = &physEnv->GetGenericMaterial();
+	else
+		mat = &materials.front().GetPhysicsMaterial();
 	if(bConvex == true)
 	{
-		shape = std::make_shared<PhysConvexHullShape>();
-		auto *ptrShape = static_cast<PhysConvexHullShape*>(shape.get());
+		shape = physEnv->CreateConvexHullShape(*mat);
+		if(shape == nullptr)
+			return nullptr;
+		auto *ptrShape = shape->GetConvexHullShape();
 		ptrShape->SetCollisionMesh(*const_cast<CollisionMesh*>(this));
 		ptrShape->SetSurfaceMaterial(GetSurfaceMaterial());
 		ptrShape->SetLocalScaling(Vector3(1.f,1.f,1.f));
@@ -94,8 +104,10 @@ std::shared_ptr<PhysShape> CollisionMesh::CreateShape(const Vector3 &scale) cons
 	}
 	else
 	{
-		shape = std::make_shared<PhysTriangleShape>();
-		auto *ptrShape = static_cast<PhysTriangleShape*>(shape.get());
+		shape = physEnv->CreateTriangleShape(*mat);
+		if(shape == nullptr)
+			return nullptr;
+		auto *ptrShape = shape->GetTriangleShape();
 		auto numMats = m_surfaceMaterials.size();
 		assert((m_vertices.size() %3) == 0);
 		ptrShape->ReserveTriangles(m_vertices.size() /3);
@@ -172,7 +184,7 @@ void CollisionMesh::SetAABB(Vector3 &min,Vector3 &max)
 	m_min = min;
 	m_max = max;
 }
-std::shared_ptr<PhysShape> CollisionMesh::GetShape() {return m_shape;}
+std::shared_ptr<pragma::physics::IShape> CollisionMesh::GetShape() {return m_shape;}
 bool CollisionMesh::IntersectAABB(Vector3 *min,Vector3 *max)
 {
 	if(!Intersection::AABBAABB(m_min,m_max,*min,*max))

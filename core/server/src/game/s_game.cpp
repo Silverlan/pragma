@@ -6,6 +6,7 @@
 #include <fsys/filesystem.h>
 #include "luasystem.h"
 #include "pragma/networking/wvlocalclient.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/cacheinfo.h"
 #include "pragma/debug/debugoverlay.h"
@@ -19,7 +20,7 @@
 #include "pragma/console/s_convars.h"
 #include "pragma/console/s_cvar.h"
 #include <pragma/ai/navsystem.h>
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include <mathutil/umath.h>
@@ -41,7 +42,8 @@
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/lua/s_lua_script_watcher.h"
 #include "pragma/model/s_modelmanager.h"
-#include "pragma/networking/wvserver.h"
+#include "pragma/networking/iserver.hpp"
+#include "pragma/networking/iserver_client.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
@@ -50,6 +52,8 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
+#include <pragma/networking/enums.hpp>
+#include <pragma/networking/error.hpp>
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -76,7 +80,7 @@ extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 extern ServerState *server;
 extern SGame *s_game;
-DLLSERVER PhysEnv *s_physEnv = NULL;
+DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
 SGame::SGame(NetworkState *state)
 	: Game(state),m_nextUniqueEntityIndex(1)
@@ -90,9 +94,8 @@ SGame::SGame(NetworkState *state)
 		auto &hCallback = it->second;
 		AddCallback(name,hCallback);
 	}
-#ifdef PHYS_ENGINE_BULLET
 	s_physEnv = m_physEnvironment.get();
-#endif
+
 	m_ents.push_back(NULL); // Slot 0 is reserved
 	m_baseEnts.push_back(NULL);
 
@@ -174,9 +177,7 @@ SGame::~SGame()
 	server->GetMaterialManager().ClearUnused();
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
-#ifdef PHYS_ENGINE_BULLET
-	s_physEnv = NULL;
-#endif
+	s_physEnv = nullptr;
 }
 
 bool SGame::RunLua(const std::string &lua) {return Game::RunLua(lua,"lua_run");}
@@ -197,7 +198,7 @@ void SGame::SetTimeScale(float t)
 	Game::SetTimeScale(t);
 	NetPacket p;
 	p->Write<float>(t);
-	server->BroadcastTCP("game_timescale",p);
+	server->SendPacket("game_timescale",p,pragma::networking::Protocol::SlowReliable);
 }
 
 static void CVAR_CALLBACK_host_timescale(NetworkState*,ConVar*,float,float val)
@@ -217,10 +218,10 @@ void SGame::Initialize()
 	//p->Write<float>(GetTimeScale());
 	//auto *gameMode = GetGameMode();
 	//p->WriteString((gameMode != nullptr) ? gameMode->id : "");
-	//server->BroadcastTCP("game_start",p);
+	//server->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
 	ClearResources<ModelManager>();
-	m_surfaceMaterials.Load("scripts\\physics\\materials.txt");
+	m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
 }
@@ -251,7 +252,7 @@ bool SGame::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHand
 	bool b = Game::LoadMap(map,origin,entities);
 	if(b == false)
 		return false;
-	server->BroadcastTCP("map_ready");
+	server->SendPacket("map_ready",pragma::networking::Protocol::SlowReliable);
 	LoadNavMesh();
 
 	CallCallbacks<void>("OnMapLoaded");
@@ -538,7 +539,7 @@ bool SGame::RegisterNetMessage(std::string name)
 		return false;
 	NetPacket packet;
 	packet->WriteString(name);
-	server->BroadcastTCP("luanet_reg",packet);
+	server->SendPacket("luanet_reg",packet,pragma::networking::Protocol::SlowReliable);
 	return true;
 }
 
@@ -559,16 +560,13 @@ void SGame::RegisterGameResource(const std::string &fileName)
 		return;
 
 	// Send resource to all clients that have already requested it
-	for(auto &hClient : sv->GetClients())
+	for(auto &client : sv->GetClients())
 	{
-		if(hClient.IsValid() == false)
-			continue;
-		auto *cl = static_cast<WVServerClient*>(hClient.get());
-		auto &clResources = cl->GetScheduledResources();
+		auto &clResources = client->GetScheduledResources();
 		auto it = std::find(clResources.begin(),clResources.end(),fileName);
 		if(it == clResources.end())
 			continue;
-		server->SendResourceFile(fileName,{cl});
+		server->SendResourceFile(fileName,{client.get()});
 		clResources.erase(it);
 	}
 }
@@ -577,7 +575,7 @@ void SGame::CreateGiblet(const GibletCreateInfo &info)
 {
 	NetPacket packet {};
 	packet->Write<GibletCreateInfo>(info);
-	server->BroadcastUDP("create_giblet",packet);
+	server->SendPacket("create_giblet",packet,pragma::networking::Protocol::FastUnreliable);
 }
 
 bool SGame::IsValidGameResource(const std::string &fileName)
@@ -727,7 +725,7 @@ void SGame::CreateExplosion(const Vector3 &origin,Float radius,DamageInfo &dmg,c
 	NetPacket p;
 	p->Write<Vector3>(origin);
 	p->Write<float>(radius);
-	server->BroadcastTCP("create_explosion",p);
+	server->SendPacket("create_explosion",p,pragma::networking::Protocol::SlowReliable);
 }
 void SGame::CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Float force,BaseEntity *attacker,BaseEntity *inflictor,const std::function<bool(BaseEntity*,DamageInfo&)> &callback)
 {
@@ -743,25 +741,21 @@ void SGame::CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Flo
 {
 	CreateExplosion(origin,radius,damage,force,attacker.get(),inflictor.get(),callback);
 }
-void SGame::OnClientDropped(nwm::ServerClient *client,nwm::ClientDropped reason)
+void SGame::OnClientDropped(pragma::networking::IServerClient &client,pragma::networking::DropReason reason)
 {
-	auto *pl = server->GetPlayer(static_cast<WVServerClient*>(client));
+	auto *pl = server->GetPlayer(client);
 	if(pl == nullptr)
 		return;
 	auto &ent = pl->GetEntity();
-	nwm::RecipientFilter rp;
-	rp.SetFilterType(nwm::RecipientFilter::Type::Exclude);
-	rp.Add(client);
-
 	NetPacket p;
 	nwm::write_player(p,pl);
 	p->Write<int32_t>(umath::to_integral(reason));
-	server->SendPacketTCP("client_dropped",p,rp);
+	server->SendPacket("client_dropped",p,pragma::networking::Protocol::SlowReliable,{client,pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 	OnPlayerDropped(*pl,reason);
 	ent.RemoveSafely();
 }
 
-void SGame::ReceiveGameReady(WVServerClient *session,NetPacket&)
+void SGame::ReceiveGameReady(pragma::networking::IServerClient &session,NetPacket&)
 {
 	auto *pl = GetPlayer(session);
 	if(pl == nullptr)
@@ -769,11 +763,11 @@ void SGame::ReceiveGameReady(WVServerClient *session,NetPacket&)
 	pl->SetGameReady(true);
 	NetPacket p;
 	nwm::write_player(p,pl);
-	server->BroadcastTCP("client_ready",p);
+	server->SendPacket("client_ready",p,pragma::networking::Protocol::SlowReliable);
 	OnPlayerReady(*pl);
 }
 
-void SGame::WriteEntityData(NetPacket &packet,SBaseEntity **ents,uint32_t entCount,nwm::RecipientFilter &rp)
+void SGame::WriteEntityData(NetPacket &packet,SBaseEntity **ents,uint32_t entCount,pragma::networking::ClientRecipientFilter &rp)
 {
 	unsigned int numEnts = 0;
 	auto posNumEnts = packet->GetSize();
@@ -812,7 +806,7 @@ void SGame::WriteEntityData(NetPacket &packet,SBaseEntity **ents,uint32_t entCou
 	packet->Write<unsigned int>(numEnts,&posNumEnts);
 }
 
-void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
+void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket &packet)
 {
 	auto *pl = GetPlayer(session);
 	if(pl != NULL) return;
@@ -820,34 +814,31 @@ void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
 	auto version = get_engine_version();
 	if(version != plVersion)
 	{
-		auto address = session->GetAddress();
-		Con::csv<<"Client "<<address.ToString()<<" has a different engine version ("<<plVersion.ToString()<<") from server's. Dropping client..."<<Con::endl;
-		session->Drop(nwm::ClientDropped::Kicked);
+		Con::csv<<"Client "<<session.GetIdentifier()<<" has a different engine version ("<<plVersion.ToString()<<") from server's. Dropping client..."<<Con::endl;
+		pragma::networking::Error err;
+		session.Drop(pragma::networking::DropReason::Kicked,err);
 		return;
 	}
-	ClientSessionInfo *info = session->GetSessionInfo();
 	auto *plEnt = CreateEntity<Player>();
 	if(plEnt == nullptr)
 	{
-		auto address = session->GetAddress();
-		Con::csv<<"Unable to create player entity for client "<<address.ToString()<<". Dropping client..."<<Con::endl;
-		session->Drop(nwm::ClientDropped::Kicked);
+		Con::csv<<"Unable to create player entity for client "<<session.GetIdentifier()<<". Dropping client..."<<Con::endl;
+		pragma::networking::Error err;
+		session.Drop(pragma::networking::DropReason::Kicked,err);
 		return;
 	}
 	if(plEnt->IsPlayer() == false)
 	{
-		auto address = session->GetAddress();
-		Con::csv<<"Unable to create player component for client "<<address.ToString()<<". Dropping client..."<<Con::endl;
+		Con::csv<<"Unable to create player component for client "<<session.GetIdentifier()<<". Dropping client..."<<Con::endl;
 		plEnt->RemoveSafely();
-		session->Drop(nwm::ClientDropped::Kicked);
+		pragma::networking::Error err;
+		session.Drop(pragma::networking::DropReason::Kicked,err);
 		return;
 	}
 	pl = static_cast<pragma::SPlayerComponent*>(plEnt->GetPlayerComponent().get());
-	auto *localClient = dynamic_cast<WVLocalClient*>(session);
-	if(localClient != nullptr)
+	if(session.IsListenServerHost())
 		pl->SetLocalPlayer(true);
-	if(info != NULL)
-		info->SetPlayer(pl);
+	session.SetPlayer(*pl);
 	pl->SetClientSession(session);
 	NetPacket p;
 	nwm::write_player(p,pl);
@@ -877,10 +868,10 @@ void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
 	Con::csv<<"Player "<<pl<<" authenticated."<<Con::endl;
 	//unsigned char clPlIdx = pl->GetIndex();
 	Con::csv<<"[SERVER] Sending Game Information..."<<Con::endl;
-	nwm::RecipientFilter rp;
-	rp.Add(pl->GetClientSession());
-	NetPacket packetInf;
 
+	pragma::networking::ClientRecipientFilter rp {*pl->GetClientSession()};
+
+	NetPacket packetInf;
 	// Write replicated ConVars
 	auto &conVars = server->GetConVars();
 	uint32_t numReplicated = 0;
@@ -962,98 +953,23 @@ void SGame::ReceiveUserInfo(WVServerClient *session,NetPacket &packet)
 
 	auto *ptrWorld = GetWorld();
 	nwm::write_entity(packetInf,(ptrWorld != nullptr) ? &ptrWorld->GetEntity() : nullptr);
-	server->SendPacketTCP("gameinfo",packetInf,rp);
-	server->SendPacketTCP("pl_local",p,session);
+	server->SendPacket("gameinfo",packetInf,pragma::networking::Protocol::SlowReliable,rp);
+	server->SendPacket("pl_local",p,pragma::networking::Protocol::SlowReliable,session);
 
 	NetPacket pJoinedInfo;
 	nwm::write_player(pJoinedInfo,pl);
-	server->BroadcastTCP("client_joined",pJoinedInfo);
+	server->SendPacket("client_joined",pJoinedInfo,pragma::networking::Protocol::SlowReliable);
 
 	if(IsMapInitialized() == true)
 		SpawnPlayer(*pl);
 	OnPlayerJoined(*pl);
-	//packetInf.Write<unsigned char>(clPlIdx);
-	/*unsigned int numPlayers = Player::GetPlayerCount();
-	packetInf.Write<unsigned char>(numPlayers);
-
-	std::vector<Player*> *players;
-	Player::GetAll(&players);
-	for(int i=0;i<players->size();i++)
-	{
-		Player *plOther = (*players)[i];
-		packetInf.Write<unsigned int>(plOther->GetIndex());
-		packetInf.WriteString(plOther->GetPlayerName());
-		packetInf.Write<double>(plOther->ConnectionTime());
-	}*/
-	/*unsigned int numMessages = m_luaNetMessageIndex.size();
-	packetInf.Write<unsigned int>(numMessages -1);
-	for(int i=1;i<numMessages;i++)
-		packetInf.WriteString(m_luaNetMessageIndex[i]);
-
-	std::unordered_map<std::string,ConCommand*> *cmds;
-	server->GetLuaConCommands(&cmds);
-	std::unordered_map<std::string,ConCommand*>::iterator iCmd;
-	packetInf.Write<unsigned int>(cmds->size());
-	for(iCmd=cmds->begin();iCmd!=cmds->end();iCmd++)
-	{
-		packetInf.WriteString(iCmd->first);
-		packetInf.Write<unsigned int>(iCmd->second->GetID());
-	}
-
-	std::unordered_map<std::string,ConConf*> *convars;
-	server->GetConVars(&convars);
-	std::unordered_map<std::string,ConConf*>::iterator itCvar;
-	unsigned int numReplicated = 0;
-	size_t sz = packetInf.GetBodySize();
-	packetInf.Write<unsigned int>((unsigned int)(0));
-	for(itCvar=convars->begin();itCvar!=convars->end();itCvar++)
-	{
-		ConConf *cv = itCvar->second;
-		if(cv->GetType() == 0)
-		{
-			ConVar *cvar = static_cast<ConVar*>(cv);
-			if((cvar->GetFlags() &ConVarFlags::Replicated) == ConVarFlags::Replicated && cvar->GetString() != cvar->GetDefault())
-			{
-				unsigned int ID = cvar->GetID();
-				packetInf.Write<unsigned int>(ID);
-				if(ID == 0)
-					packetInf.WriteString(itCvar->first);
-				packetInf.WriteString(cvar->GetString());
-				numReplicated++;
-			}
-		}
-	}
-	packetInf.Write<unsigned int>(numReplicated,&sz);*/
-	/*CacheInfo *cache = state->GetLuaCacheInfo();
-	if(cache == NULL || cache->size == 0)
-		packetInf.Write<unsigned int>((unsigned int)(0));
-	else
-	{
-		packetInf.Write<unsigned int>(cache->size);
-		packetInf.WriteString(cache->cache);
-	}*/
-	/*
-	server->SendTCPMessage("gameinfo",&packetInf,session);
-
-	NetPacket packetOther;
-	packetOther.Write<unsigned int>(pl->GetIndex());
-	packetOther.WriteString(pl->GetPlayerName());
-	packetOther.Write<double>(pl->ConnectionTime());
-	RecipientFilter rp;
-	for(int i=0;i<players->size();i++)
-	{
-		Player *plOther = (*players)[i];
-		if(plOther != pl)
-			rp.AddRecipient(plOther->GetClientSession());
-	}
-	server->SendTCPMessage("playerconnect",&packetOther,&rp);*/
 }
 
 pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)
 {
 	NetPacket packet;
 	packet->WriteString(name);
-	server->BroadcastTCP("register_net_event",packet);
+	server->SendPacket("register_net_event",packet,pragma::networking::Protocol::SlowReliable);
 	return m_entNetEventManager.RegisterNetEvent(name);
 }
 
@@ -1075,7 +991,7 @@ void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cv
 		NetPacket p;
 		nwm::write_player(p,&pl);
 		p->WriteString(value);
-		server->BroadcastTCP("pl_changedname",p);
+		server->SendPacket("pl_changedname",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 

@@ -10,11 +10,7 @@
 #include <pragma/util/matrices.h>
 #include "pragma/physics/physobj.h"
 #include "pragma/lua/classes/lphysobj.h"
-#ifdef PHYS_ENGINE_BULLET
 #include "pragma/lua/classes/lphysics.h"
-#elif PHYS_ENGINE_PHYSX
-#include "pragma/lua/classes/lphysx.h"
-#endif
 #include "pragma/lua/classes/ldamageinfo.h"
 #include "pragma/game/damageinfo.h"
 #include "pragma/lua/classes/lplane.h"
@@ -24,8 +20,8 @@
 #include "pragma/model/model.h"
 #include "luasystem.h"
 #include "pragma/game/gamemode/gamemode.h"
-#include "pragma/physics/physshape.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/lua/libraries/lnoise.h"
 #include "pragma/lua/classes/lsurfacematerial.h"
 #include "pragma/audio/alsound_type.h"
@@ -714,32 +710,6 @@ void Game::RegisterLuaClasses()
 	auto _G = luabind::globals(GetLuaState());
 	_G["GMBase"] = _G["game"]["Base"];
 
-#ifdef PHYS_ENGINE_BULLET
-
-#elif PHYS_ENGINE_PHYSX
-	lua_bind(luabind::class_<PhysObjHandle>("PhysObj")
-		.def("IsValid",&Lua_PhysObj_IsValid)
-		.def("SetLinearVelocity",&Lua_PhysObj_SetLinearVelocity)
-		.def("GetLinearVelocity",&Lua_PhysObj_GetLinearVelocity)
-		.def("AddLinearVelocity",&Lua_PhysObj_AddLinearVelocity)
-		.def("SetAngularVelocity",&Lua_PhysObj_SetAngularVelocity)
-		.def("GetAngularVelocity",&Lua_PhysObj_GetAngularVelocity)
-		.def("AddAngularVelocity",&Lua_PhysObj_AddAngularVelocity)
-		.def("PutToSleep",&Lua_PhysObj_PutToSleep)
-		.def("WakeUp",&Lua_PhysObj_WakeUp)
-		.def("SetGravityScale",&Lua_PhysObj_SetGravityScale)
-		.def("SetGravityOverride",static_cast<void(*)(lua_State*,PhysObjHandle&,Vector3&,float)>(&Lua_PhysObj_SetGravityOverride))
-		.def("SetGravityOverride",static_cast<void(*)(lua_State*,PhysObjHandle&,float)>(&Lua_PhysObj_SetGravityOverride))
-		.def("SetGravityOverride",static_cast<void(*)(lua_State*,PhysObjHandle&)>(&Lua_PhysObj_SetGravityOverride))
-		.def("GetGravityScale",&Lua_PhysObj_GetGravityScale)
-		.def("GetGravityDirection",&Lua_PhysObj_GetGravityDirection)
-		.def("GetGravity",&Lua_PhysObj_GetGravity)
-		.def("GetActorBone",&Lua_PhysObj_GetActorBone)
-
-		.def("GetActor",&Lua_PhysObj_GetActor)
-		.def("GetActors",&Lua_PhysObj_GetActors)
-	);
-#endif
 	auto &modMath = m_lua->RegisterLibrary("math");
 	auto defPlane = luabind::class_<Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
@@ -770,119 +740,6 @@ void Game::RegisterLuaClasses()
 		plane = Plane{Vector3{p04.x,p04.y,p04.z},Vector3{p14.x,p14.y,p14.z},Vector3{p24.x,p24.y,p24.z}};
 	}));
 	modMath[defPlane];
-#ifdef PHYS_ENGINE_BULLET
-	/*lua_bind(luabind::class_<btTransform>("Transform")
-		.def(luabind::constructor<>())
-		.def("SetOrigin",&Lua_btTransform_SetOrigin)
-		.def("GetOrigin",&Lua_btTransform_GetOrigin)
-		.def("SetRotation",&Lua_btTransform_SetRotation)
-		.def("GetRotation",&Lua_btTransform_GetRotation)
-		.def("SetIdentity",&Lua_btTransform_SetIdentity)
-	);*/
-#elif PHYS_ENGINE_PHYSX
-	//lua_bind(luabind::class_<PtrPhysObjHandle>("PhysObj")
-	lua_bind(luabind::class_<PhysXMaterial>("PhysXMaterial")
-		.def("Release",&Lua_PhysXMaterial_Release)
-	);
-	lua_bind(luabind::class_<PhysXActor>("PhysXActor")
-		.def("Release",&Lua_PhysXActor_Release)
-		.def("GetActorFlags",&Lua_PhysXActor_GetActorFlags)
-		.def("SetActorFlags",&Lua_PhysXActor_SetActorFlags)
-		.def("GetType",&Lua_PhysXActor_GetType)
-	);
-	lua_bind(luabind::class_<PhysXJoint>("PhysXJoint")
-		.def("Release",&Lua_PhysXJoint_Release)
-	);
-	lua_bind(luabind::class_<PhysXFixedJoint,PhysXJoint>("PhysXFixedJoint")
-
-	);
-	lua_bind(luabind::class_<PhysXSphericalJoint,PhysXJoint>("PhysXSphericalJoint")
-		.def("SetLimitCone",static_cast<void(*)(lua_State*,PhysXSphericalJoint&,float,float,float)>(&Lua_PhysXSpericalJoint_SetLimitCone))
-		.def("SetLimitCone",static_cast<void(*)(lua_State*,PhysXSphericalJoint&,float,float)>(&Lua_PhysXSpericalJoint_SetLimitCone))
-		.def("EnableLimit",&Lua_PhysXSpericalJoint_EnableLimit)
-	);
-	lua_bind(luabind::class_<PhysXRevoluteJoint,PhysXJoint>("PhysXRevoluteJoint")
-
-	);
-	lua_bind(luabind::class_<PhysXPrismaticJoint,PhysXJoint>("PhysXPrismaticJoint")
-
-	);
-	lua_bind(luabind::class_<PhysXDistanceJoint,PhysXJoint>("PhysXDistanceJoint")
-
-	);
-	lua_bind(luabind::class_<PhysXShape>("PhysXShape")
-
-	);
-	lua_bind(luabind::class_<PhysXRigidActor,PhysXActor>("PhysXRigidActor")
-		.def("GetPosition",&Lua_PhysXRigidActor_GetPosition)
-		.def("GetOrientation",&Lua_PhysXRigidActor_GetOrientation)
-		.def("SetPosition",&Lua_PhysXRigidActor_SetPosition)
-		.def("SetOrientation",&Lua_PhysXRigidActor_SetOrientation)
-	);
-	lua_bind(luabind::class_<PhysXRigidDynamic COMMA PhysXRigidActor,PhysXActor>("PhysXRigidDynamic")
-		.def("AddForce",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int,bool)>(&Lua_PhysXRigidDynamic_AddForce))
-		.def("AddForce",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int)>(&Lua_PhysXRigidDynamic_AddForce))
-		.def("AddTorque",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int,bool)>(&Lua_PhysXRigidDynamic_AddTorque))
-		.def("AddTorque",static_cast<void(*)(lua_State*,PhysXRigidDynamic&,Vector3*,int)>(&Lua_PhysXRigidDynamic_AddTorque))
-		.def("ClearForce",&Lua_PhysXRigidDynamic_ClearForce)
-		.def("ClearTorque",&Lua_PhysXRigidDynamic_ClearTorque)
-		.def("GetAngularDamping",&Lua_PhysXRigidDynamic_GetAngularDamping)
-		.def("GetAngularVelocity",&Lua_PhysXRigidDynamic_GetAngularVelocity)
-		.def("GetLinearDamping",&Lua_PhysXRigidDynamic_GetLinearDamping)
-		.def("GetLinearVelocity",&Lua_PhysXRigidDynamic_GetLinearVelocity)
-		.def("GetMass",&Lua_PhysXRigidDynamic_GetMass)
-		.def("GetMassSpaceInertiaTensor",&Lua_PhysXRigidDynamic_GetMassSpaceInertiaTensor)
-		.def("GetMaxAngularVelocity",&Lua_PhysXRigidDynamic_GetMaxAngularVelocity)
-		.def("SetAngularDamping",&Lua_PhysXRigidDynamic_SetAngularDamping)
-		.def("SetAngularVelocity",&Lua_PhysXRigidDynamic_SetAngularVelocity)
-		.def("SetLinearDamping",&Lua_PhysXRigidDynamic_SetLinearDamping)
-		.def("SetLinearVelocity",&Lua_PhysXRigidDynamic_SetLinearVelocity)
-		.def("SetMass",&Lua_PhysXRigidDynamic_SetMass)
-		.def("SetMassSpaceInertiaTensor",&Lua_PhysXRigidDynamic_SetMassSpaceInertiaTensor)
-		.def("SetMaxAngularVelocity",&Lua_PhysXRigidDynamic_SetMaxAngularVelocity)
-		.def("SetMassAndUpdateInertia",&Lua_PhysXRigidDynamic_SetMassAndUpdateInertia)
-	);
-	lua_bind(luabind::class_<PhysXController>("PhysXController")
-		.def("Release",&Lua_PhysXController_Release)
-		.def("Move",&Lua_PhysXController_Move)
-		.def("GetPosition",&Lua_PhysXController_GetPosition)
-		.def("GetFootPosition",&Lua_PhysXController_GetFootPosition)
-		.def("GetContactOffset",&Lua_PhysXController_GetContactOffset)
-		.def("GetNonWalkableMode",&Lua_PhysXController_GetNonWalkableMode)
-		.def("GetSlopeLimit",&Lua_PhysXController_GetSlopeLimit)
-		.def("GetStepOffset",&Lua_PhysXController_GetStepOffset)
-		.def("GetUpDirection",&Lua_PhysXController_GetUpDirection)
-		.def("GetActor",&Lua_PhysXController_GetActor)
-		.def("SetPosition",&Lua_PhysXController_SetPosition)
-		.def("SetFootPosition",&Lua_PhysXController_SetFootPosition)
-		.def("SetContactOffset",&Lua_PhysXController_SetContactOffset)
-		.def("SetNonWalkableMode",&Lua_PhysXController_SetNonWalkableMode)
-		.def("SetSlopeLimit",&Lua_PhysXController_SetSlopeLimit)
-		.def("SetStepOffset",&Lua_PhysXController_SetStepOffset)
-		.def("SetUpDirection",&Lua_PhysXController_SetUpDirection)
-	);
-	luabind::module(m_lua)
-	[
-		luabind::class_<PhysXScene>("PhysXScene")
-		.def("ShiftOrigin",&Lua_PhysXScene_ShiftOrigin)
-		.def("Release",&Lua_PhysXScene_Release)
-		.def("SetFlag",&Lua_PhysXScene_SetFlag)
-		.def("SetGravity",&Lua_PhysXScene_SetGravity)
-		.def("GetGravity",Lua_PhysXScene_GetGravity)
-		.def("Simulate",&Lua_PhysXScene_Simulate)
-		.def("FetchResults",static_cast<void(*)(lua_State*,PhysXScene&,bool)>(&Lua_PhysXScene_FetchResults))
-		.def("FetchResults",static_cast<void(*)(lua_State*,PhysXScene&)>(&Lua_PhysXScene_FetchResults))
-		.def("GetActors",static_cast<void(*)(lua_State*,PhysXScene&,int)>(&Lua_PhysXScene_GetActors))
-		.def("GetActors",static_cast<void(*)(lua_State*,PhysXScene&)>(&Lua_PhysXScene_GetActors))
-		.def("AddActor",&Lua_PhysXScene_AddActor)
-		.def("RemoveActor",&Lua_PhysXScene_RemoveActor)
-		.def("RayCast",static_cast<void(*)(lua_State*,PhysXScene&,Vector3&,Vector3&,float,unsigned int,bool)>(&Lua_PhysXScene_RayCast))
-		.def("RayCast",static_cast<void(*)(lua_State*,PhysXScene&,Vector3&,Vector3&,float,unsigned int)>(&Lua_PhysXScene_RayCast))
-		.def("RayCast",static_cast<void(*)(lua_State*,PhysXScene&,Vector3&,Vector3&,float)>(&Lua_PhysXScene_RayCast))
-		.def("RayCast",static_cast<void(*)(lua_State*,PhysXScene&,Vector3&,Vector3&,float,unsigned int,unsigned int)>(&Lua_PhysXScene_RayCast))
-		.def("RayCast",static_cast<void(*)(lua_State*,PhysXScene&,Vector3&,Vector3&,float,unsigned int,luabind::object)>(&Lua_PhysXScene_RayCast))
-	];
-#endif
 }
 
 LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,luabind::object oFilter,uint32_t idxFilter,EntityIterator::FilterFlags filterFlags)
@@ -1010,8 +867,11 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def(luabind::tostring(luabind::self));
 	surfaceMatDef.def("GetName",&Lua::SurfaceMaterial::GetName);
 	surfaceMatDef.def("GetIndex",&Lua::SurfaceMaterial::GetIndex);
-	surfaceMatDef.def("GetFriction",&Lua::SurfaceMaterial::GetFriction);
 	surfaceMatDef.def("SetFriction",&Lua::SurfaceMaterial::SetFriction);
+	surfaceMatDef.def("SetStaticFriction",&Lua::SurfaceMaterial::SetStaticFriction);
+	surfaceMatDef.def("SetDynamicFriction",&Lua::SurfaceMaterial::SetDynamicFriction);
+	surfaceMatDef.def("GetStaticFriction",&Lua::SurfaceMaterial::GetStaticFriction);
+	surfaceMatDef.def("GetDynamicFriction",&Lua::SurfaceMaterial::GetDynamicFriction);
 	surfaceMatDef.def("GetRestitution",&Lua::SurfaceMaterial::GetRestitution);
 	surfaceMatDef.def("SetRestitution",&Lua::SurfaceMaterial::SetRestitution);
 	surfaceMatDef.def("GetFootstepSound",&Lua::SurfaceMaterial::GetFootstepType);

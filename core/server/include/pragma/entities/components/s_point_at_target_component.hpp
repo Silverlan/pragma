@@ -4,7 +4,7 @@
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_point_at_target_component.hpp>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 namespace pragma
 {
@@ -15,7 +15,7 @@ namespace pragma
 	public:
 		SPointAtTargetComponent(BaseEntity &ent) : BasePointAtTargetComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 

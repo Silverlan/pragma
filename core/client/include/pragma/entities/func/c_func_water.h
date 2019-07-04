@@ -19,7 +19,7 @@ namespace pragma
 		CWaterComponent(BaseEntity &ent);
 		virtual ~CWaterComponent() override;
 		virtual void Initialize() override;
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result) override;
+		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;

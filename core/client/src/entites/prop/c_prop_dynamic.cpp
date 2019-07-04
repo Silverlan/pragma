@@ -3,7 +3,6 @@
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include "pragma/physics/movetypes.h"
-#include "pragma/rendering/scene/camera.h"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"

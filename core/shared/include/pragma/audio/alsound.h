@@ -10,7 +10,6 @@
 #include "pragma/entities/baseentity_handle.h"
 #include <sharedutils/callback_handler.h>
 #include "pragma/lua/lua_callback_handler.h"
-#include <luasystem.h>
 #include <sharedutils/util_virtual_shared_from_this.hpp>
 
 #define FLALSOUND_IGNORE_TIMESCALE 1

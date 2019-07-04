@@ -1,11 +1,11 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 extern DLLENGINE Engine *engine;
 
@@ -172,7 +172,7 @@ void Lua::CollisionMesh::GetShape(lua_State *l,::CollisionMesh &mesh)
 	auto shape = mesh.GetShape();
 	if(shape == nullptr)
 		return;
-	shape->GetLuaObject(l).push(l);
+	shape->Push(l);
 }
 void Lua::CollisionMesh::GetSurfaceMaterialId(lua_State *l,::CollisionMesh &mesh)
 {

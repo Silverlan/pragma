@@ -19,7 +19,7 @@ namespace pragma
 		virtual void FireBullets(const BulletInfo &bulletInfo,std::vector<TraceResult> &results,bool bMaster=true) override final;
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override {}
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override {}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmgInfo,std::vector<TraceResult> &outHitTargets,const std::function<bool(DamageInfo&,BaseEntity*)> &fCallback=nullptr,bool bMaster=true);

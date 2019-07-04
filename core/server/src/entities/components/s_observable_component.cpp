@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
@@ -19,7 +20,7 @@ void SObservableComponent::SetFirstPersonObserverOffset(const Vector3 &offset)
 		p->Write<bool>(true);
 		p->Write<Vector3>(offset);
 	}
-	ent.SendNetEventTCP(m_netEvSetFirstPersonObserverOffset,p);
+	ent.SendNetEvent(m_netEvSetFirstPersonObserverOffset,p,pragma::networking::Protocol::SlowReliable);
 }
 luabind::object SObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SObservableComponentHandleWrapper>(l);}
 void SObservableComponent::SetThirdPersonObserverOffset(const Vector3 &offset)
@@ -36,9 +37,9 @@ void SObservableComponent::SetThirdPersonObserverOffset(const Vector3 &offset)
 		p->Write<bool>(true);
 		p->Write<Vector3>(offset);
 	}
-	ent.SendNetEventTCP(m_netEvSetThirdPersonObserverOffset,p);
+	ent.SendNetEvent(m_netEvSetThirdPersonObserverOffset,p,pragma::networking::Protocol::SlowReliable);
 }
-void SObservableComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SObservableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	if(*m_bFirstPersonEnabled == false)
 		packet->Write<bool>(false);

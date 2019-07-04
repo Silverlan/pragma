@@ -2,7 +2,7 @@
 #include "pragma/entities/player.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
 namespace Lua

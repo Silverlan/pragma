@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lproperty_generic.hpp"
 #include <sharedutils/property/util_property.hpp>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 
 LGenericFloatPropertyWrapper::LGenericFloatPropertyWrapper(const util::PFloatProperty &prop)

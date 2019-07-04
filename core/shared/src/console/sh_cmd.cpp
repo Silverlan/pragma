@@ -16,7 +16,7 @@ std::vector<BaseEntity*> command::find_trace_targets(NetworkState *state,pragma:
 	if(trCallback != nullptr)
 		trCallback(trData);
 	auto r = game->RayCast(trData);
-	if(r.hit == false)
+	if(r.hitType == RayCastHitType::None)
 		return ents;
 	if(!r.entity.IsValid() || r.entity->IsWorld())
 		return ents;

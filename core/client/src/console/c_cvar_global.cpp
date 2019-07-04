@@ -9,6 +9,7 @@
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvclient.h"
+#include "pragma/networking/iclient.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>
 #include "pragma/gui/widebugmipmaps.h"
@@ -23,6 +24,7 @@
 #include <pragma/console/util_cmd.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/engine_info.hpp>
+#include <pragma/networking/enums.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -71,7 +73,7 @@ DLLCLIENT void CMD_setpos(NetworkState *state,pragma::BasePlayerComponent*,std::
 	Vector3 pos(atof(argv[0].c_str()),atof(argv[1].c_str()),atof(argv[2].c_str()));
 	NetPacket p;
 	nwm::write_vector(p,pos);
-	cstate->SendPacketTCP("cmd_setpos",p);
+	cstate->SendPacket("cmd_setpos",p,pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_getpos(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
@@ -176,7 +178,7 @@ DLLCLIENT void CMD_status_cl(NetworkState*,pragma::BasePlayerComponent*,std::vec
 		return;
 	}
 	Con::cout<<"hostname:\t"<<"Unknown"<<Con::endl;
-	Con::cout<<"udp/ip:\t\t"<<cl->GetIP()<<Con::endl;
+	Con::cout<<"udp/ip:\t\t"<<cl->GetIdentifier()<<Con::endl;
 	Con::cout<<"map:\t\t"<<"Unknown"<<Con::endl;
 	Con::cout<<"players:\t"<<players.size()<<" ("<<0<<" max)"<<Con::endl<<Con::endl;
 	Con::cout<<"#  userid\tname    \tconnected\tping";
@@ -507,7 +509,7 @@ void CMD_debug_ai_schedule_print(NetworkState *state,pragma::BasePlayerComponent
 	Con::cout<<"Querying schedule data for NPC "<<*npc<<"..."<<Con::endl;
 	NetPacket p;
 	nwm::write_entity(p,npc);
-	client->SendPacketTCP("debug_ai_schedule_print",p);
+	client->SendPacket("debug_ai_schedule_print",p,pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_reloadmaterial(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)

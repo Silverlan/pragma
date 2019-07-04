@@ -621,6 +621,7 @@ void pragma::level::load_map_brushes(
 		}
 	}
 
+	auto *physEnv = game.GetPhysicsEnvironment();
 	std::vector<std::shared_ptr<BrushMesh>> meshes(numMeshes);
 	for(unsigned int i=0;i<numMeshes;i++)
 	{
@@ -862,7 +863,8 @@ void pragma::level::load_map_brushes(
 		}
 		if(bDisplacement == false)
 			mesh->Optimize();
-		mesh->Calculate(&surfaceMaterials);
+		if(physEnv)
+			mesh->Calculate(*physEnv,&surfaceMaterials);
 		meshes[i] = mesh;
 	}
 	if(ent == NULL)

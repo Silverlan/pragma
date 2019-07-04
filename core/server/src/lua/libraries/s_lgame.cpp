@@ -1,7 +1,9 @@
 #include "stdafx_server.h"
 #include "pragma/lua/libraries/s_lgame.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/serverstate/serverstate.h>
 #include "luasystem.h"
+#include <pragma/networking/enums.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/lua/libraries/lgame.h>
@@ -10,14 +12,6 @@
 #include <sharedutils/scope_guard.h>
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
-#ifdef PHYS_ENGINE_PHYSX
-DLLSERVER int Lua_sv_game_GetPhysXScene(lua_State *l)
-{
-	Game *game = server->GetGameState();
-	Lua::Push<PhysXScene>(l,PhysXScene(game->GetPhysXScene()));
-	return 1;
-}
-#endif
 
 DLLSERVER int Lua::game::Server::set_gravity(lua_State *l)
 {
@@ -90,8 +84,6 @@ int Lua::game::Server::load_map(lua_State *l)
 	packet->Write<Vector3>(origin);
 	packet->Write<uint32_t>(startIdx);
 
-	nwm::RecipientFilter rp {};
-	rp.SetFilterType(nwm::RecipientFilter::Type::Exclude);
 	std::vector<SBaseEntity*> ptrEnts;
 	ptrEnts.reserve(ents.size());
 	for(auto &hEnt : ents)
@@ -101,10 +93,10 @@ int Lua::game::Server::load_map(lua_State *l)
 		ptrEnts.push_back(static_cast<SBaseEntity*>(hEnt.get()));
 	}
 
-	s_game->WriteEntityData(packet,ptrEnts.data(),ptrEnts.size(),rp);
+	s_game->WriteEntityData(packet,ptrEnts.data(),ptrEnts.size(),pragma::networking::ClientRecipientFilter{});
 	packet->Write<bool>((entWorld != nullptr) ? true : false);
 
-	server->BroadcastTCP("map_load",packet);
+	server->SendPacket("map_load",packet,pragma::networking::Protocol::SlowReliable);
 	return pair.second;
 }
 

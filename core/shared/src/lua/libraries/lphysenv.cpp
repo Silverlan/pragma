@@ -2,7 +2,7 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/classes/lphysobj.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
@@ -21,6 +21,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLENGINE Engine *engine;
+
+// #define ENABLE_DEPRECATED_PHYSICS
 
 namespace Lua
 {
@@ -129,25 +131,34 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"COLLISIONMASK_ALL_HITBOX",umath::to_integral(CollisionMask::AllHitbox)},
 		{"COLLISIONMASK_NO_COLLISION",umath::to_integral(CollisionMask::NoCollision)},
 
-		{"FTRACE_ALL_HITS",umath::to_integral(FTRACE::ALL_HITS)},
-		{"FTRACE_FILTER_INVERT",umath::to_integral(FTRACE::FILTER_INVERT)},
-		{"FTRACE_IGNORE_DYNAMIC",umath::to_integral(FTRACE::IGNORE_DYNAMIC)},
-		{"FTRACE_IGNORE_STATIC",umath::to_integral(FTRACE::IGNORE_STATIC)}
+		{"RAYCAST_FLAG_BIT_REPORT_HIT_POSITION",umath::to_integral(RayCastFlags::ReportHitPosition)},
+		{"RAYCAST_FLAG_BIT_REPORT_HIT_NORMAL",umath::to_integral(RayCastFlags::ReportHitNormal)},
+		{"RAYCAST_FLAG_BIT_REPORT_HIT_UV",umath::to_integral(RayCastFlags::ReportHitUV)},
+		{"RAYCAST_FLAG_BIT_REPORT_ALL_RESULTS",umath::to_integral(RayCastFlags::ReportAllResults)},
+		{"RAYCAST_FLAG_BIT_REPORT_ANY_RESULT",umath::to_integral(RayCastFlags::ReportAnyResult)},
+		{"RAYCAST_FLAG_BIT_REPORT_BACK_FACE_HITS",umath::to_integral(RayCastFlags::ReportBackFaceHits)},
+		{"RAYCAST_FLAG_BIT_PRECISE",umath::to_integral(RayCastFlags::Precise)},
+		{"RAYCAST_FLAG_BIT_IGNORE_DYNAMIC",umath::to_integral(RayCastFlags::IgnoreDynamic)},
+		{"RAYCAST_FLAG_BIT_IGNORE_STATIC",umath::to_integral(RayCastFlags::IgnoreStatic)},
+		{"RAYCAST_FLAG_BIT_INVERT_FILTER",umath::to_integral(RayCastFlags::InvertFilter)},
+		{"RAYCAST_FLAG_DEFAULT",umath::to_integral(RayCastFlags::Default)},
+		{"RAYCAST_FLAG_NONE",umath::to_integral(RayCastFlags::None)}
+
 	});
 
 	auto &physMod = lua.RegisterLibrary(libName);
+	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
+	physMod[classBase];
+
 	auto classDefRayCastData = luabind::class_<TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
-	classDefRayCastData.def("SetSource",static_cast<void(*)(lua_State*,TraceData&,const LPhysShape&)>(&Lua_TraceData_SetSource));
-	classDefRayCastData.def("SetSource",static_cast<void(*)(lua_State*,TraceData&,const PhysObjHandle&)>(&Lua_TraceData_SetSource));
-	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(PhysCollisionObject*)>(&TraceData::SetSource));
+	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,TraceData&,const util::TSharedHandle<pragma::physics::IConvexShape>&)>(&Lua_TraceData_SetSource));
 	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetSource));
-	classDefRayCastData.def("SetSource",static_cast<void(*)(lua_State*,TraceData&,const EntityHandle&)>(&Lua_TraceData_SetSource));
 	classDefRayCastData.def("SetSourceRotation",&TraceData::SetSourceRotation);
-	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const PhysTransform&)>(&TraceData::SetSource));
+	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const pragma::physics::Transform&)>(&TraceData::SetSource));
 	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetTarget));
 	classDefRayCastData.def("SetTargetRotation",&TraceData::SetTargetRotation);
-	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const PhysTransform&)>(&TraceData::SetTarget));
+	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const pragma::physics::Transform&)>(&TraceData::SetTarget));
 	classDefRayCastData.def("SetRotation",&TraceData::SetRotation);
 	classDefRayCastData.def("SetFlags",&Lua_TraceData_SetFlags);
 	classDefRayCastData.def("SetFilter",&Lua_TraceData_SetFilter);
@@ -164,7 +175,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefRayCastData];
 
 	auto classDefRayCastResult = luabind::class_<TraceResult>("RayCastResult");
-	classDefRayCastResult.def_readonly("hit",&TraceResult::hit);
+	classDefRayCastResult.def_readonly("hitType",reinterpret_cast<std::underlying_type_t<decltype(TraceResult::hitType)> TraceResult::*>(&TraceResult::hitType));
 	classDefRayCastResult.property("entity",static_cast<void(*)(lua_State*,TraceResult&)>([](lua_State *l,TraceResult &tr) {
 		if(tr.entity.IsValid() == false)
 			return;
@@ -179,7 +190,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastResult.property("colObj",static_cast<void(*)(lua_State*,TraceResult&)>([](lua_State *l,TraceResult &tr) {
 		if(tr.collisionObj.IsValid() == false)
 			return;
-		tr.collisionObj->GetLuaObject()->push(l);
+		tr.collisionObj->Push(l);
 	}));
 	classDefRayCastResult.property("mesh",static_cast<void(*)(lua_State*,TraceResult&)>([](lua_State *l,TraceResult &tr) {
 		ModelMesh *mesh = nullptr;
@@ -213,22 +224,20 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	physMod[classDefRayCastResult];
 
-	auto classDefTransform = luabind::class_<PhysTransform>("Transform");
+	auto classDefTransform = luabind::class_<pragma::physics::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<>());
-	classDefTransform.def("GetOrigin",&PhysTransform::GetOrigin);
-	classDefTransform.def("GetRotation",&PhysTransform::GetRotation);
-	classDefTransform.def("SetOrigin",&PhysTransform::SetOrigin);
-	classDefTransform.def("SetRotation",&PhysTransform::SetRotation);
-	classDefTransform.def("SetIdentity",&PhysTransform::SetIdentity);
-	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,PhysTransform&)>([](lua_State *l,PhysTransform &t) {
-		Lua::Push<PhysTransform>(l,t.GetInverse());
+	classDefTransform.def("GetOrigin",&pragma::physics::Transform::GetOrigin);
+	classDefTransform.def("GetRotation",&pragma::physics::Transform::GetRotation);
+	classDefTransform.def("SetOrigin",&pragma::physics::Transform::SetOrigin);
+	classDefTransform.def("SetRotation",&pragma::physics::Transform::SetRotation);
+	classDefTransform.def("SetIdentity",&pragma::physics::Transform::SetIdentity);
+	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+		Lua::Push<pragma::physics::Transform>(l,t.GetInverse());
 	}));
-	classDefTransform.def("GetMatrix",static_cast<void(*)(lua_State*,PhysTransform&)>([](lua_State *l,PhysTransform &t) {
-		auto m = umat::identity();
-		m = glm::translate(m,t.GetOrigin()) *static_cast<Mat4>(t.GetRotation());
-		Lua::Push<Mat4>(l,m);
+	classDefTransform.def("ToMatrix",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+		Lua::Push<Mat4>(l,t.ToMatrix());
 	}));
-	classDefTransform.def("SetMatrix",static_cast<void(*)(lua_State*,PhysTransform&,const Mat4&)>([](lua_State *l,PhysTransform &t,const Mat4 &m) {
+	classDefTransform.def("SetMatrix",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Mat4&)>([](lua_State *l,pragma::physics::Transform &t,const Mat4 &m) {
 		Mat4 transformation;
 		Vector3 scale;
 		Quat rotation;
@@ -239,14 +248,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def("GetBasis",static_cast<void(*)(lua_State*,PhysTransform&)>([](lua_State *l,PhysTransform &t) {
-		auto &m = t.GetBasis();
-		Lua::Push<Mat3*>(l,&m);
-	}));
-	classDefTransform.def("SetBasis",static_cast<void(*)(lua_State*,PhysTransform&,const Mat3&)>([](lua_State *l,PhysTransform &t,const Mat3 &m) {
-		t.SetBasis(m);
-	}));
-	classDefTransform.def(luabind::const_self *PhysTransform());
+	classDefTransform.def(luabind::const_self *pragma::physics::Transform());
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
@@ -256,6 +258,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		auto tree = std::make_shared<Tree>();
 		Lua::Push<std::shared_ptr<Tree>>(l,tree);
 	}))];
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	classTreeIkTree.def("Draw",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
 		auto *game = engine->GetNetworkState(l)->GetGameState();
 		auto fGetLocalTransform = [](const Node* node, btTransform& act) {
@@ -269,8 +272,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			act.setRotation(rot);
 			act.setOrigin(btVector3(node->r.x, node->r.y, node->r.z));
 		};
-		std::function<void(Node*, const btTransform&)> fDrawTree = nullptr;
-		fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node, const btTransform& tr) {
+		std::function<void(Node*,const btTransform&)> fDrawTree = nullptr;
+		fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node,const btTransform& tr) {
 			btVector3 lineColor = btVector3(0, 0, 0);
 			int lineWidth = 2;
 			auto fUpdateLine = [game](int32_t tIdx,const Vector3 &start,const Vector3 &end,const Color &col) {
@@ -289,7 +292,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 				btVector3 pos = btVector3(tr.getOrigin().x(), tr.getOrigin().y(), tr.getOrigin().z());
 				btVector3 color = btVector3(0, 1, 0);
 				int pointSize = 10;
-				auto enPos = uvec::create(pos /PhysEnv::WORLD_SCALE);
+				auto enPos = uvec::create(pos);
 				//auto it = m_dbgObjects.find(0u);
 				//if(it == m_dbgObjects.end())
 				//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,Color::Lime))).first;
@@ -340,6 +343,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		};
 		fRenderScene(tree);
 	}));
+#endif
 	classTreeIkTree.def("GetNodeCount",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
 		Lua::PushInt(l,tree.GetNumNode());
 	}));
@@ -384,7 +388,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classTreeIkTree.def("GetEffectorPosition",static_cast<void(*)(lua_State*,Tree&,uint32_t)>([](lua_State *l,Tree &tree,uint32_t nodeIdx) {
 		auto &pos = tree.GetEffectorPosition(nodeIdx);
-		Lua::Push<Vector3>(l,Vector3(pos.x,pos.y,pos.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+		Lua::Push<Vector3>(l,Vector3(pos.x,pos.y,pos.z));
 	}));
 	classTreeIkTree.def("GetRoot",static_cast<void(*)(lua_State*,Tree&)>([](lua_State *l,Tree &tree) {
 		auto *root = tree.GetRoot();
@@ -409,17 +413,17 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classTreeIkTreeNode.add_static_constant("PURPOSE_JOINT",JOINT);
 	classTreeIkTreeNode.add_static_constant("PURPOSE_EFFECTOR",EFFECTOR);
 	classTreeIkTreeNode.scope[luabind::def("Create",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,uint32_t,double,double,double)>([](lua_State *l,const Vector3 &origin,const Vector3 &rotAxis,uint32_t purpose,double minTheta,double maxTheta,double restAngle) {
-		auto node = std::make_shared<Node>(VectorR3(origin.x,origin.y,origin.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,static_cast<Purpose>(purpose),minTheta,maxTheta,restAngle);
+		auto node = std::make_shared<Node>(VectorR3(origin.x,origin.y,origin.z),VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,static_cast<Purpose>(purpose),minTheta,maxTheta,restAngle);
 		Lua::Push<std::shared_ptr<Node>>(l,node);
 	}))];
 	classTreeIkTreeNode.scope[luabind::def("Create",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &origin,const Vector3 &rotAxis,uint32_t purpose) {
-		auto node = std::make_shared<Node>(VectorR3(origin.x,origin.y,origin.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,static_cast<Purpose>(purpose));
+		auto node = std::make_shared<Node>(VectorR3(origin.x,origin.y,origin.z),VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,static_cast<Purpose>(purpose));
 		Lua::Push<std::shared_ptr<Node>>(l,node);
 	}))];
 	classTreeIkTreeNode.def("GetLocalTransform",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
-		PhysTransform t {};
+		pragma::physics::Transform t {};
 		util::ik::get_local_transform(node,t);
-		Lua::Push<PhysTransform>(l,t);
+		Lua::Push<pragma::physics::Transform>(l,t);
 	}));
 	classTreeIkTreeNode.def("PrintNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		node.PrintNode();
@@ -449,14 +453,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classTreeIkTreeNode.def("GetAttach",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto &r = node.GetAttach();
-		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z));
 	}));
 	classTreeIkTreeNode.def("SetAttach",static_cast<void(*)(lua_State*,Node&,const Vector3&)>([](lua_State *l,Node &node,const Vector3 &attach) {
-		node.attach = VectorR3(attach.x,attach.y,attach.z) *PhysEnv::WORLD_SCALE;
+		node.attach = VectorR3(attach.x,attach.y,attach.z);
 	}));
 	classTreeIkTreeNode.def("GetRelativePosition",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto &r = node.r;
-		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+		Lua::Push<Vector3>(l,Vector3(r.x,r.y,r.z));
 	}));
 	classTreeIkTreeNode.def("GetTheta",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto theta = node.GetTheta();
@@ -472,11 +476,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classTreeIkTreeNode.def("GetS",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto &s = node.GetS();
-		Lua::Push<Vector3>(l,Vector3(s.x,s.y,s.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+		Lua::Push<Vector3>(l,Vector3(s.x,s.y,s.z));
 	}));
 	classTreeIkTreeNode.def("GetW",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto &w = node.GetW();
-		Lua::Push<Vector3>(l,Vector3(w.x,w.y,w.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+		Lua::Push<Vector3>(l,Vector3(w.x,w.y,w.z));
 	}));
 	classTreeIkTreeNode.def("GetMinTheta",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		auto minTheta = node.GetMinTheta();
@@ -536,7 +540,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			Lua::PushInt(l,i +1);
 			Lua::GetTableValue(l,2);
 			auto *v = Lua::CheckVector(l,-1);
-			targets.push_back(VectorR3(v->x,v->y,v->z) *PhysEnv::WORLD_SCALE);
+			targets.push_back(VectorR3(v->x,v->y,v->z));
 			Lua::Pop(l,1);
 		}
 		jacobian.ComputeJacobian(targets.data());
@@ -602,7 +606,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			Lua::PushInt(l,i +1);
 			Lua::GetTableValue(l,2);
 			auto *v = Lua::CheckVector(l,-1);
-			targets.push_back(VectorR3(v->x,v->y,v->z) *PhysEnv::WORLD_SCALE);
+			targets.push_back(VectorR3(v->x,v->y,v->z));
 			Lua::Pop(l,1);
 		}
 		jacobian.UpdatedSClampValue(targets.data());
@@ -729,7 +733,7 @@ int Lua::physenv::raycast(lua_State *l)
 		return 1;
 	}
 	auto table = Lua::CreateTable(l);
-	if(data->HasFlag(FTRACE::ALL_HITS))
+	if(data->HasFlag(RayCastFlags::ReportAllResults))
 	{
 		for(size_t i=0;i<res.size();i++)
 		{
@@ -762,9 +766,8 @@ int Lua::physenv::overlap(lua_State *l)
 	auto *data = Lua::CheckTraceData(l,1);
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	TraceResult res;
-	auto r = game->Overlap(*data,&res);
-	if(r == false)
+	auto res = game->Overlap(*data);
+	if(res.hitType == RayCastHitType::None)
 	{
 		Lua::PushBool(l,false);
 		return 1;
@@ -777,7 +780,11 @@ int Lua::physenv::create_convex_hull_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	env->CreateConvexHullShape()->GetLuaObject(l).push(l);
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,1);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
+	auto shape = env->CreateConvexHullShape(*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IConvexHullShape>>(l,shape);
 	return 1;
 }
 
@@ -788,9 +795,11 @@ int Lua::physenv::create_box_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-
-	auto shape = env->CreateBoxShape(*halfExtents);
-	shape->GetLuaObject(l).push(l);
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,2);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
+	auto shape = env->CreateBoxShape(*halfExtents,*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
 
@@ -802,9 +811,12 @@ int Lua::physenv::create_capsule_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,3);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
 
-	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight));
-	shape->GetLuaObject(l).push(l);
+	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
 
@@ -814,9 +826,12 @@ int Lua::physenv::create_sphere_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,2);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
 
-	auto shape = env->CreateSphereShape(CFloat(radius));
-	shape->GetLuaObject(l).push(l);
+	auto shape = env->CreateSphereShape(CFloat(radius),*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
 
@@ -827,9 +842,12 @@ int Lua::physenv::create_cylinder_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,3);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
 
-	auto shape = env->CreateCylinderShape(radius,height);
-	shape->GetLuaObject(l).push(l);
+	auto shape = env->CreateCylinderShape(radius,height,*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
 
@@ -841,9 +859,12 @@ int Lua::physenv::create_torus_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,4);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
 
-	auto shape = env->CreateTorusShape(subDivisions,outerRadius,innerRadius);
-	shape->GetLuaObject(l).push(l);
+	auto shape = env->CreateTorusShape(subDivisions,outerRadius,innerRadius,*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IShape>>(l,shape);
 	return 1;
 }
 
@@ -857,171 +878,186 @@ int Lua::physenv::create_heightfield_terrain_shape(lua_State *l)
 	auto length = Lua::CheckInt(l,2);
 	auto maxHeight = Lua::CheckNumber(l,3);
 	auto upAxis = Lua::CheckInt(l,4);
+	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,5);
+	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
+		return 0;
 
-	auto shape = env->CreateHeightfieldTerrainShape(width,length,maxHeight,upAxis);
-	shape->GetLuaObject(l).push(l);
+	auto shape = env->CreateHeightfieldTerrainShape(width,length,maxHeight,upAxis,*hMat);
+	Lua::Push<std::shared_ptr<pragma::physics::IShape>>(l,shape);
 	return 1;
 }
 
 int Lua::physenv::create_rigid_body(lua_State *l)
 {
 	auto mass = Lua::CheckNumber(l,1);
-	auto *shape = Lua::CheckPhysShape(l,2);
+	auto &shape = Lua::Check<pragma::physics::IShape>(l,2);
 	auto *inertia = Lua::CheckVector(l,3);
 
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto *body = env->CreateRigidBody(CFloat(mass),shape->GetSharedPointer(),*inertia);
+	auto body = env->CreateRigidBody(CFloat(mass),shape,*inertia);
 	if(body == nullptr)
 		return 0;
-	Lua::PushObject(l,body);
+	body->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_ghost_object(lua_State *l)
 {
-	std::shared_ptr<::PhysShape> shape = nullptr;
-	if(Lua::IsSet(l,1) == true)
-		shape = Lua::CheckPhysShape(l,1)->GetSharedPointer();
+	auto &shape = Lua::Check<pragma::physics::IShape>(l,2);
 
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto *ghost = env->CreateGhostObject(shape);
+	auto ghost = env->CreateGhostObject(shape);
 	if(ghost == nullptr)
 		return 0;
-	Lua::PushObject(l,ghost);
+	ghost->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_fixed_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
 	auto *rotA = Lua::CheckQuaternion(l,3);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,4);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,4);
 	auto *pivotB = Lua::CheckVector(l,5);
 	auto *rotB = Lua::CheckQuaternion(l,6);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateFixedConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,*rotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*rotB
+		bodyA,*pivotA,*rotA,
+		bodyB,*pivotB,*rotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_ball_socket_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,3);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,3);
 	auto *pivotB = Lua::CheckVector(l,4);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateBallSocketConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB
+		bodyA,*pivotA,
+		bodyB,*pivotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_hinge_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,3);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,3);
 	auto *pivotB = Lua::CheckVector(l,4);
 	auto *axis = Lua::CheckVector(l,5);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateHingeConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*axis
+		bodyA,*pivotA,
+		bodyB,*pivotB,*axis
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_slider_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
 	auto *rotA = Lua::CheckQuaternion(l,3);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,4);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,4);
 	auto *pivotB = Lua::CheckVector(l,5);
 	auto *rotB = Lua::CheckQuaternion(l,6);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateSliderConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,*rotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*rotB
+		bodyA,*pivotA,*rotA,
+		bodyB,*pivotB,*rotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_cone_twist_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
 	auto *rotA = Lua::CheckQuaternion(l,3);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,4);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,4);
 	auto *pivotB = Lua::CheckVector(l,5);
 	auto *rotB = Lua::CheckQuaternion(l,6);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateConeTwistConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,*rotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*rotB
+		bodyA,*pivotA,*rotA,
+		bodyB,*pivotB,*rotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_DoF_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
 	auto *rotA = Lua::CheckQuaternion(l,3);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,4);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,4);
 	auto *pivotB = Lua::CheckVector(l,5);
 	auto *rotB = Lua::CheckQuaternion(l,6);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateDoFConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,*rotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*rotB
+		bodyA,*pivotA,*rotA,
+		bodyB,*pivotB,*rotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 
 int Lua::physenv::create_dof_spring_constraint(lua_State *l)
 {
-	auto *bodyA = Lua::CheckPhysRigidBody(l,1);
+	auto &bodyA = Lua::CheckHandle<pragma::physics::IRigidBody>(l,1);
 	auto *pivotA = Lua::CheckVector(l,2);
 	auto *rotA = Lua::CheckQuaternion(l,3);
-	auto *bodyB = Lua::CheckPhysRigidBody(l,4);
+	auto &bodyB = Lua::CheckHandle<pragma::physics::IRigidBody>(l,4);
 	auto *pivotB = Lua::CheckVector(l,5);
 	auto *rotB = Lua::CheckQuaternion(l,6);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
 	auto constraint = env->CreateDoFSpringConstraint(
-		static_cast<::PhysRigidBody*>(bodyA->get()),*pivotA,*rotA,
-		static_cast<::PhysRigidBody*>(bodyB->get()),*pivotB,*rotB
+		bodyA,*pivotA,*rotA,
+		bodyB,*pivotB,*rotB
 	);
-	Lua::PushConstraint(l,constraint);
+	if(constraint == nullptr)
+		return 0;
+	constraint->Push(l);
 	return 1;
 }
 

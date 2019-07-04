@@ -10,12 +10,7 @@
 #include <pragma/engine.h>
 #include "pragma/physics/physxcallbacks.h"
 #include "pragma/ai/navsystem.h"
-#ifdef PHYS_ENGINE_BULLET
-#include "pragma/physics/physenvironment.h"
-#elif PHYS_ENGINE_PHYSX
-#include <extensions/PxDefaultSimulationFilterShader.h>
-#include "pragma/physics/physxcontrollerhitreport.h"
-#endif
+#include "pragma/physics/environment.hpp"
 #include "pragma/lua/libraries/ltimer.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/console/convars.h>
@@ -40,6 +35,7 @@
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <util_bsp.hpp>
+#include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 
 #pragma optimize("",off)
@@ -278,115 +274,6 @@ DLLNETWORK void Lua::TableDump(lua_State *lua,int n)
 
 ////////////////
 
-#ifdef PHYS_ENGINE_PHYSX
-static physx::PxFilterFlags CCDFilterShader(
-	physx::PxFilterObjectAttributes attributes0,
-	physx::PxFilterData filterData0,
-	physx::PxFilterObjectAttributes attributes1,
-	physx::PxFilterData filterData1,
-	physx::PxPairFlags& pairFlags,
-	const void* constantBlock,
-	physx::PxU32 constantBlockSize
-)
-{
-	pairFlags = physx::PxPairFlag::eRESOLVE_CONTACTS;
-	pairFlags |= physx::PxPairFlag::eCCD_LINEAR;
-	return physx::PxFilterFlags();
-}
-
-static physx::PxFilterFlags testFilterShader(
-		physx::PxFilterObjectAttributes attributes0,physx::PxFilterData filterData0,
-		physx::PxFilterObjectAttributes attributes1,physx::PxFilterData filterData1,
-		physx::PxPairFlags &pairFlags,const void *constantBlock,physx::PxU32 constantBlockSize
-	)
-{
-	pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
-	if(((filterData0.word0 &filterData1.word1) == 0) || ((filterData1.word0 &filterData0.word1) == 0))
-		return physx::PxFilterFlag::eKILL;
-	if(physx::PxFilterObjectIsTrigger(attributes0) || physx::PxFilterObjectIsTrigger(attributes1))
-	{
-		pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
-		pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_LOST;
-		return physx::PxFilterFlag::eDEFAULT;
-	}
-	if(physx::PxFilterObjectIsKinematic(attributes0) && physx::PxFilterObjectIsKinematic(attributes1))
-	{
-		pairFlags = physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
-		pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_LOST;
-		return physx::PxFilterFlag::eDEFAULT;
-	}
-	if(filterData0.word2 || filterData1.word2)
-		pairFlags |= physx::PxPairFlags(filterData0.word2 | filterData1.word2);
-	
-	return physx::PxFilterFlag::eDEFAULT;
-}
-PhysXControllerHitReport *Game::GetPhysXControllerHitReport() {return m_controllerHitReport;}
-physx::PxControllerManager *Game::GetPhysXControllerManager() {return m_pxControllerManager;}
-physx::PxScene *Game::GetPhysXScene() {return m_pxScene;}
-physx::PxRigidDynamic *Game::CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material) {return CreatePhysXActor(geometry,material,physx::PxTransform(physx::PxVec3(0,0,0)));}
-physx::PxRigidDynamic *Game::CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,physx::PxTransform &transform)
-{
-	physx::PxPhysics *physics = m_stateNetwork->GetPhysics();
-	if(physics == NULL)
-		return NULL;
-	physx::PxRigidDynamic *actor = physics->createRigidDynamic(transform);
-	actor->createShape(geometry,material);
-	m_pxScene->addActor(*actor);
-	actor->putToSleep();
-	return actor;
-}
-physx::PxRigidDynamic *Game::CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,Vector3 &pos) {return CreatePhysXActor(geometry,material,physx::PxTransform(physx::PxVec3(pos.x,pos.y,pos.z)));}
-
-physx::PxRigidStatic *Game::CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material) {return CreateStaticPhysXActor(geometry,material,physx::PxTransform(physx::PxVec3(0,0,0)));}
-physx::PxRigidStatic *Game::CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,physx::PxTransform &transform)
-{
-	physx::PxPhysics *physics = m_stateNetwork->GetPhysics();
-	if(physics == NULL)
-		return NULL;
-	physx::PxRigidStatic *actor = physics->createRigidStatic(transform);
-	actor->createShape(geometry,material);
-	m_pxScene->addActor(*actor);
-	return actor;
-}
-physx::PxRigidStatic *Game::CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,Vector3 &pos) {return CreateStaticPhysXActor(geometry,material,physx::PxTransform(physx::PxVec3(pos.x,pos.y,pos.z)));}
-physx::PxFixedJoint *Game::CreateFixedJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxFixedJoint *joint = physx::PxFixedJointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-physx::PxDistanceJoint *Game::CreateDistanceJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxDistanceJoint *joint = physx::PxDistanceJointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-physx::PxSphericalJoint *Game::CreateSphericalJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxSphericalJoint *joint = physx::PxSphericalJointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-physx::PxRevoluteJoint *Game::CreateRevoluteJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxRevoluteJoint *joint = physx::PxRevoluteJointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-physx::PxPrismaticJoint *Game::CreatePrismaticJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxPrismaticJoint *joint = physx::PxPrismaticJointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-physx::PxD6Joint *Game::CreateD6Joint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt)
-{
-	physx::PxD6Joint *joint = physx::PxD6JointCreate(*m_stateNetwork->GetPhysics(),src,tSrc,tgt,tTgt);
-	InitializeJoint(joint);
-	return joint;
-}
-#endif
-
 extern DLLENGINE Engine *engine;
 Game::Game(NetworkState *state)
 {
@@ -402,7 +289,7 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void,lua_State*>("OnLuaReleased");
 	RegisterCallback<void,pragma::BasePlayerComponent*>("OnPlayerReady");
-	RegisterCallback<void,pragma::BasePlayerComponent*,nwm::ClientDropped>("OnPlayerDropped");
+	RegisterCallback<void,pragma::BasePlayerComponent*,pragma::networking::DropReason>("OnPlayerDropped");
 	RegisterCallback<void,pragma::BasePlayerComponent*>("OnPlayerJoined");
 	RegisterCallback<void,BaseEntity*>("OnEntityCreated");
 	RegisterCallback<void>("PrePhysicsSimulate");
@@ -431,50 +318,35 @@ Game::Game(NetworkState *state)
 
 	LoadSoundScripts("game_sounds_generic.txt");
 	LoadSoundScripts("fx_physics_impact.txt");
-#ifdef PHYS_ENGINE_BULLET
-	m_physEnvironment = std::make_unique<PhysEnv>(state);
-#elif PHYS_ENGINE_PHYSX
-	m_eventCallback = new WVPxEventCallback(this);
-	physx::PxPhysics *physics = state->GetPhysics();
-	physx::PxSceneDesc sceneDesc(physics->getTolerancesScale());
-	sceneDesc.gravity = physx::PxVec3(0.0f,0.0f,0.0f);
-	sceneDesc.simulationEventCallback = m_eventCallback;
-	sceneDesc.flags = physx::PxSceneFlag::eENABLE_CCD;
-	sceneDesc.filterShader = testFilterShader;
-	if(sceneDesc.cpuDispatcher == NULL)
+
+	enum class PhysicsEngine : uint8_t
 	{
-		physx::PxDefaultCpuDispatcher *dispatcher = physx::PxDefaultCpuDispatcherCreate(1);
-		if(dispatcher == NULL)
-		{
-			Con::crit<<"Unable to create PhysX CPU Dispatcher"<<Con::endl;
-			exit(EXIT_FAILURE);
-		}
-		sceneDesc.cpuDispatcher = dispatcher;
-	}
-	//static physx::PxSimulationFilterShader gDefaultFilterShader;
-	if(sceneDesc.filterShader == NULL)
-		sceneDesc.filterShader = CCDFilterShader;//physx::PxDefaultSimulationFilterShader;
-	if(!sceneDesc.isValid())
+		Bullet = 0,
+		PhysX
+	};
+	auto physEngine = PhysicsEngine::PhysX;
+	std::string physEngineLibName = "";
+	switch(physEngine)
 	{
-		Con::crit<<"PhysX Simulation Filter Shader is invalid"<<Con::endl;
-		exit(EXIT_FAILURE);
+	case PhysicsEngine::Bullet:
+		physEngineLibName = "bullet/pr_bullet";
+		break;
+	case PhysicsEngine::PhysX:
+		physEngineLibName = "physx/pr_physx";
+		break;
 	}
-	m_pxScene = physics->createScene(sceneDesc);
-	if(m_pxScene == NULL)
+	std::string err;
+	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName,&err);
+	if(dllHandle)
 	{
-		Con::crit<<"Unable to create PhysX Scene"<<Con::endl;
-		exit(EXIT_FAILURE);
+		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::physics::IEnvironment>&)>("initialize_physics_engine");
+		if(fInitPhysicsEngine != nullptr)
+			fInitPhysicsEngine(*GetNetworkState(),m_physEnvironment);
 	}
-	m_controllerHitReport = new PhysXControllerHitReport(this);
-	m_pxScene->setFlag(physx::PxSceneFlag::eENABLE_KINEMATIC_PAIRS,true);
-	m_pxScene->setFlag(physx::PxSceneFlag::eENABLE_KINEMATIC_STATIC_PAIRS,true);
-	m_pxControllerManager = PxCreateControllerManager(*m_pxScene);
-	if(m_pxControllerManager == NULL)
-	{
-		Con::crit<<"Unable to create PhysX Controller Manager"<<Con::endl;
-		exit(EXIT_FAILURE);
-	}
-#endif
+	else
+		Con::cerr<<"ERROR: Unable to initialize physics engine: "<<err<<Con::endl;
+	if(m_physEnvironment)
+		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
 
 	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
@@ -517,14 +389,7 @@ Game::~Game()
 	GetNetworkState()->DeregisterLuaModules(state,identifier); // Has to be called AFTER Lua instance has been released!
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
-#ifdef PHYS_ENGINE_BULLET
 	m_physEnvironment = nullptr;
-#elif PHYS_ENGINE_PHYSX
-	if(m_controllerHitReport != NULL)
-		delete m_controllerHitReport;
-	m_pxScene->release();
-	delete m_eventCallback;
-#endif
 }
 
 void Game::InitializeLuaScriptWatcher()
@@ -542,9 +407,9 @@ void Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 	CallLuaCallbacks<void,luabind::object>("OnPlayerReady",pl.GetLuaObject());
 }
 
-void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl,nwm::ClientDropped reason)
+void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl,pragma::networking::DropReason reason)
 {
-	CallCallbacks<void,pragma::BasePlayerComponent*,nwm::ClientDropped>("OnPlayerDropped",&pl,reason);
+	CallCallbacks<void,pragma::BasePlayerComponent*,pragma::networking::DropReason>("OnPlayerDropped",&pl,reason);
 	CallLuaCallbacks<void,luabind::object,std::underlying_type_t<decltype(reason)>>("OnPlayerDropped",pl.GetLuaObject(),umath::to_integral(reason));
 }
 
@@ -572,9 +437,8 @@ void Game::SetupEntity(BaseEntity*)
 bool Game::IsMultiPlayer() const {return engine->IsMultiPlayer();}
 bool Game::IsSinglePlayer() const {return engine->IsSinglePlayer();}
 
-#ifdef PHYS_ENGINE_BULLET
-PhysEnv *Game::GetPhysicsEnvironment() {return m_physEnvironment.get();}
-#endif
+const pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() const {return const_cast<Game*>(this)->GetPhysicsEnvironment();}
+pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() {return m_physEnvironment.get();}
 
 void Game::OnEntityCreated(BaseEntity *ent)
 {
@@ -642,14 +506,6 @@ void Game::GetSpawnedEntities(std::vector<BaseEntity*> *ents)
 			ents->push_back(ent);
 	}
 }
-#ifdef PHYS_ENGINE_PHYSX
-static void InitializeJoint(physx::PxJoint *joint)
-{
-#ifdef _DEBUG
-	joint->setConstraintFlag(physx::PxConstraintFlag::eVISUALIZATION,true);
-#endif
-}
-#endif
 
 NetworkState *Game::GetNetworkState() {return m_stateNetwork;}
 
@@ -741,17 +597,11 @@ void Game::Tick()
 	CallCallbacks("PrePhysicsSimulate");
 	CallLuaCallbacks("PrePhysicsSimulate");
 	StartProfilingStage(CPUProfilingPhase::PhysicsSimulation);
-#ifdef PHYS_ENGINE_BULLET
-	if(IsPhysicsSimulationEnabled() == true)
+	if(IsPhysicsSimulationEnabled() == true && m_physEnvironment)
 	{
 		static int maxSteps = 1;
-		int numSimSteps = m_physEnvironment->StepSimulation(CFloat(m_tDeltaTick),maxSteps,CFloat(m_tDeltaTick));
-		UNUSED(numSimSteps);
+		m_tPhysDeltaRemainder = m_physEnvironment->StepSimulation(CFloat(m_tDeltaTick +m_tPhysDeltaRemainder),maxSteps,CFloat(m_tDeltaTick));
 	}
-#elif PHYS_ENGINE_PHYSX
-	m_pxScene->simulate(m_tDeltaTick);
-	m_pxScene->fetchResults(true);
-#endif
 	StopProfilingStage(CPUProfilingPhase::PhysicsSimulation);
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
@@ -1075,22 +925,22 @@ pragma::EntityComponentManager &Game::GetEntityComponentManager() {return *m_com
 
 SurfaceMaterial &Game::CreateSurfaceMaterial(const std::string &identifier,Float friction,Float restitution)
 {
-	return m_surfaceMaterials.Create(identifier,friction,restitution);
+	return m_surfaceMaterialManager->Create(identifier,friction,restitution);
 }
 SurfaceMaterial *Game::GetSurfaceMaterial(const std::string &id)
 {
-	return m_surfaceMaterials.GetMaterial(id);
+	return m_surfaceMaterialManager->GetMaterial(id);
 }
 SurfaceMaterial *Game::GetSurfaceMaterial(UInt32 id)
 {
-	auto &materials = m_surfaceMaterials.GetMaterials();
+	auto &materials = m_surfaceMaterialManager->GetMaterials();
 	if(id >= materials.size())
 		return nullptr;
 	return &materials[id];
 }
 std::vector<SurfaceMaterial> &Game::GetSurfaceMaterials()
 {
-	return m_surfaceMaterials.GetMaterials();
+	return m_surfaceMaterialManager->GetMaterials();
 }
 
 double &Game::RealTime() {return m_tReal;}

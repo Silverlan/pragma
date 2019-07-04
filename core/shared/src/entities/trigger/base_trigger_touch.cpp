@@ -3,6 +3,7 @@
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
 #include "pragma/physics/collisionmasks.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/entities/trigger/trigger_spawnflags.h"
 #include "pragma/lua/luafunction_call.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -59,8 +60,6 @@ void BaseTouchComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto physComponent = ent.GetPhysicsComponent();
-	if(physComponent.valid())
-		physComponent->SetTrigger(true);
 	CollisionMask masks = CollisionMask::None;
 	if((m_triggerFlags &TriggerFlags::Everything) != TriggerFlags::None)
 		masks = CollisionMask::Dynamic | CollisionMask::Generic;
@@ -77,6 +76,16 @@ void BaseTouchComponent::OnPhysicsInitialized()
 	{
 		physComponent->SetCollisionFilterMask(masks);
 		physComponent->SetCollisionFilterGroup(CollisionMask::Trigger);
+		auto *physObj = physComponent->GetPhysicsObject();
+		if(physObj)
+		{
+			auto &colObjs = physObj->GetCollisionObjects();
+			auto it = std::find_if(colObjs.begin(),colObjs.end(),[](const util::TSharedHandle<pragma::physics::ICollisionObject> &hColObj) {
+				return hColObj.IsValid() && hColObj->GetCollisionShape() && hColObj->GetCollisionShape()->IsTrigger();
+			});
+			if(it != colObjs.end())
+				Con::cwar<<"WARNING: Trigger entity has non-trigger physics shapes!"<<Con::endl;
+		}
 	}
 }
 void BaseTouchComponent::OnEntitySpawn()
@@ -177,7 +186,7 @@ void BaseTouchComponent::UpdateTouch()
 void BaseTouchComponent::OnTouch(PhysTouch&) {}
 void BaseTouchComponent::OnContact(PhysContact&) {}
 bool BaseTouchComponent::IsTouchEnabled() const {return true;}
-void BaseTouchComponent::Touch(BaseEntity *entOther,PhysObj *physOther,PhysCollisionObject*,PhysCollisionObject*)
+void BaseTouchComponent::Touch(BaseEntity *entOther,PhysObj *physOther,pragma::physics::ICollisionObject*,pragma::physics::ICollisionObject*)
 {
 	if(!IsTouchEnabled() || !CanTrigger(entOther,physOther))
 		return;

@@ -27,7 +27,7 @@ namespace pragma
 		virtual void Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
 		virtual void Extinguish() override;
 		virtual void SetIgnitable(bool b) override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:

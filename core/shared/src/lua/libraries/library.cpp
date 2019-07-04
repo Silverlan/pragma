@@ -8,11 +8,7 @@
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/libraries/ltimer.h"
 #include "pragma/lua/libraries/lgeometry.h"
-#ifdef PHYS_ENGINE_BULLET
 #include "pragma/lua/classes/lphysics.h"
-#elif PHYS_ENGINE_PHYSX
-#include "pragma/lua/classes/lphysx.h"
-#endif
 #include "pragma/lua/libraries/lmatrix.h"
 
 #include "pragma/lua/classes/ldef_vector.h"
@@ -909,23 +905,5 @@ void Game::RegisterLuaLibraries()
 		{"FORMAT_NO_COPY",umath::to_integral(std::regex_constants::format_no_copy)},
 		{"FORMAT_FIRST_ONLY",umath::to_integral(std::regex_constants::format_first_only)}
 	});
-
-#ifdef PHYS_ENGINE_BULLET
 	Lua::physenv::register_library(GetLuaInterface());
-#elif PHYS_ENGINE_PHYSX
-	static const luaL_Reg funcs_physx[] = {
-		{"create_box_controller",Lua_physx_CreateBoxController},
-		{"create_capsule_controller",Lua_physx_CreateCapsuleController},
-		{"create_material",Lua_physx_CreateMaterial},
-		{"create_scene",Lua_physx_CreateScene},
-		{"create_fixed_joint",Lua_physx_CreateFixedJoint},
-		{"create_spherical_joint",Lua_physx_CreateSphericalJoint},
-		{"create_revolute_joint",Lua_physx_CreateRevoluteJoint},
-		{"create_prismatic_joint",Lua_physx_CreatePrismaticJoint},
-		{"create_distance_joint",Lua_physx_CreateDistanceJoint},
-		{NULL,NULL}
-	};
-	luaL_newlib(GetLuaState(),funcs_physx);
-	lua_setglobal(GetLuaState(),"physx");
-#endif
 }

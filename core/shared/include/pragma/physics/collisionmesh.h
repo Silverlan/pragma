@@ -7,8 +7,9 @@
 #include <vector>
 #include <memory>
 
-class PhysShape;
+class Game;
 struct PhysSoftBodyInfo;
+class ModelSubMesh;
 class DLLNETWORK CollisionMesh
 	: public std::enable_shared_from_this<CollisionMesh>
 {
@@ -50,7 +51,7 @@ private:
 	Vector3 m_min = {};
 	Vector3 m_max = {};
 	Vector3 m_origin = {};
-	std::shared_ptr<PhysShape> m_shape = nullptr;
+	std::shared_ptr<pragma::physics::IShape> m_shape = nullptr;
 	bool m_bConvex = true;
 	int m_boneID = -1;
 	int m_surfaceMaterialId = 0;
@@ -60,7 +61,7 @@ private:
 public:
 	static std::shared_ptr<CollisionMesh> Create(Game *game);
 	static std::shared_ptr<CollisionMesh> Create(const CollisionMesh &other);
-	std::shared_ptr<PhysShape> CreateShape(const Vector3 &scale={1.f,1.f,1.f}) const;
+	std::shared_ptr<pragma::physics::IShape> CreateShape(const Vector3 &scale={1.f,1.f,1.f}) const;
 	void SetBoneParent(int boneID);
 	int GetBoneParent();
 	void CalculateBounds();
@@ -68,7 +69,7 @@ public:
 	void SetAABB(Vector3 &min,Vector3 &max);
 	void SetOrigin(const Vector3 &origin);
 	Vector3 &GetOrigin();
-	std::shared_ptr<PhysShape> GetShape();
+	std::shared_ptr<pragma::physics::IShape> GetShape();
 	bool IntersectAABB(Vector3 *min,Vector3 *max);
 	void UpdateShape();
 	void SetConvex(bool bConvex);

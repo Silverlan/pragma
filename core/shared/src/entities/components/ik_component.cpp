@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/ik_component.hpp"
 #include "pragma/physics/collisionmesh.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/physics/ik/util_ik.hpp"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
@@ -145,7 +145,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	// Effector is always bottom-most element in tree (= first element in ikJoints)
 	auto &ikJointEffector = ikJoints.front();
 	auto &effectorPos = ikJointEffector.referenceTransform.pos;
-	ikJointEffector.nodes.at(0) = std::make_shared<Node>(VectorR3(effectorPos.x,effectorPos.y,effectorPos.z) *PhysEnv::WORLD_SCALE,VectorR3(0.f,0.f,0.f),0.0,Purpose::EFFECTOR);
+	ikJointEffector.nodes.at(0) = std::make_shared<Node>(VectorR3(effectorPos.x,effectorPos.y,effectorPos.z),VectorR3(0.f,0.f,0.f),0.0,Purpose::EFFECTOR);
 
 	for(auto it=ikJoints.begin() +1;it<ikJoints.end();++it)
 	{
@@ -203,19 +203,19 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto &rot = ikJoint.referenceTransform.rot;
 		auto rotAxis = uquat::up(rot);
 		ikJoint.nodes.at(2) = std::make_shared<Node>(
-			VectorR3(pos.x,pos.y,pos.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
+			VectorR3(pos.x,pos.y,pos.z),VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
 			Purpose::JOINT,umath::deg_to_rad(min.y),umath::deg_to_rad(max.y),umath::deg_to_rad(0.0)
 		);
 
 		rotAxis = uquat::forward(rot); // TODO: Does this axis have to be negated?
 		ikJoint.nodes.at(1) = std::make_shared<Node>(
-			VectorR3(pos.x,pos.y,pos.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
+			VectorR3(pos.x,pos.y,pos.z),VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
 			Purpose::JOINT,umath::deg_to_rad(min.r),umath::deg_to_rad(max.r),umath::deg_to_rad(0.0)
 		);
 
 		rotAxis = -uquat::right(rot);
 		ikJoint.nodes.at(0) = std::make_shared<Node>(
-			VectorR3(pos.x,pos.y,pos.z) *PhysEnv::WORLD_SCALE,VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
+			VectorR3(pos.x,pos.y,pos.z),VectorR3(rotAxis.x,rotAxis.y,rotAxis.z),0.0,
 			Purpose::JOINT,umath::deg_to_rad(min.p),umath::deg_to_rad(max.p),umath::deg_to_rad(0.0)
 		);
 	}
@@ -419,7 +419,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			auto *game = ent.GetNetworkState()->GetGameState();
 			auto rayResult = game->RayCast(traceData);
 
-			if(rayResult.hit == true)
+			if(rayResult.hitType != RayCastHitType::None)
 			{
 				auto posRay = rayResult.position +rayResult.normal *footInfo.yOffset;
 				if(pTrComponent.valid())
@@ -448,7 +448,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			continue;
 
 		auto &treeInfo = *pair.second;
-		std::vector<PhysTransform> rootDeltaTransforms {};
+		std::vector<physics::Transform> rootDeltaTransforms {};
 		rootDeltaTransforms.reserve(treeInfo.rootNodes.size());
 		for(auto &rootNodeInfo : treeInfo.rootNodes)
 		{
@@ -490,7 +490,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			auto &t = rootDeltaTransforms.at(effector->rootIndex);
 			auto posEffector = effector->position;
 			posEffector = t.GetInverse() *posEffector;
-			ikEffectorPositions.push_back(VectorR3(posEffector.x,posEffector.y,posEffector.z) *PhysEnv::WORLD_SCALE);
+			ikEffectorPositions.push_back(VectorR3(posEffector.x,posEffector.y,posEffector.z));
 		}
 		
 		auto &jacobian = *treeInfo.jacobian;
@@ -553,7 +553,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 					btVector3 pos = btVector3(tr.getOrigin().x(), tr.getOrigin().y(), tr.getOrigin().z());
 					btVector3 color = btVector3(0, 1, 0);
 					int pointSize = 10;
-					auto enPos = uvec::create(pos /PhysEnv::WORLD_SCALE);
+					auto enPos = uvec::create(pos);
 					//auto it = m_dbgObjects.find(0u);
 					//if(it == m_dbgObjects.end())
 					//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,Color::Lime))).first;
@@ -577,8 +577,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						fGetLocalTransform(node->left, act);
 				
 						btTransform trl = tr*act;
-						auto trOrigin = uvec::create(tr.getOrigin() /PhysEnv::WORLD_SCALE);
-						auto trlOrigin = uvec::create(trl.getOrigin() /PhysEnv::WORLD_SCALE);
+						auto trOrigin = uvec::create(tr.getOrigin());
+						auto trlOrigin = uvec::create(trl.getOrigin());
 						fUpdateLine(5,trOrigin,trlOrigin,Color::Maroon);
 						fDrawTree(node->left, trl);		// Draw tree of children recursively
 					}
@@ -587,8 +587,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						btTransform act;
 						fGetLocalTransform(node->right, act);
 						btTransform trr = tr*act;
-						auto trOrigin = uvec::create(tr.getOrigin() /PhysEnv::WORLD_SCALE);
-						auto trrOrigin = uvec::create(trr.getOrigin() /PhysEnv::WORLD_SCALE);
+						auto trOrigin = uvec::create(tr.getOrigin());
+						auto trrOrigin = uvec::create(trr.getOrigin());
 						fUpdateLine(6,trOrigin,trrOrigin,Color::Silver);
 						fDrawTree(node->right,trr);		// Draw right siblings recursively
 					}
@@ -607,8 +607,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 #endif
 
 		// Apply IK transforms to entity skeleton
-		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>>&,PhysTransform&,PhysTransform*,bool)> fIterateIkTree = nullptr;
-		fIterateIkTree = [this,&fIterateIkTree,&rootDeltaTransforms,&animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes,PhysTransform &tParent,PhysTransform *rootDeltaTransform,bool root) {
+		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>>&,physics::Transform&,physics::Transform*,bool)> fIterateIkTree = nullptr;
+		fIterateIkTree = [this,&fIterateIkTree,&rootDeltaTransforms,&animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes,physics::Transform &tParent,physics::Transform *rootDeltaTransform,bool root) {
 			auto nodeIdx = 0u;
 			for(auto &nodeInfo : nodes)
 			{
@@ -619,13 +619,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						continue;
 					rootDeltaTransform = &rootDeltaTransforms.at(nodeIdx);
 				}
-				auto tNode = PhysTransform {};
+				physics::Transform tNode {};
 				util::ik::get_local_transform(*nodeInfo->ikNodes.at(0u),tNode);
 				tNode = tParent *tNode;
 
 				for(auto i=decltype(nodeInfo->ikNodes.size()){1u};i<nodeInfo->ikNodes.size();++i)
 				{
-					auto tNodeOther = PhysTransform {};
+					physics::Transform tNodeOther {};
 					auto &nodeOther = nodeInfo->ikNodes.at(i);
 					if(nodeOther != nullptr)
 					{
@@ -643,7 +643,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				++nodeIdx;
 			}
 		};
-		PhysTransform t {};
+		physics::Transform t {};
 		fIterateIkTree(treeInfo.rootNodes,t,nullptr,true);
 	}
 

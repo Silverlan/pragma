@@ -206,7 +206,7 @@ namespace pragma
 		bool TriggerScheduleInterrupt(uint32_t interruptFlags);
 
 		virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl) override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitSnapshotData() const override {return true;}
 		virtual bool ShouldTransmitNetData() const {return true;}
 

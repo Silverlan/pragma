@@ -11,6 +11,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <networkmanager/nwm_packet.h>
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
@@ -134,7 +135,7 @@ void SWaterComponent::UpdateSurfaceSimulator()
 	ReloadSurfaceSimulator();
 }
 
-void SWaterComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SWaterComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSurfaceMaterial);
 	packet->Write<float>(m_kvMaxWaveHeight);
@@ -152,7 +153,7 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 	packet->Write<Vector3>(origin);
 	packet->Write<float>(radius);
 	packet->Write<float>(force);
-	ent.SendNetEventTCP(m_netEvCreateSplash,packet);
+	ent.SendNetEvent(m_netEvCreateSplash,packet,pragma::networking::Protocol::SlowReliable);
 }
 const Vector3 &SWaterComponent::GetPosition() const
 {

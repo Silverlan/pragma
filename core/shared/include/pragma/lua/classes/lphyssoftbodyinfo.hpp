@@ -2,7 +2,7 @@
 #define __LPHYSSOFTBODYINFO_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 struct PhysSoftBodyInfo;
 namespace Lua

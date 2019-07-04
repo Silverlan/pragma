@@ -16,8 +16,7 @@
 #include <memory.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <luabind/luabind.hpp>
-#include <luabind/operator.hpp>
+#include <pragma/lua/luaapi.h>
 #include <fstream>
 #include <cinttypes>
 #include <queue>

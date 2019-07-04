@@ -14,7 +14,7 @@ LINK_ENTITY_TO_CLASS(env_smoke_trail,EnvSmokeTrail);
 extern ServerState *server;
 extern SGame *s_game;
 
-void SSmokeTrailComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSmokeTrailComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_speed);
 	packet->Write<float>(m_distance);

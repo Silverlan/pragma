@@ -1,6 +1,7 @@
 #include "stdafx_engine.h"
 #include "pragma/lua/luaapi.h"
 #include "pragma/lua/lua_error_handling.hpp"
+#include "pragma/console/conout.h"
 #include <luainterface.hpp>
 
 static auto s_bExtendedModules = false;

@@ -25,7 +25,7 @@ void SSoundComponent::OnSoundCreated(ALSound &snd)
 	auto pMapComponent = GetEntity().GetComponent<pragma::MapComponent>();
 	dynamic_cast<SALSound&>(snd).SetEntityMapIndex(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 }
-void SSoundComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvMaxDist);
 	auto idx = (m_sound != nullptr) ? m_sound->GetIndex() : std::numeric_limits<uint32_t>::max();

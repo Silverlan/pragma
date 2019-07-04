@@ -1,5 +1,6 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_entity_component.hpp"
+#include <pragma/networking/enums.hpp>
 #include <networkmanager/nwm_packet.h>
 
 extern DLLSERVER ServerState *server;
@@ -13,5 +14,5 @@ void SEntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &com
 	NetPacket p {};
 	p->Write<ComponentId>(componentInfo.id);
 	p->WriteString(componentInfo.name);
-	server->BroadcastTCP("register_entity_component",p);
+	server->SendPacket("register_entity_component",p,pragma::networking::Protocol::SlowReliable);
 }

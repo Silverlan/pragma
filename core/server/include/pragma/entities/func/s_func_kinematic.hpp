@@ -14,7 +14,7 @@ namespace pragma
 	{
 	public:
 		SKinematicComponent(BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void StartForward() override;
 		virtual void StartBackward() override;
 		virtual bool ShouldTransmitNetData() const override {return true;}

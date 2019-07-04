@@ -22,6 +22,7 @@
 struct PhysVehicleRaycaster;
 namespace pragma
 {
+	namespace physics {class IConvexShape;};
 	class DLLNETWORK BaseVehicleComponent
 		: public BaseEntityComponent
 	{
@@ -33,8 +34,10 @@ namespace pragma
 		virtual void ClearDriver();
 		virtual void SetDriver(BaseEntity *ent);
 		unsigned char GetWheelCount();
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		btWheelInfo *GetWheelInfo(int wheel);
 		btRaycastVehicle *GetBtVehicle();
+#endif
 		virtual void Think(double tDelta);
 		void DetachWheel(UChar wheelId);
 		void AttachWheel(UChar wheelId,pragma::BaseWheelComponent *wheel);
@@ -100,11 +103,13 @@ namespace pragma
 		};
 		std::vector<WheelData> m_wheels;
 		EntityHandle m_steeringWheel = {};
-		std::shared_ptr<PhysConvexShape> m_shape = nullptr;
-		std::unique_ptr<PhysRigidBody> m_rigidBody = nullptr;
+		util::TWeakSharedHandle<pragma::physics::IConvexShape> m_shape = {};
+		util::TWeakSharedHandle<pragma::physics::IRigidBody> m_rigidBody = {};
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		btRaycastVehicle::btVehicleTuning m_tuning = {};
-		std::unique_ptr<PhysVehicleRaycaster> m_vhcRayCaster = nullptr;
 		std::unique_ptr<btRaycastVehicle> m_vhcRaycast = nullptr;
+#endif
+		std::unique_ptr<PhysVehicleRaycaster> m_vhcRayCaster = nullptr;
 		WheelInfo m_wheelInfo = {};
 		CallbackHandle m_cbSteeringWheel = {};
 		EntityHandle m_driver = {};

@@ -17,7 +17,7 @@ namespace pragma
 		virtual ~SWaterComponent() override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
 		void UpdateSurfaceSimulator();
 		virtual const Vector3 &GetPosition() const override;

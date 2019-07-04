@@ -149,7 +149,7 @@ void SBaseNPC::_debugSendScheduleInfo(Player *pl,std::shared_ptr<DebugBehaviorTr
 	server->SendPacketTCP("debug_ai_schedule_tree",p,pl->GetClientSession());
 }
 
-void NET_sv_debug_ai_navigation(WVServerClient *session,NetPacket packet)
+void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;

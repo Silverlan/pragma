@@ -3,6 +3,7 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/ai/s_disposition.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
@@ -40,7 +41,7 @@ void SCharacterComponent::OnFrozen(bool bFrozen)
 	{
 		NetPacket p;
 		p->Write<bool>(bFrozen);
-		ent.SendNetEventTCP(m_netEvSetFrozen,p);
+		ent.SendNetEvent(m_netEvSetFrozen,p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -53,7 +54,7 @@ void SCharacterComponent::SetAmmoCount(UInt32 ammoType,UInt16 count)
 		NetPacket p;
 		p->Write<uint32_t>(ammoType);
 		p->Write<uint16_t>(count);
-		entThis.SendNetEventTCP(m_netEvSetAmmoCount,p);
+		entThis.SendNetEvent(m_netEvSetAmmoCount,p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -65,7 +66,7 @@ void SCharacterComponent::SetActiveWeapon(BaseEntity *ent)
 	{
 		NetPacket p;
 		nwm::write_entity(p,ent);
-		entThis.SendNetEventTCP(m_netEvSetActiveWeapon,p);
+		entThis.SendNetEvent(m_netEvSetActiveWeapon,p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 

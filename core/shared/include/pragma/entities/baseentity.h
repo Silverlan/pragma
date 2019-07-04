@@ -4,6 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/baseluaobj.h"
 #include "pragma/entities/entity_component_system.hpp"
+#include <pragma/console/conout.h>
 
 #define DECLARE_ENTITY_HANDLE \
 	protected: \

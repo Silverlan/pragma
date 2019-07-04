@@ -1,5 +1,6 @@
 #include "stdafx_engine.h"
 #include "pragma/engine.h"
+#include "pragma/console/conout.h"
 #include <fsys/filesystem.h>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convars.h>

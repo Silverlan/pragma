@@ -782,7 +782,7 @@ void RenderNode::BuildTree()
 	for(auto it=m_meshes.begin();it!=m_meshes.end();)
 	{
 		NodeMeshInfo *info = *it;
-		if(info->m_hEnt->IsValid())
+		if(info->m_hEnt.IsValid())
 		{
 			Vector3 min;
 			Vector3 max;
@@ -1005,11 +1005,11 @@ void RenderNode::UpdateTree()
 		for(unsigned int i=0;i<m_queue.size();i++)
 		{
 			NodeMeshInfo *info = m_queue[i];
-			EntityHandle *hEnt = info->m_hEnt;
-			if(hEnt->IsValid())
+			EntityHandle &hEnt = info->m_hEnt;
+			if(hEnt.IsValid())
 			{
 				ModelMesh *mesh = info->m_mesh;
-				if(Insert(hEnt->get<CBaseEntity>(),mesh) == false)
+				if(Insert(hEnt.get<CBaseEntity>(),mesh) == false)
 				{
 #ifdef _DEBUG
 					assert(("Mesh out of render node bounds!",false));
@@ -1020,7 +1020,7 @@ void RenderNode::UpdateTree()
 					else
 					{
 						auto *parent = static_cast<RenderNode*>(m_parent);
-						parent->AddMesh(hEnt->get<CBaseEntity>(),mesh);
+						parent->AddMesh(hEnt.get<CBaseEntity>(),mesh);
 						parent->UpdateTree();
 					}
 #endif
@@ -1063,10 +1063,10 @@ void RenderNode::Update(double &t)
 		for(size_t i=0;i<numMeshes;i++)
 		{
 			NodeMeshInfo *info = m_meshes[i];
-			EntityHandle *hEnt = info->m_hEnt;
-			if(hEnt->IsValid())
+			EntityHandle &hEnt = info->m_hEnt;
+			if(hEnt.IsValid())
 			{
-				CBaseEntity *ent = static_cast<CBaseEntity*>(hEnt->get());
+				CBaseEntity *ent = static_cast<CBaseEntity*>(hEnt.get());
 				const auto changeFlags = BaseEntity::StateFlags::CollisionBoundsChanged | BaseEntity::StateFlags::PositionChanged | BaseEntity::StateFlags::RenderBoundsChanged | BaseEntity::StateFlags::RotationChanged;
 				if((ent->GetStateFlags() &changeFlags) != BaseEntity::StateFlags::None && info->m_tLastUpdate < t)
 				{
@@ -1099,7 +1099,7 @@ void RenderNode::Update(double &t)
 			for(size_t i=numEls -1;i!=size_t(-1);i--)
 			{
 				NodeMeshInfo *info = movedMeshes[i];
-				CBaseEntity *ent = info->m_hEnt->get<CBaseEntity>();
+				CBaseEntity *ent = info->m_hEnt.get<CBaseEntity>();
 				Vector3 min {};
 				Vector3 max {};
 				auto pRenderComponent = ent->GetRenderComponent();
@@ -1149,30 +1149,27 @@ void RenderNode::Update(double &t)
 ////////////////////////////////////
 
 NodeMeshInfo::NodeMeshInfo(RenderNode *node,CBaseEntity *ent,ModelMesh *mesh)
-	: m_hEnt(ent->CreateHandle()),m_node(node),m_mesh(mesh),m_tLastUpdate(0.0)
+	: m_hEnt(ent->GetHandle()),m_node(node),m_mesh(mesh),m_tLastUpdate(0.0)
 {}
 
-NodeMeshInfo::~NodeMeshInfo()
-{
-	delete m_hEnt;
-}
+NodeMeshInfo::~NodeMeshInfo() {}
 
 void NodeMeshInfo::Remove() {m_node->RemoveMesh(this);}
 ModelMesh *NodeMeshInfo::GetMesh() {return m_mesh;}
 CBaseEntity *NodeMeshInfo::GetEntity()
 {
-	if(!m_hEnt->IsValid())
+	if(!m_hEnt.IsValid())
 		return NULL;
-	return m_hEnt->get<CBaseEntity>();
+	return m_hEnt.get<CBaseEntity>();
 }
 
-bool NodeMeshInfo::IsValid() {return m_hEnt->IsValid();}
+bool NodeMeshInfo::IsValid() {return m_hEnt.IsValid();}
 
 void NodeMeshInfo::GetBounds(Vector3 *min,Vector3 *max)
 {
 	if(!IsValid())
 		return;
-	CBaseEntity *ent = m_hEnt->get<CBaseEntity>();
+	CBaseEntity *ent = m_hEnt.get<CBaseEntity>();
 	Vector3 rMin;
 	Vector3 rMax;
 	m_mesh->GetBounds(rMin,rMax);

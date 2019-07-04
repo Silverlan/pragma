@@ -1,10 +1,10 @@
 #include "stdafx_shared.h"
 #include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 #include "pragma/physics/phys_water_surface_simulator.hpp"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/phys_liquid.hpp"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/util/util_best_fitting_plane.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -14,11 +14,11 @@
 #include <pragma/physics/movetypes.h>
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
-PhysWaterBuoyancySimulator::PhysWaterBuoyancySimulator()
+pragma::physics::WaterBuoyancySimulator::WaterBuoyancySimulator()
 {}
 
 template<class InputItVert,class InputItIndex>
-	double PhysWaterBuoyancySimulator::CalcBuoyancy(
+	double pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(
 	const Quat &rorigin,
 	const PhysLiquid &liquid,
 	const Vector3 &waterPlane,double waterPlaneDist,
@@ -193,7 +193,7 @@ template<class TIterator>
 	}
 }
 
-void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid &liquid,BaseEntity &ent,Vector3 waterPlane,double waterPlaneDist,const Vector3 &waterVelocity,const PhysWaterSurfaceSimulator *surfaceSim) const
+void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid &liquid,BaseEntity &ent,Vector3 waterPlane,double waterPlaneDist,const Vector3 &waterVelocity,const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto physType = pPhysComponent.valid() ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
@@ -285,7 +285,7 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 				continue;
 			if(hColObj->IsRigid() == false)
 				continue;
-			auto *colObj = static_cast<PhysRigidBody*>(hColObj.get());
+			auto *colObj = hColObj->GetRigidBody();
 			auto mass = colObj->GetMass();
 			auto shape = colObj->GetCollisionShape();
 			if(mass == 0.f || shape == nullptr)
@@ -299,7 +299,7 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 
 			if(shape->IsConvex())
 			{
-				auto *convexShape = static_cast<PhysConvexShape*>(shape.get());
+				auto *convexShape = shape->GetConvexShape();
 				auto *colMesh = convexShape->GetCollisionMesh();
 				if(colMesh != nullptr)
 				{
@@ -436,44 +436,36 @@ void PhysWaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid 
 
 ////////////////////////
 
-Vector3 PhysWaterBuoyancySimulator::CalcBuoyancy(double liquidDensity,double submergedVolume,double gravity,const Vector3 &liquidUpVec) const
+Vector3 pragma::physics::WaterBuoyancySimulator::CalcBuoyancy(double liquidDensity,double submergedVolume,double gravity,const Vector3 &liquidUpVec) const
 {
-	liquidDensity *= PhysEnv::WORLD_SCALE;
-	submergedVolume *= umath::pow3(PhysEnv::WORLD_SCALE);
-	gravity *= PhysEnv::WORLD_SCALE;
-	return (static_cast<float>(liquidDensity *submergedVolume *gravity) *liquidUpVec) /static_cast<float>(PhysEnv::WORLD_SCALE);
+	return static_cast<float>(liquidDensity *submergedVolume *gravity) *liquidUpVec;
 }
 
-Vector3 PhysWaterBuoyancySimulator::CalcTorque(const Quat &rorigin,const Vector3 &centerBody,const Vector3 &centerSubmergedVolume,double liquidDensity,double submergedVolume,double gravity,const Vector3 &liquidUpVec) const
+Vector3 pragma::physics::WaterBuoyancySimulator::CalcTorque(const Quat &rorigin,const Vector3 &centerBody,const Vector3 &centerSubmergedVolume,double liquidDensity,double submergedVolume,double gravity,const Vector3 &liquidUpVec) const
 {
 	auto r = centerSubmergedVolume -centerBody;
 	uvec::rotate(&r,rorigin);
-
-	r *= PhysEnv::WORLD_SCALE;
-	liquidDensity *= PhysEnv::WORLD_SCALE;
-	submergedVolume *= umath::pow3(PhysEnv::WORLD_SCALE);
-	gravity *= PhysEnv::WORLD_SCALE;
-	return uvec::cross(r,static_cast<float>(liquidDensity *submergedVolume *gravity) *liquidUpVec) /static_cast<float>(PhysEnv::WORLD_SCALE_SQR);
+	return uvec::cross(r,static_cast<float>(liquidDensity *submergedVolume *gravity) *liquidUpVec);
 }
 
-Vector3 PhysWaterBuoyancySimulator::IntersectLinePlane(const Vector3 &a,const Vector3 &b,double da,double db) const
+Vector3 pragma::physics::WaterBuoyancySimulator::IntersectLinePlane(const Vector3 &a,const Vector3 &b,double da,double db) const
 {
 	return a +static_cast<float>(da /(da -db)) *(b -a);
 }
 
-double PhysWaterBuoyancySimulator::CalcTetrahedronVolume(Vector3 &c,const Vector3 &u,const Vector3 &v,const Vector3 &w) const
+double pragma::physics::WaterBuoyancySimulator::CalcTetrahedronVolume(Vector3 &c,const Vector3 &u,const Vector3 &v,const Vector3 &w) const
 {
 	auto volume = (1.0 /6.0) *uvec::dot(uvec::cross(u,v),w);
 	c += static_cast<float>((1.0 /4.0) *volume) *(u +v +w);
 	return volume;
 }
 
-double PhysWaterBuoyancySimulator::CalcDistanceFromVertexToPlane(const Vector3 &v,const Vector3 &p,double d) const
+double pragma::physics::WaterBuoyancySimulator::CalcDistanceFromVertexToPlane(const Vector3 &v,const Vector3 &p,double d) const
 {
 	return uvec::dot(v,p) -d;
 }
 
-double PhysWaterBuoyancySimulator::ClipTriangle(Vector3 &C,const Vector3 &a,const Vector3 &b,const Vector3 &c,double d1,double d2,double d3,Vector3 *vertSum,uint32_t *vertCount,std::vector<Vector3> *clippedVerts) const
+double pragma::physics::WaterBuoyancySimulator::ClipTriangle(Vector3 &C,const Vector3 &a,const Vector3 &b,const Vector3 &c,double d1,double d2,double d3,Vector3 *vertSum,uint32_t *vertCount,std::vector<Vector3> *clippedVerts) const
 {
 	auto ab = IntersectLinePlane(a,b,d1,d2);
 	auto volume = 0.0;
@@ -567,7 +559,7 @@ double PhysWaterBuoyancySimulator::ClipTriangle(Vector3 &C,const Vector3 &a,cons
 	return volume;
 }
 
-double PhysWaterBuoyancySimulator::CalcClipVolume(Vector3 &C,const Vector3 &a,const Vector3 &b,const Vector3 &c,double d1,double d2,double d3,Vector3 *vertSum,uint32_t *vertCount,std::vector<Vector3> *clippedVerts) const
+double pragma::physics::WaterBuoyancySimulator::CalcClipVolume(Vector3 &C,const Vector3 &a,const Vector3 &b,const Vector3 &c,double d1,double d2,double d3,Vector3 *vertSum,uint32_t *vertCount,std::vector<Vector3> *clippedVerts) const
 {
 	if(vertSum != nullptr)
 		*vertSum = {};
@@ -607,12 +599,12 @@ double PhysWaterBuoyancySimulator::CalcClipVolume(Vector3 &C,const Vector3 &a,co
 	return clipVolume;
 }
 
-Vector3 PhysWaterBuoyancySimulator::CalcCattoDragLinearForceApproximation(double dragCoefficientHz,double mass,double submergedLiquidVolume,double volume,const Vector3 &liquidVel,const Vector3 &velSubmergedVolume) const
+Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragLinearForceApproximation(double dragCoefficientHz,double mass,double submergedLiquidVolume,double volume,const Vector3 &liquidVel,const Vector3 &velSubmergedVolume) const
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume)) *(liquidVel -velSubmergedVolume);
 }
 
-Vector3 PhysWaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double dragCoefficientHz,double mass,double submergedLiquidVolume,double volume,double lenPolyhedron,const Vector3 &bodyAngularVelocity) const
+Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragTorqueForceApproximation(double dragCoefficientHz,double mass,double submergedLiquidVolume,double volume,double lenPolyhedron,const Vector3 &bodyAngularVelocity) const
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume) *umath::pow2(lenPolyhedron)) *-bodyAngularVelocity;
 }

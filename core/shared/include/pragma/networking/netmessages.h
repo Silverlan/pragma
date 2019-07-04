@@ -5,12 +5,12 @@
 #include <networkmanager/nwm_message.h>
 #include <pragma/engine.h>
 
-class WVServerClient;
+namespace pragma::networking {class IServerClient;};
 #define COMMA ,
 class DLLNETWORK SVNetMessage
 {
 public:
-	void (*handler)(WVServerClient*,NetPacket);
+	void (*handler)(pragma::networking::IServerClient&,NetPacket);
 	unsigned int ID;
 };
 
@@ -33,8 +33,8 @@ protected:
 public:
 	virtual void RegisterNetMessage(std::string name,void (*handler)(NetPacket));
 	virtual void PreRegisterNetMessage(std::string name,void (*handler)(NetPacket));
-	virtual void RegisterNetMessage(std::string name,void (*handler)(WVServerClient*,NetPacket));
-	virtual void PreRegisterNetMessage(std::string name,void (*handler)(WVServerClient*,NetPacket));
+	virtual void RegisterNetMessage(std::string name,void (*handler)(pragma::networking::IServerClient&,NetPacket));
+	virtual void PreRegisterNetMessage(std::string name,void (*handler)(pragma::networking::IServerClient&,NetPacket));
 	void GetNetMessages(std::unordered_map<unsigned int,T> **messages);
 	void GetNetMessages(std::unordered_map<std::string,unsigned int> **messages);
 	T *GetNetMessage(unsigned int ID);
@@ -48,9 +48,9 @@ template<class T>
 {}
 
 template<class T> void NetMessageMap<T>::RegisterNetMessage(std::string name,void (*)(NetPacket)) {}
-template<class T> void NetMessageMap<T>::RegisterNetMessage(std::string name,void (*)(WVServerClient*,NetPacket)) {}
+template<class T> void NetMessageMap<T>::RegisterNetMessage(std::string name,void (*)(pragma::networking::IServerClient&,NetPacket)) {}
 template<class T> void NetMessageMap<T>::PreRegisterNetMessage(std::string name,void (*)(NetPacket)) {}
-template<class T> void NetMessageMap<T>::PreRegisterNetMessage(std::string name,void (*)(WVServerClient*,NetPacket)) {}
+template<class T> void NetMessageMap<T>::PreRegisterNetMessage(std::string name,void (*)(pragma::networking::IServerClient&,NetPacket)) {}
 
 template<class T>
 	void NetMessageMap<T>::GetNetMessages(std::unordered_map<unsigned int,T> **messages) {*messages = &m_netMessages;}
@@ -99,8 +99,8 @@ class DLLNETWORK ServerMessageMap
 	: public NetMessageMap<SVNetMessage>
 {
 public:
-	void RegisterNetMessage(std::string name,void (*handler)(WVServerClient*,NetPacket));
-	void PreRegisterNetMessage(std::string name,void (*handler)(WVServerClient*,NetPacket));
+	void RegisterNetMessage(std::string name,void (*handler)(pragma::networking::IServerClient&,NetPacket));
+	void PreRegisterNetMessage(std::string name,void (*handler)(pragma::networking::IServerClient&,NetPacket));
 };
 
 #define net_newglobal_dec(glname,args) \
@@ -116,7 +116,7 @@ public:
 		} \
 	};
 
-net_newglobal_dec(Server,WVServerClient* COMMA NetPacket);
+net_newglobal_dec(Server,pragma::networking::IServerClient& COMMA NetPacket);
 net_newglobal_dec(Client,NetPacket);
 
 #define _REGISTER_NETMESSAGE_SV(msgName,handler) \

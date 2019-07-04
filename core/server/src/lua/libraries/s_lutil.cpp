@@ -7,6 +7,7 @@
 #include <pragma/util/bulletinfo.h>
 #include <pragma/util/util_splash_damage_info.hpp>
 #include <networkmanager/nwm_packet.h>
+#include <pragma/networking/enums.hpp>
 
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
@@ -41,7 +42,7 @@ int Lua::util::Server::fire_bullets(lua_State *l)
 	Vector3 start;
 	uint32_t numTracer = 0;
 	auto r = Lua::util::fire_bullets(l,[&hitPositions,&hitNormals,&hitSurfaceMaterials,&start,&numTracer](DamageInfo &dmg,TraceData&,TraceResult &result,uint32_t &tracerCount) {
-		if(result.hit == true)
+		if(result.hitType != RayCastHitType::None)
 		{
 			hitPositions.push_back(result.position);
 			hitNormals.push_back(result.normal);
@@ -84,7 +85,7 @@ int Lua::util::Server::fire_bullets(lua_State *l)
 		packet->Write<Vector3>(n);
 		packet->Write<int32_t>(surfaceMaterial);
 	}
-	server->BroadcastUDP("fire_bullet",packet);
+	server->SendPacket("fire_bullet",packet,pragma::networking::Protocol::FastUnreliable);
 	return r;
 }
 

@@ -3,12 +3,13 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <networkmanager/nwm_packet.h>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
-void SHealthComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SHealthComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<unsigned short>(GetHealth());
 }
@@ -21,6 +22,6 @@ void SHealthComponent::SetHealth(unsigned short health)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<unsigned short>(health);
-	server->BroadcastTCP("ent_sethealth",p);
+	server->SendPacket("ent_sethealth",p,pragma::networking::Protocol::SlowReliable);
 }
 luabind::object SHealthComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SHealthComponentHandleWrapper>(l);}

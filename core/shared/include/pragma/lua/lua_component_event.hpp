@@ -3,7 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/entity_component_event.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <vector>
 
 struct DLLNETWORK LuaComponentEvent

@@ -29,7 +29,7 @@ bool SSoundDspDistortionComponent::OnSetKeyValue(const std::string &key,const st
 	return true;
 }
 
-void SSoundDspDistortionComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspDistortionComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvEdge);
 	packet->Write<float>(m_kvGain);

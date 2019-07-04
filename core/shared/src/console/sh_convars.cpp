@@ -3,7 +3,7 @@
 #include <pragma/console/convars.h>
 #include <pragma/console/s_convars.h>
 #include <pragma/console/c_convars.h>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <pragma/game/game.h>
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
@@ -12,9 +12,6 @@
 #include <pragma/engine_version.h>
 #include <pragma/lua/lua_doc.hpp>
 #include <map>
-#ifdef BT_ENABLE_PROFILE
-#include <LinearMath/btQuickprof.h>
-#endif
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <wv_steamworks.hpp>
@@ -298,6 +295,7 @@ static void debug_profiling_print(NetworkState*,pragma::BasePlayerComponent*,std
 }
 REGISTER_ENGINE_CONCOMMAND(debug_profiling_print,debug_profiling_print,ConVarFlags::None,"Prints the last profiled times.");
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 #ifdef BT_ENABLE_PROFILE
 static void bt_profile_manager_dump_recursive(CProfileIterator* profileIterator, int spacing)
 {
@@ -372,19 +370,8 @@ static void debug_profiling_physics_end(NetworkState*,pragma::BasePlayerComponen
 }
 REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end,debug_profiling_physics_end,ConVarFlags::None,"Prints physics profiling information for the last simulation step.");
 #endif
+#endif
 
 //////////////// SERVER ////////////////
 
 REGISTER_SHARED_CONVAR(rcon_password,"",ConVarFlags::None,"Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
-
-#ifdef PHYS_ENGINE_PHYSX
-#ifdef _DEBUG
-REGISTER_CONCOMMAND(pvd_connect,[](NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv) {
-	engine->OpenPVDConnection();
-},"Connects with the PVD, if it is started. Only available in debug configuration!");
-
-REGISTER_CONCOMMAND(pvd_disconnect,[](NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv) {
-	engine->ClosePVDConnection();
-},"Disconnects from the PVD, if currently connected. Only available in debug configuration!");
-#endif
-#endif

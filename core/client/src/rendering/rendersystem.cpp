@@ -4,7 +4,6 @@
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/opengl/renderobject.h"
 #include "cmaterialmanager.h"
-#include "pragma/rendering/scene/camera.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/model/c_model.h"

@@ -242,12 +242,14 @@ void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *p
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
 	TraceData data {};
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	data.SetFilter(ent.GetHandle());
-	data.SetFlags(FTRACE::FILTER_INVERT);
+#endif
+	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);
 	auto r = c_game->RayCast(data);
-	if(r.hit == false)
+	if(r.hitType == RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh&>(*navMesh).SetDebugPathStart(r.position);
 }
@@ -269,12 +271,14 @@ void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
 	TraceData data {};
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	data.SetFilter(ent.GetHandle());
-	data.SetFlags(FTRACE::FILTER_INVERT);
+#endif
+	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);
 	auto r = c_game->RayCast(data);
-	if(r.hit == false)
+	if(r.hitType == RayCastHitType::None)
 		return;
 	static_cast<pragma::nav::CMesh&>(*navMesh).SetDebugPathEnd(r.position);
 }

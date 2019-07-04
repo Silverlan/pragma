@@ -25,6 +25,18 @@ register_module(pr_xml)
 register_module(pr_video_recorder)
 register_module(pr_steam_networking)
 
+set(CONFIG_ENABLE_BULLET_PHYSICS ON CACHE BOOL "Enable Bullet physics engine")
+if(CONFIG_ENABLE_BULLET_PHYSICS MATCHES ON)
+	register_module(pr_bullet)
+	set_target_properties(pr_bullet PROPERTIES FOLDER modules)
+endif()
+
+set(CONFIG_ENABLE_PHYSX_PHYSICS ON CACHE BOOL "Enable PhysX physics engine")
+if(CONFIG_ENABLE_PHYSX_PHYSICS MATCHES ON)
+	register_module(pr_physx)
+	set_target_properties(pr_physx PROPERTIES FOLDER modules)
+endif()
+
 set_target_properties(pr_steamworks PROPERTIES FOLDER modules)
 set_target_properties(pr_chromium PROPERTIES FOLDER modules)
 set_target_properties(pr_curl PROPERTIES FOLDER modules)

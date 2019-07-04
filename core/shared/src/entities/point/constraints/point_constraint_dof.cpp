@@ -2,11 +2,11 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_dof.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include <sharedutils/util.h>
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -63,14 +63,14 @@ void BasePointConstraintDoFComponent::InitializeConstraint(BaseEntity *src,BaseE
 		if(bodyTgt.IsValid())
 		{
 			auto posTgt = bodyTgt->GetPos();
-			auto *dof = physEnv->CreateDoFConstraint(bodySrc,Vector3(0.f,0.f,0.f),uquat::identity(),static_cast<PhysRigidBody*>(bodyTgt.get()),Vector3(0.f,50.f,0.f),uquat::identity());
+			auto dof = physEnv->CreateDoFConstraint(*bodySrc,Vector3(0.f,0.f,0.f),uquat::identity(),*bodyTgt,Vector3(0.f,50.f,0.f),uquat::identity());
 			if(dof != nullptr)
 			{
 				//dof->SetLinearLimit(Vector3(1.f,1.f,1.f),Vector3(-1.f,-1.f,-1.f));
 				dof->SetAngularLimit(Vector3(M_PI,M_PI,M_PI),Vector3(-M_PI,-M_PI,-M_PI));
 				//dof->SetLinearLimit(m_kvLimLinLower,m_kvLimLinUpper);
 				//dof->SetAngularLimit(m_kvLimAngLower,m_kvLimAngUpper);
-				m_constraints.push_back(dof->GetHandle());
+				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IDoFConstraint,pragma::physics::IConstraint>(dof));
 			}
 		}
 	}

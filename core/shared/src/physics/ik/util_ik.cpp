@@ -1,14 +1,14 @@
 #include "stdafx_shared.h"
 #include "pragma/physics/ik/util_ik.hpp"
-#include "pragma/physics/phystransform.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/transform.hpp"
+#include "pragma/physics/environment.hpp"
 #include "pragma/buss_ik/Tree.h"
 
-void util::ik::get_local_transform(const Node &node,PhysTransform &t)
+void util::ik::get_local_transform(const Node &node,pragma::physics::Transform &t)
 {
 	auto rot = get_rotation(node);
 	t.SetRotation(rot);
-	t.SetOrigin(Vector3(node.r.x,node.r.y,node.r.z) /static_cast<float>(PhysEnv::WORLD_SCALE));
+	t.SetOrigin(Vector3{node.r.x,node.r.y,node.r.z});
 }
 
 Quat util::ik::get_rotation(const Node &node)

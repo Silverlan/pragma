@@ -615,9 +615,4 @@ void CGame::RegisterLuaLibraries()
 	{
 		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
 	}
-
-#ifdef PHYS_ENGINE_PHYSX
-	lua_pushtablecfunction("physx","SetVisualizationParameter",Lua_physx_SetVisualizationParameter);
-	lua_pushtablecfunction("physx","SetVisualizationEnabled",Lua_physx_SetVisualizationEnabled);
-#endif
 }

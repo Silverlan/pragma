@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
@@ -19,5 +20,5 @@ void STimeScaleComponent::SetTimeScale(float timeScale)
 		return;
 	NetPacket p;
 	p->Write<float>(timeScale);
-	ent.SendNetEventTCP(m_netEvSetTimeScale,p);
+	ent.SendNetEvent(m_netEvSetTimeScale,p,pragma::networking::Protocol::SlowReliable);
 }

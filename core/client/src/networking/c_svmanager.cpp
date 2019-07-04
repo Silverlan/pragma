@@ -2,9 +2,13 @@
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
 #include "pragma/console/c_cvar_server.h"
+#include "pragma/networking/iclient.hpp"
+#include "pragma/networking/standard_client.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvclient.h"
 #include <sharedutils/util.h>
+#include <pragma/networking/error.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/portinfo.h>
 #include <pragma/networking/netmessages.h>
 
@@ -17,20 +21,13 @@ void ClientState::Connect(std::string ip,std::string port)
 #ifdef DEBUG_SOCKET
 	Con::ccl<<"Connecting to "<<ip<<":"<<port<<"..."<<Con::endl;
 #endif
-	if(m_client != nullptr)
-	{
-		m_client->Disconnect();
-		m_client = nullptr;
-	}
-	try
-	{
-		m_client = WVClient::Create(ip,CUInt16(util::to_int(port)));
-	}
-	catch(NWMException &e)
-	{
-		Con::cwar<<"WARNING: Unable to connect to '"<<ip<<":"<<port<<"': "<<e.what()<<"!"<<Con::endl;
+	Disconnect();
+	m_client = std::make_unique<pragma::networking::StandardClient>();
+	if(m_client == nullptr)
 		return;
-	}
+	pragma::networking::Error err;
+	if(m_client->Connect(ip,CUInt16(util::to_int(port)),err) == false)
+		Con::cwar<<"WARNING: Unable to connect to '"<<ip<<":"<<port<<"': "<<err.GetMessage()<<"!"<<Con::endl;
 }
 
 ///////////////////////////
@@ -44,7 +41,7 @@ DLLCLIENT void CMD_cl_rcon(NetworkState*,pragma::BasePlayerComponent*,std::vecto
 	NetPacket p;
 	p->WriteString(pass);
 	p->WriteString(argv[0]);
-	client->SendPacketTCP("rcon",p);
+	client->SendPacket("rcon",p,pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
@@ -123,7 +120,7 @@ DLLCLIENT void CMD_cl_send(NetworkState*,pragma::BasePlayerComponent*,std::vecto
 	if(argv.empty()) return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	client->SendPacketTCP("cl_send",packet);
+	client->SendPacket("cl_send",packet,pragma::networking::Protocol::SlowReliable);
 }
 
 DLLCLIENT void CMD_cl_send_udp(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -132,7 +129,7 @@ DLLCLIENT void CMD_cl_send_udp(NetworkState*,pragma::BasePlayerComponent*,std::v
 		return;
 	NetPacket packet;
 	packet->WriteString(argv[0]);
-	client->SendPacketUDP("cl_send",packet);
+	client->SendPacket("cl_send",packet,pragma::networking::Protocol::FastUnreliable);
 }
 
 void CMD_cl_debug_netmessages(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

@@ -35,9 +35,6 @@ namespace Lua
 			DLLCLIENT int get_csm_buffer(lua_State *l);
 			DLLCLIENT int get_render_settings_descriptor_set(lua_State *l);
 
-#ifdef PHYS_ENGINE_PHYSX
-			DLLCLIENT int get_physx_scene(lua_State *l);
-#endif
 			DLLCLIENT int load_map(lua_State *l);
 
 			DLLCLIENT int test(lua_State *l);

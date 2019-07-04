@@ -3,14 +3,14 @@
 #include "pragma/entities/baseentity.h"
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
-#include "pragma/physics/physcollisionobject.h"
-#include "pragma/physics/physcontroller.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/collision_object.hpp"
+#include "pragma/physics/controller.hpp"
+#include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/entities/components/base_physics_component.hpp"
 
 DEFINE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
-
+#pragma optimize("",off)
 PhysObj::PhysObj(pragma::BaseEntityComponent *owner)
 	: m_handle(new PtrPhysObj(this)),
 	m_collisionFilterGroup(CollisionMask::None),m_collisionFilterMask(CollisionMask::None)
@@ -19,19 +19,19 @@ PhysObj::PhysObj(pragma::BaseEntityComponent *owner)
 	m_networkState = owner->GetEntity().GetNetworkState();
 }
 
-#ifdef PHYS_ENGINE_BULLET
-PhysObj::PhysObj(pragma::BaseEntityComponent *owner,PhysCollisionObject *object)
+PhysObj::PhysObj(pragma::BaseEntityComponent *owner,pragma::physics::ICollisionObject &object)
 	: PhysObj(owner)
 {
 	AddCollisionObject(object);
 }
 
-PhysObj::PhysObj(pragma::BaseEntityComponent *owner,std::vector<PhysCollisionObject*> *objects)
+PhysObj::PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::physics::ICollisionObject*> &objects)
 	: PhysObj(owner)
 {
-	for(unsigned int i=0;i<objects->size();i++)
-		AddCollisionObject((*objects)[i]);
+	for(unsigned int i=0;i<objects.size();i++)
+		AddCollisionObject(*objects[i]);
 }
+bool PhysObj::Initialize() {return true;}
 void PhysObj::GetAABB(Vector3 &min,Vector3 &max) const
 {
 	min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
@@ -43,7 +43,7 @@ void PhysObj::GetAABB(Vector3 &min,Vector3 &max) const
 		if(hObj.IsValid())
 		{
 			b = true;
-			auto &o = *hObj.get();
+			auto &o = *hObj.Get();
 			o.GetAABB(oMin,oMax);
 			assert(oMin.x <= oMax.x && oMin.y <= oMax.y && oMin.z <= oMax.z);
 			uvec::min(&min,oMin);
@@ -68,16 +68,6 @@ void PhysObj::SetStatic(bool) {}
 bool PhysObj::IsRigid() const {return false;}
 bool PhysObj::IsSoftBody() const {return false;}
 
-void PhysObj::UpdateCCD()
-{
-	for(auto &hObj : m_collisionObjects)
-	{
-		if(hObj.IsValid() == false)
-			continue;
-		hObj->UpdateCCD();
-	}
-}
-
 void PhysObj::SetCCDEnabled(bool b)
 {
 	for(auto &hObj : m_collisionObjects)
@@ -85,16 +75,20 @@ void PhysObj::SetCCDEnabled(bool b)
 		if(hObj.IsValid() == false)
 			continue;
 		hObj->SetCCDEnabled(b);
-		hObj->UpdateCCD();
 	}
 }
 
-void PhysObj::AddCollisionObject(PhysCollisionObject *obj)
+void PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
 {
-	m_collisionObjects.push_back(obj->GetHandle());
-	obj->userData = this;
+	pragma::physics::IBase *x;
+	auto *y = static_cast<pragma::physics::ICollisionObject*>(x);
+	//static_assert(std::is_convertible<pragma::physics::IBase*,pragma::physics::ICollisionObject*>::value);
+
+
+	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
+	obj.userData = this;
 	if(m_bSpawned == true)
-		obj->Spawn();
+		obj.Spawn();
 }
 
 void PhysObj::Spawn()
@@ -107,65 +101,28 @@ void PhysObj::Spawn()
 			hObj->Spawn();
 	}
 }
-
-std::vector<PhysCollisionObjectHandle> &PhysObj::GetCollisionObjects() {return m_collisionObjects;}
-PhysCollisionObject *PhysObj::GetCollisionObject()
+const pragma::physics::ICollisionObject *PhysObj::GetCollisionObject() const {return const_cast<PhysObj*>(this)->GetCollisionObject();}
+std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &PhysObj::GetCollisionObjects() {return m_collisionObjects;}
+pragma::physics::ICollisionObject *PhysObj::GetCollisionObject()
 {
 	if(m_collisionObjects.empty())
 		return nullptr;
 	auto &hObj = m_collisionObjects.front();
 	if(!hObj.IsValid())
 		return nullptr;
-	return hObj.get();
+	return hObj.Get();
 }
-#elif PHYS_ENGINE_PHYSX
-PhysObj::PhysObj(BaseEntity *owner,physx::PxRigidActor *actor)
-	: PhysObj()
-{
-	m_owner = owner->CreateHandle();
-	AddActor(actor);
-}
-
-PhysObj::PhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors)
-	: PhysObj()
-{
-	m_owner = owner->CreateHandle();
-	for(unsigned int i=0;i<actors->size();i++)
-		AddActor((*actors)[i]);
-}
-
-void PhysObj::AddActor(physx::PxRigidActor *actor)
-{
-	m_actors.push_back(actor);
-	actor->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY,1);
-	actor->setActorFlag(physx::PxActorFlag::eSEND_SLEEP_NOTIFIES,1);
-	actor->userData = this;
-}
-
-physx::PxRigidActor *PhysObj::GetActor()
-{
-	if(m_actors.empty())
-		return NULL;
-	return m_actors[0];
-}
-#endif
 
 PhysObj::~PhysObj()
 {
 	m_handle.Invalidate();
-#ifdef PHYS_ENGINE_PHYSX
-	for(unsigned int i=0;i<m_actors.size();i++)
-		m_actors[i]->release();
-#endif
-#ifdef PHYS_ENGINE_BULLET
 	//NetworkState *state = m_networkState;
 	for(unsigned int i=0;i<m_collisionObjects.size();i++)
 	{
 		auto &o = m_collisionObjects[i];
 		if(o.IsValid())
-			delete o.get();
+			o.Remove();
 	}
-#endif
 }
 void PhysObj::OnSleep()
 {
@@ -205,9 +162,7 @@ float PhysObj::GetAngularSleepingThreshold() const {return 0.f;}
 void PhysObj::Simulate(double,bool) {}
 
 PhysObjHandle PhysObj::GetHandle() {return m_handle;}
-PhysObjHandle *PhysObj::CreateHandle() {return m_handle.Copy();}
 
-#ifdef PHYS_ENGINE_BULLET
 void PhysObj::SetPosition(const Vector3 &pos)
 {
 	if(m_collisionObjects.empty())
@@ -249,7 +204,7 @@ void PhysObj::SetOrientation(const Quat &q)
 	for(auto it=m_collisionObjects.begin();it!=m_collisionObjects.end();++it)
 	{
 		auto &o = *it;
-		if(o.IsValid() && o.get() != root.get())
+		if(o.IsValid() && o.Get() != root.Get())
 		{
 			auto offset = o->GetPos() -origin;
 			uvec::rotate(&offset,rotOffset);
@@ -261,14 +216,14 @@ void PhysObj::SetOrientation(const Quat &q)
 }
 Quat PhysObj::GetOrientation()
 {
-	PhysCollisionObject *o = GetCollisionObject();
+	auto *o = GetCollisionObject();
 	if(o == NULL)
 		return uquat::identity();
 	return o->GetRotation();
 }
 Vector3 PhysObj::GetPosition()
 {
-	PhysCollisionObject *o = GetCollisionObject();
+	auto *o = GetCollisionObject();
 	if(o == NULL)
 		return Vector3(0,0,0);
 	auto r = o->GetPos();
@@ -282,8 +237,8 @@ Vector3 PhysObj::GetPosition()
 }
 Vector3 PhysObj::GetOrigin() const
 {
-	PhysCollisionObject *o = const_cast<PhysObj*>(this)->GetCollisionObject();
-	if(o == NULL)
+	auto *o = const_cast<PhysObj*>(this)->GetCollisionObject();
+	if(o == nullptr)
 		return Vector3(0,0,0);
 	auto r = o->GetPos();
 	if(!o->HasOrigin()) // If origin is enabled, position can be vastly off from the entity position (e.g. player ragdoll)
@@ -292,16 +247,6 @@ Vector3 PhysObj::GetOrigin() const
 	auto &origin = o->GetOrigin();
 	r += origin *uquat::get_inverse(rot);
 	return r;
-}
-void PhysObj::SetTrigger(bool b)
-{
-	m_bTrigger = b;
-	for(unsigned int i=0;i<m_collisionObjects.size();i++)
-	{
-		auto &o = m_collisionObjects[i];
-		if(o.IsValid())
-			o->SetTrigger(b);
-	}
 }
 void PhysObj::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask)
 {
@@ -317,97 +262,6 @@ void PhysObj::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterM
 	}
 }
 void PhysObj::SetCollisionFilterMask(CollisionMask filterMask) {SetCollisionFilter(m_collisionFilterGroup,filterMask);}
-#elif PHYS_ENGINE_PHYSX
-void PhysObj::SetPosition(const Vector3 &pos)
-{
-	if(m_actors.empty())
-		return;
-	physx::PxRigidActor *root = m_actors[0];
-	physx::PxTransform tRoot = root->getGlobalPose();
-	physx::PxVec3 &posRoot = tRoot.p;
-	for(unsigned int i=0;i<m_actors.size();i++)
-	{
-		physx::PxRigidActor *actor = m_actors[i];
-		physx::PxTransform t = actor->getGlobalPose();
-		t.p.x = pos.x +(t.p.x -posRoot.x);
-		t.p.y = pos.y +(t.p.y -posRoot.y);
-		t.p.z = pos.z +(t.p.z -posRoot.z);
-		actor->setGlobalPose(t);
-	}
-}
-void PhysObj::SetOrientation(const Quat &q)
-{
-	if(m_actors.empty())
-		return;
-	physx::PxRigidActor *root = m_actors[0];
-	physx::PxTransform tRoot = root->getGlobalPose();
-	physx::PxQuat &rotRoot = tRoot.q;
-	physx::PxQuat qNew(q.x,q.y,q.z,q.w);
-	for(unsigned int i=0;i<m_actors.size();i++)
-	{
-		physx::PxRigidActor *actor = m_actors[i];
-		physx::PxTransform t = actor->getGlobalPose();
-		t.q = t.q *rotRoot.getConjugate() *qNew;
-		actor->setGlobalPose(t);
-	}
-}
-Quat PhysObj::GetOrientation()
-{
-	physx::PxRigidActor *actor = GetActor();
-	if(actor == NULL)
-		return uquat::identity();
-	physx::PxTransform t = actor->getGlobalPose();
-	return Quat(t.q.w,t.q.x,t.q.y,t.q.z);
-}
-Vector3 PhysObj::GetPosition()
-{
-	physx::PxRigidActor *actor = GetActor();
-	if(actor == NULL)
-		return Vector3(0,0,0);
-	physx::PxTransform t = actor->getGlobalPose();
-	return Vector3(t.p.x,t.p.y,t.p.z);
-}
-void PhysObj::SetTrigger(bool b)
-{
-	m_bTrigger = b;
-	for(unsigned int i=0;i<m_actors.size();i++)
-	{
-		physx::PxRigidActor *actor = m_actors[i];
-		unsigned int numShapes = actor->getNbShapes();
-		physx::PxShape **shapes = new physx::PxShape*[numShapes];
-		actor->getShapes(&shapes[0],numShapes);
-		for(unsigned int j=0;j<numShapes;j++)
-		{
-			physx::PxShape *shape = shapes[j];
-			shape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE,!b);
-			shape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE,b);
-		}
-		delete[] shapes;
-	}
-}
-void PhysObj::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask)
-{
-	m_collisionFilterGroup = filterGroup;
-	m_collisionFilterMask = filterMask;
-	for(unsigned int i=0;i<m_actors.size();i++)
-	{
-		physx::PxRigidActor *actor = m_actors[i];
-		unsigned int numShapes = actor->getNbShapes();
-		physx::PxShape **shapes = new physx::PxShape*[numShapes];
-		actor->getShapes(&shapes[0],numShapes);
-		for(unsigned int j=0;j<numShapes;j++)
-		{
-			physx::PxShape *shape = shapes[j];
-			physx::PxFilterData filter = shape->getSimulationFilterData();
-			filter.word0 = filterGroup;
-			filter.word1 = filterMask;
-			shape->setSimulationFilterData(filter);
-		}
-		delete[] shapes;
-	}
-}
-std::vector<physx::PxRigidActor*> *PhysObj::GetActors() {return &m_actors;}
-#endif
 void PhysObj::AddCollisionFilter(CollisionMask filter)
 {
 	CollisionMask filterGroup;
@@ -431,7 +285,14 @@ void PhysObj::GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filte
 	*filterMask = m_collisionFilterMask;
 }
 
-bool PhysObj::IsTrigger() {return m_bTrigger;}
+bool PhysObj::IsTrigger() const
+{
+	auto *colObj = GetCollisionObject();
+	if(colObj == nullptr)
+		return false;
+	auto *shape = colObj->GetCollisionShape();
+	return shape ? shape->IsTrigger() : false;
+}
 
 void PhysObj::SetLinearVelocity(const Vector3&) {}
 void PhysObj::AddLinearVelocity(const Vector3 &vel) {SetLinearVelocity(GetLinearVelocity() +vel);}
@@ -457,140 +318,4 @@ void PhysObj::ClearForces() {}
 Vector3 PhysObj::GetTotalForce() {return Vector3(0.f,0.f,0.f);}
 Vector3 PhysObj::GetTotalTorque() {return Vector3(0.f,0.f,0.f);}
 
-////////////////////////////////////
-
-#if PHYS_ENGINE_PHYSX
-DynamicActorInfo::DynamicActorInfo(physx::PxRigidDynamic *actor,int bone)
-	: m_actor(actor),m_bone(bone)
-{}
-physx::PxRigidDynamic *DynamicActorInfo::GetActor() {return m_actor;}
-int DynamicActorInfo::GetBoneID() {return m_bone;}
-
-DynamicPhysObj::DynamicPhysObj(BaseEntity *owner,physx::PxRigidDynamic *actor,int bone)
-	: PhysObj(owner,actor),PhysObjGravitation(),PhysObjKinematic()
-{
-	m_actorInfos.push_back(DynamicActorInfo(actor,bone));
-	m_bAsleep = actor->isSleeping();
-}
-
-DynamicPhysObj::DynamicPhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors)
-	: PhysObj(owner,actors)
-{
-	for(unsigned int i=0;i<actors->size();i++)
-		m_actorInfos.push_back(DynamicActorInfo(static_cast<physx::PxRigidDynamic*>((*actors)[i])));
-	if(!m_actorInfos.empty())
-		m_bAsleep = m_actorInfos[0].GetActor()->isSleeping();
-}
-void DynamicPhysObj::AddActor(physx::PxRigidActor *actor)
-{
-	PhysObj::AddActor(actor);
-}
-unsigned int DynamicPhysObj::AddActor(physx::PxRigidDynamic *actor,int bone)
-{
-	AddActor(static_cast<physx::PxRigidActor*>(actor));
-	m_actorInfos.push_back(DynamicActorInfo(actor,bone));
-	return m_actorInfos.size() -1;
-}
-unsigned int DynamicPhysObj::AddActor(physx::PxRigidDynamic *actor) {return AddActor(actor,0);}
-int DynamicPhysObj::GetBoneID(physx::PxRigidDynamic *actor)
-{
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-	{
-		if(m_actorInfos[i].GetActor() == actor)
-			return m_actorInfos[i].GetBoneID();
-	}
-	return -1;
-}
-void DynamicPhysObj::PutToSleep()
-{
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-		m_actorInfos[i].GetActor()->putToSleep();
-}
-void DynamicPhysObj::WakeUp()
-{
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-		m_actorInfos[i].GetActor()->wakeUp();
-}
-void DynamicPhysObj::Simulate(double tDelta,bool bIgnoreGravity)
-{
-	if(m_bDisabled == true || IsKinematic())
-		return;
-	if(!m_owner->IsValid())
-		return;
-	if(bIgnoreGravity)
-		return;
-	Vector3 f = GetGravityForce();
-	physx::PxVec3 force(f.x,f.y,f.z);
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-		m_actorInfos[i].GetActor()->addForce(force,physx::PxForceMode::eACCELERATION,false);
-}
-Vector3 DynamicPhysObj::GetLinearVelocity()
-{
-	physx::PxRigidDynamic *actor = static_cast<physx::PxRigidDynamic*>(GetActor());
-	if(actor == NULL)
-		return Vector3(0,0,0);
-	physx::PxVec3 vel = actor->getLinearVelocity();
-	return Vector3(vel.x,vel.y,vel.z);
-}
-
-void DynamicPhysObj::SetLinearVelocity(const Vector3 &vel)
-{
-	if(IsKinematic())
-		return;
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-		m_actorInfos[i].GetActor()->setLinearVelocity(physx::PxVec3(vel.x,vel.y,vel.z));
-}
-void DynamicPhysObj::SetKinematic(bool b)
-{
-	PhysObjKinematic::SetKinematic(b,m_actors);
-}
-Vector3 DynamicPhysObj::GetAngularVelocity()
-{
-	physx::PxRigidDynamic *actor = static_cast<physx::PxRigidDynamic*>(GetActor());
-	if(actor == NULL)
-		return Vector3(0,0,0);
-	physx::PxVec3 vel = actor->getAngularVelocity();
-	return Vector3(vel.x,vel.y,vel.z);
-}
-void DynamicPhysObj::SetAngularVelocity(const Vector3 &vel)
-{
-	if(IsKinematic())
-		return;
-	for(unsigned int i=0;i<m_actorInfos.size();i++)
-		m_actorInfos[i].GetActor()->setAngularVelocity(physx::PxVec3(vel.x,vel.y,vel.z));
-}
-
-DynamicPhysObj::~DynamicPhysObj()
-{}
-
-DynamicActorInfo *DynamicPhysObj::GetActorInfo(unsigned int idx)
-{
-	if(idx >= m_actorInfos.size())
-		return NULL;
-	return &m_actorInfos[idx];
-}
-std::vector<DynamicActorInfo> &DynamicPhysObj::GetActorInfo() {return m_actorInfos;}
-
-BaseEntity *DynamicPhysObj::GetOwner() {return PhysObj::GetOwner();}
-
-void DynamicPhysObj::AddLinearVelocity(const Vector3 &vel) {SetLinearVelocity(GetLinearVelocity() +vel);}
-void DynamicPhysObj::AddAngularVelocity(const Vector3 &vel) {SetAngularVelocity(GetAngularVelocity() +vel);}
-
-////////////////////////////////////
-
-StaticPhysObj::StaticPhysObj(BaseEntity *owner,physx::PxRigidStatic *actor)
-	: PhysObj(owner,actor)
-{
-	m_staticActors.push_back(actor);
-}
-
-StaticPhysObj::StaticPhysObj(BaseEntity *owner,std::vector<physx::PxRigidActor*> *actors)
-	: PhysObj(owner,actors)
-{
-	for(unsigned int i=0;i<actors->size();i++)
-		m_staticActors.push_back(static_cast<physx::PxRigidStatic*>((*actors)[i]));
-}
-bool StaticPhysObj::IsStatic() {return true;}
-void StaticPhysObj::Enable() {}
-void StaticPhysObj::Disable() {}
-#endif
+#pragma optimize("",on)

@@ -11,7 +11,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/c_settings.hpp"
-#include "pragma/physics/c_physdebug.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -302,16 +301,7 @@ void RasterizationRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer
 		if(cam.valid())
 			DebugRenderer::Render(drawCmd,*cam);
 		if(cvRenderPhysics->GetBool())
-		{
-#ifdef PHYS_ENGINE_BULLET
-			auto *physDebugInterface = c_game->GetPhysicsDebugInterface();
-			if(physDebugInterface && cam.valid())
-				physDebugInterface->Render(drawCmd,*cam);
-#elif PHYS_ENGINE_PHYSX
-			const physx::PxRenderBuffer &pxRenderBuffer = GetPhysXScene()->getRenderBuffer();
-			PxVisualizer::RenderScene(pxRenderBuffer);
-#endif
-		}
+			c_game->RenderDebugPhysics(drawCmd,*cam);
 		c_game->CallCallbacks("PostRenderDebug");
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
 	}

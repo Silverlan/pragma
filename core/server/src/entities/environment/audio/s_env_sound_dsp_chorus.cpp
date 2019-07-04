@@ -31,7 +31,7 @@ bool SSoundDspChorusComponent::OnSetKeyValue(const std::string &key,const std::s
 	return true;
 }
 
-void SSoundDspChorusComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspChorusComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<int>(m_kvWaveform);
 	packet->Write<int>(m_kvPhase);

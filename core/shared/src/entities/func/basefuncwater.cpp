@@ -1,12 +1,13 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/func/basefuncwater.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 #include "pragma/physics/phys_water_surface_simulator.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/entities/trigger/trigger_spawnflags.h"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/physics/raytraces.h"
+#include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -16,6 +17,8 @@
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/model/model.h"
 #include <pragma/math/intersection.h>
+
+// #define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
 
@@ -54,11 +57,7 @@ void BaseFuncWaterComponent::Initialize()
 	});
 	BindEvent(BasePhysicsComponent::EVENT_HANDLE_RAYCAST,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &raycastData = static_cast<CEHandleRaycast&>(evData.get());
-		auto r = OnRayResultCallback(
-			raycastData.rayCollisionGroup,raycastData.rayCollisionMask,
-			raycastData.rayFromWorld,raycastData.rayToWorld,raycastData.hitNormalWorld,
-			raycastData.hitPointWorld,raycastData.rayResult
-		);
+		auto r = OnRayResultCallback(raycastData.rayCollisionGroup,raycastData.rayCollisionMask);
 		if(r == false)
 		{
 			raycastData.hit = false;
@@ -118,8 +117,9 @@ void BaseFuncWaterComponent::OnPhysicsInitialized()
 	pPhysComponent->SetCollisionFilterGroup(CollisionMask::Water | CollisionMask::WaterSurface);
 }
 
-bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,btVector3 &rayFromWorld,btVector3 &rayToWorld,btVector3 &hitNormalWorld,btVector3 &hitPointWorld,btCollisionWorld::LocalRayResult &rayResult)
+bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_physSurfaceSim == nullptr || (rayCollisionMask &CollisionMask::WaterSurface) == CollisionMask::None)
 		return true;
 	auto rayFromWorldWs = uvec::create(rayFromWorld /PhysEnv::WORLD_SCALE);
@@ -137,6 +137,9 @@ bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup
 	rayResult.m_hitNormalLocal = hitNormalWorld;
 	hitPointWorld = uvec::create_bt(rayFromWorldWs +dir *static_cast<float>(t)) *PhysEnv::WORLD_SCALE;
 	return true;
+#else
+	return false;
+#endif
 }
 
 void BaseFuncWaterComponent::SetMaxWaveHeight(float height) {m_kvMaxWaveHeight = height;}
@@ -144,7 +147,7 @@ void BaseFuncWaterComponent::SetMaxWaveHeight(float height) {m_kvMaxWaveHeight =
 const PhysWaterSurfaceSimulator *BaseFuncWaterComponent::GetSurfaceSimulator() const {return const_cast<BaseFuncWaterComponent*>(this)->GetSurfaceSimulator();}
 PhysWaterSurfaceSimulator *BaseFuncWaterComponent::GetSurfaceSimulator() {return m_physSurfaceSim.get();}
 
-bool BaseFuncWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result)
+bool BaseFuncWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result)
 {
 	if(m_physSurfaceSim != nullptr)
 	{
@@ -153,7 +156,7 @@ bool BaseFuncWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const Trac
 		auto srcOrigin = data.GetSourceOrigin();
 		auto dir = data.GetDirection();
 		auto dist = data.GetDistance();
-		auto hitPos = srcOrigin +dir *(dist *static_cast<float>(result.m_hitFraction));
+		auto hitPos = srcOrigin +dir *(dist *result.fraction);
 		CreateSplash(hitPos,radius,force);
 	}
 	return false;

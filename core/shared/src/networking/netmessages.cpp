@@ -17,7 +17,7 @@
 	} \
 	DLLNETWORK glname##MessageMap *Get##glname##MessageMap() {return g_NetMessages##suffix;}
 
-net_newglobal(Sv,Server,WVServerClient* COMMA NetPacket);
+net_newglobal(Sv,Server,pragma::networking::IServerClient& COMMA NetPacket);
 net_newglobal(Cl,Client,NetPacket);
 
 void ClientMessageMap::PreRegisterNetMessage(std::string name,void(*)(NetPacket))
@@ -51,7 +51,7 @@ void ClientMessageMap::RegisterNetMessage(std::string name,void (*handler)(NetPa
 	m_messageID++;
 }
 
-void ServerMessageMap::PreRegisterNetMessage(std::string name,void(*)(WVServerClient*,NetPacket))
+void ServerMessageMap::PreRegisterNetMessage(std::string name,void(*)(pragma::networking::IServerClient&,NetPacket))
 {
 	if(m_netMessageIDs.find(name) != m_netMessageIDs.end())
 		return;
@@ -63,7 +63,7 @@ void ServerMessageMap::PreRegisterNetMessage(std::string name,void(*)(WVServerCl
 	m_messageID++;
 }
 
-void ServerMessageMap::RegisterNetMessage(std::string name,void (*handler)(WVServerClient*,NetPacket))
+void ServerMessageMap::RegisterNetMessage(std::string name,void (*handler)(pragma::networking::IServerClient&,NetPacket))
 {
 	std::unordered_map<std::string,unsigned int>::iterator i = m_netMessageIDs.find(name);
 	if(i != m_netMessageIDs.end())

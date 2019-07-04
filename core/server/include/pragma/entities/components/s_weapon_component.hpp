@@ -23,7 +23,7 @@ namespace pragma
 		
 		SWeaponComponent(BaseEntity &ent);
 		virtual ~SWeaponComponent() override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 		virtual void Deploy() override;
 		virtual void Holster() override;
@@ -57,7 +57,7 @@ namespace pragma
 
 		virtual bool ShouldTransmitNetData() const override {return true;};
 	protected:
-		void GetTargetRecipients(nwm::RecipientFilter &rf);
+		void GetTargetRecipients(networking::ClientRecipientFilter &rf);
 		virtual void OnUse(BaseEntity *pl);
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnEntitySpawn() override;

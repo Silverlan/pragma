@@ -14,7 +14,7 @@ namespace pragma
 	public:
 		SAttachableComponent(BaseEntity &ent) : BaseAttachableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void SetAttachmentFlags(FAttachmentMode flags) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 

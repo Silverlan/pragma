@@ -8,19 +8,19 @@ Vector3 PhysContactInfo::GetContactNormal(const Vector3 &n,int8_t controllerInde
 	return n;
 }
 
-double PhysContactInfo::CalcXZDistance(const btManifoldPoint &contactPoint,int8_t controllerIndex)
+double PhysContactInfo::CalcXZDistance(const Vector3 &contactPointA,const Vector3 &contactPointB,int8_t controllerIndex)
 {
-	auto &localPoint = (controllerIndex == 0) ? contactPoint.m_localPointA : contactPoint.m_localPointB;
-	return umath::pow2(localPoint.x()) +umath::pow2(localPoint.z());
+	auto &localPoint = (controllerIndex == 0) ? contactPointA : contactPointB;
+	return umath::pow2(localPoint.x) +umath::pow2(localPoint.z);
 }
 
-PhysContactInfo::PhysContactInfo(const btManifoldPoint &contactPoint,int8_t controllerIndex)
-	: contactPoint{contactPoint},controllerIndex{controllerIndex}
+PhysContactInfo::PhysContactInfo(int8_t controllerIndex)
+	: controllerIndex{controllerIndex}
 {}
 
 Vector3 PhysContactInfo::GetContactNormal() const
 {
-	return GetContactNormal(uvec::create(contactPoint.m_normalWorldOnB),controllerIndex);
+	return GetContactNormal(normalWorldOnB,controllerIndex);
 }
 
-double PhysContactInfo::CalcXZDistance() const {return CalcXZDistance(contactPoint,controllerIndex);}
+double PhysContactInfo::CalcXZDistance() const {return CalcXZDistance(contactPointA,contactPointB,controllerIndex);}

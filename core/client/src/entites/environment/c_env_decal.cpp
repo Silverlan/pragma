@@ -37,9 +37,9 @@ void CDecalComponent::OnEntitySpawn()
 	TraceData tr {};
 	tr.SetSource(pos);
 	tr.SetTarget(pos +dir *18.f);
-	tr.SetFlags(FTRACE::IGNORE_DYNAMIC);
+	tr.SetFlags(RayCastFlags::IgnoreDynamic);
 	auto r = c_game->RayCast(tr);
-	if(r.hit == true)
+	if(r.hitType != RayCastHitType::None)
 	{
 		pTrComponent->SetPosition(r.position +dir *-std::numeric_limits<float>::epsilon());
 		auto &rot = pTrComponent->GetOrientation();

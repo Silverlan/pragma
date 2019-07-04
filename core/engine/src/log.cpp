@@ -1,5 +1,6 @@
 #include "stdafx_engine.h"
 #include "pragma/engine.h"
+#include "pragma/console/conout.h"
 #include <fsys/filesystem.h>
 
 void Engine::StartLogging()

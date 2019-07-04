@@ -1,6 +1,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/brush/brushmesh.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/environment.hpp"
 
 Con::c_cout &operator<<(Con::c_cout& os,const BrushMesh& mesh)
 {
@@ -25,18 +26,22 @@ BrushMesh::BrushMesh()
 	uvec::zero(&m_max);
 }
 
-std::shared_ptr<PhysShape> BrushMesh::GetShape() {return m_shape;}
-void BrushMesh::UpdateHullShape(const std::vector<SurfaceMaterial> *surfaceMaterials)
+std::shared_ptr<pragma::physics::IShape> BrushMesh::GetShape() {return m_shape;}
+void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env,const std::vector<SurfaceMaterial> *surfaceMaterials)
 {
 	if(m_shape != NULL)
-	{
-		m_shape->Remove();
 		m_shape = NULL;
-	}
+	pragma::physics::IMaterial *mat = nullptr;
+	if(surfaceMaterials == nullptr || surfaceMaterials->empty())
+		mat = &env.GetGenericMaterial();
+	else
+		mat = &surfaceMaterials->front().GetPhysicsMaterial();
 	if(IsConvex())
 	{
-		m_shape = std::make_shared<PhysConvexHullShape>();
-		auto *shape = static_cast<PhysConvexHullShape*>(m_shape.get());
+		m_shape = env.CreateConvexHullShape(*mat);
+		if(m_shape == nullptr)
+			return;
+		auto *shape = m_shape->GetConvexHullShape();
 		shape->SetLocalScaling(Vector3(1.f,1.f,1.f));
 		for(unsigned int i=0;i<m_sides.size();i++)
 		{
@@ -50,8 +55,10 @@ void BrushMesh::UpdateHullShape(const std::vector<SurfaceMaterial> *surfaceMater
 		}
 		return;
 	}
-	m_shape = std::make_shared<PhysTriangleShape>();
-	auto *shape = static_cast<PhysTriangleShape*>(m_shape.get());
+	m_shape = env.CreateTriangleShape(*mat);
+	if(m_shape == nullptr)
+		return;
+	auto *shape = m_shape->GetTriangleShape();
 	for(auto it=m_sides.begin();it!=m_sides.end();++it)
 	{
 		auto &side = *it;
@@ -128,7 +135,7 @@ void BrushMesh::Optimize()
 	}*/
 }
 
-void BrushMesh::Calculate(const std::vector<SurfaceMaterial> *surfaceMaterials)
+void BrushMesh::Calculate(pragma::physics::IEnvironment &env,const std::vector<SurfaceMaterial> *surfaceMaterials)
 {
 	uvec::zero(&m_min);
 	uvec::zero(&m_max);
@@ -147,7 +154,7 @@ void BrushMesh::Calculate(const std::vector<SurfaceMaterial> *surfaceMaterials)
 			uvec::max(&m_max,max);
 		}
 	}
-	UpdateHullShape(surfaceMaterials);
+	UpdateHullShape(env,surfaceMaterials);
 }
 
 void BrushMesh::GetBounds(Vector3 *min,Vector3 *max) const

@@ -138,12 +138,12 @@ Bool CWaterComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pack
 	return true;
 }
 
-bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result)
+bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result)
 {
 	auto srcOrigin = data.GetSourceOrigin();
 	auto dir = data.GetDirection();
 	auto dist = data.GetDistance();
-	auto hitPos = srcOrigin +dir *(dist *static_cast<float>(result.m_hitFraction));
+	auto hitPos = srcOrigin +dir *(dist *static_cast<float>(result.friction));
 
 	auto surfMatId = col->GetSurfaceMaterial();
 	auto *surfMat = c_game->GetSurfaceMaterial(surfMatId);
@@ -160,7 +160,7 @@ bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &
 				{
 					pTrComponent->SetPosition(hitPos);
 
-					auto up = uvec::create(result.m_hitNormalLocal);
+					auto up = result.hitNormalLocal;
 					uvec::normalize(&up);
 					const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
 					pTrComponent->SetOrientation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);

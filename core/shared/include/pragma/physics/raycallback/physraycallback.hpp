@@ -1,6 +1,8 @@
 #ifndef __PHYS_RAYCALLBACK_HPP__
 #define __PHYS_RAYCALLBACK_HPP__
 
+// #define ENABLE_DEPRECATED_PHYSICS
+#ifdef ENABLE_DEPRECATED_PHYSICS
 #include "pragma/physics/raycallback/physraycallbackfilter.hpp"
 #include "pragma/physics/raycallback/physraycallbackfilter_collisionobject.hpp"
 #include "pragma/physics/raycallback/physraycallbackfilter_entity.hpp"
@@ -16,23 +18,23 @@ template<class T>
 protected:
 	std::shared_ptr<BasePhysRayCallbackFilter> m_filter;
 public:
-	bool ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *obj);
+	bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,nullptr_t);
-	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &filter);
-	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter);
-	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter);
+	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &filter);
+	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter);
+	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<EntityHandle> &filter);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const EntityHandle &filter);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysObjHandle> &filter);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const PhysObjHandle &filter);
-	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysCollisionObject*> &filter);
-	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,PhysCollisionObject *filter);
+	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<pragma::physics::ICollisionObject*> &filter);
+	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,pragma::physics::ICollisionObject *filter);
 	PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const LuaFunction &filter);
 };
 
 template<class T>
-	bool PhysBaseRayResultCallback<T>::ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *obj)
+	bool PhysBaseRayResultCallback<T>::ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj)
 {
 	if(m_filter == nullptr)
 		return true;
@@ -48,29 +50,29 @@ template<class T>
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {}
 template<class T>
-	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &filter)
+	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &filter)
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {
 	m_filter = std::make_shared<BasePhysRayCallbackFilterFunction>(filter,flags,group,mask);
 }
 template<class T>
-	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter)
+	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter)
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {
 	m_filter = std::make_shared<BasePhysRayCallbackFilterFunction>(nullptr,flags,group,mask);
 	auto *ptrFilter = static_cast<BasePhysRayCallbackFilterFunction*>(m_filter.get());
-	ptrFilter->SetFilter([filter,ptrFilter](BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col) {
+	ptrFilter->SetFilter([filter,ptrFilter](BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *col) {
 		auto *rayResult = static_cast<btCollisionWorld::LocalRayResult*>(ptrFilter->GetUserData());
 		return filter(ent,phys,col,*rayResult);
 	});
 }
 template<class T>
-	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter)
+	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter)
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {
 	m_filter = std::make_shared<BasePhysRayCallbackFilterFunction>(nullptr,flags,group,mask);
 	auto *ptrFilter = static_cast<BasePhysRayCallbackFilterFunction*>(m_filter.get());
-	ptrFilter->SetFilter([filter,ptrFilter](BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col) {
+	ptrFilter->SetFilter([filter,ptrFilter](BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *col) {
 		auto *convexResult = static_cast<btCollisionWorld::LocalConvexResult*>(ptrFilter->GetUserData());
 		return filter(ent,phys,col,*convexResult);
 	});
@@ -100,13 +102,13 @@ template<class T>
 	m_filter = std::make_shared<BasePhysRayCallbackFilterPhysObj>(filter,flags,group,mask);
 }
 template<class T>
-	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysCollisionObject*> &filter)
+	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<pragma::physics::ICollisionObject*> &filter)
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {
 	m_filter = std::make_shared<BasePhysRayCallbackFilterCollisionObject>(filter,flags,group,mask);
 }
 template<class T>
-	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,PhysCollisionObject *filter)
+	PhysBaseRayResultCallback<T>::PhysBaseRayResultCallback(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,pragma::physics::ICollisionObject *filter)
 		: PhysBaseRayResultCallback(rayFromWorld,rayToWorld)
 {
 	m_filter = std::make_shared<BasePhysRayCallbackFilterCollisionObject>(filter,flags,group,mask);
@@ -124,15 +126,15 @@ template<class T>
 public: \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,nullptr_t); \
-	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &filter); \
-	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter); \
-	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter); \
+	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &filter); \
+	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalRayResult&)> &filter); \
+	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*,const btCollisionWorld::LocalConvexResult&)> &filter); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<EntityHandle> &filter); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const EntityHandle &filter); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysObjHandle> &filter); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const PhysObjHandle &filter); \
-	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<PhysCollisionObject*> &filter); \
-	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,PhysCollisionObject *filter); \
+	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const std::vector<pragma::physics::ICollisionObject*> &filter); \
+	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,pragma::physics::ICollisionObject *filter); \
 	TCALLBACK(const btVector3 &rayFromWorld,const btVector3 &rayToWorld,FTRACE flags,CollisionMask group,CollisionMask mask,const LuaFunction &filter);
 
 class DLLNETWORK PhysClosestRayResultCallback
@@ -160,4 +162,5 @@ public:
 	virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult &convexResult,bool normalInWorldSpace) override;
 };
 
+#endif
 #endif

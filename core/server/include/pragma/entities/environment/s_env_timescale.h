@@ -14,7 +14,7 @@ namespace pragma
 	{
 	public:
 		SEnvTimescaleComponent(BaseEntity &ent) : BaseEnvTimescaleComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	};

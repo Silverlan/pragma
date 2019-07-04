@@ -10,7 +10,6 @@
 class PhysObj;
 class PhysContact;
 struct PhysTouch;
-class PhysCollisionObject;
 namespace pragma
 {
 	struct DLLNETWORK CECanTriggerData
@@ -52,7 +51,7 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		using BaseEntityComponent::BaseEntityComponent;
 		// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))
-		void Touch(BaseEntity *entOther,PhysObj *physOther,PhysCollisionObject *objThis,PhysCollisionObject *objOther);
+		void Touch(BaseEntity *entOther,PhysObj *physOther,physics::ICollisionObject *objThis,physics::ICollisionObject *objOther);
 		// Only called if collision callbacks and contact reports are enabled (Entity::SetCollisionCallbacksEnabled(true),Entity::SetCollisionContactReportEnabled(true))
 		void Contact(const PhysContact &contact);
 

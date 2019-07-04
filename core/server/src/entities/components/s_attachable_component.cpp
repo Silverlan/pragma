@@ -1,5 +1,6 @@
 #include "stdafx_server.h"
 #include "pragma/networking/s_nwm_util.h"
+#include <pragma/networking/enums.hpp>
 #include "pragma/entities/components/s_attachable_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 
@@ -25,7 +26,7 @@ AttachmentData *SAttachableComponent::SetupAttachment(BaseEntity *ent,const Atta
 		p->Write<FAttachmentMode>(attInfo.flags);
 		p->Write<Vector3>(attData->offset);
 		p->Write<Quat>(attData->rotation);
-		server->BroadcastTCP("ent_setparent",p);
+		server->SendPacket("ent_setparent",p,pragma::networking::Protocol::SlowReliable);
 	}
 	return attData;
 }
@@ -39,11 +40,11 @@ void SAttachableComponent::SetAttachmentFlags(FAttachmentMode flags)
 		NetPacket p;
 		nwm::write_entity(p,&entThis);
 		p->Write<FAttachmentMode>(flags);
-		server->BroadcastTCP("ent_setparentmode",p);
+		server->SendPacket("ent_setparentmode",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
-void SAttachableComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SAttachableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	if(m_attachment == nullptr)
 		packet->Write<Bool>(false);

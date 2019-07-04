@@ -27,10 +27,10 @@
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
 #include "pragma/physics/physapi.h"
+#include "pragma/lua/luaapi.h"
 #include "pragma/engine.h"
 #include <pragma/networkstate/networkstate.h>
 #include <pragma/game/game.h>
-#include <luasystem.h>
 #include <algorithm>
 #include <vector>
 #include <string>

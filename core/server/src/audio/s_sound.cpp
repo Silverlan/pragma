@@ -5,6 +5,7 @@
 #include <pragma/audio/soundscript.h>
 #include "pragma/audio/s_alsoundscript.h"
 #include "pragma/scripts.h"
+#include <pragma/networking/enums.hpp>
 #include <fsys/filesystem.h>
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
@@ -111,7 +112,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 		p->WriteString(snd);
 		p->Write<unsigned int>(idx);
 		p->Write<uint32_t>(umath::to_integral(flags));
-		BroadcastUDP("snd_create",p);
+		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable);
 	}
 	return pAs;
 }
@@ -193,6 +194,6 @@ bool ServerState::PrecacheSound(std::string snd,ALChannel mode)
 	NetPacket p;
 	p->WriteString(snd);
 	p->Write<uint8_t>(umath::to_integral(mode));
-	BroadcastTCP("snd_precache",p);
+	SendPacket("snd_precache",p,pragma::networking::Protocol::SlowReliable);
 	return true;
 }

@@ -9,7 +9,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_sprite,EnvSprite);
 
-void SSpriteComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSpriteComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_spritePath);
 	packet->Write<float>(m_size);

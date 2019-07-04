@@ -2,7 +2,7 @@
 #define __LUAFUNCTION_CALL_H__
 
 #include "pragma/lua/luafunction.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 template<class T,typename... TARGS>
 	T LuaFunction::Call(TARGS ...args)

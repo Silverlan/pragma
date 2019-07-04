@@ -4,7 +4,7 @@
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/game/game_limits.h"
 #include "pragma/util/bulletinfo.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
@@ -152,7 +152,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	}
 	//if(phys->IsSleeping())
 	//	return;
-	PhysCollisionObject *o = phys->GetCollisionObject();
+	auto *o = phys->GetCollisionObject();
 	if(o == NULL)
 		return;
 	phys->UpdateVelocity();
@@ -173,7 +173,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 
 	bool bStatic = phys->IsStatic();
 	bool bSnapshot = !bStatic;
-	PhysTransform t = o->GetWorldTransform();
+	auto t = o->GetWorldTransform();
 	Vector3 pos = phys->GetPosition();
 	Quat rot = t.GetRotation();
 	if(!m_physObject->IsController() && pTrComponent.valid()) // TODO
@@ -310,10 +310,7 @@ void BasePhysicsComponent::SetCollisionsEnabled(bool b)
 	{
 		if(!hCol.IsValid())
 			continue;
-		if(b == false)
-			hCol->SetCollisionFlags(hCol->GetCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		else
-			hCol->SetCollisionFlags(hCol->GetCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+		hCol->SetCollisionsEnabled(b);
 	}
 }
 bool BasePhysicsComponent::GetCollisionsEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::CollisionsEnabled);}
@@ -323,15 +320,6 @@ bool BasePhysicsComponent::IsTrigger() const
 	if(phys == NULL)
 		return false;
 	return phys->IsTrigger();
-}
-void BasePhysicsComponent::SetTrigger(bool b)
-{
-	if(GetCollisionCallbacksEnabled() != b)
-		SetCollisionCallbacksEnabled(b);
-	PhysObj *phys = GetPhysicsObject();
-	if(phys == NULL)
-		return;
-	phys->SetTrigger(b);
 }
 
 void BasePhysicsComponent::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask)
@@ -381,9 +369,9 @@ float BasePhysicsComponent::GetCollisionRadius(Vector3 *center) const
 void BasePhysicsComponent::SetRayResultCallbackEnabled(bool b) {m_bRayResultCallbackEnabled = b;}
 bool BasePhysicsComponent::IsRayResultCallbackEnabled() const {return m_bRayResultCallbackEnabled;}
 
-bool BasePhysicsComponent::RayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,btVector3 &rayFromWorld,btVector3 &rayToWorld,btVector3 &hitNormalWorld,btVector3 &hitPointWorld,btCollisionWorld::LocalRayResult &rayResult)
+bool BasePhysicsComponent::RayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
 {
-	CEHandleRaycast evData{rayCollisionGroup,rayCollisionMask,rayFromWorld,rayToWorld,hitNormalWorld,hitPointWorld,rayResult};
+	CEHandleRaycast evData{rayCollisionGroup,rayCollisionMask};
 	InvokeEventCallbacks(EVENT_HANDLE_RAYCAST,evData);
 	return evData.hit;
 }
@@ -570,7 +558,7 @@ static void entity_space_to_bone_space(std::vector<Transform> &transforms,Bone &
 		rot = inv *rot;
 	}
 }
-PhysCollisionObject *BasePhysicsComponent::GetCollisionObject(UInt32 boneId) const
+pragma::physics::ICollisionObject *BasePhysicsComponent::GetCollisionObject(UInt32 boneId) const
 {
 	if(m_physObject == nullptr)
 		return nullptr;
@@ -581,7 +569,7 @@ PhysCollisionObject *BasePhysicsComponent::GetCollisionObject(UInt32 boneId) con
 		if(o.IsValid())
 		{
 			if(o->GetBoneID() == boneId)
-				return o.get();
+				return o.Get();
 		}
 	}
 	return nullptr;
@@ -781,19 +769,24 @@ void BasePhysicsComponent::DropToFloor()
 	auto *game = nw->GetGameState();
 	auto origin = ent.GetCenter();
 	auto extents = GetCollisionExtents();
-	btBoxShape shape(btVector3(extents.x,extents.y,extents.z) *PhysEnv::WORLD_SCALE);
+	auto *physEnv = game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return;
+	auto shape = physEnv->CreateBoxShape(extents,physEnv->GetGenericMaterial()); // TODO: Cache this shape?
 	auto pGravity = ent.GetComponent<pragma::GravityComponent>();
 	auto dir = pGravity.valid() ? pGravity->GetGravityDirection() : -uvec::UP;
 	auto dest = origin +dir *static_cast<float>(GameLimits::MaxRayCastRange);
 
 	TraceData trace;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	trace.SetFilter(GetEntity().GetHandle());
-	trace.SetFlags(FTRACE::FILTER_INVERT);
+#endif
+	trace.SetFlags(RayCastFlags::InvertFilter);
 	trace.SetSource(origin);
-	trace.SetSource(&shape);
+	trace.SetShape(*shape);
 	trace.SetTarget(dest);
 	auto result = game->Sweep(trace);
-	if(result.hit == false || result.distance == 0.f)
+	if(result.hitType == RayCastHitType::None || result.distance == 0.f)
 		return;
 	auto pos = pTrComponent->GetPosition();
 	auto rot = uvec::get_rotation(uvec::UP,-dir);
@@ -931,15 +924,9 @@ void CEPhysicsUpdateData::PushArguments(lua_State *l)
 ///////////////
 
 CEHandleRaycast::CEHandleRaycast(
-	CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,
-	btVector3 &rayFromWorld,btVector3 &rayToWorld,
-	btVector3 &hitNormalWorld,btVector3 &hitPointWorld,
-	btCollisionWorld::LocalRayResult &rayResult
+	CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask
 )
-	: rayCollisionGroup{rayCollisionGroup},rayCollisionMask{rayCollisionMask},
-	rayFromWorld{rayFromWorld},rayToWorld{rayToWorld},
-	hitNormalWorld{hitNormalWorld},hitPointWorld{hitPointWorld},
-	rayResult{rayResult}
+	: rayCollisionGroup{rayCollisionGroup},rayCollisionMask{rayCollisionMask}
 {}
 void CEHandleRaycast::PushArguments(lua_State *l) {}
 

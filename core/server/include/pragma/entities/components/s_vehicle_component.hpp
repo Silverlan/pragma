@@ -20,7 +20,7 @@ namespace pragma
 		virtual void SetDriver(BaseEntity *ent) override;
 		BaseEntity *AddWheel(const std::string &mdl,const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={});
 		BaseEntity *AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={});
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 
 		virtual void SetMaxEngineForce(Float force) override;
@@ -35,7 +35,7 @@ namespace pragma
 
 		virtual bool ShouldTransmitNetData() const override {return true;};
 	protected:
-		void WriteWheelInfo(NetPacket &p,WheelData &data,btWheelInfo *info);
+		void WriteWheelInfo(NetPacket &p,WheelData &data);
 		CallbackHandle m_playerAction;
 		std::string m_steeringWheelMdl;
 		void OnActionInput(Action action, bool b);

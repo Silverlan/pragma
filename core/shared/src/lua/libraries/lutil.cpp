@@ -258,6 +258,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 	int32_t idxResultTable = -1;
 	if(bHitReport == true)
 		idxResultTable = Lua::CreateTable(l);
+	int32_t tIdx = 1;
 	for(Int32 i=0;i<bulletInfo->bulletCount;i++)
 	{
 		auto randSpread = EulerAngles(umath::random(-bulletInfo->spread.p,bulletInfo->spread.p),umath::random(-bulletInfo->spread.y,bulletInfo->spread.y),0);
@@ -268,6 +269,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 		data.SetTarget(src +bulletDir *bulletInfo->distance);
 		data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
 		auto *attacker = dmg.GetAttacker();
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		data.SetFilter([attacker](BaseEntity *ent,PhysObj *phys,PhysCollisionObject*) -> bool {
 			if(ent == attacker) // Attacker can't shoot themselves
 				return false;
@@ -277,6 +279,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 				return false;
 			return true;
 		});
+#endif
 		auto filterGroup = CollisionMask::None;
 		if(attacker != nullptr)
 		{
@@ -288,9 +291,10 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 		else
 			filterGroup = CollisionMask::AllHitbox;
 		data.SetCollisionFilterGroup(filterGroup);
-		auto result = game->RayCast(data);
-		if(result.hit && result.entity.IsValid())
+		std::vector<TraceResult> results {};
+		if(game->RayCast(data,&results) && results.front().entity.IsValid())
 		{
+			auto &result = results.front();
 			auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
 			if(pDamageableComponent.valid())
 			{
@@ -299,7 +303,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 				{
 					auto charComponent = result.entity->GetCharacterComponent();
 					if(charComponent.valid())
-						charComponent->FindHitgroup(*result.collisionObj.get(),hitGroup);
+						charComponent->FindHitgroup(*result.collisionObj,hitGroup);
 				}
 				dmg.SetHitGroup(hitGroup);
 				dmg.SetForce(bulletDir *bulletInfo->force);
@@ -309,12 +313,36 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 		}
 		if(idxResultTable != -1)
 		{
-			Lua::PushInt(l,i +1);
-			Lua_TraceData_FillTraceResultTable(l,result);
-			Lua::SetTableValue(l,idxResultTable);
+			if(results.empty())
+			{
+				TraceResult result {data};
+				Lua::PushInt(l,tIdx++);
+				Lua_TraceData_FillTraceResultTable(l,result);
+				Lua::SetTableValue(l,idxResultTable);
+			}
+			else
+			{
+				for(auto &result : results)
+				{
+					Lua::PushInt(l,tIdx++);
+					Lua_TraceData_FillTraceResultTable(l,result);
+					Lua::SetTableValue(l,idxResultTable);
+				}
+			}
 		}
 		if(f != nullptr)
-			f(dmg,data,result,bulletInfo->tracerCount);
+		{
+			if(results.empty())
+			{
+				TraceResult result {data};
+				f(dmg,data,result,bulletInfo->tracerCount);
+			}
+			else
+			{
+				for(auto &result : results)
+					f(dmg,data,result,bulletInfo->tracerCount);
+			}
+		}
 	}
 	return (idxResultTable == -1) ? 0 : 1;
 }

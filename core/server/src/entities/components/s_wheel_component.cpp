@@ -6,6 +6,7 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -27,6 +28,7 @@ void SWheelComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerCompo
 {
 	packet->Write<Float>(GetSteeringAngle());
 	packet->Write<Float>(GetWheelRotation());
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info != nullptr)
 	{
@@ -41,9 +43,10 @@ void SWheelComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerCompo
 		packet->Write<Vector3>(Vector3(0.f,0.f,0.f));
 		packet->Write<Quat>(uquat::identity());
 	}
+#endif
 }
 luabind::object SWheelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SWheelComponentHandleWrapper>(l);}
-void SWheelComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SWheelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_entity(packet,m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
 	packet->Write<UChar>(m_wheelId);
@@ -78,7 +81,7 @@ void SWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 	NetPacket p;
 	nwm::write_entity(p,ent);
 	p->Write<UChar>(wheelId);
-	entThis.SendNetEventTCP(m_netEvAttach,p);
+	entThis.SendNetEvent(m_netEvAttach,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::Detach()
 {
@@ -86,7 +89,7 @@ void SWheelComponent::Detach()
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(!ent.IsShared())
 		return;
-	ent.SendNetEventTCP(m_netEvDetach);
+	ent.SendNetEvent(m_netEvDetach,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetFrontWheel(Bool b)
 {
@@ -96,7 +99,7 @@ void SWheelComponent::SetFrontWheel(Bool b)
 		return;
 	NetPacket p;
 	p->Write<Bool>(b);
-	ent.SendNetEventTCP(m_netEvFrontWheel,p);
+	ent.SendNetEvent(m_netEvFrontWheel,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetChassisConnectionPoint(const Vector3 &point)
 {
@@ -106,7 +109,7 @@ void SWheelComponent::SetChassisConnectionPoint(const Vector3 &point)
 		return;
 	NetPacket p;
 	p->Write<Vector3>(point);
-	ent.SendNetEventTCP(m_netEvChassisConnectionPoint,p);
+	ent.SendNetEvent(m_netEvChassisConnectionPoint,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetWheelAxle(const Vector3 &axis)
 {
@@ -116,7 +119,7 @@ void SWheelComponent::SetWheelAxle(const Vector3 &axis)
 		return;
 	NetPacket p;
 	p->Write<Vector3>(axis);
-	ent.SendNetEventTCP(m_netEvAxle,p);
+	ent.SendNetEvent(m_netEvAxle,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetWheelDirection(const Vector3 &dir)
 {
@@ -126,7 +129,7 @@ void SWheelComponent::SetWheelDirection(const Vector3 &dir)
 		return;
 	NetPacket p;
 	p->Write<Vector3>(dir);
-	ent.SendNetEventTCP(m_netEvDirection,p);
+	ent.SendNetEvent(m_netEvDirection,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetMaxSuspensionLength(Float len)
 {
@@ -136,7 +139,7 @@ void SWheelComponent::SetMaxSuspensionLength(Float len)
 		return;
 	NetPacket p;
 	p->Write<Float>(len);
-	ent.SendNetEventTCP(m_netEvMaxSuspensionLength,p);
+	ent.SendNetEvent(m_netEvMaxSuspensionLength,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetMaxSuspensionCompression(Float cmp)
 {
@@ -146,7 +149,7 @@ void SWheelComponent::SetMaxSuspensionCompression(Float cmp)
 		return;
 	NetPacket p;
 	p->Write<Float>(cmp);
-	ent.SendNetEventTCP(m_netEvMaxSuspensionCompression,p);
+	ent.SendNetEvent(m_netEvMaxSuspensionCompression,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetMaxDampingRelaxation(Float damping)
 {
@@ -156,7 +159,7 @@ void SWheelComponent::SetMaxDampingRelaxation(Float damping)
 		return;
 	NetPacket p;
 	p->Write<Float>(damping);
-	ent.SendNetEventTCP(m_netEvMaxDampingRelaxation,p);
+	ent.SendNetEvent(m_netEvMaxDampingRelaxation,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetWheelRadius(Float radius)
 {
@@ -166,7 +169,7 @@ void SWheelComponent::SetWheelRadius(Float radius)
 		return;
 	NetPacket p;
 	p->Write<Float>(radius);
-	ent.SendNetEventTCP(m_netEvRadius,p);
+	ent.SendNetEvent(m_netEvRadius,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetSuspensionStiffness(Float stiffness)
 {
@@ -176,7 +179,7 @@ void SWheelComponent::SetSuspensionStiffness(Float stiffness)
 		return;
 	NetPacket p;
 	p->Write<Float>(stiffness);
-	ent.SendNetEventTCP(m_netEvSuspensionStiffness,p);
+	ent.SendNetEvent(m_netEvSuspensionStiffness,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetWheelDampingCompression(Float cmp)
 {
@@ -186,7 +189,7 @@ void SWheelComponent::SetWheelDampingCompression(Float cmp)
 		return;
 	NetPacket p;
 	p->Write<Float>(cmp);
-	ent.SendNetEventTCP(m_netEvDampingCompression,p);
+	ent.SendNetEvent(m_netEvDampingCompression,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetFrictionSlip(Float slip)
 {
@@ -196,7 +199,7 @@ void SWheelComponent::SetFrictionSlip(Float slip)
 		return;
 	NetPacket p;
 	p->Write<Float>(slip);
-	ent.SendNetEventTCP(m_netEvFrictionSlip,p);
+	ent.SendNetEvent(m_netEvFrictionSlip,p,pragma::networking::Protocol::SlowReliable);
 }
 void SWheelComponent::SetSteeringAngle(Float ang)
 {
@@ -226,5 +229,5 @@ void SWheelComponent::SetRollInfluence(Float influence)
 		return;
 	NetPacket p;
 	p->Write<Float>(influence);
-	ent.SendNetEventTCP(m_netEvRollInfluence,p);
+	ent.SendNetEvent(m_netEvRollInfluence,p,pragma::networking::Protocol::SlowReliable);
 }

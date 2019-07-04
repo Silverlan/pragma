@@ -21,14 +21,11 @@ namespace Lua
 	namespace Physics
 	{
 		template<class THandle>
-			void InitializePhysics(lua_State *l,THandle &hEnt,LPhysConvexShape &shape,float mass)
+			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass)
 		{
 			pragma::Lua::check_component(l,hEnt);
 
-			auto *pConvexShape = dynamic_cast<PhysConvexShape*>(shape.get());
-			if(pConvexShape == nullptr)
-				return;
-			auto *phys = hEnt->InitializePhysics(*pConvexShape,mass);
+			auto *phys = hEnt->InitializePhysics(*shape,mass);
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}
@@ -434,7 +431,7 @@ namespace Lua
 			auto *o = hEnt->GetGroundObject();
 			if(o == nullptr)
 				return;
-			o->GetLuaObject()->push(l);
+			o->Push(l);
 		}));
 	}
 	template<class TLuaClass,class THandle>
@@ -975,10 +972,10 @@ namespace Lua
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}));
-		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,LPhysConvexShape&,float)>([](lua_State *l,THandle &hEnt,LPhysConvexShape &shape,float mass) {
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,float)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass) {
 			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,mass);
 		}));
-		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,LPhysConvexShape&)>([](lua_State *l,THandle &hEnt,LPhysConvexShape &shape) {
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
 			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,0.f);
 		}));
 		def.def("DestroyPhysicsObject",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
@@ -988,10 +985,6 @@ namespace Lua
 		def.def("DropToFloor",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->DropToFloor();
-		}));
-		def.def("SetTrigger",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetTrigger(b);
 		}));
 		def.def("IsTrigger",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1084,7 +1077,7 @@ namespace Lua
 					Lua::SetTableValue(l,tConstraint); /* 2 */
 
 					Lua::PushString(l,"constraint"); /* 3 */
-					Lua::PushConstraint(l,joint.constraint); /* 4 */
+					joint.constraint->Push(l); /* 4 */
 					Lua::SetTableValue(l,tConstraint); /* 2 */
 
 					Lua::PushInt(l,n); /* 3 */

@@ -73,12 +73,6 @@ Engine::Engine(int,char*[])
 	: CVarHandler(),m_bRunning(true),m_bInitialized(false),
 	m_console(nullptr),m_consoleThread(nullptr),
 	m_logFile(nullptr),
-#ifdef PHYS_ENGINE_PHYSX
-	m_physics(NULL),m_pxFoundation(NULL),m_pxCooking(NULL),
-#ifdef _DEBUG
-	m_pxPvdConnection(NULL),
-#endif
-#endif
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
 	m_lastTick = static_cast<long long>(m_ctTick());
@@ -177,16 +171,6 @@ void Engine::Close()
 	m_bRunning = false;
 	CloseServerState();
 
-#if PHYS_ENGINE_PHYSX
-#ifdef _DEBUG
-	ClosePVDConnection();
-#endif
-	physx::PxCloseVehicleSDK();
-	m_physics->release();
-	m_pxCooking->release();
-	m_pxFoundation->release();
-#endif
-
 	CloseConsole();
 	EndLogging();
 
@@ -272,44 +256,6 @@ bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr});
 	//
 	InitLaunchOptions(argc,argv);
-#ifdef PHYS_ENGINE_PHYSX
-	Con::cout<<"Initializing PhysX..."<<Con::endl;
-	static WVPxErrorCallback gDefaultErrorCallback;
-	static physx::PxDefaultAllocator gDefaultAllocatorCallback;
-
-	m_pxFoundation = PxCreateFoundation(PX_PHYSICS_VERSION,gDefaultAllocatorCallback,gDefaultErrorCallback);
-	if(m_pxFoundation == NULL)
-	{
-		Con::cerr<<"ERROR: Unable to create PhysX foundation!"<<Con::endl;
-		exit(EXIT_FAILURE);
-	}
-	physx::PxTolerancesScale scale;
-	scale.length = 190.5f;
-	scale.mass = 1000.f;
-	scale.speed = 180.f;
-	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION,*m_pxFoundation,scale);
-	if(m_physics == NULL)
-	{
-		Con::cerr<<"ERROR: Unable to create top-level PhysX Object!"<<Con::endl;
-		exit(EXIT_FAILURE);
-	}
-	m_pxCooking = PxCreateCooking(PX_PHYSICS_VERSION,*m_pxFoundation,physx::PxCookingParams(scale));
-	if(m_pxCooking == NULL)
-	{
-		Con::cerr<<"ERROR: Unable to initialize PhysX Cooking!"<<Con::endl;
-		exit(EXIT_FAILURE);
-	}
-	if(!physx::PxInitVehicleSDK(*m_physics))
-	{
-		Con::cerr<<"ERROR: Unable to initialize PhysX Vehicle SDK!"<<Con::endl;
-		exit(EXIT_FAILURE);
-	}
-	physx::PxVehicleSetBasisVectors(physx::PxVec3(0.f,1.f,0.f),physx::PxVec3(0.f,0.f,1.f));
-	physx::PxVehicleSetUpdateMode(physx::PxVehicleUpdateMode::Enum::eACCELERATION);
-#ifdef _DEBUG
-	OpenPVDConnection();
-#endif
-#endif
 	if(!IsServerOnly())
 		LoadConfig();
 
@@ -345,79 +291,6 @@ void Engine::RunLaunchCommands()
 	}
 	m_launchCommands.clear();
 }
-
-#ifdef PHYS_ENGINE_BULLET
-
-#elif PHYS_ENGINE_PHYSX
-#ifdef _DEBUG
-void Engine::OpenPVDConnection()
-{
-	const char *host = "127.0.0.1";
-	int port = 5425;
-	unsigned int timeout = 1;
-	OpenPVDConnection(host,port,timeout);
-}
-
-struct PVDConnectionHandler : public physx::debugger::comm::PvdConnectionHandler
-{
-    virtual void onPvdSendClassDescriptions( physx::debugger::comm::PvdConnection& inFactory ) override
-    {
-        // send your custom PVD class descriptions from here
-        // this then allows PVD to correctly identify and represent
-        // custom data that is sent from your application to a PvdConnection.
-        // example in JointConnectionHandler
-    }
-    virtual void onPvdConnected( physx::debugger::comm::PvdConnection &con ) override
-    {
-		Con::cwar<<"Successfully connected to PVD!"<<Con::endl;
-        // do something when successfully connected
-        // e.g. enable contact and constraint visualization
-    }
-    virtual void onPvdDisconnected( physx::debugger::comm::PvdConnection&) override
-    {
-		Con::cwar<<"Disconnected from PVD!"<<Con::endl;
-        // handle disconnection
-        // e.g. disable contact and constraint visualization
-    }
-};
-
-void Engine::OpenPVDConnection(const char *host,int port,unsigned int timeout)
-{
-	if(m_physics->getPvdConnectionManager() == NULL || m_pxPvdConnection != NULL)
-		return;
-	physx::PxVisualDebuggerConnectionFlags flags = physx::PxVisualDebuggerConnectionFlag::eDEBUG;
-	m_pxPvdConnection = physx::PxVisualDebuggerExt::createConnection(m_physics->getPvdConnectionManager(),host,port,timeout,flags);
-
-	PVDConnectionHandler pvdConnectionHandler;
-	if(m_physics->getPvdConnectionManager())
-		m_physics->getPvdConnectionManager()->addHandler(pvdConnectionHandler);
-
-	m_physics->getVisualDebugger()->setVisualizeConstraints(true);
-	m_physics->getVisualDebugger()->setVisualDebuggerFlag(physx::PxVisualDebuggerFlag::eTRANSMIT_CONTACTS,true);
-}
-void Engine::ClosePVDConnection()
-{
-	if(m_pxPvdConnection == NULL)
-		return;
-	if(m_pxPvdConnection->isConnected())
-		m_pxPvdConnection->disconnect();
-	m_pxPvdConnection->release();
-	m_pxPvdConnection = NULL;
-}
-#endif
-
-physx::PxPhysics *Engine::GetPhysics() {return m_physics;}
-physx::PxCooking *Engine::GetCookingLibrary() {return m_pxCooking;}
-
-#endif
-
-void Engine::HandleLocalPlayerServerPacket(NetPacket &p)
-{
-	if(server == nullptr)
-		return;
-	server->HandlePacket(server->GetLocalClient(),p);
-}
-void Engine::HandleLocalPlayerClientPacket(NetPacket&) {}
 
 Lua::Interface *Engine::GetLuaInterface(lua_State *l)
 {
@@ -618,6 +491,14 @@ bool Engine::IsActiveState(NetworkState *state) {return state == GetActiveState(
 void Engine::AddLaunchConVar(std::string cvar,std::string val) {m_launchCommands.push_back({cvar,{val}});}
 
 void Engine::ShutDown() {m_bRunning = false;}
+
+void Engine::HandleLocalPlayerClientPacket(NetPacket &p) {}
+void Engine::HandleLocalPlayerServerPacket(NetPacket &p)
+{
+	if(server == nullptr)
+		return;
+	server->HandlePacket(*server->GetLocalClient(),p);
+}
 
 Engine::~Engine()
 {

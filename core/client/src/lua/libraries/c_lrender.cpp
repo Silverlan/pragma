@@ -6,7 +6,6 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/lua/classes/ldef_color.h"
 #include "pragma/lua/classes/ldef_material.h"
-#include "pragma/lua/classes/c_ldef_camera.h"
 extern ClientState *client;
 DLLCLIENT int Lua_render_SetMaterialOverride(lua_State *l)
 {

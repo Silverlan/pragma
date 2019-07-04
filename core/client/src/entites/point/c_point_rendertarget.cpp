@@ -2,7 +2,6 @@
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/entities/c_entityfactories.h"
 #include <cmaterialmanager.h>
-#include "pragma/rendering/scene/camera.h"
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/c_engine.h"

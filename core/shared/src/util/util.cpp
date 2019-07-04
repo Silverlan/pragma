@@ -1,8 +1,9 @@
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
 #include "pragma/physics/raytraces.h"
-#include "pragma/physics/physcollisionobject.h"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/collision_object.hpp"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
@@ -90,14 +91,16 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			TraceData data;
 			data.SetSource(origin);
 			data.SetTarget(pos);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 			data.SetFilter(traceFilter);
+#endif
 			if(entOrigin != nullptr && pPhysComponent.valid())
 			{
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 				data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 			}
 			auto r = RayCast(data);
-			if(r.hit == true && r.entity.get() != ent)
+			if(r.hitType != RayCastHitType::None && r.entity.get() != ent)
 			{
 				auto pPhysComponent = ent->GetPhysicsComponent();
 				auto &pos = pTrComponent->GetPosition();
@@ -109,14 +112,14 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 				min = pos +center +(min -center) *0.5f;
 				data.SetTarget(min);
 				r = RayCast(data);
-				if(r.hit == true && r.entity.get() != ent)
+				if(r.hitType != RayCastHitType::None && r.entity.get() != ent)
 				{
 					max = pos +center +(max -center) *0.5f;
 					data.SetTarget(max);
 					r = RayCast(data);
 				}
 			}
-			if(r.hit == false || r.entity.get() == ent)
+			if(r.hitType == RayCastHitType::None || r.entity.get() == ent)
 			{
 				auto pDamageableComponent = ent->GetComponent<pragma::DamageableComponent>();
 				if(pDamageableComponent.valid())
@@ -149,4 +152,58 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float f
 void Game::SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float force,const EntityHandle &attacker,const EntityHandle &inflictor,const std::function<bool(BaseEntity*,DamageInfo&)> &callback)
 {
 	SplashDamage(origin,radius,damage,force,attacker.get(),inflictor.get(),callback);
+}
+Bool Game::Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults) const
+{
+	auto *physEnv = GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return false;
+	return physEnv->Overlap(data,optOutResults);
+}
+Bool Game::RayCast(const TraceData &data,std::vector<TraceResult> *optOutResults) const
+{
+	auto *physEnv = GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return false;
+	return physEnv->RayCast(data,optOutResults);
+}
+Bool Game::Sweep(const TraceData &data,TraceResult *optOutResult) const
+{
+	auto *physEnv = GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+	{
+		if(optOutResult)
+			optOutResult->hitType = RayCastHitType::None;
+		return false;
+	}
+	return physEnv->Sweep(data,optOutResult);
+}
+TraceResult Game::Overlap(const TraceData &data) const
+{
+	std::vector<TraceResult> results {};
+	if(Overlap(data,&results) == false)
+	{
+		TraceResult result {};
+		result.hitType = RayCastHitType::None;
+		return result;
+	}
+	return results.front();
+}
+TraceResult Game::RayCast(const TraceData &data) const
+{
+	std::vector<TraceResult> results {};
+	if(RayCast(data,&results) == false)
+	{
+		TraceResult result {};
+		result.hitType = RayCastHitType::None;
+		return result;
+	}
+	return results.front();
+}
+TraceResult Game::Sweep(const TraceData &data) const
+{
+	TraceResult result {};
+	if(Sweep(data,&result) == false)
+		result.hitType = RayCastHitType::None;
+	return result;
 }

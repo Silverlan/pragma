@@ -10,7 +10,7 @@ DLLNETWORK CollisionMask get_collision_group(CollisionMask group,CollisionMask m
 enum class FTRACE;
 class BaseEntity;
 class PhysObj;
-class PhysCollisionObject;
+namespace pragma::physics {class ICollisionObject;};
 class DLLNETWORK BasePhysRayCallbackFilter
 {
 protected:
@@ -21,7 +21,7 @@ protected:
 	BasePhysRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask);
 	bool TranslateFilterValue(bool b) const;
 public:
-	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *obj);
+	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj);
 	void SetUserData(void *userData) const;
 	void *GetUserData() const;
 };

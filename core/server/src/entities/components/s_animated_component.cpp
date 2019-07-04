@@ -1,7 +1,9 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_animated_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -17,7 +19,7 @@ void SAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	BaseAnimatedComponent::RegisterEvents(componentManager);
 }
 void SAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
-void SAnimatedComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SAnimatedComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<int>(GetAnimation());
 	packet->Write<float>(GetCycle());
@@ -35,7 +37,7 @@ void SAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<int>(GetBaseAnimationInfo().animation);
-		server->BroadcastUDP("ent_anim_play",p);
+		server->SendPacket("ent_anim_play",p,pragma::networking::Protocol::FastUnreliable);
 	}
 }
 void SAnimatedComponent::StopLayeredAnimation(int slot)
@@ -53,7 +55,7 @@ void SAnimatedComponent::StopLayeredAnimation(int slot)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<int>(slot);
-		server->BroadcastTCP("ent_anim_gesture_stop",p);
+		server->SendPacket("ent_anim_gesture_stop",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SAnimatedComponent::PlayLayeredAnimation(int slot,int animation,FPlayAnim flags)
@@ -72,6 +74,6 @@ void SAnimatedComponent::PlayLayeredAnimation(int slot,int animation,FPlayAnim f
 		nwm::write_entity(p,&ent);
 		p->Write<int>(slot);
 		p->Write<int>(animInfo.animation);
-		server->BroadcastTCP("ent_anim_gesture_play",p);
+		server->SendPacket("ent_anim_gesture_play",p,pragma::networking::Protocol::SlowReliable);
 	}
 }

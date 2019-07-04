@@ -4,6 +4,7 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -18,7 +19,7 @@ void SFogControllerComponent::SetFogStart(float start)
 	NetPacket p;
 	nwm::write_entity(p,&GetEntity());
 	p->Write<float>(m_kvFogStart);
-	server->BroadcastTCP("env_fogcon_setstartdist",p);
+	server->SendPacket("env_fogcon_setstartdist",p,pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogEnd(float end)
 {
@@ -26,7 +27,7 @@ void SFogControllerComponent::SetFogEnd(float end)
 	NetPacket p;
 	nwm::write_entity(p,&GetEntity());
 	p->Write<float>(m_kvFogEnd);
-	server->BroadcastTCP("env_fogcon_setenddist",p);
+	server->SendPacket("env_fogcon_setenddist",p,pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetMaxDensity(float density)
 {
@@ -34,13 +35,13 @@ void SFogControllerComponent::SetMaxDensity(float density)
 	NetPacket p;
 	nwm::write_entity(p,&GetEntity());
 	p->Write<float>(m_kvMaxDensity);
-	server->BroadcastTCP("env_fogcon_setmaxdensity",p);
+	server->SendPacket("env_fogcon_setmaxdensity",p,pragma::networking::Protocol::SlowReliable);
 }
 void SFogControllerComponent::SetFogType(unsigned char type)
 {
 	BaseEnvFogControllerComponent::SetFogType(type);
 }
-void SFogControllerComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SFogControllerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<unsigned char>(m_kvFogType);
 	packet->Write<float>(m_kvFogStart);

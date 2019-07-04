@@ -1,10 +1,11 @@
 #include "stdafx_shared.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/physics/physcontact.h"
+#include "pragma/physics/collision_object.hpp"
 
 extern DLLENGINE Engine *engine;
 
@@ -59,13 +60,13 @@ void Lua::PhysContact::GetCollisionObject1(lua_State *l,::PhysContact &contact)
 {
 	if(contact.objA == nullptr)
 		return;
-	contact.objA->GetLuaObject()->push(l);
+	contact.objA->Push(l);
 }
 void Lua::PhysContact::GetCollisionObject2(lua_State *l,::PhysContact &contact)
 {
 	if(contact.objB == nullptr)
 		return;
-	contact.objB->GetLuaObject()->push(l);
+	contact.objB->Push(l);
 }
 void Lua::PhysContact::GetPhysicsObject1(lua_State *l,::PhysContact &contact)
 {

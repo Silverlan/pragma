@@ -1,7 +1,9 @@
 #include "stdafx_server.h"
 #include "pragma/lua/s_lua_component.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -41,9 +43,9 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	NetPacket p {};
 	p->Write<uint8_t>(nwIndex);
 	Lua::WriteAny(p,member.type,value);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_networkedMemberInfo->netEvSetMember,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_networkedMemberInfo->netEvSetMember,p,pragma::networking::Protocol::SlowReliable);
 }
-void SLuaBaseEntityComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	if(m_networkedMemberInfo != nullptr)
 	{
@@ -56,7 +58,7 @@ void SLuaBaseEntityComponent::SendData(NetPacket &packet,nwm::RecipientFilter &r
 		}
 	}
 
-	CallLuaMember<void,NetPacket,nwm::RecipientFilter>("SendData",packet,rp);
+	CallLuaMember<void,NetPacket,pragma::networking::ClientRecipientFilter>("SendData",packet,rp);
 }
 Bool SLuaBaseEntityComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId evId,NetPacket &packet)
 {

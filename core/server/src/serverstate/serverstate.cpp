@@ -6,15 +6,20 @@
 #include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/clientsessioninfo.h"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/standard_server.hpp"
 #include "pragma/console/convarhandle.h"
 #include <pragma/audio/soundscript.h>
 #include "luasystem.h"
 #include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/wvlocalclient.h"
+#include "pragma/networking/local_server.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/console/convars.h>
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
+#include <pragma/networking/error.hpp>
 #include <sharedutils/util_file.h>
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
@@ -40,36 +45,28 @@ ServerState::ServerState()
 	server = this;
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();
 
-	if(!engine->IsServerOnly())
-		m_local = std::unique_ptr<WVLocalClient>(new WVLocalClient);
-	else m_local = nullptr;
 	FileManager::AddCustomMountDirectory("cache",static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
 
 	RegisterCallback<void,SGame*>("EndGame");
 	RegisterCallback<void,SGame*>("OnGameStart");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketTCP");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketUDP");
+
+	m_server = std::make_unique<pragma::networking::LocalServer>();
+	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
+	m_server->AddClient(m_localClient);
 }
 
 ServerState::~ServerState()
 {
-	/*if(m_wmsClient != nullptr)
-	{
-		m_wmsClient->Close();
-		while(m_wmsClient->IsActive())
-			m_wmsClient->Run();
-		delete m_wmsClient;
-	}*/
+	CloseServer();
 	FileManager::RemoveCustomMountDirectory("cache");
-	std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &conVarPtrs = GetConVarPtrs();
-	std::unordered_map<std::string,std::shared_ptr<PtrConVar>>::iterator itHandles;
-	for(itHandles=conVarPtrs.begin();itHandles!=conVarPtrs.end();itHandles++)
+	auto &conVarPtrs = GetConVarPtrs();
+	for(auto itHandles=conVarPtrs.begin();itHandles!=conVarPtrs.end();itHandles++)
 		itHandles->second->set(NULL);
 	ResourceManager::ClearResources();
 	ModelManager::Clear();
 	GetMaterialManager().ClearUnused();
-	if(m_server != nullptr)
-		m_server->Close();
 }
 
 void ServerState::Initialize()
@@ -112,8 +109,12 @@ void ServerState::Close()
 void ServerState::Think()
 {
 	NetworkState::Think();
-	if(m_server != nullptr && m_server->IsActive())
-		m_server->PollEvents();
+	if(m_server != nullptr && m_server->IsRunning())
+	{
+		pragma::networking::Error err;
+		if(m_server->PollEvents(err) == false)
+			Con::cwar<<"WARNING: Server polling failed: "<<err.GetMessage()<<Con::endl;
+	}
 }
 
 void ServerState::Tick()
@@ -143,50 +144,11 @@ void ServerState::EndGame()
 	delete m_game;
 	m_game = nullptr;
 	s_game = nullptr;
-	/*if(m_server != NULL)
-	{
-		std::vector<boost::shared_ptr<ClientSession>> *sessions;
-		m_server->get()->GetSessions(&sessions);
-		for(unsigned int i=0;i<sessions->size();i++)
-		{
-			ClientSession *session = (*sessions)[i].get();
-			if(session->userData != NULL)
-			{
-				ClientSessionInfo *info = static_cast<ClientSessionInfo*>(session->userData);
-				info->SetPlayer(NULL);
-			}
-		}
-	}*/
+
 	NetworkState::EndGame();
 	ClearConCommands();
 }
-/*
-void ServerState::HandleUDPPacket(UDPSession *session,NetPacket &packet,udp::endpoint ep)
-{
-	boost::asio::ip::address address = ep.address();
-	unsigned short port = ep.port();
-	std::vector<Player*> *players;
-	Player::GetAll(&players);
-	for(int i=0;i<players->size();i++)
-	{
-		Player *pl = (*players)[i];
-		ClientSession *session = pl->GetClientSession();
-		if(session != NULL)
-		{
-			tcp::socket *socketPl = session->GetSocket();
-			if(socketPl != NULL)
-			{
-				tcp::endpoint epPl = socketPl->remote_endpoint();
-				if(address == epPl.address() && pl->GetUDPPort() == port) // TODO: Find a better way to get our target
-				{
-					HandlePacket(session,packet);
-					break;
-				}
-			}
-		}
-	}
-}
-*/ // WVTODO
+
 std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 {
 	auto &snds = GetSounds();
@@ -200,8 +162,6 @@ std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 
 void ServerState::StartGame()
 {
-	if(m_local != nullptr)
-		m_local->Reset();
 	NetworkState::StartGame();
 	m_game = new SGame{this};
 	s_game = m_game;
@@ -263,18 +223,12 @@ ConVar *ServerState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
-		BroadcastTCP("cvar_set",p);
+		SendPacket("cvar_set",p,pragma::networking::Protocol::SlowReliable);
 	}
 	return cvar;
 }
 
-pragma::SPlayerComponent *ServerState::GetPlayer(WVServerClient *session)
-{
-	ClientSessionInfo *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return nullptr;
-	return info->GetPlayer();
-}
+pragma::SPlayerComponent *ServerState::GetPlayer(const pragma::networking::IServerClient &session) {return session.GetPlayer();}
 bool ServerState::IsServer() const {return true;}
 ConVarMap *ServerState::GetConVarMap() {return console_system::server::get_convar_map();}
 
@@ -304,7 +258,7 @@ ConCommand *ServerState::CreateConCommand(const std::string &scmd,LuaFunction fc
 	NetPacket packet;
 	packet->WriteString(scmd);
 	packet->Write<unsigned int>(cmd->GetID());
-	BroadcastTCP("luacmd_reg",packet);
+	SendPacket("luacmd_reg",packet,pragma::networking::Protocol::SlowReliable);
 	return cmd;
 }
 WMServerData &ServerState::GetServerData() {return m_serverData;}

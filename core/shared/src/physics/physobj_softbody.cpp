@@ -2,24 +2,32 @@
 #include "pragma/physics/physobj.h"
 #include "pragma/entities/baseentity.h"
 #include "pragma/networkstate/networkstate.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include <pragma/game/game.h>
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 
-SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner,PhysSoftBody *body)
-	: PhysObj(owner,body),PhysObjDynamic()
-{
-	m_softBodies.push_back(body->GetHandle());
-}
-SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner,std::vector<PhysSoftBody*> *bodies)
+SoftBodyPhysObj::SoftBodyPhysObj(pragma::BaseEntityComponent *owner)
 	: PhysObj(owner),PhysObjDynamic()
+{}
+bool SoftBodyPhysObj::Initialize(pragma::physics::ISoftBody &body)
 {
-	m_softBodies.reserve(bodies->size());
-	for(auto *body : *bodies)
+	if(PhysObj::Initialize() == false)
+		return false;
+	AddCollisionObject(body);
+	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ISoftBody>(body.ClaimOwnership()));
+	return true;
+}
+bool SoftBodyPhysObj::Initialize(const std::vector<pragma::physics::ISoftBody*> &bodies)
+{
+	if(PhysObj::Initialize() == false)
+		return false;
+	m_softBodies.reserve(bodies.size());
+	for(auto *body : bodies)
 	{
-		AddCollisionObject(body);
-		m_softBodies.push_back(body->GetHandle());
+		AddCollisionObject(*body);
+		m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ISoftBody>(body->ClaimOwnership()));
 	}
+	return true;
 }
 void SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
 {
@@ -27,31 +35,32 @@ void SoftBodyPhysObj::SetLinearVelocity(const Vector3 &vel)
 	{
 		if(hBody.IsValid())
 		{
-			auto *body = static_cast<PhysSoftBody*>(hBody.get());
+			auto *body = hBody.Get();
 			body->SetLinearVelocity(vel);
-			body->Activate();
+			body->WakeUp();
 		}
 	}
 }
-std::vector<PhysSoftBodyHandle> &SoftBodyPhysObj::GetSoftBodies() {return m_softBodies;}
-PhysSoftBody *SoftBodyPhysObj::GetSoftBody() const
+std::vector<util::TSharedHandle<pragma::physics::ISoftBody>> &SoftBodyPhysObj::GetSoftBodies() {return m_softBodies;}
+const pragma::physics::ISoftBody *SoftBodyPhysObj::GetSoftBody() const {return const_cast<SoftBodyPhysObj*>(this)->GetSoftBody();}
+pragma::physics::ISoftBody *SoftBodyPhysObj::GetSoftBody()
 {
 	if(m_softBodies.empty())
 		return nullptr;
 	auto &hBody = m_softBodies.front();
 	if(!hBody.IsValid())
 		return nullptr;
-	return static_cast<PhysSoftBody*>(hBody.get());
+	return hBody.Get();
 }
 bool SoftBodyPhysObj::IsStatic() const {return false;}
 bool SoftBodyPhysObj::IsSoftBody() const {return true;}
-void SoftBodyPhysObj::AddCollisionObject(PhysCollisionObject *o)
+void SoftBodyPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 {
-	auto *body = dynamic_cast<PhysSoftBody*>(o);
+	auto *body = o.GetSoftBody();
 	if(body == nullptr)
 		return;
 	PhysObj::AddCollisionObject(o);
-	m_softBodies.push_back(body->GetHandle());
+	m_softBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ISoftBody>(body->ClaimOwnership()));
 }
 
 float SoftBodyPhysObj::GetMass() const
@@ -66,7 +75,7 @@ void SoftBodyPhysObj::SetMass(float mass)
 	for(auto &hBody : m_softBodies)
 	{
 		if(hBody.IsValid())
-			static_cast<PhysSoftBody*>(hBody.get())->SetMass(mass);
+			hBody->SetMass(mass);
 	}
 }
 pragma::BaseEntityComponent *SoftBodyPhysObj::GetOwner() {return m_owner.get();}
@@ -76,7 +85,7 @@ void SoftBodyPhysObj::PutToSleep()
 	for(auto &hBody : m_softBodies)
 	{
 		if(hBody.IsValid())
-			static_cast<PhysSoftBody*>(hBody.get())->SetActivationState(WANTS_DEACTIVATION);
+			hBody->GetSoftBody()->SetActivationState(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation);
 	}
 }
 void SoftBodyPhysObj::WakeUp()
@@ -84,7 +93,7 @@ void SoftBodyPhysObj::WakeUp()
 	for(auto &hBody : m_softBodies)
 	{
 		if(hBody.IsValid())
-			static_cast<PhysSoftBody*>(hBody.get())->Activate();
+			hBody->WakeUp();
 	}
 }
 bool SoftBodyPhysObj::IsSleeping()
@@ -92,8 +101,7 @@ bool SoftBodyPhysObj::IsSleeping()
 	auto *body = GetSoftBody();
 	if(body == nullptr)
 		return true;
-	auto state = body->GetActivationState();
-	return (state == DISABLE_SIMULATION || state == ISLAND_SLEEPING) ? true : false;
+	return body->IsAsleep();
 }
 
 void SoftBodyPhysObj::ApplyForce(const Vector3 &force)
@@ -101,7 +109,7 @@ void SoftBodyPhysObj::ApplyForce(const Vector3 &force)
 	for(auto &hBody : m_softBodies)
 	{
 		if(hBody.IsValid())
-			static_cast<PhysSoftBody*>(hBody.get())->AddForce(force);
+			hBody->AddForce(force);
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/base_model_component_setmodel.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 
 using namespace pragma;
@@ -30,7 +31,7 @@ void SModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->WriteString(GetModelName());
-		server->BroadcastTCP("ent_model",p);
+		server->SendPacket("ent_model",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -47,7 +48,7 @@ bool SModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 	NetPacket p;
 	p->Write<UInt32>(groupId);
 	p->Write<UInt32>(id);
-	ent.SendNetEventTCP(m_netEvSetBodyGroup,p);
+	ent.SendNetEvent(m_netEvSetBodyGroup,p,pragma::networking::Protocol::SlowReliable);
 	return r;
 }
 
@@ -62,10 +63,10 @@ void SModelComponent::SetSkin(unsigned int skin)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<unsigned int>(skin);
-	server->BroadcastTCP("ent_skin",p);
+	server->SendPacket("ent_skin",p,pragma::networking::Protocol::SlowReliable);
 }
 
-void SModelComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SModelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	std::string mdl = GetModelName();
 	packet->WriteString(mdl);

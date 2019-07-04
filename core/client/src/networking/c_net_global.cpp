@@ -37,6 +37,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
 enum class CLIENT_DROPPED;
@@ -1016,7 +1017,7 @@ void NET_cl_client_dropped(NetPacket packet)
 	if(pl == nullptr)
 		return;
 	auto reason = packet->Read<int32_t>();
-	client->GetGameState()->OnPlayerDropped(*pl,static_cast<nwm::ClientDropped>(reason));
+	client->GetGameState()->OnPlayerDropped(*pl,static_cast<pragma::networking::DropReason>(reason));
 }
 
 void NET_cl_client_ready(NetPacket packet)
@@ -1195,7 +1196,7 @@ void CMD_debug_ai_schedule(NetworkState *state,pragma::BasePlayerComponent *pl,s
 	Con::cout<<"Querying schedule data for NPC "<<*npc<<"..."<<Con::endl;
 	NetPacket p;
 	nwm::write_entity(p,npc);
-	client->SendPacketTCP("debug_ai_schedule_tree",p);
+	client->SendPacket("debug_ai_schedule_tree",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
@@ -1208,7 +1209,7 @@ void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std:
 	auto *game = state->GetGameState();
 	auto aimData = ent.GetCharacterComponent()->GetAimTraceData();
 	auto res = game->RayCast(aimData);
-	if(res.hit == false)
+	if(res.hitType == RayCastHitType::None)
 	{
 		Con::cout<<"Nothing found in player aim direction!"<<Con::endl;
 		return;
@@ -1545,7 +1546,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 			cbOnRemove.Remove();
 	});
 	dbgAiSchedule->SetUserData(0,dbgTree);
-	dbgAiSchedule->SetUserData(1,std::shared_ptr<EntityHandle>(ent->CreateHandle()));
+	dbgAiSchedule->SetUserData(1,std::make_shared<EntityHandle>(ent->GetHandle()));
 }
 
 void NET_cl_cmd_call_response(NetPacket packet)
@@ -1573,5 +1574,5 @@ REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation,[](NetworkState *state,ConVar*,b
 		s_aiNavDebugObjects.clear();
 	NetPacket p {};
 	p->Write<bool>(val);
-	client->SendPacketTCP("debug_ai_navigation",p);
+	client->SendPacket("debug_ai_navigation",p,pragma::networking::Protocol::SlowReliable);
 });

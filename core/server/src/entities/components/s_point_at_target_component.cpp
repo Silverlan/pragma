@@ -2,6 +2,7 @@
 #include "pragma/networking/s_nwm_util.h"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -11,7 +12,7 @@ void SPointAtTargetComponent::Initialize()
 }
 luabind::object SPointAtTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPointAtTargetComponentHandleWrapper>(l);}
 
-void SPointAtTargetComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SPointAtTargetComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_unique_entity(packet,GetPointAtTarget());
 }
@@ -21,5 +22,5 @@ void SPointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 	BasePointAtTargetComponent::SetPointAtTarget(ent);
 	NetPacket p {};
 	nwm::write_entity(p,ent);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetPointAtTarget,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetPointAtTarget,p,pragma::networking::Protocol::SlowReliable);
 }

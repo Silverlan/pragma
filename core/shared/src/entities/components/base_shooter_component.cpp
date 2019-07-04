@@ -79,6 +79,7 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,Trace
 	auto *inflictor = bulletInfo.hInflictor.get();
 	auto *entSrc = (attacker != nullptr) ? attacker : (inflictor != nullptr) ? inflictor : &GetEntity();
 	data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	data.SetFilter([this,&data,attacker,inflictor,&bulletInfo](BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result) -> bool {
 		if(ent == &GetEntity() || ent == attacker || ent == inflictor) // Attacker can't shoot themselves or the inflictor
 			return false;
@@ -88,6 +89,7 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,Trace
 			return false;
 		return const_cast<BaseShooterComponent*>(this)->OnBulletHit(bulletInfo,data,phys,col,result);
 	});
+#endif
 	auto physComponent = GetEntity().GetPhysicsComponent();
 	auto filterGroup = CollisionMask::None;
 	if(physComponent.valid())

@@ -8,11 +8,15 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/wvlocalclient.h"
+#include "pragma/networking/iserver.hpp"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/engine.h>
 #include "pragma/ai/ai_schedule.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -24,20 +28,20 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 extern DLLNETWORK Engine *engine;
-DLLSERVER void NET_sv_disconnect(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_disconnect(pragma::networking::IServerClient &session,NetPacket packet)
 {
 #ifdef DEBUG_SOCKET
-	Con::csv<<"Client '"<<session->GetIP()<<"' has disconnected."<<Con::endl;
+	Con::csv<<"Client '"<<session.GetIdentifier()<<"' has disconnected."<<Con::endl;
 #endif
 	server->DropClient(session);
 }
 
-DLLSERVER void NET_sv_userinput(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_userinput(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	server->ReceiveUserInput(session,packet);
 }
 
-DLLSERVER void NET_sv_ent_event(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_ent_event(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -53,7 +57,7 @@ DLLSERVER void NET_sv_ent_event(WVServerClient *session,NetPacket packet)
 	ent->ReceiveNetEvent(*pl,eventId,packet);
 }
 
-DLLSERVER void NET_sv_clientinfo(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_clientinfo(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -61,7 +65,7 @@ DLLSERVER void NET_sv_clientinfo(WVServerClient *session,NetPacket packet)
 	game->ReceiveUserInfo(session,packet);
 }
 
-void NET_sv_game_ready(WVServerClient *session,NetPacket packet)
+void NET_sv_game_ready(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -69,7 +73,7 @@ void NET_sv_game_ready(WVServerClient *session,NetPacket packet)
 	game->ReceiveGameReady(session,packet);
 }
 
-DLLSERVER void NET_sv_cmd_setpos(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(server->CheatsEnabled() == false)
 		return;
@@ -85,7 +89,7 @@ DLLSERVER void NET_sv_cmd_setpos(WVServerClient *session,NetPacket packet)
 	pTrComponent->SetPosition(pos);
 }
 
-DLLSERVER void NET_sv_cmd_call(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_cmd_call(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	auto *pl = s_game->GetPlayer(session);
 	std::string cmd = packet->ReadString();
@@ -125,10 +129,10 @@ DLLSERVER void NET_sv_cmd_call(WVServerClient *session,NetPacket packet)
 			p->WriteString("");
 		}
 	}
-	server->SendPacketTCP("cmd_call_response",p,session);
+	server->SendPacket("cmd_call_response",p,pragma::networking::Protocol::SlowReliable,session);
 }
 
-DLLSERVER void NET_sv_rcon(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -145,35 +149,37 @@ DLLSERVER void NET_sv_rcon(WVServerClient *session,NetPacket packet)
 		Con::crit<<"Incorrect RCON Password! ("<<passCl<<")"<<Con::endl; // WEAVETODO
 		return;
 	}
-	Con::csv<<"Remote console input from "<<session->GetIP()<<": '"<<cvar<<"'"<<Con::endl;
+	Con::csv<<"Remote console input from "<<session.GetIdentifier()<<": '"<<cvar<<"'"<<Con::endl;
 	engine->ConsoleInput(cvar.c_str());
 }
 
-DLLSERVER void NET_sv_serverinfo_request(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	std::string password = packet->ReadString();
 	std::string passSv = server->GetConVarString("sv_password");
-	if(passSv != "" && passSv != password && dynamic_cast<WVLocalClient*>(session) == nullptr)
+	if(passSv != "" && passSv != password && session.IsListenServerHost())
 	{
 		NetPacket p;
-		server->SendPacketTCP("invalidpassword",p,session);
+		server->SendPacket("invalidpassword",p,pragma::networking::Protocol::SlowReliable,session);
 		server->DropClient(session);
 		return;
 	}
 	NetPacket p;
-	if(server->IsUDPOpen())
+	auto *sv = server->GetServer();
+	if(sv && sv->GetLocalUDPPort().has_value())
 	{
+		auto port = sv->GetLocalUDPPort();
 		p->Write<unsigned char>(1);
-		p->Write<unsigned short>(server->GetUDPPort());
+		p->Write<unsigned short>(*port);
 	}
 	else
 		p->Write<unsigned char>((unsigned char)(0));
 	unsigned int numResources = ResourceManager::GetResourceCount();
 	p->Write<unsigned int>(numResources);
-	server->SendPacketTCP("serverinfo",p,session);
+	server->SendPacket("serverinfo",p,pragma::networking::Protocol::SlowReliable,session);
 }
 
-DLLSERVER void NET_sv_cvar_set(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->IsGameActive())
 		return;
@@ -189,7 +195,7 @@ DLLSERVER void NET_sv_cvar_set(WVServerClient *session,NetPacket packet)
 	game->OnClientConVarChanged(*pl,cvar,val);
 }
 
-DLLSERVER void NET_sv_noclip(WVServerClient *session,NetPacket packet)
+DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -214,10 +220,10 @@ DLLSERVER void NET_sv_noclip(WVServerClient *session,NetPacket packet)
 	NetPacket p;
 	nwm::write_entity(p,&pl->GetEntity());
 	p->Write<bool>(bNoclip);
-	server->BroadcastTCP("pl_toggle_noclip",p);
+	server->SendPacket("pl_toggle_noclip",p,pragma::networking::Protocol::SlowReliable);
 }
 
-void NET_sv_notarget(WVServerClient *session,NetPacket packet)
+void NET_sv_notarget(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -231,7 +237,7 @@ void NET_sv_notarget(WVServerClient *session,NetPacket packet)
 	pl->PrintMessage(std::string("Notarget turned ") +((charComponent->GetNoTarget() == true) ? "ON" : "OFF"),MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_godmode(WVServerClient *session,NetPacket packet)
+void NET_sv_godmode(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -245,7 +251,7 @@ void NET_sv_godmode(WVServerClient *session,NetPacket packet)
 	pl->PrintMessage(std::string("God mode turned ") +((charComponent->GetGodMode() == true) ? "ON" : "OFF"),MESSAGE::PRINTCONSOLE);
 }
 
-void NET_sv_suicide(WVServerClient *session,NetPacket packet)
+void NET_sv_suicide(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -258,7 +264,7 @@ void NET_sv_suicide(WVServerClient *session,NetPacket packet)
 	charComponent->Kill();
 }
 
-void NET_sv_hurtme(WVServerClient *session,NetPacket packet)
+void NET_sv_hurtme(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled())
 		return;
@@ -278,7 +284,7 @@ void NET_sv_hurtme(WVServerClient *session,NetPacket packet)
 	pDamageableComponent->TakeDamage(dmgInfo);
 }
 
-void NET_sv_weapon_next(WVServerClient *session,NetPacket packet)
+void NET_sv_weapon_next(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
@@ -289,7 +295,7 @@ void NET_sv_weapon_next(WVServerClient *session,NetPacket packet)
 	sCharComponent->SelectNextWeapon();
 }
 
-void NET_sv_weapon_previous(WVServerClient *session,NetPacket packet)
+void NET_sv_weapon_previous(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	auto *pl = server->GetPlayer(session);
 	if(pl == nullptr)
@@ -300,7 +306,7 @@ void NET_sv_weapon_previous(WVServerClient *session,NetPacket packet)
 	sCharComponent->SelectPreviousWeapon();
 }
 
-void NET_sv_give_weapon(WVServerClient *session,NetPacket packet)
+void NET_sv_give_weapon(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -317,7 +323,7 @@ void NET_sv_give_weapon(WVServerClient *session,NetPacket packet)
 	sCharComponent->DeployWeapon(*wep);
 }
 
-void NET_sv_give_ammo(WVServerClient *session,NetPacket packet)
+void NET_sv_give_ammo(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -336,7 +342,7 @@ void NET_sv_give_ammo(WVServerClient *session,NetPacket packet)
 	sCharComponent->SetAmmoCount(ammoTypeId,static_cast<uint16_t>(am));
 }
 
-void NET_sv_debug_ai_schedule_print(WVServerClient *session,NetPacket packet)
+void NET_sv_debug_ai_schedule_print(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;
@@ -358,10 +364,10 @@ void NET_sv_debug_ai_schedule_print(WVServerClient *session,NetPacket packet)
 		schedule->DebugPrint(ss);
 		response->WriteString(ss.str());
 	}
-	server->SendPacketTCP("debug_ai_schedule_print",response,session);
+	server->SendPacket("debug_ai_schedule_print",response,pragma::networking::Protocol::SlowReliable,session);
 }
 
-void NET_sv_debug_ai_schedule_tree(WVServerClient *session,NetPacket packet)
+void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)
 		return;

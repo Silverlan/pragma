@@ -6,8 +6,8 @@
 #include "pragma/entities/func/c_func_brush.h"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
-#include <pragma/physics/physenvironment.h>
-#include <pragma/physics/physshape.h>
+#include <pragma/physics/environment.hpp>
+#include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
@@ -164,7 +164,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 
 						if(bConvex == true)
 						{
-							auto &convexShape = static_cast<PhysConvexShape&>(*shape);
+							auto &convexShape = *shape->GetConvexShape();
 							auto *colMesh = convexShape.GetCollisionMesh();
 							if(colMesh != nullptr)
 							{
@@ -204,16 +204,15 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 							auto &iplTris = mesh->GetTriangles();
 							auto &iplMatIndices = mesh->GetMaterialIndices();
 
-							auto &triShape = static_cast<PhysTriangleShape&>(*shape);
-							auto &verts = triShape.GetVertices();
+							auto &triShape = *shape->GetTriangleShape();
+							auto verts = triShape.GetVertices();
 							auto &triangles = triShape.GetTriangles();
 							auto &materialIndices = triShape.GetSurfaceMaterials();
 
 							iplVerts.reserve(verts.size());
 							auto vertIdx = 0u;
-							for(auto btVec : verts)
+							for(auto &v : verts)
 							{
-								auto v = uvec::create(btVec /PhysEnv::WORLD_SCALE);
 								uvec::local_to_world(pos,rot,v);
 								iplVerts.push_back(al::to_custom_vector<IPLVector3>(al::to_audio_position(v)));
 							}

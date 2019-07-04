@@ -14,7 +14,6 @@
 #include "pragma/entities/parentinfo.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/rendersystem.h"
-#include "pragma/rendering/scene/camera.h"
 #include <materialmanager.h>
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
@@ -32,11 +31,12 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/collisionmasks.h>
 #include <pragma/audio/alsound_type.h>
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 #include <sharedutils/scope_guard.h>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -234,7 +234,7 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId,NetPacket &data) const
 		return;
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
-	client->SendPacketTCP("ent_event",data);
+	client->SendPacket("ent_event",data,pragma::networking::Protocol::SlowReliable);
 }
 void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 {
@@ -249,7 +249,7 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId,NetPacket &data) const
 		return;
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
-	client->SendPacketUDP("ent_event",data);
+	client->SendPacket("ent_event",data,pragma::networking::Protocol::FastUnreliable);
 }
 util::WeakHandle<pragma::BaseModelComponent> CBaseEntity::GetModelComponent() const
 {

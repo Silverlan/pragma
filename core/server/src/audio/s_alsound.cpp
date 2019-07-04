@@ -1,11 +1,12 @@
 #include "stdafx_server.h"
 #include "pragma/audio/s_alsound.h"
 #include "pragma/audio/s_alsoundscript.h"
+#include <pragma/networking/enums.hpp>
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/engine.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/lua/luafunction_call.h>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
 extern ServerState *server;
@@ -49,9 +50,9 @@ void SALSound::SendEvent(NetEvent evId,const std::function<void(NetPacket&)> &wr
 	if(write != nullptr)
 		write(p);
 	if(bUDP == true)
-		server->BroadcastUDP("snd_ev",p);
+		server->SendPacket("snd_ev",p,pragma::networking::Protocol::FastUnreliable);
 	else
-		server->BroadcastTCP("snd_ev",p);
+		server->SendPacket("snd_ev",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SALSound::SetState(ALState state)

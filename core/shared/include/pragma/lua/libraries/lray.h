@@ -1,13 +1,14 @@
 #ifndef __LRAY_H__
 #define __LRAY_H__
 #include "pragma/networkdefinitions.h"
+#include "pragma/physics/shape.hpp"
 #include <pragma/lua/luaapi.h>
 
 class TraceData;
 class PhysObjHandle;
 class EntityHandle;
-class LPhysShape;
-DLLNETWORK void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const LPhysShape &shape);
+namespace pragma::physics {class IConvexShape;};
+DLLNETWORK void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const util::TSharedHandle<pragma::physics::IConvexShape> &shape);
 DLLNETWORK void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const PhysObjHandle &hPhys);
 DLLNETWORK void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const EntityHandle &hAttacker);
 DLLNETWORK void Lua_TraceData_SetFlags(lua_State *l,TraceData &data,unsigned int flags);

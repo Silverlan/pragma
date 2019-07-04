@@ -6,6 +6,7 @@
 #include "pragma/console/debugconsole.h"
 #include "pragma/lua/lua_doc.hpp"
 #include "pragma/console/util_console_color.hpp"
+#include "pragma/console/conout.h"
 #include <pragma/debug/debug_lua_zerobrane.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_file.h>

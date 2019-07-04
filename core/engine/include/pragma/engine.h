@@ -107,16 +107,7 @@ public:
 	// Lua
 	virtual NetworkState *GetNetworkState(lua_State *l);
 	virtual Lua::Interface *GetLuaInterface(lua_State *l);
-#ifdef PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxPhysics *GetPhysics();
-	physx::PxCooking *GetCookingLibrary();
-#ifdef _DEBUG
-	void OpenPVDConnection();
-	void OpenPVDConnection(const char *host,int port,unsigned int timeout);
-	void ClosePVDConnection();
-#endif
-#endif
+
 	// Log
 	void StartLogging();
 	void EndLogging();
@@ -170,11 +161,12 @@ public:
 	void CloseServerState();
 	void StartServer();
 	void CloseServer();
-	void HandleLocalPlayerServerPacket(NetPacket &p);
-	virtual void HandleLocalPlayerClientPacket(NetPacket &p);
 	virtual void LoadMap(const char *map);
 	// Config
 	bool ExecConfig(const std::string &cfg);
+
+	void HandleLocalPlayerServerPacket(NetPacket &p);
+	virtual void HandleLocalPlayerClientPacket(NetPacket &p);
 
 	void SetMountExternalGameResources(bool b);
 	bool ShouldMountExternalGameResources() const;
@@ -229,17 +221,6 @@ protected:
 	void InitLaunchOptions(int argc,char *argv[]);
 	virtual void Think();
 	virtual void Tick();
-
-#ifdef PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxPhysics *m_physics;
-	physx::PxFoundation *m_pxFoundation;
-	physx::PxCooking *m_pxCooking;
-
-#ifdef _DEBUG
-	physx::debugger::comm::PvdConnection *m_pxPvdConnection;
-#endif
-#endif
 };
 
 template<class T>

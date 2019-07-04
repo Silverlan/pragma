@@ -2,7 +2,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/classes/lproperty_generic.hpp"
 #include "pragma/lua/lua_call.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 
 static float operator+(float f,const LGenericFloatPropertyWrapper &prop)

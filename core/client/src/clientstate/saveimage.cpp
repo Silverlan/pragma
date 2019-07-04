@@ -3,7 +3,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include <fsys/filesystem.h>
 #include "pragma/rendering/scene/scene.h"
-#include "pragma/rendering/scene/camera.h"
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

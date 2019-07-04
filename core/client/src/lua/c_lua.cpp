@@ -46,9 +46,6 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
-#ifdef PHYS_ENGINE_PHYSX
-#include <PxVisualizationParameter.h>
-#endif
 #include "pragma/debug/c_debug_vehicle.hpp"
 
 #undef LEFT
@@ -91,15 +88,11 @@ void CGame::RegisterLua()
 		{"precache_particle_system",&Lua::engine::precache_particle_system},
 		{"save_particle_system",&Lua::engine::save_particle_system},
 
-		{"test",Lua::game::Client::test},
 		{"open_dropped_file",Lua::game::Client::open_dropped_file},
 		{"set_gravity",Lua::game::Client::set_gravity},
 		{"get_gravity",Lua::game::Client::get_gravity},
 		{"load_model",Lua::game::Client::load_model},
 		{"create_model",Lua::game::Client::create_model},
-#ifdef PHYS_ENGINE_PHYSX
-		{"get_physx_scene",Lua::game::physx_scene},
-#endif
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
 		{"draw_scene",Lua::game::Client::draw_scene},
@@ -571,119 +564,6 @@ void CGame::RegisterLua()
 	/*lua_registerglobalint(SHADER_VERTEX_BUFFER_LOCATION);
 	lua_registerglobalint(SHADER_UV_BUFFER_LOCATION);
 	lua_registerglobalint(SHADER_NORMAL_BUFFER_LOCATION);*/ // Vulkan TODO
-
-#ifdef PHYS_ENGINE_PHYSX
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eSCALE);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_SCALE");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eWORLD_AXES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_WORLD_AXES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eBODY_AXES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_BODY_AXES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eBODY_MASS_AXES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_MASS_AXES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eBODY_LIN_VELOCITY);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_LIN_VELOCITY");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eBODY_ANG_VELOCITY);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_ANG_VELOCITY");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eBODY_JOINT_GROUPS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_JOINT_GROUPS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCONTACT_POINT);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CONTACT_POINT");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCONTACT_NORMAL);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CONTACT_NORMAL");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCONTACT_ERROR);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CONTACT_ERROR");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCONTACT_FORCE);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CONTACT_FORCE");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eACTOR_AXES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_ACTOR_AXES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_AABBS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_AABBS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_SHAPES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_SHAPES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_AXES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_AXES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_COMPOUNDS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_COMPOUNDS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_FNORMALS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_FNORMALS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_EDGES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_EDGES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_STATIC);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_STATIC");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_DYNAMIC);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_DYNAMIC");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCOLLISION_PAIRS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_COLLISION_PAIRS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eJOINT_LOCAL_FRAMES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_JOINT_LOCAL_FRAMES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eJOINT_LIMITS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_JOINT_LIMITS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_POSITION);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_POSITION");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_VELOCITY);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_VELOCITY");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_COLLISION_NORMAL);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_COLLISION_NORMAL");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_BOUNDS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_BOUNDS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_GRID);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_GRID");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_BROADPHASE_BOUNDS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_BROADPHASE_BOUNDS");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::ePARTICLE_SYSTEM_MAX_MOTION_DISTANCE);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_PARTICLE_SYSTEM_MAX_MOTION_DISTANCE");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCULL_BOX);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CULL_BOX");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCLOTH_VERTICAL);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CLOTH_VERTICAL");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCLOTH_HORIZONTAL);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CLOTH_HORIZONTAL");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCLOTH_BENDING);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CLOTH_BENDING");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCLOTH_SHEARING);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CLOTH_SHEARING");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eCLOTH_VIRTUAL_PARTICLES);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_CLOTH_VIRTUAL_PARTICLES");
-
-	lua_pushinteger(m_lua,physx::PxVisualizationParameter::eMBP_REGIONS);
-	lua_setglobal(m_lua,"FPHYSX_VISUALIZE_MBP_REGIONS");
-#endif
 }
 
 void CGame::InitializeLua()

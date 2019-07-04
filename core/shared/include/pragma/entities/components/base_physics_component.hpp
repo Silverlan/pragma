@@ -2,7 +2,9 @@
 #define __BASE_PHYSICS_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/entities/baseentity_handle.h"
+#include "pragma/physics/physicstypes.h"
+#include <sharedutils/util_shared_handle.hpp>
 
 class BrushMesh;
 class Frame;
@@ -11,6 +13,7 @@ enum class MOVETYPE : int;
 enum class COLLISIONTYPE : int;
 namespace pragma
 {
+	namespace physics {class IConvexShape; class IRigidBody; class IConstraint; class IShape;};
 	struct DLLNETWORK CEPhysicsUpdateData
 		: public ComponentEvent
 	{
@@ -21,20 +24,10 @@ namespace pragma
 	struct DLLNETWORK CEHandleRaycast
 		: public ComponentEvent
 	{
-		CEHandleRaycast(
-			CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,
-			btVector3 &rayFromWorld,btVector3 &rayToWorld,
-			btVector3 &hitNormalWorld,btVector3 &hitPointWorld,
-			btCollisionWorld::LocalRayResult &rayResult
-		);
+		CEHandleRaycast(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask);
 		virtual void PushArguments(lua_State *l) override;
 		CollisionMask rayCollisionGroup;
 		CollisionMask rayCollisionMask;
-		btVector3 &rayFromWorld;
-		btVector3 &rayToWorld;
-		btVector3 &hitNormalWorld;
-		btVector3 &hitPointWorld;
-		btCollisionWorld::LocalRayResult &rayResult;
 		bool hit = false;
 	};
 	class DLLNETWORK BasePhysicsComponent
@@ -53,7 +46,7 @@ namespace pragma
 			PhysJoint(unsigned int source,unsigned int target);
 			unsigned int source; // Bone ID
 			unsigned int target; // Bone ID
-			ConstraintHandle constraint;
+			util::TSharedHandle<pragma::physics::IConstraint> constraint;
 		};
 	public:
 		enum class StateFlags : uint32_t
@@ -89,32 +82,16 @@ namespace pragma
 		float GetAABBDistance(const Vector3 &p) const;
 		float GetAABBDistance(const BaseEntity &ent) const;
 
-		virtual bool ShouldCollide(PhysObj *physThis,PhysCollisionObject *colThis,BaseEntity *entOther,PhysObj *physOther,PhysCollisionObject *colOther,bool valDefault) const;
+		virtual bool ShouldCollide(PhysObj *physThis,pragma::physics::ICollisionObject *colThis,BaseEntity *entOther,PhysObj *physOther,pragma::physics::ICollisionObject *colOther,bool valDefault) const;
 		void ResetCollisions(BaseEntity *ent);
 		void DisableCollisions(BaseEntity *ent);
 		void EnableCollisions(BaseEntity *ent);
 		void SetCollisionsEnabled(BaseEntity *ent,bool b);
 		void UpdateCCD();
-#ifdef PHYS_ENGINE_BULLET
 		void SetCollisionCallbacksEnabled(bool b);
 		bool GetCollisionCallbacksEnabled() const;
 		void SetCollisionContactReportEnabled(bool b);
 		bool GetCollisionContactReportEnabled() const;
-#elif PHYS_ENGINE_PHYSX
-		// PhysX
-		physx::PxRigidActor *GetGroundActor();
-		physx::PxShape *GetGroundState();
-		bool GetControllerState(physx::PxControllerState &state);
-		// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))
-		virtual void OnContact(BaseEntity *ent,PhysObj *phys,physx::PxActor *actor);
-		// Only called if collision callbacks and contact reports are enabled (Entity::SetCollisionCallbacksEnabled(true),Entity::SetCollisionContactReportEnabled(true))
-		virtual void OnContact(BaseEntity *ent,PhysObj *phys,physx::PxActor *actor,const physx::PxContactPair &cp,unsigned int nbContacts,physx::PxContactPairPoint *contacts);
-		void SetCollisionNotificationEnabled(unsigned int flags,bool bEnabled);
-		void SetCollisionCallbacksEnabled(bool b);
-		bool GetCollisionCallbacksEnabled();
-		void SetCollisionContactReportEnabled(bool b);
-		bool GetCollisionContactReportEnabled();
-#endif
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 		Vector3 GetPhysicsSimulationOffset();
 		Quat GetPhysicsSimulationRotation();
@@ -130,14 +107,13 @@ namespace pragma
 
 		BaseEntity *GetGroundEntity() const;
 		PhysObj *GetPhysicsObject() const;
-		PhysCollisionObject *GetCollisionObject(UInt32 boneId) const;
+		pragma::physics::ICollisionObject *GetCollisionObject(UInt32 boneId) const;
 		virtual PhysObj *InitializePhysics(PHYSICSTYPE type);
-		PhysObj *InitializePhysics(PhysConvexShape &shape,float mass=0.f);
+		PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape,float mass=0.f);
 		virtual void DestroyPhysicsObject();
 		PHYSICSTYPE GetPhysicsType() const;
 		void DropToFloor();
 		bool IsTrigger() const;
-		void SetTrigger(bool b);
 		virtual void SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask);
 		void AddCollisionFilter(CollisionMask filter);
 		void RemoveCollisionFilter(CollisionMask filter);
@@ -154,7 +130,7 @@ namespace pragma
 		// Is called after the world physics have been simulated
 		virtual void UpdatePhysicsData();
 		// Return false to discard result
-		virtual bool RayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,btVector3 &rayFromWorld,btVector3 &rayToWorld,btVector3 &hitNormalWorld,btVector3 &hitPointWorld,btCollisionWorld::LocalRayResult &rayResult);
+		virtual bool RayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask);
 		bool IsRayResultCallbackEnabled() const;
 		void SetRayResultCallbackEnabled(bool b);
 
@@ -218,7 +194,7 @@ namespace pragma
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
-		PhysRigidBody *CreateRigidBody(const std::shared_ptr<PhysShape> &shape,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
+		pragma::physics::IRigidBody *CreateRigidBody(pragma::physics::IShape &shape,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(bool bDynamic=true);
 		util::WeakHandle<PhysObj> InitializeBrushPhysics(bool bDynamic=false,float mass=0.f);

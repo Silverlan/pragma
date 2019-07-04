@@ -1,6 +1,5 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lcamera.h"
-#include "pragma/lua/classes/c_ldef_camera.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/ldef_plane.h"
 #include <pragma/math/plane.h>

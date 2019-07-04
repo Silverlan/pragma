@@ -53,7 +53,7 @@ public:
 	template<class TPoly,class TPolyMesh>
 		static Model *GenerateModel(const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
 	template<class TSide,class TPolyMesh,class TBrushMesh>
-		static void GenerateBrushMeshes(std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
+		static void GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes);
 	void GetBounds(Vector3 *min,Vector3 *max);
 	Vector3 GetCenter();
 	Vector3 *GetLocalizedCenter();
@@ -105,7 +105,7 @@ template<class TPoly,class TPolyMesh>
 }
 
 template<class TSide,class TPolyMesh,class TBrushMesh>
-	void PolyMesh::GenerateBrushMeshes(std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
+	void PolyMesh::GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<TBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<TPolyMesh>> &meshes) // Obsolete?
 {
 	for(int i=0;i<meshes.size();i++)
 	{
@@ -125,7 +125,7 @@ template<class TSide,class TPolyMesh,class TBrushMesh>
 			//TSide *side = new TSide(vertexList,verts,uvs,normals,mat);
 			//mesh->AddSide(side);
 		}
-		mesh->Calculate();
+		mesh->Calculate(env);
 		outBrushMeshes.push_back(mesh);
 	}
 }

@@ -2,7 +2,7 @@
 #if 0
 #include "pragma/lua/classes/s_lua_vehicle.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 
 DEFINE_LUA_ENTITY_HANDLE(SLuaVehicle);
 
@@ -30,7 +30,7 @@ void SLuaVehicle::SetDriver(BaseEntity *ent)
 	BaseLuaVehicle::SetDriver(ent);
 }
 
-void SLuaVehicle::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLuaVehicle::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseVehicle::SendData(packet,rp);
 	SLuaBaseEntity::ImplSendData(packet,rp);

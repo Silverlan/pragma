@@ -10,11 +10,11 @@ class DLLNETWORK BasePhysRayCallbackFilterFunction
 private:
 	BasePhysRayCallbackFilterFunction &operator=(const BasePhysRayCallbackFilterFunction&) {return *this;};
 protected:
-	std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> m_filter;
+	std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> m_filter;
 public:
-	BasePhysRayCallbackFilterFunction(const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
-	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *obj) override;
-	void SetFilter(const std::function<bool(BaseEntity*,PhysObj*,PhysCollisionObject*)> &f);
+	BasePhysRayCallbackFilterFunction(const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
+	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj) override;
+	void SetFilter(const std::function<bool(BaseEntity*,PhysObj*,pragma::physics::ICollisionObject*)> &f);
 };
 
 #endif

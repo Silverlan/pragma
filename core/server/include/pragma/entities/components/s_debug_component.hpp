@@ -16,7 +16,7 @@ namespace pragma
 		virtual void SetText(const std::string &text) override;
 		virtual void SetSize(float size) override;
 		
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -27,7 +27,7 @@ namespace pragma
 		: public SBaseNetComponent
 	{
 	public:
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
 		SBaseDebugOutlineComponent()=default;
@@ -41,7 +41,7 @@ namespace pragma
 	{
 	public:
 		SDebugPointComponent(BaseEntity &ent) : BaseDebugPointComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -54,7 +54,7 @@ namespace pragma
 	{
 	public:
 		SDebugLineComponent(BaseEntity &ent) : BaseDebugLineComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -69,7 +69,7 @@ namespace pragma
 		SDebugBoxComponent(BaseEntity &ent) : BaseDebugBoxComponent(ent) {}
 		virtual void SetBounds(const Vector3 &min,const Vector3 &max) override;
 		
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -82,7 +82,7 @@ namespace pragma
 	{
 	public:
 		SDebugSphereComponent(BaseEntity &ent) : BaseDebugSphereComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -98,7 +98,7 @@ namespace pragma
 		virtual void SetConeAngle(float angle) override;
 		virtual void SetStartRadius(float radius) override;
 		
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
@@ -113,7 +113,7 @@ namespace pragma
 		SDebugCylinderComponent(BaseEntity &ent) : BaseDebugCylinderComponent(ent) {}
 		virtual void SetLength(float length) override;
 		
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};

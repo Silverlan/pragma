@@ -3,7 +3,7 @@
 #if 0
 #include "pragma/lua/c_lua_npc.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 
 DEFINE_LUA_ENTITY_HANDLE(CLuaNPC);
 

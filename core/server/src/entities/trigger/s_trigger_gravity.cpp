@@ -9,6 +9,7 @@
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/basetriggergravity.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -48,7 +49,7 @@ void STriggerGravityComponent::OnResetGravity(BaseEntity *ent,GravitySettings &s
 	p->Write<Vector3>((settings.dir != nullptr) ? *settings.dir : Vector3{});
 	p->Write<float>((settings.force != nullptr) ? *settings.force : 0.f);
 	p->Write<Vector3>((settings.dirMove != nullptr) ? *settings.dirMove : Vector3{});
-	server->BroadcastTCP("ent_trigger_gravity_onstarttouch",p);
+	server->SendPacket("ent_trigger_gravity_onstarttouch",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void STriggerGravityComponent::OnStartTouch(BaseEntity *ent,PhysObj *phys)
@@ -64,7 +65,7 @@ void STriggerGravityComponent::OnStartTouch(BaseEntity *ent,PhysObj *phys)
 	p->Write<uint32_t>(entThis.GetSpawnFlags());
 	p->Write<Vector3>(m_kvGravityDir);
 	p->Write<float>(m_kvGravityForce);
-	server->BroadcastTCP("ent_trigger_gravity_onstarttouch",p);
+	server->SendPacket("ent_trigger_gravity_onstarttouch",p,pragma::networking::Protocol::SlowReliable);
 }
 
 ////////////

@@ -7,6 +7,8 @@
 #include "pragma/entities/player.h"
 #include "pragma/networking/wvserver.h"
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/iserver.hpp"
+#include "pragma/networking/iserver_client.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/console/util_cmd.hpp>
@@ -132,18 +134,17 @@ DLLSERVER void CMD_status_sv(NetworkState*,pragma::BasePlayerComponent*,std::vec
 {
 	auto &players = pragma::SPlayerComponent::GetAll();
 	std::string ip;
-	WVServer *sv = server->GetServer();
+	auto *sv = server->GetServer();
 	if(sv == nullptr)
 	{
 		std::stringstream str;
-		str<<"[::1]"<<":"<<server->GetTCPPort();
+		str<<"[::1]";
 		ip = str.str();
 	}
 	else
 	{
-		std::stringstream str;
-		str<<sv->GetLocalIP();
-		ip = str.str();
+		auto hostIp = sv->GetHostIP();
+		ip = hostIp.has_value() ? *hostIp : "Unknown";
 	}
 	auto &serverData = server->GetServerData();
 	Con::cout<<"hostname:\t"<<serverData.name<<Con::endl;

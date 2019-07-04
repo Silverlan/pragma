@@ -1,7 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/lua/classes/s_lfaction.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 {

@@ -12,7 +12,7 @@ protected:
 public:
 	BasePhysRayCallbackFilterPhysObj(const std::vector<PhysObjHandle> &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
 	BasePhysRayCallbackFilterPhysObj(const PhysObjHandle &filter,FTRACE flags,CollisionMask group,CollisionMask mask);
-	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *obj) override;
+	virtual bool ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *obj) override;
 };
 
 #endif

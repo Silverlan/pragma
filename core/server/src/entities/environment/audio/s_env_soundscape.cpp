@@ -11,7 +11,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_soundscape,EnvSoundScape);
 
-void SSoundScapeComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundScapeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSoundScape);
 	packet->Write<float>(m_kvRadius);

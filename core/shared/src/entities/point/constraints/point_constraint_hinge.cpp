@@ -2,11 +2,11 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_hinge.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include <sharedutils/util.h>
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -66,9 +66,9 @@ void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src,Bas
 		if(bodyTgt.IsValid())
 		{
 			auto posTgt = bodyTgt->GetPos();
-			auto *hinge = physEnv->CreateHingeConstraint(static_cast<PhysRigidBody*>(bodyTgt.get()),posThis -posTgt,bodySrc,posThis,axis);
+			auto hinge = physEnv->CreateHingeConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis,axis);
 			if(hinge != nullptr)
-				m_constraints.push_back(hinge->GetHandle());
+				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IHingeConstraint,pragma::physics::IConstraint>(hinge));
 		}
 	}
 }

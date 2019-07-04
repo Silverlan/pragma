@@ -34,7 +34,7 @@ bool SAIComponent::IsInViewCone(BaseEntity *ent,float *dist)
 			auto data = charComponent->GetAimTraceData();
 			data.SetTarget(posEnt);
 			auto res = s_game->RayCast(data);
-			if(res.hit == false || res.entity == ent)
+			if(res.hitType == RayCastHitType::None || res.entity == ent)
 				return true;
 		}
 	}

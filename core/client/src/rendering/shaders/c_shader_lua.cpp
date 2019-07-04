@@ -875,7 +875,7 @@ luabind::object *LuaShaderManager::GetClassObject(std::string className)
 #include "c_shader_lua.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

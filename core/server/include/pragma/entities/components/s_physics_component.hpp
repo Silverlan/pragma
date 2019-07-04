@@ -19,7 +19,7 @@ namespace pragma
 		virtual void OnPhysicsDestroyed() override;
 		virtual void PostPhysicsSimulate() override;
 		
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 
 		virtual void SetCollisionsEnabled(bool b) override;
 		using BasePhysicsComponent::SetCollisionsEnabled;

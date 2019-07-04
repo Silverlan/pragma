@@ -7,7 +7,7 @@ using namespace pragma;
 
 luabind::object PropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<PropComponentHandleWrapper>(l);}
 
-void PropComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void PropComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvMaxVisibleDist);
 	packet->Write<float>(m_kvMass);

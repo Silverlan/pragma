@@ -5,9 +5,11 @@
 #include "pragma/networking/netmessages.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvclient.h"
+#include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_string.h>
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/c_world.h"
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/lua/lua_script_watcher.h>
 #include <pragma/util/resource_watcher.h>
@@ -47,14 +49,17 @@ void ClientState::RequestServerInfo()
 	Con::ccl<<"[CLIENT] Sending serverinfo request..."<<Con::endl;
 	NetPacket packet;
 	packet->WriteString(GetConVarString("password"));
-	SendPacketTCP("serverinfo_request",packet);
+	SendPacket("serverinfo_request",packet,pragma::networking::Protocol::SlowReliable);
 }
 
 void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 {
 	m_svInfo = std::make_unique<ServerInfo>();
 	if(IsConnected())
-		m_svInfo->address = m_client->GetIP();
+	{
+		auto ip = m_client->GetIP();
+		m_svInfo->address = ip.has_value() ? *ip : "unknown";
+	}
 	else
 		m_svInfo->address = "[::1]";
 	if(packet->Read<unsigned char>() == 1)
@@ -280,7 +285,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	LoadMap(map.c_str(),true);
 	game->ReloadSoundCache();
 
-	SendPacketTCP("game_ready");
+	SendPacket("game_ready",pragma::networking::Protocol::SlowReliable);
 	game->OnGameReady();
 
 	// WEAVETODO

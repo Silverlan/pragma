@@ -5,7 +5,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/lua/luaobjectbase.h"
 #include "pragma/util/util_variable_type.hpp"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <any>
 
 extern DLLENGINE Engine *engine;

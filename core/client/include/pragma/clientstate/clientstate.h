@@ -68,7 +68,6 @@ struct DLLCLIENT ALBuffer
 */
 class CLNetMessage;
 class ClientMessageMap;
-class WVClient;
 enum class ClientEvent : int;
 struct ALResource;
 struct ALAudio;
@@ -76,6 +75,11 @@ class WIMainMenu;
 struct WILuaHandleWrapper;
 enum class ALSoundType : Int32;
 namespace al {class SoundBuffer;class Decoder;};
+namespace pragma::networking
+{
+	class IClient;
+	enum class Protocol : uint8_t;
+};
 class DLLCLIENT ClientState
 	: public NetworkState
 {
@@ -86,7 +90,7 @@ public:
 //
 private:
 	CGame *m_game;
-	std::unique_ptr<WVClient> m_client;
+	std::unique_ptr<pragma::networking::IClient> m_client = nullptr;
 	std::unique_ptr<ServerInfo> m_svInfo;
 	std::unique_ptr<ResourceDownload> m_resDownload; // Current resource file being downloaded
 
@@ -108,9 +112,6 @@ protected:
 	std::vector<std::function<luabind::object(lua_State*,WIBase&)>> m_guiLuaWrapperFactories;
 	
 	virtual void InitializeResourceManager() override;
-
-	void SendPacketTCP(unsigned int ID,NetPacket &packet);
-	void SendPacketUDP(unsigned int ID,NetPacket &packet);
 	void StartResourceTransfer();
 
 	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
@@ -125,7 +126,7 @@ public:
 	Material *CreateMaterial(const std::string &path,const std::string &shader);
 	Material *CreateMaterial(const std::string &shader);
 	bool LoadGUILuaFile(std::string f);
-	WVClient *GetClient();
+	pragma::networking::IClient *GetClient();
 	void Think();
 	void Tick();
 	void Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
@@ -159,8 +160,6 @@ public:
 	virtual bool RunConsoleCommand(std::string scmd,std::vector<std::string> &argv,pragma::BasePlayerComponent *pl=nullptr,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr) override;
 	ConVar *SetConVar(std::string scmd,std::string value,bool bApplyIfEqual=false);
 	// Sockets
-	unsigned short GetTCPPort();
-	unsigned short GetUDPPort();
 	void Connect(std::string ip,std::string port=sci::DEFAULT_PORT_TCP);
 	CLNetMessage *GetNetMessage(unsigned int ID);
 	ClientMessageMap *GetNetMessageMap();
@@ -215,13 +214,10 @@ public:
 
 	void HandleLuaNetPacket(NetPacket &packet);
 
-	void SendPacketTCP(const std::string &name,NetPacket &packet);
-	void SendPacketUDP(const std::string &name,NetPacket &packet);
+	void SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol);
+	void SendPacket(const std::string &name,NetPacket &packet);
+	void SendPacket(const std::string &name,pragma::networking::Protocol protocol);
 
-	void SendPacketTCP(const std::string &name);
-	void SendPacketUDP(const std::string &name);
-	virtual bool IsTCPOpen() const override;
-	virtual bool IsUDPOpen() const override;
 	void Disconnect();
 	// Game
 	virtual bool IsMultiPlayer() const override;

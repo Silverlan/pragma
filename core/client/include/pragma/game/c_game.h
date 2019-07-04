@@ -45,9 +45,6 @@ class WorldEnvironment;
 template<class T>
 	class OcclusionOctree;
 enum class UniformBinding : uint32_t;
-#ifdef PHYS_ENGINE_BULLET
-	class WVBtIDebugDraw;
-#endif
 namespace al {class Effect;};
 namespace GLFW
 {
@@ -60,6 +57,7 @@ namespace GLFW
 namespace pragma
 {
 	namespace debug {class GPUProfilingStage;};
+	namespace physics {class IVisualDebugger;};
 	class LuaShaderManager;
 	class CPlayerComponent;
 	class CViewModelComponent;
@@ -277,11 +275,9 @@ public:
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f) override;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f) override;
 	virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f) override;
+	void RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	using Game::LoadNavMesh;
-#ifdef PHYS_ENGINE_BULLET
-	WVBtIDebugDraw *GetPhysicsDebugInterface();
-#endif
 	const std::vector<DroppedFile> &GetDroppedFiles() const;
 
 	void OnReceivedRegisterNetEvent(NetPacket &packet);
@@ -494,9 +490,6 @@ private:
 
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	void InitializeWorldEnvironment();
-#ifdef PHYS_ENGINE_BULLET
-	std::unique_ptr<WVBtIDebugDraw> m_btDebugDraw = nullptr;
-#endif
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader);

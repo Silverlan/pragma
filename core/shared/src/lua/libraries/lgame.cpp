@@ -12,7 +12,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
 #include "pragma/lua/libraries/lray.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -349,13 +349,13 @@ int Lua::game::raycast(lua_State *l)
 	game->GetEntities(&ents);
 
 	//std::vector<TraceResult> res; // TODO
-	auto bAllHits = data.HasFlag(FTRACE::ALL_HITS);
+	auto bAllHits = data.HasFlag(RayCastFlags::ReportAllResults);
 	BaseEntity *entClosest = nullptr;
 	auto tClosest = 1.f;
 
 	auto origin = data.GetSourceOrigin();
-	auto btOrigin = uvec::create_bt(origin) *PhysEnv::WORLD_SCALE;
-	auto btEnd = uvec::create_bt(data.GetTargetOrigin()) *PhysEnv::WORLD_SCALE;
+	auto btOrigin = origin;
+	auto btEnd = data.GetTargetOrigin();
 #ifdef _DEBUG
 	//if(uvec::cmp(origin,data.GetTargetOrigin()) == true)
 	//	btEnd.setX(btEnd.getX() +1.f); // Move it slightly, so source and target aren't the same (Causes fuzzyZero assertion error in debug mode)
@@ -363,8 +363,10 @@ int Lua::game::raycast(lua_State *l)
 	auto flags = data.GetFlags();
 	auto mask = data.GetCollisionFilterMask();
 	auto group = data.GetCollisionFilterGroup();
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *dataFilter = data.GetFilter();
 	auto filter = (dataFilter != nullptr) ? std::shared_ptr<PhysClosestRayResultCallback>(new PhysClosestRayResultCallback(dataFilter->CreateClosestRayCallbackFilter(flags,group,mask,btOrigin,btEnd))) : nullptr;
+#endif
 	Intersection::LineMeshResult meshResult {};
 	for(auto *ent : *ents)
 	{
@@ -375,8 +377,10 @@ int Lua::game::raycast(lua_State *l)
 		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 		if(hMdl == nullptr || pTrComponent.expired())
 			continue;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		if(dataFilter != nullptr && filter->ShouldPass(ent,nullptr,nullptr) == false)
 			continue;
+#endif
 		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetOrientation());
 	}
 	if(entClosest != nullptr)
@@ -385,7 +389,7 @@ int Lua::game::raycast(lua_State *l)
 		r.fraction = tClosest;
 		r.distance = d *tClosest;
 		r.entity = entClosest->GetHandle();
-		r.hit = true;
+		r.hitType = RayCastHitType::Block;
 		r.position = start +n *(d *tClosest);
 		r.startPosition = start;
 		auto *phys = entClosest->GetPhysicsComponent()->GetPhysicsObject();

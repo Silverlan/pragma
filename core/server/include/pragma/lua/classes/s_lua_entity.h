@@ -103,7 +103,7 @@ public:
 
 DECLARE_LUA_ENTITY_BASE(DLLSERVER,SLuaEntity,public Entity COMMA public SLuaBaseEntity,
 public:
-	virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+	virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 	virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent *pl,UInt32 eventId,NetPacket &packet) override;
 );
 

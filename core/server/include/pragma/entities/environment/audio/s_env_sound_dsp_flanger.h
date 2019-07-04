@@ -14,7 +14,7 @@ namespace pragma
 	public:
 		SSoundDspFlangerComponent(BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
 		virtual bool OnSetKeyValue(const std::string &key,const std::string &val) override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	};
 };

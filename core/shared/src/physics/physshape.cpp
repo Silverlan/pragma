@@ -1,177 +1,144 @@
 #include "stdafx_shared.h"
-#include "pragma/physics/physshape.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/environment.hpp"
 #include "pragma/math/surfacematerial.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lphysics.h"
+#include "pragma/networkstate/networkstate.h"
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btMultimaterialTriangleMeshShape.h>
 
-DEFINE_BASE_HANDLE(DLLNETWORK,PhysShape,PhysShape);
-DEFINE_DERIVED_HANDLE(DLLNETWORK,PhysShape,PhysShape,PhysConvexHullShape,PhysConvexHullShape);
-DEFINE_DERIVED_HANDLE(DLLNETWORK,PhysShape,PhysShape,PhysHeightfield,PhysHeightfield);
-
-PhysShape::PhysShape(btCollisionShape *shape,bool bOwns)
-	: std::enable_shared_from_this<PhysShape>(),m_shape(nullptr),m_externalShape(nullptr),m_handle(this)
-{
-	if(bOwns == true)
-		m_shape = std::shared_ptr<btCollisionShape>(shape);
-	else
-		m_externalShape = shape;
-}
-
-PhysShape::~PhysShape()
-{
-	m_handle.Invalidate();
-}
-
-luabind::object PhysShape::GetLuaObject(lua_State *l) {return luabind::object(l,LPhysShape(shared_from_this()));}
-bool PhysShape::IsConvex() const {return false;}
-bool PhysShape::IsConvexHull() const {return false;}
-bool PhysShape::IsCompoundShape() const {return false;}
-bool PhysShape::IsHeightfield() const {return false;}
-bool PhysShape::IsTriangleShape() const {return false;}
-
-void PhysShape::CalculateLocalInertia(float mass,Vector3 *localInertia)
-{
-	if(m_shape == nullptr)
-		return;
-	btVector3 btInertia;
-	m_shape->calculateLocalInertia(mass,btInertia);
-	localInertia->x = static_cast<float>(btInertia.x() /PhysEnv::WORLD_SCALE);
-	localInertia->y = static_cast<float>(btInertia.y() /PhysEnv::WORLD_SCALE);
-	localInertia->z = static_cast<float>(btInertia.z() /PhysEnv::WORLD_SCALE);
-}
-
-void PhysShape::Remove()
-{
-	delete this;
-}
-
-void PhysShape::GetAABB(Vector3 &min,Vector3 &max) const
-{
-	if(m_shape == nullptr)
-	{
-		min = {};
-		max = {};
-		return;
-	}
-	btTransform t {};
-	t.setIdentity();
-	btVector3 btMin,btMax;
-	m_shape->getAabb(t,btMin,btMax);
-	min = uvec::create(btMin /PhysEnv::WORLD_SCALE);
-	max = uvec::create(btMax /PhysEnv::WORLD_SCALE);
-}
-
-PhysShapeHandle PhysShape::GetHandle() const {return m_handle;}
-
-btCollisionShape *PhysShape::GetShape() {return (m_externalShape != nullptr) ? m_externalShape : m_shape.get();}
-
-//////////////////////////////////
-
-PhysConvexShape::PhysConvexShape(btConvexShape *shape)
-	: PhysShape(shape),m_convexShape(shape)
-{
-}
-bool PhysConvexShape::IsConvex() const {return true;}
-btConvexShape *PhysConvexShape::GetConvexShape() {return m_convexShape;}
-luabind::object PhysConvexShape::GetLuaObject(lua_State *l) {return luabind::object(l,LPhysConvexShape(std::static_pointer_cast<::PhysConvexShape>(shared_from_this())));}
-
-void PhysConvexShape::SetCollisionMesh(CollisionMesh &collisionMesh) {m_collisionMesh = collisionMesh.shared_from_this();}
-void PhysConvexShape::SetCollisionMesh() {m_collisionMesh = nullptr;}
-const CollisionMesh *PhysConvexShape::GetCollisionMesh() const {return const_cast<PhysConvexShape*>(this)->GetCollisionMesh();}
-CollisionMesh *PhysConvexShape::GetCollisionMesh() {return m_collisionMesh.get();}
-
-void PhysConvexShape::SetLocalScaling(const Vector3 &scale)
-{
-	m_convexShape->setLocalScaling(btVector3(scale.x,scale.y,scale.z));
-}
-
-//////////////////////////////////
-
-PhysConvexHullShape::PhysConvexHullShape(btConvexHullShape *shape)
-	: PhysConvexShape(shape),m_convexHullShape(shape),m_surfaceMaterial(0)
+pragma::physics::IShape::IShape(IEnvironment &env)
+	: IBase{env}
+{}
+pragma::physics::IShape::~IShape()
 {}
 
-PhysConvexHullShape::PhysConvexHullShape()
-	: PhysConvexHullShape(new btConvexHullShape)
+bool pragma::physics::IShape::IsConvex() const {return false;}
+bool pragma::physics::IShape::IsConvexHull() const {return false;}
+bool pragma::physics::IShape::IsCompoundShape() const {return false;}
+bool pragma::physics::IShape::IsHeightfield() const {return false;}
+bool pragma::physics::IShape::IsTriangleShape() const {return false;}
+
+pragma::physics::IConvexShape *pragma::physics::IShape::GetConvexShape() {return nullptr;}
+const pragma::physics::IConvexShape *pragma::physics::IShape::GetConvexShape() const {return const_cast<IShape*>(this)->GetConvexShape();}
+pragma::physics::IConvexHullShape *pragma::physics::IShape::GetConvexHullShape() {return nullptr;}
+const pragma::physics::IConvexHullShape *pragma::physics::IShape::GetConvexHullShape() const {return const_cast<IShape*>(this)->GetConvexHullShape();}
+pragma::physics::ICompoundShape *pragma::physics::IShape::GetCompoundShape() {return nullptr;}
+const pragma::physics::ICompoundShape *pragma::physics::IShape::GetCompoundShape() const {return const_cast<IShape*>(this)->GetCompoundShape();}
+pragma::physics::IHeightfield *pragma::physics::IShape::GetHeightfield() {return nullptr;}
+const pragma::physics::IHeightfield *pragma::physics::IShape::GetHeightfield() const {return const_cast<IShape*>(this)->GetHeightfield();}
+pragma::physics::ITriangleShape *pragma::physics::IShape::GetTriangleShape() {return nullptr;}
+const pragma::physics::ITriangleShape *pragma::physics::IShape::GetTriangleShape() const {return const_cast<IShape*>(this)->GetTriangleShape();}
+
+void pragma::physics::IShape::SetSurfaceMaterial(int32_t surfMatIdx) {m_surfaceMaterialIdx = surfMatIdx;}
+int32_t pragma::physics::IShape::GetSurfaceMaterialIndex() const {return m_surfaceMaterialIdx;}
+SurfaceMaterial *pragma::physics::IShape::GetSurfaceMaterial()
+{
+	if(m_surfaceMaterialIdx < 0)
+		return nullptr;
+	return m_physEnv.GetNetworkState().GetGameState()->GetSurfaceMaterial(m_surfaceMaterialIdx);
+}
+
+void pragma::physics::IShape::SetDensity(float density) {m_density = density;}
+float pragma::physics::IShape::GetDensity() const {return m_density;}
+
+/////////////
+
+pragma::physics::IConvexShape::IConvexShape(IEnvironment &env)
+	: IShape{env}
 {}
-luabind::object PhysConvexHullShape::GetLuaObject(lua_State *l) {return luabind::object(l,LPhysConvexHullShape(std::static_pointer_cast<PhysConvexHullShape>(shared_from_this())));}
-bool PhysConvexHullShape::IsConvexHull() const {return true;}
-void PhysConvexHullShape::SetSurfaceMaterial(int id) {m_surfaceMaterial = id;}
-int PhysConvexHullShape::GetSurfaceMaterial() const {return m_surfaceMaterial;}
-
-void PhysConvexHullShape::AddPoint(const Vector3 &point)
-{
-	m_convexHullShape->addPoint(btVector3(point.x,point.y,point.z) *PhysEnv::WORLD_SCALE);
-}
-
-//////////////////////////////////
-
-PhysHeightfield::PhysHeightfield(uint32_t width,uint32_t length,btScalar maxHeight,uint8_t upAxis)
-	: PhysShape(nullptr),m_width(width),m_length(length),m_maxHeight(maxHeight),m_upAxis(upAxis)
-{
-	const auto bFlipQuadEdges = false;
-	static auto height = 50.f; // TODO
-	const auto heightScale = 1.f;
-	const auto minHeight = -maxHeight;//-50.f;
-	const auto gridSpacing = 10.f *PhysEnv::WORLD_SCALE;
-
-	m_heightFieldData.resize(width *length,height *PhysEnv::WORLD_SCALE);
-	auto shape = std::shared_ptr<btHeightfieldTerrainShape>(new btHeightfieldTerrainShape(width,length,m_heightFieldData.data(),heightScale,minHeight *PhysEnv::WORLD_SCALE,maxHeight *PhysEnv::WORLD_SCALE,upAxis,PHY_ScalarType::PHY_FLOAT,bFlipQuadEdges));
-
-	shape->setLocalScaling({gridSpacing,1.0,gridSpacing});
-	m_shape = shape;
-	m_heightField = shape;
-}
-luabind::object PhysHeightfield::GetLuaObject(lua_State *l) {return luabind::object(l,LPhysHeightfield(std::static_pointer_cast<PhysHeightfield>(shared_from_this())));}
-uint32_t PhysHeightfield::GetWidth() const {return m_width;}
-uint32_t PhysHeightfield::GetLength() const {return m_length;}
-btScalar PhysHeightfield::GetMaxHeight() const {return m_maxHeight;}
-uint8_t PhysHeightfield::GetUpAxis() const {return m_upAxis;}
-float PhysHeightfield::GetHeight(uint32_t x,uint32_t y) const
-{
-	auto idx = y *GetWidth() +x;
-	if(idx >= m_heightFieldData.size())
-		return 0.f;
-	return m_heightFieldData.at(idx);
-}
-void PhysHeightfield::SetHeight(uint32_t x,uint32_t y,float height)
-{
-	auto idx = y *GetWidth() +x;
-	if(idx >= m_heightFieldData.size())
-		return;
-	m_heightFieldData.at(idx) = height *PhysEnv::WORLD_SCALE;
-}
-bool PhysHeightfield::IsHeightfield() const {return true;}
-
-//////////////////////////////////
-
-PhysTriangleShape::PhysTriangleShape()
-	: PhysShape(nullptr),m_infoMap(nullptr),//m_triangleMesh(new btTriangleMesh),
-	m_bBuilt(false)
+pragma::physics::IConvexShape::~IConvexShape()
 {}
 
-PhysTriangleShape::~PhysTriangleShape()
+bool pragma::physics::IConvexShape::IsConvex() const {return true;}
+pragma::physics::IConvexShape *pragma::physics::IConvexShape::GetConvexShape() {return this;}
+
+void pragma::physics::IConvexShape::SetCollisionMesh(CollisionMesh &collisionMesh) {m_collisionMesh = collisionMesh.shared_from_this();}
+void pragma::physics::IConvexShape::SetCollisionMesh() {m_collisionMesh = nullptr;}
+const CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() const {return const_cast<IConvexShape*>(this)->GetCollisionMesh();}
+CollisionMesh *pragma::physics::IConvexShape::GetCollisionMesh() {return m_collisionMesh.get();}
+
+/////////////
+
+pragma::physics::ICapsuleShape::ICapsuleShape(IEnvironment &env)
+	: IConvexShape{env}
+{}
+pragma::physics::ICapsuleShape::~ICapsuleShape()
+{}
+
+/////////////
+
+pragma::physics::IBoxShape::IBoxShape(IEnvironment &env)
+	: IConvexShape{env}
+{}
+pragma::physics::IBoxShape::~IBoxShape()
+{}
+
+/////////////
+
+pragma::physics::IConvexHullShape::IConvexHullShape(IEnvironment &env)
+	: IConvexShape{env}
+{}
+pragma::physics::IConvexHullShape *pragma::physics::IConvexHullShape::GetConvexHullShape() {return this;}
+bool pragma::physics::IConvexHullShape::IsConvexHull() const {return true;}
+
+/////////////
+
+pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env)
+	: IShape{env}
+{}
+pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape)
+	: IShape{env}
 {
-	if(m_infoMap != nullptr)
-		delete m_infoMap;
+	m_shapes.push_back(std::static_pointer_cast<IShape>(shape.shared_from_this()));
 }
+pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env,const std::vector<pragma::physics::IShape*> &shapes)
+	: IShape{env}
+{
+	m_shapes.reserve(shapes.size());
+	for(auto *pShape : shapes)
+		m_shapes.push_back(std::static_pointer_cast<IShape>(pShape->shared_from_this()));
+}
+bool pragma::physics::ICompoundShape::IsCompoundShape() const {return true;}
+pragma::physics::ICompoundShape *pragma::physics::ICompoundShape::GetCompoundShape() {return this;}
 
-luabind::object PhysTriangleShape::GetLuaObject(lua_State *l) {return luabind::object(l,LPhysTriangleShape(std::static_pointer_cast<::PhysTriangleShape>(shared_from_this())));}
+/////////////
 
-void PhysTriangleShape::AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c,const SurfaceMaterial *mat)
+pragma::physics::IHeightfield::IHeightfield(IEnvironment &env,uint32_t width,uint32_t length,float maxHeight,uint8_t upAxis)
+	: IShape{env},m_width{width},m_length{length},m_maxHeight{maxHeight},m_upAxis{upAxis}
+{}
+bool pragma::physics::IHeightfield::IsHeightfield() const {return true;}
+pragma::physics::IHeightfield *pragma::physics::IHeightfield::GetHeightfield() {return this;}
+
+/////////////
+
+pragma::physics::ITriangleShape::ITriangleShape(IEnvironment &env)
+	: IShape{env}
+{}
+bool pragma::physics::ITriangleShape::IsTriangleShape() const {return true;}
+pragma::physics::ITriangleShape *pragma::physics::ITriangleShape::GetTriangleShape() {return this;}
+size_t pragma::physics::ITriangleShape::GetVertexCount() const {return m_vertices.size();}
+Vector3 *pragma::physics::ITriangleShape::GetVertex(size_t idx) {return idx < m_vertices.size() ? &m_vertices.at(idx) : nullptr;}
+const Vector3 *pragma::physics::ITriangleShape::GetVertex(size_t idx) const {return const_cast<ITriangleShape*>(this)->GetVertex(idx);}
+std::vector<Vector3> &pragma::physics::ITriangleShape::GetVertices() {return m_vertices;}
+const std::vector<Vector3> &pragma::physics::ITriangleShape::GetVertices() const {return const_cast<ITriangleShape*>(this)->GetVertices();}
+
+std::vector<int32_t> &pragma::physics::ITriangleShape::GetTriangles() {return m_triangles;}
+const std::vector<int32_t> &pragma::physics::ITriangleShape::GetTriangles() const {return const_cast<ITriangleShape*>(this)->GetTriangles();}
+std::vector<int32_t> &pragma::physics::ITriangleShape::GetSurfaceMaterials() {return m_faceMaterials;}
+const std::vector<int32_t> &pragma::physics::ITriangleShape::GetSurfaceMaterials() const {return const_cast<ITriangleShape*>(this)->GetSurfaceMaterials();}
+void pragma::physics::ITriangleShape::AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c,const SurfaceMaterial *mat)
 {
 	assert(!m_bBuilt); // If already built, we'd have to remove our btTriangleIndexVertexMaterialArray, due to its internal structure (It points directly to our vector data). 
-	m_vertices.push_back(btVector3(a.x,a.y,a.z) *PhysEnv::WORLD_SCALE);
+	m_vertices.push_back(a);
 	m_triangles.push_back(static_cast<int>(m_vertices.size() -1));
 
-	m_vertices.push_back(btVector3(b.x,b.y,b.z) *PhysEnv::WORLD_SCALE);
+	m_vertices.push_back(b);
 	m_triangles.push_back(static_cast<int>(m_vertices.size() -1));
 
-	m_vertices.push_back(btVector3(c.x,c.y,c.z) *PhysEnv::WORLD_SCALE);
+	m_vertices.push_back(c);
 	m_triangles.push_back(static_cast<int>(m_vertices.size() -1));
 
 	if(mat != nullptr)
@@ -179,96 +146,13 @@ void PhysTriangleShape::AddTriangle(const Vector3 &a,const Vector3 &b,const Vect
 	else
 		m_faceMaterials.push_back(0);
 	/*m_triangleMesh->addTriangle(
-		btVector3(a.x,a.y,a.z),
-		btVector3(b.x,b.y,b.z),
-		btVector3(c.x,c.y,c.z),
-		false
+	btVector3(a.x,a.y,a.z),
+	btVector3(b.x,b.y,b.z),
+	btVector3(c.x,c.y,c.z),
+	false
 	);*/
 }
-
-void PhysTriangleShape::ReserveTriangles(std::size_t count)
-{
-	m_vertices.reserve(count *3);
-	m_triangles.reserve(count *3);
-	m_faceMaterials.reserve(count);
-}
-btTriangleIndexVertexArray *PhysTriangleShape::GetBtIndexVertexArray() {return m_triangleArray.get();}
-
-void PhysTriangleShape::Build(const std::vector<SurfaceMaterial> *materials)
-{
-	m_shape = nullptr;
-	if(m_triangles.empty() || m_vertices.empty())
-		return;
-	btBvhTriangleMeshShape *shape = nullptr;
-	if(materials == nullptr)
-	{
-		m_triangleArray = std::make_unique<btTriangleIndexVertexArray>(
-			static_cast<int>(m_triangles.size() /3),&m_triangles[0],static_cast<int>(sizeof(int) *3),
-			static_cast<int>(m_vertices.size()),&m_vertices[0][0],static_cast<int>(sizeof(btVector3))
-		);
-		shape = new btBvhTriangleMeshShape(m_triangleArray.get(),false);
-	}
-	else
-	{
-		m_triangleArray = std::make_unique<btTriangleIndexVertexMaterialArray>(
-			static_cast<int>(m_triangles.size() /3),&m_triangles[0],static_cast<int>(sizeof(int) *3),
-			static_cast<int>(m_vertices.size()),&m_vertices[0][0],static_cast<int>(sizeof(btVector3)),
-			static_cast<int>(materials->size()),(unsigned char*)(&(*materials)[0]),static_cast<int>(sizeof(SurfaceMaterial)),
-			&m_faceMaterials[0],static_cast<int>(sizeof(int))
-		);
-		shape = new btMultimaterialTriangleMeshShape(m_triangleArray.get(),false);
-	}
-	m_bBuilt = true;
-	m_shape = std::shared_ptr<btCollisionShape>(shape);
-	m_infoMap = new btTriangleInfoMap();
-	GenerateInternalEdgeInfo();
-}
-
-void PhysTriangleShape::GenerateInternalEdgeInfo()
-{
-	static_cast<btBvhTriangleMeshShape*>(m_shape.get())->setTriangleInfoMap(nullptr);
-	btGenerateInternalEdgeInfo(static_cast<btBvhTriangleMeshShape*>(m_shape.get()),m_infoMap);
-}
-std::vector<btVector3> &PhysTriangleShape::GetVertices() {return m_vertices;}
-const std::vector<btVector3> &PhysTriangleShape::GetVertices() const {return m_vertices;}
-std::vector<int32_t> &PhysTriangleShape::GetTriangles() {return m_triangles;}
-const std::vector<int32_t> &PhysTriangleShape::GetTriangles() const {return const_cast<PhysTriangleShape*>(this)->GetTriangles();}
-std::vector<int32_t> &PhysTriangleShape::GetSurfaceMaterials() {return m_faceMaterials;}
-const std::vector<int32_t> &PhysTriangleShape::GetSurfaceMaterials() const {return const_cast<PhysTriangleShape*>(this)->GetSurfaceMaterials();}
-
-void PhysTriangleShape::CalculateLocalInertia(float,Vector3 *localInertia)
+void pragma::physics::ITriangleShape::CalculateLocalInertia(float,Vector3 *localInertia) const
 {
 	*localInertia = Vector3(0.f,0.f,0.f);
 }
-bool PhysTriangleShape::IsTriangleShape() const {return true;}
-
-//////////////////////////////////
-
-PhysCompoundShape::PhysCompoundShape(btCompoundShape *sh)
-	: PhysShape(sh)
-{}
-PhysCompoundShape::PhysCompoundShape()
-	: PhysShape(new btCompoundShape)
-{}
-PhysCompoundShape::PhysCompoundShape(std::shared_ptr<PhysShape> &shape)
-	: PhysShape(new btCompoundShape)
-{
-	AddShape(shape);
-}
-PhysCompoundShape::PhysCompoundShape(std::vector<std::shared_ptr<PhysShape>> &shapes)
-	: PhysShape(new btCompoundShape)
-{
-	for(auto it=shapes.begin();it!=shapes.end();++it)
-		AddShape(*it);
-}
-void PhysCompoundShape::AddShape(std::shared_ptr<PhysShape> &shape,const Vector3 &origin,const Quat &rot)
-{
-	auto *btShape = shape->GetShape();
-	btTransform t;
-	t.setIdentity();
-	t.setOrigin(btVector3(origin.x,origin.y,origin.z) *PhysEnv::WORLD_SCALE);
-	t.setRotation(uquat::create_bt(rot));
-	static_cast<btCompoundShape*>(m_shape.get())->addChildShape(t,btShape);
-	m_shapes.push_back(shape);
-}
-bool PhysCompoundShape::IsCompoundShape() const {return true;}

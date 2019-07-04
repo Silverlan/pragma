@@ -15,7 +15,7 @@ namespace pragma
 		STransformComponent(BaseEntity &ent) : BaseTransformComponent(ent) {}
 		virtual void SetEyeOffset(const Vector3 &offset) override;
 		virtual void SetScale(const Vector3 &scale) override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	};

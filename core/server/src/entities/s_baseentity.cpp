@@ -10,6 +10,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/player.h"
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
@@ -23,6 +24,7 @@
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/lua/libraries/ltimer.h>
 #include <pragma/physics/raytraces.h>
@@ -91,7 +93,7 @@ Bool SBaseEntity::IsNetworked() {return (IsShared() && IsSpawned()) ? true : fal
 bool SBaseEntity::IsServersideOnly() const {return IsShared() == false;}
 bool SBaseEntity::IsNetworkLocal() const {return IsServersideOnly();}
 
-void SBaseEntity::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SBaseEntity::SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp)
 {
 	packet->Write<uint64_t>(GetUniqueIndex());
 	packet->Write<uint32_t>(GetSpawnFlags());
@@ -150,51 +152,31 @@ void SBaseEntity::EraseFunction(int function)
 	lua_removereference(game->GetLuaState(),function);
 }
 
-void SBaseEntity::SendNetEventTCP(pragma::NetEventId eventId) const
+void SBaseEntity::SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol,const pragma::networking::ClientRecipientFilter &rf)
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	NetPacket p;
-	SendNetEventTCP(eventId,p);
+	nwm::write_entity(packet,this);
+	packet->Write<UInt32>(eventId);
+	server->SendPacket("ent_event",packet,protocol,rf);
 }
-void SBaseEntity::SendNetEventTCP(pragma::NetEventId eventId,NetPacket &data) const
+void SBaseEntity::SendNetEvent(pragma::NetEventId eventId,NetPacket &packet,pragma::networking::Protocol protocol)
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	nwm::write_entity(data,this);
-	data->Write<UInt32>(eventId);
-	server->BroadcastTCP("ent_event",data);
+	SendNetEvent(eventId,packet,protocol,pragma::networking::ClientRecipientFilter{});
 }
-void SBaseEntity::SendNetEventTCP(pragma::NetEventId eventId,NetPacket &data,nwm::RecipientFilter &rp) const
+void SBaseEntity::SendNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	nwm::write_entity(data,this);
-	data->Write<UInt32>(eventId);
-	server->SendPacketTCP("ent_event",data,rp);
+	SendNetEvent(eventId,packet,pragma::networking::Protocol::FastUnreliable);
 }
-void SBaseEntity::SendNetEventUDP(pragma::NetEventId eventId) const
+void SBaseEntity::SendNetEvent(pragma::NetEventId eventId,pragma::networking::Protocol protocol)
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	NetPacket p;
-	SendNetEventUDP(eventId,p);
-}
-void SBaseEntity::SendNetEventUDP(pragma::NetEventId eventId,NetPacket &data) const
-{
-	if(!IsShared() || !IsSpawned())
-		return;
-	nwm::write_entity(data,this);
-	data->Write<UInt32>(eventId);
-	server->BroadcastUDP("ent_event",data);
-}
-void SBaseEntity::SendNetEventUDP(pragma::NetEventId eventId,NetPacket &data,nwm::RecipientFilter &rp) const
-{
-	if(!IsShared() || !IsSpawned())
-		return;
-	nwm::write_entity(data,this);
-	data->Write<UInt32>(eventId);
-	server->SendPacketUDP("ent_event",data,rp);
+	SendNetEvent(eventId,NetPacket{},protocol);
 }
 Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId eventId,NetPacket &packet)
 {

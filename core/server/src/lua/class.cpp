@@ -22,7 +22,7 @@
 #include "pragma/lua/classes/s_lua_weapon.h"
 #include "pragma/lua/classes/s_lua_vehicle.h"
 #include "pragma/lua/classes/s_lua_npc.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/lua/classes/s_lmodelmesh.h"
 #include <pragma/entities/func/basefuncwater.h>
 #include <pragma/model/modelmesh.h>

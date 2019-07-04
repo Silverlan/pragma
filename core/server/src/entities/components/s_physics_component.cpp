@@ -10,6 +10,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
@@ -20,7 +21,7 @@ void SPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &component
 {
 	BasePhysicsComponent::RegisterEvents(componentManager);
 }
-void SPhysicsComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
 	packet->Write<uint32_t>(static_cast<uint32_t>(GetMoveType()));
@@ -48,7 +49,7 @@ void SPhysicsComponent::SetKinematic(bool b)
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<bool>(b);
-		server->BroadcastTCP("ent_setkinematic",p);
+		server->SendPacket("ent_setkinematic",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -61,7 +62,7 @@ void SPhysicsComponent::SetMoveType(MOVETYPE movetype)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(movetype));
-	server->BroadcastTCP("ent_movetype",p);
+	server->SendPacket("ent_movetype",p,pragma::networking::Protocol::SlowReliable);
 }
 void SPhysicsComponent::OnPhysicsInitialized()
 {
@@ -72,7 +73,7 @@ void SPhysicsComponent::OnPhysicsInitialized()
 		NetPacket p;
 		nwm::write_entity(p,&ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
-		server->BroadcastTCP("ent_phys_init",p);
+		server->SendPacket("ent_phys_init",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::OnPhysicsDestroyed()
@@ -83,7 +84,7 @@ void SPhysicsComponent::OnPhysicsDestroyed()
 	{
 		NetPacket p;
 		nwm::write_entity(p,&ent);
-		server->BroadcastTCP("ent_phys_destroy",p);
+		server->SendPacket("ent_phys_destroy",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 void SPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePhysicsComponent));}
@@ -95,7 +96,7 @@ void SPhysicsComponent::SetCollisionsEnabled(bool b)
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	NetPacket p {};
 	p->Write<bool>(b);
-	ent.SendNetEventTCP(m_netEvSetCollisionsEnabled,p);
+	ent.SendNetEvent(m_netEvSetCollisionsEnabled,p,pragma::networking::Protocol::SlowReliable);
 }
 void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 {
@@ -106,7 +107,7 @@ void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<unsigned char>(static_cast<unsigned char>(collisiontype));
-	server->BroadcastTCP("ent_collisiontype",p);
+	server->SendPacket("ent_collisiontype",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask)
@@ -119,7 +120,7 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup,CollisionMa
 		nwm::write_entity(p,&ent);
 		p->Write<unsigned int>(static_cast<unsigned int>(filterGroup));
 		p->Write<unsigned int>(static_cast<unsigned int>(filterMask));
-		server->BroadcastTCP("ent_setcollisionfilter",p);
+		server->SendPacket("ent_setcollisionfilter",p,pragma::networking::Protocol::SlowReliable);
 	}
 }
 
@@ -128,6 +129,7 @@ void SPhysicsComponent::PostPhysicsSimulate()
 	BasePhysicsComponent::PostPhysicsSimulate();
 	if(GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
 		return;
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto *phys = GetPhysicsObject();
 	auto *entCl = ent.GetClientsideEntity();
@@ -145,8 +147,8 @@ void SPhysicsComponent::PostPhysicsSimulate()
 		auto &colCl = colObjsCl.at(i);
 		if(col.IsValid() == false || colCl.IsValid() == false || col->IsSoftBody() == false || colCl->IsSoftBody() == false)
 			continue;
-		auto &sb = static_cast<PhysSoftBody&>(*col.get());
-		auto &sbCl = static_cast<PhysSoftBody&>(*colCl.get());
+		auto &sb = *col->GetSoftBody();
+		auto &sbCl = *colCl->GetSoftBody();
 		auto *btSb = sb.GetSoftBody();
 		auto *btSbCl = sbCl.GetSoftBody();
 		auto numNodes = umath::min(btSb->m_nodes.size(),btSbCl->m_nodes.size());
@@ -163,4 +165,5 @@ void SPhysicsComponent::PostPhysicsSimulate()
 			nodeCl.m_x = node.m_x;
 		}
 	}
+#endif
 }

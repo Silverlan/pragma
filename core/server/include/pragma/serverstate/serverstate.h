@@ -11,11 +11,15 @@
 
 class SVNetMessage;
 class ServerMessageMap;
-class WVServer;
-class WVLocalClient;
-class ClientSessionInfo;
-namespace nwm {class RecipientFilter;};
-namespace pragma {class SPlayerComponent;};
+namespace pragma
+{
+	class SPlayerComponent;
+	namespace networking
+	{
+		class IServer; class IServerClient; class ClientRecipientFilter;
+		enum class Protocol : uint8_t;
+	};
+};
 struct Resource;
 enum class ServerEvent : int;
 #pragma warning(push)
@@ -32,9 +36,9 @@ private:
 	SGame *m_game = nullptr;
 	std::unordered_map<std::string,ConCommand*> m_luaConCommands;
 	unsigned int m_conCommandID;
-	std::unique_ptr<WVServer> m_server;
+	std::unique_ptr<pragma::networking::IServer> m_server = nullptr;
+	std::shared_ptr<pragma::networking::IServerClient> m_localClient = {};
 	ChronoTimePoint m_tNextWMSConnect;
-	std::unique_ptr<WVLocalClient> m_local; // SinglePlayer or local player on a listen server
 	unsigned int m_alsoundID;
 
 	std::deque<unsigned int> m_alsoundIndex;
@@ -53,9 +57,9 @@ public:
 	virtual void Tick() override;
 	virtual void Close() override;
 	WMServerData &GetServerData();
-	void SendResourceFile(const std::string &f,const std::vector<WVServerClient*> &clients);
+	void SendResourceFile(const std::string &f,const std::vector<pragma::networking::IServerClient*> &clients);
 	void SendResourceFile(const std::string &f);
-	void SendRoughModel(const std::string &f,const std::vector<WVServerClient*> &clients);
+	void SendRoughModel(const std::string &f,const std::vector<pragma::networking::IServerClient*> &clients);
 	void SendRoughModel(const std::string &f);
 	// ConVars
 	virtual ConVar *SetConVar(std::string scmd,std::string value,bool bApplyIfEqual=false) override;
@@ -72,24 +76,20 @@ public:
 
 	virtual Lua::ErrorColorMode GetLuaErrorColorMode() override;
 	void OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cvar,std::string value);
-	pragma::SPlayerComponent *GetPlayer(WVServerClient *session);
+	pragma::SPlayerComponent *GetPlayer(const pragma::networking::IServerClient &session);
 
 	virtual bool IsMultiPlayer() const override;
 	virtual bool IsSinglePlayer() const override;
 	void StartServer();
 	void CloseServer();
-	WVLocalClient *GetLocalClient();
-	void InitResourceTransfer(WVServerClient *session);
-	void HandleServerNextResource(WVServerClient *session);
-	void HandleServerResourceStart(WVServerClient *session,NetPacket &packet);
-	void HandleServerResourceFragment(WVServerClient *session);
-	void HandleLuaNetPacket(WVServerClient *session,NetPacket &packet);
-	bool HandlePacket(WVServerClient *session,NetPacket &packet);
-	void ReceiveUserInput(WVServerClient *session,NetPacket &packet);
-	void BroadcastTCP(unsigned int ID,NetPacket &packet);
-	void BroadcastUDP(unsigned int ID,NetPacket &packet);
-	void SendPacketTCP(unsigned int ID,NetPacket &packet,const nwm::RecipientFilter &rp);
-	void SendPacketUDP(unsigned int ID,NetPacket &packet,const nwm::RecipientFilter &rp);
+	pragma::networking::IServerClient *GetLocalClient();
+	void InitResourceTransfer(pragma::networking::IServerClient &session);
+	void HandleServerNextResource(pragma::networking::IServerClient &session);
+	void HandleServerResourceStart(pragma::networking::IServerClient &session,NetPacket &packet);
+	void HandleServerResourceFragment(pragma::networking::IServerClient &session);
+	void HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPacket &packet);
+	bool HandlePacket(pragma::networking::IServerClient &session,NetPacket &packet);
+	void ReceiveUserInput(pragma::networking::IServerClient &session,NetPacket &packet);
 public:
 	ServerState();
 	virtual ~ServerState() override;
@@ -104,6 +104,8 @@ public:
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="") override;
 	void GetLuaConCommands(std::unordered_map<std::string,ConCommand*> **cmds);
 
+	void SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver);
+
 	// Game
 	virtual SGame *GetGameState() override;
 	virtual void EndGame() override;
@@ -113,26 +115,14 @@ public:
 	// Sound
 	virtual bool LoadSoundScripts(const char *file,bool bPrecache=false) override;
 
-	void BroadcastTCP(const std::string &name,NetPacket &packet);
-	void BroadcastUDP(const std::string &name,NetPacket &packet);
-	void SendPacketTCP(const std::string &name,NetPacket &packet,const nwm::RecipientFilter &rp);
-	void SendPacketUDP(const std::string &name,NetPacket &packet,const nwm::RecipientFilter &rp);
-	void SendPacketTCP(const std::string &name,NetPacket &packet,WVServerClient *client);
-	void SendPacketUDP(const std::string &name,NetPacket &packet,WVServerClient *client);
-	void BroadcastTCP(const std::string &name);
-	void BroadcastUDP(const std::string &name);
-	void SendPacketTCP(const std::string &name,const nwm::RecipientFilter &rp);
-	void SendPacketUDP(const std::string &name,const nwm::RecipientFilter &rp);
-	void SendPacketTCP(const std::string &name,WVServerClient *client);
-	void SendPacketUDP(const std::string &name,WVServerClient *client);
+	void SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol,const pragma::networking::ClientRecipientFilter &rf);
+	void SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol);
+	void SendPacket(const std::string &name,NetPacket &packet);
+	void SendPacket(const std::string &name,pragma::networking::Protocol protocol);
 
-	WVServer *GetServer();
+	pragma::networking::IServer *GetServer();
 	bool IsServerRunning() const;
-	void DropClient(WVServerClient *session);
-	unsigned short GetTCPPort();
-	unsigned short GetUDPPort();
-	virtual bool IsTCPOpen() const override;
-	virtual bool IsUDPOpen() const override;
+	void DropClient(pragma::networking::IServerClient &session);
 };
 #pragma warning(pop)
 #endif

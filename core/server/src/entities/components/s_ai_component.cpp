@@ -11,6 +11,7 @@
 #include "pragma/game/s_game.h"
 #include "pragma/entities/player.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/model/model.h>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
@@ -120,7 +121,7 @@ void SAIComponent::OnLookTargetChanged()
 				nwm::write_entity(p,m_neckInfo.hEntityLookTarget);
 				break;
 		}
-		ent.SendNetEventTCP(m_netEvSetLookTarget,p);
+		ent.SendNetEvent(m_netEvSetLookTarget,p,pragma::networking::Protocol::SlowReliable);
 	}
 	BroadcastEvent(EVENT_ON_LOOK_TARGET_CHANGED);
 }
@@ -265,7 +266,7 @@ bool SAIComponent::OnInput(std::string input,BaseEntity *activator,BaseEntity *c
 		return false;
 	return true;
 }
-void SAIComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp) {}
+void SAIComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) {}
 void SAIComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl)
 {
 	auto snapshotFlags = SnapshotFlags::None;

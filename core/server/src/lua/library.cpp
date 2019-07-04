@@ -7,7 +7,7 @@
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/s_ldebug.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <pragma/lua/classes/lalsound.h>
 #include <luainterface.hpp>
 

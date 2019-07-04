@@ -13,7 +13,7 @@ namespace pragma
 	{
 	public:
 		virtual void Initialize() override;
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void SetGain(float gain) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:

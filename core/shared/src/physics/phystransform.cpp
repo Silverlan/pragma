@@ -1,87 +1,70 @@
 #include "stdafx_shared.h"
-#include "pragma/physics/phystransform.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/transform.hpp"
+#include "pragma/physics/environment.hpp"
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 
-PhysTransform::PhysTransform(const btTransform &t)
-	: m_transform(t)
-{}
-
-PhysTransform::PhysTransform()
-	: PhysTransform(btTransform())
+pragma::physics::Transform::Transform()
 {
 	SetIdentity();
 }
 
-PhysTransform PhysTransform::GetInverse() const
+pragma::physics::Transform::Transform(const Mat4 &t)
 {
-	return PhysTransform {
-		m_transform.inverse()
-	};
+	umat::decompose(t,m_translation,m_rotation);
 }
 
-void PhysTransform::SetTransform(const btTransform &t) {m_transform = t;}
-const btTransform &PhysTransform::GetTransform() const {return m_transform;}
-void PhysTransform::GetTransform(btTransform **t) {*t = &m_transform;}
+pragma::physics::Transform::Transform(const Vector3 &translation,const Quat &rotation)
+	: m_translation{translation},m_rotation{rotation}
+{}
 
-Vector3 PhysTransform::GetOrigin() const
+pragma::physics::Transform pragma::physics::Transform::GetInverse() const
 {
-	auto &p = m_transform.getOrigin();
-	return Vector3(p.x() /PhysEnv::WORLD_SCALE,p.y() /PhysEnv::WORLD_SCALE,p.z() /PhysEnv::WORLD_SCALE);
+	return Transform{-m_translation,uquat::get_inverse(m_rotation)};
 }
 
-Quat PhysTransform::GetRotation() const
+const Vector3 &pragma::physics::Transform::GetOrigin() const {return m_translation;}
+
+const Quat &pragma::physics::Transform::GetRotation() const {return m_rotation;}
+
+Mat4 pragma::physics::Transform::ToMatrix() const
 {
-	btQuaternion rot = m_transform.getRotation();
-	return Quat(
-		static_cast<float>(rot.w()),
-		static_cast<float>(rot.x()),
-		static_cast<float>(rot.y()),
-		static_cast<float>(rot.z())
-	);
+	auto m = glm::translate(Mat4{1.f},m_translation);
+	m *= umat::create(m_rotation);
+	return m;
 }
 
-void PhysTransform::SetOrigin(const Vector3 &origin)
-{
-	m_transform.setOrigin(btVector3(origin.x,origin.y,origin.z) *PhysEnv::WORLD_SCALE);
-}
+void pragma::physics::Transform::SetOrigin(const Vector3 &origin) {m_translation = origin;}
 
-void PhysTransform::SetRotation(const Quat &rot) {m_transform.setRotation(btQuaternion(rot.x,rot.y,rot.z,rot.w));}
+void pragma::physics::Transform::SetRotation(const Quat &rot) {m_rotation = rot;}
 
-void PhysTransform::SetIdentity()
+void pragma::physics::Transform::SetIdentity()
 {
-	m_transform.setIdentity();
+	m_translation = {};
+	m_rotation = uquat::identity();
 }
-
-const Mat3 &PhysTransform::GetBasis() const {return const_cast<PhysTransform*>(this)->GetBasis();}
-Mat3 &PhysTransform::GetBasis() {return reinterpret_cast<Mat3&>(m_transform.getBasis());}
-void PhysTransform::SetBasis(const Mat3 &m) {m_transform.setBasis(reinterpret_cast<const btMatrix3x3&>(m));}
-PhysTransform PhysTransform::operator*(const PhysTransform &tOther) const
+pragma::physics::Transform pragma::physics::Transform::operator*(const Transform &tOther) const
 {
-	auto r = PhysTransform(m_transform);
-	return r *= tOther;
+	auto res = *this;
+	uvec::rotate(&res.m_translation,tOther.m_rotation);
+	res.m_rotation *= tOther.m_rotation;
+	return res;
 }
-PhysTransform &PhysTransform::operator*=(const PhysTransform &tOther)
+pragma::physics::Transform &pragma::physics::Transform::operator*=(const Transform &tOther)
 {
-	m_transform *= tOther.m_transform;
+	*this = *this *tOther;
 	return *this;
 }
-Vector3 PhysTransform::operator()(const Vector3 &x) const
+Vector3 pragma::physics::Transform::operator*(const Vector3 &translation) const
 {
-	auto r = m_transform(uvec::create_bt(x) *PhysEnv::WORLD_SCALE);
-	return uvec::create(r /PhysEnv::WORLD_SCALE);
+	auto result = translation;
+	uvec::rotate(&result,m_rotation);
+	result += m_translation;
+	return result;
 }
-Vector3 PhysTransform::operator*(const Vector3 &x) const
+Quat pragma::physics::Transform::operator*(const Quat &rot) const
 {
-	auto r = m_transform *(uvec::create_bt(x) *PhysEnv::WORLD_SCALE);
-	return uvec::create(r /PhysEnv::WORLD_SCALE);
-}
-Quat PhysTransform::operator*(const Quat &q) const
-{
-	auto r = m_transform *btQuaternion(q.x,q.y,q.z,q.w);
-	return Quat(
-		static_cast<float>(r.w()),
-		static_cast<float>(r.x()),
-		static_cast<float>(r.y()),
-		static_cast<float>(r.z())
-	);
+	auto result = rot;
+	result *= m_rotation;
+	return result;
 }

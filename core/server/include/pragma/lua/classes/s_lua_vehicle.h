@@ -17,7 +17,7 @@ public:
 	virtual void ClearDriver() override;
 	virtual void SetDriver(BaseEntity *ent) override;
 
-	virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+	virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 	virtual Bool ReceiveNetEvent(Player *pl,UInt32 eventId,NetPacket &packet) override;
 );
 

@@ -39,7 +39,7 @@ bool SSoundDspEqualizerComponent::OnSetKeyValue(const std::string &key,const std
 	return true;
 }
 
-void SSoundDspEqualizerComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspEqualizerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_lowGain);
 	packet->Write<float>(m_lowCutoff);

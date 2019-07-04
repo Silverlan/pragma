@@ -20,8 +20,6 @@ extern DLLCLIENT ClientState *client;
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()
 {
-	if(true)
-		return nullptr;
 	if(s_hConsole.IsValid())
 	{
 		auto *pConsole = static_cast<WIConsole*>(s_hConsole.get());
@@ -68,6 +66,8 @@ WIConsole *WIConsole::Open()
 		"- {[l:list]}{[c:fde4f2]}list{[/c]}{[/l]}: Lists all available console commands.\n"
 		"- {[c:f9cee7]}help{[/c]} <cvarName>: Prints a description for a particular console command or variable.\n"
 		"- {[c:f4b8da]}lua_help{[/c]} <query>: Prints information about a particular Lua class/library/function/enum.\n"
+		"- {[c:f4b8da]}lua_exec / lua_exec_cl{[/c]} <luaFile>: Executes the specified Lua-file serverside/clientside.\n"
+		"- {[c:f4b8da]}lua_run / lua_run_cl{[/c]} <luaCode>: Executes the specified Lua-code serverside/clientside.\n"
 		"- {[c:eea1cd]}map{[/c]} <mapName>: Disconnects from the current game and starts a new game with the specified map.\n"
 		"- {[c:e68bbe]}exit{[/c]}: Exits the engine\n\n"
 	);

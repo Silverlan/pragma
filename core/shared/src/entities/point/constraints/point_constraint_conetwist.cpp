@@ -2,8 +2,8 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_conetwist.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
 #include <sharedutils/util.h>
@@ -72,17 +72,17 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 	auto swingSpan2 = CFloat(umath::deg_to_rad(m_kvSwingSpan2));
 	auto twistSpan = CFloat(umath::deg_to_rad(m_kvTwistSpan));
 
-	auto *coneTwist = physEnv->CreateConeTwistConstraint(
-		rigidSrc,originConstraint,rotConstraint,
-		rigidTgt,originTgt,rotTgt
+	auto coneTwist = physEnv->CreateConeTwistConstraint(
+		*rigidSrc,originConstraint,rotConstraint,
+		*rigidTgt,originTgt,rotTgt
 	);
-	if(coneTwist != nullptr)
+	if(coneTwist.IsValid())
 	{
 		coneTwist->SetLimit(
 			swingSpan1,swingSpan2,twistSpan,
 			m_kvSoftness,m_kvBiasFactor,
 			m_kvRelaxationFactor
 		);
-		m_constraints.push_back(coneTwist->GetHandle());
+		m_constraints.push_back(util::shared_handle_cast<physics::IConeTwistConstraint,physics::IConstraint>(coneTwist));
 	}
 }

@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_debug_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <networkmanager/nwm_packet.h>
 
 using namespace pragma;
@@ -13,7 +14,7 @@ void SDebugTextComponent::SetText(const std::string &text)
 
 	NetPacket packet {};
 	packet->WriteString(text);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetText,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetText,packet,pragma::networking::Protocol::SlowReliable);
 }
 void SDebugTextComponent::SetSize(float size)
 {
@@ -23,10 +24,10 @@ void SDebugTextComponent::SetSize(float size)
 
 	NetPacket packet {};
 	packet->Write<float>(size);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetSize,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetSize,packet,pragma::networking::Protocol::SlowReliable);
 }
 luabind::object SDebugTextComponent::InitializeLuaObject(lua_State *l) {return BaseDebugTextComponent::InitializeLuaObject<SDebugTextComponentHandleWrapper>(l);}
-void SDebugTextComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugTextComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_debugText);
 	packet->Write<float>(m_size);
@@ -34,7 +35,7 @@ void SDebugTextComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
 
 ////////////////
 
-void SBaseDebugOutlineComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SBaseDebugOutlineComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	auto *pDebugComponent = dynamic_cast<BaseDebugOutlineComponent*>(this);
 	packet->Write<Color>(pDebugComponent->GetOutlineColor());
@@ -42,7 +43,7 @@ void SBaseDebugOutlineComponent::SendData(NetPacket &packet,nwm::RecipientFilter
 
 ////////////////
 	
-void SDebugPointComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugPointComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<bool>(m_bAxis);
 }
@@ -50,7 +51,7 @@ luabind::object SDebugPointComponent::InitializeLuaObject(lua_State *l) {return 
 
 ////////////////
 
-void SDebugLineComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugLineComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_targetEntity);
 	packet->Write<Vector3>(m_targetOrigin);
@@ -68,10 +69,10 @@ void SDebugBoxComponent::SetBounds(const Vector3 &min,const Vector3 &max)
 	NetPacket packet {};
 	packet->Write<Vector3>(min);
 	packet->Write<Vector3>(max);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetBounds,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetBounds,packet,pragma::networking::Protocol::SlowReliable);
 }
 		
-void SDebugBoxComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugBoxComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseDebugOutlineComponent::SendData(packet,rp);
 	packet->Write<Vector3>(m_bounds.first);
@@ -81,7 +82,7 @@ luabind::object SDebugBoxComponent::InitializeLuaObject(lua_State *l) {return Ba
 
 ////////////////
 	
-void SDebugSphereComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugSphereComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseDebugOutlineComponent::SendData(packet,rp);
 	packet->Write<uint32_t>(m_recursionLevel);
@@ -98,7 +99,7 @@ void SDebugConeComponent::SetConeAngle(float angle)
 
 	NetPacket packet {};
 	packet->Write<float>(angle);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetConeAngle,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetConeAngle,packet,pragma::networking::Protocol::SlowReliable);
 }
 void SDebugConeComponent::SetStartRadius(float radius)
 {
@@ -108,10 +109,10 @@ void SDebugConeComponent::SetStartRadius(float radius)
 
 	NetPacket packet {};
 	packet->Write<float>(radius);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetStartRadius,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetStartRadius,packet,pragma::networking::Protocol::SlowReliable);
 }
 		
-void SDebugConeComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugConeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseDebugOutlineComponent::SendData(packet,rp);
 	packet->Write<float>(m_coneAngle);
@@ -130,10 +131,10 @@ void SDebugCylinderComponent::SetLength(float length)
 
 	NetPacket packet {};
 	packet->Write<float>(length);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetLength,packet);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetLength,packet,pragma::networking::Protocol::SlowReliable);
 }
 		
-void SDebugCylinderComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SDebugCylinderComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseDebugOutlineComponent::SendData(packet,rp);
 	packet->Write<float>(m_length);

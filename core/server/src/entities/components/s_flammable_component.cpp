@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_flammable_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -56,7 +57,7 @@ void SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity 
 	p->Write<float>(duration);
 	nwm::write_entity(p,attacker);
 	nwm::write_entity(p,inflictor);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvIgnite,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvIgnite,p,pragma::networking::Protocol::SlowReliable);
 
 	auto reps = static_cast<uint32_t>(umath::floor(duration /0.5f));
 	Timer *t = nullptr;
@@ -83,7 +84,7 @@ void SFlammableComponent::Extinguish()
 	if(!IsOnFire())
 		return;
 	BaseFlammableComponent::Extinguish();
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvExtinguish);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvExtinguish,pragma::networking::Protocol::SlowReliable);
 	m_igniteInfo.Clear();
 }
 void SFlammableComponent::SetIgnitable(bool b)
@@ -93,9 +94,9 @@ void SFlammableComponent::SetIgnitable(bool b)
 	BaseFlammableComponent::SetIgnitable(b);
 	NetPacket p {};
 	p->Write<bool>(b);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetIgnitable,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetIgnitable,p,pragma::networking::Protocol::SlowReliable);
 }
-void SFlammableComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SFlammableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<bool>(*m_bIgnitable);
 	packet->Write<bool>(*m_bIsOnFire);

@@ -29,7 +29,7 @@ bool SSoundDspEchoComponent::OnSetKeyValue(const std::string &key,const std::str
 	return true;
 }
 
-void SSoundDspEchoComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SSoundDspEchoComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(m_kvDelay);
 	packet->Write<float>(m_kvLRDelay);

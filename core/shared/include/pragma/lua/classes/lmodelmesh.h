@@ -4,7 +4,6 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include "pragma/math/icosphere.h"
-#include <luasystem.h>
 
 class ModelMesh;
 class ModelSubMesh;

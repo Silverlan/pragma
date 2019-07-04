@@ -2,7 +2,7 @@
 #if 0
 #include "pragma/lua/classes/s_lua_npc.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 
 DEFINE_LUA_ENTITY_HANDLE(SLuaNPC);
 
@@ -117,7 +117,7 @@ void SLuaNPC::PlayFootStepSound(BaseCharacter::FootType foot,const SurfaceMateri
 	SBaseNPC::PlayFootStepSound(foot,surfMat,scale);
 }
 
-void SLuaNPC::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLuaNPC::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	SBaseNPC::SendData(packet,rp);
 	SLuaBaseEntity::ImplSendData(packet,rp);

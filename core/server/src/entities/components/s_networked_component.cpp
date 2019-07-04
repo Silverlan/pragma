@@ -6,7 +6,7 @@
 
 using namespace pragma;
 
-void SNetworkedComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SNetworkedComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 #if NETWORKED_VARS_ENABLED != 0
 	auto numNwVars = m_networkedVarNames.size();

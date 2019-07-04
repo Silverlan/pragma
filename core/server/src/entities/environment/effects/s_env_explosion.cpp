@@ -4,6 +4,7 @@
 #include <pragma/game/damageinfo.h>
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -20,7 +21,7 @@ void SExplosionComponent::Explode()
 	{
 		NetPacket p;
 		nwm::write_entity(p,&ent);
-		server->BroadcastTCP("envexplosion_explode",p);
+		server->SendPacket("envexplosion_explode",p,pragma::networking::Protocol::SlowReliable);
 	}
 	BaseEnvExplosionComponent::Explode();
 }

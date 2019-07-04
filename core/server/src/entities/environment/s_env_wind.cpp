@@ -9,7 +9,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_wind,EnvWind);
 
-void SWindComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SWindComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<Vector3>(GetWindForce());
 }

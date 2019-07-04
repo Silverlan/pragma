@@ -62,12 +62,14 @@ void CWheelComponent::ReceiveSnapshotData(NetPacket &packet)
 	SetWheelRotation(wheelRot);
 	auto origin = packet->Read<Vector3>();
 	auto rot = packet->Read<Quat>();
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
 	auto &t = info->m_worldTransform;
 	t.setOrigin(btVector3(origin.x,origin.y,origin.z));
 	t.setRotation(btQuaternion(rot.x,rot.y,rot.z,rot.w));
+#endif
 }
 
 Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)

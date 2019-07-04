@@ -9,6 +9,7 @@
 class Player;
 namespace pragma
 {
+	namespace networking {class IServerClient;};
 	class DLLSERVER SPlayerComponent final
 		: public BasePlayerComponent,
 		public SBaseNetComponent
@@ -28,11 +29,11 @@ namespace pragma
 		void SetRunSpeed(float speed);
 		void SetSprintSpeed(float speed);
 		void SetCrouchedWalkSpeed(float speed);
-		void SetClientSession(WVServerClient *session);
+		void SetClientSession(networking::IServerClient &session);
 		Con::c_cout& print(Con::c_cout&);
 		std::ostream& print(std::ostream&);
-		WVServerClient *GetClientSession();
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		networking::IServerClient *GetClientSession();
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual std::string GetClientIP() override;
 		virtual unsigned short GetClientPort() override;
 		nwm::IPAddress GetClientIPAddress() const;
@@ -57,7 +58,7 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;};
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
-		WVServerClient *m_session;
+		mutable util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;
 		bool m_bAuthed;
 		std::vector<InputAction> m_keyStack;

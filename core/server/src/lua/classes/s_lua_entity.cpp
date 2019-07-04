@@ -2,9 +2,12 @@
 #include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/iserver_client.hpp"
 #include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 
 extern DLLSERVER SGame *s_game;
@@ -37,23 +40,16 @@ void SLuaEntity::DoSpawn()
 	SBaseEntity::DoSpawn();
 	if(IsShared())
 	{
-		nwm::RecipientFilter rp;
-		EntityIterator entIt {*s_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending | EntityIterator::FilterFlags::Player};
-		for(auto *entPl : entIt)
-		{
-			if(entPl != nullptr)
-			{
-				auto &pPlComponent = static_cast<pragma::SPlayerComponent&>(*entPl->GetPlayerComponent());
-				rp.Add(pPlComponent.GetClientSession());
-			}
-		}
+		pragma::networking::ClientRecipientFilter rf {[](const pragma::networking::IServerClient &cl) -> bool {
+			return cl.GetPlayer();
+		}};
 		NetPacket p;
 		p->WriteString(GetClass());
 		p->Write<unsigned int>(GetIndex());
 		auto pMapComponent = GetComponent<pragma::MapComponent>();
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
-		SendData(p,rp);
-		server->SendPacketTCP("ent_create_lua",p,rp);
+		SendData(p,rf);
+		server->SendPacket("ent_create_lua",p,pragma::networking::Protocol::SlowReliable,rf);
 	}
 }
 void SLuaEntity::Remove()
@@ -63,7 +59,7 @@ void SLuaEntity::Remove()
 		// TODO: Do we need this? (If so, why?)
 		NetPacket p;
 		nwm::write_entity(p,this);
-		server->BroadcastTCP("ent_remove",p);
+		server->SendPacket("ent_remove",p,pragma::networking::Protocol::SlowReliable);
 	}
 	SBaseEntity::Remove();
 }
@@ -76,7 +72,7 @@ void SLuaEntityWrapper::default_Initialize(SLuaEntityWrapper *ent) {}
 #if 0
 #include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 
 DEFINE_DERIVED_CHILD_HANDLE(DLLSERVER,Entity,BaseEntity,Entity,SLuaEntity,SLuaEntity);
 void SLuaEntityHandle::Reset(PtrEntity *e)
@@ -131,7 +127,7 @@ SLuaEntity::SLuaEntity(luabind::object &o,std::string &className)
 SLuaEntity::~SLuaEntity()
 {}
 
-void SLuaEntity::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLuaEntity::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	Entity::SendData(packet,rp);
 	SLuaBaseEntity::ImplSendData(packet,rp);

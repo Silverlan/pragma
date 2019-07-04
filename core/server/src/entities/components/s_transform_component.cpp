@@ -3,12 +3,13 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
-void STransformComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void STransformComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_vector(packet,GetPosition());
 	nwm::write_quat(packet,GetOrientation());
@@ -23,7 +24,7 @@ void STransformComponent::SetScale(const Vector3 &scale)
 	NetPacket p;
 	p->Write<Vector3>(scale);
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	ent.SendNetEventTCP(m_netEvSetScale,p);
+	ent.SendNetEvent(m_netEvSetScale,p,pragma::networking::Protocol::SlowReliable);
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->InitializePhysics(pPhysComponent->GetPhysicsType());
@@ -38,5 +39,5 @@ void STransformComponent::SetEyeOffset(const Vector3 &offset)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	nwm::write_vector(p,offset);
-	server->BroadcastTCP("ent_eyeoffset",p);
+	server->SendPacket("ent_eyeoffset",p,pragma::networking::Protocol::SlowReliable);
 }

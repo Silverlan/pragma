@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/ldef_color.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/ldef_plane.h"
-#include "pragma/lua/classes/c_ldef_camera.h"
 #include "luasystem.h"
 
 int Lua::DebugRenderer::Client::DrawPoints(lua_State *l)

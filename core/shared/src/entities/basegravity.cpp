@@ -6,8 +6,8 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/lua/l_entity_handles.hpp"
-#include "pragma/physics/physcontroller.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/controller.hpp"
 #include <pragma/physics/movetypes.h>
 
 using namespace pragma;
@@ -134,16 +134,16 @@ void GravityComponent::ApplyGravity(double dt)
 		{
 			if(hObj.IsValid() == false)
 				continue;
-			static_cast<PhysRigidBody*>(hObj.get())->ApplyForce(f);
+			hObj->GetRigidBody()->ApplyForce(f);
 		}
 	}
 	else if(pPhys->IsController())
 	{
 		auto *pPhysObjController = static_cast<ControllerPhysObj*>(pPhys);
-		auto *pGhostObject = pPhysObjController->GetGhostObject();
-		if(pGhostObject == nullptr)
+		auto *pCollisionObject = pPhysObjController->GetCollisionObject();
+		if(pCollisionObject == nullptr)
 			return;
-		auto t = pGhostObject->GetWorldTransform();
+		auto t = pCollisionObject->GetWorldTransform();
 		//m_originLast = t.GetOrigin();
 		Vector3 disp {};
 		if(pPhysObjController->IsGroundWalkable() == false)//!m_controller->onGround())
@@ -192,8 +192,8 @@ void GravityComponent::ApplyGravity(double dt)
 
 		disp *= dt;
 		auto *pPhysController = pPhysObjController->GetController();
-		auto walkDir = pPhysController->GetWalkDirection() +disp;
-		pPhysController->SetWalkDirection(walkDir);
+		auto walkDir = pPhysController->GetLastMoveDisplacement() +disp;
+		pPhysController->Move(walkDir);
 	}
 	else if(pPhys->IsSoftBody())
 	{
@@ -203,8 +203,7 @@ void GravityComponent::ApplyGravity(double dt)
 		{
 			if(hSoftBody.IsValid() == false)
 				continue;
-			auto *btSoftBody = static_cast<PhysSoftBody*>(hSoftBody.get())->GetSoftBody();
-			btSoftBody->addVelocity(uvec::create_bt(f) *PhysEnv::WORLD_SCALE);
+			hSoftBody->AddVelocity(f);
 		}
 	}
 }

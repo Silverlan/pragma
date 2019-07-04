@@ -13,14 +13,14 @@
 #include "pragma/physics/raytraces.h"
 #include "pragma/physics/collisionmasks.h"
 #include <sharedutils/util.h>
-#include "pragma/physics/physshape.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/environment.hpp"
 #include "pragma/game/damageinfo.h"
 #include "pragma/util/ammo_type.h"
 #include "pragma/lua/luacallback.h"
 #include "luasystem.h"
 #include "pragma/lua/luafunction_call.h"
-#include "pragma/physics/physcontroller.h"
+#include "pragma/physics/controller.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/util/util_game.hpp"
 #include "pragma/entities/entity_iterator.hpp"
@@ -48,7 +48,6 @@ void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_HANDLE_ACTION_INPUT = componentManager.RegisterEvent("HANDLE_ACTION_INPUT",componentType);
 }
 
-#ifdef PHYS_ENGINE_BULLET
 void BasePlayerComponent::SetStandHeight(float height)
 {
 	m_standHeight = height;
@@ -110,11 +109,10 @@ bool BasePlayerComponent::CanUnCrouch() const
 	auto colPos = col->GetPos();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
-	auto *shape = m_shapeStand->GetConvexShape();
 	auto data = charComponent.GetAimTraceData();
 	data.SetSource(colPos);
 	data.SetTarget(colPos +(pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
-	data.SetSource(shape);
+	data.SetShape(*m_shapeStand);
 	TraceResult result;
 	return !game->Sweep(data,&result); // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
@@ -218,156 +216,6 @@ bool BasePlayerComponent::IsMoving() const
 }
 bool BasePlayerComponent::IsWalking() const {return GetActionInput(Action::Walk);}
 bool BasePlayerComponent::IsSprinting() const {return (!IsWalking() && GetActionInput(Action::Sprint)) ? true : false;}
-#elif PHYS_ENGINE_PHYSX
-void BasePlayerComponent::Think(double tDelta)
-{
-	BaseCharacter::Think(tDelta);
-	if(m_bCrouching || m_crouchTransition != -1)
-	{
-		if(GetActionInput(ACTION::CROUCH) == false && m_crouchTransition != 1)
-			UnCrouch();
-		else if(m_crouchTransition != -1)
-		{
-			NetworkState *state = m_entity->GetNetworkState();
-			Game *game = state->GetGameState();
-			if(game->CurTime() >= m_tCrouch)
-			{
-				m_tCrouch = 0.f;
-				if(m_crouchTransition == 0)
-				{
-					m_bCrouching = true;
-					PhysObj *phys = m_entity->GetPhysicsObject();
-					if(phys != NULL && phys->IsController())
-					{
-						ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-						physx::PxController *controller = physController->GetController();
-						physx::PxExtendedVec3 pos = controller->getFootPosition();
-						controller->resize(m_crouchHeight *0.5f);
-						controller->setFootPosition(pos);
-						OnFullyCrouched();
-					}
-				}
-				else
-				{
-					m_bCrouching = false;
-					PhysObj *phys = m_entity->GetPhysicsObject();
-					if(phys != NULL && phys->IsController())
-					{
-						ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-						physx::PxController *controller = physController->GetController();
-						controller->resize(m_standHeight *0.5f);
-						controller->setPosition(controller->getPosition());
-						OnFullyUnCrouched();
-					}
-				}
-				m_crouchTransition = -1;
-			}
-		}
-	}
-}
-void BasePlayerComponent::SetMoveType(MOVETYPE movetype)
-{
-
-}
-void BasePlayerComponent::SetStandHeight(float height)
-{
-	m_standHeight = height;
-	if(IsCrouching())
-		return;
-	PhysObj *phys = m_entity->GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
-		return;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-	physx::PxController *controller = physController->GetController();
-	controller->resize(height *0.5f);
-}
-void BasePlayerComponent::SetCrouchHeight(float height)
-{
-	m_crouchHeight = height;
-	if(!IsCrouching())
-		return;
-	PhysObj *phys = m_entity->GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
-		return;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-	physx::PxController *controller = physController->GetController();
-	controller->resize(height *0.5f);
-}
-bool BasePlayerComponent::CanUnCrouch()
-{
-	if(!m_bCrouching && m_crouchTransition != -1)
-		return true;
-	PhysObj *phys = m_entity->GetPhysicsObject();
-	if(phys == NULL || !phys->IsController())
-		return true;
-	ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-	if(physController->IsCapsule())
-	{
-		physx::PxCapsuleController *controller = static_cast<physx::PxCapsuleController*>(physController->GetController());
-		physx::PxScene *scene = controller->getScene();
-
-		physx::PxReal r = controller->getRadius();
-		physx::PxCapsuleGeometry geom(r,m_standHeight *0.5f);
-
-		physx::PxExtendedVec3 position = controller->getFootPosition();
-		position += controller->getUpDirection() *(r +m_standHeight *0.5f +controller->getContactOffset());
-		physx::PxVec3 pos(position.x,position.y,position.z);
-		physx::PxOverlapBuffer hit;
-		PhysXQuerySingleFilterCallback filterCall(controller->getActor());
-		physx::PxQueryFilterData filter(physx::PxQueryFlag::eANY_HIT | physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER);
-		unsigned int filterGroup;
-		unsigned int filterMask;
-		m_entity->GetCollisionFilter(&filterGroup,&filterMask);
-		filter.data.word0 = filterGroup;
-		filter.data.word1 = filterMask;
-		if(scene->overlap(
-				geom,
-				physx::PxTransform(pos,controller->getActor()->getGlobalPose().q),
-				hit,
-				physx::PxQueryFilterData(physx::PxQueryFlag::eANY_HIT | physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER),
-				&filterCall
-			) && hit.hasBlock)
-		{
-			physx::PxRigidActor *actor = hit.block.actor;
-			if(actor->userData != NULL)
-			{
-				PhysObj *phys = static_cast<PhysObj*>(actor->userData);
-				BaseEntity *ent = phys->GetOwner();
-				if(ent != NULL)
-				{
-					physx::PxTransform t = hit.block.shape->getLocalPose();
-					std::cout<<"BLOCKED BY "<<ent->GetClass()<<" ("<<t.p.x<<","<<t.p.y<<","<<t.p.z<<")"<<std::endl;
-				}
-			}
-			return false;
-		}
-	}
-	else
-	{
-		physx::PxBoxController *controller = static_cast<physx::PxBoxController*>(physController->GetController());
-		physx::PxScene *scene = controller->getScene();
-
-		physx::PxReal h = m_standHeight -m_crouchHeight;
-		physx::PxVec3 halfExtents(
-			controller->getHalfForwardExtent(),
-			h,
-			controller->getHalfSideExtent()
-		);
-		physx::PxBoxGeometry geom(halfExtents);
-		physx::PxExtendedVec3 position = controller->getFootPosition();
-		physx::PxVec3 pos(position.x,position.y +controller->getHalfHeight() +h *0.5f,position.z);
-		physx::PxOverlapBuffer hit;
-		if(scene->overlap(
-				geom,
-				physx::PxTransform(pos,controller->getActor()->getGlobalPose().q),
-				hit,
-				physx::PxQueryFilterData(physx::PxQueryFlag::eANY_HIT | physx::PxQueryFlag::eSTATIC | physx::PxQueryFlag::eDYNAMIC | physx::PxQueryFlag::ePREFILTER)
-			) && hit.hasBlock)
-			return false;
-	}
-	return true;
-}
-#endif
 
 Con::c_cout& BasePlayerComponent::print(Con::c_cout &os)
 {
@@ -580,9 +428,11 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 					TraceData data;
 					data.SetSource(origin);
 					data.SetTarget(origin +dir *dist);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 					data.SetFilter(entOther->GetHandle());
+#endif
 					auto result = game->RayCast(data);
-					if(!result.hit || result.entity.get() == entOther)
+					if(result.hitType == RayCastHitType::None || result.entity.get() == entOther)
 					{
 						dotClosest = dot;
 						entClosest = entOther;
@@ -918,14 +768,17 @@ void BasePlayerComponent::Crouch()
 		auto shape = controller->GetShape();
 		if(shape != nullptr && controllerPhys->IsCapsule())
 		{
-			auto *btShape = static_cast<btCapsuleShape*>(shape->GetShape());
-			auto radius = btShape->getRadius();
-			auto halfHeight = btShape->getHalfHeight();
-			auto w = util::metres_to_units(radius);
-			auto btH = util::metres_to_units(halfHeight) *2.0; // Half-Height; Multiply by 2 to get full height
-			auto h = (btH +w *2.0) /2.0;
-			auto *physEnv = game->GetPhysicsEnvironment();
-			m_shapeStand = physEnv->CreateCapsuleShape(w,h);
+			auto *capsuleShape = dynamic_cast<pragma::physics::ICapsuleShape*>(shape);
+			if(capsuleShape)
+			{
+				auto radius = capsuleShape->GetRadius();
+				auto halfHeight = capsuleShape->GetHalfHeight();
+				auto w = util::metres_to_units(radius);
+				auto btH = util::metres_to_units(halfHeight) *2.0; // Half-Height; Multiply by 2 to get full height
+				auto h = (btH +w *2.0) /2.0;
+				auto *physEnv = game->GetPhysicsEnvironment();
+				m_shapeStand = physEnv->CreateCapsuleShape(w,h,physEnv->GetGenericMaterial()); // TODO: Cache this shape
+			}
 		}
 	}
 

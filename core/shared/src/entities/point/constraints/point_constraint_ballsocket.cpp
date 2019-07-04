@@ -2,11 +2,11 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_ballsocket.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 
@@ -51,7 +51,7 @@ void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *sr
 		if(bodyTgt.IsValid())
 		{
 			auto posTgt = bodyTgt->GetPos();
-			auto *ballSocket = physEnv->CreateBallSocketConstraint(static_cast<PhysRigidBody*>(bodyTgt.get()),posThis -posTgt,bodySrc,posThis);
+			auto ballSocket = physEnv->CreateBallSocketConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis);
 			//if(ballSocket != nullptr)
 			//	m_constraints.push_back(ballSocket->GetHandle());
 		}

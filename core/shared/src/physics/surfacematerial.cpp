@@ -1,6 +1,8 @@
 #include "stdafx_shared.h"
 #include <pragma/engine.h>
 #include "pragma/math/surfacematerial.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/phys_material.hpp"
 #include <fsys/filesystem.h>
 #include "datasystem.h"
 #include "pragma/ai/navsystem.h"
@@ -9,9 +11,10 @@
 
 extern DLLENGINE Engine *engine;
 
-SurfaceMaterialManager::SurfaceMaterialManager()
+SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
+	: m_physEnv{env}
 {
-	m_materials.push_back(SurfaceMaterial("generic",0,0.8f,0.f));
+	Create("generic",0.f,0.8f);
 	auto &surface = m_materials.back();
 	surface.SetSoftImpactSound("fx.phys_impact_generic_soft");
 	surface.SetHardImpactSound("fx.phys_impact_generic_hard");
@@ -69,25 +72,14 @@ void SurfaceMaterialManager::Load(const std::string &path)
 					physMat.SetWaveStiffness(val);
 				if(mat->GetFloat("wave_propagation",&val))
 					physMat.SetWavePropagation(val);
-#ifdef PHYS_ENGINE_BULLET
 				if(mat->GetFloat("friction",&val))
 					physMat.SetFriction(val);
+				if(mat->GetFloat("static_friction",&val))
+					physMat.SetStaticFriction(val);
+				if(mat->GetFloat("dynamic_friction",&val))
+					physMat.SetDynamicFriction(val);
 				if(mat->GetFloat("restitution",&val))
 					physMat.SetRestitution(val);
-#elif PHYS_ENGINE_PHYSX
-				float val;
-				if(mat->GetFloat("dynamic_friction",&val))
-					physMat->SetDynamicFriction(val);
-				if(mat->GetFloat("static_friction",&val))
-					physMat->SetStaticFriction(val);
-				if(mat->GetFloat("restitution",&val))
-					physMat->SetRestitution(val);
-				bool bVal;
-				if(mat->GetBool("disable_friction",&bVal))
-					physMat->SetFrictionEnabled(!bVal);
-				if(mat->GetBool("disable_strong_friction",&bVal))
-					physMat->SetStrongFrictionEnabled(!bVal);
-#endif
 				auto audio = mat->GetBlock("audio",0u);
 				if(audio != nullptr)
 				{
@@ -110,17 +102,22 @@ void SurfaceMaterialManager::Load(const std::string &path)
 		}
 	}
 }
-SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier,Float friction,Float restitution)
+SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier,Float staticFriction,Float dynamicFriction,Float restitution)
 {
 	auto *mat = GetMaterial(identifier);
 	if(mat == nullptr)
 	{
+		auto physMat = m_physEnv.CreateMaterial(staticFriction,dynamicFriction,restitution);
 		const auto numReserve = 50;
 		m_materials.reserve((m_materials.size() /numReserve) *numReserve +numReserve);
-		m_materials.push_back(SurfaceMaterial(identifier,m_materials.size(),friction,restitution));
+		m_materials.push_back(SurfaceMaterial(identifier,m_materials.size(),*physMat));
 		mat = &m_materials.back();
 	}
 	return *mat;
+}
+SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier,Float friction,Float restitution)
+{
+	return Create(identifier,friction,friction,restitution);
 }
 SurfaceMaterial *SurfaceMaterialManager::GetMaterial(const std::string &id)
 {
@@ -141,37 +138,13 @@ SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other)
 	*this = other;
 }
 
-#ifdef PHYS_ENGINE_BULLET
-SurfaceMaterial::SurfaceMaterial(const std::string &identifier,UInt idx,Float friction,Float restitution)
-	: btMaterial(friction,restitution),m_index(idx),m_identifier(identifier),
+SurfaceMaterial::SurfaceMaterial(const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat)
+	: m_physMaterial{std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())},m_index(idx),m_identifier(identifier),
 	m_footstepType("fx.fst_concrete")
 {}
-#elif PHYS_ENGINE_PHYSX
-SurfaceMaterial::SurfaceMaterial()
-{
-#ifdef PHYS_ENGINE_PHYSX
-	physx::PxPhysics *physics = engine->GetPhysics();
-	m_material = physics->createMaterial(0.5f,0.5f,0.1f);
-#endif
-	Reset();
-}
-
-SurfaceMaterial::SurfaceMaterial(float,float,float,std::string footstepType)
-{
-#ifdef PHYS_ENGINE_PHYSX
-	physx::PxPhysics *physics = engine->GetPhysics();
-	m_material = physics->createMaterial(staticFriction,dynamicFriction,restitution);
-#endif
-	Reset();
-}
-
-SurfaceMaterial::~SurfaceMaterial()
-{}
-#endif
 
 SurfaceMaterial &SurfaceMaterial::operator=(const SurfaceMaterial &other)
 {
-	btMaterial::operator=(other);
 	m_index = other.m_index;
 	m_identifier = other.m_identifier;
 	m_footstepType = other.m_footstepType;
@@ -180,6 +153,7 @@ SurfaceMaterial &SurfaceMaterial::operator=(const SurfaceMaterial &other)
 	m_bulletImpactSound = other.m_bulletImpactSound;
 	m_impactParticle = other.m_impactParticle;
 	m_navigationFlags = other.m_navigationFlags;
+	m_physMaterial = other.m_physMaterial;
 	if(other.m_liquidInfo != nullptr)
 	{
 		m_liquidInfo = std::make_unique<PhysLiquid>();
@@ -263,39 +237,26 @@ void SurfaceMaterial::Reset()
 
 	m_audioInfo = {};
 	m_navigationFlags = pragma::nav::PolyFlags::None;
-#ifdef PHYS_ENGINE_BULLET
-	m_friction = 0.5f;
-	m_restitution = 0.5f;
-#elif PHYS_ENGINE_PHYSX
-	m_material->setDynamicFriction(0.5f);
-	m_material->setStaticFriction(0.5f);
-	m_material->setRestitution(0.1f);
-	m_material->setFlag(physx::PxMaterialFlag::Enum::eDISABLE_FRICTION,false);
-	m_material->setFlag(physx::PxMaterialFlag::Enum::eDISABLE_STRONG_FRICTION,false);
-#endif
+
+	m_physMaterial->SetFriction(0.5f);
+	m_physMaterial->SetRestitution(0.5f);
 }
-#ifdef PHYS_ENGINE_BULLET
+
+pragma::physics::IMaterial &SurfaceMaterial::GetPhysicsMaterial() const {return *m_physMaterial;}
 const std::string &SurfaceMaterial::GetIdentifier() const {return m_identifier;}
-Float SurfaceMaterial::GetFriction() const {return CFloat(m_friction);}
-void SurfaceMaterial::SetFriction(Float friction) {m_friction = friction;}
-Float SurfaceMaterial::GetRestitution() const {return CFloat(m_restitution);}
-void SurfaceMaterial::SetRestitution(Float restitution) {m_restitution = restitution;}
+void SurfaceMaterial::SetFriction(Float friction)
+{
+	SetStaticFriction(friction);
+	SetDynamicFriction(friction);
+}
+Float SurfaceMaterial::GetRestitution() const {return m_physMaterial->GetRestitution();}
+void SurfaceMaterial::SetRestitution(Float restitution) {m_physMaterial->SetRestitution(restitution);}
+float SurfaceMaterial::GetStaticFriction() const {return m_physMaterial->GetStaticFriction();}
+void SurfaceMaterial::SetStaticFriction(float friction) {m_physMaterial->SetStaticFriction(friction);}
+float SurfaceMaterial::GetDynamicFriction() const {return m_physMaterial->GetDynamicFriction();}
+void SurfaceMaterial::SetDynamicFriction(float friction) {m_physMaterial->SetDynamicFriction(friction);}
 UInt SurfaceMaterial::GetIndex() const {return m_index;}
-#elif PHYS_ENGINE_PHYSX
-void SurfaceMaterial::SetDynamicFriction(float) {}
-void SurfaceMaterial::SetStaticFriction(float) {}
-void SurfaceMaterial::SetRestitution(float) {}
-void SurfaceMaterial::SetFrictionEnabled(bool) {}
-void SurfaceMaterial::SetStrongFrictionEnabled(bool) {}
-physx::PxMaterial *SurfaceMaterial::GetMaterial() {return m_material;}
-void SurfaceMaterial::SetFrictionEnabled(bool b) {m_material->setFlag(physx::PxMaterialFlag::Enum::eDISABLE_FRICTION,!b);}
-void SurfaceMaterial::SetStrongFrictionEnabled(bool b) {m_material->setFlag(physx::PxMaterialFlag::Enum::eDISABLE_STRONG_FRICTION,!b);}
-float SurfaceMaterial::GetDynamicFriction() {return m_material->getDynamicFriction();}
-float SurfaceMaterial::GetStaticFriction() {return m_material->getStaticFriction();}
-void SurfaceMaterial::SetDynamicFriction(float friction) {m_material->setDynamicFriction(friction);}
-void SurfaceMaterial::SetStaticFriction(float friction) {m_material->setStaticFriction(friction);}
-void SurfaceMaterial::SetRestitution(float restitution) {m_material->setRestitution(restitution);}
-#endif
+
 const std::string &SurfaceMaterial::GetFootstepType() const {return m_footstepType;}
 void SurfaceMaterial::SetFootstepType(const std::string &type) {m_footstepType = type;}
 

@@ -3,7 +3,6 @@
 #include "pragma/lua/baseluaobj.h"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <stack>
-#include <luasystem.h>
 #include <sharedutils/util_file.h>
 
 extern DLLENGINE Engine *engine;

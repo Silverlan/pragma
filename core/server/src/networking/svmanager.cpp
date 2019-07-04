@@ -4,10 +4,14 @@
 #include "pragma/entities/player.h"
 #include "pragma/networking/clientsessioninfo.h"
 #include "pragma/networking/wvserver.h"
+#include "pragma/networking/iserver.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/networking/wvlocalclient.h"
+#include "pragma/networking/standard_server.hpp"
+#include <pragma/networking/enums.hpp>
 #include <wms_shared.h>
 #include <pragma/engine_version.h>
+#include <pragma/networking/error.hpp>
 #include <networkmanager/nwm_error_handle.h>
 
 extern DLLENGINE Engine *engine;
@@ -33,88 +37,57 @@ void ServerState::RegisterServerInfo()
 	m_serverData.map = s_game->GetMapName();
 	if(gameMode != nullptr)
 		m_serverData.gameMode = gameMode->name;
+	auto tcpPort = m_server->GetLocalTCPPort();
+	auto udpPort = m_server->GetLocalUDPPort();
 	m_serverData.players = s_game->GetPlayerCount();
-	m_serverData.tcpPort = m_server->GetLocalTCPPort();
-	m_serverData.udpPort = m_server->GetLocalUDPPort();
+	m_serverData.tcpPort = tcpPort.has_value() ? *tcpPort : 0;
+	m_serverData.udpPort = udpPort.has_value() ? *udpPort : 0;
 	m_serverData.engineVersion = get_engine_version();
 	//m_serverData.maxPlayers
 	//m_serverData.password
 	//m_serverData.bots
 }
 
+void ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)
+{
+	CloseServer();
+	m_server = std::move(iserver);
+
+	pragma::networking::ServerEventInterface eventInterface {};
+	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client,pragma::networking::DropReason reason) {
+		auto *game = GetGameState();
+		if(game == nullptr)
+			return;
+		game->OnClientDropped(client,reason);
+	};
+}
+
 void ServerState::StartServer()
 {
 	CloseServer();
-	auto tcpPort = GetConVarInt("sv_port_tcp");
-	auto udpPort = GetConVarInt("sv_port_udp");
-	try
+	if(m_server == nullptr)
+		return;
+	SetServerInterface(std::make_unique<pragma::networking::StandardServer>());
+	m_server->AddClient(m_localClient);
+
+	pragma::networking::Error err;
+	if(m_server->Start(err) == false)
 	{
-		m_server = WVServer::Create(static_cast<uint16_t>(tcpPort),static_cast<uint16_t>(udpPort),nwm::ConnectionType::TCPUDP);
-		m_server->SetClientDroppedHandle([this](nwm::ServerClient *client,nwm::ClientDropped reason) {
-			auto *game = GetGameState();
-			if(game == nullptr)
-				return;
-			game->OnClientDropped(client,reason);
-		});
-	}
-	catch(const NWMException &e)
-	{
-		Con::cerr<<"ERROR: Unable to start server with ports TCP = "<<tcpPort<<" and UDP = "<<udpPort<<": "<<e.what()<<Con::endl;
+		Con::cerr<<"ERROR: "<<err.GetMessage()<<Con::endl;
+		return;
 	}
 	if(IsGameActive())
 		RegisterServerInfo();
-	// TODO
-	/*if(m_ioservice != NULL) return;
-	//CloseServer(); // TODO: Wait for it; Pass function?
-#ifdef DEBUG_SOCKET
-	Con::cout<<"[SERVER] Binding to port "<<port<<Con::endl;
-#endif
-	m_endpoint = new tcp::endpoint(tcp::v4(),port);
-	m_ioservice = new boost::asio::io_service;
-	Server *sv;
-	try
-	{
-		sv = new Server(*m_ioservice,*m_endpoint);
-	}
-	catch(std::exception e)
-	{
-		Con::cwar<<"WARNING: Unable to start server at port "<<port<<": "<<e.what()<<Con::endl;
-		delete m_ioservice;
-		delete m_endpoint;
-		m_ioservice = NULL;
-		return;
-	}
-	m_server = new std::shared_ptr<Server>(sv);
-	sv->SetPacketHandle(boost::bind(&ServerState::HandlePacket,this,_1,_2));
-	sv->SetSessionHandle(boost::bind(&ServerState::HandleSession,this,_1));
-	sv->SetDisconnectHandle(boost::bind(&ServerState::HandleDisconnect,this,_1));
-	sv->SetTerminateHandle(boost::bind(&ServerState::HandleTerminate,this));
-	sv->SetErrorHandle(boost::bind(&ServerState::HandleError,this,_1,_2,_3,_4));
-	StartUDPSession(GetUDPPort());*/
 }
 
 void ServerState::CloseServer()
 {
 	if(m_server == nullptr)
 		return;
-	m_server->Shutdown();
-	m_server = nullptr;
-	/*if(m_ioservice == NULL) return;
-	Server *server = m_server->get();
-	if(!force)
-	{
-		SendTCPMessage("shutdown");
-		server->Close();
-		m_wmsClient->Close();
-	}
-	else
-	{
-		MarkSocketForTermination();
-		InvalidateSocketHandles();
-	}
-	EndUDPSession();
-	if(engine->IsServerOnly())
-		engine->ShutDown();*/
+	pragma::networking::Error err;
+	if(m_server->Shutdown(err) == true)
+		return;
+	Con::cerr<<"ERROR: Unable to shut down server: "<<err.GetMessage()<<Con::endl;
 }
 
 /////////////////////////////////

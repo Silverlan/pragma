@@ -3,7 +3,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lcamera.h"
-#include "pragma/lua/classes/c_ldef_camera.h"
 #include "pragma/entities/point/c_point_target.h"
 #include "luasystem.h"
 #include "pragma/entities/components/c_render_component.hpp"

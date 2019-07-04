@@ -2,6 +2,8 @@
 #include "pragma/game/s_game.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/player.h"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
@@ -11,14 +13,15 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 
 extern DLLSERVER ServerState *server;
 
 void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {
-	if(pl == nullptr)
+	auto *session = pl ? pl->GetClientSession() : nullptr;
+	if(session == nullptr)
 		return;
-	auto *session = pl->GetClientSession();
 	NetPacket packet;
 	packet->Write<uint8_t>(session->SwapSnapshotId());
 	packet->Write<double>(CurTime());
@@ -62,7 +65,6 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			if(physObj != NULL && !physObj->IsStatic())
 			{
 				flags |= pragma::SnapshotFlags::PhysicsData;
-#ifdef PHYS_ENGINE_BULLET
 				if(physObj->IsController())
 				{
 					packet->Write<uint8_t>(1u);
@@ -85,12 +87,12 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 						Vector3 angVel {0.f,0.f,0.f};
 						if(hObj.IsValid())
 						{
-							auto *o = static_cast<PhysCollisionObject*>(hObj.get());
+							auto *o = hObj.Get();
 							pos = o->GetPos();
 							rot = o->GetRotation();
 							if(o->IsRigid())
 							{
-								auto *rigid = static_cast<PhysRigidBody*>(o);
+								auto *rigid = o->GetRigidBody();
 								vel = rigid->GetLinearVelocity();
 								angVel = rigid->GetAngularVelocity();
 							}
@@ -101,27 +103,6 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 						packet->Write<Vector3>(angVel);
 					}
 				}
-#elif PHYS_ENGINE_PHYSX
-				std::vector<DynamicActorInfo> &actors = phys->GetActorInfo();
-				packet.Write<unsigned char>(actors.size());
-				for(unsigned char j=0;j<actors.size();j++)
-				{
-					physx::PxRigidDynamic *actor = actors[j].GetActor();
-					physx::PxTransform t = actor->getGlobalPose();
-					physx::PxVec3 vel = actor->getLinearVelocity();
-					physx::PxVec3 angVel = actor->getAngularVelocity();
-					for(char i=0;i<3;i++)
-						packet->Write<float>(t.p[i]);
-					for(char i=0;i<3;i++)
-						packet->Write<float>(vel[i]);
-					for(char i=0;i<3;i++)
-						packet->Write<float>(angVel[i]);
-					packet->Write<float>(t.q.w);
-					packet->Write<float>(t.q.x);
-					packet->Write<float>(t.q.y);
-					packet->Write<float>(t.q.z);
-				}
-#endif
 			}
 
 			auto offsetNumComponents = 0u;
@@ -194,7 +175,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 		}
 	}
 	packet->Write<unsigned char>(numPlayersValid,&posNumPls);
-	server->SendPacketUDP("snapshot",packet,pl->GetClientSession());
+	server->SendPacket("snapshot",packet,pragma::networking::Protocol::FastUnreliable,*session);
 }
 
 void SGame::SendSnapshot()

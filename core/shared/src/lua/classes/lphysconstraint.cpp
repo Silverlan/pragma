@@ -1,9 +1,11 @@
 #include "stdafx_shared.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/lphysics.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
+
+// #define ENABLE_DEPRECATED_PHYSICS
 
 extern DLLENGINE Engine *engine;
 
@@ -11,102 +13,104 @@ namespace Lua
 {
 	namespace PhysConstraint
 	{
-		static void IsValid(lua_State *l,ConstraintHandle &hConstraint);
-		static void Remove(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetSourceObject(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetTargetObject(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetSourceTransform(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetTargetTransform(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetSourcePosition(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetSourceRotation(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetTargetPosition(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetTargetRotation(lua_State *l,ConstraintHandle &hConstraint);
+		static void IsValid(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void Remove(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetSourceObject(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetTargetObject(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetSourceTransform(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetTargetTransform(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetSourcePosition(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetSourceRotation(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetTargetPosition(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetTargetRotation(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
 
-		static void SetOverrideSolverIterationCount(lua_State *l,ConstraintHandle &hConstraint,int32_t count);
-		static void GetOverrideSolverIterationCount(lua_State *l,ConstraintHandle &hConstraint);
-		static void GetBreakingImpulseThreshold(lua_State *l,ConstraintHandle &hConstraint);
-		static void SetBreakingImpulseThreshold(lua_State *l,ConstraintHandle &hConstraint,float threshold);
+		static void SetOverrideSolverIterationCount(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,int32_t count);
+		static void GetOverrideSolverIterationCount(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void GetBreakingImpulseThreshold(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void SetBreakingImpulseThreshold(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,float threshold);
 
-		static void SetEnabled(lua_State *l,ConstraintHandle &hConstraint,bool b);
-		static void IsEnabled(lua_State *l,ConstraintHandle &hConstraint);
-		static void SetCollisionsEnabled(lua_State *l,ConstraintHandle &hConstraint,bool b);
-		static void GetCollisionsEnabled(lua_State *l,ConstraintHandle &hConstraint);
-		static void EnableCollisions(lua_State *l,ConstraintHandle &hConstraint);
-		static void DisableCollisions(lua_State *l,ConstraintHandle &hConstraint);
+		static void SetEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,bool b);
+		static void IsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void SetCollisionsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,bool b);
+		static void GetCollisionsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void EnableCollisions(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
+		static void DisableCollisions(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint);
 	};
 	namespace PhysConeTwistConstraint
 	{
-		static void SetLimit(lua_State *l,ConeTwistConstraintHandle &constraint,float swingSpan1,float swingSpan2,float twistSpan);
-		static void SetLimit(lua_State *l,ConeTwistConstraintHandle &constraint,const EulerAngles &ang);
+		static void SetLimit(lua_State *l,util::TSharedHandle<pragma::physics::IConeTwistConstraint> &constraint,float swingSpan1,float swingSpan2,float twistSpan);
+		static void SetLimit(lua_State *l,util::TSharedHandle<pragma::physics::IConeTwistConstraint> &constraint,const EulerAngles &ang);
 	};
 	namespace PhysDoFConstraint
 	{
-		static void SetLinearLowerLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit);
-		static void SetLinearUpperLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit);
-		static void SetLinearLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &lower,const Vector3 &upper);
-		static void SetLinearLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit);
-		static void SetAngularLowerLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit);
-		static void SetAngularUpperLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit);
-		static void SetAngularLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &lower,const EulerAngles &upper);
-		static void SetAngularLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit);
+		static void SetLinearLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit);
+		static void SetLinearUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit);
+		static void SetLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &lower,const Vector3 &upper);
+		static void SetLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit);
+		static void SetAngularLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit);
+		static void SetAngularUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit);
+		static void SetAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &lower,const EulerAngles &upper);
+		static void SetAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit);
 
-		static void GetLinearLowerLimit(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetlinearUpperLimit(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetAngularLowerLimit(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetAngularUpperLimit(lua_State *l,DoFConstraintHandle &constraint);
+		static void GetLinearLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetlinearUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetAngularLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetAngularUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
 
-		static void GetAngularTargetVelocity(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetAngularMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force);
-		static void GetAngularMaxLimitForce(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularMaxLimitForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force);
-		static void GetAngularDamping(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularDamping(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &damping);
-		static void GetAngularLimitSoftness(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularLimitSoftness(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &softness);
-		static void GetAngularForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor);
-		static void GetAngularLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &tolerance);
-		static void GetAngularLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor);
-		static void GetAngularRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetAngularRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor);
-		static void IsAngularMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis);
-		static void SetAngularMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis,bool bEnabled);
-		static void GetCurrentAngularLimitError(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentAngularPosition(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentAngularLimit(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentAngularAccumulatedImpulse(lua_State *l,DoFConstraintHandle &constraint);
+		static void GetAngularTargetVelocity(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetAngularMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force);
+		static void GetAngularMaxLimitForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularMaxLimitForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force);
+		static void GetAngularDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &damping);
+		static void GetAngularLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &softness);
+		static void GetAngularForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor);
+		static void GetAngularLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &tolerance);
+		static void GetAngularLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor);
+		static void GetAngularRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetAngularRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor);
+		static void IsAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis);
+		static void SetAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis,bool bEnabled);
+		static void SetAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,bool bEnabled);
+		static void GetCurrentAngularLimitError(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentAngularPosition(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentAngularAccumulatedImpulse(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
 
-		static void GetLinearTargetVelocity(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetLinearMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force);
-		static void GetLinearDamping(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearDamping(lua_State *l,DoFConstraintHandle &constraint,float damping);
-		static void GetLinearLimitSoftness(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearLimitSoftness(lua_State *l,DoFConstraintHandle &constraint,float softness);
-		static void GetLinearForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor);
-		static void GetLinearLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &tolerance);
-		static void GetLinearLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor);
+		static void GetLinearTargetVelocity(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetLinearMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force);
+		static void GetLinearDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float damping);
+		static void GetLinearLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float softness);
+		static void GetLinearForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor);
+		static void GetLinearLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &tolerance);
+		static void GetLinearLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor);
 
-		static void GetLinearRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint);
-		static void SetLinearRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint,float factor);
-		static void IsLinearMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis);
-		static void SetLinearMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis,bool bEnabled);
-		static void GetCurrentLinearDifference(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentLinearLimitError(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentLinearLimit(lua_State *l,DoFConstraintHandle &constraint);
-		static void GetCurrentLinearAccumulatedImpulse(lua_State *l,DoFConstraintHandle &constraint);
+		static void GetLinearRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void SetLinearRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float factor);
+		static void IsLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis);
+		static void SetLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis,bool bEnabled);
+		static void SetLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,bool bEnabled);
+		static void GetCurrentLinearDifference(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentLinearLimitError(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
+		static void GetCurrentLinearAccumulatedImpulse(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint);
 	};
 };
 
 void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 {
-	auto classDef = luabind::class_<ConstraintHandle>("Constraint");
+	auto classDef = luabind::class_<pragma::physics::IConstraint>("Constraint");
 	classDef.def("IsValid",&IsValid);
 	classDef.def("Remove",&Remove);
 	classDef.def("GetSourceObject",&GetSourceObject);
@@ -134,28 +138,28 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	// fully defined before a derived class is registered, and scoped classes cannot be added AFTER a class was defined.
 	// For this reason all constraint classes are in the 'phys' library instead.
 
-	auto fixedClassDef = luabind::class_<FixedConstraintHandle,ConstraintHandle>("FixedConstraint");
+	auto fixedClassDef = luabind::class_<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>("FixedConstraint");
 
-	auto ballSocketClassDef = luabind::class_<BallSocketConstraintHandle,ConstraintHandle>("BallSocketConstraint");
+	auto ballSocketClassDef = luabind::class_<pragma::physics::IBallSocketConstraint,pragma::physics::IConstraint>("BallSocketConstraint");
 
-	auto hingeClassDef = luabind::class_<HingeConstraintHandle,ConstraintHandle>("HingeConstraint");
+	auto hingeClassDef = luabind::class_<pragma::physics::IHingeConstraint,pragma::physics::IConstraint>("HingeConstraint");
 
-	auto sliderClassDef = luabind::class_<SliderConstraintHandle,ConstraintHandle>("SliderConstraint");
+	auto sliderClassDef = luabind::class_<pragma::physics::ISliderConstraint,pragma::physics::IConstraint>("SliderConstraint");
 
-	auto coneTwistClassDef = luabind::class_<ConeTwistConstraintHandle,ConstraintHandle>("ConeTwistConstraint");
-	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,ConeTwistConstraintHandle&,float,float,float)>(&PhysConeTwistConstraint::SetLimit));
-	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,ConeTwistConstraintHandle&,const EulerAngles&)>(&PhysConeTwistConstraint::SetLimit));
+	auto coneTwistClassDef = luabind::class_<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>("ConeTwistConstraint");
+	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IConeTwistConstraint>&,float,float,float)>(&PhysConeTwistConstraint::SetLimit));
+	coneTwistClassDef.def("SetLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IConeTwistConstraint>&,const EulerAngles&)>(&PhysConeTwistConstraint::SetLimit));
 
-	auto DoFClassDef = luabind::class_<DoFConstraintHandle,ConstraintHandle>("DoFConstraint");
+	auto DoFClassDef = luabind::class_<pragma::physics::IDoFConstraint,pragma::physics::IConstraint>("DoFConstraint");
 	DoFClassDef.def("SetLinearLowerLimit",&PhysDoFConstraint::SetLinearLowerLimit);
 	DoFClassDef.def("SetLinearUpperLimit",&PhysDoFConstraint::SetLinearUpperLimit);
-	DoFClassDef.def("SetLinearLimit",static_cast<void(*)(lua_State*,DoFConstraintHandle&,const Vector3&)>(&PhysDoFConstraint::SetLinearLimit));
-	DoFClassDef.def("SetLinearLimit",static_cast<void(*)(lua_State*,DoFConstraintHandle&,const Vector3&,const Vector3&)>(&PhysDoFConstraint::SetLinearLimit));
+	DoFClassDef.def("SetLinearLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const Vector3&)>(&PhysDoFConstraint::SetLinearLimit));
+	DoFClassDef.def("SetLinearLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const Vector3&,const Vector3&)>(&PhysDoFConstraint::SetLinearLimit));
 
 	DoFClassDef.def("SetAngularLowerLimit",&PhysDoFConstraint::SetAngularLowerLimit);
 	DoFClassDef.def("SetAngularUpperLimit",&PhysDoFConstraint::SetAngularUpperLimit);
-	DoFClassDef.def("SetAngularLimit",static_cast<void(*)(lua_State*,DoFConstraintHandle&,const EulerAngles&)>(&PhysDoFConstraint::SetAngularLimit));
-	DoFClassDef.def("SetAngularLimit",static_cast<void(*)(lua_State*,DoFConstraintHandle&,const EulerAngles&,const EulerAngles&)>(&PhysDoFConstraint::SetAngularLimit));
+	DoFClassDef.def("SetAngularLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const EulerAngles&)>(&PhysDoFConstraint::SetAngularLimit));
+	DoFClassDef.def("SetAngularLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const EulerAngles&,const EulerAngles&)>(&PhysDoFConstraint::SetAngularLimit));
 
 	DoFClassDef.def("GetLinearLowerLimit",&PhysDoFConstraint::GetLinearLowerLimit);
 	DoFClassDef.def("GetlinearUpperLimit",&PhysDoFConstraint::GetlinearUpperLimit);
@@ -180,11 +184,17 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	DoFClassDef.def("GetAngularRestitutionFactor",&PhysDoFConstraint::GetAngularRestitutionFactor);
 	DoFClassDef.def("SetAngularRestitutionFactor",&PhysDoFConstraint::SetAngularRestitutionFactor);
 	DoFClassDef.def("IsAngularMotorEnabled",&PhysDoFConstraint::IsAngularMotorEnabled);
-	DoFClassDef.def("SetAngularMotorEnabled",&PhysDoFConstraint::SetAngularMotorEnabled);
+	DoFClassDef.def("SetAngularMotorEnabled",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,uint8_t,bool)>(&PhysDoFConstraint::SetAngularMotorEnabled));
+	DoFClassDef.def("SetAngularMotorEnabled",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,bool)>(&PhysDoFConstraint::SetAngularMotorEnabled));
 	DoFClassDef.def("GetCurrentAngularLimitError",&PhysDoFConstraint::GetCurrentAngularLimitError);
 	DoFClassDef.def("GetCurrentAngularPosition",&PhysDoFConstraint::GetCurrentAngularPosition);
 	DoFClassDef.def("GetCurrentAngularLimit",&PhysDoFConstraint::GetCurrentAngularLimit);
 	DoFClassDef.def("GetCurrentAngularAccumulatedImpulse",&PhysDoFConstraint::GetCurrentAngularAccumulatedImpulse);
+	DoFClassDef.def("SetAngularTargetVelocity",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &velocity) {
+		if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAngularTargetVelocity(velocity);
+	}));
 
 	DoFClassDef.def("GetLinearTargetVelocity",&PhysDoFConstraint::GetLinearTargetVelocity);
 	DoFClassDef.def("GetLinearMaxMotorForce",&PhysDoFConstraint::GetLinearMaxMotorForce);
@@ -202,228 +212,289 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	DoFClassDef.def("GetLinearRestitutionFactor",&PhysDoFConstraint::GetLinearRestitutionFactor);
 	DoFClassDef.def("SetLinearRestitutionFactor",&PhysDoFConstraint::SetLinearRestitutionFactor);
 	DoFClassDef.def("IsLinearMotorEnabled",&PhysDoFConstraint::IsLinearMotorEnabled);
-	DoFClassDef.def("SetLinearMotorEnabled",&PhysDoFConstraint::SetLinearMotorEnabled);
+	DoFClassDef.def("SetLinearMotorEnabled",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,uint8_t,bool)>(&PhysDoFConstraint::SetLinearMotorEnabled));
+	DoFClassDef.def("SetLinearMotorEnabled",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,bool)>(&PhysDoFConstraint::SetLinearMotorEnabled));
 	DoFClassDef.def("GetCurrentLinearDifference",&PhysDoFConstraint::GetCurrentLinearDifference);
 	DoFClassDef.def("GetCurrentLinearLimitError",&PhysDoFConstraint::GetCurrentLinearLimitError);
 	DoFClassDef.def("GetCurrentLinearLimit",&PhysDoFConstraint::GetCurrentLinearLimit);
 	DoFClassDef.def("GetCurrentLinearAccumulatedImpulse",&PhysDoFConstraint::GetCurrentLinearAccumulatedImpulse);
+	DoFClassDef.def("SetLinearTargetVelocity",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &velocity) {
+		if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLinearTargetVelocity(velocity);
+	}));
 
-	auto doFSprintClassDef = luabind::class_<DoFSpringConstraintHandle,ConstraintHandle>("DoFSpringConstraint");
-	doFSprintClassDef.def("CalculateTransforms",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->CalculateTransforms();
+	auto doFSprintClassDef = luabind::class_<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>("DoFSpringConstraint");
+	doFSprintClassDef.def("CalculateTransforms",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->CalculateTransforms();
 	}));
-	doFSprintClassDef.def("CalculateTransforms",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const PhysTransform&,const PhysTransform&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const PhysTransform &transformA,const PhysTransform &transformB) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->CalculateTransforms(transformA,transformB);
+	doFSprintClassDef.def("CalculateTransforms",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const pragma::physics::Transform &transformA,const pragma::physics::Transform &transformB) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->CalculateTransforms(transformA,transformB);
 	}));
-	doFSprintClassDef.def("GetRotationalLimitMotor",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		auto *pRotLimitMotor = static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetRotationalLimitMotor(static_cast<pragma::Axis>(axis));
+#ifdef ENABLE_DEPRECATED_PHYSICS
+	doFSprintClassDef.def("GetRotationalLimitMotor",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		auto *pRotLimitMotor = constraint->GetRotationalLimitMotor(static_cast<pragma::Axis>(axis));
 		if(pRotLimitMotor == nullptr)
 			return;
 		Lua::Push<btRotationalLimitMotor2*>(l,pRotLimitMotor);
 	}));
-	doFSprintClassDef.def("GetTranslationalLimitMotor",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		auto *pTransLimitMotor = static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetTranslationalLimitMotor();
+	doFSprintClassDef.def("GetTranslationalLimitMotor",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		auto *pTransLimitMotor = constraint->GetTranslationalLimitMotor();
 		if(pTransLimitMotor == nullptr)
 			return;
 		Lua::Push<btTranslationalLimitMotor2*>(l,pTransLimitMotor);
 	}));
-	doFSprintClassDef.def("GetCalculatedTransformA",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<PhysTransform>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetCalculatedTransformA());
+#endif
+	doFSprintClassDef.def("GetCalculatedTransformA",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<pragma::physics::Transform>(l,constraint->GetCalculatedTransformA());
 	}));
-	doFSprintClassDef.def("GetCalculatedTransformB",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<PhysTransform>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetCalculatedTransformB());
+	doFSprintClassDef.def("GetCalculatedTransformB",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<pragma::physics::Transform>(l,constraint->GetCalculatedTransformB());
 	}));
-	doFSprintClassDef.def("GetFrameOffsetA",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<PhysTransform>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetFrameOffsetA());
+	doFSprintClassDef.def("GetFrameOffsetA",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<pragma::physics::Transform>(l,constraint->GetFrameOffsetA());
 	}));
-	doFSprintClassDef.def("GetFrameOffsetB",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<PhysTransform>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetFrameOffsetB());
+	doFSprintClassDef.def("GetFrameOffsetB",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<pragma::physics::Transform>(l,constraint->GetFrameOffsetB());
 	}));
-	doFSprintClassDef.def("GetAxis",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAxis(static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetAxis",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetAxis(static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("GetAngle",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAngle(static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetAngle",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetAngle(static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("GetRelativePivotPosition",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetRelativePivotPosition(static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetRelativePivotPosition",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetRelativePivotPosition(static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("SetFrames",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const PhysTransform&,const PhysTransform&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const PhysTransform &transformA,const PhysTransform &transformB) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetFrames(transformA,transformB);
+	doFSprintClassDef.def("SetFrames",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const pragma::physics::Transform &transformA,const pragma::physics::Transform &transformB) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetFrames(transformA,transformB);
 	}));
-	doFSprintClassDef.def("SetLinearLowerLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &linearLower) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetLinearLowerLimit(linearLower);
+	doFSprintClassDef.def("SetLinearLowerLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &linearLower) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLinearLowerLimit(linearLower);
 	}));
-	doFSprintClassDef.def("GetLinearLowerLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetLinearLowerLimit());
+	doFSprintClassDef.def("GetLinearLowerLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetLinearLowerLimit());
 	}));
-	doFSprintClassDef.def("SetLinearUpperLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &linearUpper) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetLinearUpperLimit(linearUpper);
+	doFSprintClassDef.def("SetLinearUpperLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &linearUpper) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLinearUpperLimit(linearUpper);
 	}));
-	doFSprintClassDef.def("GetLinearUpperLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetLinearUpperLimit());
+	doFSprintClassDef.def("GetLinearUpperLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetLinearUpperLimit());
 	}));
-	doFSprintClassDef.def("SetAngularLowerLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &angularLower) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetAngularLowerLimit(angularLower);
+	doFSprintClassDef.def("SetAngularLowerLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &angularLower) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAngularLowerLimit(angularLower);
 	}));
-	doFSprintClassDef.def("SetAngularLowerLimitReversed",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &angularLower) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetAngularLowerLimitReversed(angularLower);
+	doFSprintClassDef.def("SetAngularLowerLimitReversed",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &angularLower) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAngularLowerLimitReversed(angularLower);
 	}));
-	doFSprintClassDef.def("GetAngularLowerLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAngularLowerLimit());
+	doFSprintClassDef.def("GetAngularLowerLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetAngularLowerLimit());
 	}));
-	doFSprintClassDef.def("GetAngularLowerLimitReversed",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAngularLowerLimitReversed());
+	doFSprintClassDef.def("GetAngularLowerLimitReversed",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetAngularLowerLimitReversed());
 	}));
-	doFSprintClassDef.def("SetAngularUpperLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &angularUpper) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetAngularUpperLimit(angularUpper);
+	doFSprintClassDef.def("SetAngularUpperLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &angularUpper) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAngularUpperLimit(angularUpper);
 	}));
-	doFSprintClassDef.def("SetAngularUpperLimitReversed",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &angularUpper) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetAngularUpperLimitReversed(angularUpper);
+	doFSprintClassDef.def("SetAngularUpperLimitReversed",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &angularUpper) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAngularUpperLimitReversed(angularUpper);
 	}));
-	doFSprintClassDef.def("GetAngularUpperLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAngularUpperLimit());
+	doFSprintClassDef.def("GetAngularUpperLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetAngularUpperLimit());
 	}));
-	doFSprintClassDef.def("GetAngularUpperLimitReversed",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::Push<Vector3>(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetAngularUpperLimitReversed());
+	doFSprintClassDef.def("GetAngularUpperLimitReversed",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::Push<Vector3>(l,constraint->GetAngularUpperLimitReversed());
 	}));
-	doFSprintClassDef.def("SetLimit",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double lo,double hi) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetLimit(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),lo,hi);
+	doFSprintClassDef.def("SetLimit",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double lo,double hi) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLimit(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),lo,hi);
 	}));
-	doFSprintClassDef.def("SetLimitReversed",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double lo,double hi) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetLimitReversed(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),lo,hi);
+	doFSprintClassDef.def("SetLimitReversed",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double lo,double hi) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLimitReversed(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),lo,hi);
 	}));
-	doFSprintClassDef.def("IsLimited",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t axis,uint32_t type) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushBool(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->IsLimited(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("IsLimited",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t axis,uint32_t type) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushBool(l,constraint->IsLimited(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("SetRotationOrder",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t rotationOrder) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetRotationOrder(static_cast<pragma::RotationOrder>(rotationOrder));
+	doFSprintClassDef.def("SetRotationOrder",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t rotationOrder) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetRotationOrder(static_cast<pragma::RotationOrder>(rotationOrder));
 	}));
-	doFSprintClassDef.def("GetRotationOrder",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushInt(l,umath::to_integral(static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetRotationOrder()));
+	doFSprintClassDef.def("GetRotationOrder",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushInt(l,umath::to_integral(constraint->GetRotationOrder()));
 	}));
-	doFSprintClassDef.def("SetAxis",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,const Vector3&,const Vector3&)>([](lua_State *l,DoFSpringConstraintHandle &constraint,const Vector3 &axis1,const Vector3 &axis2) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetAxis(axis1,axis2);
+	doFSprintClassDef.def("SetAxis",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,const Vector3&,const Vector3&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,const Vector3 &axis1,const Vector3 &axis2) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetAxis(axis1,axis2);
 	}));
-	doFSprintClassDef.def("SetBounce",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double bounce) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetBounce(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),bounce);
+	doFSprintClassDef.def("SetBounce",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double bounce) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetBounce(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),bounce);
 	}));
-	doFSprintClassDef.def("EnableMotor",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,bool enable) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->EnableMotor(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
+	doFSprintClassDef.def("EnableMotor",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,bool)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,bool enable) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->EnableMotor(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
 	}));
-	doFSprintClassDef.def("SetServo",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,bool enable) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetServo(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
+	doFSprintClassDef.def("SetServo",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,bool)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,bool enable) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetServo(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
 	}));
-	doFSprintClassDef.def("SetTargetVelocity",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double velocity) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetTargetVelocity(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),velocity);
+	doFSprintClassDef.def("SetTargetVelocity",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double velocity) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetTargetVelocity(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),velocity);
 	}));
-	doFSprintClassDef.def("SetServoTarget",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double target) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetServoTarget(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),target);
+	doFSprintClassDef.def("SetServoTarget",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double target) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetServoTarget(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),target);
 	}));
-	doFSprintClassDef.def("SetMaxMotorForce",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double force) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetMaxMotorForce(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),force);
+	doFSprintClassDef.def("SetMaxMotorForce",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double force) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetMaxMotorForce(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),force);
 	}));
-	doFSprintClassDef.def("EnableSpring",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,bool enable) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->EnableSpring(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
+	doFSprintClassDef.def("EnableSpring",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,bool)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,bool enable) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->EnableSpring(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),enable);
 	}));
-	doFSprintClassDef.def("SetStiffness",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double,bool)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double stiffness,bool limitIfNeeded) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetStiffness(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),stiffness,limitIfNeeded);
+	doFSprintClassDef.def("SetStiffness",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double,bool)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double stiffness,bool limitIfNeeded) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetStiffness(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),stiffness,limitIfNeeded);
 	}));
-	doFSprintClassDef.def("SetStiffness",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double stiffness) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetStiffness(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),stiffness);
+	doFSprintClassDef.def("SetStiffness",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double stiffness) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetStiffness(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),stiffness);
 	}));
-	doFSprintClassDef.def("SetDamping",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double,bool)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double damping,bool limitIfNeeded) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetDamping(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),damping,limitIfNeeded);
+	doFSprintClassDef.def("SetDamping",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double,bool)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double damping,bool limitIfNeeded) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetDamping(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),damping,limitIfNeeded);
 	}));
-	doFSprintClassDef.def("SetDamping",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double damping) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetDamping(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),damping);
+	doFSprintClassDef.def("SetDamping",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double damping) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetDamping(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),damping);
 	}));
-	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&)>([](lua_State *l,DoFSpringConstraintHandle &constraint) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetEquilibriumPoint();
+	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetEquilibriumPoint();
 	}));
-	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetEquilibriumPoint(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis));
+	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetEquilibriumPoint(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis));
 	}));
-	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double value) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetEquilibriumPoint(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
+	doFSprintClassDef.def("SetEquilibriumPoint",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double value) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetEquilibriumPoint(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
 	}));
-	doFSprintClassDef.def("SetERP",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double value) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetERP(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
+	doFSprintClassDef.def("SetERP",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double value) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
 	}));
-	doFSprintClassDef.def("GetERP",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetERP(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetERP",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("SetStopERP",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double value) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetStopERP(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
+	doFSprintClassDef.def("SetStopERP",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double value) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetStopERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
 	}));
-	doFSprintClassDef.def("GetStopERP",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetStopERP(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetStopERP",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetStopERP(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("SetCFM",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double value) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetCFM(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
+	doFSprintClassDef.def("SetCFM",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double value) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
 	}));
-	doFSprintClassDef.def("GetCFM",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetCFM(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetCFM",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
 	}));
-	doFSprintClassDef.def("SetStopCFM",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t,double)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis,double value) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		static_cast<PhysDoFSpringConstraint*>(constraint.get())->SetStopCFM(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
+	doFSprintClassDef.def("SetStopCFM",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t,double)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis,double value) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		constraint->SetStopCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis),value);
 	}));
-	doFSprintClassDef.def("GetStopCFM",static_cast<void(*)(lua_State*,DoFSpringConstraintHandle&,uint32_t,uint32_t)>([](lua_State *l,DoFSpringConstraintHandle &constraint,uint32_t type,uint32_t axis) {
-		LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-		Lua::PushNumber(l,static_cast<PhysDoFSpringConstraint*>(constraint.get())->GetStopCFM(static_cast<PhysDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
+	doFSprintClassDef.def("GetStopCFM",static_cast<void(*)(lua_State*,util::TSharedHandle<pragma::physics::IDoFSpringConstraint>&,uint32_t,uint32_t)>([](lua_State *l,util::TSharedHandle<pragma::physics::IDoFSpringConstraint> &constraint,uint32_t type,uint32_t axis) {
+		if(Lua::CheckHandle<pragma::physics::IDoFSpringConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetStopCFM(static_cast<pragma::physics::IDoFSpringConstraint::AxisType>(type),static_cast<pragma::Axis>(axis)));
 	}));
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto defRotLimitMotor = luabind::class_<btRotationalLimitMotor2>("RotationalLimitMotor");
 	defRotLimitMotor.def_readwrite("loLimit",&btRotationalLimitMotor2::m_loLimit);
 	defRotLimitMotor.def_readwrite("hiLimit",&btRotationalLimitMotor2::m_hiLimit);
@@ -562,6 +633,7 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 		Lua::PushBool(l,transLimitMotor.isLimited(axis));
 	}));
 	doFSprintClassDef.scope[defTransLimitMotor];
+#endif
 	mod[classDef];
 	mod[ballSocketClassDef];
 	mod[doFSprintClassDef];
@@ -572,405 +644,494 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	mod[hingeClassDef];
 }
 
-void Lua::PhysConstraint::IsValid(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::IsValid(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
 	Lua::PushBool(l,hConstraint.IsValid());
 }
-void Lua::PhysConstraint::GetSourceObject(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetSourceObject(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	auto *o = hConstraint->GetSourceObject();
 	if(o == nullptr)
 		return;
-	o->GetLuaObject()->push(l);
+	o->Push(l);
 }
-void Lua::PhysConstraint::GetTargetObject(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetTargetObject(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	auto *o = hConstraint->GetTargetObject();
 	if(o == nullptr)
 		return;
-	o->GetLuaObject()->push(l);
+	o->Push(l);
 }
-void Lua::PhysConstraint::Remove(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::Remove(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
-	hConstraint->Remove();
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
+	hConstraint.Remove();
 }
-void Lua::PhysConstraint::GetSourceTransform(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetSourceTransform(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
-	Lua::Push<PhysTransform>(l,hConstraint->GetSourceTransform());
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
+	Lua::Push<pragma::physics::Transform>(l,hConstraint->GetSourceTransform());
 }
-void Lua::PhysConstraint::GetTargetTransform(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetTargetTransform(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
-	Lua::Push<PhysTransform>(l,hConstraint->GetTargetTransform());
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
+	Lua::Push<pragma::physics::Transform>(l,hConstraint->GetTargetTransform());
 }
-void Lua::PhysConstraint::GetSourcePosition(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetSourcePosition(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::Push<Vector3>(l,hConstraint->GetSourcePosition());
 }
-void Lua::PhysConstraint::GetSourceRotation(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetSourceRotation(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::Push<Quat>(l,hConstraint->GetSourceRotation());
 }
-void Lua::PhysConstraint::GetTargetPosition(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetTargetPosition(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::Push<Vector3>(l,hConstraint->GetTargetPosition());
 }
-void Lua::PhysConstraint::GetTargetRotation(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetTargetRotation(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::Push<Quat>(l,hConstraint->GetTargetRotation());
 }
-void Lua::PhysConstraint::SetOverrideSolverIterationCount(lua_State *l,ConstraintHandle &hConstraint,int32_t count)
+void Lua::PhysConstraint::SetOverrideSolverIterationCount(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,int32_t count)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->SetOverrideSolverIterationCount(count);
 }
-void Lua::PhysConstraint::GetOverrideSolverIterationCount(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetOverrideSolverIterationCount(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::PushInt(l,hConstraint->GetOverrideSolverIterationCount());
 }
-void Lua::PhysConstraint::GetBreakingImpulseThreshold(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetBreakingImpulseThreshold(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::PushNumber(l,hConstraint->GetBreakingImpulseThreshold());
 }
-void Lua::PhysConstraint::SetBreakingImpulseThreshold(lua_State *l,ConstraintHandle &hConstraint,float threshold)
+void Lua::PhysConstraint::SetBreakingImpulseThreshold(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,float threshold)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->SetBreakingImpulseThreshold(threshold);
 }
-void Lua::PhysConstraint::SetEnabled(lua_State *l,ConstraintHandle &hConstraint,bool b)
+void Lua::PhysConstraint::SetEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,bool b)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->SetEnabled(b);
 }
-void Lua::PhysConstraint::IsEnabled(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::IsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::PushBool(l,hConstraint->IsEnabled());
 }
-void Lua::PhysConstraint::SetCollisionsEnabled(lua_State *l,ConstraintHandle &hConstraint,bool b)
+void Lua::PhysConstraint::SetCollisionsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint,bool b)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->SetCollisionsEnabled(b);
 }
-void Lua::PhysConstraint::GetCollisionsEnabled(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::GetCollisionsEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	Lua::PushBool(l,hConstraint->GetCollisionsEnabled());
 }
-void Lua::PhysConstraint::EnableCollisions(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::EnableCollisions(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->EnableCollisions();
 }
-void Lua::PhysConstraint::DisableCollisions(lua_State *l,ConstraintHandle &hConstraint)
+void Lua::PhysConstraint::DisableCollisions(lua_State *l,util::TSharedHandle<pragma::physics::IConstraint> &hConstraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,hConstraint);
+	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
+		return;
 	hConstraint->DisableCollisions();
 }
 
-void Lua::PhysConeTwistConstraint::SetLimit(lua_State *l,ConeTwistConstraintHandle &constraint,float swingSpan1,float swingSpan2,float twistSpan)
+void Lua::PhysConeTwistConstraint::SetLimit(lua_State *l,util::TSharedHandle<pragma::physics::IConeTwistConstraint> &constraint,float swingSpan1,float swingSpan2,float twistSpan)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	auto *c = constraint->GetConstraint();
-	static_cast<btConeTwistConstraint*>(c)->setLimit(swingSpan1,swingSpan2,twistSpan);
+	if(Lua::CheckHandle<pragma::physics::IConeTwistConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLimit(swingSpan1,swingSpan2,twistSpan);
 }
-void Lua::PhysConeTwistConstraint::SetLimit(lua_State *l,ConeTwistConstraintHandle &constraint,const EulerAngles &ang)
+void Lua::PhysConeTwistConstraint::SetLimit(lua_State *l,util::TSharedHandle<pragma::physics::IConeTwistConstraint> &constraint,const EulerAngles &ang)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	auto *c = constraint->GetConstraint();
-	static_cast<btConeTwistConstraint*>(c)->setLimit(umath::deg_to_rad(ang.p),umath::deg_to_rad(ang.y),umath::deg_to_rad(ang.r));
-}
-
-void Lua::PhysDoFConstraint::SetLinearLowerLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLowerLimit(limit);
-}
-void Lua::PhysDoFConstraint::SetLinearUpperLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearUpperLimit(limit);
-}
-void Lua::PhysDoFConstraint::SetLinearLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &lower,const Vector3 &upper)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLimit(lower,upper);
-}
-void Lua::PhysDoFConstraint::SetLinearLimit(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLimit(limit);
-}
-void Lua::PhysDoFConstraint::SetAngularLowerLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLowerLimit(limit);
-}
-void Lua::PhysDoFConstraint::SetAngularUpperLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularUpperLimit(limit);
-}
-void Lua::PhysDoFConstraint::SetAngularLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &lower,const EulerAngles &upper)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLimit(lower,upper);
-}
-void Lua::PhysDoFConstraint::SetAngularLimit(lua_State *l,DoFConstraintHandle &constraint,const EulerAngles &limit)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLimit(limit);
+	if(Lua::CheckHandle<pragma::physics::IConeTwistConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLimit(umath::deg_to_rad(ang.p),umath::deg_to_rad(ang.y),umath::deg_to_rad(ang.r));
 }
 
-void Lua::PhysDoFConstraint::GetLinearLowerLimit(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetLinearLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearLowerLimit());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLowerLimit(limit);
 }
-void Lua::PhysDoFConstraint::GetlinearUpperLimit(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetLinearUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetlinearUpperLimit());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearUpperLimit(limit);
 }
-void Lua::PhysDoFConstraint::GetAngularLowerLimit(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &lower,const Vector3 &upper)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<EulerAngles>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularLowerLimit());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLimit(lower,upper);
 }
-void Lua::PhysDoFConstraint::GetAngularUpperLimit(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<EulerAngles>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularUpperLimit());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLimit(limit);
 }
-
-void Lua::PhysDoFConstraint::GetAngularTargetVelocity(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetAngularLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularTargetVelocity());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLowerLimit(limit);
 }
-void Lua::PhysDoFConstraint::GetAngularMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetAngularUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularMaxMotorForce());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularUpperLimit(limit);
 }
-void Lua::PhysDoFConstraint::SetAngularMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force)
+void Lua::PhysDoFConstraint::SetAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &lower,const EulerAngles &upper)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularMaxMotorForce(force);
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLimit(lower,upper);
 }
-void Lua::PhysDoFConstraint::GetAngularMaxLimitForce(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const EulerAngles &limit)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularMaxLimitForce());
-}
-void Lua::PhysDoFConstraint::SetAngularMaxLimitForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularMaxLimitForce(force);
-}
-void Lua::PhysDoFConstraint::GetAngularDamping(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularDamping());
-}
-void Lua::PhysDoFConstraint::SetAngularDamping(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &damping)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularDamping(damping);
-}
-void Lua::PhysDoFConstraint::GetAngularLimitSoftness(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularLimitSoftness());
-}
-void Lua::PhysDoFConstraint::SetAngularLimitSoftness(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &softness)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLimitSoftness(softness);
-}
-void Lua::PhysDoFConstraint::GetAngularForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularForceMixingFactor());
-}
-void Lua::PhysDoFConstraint::SetAngularForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularForceMixingFactor(factor);
-}
-void Lua::PhysDoFConstraint::GetAngularLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularLimitErrorTolerance());
-}
-void Lua::PhysDoFConstraint::SetAngularLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &tolerance)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLimitErrorTolerance(tolerance);
-}
-void Lua::PhysDoFConstraint::GetAngularLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularLimitForceMixingFactor());
-}
-void Lua::PhysDoFConstraint::SetAngularLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularLimitForceMixingFactor(factor);
-}
-void Lua::PhysDoFConstraint::GetAngularRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetAngularRestitutionFactor());
-}
-void Lua::PhysDoFConstraint::SetAngularRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularRestitutionFactor(factor);
-}
-void Lua::PhysDoFConstraint::IsAngularMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::PushBool(l,static_cast<PhysDoF*>(constraint.get())->IsAngularMotorEnabled(axis));
-}
-void Lua::PhysDoFConstraint::SetAngularMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis,bool bEnabled)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetAngularMotorEnabled(axis,bEnabled);
-}
-void Lua::PhysDoFConstraint::GetCurrentAngularLimitError(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentAngularLimitError());
-}
-void Lua::PhysDoFConstraint::GetCurrentAngularPosition(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentAngularPosition());
-}
-void Lua::PhysDoFConstraint::GetCurrentAngularLimit(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentAngularLimit());
-}
-void Lua::PhysDoFConstraint::GetCurrentAngularAccumulatedImpulse(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentAngularAccumulatedImpulse());
-}
-void Lua::PhysDoFConstraint::GetLinearTargetVelocity(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearTargetVelocity());
-}
-void Lua::PhysDoFConstraint::GetLinearMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearMaxMotorForce());
-}
-void Lua::PhysDoFConstraint::SetLinearMaxMotorForce(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &force)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearMaxMotorForce(force);
-}
-void Lua::PhysDoFConstraint::GetLinearDamping(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::PushNumber(l,static_cast<PhysDoF*>(constraint.get())->GetLinearDamping());
-}
-void Lua::PhysDoFConstraint::SetLinearDamping(lua_State *l,DoFConstraintHandle &constraint,float damping)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearDamping(damping);
-}
-void Lua::PhysDoFConstraint::GetLinearLimitSoftness(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::PushNumber(l,static_cast<PhysDoF*>(constraint.get())->GetLinearLimitSoftness());
-}
-void Lua::PhysDoFConstraint::SetLinearLimitSoftness(lua_State *l,DoFConstraintHandle &constraint,float softness)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLimitSoftness(softness);
-}
-void Lua::PhysDoFConstraint::GetLinearForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearForceMixingFactor());
-}
-void Lua::PhysDoFConstraint::SetLinearForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearForceMixingFactor(factor);
-}
-void Lua::PhysDoFConstraint::GetLinearLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearLimitErrorTolerance());
-}
-void Lua::PhysDoFConstraint::SetLinearLimitErrorTolerance(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &tolerance)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLimitErrorTolerance(tolerance);
-}
-void Lua::PhysDoFConstraint::GetLinearLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetLinearLimitForceMixingFactor());
-}
-void Lua::PhysDoFConstraint::SetLinearLimitForceMixingFactor(lua_State *l,DoFConstraintHandle &constraint,const Vector3 &factor)
-{
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearLimitForceMixingFactor(factor);
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLimit(limit);
 }
 
-void Lua::PhysDoFConstraint::GetLinearRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::GetLinearLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::PushNumber(l,static_cast<PhysDoF*>(constraint.get())->GetLinearRestitutionFactor());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearLowerLimit());
 }
-void Lua::PhysDoFConstraint::SetLinearRestitutionFactor(lua_State *l,DoFConstraintHandle &constraint,float factor)
+void Lua::PhysDoFConstraint::GetlinearUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearRestitutionFactor(factor);
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetlinearUpperLimit());
 }
-void Lua::PhysDoFConstraint::IsLinearMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis)
+void Lua::PhysDoFConstraint::GetAngularLowerLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::PushBool(l,static_cast<PhysDoF*>(constraint.get())->IsLinearMotorEnabled(axis));
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<EulerAngles>(l,constraint->GetAngularLowerLimit());
 }
-void Lua::PhysDoFConstraint::SetLinearMotorEnabled(lua_State *l,DoFConstraintHandle &constraint,uint8_t axis,bool bEnabled)
+void Lua::PhysDoFConstraint::GetAngularUpperLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	static_cast<PhysDoF*>(constraint.get())->SetLinearMotorEnabled(axis,bEnabled);
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<EulerAngles>(l,constraint->GetAngularUpperLimit());
 }
-void Lua::PhysDoFConstraint::GetCurrentLinearDifference(lua_State *l,DoFConstraintHandle &constraint)
+
+void Lua::PhysDoFConstraint::GetAngularTargetVelocity(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentLinearDifference());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularTargetVelocity());
 }
-void Lua::PhysDoFConstraint::GetCurrentLinearLimitError(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::GetAngularMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentLinearLimitError());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularMaxMotorForce());
 }
-void Lua::PhysDoFConstraint::GetCurrentLinearLimit(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::SetAngularMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentLinearLimit());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularMaxMotorForce(force);
 }
-void Lua::PhysDoFConstraint::GetCurrentLinearAccumulatedImpulse(lua_State *l,DoFConstraintHandle &constraint)
+void Lua::PhysDoFConstraint::GetAngularMaxLimitForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
 {
-	LUA_CHECK_PHYS_CONSTRAINT(l,constraint);
-	Lua::Push<Vector3>(l,static_cast<PhysDoF*>(constraint.get())->GetCurrentLinearAccumulatedImpulse());
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularMaxLimitForce());
+}
+void Lua::PhysDoFConstraint::SetAngularMaxLimitForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularMaxLimitForce(force);
+}
+void Lua::PhysDoFConstraint::GetAngularDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularDamping());
+}
+void Lua::PhysDoFConstraint::SetAngularDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &damping)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularDamping(damping);
+}
+void Lua::PhysDoFConstraint::GetAngularLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularLimitSoftness());
+}
+void Lua::PhysDoFConstraint::SetAngularLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &softness)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLimitSoftness(softness);
+}
+void Lua::PhysDoFConstraint::GetAngularForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularForceMixingFactor());
+}
+void Lua::PhysDoFConstraint::SetAngularForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularForceMixingFactor(factor);
+}
+void Lua::PhysDoFConstraint::GetAngularLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularLimitErrorTolerance());
+}
+void Lua::PhysDoFConstraint::SetAngularLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &tolerance)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLimitErrorTolerance(tolerance);
+}
+void Lua::PhysDoFConstraint::GetAngularLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularLimitForceMixingFactor());
+}
+void Lua::PhysDoFConstraint::SetAngularLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularLimitForceMixingFactor(factor);
+}
+void Lua::PhysDoFConstraint::GetAngularRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetAngularRestitutionFactor());
+}
+void Lua::PhysDoFConstraint::SetAngularRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularRestitutionFactor(factor);
+}
+void Lua::PhysDoFConstraint::IsAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::PushBool(l,constraint->IsAngularMotorEnabled(axis));
+}
+void Lua::PhysDoFConstraint::SetAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis,bool bEnabled)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetAngularMotorEnabled(axis,bEnabled);
+}
+void Lua::PhysDoFConstraint::SetAngularMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,bool bEnabled)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	for(uint32_t i=0;i<3;++i)
+		SetAngularMotorEnabled(l,constraint,i,bEnabled);
+}
+void Lua::PhysDoFConstraint::GetCurrentAngularLimitError(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentAngularLimitError());
+}
+void Lua::PhysDoFConstraint::GetCurrentAngularPosition(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentAngularPosition());
+}
+void Lua::PhysDoFConstraint::GetCurrentAngularLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentAngularLimit());
+}
+void Lua::PhysDoFConstraint::GetCurrentAngularAccumulatedImpulse(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentAngularAccumulatedImpulse());
+}
+void Lua::PhysDoFConstraint::GetLinearTargetVelocity(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearTargetVelocity());
+}
+void Lua::PhysDoFConstraint::GetLinearMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearMaxMotorForce());
+}
+void Lua::PhysDoFConstraint::SetLinearMaxMotorForce(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &force)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearMaxMotorForce(force);
+}
+void Lua::PhysDoFConstraint::GetLinearDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::PushNumber(l,constraint->GetLinearDamping());
+}
+void Lua::PhysDoFConstraint::SetLinearDamping(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float damping)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearDamping(damping);
+}
+void Lua::PhysDoFConstraint::GetLinearLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::PushNumber(l,constraint->GetLinearLimitSoftness());
+}
+void Lua::PhysDoFConstraint::SetLinearLimitSoftness(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float softness)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLimitSoftness(softness);
+}
+void Lua::PhysDoFConstraint::GetLinearForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearForceMixingFactor());
+}
+void Lua::PhysDoFConstraint::SetLinearForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearForceMixingFactor(factor);
+}
+void Lua::PhysDoFConstraint::GetLinearLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearLimitErrorTolerance());
+}
+void Lua::PhysDoFConstraint::SetLinearLimitErrorTolerance(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &tolerance)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLimitErrorTolerance(tolerance);
+}
+void Lua::PhysDoFConstraint::GetLinearLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetLinearLimitForceMixingFactor());
+}
+void Lua::PhysDoFConstraint::SetLinearLimitForceMixingFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,const Vector3 &factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearLimitForceMixingFactor(factor);
+}
+
+void Lua::PhysDoFConstraint::GetLinearRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::PushNumber(l,constraint->GetLinearRestitutionFactor());
+}
+void Lua::PhysDoFConstraint::SetLinearRestitutionFactor(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,float factor)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearRestitutionFactor(factor);
+}
+void Lua::PhysDoFConstraint::IsLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::PushBool(l,constraint->IsLinearMotorEnabled(axis));
+}
+void Lua::PhysDoFConstraint::SetLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,uint8_t axis,bool bEnabled)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	constraint->SetLinearMotorEnabled(axis,bEnabled);
+}
+void Lua::PhysDoFConstraint::SetLinearMotorEnabled(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint,bool bEnabled)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	for(uint32_t i=0;i<3;++i)
+		SetLinearMotorEnabled(l,constraint,i,bEnabled);
+}
+void Lua::PhysDoFConstraint::GetCurrentLinearDifference(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentLinearDifference());
+}
+void Lua::PhysDoFConstraint::GetCurrentLinearLimitError(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentLinearLimitError());
+}
+void Lua::PhysDoFConstraint::GetCurrentLinearLimit(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentLinearLimit());
+}
+void Lua::PhysDoFConstraint::GetCurrentLinearAccumulatedImpulse(lua_State *l,util::TSharedHandle<pragma::physics::IDoFConstraint> &constraint)
+{
+	if(Lua::CheckHandle<pragma::physics::IDoFConstraint>(l,constraint) == false)
+		return;
+	Lua::Push<Vector3>(l,constraint->GetCurrentLinearAccumulatedImpulse());
 }

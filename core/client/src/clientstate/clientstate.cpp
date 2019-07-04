@@ -25,8 +25,11 @@
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
+#include "pragma/networking/local_client.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <luasystem_file.h>
+#include <pragma/networking/enums.hpp>
+#include <pragma/networking/error.hpp>
 #include <pragma/networking/resources.h>
 #include <pragma/engine_version.h>
 #include <luainterface.hpp>
@@ -100,7 +103,6 @@ ClientState::ClientState()
 	RegisterCallback<void,CGame*>("OnGameStart");
 	RegisterCallback<void,CGame*>("EndGame");
 
-
 	RegisterCallback<void>("Draw");
 	RegisterCallback<
 		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
@@ -113,6 +115,9 @@ ClientState::ClientState()
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnReceivePacket");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketTCP");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
+
+	// Initialize default client
+	m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
 ClientState::~ClientState()
@@ -285,9 +290,6 @@ void ClientState::Close()
 	CModelManager::Clear();
 	GetMaterialManager().ClearUnused();
 	pragma::CParticleSystemComponent::ClearCache();
-#ifdef PHYS_ENGINE_PHYSX
-	PxVisualizer::ClearScene();
-#endif
 }
 
 void ClientState::implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const
@@ -337,7 +339,7 @@ bool ClientState::RunConsoleCommand(std::string scmd,std::vector<std::string> &a
 	p->Write<unsigned char>(CUChar(argv.size()));
 	for(unsigned char i=0;i<argv.size();i++)
 		p->WriteString(argv[i]);
-	SendPacketTCP("cmd_call",p);
+	SendPacket("cmd_call",p,pragma::networking::Protocol::SlowReliable);
 	return true;
 }
 
@@ -352,7 +354,7 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
-		SendPacketTCP("cvar_set",p);
+		SendPacket("cvar_set",p,pragma::networking::Protocol::SlowReliable);
 	}
 	return cvar;
 }
@@ -406,9 +408,10 @@ void ClientState::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 void ClientState::Think()
 {
 	NetworkState::Think();
-	if(m_client != nullptr && m_client->IsActive())
+	if(m_client != nullptr && m_client->IsRunning())
 	{
-		m_client->PollEvents();
+		pragma::networking::Error err;
+		m_client->PollEvents(err);
 		if(m_client->IsDisconnected() == true)
 			Disconnect();
 	}
@@ -462,10 +465,14 @@ std::shared_ptr<ALSound> ClientState::GetSoundByIndex(unsigned int idx)
 
 void ClientState::Disconnect()
 {
-	if(m_client == nullptr)
-		return;
-	m_client->Disconnect();
-	m_client = nullptr;
+	if(m_client != nullptr)
+	{
+		pragma::networking::Error err;
+		if(m_client->Disconnect(err) == false)
+			Con::cwar<<"WARNING: Unable to disconnect from server: "<<err.GetMessage()<<Con::endl;
+	}
+	// Initialize default client for single player
+	m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
 bool ClientState::IsConnected() const {return (m_client != nullptr) ? true : false;}
@@ -478,9 +485,6 @@ CLNetMessage *ClientState::GetNetMessage(unsigned int ID)
 
 extern DLLNETWORK ClientMessageMap *g_NetMessagesCl;
 ClientMessageMap *ClientState::GetNetMessageMap() {return g_NetMessagesCl;}
-
-unsigned short ClientState::GetTCPPort() {return CUChar(GetConVarInt("cl_port_tcp"));}
-unsigned short ClientState::GetUDPPort() {return CUChar(GetConVarInt("cl_port_udp"));}
 
 bool ClientState::IsClient() const {return true;}
 
@@ -498,10 +502,11 @@ void ClientState::SendUserInfo()
 	auto &version = get_engine_version();
 	packet->Write<util::Version>(version);
 
-	if(client->IsUDPOpen())
+	auto udpPort = m_client->GetLocalUDPPort();
+	if(IsConnected() && udpPort.has_value())
 	{
 		packet->Write<unsigned char>(1);
-		packet->Write<unsigned short>(client->GetUDPPort());
+		packet->Write<unsigned short>(*udpPort);
 	}
 	else
 		packet->Write<unsigned char>((unsigned char)(0));
@@ -526,7 +531,7 @@ void ClientState::SendUserInfo()
 		}
 	}
 	packet->Write<unsigned int>(numUserInfo,&sz);
-	client->SendPacketTCP("clientinfo",packet);
+	client->SendPacket("clientinfo",packet,pragma::networking::Protocol::SlowReliable);
 }
 
 Lua::ErrorColorMode ClientState::GetLuaErrorColorMode() {return Lua::ErrorColorMode::Magenta;}
@@ -630,12 +635,9 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 Material *ClientState::LoadMaterial(const std::string &path,const std::function<void(Material*)> &onLoaded,bool bReload) {return LoadMaterial(path,onLoaded,bReload,!cvMatStreaming->GetBool());}
 Material *ClientState::LoadMaterial(const std::string &path,bool bLoadInstantly,bool bReload) {return LoadMaterial(path,CallbackHandle(),bReload,bLoadInstantly);}
 
-WVClient *ClientState::GetClient() {return m_client.get();}
+pragma::networking::IClient *ClientState::GetClient() {return m_client.get();}
 
 void ClientState::InitializeResourceManager() {m_resourceWatcher = std::make_unique<CResourceWatcherManager>(this);}
-
-bool ClientState::IsTCPOpen() const {return (IsConnected() && m_client->HasTCPConnection()) ? true : false;}
-bool ClientState::IsUDPOpen() const {return (IsConnected() && m_client->HasUDPConnection()) ? true : false;}
 
 void ClientState::InitializeGUIModule()
 {

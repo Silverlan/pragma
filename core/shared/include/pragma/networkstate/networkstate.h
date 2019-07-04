@@ -1,6 +1,7 @@
 #ifndef __NETWORKSTATE_H__
 #define __NETWORKSTATE_H__
 #include "pragma/networkdefinitions.h"
+#include "pragma/debug/debug_performance_profiler.hpp"
 #include <pragma/lua/luaapi.h>
 #include <pragma/physics/physapi.h>
 #include <pragma/audio/alenums.hpp>
@@ -121,10 +122,6 @@ public:
 	static void RegisterSharedLuaGlobals(Lua::Interface &lua);
 	static void RegisterSharedLuaClasses(Lua::Interface &lua);
 	static void RegisterSharedLuaLibraries(Lua::Interface &lua);
-#ifdef PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxPhysics *GetPhysics();
-#endif
 	// Time
 	double &RealTime();
 	double &DeltaTime();
@@ -192,9 +189,6 @@ public:
 
 	ConVar *CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="");
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
-
-	virtual bool IsTCPOpen() const=0;
-	virtual bool IsUDPOpen() const=0;
 };
 
 #endif

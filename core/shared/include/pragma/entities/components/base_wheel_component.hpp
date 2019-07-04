@@ -54,8 +54,9 @@ namespace pragma
 		pragma::NetEventId m_netEvRollInfluence = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvChassisConnectionPoint = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvMaxDampingRelaxation = pragma::INVALID_NET_EVENT;
-
+#ifdef ENABLE_DEPRECATED_PHYSICS
 		btWheelInfo *GetWheelInfo() const;
+#endif
 		virtual void Think(double tDelta);
 		void UpdateWheel();
 	public:
@@ -106,7 +107,7 @@ namespace pragma
 		Float GetSuspensionLength() const;
 		Vector3 GetWorldSpaceWheelAxle() const;
 		Vector3 GetWorldSpaceWheelDirection() const;
-		PhysCollisionObject *GetGroundObject() const;
+		physics::ICollisionObject *GetGroundObject() const;
 	};
 };
 

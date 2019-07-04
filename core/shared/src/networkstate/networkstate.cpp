@@ -17,7 +17,7 @@
 #include "pragma/util/resource_watcher.h"
 #include "pragma/entities/components/base_player_component.hpp"
 #include <pragma/console/s_cvar_global_functions.h>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
@@ -169,10 +169,6 @@ bool NetworkState::CheatsEnabled() const
 		return true;
 	return engine->GetConVarBool("sv_cheats");
 }
-
-#ifdef PHYS_ENGINE_PHYSX
-physx::PxPhysics *NetworkState::GetPhysics() {return engine->GetPhysics();}
-#endif
 
 Material *NetworkState::LoadMaterial(const std::string &path,bool bReload)
 {

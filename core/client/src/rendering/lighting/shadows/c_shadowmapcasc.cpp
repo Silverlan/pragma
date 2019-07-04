@@ -4,7 +4,6 @@
 #include <mathutil/umat.h>
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
-#include "pragma/rendering/scene/camera.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/math/math_seb.h"

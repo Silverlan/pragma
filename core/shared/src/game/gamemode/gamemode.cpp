@@ -127,7 +127,7 @@ void GameMode::Initialize(Game *game,luabind::object&)
 	m_callbacks.push_back(game->AddCallback("OnPlayerReady",FunctionCallback<void,pragma::BasePlayerComponent*>::Create([this](pragma::BasePlayerComponent *pl) {
 		OnPlayerReady(pl->GetLuaObject());
 	})));
-	m_callbacks.push_back(game->AddCallback("OnPlayerDropped",FunctionCallback<void,pragma::BasePlayerComponent*,nwm::ClientDropped>::Create([this](pragma::BasePlayerComponent *pl,nwm::ClientDropped reason) {
+	m_callbacks.push_back(game->AddCallback("OnPlayerDropped",FunctionCallback<void,pragma::BasePlayerComponent*,pragma::networking::DropReason>::Create([this](pragma::BasePlayerComponent *pl,pragma::networking::DropReason reason) {
 		OnPlayerDropped(pl->GetLuaObject(),std::underlying_type_t<decltype(reason)>(reason));
 	})));
 	m_callbacks.push_back(game->AddCallback("OnPlayerJoined",FunctionCallback<void,pragma::BasePlayerComponent*>::Create([this](pragma::BasePlayerComponent *pl) {

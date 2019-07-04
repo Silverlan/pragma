@@ -4,6 +4,7 @@
 #include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/entities/player.h"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
@@ -11,10 +12,11 @@
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_handle.hpp>
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
-void SGame::HandleLuaNetPacket(WVServerClient *session,NetPacket &packet)
+void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPacket &packet)
 {
 	unsigned int ID = packet->Read<unsigned int>();
 	if(ID == 0)
@@ -42,7 +44,7 @@ void SGame::HandleLuaNetPacket(WVServerClient *session,NetPacket &packet)
 ////////////////////////////
 
 extern ServerState *server;
-DLLSERVER bool GetRecipients(lua_State *l,int arg,nwm::RecipientFilter *rp)
+DLLSERVER bool GetRecipients(lua_State *l,int arg,pragma::networking::TargetRecipientFilter &rp)
 {
 	if(lua_istable(l,arg))
 	{
@@ -55,9 +57,9 @@ DLLSERVER bool GetRecipients(lua_State *l,int arg,nwm::RecipientFilter *rp)
 				auto *hnd = Lua::CheckSPlayer(l,-1);
 				if(hnd->expired() == false)
 				{
-					WVServerClient *session = (*hnd)->GetClientSession();
-					if(session != NULL)
-						rp->Add(session);
+					auto *session = (*hnd)->GetClientSession();
+					if(session != nullptr)
+						rp.AddRecipient(*session);
 				}
 			}
 			lua_pop(l,1);
@@ -66,16 +68,16 @@ DLLSERVER bool GetRecipients(lua_State *l,int arg,nwm::RecipientFilter *rp)
 	else if(_lua_isRecipientFilter(l,arg))
 	{
 		auto *rpc = _lua_RecipientFilter_check(l,arg);
-		*rp = *rpc;
+		rp = *rpc;
 	}
 	else
 	{
 		auto *hnd = Lua::CheckSPlayer(l,arg);
 		if(Lua::CheckComponentHandle(l,*hnd) == false)
 			return false;
-		WVServerClient *session = (*hnd)->GetClientSession();
-		if(session != NULL)
-			rp->Add(session);
+		auto *session = (*hnd)->GetClientSession();
+		if(session != nullptr)
+			rp.AddRecipient(*session);
 	}
 	return true;
 }
@@ -92,7 +94,7 @@ DLLSERVER int Lua_sv_net_Register(lua_State *l)
 
 DLLSERVER int Lua_sv_net_Broadcast(lua_State *l)
 {
-	auto protocol = static_cast<nwm::Protocol>(Lua::CheckInt(l,1));
+	auto protocol = static_cast<pragma::networking::Protocol>(Lua::CheckInt(l,1));
 	std::string identifier = luaL_checkstring(l,2);
 	NetPacket *p = _lua_NetPacket_check(l,3);
 	NetPacket packetNew;
@@ -101,21 +103,13 @@ DLLSERVER int Lua_sv_net_Broadcast(lua_State *l)
 		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
 		return 0;
 	}
-	switch(protocol)
-	{
-		case nwm::Protocol::TCP:
-			server->BroadcastTCP("luanet",packetNew);
-			break;
-		case nwm::Protocol::UDP:
-			server->BroadcastUDP("luanet",packetNew);
-			break;
-	}
+	server->SendPacket("luanet",packetNew,protocol);
 	return 0;
 }
 
 DLLSERVER int Lua_sv_net_Send(lua_State *l)
 {
-	auto protocol = static_cast<nwm::Protocol>(Lua::CheckInt(l,1));
+	auto protocol = static_cast<pragma::networking::Protocol>(Lua::CheckInt(l,1));
 	std::string identifier = luaL_checkstring(l,2);
 	NetPacket *p = _lua_NetPacket_check(l,3);
 	NetPacket packetNew;
@@ -124,18 +118,10 @@ DLLSERVER int Lua_sv_net_Send(lua_State *l)
 		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
 		return 0;
 	}
-	nwm::RecipientFilter rp;
-	if(!GetRecipients(l,4,&rp))
+	pragma::networking::TargetRecipientFilter rp {};
+	if(!GetRecipients(l,4,rp))
 		return 0;
-	switch(protocol)
-	{
-		case nwm::Protocol::TCP:
-			server->SendPacketTCP("luanet",packetNew,rp);
-			break;
-		case nwm::Protocol::UDP:
-			server->SendPacketUDP("luanet",packetNew,rp);
-			break;
-	}
+	server->SendPacket("luanet",packetNew,protocol,rp);
 	return 0;
 }
 
@@ -152,4 +138,4 @@ DLLSERVER int Lua_sv_net_Receive(lua_State *l)
 }
 
 
-DLLSERVER void NET_sv_luanet(WVServerClient *session,NetPacket packet) {server->HandleLuaNetPacket(session,packet);}
+DLLSERVER void NET_sv_luanet(pragma::networking::IServerClient &session,NetPacket packet) {server->HandleLuaNetPacket(session,packet);}

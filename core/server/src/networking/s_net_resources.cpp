@@ -6,13 +6,17 @@
 #include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/clientsessioninfo.h"
 #include "pragma/networking/resource.h"
+#include "pragma/networking/iserver.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/player.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/networking/wvserver.h"
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_player_component.hpp"
+#include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <sharedutils/util_file.h>
 
@@ -21,18 +25,15 @@
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
-void ServerState::InitResourceTransfer(WVServerClient *session)
+void ServerState::InitResourceTransfer(pragma::networking::IServerClient &session)
 {
-	auto *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return;
-	auto state = info->GetInitialResourceTransferState();
-	if(state == ClientSessionInfo::TransferState::Initial || info->IsTransferring() == true)
+	auto state = session.GetInitialResourceTransferState();
+	if(state == pragma::networking::IServerClient::TransferState::Initial || session.IsTransferring() == true)
 		return;
 	HandleServerNextResource(session);
 }
 
-void ServerState::SendResourceFile(const std::string &f,const std::vector<WVServerClient*> &clients)
+void ServerState::SendResourceFile(const std::string &f,const std::vector<pragma::networking::IServerClient*> &clients)
 {
 	std::string ext;
 	auto bMdl = (ufile::get_extension(f,&ext) == true && ext == "wmd") ? true : false;
@@ -40,12 +41,9 @@ void ServerState::SendResourceFile(const std::string &f,const std::vector<WVServ
 		SendRoughModel(f,clients);
 	for(auto *cl : clients)
 	{
-		auto *info = cl->GetSessionInfo();
-		if(info == nullptr)
-			continue;
-		auto r = info->AddResource(f);
+		auto r = cl->AddResource(f);
 		UNUSED(r);
-		InitResourceTransfer(cl);
+		InitResourceTransfer(*cl);
 	}
 }
 
@@ -54,14 +52,14 @@ void ServerState::SendResourceFile(const std::string &f)
 	if(m_server == nullptr)
 		return;
 	auto clientHandles = m_server->GetClients();
-	std::vector<WVServerClient*> clients;
+	std::vector<pragma::networking::IServerClient*> clients;
 	clients.reserve(clientHandles.size());
 	for(auto &hClient : clientHandles)
-		clients.push_back(static_cast<WVServerClient*>(hClient.get()));
+		clients.push_back(hClient.get());
 	SendResourceFile(f,clients);
 }
 
-void ServerState::SendRoughModel(const std::string &f,const std::vector<WVServerClient*> &clients)
+void ServerState::SendRoughModel(const std::string &f,const std::vector<pragma::networking::IServerClient*> &clients)
 {
 	if(m_server == nullptr)
 		return;
@@ -121,9 +119,9 @@ endLoop:;
 	}
 	for(auto *cl : clients)
 	{
-		server->SendPacketUDP("resource_mdl_rough",pOut,cl);
+		server->SendPacket("resource_mdl_rough",pOut,pragma::networking::Protocol::FastUnreliable,*cl);
 //#if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv<<"[ResourceManager] Sent rough model to: "<<cl->GetIP()<<"..."<<Con::endl;
+		Con::csv<<"[ResourceManager] Sent rough model to: "<<cl->GetIdentifier()<<"..."<<Con::endl;
 //#endif
 	}
 }
@@ -132,27 +130,24 @@ void ServerState::SendRoughModel(const std::string &f)
 	if(m_server == nullptr)
 		return;
 	auto clientHandles = m_server->GetClients();
-	std::vector<WVServerClient*> clients;
+	std::vector<pragma::networking::IServerClient*> clients;
 	clients.reserve(clientHandles.size());
 	for(auto &hClient : clientHandles)
-		clients.push_back(static_cast<WVServerClient*>(hClient.get()));
+		clients.push_back(hClient.get());
 	SendRoughModel(f,clients);
 }
 
-void ServerState::HandleServerNextResource(WVServerClient *session)
+void ServerState::HandleServerNextResource(pragma::networking::IServerClient &session)
 {
-	auto *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return;
 	auto bRemoveCurrent = true;
-	if(info->IsTransferring() == false)
+	if(session.IsTransferring() == false)
 	{
 		bRemoveCurrent = false; // Transfer has just started; Don't remove first resource
-		info->SetTransferComplete(false);
+		session.SetTransferComplete(false);
 	}
-	auto &resTransfer = info->GetResourceTransfer();
+	auto &resTransfer = session.GetResourceTransfer();
 	size_t numResources;
-	auto bComplete = info->IsInitialResourceTransferComplete();
+	auto bComplete = session.IsInitialResourceTransferComplete();
 	if(bComplete == false && resTransfer.empty())
 	{
 		auto &resources = ResourceManager::GetResources();
@@ -161,7 +156,7 @@ void ServerState::HandleServerNextResource(WVServerClient *session)
 		{
 			for(auto &res : resources)
 			{
-				if(info->AddResource(res.fileName,res.stream) == false)
+				if(session.AddResource(res.fileName,res.stream) == false)
 					Con::csv<<"WARNING: [ResourceManager] Unable to open file '"<<res.fileName<<"'. Skipping..."<<Con::endl;
 			}
 		}
@@ -176,7 +171,7 @@ void ServerState::HandleServerNextResource(WVServerClient *session)
 			auto &r = resTransfer[0];
 			Con::csv<<"[ResourceManager] File '"<<r->name<<"' transferred successfully to "<<session->GetIP()<<". "<<(numResources -1)<<" resources left!"<<Con::endl;
 #endif
-			info->RemoveResource(0);
+			session.RemoveResource(0);
 			numResources--;
 		}
 	}
@@ -189,14 +184,14 @@ void ServerState::HandleServerNextResource(WVServerClient *session)
 	{
 		if(bComplete == false)
 		{
-			info->SetInitialResourceTransferState(ClientSessionInfo::TransferState::Complete);
-			Con::csv<<"All resources have been sent to client '"<<session->GetIP()<<"'!"<<Con::endl;
+			session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Complete);
+			Con::csv<<"All resources have been sent to client '"<<session.GetIdentifier()<<"'!"<<Con::endl;
 			NetPacket p;
-			SendPacketTCP("resourcecomplete",p,session);
+			SendPacket("resourcecomplete",p,pragma::networking::Protocol::SlowReliable,session);
 		}
 		if(numResources == 0)
 		{
-			info->SetTransferComplete(true);
+			session.SetTransferComplete(true);
 			return;
 		}
 	}
@@ -206,39 +201,33 @@ void ServerState::HandleServerNextResource(WVServerClient *session)
 	NetPacket packetRes;
 	packetRes->WriteString(r->name);
 	packetRes->Write<UInt64>(size);
-	SendPacketTCP("resourceinfo",packetRes,session);
+	SendPacket("resourceinfo",packetRes,pragma::networking::Protocol::SlowReliable,session);
 }
 
-void ServerState::HandleServerResourceStart(WVServerClient *session,NetPacket &packet)
+void ServerState::HandleServerResourceStart(pragma::networking::IServerClient &session,NetPacket &packet)
 {
-	ClientSessionInfo *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return;
-	auto &resTransfer = info->GetResourceTransfer();
+	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().ToString()<<Con::endl;
+		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
 		return;
 	}
 	bool send = packet->Read<bool>();
 	if(send)
 	{
-		Con::csv<<"Sending file '"<<resTransfer[0]->name<<"' to client '"<<session->GetIP()<<"'"<<Con::endl;
+		Con::csv<<"Sending file '"<<resTransfer[0]->name<<"' to client '"<<session.GetIdentifier()<<"'"<<Con::endl;
 		HandleServerResourceFragment(session);
 	}
 	else
 		HandleServerNextResource(session);
 }
 
-void ServerState::HandleServerResourceFragment(WVServerClient *session)
+void ServerState::HandleServerResourceFragment(pragma::networking::IServerClient &session)
 {
-	ClientSessionInfo *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return;
-	auto &resTransfer = info->GetResourceTransfer();
+	auto &resTransfer = session.GetResourceTransfer();
 	if(resTransfer.empty())
 	{
-		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session->GetRemoteAddress().ToString()<<Con::endl;
+		Con::cwar<<"WARNING: Attempted to send invalid resource fragment to client "<<session.GetIdentifier()<<Con::endl;
 		return;
 	}
 	auto &r = resTransfer[0];
@@ -254,15 +243,15 @@ void ServerState::HandleServerResourceFragment(WVServerClient *session)
 	fragment->Write<unsigned int>(read);
 	fragment->Write(buf.data(),read);
 	r->offset += read;
-	SendPacketTCP("resource_fragment",fragment,session);
+	SendPacket("resource_fragment",fragment,pragma::networking::Protocol::SlowReliable,session);
 }
 
-void ServerState::ReceiveUserInput(WVServerClient *client,NetPacket &packet)
+void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client,NetPacket &packet)
 {
 	auto *pl = GetPlayer(client);
 	if(pl == nullptr)
 		return;
-	auto latency = client->GetLatency() /2.f; // Latency is entire roundtrip; We need the time for one way
+	auto latency = client.GetLatency() /2.f; // Latency is entire roundtrip; We need the time for one way
 	auto tActivated = (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() -packet.GetTimeActivated()) /1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency +tActivated) /1'000.0);
@@ -300,28 +289,26 @@ void ServerState::ReceiveUserInput(WVServerClient *client,NetPacket &packet)
 	pl->SetActionInputs(actions,bController);
 	//Con::csv<<"Action inputs "<<actions<<" for player "<<pl<<" ("<<pl->GetClientSession()->GetIP()<<")"<<Con::endl;
 
-	nwm::RecipientFilter rp(nwm::RecipientFilter::Type::Exclude);
-	rp.Add(client);
-	SendPacketUDP("playerinput",pOut,rp);
+	SendPacket("playerinput",pOut,pragma::networking::Protocol::FastUnreliable,{client,pragma::networking::ClientRecipientFilter::FilterType::Exclude});
 
 	NetPacket plPacket;
 	plPacket->Write<uint8_t>(userInputId);
-	SendPacketUDP("playerinput",plPacket,client);
+	SendPacket("playerinput",plPacket,pragma::networking::Protocol::FastUnreliable,client);
 }
 
 ////////////////////
 
 extern ServerState *server;
-void NET_sv_resourceinfo_response(WVServerClient *session,NetPacket packet)
+void NET_sv_resourceinfo_response(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	server->HandleServerResourceStart(session,packet);
 }
 
-void NET_sv_resource_request(WVServerClient *session,NetPacket packet)
+void NET_sv_resource_request(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	bool b = packet->Read<bool>();
 #if RESOURCE_TRANSFER_VERBOSE == 1
-	Con::csv<<"[ResourceManager] Got resource request from client: "<<session->GetIP()<<" ("<<b<<")"<<Con::endl;
+	Con::csv<<"[ResourceManager] Got resource request from client: "<<session->GetIdentifier()<<" ("<<b<<")"<<Con::endl;
 #endif
 	if(b)
 		server->HandleServerNextResource(session);
@@ -329,31 +316,28 @@ void NET_sv_resource_request(WVServerClient *session,NetPacket packet)
 		server->HandleServerResourceFragment(session);
 }
 
-void NET_sv_resource_begin(WVServerClient *session,NetPacket packet)
+void NET_sv_resource_begin(pragma::networking::IServerClient &session,NetPacket packet)
 {
-	auto *info = session->GetSessionInfo();
-	if(info == nullptr)
-		return;
-	info->SetInitialResourceTransferState(ClientSessionInfo::TransferState::Started);
+	session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Started);
 	bool bSend = packet->Read<bool>() && server->GetConVarBool("sv_allowdownload");
 	if(bSend)
 	{
 #if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv<<"[ResourceManager] Sending next resource to client: "<<session->GetIP()<<Con::endl;
+		Con::csv<<"[ResourceManager] Sending next resource to client: "<<session->GetIdentifier()<<Con::endl;
 #endif
 		server->HandleServerNextResource(session);
 	}
 	else
 	{
 #if RESOURCE_TRANSFER_VERBOSE == 1
-		Con::csv<<"[ResourceManager] All resources have been sent to: "<<session->GetIP()<<Con::endl;
+		Con::csv<<"[ResourceManager] All resources have been sent to: "<<session->GetIdentifier()<<Con::endl;
 #endif
 		NetPacket p;
-		server->SendPacketTCP("resourcecomplete",p,session);
+		server->SendPacket("resourcecomplete",p,pragma::networking::Protocol::SlowReliable,session);
 	}
 }
 
-void NET_sv_query_resource(WVServerClient *session,NetPacket packet)
+void NET_sv_query_resource(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(s_game == nullptr)
 		return;
@@ -363,13 +347,13 @@ void NET_sv_query_resource(WVServerClient *session,NetPacket packet)
 //#endif
 	if(s_game->IsValidGameResource(fileName) == false) // Client isn't allowed to download this resource
 	{
-		session->ScheduleResource(fileName); // Might be allowed to download the resource in the future, remember it!
+		session.ScheduleResource(fileName); // Might be allowed to download the resource in the future, remember it!
 		return;
 	}
-	server->SendResourceFile(fileName,{session});
+	server->SendResourceFile(fileName,{&session});
 }
 
-void NET_sv_query_model_texture(WVServerClient *session,NetPacket packet)
+void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	auto mdlName = packet->ReadString();
 	auto matName = packet->ReadString();
@@ -408,7 +392,7 @@ void NET_sv_query_model_texture(WVServerClient *session,NetPacket packet)
 	};
 	fFindTextures(block,textures);
 
-	std::vector<WVServerClient*> vSession = {session};
+	std::vector<pragma::networking::IServerClient*> vSession = {&session};
 	for(auto &tex : textures)
 		server->SendResourceFile(tex,vSession);
 	server->SendResourceFile("materials\\" +dstName,vSession);

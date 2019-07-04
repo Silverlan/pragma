@@ -13,7 +13,7 @@ CollisionMask get_collision_group(CollisionMask group,CollisionMask mask)
 BasePhysRayCallbackFilter::BasePhysRayCallbackFilter(FTRACE flags,CollisionMask group,CollisionMask mask)
 	: m_flags(flags)
 {
-	if((UInt32(flags) &UInt32(FTRACE::FILTER_INVERT)) != 0 && mask == CollisionMask::All)
+	if((UInt32(flags) &UInt32(RayCastFlags::InvertFilter)) != 0 && mask == CollisionMask::All)
 		mask = CollisionMask::None;
 	m_filterGroup = get_collision_group(group,mask);
 	m_filterMask = mask;
@@ -22,13 +22,13 @@ BasePhysRayCallbackFilter::BasePhysRayCallbackFilter(FTRACE flags,CollisionMask 
 void BasePhysRayCallbackFilter::SetUserData(void *userData) const {m_userData = userData;}
 void *BasePhysRayCallbackFilter::GetUserData() const {return m_userData;}
 
-bool BasePhysRayCallbackFilter::ShouldPass(BaseEntity*,PhysObj *phys,PhysCollisionObject *physCol)
+bool BasePhysRayCallbackFilter::ShouldPass(BaseEntity*,PhysObj *phys,pragma::physics::ICollisionObject *physCol)
 {
 	if(phys == nullptr)
 		return true;
 	if(
-		(umath::to_integral(m_flags) &umath::to_integral(FTRACE::IGNORE_DYNAMIC)) != 0 && !phys->IsStatic() ||
-		(umath::to_integral(m_flags) &umath::to_integral(FTRACE::IGNORE_STATIC)) != 0 && phys->IsStatic()
+		(umath::to_integral(m_flags) &umath::to_integral(RayCastFlags::IgnoreDynamic)) != 0 && !phys->IsStatic() ||
+		(umath::to_integral(m_flags) &umath::to_integral(RayCastFlags::IgnoreStatic)) != 0 && phys->IsStatic()
 	)
 		return false;
 	if(physCol == nullptr)
@@ -40,7 +40,7 @@ bool BasePhysRayCallbackFilter::ShouldPass(BaseEntity*,PhysObj *phys,PhysCollisi
 
 bool BasePhysRayCallbackFilter::TranslateFilterValue(bool b) const
 {
-	return ((UInt32(m_flags) &UInt32(FTRACE::FILTER_INVERT)) == 0) ? b : !b;
+	return ((UInt32(m_flags) &UInt32(RayCastFlags::InvertFilter)) == 0) ? b : !b;
 }
 
 #define DEFINE_RESULT_CALLBACK(TCALLBACK,TBASE) \
@@ -129,6 +129,7 @@ bool BasePhysRayCallbackFilter::TranslateFilterValue(bool b) const
 		m_collisionFilterMask = static_cast<int16_t>(umath::to_integral(mask)); \
 	}
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 DEFINE_RESULT_CALLBACK(PhysClosestRayResultCallback,btCollisionWorld::ClosestRayResultCallback);
 DEFINE_RESULT_CALLBACK(PhysAllHitsRayResultCallback,btCollisionWorld::AllHitsRayResultCallback);
 DEFINE_RESULT_CALLBACK(PhysClosestConvexResultCallback,btCollisionWorld::ClosestConvexResultCallback);
@@ -235,3 +236,4 @@ btScalar PhysClosestConvexResultCallback::addSingleResult(btCollisionWorld::Loca
 	}
 	return btCollisionWorld::ClosestConvexResultCallback::addSingleResult(convexResult,normalInWorldSpace);
 }
+#endif

@@ -12,6 +12,7 @@ class BasePlayer;
 enum class Activity : uint16_t;
 namespace pragma
 {
+	namespace physics {class IConvexShape;};
 	struct DLLNETWORK CEHandleActionInput
 		: public ComponentEvent
 	{
@@ -177,7 +178,7 @@ namespace pragma
 		void OnKilled(DamageInfo *dmgInfo=nullptr);
 
 		virtual void Think(double tDelta);
-		std::shared_ptr<PhysConvexShape> m_shapeStand;
+		std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;
 	private:
 		unsigned short m_portUDP;
 		std::unordered_map<int,bool> m_keysPressed;

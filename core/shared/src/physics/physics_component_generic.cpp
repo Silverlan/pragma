@@ -6,15 +6,13 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physxstream.h"
 #include "pragma/model/brush/brushmesh.h"
-#include "pragma/physics/physxcontrollerhitreport.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physshape.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/shape.hpp"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include <pragma/physics/movetypes.h>
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
@@ -28,9 +26,7 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-#ifdef PHYS_ENGINE_BULLET
-
-PhysRigidBody *BasePhysicsComponent::CreateRigidBody(const std::shared_ptr<PhysShape> &shape,float mass,const Vector3 &origin)
+pragma::physics::IRigidBody *BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,float mass,const Vector3 &origin)
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -38,8 +34,8 @@ PhysRigidBody *BasePhysicsComponent::CreateRigidBody(const std::shared_ptr<PhysS
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	Vector3 localInertia(0.f,0.f,0.f);
-	shape->CalculateLocalInertia(mass,&localInertia);
-	auto *body = physEnv->CreateRigidBody(mass,shape,localInertia);
+	shape.CalculateLocalInertia(mass,&localInertia);
+	auto body = physEnv->CreateRigidBody(mass,shape,localInertia);
 	if(body == nullptr)
 		return nullptr;
 	body->SetOrigin(origin);
@@ -47,11 +43,11 @@ PhysRigidBody *BasePhysicsComponent::CreateRigidBody(const std::shared_ptr<PhysS
 	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
 	auto tOrigin = origin;
 	uvec::rotate(&tOrigin,rot);
-	PhysTransform startTransform;
+	physics::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(/*-tOrigin +*/originOffset);
 	startTransform.SetRotation(rot);
-	btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
+	auto contactProcessingThreshold = 1e30;
 
 	auto group = GetCollisionFilter();
 	if(group != CollisionMask::Default)
@@ -61,15 +57,13 @@ PhysRigidBody *BasePhysicsComponent::CreateRigidBody(const std::shared_ptr<PhysS
 		body->SetCollisionFilterMask(mask);
 	body->SetWorldTransform(startTransform);
 	body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
-	int flags = body->GetFlags();
 	if(mass == 0.f)
 	{
-		flags |= btCollisionObject::CF_STATIC_OBJECT;
+		body->SetStatic(true);
 		body->UpdateAABB();
-		body->SetActivationState(DISABLE_SIMULATION);
+		body->SetActivationState(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive);
 	}
-	body->SetCollisionFlags(flags);
-	return body;
+	return body.Get();
 }
 
 util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDynamic)
@@ -94,10 +88,10 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	auto &joints = hMdl->GetJoints();
 	struct ShapeInfo
 	{
-		ShapeInfo(const std::shared_ptr<PhysShape> &_shape,const Vector3 &_origin)
+		ShapeInfo(const std::shared_ptr<pragma::physics::IShape> &_shape,const Vector3 &_origin)
 			: shape(_shape),origin(_origin)
 		{}
-		std::shared_ptr<PhysShape> shape;
+		std::shared_ptr<pragma::physics::IShape> shape;
 		Vector3 origin;
 	};
 	struct SortedShape
@@ -106,7 +100,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			: body(nullptr)
 		{}
 		std::vector<ShapeInfo> shapes;
-		PhysRigidBody *body;
+		pragma::physics::IRigidBody *body;
 	};
 	std::unordered_map<int,SortedShape> sortedShapes;
 	std::unordered_map<unsigned int,unsigned int> sortedShapeMap; // meshes -> sortedShapes
@@ -162,7 +156,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		auto &sortedShape = it->second;
 		auto &shapes = sortedShape.shapes;
 		Vector3 origin(0.f,0.f,0.f);
-		std::shared_ptr<PhysShape> shape;
+		std::shared_ptr<pragma::physics::IShape> shape;
 		if(shapes.size() == 1)
 		{
 			auto &shapeInfo = shapes.front();
@@ -175,16 +169,16 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			{
 				for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto *body = CreateRigidBody(it->shape,mass,it->origin);//-it->origin);
+					auto *body = CreateRigidBody(*it->shape,mass,it->origin);//-it->origin);
 					if(bPhys == false)
 					{
 						bPhys = true;
 						if(m_physObject != nullptr)
 							DestroyPhysicsObject();
-						m_physObject = std::make_shared<RigidPhysObj>(this,body);
+						m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 					}
 					else
-						m_physObject->AddCollisionObject(body);
+						m_physObject->AddCollisionObject(*body);
 				}
 				/*shape = physEnv->CreateCompoundShape();
 				auto cmpShape = std::static_pointer_cast<PhysCompoundShape>(shape);
@@ -203,11 +197,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 				continue;
 			}
 			shape = physEnv->CreateCompoundShape();
-			auto cmpShape = std::static_pointer_cast<PhysCompoundShape>(shape);
+			auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
 			for(auto it=shapes.begin();it!=shapes.end();++it)
-				cmpShape->AddShape(it->shape,-it->origin);
+				cmpShape->AddShape(*it->shape,-it->origin);
 		}
-		auto *body = CreateRigidBody(shape,mass,origin);
+		auto *body = CreateRigidBody(*shape,mass,origin);
 		body->SetBoneID(it->first);
 		if(it->first >= 0 && bDynamic == true && joints.empty() == false) // Static physics and non-ragdolls can still play animation
 			umath::set_flag(m_stateFlags,StateFlags::Ragdoll);
@@ -217,10 +211,10 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			bPhys = true;
 			if(m_physObject != nullptr)
 				DestroyPhysicsObject();
-			m_physObject = std::make_shared<RigidPhysObj>(this,body);
+			m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 		}
 		else
-			m_physObject->AddCollisionObject(body);
+			m_physObject->AddCollisionObject(*body);
 	}
 	for(auto it=joints.begin();it!=joints.end();++it)
 	{
@@ -235,7 +229,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			auto *bodyTgt = dest.body;
 			if(bodySrc == nullptr || bodyTgt == nullptr)
 				continue;
-			PhysConstraint *c = nullptr;
+			util::TSharedHandle<pragma::physics::IConstraint> c = nullptr;
 
 			auto boneId = itDest->second;
 
@@ -250,7 +244,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
 			//
 			if(joint.type == JOINT_TYPE_FIXED)
-				c = physEnv->CreateFixedConstraint(bodySrc,posConstraint,uquat::identity(),bodyTgt,posTgt,uquat::identity());
+				c = util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc,posConstraint,uquat::identity(),*bodyTgt,posTgt,uquat::identity()));
 			else if(joint.type == JOINT_TYPE_CONETWIST)
 			{
 				// Conetwist constraints are deprecated for ragdolls and should be avoided.
@@ -290,7 +284,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 				// However, since the constraint limits are defined as min and max values, but bullet uses a single span value (=(max -min) /2.0),
 				// the rotation has to be changed to point to the 'center' of the limits ('rotOffset').
 				auto rotOffset = uquat::create(EulerAngles((sp.y +sp.x) *0.5f,(ts.y +ts.x) *0.5f,(sp2.y +sp2.x) *0.5f));
-				auto *ct = physEnv->CreateConeTwistConstraint(bodySrc,posConstraint,rotConstraint,bodyTgt,posTgt,rotOffset);
+				auto ct = physEnv->CreateConeTwistConstraint(*bodySrc,posConstraint,rotConstraint,*bodyTgt,posTgt,rotOffset);
 				auto softness = 1.f;
 				auto biasFactor = 0.3f;
 				auto relaxationFactor = 1.f;
@@ -315,7 +309,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 					CFloat(umath::deg_to_rad(twistSpan)),
 					softness,biasFactor,relaxationFactor
 				);
-				c = ct;
+				c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
 			}
 			else if(joint.type == JOINT_TYPE_DOF)
 			{
@@ -341,7 +335,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 				if(itLimitAngMax != joint.args.end())
 					limitAngMax = EulerAngles(itLimitAngMax->second);
 
-				auto *ct = physEnv->CreateDoFSpringConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
+				auto ct = physEnv->CreateDoFSpringConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
 				//auto *ct = physEnv->CreateDoFConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
 
 				//ct->SetLinearLimit(limitLinMin,limitLinMax);
@@ -352,14 +346,14 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 				ct->SetAngularLowerLimit(Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)));
 				ct->SetAngularUpperLimit(Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r)));
 
-				c = ct;
+				c = util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(ct);
 			}
 			if(c != nullptr)
 			{
 				c->SetCollisionsEnabled(joint.collide);
 				m_joints.push_back(PhysJoint(itSrc->second,itDest->second));
 				auto &jointData = m_joints.back();
-				jointData.constraint = c->GetHandle();
+				jointData.constraint = c;
 			}
 		}
 	}
@@ -368,14 +362,14 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	m_physObject->Spawn();
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
 	auto animComponent = ent.GetAnimatedComponent();
-	PhysCollisionObject *root = nullptr;
+	pragma::physics::ICollisionObject *root = nullptr;
 	auto posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 	if(!collisionObjs.empty())
 	{
 		auto &hRoot = collisionObjs.front();
 		if(hRoot.IsValid())
 		{
-			root = hRoot.get();
+			root = hRoot.Get();
 			auto boneId = root->GetBoneID();
 			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent.valid())
 				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetOrientation(),posRoot); // World space position of root collision object bone
@@ -478,7 +472,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 	auto &ent = GetEntity();
 	NetworkState *state = ent.GetNetworkState();
 	Game *game = state->GetGameState();
-	PhysEnv *physEnv = game->GetPhysicsEnvironment();
+	auto *physEnv = game->GetPhysicsEnvironment();
 
 	auto &meshes = GetBrushMeshes();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -496,29 +490,28 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 			Vector3 localInertia(0.f,0.f,0.f);
 			shape->CalculateLocalInertia(mass,&localInertia);
 
-			PhysTransform startTransform;
+			physics::Transform startTransform;
 			startTransform.SetIdentity();
 			startTransform.SetOrigin(origin);
-			btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
+			auto contactProcessingThreshold = 1e30;
 
-			PhysRigidBody *body = physEnv->CreateRigidBody(mass,shape,localInertia);
+			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia);
 			//PhysRigidBody *body = physEnv->CreateRigid
 			//btRigidBody *body = new btRigidBody(mass,NULL,shape,localInertia);
 			body->SetWorldTransform(startTransform);
 			body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
-			int flags = body->GetFlags();
 			if(mass == 0.f)
-				flags |= btCollisionObject::CF_STATIC_OBJECT;
-			body->SetCollisionFlags(flags);
+				body->SetStatic(true);
+
 			if(bPhys == false)
 			{
 				bPhys = true;
 				if(m_physObject != NULL)
 					DestroyPhysicsObject();
-				m_physObject = std::make_shared<RigidPhysObj>(this,body);
+				m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 			}
 			else
-				m_physObject->AddCollisionObject(body);
+				m_physObject->AddCollisionObject(*body);
 		}
 		else // It's a displacement, every side will be a seperate actor
 		{
@@ -551,7 +544,9 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
 	auto origin = (min +max) /2.f;
 	auto extents = max -min;
 
-	m_physObject = std::static_pointer_cast<PhysObj>(std::make_shared<BoxControllerPhysObj>(this,extents *0.5f,24));
+	m_physObject = std::shared_ptr<PhysObj>{PhysObj::Create<BoxControllerPhysObj>(*this,extents *0.5f,24)};
+	if(m_physObject == nullptr)
+		return {};
 	m_physObject->GetCollisionObject()->SetOrigin(-origin);
 	static_cast<BoxControllerPhysObj*>(m_physObject.get())->SetCollisionBounds(min,max);
 	m_physicsType = PHYSICSTYPE::BOXCONTROLLER;
@@ -566,7 +561,9 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysi
 	Vector3 min,max;
 	GetCollisionBounds(&min,&max);
 
-	m_physObject = std::static_pointer_cast<PhysObj>(std::make_shared<CapsuleControllerPhysObj>(this,CUInt32(umath::max(max.x -min.x,max.z -min.z)),CUInt32(max.y -min.y),24));
+	m_physObject = std::shared_ptr<PhysObj>{PhysObj::Create<CapsuleControllerPhysObj>(*this,CUInt32(umath::max(max.x -min.x,max.z -min.z)),CUInt32(max.y -min.y),24)};
+	if(m_physObject == nullptr)
+		return {};
 	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
 	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic | CollisionMask::Player,CollisionMask::All &~CollisionMask::Particle &~CollisionMask::Item);
 	m_physObject->Spawn();
@@ -574,493 +571,6 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysi
 	OnPhysicsInitialized();
 	return m_physObject;
 }
-#elif PHYS_ENGINE_PHYSX
-#pragma message ("URGENT: Implement this properly!")
-static physx::PxQuat getLookAtQuat(const physx::PxVec3& fromPos, const physx::PxVec3& toPos)
-{
-    // Position of toPos relative to fromPos
-    const physx::PxVec3 relToPos = toPos -fromPos;
- 
-    /**
-     * First we rotate fromPos around Y axis to look at toPos
-     * This gives us Euler angle around Y axis
-     */
- 
-    // Compute the angle
-    // theta = atan(z/x)
-    const float yAng0 = atan(fabs(relToPos.z) / fabs(relToPos.x));
- 
-    // Fix the angle based on XZ quadrant point lies in
-    float yAng;
-    if (relToPos.x >= 0)
-    {
-        if (relToPos.z >= 0)
-            yAng = 2 * M_PI - yAng0; // 360 - theta
-        else
-            yAng = yAng0;
-    }
-    else
-    {
-        if (relToPos.z >= 0)
-            yAng = M_PI + yAng0; // 180 + theta
-        else
-            yAng = M_PI - yAng0; // 180 - theta
-    }
- 
-    /**
-     * Next fromPos will look "up" to see toPos
-     * This gives us Euler angle around Z axis
-     */
- 
-    // Compute the angle
-    // theta = atan( y / sqrt(x^2 + z^2))
-    const float zAng0 = atan(fabs(relToPos.y) /
-        sqrt(relToPos.x * relToPos.x + relToPos.z * relToPos.z));
- 
-    // Fix angle based on whether toPos is above or below XZ plane
-    const float zAng = (relToPos.y >= 0) ? zAng0 : -zAng0;
- 
-    /**
-     * Convert Euler angles to quaternion that rotates
-     * X axis of upright orientation to point at toPos
-     * Reference: PhysX Math Primer
-     */
- 
-    // Convert to quaternions
-    physx::PxQuat qy(yAng, physx::PxVec3(0, 1, 0));
-    physx::PxQuat qz(zAng, physx::PxVec3(0, 0, 1));
- 
-    // Rotate local axes
-    physx::PxQuat q = qy * qz;
- 
-    return q;
-}
-class WVPxControllerBehaviorCallback
-	: public physx::PxControllerBehaviorCallback
-{
-	physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxShape &shape,const physx::PxActor &actor)
-	{
-		return physx::PxControllerBehaviorFlag::eCCT_CAN_RIDE_ON_OBJECT | physx::PxControllerBehaviorFlag::eCCT_SLIDE;
-	}
-	physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxController &controller)
-	{
-		return physx::PxControllerBehaviorFlags(0);
-	}
-	physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxObstacle &obstacle)
-	{
-		return physx::PxControllerBehaviorFlag::eCCT_CAN_RIDE_ON_OBJECT | physx::PxControllerBehaviorFlag::eCCT_SLIDE;
-	}
-};
-PhysObj *BasePhysicsComponent::InitializeModelPhysics(bool bDynamic)
-{
-	Model *mdl = GetModel();
-	if(mdl == NULL)
-		return NULL;
-	std::vector<CollisionMesh*> *collisionMeshes;
-	mdl->GetCollisionMeshes(&collisionMeshes);
-	if(collisionMeshes->empty())
-		return NULL;
-	float mass = mdl->GetMass();
-	Skeleton *skeleton = mdl->GetSkeleton();
-	physx::PxPhysics *physics = engine->GetPhysics();
-	physx::PxCooking *cooking = engine->GetCookingLibrary();
-	NetworkState *state = GetNetworkState();
-	Game *game = state->GetGameState();
-
-	physx::PxMaterial *material = physics->createMaterial(0.5f,0.5f,0.1f);
-	physx::PxConvexMeshDesc meshDesc;
-	meshDesc.points.stride = sizeof(Vector3);
-	meshDesc.flags = physx::PxConvexFlag::eCOMPUTE_CONVEX;
-	meshDesc.vertexLimit = 256;
-	std::vector<physx::PxRigidActor*> actors;
-	std::unordered_map<int,unsigned int> boneActorIDs;
-	bool bPhys = false;
-	for(unsigned int i=0;i<collisionMeshes->size();i++)
-	{
-		CollisionMesh *mesh = (*collisionMeshes)[i];
-		std::vector<Vector3> &verts = mesh->vertices;
-		if(!verts.empty())
-		{
-			meshDesc.points.count = verts.size();
-			meshDesc.points.data = &verts[0];
-			physx::MemoryOutputStream buf;
-			if(cooking->cookConvexMesh(meshDesc,buf))
-			{
-				physx::MemoryInputData input(buf.getData(),buf.getSize());
-				physx::PxConvexMesh *convexMesh = physics->createConvexMesh(input);
-				if(bDynamic == true)
-				{
-					int boneID = mesh->GetBoneParent();
-					std::unordered_map<int,unsigned int>::iterator it = boneActorIDs.find(boneID);
-					if(it == boneActorIDs.end())
-					{
-						Vector3 &pos = GetPosition();
-						auto &rot = GetOrientation();
-						physx::PxTransform t(physx::PxVec3(pos.x,pos.y,pos.z),physx::PxQuat(rot.x,rot.y,rot.z,rot.w));
-						physx::PxRigidDynamic *actor = game->CreatePhysXActor(physx::PxConvexMeshGeometry(convexMesh),*material,t);
-						actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD,true);
-						actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD_FRICTION,true);
-						physx::PxRigidBodyExt::setMassAndUpdateInertia(*actor,mass);
-						if(bPhys == false)
-						{
-							bPhys = true;
-							if(m_physObject != NULL)
-								DestroyPhysicsObject();
-							m_physObject = new DynamicPhysObj(this,actor,boneID);
-						}
-						else
-							static_cast<DynamicPhysObj*>(m_physObject)->AddActor(actor,boneID);
-						actors.push_back(actor);
-						boneActorIDs.insert(std::unordered_map<int,unsigned int>::value_type(boneID,actors.size() -1));
-					}
-					else
-						actors[it->second]->createShape(physx::PxConvexMeshGeometry(convexMesh),*material);
-				}
-				else
-				{
-					if(!actors.empty())
-						actors.back()->createShape(physx::PxConvexMeshGeometry(convexMesh),*material);
-					else
-					{
-						Vector3 &pos = GetPosition();
-						auto &rot = GetOrientation();
-						physx::PxTransform t(physx::PxVec3(pos.x,pos.y,pos.z),physx::PxQuat(rot.x,rot.y,rot.z,rot.w));
-						physx::PxRigidStatic *actor = game->CreateStaticPhysXActor(physx::PxConvexMeshGeometry(convexMesh),*material,t);
-						if(bPhys == false)
-						{
-							bPhys = true;
-							if(m_physObject != NULL)
-								DestroyPhysicsObject();
-							m_physObject = new StaticPhysObj(this,actor);
-						}
-						actors.push_back(actor);
-					}
-				}
-			}
-		}
-	}
-	if(bPhys == false)
-		return NULL;
-	std::unordered_map<int,unsigned int>::iterator it;
-	for(it=boneActorIDs.begin();it!=boneActorIDs.end();it++)
-	{
-		int boneID = it->first;
-		unsigned int actorID = it->second;
-		physx::PxRigidActor *actor = actors[actorID];
-		Bone *bone = skeleton->GetBone(boneID);
-		JointInfo &joint = bone->joint;
-		if(joint.type != JOINT_TYPE_NONE)
-		{
-			Bone *parent = bone->parent;
-			std::unordered_map<int,unsigned int>::iterator itParent;
-			if(parent != NULL)
-			{
-				itParent = boneActorIDs.find(parent->ID);
-				while(parent != NULL && itParent == boneActorIDs.end())
-				{
-					parent = parent->parent;
-					if(parent != NULL)
-						itParent = boneActorIDs.find(parent->ID);
-				}
-			}
-			if(parent != NULL && itParent != boneActorIDs.end())
-			{
-				std::unordered_map<int,unsigned int>::iterator itParent = boneActorIDs.find(parent->ID);
-				if(itParent != boneActorIDs.end())
-				{
-					physx::PxRigidActor *actorParent = actors[itParent->second];
-					switch(joint.type)
-					{
-					case JOINT_TYPE_SPHERICAL:
-						{
-							physx::PxVec3 fromPos = actorParent->getGlobalPose().p;
-							physx::PxVec3 toPos = actor->getGlobalPose().p;
-							physx::PxQuat fromToQuat = getLookAtQuat(fromPos,toPos);
-							physx::PxTransform tSrc(physx::PxVec3(0.f,0.f,0.f),fromToQuat);
-							physx::PxTransform tTgt((toPos -fromPos) *0.5f,fromToQuat);
-							physx::PxSphericalJoint *joint = physx::PxSphericalJointCreate(
-								*physics,
-								actorParent,
-								tSrc,
-								actor,
-								tTgt
-							);
-							if(joint != NULL)
-							{
-								joint->setLimitCone(physx::PxJointLimitCone(0.8f,0.8f,0.1f));
-								joint->setSphericalJointFlag(physx::PxSphericalJointFlag::eLIMIT_ENABLED,true);
-							}
-							break;
-						}
-					case JOINT_TYPE_FIXED:
-						{
-							physx::PxTransform local;
-							local.p = physx::PxVec3(0,0,0);
-							local.q = physx::PxQuat(0,0,0,1);
-							physx::PxFixedJointCreate(
-								*physics,
-								actor,
-								local,
-								actorParent,
-								local
-							);
-							break;
-						}
-					case JOINT_TYPE_REVOLUTE:
-						{
-							break;
-						}
-					case JOINT_TYPE_DISTANCE:
-						{
-							break;
-						}
-					case JOINT_TYPE_PRISMATIC:
-						{
-							break;
-						}
-					default:
-						{}
-					}
-				}
-			}
-		}
-	}
-	if(bDynamic == true)
-	{
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::Dynamic | CollisionMask::Generic);
-	}
-	else
-	{
-		m_physicsType = PHYSICSTYPE::STATIC;
-		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic | CollisionMask::Particle,CollisionMask::Static | CollisionMask::Generic);
-	}
-	InitializePhysObj();
-	OnPhysicsInitialized();
-	return m_physObject;
-}
-PhysObj *BasePhysicsComponent::InitializeBrushPhysics(bool bDynamic,float mass)
-{
-	physx::PxPhysics *physics = engine->GetPhysics();
-	physx::PxCooking *cooking = engine->GetCookingLibrary();
-	physx::PxMaterial *material = physics->createMaterial(0.5f,0.5f,0.1f);
-	NetworkState *state = GetNetworkState();
-	Game *game = state->GetGameState();
-
-	std::vector<BrushMesh*> *meshes;
-	GetBrushMeshes(&meshes);
-	physx::PxRigidActor *physActor = NULL;
-	bool bPhys = false;
-	for(unsigned int i=0;i<meshes->size();i++)
-	{
-		std::vector<Vector3> vertices;
-		BrushMesh *mesh = (*meshes)[i];
-		bool bConvex = mesh->IsConvex();
-		std::vector<Side*> *sides;
-		mesh->GetSides(&sides);
-		if(bConvex == true) // Create a single convex mesh
-		{
-			if(!vertices.empty())
-			{
-				physx::PxConvexMeshDesc meshDesc;
-				meshDesc.points.count = vertices.size();
-				meshDesc.points.stride = sizeof(Vector3);
-				meshDesc.points.data = &vertices[0];
-				meshDesc.flags = physx::PxConvexFlag::eCOMPUTE_CONVEX;
-				meshDesc.vertexLimit = 256;
-	
-				physx::MemoryOutputStream buf;
-				if(cooking->cookConvexMesh(meshDesc,buf))
-				{
-					physx::MemoryInputData input(buf.getData(),buf.getSize());
-					physx::PxConvexMesh *convexMesh = physics->createConvexMesh(input);
-					if(bDynamic == true)
-					{
-						if(physActor != NULL)
-							physActor->createShape(physx::PxConvexMeshGeometry(convexMesh),*material);
-						else
-						{
-							Vector3 *pos = GetPosition();
-							auto *rot = GetOrientation();
-							physx::PxTransform t(physx::PxVec3(pos->x,pos->y,pos->z),physx::PxQuat(rot->x,rot->y,rot->z,rot->w));
-							physx::PxRigidDynamic *actor = game->CreatePhysXActor(physx::PxConvexMeshGeometry(convexMesh),*material,t);
-							actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD,true);
-							actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD_FRICTION,true);
-							physx::PxRigidBodyExt::setMassAndUpdateInertia(*actor,mass);
-							if(bPhys == false)
-							{
-								bPhys = true;
-								if(m_physObject != NULL)
-									DestroyPhysicsObject();
-								m_physObject = new DynamicPhysObj(this,actor);
-							}
-							else
-								static_cast<DynamicPhysObj*>(m_physObject)->AddActor(actor);
-							physActor = actor;
-						}
-					}
-					else
-					{
-						if(physActor != NULL)
-							physActor->createShape(physx::PxConvexMeshGeometry(convexMesh),*material);
-						else
-						{
-							Vector3 *pos = GetPosition();
-							auto *rot = GetOrientation();
-							physx::PxTransform t(physx::PxVec3(pos->x,pos->y,pos->z),physx::PxQuat(rot->x,rot->y,rot->z,rot->w));
-							physx::PxRigidStatic *actor = game->CreateStaticPhysXActor(physx::PxConvexMeshGeometry(convexMesh),*material,t);
-							if(bPhys == false)
-							{
-								bPhys = true;
-								if(m_physObject != NULL)
-									DestroyPhysicsObject();
-								m_physObject = new StaticPhysObj(this,actor);
-							}
-							physActor = actor;
-						}
-					}
-				}
-			}
-		}
-		else // It's a displacement, every side will be a seperate actor
-		{
-			for(unsigned j=0;j<sides->size();j++)
-			{
-				Side *side = (*sides)[j];
-				std::vector<unsigned int> *triangles;
-				std::vector<Vector3> *vertices;
-				side->GetTriangles(&triangles);
-				side->GetVertices(&vertices);
-				std::vector<Vector3> triangleVerts;
-				std::vector<int> indices;
-				for(unsigned int i=0;i<triangles->size();i++)
-				{
-					triangleVerts.push_back((*vertices)[(*triangles)[i]]);
-					indices.push_back(i);
-				}
-
-				physx::PxTriangleMeshDesc meshDesc;
-				meshDesc.points.count = triangleVerts.size();
-				meshDesc.triangles.count = indices.size() /3;
-				meshDesc.points.stride = sizeof(glm::mediump_float) *3;
-				meshDesc.triangles.stride = sizeof(glm::mediump_float) *3;
-				meshDesc.points.data = &triangleVerts[0][0];
-				meshDesc.triangles.data = &indices[0];
-
-				physx::MemoryOutputStream buf;
-				if(cooking->cookTriangleMesh(meshDesc,buf))
-				{
-					physx::MemoryInputData input(buf.getData(),buf.getSize());
-					physx::PxTriangleMesh *triangleMesh = physics->createTriangleMesh(input);
-
-					if(physActor != NULL)
-						physActor->createShape(physx::PxTriangleMeshGeometry(triangleMesh),*material);
-					else
-					{
-						Vector3 *pos = GetPosition();
-						auto *rot = GetOrientation();
-						physx::PxTransform t(physx::PxVec3(pos->x,pos->y,pos->z),physx::PxQuat(rot->x,rot->y,rot->z,rot->w));
-						physx::PxRigidStatic *actor = game->CreateStaticPhysXActor(physx::PxTriangleMeshGeometry(triangleMesh),*material,t);
-						if(bPhys == false)
-						{
-							bPhys = true;
-							if(m_physObject != NULL)
-								DestroyPhysicsObject();
-							m_physObject = new StaticPhysObj(this,actor);
-						}
-						physActor = actor;
-					}
-				}
-			}
-		}
-	}
-	if(bPhys == false)
-		return NULL;
-	if(bDynamic == true)
-	{
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::Dynamic | CollisionMask::Generic);
-	}
-	else
-	{
-		m_physicsType = PHYSICSTYPE::STATIC;
-		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic | CollisionMask::Particle,CollisionMask::Static | CollisionMask::Generic);
-	}
-	InitializePhysObj();
-	OnPhysicsInitialized();
-	return m_physObject;
-}
-
-PhysObj *BasePhysicsComponent::InitializeBoxControllerPhysics()
-{
-	NetworkState *state = GetNetworkState();
-	Game *game = state->GetGameState();
-	physx::PxControllerManager *manager = game->GetPhysXControllerManager();
-	physx::PxPhysics *physics = state->GetPhysics();
-	physx::PxMaterial *material = physics->createMaterial(0.5f,0.5f,0.1f);
-
-	Vector3 *pos = GetPosition();
-	Vector3 min,max;
-	GetCollisionBounds(&min,&max);
-	physx::PxBoxControllerDesc desc;
-	desc.halfForwardExtent = (max.x -min.x) *0.5f;
-	desc.halfHeight = (max.z -min.z) *0.5f;
-	desc.halfSideExtent = (max.y -min.y) *0.5f;
-	desc.material = material;
-	desc.contactOffset = 0.1f;
-	desc.position = physx::PxExtendedVec3(pos->x,pos->y,pos->z);
-	desc.reportCallback = game->GetPhysXControllerHitReport();
-	physx::PxController *controller = manager->createController(desc);
-	if(controller == NULL)
-		return NULL;
-	physx::PxBoxController *boxController = static_cast<physx::PxBoxController*>(controller);
-	physx::PxRigidDynamic *actor = boxController->getActor();
-	actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD,true);
-	actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD_FRICTION,true);
-	m_physObject = new BoxControllerPhysObj(this,boxController);
-	m_physicsType = PHYSICSTYPE::BOXCONTROLLER;
-	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::Dynamic | CollisionMask::Generic);
-	InitializePhysObj();
-	OnPhysicsInitialized();
-	return m_physObject;
-}
-PhysObj *BasePhysicsComponent::InitializeCapsuleControllerPhysics()
-{
-	NetworkState *state = GetNetworkState();
-	Game *game = state->GetGameState();
-
-	Vector3 *pos = GetPosition();
-	Vector3 min,max;
-	GetCollisionBounds(&min,&max);
-	physx::PxControllerManager *manager = game->GetPhysXControllerManager();
-	physx::PxPhysics *physics = state->GetPhysics();
-	physx::PxMaterial *material = physics->createMaterial(0.5f,0.5f,0.1f);
-
-	physx::PxCapsuleControllerDesc desc;
-	float r = Math::Max(max.x -min.x,max.z -min.z) *0.5f;
-	desc.height = (max.y -min.y) *0.5f;
-	desc.radius = r;
-	desc.material = material;
-	desc.contactOffset = 0.1f;
-	desc.position = physx::PxExtendedVec3(pos->x,pos->y,pos->z);
-	desc.reportCallback = game->GetPhysXControllerHitReport();
-	desc.behaviorCallback = new WVPxControllerBehaviorCallback;
-#pragma message ("URGENT: Remove me!!!")
-	physx::PxController *controller = manager->createController(desc);
-	if(controller == NULL)
-		return NULL;
-	physx::PxCapsuleController *capsuleController = static_cast<physx::PxCapsuleController*>(controller);
-	physx::PxRigidDynamic *actor = capsuleController->getActor();
-	actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD,true);
-	actor->setRigidBodyFlag(physx::PxRigidBodyFlag::Enum::eENABLE_CCD_FRICTION,true);
-	m_physObject = new CapsuleControllerPhysObj(this,capsuleController);
-	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
-	SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::Dynamic | CollisionMask::Generic);
-	InitializePhysObj();
-	OnPhysicsInitialized();
-	return m_physObject;
-}
-#endif
 
 void BasePhysicsComponent::AddBrushMesh(const std::shared_ptr<BrushMesh> &mesh) {m_brushMeshes.push_back(mesh);}
 void BasePhysicsComponent::InitializeBrushGeometry() {}
@@ -1080,12 +590,6 @@ void BasePhysicsComponent::InitializePhysObj()
 		phys->SetCollisionFilter(m_collisionFilterGroup);
 	if(m_collisionFilterMask != CollisionMask::Default)
 		phys->SetCollisionFilterMask(m_collisionFilterMask);
-#ifdef PHYS_ENGINE_PHYSX
-	if(GetCollisionCallbacksEnabled() == true)
-		SetCollisionCallbacksEnabled(true);
-	if(GetCollisionContactReportEnabled() == true)
-		SetCollisionContactReportEnabled(true);
-#endif
 	if(IsKinematic())
 		SetKinematic(true);
 	phys->SetStatic((GetPhysicsType() == PHYSICSTYPE::STATIC) ? true : false);
@@ -1098,14 +602,14 @@ void BasePhysicsComponent::InitializePhysObj()
 	//	pos -= o->GetOrigin();
 	//SetPosition(pos);//,true); // Update our position, since our origin may have changed
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(PhysConvexShape &shape,float mass)
+PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,float mass)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
-	auto *body = CreateRigidBody(shape.shared_from_this(),mass);
+	auto *body = CreateRigidBody(shape,mass);
 
 	if(m_physObject != NULL)
 		DestroyPhysicsObject();
-	m_physObject = std::make_shared<RigidPhysObj>(this,body);
+	m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 	auto group = GetCollisionFilter();
 	auto mask = GetCollisionFilterMask();
 	if(mass == 0.f)
@@ -1181,13 +685,13 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	{
 		auto &hConstraint = it->constraint;
 		if(hConstraint.IsValid())
-			hConstraint->Remove();
+			hConstraint.Remove();
 	}
 	//auto pos = GetPosition();
 	//auto *physRoot = m_physObject->GetCollisionObject();
 	//pos += physRoot->GetOrigin() *physRoot->GetRotation();
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
-	PhysCollisionObject *root = nullptr;
+	pragma::physics::ICollisionObject *root = nullptr;
 	Vector3 posRoot {0.f,0.f,0.f};
 	Vector3 originRoot {0.f,0.f,0.f};
 	auto rotRoot = uquat::identity();
@@ -1195,7 +699,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	if(!collisionObjs.empty())
 	{
 		posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-		root = collisionObjs.front().get();
+		root = collisionObjs.front().Get();
 		originRoot = root->GetOrigin();
 		rotRoot = root->GetRotation();
 	}
@@ -1228,7 +732,7 @@ void BasePhysicsComponent::SetKinematic(bool b)
 	PhysObjKinematic *kinematic = dynamic_cast<PhysObjKinematic*>(phys);
 	kinematic->SetKinematic(b);
 }
-bool BasePhysicsComponent::ShouldCollide(PhysObj*,PhysCollisionObject*,BaseEntity *entOther,PhysObj*,PhysCollisionObject*,bool valDefault) const
+bool BasePhysicsComponent::ShouldCollide(PhysObj*,pragma::physics::ICollisionObject*,BaseEntity *entOther,PhysObj*,pragma::physics::ICollisionObject*,bool valDefault) const
 {
 	if(m_customCollisions.empty())
 		return valDefault;

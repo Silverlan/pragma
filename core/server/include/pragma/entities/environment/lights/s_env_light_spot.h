@@ -13,7 +13,7 @@ namespace pragma
 	{
 	public:
 		SLightSpotComponent(BaseEntity &ent) : BaseEnvLightSpotComponent(ent) {}
-		virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void SetOuterCutoffAngle(float ang) override;
 		virtual void SetInnerCutoffAngle(float ang) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}

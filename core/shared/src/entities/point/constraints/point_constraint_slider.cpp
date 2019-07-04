@@ -2,11 +2,11 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_slider.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <sharedutils/util.h>
@@ -69,7 +69,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 	{
 		if(hBody.IsValid() == false)
 			continue;
-		auto *rigidBody0 = static_cast<PhysRigidBody*>(hBody.get());
+		auto *rigidBody0 = hBody.Get();
 		auto *rigidBody1 = bodySrc;
 		auto pivot0 = Vector3{};
 		auto pivot1 = rigidBody0->GetPos();
@@ -77,16 +77,16 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 		auto rotation1 = rotation0;
 		rotation0 = tgt->GetTransformComponent()->GetOrientation() *rotation0;
 
-		auto *slider = physEnv->CreateDoFSpringConstraint(rigidBody0,pivot0,rotation0,rigidBody1,pivot1,rotation1);
+		auto slider = physEnv->CreateDoFSpringConstraint(*rigidBody0,pivot0,rotation0,*rigidBody1,pivot1,rotation1);
 		if(slider != nullptr)
 		{
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Linear,pragma::Axis::X,0.f,l);
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Linear,pragma::Axis::Y,0.f,0.f);
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Linear,pragma::Axis::Z,0.f,0.f);
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Angular,pragma::Axis::X,0.f,0.f);
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Angular,pragma::Axis::Y,0.f,0.f);
-			slider->SetLimit(PhysDoFSpringConstraint::AxisType::Angular,pragma::Axis::Z,0.f,0.f);
-			m_constraints.push_back(slider->GetHandle());
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Linear,pragma::Axis::X,0.f,l);
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Linear,pragma::Axis::Y,0.f,0.f);
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Linear,pragma::Axis::Z,0.f,0.f);
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Angular,pragma::Axis::X,0.f,0.f);
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Angular,pragma::Axis::Y,0.f,0.f);
+			slider->SetLimit(pragma::physics::IDoFSpringConstraint::AxisType::Angular,pragma::Axis::Z,0.f,0.f);
+			m_constraints.push_back(util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(slider));
 		}
 	}
 }

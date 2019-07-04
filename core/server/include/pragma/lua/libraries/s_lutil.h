@@ -2,7 +2,7 @@
 #define __S_LUTIL_H__
 
 #include "pragma/serverdefinitions.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 namespace Lua
 {

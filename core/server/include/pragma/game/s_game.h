@@ -14,12 +14,11 @@
 #endif
 
 struct CacheInfo;
-class WVServerClient;
 class SBaseEntity;
-namespace nwm {class ServerClient;};
 namespace pragma {
 	class SPlayerComponent;
 	namespace ai {class TaskManager;};
+	namespace networking {class IServerClient; class ClientRecipientFilter;};
 };
 enum class CLIENT_DROPPED;
 #pragma warning(push)
@@ -135,7 +134,7 @@ public:
 	template<class T> T *CreateEntity();
 	template<class T> T *CreateEntity(unsigned int idx);
 	virtual void RemoveEntity(BaseEntity *ent) override;
-	pragma::SPlayerComponent *GetPlayer(WVServerClient *session);
+	pragma::SPlayerComponent *GetPlayer(pragma::networking::IServerClient &session);
 	virtual void SpawnEntity(BaseEntity *ent) override;
 	void GetEntities(std::vector<SBaseEntity*> **ents);
 	void GetPlayers(std::vector<BaseEntity*> *ents);
@@ -154,12 +153,12 @@ public:
 	void GetVehicles(std::vector<EntityHandle> *ents);
 
 	bool RegisterNetMessage(std::string name);
-	void HandleLuaNetPacket(WVServerClient *session,NetPacket &packet);
+	void HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPacket &packet);
 
-	void ReceiveUserInfo(WVServerClient *session,NetPacket &packet);
-	void ReceiveGameReady(WVServerClient *session,NetPacket &packet);
+	void ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket &packet);
+	void ReceiveGameReady(pragma::networking::IServerClient &session,NetPacket &packet);
 	void OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cvar,std::string value);
-	void OnClientDropped(nwm::ServerClient *client,nwm::ClientDropped reason);
+	void OnClientDropped(pragma::networking::IServerClient &client,pragma::networking::DropReason reason);
 
 	virtual Float GetFrictionScale() const override;
 	virtual Float GetRestitutionScale() const override;
@@ -182,7 +181,7 @@ public:
 	void CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Float force=0.f,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr,const std::function<bool(BaseEntity*,DamageInfo&)> &callback=nullptr);
 	void CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Float force=0.f,const EntityHandle &attacker=EntityHandle(),const EntityHandle &inflictor=EntityHandle(),const std::function<bool(BaseEntity*,DamageInfo&)> &callback=nullptr);
 
-	void WriteEntityData(NetPacket &packet,SBaseEntity **ents,uint32_t entCount,nwm::RecipientFilter &rp);
+	void WriteEntityData(NetPacket &packet,SBaseEntity **ents,uint32_t entCount,pragma::networking::ClientRecipientFilter &rp);
 };
 #pragma warning(pop)
 

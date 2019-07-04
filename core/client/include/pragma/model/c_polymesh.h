@@ -14,7 +14,7 @@ class DLLCLIENT CPolyMesh
 private:
 	std::vector<CPoly*> m_polys;
 public:
-	static void GenerateBrushMeshes(std::vector<std::shared_ptr<CBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<CPolyMesh>> &meshes);
+	static void GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<CBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<CPolyMesh>> &meshes);
 };
 
 inline Con::c_cout &operator<<(Con::c_cout &os,const CPolyMesh& mesh)
@@ -23,9 +23,9 @@ inline Con::c_cout &operator<<(Con::c_cout &os,const CPolyMesh& mesh)
 	return os;
 }
 
-inline void CPolyMesh::GenerateBrushMeshes(std::vector<std::shared_ptr<CBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<CPolyMesh>> &meshes)
+inline void CPolyMesh::GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<CBrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<CPolyMesh>> &meshes)
 {
-	return PolyMesh::GenerateBrushMeshes<CSide,CPolyMesh,CBrushMesh>(outBrushMeshes,meshes);
+	return PolyMesh::GenerateBrushMeshes<CSide,CPolyMesh,CBrushMesh>(env,outBrushMeshes,meshes);
 }
 
 #endif

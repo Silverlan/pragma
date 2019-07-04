@@ -4,6 +4,7 @@
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include <pragma/networking/nwm_util.h>
+#include <pragma/networking/enums.hpp>
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -11,7 +12,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_spot,EnvLightSpot);
 
-void SLightSpotComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SLightSpotComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<float>(*m_angOuterCutoff);
 	packet->Write<float>(*m_angInnerCutoff);
@@ -23,7 +24,7 @@ void SLightSpotComponent::SetConeStartOffset(float offset)
 	BaseEnvLightSpotComponent::SetConeStartOffset(offset);
 	NetPacket p {};
 	p->Write<float>(offset);
-	static_cast<SBaseEntity&>(GetEntity()).SendNetEventTCP(m_netEvSetConeStartOffset,p);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetConeStartOffset,p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetOuterCutoffAngle(float ang)
@@ -35,7 +36,7 @@ void SLightSpotComponent::SetOuterCutoffAngle(float ang)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<float>(ang);
-	server->BroadcastTCP("env_light_spot_outercutoff_angle",p);
+	server->SendPacket("env_light_spot_outercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void SLightSpotComponent::SetInnerCutoffAngle(float ang)
@@ -47,7 +48,7 @@ void SLightSpotComponent::SetInnerCutoffAngle(float ang)
 	NetPacket p;
 	nwm::write_entity(p,&ent);
 	p->Write<float>(ang);
-	server->BroadcastTCP("env_light_spot_innercutoff_angle",p);
+	server->SendPacket("env_light_spot_innercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
 }
 
 luabind::object SLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightSpotComponentHandleWrapper>(l);}

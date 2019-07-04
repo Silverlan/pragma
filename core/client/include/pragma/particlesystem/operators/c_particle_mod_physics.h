@@ -15,8 +15,8 @@ protected:
 	Vector3 m_angularFactor = {1.f,1.f,1.f};
 	Vector3 m_posOffset = {};
 	Quat m_rotOffset = uquat::identity();
-	std::vector<std::shared_ptr<PhysRigidBody>> m_physicsObjects;
-	virtual std::shared_ptr<PhysShape> CreateShape()=0;
+	std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
+	virtual std::shared_ptr<pragma::physics::IShape> CreateShape()=0;
 public:
 	CParticleOperatorPhysics(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 	virtual void Initialize(CParticle &particle) override;
@@ -32,7 +32,7 @@ class DLLCLIENT CParticleOperatorPhysicsSphere
 {
 protected:
 	float m_radius = 0.f;
-	virtual std::shared_ptr<PhysShape> CreateShape() override;
+	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
 	CParticleOperatorPhysicsSphere(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 };
@@ -43,7 +43,7 @@ class DLLCLIENT CParticleOperatorPhysicsBox
 {
 protected:
 	float m_extent = 0.f;
-	virtual std::shared_ptr<PhysShape> CreateShape() override;
+	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
 	CParticleOperatorPhysicsBox(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 };
@@ -55,7 +55,7 @@ class DLLCLIENT CParticleOperatorPhysicsCylinder
 protected:
 	float m_radius = 0.f;
 	float m_height = 0.f;
-	virtual std::shared_ptr<PhysShape> CreateShape() override;
+	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
 	CParticleOperatorPhysicsCylinder(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 };
@@ -69,7 +69,7 @@ public:
 	virtual void Initialize(CParticle &particle) override;
 protected:
 	std::shared_ptr<Model> m_model = nullptr;
-	virtual std::shared_ptr<PhysShape> CreateShape() override;
+	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 };
 REGISTER_PARTICLE_OPERATOR(physics_model,CParticleOperatorPhysicsModel);
 

@@ -2,11 +2,6 @@
 #define __GAME_H__
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#ifdef PHYS_ENGINE_PHYSX
-#include "pragma/physics/physxutil.h"
-#include <PxShape.h>
-#include <PxQueryFiltering.h>
-#endif
 #include <pragma/lua/luaapi.h>
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/level/mapinfo.h"
@@ -29,7 +24,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #ifdef __linux__
 #include "pragma/lua/lua_script_watcher.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #endif
 
 namespace Lua
@@ -53,8 +48,6 @@ class WVPxEventCallback;
 class PhysObj;
 class TCallback;
 class SurfaceMaterial;
-class PhysEnv;
-class PhysCollisionObject;
 class TraceData;
 class Timer;
 class Model;
@@ -66,8 +59,7 @@ struct AmmoType;
 struct GameModeInfo;
 struct Color;
 class GibletCreateInfo;
-enum class FTRACE;
-namespace nwm {enum class ClientDropped : int8_t;};
+enum class RayCastFlags : uint32_t;
 namespace pragma
 {
 	class BaseWorldComponent;
@@ -77,55 +69,22 @@ namespace pragma
 	{
 		class Mesh;
 	};
+	namespace networking {enum class DropReason : int8_t;};
 };
-#ifdef PHYS_ENGINE_BULLET
-#elif PHYS_ENGINE_PHYSX
-class PhysXControllerHitReport;
-namespace physx
-{
-	class PxControllerManager;
-	class PxFixedJoint;
-	class PxDistanceJoint;
-	class PxSphericalJoint;
-	class PxRevoluteJoint;
-	class PxPrismaticJoint;
-	class PxD6Joint;
-};
-#endif
 
 namespace pragma {namespace level {class BSPInputData;};};
+namespace pragma::physics {class IEnvironment;};
 class DLLNETWORK Game
 	: public CallbackHandler,public LuaCallbackHandler
 {
 public:
-#ifdef PHYS_ENGINE_BULLET
-	PhysEnv *GetPhysicsEnvironment();
+	pragma::physics::IEnvironment *GetPhysicsEnvironment();
+	const pragma::physics::IEnvironment *GetPhysicsEnvironment() const;
 	SurfaceMaterial &CreateSurfaceMaterial(const std::string &identifier,Float friction=0.5f,Float restitution=0.5f);
 	SurfaceMaterial *GetSurfaceMaterial(const std::string &id);
 	SurfaceMaterial *GetSurfaceMaterial(UInt32 id);
 	std::vector<SurfaceMaterial> &GetSurfaceMaterials();
-#elif PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxRigidDynamic *CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material);
-	physx::PxRigidDynamic *CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,physx::PxTransform &transform);
-	physx::PxRigidDynamic *CreatePhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,Vector3 &pos);
-	physx::PxRigidStatic *CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material);
-	physx::PxRigidStatic *CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,physx::PxTransform &transform);
-	physx::PxRigidStatic *CreateStaticPhysXActor(physx::PxGeometry &geometry,physx::PxMaterial &material,Vector3 &pos);
-	physx::PxControllerManager *GetPhysXControllerManager();
-	physx::PxScene *GetPhysXScene();
-	physx::PxFixedJoint *CreateFixedJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	physx::PxDistanceJoint *CreateDistanceJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	physx::PxSphericalJoint *CreateSphericalJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	physx::PxRevoluteJoint *CreateRevoluteJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	physx::PxPrismaticJoint *CreatePrismaticJoint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	physx::PxD6Joint *CreateD6Joint(physx::PxRigidActor *src,physx::PxTransform &tSrc,physx::PxRigidActor *tgt,physx::PxTransform &tTgt);
-	virtual SurfaceMaterial *CreateSurfaceMaterial(std::string &identifier)=0;
-	virtual SurfaceMaterial *CreateSurfaceMaterial(std::string &identifier,float staticFriction,float dynamicFriction,float restitution,std::string footstepType)=0;
-	virtual SurfaceMaterial *GetSurfaceMaterial(std::string &identifier)=0;
-	virtual std::unordered_map<std::string,SurfaceMaterial*> &GetSurfaceMaterials()=0;
-	PhysXControllerHitReport *GetPhysXControllerHitReport();
-#endif
+
 	enum class GameFlags : uint32_t
 	{
 		None = 0u,
@@ -202,6 +161,14 @@ public:
 	void SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float force=0.f,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr,const std::function<bool(BaseEntity*,DamageInfo&)> &callback=nullptr);
 	void SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float force=0.f,const EntityHandle &attacker=EntityHandle(),const EntityHandle &inflictor=EntityHandle(),const std::function<bool(BaseEntity*,DamageInfo&)> &callback=nullptr);
 
+	Bool Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults) const;
+	Bool RayCast(const TraceData &data,std::vector<TraceResult> *optOutResults) const;
+	Bool Sweep(const TraceData &data,TraceResult *optOutResult) const;
+
+	TraceResult Overlap(const TraceData &data) const;
+	TraceResult RayCast(const TraceData &data) const;
+	TraceResult Sweep(const TraceData &data) const;
+
 	virtual void CreateGiblet(const GibletCreateInfo &info)=0;
 
 	const std::shared_ptr<pragma::nav::Mesh> &GetNavMesh() const;
@@ -247,94 +214,6 @@ public:
 	void CollisionTest(BaseEntity *a,BaseEntity *b);
 	void EnableCollisions(bool b);
 	//
-	// Raytraces
-	// Returns true if there's a blocking hit. If 'res' isn't NULL, it will contain the hit information
-#ifdef PHYS_ENGINE_BULLET
-	Bool Overlap(const TraceData &data,TraceResult *result);
-	TraceResult Overlap(const TraceData &data);
-	Bool RayCast(const TraceData &data,std::vector<TraceResult> *results);
-	TraceResult RayCast(const TraceData &data);
-	Bool Sweep(const TraceData &data,TraceResult *result);
-	TraceResult Sweep(const TraceData &data);
-#elif PHYS_ENGINE_PHYSX
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,BaseEntity *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,EntityHandle &hFilter,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,std::vector<BaseEntity*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxRigidActor *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,std::vector<physx::PxRigidActor*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryFilterCallback &filter,TraceResult *res=NULL,unsigned int flags=0);
-	// Automatically uses pre-filter
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),TraceResult *res=NULL,unsigned int flags=0);
-	// Automatically uses post-filter
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	// Uses both pre- and post-filters
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(BaseEntity*),TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(const physx::PxRigidActor*),TraceResult *res=NULL,unsigned int flags=0);
-	bool RayCast(Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
-	
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,BaseEntity *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,EntityHandle &hFilter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,std::vector<BaseEntity*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxRigidActor *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,std::vector<physx::PxRigidActor*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryFilterCallback &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),TraceResult *res=NULL,unsigned int flags=0);
-	// Automatically uses post-filter
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	// Uses both pre- and post-filters
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(BaseEntity*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(const physx::PxRigidActor*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
-
-	// Axis-aligned
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,BaseEntity *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,EntityHandle &hFilter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,std::vector<BaseEntity*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxRigidActor *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,std::vector<physx::PxRigidActor*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryFilterCallback &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(BaseEntity*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(const physx::PxRigidActor*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Sweep(const physx::PxGeometry &geometry,Vector3 &origin,Vector3 &dir,float distance,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
-
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,BaseEntity *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,EntityHandle &hFilter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,std::vector<BaseEntity*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxRigidActor *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,std::vector<physx::PxRigidActor*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryFilterCallback &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*filter)(BaseEntity*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*filter)(const physx::PxRigidActor*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
-
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,BaseEntity *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,EntityHandle &hFilter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,std::vector<BaseEntity*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxRigidActor *filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,std::vector<physx::PxRigidActor*> &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryFilterCallback &filter,TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*preFilter)(const physx::PxFilterData&,const physx::PxShape*,const physx::PxRigidActor*,physx::PxHitFlags&),physx::PxQueryHitType::Enum(*postFilter)(const physx::PxFilterData&,const physx::PxQueryHit&),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*filter)(BaseEntity*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*filter)(const physx::PxRigidActor*),TraceResult *res=NULL,unsigned int flags=0);
-	bool Overlap(const physx::PxGeometry &geometry,Vector3 &origin,physx::PxQueryHitType::Enum(*filter)(PhysObj*),TraceResult *res=NULL,unsigned int flags=0);
-#endif
 public:
 //
 	enum class CPUProfilingPhase : uint32_t
@@ -412,7 +291,7 @@ public:
 	void AddConVarCallback(const std::string &cvar,LuaFunction function);
 	unsigned int GetNetMessageID(std::string name);
 	std::string *GetNetMessageIdentifier(unsigned int ID);
-	virtual void OnPlayerDropped(pragma::BasePlayerComponent &pl,nwm::ClientDropped reason);
+	virtual void OnPlayerDropped(pragma::BasePlayerComponent &pl,pragma::networking::DropReason reason);
 	virtual void OnPlayerReady(pragma::BasePlayerComponent &pl);
 	virtual void OnPlayerJoined(pragma::BasePlayerComponent &pl);
 	// Timers
@@ -458,7 +337,7 @@ protected:
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
 	uint32_t m_mapEntityIdx = 1u;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
-	SurfaceMaterialManager m_surfaceMaterials = {};
+	std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 	std::unordered_map<std::string,std::vector<std::shared_ptr<CvarCallback>>> m_cvarCallbacks;
 	std::vector<std::unique_ptr<Timer>> m_timers;
 	std::unordered_map<std::string,int> m_luaNetMessages;
@@ -478,6 +357,10 @@ protected:
 	double m_tDeltaTick = 0.0;
 	double m_tDeltaReal = 0.0;
 	double m_tLastReal = 0.0;
+	// Physics have a fixed time-step, if the game delta time
+	// doesn't match that time-step, the remainder will be used
+	// for the next tick.
+	float m_tPhysDeltaRemainder = 0.f;
 	Vector3 m_gravity = {0,-600,0};
 	util::WeakHandle<pragma::BaseWorldComponent> m_worldComponent = {};
 	pragma::NetEventManager m_entNetEventManager = {};
@@ -490,15 +373,6 @@ protected:
 	std::unique_ptr<luabind::object> m_luaGameMode = nullptr;
 	std::shared_ptr<pragma::EntityComponentManager> m_componentManager = nullptr;
 
-	// Raytraces
-#ifdef PHYS_ENGINE_PHYSX
-	template<class T>
-		bool FilteredRayCast(Vector3 &origin,Vector3 &dir,float distance,T filter,TraceResult *res=NULL,unsigned int flags=0);
-	template<class T>
-		bool FilteredSweep(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,Vector3 &dir,float distance,T filter,TraceResult *res=NULL,unsigned int flags=0);
-	template<class T>
-		bool FilteredOverlap(const physx::PxGeometry &geometry,Vector3 &origin,Quat &rot,T filter,TraceResult *res=NULL,unsigned int flags=0);
-#endif
 	// Lua
 	std::vector<std::string> m_luaIncludeStack = {};
 
@@ -523,16 +397,7 @@ protected:
 	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr)=0;
 	virtual void LoadMapMaterials(uint32_t version,VFilePtr f,std::vector<Material*> &materials);
 	BaseEntity *CreateMapEntity(uint32_t version,const std::string &classname,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,uint64_t offsetToEndOfEntity,std::vector<EntityHandle> &ents,std::vector<EntityHandle> *entities=nullptr);
-#ifdef PHYS_ENGINE_BULLET
-	std::unique_ptr<PhysEnv> m_physEnvironment = nullptr;
-#elif PHYS_ENGINE_PHYSX
-	// PhysX
-	physx::PxScene *m_pxScene = nullptr;
-	physx::PxControllerManager *m_pxControllerManager = nullptr;
-	double m_pxAccumulator = 0.0;
-	WVPxEventCallback *m_eventCallback = nullptr;
-	PhysXControllerHitReport *m_controllerHitReport = nullptr;
-#endif
+	std::unique_ptr<pragma::physics::IEnvironment> m_physEnvironment = nullptr;
 
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager()=0;
 	virtual void OnEntityCreated(BaseEntity *ent);

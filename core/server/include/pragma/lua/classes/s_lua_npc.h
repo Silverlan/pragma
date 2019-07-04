@@ -31,7 +31,7 @@ protected:
 	virtual void OnDeath(DamageInfo *damageInfo) override;
 	virtual void PlayFootStepSound(BaseCharacter::FootType foot,const SurfaceMaterial &surfMat,float scale) override;
 public:
-	virtual void SendData(NetPacket &packet,nwm::RecipientFilter &rp) override;
+	virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 	virtual Bool ReceiveNetEvent(Player *pl,UInt32 eventId,NetPacket &packet) override;
 );
 

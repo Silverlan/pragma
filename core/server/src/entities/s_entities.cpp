@@ -13,12 +13,15 @@
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/wvserverclient.h"
+#include "pragma/networking/iserver_client.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include <pragma/entities/components/global_component.hpp>
+#include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -27,7 +30,7 @@
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
-pragma::SPlayerComponent *SGame::GetPlayer(WVServerClient *session) {return server->GetPlayer(session);}
+pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &session) {return server->GetPlayer(session);}
 
 SBaseEntity *SGame::CreateEntity(std::string classname)
 {
@@ -66,7 +69,7 @@ void SGame::RemoveEntity(BaseEntity *ent)
 		{
 			NetPacket p;
 			nwm::write_entity(p,ent);
-			server->BroadcastTCP("ent_remove",p);
+			server->SendPacket("ent_remove",p,pragma::networking::Protocol::SlowReliable);
 		}
 	}
 	if(ent->IsPlayer())
@@ -94,20 +97,17 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 	auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
 	if(ID != 0 && (pMapComponent.valid() == false || pMapComponent->GetMapIndex() == 0))
 	{
-		nwm::RecipientFilter rp;
-		auto &players = pragma::SPlayerComponent::GetAll();
-		for(auto *pl : players)
-		{
-			if(pl != nullptr && pl->IsAuthed())
-				rp.Add(pl->GetClientSession());
-		}
+		pragma::networking::ClientRecipientFilter rp {[](const pragma::networking::IServerClient &client) -> bool {
+			auto *pl = client.GetPlayer();
+			return pl && pl->IsAuthed();
+		}};
 		SBaseEntity *sent = static_cast<SBaseEntity*>(ent);
 		NetPacket p;
 		p->Write<unsigned int>(ID);
 		p->Write<unsigned int>(ent->GetIndex());
 		p->Write<unsigned int>(pMapComponent.valid() ? pMapComponent->GetMapIndex() : 0u);
 		sent->SendData(p,rp);
-		server->SendPacketTCP("ent_create",p,rp);
+		server->SendPacket("ent_create",p,pragma::networking::Protocol::SlowReliable,rp);
 	}
 	auto hEnt = ent->GetHandle();
 	CallCallbacks<void,BaseEntity*>("OnEntitySpawned",ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)

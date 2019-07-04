@@ -4,12 +4,14 @@
 #include "pragma/entities/components/base_entity_component_handle_wrapper.hpp"
 #include "pragma/entities/entity_component_event.hpp"
 #include "pragma/entities/entity_component_info.hpp"
+#include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/util/util_handled.hpp"
 #include <unordered_map>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
+#include <typeindex>
 
 class BaseEntity;
 namespace pragma

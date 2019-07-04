@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include <pragma/definitions.h>
 #include "pragma/lua/libraries/ltable.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 int Lua::table::has_value(lua_State *l)
 {

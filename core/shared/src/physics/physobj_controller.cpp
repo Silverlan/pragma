@@ -2,9 +2,9 @@
 #include "pragma/physics/physobj.h"
 #include "pragma/entities/baseentity.h"
 #include "pragma/networkstate/networkstate.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physcontroller.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/controller.hpp"
+#include "pragma/physics/collision_object.hpp"
 #include <pragma/game/game.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/math/util_engine_math.hpp"
@@ -15,31 +15,26 @@
 
 ControllerPhysObj::~ControllerPhysObj()
 {
-#ifdef PHYS_ENGINE_BULLET
 	//NetworkState *state = m_networkState;
 	//Game *game = state->GetGameState();
 	//PhysEnv *physEnv = game->GetPhysicsEnvironment();
 
 	for(auto it=m_collisionObjects.begin();it!=m_collisionObjects.end();)
 	{
-		if(*it == m_ghostObject)
+		if(it->Get() == m_collisionObject.Get())
 			it = m_collisionObjects.erase(it);
 		else
 			it++;
 	}
-#elif PHYS_ENGINE_PHYSX
-	if(m_controller != NULL)
-		m_controller->release();
-	m_actors.clear();
-#endif
 	m_hitData.Clear();
 }
-#include <mathutil/color.h>
-bool ControllerPhysObj::SetGroundContactPoint(const btManifoldPoint &contactPoint,int32_t idx,const btCollisionObject *o,const btCollisionObject *oOther)
+
+bool ControllerPhysObj::SetGroundContactPoint(int32_t idx,const pragma::physics::ICollisionObject *o,const pragma::physics::ICollisionObject *oOther)
 {
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto d = PhysContactInfo::CalcXZDistance(contactPoint,idx);
 	if(m_groundInfo.has_value())
-		m_groundInfo->minContactDistance = umath::min(m_groundInfo->contactDistance,d);
+		m_groundInfo->minContactDistance = umath::min(m_groundInfo->contactDistance,d) /PhysEnv::WORLD_SCALE;
 
 	// Check if ground is walkable
 	auto n = PhysContactInfo::GetContactNormal(uvec::create(contactPoint.m_normalWorldOnB),idx);
@@ -64,7 +59,7 @@ bool ControllerPhysObj::SetGroundContactPoint(const btManifoldPoint &contactPoin
 	m_groundInfo = {GroundInfo{contactPoint,static_cast<int8_t>(idx)}};
 	m_groundInfo->groundWalkable = bGroundWalkable;
 	m_groundInfo->contactDistance = d;
-	m_groundInfo->minContactDistance = umath::min(d,dCur);
+	m_groundInfo->minContactDistance = umath::min(d,dCur) /PhysEnv::WORLD_SCALE;
 	auto &contactInfo = m_groundInfo->contactInfo;
 
 	auto *obj0 = static_cast<PhysCollisionObject*>(o->getUserPointer());
@@ -92,6 +87,9 @@ bool ControllerPhysObj::SetGroundContactPoint(const btManifoldPoint &contactPoin
 		}
 	}
 	return true;
+#else
+	return false;
+#endif
 }
 void ControllerPhysObj::ClearGroundContactPoint()
 {
@@ -120,12 +118,13 @@ PhysObj *ControllerPhysObj::GetGroundPhysObject() const
 	auto *o = GetGroundPhysCollisionObject();
 	return (o != nullptr) ? static_cast<PhysObj*>(o->userData) : nullptr;
 }
-PhysCollisionObject *ControllerPhysObj::GetGroundPhysCollisionObject() const
+pragma::physics::ICollisionObject *ControllerPhysObj::GetGroundPhysCollisionObject()
 {
 	if(m_groundInfo.has_value() == false)
 		return nullptr;
-	return m_groundInfo->contactInfo.contactObject1.get();
+	return m_groundInfo->contactInfo.contactObject1.Get();
 }
+const pragma::physics::ICollisionObject *ControllerPhysObj::GetGroundPhysCollisionObject() const {return const_cast<ControllerPhysObj*>(this)->GetGroundPhysCollisionObject();}
 
 ControllerHitData &ControllerPhysObj::GetControllerHitData() {return m_hitData;}
 void ControllerPhysObj::PostSimulate()
@@ -151,7 +150,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(owner);
 	data.SetTarget(origin);
 	data.SetFilter(GetHandle());
-	data.SetFlags(FTRACE::FILTER_INVERT);
+	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	m_groundRayResult = std::make_shared<TraceResult>(game->Overlap(data));*/
@@ -167,7 +166,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(origin +up *upDist);
 	data.SetTarget(origin +up *downDist);
 	data.SetFilter(GetHandle());
-	data.SetFlags(FTRACE::FILTER_INVERT);
+	data.SetFlags(RayCastFlags::InvertFilter);
 	auto pPhysComponent = owner->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 	{
@@ -198,7 +197,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(owner->GetPosition() +up *10.f);
 	data.SetTarget(owner->GetPosition() -up *100.f);
 	data.SetFilter(GetHandle());
-	data.SetFlags(FTRACE::FILTER_INVERT);
+	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	// See also: BaseCharacter::GetAimTraceData
@@ -213,9 +212,6 @@ void ControllerPhysObj::PostSimulate()
 }
 void ControllerPhysObj::SetKinematic(bool)
 {
-#ifdef PHYS_ENGINE_PHYSX
-	PhysObjKinematic::SetKinematic(b,m_actors);
-#endif
 }
 
 void ControllerPhysObj::SetOrientation(const Quat &rot)
@@ -235,10 +231,6 @@ void ControllerPhysObj::SetLinearVelocity(const Vector3 &vel)
 	m_velocity = vel;
 }
 
-#if PHYS_ENGINE_PHYSX
-Vector3 ControllerPhysObj::GetLinearVelocity() {return Vector3(m_velocity.x,m_velocity.y,m_velocity.z);}
-#endif
-
 bool ControllerPhysObj::IsController() {return true;}
 bool ControllerPhysObj::IsCapsule() {return false;}
 Vector3 &ControllerPhysObj::GetOffset() {return m_offset;}
@@ -248,7 +240,7 @@ Vector3 ControllerPhysObj::GetGroundVelocity() const
 	auto *physColGround = GetGroundPhysCollisionObject();
 	if(physColGround == nullptr || physColGround->IsRigid() == false)
 		return {};
-	auto *rigidBody = static_cast<PhysRigidBody*>(physColGround);
+	auto *rigidBody = physColGround->GetRigidBody();
 	auto v = rigidBody->GetLinearVelocity();
 	v += util::angular_velocity_to_linear(rigidBody->GetPos(),rigidBody->GetAngularVelocity(),const_cast<ControllerPhysObj*>(this)->GetPosition());
 	return v;
@@ -259,7 +251,7 @@ void ControllerPhysObj::Simulate(double tDelta,bool bIgnoreGravity)
 	if(m_bDisabled == true || IsKinematic())
 		return;
 	auto *owner = GetOwner();
-	if(owner == NULL)
+	if(owner == NULL || m_collisionObject == nullptr)
 		return;
 	//NetworkState *state = owner->GetNetworkState();
 	//Game *game = state->GetGameState();
@@ -289,45 +281,12 @@ void ControllerPhysObj::Simulate(double tDelta,bool bIgnoreGravity)
 	//	}
 	////}
 	//disp = velNew;
-#ifdef PHYS_ENGINE_BULLET
 	Vector3 disp = m_velocity;
 	disp *= tDelta;
-	PhysTransform t = m_ghostObject->GetWorldTransform();
+	auto t = m_collisionObject->GetWorldTransform();
 	//m_originLast = t.GetOrigin();
-	m_controller->SetWalkDirection(disp);
+	m_controller->Move(disp);
 	//m_controller->setVelocityForTimeInterval(disp,1);
-#elif PHYS_ENGINE_PHYSX
-	physx::PxVec3 disp(0,0,0);
-	disp += m_velocity;
-	if(bIgnoreGravity == false)
-	{
-#pragma message ("TODO: Use Verlet Gravity")
-		Vector3 f = GetGravityForce();
-		bool bApplyGravity = true;
-		if(m_hitData.physObj != NULL)
-		{
-			Vector3 n = GetGravityDirection();
-			float d = Vector3::dot(&m_hitData.hitNormal,&n);
-			if(d < 0.999f && d > 0.999f)
-				bApplyGravity = false;
-			static bool bPrint = false;
-			if(bPrint == true)
-			{
-				std::cout<<"Dot: "<<d<<std::endl;
-			}
-		}
-		//if(bApplyGravity == true)
-		//	disp += physx::PxVec3(f.x,f.y,f.z) *tDelta;
-	}
-	m_hitData.Clear();
-	disp *= tDelta;
-	
-	physx::PxExtendedVec3 pos = m_controller->getFootPosition();
-	if(owner->IsNPC())
-		physx::PxU32 collisionFlags = m_controller->move(disp,0.01f,tDelta,physx::PxControllerFilters());
-	else
-		physx::PxU32 collisionFlags = m_controller->move(disp,0.01f,tDelta,physx::PxControllerFilters());
-#endif
 }
 
 void ControllerPhysObj::SetCurrentFriction(Float friction) {m_currentFriction = friction;}
@@ -345,7 +304,7 @@ void ControllerPhysObj::UpdateVelocity()
 		scale = 1;
 	else
 		scale = 1.f /static_cast<float>(delta);
-	PhysTransform t = m_ghostObject->GetWorldTransform();
+	auto t = m_collisionObject->GetWorldTransform();
 	Vector3 pos = t.GetOrigin();
 	//m_velocity = (pos -m_posLast) *scale;
 	m_velocity = pos -m_posLast;
@@ -368,33 +327,42 @@ void ControllerPhysObj::UpdateVelocity()
 
 bool CapsuleControllerPhysObj::IsCapsule() {return true;}
 
-#ifdef PHYS_ENGINE_BULLET
-BoxControllerPhysObj::BoxControllerPhysObj(pragma::BaseEntityComponent *owner,const Vector3 &halfExtents,unsigned int stepHeight)
-	: ControllerPhysObj(owner),m_halfExtents(halfExtents)
-{
-	m_stepHeight = static_cast<float>(stepHeight);
-	NetworkState *state = m_networkState;
-	Game *game = state->GetGameState();
+BoxControllerPhysObj::BoxControllerPhysObj(pragma::BaseEntityComponent *owner)
+	: ControllerPhysObj(owner)
+{}
 
-	auto pTrComponent = owner->GetEntity().GetTransformComponent();
+bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents,unsigned int stepHeight,float maxSlopeDeg)
+{
+	if(ControllerPhysObj::Initialize() == false)
+		return false;
+	m_halfExtents = halfExtents;
+	m_stepHeight = static_cast<float>(stepHeight);
+
+	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	PhysTransform startTransform;
+	pragma::physics::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	m_posLast = pos;
-
-	PhysEnv *physEnv = game->GetPhysicsEnvironment();
-	m_controller = std::unique_ptr<PhysController>(physEnv->CreateBoxController(halfExtents,m_stepHeight,startTransform));
-	PhysGhostObject *ghost = m_controller->GetGhostObject();
-	m_ghostObject = ghost;
-	ghost->userData = this;
-	m_collisionObjects.push_back(ghost->GetHandle());
+	NetworkState *state = m_networkState;
+	Game *game = state->GetGameState();
+	auto *physEnv = game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return false;
+	m_controller = physEnv->CreateBoxController(halfExtents,m_stepHeight,maxSlopeDeg,startTransform);
+	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
+	if(collisionObject == nullptr)
+		return false;
+	m_collisionObject = collisionObject;
+	collisionObject->userData = this;
+	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership()));
+	return true;
 }
 
 Vector3 &BoxControllerPhysObj::GetHalfExtents() {return m_halfExtents;}
 void BoxControllerPhysObj::SetPosition(const Vector3 &pos)
 {
-	PhysTransform t = m_ghostObject->GetWorldTransform();
+	auto t = m_collisionObject->GetWorldTransform();
 	Vector3 posCur = t.GetOrigin();
 	PhysObj::SetPosition(pos);
 	m_posLast += pos -posCur;
@@ -405,22 +373,10 @@ ControllerPhysObj::ControllerPhysObj(pragma::BaseEntityComponent *owner)
 	: PhysObj(owner)
 {}
 float ControllerPhysObj::GetStepHeight() {return m_stepHeight;}
-void ControllerPhysObj::SetMaxSlope(float slope)
-{
-	if(m_controller == nullptr)
-		return;
-	m_controller->SetMaxSlope(slope);
-}
-float ControllerPhysObj::GetMaxSlope()
-{
-	if(m_controller == nullptr)
-		return 0.f;
-	return m_controller->GetMaxSlope();
-}
 void ControllerPhysObj::SetStepOffset(float) {}
 void ControllerPhysObj::SetPosition(const Vector3 &pos)
 {
-	PhysTransform t = m_ghostObject->GetWorldTransform();
+	auto t = m_collisionObject->GetWorldTransform();
 	Vector3 posCur = t.GetOrigin();
 	PhysObj::SetPosition(pos);
 	m_posLast += pos -posCur;
@@ -454,26 +410,37 @@ void BoxControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
 	*min = Vector3(0.f,0.f,0.f);
 	*max = Vector3(0.f,0.f,0.f);
 }
-CapsuleControllerPhysObj::CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner,unsigned int width,unsigned int height,unsigned int stepHeight)
-	: ControllerPhysObj(owner),m_width(CFloat(width)),m_height(CFloat(height))
+CapsuleControllerPhysObj::CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner)
+	: ControllerPhysObj(owner)
+{}
+bool CapsuleControllerPhysObj::Initialize(unsigned int width,unsigned int height,unsigned int stepHeight,float maxSlopeDeg)
 {
+	if(ControllerPhysObj::Initialize() == false)
+		return false;
+	m_width = CFloat(width);
+	m_height= CFloat(height);
 	m_stepHeight = static_cast<float>(stepHeight);
-	NetworkState *state = m_networkState;
-	Game *game = state->GetGameState();
 
-	auto pTrComponent = owner->GetEntity().GetTransformComponent();
+	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	PhysTransform startTransform;
+	pragma::physics::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	m_posLast = pos;
 
-	PhysEnv *physEnv = game->GetPhysicsEnvironment();
-	m_controller = std::unique_ptr<PhysController>(physEnv->CreateCapsuleController(width *0.5f,height *0.5f,m_stepHeight,startTransform));
-	PhysGhostObject *ghost = m_controller->GetGhostObject();
-	m_ghostObject = ghost;
-	ghost->userData = this;
-	m_collisionObjects.push_back(ghost->GetHandle());
+	NetworkState *state = m_networkState;
+	Game *game = state->GetGameState();
+	auto *physEnv = game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return false;
+	m_controller = physEnv->CreateCapsuleController(width *0.5f,height *0.5f,m_stepHeight,maxSlopeDeg,startTransform);
+	auto *collisionObject = m_controller.IsValid() ? m_controller->GetCollisionObject() : nullptr;
+	if(collisionObject == nullptr)
+		return false;
+	m_collisionObject = collisionObject;
+	collisionObject->userData = this;
+	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership()));
+	return true;
 }
 float CapsuleControllerPhysObj::GetWidth() const {return m_width;}
 float CapsuleControllerPhysObj::GetHeight() const {return m_height;}
@@ -527,133 +494,5 @@ void CapsuleControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
 	*min = Vector3(0.f,0.f,0.f);
 	*max = Vector3(0.f,0.f,0.f);
 }
-PhysController *ControllerPhysObj::GetController() {return m_controller.get();}
-PhysGhostObject *ControllerPhysObj::GetGhostObject() {return m_ghostObject;}
-#elif PHYS_ENGINE_PHYSX
-ControllerPhysObj::ControllerPhysObj(BaseEntity *owner,physx::PxController *controller)
-	: PhysObj(owner,controller->getActor()),PhysObjGravitation(),PhysObjKinematic(),
-	m_controller(controller),m_velocity(0,0,0),m_posLast(0,0,0)
-{
-	NetworkState *state = owner->GetNetworkState();
-	Game *game = state->GetGameState();
-	double tCur = game->CurTime();
-	m_tLastMove = tCur;
-}
-float ControllerPhysObj::GetSlopeLimit() {return m_controller->getSlopeLimit();}
-void ControllerPhysObj::SetSlopeLimit(float limit) {m_controller->setSlopeLimit(limit);}
-float ControllerPhysObj::GetStepOffset() {return m_controller->getStepOffset();}
-void ControllerPhysObj::SetStepOffset(float offset) {m_controller->setStepOffset(offset);}
-void ControllerPhysObj::SetPosition(const Vector3 &pos)
-{
-	Vector3 posCur = GetPosition();
-	m_posLast.x += pos.x -posCur.x;
-	m_posLast.y += pos.y -posCur.y;
-	m_posLast.z += pos.z -posCur.z;
-	m_controller->setFootPosition(physx::PxExtendedVec3(pos.x,pos.y,pos.z));
-}
-Vector3 ControllerPhysObj::GetPosition()
-{
-	physx::PxExtendedVec3 pos = m_controller->getFootPosition();
-	return Vector3(pos.x,pos.y,pos.z);
-}
-bool ControllerPhysObj::IsOnGround()
-{
-	physx::PxControllerState state;
-	m_controller->getState(state);
-	return (state.collisionFlags &physx::PxControllerFlag::eCOLLISION_DOWN) ? true : false;
-}
-unsigned int ControllerPhysObj::Move(const Vector3 &disp,float elapsedTime,float minDist,const physx::PxControllerFilters &filters)
-{
-	return m_controller->move(physx::PxVec3(disp.x,disp.y,disp.z),elapsedTime,minDist,filters);
-}
-unsigned int ControllerPhysObj::Move(const Vector3 &disp,float elapsedTime,float minDist)
-{
-	return Move(disp,elapsedTime,minDist,physx::PxControllerFilters());
-}
-void ControllerPhysObj::UpdateVelocity()
-{
-	if(m_owner == NULL || !m_owner->IsValid())
-		return;
-	NetworkState *state = (*m_owner)->GetNetworkState();
-	Game *game = state->GetGameState();
-	physx::PxExtendedVec3 pos = m_controller->getFootPosition();
-	double delta = game->DeltaTickTime();
-	float scale;
-	if(delta == 0)
-		scale = 1;
-	else
-		scale = 1.f /delta;
-	physx::PxRigidDynamic *actor = m_controller->getActor();
-	physx::PxVec3 vel = actor->getLinearVelocity();
-	m_velocity = vel -m_posLast *scale;
-	m_posLast.x = 0.f;
-	m_posLast.y = 0.f;
-	m_posLast.z = 0.f;
-	static bool bPrint = false;
-	if(bPrint == true && game->IsClient())
-	{
-		//std::cout<<"Out velocity: "<<Vector3::length(&Vector3(vel.x,vel.y,vel.z))<<std::endl;//("<<vel.x<<","<<vel.y<<","<<vel.z<<")"<<std::endl;
-	}
-	//m_velocity.x = (pos.x -m_posLast.x) *scale;
-	//m_velocity.y = (pos.y -m_posLast.y) *scale;
-	//m_velocity.z = (pos.z -m_posLast.z) *scale;
-}
-
-physx::PxController *ControllerPhysObj::GetController() {return m_controller;}
-
-BoxControllerPhysObj::BoxControllerPhysObj(BaseEntity *owner,physx::PxBoxController *controller)
-	: ControllerPhysObj(owner,controller),m_boxController(controller)
-{}
-physx::PxBoxController *BoxControllerPhysObj::GetController() {return m_boxController;}
-void BoxControllerPhysObj::SetCollisionBounds(const Vector3 &min,const Vector3 &max)
-{
-	physx::PxBoxController *controller = static_cast<physx::PxBoxController*>(m_controller);
-	controller->setHalfForwardExtent((max.x -min.x) *0.5f);
-	controller->setHalfHeight((max.z -min.z) *0.5f);
-	controller->setHalfSideExtent((max.y -min.y) *0.5f);
-	m_offset = max +min;
-}
-void BoxControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
-{
-	physx::PxExtendedVec3 pos = m_controller->getPosition();
-	physx::PxVec3 offset = pos -m_controller->getFootPosition();
-	Vector3 glOffset = Vector3(offset.x,offset.y,offset.z);
-	physx::PxBoxController *controller = static_cast<physx::PxBoxController*>(m_controller);
-	max->x = controller->getHalfForwardExtent();
-	min->x = -max->x;
-	max->y = controller->getHalfSideExtent();
-	min->y = -max->y;
-	max->z = controller->getHalfHeight();
-	min->z = -max->z;
-	*min -= glOffset;
-	*max -= glOffset;
-}
-
-CapsuleControllerPhysObj::CapsuleControllerPhysObj(BaseEntity *owner,physx::PxCapsuleController *controller)
-	: ControllerPhysObj(owner,controller),m_capsuleController(controller)
-{}
-physx::PxCapsuleController *CapsuleControllerPhysObj::GetController() {return m_capsuleController;}
-void CapsuleControllerPhysObj::SetCollisionBounds(const Vector3 &min,const Vector3 &max)
-{
-	physx::PxCapsuleController *controller = static_cast<physx::PxCapsuleController*>(m_controller);
-	float r = Math::Max(max.x -min.x,max.z -min.z) *0.5f;
-	controller->setRadius(r);
-	controller->setHeight((max.y -min.y) *0.5f);
-	m_offset = max +min;
-}
-void CapsuleControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
-{
-	physx::PxExtendedVec3 pos = m_controller->getPosition();
-	physx::PxVec3 offset = pos -m_controller->getFootPosition();
-	Vector3 glOffset = Vector3(offset.x,offset.y,offset.z);
-	physx::PxCapsuleController *controller = static_cast<physx::PxCapsuleController*>(m_controller);
-	max->x = controller->getRadius();
-	min->x = -max->x;
-	max->y = controller->getHeight();
-	min->y = -max->y;
-	max->z = max->x;
-	min->z = -max->z;
-	*min -= glOffset;
-	*max -= glOffset;
-}
-#endif
+pragma::physics::IController *ControllerPhysObj::GetController() {return m_controller.Get();}
+pragma::physics::ICollisionObject *ControllerPhysObj::GetCollisionObject() {return m_collisionObject.Get();}

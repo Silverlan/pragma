@@ -9,7 +9,7 @@ class DLLSERVER SPolyMesh
 	friend Con::c_cout& operator<<(Con::c_cout&,const SPolyMesh&);
 private:
 public:
-	static void GenerateBrushMeshes(std::vector<std::shared_ptr<BrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<SPolyMesh>> &meshes);
+	static void GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<BrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<SPolyMesh>> &meshes);
 };
 
 inline Con::c_cout &operator<<(Con::c_cout &os,const SPolyMesh& mesh)
@@ -19,9 +19,9 @@ inline Con::c_cout &operator<<(Con::c_cout &os,const SPolyMesh& mesh)
 }
 
 
-inline void SPolyMesh::GenerateBrushMeshes(std::vector<std::shared_ptr<BrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<SPolyMesh>> &meshes)
+inline void SPolyMesh::GenerateBrushMeshes(pragma::physics::IEnvironment &env,std::vector<std::shared_ptr<BrushMesh>> &outBrushMeshes,const std::vector<std::shared_ptr<SPolyMesh>> &meshes)
 {
-	return PolyMesh::GenerateBrushMeshes<Side,SPolyMesh,BrushMesh>(outBrushMeshes,meshes);
+	return PolyMesh::GenerateBrushMeshes<Side,SPolyMesh,BrushMesh>(env,outBrushMeshes,meshes);
 }
 
 #endif

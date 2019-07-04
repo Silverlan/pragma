@@ -2,7 +2,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/lua/c_ldebug_ik.hpp"
 #include "pragma/debug/c_debugoverlay.h"
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 
 extern DLLCLIENT CGame *c_game;
 //

@@ -15,7 +15,7 @@ void SQuakeComponent::Initialize()
 	BaseEnvQuakeComponent::Initialize();
 }
 
-void SQuakeComponent::SendData(NetPacket &packet,nwm::RecipientFilter &rp)
+void SQuakeComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<UInt32>(m_quakeFlags);
 	packet->Write<Float>(GetFrequency());

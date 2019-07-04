@@ -2,6 +2,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/networking/enums.hpp>
 
 extern DLLCLIENT ClientState *client;
 
@@ -21,7 +22,7 @@ void CModel::OnMaterialMissing(const std::string &matName)
 	NetPacket p {};
 	p->WriteString(GetName());
 	p->WriteString(matName);
-	client->SendPacketUDP("query_model_texture",p);
+	client->SendPacket("query_model_texture",p,pragma::networking::Protocol::FastUnreliable);
 }
 
 void CModel::PrecacheTexture(uint32_t texId,bool bReload)

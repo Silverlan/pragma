@@ -5,33 +5,28 @@
 #include "pragma/physics/phys_liquid.hpp"
 #include <string>
 #include <unordered_map>
-#include <BulletCollision/CollisionShapes/btMaterial.h>
 
-#ifdef PHYS_ENGINE_PHYSX
-namespace physx
-{
-	class PxPhysics;
-	class PxMaterial;
-};
-#endif
-
+namespace pragma::physics {class IEnvironment;};
 class SurfaceMaterial;
 class DLLNETWORK SurfaceMaterialManager
 {
-protected:
-	std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
 public:
-	SurfaceMaterialManager();
+	SurfaceMaterialManager(pragma::physics::IEnvironment &env);
 	void Load(const std::string &path);
+	SurfaceMaterial &Create(const std::string &identifier,Float staticFriction,Float dynamicFriction,Float restitution);
 	SurfaceMaterial &Create(const std::string &identifier,Float friction=0.5f,Float restitution=0.5f);
 	// The returned pointer is NOT guaranteed to stay alive; Don't store it.
 	SurfaceMaterial *GetMaterial(const std::string &id);
 	std::vector<SurfaceMaterial> &GetMaterials();
+protected:
+	std::vector<SurfaceMaterial> m_materials; // These have to be objects (Not pointers) to uphold the requirements for the btTriangleIndexVertexMaterialArray constructor.
+	pragma::physics::IEnvironment &m_physEnv;
 };
 
 
 namespace pragma
 {
+	namespace physics {class IMaterial;};
 	namespace nav
 	{
 		enum class PolyFlags : uint16_t;
@@ -40,9 +35,6 @@ namespace pragma
 
 struct PhysLiquid;
 class DLLNETWORK SurfaceMaterial
-#ifdef PHYS_ENGINE_BULLET
-	: public btMaterial
-#endif
 {
 public:
 	struct AudioInfo
@@ -56,44 +48,23 @@ public:
 		float midFreqTransmission = 0.050f;
 		float highFreqTransmission = 0.030f;
 	};
-protected:
-	UInt m_index;
-	std::string m_identifier;
-	std::string m_footstepType;
-	std::string m_softImpactSound;
-	std::string m_hardImpactSound;
-	std::string m_bulletImpactSound;
-	std::string m_impactParticle;
-	pragma::nav::PolyFlags m_navigationFlags;
-	std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
-	AudioInfo m_audioInfo = {};
-	PhysLiquid &InitializeLiquid();
 public:
-#ifdef PHYS_ENGINE_PHYSX
-	physx::PxMaterial *m_material;
-	SurfaceMaterial(UInt idx);
-	SurfaceMaterial(UInt idx,float staticFriction,float dynamicFriction,float restitution,std::string footstepType);
-#else
-	SurfaceMaterial(const std::string &identifier,UInt idx,Float friction=0.5f,Float restitution=0.5f);
-#endif
+	SurfaceMaterial(const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
 	SurfaceMaterial(const SurfaceMaterial &other);
 	SurfaceMaterial &operator=(const SurfaceMaterial &other);
 	void Reset();
-#ifdef PHYS_ENGINE_PHYSX
-	physx::PxMaterial *GetMaterial();
-	float GetDynamicFriction();
-	float GetStaticFriction();
-	void SetDynamicFriction(float friction);
-	void SetStaticFriction(float friction);
-	void SetFrictionEnabled(bool b);
-	void SetStrongFrictionEnabled(bool b);
-#else
+
 	const std::string &GetIdentifier() const;
 	UInt GetIndex() const;
-	Float GetFriction() const;
 	void SetFriction(Float friction);
+	float GetStaticFriction() const;
+	void SetStaticFriction(float friction);
+	float GetDynamicFriction() const;
+	void SetDynamicFriction(float friction);
 	Float GetRestitution() const;
-#endif
+
+	pragma::physics::IMaterial &GetPhysicsMaterial() const;
+
 	void SetRestitution(Float restitution);
 	const std::string &GetFootstepType() const;
 	void SetFootstepType(const std::string &footstep);
@@ -136,6 +107,19 @@ public:
 	float GetAudioMidFrequencyTransmission() const;
 	void SetAudioHighFrequencyTransmission(float transmission);
 	float GetAudioHighFrequencyTransmission() const;
+protected:
+	UInt m_index;
+	std::string m_identifier;
+	std::string m_footstepType;
+	std::string m_softImpactSound;
+	std::string m_hardImpactSound;
+	std::string m_bulletImpactSound;
+	std::string m_impactParticle;
+	pragma::nav::PolyFlags m_navigationFlags;
+	std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
+	std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;
+	AudioInfo m_audioInfo = {};
+	PhysLiquid &InitializeLiquid();
 };
 
 DLLNETWORK std::ostream &operator<<(std::ostream &out,const SurfaceMaterial &surfaceMaterial);

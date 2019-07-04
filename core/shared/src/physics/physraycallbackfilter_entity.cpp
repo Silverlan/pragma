@@ -9,7 +9,7 @@ BasePhysRayCallbackFilterEntity::BasePhysRayCallbackFilterEntity(const EntityHan
 {
 	m_filter.push_back(filter);
 }
-bool BasePhysRayCallbackFilterEntity::ShouldPass(BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col)
+bool BasePhysRayCallbackFilterEntity::ShouldPass(BaseEntity *ent,PhysObj *phys,pragma::physics::ICollisionObject *col)
 {
 	if(BasePhysRayCallbackFilter::ShouldPass(ent,phys,col) == false)
 		return false;

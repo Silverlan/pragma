@@ -2,11 +2,11 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/game/game.h>
 #include "pragma/entities/point/constraints/point_constraint_fixed.h"
-#include "pragma/physics/physenvironment.h"
-#include "pragma/physics/physconstraint.h"
+#include "pragma/physics/environment.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/entities/baseentity.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/physcollisionobject.h"
+#include "pragma/physics/collision_object.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 
@@ -42,9 +42,9 @@ void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src,Bas
 		{
 			auto posSrc = posThis -bodySrc->GetPos();
 			auto posTgt = posThis -bodyTgt->GetPos();
-			auto *fixed = physEnv->CreateFixedConstraint(static_cast<PhysRigidBody*>(bodyTgt.get()),posTgt,uquat::identity(),bodySrc,posSrc,uquat::identity());
+			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt,posTgt,uquat::identity(),*bodySrc,posSrc,uquat::identity());
 			if(fixed != nullptr)
-				m_constraints.push_back(fixed->GetHandle());
+				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(fixed));
 		}
 	}
 }

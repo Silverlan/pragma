@@ -1,6 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lcolor.h"
-#include <luasystem.h>
+#include <pragma/lua/luaapi.h>
 
 void Lua::Color::Copy(lua_State *l,::Color *col) {luabind::object(l,::Color(col->r,col->g,col->b,col->a)).push(l);}
 void Lua::Color::Set(lua_State*,::Color *col,unsigned char r,unsigned char g,unsigned char b,unsigned char a)

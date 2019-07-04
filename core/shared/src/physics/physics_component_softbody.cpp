@@ -2,9 +2,9 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/modelmesh.h"
-#include "pragma/physics/physenvironment.h"
+#include "pragma/physics/environment.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
-#include "pragma/physics/physshape.h"
+#include "pragma/physics/shape.hpp"
 #include "pragma/physics/physobj.h"
 #include "pragma/entities/components/base_softbody_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
@@ -90,7 +90,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 			}
 		}
 		std::vector<uint16_t> indexTranslations;
-		auto *softBody = physEnv->CreateSoftBody(sbInfo,mass,verts,indices,indexTranslations);
+		auto softBody = physEnv->CreateSoftBody(sbInfo,mass,verts,indices,indexTranslations);
 		if(softBody == nullptr)
 			continue;
 		std::fill(newVertexIndices.begin(),newVertexIndices.end(),std::numeric_limits<uint16_t>::max());
@@ -102,11 +102,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		softBody->SetOrigin(origin);
 		auto pTrComponent = ent.GetTransformComponent();
 		auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-		PhysTransform startTransform;
+		pragma::physics::Transform startTransform;
 		startTransform.SetIdentity();
 		startTransform.SetOrigin(-origin +originOffset);
 		startTransform.SetRotation(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
-		btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
+		auto contactProcessingThreshold = 1e30;
 
 		auto group = GetCollisionFilter();
 		if(group != CollisionMask::Default)
@@ -117,7 +117,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		softBody->SetWorldTransform(startTransform);
 		softBody->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
 
-		PhysRigidBody *rigid = nullptr; // TODO
+		pragma::physics::IRigidBody *pRigid = nullptr; // TODO
 		for(auto &anchor : *colMesh->GetSoftBodyAnchors())
 		{
 			uint16_t nodeIdx = 0u;
@@ -126,20 +126,21 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 				Con::cwar<<"WARNING: Invalid vertex index "<<anchor.vertexIndex<<" for soft-body anchor! Skipping..."<<Con::endl;
 				continue;
 			}
-			if(rigid == nullptr)
+			if(pRigid == nullptr)
 			{
-				auto shape = physEnv->CreateBoxShape({1.f,1.f,1.f});
-				rigid = physEnv->CreateRigidBody(0.f,shape,{});
+				auto shape = physEnv->CreateBoxShape({1.f,1.f,1.f},physEnv->GetGenericMaterial());
+				auto rigid = physEnv->CreateRigidBody(0.f,*shape,{});
 				rigid->SetPos({});
 				rigid->SetSimulationEnabled(false);
 				rigid->Spawn();
+				pRigid = rigid.Get();
 			}
-			softBody->AppendAnchor(nodeIdx,*rigid,(anchor.flags &CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != CollisionMesh::SoftBodyAnchor::Flags::None,anchor.influence);
+			softBody->AppendAnchor(nodeIdx,*pRigid,(anchor.flags &CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != CollisionMesh::SoftBodyAnchor::Flags::None,anchor.influence);
 		}
 		if(phys == nullptr)
-			phys = std::make_shared<SoftBodyPhysObj>(this,softBody);
+			phys = PhysObj::Create<SoftBodyPhysObj,pragma::physics::ISoftBody&>(*this,*softBody);
 		else
-			phys->AddCollisionObject(softBody);
+			phys->AddCollisionObject(*softBody);
 	}
 
 	if(phys == nullptr)

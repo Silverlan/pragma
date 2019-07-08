@@ -2,7 +2,6 @@
 #define __PHYSOBJ_H__
 
 #include "pragma/networkdefinitions.h"
-#include <pragma/physics/physapi.h>
 #include <mathutil/glmutil.h>
 #include <memory>
 #include <vector>
@@ -45,7 +44,7 @@ public:
 	virtual ~PhysObj();
 	virtual void Spawn();
 	virtual void UpdateVelocity();
-	PhysObjHandle GetHandle();
+	PhysObjHandle GetHandle() const;
 	virtual pragma::BaseEntityComponent *GetOwner();
 	NetworkState *GetNetworkState();
 	virtual void Enable();
@@ -66,9 +65,9 @@ public:
 	void AddCollisionFilter(CollisionMask filter);
 	void RemoveCollisionFilter(CollisionMask filter);
 	void SetCollisionFilter(CollisionMask filterGroup);
-	CollisionMask GetCollisionFilter();
-	CollisionMask GetCollisionFilterMask();
-	void GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filterMask);
+	CollisionMask GetCollisionFilter() const;
+	CollisionMask GetCollisionFilterMask() const;
+	void GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filterMask) const;
 
 	virtual void AddCollisionObject(pragma::physics::ICollisionObject &o);
 	const pragma::physics::ICollisionObject *GetCollisionObject() const;
@@ -76,23 +75,23 @@ public:
 	const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects() const;
 	std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &GetCollisionObjects();
 
-	virtual Vector3 GetLinearVelocity();
+	virtual Vector3 GetLinearVelocity() const;
 	virtual void SetLinearVelocity(const Vector3 &vel);
 	void AddLinearVelocity(const Vector3 &vel);
-	virtual Vector3 GetAngularVelocity();
+	virtual Vector3 GetAngularVelocity() const;
 	virtual void SetAngularVelocity(const Vector3 &vel);
 	void AddAngularVelocity(const Vector3 &vel);
 	virtual void SetPosition(const Vector3 &pos);
 	virtual void SetOrientation(const Quat &q);
-	virtual Quat GetOrientation();
-	virtual Vector3 GetPosition();
+	virtual Quat GetOrientation() const;
+	virtual Vector3 GetPosition() const;
 	Vector3 GetOrigin() const;
 	
 	virtual void PutToSleep();
 	virtual void WakeUp();
-	virtual bool IsSleeping();
+	virtual bool IsSleeping() const;
 	virtual void Simulate(double tDelta,bool bIgnoreGravity=false);
-	virtual bool IsController();
+	virtual bool IsController() const;
 	virtual void OnSleep();
 	virtual void OnWake();
 
@@ -114,8 +113,8 @@ public:
 	virtual void ApplyTorque(const Vector3 &torque);
 	virtual void ApplyTorqueImpulse(const Vector3 &torque);
 	virtual void ClearForces();
-	virtual Vector3 GetTotalForce();
-	virtual Vector3 GetTotalTorque();
+	virtual Vector3 GetTotalForce() const;
+	virtual Vector3 GetTotalTorque() const;
 
 	void SetLinearSleepingThreshold(float threshold);
 	void SetAngularSleepingThreshold(float threshold);
@@ -185,7 +184,7 @@ class DLLNETWORK PhysObjKinematic
 {
 public:
 	virtual void SetKinematic(bool b)=0;
-	bool IsKinematic();
+	bool IsKinematic() const;
 protected:
 	PhysObjKinematic();
 	bool m_bKinematic = false;
@@ -212,7 +211,7 @@ public:
 	virtual void Simulate(double tDelta,bool bIgnoreGravity=false) override;
 	virtual void PutToSleep() override;
 	virtual void WakeUp() override;
-	virtual bool IsSleeping() override;
+	virtual bool IsSleeping() const override;
 
 	virtual void ApplyForce(const Vector3 &force) override;
 protected:
@@ -244,13 +243,13 @@ public:
 	virtual void Simulate(double tDelta,bool bIgnoreGravity=false) override;
 	virtual pragma::BaseEntityComponent *GetOwner() override;
 
-	virtual Vector3 GetLinearVelocity() override;
+	virtual Vector3 GetLinearVelocity() const override;
 	virtual void SetLinearVelocity(const Vector3 &vel) override;
-	virtual Vector3 GetAngularVelocity() override;
+	virtual Vector3 GetAngularVelocity() const override;
 	virtual void SetAngularVelocity(const Vector3 &vel) override;
 	virtual void PutToSleep() override;
 	virtual void WakeUp() override;
-	virtual bool IsSleeping() override;
+	virtual bool IsSleeping() const override;
 	virtual void OnSleep() override;
 	virtual void OnWake() override;
 
@@ -272,8 +271,8 @@ public:
 	virtual void ApplyTorque(const Vector3 &torque) override;
 	virtual void ApplyTorqueImpulse(const Vector3 &torque) override;
 	virtual void ClearForces() override;
-	virtual Vector3 GetTotalForce() override;
-	virtual Vector3 GetTotalTorque() override;
+	virtual Vector3 GetTotalForce() const override;
+	virtual Vector3 GetTotalTorque() const override;
 
 	virtual void SetSleepingThresholds(float linear,float angular) override;
 	virtual float GetLinearSleepingThreshold() const override;
@@ -299,33 +298,34 @@ public:
 	pragma::physics::IController *GetController();
 	pragma::physics::ICollisionObject *GetCollisionObject();
 	virtual void PostSimulate() override;
-	float GetStepHeight();
+	float GetStepHeight() const;
 	virtual void SetKinematic(bool b) override;
 	virtual void SetLinearVelocity(const Vector3 &vel) override;
 	Vector3 &GetOffset();
 	void SetOffset(const Vector3 &offset);
 	void Simulate(double tDelta,bool bIgnoreGravity=false);
-	bool IsController();
-	virtual bool IsCapsule();
-	float GetStepOffset();
+	bool IsController() const;
+	virtual bool IsCapsule() const;
+	umath::Degree GetSlopeLimit() const;
+	void SetSlopeLimit(umath::Degree limit);
+	float GetStepOffset() const;
 	void SetStepOffset(float offset);
 	virtual void SetCollisionBounds(const Vector3 &min,const Vector3 &max);
 	virtual void GetCollisionBounds(Vector3 *min,Vector3 *max);
 	pragma::BaseEntityComponent *GetOwner();
 	virtual void SetOrientation(const Quat &q) override;
 	virtual void SetPosition(const Vector3 &pos) override;
-	virtual Vector3 GetPosition() override;
+	virtual Vector3 GetPosition() const override;
 	virtual void UpdateVelocity() override;
 	unsigned int Move(const Vector3 &disp,float elapsedTime,float minDist=0.1f);
 	ControllerHitData &GetControllerHitData();
 
 	bool IsOnGround() const;
 	bool IsGroundWalkable() const;
-	const PhysContactInfo *GetGroundContactInfo() const;
-	double GetMinGroundXZContactDistance() const;
 	BaseEntity *GetGroundEntity() const;
 	PhysObj *GetGroundPhysObject() const;
 	int32_t GetGroundSurfaceMaterial() const;
+	pragma::physics::IMaterial *GetGroundMaterial() const;
 	const pragma::physics::ICollisionObject *GetGroundPhysCollisionObject() const;
 	pragma::physics::ICollisionObject *GetGroundPhysCollisionObject();
 	// The velocity affecting this controller originating from the ground object
@@ -333,29 +333,10 @@ public:
 
 	Vector3 GetDimensions() const;
 	void SetDimensions(const Vector3 &dimensions);
-	// Sets the friction for the next simulation step. The friction will be reset after the simulation step is complete.
-	void SetCurrentFriction(Float friction);
-	Float GetCurrentFriction() const;
-
-	// These are called by the simulation; Don't call these manually!
-	bool SetGroundContactPoint(int32_t idx,const pragma::physics::ICollisionObject *o,const pragma::physics::ICollisionObject *oOther);
-	void ClearGroundContactPoint();
 protected:
-	struct GroundInfo
-	{
-		GroundInfo(int8_t controllerIndex)
-			: contactInfo{controllerIndex}
-		{}
-		PhysContactInfo contactInfo;
-		bool groundWalkable = false;
-		double contactDistance = std::numeric_limits<double>::max(); // Distance on XZ plane; Used to determine best contact point candidate
-		double minContactDistance = std::numeric_limits<double>::max(); // Minimum XZ distance for ALL contact points (in this tick)
-	};
-	std::optional<GroundInfo> m_groundInfo {};
 	ControllerHitData m_hitData = {};
 	Vector3 m_offset = {};
 	double m_tLastMove = 0.0;
-	Float m_currentFriction = 1.f;
 
 	util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
 	util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
@@ -373,8 +354,6 @@ public:
 	Vector3 &GetHalfExtents();
 	void SetCollisionBounds(const Vector3 &min,const Vector3 &max);
 	void GetCollisionBounds(Vector3 *min,Vector3 *max);
-	virtual void SetPosition(const Vector3 &pos) override;
-	virtual Vector3 GetPosition() override;
 protected:
 	BoxControllerPhysObj(pragma::BaseEntityComponent *owner);
 	bool Initialize(const Vector3 &halfExtents,unsigned int stepHeight,float maxSlopeDeg=45.f);
@@ -389,11 +368,9 @@ public:
 	float GetWidth() const;
 	float GetHeight() const;
 	void SetHeight(float height);
-	virtual bool IsCapsule() override;
+	virtual bool IsCapsule() const override;
 	void SetCollisionBounds(const Vector3 &min,const Vector3 &max);
 	void GetCollisionBounds(Vector3 *min,Vector3 *max);
-	virtual void SetPosition(const Vector3 &pos) override;
-	virtual Vector3 GetPosition() override;
 protected:
 	CapsuleControllerPhysObj(pragma::BaseEntityComponent *owner);
 	bool Initialize(unsigned int width,unsigned int height,unsigned int stepHeight,float maxSlopeDeg=45.f);

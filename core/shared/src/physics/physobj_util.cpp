@@ -35,7 +35,7 @@ void PhysObjDynamic::PostSimulate()
 	}
 }
 
-bool PhysObjKinematic::IsKinematic() {return false;}
+bool PhysObjKinematic::IsKinematic() const {return false;}
 
 ////////////////////////////////////
 

@@ -1,8 +1,5 @@
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
-#include "pragma/networking/wvserverclient.h"
-#include "pragma/networking/wvlocalclient.h"
-#include "pragma/networking/wvserver.h"
 #include "pragma/entities/player.h"
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/standard_server.hpp"

@@ -57,7 +57,7 @@ void PhysObj::GetAABB(Vector3 &min,Vector3 &max) const
 		return;
 	}
 }
-Vector3 PhysObj::GetLinearVelocity() {return m_velocity;}
+Vector3 PhysObj::GetLinearVelocity() const {return m_velocity;}
 void PhysObj::UpdateVelocity() {}
 NetworkState *PhysObj::GetNetworkState() {return m_networkState;}
 float PhysObj::GetMass() const {return 0.f;}
@@ -86,7 +86,7 @@ void PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
 
 
 	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
-	obj.userData = this;
+	obj.SetPhysObj(*this);
 	if(m_bSpawned == true)
 		obj.Spawn();
 }
@@ -145,7 +145,7 @@ void PhysObj::OnWake()
 void PhysObj::Enable() {m_bDisabled = false;}
 void PhysObj::Disable() {m_bDisabled = true;}
 pragma::BaseEntityComponent *PhysObj::GetOwner() {return m_owner.get();}
-bool PhysObj::IsController() {return false;}
+bool PhysObj::IsController() const {return false;}
 
 void PhysObj::SetLinearFactor(const Vector3&) {}
 void PhysObj::SetAngularFactor(const Vector3&) {}
@@ -161,7 +161,7 @@ float PhysObj::GetAngularSleepingThreshold() const {return 0.f;}
 
 void PhysObj::Simulate(double,bool) {}
 
-PhysObjHandle PhysObj::GetHandle() {return m_handle;}
+PhysObjHandle PhysObj::GetHandle() const {return m_handle;}
 
 void PhysObj::SetPosition(const Vector3 &pos)
 {
@@ -214,14 +214,14 @@ void PhysObj::SetOrientation(const Quat &q)
 	}
 	root->SetRotation(q); // Faster and less prone to precision errors
 }
-Quat PhysObj::GetOrientation()
+Quat PhysObj::GetOrientation() const
 {
 	auto *o = GetCollisionObject();
 	if(o == NULL)
 		return uquat::identity();
 	return o->GetRotation();
 }
-Vector3 PhysObj::GetPosition()
+Vector3 PhysObj::GetPosition() const
 {
 	auto *o = GetCollisionObject();
 	if(o == NULL)
@@ -277,9 +277,9 @@ void PhysObj::RemoveCollisionFilter(CollisionMask filter)
 	SetCollisionFilter(filterGroup & ~filter,filterMask & ~filter);
 }
 void PhysObj::SetCollisionFilter(CollisionMask filterGroup) {SetCollisionFilter(filterGroup,filterGroup);}
-CollisionMask PhysObj::GetCollisionFilter() {return m_collisionFilterGroup;}
-CollisionMask PhysObj::GetCollisionFilterMask() {return m_collisionFilterMask;}
-void PhysObj::GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filterMask)
+CollisionMask PhysObj::GetCollisionFilter() const {return m_collisionFilterGroup;}
+CollisionMask PhysObj::GetCollisionFilterMask() const {return m_collisionFilterMask;}
+void PhysObj::GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filterMask) const
 {
 	*filterGroup = m_collisionFilterGroup;
 	*filterMask = m_collisionFilterMask;
@@ -296,12 +296,12 @@ bool PhysObj::IsTrigger() const
 
 void PhysObj::SetLinearVelocity(const Vector3&) {}
 void PhysObj::AddLinearVelocity(const Vector3 &vel) {SetLinearVelocity(GetLinearVelocity() +vel);}
-Vector3 PhysObj::GetAngularVelocity() {return Vector3(0,0,0);}
+Vector3 PhysObj::GetAngularVelocity() const {return Vector3(0,0,0);}
 void PhysObj::SetAngularVelocity(const Vector3&) {}
 void PhysObj::AddAngularVelocity(const Vector3 &vel) {SetAngularVelocity(GetAngularVelocity() +vel);}
 void PhysObj::PutToSleep() {}
 void PhysObj::WakeUp() {}
-bool PhysObj::IsSleeping() {return m_bAsleep;}
+bool PhysObj::IsSleeping() const {return m_bAsleep;}
 void PhysObj::SetDamping(float,float) {}
 void PhysObj::SetLinearDamping(float) {}
 void PhysObj::SetAngularDamping(float) {}
@@ -315,7 +315,7 @@ void PhysObj::ApplyImpulse(const Vector3&,const Vector3&) {}
 void PhysObj::ApplyTorque(const Vector3&) {}
 void PhysObj::ApplyTorqueImpulse(const Vector3&) {}
 void PhysObj::ClearForces() {}
-Vector3 PhysObj::GetTotalForce() {return Vector3(0.f,0.f,0.f);}
-Vector3 PhysObj::GetTotalTorque() {return Vector3(0.f,0.f,0.f);}
+Vector3 PhysObj::GetTotalForce() const {return Vector3(0.f,0.f,0.f);}
+Vector3 PhysObj::GetTotalTorque() const {return Vector3(0.f,0.f,0.f);}
 
 #pragma optimize("",on)

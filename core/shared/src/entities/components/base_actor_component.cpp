@@ -209,7 +209,11 @@ void BaseActorComponent::OnPhysicsInitialized()
 		auto max = hb.max *scale;
 		auto extents = (max -min) *0.5f;
 		auto shape = physEnv->CreateBoxShape(extents,physEnv->GetGenericMaterial());
+		if(shape == nullptr)
+			continue;
 		auto col = physEnv->CreateGhostObject(*shape);
+		if(col == nullptr)
+			continue;
 		col->SetCollisionsEnabled(false); // Disable collisions
 		physHitboxes.push_back(col.Get());
 

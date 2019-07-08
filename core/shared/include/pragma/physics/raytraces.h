@@ -2,7 +2,6 @@
 #define __RAYTRACES_H__
 
 #include <mathutil/glmutil.h>
-#include <pragma/physics/physapi.h>
 #include "pragma/physics/transform.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/physics/physobj.h"

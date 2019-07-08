@@ -4,6 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
 
+class SurfaceMaterial;
 namespace pragma::physics
 {
 	class DLLNETWORK IMaterial
@@ -19,6 +20,12 @@ namespace pragma::physics
 		virtual void SetDynamicFriction(float friction)=0;
 		virtual float GetRestitution() const=0;
 		virtual void SetRestitution(float restitution)=0;
+
+		void SetSurfaceMaterial(SurfaceMaterial &surfMat);
+		SurfaceMaterial *GetSurfaceMaterial() const;
+		virtual void InitializeLuaObject(lua_State *lua) override;
+	private:
+		mutable SurfaceMaterial *m_surfaceMaterial = nullptr;
 	};
 };
 

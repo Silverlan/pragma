@@ -5,7 +5,6 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/engine.h>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvclient.h"
 
 extern DLLENGINE Engine *engine;
 void ClientState::SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol)

@@ -6,8 +6,6 @@
 #include "pragma/entities/player.h"
 #include "pragma/physics/movetypes.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvserverclient.h"
-#include "pragma/networking/wvlocalclient.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"

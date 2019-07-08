@@ -3,7 +3,6 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/resources.h"
 #include <fsys/filesystem.h>
-#include "pragma/networking/wvclient.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"

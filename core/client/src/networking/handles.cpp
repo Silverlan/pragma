@@ -4,7 +4,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/networking/netmessages.h"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvclient.h"
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_string.h>
 #include "pragma/entities/components/c_entity_component.hpp"

@@ -26,7 +26,7 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-pragma::physics::IRigidBody *BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,float mass,const Vector3 &origin)
+util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,float mass,const Vector3 &origin)
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -35,7 +35,7 @@ pragma::physics::IRigidBody *BasePhysicsComponent::CreateRigidBody(pragma::physi
 	auto *physEnv = game->GetPhysicsEnvironment();
 	Vector3 localInertia(0.f,0.f,0.f);
 	shape.CalculateLocalInertia(mass,&localInertia);
-	auto body = physEnv->CreateRigidBody(mass,shape,localInertia);
+	auto body = physEnv->CreateRigidBody(mass,shape,localInertia,dynamic);
 	if(body == nullptr)
 		return nullptr;
 	body->SetOrigin(origin);
@@ -63,7 +63,7 @@ pragma::physics::IRigidBody *BasePhysicsComponent::CreateRigidBody(pragma::physi
 		body->UpdateAABB();
 		body->SetActivationState(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive);
 	}
-	return body.Get();
+	return body;
 }
 
 util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDynamic)
@@ -86,21 +86,13 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto &joints = hMdl->GetJoints();
-	struct ShapeInfo
-	{
-		ShapeInfo(const std::shared_ptr<pragma::physics::IShape> &_shape,const Vector3 &_origin)
-			: shape(_shape),origin(_origin)
-		{}
-		std::shared_ptr<pragma::physics::IShape> shape;
-		Vector3 origin;
-	};
 	struct SortedShape
 	{
 		SortedShape()
 			: body(nullptr)
 		{}
-		std::vector<ShapeInfo> shapes;
-		pragma::physics::IRigidBody *body;
+		std::vector<std::shared_ptr<pragma::physics::IShape>> shapes;
+		util::TSharedHandle<pragma::physics::IRigidBody> body;
 	};
 	std::unordered_map<int,SortedShape> sortedShapes;
 	std::unordered_map<unsigned int,unsigned int> sortedShapeMap; // meshes -> sortedShapes
@@ -118,7 +110,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			auto itMesh = sortedShapes.find(bone);
 			if(itMesh == sortedShapes.end())
 				itMesh = sortedShapes.insert(std::unordered_map<int,SortedShape>::value_type(bone,SortedShape())).first;
-			itMesh->second.shapes.push_back(ShapeInfo(shape,mesh->GetOrigin() *scale));
+			itMesh->second.shapes.push_back(shape);
 			sortedShapeMap[meshId] = bone;
 		}
 		meshId++;
@@ -155,21 +147,18 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		//auto bone = it->first;
 		auto &sortedShape = it->second;
 		auto &shapes = sortedShape.shapes;
-		Vector3 origin(0.f,0.f,0.f);
 		std::shared_ptr<pragma::physics::IShape> shape;
 		if(shapes.size() == 1)
-		{
-			auto &shapeInfo = shapes.front();
-			shape = shapeInfo.shape;
-			origin = shapeInfo.origin;
-		}
+			shape = shapes.front();
 		else
 		{
 			if(bDynamic == false)
 			{
 				for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto *body = CreateRigidBody(*it->shape,mass,it->origin);//-it->origin);
+					auto body = CreateRigidBody(**it,mass,bDynamic);//-it->origin);
+					if(body == nullptr)
+						continue;
 					if(bPhys == false)
 					{
 						bPhys = true;
@@ -197,11 +186,18 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 				continue;
 			}
 			shape = physEnv->CreateCompoundShape();
-			auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
-			for(auto it=shapes.begin();it!=shapes.end();++it)
-				cmpShape->AddShape(*it->shape,-it->origin);
+			if(shape)
+			{
+				auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
+				for(auto it=shapes.begin();it!=shapes.end();++it)
+					cmpShape->AddShape(**it);
+			}
 		}
-		auto *body = CreateRigidBody(*shape,mass,origin);
+		if(shape == nullptr)
+			continue;
+		auto body = CreateRigidBody(*shape,mass,bDynamic);
+		if(body == nullptr)
+			continue;
 		body->SetBoneID(it->first);
 		if(it->first >= 0 && bDynamic == true && joints.empty() == false) // Static physics and non-ragdolls can still play animation
 			umath::set_flag(m_stateFlags,StateFlags::Ragdoll);
@@ -225,8 +221,8 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		{
 			auto &src = sortedShapes[itSrc->second]; // Bone Id
 			auto &dest = sortedShapes[itDest->second]; // Bone Id
-			auto *bodySrc = src.body;
-			auto *bodyTgt = dest.body;
+			auto &bodySrc = src.body;
+			auto &bodyTgt = dest.body;
 			if(bodySrc == nullptr || bodyTgt == nullptr)
 				continue;
 			util::TSharedHandle<pragma::physics::IConstraint> c = nullptr;
@@ -495,7 +491,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 			startTransform.SetOrigin(origin);
 			auto contactProcessingThreshold = 1e30;
 
-			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia);
+			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia,bDynamic);
 			//PhysRigidBody *body = physEnv->CreateRigid
 			//btRigidBody *body = new btRigidBody(mass,NULL,shape,localInertia);
 			body->SetWorldTransform(startTransform);
@@ -605,14 +601,15 @@ void BasePhysicsComponent::InitializePhysObj()
 PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,float mass)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
-	auto *body = CreateRigidBody(shape,mass);
+	auto bDynamic = mass == 0.f;
+	auto body = CreateRigidBody(shape,mass,bDynamic);
 
 	if(m_physObject != NULL)
 		DestroyPhysicsObject();
 	m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 	auto group = GetCollisionFilter();
 	auto mask = GetCollisionFilterMask();
-	if(mass == 0.f)
+	if(bDynamic)
 	{
 		m_physicsType = PHYSICSTYPE::STATIC;
 		if(group == CollisionMask::Default)

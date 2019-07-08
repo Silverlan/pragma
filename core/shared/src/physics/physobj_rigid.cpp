@@ -224,14 +224,14 @@ void RigidPhysObj::ClearForces()
 		return;
 	body->ClearForces();
 }
-Vector3 RigidPhysObj::GetTotalForce()
+Vector3 RigidPhysObj::GetTotalForce() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
 		return Vector3(0.f,0.f,0.f);
 	return body->GetTotalForce();
 }
-Vector3 RigidPhysObj::GetTotalTorque()
+Vector3 RigidPhysObj::GetTotalTorque() const
 {
 	auto *body = GetRigidBody();
 	if(body == nullptr)
@@ -285,7 +285,7 @@ void RigidPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)
 	PhysObj::AddCollisionObject(o);
 	m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::IRigidBody>(o.ClaimOwnership()));
 }
-Vector3 RigidPhysObj::GetLinearVelocity()
+Vector3 RigidPhysObj::GetLinearVelocity() const
 {
 	return m_velocity;
 }
@@ -301,7 +301,7 @@ void RigidPhysObj::SetLinearVelocity(const Vector3 &vel)
 		}
 	}
 }
-Vector3 RigidPhysObj::GetAngularVelocity()
+Vector3 RigidPhysObj::GetAngularVelocity() const
 {
 	auto *body = GetRigidBody();
 	if(body == NULL)
@@ -338,7 +338,7 @@ void RigidPhysObj::WakeUp()
 			body->WakeUp();
 	}
 }
-bool RigidPhysObj::IsSleeping()
+bool RigidPhysObj::IsSleeping() const
 {
 	auto *body = GetRigidBody();
 	if(body == NULL)

@@ -96,7 +96,7 @@ void SoftBodyPhysObj::WakeUp()
 			hBody->WakeUp();
 	}
 }
-bool SoftBodyPhysObj::IsSleeping()
+bool SoftBodyPhysObj::IsSleeping() const
 {
 	auto *body = GetSoftBody();
 	if(body == nullptr)

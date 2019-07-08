@@ -2,11 +2,8 @@
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/engine.h>
 #include "pragma/entities/player.h"
-#include "pragma/networking/clientsessioninfo.h"
-#include "pragma/networking/wvserver.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
-#include "pragma/networking/wvlocalclient.h"
 #include "pragma/networking/standard_server.hpp"
 #include <pragma/networking/enums.hpp>
 #include <wms_shared.h>

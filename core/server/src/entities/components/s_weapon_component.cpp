@@ -1,7 +1,6 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/player.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/networking/enums.hpp"
 #include "pragma/entities/components/s_character_component.hpp"

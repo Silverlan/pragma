@@ -5,7 +5,6 @@
 #include "pragma/networking/iclient.hpp"
 #include "pragma/networking/standard_client.hpp"
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvclient.h"
 #include <sharedutils/util.h>
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/enums.hpp>

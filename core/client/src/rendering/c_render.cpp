@@ -42,6 +42,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
+#include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -75,17 +76,23 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 	if(c_game == NULL)
 		return;
 	auto *physEnv = c_game->GetPhysicsEnvironment();
-	auto *debugDraw = physEnv ? physEnv->InitializeVisualDebugger() : nullptr;
-	if(debugDraw == nullptr)
+	if(physEnv == nullptr)
 		return;
 	if(val == 0)
 	{
-		debugDraw->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
+		physEnv->SetVisualDebugger(nullptr);
 		return;
 	}
+	auto visDebugger = std::make_unique<CPhysVisualDebugger>();
+	physEnv->SetVisualDebugger(std::move(visDebugger));
+	/*if(val == 0)
+	{
+		visDebugger->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
+		return;
+	}*/
 	cbDrawPhysics = c_game->AddCallback("Think",FunctionCallback<>::Create([]() {
 		auto *physEnv = c_game->GetPhysicsEnvironment();
-		auto *debugDraw = physEnv ? physEnv->InitializeVisualDebugger() : nullptr;
+		auto *debugDraw = physEnv ? physEnv->GetVisualDebugger() : nullptr;
 		if(debugDraw == nullptr)
 			return;
 		auto &vehicles = pragma::CVehicleComponent::GetAll();
@@ -122,7 +129,7 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 		mode = pragma::physics::IVisualDebugger::DebugMode::Constraints;
 	else if(val == 4)
 		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
-	debugDraw->SetDebugMode(mode);
+	visDebugger->SetDebugMode(mode);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,CVAR_CALLBACK_debug_physics_draw);
 

@@ -8,6 +8,8 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/raytraces.h"
+#include "pragma/physics/controller.hpp"
+#include "pragma/physics/phys_material.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 
@@ -172,15 +174,6 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 		}
 		Lua::PushInt(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundSurfaceMaterial());
 	}));
-	classDef.def("GetMinGroundXZContactDistance",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-		{
-			Lua::PushNumber(l,0.0);
-			return;
-		}
-		Lua::PushNumber(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetMinGroundXZContactDistance());
-	}));
 	classDef.def("GetGroundVelocity",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
 		LUA_CHECK_PHYSOBJ(l,hPhysObj);
 		if(hPhysObj->IsController() == false)
@@ -190,14 +183,15 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 		}
 		Lua::Push<Vector3>(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundVelocity());
 	}));
-	classDef.def("GetCurrentFriction",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
+	classDef.def("GetGroundFriction",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
 		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
+		auto *physMat = hPhysObj->IsController() ? static_cast<ControllerPhysObj*>(hPhysObj.get())->GetController()->GetGroundMaterial() : nullptr;
+		if(physMat == nullptr)
 		{
-			Lua::PushNumber(l,0.0);
+			Lua::PushNumber(l,1.0);
 			return;
 		}
-		Lua::PushNumber(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetCurrentFriction());
+		Lua::PushNumber(l,physMat->GetDynamicFriction());
 	}));
 	mod[classDef];
 }

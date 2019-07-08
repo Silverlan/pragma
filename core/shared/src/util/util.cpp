@@ -167,16 +167,12 @@ Bool Game::RayCast(const TraceData &data,std::vector<TraceResult> *optOutResults
 		return false;
 	return physEnv->RayCast(data,optOutResults);
 }
-Bool Game::Sweep(const TraceData &data,TraceResult *optOutResult) const
+Bool Game::Sweep(const TraceData &data,std::vector<TraceResult> *optOutResults) const
 {
 	auto *physEnv = GetPhysicsEnvironment();
 	if(physEnv == nullptr)
-	{
-		if(optOutResult)
-			optOutResult->hitType = RayCastHitType::None;
 		return false;
-	}
-	return physEnv->Sweep(data,optOutResult);
+	return physEnv->Sweep(data,optOutResults);
 }
 TraceResult Game::Overlap(const TraceData &data) const
 {
@@ -202,8 +198,12 @@ TraceResult Game::RayCast(const TraceData &data) const
 }
 TraceResult Game::Sweep(const TraceData &data) const
 {
-	TraceResult result {};
-	if(Sweep(data,&result) == false)
+	std::vector<TraceResult> results {};
+	if(Sweep(data,&results) == false)
+	{
+		TraceResult result {};
 		result.hitType = RayCastHitType::None;
-	return result;
+		return result;
+	}
+	return results.front();
 }

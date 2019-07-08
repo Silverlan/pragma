@@ -25,11 +25,9 @@
 
 #include "pragma/engine.h"
 #include <pragma/serverstate/serverstate.h>
-#include "pragma/physics/physxcallbacks.h"
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
 #include <networkmanager/nwm_packet.h>
-#include <pragma/networking/wvlocalclient.h>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/engine_version.h"

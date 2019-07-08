@@ -18,6 +18,7 @@
 #include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/addonsystem/addonsystem.h>
+#include <pragma/physics/environment.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>
@@ -285,6 +286,24 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	}
 	WIDropDownMenu *language = pList->AddDropDownMenu(Locale::GetText("language"),lanOptions,"cl_language");
 	language->SizeToContents();
+	//
+
+	auto *pRowGameplay = pList->AddHeaderRow();
+	pRowGameplay->SetValue(0,Locale::GetText("gameplay_options"));
+
+	// Physics Engine
+	std::unordered_map<std::string,std::string> physEngines {};
+	for(auto &engine : pragma::physics::IEnvironment::GetAvailablePhysicsEngines())
+		physEngines.insert(std::make_pair(Locale::GetText("physics_engine_" +engine),engine));
+	auto *pPhysEngineList = pList->AddDropDownMenu(Locale::GetText("physics_engine"),physEngines,"phys_engine");
+	pPhysEngineList->SizeToContents();
+	//
+
+	// Networking library
+	std::unordered_map<std::string,std::string> netLibs {};
+	// TODO: Boost asio, GameNetworkingSockets, Steamworks
+	auto *pPhysNetLibList = pList->AddDropDownMenu(Locale::GetText("networking_library"),netLibs,"net_library");
+	pPhysNetLibList->SizeToContents();
 	//
 
 	pList->AddToggleChoice(Locale::GetText("enable_steamworks"),"steam_steamworks_enabled");

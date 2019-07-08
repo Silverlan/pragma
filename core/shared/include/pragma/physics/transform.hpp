@@ -4,7 +4,6 @@
 #include "pragma/networkdefinitions.h"
 #include <memory>
 #include <sharedutils/def_handle.h>
-#include <pragma/physics/physapi.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/uquat.h>
 #include <vector>

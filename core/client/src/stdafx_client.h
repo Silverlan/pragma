@@ -8,7 +8,6 @@
 #include <mathutil/eulerangles.h>
 #include <mathutil/uquat.h>
 #include <mathutil/uvec.h>
-#include <pragma/physics/physapi.h>
 #include "pragma/c_engine.h"
 #include <pragma/engine.h>
 #include "pragma/networkstate/networkstate.h"

@@ -5,8 +5,6 @@
 #include "pragma/game/s_game.h"
 #include "pragma/console/cvar_global.h"
 #include "pragma/entities/player.h"
-#include "pragma/networking/wvserver.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/iserver.hpp"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/entities/components/s_character_component.hpp"

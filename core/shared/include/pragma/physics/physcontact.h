@@ -5,7 +5,6 @@
 #include <memory>
 #include <sharedutils/def_handle.h>
 #include <mathutil/glmutil.h>
-#include <pragma/physics/physapi.h>
 
 class BaseEntity;
 class PhysObj;

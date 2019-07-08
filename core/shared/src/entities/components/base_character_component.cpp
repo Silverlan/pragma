@@ -26,6 +26,8 @@
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_trace.hpp"
 #include "pragma/physics/environment.hpp"
+#include "pragma/physics/phys_material.hpp"
+#include "pragma/physics/controller.hpp"
 
 using namespace pragma;
 
@@ -33,6 +35,7 @@ extern DLLENGINE Engine *engine;
 
 //////////////////
 
+#pragma optimize("",off)
 void BaseCharacterComponent::InitializeController()
 {
 	//auto &ent = GetEntity();
@@ -134,15 +137,15 @@ void BaseCharacterComponent::Initialize()
 		if(phys == nullptr || phys->IsController() == false)
 			return;
 		auto *physController = static_cast<ControllerPhysObj*>(phys);
-		auto *pInfo = physController->GetGroundContactInfo();
-		if(pInfo == nullptr)
+		auto contactNormal = physController->GetController()->GetGroundTouchNormal();
+		if(contactNormal.has_value() == false)
 			return;
 		auto whVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 		if(whVelComponent.valid())
 		{
 			auto vel = whVelComponent->GetVelocity();
 			uvec::normalize(&vel);
-			auto dot = uvec::dot(pInfo->GetContactNormal(),vel);
+			auto dot = uvec::dot(*contactNormal,vel);
 			if(dot <= 0.01f)
 			{
 				// Velocity leads towards the ground; This probably means we should allow attaching to the ground again.
@@ -150,7 +153,6 @@ void BaseCharacterComponent::Initialize()
 				return;
 			}
 		}
-		physController->ClearGroundContactPoint();
 	});
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateNeckControllers();
@@ -179,15 +181,14 @@ void BaseCharacterComponent::SetSlopeLimit(float limit)
 {
 	*m_slopeLimit = limit;
 
-	// Slope limit cannot be changed dynamically in PhysX!
-	/*auto &ent = GetEntity();
+	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != NULL && phys->IsController())
 	{
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
-		physController->SetMaxSlope(limit);
-	}*/
+		physController->SetSlopeLimit(limit);
+	}
 }
 float BaseCharacterComponent::GetStepOffset() const {return *m_stepOffset;}
 void BaseCharacterComponent::SetStepOffset(float offset)
@@ -444,19 +445,20 @@ bool BaseCharacterComponent::UpdateMovement()
 		}
 	}
 
-	auto *pGroundContactInfo = physController->GetGroundContactInfo();
 	if(pPhysComponent->IsGroundWalkable() || mv != MOVETYPE::WALK || bSubmerged == true)
 	{
 		auto friction = 0.8f;
+		std::optional<Vector3> contactNormal = {};
 		if(phys != nullptr && phys->IsController())
 		{
 			auto *controller = static_cast<ControllerPhysObj*>(phys);
-			friction = controller->GetCurrentFriction();
-			controller->SetCurrentFriction(1.f); // Reset
+			auto *surfMat = controller->GetGroundMaterial();
+			friction = surfMat ? surfMat->GetDynamicFriction() : 1.f;
+			contactNormal = controller->GetController()->GetGroundTouchNormal();
 		}
 		auto frictionVel = vel;
-		if(pGroundContactInfo != nullptr) // Only apply friction to the component of the velocity which is parallel to the ground (i.e. jumping and such remain unaffected)
-			frictionVel = uvec::project_to_plane(frictionVel,pGroundContactInfo->GetContactNormal(),0.f);
+		if(contactNormal.has_value()) // Only apply friction to the component of the velocity which is parallel to the ground (i.e. jumping and such remain unaffected)
+			frictionVel = uvec::project_to_plane(frictionVel,*contactNormal,0.f);
 		auto frictionForce = -frictionVel *friction;
 		//if(ent.IsPlayer())
 		//	Con::cout<<"Player friction: "<<friction<<Con::endl;
@@ -510,19 +512,20 @@ bool BaseCharacterComponent::UpdateMovement()
 		pVelComponent->SetVelocity(vel);
 	}
 	//return controller->Move(disp,elapsedTime,minDist);
-
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	const auto threshold = -0.03;
 	auto localVel = vel;
 	uvec::rotate(&localVel,viewRot);
+	auto contactNormal = physController->GetController()->GetGroundTouchNormal();;
 	if(
 		vel.y <= 0.1f && physController->IsGroundWalkable() &&
-		(pGroundContactInfo != nullptr && pGroundContactInfo->contactDistance >= threshold) &&
+		(contactNormal.has_value() && pGroundContactInfo->contactDistance >= threshold) &&
 		mv == MOVETYPE::WALK
 	)
 	{
 		auto &info = *pGroundContactInfo;
 		//auto pos = uvec::create((info.controllerIndex == 0u ? info.contactPoint.getPositionWorldOnA() : info.contactPoint.getPositionWorldOnB()) /PhysEnv::WORLD_SCALE);
-		auto n = -info.GetContactNormal();
+		auto n = -*contactNormal;
 		//ent.GetNetworkState()->GetGameState()->DrawLine(
 		//	pos,pos -n *100.f,Color::Red,5.f
 		//);
@@ -530,6 +533,7 @@ bool BaseCharacterComponent::UpdateMovement()
 		const auto force = 100.f; // Somewhat arbitrary; The force to apply to the controller to make them stick to the ground
 		physController->AddLinearVelocity(n *force);
 	}
+#endif
 
 	return true;
 }
@@ -1018,3 +1022,4 @@ void CEViewRotation::PushArguments(lua_State *l)
 {
 	Lua::Push<Quat>(l,rotation);
 }
+#pragma optimize("",on)

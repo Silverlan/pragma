@@ -68,6 +68,7 @@ public:
 	void GetAABB(Vector3 *min,Vector3 *max);
 	void SetAABB(Vector3 &min,Vector3 &max);
 	void SetOrigin(const Vector3 &origin);
+	const Vector3 &GetOrigin() const;
 	Vector3 &GetOrigin();
 	std::shared_ptr<pragma::physics::IShape> GetShape();
 	bool IntersectAABB(Vector3 *min,Vector3 *max);

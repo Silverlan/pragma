@@ -4,8 +4,6 @@
 #include <fsys/filesystem.h>
 #include <mathutil/umath.h>
 #include "pragma/entities/player.h"
-#include "pragma/networking/wvserver.h"
-#include "pragma/networking/wvserverclient.h"
 #include <sharedutils/util_file.h>
 
 extern DLLSERVER ServerState *server;

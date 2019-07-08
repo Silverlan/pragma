@@ -3,7 +3,6 @@
 #include "pragma/lua/lnetmessages.h"
 #include "pragma/game/s_game.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/entities/player.h"

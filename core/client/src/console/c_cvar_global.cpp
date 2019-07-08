@@ -8,7 +8,6 @@
 #include "pragma/console/c_cvar.h"
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvclient.h"
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util.h>
 #include <sharedutils/util_string.h>

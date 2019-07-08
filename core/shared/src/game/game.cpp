@@ -8,7 +8,6 @@
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/level/mapgeometry.h"
 #include <pragma/engine.h>
-#include "pragma/physics/physxcallbacks.h"
 #include "pragma/ai/navsystem.h"
 #include "pragma/physics/environment.hpp"
 #include "pragma/lua/libraries/ltimer.h"
@@ -318,56 +317,6 @@ Game::Game(NetworkState *state)
 
 	LoadSoundScripts("game_sounds_generic.txt");
 	LoadSoundScripts("fx_physics_impact.txt");
-
-	enum class PhysicsEngine : uint8_t
-	{
-		Bullet = 0,
-		PhysX
-	};
-	auto physEngine = PhysicsEngine::PhysX;
-	std::string physEngineLibName = "";
-	switch(physEngine)
-	{
-	case PhysicsEngine::Bullet:
-		physEngineLibName = "bullet/pr_bullet";
-		break;
-	case PhysicsEngine::PhysX:
-		physEngineLibName = "physx/pr_physx";
-		break;
-	}
-	std::string err;
-	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName,&err);
-	if(dllHandle)
-	{
-		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::physics::IEnvironment>&)>("initialize_physics_engine");
-		if(fInitPhysicsEngine != nullptr)
-			fInitPhysicsEngine(*GetNetworkState(),m_physEnvironment);
-	}
-	else
-		Con::cerr<<"ERROR: Unable to initialize physics engine: "<<err<<Con::endl;
-	if(m_physEnvironment)
-		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
-
-	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
-		if(profilingEnabled == false)
-		{
-			m_profilingStageManager = nullptr;
-			return;
-		}
-		std::string postFix = IsClient() ? " (CL)" : " (SV)";
-		auto &cpuProfiler = engine->GetProfiler();
-		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
-		auto stageTick = pragma::debug::ProfilingStage::Create(cpuProfiler,"Tick" +postFix,&engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick));
-		auto stagePhysics = pragma::debug::ProfilingStage::Create(cpuProfiler,"Physics" +postFix,stageTick.get());
-		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
-			stageTick,
-			stagePhysics,
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"PhysicsSimulation" +postFix,stagePhysics.get()),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"GameObjectLogic" +postFix,stageTick.get()),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"Timers" +postFix,stageTick.get())
-		});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 5u,"Added new profiling phase, but did not create associated profiling stage!");
-	});
 }
 
 Game::~Game()
@@ -493,6 +442,49 @@ void Game::Initialize()
 	LoadSoundScripts("fx.txt");
 }
 void Game::SetUp() {}
+
+void Game::InitializeGame()
+{
+	InitializeLua(); // Lua has to be initialized completely before any entites are created
+
+	auto physEngineName = GetConVarString("phys_engine");
+	auto physEngineLibName = pragma::physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
+	std::string err;
+	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName,&err);
+	if(dllHandle)
+	{
+		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::physics::IEnvironment>&)>("initialize_physics_engine");
+		if(fInitPhysicsEngine != nullptr)
+			fInitPhysicsEngine(*GetNetworkState(),m_physEnvironment);
+		else
+			Con::cerr<<"ERROR: Unable to initialize physics engine '"<<physEngineName<<"': Function 'initialize_physics_engine' not found!"<<Con::endl;
+	}
+	else
+		Con::cerr<<"ERROR: Unable to initialize physics engine '"<<physEngineName<<"': "<<err<<Con::endl;
+	if(m_physEnvironment)
+		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
+
+	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
+		if(profilingEnabled == false)
+		{
+			m_profilingStageManager = nullptr;
+			return;
+		}
+		std::string postFix = IsClient() ? " (CL)" : " (SV)";
+		auto &cpuProfiler = engine->GetProfiler();
+		m_profilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>>();
+		auto stageTick = pragma::debug::ProfilingStage::Create(cpuProfiler,"Tick" +postFix,&engine->GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick));
+		auto stagePhysics = pragma::debug::ProfilingStage::Create(cpuProfiler,"Physics" +postFix,stageTick.get());
+		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
+			stageTick,
+			stagePhysics,
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"PhysicsSimulation" +postFix,stagePhysics.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"GameObjectLogic" +postFix,stageTick.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Timers" +postFix,stageTick.get())
+			});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 5u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
+}
 
 void Game::GetEntities(std::vector<BaseEntity*> **ents) {*ents = &m_baseEnts;}
 void Game::GetSpawnedEntities(std::vector<BaseEntity*> *ents)

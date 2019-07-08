@@ -9,7 +9,6 @@
 #include "pragma/entities/parentinfo.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/player.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_entity_component.hpp"

@@ -4,7 +4,6 @@
 #include "pragma/networkdefinitions.h"
 #include <memory>
 #include <sharedutils/def_handle.h>
-#include <pragma/physics/physapi.h>
 #include "pragma/physics/base.hpp"
 #include "pragma/physics/transform.hpp"
 #include "pragma/lua/baseluaobj.h"
@@ -20,11 +19,10 @@ namespace pragma::physics
 	class IEnvironment;
 	class IRigidBody;
 	class DLLNETWORK IConstraint
-		: public IBase
+		: public IBase,public IWorldObject
 	{
 	public:
 		virtual void OnRemove() override;
-		virtual void Initialize()=0;
 		virtual void SetEnabled(bool b)=0;
 		virtual bool IsEnabled() const=0;
 		void SetCollisionsEnabled(Bool b);
@@ -44,6 +42,7 @@ namespace pragma::physics
 		virtual int32_t GetOverrideSolverIterationCount() const=0;
 		virtual float GetBreakingImpulseThreshold() const=0;
 		virtual void SetBreakingImpulseThreshold(float threshold)=0;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		IConstraint(IEnvironment &env);
 		virtual void DoSetCollisionsEnabled(Bool b)=0;
@@ -56,6 +55,8 @@ namespace pragma::physics
 	class DLLNETWORK IFixedConstraint
 		: virtual public IConstraint
 	{
+	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -63,6 +64,8 @@ namespace pragma::physics
 	class DLLNETWORK IBallSocketConstraint
 		: virtual public IConstraint
 	{
+	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -70,6 +73,8 @@ namespace pragma::physics
 	class DLLNETWORK IHingeConstraint
 		: virtual public IConstraint
 	{
+	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -77,6 +82,8 @@ namespace pragma::physics
 	class DLLNETWORK ISliderConstraint
 		: virtual public IConstraint
 	{
+	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -88,6 +95,7 @@ namespace pragma::physics
 		using IConstraint::IConstraint;
 	public:
 		virtual void SetLimit(float swingSpan1,float swingSpan2,float twistSpan,float softness=1.f,float biasFactor=0.3f,float relaxationFactor=1.f)=0;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	};
 
 	class DLLNETWORK IDoFConstraint
@@ -96,6 +104,7 @@ namespace pragma::physics
 	protected:
 		using IConstraint::IConstraint;
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual void SetLinearLimit(const Vector3 &lower,const Vector3 &upper)=0;
 		virtual void SetLinearLimit(const Vector3 &lim)=0;
 		virtual void SetLinearLowerLimit(const Vector3 &lim)=0;
@@ -171,6 +180,7 @@ namespace pragma::physics
 			Angular
 		};
 
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual void CalculateTransforms()=0;
 		virtual void CalculateTransforms(const Transform &frameA,const Transform &frameB)=0;
 		virtual Transform GetCalculatedTransformA() const=0;

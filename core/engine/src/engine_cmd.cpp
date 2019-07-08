@@ -4,6 +4,7 @@
 #include "pragma/console/conout.h"
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
+#include <pragma/physics/environment.hpp>
 #include <sharedutils/util_file.h>
 #include <util_pragma_doc.hpp>
 #include <unordered_set>
@@ -24,12 +25,33 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(mapName);
 		}
 	});
+	map.RegisterConVar("phys_engine","physx",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+		auto &physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
+		auto it = physEngines.begin();
+		std::vector<std::string_view> similarCandidates {};
+		ustring::gather_similar_elements(arg,[&it,&physEngines]() -> std::optional<std::string_view> {
+			if(it == physEngines.end())
+				return {};
+			auto &name = *it;
+			++it;
+			return name;
+			},similarCandidates,15);
+
+		autoCompleteOptions.reserve(similarCandidates.size());
+		for(auto &candidate : similarCandidates)
+		{
+			auto strOption = std::string{candidate};
+			ufile::remove_extension_from_filename(strOption);
+			autoCompleteOptions.push_back(strOption);
+		}
+	});
 }
 
 void Engine::RegisterConsoleCommands()
 {
 	auto &conVarMap = *console_system::server::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
+	// Note: Serverside ConVars HAVE to be registered shared if the command is replicated!
 	conVarMap.RegisterConCommand("map",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{

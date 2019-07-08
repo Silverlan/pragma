@@ -11,7 +11,6 @@
 #include "pragma/lua/ldefinitions.h"
 #include <pragma/physics/movetypes.h>
 #include "pragma/audio/e_alstate.h"
-#include <pragma/physics/physapi.h>
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_skeleton.hpp"
 #include "pragma/lua/classes/ldatastream.h"

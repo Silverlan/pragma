@@ -79,6 +79,8 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 	std::shared_ptr<pragma::physics::IShape> shape = nullptr;
 	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
 
+	auto &origin = GetOrigin();
+	auto scaledOrigin = bScale ? Vector3{origin.x *scale.x,origin.y *scale.y,origin.z *scale.z} : origin;
 	pragma::physics::IMaterial *mat = nullptr;
 	if(materials.empty())
 		mat = &physEnv->GetGenericMaterial();
@@ -93,6 +95,7 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 		ptrShape->SetCollisionMesh(*const_cast<CollisionMesh*>(this));
 		ptrShape->SetSurfaceMaterial(GetSurfaceMaterial());
 		ptrShape->SetLocalScaling(Vector3(1.f,1.f,1.f));
+		ptrShape->ReservePoints(m_vertices.size());
 		for(unsigned int i=0;i<m_vertices.size();i++)
 		{
 			auto &v = m_vertices[i];
@@ -101,6 +104,10 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 			else
 				ptrShape->AddPoint(v *scale);
 		}
+		ptrShape->ReserveTriangles(m_triangles.size() /3);
+		for(auto i=decltype(m_triangles.size()){0u};i<m_triangles.size();i+=3)
+			ptrShape->AddTriangle(m_triangles.at(i),m_triangles.at(i +1),m_triangles.at(i +2));
+		ptrShape->Build();
 	}
 	else
 	{
@@ -129,6 +136,7 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 		}
 		ptrShape->Build(&materials);
 	}
+	shape->SetLocalPose(pragma::physics::Transform{scaledOrigin,Quat{}});
 	return shape;
 }
 void CollisionMesh::UpdateShape()
@@ -141,6 +149,7 @@ void CollisionMesh::UpdateShape()
 void CollisionMesh::SetBoneParent(int boneID) {m_boneID = boneID;}
 int CollisionMesh::GetBoneParent() {return m_boneID;}
 void CollisionMesh::SetOrigin(const Vector3 &origin) {m_origin = origin;}
+const Vector3 &CollisionMesh::GetOrigin() const {return const_cast<CollisionMesh*>(this)->GetOrigin();}
 Vector3 &CollisionMesh::GetOrigin() {return m_origin;}
 std::vector<Vector3> &CollisionMesh::GetVertices() {return m_vertices;}
 void CollisionMesh::CalculateBounds()

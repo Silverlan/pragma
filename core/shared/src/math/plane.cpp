@@ -3,9 +3,9 @@
 
 Plane::Plane(const Vector3 &a,const Vector3 &b,const Vector3 &c)
 {
-	Vector3 n = glm::cross(b -a,c -a);
-	uvec::normalize(&n);
-	double d = glm::dot(-n,a);
+	Vector3 n;
+	float d;
+	uvec::calc_plane(a,b,c,n,d);
 	Initialize(n,d);
 }
 

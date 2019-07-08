@@ -5,7 +5,6 @@
 #include "pragma/networking/resourcemanager.h"
 #include <fsys/filesystem.h>
 #include "luasystem.h"
-#include "pragma/networking/wvlocalclient.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/player.h"
 #include "pragma/cacheinfo.h"
@@ -16,7 +15,6 @@
 #include "pragma/encryption/md5.h"
 #include <pragma/physics/physobj.h>
 #include <pragma/math/surfacematerial.h>
-#include "pragma/networking/clientsessioninfo.h"
 #include "pragma/console/s_convars.h"
 #include "pragma/console/s_cvar.h"
 #include <pragma/ai/navsystem.h>
@@ -211,7 +209,7 @@ void SGame::Initialize()
 {
 	Game::Initialize();
 
-	InitializeLua(); // Lua has to be initialized completely before any entites are created
+	InitializeGame();
 	SetupLua();
 	GenerateLuaCache();
 	//NetPacket p;
@@ -221,7 +219,8 @@ void SGame::Initialize()
 	//server->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
 	ClearResources<ModelManager>();
-	m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
+	if(m_surfaceMaterialManager)
+		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
 }

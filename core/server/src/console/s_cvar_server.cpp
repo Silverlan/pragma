@@ -6,7 +6,6 @@
 #include <pragma/physics/raytraces.h>
 #include <pragma/ai/navsystem.h>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvserver.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/iserver.hpp>
 #include "pragma/entities/components/s_name_component.hpp"

@@ -3,15 +3,11 @@
 #include "pragma/networking/s_net_resources.h"
 #include "pragma/networking/resourcemanager.h"
 #include <fsys/filesystem.h>
-#include "pragma/networking/wvserverclient.h"
-#include "pragma/networking/clientsessioninfo.h"
 #include "pragma/networking/resource.h"
 #include "pragma/networking/iserver.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/player.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
-#include "pragma/networking/wvserver.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/model/s_modelmanager.h"

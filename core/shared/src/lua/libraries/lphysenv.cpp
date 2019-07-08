@@ -12,6 +12,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/lua/classes/lphyssoftbodyinfo.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
+#include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/ik/util_ik.hpp"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
@@ -37,7 +38,6 @@ namespace Lua
 		static int create_capsule_shape(lua_State *l);
 		static int create_sphere_shape(lua_State *l);
 		static int create_cylinder_shape(lua_State *l);
-		static int create_torus_shape(lua_State *l);
 		static int create_heightfield_terrain_shape(lua_State *l);
 		static int create_character_controller(lua_State *l);
 		static int create_fixed_constraint(lua_State *l);
@@ -70,7 +70,6 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_capsule_shape",create_capsule_shape},
 		{"create_sphere_shape",create_sphere_shape},
 		{"create_cylinder_shape",create_cylinder_shape},
-		{"create_torus_shape",create_torus_shape},
 		{"create_heightfield_terrain_shape",create_heightfield_terrain_shape},
 		{"create_rigid_body",create_rigid_body},
 		{"create_ghost_object",create_ghost_object},
@@ -84,6 +83,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_surface_material",create_surface_material},
 		{"get_surface_material",get_surface_material},
 		{"get_surface_materials",get_surface_materials},
+		{"get_generic_material",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *state = engine->GetNetworkState(l);
+			auto *game = state->GetGameState();
+			auto *env = game->GetPhysicsEnvironment();
+			auto &mat = env->GetGenericMaterial();
+			mat.Push(l);
+			return 1;
+		})},
 		{"raycast",raycast},
 		{"sweep",sweep},
 		{"overlap",overlap},
@@ -143,12 +150,41 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"RAYCAST_FLAG_BIT_INVERT_FILTER",umath::to_integral(RayCastFlags::InvertFilter)},
 		{"RAYCAST_FLAG_DEFAULT",umath::to_integral(RayCastFlags::Default)},
 		{"RAYCAST_FLAG_NONE",umath::to_integral(RayCastFlags::None)}
-
 	});
 
 	auto &physMod = lua.RegisterLibrary(libName);
 	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
 	physMod[classBase];
+
+	auto classMat = luabind::class_<pragma::physics::IMaterial,pragma::physics::IBase>("Material");
+	classMat.def("SetFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,float)>([](lua_State *l,pragma::physics::IMaterial &mat,float friction) {
+		mat.SetFriction(friction);
+	}));
+	classMat.def("GetStaticFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&)>([](lua_State *l,pragma::physics::IMaterial &mat) {
+		Lua::PushNumber(l,mat.GetStaticFriction());
+	}));
+	classMat.def("SetStaticFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,float)>([](lua_State *l,pragma::physics::IMaterial &mat,float friction) {
+		mat.SetStaticFriction(friction);
+	}));
+	classMat.def("SetDynamicFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,float)>([](lua_State *l,pragma::physics::IMaterial &mat,float friction) {
+		mat.SetDynamicFriction(friction);
+	}));
+	classMat.def("GetDynamicFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&)>([](lua_State *l,pragma::physics::IMaterial &mat) {
+		Lua::PushNumber(l,mat.GetDynamicFriction());
+	}));
+	classMat.def("GetRestitution",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&)>([](lua_State *l,pragma::physics::IMaterial &mat) {
+		Lua::PushNumber(l,mat.GetRestitution());
+	}));
+	classMat.def("SetRestitution",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,float)>([](lua_State *l,pragma::physics::IMaterial &mat,float restitution) {
+		mat.SetRestitution(restitution);
+	}));
+	classMat.def("SetSurfaceMaterial",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,SurfaceMaterial&)>([](lua_State *l,pragma::physics::IMaterial &mat,SurfaceMaterial &surfMat) {
+		mat.SetSurfaceMaterial(surfMat);
+	}));
+	classMat.def("GetSurfaceMaterial",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&)>([](lua_State *l,pragma::physics::IMaterial &mat) {
+		Lua::Push<SurfaceMaterial*>(l,mat.GetSurfaceMaterial());
+	}));
+	physMod[classMat];
 
 	auto classDefRayCastData = luabind::class_<TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
@@ -751,9 +787,8 @@ int Lua::physenv::sweep(lua_State *l)
 	auto *data = Lua::CheckTraceData(l,1);
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	TraceResult res;
-	auto r = game->Sweep(*data,&res);
-	if(r == false)
+	auto res = game->Sweep(*data);
+	if(res.hitType == RayCastHitType::None)
 	{
 		Lua::PushBool(l,false);
 		return 1;
@@ -780,10 +815,8 @@ int Lua::physenv::create_convex_hull_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,1);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
-	auto shape = env->CreateConvexHullShape(*hMat);
+	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,1);
+	auto shape = env->CreateConvexHullShape(mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexHullShape>>(l,shape);
 	return 1;
 }
@@ -795,10 +828,8 @@ int Lua::physenv::create_box_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,2);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
-	auto shape = env->CreateBoxShape(*halfExtents,*hMat);
+	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
+	auto shape = env->CreateBoxShape(*halfExtents,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
@@ -811,11 +842,9 @@ int Lua::physenv::create_capsule_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,3);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
+	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
 
-	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),*hMat);
+	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
@@ -826,11 +855,9 @@ int Lua::physenv::create_sphere_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,2);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
+	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
 
-	auto shape = env->CreateSphereShape(CFloat(radius),*hMat);
+	auto shape = env->CreateSphereShape(CFloat(radius),mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
 }
@@ -842,29 +869,10 @@ int Lua::physenv::create_cylinder_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,3);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
+	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
 
-	auto shape = env->CreateCylinderShape(radius,height,*hMat);
+	auto shape = env->CreateCylinderShape(radius,height,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
-	return 1;
-}
-
-int Lua::physenv::create_torus_shape(lua_State *l)
-{
-	auto subDivisions = Lua::CheckInt(l,1);
-	auto outerRadius = Lua::CheckNumber(l,2);
-	auto innerRadius = Lua::CheckNumber(l,3);
-	auto *state = engine->GetNetworkState(l);
-	auto *game = state->GetGameState();
-	auto *env = game->GetPhysicsEnvironment();
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,4);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
-
-	auto shape = env->CreateTorusShape(subDivisions,outerRadius,innerRadius,*hMat);
-	Lua::Push<std::shared_ptr<pragma::physics::IShape>>(l,shape);
 	return 1;
 }
 
@@ -878,7 +886,7 @@ int Lua::physenv::create_heightfield_terrain_shape(lua_State *l)
 	auto length = Lua::CheckInt(l,2);
 	auto maxHeight = Lua::CheckNumber(l,3);
 	auto upAxis = Lua::CheckInt(l,4);
-	auto &hMat = Lua::Check<util::TSharedHandle<pragma::physics::IMaterial>>(l,5);
+	auto &hMat = Lua::Check<util::TWeakSharedHandle<pragma::physics::IMaterial>>(l,5);
 	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
 		return 0;
 
@@ -892,11 +900,14 @@ int Lua::physenv::create_rigid_body(lua_State *l)
 	auto mass = Lua::CheckNumber(l,1);
 	auto &shape = Lua::Check<pragma::physics::IShape>(l,2);
 	auto *inertia = Lua::CheckVector(l,3);
+	auto dynamic = true;
+	if(Lua::IsSet(l,4))
+		dynamic = Lua::CheckBool(l,4);
 
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
-	auto body = env->CreateRigidBody(CFloat(mass),shape,*inertia);
+	auto body = env->CreateRigidBody(CFloat(mass),shape,*inertia,dynamic);
 	if(body == nullptr)
 		return 0;
 	body->Push(l);

@@ -1,5 +1,4 @@
 #include "stdafx_server.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/s_net_server.h"
 #include <pragma/console/conout.h>

@@ -12,6 +12,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseGravity::SetGravityScale(float scale) {m_gravityScale = scale;}
 void BaseGravity::SetGravityOverride(const Vector3 &dir)
 {
@@ -192,8 +193,11 @@ void GravityComponent::ApplyGravity(double dt)
 
 		disp *= dt;
 		auto *pPhysController = pPhysObjController->GetController();
-		auto walkDir = pPhysController->GetLastMoveDisplacement() +disp;
-		pPhysController->Move(walkDir);
+#ifndef TEST_PHYSX
+		//auto walkDir = pPhysController->GetLastMoveDisplacement() +disp;
+		//pPhysController->Move(walkDir);
+		pPhysController->AddMoveVelocity(disp);
+#endif
 	}
 	else if(pPhys->IsSoftBody())
 	{
@@ -267,3 +271,4 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3
 
 	return true;
 }
+#pragma optimize("",on)

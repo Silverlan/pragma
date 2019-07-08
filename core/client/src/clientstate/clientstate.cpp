@@ -9,7 +9,6 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/c_engine.h"
-#include "pragma/physics/pxvisualizer.h"
 #include "pragma/console/convarhandle.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -19,7 +18,6 @@
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/util/c_resource_watcher.hpp"
-#include "pragma/networking/wvclient.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/gui/wifps.h"
 #include <pragma/lua/libraries/lengine.h>

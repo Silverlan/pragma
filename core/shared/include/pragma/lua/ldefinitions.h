@@ -19,11 +19,27 @@ namespace Lua
 	template<class TType>
 		bool CheckHandle(lua_State *l,const util::TSharedHandle<TType> &handle);
 	template<class TType>
+		bool CheckHandle(lua_State *l,const util::TWeakSharedHandle<TType> &handle);
+	template<class TType>
+		bool CheckHandle(lua_State *l,const TType *value);
+	template<class TType>
 		TType &CheckHandle(lua_State *l,const int32_t idx);
 };
 
 template<class TType>
 	bool Lua::CheckHandle(lua_State *l,const util::TSharedHandle<TType> &handle)
+{
+	if(handle.IsExpired())
+	{
+		Lua::PushString(l,"Attempted to use a NULL handle");
+		lua_error(l);
+		return false;
+	}
+	return true;
+}
+
+template<class TType>
+	bool Lua::CheckHandle(lua_State *l,const util::TWeakSharedHandle<TType> &handle)
 {
 	if(handle.IsExpired())
 	{
@@ -44,6 +60,18 @@ template<class TType>
 		// Unreachable
 	}
 	return *handle;
+}
+
+template<class TType>
+	bool Lua::CheckHandle(lua_State *l,const TType *value)
+{
+	if(value == nullptr)
+	{
+		Lua::PushString(l,"Attempted to use a NULL handle");
+		lua_error(l);
+		// Unreachable
+	}
+	return true;
 }
 
 inline int lua_createreference(lua_State *l,int index)

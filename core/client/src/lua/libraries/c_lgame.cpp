@@ -50,7 +50,6 @@ static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world,btSoftBodyWorl
 	return cloth;
 }
 #include "pragma/cinematic/choreographic_scene.hpp"
-#include "pragma/debug/c_debug_vehicle.hpp"
 #include <se_scene.hpp>
 
 #include <pragma/buss_ik/Node.h>

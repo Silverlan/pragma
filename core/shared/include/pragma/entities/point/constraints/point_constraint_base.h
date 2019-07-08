@@ -3,7 +3,6 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <mathutil/glmutil.h>
-#include <pragma/physics/physapi.h>
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/physics/constraint.hpp"
 #include <string>

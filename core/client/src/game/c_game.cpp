@@ -56,7 +56,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/audio/c_sound_efx.hpp"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/networking/wvclient.h"
 #include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
@@ -68,6 +67,7 @@
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/rendering/c_settings.hpp"
+#include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/entities/baseplayer.hpp>
 #include <pragma/game/game_clear_resources.h>
 #include <pragma/util/giblet_create_info.hpp>
@@ -625,7 +625,7 @@ pragma::CCameraComponent *CGame::CreateCamera(uint32_t width,uint32_t height,flo
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
-	InitializeLua(); // Lua has to be initialized completely before any entites are created
+	Game::InitializeGame();
 	SetupLua();
 
 	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd) {
@@ -635,7 +635,8 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	materialManager.ReloadMaterialShaders();
-	m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
+	if(m_surfaceMaterialManager)
+		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 
 	c_engine->SavePipelineCache();
 
@@ -936,6 +937,7 @@ pragma::LuaShaderManager &CGame::GetLuaShaderManager() {return *m_luaShaderManag
 
 void CGame::SetUp()
 {
+	Game::SetUp();
 	CListener *listener = CreateEntity<CListener>();
 	m_listener = listener->GetComponent<pragma::CListenerComponent>();
 
@@ -1765,7 +1767,14 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 {
 	DebugRenderer::DrawPlane(n,dist,color,duration);
 }
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam) {}
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+{
+	auto *physEnv = GetPhysicsEnvironment();
+	auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
+	if(pVisualDebugger == nullptr)
+		return;
+	static_cast<CPhysVisualDebugger&>(*pVisualDebugger).Render(drawCmd,cam);
+}
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {

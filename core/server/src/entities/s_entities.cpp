@@ -12,7 +12,6 @@
 #include "pragma/game/s_game_entities.h"
 #include <sharedutils/util_string.h>
 #include <pragma/networking/nwm_util.h>
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/entities/components/s_player_component.hpp"

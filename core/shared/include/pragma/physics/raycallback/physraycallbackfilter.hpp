@@ -1,7 +1,6 @@
 #ifndef __PHYS_RAYCALLBACKFILTER_HPP__
 #define __PHYS_RAYCALLBACKFILTER_HPP__
 
-#include <pragma/physics/physapi.h>
 #include "pragma/lua/luafunction.h"
 #include "pragma/physics/collisionmasks.h"
 

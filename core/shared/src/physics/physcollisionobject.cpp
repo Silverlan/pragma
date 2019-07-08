@@ -14,8 +14,9 @@ pragma::physics::ICollisionObject::ICollisionObject(IEnvironment &env,pragma::ph
 
 void pragma::physics::ICollisionObject::OnRemove()
 {
-	IBase::OnRemove();
+	RemoveWorldObject();
 	m_physEnv.RemoveCollisionObject(*this);
+	IBase::OnRemove();
 }
 
 UInt32 pragma::physics::ICollisionObject::GetBoneID() const {return m_boneId;}
@@ -28,7 +29,8 @@ void pragma::physics::ICollisionObject::UpdateSurfaceMaterial()
 	auto *shape = m_shape.get();
 	if(shape == nullptr || shape->IsConvexHull() == false)
 		return;
-	m_surfaceMaterial = shape->GetConvexHullShape()->GetSurfaceMaterial();
+	auto *surfMat = shape->GetConvexHullShape()->GetSurfaceMaterial();
+	m_surfaceMaterial = surfMat ? surfMat->GetIndex() : -1;
 }
 
 int pragma::physics::ICollisionObject::GetSurfaceMaterial() const {return m_surfaceMaterial;}
@@ -38,23 +40,25 @@ bool pragma::physics::ICollisionObject::IsRigid() const {return false;}
 bool pragma::physics::ICollisionObject::IsGhost() const {return false;}
 bool pragma::physics::ICollisionObject::IsSoftBody() const {return false;}
 
+void pragma::physics::ICollisionObject::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<ICollisionObject>(lua);
+}
+
 const pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBody() const {return const_cast<ICollisionObject*>(this)->GetRigidBody();}
 const pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() const {return const_cast<ICollisionObject*>(this)->GetSoftBody();}
 const pragma::physics::IGhostObject *pragma::physics::ICollisionObject::GetGhostObject() const {return const_cast<ICollisionObject*>(this)->GetGhostObject();}
 
-void pragma::physics::ICollisionObject::Initialize()
+void pragma::physics::ICollisionObject::InitializeLuaHandle(lua_State *l,const util::TWeakSharedHandle<IBase> &handle)
 {
-	auto &nwState = m_physEnv.GetNetworkState();
-	InitializeLuaObject(nwState.GetLuaState());
-
+	IBase::InitializeLuaHandle(l,handle);
 	UpdateSurfaceMaterial();
 }
 
 void pragma::physics::ICollisionObject::Spawn()
 {
-	if(m_bSpawned == true)
+	if(IsSpawned())
 		return;
-	m_bSpawned = true;
 	SetCollisionShape(m_shape.get()); // Add it to the physics environment
 }
 
@@ -74,15 +78,7 @@ void pragma::physics::ICollisionObject::SetOrigin(const Vector3 &origin)
 	else
 		m_bHasOrigin = true;
 }
-Vector3 &pragma::physics::ICollisionObject::GetOrigin() {return m_origin;}
-
-void pragma::physics::ICollisionObject::AddWorldObject()
-{
-	if(m_bSpawned == false)
-		return;
-	RemoveWorldObject();
-	DoAddWorldObject();
-}
+const Vector3 &pragma::physics::ICollisionObject::GetOrigin() const {return m_origin;}
 
 void pragma::physics::ICollisionObject::UpdateAABB() {m_bUpdateAABB = true;}
 bool pragma::physics::ICollisionObject::ShouldUpdateAABB() const {return m_bUpdateAABB;}
@@ -124,6 +120,10 @@ pragma::physics::IGhostObject *pragma::physics::ICollisionObject::GetGhostObject
 
 bool pragma::physics::IGhostObject::IsGhost() const {return true;}
 pragma::physics::IGhostObject *pragma::physics::IGhostObject::GetGhostObject() {return this;}
+void pragma::physics::IGhostObject::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IGhostObject>(lua);
+}
 
 //////////////////////////
 
@@ -143,6 +143,10 @@ void pragma::physics::IRigidBody::SetSleepingThresholds(float linear,float angul
 	SetAngularSleepingThreshold(angular);
 }
 std::pair<float,float> pragma::physics::IRigidBody::GetSleepingThreshold() const {return {GetLinearSleepingThreshold(),GetAngularSleepingThreshold()};}
+void pragma::physics::IRigidBody::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IRigidBody>(lua);
+}
 
 //////////////////////////
 
@@ -154,4 +158,8 @@ ModelSubMesh *pragma::physics::ISoftBody::GetSubMesh() const {return m_subMesh.e
 bool pragma::physics::ISoftBody::IsSoftBody() const {return true;}
 
 pragma::physics::ISoftBody *pragma::physics::ISoftBody::GetSoftBody() {return this;}
+void pragma::physics::ISoftBody::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<ISoftBody>(lua);
+}
 #pragma optimize("",on)

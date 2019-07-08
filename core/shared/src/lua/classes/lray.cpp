@@ -5,7 +5,6 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/ldef_physobj.h"
-#include "pragma/lua/classes/ldef_physx.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
 #include "pragma/lua/classes/lphysics.h"
 #include <pragma/game/game.h>

@@ -10,7 +10,6 @@
 #include <deque>
 #include "pragma/physics/physicstypes.h"
 #include "pragma/entities/baseentity_handle.h"
-#include <pragma/physics/physapi.h>
 #include <sharedutils/callback_handler.h>
 #include "pragma/lua/lua_callback_handler.h"
 #include <sharedutils/chronotime.h>
@@ -123,6 +122,7 @@ public:
 	bool IsGameInitialized() const;
 	bool IsMapLoaded() const;
 	const std::array<std::string,4> &GetLuaEntityDirectories() const;
+	virtual void InitializeGame();
 	virtual void InitializeLua();
 	virtual void SetupLua();
 	virtual void SetUp();
@@ -163,7 +163,7 @@ public:
 
 	Bool Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults) const;
 	Bool RayCast(const TraceData &data,std::vector<TraceResult> *optOutResults) const;
-	Bool Sweep(const TraceData &data,TraceResult *optOutResult) const;
+	Bool Sweep(const TraceData &data,std::vector<TraceResult> *optOutResults) const;
 
 	TraceResult Overlap(const TraceData &data) const;
 	TraceResult RayCast(const TraceData &data) const;

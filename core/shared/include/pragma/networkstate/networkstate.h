@@ -3,7 +3,6 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include <pragma/lua/luaapi.h>
-#include <pragma/physics/physapi.h>
 #include <pragma/audio/alenums.hpp>
 #include <sharedutils/callback_handler.h>
 #include <pragma/console/cvar_handler.h>

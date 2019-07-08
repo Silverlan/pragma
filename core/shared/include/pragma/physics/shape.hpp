@@ -3,9 +3,9 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
+#include "pragma/physics/transform.hpp"
 #include <memory>
 #include <sharedutils/def_handle.h>
-#include <pragma/physics/physapi.h>
 #include <mathutil/glmutil.h>
 #include <vector>
 
@@ -32,12 +32,16 @@ namespace pragma::physics
 
 		virtual void SetTrigger(bool bTrigger)=0;
 		virtual bool IsTrigger() const=0;
+		virtual bool IsValid() const;
 
 		virtual bool IsConvex() const;
 		virtual bool IsConvexHull() const;
 		virtual bool IsCompoundShape() const;
 		virtual bool IsHeightfield() const;
 		virtual bool IsTriangleShape() const;
+
+		virtual void SetLocalPose(const Transform &t)=0;
+		virtual Transform GetLocalPose() const=0;
 
 		virtual IConvexShape *GetConvexShape();
 		const IConvexShape *GetConvexShape() const;
@@ -58,6 +62,7 @@ namespace pragma::physics
 
 		virtual void SetDensity(float density);
 		float GetDensity() const;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		void *userData = nullptr;
 	protected:
@@ -73,6 +78,7 @@ namespace pragma::physics
 		virtual ~IConvexShape() override;
 
 		virtual void SetLocalScaling(const Vector3 &scale)=0;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		void SetCollisionMesh(CollisionMesh &collisionMesh);
 		void SetCollisionMesh();
@@ -92,6 +98,7 @@ namespace pragma::physics
 	{
 	public:
 		virtual ~ICapsuleShape() override;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		virtual float GetRadius() const=0;
 		virtual float GetHalfHeight() const=0;
@@ -104,6 +111,7 @@ namespace pragma::physics
 	{
 	public:
 		virtual ~IBoxShape() override;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		virtual Vector3 GetHalfExtents() const=0;
 	protected:
@@ -114,23 +122,30 @@ namespace pragma::physics
 		: virtual public IConvexShape
 	{
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsConvexHull() const override;
 		virtual IConvexHullShape *GetConvexHullShape() override;
 		virtual void AddPoint(const Vector3 &point)=0;
-		virtual void SetSurfaceMaterial(int id)=0;
-		virtual int GetSurfaceMaterial() const=0;
+
+		virtual void AddTriangle(uint32_t idx0,uint32_t idx1,uint32_t idx2)=0;
+		virtual void ReservePoints(uint32_t numPoints)=0;
+		virtual void ReserveTriangles(uint32_t numTris)=0;
+		virtual void Build()=0;
 	protected:
 		IConvexHullShape(IEnvironment &env);
+		bool m_bBuilt = false;
 	};
 
 	class DLLNETWORK ICompoundShape
 		: virtual public IShape
 	{
 	public:
-		virtual void AddShape(pragma::physics::IShape &shape,const Vector3 &origin={},const Quat &rot={})=0;
+		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void AddShape(pragma::physics::IShape &shape)=0;
 
 		virtual bool IsCompoundShape() const override;
 		virtual ICompoundShape *GetCompoundShape() override;
+		const std::vector<std::shared_ptr<pragma::physics::IShape>> &GetShapes() const;
 	protected:
 		ICompoundShape(IEnvironment &env);
 		ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape);
@@ -142,6 +157,7 @@ namespace pragma::physics
 		: virtual public IShape
 	{
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsHeightfield() const override;
 		virtual IHeightfield *GetHeightfield() override;
 		virtual float GetHeight(uint32_t x,uint32_t y) const=0;
@@ -164,14 +180,14 @@ namespace pragma::physics
 		: virtual public IShape
 	{
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsTriangleShape() const override;
 		virtual ITriangleShape *GetTriangleShape() override;
 
 		virtual void CalculateLocalInertia(float mass,Vector3 *localInertia) const override;
 		virtual void AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c,const SurfaceMaterial *mat=nullptr);
 		virtual void Build(const std::vector<SurfaceMaterial> *materials=nullptr)=0;
-		virtual void ReserveTriangles(std::size_t count)=0;
-		virtual void GenerateInternalEdgeInfo()=0;
+		void ReserveTriangles(std::size_t count);
 
 		size_t GetVertexCount() const;
 		Vector3 *GetVertex(size_t idx);
@@ -179,15 +195,15 @@ namespace pragma::physics
 		std::vector<Vector3> &GetVertices();
 		const std::vector<Vector3> &GetVertices() const;
 
-		std::vector<int32_t> &GetTriangles();
-		const std::vector<int32_t> &GetTriangles() const;
+		std::vector<uint32_t> &GetTriangles();
+		const std::vector<uint32_t> &GetTriangles() const;
 		std::vector<int32_t> &GetSurfaceMaterials();
 		const std::vector<int32_t> &GetSurfaceMaterials() const;
 	protected:
 		ITriangleShape(IEnvironment &env);
 
 		std::vector<Vector3> m_vertices;
-		std::vector<int> m_triangles; // Index offsets into m_vertices
+		std::vector<uint32_t> m_triangles; // Index offsets into m_vertices
 		std::vector<int> m_faceMaterials; // Surface material index for each vertex
 		bool m_bBuilt = false;
 	};

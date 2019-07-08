@@ -2,7 +2,6 @@
 #define __PHYSENVIRONMENT_H__
 
 #include "pragma/networkdefinitions.h"
-#include <pragma/physics/physapi.h>
 #include <mathutil/glmutil.h>
 #include "pragma/physics/transform.hpp"
 #include <sharedutils/functioncallback.h>
@@ -42,6 +41,7 @@ namespace pragma::physics
 	class ICollisionObject;
 	class IRigidBody;
 	class ISoftBody;
+	class IVehicle;
 	
 	class IGhostObject;
 	class ICompoundShape;
@@ -60,18 +60,23 @@ namespace pragma::physics
 			OnConstraintCreated = 0,
 			OnCollisionObjectCreated,
 			OnControllerCreated,
+			OnVehicleCreated,
 
 			OnConstraintRemoved,
 			OnCollisionObjectRemoved,
 			OnControllerRemoved,
+			OnVehicleRemoved,
 
 			Count
 		};
 		static constexpr float DEFAULT_CHARACTER_SLOPE_LIMIT = 45.f;
+		static constexpr std::string_view PHYS_ENGINE_MODULE_LOCATION = "physics_engines";
+		static std::vector<std::string> GetAvailablePhysicsEngines();
+		static std::string GetPhysicsEngineModuleLocation(const std::string &physEngine);
 		template<class T,typename... TARGS>
-			static std::shared_ptr<T> CreateSharedPtr(TARGS&& ...args);
+			std::shared_ptr<T> CreateSharedPtr(TARGS&& ...args);
 		template<class T,typename... TARGS>
-			static util::TSharedHandle<T> CreateSharedHandle(TARGS&& ...args);
+			util::TSharedHandle<T> CreateSharedHandle(TARGS&& ...args);
 		using RemainingDeltaTime = float;
 
 		IEnvironment(NetworkState &state);
@@ -81,9 +86,10 @@ namespace pragma::physics
 		void AddEventCallback(Event eventid,const CallbackHandle &hCb);
 		IMaterial &GetGenericMaterial() const;
 
+		virtual bool Initialize();
 		virtual float GetWorldScale() const;
 
-		virtual IVisualDebugger *InitializeVisualDebugger()=0;
+		void SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger);
 		IVisualDebugger *GetVisualDebugger() const;
 
 		virtual util::TSharedHandle<IFixedConstraint> CreateFixedConstraint(IRigidBody &a,const Vector3 &pivotA,const Quat &rotA,IRigidBody &b,const Vector3 &pivotB,const Quat &rotB)=0;
@@ -94,22 +100,21 @@ namespace pragma::physics
 		virtual util::TSharedHandle<IDoFConstraint> CreateDoFConstraint(IRigidBody &a,const Vector3 &pivotA,const Quat &rotA,IRigidBody &b,const Vector3 &pivotB,const Quat &rotB)=0;
 		virtual util::TSharedHandle<IDoFSpringConstraint> CreateDoFSpringConstraint(IRigidBody &a,const Vector3 &pivotA,const Quat &rotA,IRigidBody &b,const Vector3 &pivotB,const Quat &rotB)=0;
 
-		virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth,float halfHeight,float stepHeight,float slopeLimitDeg=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
-		virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents,float stepHeight,float slopeLimitDeg=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
+		virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth,float halfHeight,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
+		virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
 		virtual util::TSharedHandle<ICollisionObject> CreateCollisionObject(IShape &shape)=0;
-		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(float mass,IShape &shape,const Vector3 &localInertia)=0;
+		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(float mass,IShape &shape,const Vector3 &localInertia,bool dynamic=true)=0;
 		virtual util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info,float mass,const std::vector<Vector3> &verts,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)=0;
 		virtual util::TSharedHandle<IGhostObject> CreateGhostObject(IShape &shape)=0;
 
 		virtual std::shared_ptr<IConvexShape> CreateCapsuleShape(float halfWidth,float halfHeight,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IConvexShape> CreateBoxShape(const Vector3 &halfExtents,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IConvexShape> CreateCylinderShape(float radius,float height,const IMaterial &mat)=0;
-		virtual std::shared_ptr<ICompoundShape> CreateTorusShape(uint32_t subdivisions,double outerRadius,double innerRadius,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IConvexShape> CreateSphereShape(float radius,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IConvexHullShape> CreateConvexHullShape(const IMaterial &mat)=0;
 		virtual std::shared_ptr<ITriangleShape> CreateTriangleShape(const IMaterial &mat)=0;
-		virtual std::shared_ptr<ICompoundShape> CreateCompoundShape()=0;
-		virtual std::shared_ptr<ICompoundShape> CreateCompoundShape(IShape &shape)=0;
+		std::shared_ptr<ICompoundShape> CreateCompoundShape();
+		std::shared_ptr<ICompoundShape> CreateCompoundShape(IShape &shape);
 		virtual std::shared_ptr<ICompoundShape> CreateCompoundShape(std::vector<IShape*> &shapes)=0;
 		virtual std::shared_ptr<IShape> CreateHeightfieldTerrainShape(uint32_t width,uint32_t length,Scalar maxHeight,uint32_t upAxis,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IMaterial> CreateMaterial(float staticFriction,float dynamicFriction,float restitution)=0;
@@ -130,6 +135,7 @@ namespace pragma::physics
 		virtual void RemoveConstraint(IConstraint &constraint);
 		virtual void RemoveCollisionObject(ICollisionObject &obj);
 		virtual void RemoveController(IController &controller);
+		virtual void RemoveVehicle(IVehicle &vehicle);
 
 		const WaterBuoyancySimulator &GetWaterBuoyancySimulator() const;
 	protected:
@@ -139,19 +145,22 @@ namespace pragma::physics
 		void ClearConstraints();
 		void ClearCollisionObjects();
 		void ClearControllers();
+		void ClearVehicles();
 
 		std::vector<util::TSharedHandle<IConstraint>> m_constraints = {};
 		std::vector<util::TSharedHandle<ICollisionObject>> m_collisionObjects = {};
 		std::vector<util::TSharedHandle<IController>> m_controllers = {};
+		std::vector<util::TSharedHandle<IVehicle>> m_vehicles = {};
 
 		void AddConstraint(IConstraint &constraint);
 		void AddCollisionObject(ICollisionObject &obj);
 		void AddController(IController &controller);
+		void AddVehicle(IVehicle &vehicle);
 
 		template<class T>
 			void CallCallbacks(Event eventid,T &obj);
 	protected:
-		std::shared_ptr<pragma::physics::IVisualDebugger> m_visualDebugger = nullptr;
+		std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger = nullptr;
 	private:
 		NetworkState &m_nwState;
 		std::unordered_map<Event,std::vector<CallbackHandle>> m_callbacks = {};
@@ -163,12 +172,15 @@ namespace pragma::physics
 template<class T,typename... TARGS>
 std::shared_ptr<T> pragma::physics::IEnvironment::CreateSharedPtr(TARGS&& ...args)
 {
-	return std::shared_ptr<T>{
+	auto ptr = std::shared_ptr<T>{
 		new T{std::forward<TARGS>(args)...},[](T *o) {
 			o->OnRemove();
 			delete o;
 		}
 	};
+	ptr->Initialize();
+	ptr->InitializeLuaObject(GetNetworkState().GetLuaState());
+	return ptr;
 }
 template<class T,typename... TARGS>
 util::TSharedHandle<T> pragma::physics::IEnvironment::CreateSharedHandle(TARGS&& ...args)
@@ -179,7 +191,8 @@ util::TSharedHandle<T> pragma::physics::IEnvironment::CreateSharedHandle(TARGS&&
 			delete o;
 		}
 	};
-	handle->SetHandle(util::shared_handle_cast<T,IBase>(handle));
+	handle->Initialize();
+	handle->InitializeLuaHandle(GetNetworkState().GetLuaState(),util::TWeakSharedHandle<IBase>{util::shared_handle_cast<T,IBase>(handle)});
 	return handle;
 }
 

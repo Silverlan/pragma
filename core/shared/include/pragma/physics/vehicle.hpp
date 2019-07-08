@@ -7,9 +7,10 @@
 namespace pragma::physics
 {
 	class DLLNETWORK IVehicle
-		: public IBase
+		: public IBase,public IWorldObject
 	{
 	public:
+		virtual void OnRemove() override;
 	protected:
 		IVehicle(IEnvironment &env);
 	};

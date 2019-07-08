@@ -7,7 +7,6 @@
 #include "pragma/physics/physobj.h"
 #include <mathutil/umat.h>
 #include "pragma/entities/baseflashlight.h"
-#include "pragma/physics/physxquerysinglefiltercallback.h"
 #include "pragma/entities/baseentity.h"
 #include <pragma/game/game.h>
 #include "pragma/physics/raytraces.h"
@@ -113,8 +112,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	data.SetSource(colPos);
 	data.SetTarget(colPos +(pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
 	data.SetShape(*m_shapeStand);
-	TraceResult result;
-	return !game->Sweep(data,&result); // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
+	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
 void BasePlayerComponent::Think(double tDelta)
 {

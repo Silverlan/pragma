@@ -4,6 +4,8 @@
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
 
+// Obsolete?
+// TODO: Remove this file
 struct DLLNETWORK PhysContactInfo
 {
 	static Vector3 GetContactNormal(const Vector3 &n,int8_t controllerIndex);

@@ -46,7 +46,6 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
-#include "pragma/debug/c_debug_vehicle.hpp"
 
 #undef LEFT
 #undef RIGHT

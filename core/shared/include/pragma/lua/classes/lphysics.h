@@ -2,7 +2,6 @@
 #define __LPHYSICS_H__
 #include "pragma/networkdefinitions.h"
 #include <pragma/definitions.h>
-#include <pragma/physics/physapi.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>

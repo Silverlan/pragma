@@ -342,7 +342,7 @@ public:
 	template<class TElement>
 		TElement *CreateGUIElement(WIHandle *parent);
 	void Initialize();
-	void InitializeGame();
+	virtual void InitializeGame() override;
 
 	void SetViewModelFOV(float fov);
 	const util::PFloatProperty &GetViewModelFOVProperty() const;

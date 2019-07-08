@@ -52,7 +52,13 @@ void BrushMesh::UpdateHullShape(pragma::physics::IEnvironment &env,const std::ve
 				Vector3 &v = verts[j];
 				shape->AddPoint(Vector3(v.x,v.y,v.z));
 			}
+			auto *tris = side->GetTriangles();
+			if(tris == nullptr)
+				continue;
+			for(auto i=decltype(tris->size()){0u};i<tris->size();i+=3)
+				shape->AddTriangle(tris->at(i),tris->at(i +1),tris->at(i +2));
 		}
+		shape->Build();
 		return;
 	}
 	m_shape = env.CreateTriangleShape(*mat);

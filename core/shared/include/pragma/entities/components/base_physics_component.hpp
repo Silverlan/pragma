@@ -194,7 +194,7 @@ namespace pragma
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
-		pragma::physics::IRigidBody *CreateRigidBody(pragma::physics::IShape &shape,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
+		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(bool bDynamic=true);
 		util::WeakHandle<PhysObj> InitializeBrushPhysics(bool bDynamic=false,float mass=0.f);

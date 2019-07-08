@@ -7,7 +7,6 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <pragma/console/conout.h>
-#include <pragma/physics/physapi.h>
 
 class DLLNETWORK BrushMesh
 {

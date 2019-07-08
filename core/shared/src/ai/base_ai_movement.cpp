@@ -572,8 +572,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
 	}
 	
-	TraceResult result;
-	auto r = game->Sweep(data,&result);
+	auto result = game->Sweep(data);
 	fCheckForObstruction(result);
 #endif
 }

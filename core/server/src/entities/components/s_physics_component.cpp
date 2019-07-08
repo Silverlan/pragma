@@ -2,7 +2,6 @@
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/model/s_modelmanager.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/components/base_character_component.hpp>

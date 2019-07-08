@@ -2,7 +2,6 @@
 #define __C_PHYSDEBUG_H__
 
 #include <pragma/networkdefinitions.h>
-#include <pragma/physics/physapi.h>
 #include <vector>
 #include <mathutil/glmutil.h>
 #include <mathutil/color.h>
@@ -10,33 +9,10 @@
 #include <sharedutils/functioncallback.h>
 #include <sharedutils/util_shared_handle.hpp>
 
-namespace pragma {class CCameraComponent;};
+#undef DrawText
+
 namespace pragma::physics
 {
-	class IBase;
-	class ICollisionObject;
-	class IConstraint;
-	class DLLNETWORK VisualDebugObject
-	{
-	public:
-		VisualDebugObject(pragma::physics::ICollisionObject &o);
-		VisualDebugObject(pragma::physics::IConstraint &c);
-		~VisualDebugObject();
-		util::TWeakSharedHandle<pragma::physics::IBase> hObject = {};
-		bool constraint = false;
-		std::vector<Vector3> lines;
-		std::vector<Vector4> colors;
-		bool dynamic = false;
-		//std::shared_ptr<prosper::Buffer> lineBuffer = nullptr;
-		//std::shared_ptr<prosper::Buffer> colorBuffer = nullptr;
-		//void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
-		void UpdateBuffer();
-	private:
-		VisualDebugObject();
-		uint32_t m_vertexCount = 0u;
-		//std::shared_ptr<prosper::Buffer> m_instanceBuffer = nullptr;
-	};
-
 	class DLLNETWORK IVisualDebugger
 	{
 	public:
@@ -66,32 +42,23 @@ namespace pragma::physics
 		else if(val == 4)
 			mode = btIDebugDraw::DBG_DrawNormals;
 			*/
-		IVisualDebugger();
-		virtual ~IVisualDebugger();
-		//void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+		IVisualDebugger()=default;
+		virtual ~IVisualDebugger()=default;
 		IVisualDebugger(IVisualDebugger&)=delete;
 		IVisualDebugger &operator=(const IVisualDebugger&)=delete;
 
 		void DrawLine(const Vector3 &from,const Vector3 &to,const Color &color);
-		void DrawLine(const Vector3 &from,const Vector3 &to,const Color &fromColor,const Color &toColor);
-		void DrawContactPoint(const Vector3 &PointOnB,const Vector3 &normalOnB,float distance,int lifeTime,const Color &color);
-		void ReportErrorWarning(const std::string &str);
-		void Draw3DText(const Vector3 &location,const std::string &str);
+		virtual void DrawLine(const Vector3 &from,const Vector3 &to,const Color &fromColor,const Color &toColor)=0;
+		virtual void DrawPoint(const Vector3 &pos,const Color &color)=0;
+		virtual void DrawTriangle(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,const Color &c0,const Color &c1,const Color &c2)=0;
+		virtual void ReportErrorWarning(const std::string &str)=0;
+		virtual void DrawText(const std::string &str,const Vector3 &location,const Color &color,float size)=0;
+		virtual void Reset()=0;
+		virtual void Flush()=0;
 
 		void SetDebugMode(DebugMode debugMode);
-	protected:
-		void Draw();
-		void Clear();
 	private:
-		std::vector<std::unique_ptr<VisualDebugObject>> m_objects;
-		VisualDebugObject *m_drawObject;
-		CallbackHandle m_cbCollisionObject;
-		CallbackHandle m_cbConstraint;
-		CallbackHandle m_cbController;
 		DebugMode m_debugMode = DebugMode::None;
-		void Draw(VisualDebugObject *o);
-
-		void Draw(pragma::physics::IBase *b);
 	};
 };
 

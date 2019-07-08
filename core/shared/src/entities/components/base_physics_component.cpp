@@ -135,6 +135,7 @@ float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 
 	return uvec::distance(r0,r1);
 }
+
 void BasePhysicsComponent::UpdatePhysicsData()
 {
 	PHYSICSTYPE type = GetPhysicsType();
@@ -529,8 +530,6 @@ void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 		InvokeEventCallbacks(EVENT_ON_DYNAMIC_PHYSICS_UPDATED,evData);
 	}
 	InvokeEventCallbacks(EVENT_ON_PHYSICS_UPDATED,evData);
-	if(phys != nullptr && phys->IsController())
-		static_cast<ControllerPhysObj*>(phys)->ClearGroundContactPoint();
 }
 
 void BasePhysicsComponent::PrePhysicsSimulate()

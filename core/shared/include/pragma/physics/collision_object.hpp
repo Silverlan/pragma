@@ -4,7 +4,6 @@
 #include "pragma/networkdefinitions.h"
 #include <memory>
 #include <sharedutils/def_handle.h>
-#include <pragma/physics/physapi.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/uquat.h>
 #include "pragma/physics/transform.hpp"
@@ -25,7 +24,7 @@ namespace pragma::physics
 	class ISoftBody;
 	class IGhostObject;
 	class DLLNETWORK ICollisionObject
-		: public IBase
+		: public IBase,public IWorldObject
 	{
 	public:
 		enum class ActivationState : uint32_t
@@ -44,7 +43,7 @@ namespace pragma::physics
 		int GetSurfaceMaterial() const;
 		void SetSurfaceMaterial(int id);
 		void SetOrigin(const Vector3 &origin);
-		Vector3 &GetOrigin();
+		const Vector3 &GetOrigin() const;
 		Bool HasOrigin() const;
 
 		UInt32 GetBoneID() const;
@@ -56,6 +55,8 @@ namespace pragma::physics
 		virtual bool IsRigid() const;
 		virtual bool IsGhost() const;
 		virtual bool IsSoftBody() const;
+
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		virtual void SetActivationState(ActivationState state)=0;
 		virtual ActivationState GetActivationState() const=0;
@@ -103,7 +104,7 @@ namespace pragma::physics
 		virtual IGhostObject *GetGhostObject();
 		const IGhostObject *GetGhostObject() const;
 
-		virtual void Initialize();
+		virtual void InitializeLuaHandle(lua_State *l,const util::TWeakSharedHandle<IBase> &handle) override;
 	protected:
 		ICollisionObject(pragma::physics::IEnvironment &env,pragma::physics::IShape &shape);
 		virtual void ApplyCollisionShape(pragma::physics::IShape *optShape)=0;
@@ -113,7 +114,6 @@ namespace pragma::physics
 		std::shared_ptr<pragma::physics::IShape> m_shape;
 		UInt32 m_boneId = 0u;
 		Vector3 m_origin = {};
-		Bool m_bSpawned = false;
 		Bool m_bHasOrigin = false;
 		Bool m_customSurfaceMaterial = false;
 		int m_surfaceMaterial = 0u;
@@ -123,9 +123,6 @@ namespace pragma::physics
 		CollisionMask m_collisionFilterGroup = CollisionMask::Default;
 		CollisionMask m_collisionFilterMask = CollisionMask::Default;
 
-		void AddWorldObject();
-		virtual void RemoveWorldObject()=0;
-		virtual void DoAddWorldObject()=0;
 		void UpdateSurfaceMaterial();
 	};
 
@@ -135,6 +132,7 @@ namespace pragma::physics
 	public:
 		virtual bool IsGhost() const override;
 		virtual IGhostObject *GetGhostObject() override;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		using ICollisionObject::ICollisionObject;
 	};
@@ -143,6 +141,7 @@ namespace pragma::physics
 		: virtual public ICollisionObject
 	{
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsRigid() const override;
 		virtual IRigidBody *GetRigidBody() override;
 		virtual void ApplyForce(const Vector3 &force)=0;
@@ -152,8 +151,8 @@ namespace pragma::physics
 		virtual void ApplyTorque(const Vector3 &torque)=0;
 		virtual void ApplyTorqueImpulse(const Vector3 &torque)=0;
 		virtual void ClearForces()=0;
-		virtual Vector3 GetTotalForce()=0;
-		virtual Vector3 GetTotalTorque()=0;
+		virtual Vector3 GetTotalForce() const=0;
+		virtual Vector3 GetTotalTorque() const=0;
 		virtual void SetMassProps(float mass,const Vector3 &inertia)=0;
 		virtual float GetMass() const=0;
 		virtual void SetMass(float mass)=0;
@@ -190,6 +189,7 @@ namespace pragma::physics
 		: virtual public ICollisionObject
 	{
 	public:
+		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsSoftBody() const override;
 		virtual ISoftBody *GetSoftBody() override;
 		virtual void AddVelocity(const Vector3 &vel)=0;

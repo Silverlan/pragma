@@ -9,7 +9,6 @@
 #include <pragma/math/intersection.h>
 #include <pragma/console/conout.h>
 #include "material.h"
-#include <pragma/physics/physapi.h>
 #include "pragma/physics/hitboxes.h"
 #include "pragma/math/surfacematerial.h"
 #include "pragma/model/modelupdateflags.hpp"

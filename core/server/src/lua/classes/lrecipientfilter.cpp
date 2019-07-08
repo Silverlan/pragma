@@ -2,7 +2,6 @@
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/entities/player.h"
-#include "pragma/networking/wvserverclient.h"
 #include "pragma/networking/recipient_filter.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_entity.h"

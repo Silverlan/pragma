@@ -14,7 +14,12 @@ pragma::physics::IShape::IShape(IEnvironment &env)
 {}
 pragma::physics::IShape::~IShape()
 {}
+void pragma::physics::IShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IShape>(lua);
+}
 
+bool pragma::physics::IShape::IsValid() const {return true;}
 bool pragma::physics::IShape::IsConvex() const {return false;}
 bool pragma::physics::IShape::IsConvexHull() const {return false;}
 bool pragma::physics::IShape::IsCompoundShape() const {return false;}
@@ -51,6 +56,10 @@ pragma::physics::IConvexShape::IConvexShape(IEnvironment &env)
 {}
 pragma::physics::IConvexShape::~IConvexShape()
 {}
+void pragma::physics::IConvexShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IConvexShape>(lua);
+}
 
 bool pragma::physics::IConvexShape::IsConvex() const {return true;}
 pragma::physics::IConvexShape *pragma::physics::IConvexShape::GetConvexShape() {return this;}
@@ -67,6 +76,10 @@ pragma::physics::ICapsuleShape::ICapsuleShape(IEnvironment &env)
 {}
 pragma::physics::ICapsuleShape::~ICapsuleShape()
 {}
+void pragma::physics::ICapsuleShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<ICapsuleShape>(lua);
+}
 
 /////////////
 
@@ -75,6 +88,10 @@ pragma::physics::IBoxShape::IBoxShape(IEnvironment &env)
 {}
 pragma::physics::IBoxShape::~IBoxShape()
 {}
+void pragma::physics::IBoxShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IBoxShape>(lua);
+}
 
 /////////////
 
@@ -83,6 +100,10 @@ pragma::physics::IConvexHullShape::IConvexHullShape(IEnvironment &env)
 {}
 pragma::physics::IConvexHullShape *pragma::physics::IConvexHullShape::GetConvexHullShape() {return this;}
 bool pragma::physics::IConvexHullShape::IsConvexHull() const {return true;}
+void pragma::physics::IConvexHullShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IConvexHullShape>(lua);
+}
 
 /////////////
 
@@ -103,6 +124,11 @@ pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env,const std::vec
 }
 bool pragma::physics::ICompoundShape::IsCompoundShape() const {return true;}
 pragma::physics::ICompoundShape *pragma::physics::ICompoundShape::GetCompoundShape() {return this;}
+const std::vector<std::shared_ptr<pragma::physics::IShape>> &pragma::physics::ICompoundShape::GetShapes() const {return m_shapes;}
+void pragma::physics::ICompoundShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<ICompoundShape>(lua);
+}
 
 /////////////
 
@@ -111,6 +137,10 @@ pragma::physics::IHeightfield::IHeightfield(IEnvironment &env,uint32_t width,uin
 {}
 bool pragma::physics::IHeightfield::IsHeightfield() const {return true;}
 pragma::physics::IHeightfield *pragma::physics::IHeightfield::GetHeightfield() {return this;}
+void pragma::physics::IHeightfield::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<IHeightfield>(lua);
+}
 
 /////////////
 
@@ -119,14 +149,20 @@ pragma::physics::ITriangleShape::ITriangleShape(IEnvironment &env)
 {}
 bool pragma::physics::ITriangleShape::IsTriangleShape() const {return true;}
 pragma::physics::ITriangleShape *pragma::physics::ITriangleShape::GetTriangleShape() {return this;}
+void pragma::physics::ITriangleShape::ReserveTriangles(std::size_t count)
+{
+	m_vertices.reserve(count *3);
+	m_triangles.reserve(count *3);
+	m_faceMaterials.reserve(count);
+}
 size_t pragma::physics::ITriangleShape::GetVertexCount() const {return m_vertices.size();}
 Vector3 *pragma::physics::ITriangleShape::GetVertex(size_t idx) {return idx < m_vertices.size() ? &m_vertices.at(idx) : nullptr;}
 const Vector3 *pragma::physics::ITriangleShape::GetVertex(size_t idx) const {return const_cast<ITriangleShape*>(this)->GetVertex(idx);}
 std::vector<Vector3> &pragma::physics::ITriangleShape::GetVertices() {return m_vertices;}
 const std::vector<Vector3> &pragma::physics::ITriangleShape::GetVertices() const {return const_cast<ITriangleShape*>(this)->GetVertices();}
 
-std::vector<int32_t> &pragma::physics::ITriangleShape::GetTriangles() {return m_triangles;}
-const std::vector<int32_t> &pragma::physics::ITriangleShape::GetTriangles() const {return const_cast<ITriangleShape*>(this)->GetTriangles();}
+std::vector<uint32_t> &pragma::physics::ITriangleShape::GetTriangles() {return m_triangles;}
+const std::vector<uint32_t> &pragma::physics::ITriangleShape::GetTriangles() const {return const_cast<ITriangleShape*>(this)->GetTriangles();}
 std::vector<int32_t> &pragma::physics::ITriangleShape::GetSurfaceMaterials() {return m_faceMaterials;}
 const std::vector<int32_t> &pragma::physics::ITriangleShape::GetSurfaceMaterials() const {return const_cast<ITriangleShape*>(this)->GetSurfaceMaterials();}
 void pragma::physics::ITriangleShape::AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c,const SurfaceMaterial *mat)
@@ -155,4 +191,8 @@ void pragma::physics::ITriangleShape::AddTriangle(const Vector3 &a,const Vector3
 void pragma::physics::ITriangleShape::CalculateLocalInertia(float,Vector3 *localInertia) const
 {
 	*localInertia = Vector3(0.f,0.f,0.f);
+}
+void pragma::physics::ITriangleShape::InitializeLuaObject(lua_State *lua)
+{
+	IBase::InitializeLuaObject<ITriangleShape>(lua);
 }

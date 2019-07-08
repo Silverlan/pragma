@@ -5,9 +5,9 @@
 #include <pragma/lua/luaapi.h>
 #include <memory>
 #include <sharedutils/util_shared_handle.hpp>
-#include <pragma/physics/physapi.h>
 #include <vector>
 
+class PhysObj;
 namespace pragma::physics
 {
 	class IEnvironment;
@@ -27,21 +27,52 @@ namespace pragma::physics
 		virtual bool IsController() const;
 
 		virtual void OnRemove();
+		virtual void Initialize();
 		virtual void InitializeLuaObject(lua_State *lua);
 		luabind::object &GetLuaObject();
 		const luabind::object &GetLuaObject() const;
 		void Push(lua_State *l);
-		void *userData = nullptr;
+		
+		void *GetUserData() const;
+		PhysObj *GetPhysObj() const;
+		void SetPhysObj(PhysObj &physObj);
 	protected:
 		friend IEnvironment;
+		friend PhysObj;
 		IBase(IEnvironment &env);
-		void SetHandle(const util::TWeakSharedHandle<IBase> &handle);
+		void SetUserData(void *userData) const;
+		virtual void InitializeLuaHandle(lua_State *l,const util::TWeakSharedHandle<IBase> &handle);
+		template<class T>
+			void InitializeLuaObject(lua_State *lua);
 
 		IEnvironment &m_physEnv;
 		util::TWeakSharedHandle<IBase> m_handle = {};
 
 		std::unique_ptr<luabind::object> m_luaObj = nullptr;
+	private:
+		mutable void *m_userData = nullptr;
+		mutable PhysObj *m_physObj = nullptr;
+	};
+
+	class DLLNETWORK IWorldObject
+	{
+	public:
+		bool IsSpawned() const;
+		void AddWorldObject();
+		virtual void RemoveWorldObject()=0;
+		virtual void DoAddWorldObject()=0;
+	private:
+		bool m_bSpawned = false;
 	};
 };
+template<class T>
+	void pragma::physics::IBase::InitializeLuaObject(lua_State *lua)
+{
+	auto handle = ClaimOwnership();
+	if(handle.IsValid())
+		m_luaObj = std::make_unique<luabind::object>(lua,util::shared_handle_cast<IBase,T>(handle));
+	else
+		m_luaObj = std::make_unique<luabind::object>(lua,std::dynamic_pointer_cast<T>(shared_from_this()));
+}
 
 #endif

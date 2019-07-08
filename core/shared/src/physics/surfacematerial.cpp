@@ -7,7 +7,6 @@
 #include "datasystem.h"
 #include "pragma/ai/navsystem.h"
 #include <algorithm>
-#include <pragma/physics/physapi.h>
 
 extern DLLENGINE Engine *engine;
 
@@ -141,7 +140,9 @@ SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other)
 SurfaceMaterial::SurfaceMaterial(const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat)
 	: m_physMaterial{std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())},m_index(idx),m_identifier(identifier),
 	m_footstepType("fx.fst_concrete")
-{}
+{
+	physMat.SetSurfaceMaterial(*this);
+}
 
 SurfaceMaterial &SurfaceMaterial::operator=(const SurfaceMaterial &other)
 {

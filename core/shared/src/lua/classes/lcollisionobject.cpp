@@ -2,6 +2,7 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/physics/environment.hpp"
+#include "pragma/physics/vehicle.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 
@@ -229,6 +230,20 @@ void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 		Lua::PushBool(l,hPhys != nullptr);
 	}));
 	mod[classDefGhost];
+
+	auto classDefVhc = luabind::class_<pragma::physics::IVehicle,pragma::physics::IBase>("Vehicle");
+	classDefVhc.def("IsValid",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		Lua::PushBool(l,hPhys != nullptr);
+	}));
+	classDefVhc.def("GetCollisionObject",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		auto *pCollisionObject = hPhys->GetCollisionObject();
+		if(pCollisionObject == nullptr)
+			return;
+		pCollisionObject->Push(l);
+	}));
+	mod[classDefVhc];
 }
 
 void Lua::PhysRigidBody::register_class(lua_State *l,luabind::module_ &mod)

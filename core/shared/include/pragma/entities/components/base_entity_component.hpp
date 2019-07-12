@@ -6,6 +6,7 @@
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/util/util_handled.hpp"
+#include <luasystem.h>
 #include <unordered_map>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/util_extensible_enum.hpp>

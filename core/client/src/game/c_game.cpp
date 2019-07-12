@@ -1568,17 +1568,21 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			auto posEnt = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 			auto correctionVel = pos -posEnt;
 			auto l = uvec::length_sqr(correctionVel);
+#ifdef ENABLE_DEPRECATED_PHYSICS
 			if(l > maxCorrectionDistance)
+#endif
 			{
 				if(pTrComponent.valid())
 					pTrComponent->SetPosition(pos); // Too far away, just snap into position
 			}
+#ifdef ENABLE_DEPRECATED_PHYSICS
 			else
 			{
 				auto *pPhysComponent = static_cast<pragma::CPhysicsComponent*>(ent->GetPhysicsComponent().get());
 				if(pPhysComponent != nullptr)
 					pPhysComponent->SetLinearCorrectionVelocity(pos -posEnt);
 			}
+#endif
 			//
 			auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 			if(pVelComponent.valid())

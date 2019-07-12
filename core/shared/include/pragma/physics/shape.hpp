@@ -22,6 +22,7 @@ namespace pragma::physics
 	class ICompoundShape;
 	class IHeightfield;
 	class ITriangleShape;
+	class IMaterial;
 	class DLLNETWORK IShape
 		: public IBase
 	{
@@ -56,6 +57,11 @@ namespace pragma::physics
 
 		virtual void GetBoundingSphere(Vector3 &outCenter,float &outRadius) const=0;
 
+		virtual float GetMass() const=0;
+		virtual void SetMass(float mass)=0;
+		virtual Vector3 GetCenterOfMass() const=0;
+
+		virtual void ApplySurfaceMaterial(IMaterial &mat)=0;
 		void SetSurfaceMaterial(int32_t surfMatIdx); // TODO: Apply density from surface material
 		int32_t GetSurfaceMaterialIndex() const;
 		SurfaceMaterial *GetSurfaceMaterial();
@@ -130,9 +136,10 @@ namespace pragma::physics
 		virtual void AddTriangle(uint32_t idx0,uint32_t idx1,uint32_t idx2)=0;
 		virtual void ReservePoints(uint32_t numPoints)=0;
 		virtual void ReserveTriangles(uint32_t numTris)=0;
-		virtual void Build()=0;
+		void Build();
 	protected:
 		IConvexHullShape(IEnvironment &env);
+		virtual void DoBuild()=0;
 		bool m_bBuilt = false;
 	};
 
@@ -186,7 +193,7 @@ namespace pragma::physics
 
 		virtual void CalculateLocalInertia(float mass,Vector3 *localInertia) const override;
 		virtual void AddTriangle(const Vector3 &a,const Vector3 &b,const Vector3 &c,const SurfaceMaterial *mat=nullptr);
-		virtual void Build(const std::vector<SurfaceMaterial> *materials=nullptr)=0;
+		void Build(const std::vector<SurfaceMaterial> *materials=nullptr);
 		void ReserveTriangles(std::size_t count);
 
 		size_t GetVertexCount() const;
@@ -201,6 +208,7 @@ namespace pragma::physics
 		const std::vector<int32_t> &GetSurfaceMaterials() const;
 	protected:
 		ITriangleShape(IEnvironment &env);
+		virtual void DoBuild(const std::vector<SurfaceMaterial> *materials=nullptr)=0;
 
 		std::vector<Vector3> m_vertices;
 		std::vector<uint32_t> m_triangles; // Index offsets into m_vertices

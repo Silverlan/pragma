@@ -242,9 +242,7 @@ void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *p
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
 	TraceData data {};
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	data.SetFilter(ent.GetHandle());
-#endif
+	data.SetFilter(ent);
 	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);
@@ -271,9 +269,7 @@ void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 
 	TraceData data {};
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	data.SetFilter(ent.GetHandle());
-#endif
+	data.SetFilter(ent);
 	data.SetFlags(RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);

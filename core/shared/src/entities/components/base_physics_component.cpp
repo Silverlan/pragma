@@ -25,6 +25,8 @@ ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPON
 ComponentEventId BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = INVALID_COMPONENT_ID;
+ComponentEventId BasePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
+ComponentEventId BasePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
 void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -35,6 +37,8 @@ void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_DYNAMIC_PHYSICS_UPDATED = componentManager.RegisterEvent("ON_DYNAMIC_PHYSICS_UPDATED",componentType);
 	EVENT_ON_PRE_PHYSICS_SIMULATE = componentManager.RegisterEvent("ON_PRE_PHYSICS_SIMULATE",componentType);
 	EVENT_ON_POST_PHYSICS_SIMULATE = componentManager.RegisterEvent("ON_POST_PHYSICS_SIMULATE",componentType);
+	EVENT_ON_SLEEP = componentManager.RegisterEvent("EVENT_ON_SLEEP",componentType);
+	EVENT_ON_WAKE = componentManager.RegisterEvent("EVENT_ON_WAKE",componentType);
 	EVENT_HANDLE_RAYCAST = componentManager.RegisterEvent("HANDLE_RAYCAST",componentType);
 }
 BasePhysicsComponent::BasePhysicsComponent(BaseEntity &ent)
@@ -293,6 +297,13 @@ void BasePhysicsComponent::SetCollisionCallbacksEnabled(bool b)
 void BasePhysicsComponent::SetCollisionContactReportEnabled(bool b)
 {
 	m_bColContactReportEnabled = b;
+	auto *phys = GetPhysicsObject();
+	for(auto &hColObj : phys->GetCollisionObjects())
+	{
+		if(hColObj.IsValid() == false)
+			continue;
+		hColObj->SetContactReportEnabled(b);
+	}
 }
 bool BasePhysicsComponent::GetCollisionCallbacksEnabled() const {return m_bColCallbacksEnabled;}
 
@@ -695,6 +706,29 @@ void BasePhysicsComponent::Load(DataStream &ds,uint32_t version)
 	SetCollisionType(collisionType);
 }
 
+void BasePhysicsComponent::SetSleepReportEnabled(bool reportEnabled)
+{
+	umath::set_flag(m_stateFlags,StateFlags::SleepReportEnabled,reportEnabled);
+	auto *physObj = GetPhysicsObject();
+	if(physObj == nullptr)
+		return;
+	for(auto &hCol : physObj->GetCollisionObjects())
+	{
+		if(hCol.IsValid() == false)
+			continue;
+		hCol->SetSleepReportEnabled(reportEnabled);
+	}
+}
+bool BasePhysicsComponent::IsSleepReportEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SleepReportEnabled);}
+void BasePhysicsComponent::OnWake()
+{
+	InvokeEventCallbacks(EVENT_ON_WAKE);
+}
+void BasePhysicsComponent::OnSleep()
+{
+	InvokeEventCallbacks(EVENT_ON_SLEEP);
+}
+
 bool BasePhysicsComponent::IsRagdoll() const {return umath::is_flag_set(m_stateFlags,StateFlags::Ragdoll);}
 
 void BasePhysicsComponent::UpdateRagdollPose()
@@ -777,9 +811,7 @@ void BasePhysicsComponent::DropToFloor()
 	auto dest = origin +dir *static_cast<float>(GameLimits::MaxRayCastRange);
 
 	TraceData trace;
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	trace.SetFilter(GetEntity().GetHandle());
-#endif
+	trace.SetFilter(GetEntity());
 	trace.SetFlags(RayCastFlags::InvertFilter);
 	trace.SetSource(origin);
 	trace.SetShape(*shape);

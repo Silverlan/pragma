@@ -66,6 +66,7 @@ void BasePointConstraintDoFComponent::InitializeConstraint(BaseEntity *src,BaseE
 			auto dof = physEnv->CreateDoFConstraint(*bodySrc,Vector3(0.f,0.f,0.f),uquat::identity(),*bodyTgt,Vector3(0.f,50.f,0.f),uquat::identity());
 			if(dof != nullptr)
 			{
+				dof->SetEntity(GetEntity());
 				//dof->SetLinearLimit(Vector3(1.f,1.f,1.f),Vector3(-1.f,-1.f,-1.f));
 				dof->SetAngularLimit(Vector3(M_PI,M_PI,M_PI),Vector3(-M_PI,-M_PI,-M_PI));
 				//dof->SetLinearLimit(m_kvLimLinLower,m_kvLimLinUpper);

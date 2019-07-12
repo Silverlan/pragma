@@ -15,6 +15,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 PhysVehicleRaycaster::PhysVehicleRaycaster(Game *game,pragma::BaseVehicleComponent &vhc)
 	: m_game(game),m_vehicle(vhc),m_entity(vhc.GetEntity())
 {
@@ -79,6 +80,16 @@ BaseVehicleComponent::WheelData::WheelData()
 
 void BaseVehicleComponent::OnPhysicsInitialized()
 {
+	auto &ent = GetEntity();
+	auto *nw = ent.GetNetworkState();
+	auto *game = nw->GetGameState();
+	auto *physEnv = game->GetPhysicsEnvironment();
+	if(physEnv == nullptr)
+		return;
+	auto vhc = physEnv->CreateVehicle();
+	if(vhc == nullptr)
+		return;
+
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -472,6 +483,7 @@ void BaseVehicleComponent::Initialize()
 		if(pPhysComponent.expired())
 			return;
 		pPhysComponent->AddCollisionFilter(CollisionMask::Vehicle);
+		OnPhysicsInitialized();
 	});
 
 	auto &ent = GetEntity();
@@ -599,3 +611,4 @@ void BaseVehicleComponent::SetRollInfluence(Float influence)
 			data.hWheel->SetRollInfluence(influence);
 	}
 }
+#pragma optimize("",on)

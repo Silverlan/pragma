@@ -293,9 +293,7 @@ void CPlayerComponent::UpdateObserverCallback()
 			data.SetSource(origin);
 			data.SetTarget(npos);
 			data.SetFlags(RayCastFlags::InvertFilter);
-#ifdef ENABLE_DEPRECATED_PHYSICS
-			data.SetFilter(ent->GetEntity().GetHandle());
-#endif
+			data.SetFilter(ent->GetEntity());
 			auto r = c_game->RayCast(data);
 			pos = r.position;
 		}

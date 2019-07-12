@@ -71,7 +71,7 @@ void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &b
 	BroadcastEvent(EVENT_ON_FIRE_BULLETS,evData);
 }
 
-bool BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result) {return true;}
+RayCastHitType BaseShooterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj &phys,physics::ICollisionObject &col) {return RayCastHitType::Block;}
 
 void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,TraceData &data) const
 {
@@ -79,17 +79,17 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,Trace
 	auto *inflictor = bulletInfo.hInflictor.get();
 	auto *entSrc = (attacker != nullptr) ? attacker : (inflictor != nullptr) ? inflictor : &GetEntity();
 	data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	data.SetFilter([this,&data,attacker,inflictor,&bulletInfo](BaseEntity *ent,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result) -> bool {
-		if(ent == &GetEntity() || ent == attacker || ent == inflictor) // Attacker can't shoot themselves or the inflictor
-			return false;
+	data.SetFilter([this,&data,attacker,inflictor,&bulletInfo](pragma::physics::IShape &shape,pragma::physics::IRigidBody &body) -> RayCastHitType {
+		auto *phys = body.GetPhysObj();
+		auto *ent = phys ? phys->GetOwner() : nullptr;
+		if(ent == nullptr || &ent->GetEntity() == &GetEntity() || &ent->GetEntity() == attacker || &ent->GetEntity() == inflictor) // Attacker can't shoot themselves or the inflictor
+			return RayCastHitType::None;
 		auto filterGroup = phys->GetCollisionFilter();
-		auto mdlComponent = ent->GetModelComponent();
+		auto mdlComponent = ent->GetEntity().GetModelComponent();
 		if(mdlComponent.valid() && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
-			return false;
-		return const_cast<BaseShooterComponent*>(this)->OnBulletHit(bulletInfo,data,phys,col,result);
+			return RayCastHitType::None;
+		return const_cast<BaseShooterComponent*>(this)->OnBulletHit(bulletInfo,data,*phys,body);
 	});
-#endif
 	auto physComponent = GetEntity().GetPhysicsComponent();
 	auto filterGroup = CollisionMask::None;
 	if(physComponent.valid())

@@ -289,6 +289,7 @@ protected:
 
 ////////////////////////////////////
 
+namespace pragma::physics {class IMaterial;};
 class DLLNETWORK ControllerPhysObj
 	: public PhysObj,public PhysObjKinematic,public PhysObjDynamic
 {

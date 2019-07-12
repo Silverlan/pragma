@@ -426,9 +426,7 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 					TraceData data;
 					data.SetSource(origin);
 					data.SetTarget(origin +dir *dist);
-#ifdef ENABLE_DEPRECATED_PHYSICS
-					data.SetFilter(entOther->GetHandle());
-#endif
+					data.SetFilter(*entOther);
 					auto result = game->RayCast(data);
 					if(result.hitType == RayCastHitType::None || result.entity.get() == entOther)
 					{
@@ -771,11 +769,8 @@ void BasePlayerComponent::Crouch()
 			{
 				auto radius = capsuleShape->GetRadius();
 				auto halfHeight = capsuleShape->GetHalfHeight();
-				auto w = util::metres_to_units(radius);
-				auto btH = util::metres_to_units(halfHeight) *2.0; // Half-Height; Multiply by 2 to get full height
-				auto h = (btH +w *2.0) /2.0;
 				auto *physEnv = game->GetPhysicsEnvironment();
-				m_shapeStand = physEnv->CreateCapsuleShape(w,h,physEnv->GetGenericMaterial()); // TODO: Cache this shape
+				m_shapeStand = physEnv->CreateCapsuleShape(radius,halfHeight,physEnv->GetGenericMaterial()); // TODO: Cache this shape
 			}
 		}
 	}

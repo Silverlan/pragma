@@ -15,7 +15,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
-		virtual void OnStartTouch(BaseEntity *ent,PhysObj *phys) override;
+		virtual void OnStartTouch(BaseEntity *ent) override;
 		virtual void OnResetGravity(BaseEntity *ent,GravitySettings &settings) override;
 	};
 };

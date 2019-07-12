@@ -33,7 +33,7 @@ void BaseEntityTriggerGravityComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("touch");
 }
-void BaseEntityTriggerGravityComponent::OnStartTouch(BaseEntity *ent,PhysObj *phys)
+void BaseEntityTriggerGravityComponent::OnStartTouch(BaseEntity *ent)
 {
 	auto &settings = m_gravityReset.insert(std::make_pair(std::make_shared<EntityHandle>(ent->GetHandle()),GravitySettings{})).first->second;
 	auto pEntGravityComponent = ent->GetComponent<pragma::GravityComponent>();
@@ -49,7 +49,7 @@ void BaseEntityTriggerGravityComponent::OnStartTouch(BaseEntity *ent,PhysObj *ph
 	auto &entThis = GetEntity();
 	pragma::Entity::TriggerGravity::apply_gravity(ent,entThis.GetSpawnFlags(),-m_kvGravityDir,m_kvGravityDir,m_kvUseForce,m_kvGravityForce,&settings.dirMove);
 }
-void BaseEntityTriggerGravityComponent::OnEndTouch(BaseEntity *ent,PhysObj *phys)
+void BaseEntityTriggerGravityComponent::OnEndTouch(BaseEntity *ent)
 {
 	auto &entThis = GetEntity();
 	for(auto it=m_gravityReset.begin();it!=m_gravityReset.end();)
@@ -86,12 +86,12 @@ util::EventReply BaseEntityTriggerGravityComponent::HandleEvent(ComponentEventId
 	if(eventId == BaseTouchComponent::EVENT_ON_START_TOUCH)
 	{
 		auto &touchData = static_cast<const pragma::CETouchData&>(evData);
-		OnStartTouch(touchData.entity,touchData.physObj);
+		OnStartTouch(touchData.entity);
 	}
 	if(eventId == BaseTouchComponent::EVENT_ON_END_TOUCH)
 	{
 		auto &touchData = static_cast<const pragma::CETouchData&>(evData);
-		OnEndTouch(touchData.entity,touchData.physObj);
+		OnEndTouch(touchData.entity);
 	}
 	return util::EventReply::Unhandled;
 }

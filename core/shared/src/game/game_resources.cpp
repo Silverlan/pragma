@@ -8,6 +8,7 @@
 extern DLLENGINE Engine *engine;
 
 static bool s_bModuleInitialized = false;
+#pragma optimize("",off)
 static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 {
 	static std::shared_ptr<util::Library> dllHandle = nullptr;
@@ -137,3 +138,4 @@ bool util::port_file(NetworkState *nw,const std::string &path)
 		return false;
 	return ptrExtractResource(nw,path,util::IMPORT_PATH);
 }
+#pragma optimize("",on)

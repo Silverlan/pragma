@@ -580,12 +580,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 		auto &ent = *Lua::CheckEntity(l,-1);
 		Lua::Pop(l,1);
 
-		Lua::PushInt(l,2);
-		Lua::GetTableValue(l,argsIdx);
-		auto &physObj = *Lua::CheckPhysObj(l,-1);
-		Lua::Pop(l,1);
-
-		pragma::CECanTriggerData evData{&ent,&physObj};
+		pragma::CECanTriggerData evData{&ent};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else
@@ -721,12 +716,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 		auto &ent = *Lua::CheckEntity(l,-1);
 		Lua::Pop(l,1);
 
-		Lua::PushInt(l,2);
-		Lua::GetTableValue(l,argsIdx);
-		auto &physObj = *Lua::CheckPhysObj(l,-1);
-		Lua::Pop(l,1);
-
-		pragma::CETouchData evData{&ent,&physObj};
+		pragma::CETouchData evData{ent};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else

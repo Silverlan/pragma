@@ -23,6 +23,7 @@ namespace pragma::physics
 	class IRigidBody;
 	class ISoftBody;
 	class IGhostObject;
+	class ContactInfo;
 	class DLLNETWORK ICollisionObject
 		: public IBase,public IWorldObject
 	{
@@ -38,6 +39,16 @@ namespace pragma::physics
 			Count
 		};
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			HasOrigin = 1u,
+			CustomSurfaceMaterial = HasOrigin<<1u,
+			CCDEnabled = CustomSurfaceMaterial<<1u,
+			UpdateAABB = CCDEnabled<<1u,
+			ContactReportEnabled = UpdateAABB<<1u
+		};
+
 		virtual void Spawn();
 		virtual void OnRemove() override;
 		int GetSurfaceMaterial() const;
@@ -45,6 +56,7 @@ namespace pragma::physics
 		void SetOrigin(const Vector3 &origin);
 		const Vector3 &GetOrigin() const;
 		Bool HasOrigin() const;
+		Vector3 GetGravity() const;
 
 		UInt32 GetBoneID() const;
 		void SetBoneID(UInt32 id);
@@ -89,9 +101,20 @@ namespace pragma::physics
 		CollisionMask GetCollisionFilterGroup() const;
 		void SetCollisionFilterMask(CollisionMask mask);
 		CollisionMask GetCollisionFilterMask() const;
+		virtual void SetSleepReportEnabled(bool reportEnabled)=0;
+		virtual bool IsSleepReportEnabled() const=0;
+
+		void SetContactReportEnabled(bool reportEnabled);
+		bool IsContactReportEnabled() const;
 
 		virtual void PreSimulate();
 		virtual void PostSimulate();
+
+		void OnContact(const ContactInfo &contactInfo);
+		void OnStartTouch(ICollisionObject &other);
+		void OnEndTouch(ICollisionObject &other);
+		void OnWake();
+		void OnSleep();
 
 		void UpdateAABB();
 		bool ShouldUpdateAABB() const;
@@ -114,12 +137,8 @@ namespace pragma::physics
 		std::shared_ptr<pragma::physics::IShape> m_shape;
 		UInt32 m_boneId = 0u;
 		Vector3 m_origin = {};
-		Bool m_bHasOrigin = false;
-		Bool m_customSurfaceMaterial = false;
+		StateFlags m_stateFlags = StateFlags::CCDEnabled;
 		int m_surfaceMaterial = 0u;
-		bool m_bCcdEnabled = true;
-		bool m_bUpdateAABB = false;
-		std::pair<bool,CollisionMask> m_simulationEnabled = {true,CollisionMask::None};
 		CollisionMask m_collisionFilterGroup = CollisionMask::Default;
 		CollisionMask m_collisionFilterMask = CollisionMask::Default;
 
@@ -297,5 +316,6 @@ namespace pragma::physics
 		std::weak_ptr<ModelSubMesh> m_subMesh = {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::ICollisionObject::StateFlags)
 
 #endif

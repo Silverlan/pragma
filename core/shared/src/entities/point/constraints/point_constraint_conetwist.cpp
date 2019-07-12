@@ -78,6 +78,7 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 	);
 	if(coneTwist.IsValid())
 	{
+		coneTwist->SetEntity(GetEntity());
 		coneTwist->SetLimit(
 			swingSpan1,swingSpan2,twistSpan,
 			m_kvSoftness,m_kvBiasFactor,

@@ -66,7 +66,7 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	return body;
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDynamic)
+util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
 {
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
@@ -75,7 +75,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	float mass = hMdl->GetMass();
 	auto bStaticMass = (mass == 0.f) ? true : false;
-	if(bDynamic == true && bStaticMass == true) // If a mesh has been initialized with a mass of 0, it can't be changed anymore? (TODO: Then why does it work for the world? CHECK AND CONFIRM/DISCONFIRM!)
+	if(umath::is_flag_set(flags,PhysFlags::Dynamic) && bStaticMass == true) // If a mesh has been initialized with a mass of 0, it can't be changed anymore? (TODO: Then why does it work for the world? CHECK AND CONFIRM/DISCONFIRM!)
 		mass = 1.f;
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
@@ -106,6 +106,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		auto shape = (bScale == false) ? mesh->GetShape() : mesh->CreateShape(scale);
 		if(shape != nullptr)
 		{
+			shape->SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 			auto bone = mesh->GetBoneParent();
 			auto itMesh = sortedShapes.find(bone);
 			if(itMesh == sortedShapes.end())
@@ -152,11 +153,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 			shape = shapes.front();
 		else
 		{
-			if(bDynamic == false)
+			if(umath::is_flag_set(flags,PhysFlags::Dynamic) == false)
 			{
 				for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto body = CreateRigidBody(**it,mass,bDynamic);//-it->origin);
+					auto body = CreateRigidBody(**it,mass,umath::is_flag_set(flags,PhysFlags::Dynamic));//-it->origin);
 					if(body == nullptr)
 						continue;
 					if(bPhys == false)
@@ -195,11 +196,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		}
 		if(shape == nullptr)
 			continue;
-		auto body = CreateRigidBody(*shape,mass,bDynamic);
+		auto body = CreateRigidBody(*shape,mass,umath::is_flag_set(flags,PhysFlags::Dynamic));
 		if(body == nullptr)
 			continue;
 		body->SetBoneID(it->first);
-		if(it->first >= 0 && bDynamic == true && joints.empty() == false) // Static physics and non-ragdolls can still play animation
+		if(it->first >= 0 && umath::is_flag_set(flags,PhysFlags::Dynamic) == true && joints.empty() == false) // Static physics and non-ragdolls can still play animation
 			umath::set_flag(m_stateFlags,StateFlags::Ragdoll);
 		sortedShape.body = body;
 		if(bPhys == false)
@@ -444,7 +445,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 	}
 	//
 
-	if(bDynamic == true)
+	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
 	{
 		m_physicsType = PHYSICSTYPE::DYNAMIC;
 		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::All);
@@ -457,13 +458,13 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(bool bDyn
 		SetMoveType(MOVETYPE::NONE);
 	}
 	InitializePhysObj();
-	if(bDynamic == true && bStaticMass == true)
+	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true && bStaticMass == true)
 		m_physObject->SetMass(0.f);
 	OnPhysicsInitialized();
 	return m_physObject;
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDynamic,float mass) // Obsolete?
+util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags flags,float mass) // Obsolete?
 {
 	auto &ent = GetEntity();
 	NetworkState *state = ent.GetNetworkState();
@@ -482,6 +483,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 		if(bConvex == true) // Create a single convex mesh
 		{
 			auto shape = mesh->GetShape();
+			shape->SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 
 			Vector3 localInertia(0.f,0.f,0.f);
 			shape->CalculateLocalInertia(mass,&localInertia);
@@ -491,7 +493,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 			startTransform.SetOrigin(origin);
 			auto contactProcessingThreshold = 1e30;
 
-			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia,bDynamic);
+			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia,umath::is_flag_set(flags,PhysFlags::Dynamic));
 			//PhysRigidBody *body = physEnv->CreateRigid
 			//btRigidBody *body = new btRigidBody(mass,NULL,shape,localInertia);
 			body->SetWorldTransform(startTransform);
@@ -516,7 +518,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(bool bDyn
 	}
 	if(bPhys == false)
 		return {};
-	if(bDynamic == true)
+	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
 	{
 		m_physicsType = PHYSICSTYPE::DYNAMIC;
 		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::All);
@@ -598,9 +600,10 @@ void BasePhysicsComponent::InitializePhysObj()
 	//	pos -= o->GetOrigin();
 	//SetPosition(pos);//,true); // Update our position, since our origin may have changed
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,float mass)
+PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags,float mass)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
+	shape.SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 	auto bDynamic = mass == 0.f;
 	auto body = CreateRigidBody(shape,mass,bDynamic);
 
@@ -639,8 +642,9 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 	OnPhysicsInitialized();
 	return m_physObject.get();
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type)
+PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type,PhysFlags flags)
 {
+	umath::set_flag(flags,PhysFlags::Dynamic,type != PHYSICSTYPE::STATIC);
 	if(m_physObject != NULL)
 		DestroyPhysicsObject();
 	if(type != PHYSICSTYPE::STATIC)
@@ -665,7 +669,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type)
 				Model *mdl = hMdl.get();
 				auto &meshes = mdl->GetCollisionMeshes();
 				if(!meshes.empty())
-					return InitializeModelPhysics((type == PHYSICSTYPE::DYNAMIC) ? true : false).get();
+					return InitializeModelPhysics(flags).get();
 			}
 			return nullptr;//InitializeBrushPhysics((type == PHYSICSTYPE::DYNAMIC) ? true : false); // Obsolete?
 		}
@@ -717,7 +721,12 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	//SetPosition(pos,true);
 	OnPhysicsDestroyed();
 }
-void BasePhysicsComponent::OnPhysicsInitialized() {BroadcastEvent(EVENT_ON_PHYSICS_INITIALIZED);}
+void BasePhysicsComponent::OnPhysicsInitialized()
+{
+	BroadcastEvent(EVENT_ON_PHYSICS_INITIALIZED);
+	SetCollisionContactReportEnabled(GetCollisionContactReportEnabled());
+	SetSleepReportEnabled(IsSleepReportEnabled());
+}
 void BasePhysicsComponent::OnPhysicsDestroyed() {BroadcastEvent(EVENT_ON_PHYSICS_DESTROYED);}
 bool BasePhysicsComponent::IsKinematic() const {return umath::is_flag_set(m_stateFlags,StateFlags::Kinematic);}
 void BasePhysicsComponent::SetKinematic(bool b)

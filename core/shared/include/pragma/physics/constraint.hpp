@@ -7,6 +7,7 @@
 #include "pragma/physics/base.hpp"
 #include "pragma/physics/transform.hpp"
 #include "pragma/lua/baseluaobj.h"
+#include "pragma/entities/baseentity_handle.h"
 #include <vector>
 
 namespace pragma
@@ -38,16 +39,23 @@ namespace pragma::physics
 		Vector3 GetTargetPosition();
 		Quat GetTargetRotation();
 
+		// Returns the entity this constraint belongs to (if any)
+		BaseEntity *GetEntity() const;
+		void SetEntity(BaseEntity &ent);
+
 		virtual void SetOverrideSolverIterationCount(int32_t count)=0;
 		virtual int32_t GetOverrideSolverIterationCount() const=0;
 		virtual float GetBreakingImpulseThreshold() const=0;
 		virtual void SetBreakingImpulseThreshold(float threshold)=0;
 		virtual void InitializeLuaObject(lua_State *lua) override;
+
+		void OnBroken();
 	protected:
 		IConstraint(IEnvironment &env);
 		virtual void DoSetCollisionsEnabled(Bool b)=0;
 		Transform m_srcTransform;
 		Transform m_tgtTransform;
+		EntityHandle m_hEntity = {};
 	private:
 		bool m_bCollisionsEnabled = true;
 	};

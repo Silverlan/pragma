@@ -52,6 +52,29 @@ namespace pragma::physics
 	class IVisualDebugger;
 
 	using Scalar = double;
+
+	class ContactInfo;
+	class DLLNETWORK IEventCallback
+	{
+	public:
+		virtual ~IEventCallback()=default;
+		// Called if contact report is enabled for a collision object and it
+		// collided with another actor. This is NOT called for triggers!
+		virtual void OnContact(const ContactInfo &contactInfo)=0;
+
+		// Called whenever a constraint is broken
+		virtual void OnConstraintBroken(IConstraint &constraint)=0;
+
+		// Called when an actor has started touching another for the first time.
+		virtual void OnStartTouch(ICollisionObject &o0,ICollisionObject &o1)=0;
+
+		// Called when an actor has stopped touching another actor.
+		virtual void OnEndTouch(ICollisionObject &o0,ICollisionObject &o1)=0;
+
+		virtual void OnWake(ICollisionObject &o)=0;
+		virtual void OnSleep(ICollisionObject &o)=0;
+	};
+
 	class DLLNETWORK IEnvironment
 	{
 	public:
@@ -89,6 +112,11 @@ namespace pragma::physics
 		virtual bool Initialize();
 		virtual float GetWorldScale() const;
 
+		void SetEventCallback(std::unique_ptr<IEventCallback> evCallback);
+
+		virtual void StartProfiling()=0;
+		virtual void EndProfiling()=0;
+
 		void SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger);
 		IVisualDebugger *GetVisualDebugger() const;
 
@@ -119,6 +147,8 @@ namespace pragma::physics
 		virtual std::shared_ptr<IShape> CreateHeightfieldTerrainShape(uint32_t width,uint32_t length,Scalar maxHeight,uint32_t upAxis,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IMaterial> CreateMaterial(float staticFriction,float dynamicFriction,float restitution)=0;
 
+		virtual util::TSharedHandle<IVehicle> CreateVehicle()=0;
+
 		virtual RemainingDeltaTime StepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
 
 		virtual Bool Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults=nullptr) const=0;
@@ -131,6 +161,8 @@ namespace pragma::physics
 		std::vector<util::TSharedHandle<ICollisionObject>> &GetCollisionObjects();
 		const std::vector<util::TSharedHandle<IController>> &GetControllers() const;
 		std::vector<util::TSharedHandle<IController>> &GetControllers();
+		const std::vector<util::TSharedHandle<IVehicle>> &GetVehicles() const;
+		std::vector<util::TSharedHandle<IVehicle>> &GetVehicles();
 
 		virtual void RemoveConstraint(IConstraint &constraint);
 		virtual void RemoveCollisionObject(ICollisionObject &obj);
@@ -160,12 +192,20 @@ namespace pragma::physics
 		template<class T>
 			void CallCallbacks(Event eventid,T &obj);
 	protected:
+		void OnContact(const ContactInfo &contactInfo);
+		void OnStartTouch(ICollisionObject &a,ICollisionObject &b);
+		void OnEndTouch(ICollisionObject &a,ICollisionObject &b);
+		void OnWake(ICollisionObject &o);
+		void OnSleep(ICollisionObject &o);
+		void OnConstraintBroken(IConstraint &constraint);
+
 		std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger = nullptr;
 	private:
 		NetworkState &m_nwState;
 		std::unordered_map<Event,std::vector<CallbackHandle>> m_callbacks = {};
 		std::shared_ptr<WaterBuoyancySimulator> m_buoyancySim = nullptr;
 		std::shared_ptr<IMaterial> m_genericMaterial = nullptr;
+		std::unique_ptr<IEventCallback> m_eventCallback = nullptr;
 	};
 };
 

@@ -10,6 +10,7 @@
 #include "DetourNavMeshQuery.h"
 #include "pragma/model/animation/fanim.h"
 #include "pragma/physics/raytraces.h"
+#include "pragma/physics/raycast_filter.hpp"
 #include "pragma/entities/baseworld.h"
 #include "pragma/math/util_hermite.h"
 #include "pragma/util/util_approach_rotation.hpp"
@@ -246,9 +247,11 @@ void BaseAIComponent::OnEntitySpawn()
 	auto &ent = GetEntity();
 	auto *game = ent.GetNetworkState()->GetGameState();
 	auto *world = game->GetWorld();
-	m_obstruction.sweepFilter.push_back(ent.GetHandle());
+	std::vector<EntityHandle> filterEnts {};
+	filterEnts.push_back(ent.GetHandle());
 	if(world != nullptr)
-		m_obstruction.sweepFilter.push_back(world->GetEntity().GetHandle()); // The navigation mesh should already ensure there's no collision with the world, so we'll exclude it here
+		filterEnts.push_back(world->GetEntity().GetHandle()); // The navigation mesh should already ensure there's no collision with the world, so we'll exclude it here
+	m_obstruction.sweepFilter = std::make_unique<physics::MultiEntityRayCastFilterCallback>(std::move(filterEnts));
 }
 
 void BaseAIComponent::OnModelChanged(const std::shared_ptr<Model> &model)

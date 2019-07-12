@@ -22,7 +22,11 @@ void pragma::physics::IController::Move(Vector3 &disp)
 	//m_moveDisplacement = disp;
 	//DoMove(disp);
 }
-void pragma::physics::IController::SetMoveVelocity(const Vector3 &vel) {m_moveVelocity = vel;}
+void pragma::physics::IController::SetMoveVelocity(const Vector3 &vel)
+{
+	std::cout<<"Move Velocity: "<<vel.x<<","<<vel.y<<","<<vel.z<<std::endl;
+	m_moveVelocity = vel;
+}
 void pragma::physics::IController::AddMoveVelocity(const Vector3 &vel) {SetMoveVelocity(GetMoveVelocity() +vel);}
 const Vector3 &pragma::physics::IController::GetMoveVelocity() const {return m_moveVelocity;}
 

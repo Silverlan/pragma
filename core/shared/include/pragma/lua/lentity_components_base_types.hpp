@@ -21,14 +21,19 @@ namespace Lua
 	namespace Physics
 	{
 		template<class THandle>
-			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass)
+			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t flags,float mass)
 		{
 			pragma::Lua::check_component(l,hEnt);
 
-			auto *phys = hEnt->InitializePhysics(*shape,mass);
+			auto *phys = hEnt->InitializePhysics(*shape,static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags),mass);
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}
+		template<class THandle>
+			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass)
+			{
+				InitializePhysics<THandle>(l,hEnt,shape,umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None),mass);
+			}
 	};
 	namespace Shooter
 	{
@@ -965,18 +970,28 @@ namespace Lua
 				return;
 			luabind::object(l,phys->GetHandle()).push(l);
 		}));
-		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,unsigned int)>([](lua_State *l,THandle &hEnt,uint32_t type) {
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,uint32_t,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t type,uint32_t physFlags) {
+			pragma::Lua::check_component(l,hEnt);
+
+			PhysObj *phys = hEnt->InitializePhysics(PHYSICSTYPE(type),static_cast<pragma::BasePhysicsComponent::PhysFlags>(physFlags));
+			if(phys != NULL)
+				luabind::object(l,phys->GetHandle()).push(l);
+		}));
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t type) {
 			pragma::Lua::check_component(l,hEnt);
 			
 			PhysObj *phys = hEnt->InitializePhysics(PHYSICSTYPE(type));
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}));
-		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,float)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass) {
-			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,mass);
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,uint32_t,float)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t physFlags,float mass) {
+			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,physFlags,mass);
+		}));
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,uint32_t)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t physFlags) {
+			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,physFlags);
 		}));
 		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
-			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,0.f);
+			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,0,0.f);
 		}));
 		def.def("DestroyPhysicsObject",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1165,6 +1180,8 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_DYNAMIC_PHYSICS_UPDATED",pragma::BasePhysicsComponent::EVENT_ON_DYNAMIC_PHYSICS_UPDATED);
 		def.add_static_constant("EVENT_ON_PRE_PHYSICS_SIMULATE",pragma::BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE);
 		def.add_static_constant("EVENT_ON_POST_PHYSICS_SIMULATE",pragma::BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE);
+		def.add_static_constant("EVENT_ON_WAKE",pragma::BasePhysicsComponent::EVENT_ON_WAKE);
+		def.add_static_constant("EVENT_ON_SLEEP",pragma::BasePhysicsComponent::EVENT_ON_SLEEP);
 		def.add_static_constant("EVENT_HANDLE_RAYCAST",pragma::BasePhysicsComponent::EVENT_HANDLE_RAYCAST);
 
 		def.add_static_constant("MOVETYPE_NONE",umath::to_integral(MOVETYPE::NONE));

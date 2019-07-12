@@ -4,6 +4,7 @@
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/environment.hpp"
+#include "pragma/physics/raycast_filter.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
@@ -46,14 +47,16 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 		auto dist = uvec::length(pos);
 		ents.push_back(EntityCandidate(ent,pos,dist));
 	}
-	std::vector<EntityHandle> traceFilter;
-	traceFilter.reserve(2);
+	std::vector<EntityHandle> entsFilter;
+	entsFilter.reserve(2);
 	auto *attacker = dmg.GetAttacker();
 	if(attacker != nullptr)
-		traceFilter.push_back(attacker->GetHandle());
+		entsFilter.push_back(attacker->GetHandle());
 	auto *inflictor = dmg.GetInflictor();
 	if(inflictor != nullptr)
-		traceFilter.push_back(inflictor->GetHandle());
+		entsFilter.push_back(inflictor->GetHandle());
+	auto traceFilter = std::make_shared<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(entsFilter));
+
 	auto *entOrigin = (attacker != nullptr) ? attacker : inflictor;
 	for(auto it=ents.begin();it!=ents.end();++it)
 	{
@@ -91,9 +94,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			TraceData data;
 			data.SetSource(origin);
 			data.SetTarget(pos);
-#ifdef ENABLE_DEPRECATED_PHYSICS
 			data.SetFilter(traceFilter);
-#endif
 			if(entOrigin != nullptr && pPhysComponent.valid())
 			{
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());

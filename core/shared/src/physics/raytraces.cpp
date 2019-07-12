@@ -9,6 +9,7 @@
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
+#include "pragma/physics/raycast_filter.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -125,15 +126,12 @@ TraceData::TraceData(const TraceData &other)
 	m_flags(other.m_flags),m_bHasTarget(other.m_bHasTarget),
 	m_shape{other.m_shape},
 	m_filterMask(other.m_filterMask),m_filterGroup(other.m_filterGroup)
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	,m_filter(std::shared_ptr<TraceFilterBase>(other.m_filter->Copy()))
-#endif
 {}
 void TraceData::SetShape(const pragma::physics::IConvexShape &shape)
 {
-	m_shape = util::weak_shared_handle_cast<pragma::physics::IBase,pragma::physics::IConvexShape>(shape.GetHandle());
+	m_shape = std::dynamic_pointer_cast<pragma::physics::IConvexShape>(const_cast<pragma::physics::IConvexShape&>(shape).shared_from_this());
 }
-const pragma::physics::IConvexShape *TraceData::GetShape() const {return m_shape.Get();}
+const pragma::physics::IConvexShape *TraceData::GetShape() const {return m_shape.get();}
 Vector3 TraceData::GetSourceOrigin() const
 {
 	auto &t = GetSource();
@@ -167,12 +165,32 @@ void TraceData::SetRotation(const Quat &rot)
 }
 void TraceData::SetFlags(RayCastFlags flags) {m_flags = flags;}
 RayCastFlags TraceData::GetFlags() const {return m_flags;}
-#ifdef ENABLE_DEPRECATED_PHYSICS
-const TraceFilterBase *TraceData::GetFilter() const {return m_filter.get();}
-#endif
 void TraceData::SetCollisionFilterMask(CollisionMask mask) {m_filterMask = mask;}
 void TraceData::SetCollisionFilterGroup(CollisionMask group) {m_filterGroup = group;}
 void TraceData::SetFilter(const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &filter) {m_filter = filter;}
+void TraceData::SetFilter(BaseEntity &ent)
+{
+	SetFilter(std::make_unique<::pragma::physics::EntityRayCastFilterCallback>(ent));
+}
+void TraceData::SetFilter(std::vector<EntityHandle> &&ents)
+{
+	SetFilter(std::make_unique<::pragma::physics::MultiEntityRayCastFilterCallback>(std::move(ents)));
+}
+void TraceData::SetFilter(PhysObj &phys)
+{
+	SetFilter(std::make_unique<::pragma::physics::PhysObjRayCastFilterCallback>(phys));
+}
+void TraceData::SetFilter(pragma::physics::ICollisionObject &colObj)
+{
+	SetFilter(std::make_unique<::pragma::physics::CollisionObjRayCastFilterCallback>(colObj));
+}
+void TraceData::SetFilter(
+	const std::function<RayCastHitType(pragma::physics::IShape&,pragma::physics::IRigidBody&)> &preFilter,
+	const std::function<RayCastHitType(pragma::physics::IShape&,pragma::physics::IRigidBody&)> &postFilter
+)
+{
+	SetFilter(std::make_unique<::pragma::physics::CustomRayCastFilterCallback>(preFilter,postFilter));
+}
 const std::shared_ptr<pragma::physics::IRayCastFilterCallback> &TraceData::GetFilter() const {return m_filter;}
 Vector3 TraceData::GetDirection() const
 {

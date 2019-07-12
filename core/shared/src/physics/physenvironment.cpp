@@ -138,6 +138,46 @@ void pragma::physics::IEnvironment::AddVehicle(IVehicle &vehicle)
 	m_vehicles.push_back(util::shared_handle_cast<IBase,IVehicle>(hVehicle));
 	CallCallbacks<IVehicle>(Event::OnVehicleCreated,vehicle);
 }
+void pragma::physics::IEnvironment::SetEventCallback(std::unique_ptr<IEventCallback> evCallback)
+{
+	m_eventCallback = std::move(evCallback);
+}
+void pragma::physics::IEnvironment::OnContact(const ContactInfo &contactInfo)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnContact(contactInfo);
+}
+void pragma::physics::IEnvironment::OnStartTouch(ICollisionObject &a,ICollisionObject &b)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnStartTouch(a,b);
+}
+void pragma::physics::IEnvironment::OnEndTouch(ICollisionObject &a,ICollisionObject &b)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnEndTouch(a,b);
+}
+void pragma::physics::IEnvironment::OnWake(ICollisionObject &o)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnWake(o);
+}
+void pragma::physics::IEnvironment::OnSleep(ICollisionObject &o)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnSleep(o);
+}
+void pragma::physics::IEnvironment::OnConstraintBroken(IConstraint &constraint)
+{
+	if(m_eventCallback == nullptr)
+		return;
+	m_eventCallback->OnConstraintBroken(constraint);
+}
 void pragma::physics::IEnvironment::RemoveConstraint(IConstraint &constraint)
 {
 	auto it = std::find_if(m_constraints.begin(),m_constraints.end(),[&constraint](const util::TSharedHandle<IConstraint> &hConstraint) {
@@ -210,3 +250,5 @@ const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &pragm
 std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &pragma::physics::IEnvironment::GetCollisionObjects() {return m_collisionObjects;}
 const std::vector<util::TSharedHandle<pragma::physics::IController>> &pragma::physics::IEnvironment::GetControllers() const {return const_cast<IEnvironment*>(this)->GetControllers();}
 std::vector<util::TSharedHandle<pragma::physics::IController>> &pragma::physics::IEnvironment::GetControllers() {return m_controllers;}
+const std::vector<util::TSharedHandle<pragma::physics::IVehicle>> &pragma::physics::IEnvironment::GetVehicles() const {return const_cast<IEnvironment*>(this)->GetVehicles();}
+std::vector<util::TSharedHandle<pragma::physics::IVehicle>> &pragma::physics::IEnvironment::GetVehicles() {return m_vehicles;}

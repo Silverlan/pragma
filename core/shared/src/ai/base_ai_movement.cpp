@@ -557,14 +557,12 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		pos += offset;
 		dstPos += offset;
 	}
-	
+
 	TraceData data {};
 	data.SetSource(pos);
 	data.SetShape(*shape);
 	data.SetTarget(dstPos);
-#ifdef ENABLE_DEPRECATED_PHYSICS
 	data.SetFilter(m_obstruction.sweepFilter);
-#endif
 	data.SetFlags(RayCastFlags::InvertFilter);
 	if(pPhysComponent.valid())
 	{

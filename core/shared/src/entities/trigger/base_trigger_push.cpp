@@ -92,8 +92,8 @@ void BaseTriggerPushComponent::OnThink(double dt)
 	auto *pTouchComponent = static_cast<pragma::BaseTouchComponent*>(GetEntity().FindComponent("touch").get());
 	for(auto &touch : pTouchComponent->GetTouchingInfo())
 	{
-		auto &hEnt = touch.entity;
-		if(hEnt.IsValid() == false)
+		auto &hEnt = touch.touch.entity;
+		if(hEnt.IsValid() == false || touch.triggered == false)
 			continue;
 		auto pVelComponentEnt = hEnt.get()->GetComponent<pragma::VelocityComponent>();
 		if(pVelComponentEnt.valid())

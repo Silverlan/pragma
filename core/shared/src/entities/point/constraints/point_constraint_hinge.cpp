@@ -68,7 +68,10 @@ void BasePointConstraintHingeComponent::InitializeConstraint(BaseEntity *src,Bas
 			auto posTgt = bodyTgt->GetPos();
 			auto hinge = physEnv->CreateHingeConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis,axis);
 			if(hinge != nullptr)
+			{
+				hinge->SetEntity(GetEntity());
 				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IHingeConstraint,pragma::physics::IConstraint>(hinge));
+			}
 		}
 	}
 }

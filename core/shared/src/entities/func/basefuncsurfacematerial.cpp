@@ -5,6 +5,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseFuncSurfaceMaterialComponent::UpdateSurfaceMaterial(Game *game)
 {
 	auto &ent = GetEntity();
@@ -24,3 +25,4 @@ void BaseFuncSurfaceMaterialComponent::UpdateSurfaceMaterial(Game *game)
 			hObj->SetSurfaceMaterial(CUInt32(idx));
 	}
 }
+#pragma optimize("",on)

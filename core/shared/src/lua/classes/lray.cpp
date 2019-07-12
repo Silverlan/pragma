@@ -7,15 +7,16 @@
 #include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
 #include "pragma/lua/classes/lphysics.h"
+#include "pragma/lua/lua_call.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/physics/shape.hpp"
 
 extern DLLENGINE Engine *engine;
 
-void Lua_TraceData_SetSource(lua_State*,TraceData &data,const util::TSharedHandle<pragma::physics::IConvexShape> &shape)
+void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const pragma::physics::IConvexShape &shape)
 {
-	data.SetShape(*shape);
+	data.SetShape(shape);
 }
 void Lua_TraceData_SetFlags(lua_State*,TraceData &data,unsigned int flags)
 {
@@ -39,17 +40,16 @@ void Lua_TraceData_GetDistance(lua_State *l,TraceData &data) {Lua::PushNumber(l,
 void Lua_TraceData_GetDirection(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetDirection());}
 void Lua_TraceData_SetFilter(lua_State *l,TraceData &data,luabind::object)
 {
-#ifdef ENABLE_DEPRECATED_PHYSICS
 	if(Lua::IsEntity(l,2))
 	{
 		auto *ent = Lua::CheckEntity(l,2);
-		data.SetFilter(ent->GetHandle());
+		data.SetFilter(*ent);
 		return;
 	}
 	else if(Lua::IsPhysObj(l,2))
 	{
 		auto *phys = Lua::CheckEntity(l,2);
-		data.SetFilter(phys->GetHandle());
+		data.SetFilter(*phys);
 		return;
 	}
 	else if(Lua::IsTable(l,2))
@@ -60,32 +60,25 @@ void Lua_TraceData_SetFilter(lua_State *l,TraceData &data,luabind::object)
 
 		Lua::PushNil(l); /* 2 */
 		std::vector<EntityHandle> ents;
-		std::vector<PhysObjHandle> phys;
 		while(Lua::GetNextPair(l,table) != 0) /* 3 */
 		{
-			if(Lua::IsEntity(l,-1))
-			{
-				if(phys.empty())
-				{
-					BaseEntity *v = Lua::CheckEntity(l,-1); /* 3 */
-					ents.push_back(v->GetHandle());
-				}
-			}
-			else if(ents.empty())
-			{
-				PhysObj *v = Lua::CheckPhysObj(l,-1); /* 3 */
-				phys.push_back(v->GetHandle());
-			}
+			BaseEntity *v = Lua::CheckEntity(l,-1); /* 3 */
+			ents.push_back(v->GetHandle());
+
 			Lua::Pop(l,1); /* 2 */
 		} /* 1 */
 		Lua::Pop(l,1); /* 0 */
-		if(!ents.empty())
-			data.SetFilter(ents);
-		else if(!phys.empty())
-			data.SetFilter(phys);
+		data.SetFilter(std::move(ents));
 		return;
 	}
 	Lua::CheckFunction(l,2);
-	data.SetFilter(LuaFunction(luabind::object(luabind::from_stack(l,2))));
-#endif
+	auto oFc = luabind::object(luabind::from_stack(l,2));
+	data.SetFilter([l,oFc](pragma::physics::IShape &shape,pragma::physics::IRigidBody &body) -> RayCastHitType {
+		auto c = Lua::CallFunction(l,[oFc,&shape,&body](lua_State *l) -> Lua::StatusCode {
+			oFc.push(l);
+			shape.Push(l);
+			body.Push(l);
+			return Lua::StatusCode::Ok;
+		},0);
+	});
 }

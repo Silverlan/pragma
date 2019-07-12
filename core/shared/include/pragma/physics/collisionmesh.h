@@ -10,6 +10,7 @@
 class Game;
 struct PhysSoftBodyInfo;
 class ModelSubMesh;
+namespace pragma::physics {class IShape;};
 class DLLNETWORK CollisionMesh
 	: public std::enable_shared_from_this<CollisionMesh>
 {

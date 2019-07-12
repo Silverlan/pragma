@@ -10,6 +10,8 @@
 #include <pragma/engine.h>
 #include "pragma/ai/navsystem.h"
 #include "pragma/physics/environment.hpp"
+#include "pragma/physics/contact.hpp"
+#include "pragma/physics/constraint.hpp"
 #include "pragma/lua/libraries/ltimer.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/console/convars.h>
@@ -21,6 +23,7 @@
 #include "pragma/util/resource_watcher.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/input/inkeys.h"
+#include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
@@ -443,6 +446,83 @@ void Game::Initialize()
 }
 void Game::SetUp() {}
 
+class PhysEventCallback
+	: public pragma::physics::IEventCallback
+{
+public:
+	// Called if contact report is enabled for a collision object and it
+	// collided with another actor. This is NOT called for triggers!
+	virtual void OnContact(const pragma::physics::ContactInfo &contactInfo) override
+	{
+		if(contactInfo.collisionObj0.IsExpired() || contactInfo.collisionObj1.IsExpired())
+			return;
+		auto *physObj0 = contactInfo.collisionObj0->GetPhysObj();
+		auto *entC0 = physObj0 ? physObj0->GetOwner() : nullptr;
+		auto *touchC0 = entC0 ? static_cast<pragma::BaseTouchComponent*>(entC0->GetEntity().FindComponent("touch").get()) : nullptr;
+		if(touchC0 == nullptr)
+			return;
+		touchC0->Contact(contactInfo);
+	}
+
+	// Called whenever a constraint is broken
+	virtual void OnConstraintBroken(pragma::physics::IConstraint &constraint) override
+	{
+		auto *ent = constraint.GetEntity();
+		if(ent == nullptr)
+			return;
+		// TODO: Check constraint component
+	}
+
+	// Called when an actor has started touching another for the first time.
+	virtual void OnStartTouch(pragma::physics::ICollisionObject &o0,pragma::physics::ICollisionObject &o1) override
+	{
+		// TODO: TocuhComponent:SetTouchEnabled -> Rely to physicxs
+		// TODO: Make sure EndTouch is called when actor is removed and still touching!
+		auto *physObj0 = o0.GetPhysObj();
+		auto *entC0 = physObj0 ? physObj0->GetOwner() : nullptr;
+		auto *touchC0 = entC0 ? static_cast<pragma::BaseTouchComponent*>(entC0->GetEntity().FindComponent("touch").get()) : nullptr;
+
+		auto *physObj1 = o1.GetPhysObj();
+		auto *entC1 = physObj1 ? physObj1->GetOwner() : nullptr;
+		if(touchC0 == nullptr || entC1 == nullptr)
+			return;
+		touchC0->StartTouch(entC1->GetEntity(),*physObj1,o0,o1);
+	}
+
+	// Called when an actor has stopped touching another actor.
+	virtual void OnEndTouch(pragma::physics::ICollisionObject &o0,pragma::physics::ICollisionObject &o1) override
+	{
+		auto *physObj0 = o0.GetPhysObj();
+		auto *entC0 = physObj0 ? physObj0->GetOwner() : nullptr;
+		auto *touchC0 = entC0 ? static_cast<pragma::BaseTouchComponent*>(entC0->GetEntity().FindComponent("touch").get()) : nullptr;
+
+		auto *physObj1 = o1.GetPhysObj();
+		auto *entC1 = physObj1 ? physObj1->GetOwner() : nullptr;
+		if(touchC0 == nullptr || entC1 == nullptr)
+			return;
+		touchC0->EndTouch(entC1->GetEntity(),*physObj1,o0,o1);
+	}
+
+	virtual void OnWake(pragma::physics::ICollisionObject &o) override
+	{
+		auto *physObj = o.GetPhysObj();
+		auto *ent = physObj ? physObj->GetOwner() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		if(physC == nullptr)
+			return;
+		physC->OnWake();
+	}
+	virtual void OnSleep(pragma::physics::ICollisionObject &o) override
+	{
+		auto *physObj = o.GetPhysObj();
+		auto *ent = physObj ? physObj->GetOwner() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		if(physC == nullptr)
+			return;
+		physC->OnSleep();
+	}
+};
+
 void Game::InitializeGame()
 {
 	InitializeLua(); // Lua has to be initialized completely before any entites are created
@@ -462,7 +542,10 @@ void Game::InitializeGame()
 	else
 		Con::cerr<<"ERROR: Unable to initialize physics engine '"<<physEngineName<<"': "<<err<<Con::endl;
 	if(m_physEnvironment)
+	{
 		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
+		m_physEnvironment->SetEventCallback(std::make_unique<PhysEventCallback>());
+	}
 
 	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)

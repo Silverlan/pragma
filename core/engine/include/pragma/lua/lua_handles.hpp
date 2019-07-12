@@ -7,6 +7,8 @@ namespace util
 		class TWeakSharedHandle;
 	template<typename T>
 		class TSharedHandle;
+	template<typename T>
+		class WeakHandle;
 };
 namespace luabind
 {
@@ -20,6 +22,11 @@ namespace luabind
 	{
 		return const_cast<T*>(pointer.Get());
 	}
+	template<typename T>
+		T* get_pointer(const util::WeakHandle<T>& pointer)
+	{
+		return const_cast<T*>(pointer.get());
+	}
 };
 namespace luabind::detail::has_get_pointer_
 {
@@ -32,6 +39,11 @@ namespace luabind::detail::has_get_pointer_
 		T* get_pointer(const util::TSharedHandle<T>& pointer)
 	{
 		return const_cast<T*>(pointer.Get());
+	}
+	template<typename T>
+		T* get_pointer(const util::WeakHandle<T>& pointer)
+	{
+		return const_cast<T*>(pointer.get());
 	}
 }
 

@@ -24,17 +24,26 @@ void pragma::physics::ICollisionObject::SetBoneID(UInt32 id) {m_boneId = id;}
 
 void pragma::physics::ICollisionObject::UpdateSurfaceMaterial()
 {
-	if(m_customSurfaceMaterial == true)
-		return;
 	auto *shape = m_shape.get();
-	if(shape == nullptr || shape->IsConvexHull() == false)
+	if(shape == nullptr)
 		return;
-	auto *surfMat = shape->GetConvexHullShape()->GetSurfaceMaterial();
+	if(umath::is_flag_set(m_stateFlags,StateFlags::CustomSurfaceMaterial))
+	{
+		shape->SetSurfaceMaterial(m_surfaceMaterial);
+		return;
+	}
+	auto *surfMat = shape->GetSurfaceMaterial();
 	m_surfaceMaterial = surfMat ? surfMat->GetIndex() : -1;
 }
 
 int pragma::physics::ICollisionObject::GetSurfaceMaterial() const {return m_surfaceMaterial;}
-void pragma::physics::ICollisionObject::SetSurfaceMaterial(int id) {m_surfaceMaterial = id; m_customSurfaceMaterial = true;}
+void pragma::physics::ICollisionObject::SetSurfaceMaterial(int id)
+{
+	umath::set_flag(m_stateFlags,StateFlags::CustomSurfaceMaterial,true);
+	auto *shape = GetCollisionShape();
+	if(shape)
+		shape->SetSurfaceMaterial(id);
+}
 
 bool pragma::physics::ICollisionObject::IsRigid() const {return false;}
 bool pragma::physics::ICollisionObject::IsGhost() const {return false;}
@@ -62,7 +71,16 @@ void pragma::physics::ICollisionObject::Spawn()
 	SetCollisionShape(m_shape.get()); // Add it to the physics environment
 }
 
-Bool pragma::physics::ICollisionObject::HasOrigin() const {return m_bHasOrigin;}
+Bool pragma::physics::ICollisionObject::HasOrigin() const {return umath::is_flag_set(m_stateFlags,StateFlags::HasOrigin);}
+Vector3 pragma::physics::ICollisionObject::GetGravity() const
+{
+	auto *physObj = GetPhysObj();
+	auto *ent = physObj ? physObj->GetOwner() : nullptr;
+	if(ent == nullptr)
+		return Vector3{};
+	auto gravityComponent = ent->GetEntity().GetComponent<GravityComponent>();
+	return gravityComponent.valid() ? gravityComponent->GetGravityForce() : Vector3{};
+}
 void pragma::physics::ICollisionObject::SetOrigin(const Vector3 &origin)
 {
 	m_origin = origin;
@@ -73,22 +91,23 @@ void pragma::physics::ICollisionObject::SetOrigin(const Vector3 &origin)
 	)
 	{
 		m_origin = Vector3(0.f,0.f,0.f);
-		m_bHasOrigin = false;
+		umath::set_flag(m_stateFlags,StateFlags::HasOrigin,false);
 	}
 	else
-		m_bHasOrigin = true;
+		umath::set_flag(m_stateFlags,StateFlags::HasOrigin,true);
 }
 const Vector3 &pragma::physics::ICollisionObject::GetOrigin() const {return m_origin;}
 
-void pragma::physics::ICollisionObject::UpdateAABB() {m_bUpdateAABB = true;}
-bool pragma::physics::ICollisionObject::ShouldUpdateAABB() const {return m_bUpdateAABB;}
-void pragma::physics::ICollisionObject::ResetUpdateAABBFlag() {m_bUpdateAABB = false;}
+void pragma::physics::ICollisionObject::UpdateAABB() {umath::set_flag(m_stateFlags,StateFlags::UpdateAABB,true);}
+bool pragma::physics::ICollisionObject::ShouldUpdateAABB() const {return umath::is_flag_set(m_stateFlags,StateFlags::UpdateAABB);}
+void pragma::physics::ICollisionObject::ResetUpdateAABBFlag() {umath::set_flag(m_stateFlags,StateFlags::UpdateAABB,false);}
 
 void pragma::physics::ICollisionObject::SetCollisionShape(pragma::physics::IShape *shape)
 {
 	m_shape = shape ? std::static_pointer_cast<pragma::physics::IShape>(shape->shared_from_this()) : nullptr;
 	ApplyCollisionShape(shape);
 	AddWorldObject();
+	UpdateSurfaceMaterial();
 }
 
 const pragma::physics::IShape *pragma::physics::ICollisionObject::GetCollisionShape() const {return const_cast<ICollisionObject*>(this)->GetCollisionShape();}
@@ -109,8 +128,38 @@ void pragma::physics::ICollisionObject::SetCollisionFilterMask(CollisionMask mas
 }
 CollisionMask pragma::physics::ICollisionObject::GetCollisionFilterMask() const {return m_collisionFilterMask;}
 
+void pragma::physics::ICollisionObject::SetContactReportEnabled(bool reportEnabled)
+{
+	return umath::set_flag(m_stateFlags,StateFlags::ContactReportEnabled,reportEnabled);
+}
+bool pragma::physics::ICollisionObject::IsContactReportEnabled() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::ContactReportEnabled);
+}
+
 void pragma::physics::ICollisionObject::PreSimulate() {}
 void pragma::physics::ICollisionObject::PostSimulate() {}
+
+void pragma::physics::ICollisionObject::OnContact(const ContactInfo &contactInfo)
+{
+	m_physEnv.OnContact(contactInfo);
+}
+void pragma::physics::ICollisionObject::OnStartTouch(ICollisionObject &other)
+{
+	m_physEnv.OnStartTouch(*this,other);
+}
+void pragma::physics::ICollisionObject::OnEndTouch(ICollisionObject &other)
+{
+	m_physEnv.OnEndTouch(*this,other);
+}
+void pragma::physics::ICollisionObject::OnWake()
+{
+	m_physEnv.OnWake(*this);
+}
+void pragma::physics::ICollisionObject::OnSleep()
+{
+	m_physEnv.OnSleep(*this);
+}
 
 pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBody() {return nullptr;}
 pragma::physics::ISoftBody *pragma::physics::ICollisionObject::GetSoftBody() {return nullptr;}

@@ -739,10 +739,14 @@ target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party
 # libbsa
 set(PROJECT_STATIC_RUNTIME OFF CACHE BOOL OFF FORCE)
 set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 register_third_party_library(libbsa)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 set_target_properties(bsa PROPERTIES FOLDER third_party_libs/libbsa)
 set_target_properties(tests PROPERTIES FOLDER third_party_libs/libbsa)
 # set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
+target_include_directories(bsa PUBLIC ${ZLIB_INCLUDE_DIR})
+target_include_directories(bsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # ba2lib

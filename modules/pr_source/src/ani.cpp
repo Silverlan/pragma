@@ -2,7 +2,7 @@
 #include <pragma/debug/debug_performance_profiler.hpp>
 #include <pragma/level/mapinfo.h>
 #include <pragma/networkstate/networkstate.h>
-#include <pragma/physics/physenvironment.h>
+#include <pragma/physics/environment.hpp>
 #include "ani.h"
 #include "mdl.h"
 #include <fsys/filesystem.h>

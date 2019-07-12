@@ -13,6 +13,7 @@
 #include "pragma/lua/classes/lphyssoftbodyinfo.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/physics/phys_material.hpp"
+#include "pragma/physics/vehicle.hpp"
 #include "pragma/physics/ik/util_ik.hpp"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
@@ -81,12 +82,26 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_dof_constraint",create_DoF_constraint},
 		{"create_dof_spring_constraint",create_dof_spring_constraint},
 		{"create_surface_material",create_surface_material},
+		{"create_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *state = engine->GetNetworkState(l);
+			auto *game = state->GetGameState();
+			auto *env = game->GetPhysicsEnvironment();
+			if(env == nullptr)
+				return 0;
+			auto vhc = env->CreateVehicle();
+			if(vhc == nullptr)
+				return 0;
+			vhc->Push(l);
+			return 1;
+		})},
 		{"get_surface_material",get_surface_material},
 		{"get_surface_materials",get_surface_materials},
 		{"get_generic_material",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto *state = engine->GetNetworkState(l);
 			auto *game = state->GetGameState();
 			auto *env = game->GetPhysicsEnvironment();
+			if(env == nullptr)
+				return 0;
 			auto &mat = env->GetGenericMaterial();
 			mat.Push(l);
 			return 1;
@@ -188,7 +203,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 	auto classDefRayCastData = luabind::class_<TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
-	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,TraceData&,const util::TSharedHandle<pragma::physics::IConvexShape>&)>(&Lua_TraceData_SetSource));
+	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,TraceData&,const pragma::physics::IConvexShape&)>(&Lua_TraceData_SetSource));
 	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetSource));
 	classDefRayCastData.def("SetSourceRotation",&TraceData::SetSourceRotation);
 	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const pragma::physics::Transform&)>(&TraceData::SetSource));
@@ -211,6 +226,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefRayCastData];
 
 	auto classDefRayCastResult = luabind::class_<TraceResult>("RayCastResult");
+	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK",umath::to_integral(RayCastHitType::Block));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH",umath::to_integral(RayCastHitType::Touch));
+	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE",umath::to_integral(RayCastHitType::None));
 	classDefRayCastResult.def_readonly("hitType",reinterpret_cast<std::underlying_type_t<decltype(TraceResult::hitType)> TraceResult::*>(&TraceResult::hitType));
 	classDefRayCastResult.property("entity",static_cast<void(*)(lua_State*,TraceResult&)>([](lua_State *l,TraceResult &tr) {
 		if(tr.entity.IsValid() == false)
@@ -763,7 +781,7 @@ int Lua::physenv::raycast(lua_State *l)
 	Game *game = state->GetGameState();
 	std::vector<TraceResult> res;
 	auto r = game->RayCast(*data,&res);
-	if(r == false || res.empty())
+	if(res.empty() || (r == false && (data->HasFlag(RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 	{
 		Lua::PushBool(l,r);
 		return 1;
@@ -779,7 +797,7 @@ int Lua::physenv::raycast(lua_State *l)
 		}
 	}
 	else
-		Lua_TraceData_FillTraceResultTable(l,res[0]);
+		Lua_TraceData_FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::sweep(lua_State *l)
@@ -787,13 +805,25 @@ int Lua::physenv::sweep(lua_State *l)
 	auto *data = Lua::CheckTraceData(l,1);
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	auto res = game->Sweep(*data);
-	if(res.hitType == RayCastHitType::None)
+	std::vector<TraceResult> res;
+	auto r = game->Sweep(*data,&res);
+	if(res.empty() || (r == false && (data->HasFlag(RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 	{
-		Lua::PushBool(l,false);
+		Lua::PushBool(l,r);
 		return 1;
 	}
-	Lua_TraceData_FillTraceResultTable(l,res);
+	auto table = Lua::CreateTable(l);
+	if(data->HasFlag(RayCastFlags::ReportAllResults))
+	{
+		for(size_t i=0;i<res.size();i++)
+		{
+			auto &r = res[i];
+			Lua_TraceData_FillTraceResultTable(l,r);
+			lua_rawseti(l,table,i +1);
+		}
+	}
+	else
+		Lua_TraceData_FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::overlap(lua_State *l)
@@ -801,13 +831,25 @@ int Lua::physenv::overlap(lua_State *l)
 	auto *data = Lua::CheckTraceData(l,1);
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	auto res = game->Overlap(*data);
-	if(res.hitType == RayCastHitType::None)
+	std::vector<TraceResult> res;
+	auto r = game->Overlap(*data,&res);
+	if(res.empty() || (r == false && (data->HasFlag(RayCastFlags::ReportAllResults) == false || res.size() == 1)))
 	{
-		Lua::PushBool(l,false);
+		Lua::PushBool(l,r);
 		return 1;
 	}
-	Lua_TraceData_FillTraceResultTable(l,res);
+	auto table = Lua::CreateTable(l);
+	if(data->HasFlag(RayCastFlags::ReportAllResults))
+	{
+		for(size_t i=0;i<res.size();i++)
+		{
+			auto &r = res[i];
+			Lua_TraceData_FillTraceResultTable(l,r);
+			lua_rawseti(l,table,i +1);
+		}
+	}
+	else
+		Lua_TraceData_FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::create_convex_hull_shape(lua_State *l)
@@ -815,6 +857,8 @@ int Lua::physenv::create_convex_hull_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,1);
 	auto shape = env->CreateConvexHullShape(mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexHullShape>>(l,shape);
@@ -828,6 +872,8 @@ int Lua::physenv::create_box_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
 	auto shape = env->CreateBoxShape(*halfExtents,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
@@ -842,6 +888,8 @@ int Lua::physenv::create_capsule_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),mat);
@@ -855,6 +903,8 @@ int Lua::physenv::create_sphere_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
 
 	auto shape = env->CreateSphereShape(CFloat(radius),mat);
@@ -869,6 +919,8 @@ int Lua::physenv::create_cylinder_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCylinderShape(radius,height,mat);
@@ -881,6 +933,8 @@ int Lua::physenv::create_heightfield_terrain_shape(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 
 	auto width = Lua::CheckInt(l,1);
 	auto length = Lua::CheckInt(l,2);
@@ -907,6 +961,8 @@ int Lua::physenv::create_rigid_body(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto body = env->CreateRigidBody(CFloat(mass),shape,*inertia,dynamic);
 	if(body == nullptr)
 		return 0;
@@ -921,6 +977,8 @@ int Lua::physenv::create_ghost_object(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto ghost = env->CreateGhostObject(shape);
 	if(ghost == nullptr)
 		return 0;
@@ -939,6 +997,8 @@ int Lua::physenv::create_fixed_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateFixedConstraint(
 		bodyA,*pivotA,*rotA,
 		bodyB,*pivotB,*rotB
@@ -958,6 +1018,8 @@ int Lua::physenv::create_ball_socket_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateBallSocketConstraint(
 		bodyA,*pivotA,
 		bodyB,*pivotB
@@ -978,6 +1040,8 @@ int Lua::physenv::create_hinge_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateHingeConstraint(
 		bodyA,*pivotA,
 		bodyB,*pivotB,*axis
@@ -999,6 +1063,8 @@ int Lua::physenv::create_slider_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateSliderConstraint(
 		bodyA,*pivotA,*rotA,
 		bodyB,*pivotB,*rotB
@@ -1020,6 +1086,8 @@ int Lua::physenv::create_cone_twist_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateConeTwistConstraint(
 		bodyA,*pivotA,*rotA,
 		bodyB,*pivotB,*rotB
@@ -1041,6 +1109,8 @@ int Lua::physenv::create_DoF_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateDoFConstraint(
 		bodyA,*pivotA,*rotA,
 		bodyB,*pivotB,*rotB
@@ -1062,6 +1132,8 @@ int Lua::physenv::create_dof_spring_constraint(lua_State *l)
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
 	auto constraint = env->CreateDoFSpringConstraint(
 		bodyA,*pivotA,*rotA,
 		bodyB,*pivotB,*rotB

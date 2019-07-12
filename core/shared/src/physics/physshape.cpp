@@ -100,6 +100,14 @@ pragma::physics::IConvexHullShape::IConvexHullShape(IEnvironment &env)
 {}
 pragma::physics::IConvexHullShape *pragma::physics::IConvexHullShape::GetConvexHullShape() {return this;}
 bool pragma::physics::IConvexHullShape::IsConvexHull() const {return true;}
+void pragma::physics::IConvexHullShape::Build()
+{
+	DoBuild();
+	auto *pSurfMat = GetSurfaceMaterial();
+	if(pSurfMat == nullptr)
+		return;
+	ApplySurfaceMaterial(pSurfMat->GetPhysicsMaterial());
+}
 void pragma::physics::IConvexHullShape::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<IConvexHullShape>(lua);
@@ -154,6 +162,14 @@ void pragma::physics::ITriangleShape::ReserveTriangles(std::size_t count)
 	m_vertices.reserve(count *3);
 	m_triangles.reserve(count *3);
 	m_faceMaterials.reserve(count);
+}
+void pragma::physics::ITriangleShape::Build(const std::vector<SurfaceMaterial> *materials)
+{
+	DoBuild(materials);
+	auto *pSurfMat = GetSurfaceMaterial();
+	if(pSurfMat == nullptr)
+		return;
+	ApplySurfaceMaterial(pSurfMat->GetPhysicsMaterial());
 }
 size_t pragma::physics::ITriangleShape::GetVertexCount() const {return m_vertices.size();}
 Vector3 *pragma::physics::ITriangleShape::GetVertex(size_t idx) {return idx < m_vertices.size() ? &m_vertices.at(idx) : nullptr;}

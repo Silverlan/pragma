@@ -269,17 +269,17 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 		data.SetTarget(src +bulletDir *bulletInfo->distance);
 		data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
 		auto *attacker = dmg.GetAttacker();
-#ifdef ENABLE_DEPRECATED_PHYSICS
-		data.SetFilter([attacker](BaseEntity *ent,PhysObj *phys,PhysCollisionObject*) -> bool {
-			if(ent == attacker) // Attacker can't shoot themselves
-				return false;
+		data.SetFilter([attacker](pragma::physics::IShape &shape,pragma::physics::IRigidBody &body) -> RayCastHitType {
+			auto *phys = body.GetPhysObj();
+			auto *ent = phys ? phys->GetOwner() : nullptr;
+			if(ent == nullptr || &ent->GetEntity() == attacker) // Attacker can't shoot themselves
+				return RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
-			auto mdlComponent = ent->GetModelComponent();
+			auto mdlComponent = ent->GetEntity().GetModelComponent();
 			if(mdlComponent.valid() && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
-				return false;
-			return true;
+				return RayCastHitType::None;
+			return RayCastHitType::Block;
 		});
-#endif
 		auto filterGroup = CollisionMask::None;
 		if(attacker != nullptr)
 		{

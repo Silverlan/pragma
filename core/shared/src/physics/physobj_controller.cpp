@@ -252,8 +252,8 @@ void ControllerPhysObj::UpdateVelocity()
 		scale = 1;
 	else
 		scale = 1.f /static_cast<float>(delta);
-	auto t = m_collisionObject->GetWorldTransform();
-	Vector3 pos = t.GetOrigin();
+	//auto t = m_collisionObject->GetWorldTransform();
+	Vector3 pos = GetPosition();//t.GetOrigin();
 	//m_velocity = (pos -m_posLast) *scale;
 	m_velocity = pos -m_posLast;
 	m_posLast = pos;
@@ -331,7 +331,7 @@ void ControllerPhysObj::SetPosition(const Vector3 &pos)
 	auto t = m_collisionObject->GetWorldTransform();
 	Vector3 posCur = t.GetOrigin();
 	if(m_controller == nullptr)
-		SetPosition(pos);
+		PhysObj::SetPosition(pos);
 	else
 		m_controller->SetFootPos(pos);
 	m_posLast += pos -posCur;

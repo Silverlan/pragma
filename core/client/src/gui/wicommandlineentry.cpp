@@ -6,6 +6,7 @@
 
 LINK_WGUI_TO_CLASS(WICommandLineEntry,WICommandLineEntry);
 
+#pragma optimize("",off)
 WICommandLineEntry::WICommandLineEntry()
 	: WITextEntry()
 {}
@@ -143,7 +144,8 @@ void WICommandLineEntry::InitializeAutoCompleteList()
 			if(hThis.IsValid())
 			{
 				SetText(option);
-				SetCaretPos(option.length());
+				if(hThis.IsValid())
+					SetCaretPos(option.length());
 			}
 			return true;
 		});
@@ -197,3 +199,4 @@ void WICommandLineEntry::AddCommandHistoryEntry(const std::string_view &entry)
 	m_nextCommandHistoryInsertPos = (m_nextCommandHistoryInsertPos +1u) %m_commandHistory.size();
 	m_commandHistoryCount = umath::min(m_commandHistoryCount +1u,static_cast<uint32_t>(m_commandHistory.size()));
 }
+#pragma optimize("",on)

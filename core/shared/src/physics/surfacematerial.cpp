@@ -13,7 +13,7 @@ extern DLLENGINE Engine *engine;
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
 	: m_physEnv{env}
 {
-	Create("generic",0.f,0.8f);
+	Create("generic",1.f,0.8f);
 	auto &surface = m_materials.back();
 	surface.SetSoftImpactSound("fx.phys_impact_generic_soft");
 	surface.SetHardImpactSound("fx.phys_impact_generic_hard");

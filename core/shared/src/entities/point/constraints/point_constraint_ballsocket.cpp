@@ -52,6 +52,8 @@ void BasePointConstraintBallSocketComponent::InitializeConstraint(BaseEntity *sr
 		{
 			auto posTgt = bodyTgt->GetPos();
 			auto ballSocket = physEnv->CreateBallSocketConstraint(*bodyTgt,posThis -posTgt,*bodySrc,posThis);
+			if(ballSocket.IsValid())
+				ballSocket->SetEntity(GetEntity());
 			//if(ballSocket != nullptr)
 			//	m_constraints.push_back(ballSocket->GetHandle());
 		}

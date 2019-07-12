@@ -6,6 +6,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 LFile::LFile()
 {}
 
@@ -289,7 +290,7 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
 	}
 	auto br = fname.find(FileManager::GetDirectorySeparator(),8);
 	auto prefix = ustring::substr(fname,0,br +1);
-	path = prefix +path;
+	path = prefix +FileManager::GetCanonicalizedPath(path);
 	return true;
 }
 
@@ -586,3 +587,4 @@ int Lua::file::ComparePath(lua_State *l)
 	Lua::PushBool(l,p0 == p1);
 	return 1;
 }
+#pragma optimize("",on)

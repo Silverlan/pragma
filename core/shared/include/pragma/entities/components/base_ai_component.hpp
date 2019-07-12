@@ -44,6 +44,7 @@ namespace pragma
 		};
 	};
 
+	namespace physics {class IRayCastFilterCallback;};
 	class DLLNETWORK BaseAIComponent
 		: public BaseEntityComponent
 	{
@@ -155,7 +156,7 @@ namespace pragma
 			double nextObstructionCheck;
 			bool pathObstructed;
 			Vector3 resolveDirection;
-			std::vector<EntityHandle> sweepFilter;
+			std::shared_ptr<physics::IRayCastFilterCallback> sweepFilter;
 		} m_obstruction;
 
 		enum class LookTargetType : uint8_t

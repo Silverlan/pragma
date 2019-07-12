@@ -28,6 +28,13 @@ Vector3 pragma::physics::IConstraint::GetSourcePosition() {return m_srcTransform
 Quat pragma::physics::IConstraint::GetSourceRotation() {return m_srcTransform.GetRotation();}
 Vector3 pragma::physics::IConstraint::GetTargetPosition() {return m_tgtTransform.GetOrigin();}
 Quat pragma::physics::IConstraint::GetTargetRotation() {return m_tgtTransform.GetRotation();}
+BaseEntity *pragma::physics::IConstraint::GetEntity() const {return m_hEntity.get();}
+void pragma::physics::IConstraint::SetEntity(BaseEntity &ent) {m_hEntity = ent.GetHandle();}
+
+void pragma::physics::IConstraint::OnBroken()
+{
+	m_physEnv.OnConstraintBroken(*this);
+}
 void pragma::physics::IConstraint::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<IConstraint>(lua);

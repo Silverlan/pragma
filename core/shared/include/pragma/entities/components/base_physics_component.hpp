@@ -58,7 +58,15 @@ namespace pragma
 			ApplyingLinearVelocity = CollisionsEnabled<<1u,
 			ApplyingAngularVelocity = ApplyingLinearVelocity<<1u,
 			ApplyingPhysicsPosition = ApplyingAngularVelocity<<1u,
-			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u
+			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u,
+			SleepReportEnabled = ApplyingPhysicsRotation<<1u
+		};
+
+		enum class PhysFlags : uint32_t
+		{
+			None = 0u,
+			Dynamic = 1u,
+			Trigger = Dynamic<<1u
 		};
 
 		static ComponentEventId EVENT_ON_PHYSICS_INITIALIZED;
@@ -67,6 +75,8 @@ namespace pragma
 		static ComponentEventId EVENT_ON_DYNAMIC_PHYSICS_UPDATED;
 		static ComponentEventId EVENT_ON_PRE_PHYSICS_SIMULATE;
 		static ComponentEventId EVENT_ON_POST_PHYSICS_SIMULATE;
+		static ComponentEventId EVENT_ON_SLEEP;
+		static ComponentEventId EVENT_ON_WAKE;
 		static ComponentEventId EVENT_HANDLE_RAYCAST;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -108,8 +118,8 @@ namespace pragma
 		BaseEntity *GetGroundEntity() const;
 		PhysObj *GetPhysicsObject() const;
 		pragma::physics::ICollisionObject *GetCollisionObject(UInt32 boneId) const;
-		virtual PhysObj *InitializePhysics(PHYSICSTYPE type);
-		PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape,float mass=0.f);
+		virtual PhysObj *InitializePhysics(PHYSICSTYPE type,PhysFlags flags=PhysFlags::None);
+		PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags=PhysFlags::None,float mass=0.f);
 		virtual void DestroyPhysicsObject();
 		PHYSICSTYPE GetPhysicsType() const;
 		void DropToFloor();
@@ -177,6 +187,11 @@ namespace pragma
 
 		virtual void Save(DataStream &ds) override;
 		virtual void Load(DataStream &ds,uint32_t version) override;
+
+		void SetSleepReportEnabled(bool reportEnabled);
+		bool IsSleepReportEnabled() const;
+		void OnWake();
+		void OnSleep();
 	protected:
 		BasePhysicsComponent(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -196,8 +211,8 @@ namespace pragma
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
 		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
-		util::WeakHandle<PhysObj> InitializeModelPhysics(bool bDynamic=true);
-		util::WeakHandle<PhysObj> InitializeBrushPhysics(bool bDynamic=false,float mass=0.f);
+		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
+		util::WeakHandle<PhysObj> InitializeBrushPhysics(PhysFlags flags=PhysFlags::None,float mass=0.f);
 		util::WeakHandle<PhysObj> InitializeBoxControllerPhysics();
 		util::WeakHandle<PhysObj> InitializeCapsuleControllerPhysics();
 		virtual void OnPhysicsInitialized();
@@ -221,5 +236,6 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::StateFlags);
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::PhysFlags)
 
 #endif

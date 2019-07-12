@@ -44,7 +44,10 @@ void BasePointConstraintFixedComponent::InitializeConstraint(BaseEntity *src,Bas
 			auto posTgt = posThis -bodyTgt->GetPos();
 			auto fixed = physEnv->CreateFixedConstraint(*bodyTgt,posTgt,uquat::identity(),*bodySrc,posSrc,uquat::identity());
 			if(fixed != nullptr)
+			{
+				fixed->SetEntity(GetEntity());
 				m_constraints.push_back(util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(fixed));
+			}
 		}
 	}
 }

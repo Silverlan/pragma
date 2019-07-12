@@ -3,33 +3,32 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
-#include "pragma/physics/physcontact.h"
 #include "pragma/physics/phystouch.h"
+#include "pragma/physics/contact.hpp"
 #include <vector>
+#include <queue>
 
 class PhysObj;
-class PhysContact;
 struct PhysTouch;
 namespace pragma
 {
+	namespace physics {class ContactInfo;};
 	struct DLLNETWORK CECanTriggerData
 		: public ComponentEvent
 	{
-		CECanTriggerData(BaseEntity *ent,PhysObj *phys);
+		CECanTriggerData(BaseEntity *ent);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		BaseEntity *entity;
-		PhysObj *physObj;
 		bool canTrigger = true;
 	};
 	struct DLLNETWORK CETouchData
 		: public ComponentEvent
 	{
-		CETouchData(BaseEntity *ent,PhysObj *phys);
+		CETouchData(BaseEntity &ent);
 		virtual void PushArguments(lua_State *l) override;
 		BaseEntity *entity;
-		PhysObj *physObj;
 	};
 	class DLLNETWORK BaseTouchComponent
 		: public BaseEntityComponent
@@ -43,6 +42,21 @@ namespace pragma
 			Physics = NPCs<<1u,
 			Everything = Players | NPCs | Physics
 		};
+		struct ContactEvent
+		{
+			enum class Event : uint8_t
+			{
+				StartTouch = 0,
+				EndTouch
+			};
+			EntityHandle contactTarget;
+			Event eventType;
+		};
+		struct TouchInfo
+		{
+			PhysTouch touch;
+			bool triggered;
+		};
 
 		static ComponentEventId EVENT_CAN_TRIGGER;
 		static ComponentEventId EVENT_ON_START_TOUCH;
@@ -51,23 +65,22 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		using BaseEntityComponent::BaseEntityComponent;
 		// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))
-		void Touch(BaseEntity *entOther,PhysObj *physOther,physics::ICollisionObject *objThis,physics::ICollisionObject *objOther);
+		void StartTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther);
+		void EndTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther);
 		// Only called if collision callbacks and contact reports are enabled (Entity::SetCollisionCallbacksEnabled(true),Entity::SetCollisionContactReportEnabled(true))
-		void Contact(const PhysContact &contact);
+		void Contact(const pragma::physics::ContactInfo &contactInfo);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		void GetTouchingEntities(std::vector<BaseEntity*> &touching);
-		const std::vector<PhysTouch> &GetTouchingInfo() const;
-		void Trigger(BaseEntity *ent,PhysObj *phys);
-		void StartTouch(BaseEntity *ent,PhysObj *phys);
-		void EndTouch(BaseEntity *ent,PhysObj *phys);
-		virtual bool CanTrigger(BaseEntity *ent,PhysObj *phys);
-		virtual void OnTrigger(BaseEntity *ent,PhysObj *phys);
-		virtual void OnStartTouch(BaseEntity *ent,PhysObj *phys);
-		virtual void OnEndTouch(BaseEntity *ent,PhysObj *phys);
+		const std::vector<TouchInfo> &GetTouchingInfo() const;
+		void Trigger(BaseEntity &ent);
+		void StartTouch(BaseEntity &ent);
+		void EndTouch(BaseEntity &ent);
+		virtual bool CanTrigger(BaseEntity &ent);
+		virtual void OnTrigger(BaseEntity &ent);
+		virtual void OnStartTouch(BaseEntity &ent);
+		virtual void OnEndTouch(BaseEntity &ent);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
-		bool IsTouching(BaseEntity *ent);
 
 		void SetTriggerFlags(TriggerFlags flags);
 		TriggerFlags GetTriggerFlags() const;
@@ -75,18 +88,22 @@ namespace pragma
 		void EndAllTouch();
 		virtual void OnEntitySpawn() override;
 	protected:
-		std::vector<PhysContact> m_contactReport;
-		std::vector<PhysTouch> m_touchReport;
-		std::vector<PhysTouch> m_touching;
-		std::vector<PhysTouch> m_endTouch;
+		bool IsTouching(BaseEntity &ent) const;
+
+		std::vector<physics::ContactInfo> m_contactReport;
+
+		// Actors that have started touching this actor
+		std::vector<TouchInfo> m_touching;
+		std::queue<ContactEvent> m_contactEventQueue;
+
 		TriggerFlags m_triggerFlags = TriggerFlags::None;
 		BaseTouchComponent(BaseEntity &ent);
 		void OnPhysicsInitialized();
 		void UpdateTouch();
-		void RemoveTouch(BaseEntity *entRemove);
-		std::vector<PhysTouch>::iterator RemoveTouch(std::vector<PhysTouch>::iterator it);
 		void StartTouch(PhysTouch &touch);
-		void OnContact(PhysContact &contact);
+		void FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch);
+		void FireEndTouchEvents(TouchInfo &touch,bool isLastTouch);
+		void OnContact(physics::ContactInfo &contact);
 		virtual void OnTouch(PhysTouch &touch);
 		virtual bool IsTouchEnabled() const;
 	};

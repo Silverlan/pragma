@@ -47,8 +47,8 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 	protected:
 		virtual void OnResetGravity(BaseEntity *ent,GravitySettings &settings);
-		virtual void OnStartTouch(BaseEntity *ent,PhysObj *phys);
-		void OnEndTouch(BaseEntity *ent,PhysObj *phys);
+		virtual void OnStartTouch(BaseEntity *ent);
+		void OnEndTouch(BaseEntity *ent);
 
 		Vector3 m_kvGravityDir = {};
 		float m_kvGravityForce = 0.f;

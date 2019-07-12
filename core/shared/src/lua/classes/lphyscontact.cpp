@@ -4,87 +4,69 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
-#include "pragma/physics/physcontact.h"
+#include "pragma/physics/contact.hpp"
+#include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/collision_object.hpp"
 
 extern DLLENGINE Engine *engine;
 
-namespace Lua
-{
-	namespace PhysContact
-	{
-		static void GetEntity1(lua_State *l,::PhysContact &contact);
-		static void GetEntity2(lua_State *l,::PhysContact &contact);
-		static void GetHitNormal(lua_State *l,::PhysContact &contact);
-		static void GetCollisionObject1(lua_State *l,::PhysContact &contact);
-		static void GetCollisionObject2(lua_State *l,::PhysContact &contact);
-		static void GetPhysicsObject1(lua_State *l,::PhysContact &contact);
-		static void GetPhysicsObject2(lua_State *l,::PhysContact &contact);
-		static void GetContactPos1(lua_State *l,::PhysContact &contact);
-		static void GetContactPos2(lua_State *l,::PhysContact &contact);
-	};
-};
-
 void Lua::PhysContact::register_class(lua_State *l,luabind::module_ &mod)
 {
-	auto classDef = luabind::class_<::PhysContact>("Contact");
-	classDef.def("GetEntity1",&GetEntity1);
-	classDef.def("GetEntity2",&GetEntity2);
-	classDef.def("GetHitNormal",&GetHitNormal);
-	classDef.def("GetCollisionObject1",&GetCollisionObject1);
-	classDef.def("GetCollisionObject2",&GetCollisionObject2);
-	classDef.def("GetPhysicsObject1",&GetPhysicsObject1);
-	classDef.def("GetPhysicsObject2",&GetPhysicsObject2);
-	classDef.def("GetContactPos1",&GetContactPos1);
-	classDef.def("GetContactPos2",&GetContactPos2);
-	mod[classDef];
-}
+	auto classDefPoint = luabind::class_<::pragma::physics::ContactPoint>("ContactPoint");
+	classDefPoint.def_readwrite("impulse",&::pragma::physics::ContactPoint::impulse);
+	classDefPoint.def_readwrite("normal",&::pragma::physics::ContactPoint::normal);
+	classDefPoint.def_readwrite("position",&::pragma::physics::ContactPoint::position);
+	classDefPoint.def_readwrite("distance",&::pragma::physics::ContactPoint::distance);
+	classDefPoint.property("material0",static_cast<void(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) {
+		if(cp.material0.expired())
+			return;
+		cp.material0->Push(l);
+	}));
+	classDefPoint.property("material1",static_cast<void(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) {
+		if(cp.material1.expired())
+			return;
+		cp.material1->Push(l);
+	}));
+	mod[classDefPoint];
 
-void Lua::PhysContact::GetEntity1(lua_State *l,::PhysContact &contact)
-{
-	if(contact.entA == nullptr)
-		return;
-	lua_pushentity(l,contact.entA);
-}
-void Lua::PhysContact::GetEntity2(lua_State *l,::PhysContact &contact)
-{
-	if(contact.entB == nullptr)
-		return;
-	lua_pushentity(l,contact.entB);
-}
-void Lua::PhysContact::GetHitNormal(lua_State *l,::PhysContact &contact)
-{
-	Lua::Push<Vector3>(l,contact.hitNormal);
-}
-void Lua::PhysContact::GetCollisionObject1(lua_State *l,::PhysContact &contact)
-{
-	if(contact.objA == nullptr)
-		return;
-	contact.objA->Push(l);
-}
-void Lua::PhysContact::GetCollisionObject2(lua_State *l,::PhysContact &contact)
-{
-	if(contact.objB == nullptr)
-		return;
-	contact.objB->Push(l);
-}
-void Lua::PhysContact::GetPhysicsObject1(lua_State *l,::PhysContact &contact)
-{
-	if(contact.physA == nullptr)
-		return;
-	luabind::object(l,contact.physA->GetHandle()).push(l);
-}
-void Lua::PhysContact::GetPhysicsObject2(lua_State *l,::PhysContact &contact)
-{
-	if(contact.physB == nullptr)
-		return;
-	luabind::object(l,contact.physB->GetHandle()).push(l);
-}
-void Lua::PhysContact::GetContactPos1(lua_State *l,::PhysContact &contact)
-{
-	Lua::Push<Vector3>(l,contact.posA);
-}
-void Lua::PhysContact::GetContactPos2(lua_State *l,::PhysContact &contact)
-{
-	Lua::Push<Vector3>(l,contact.posB);
+	auto classDef = luabind::class_<::pragma::physics::ContactInfo>("ContactInfo");
+	classDef.property("GetContactPointCount",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+		Lua::PushInt(l,contactInfo.contactPoints.size());
+	}));
+	classDef.property("GetContactPoint",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) {
+		auto &point = contactInfo.contactPoints.at(index);
+		Lua::Push<pragma::physics::ContactPoint>(l,point);
+	}));
+	classDef.property("GetContactPoints",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) {
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &p : contactInfo.contactPoints)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push<pragma::physics::ContactPoint>(l,p);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDef.property("shape0",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+		if(contactInfo.shape0.expired())
+			return;
+		contactInfo.shape0->Push(l);
+	}));
+	classDef.property("shape1",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+		if(contactInfo.shape1.expired())
+			return;
+		contactInfo.shape1->Push(l);
+	}));
+	classDef.property("collisionObj0",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+		if(contactInfo.collisionObj0.IsExpired())
+			return;
+		contactInfo.collisionObj0->Push(l);
+	}));
+	classDef.property("collisionObj1",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+		if(contactInfo.collisionObj1.IsExpired())
+			return;
+		contactInfo.collisionObj1->Push(l);
+	}));
+	classDef.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(::pragma::physics::ContactInfo::flags)> pragma::physics::ContactInfo::*>(&::pragma::physics::ContactInfo::flags));
+	mod[classDef];
 }

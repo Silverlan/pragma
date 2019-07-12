@@ -176,9 +176,7 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 	TraceData trData;
 	trData.SetSource(origin);
 	trData.SetTarget(origin +dir *std::numeric_limits<Float>::max());
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	trData.SetFilter(ent.GetHandle());
-#endif
+	trData.SetFilter(ent);
 	trData.SetFlags(RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
 	auto r = s_game->RayCast(trData);
 	if(r.hitType == RayCastHitType::None)

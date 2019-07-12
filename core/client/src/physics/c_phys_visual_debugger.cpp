@@ -22,19 +22,19 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebug::Pipeline::Line) == true)
 	{
 		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_lineBuffer.buffer,m_lineBuffer.instanceCount,vp *m);
+		shader.Draw(**m_lineBuffer.buffer,m_lineBuffer.instanceCount *decltype(m_lineBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebug::Pipeline::Point) == true)
 	{
 		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_pointBuffer.buffer,m_pointBuffer.instanceCount,vp *m);
+		shader.Draw(**m_pointBuffer.buffer,m_pointBuffer.instanceCount *decltype(m_pointBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebug::Pipeline::Triangle) == true)
 	{
 		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_triangleBuffer.buffer,m_triangleBuffer.instanceCount,vp *m);
+		shader.Draw(**m_triangleBuffer.buffer,m_triangleBuffer.instanceCount *decltype(m_triangleBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 }

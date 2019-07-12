@@ -52,9 +52,9 @@ void STriggerGravityComponent::OnResetGravity(BaseEntity *ent,GravitySettings &s
 	server->SendPacket("ent_trigger_gravity_onstarttouch",p,pragma::networking::Protocol::SlowReliable);
 }
 
-void STriggerGravityComponent::OnStartTouch(BaseEntity *ent,PhysObj *phys)
+void STriggerGravityComponent::OnStartTouch(BaseEntity *ent)
 {
-	BaseEntityTriggerGravityComponent::OnStartTouch(ent,phys);
+	BaseEntityTriggerGravityComponent::OnStartTouch(ent);
 	auto netFlags = pragma::Entity::TriggerGravity::NetFlags::StartTouch;
 	if(m_kvUseForce == true)
 		netFlags |= pragma::Entity::TriggerGravity::NetFlags::UseForce;

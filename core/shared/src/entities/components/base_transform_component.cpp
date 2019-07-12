@@ -295,9 +295,7 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	TraceData trData;
 	trData.SetSource(origin);
 	trData.SetTarget(origin +dir *static_cast<float>(GameLimits::MaxRayCastRange));
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	trData.SetFilter(component.GetEntity().GetHandle());
-#endif
+	trData.SetFilter(component.GetEntity());
 	trData.SetFlags(RayCastFlags::InvertFilter);
 	auto pPhysComponent = component.GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())

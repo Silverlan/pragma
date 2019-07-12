@@ -13,28 +13,28 @@ namespace Lua
 {
 	namespace PhysShape
 	{
-		static void GetBounds(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape);
-		static void IsConvex(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape);
-		static void IsConvexHull(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape);
-		static void IsHeightField(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape);
-		static void IsTriangleShape(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape);
+		static void GetBounds(lua_State *l,pragma::physics::IShape &shape);
+		static void IsConvex(lua_State *l,pragma::physics::IShape &shape);
+		static void IsConvexHull(lua_State *l,pragma::physics::IShape &shape);
+		static void IsHeightField(lua_State *l,pragma::physics::IShape &shape);
+		static void IsTriangleShape(lua_State *l,pragma::physics::IShape &shape);
 	};
 	namespace PhysConvexShape
 	{
-		static void GetCollisionMesh(lua_State *l,std::shared_ptr<pragma::physics::IConvexShape> &shape);
+		static void GetCollisionMesh(lua_State *l,pragma::physics::IConvexShape &shape);
 	};
 	namespace PhysConvexHullShape
 	{
-		static void AddPoint(lua_State *l,std::shared_ptr<pragma::physics::IConvexHullShape> &shape,Vector3 &point);
+		static void AddPoint(lua_State *l,pragma::physics::IConvexHullShape &shape,Vector3 &point);
 	};
 	namespace PhysHeightfield
 	{
-		static void GetHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape,uint32_t x,uint32_t y);
-		static void SetHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape,uint32_t x,uint32_t y,float height);
-		static void GetWidth(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape);
-		static void GetLength(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape);
-		static void GetMaxHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape);
-		static void GetUpAxis(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape);
+		static void GetHeight(lua_State *l,pragma::physics::IHeightfield &shape,uint32_t x,uint32_t y);
+		static void SetHeight(lua_State *l,pragma::physics::IHeightfield &shape,uint32_t x,uint32_t y,float height);
+		static void GetWidth(lua_State *l,pragma::physics::IHeightfield &shape);
+		static void GetLength(lua_State *l,pragma::physics::IHeightfield &shape);
+		static void GetMaxHeight(lua_State *l,pragma::physics::IHeightfield &shape);
+		static void GetUpAxis(lua_State *l,pragma::physics::IHeightfield &shape);
 	};
 };
 
@@ -46,9 +46,9 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("IsConvexHull",&IsConvexHull);
 	classDef.def("IsHeightfield",&IsHeightField);
 	classDef.def("IsTriangleShape",&IsTriangleShape);
-	classDef.def("CalculateLocalInertia",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::physics::IShape>&,float)>([](lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape,float mass) {
+	classDef.def("CalculateLocalInertia",static_cast<void(*)(lua_State*,pragma::physics::IShape&,float)>([](lua_State *l,pragma::physics::IShape &shape,float mass) {
 		Vector3 localInertia;
-		shape->CalculateLocalInertia(mass,&localInertia);
+		shape.CalculateLocalInertia(mass,&localInertia);
 		Lua::Push<Vector3>(l,localInertia);
 	}));
 	mod[classDef];
@@ -58,17 +58,17 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 	mod[convexClassDef];
 
 	auto capsuleShapeDef = luabind::class_<pragma::physics::ICapsuleShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("CapsuleShape");
-	capsuleShapeDef.def("GetRadius",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::physics::ICapsuleShape>&)>([](lua_State *l,std::shared_ptr<pragma::physics::ICapsuleShape> &shape) {
-		Lua::PushNumber(l,shape->GetRadius());
+	capsuleShapeDef.def("GetRadius",static_cast<void(*)(lua_State*,pragma::physics::ICapsuleShape&)>([](lua_State *l,pragma::physics::ICapsuleShape &shape) {
+		Lua::PushNumber(l,shape.GetRadius());
 	}));
-	capsuleShapeDef.def("GetHalfHeight",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::physics::ICapsuleShape>&)>([](lua_State *l,std::shared_ptr<pragma::physics::ICapsuleShape> &shape) {
-		Lua::PushNumber(l,shape->GetHalfHeight());
+	capsuleShapeDef.def("GetHalfHeight",static_cast<void(*)(lua_State*,pragma::physics::ICapsuleShape&)>([](lua_State *l,pragma::physics::ICapsuleShape &shape) {
+		Lua::PushNumber(l,shape.GetHalfHeight());
 	}));
 	mod[capsuleShapeDef];
 
 	auto boxShapeDef = luabind::class_<pragma::physics::IBoxShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("BoxShape");
-	boxShapeDef.def("GetHalfExtents",static_cast<void(*)(lua_State*,std::shared_ptr<pragma::physics::IBoxShape>&)>([](lua_State *l,std::shared_ptr<pragma::physics::IBoxShape> &shape) {
-		Lua::Push<Vector3>(l,shape->GetHalfExtents());
+	boxShapeDef.def("GetHalfExtents",static_cast<void(*)(lua_State*,pragma::physics::IBoxShape&)>([](lua_State *l,pragma::physics::IBoxShape &shape) {
+		Lua::Push<Vector3>(l,shape.GetHalfExtents());
 	}));
 	mod[boxShapeDef];
 
@@ -176,35 +176,35 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 #endif
 	mod[triangleShapeClassDef];
 }
-void Lua::PhysShape::GetBounds(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape)
+void Lua::PhysShape::GetBounds(lua_State *l,pragma::physics::IShape &shape)
 {
 	Vector3 min,max;
-	shape->GetAABB(min,max);
+	shape.GetAABB(min,max);
 	Lua::Push<Vector3>(l,min);
 	Lua::Push<Vector3>(l,max);
 }
-void Lua::PhysShape::IsConvex(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape)
+void Lua::PhysShape::IsConvex(lua_State *l,pragma::physics::IShape &shape)
 {
-	Lua::PushBool(l,shape->IsConvex());
+	Lua::PushBool(l,shape.IsConvex());
 }
-void Lua::PhysShape::IsConvexHull(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape)
+void Lua::PhysShape::IsConvexHull(lua_State *l,pragma::physics::IShape &shape)
 {
-	Lua::PushBool(l,shape->IsConvexHull());
+	Lua::PushBool(l,shape.IsConvexHull());
 }
-void Lua::PhysShape::IsHeightField(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape)
+void Lua::PhysShape::IsHeightField(lua_State *l,pragma::physics::IShape &shape)
 {
-	Lua::PushBool(l,shape->IsHeightfield());
+	Lua::PushBool(l,shape.IsHeightfield());
 }
-void Lua::PhysShape::IsTriangleShape(lua_State *l,std::shared_ptr<pragma::physics::IShape> &shape)
+void Lua::PhysShape::IsTriangleShape(lua_State *l,pragma::physics::IShape &shape)
 {
-	Lua::PushBool(l,shape->IsTriangleShape());
+	Lua::PushBool(l,shape.IsTriangleShape());
 }
 
 ///////////////////////////////
 
-void Lua::PhysConvexShape::GetCollisionMesh(lua_State *l,std::shared_ptr<pragma::physics::IConvexShape> &shape)
+void Lua::PhysConvexShape::GetCollisionMesh(lua_State *l,pragma::physics::IConvexShape &shape)
 {
-	auto *colMesh = shape->GetCollisionMesh();
+	auto *colMesh = shape.GetCollisionMesh();
 	if(colMesh == nullptr)
 		return;
 	Lua::Push<std::shared_ptr<::CollisionMesh>>(l,colMesh->shared_from_this());
@@ -212,34 +212,34 @@ void Lua::PhysConvexShape::GetCollisionMesh(lua_State *l,std::shared_ptr<pragma:
 
 ///////////////////////////////
 
-void Lua::PhysConvexHullShape::AddPoint(lua_State*,std::shared_ptr<pragma::physics::IConvexHullShape> &shape,Vector3 &point)
+void Lua::PhysConvexHullShape::AddPoint(lua_State*,pragma::physics::IConvexHullShape &shape,Vector3 &point)
 {
-	shape->AddPoint(point);
+	shape.AddPoint(point);
 }
 
 ///////////////////////////////
 
-void Lua::PhysHeightfield::GetHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape,uint32_t x,uint32_t y)
+void Lua::PhysHeightfield::GetHeight(lua_State *l,pragma::physics::IHeightfield &shape,uint32_t x,uint32_t y)
 {
-	Lua::PushInt(l,shape->GetHeight(x,y));
+	Lua::PushInt(l,shape.GetHeight(x,y));
 }
-void Lua::PhysHeightfield::SetHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape,uint32_t x,uint32_t y,float height)
+void Lua::PhysHeightfield::SetHeight(lua_State *l,pragma::physics::IHeightfield &shape,uint32_t x,uint32_t y,float height)
 {
-	shape->SetHeight(x,y,height);
+	shape.SetHeight(x,y,height);
 }
-void Lua::PhysHeightfield::GetWidth(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape)
+void Lua::PhysHeightfield::GetWidth(lua_State *l,pragma::physics::IHeightfield &shape)
 {
-	Lua::PushInt(l,shape->GetWidth());
+	Lua::PushInt(l,shape.GetWidth());
 }
-void Lua::PhysHeightfield::GetLength(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape)
+void Lua::PhysHeightfield::GetLength(lua_State *l,pragma::physics::IHeightfield &shape)
 {
-	Lua::PushInt(l,shape->GetLength());
+	Lua::PushInt(l,shape.GetLength());
 }
-void Lua::PhysHeightfield::GetMaxHeight(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape)
+void Lua::PhysHeightfield::GetMaxHeight(lua_State *l,pragma::physics::IHeightfield &shape)
 {
-	Lua::PushNumber(l,shape->GetMaxHeight());
+	Lua::PushNumber(l,shape.GetMaxHeight());
 }
-void Lua::PhysHeightfield::GetUpAxis(lua_State *l,std::shared_ptr<pragma::physics::IHeightfield> &shape)
+void Lua::PhysHeightfield::GetUpAxis(lua_State *l,pragma::physics::IHeightfield &shape)
 {
-	Lua::PushInt(l,shape->GetUpAxis());
+	Lua::PushInt(l,shape.GetUpAxis());
 }

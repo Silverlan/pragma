@@ -4,7 +4,6 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <typeindex>
 #include <mathutil/uvec.h>
 
@@ -13,9 +12,10 @@ struct TraceResult;
 class TraceData;
 class NetPacket;
 class PhysObj;
-class PhysCollisionObject;
+enum class RayCastHitType : uint8_t;
 namespace pragma
 {
+	namespace physics {class ICollisionObject;};
 	struct DLLNETWORK CEOnBulletsFired
 		: public ComponentEvent
 	{
@@ -62,7 +62,7 @@ namespace pragma
 		mutable std::unique_ptr<NextBulletInfo> m_nextBullet = nullptr;
 		void ReceiveBulletEvent(NetPacket &packet,pragma::BasePlayerComponent *pl=nullptr);
 		std::vector<Vector3> GetBulletDestinations(const Vector3 &origin,const Vector3 &dir,const BulletInfo &bulletInfo);
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result);
+		virtual RayCastHitType OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj &phys,physics::ICollisionObject &col);
 		
 		pragma::NetEventId m_netEvFireBullets = pragma::INVALID_NET_EVENT;
 	};

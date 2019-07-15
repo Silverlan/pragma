@@ -77,6 +77,18 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 
 	auto hullClassDef = luabind::class_<pragma::physics::IConvexHullShape,luabind::bases<pragma::physics::IConvexShape,pragma::physics::IShape,pragma::physics::IBase>>("ConvexHullShape");
 	hullClassDef.def("AddPoint",PhysConvexHullShape::AddPoint);
+	hullClassDef.def("AddTriangle",static_cast<void(*)(lua_State*,pragma::physics::IConvexHullShape&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,pragma::physics::IConvexHullShape &shape,uint32_t idx0,uint32_t idx1,uint32_t idx2) {
+		shape.AddTriangle(idx0,idx1,idx2);
+	}));
+	hullClassDef.def("ReservePoints",static_cast<void(*)(lua_State*,pragma::physics::IConvexHullShape&,uint32_t)>([](lua_State *l,pragma::physics::IConvexHullShape &shape,uint32_t numPoints) {
+		shape.ReservePoints(numPoints);
+	}));
+	hullClassDef.def("ReserveTriangles",static_cast<void(*)(lua_State*,pragma::physics::IConvexHullShape&,uint32_t)>([](lua_State *l,pragma::physics::IConvexHullShape &shape,uint32_t numTris) {
+		shape.ReserveTriangles(numTris);
+	}));
+	hullClassDef.def("Build",static_cast<void(*)(lua_State*,pragma::physics::IConvexHullShape&)>([](lua_State *l,pragma::physics::IConvexHullShape &shape) {
+		shape.Build();
+	}));
 	mod[hullClassDef];
 
 	auto heightfieldClassDef = luabind::class_<pragma::physics::IHeightfield,luabind::bases<pragma::physics::IShape,pragma::physics::IBase>>("Heightfield");

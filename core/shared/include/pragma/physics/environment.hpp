@@ -75,6 +75,8 @@ namespace pragma::physics
 		virtual void OnSleep(ICollisionObject &o)=0;
 	};
 
+	class ChassisCreateInfo;
+	class WheelCreateInfo;
 	class DLLNETWORK IEnvironment
 	{
 	public:
@@ -135,6 +137,7 @@ namespace pragma::physics
 		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(float mass,IShape &shape,const Vector3 &localInertia,bool dynamic=true)=0;
 		virtual util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info,float mass,const std::vector<Vector3> &verts,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)=0;
 		virtual util::TSharedHandle<IGhostObject> CreateGhostObject(IShape &shape)=0;
+		virtual util::TSharedHandle<ICollisionObject> CreatePlane(const Vector3 &n,float d,const IMaterial &mat)=0;
 
 		virtual std::shared_ptr<IConvexShape> CreateCapsuleShape(float halfWidth,float halfHeight,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IConvexShape> CreateBoxShape(const Vector3 &halfExtents,const IMaterial &mat)=0;
@@ -148,7 +151,7 @@ namespace pragma::physics
 		virtual std::shared_ptr<IShape> CreateHeightfieldTerrainShape(uint32_t width,uint32_t length,Scalar maxHeight,uint32_t upAxis,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IMaterial> CreateMaterial(float staticFriction,float dynamicFriction,float restitution)=0;
 
-		virtual util::TSharedHandle<IVehicle> CreateVehicle()=0;
+		virtual util::TSharedHandle<IVehicle> CreateVehicle(const ChassisCreateInfo &chassisDesc,const std::vector<WheelCreateInfo> &wheelDescs)=0;
 
 		virtual RemainingDeltaTime StepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
 

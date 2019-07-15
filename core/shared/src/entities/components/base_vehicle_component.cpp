@@ -86,9 +86,9 @@ void BaseVehicleComponent::OnPhysicsInitialized()
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
-	auto vhc = physEnv->CreateVehicle();
-	if(vhc == nullptr)
-		return;
+	//auto vhc = physEnv->CreateVehicle();
+	//if(vhc == nullptr)
+//		return;
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = GetEntity();

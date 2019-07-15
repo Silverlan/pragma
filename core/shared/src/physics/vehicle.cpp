@@ -2,6 +2,14 @@
 #include "pragma/physics/vehicle.hpp"
 #include "pragma/physics/environment.hpp"
 
+float pragma::physics::WheelCreateInfo::GetMomentOfInertia() const
+{
+	if(momentOfInertia.has_value())
+		return *momentOfInertia;
+	// MOI of a cylinder
+	return 0.5f *mass *umath::pow2(radius);
+}
+
 pragma::physics::IVehicle::IVehicle(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject)
 	: IBase{env},m_collisionObject{collisionObject}
 {}

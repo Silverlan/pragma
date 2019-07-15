@@ -52,8 +52,8 @@ template<class TType>
 template<class TType>
 	TType &Lua::CheckHandle(lua_State *l,const int32_t idx)
 {
-	auto &handle = Check<util::TSharedHandle<TType>>(l,idx);
-	if(handle.IsExpired())
+	auto *handle = CheckPtr<TType>(l,idx);
+	if(handle == nullptr)
 	{
 		Lua::PushString(l,"Attempted to use a NULL handle");
 		lua_error(l);
@@ -277,6 +277,14 @@ namespace Lua
 			luaL_argerror(l,n,err.c_str());
 		}
 		return *pValue;
+	}
+
+	template<typename T,typename=std::enable_if_t<!std::is_arithmetic<T>::value>>
+		T *CheckPtr(lua_State *l,int32_t n)
+	{
+		Lua::CheckUserData(l,n);
+		luabind::object o(luabind::from_stack(l,n));
+		return luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr));
 	}
 
 	template<typename T>

@@ -26,6 +26,7 @@ extern DLLENGINE Engine *engine;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace physenv
@@ -49,7 +50,9 @@ namespace Lua
 		static int create_DoF_constraint(lua_State *l);
 		static int create_dof_spring_constraint(lua_State *l);
 		static int create_surface_material(lua_State *l);
+		static int create_material(lua_State *l);
 		static int create_ghost_object(lua_State *l);
+		static int create_plane(lua_State *l);
 		static int get_surface_material(lua_State *l);
 		static int get_surface_materials(lua_State *l);
 
@@ -74,6 +77,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_heightfield_terrain_shape",create_heightfield_terrain_shape},
 		{"create_rigid_body",create_rigid_body},
 		{"create_ghost_object",create_ghost_object},
+		{"create_plane",create_plane},
 		{"create_fixed_constraint",create_fixed_constraint},
 		{"create_ballsocket_constraint",create_ball_socket_constraint},
 		{"create_hinge_constraint",create_hinge_constraint},
@@ -82,13 +86,30 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_dof_constraint",create_DoF_constraint},
 		{"create_dof_spring_constraint",create_dof_spring_constraint},
 		{"create_surface_material",create_surface_material},
+		{"create_material",create_material},
 		{"create_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto *state = engine->GetNetworkState(l);
 			auto *game = state->GetGameState();
 			auto *env = game->GetPhysicsEnvironment();
 			if(env == nullptr)
 				return 0;
-			auto vhc = env->CreateVehicle();
+			auto &chassisCreateInfo = Lua::Check<pragma::physics::ChassisCreateInfo>(l,1);
+
+			auto tWheels = 2;
+			Lua::CheckTable(l,tWheels);
+			auto numWheels = Lua::GetObjectLength(l,tWheels);
+			std::vector<pragma::physics::WheelCreateInfo> wheelDescs {};
+			wheelDescs.reserve(numWheels);
+			for(auto i=decltype(numWheels){0u};i<numWheels;++i)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::GetTableValue(l,tWheels);
+				auto &wheelDesc = Lua::Check<pragma::physics::WheelCreateInfo>(l,-1);
+				wheelDescs.push_back(wheelDesc);
+				Lua::Pop(l,1);
+			}
+
+			auto vhc = env->CreateVehicle(chassisCreateInfo,wheelDescs);
 			if(vhc == nullptr)
 				return 0;
 			vhc->Push(l);
@@ -170,6 +191,163 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto &physMod = lua.RegisterLibrary(libName);
 	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
 	physMod[classBase];
+
+	auto classDefVhc = luabind::class_<pragma::physics::IVehicle,pragma::physics::IBase>("Vehicle");
+	classDefVhc.add_static_constant("GEAR_REVERSE",umath::to_integral(pragma::physics::IVehicle::Gear::Reverse));
+	classDefVhc.add_static_constant("GEAR_NEUTRAL",umath::to_integral(pragma::physics::IVehicle::Gear::Neutral));
+	classDefVhc.add_static_constant("GEAR_FIRST",umath::to_integral(pragma::physics::IVehicle::Gear::First));
+	classDefVhc.add_static_constant("GEAR_SECOND",umath::to_integral(pragma::physics::IVehicle::Gear::Second));
+	classDefVhc.add_static_constant("GEAR_THIRD",umath::to_integral(pragma::physics::IVehicle::Gear::Third));
+	classDefVhc.add_static_constant("GEAR_FOURTH",umath::to_integral(pragma::physics::IVehicle::Gear::Fourth));
+	classDefVhc.add_static_constant("GEAR_FIFTH",umath::to_integral(pragma::physics::IVehicle::Gear::Fifth));
+	classDefVhc.add_static_constant("GEAR_SIXTH",umath::to_integral(pragma::physics::IVehicle::Gear::Sixth));
+	classDefVhc.add_static_constant("GEAR_SEVENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Seventh));
+	classDefVhc.add_static_constant("GEAR_EIGHTH",umath::to_integral(pragma::physics::IVehicle::Gear::Eighth));
+	classDefVhc.add_static_constant("GEAR_NINTH",umath::to_integral(pragma::physics::IVehicle::Gear::Ninth));
+	classDefVhc.add_static_constant("GEAR_TENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Tenth));
+	classDefVhc.add_static_constant("GEAR_ELEVENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Eleventh));
+	classDefVhc.add_static_constant("GEAR_TWELFTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twelfth));
+	classDefVhc.add_static_constant("GEAR_THIRTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Thirteenth));
+	classDefVhc.add_static_constant("GEAR_FOURTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Fourteenth));
+	classDefVhc.add_static_constant("GEAR_FIFTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Fifteenth));
+	classDefVhc.add_static_constant("GEAR_SIXTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Sixteenth));
+	classDefVhc.add_static_constant("GEAR_SEVENTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Seventeenth));
+	classDefVhc.add_static_constant("GEAR_EIGHTEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Eighteenth));
+	classDefVhc.add_static_constant("GEAR_NINETEENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Nineteenth));
+	classDefVhc.add_static_constant("GEAR_TWENTIETH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentieth));
+	classDefVhc.add_static_constant("GEAR_TWENTYFIRST",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfirst));
+	classDefVhc.add_static_constant("GEAR_TWENTYSECOND",umath::to_integral(pragma::physics::IVehicle::Gear::Twentysecond));
+	classDefVhc.add_static_constant("GEAR_TWENTYTHIRD",umath::to_integral(pragma::physics::IVehicle::Gear::Twentythird));
+	classDefVhc.add_static_constant("GEAR_TWENTYFOURTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfourth));
+	classDefVhc.add_static_constant("GEAR_TWENTYFIFTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyfifth));
+	classDefVhc.add_static_constant("GEAR_TWENTYSIXTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentysixth));
+	classDefVhc.add_static_constant("GEAR_TWENTYSEVENTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyseventh));
+	classDefVhc.add_static_constant("GEAR_TWENTYEIGHTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyeighth));
+	classDefVhc.add_static_constant("GEAR_TWENTYNINTH",umath::to_integral(pragma::physics::IVehicle::Gear::Twentyninth));
+	classDefVhc.add_static_constant("GEAR_THIRTIETH",umath::to_integral(pragma::physics::IVehicle::Gear::Thirtieth));
+	classDefVhc.add_static_constant("GEAR_COUNT",umath::to_integral(pragma::physics::IVehicle::Gear::Count));
+	classDefVhc.def("IsValid",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		Lua::PushBool(l,hPhys != nullptr);
+	}));
+	classDefVhc.def("GetCollisionObject",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		auto *pCollisionObject = hPhys->GetCollisionObject();
+		if(pCollisionObject == nullptr)
+			return;
+		pCollisionObject->Push(l);
+	}));
+	classDefVhc.def("SetUseDigitalInputs",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,bool)>([](lua_State *l,pragma::physics::IVehicle *hPhys,bool useDigitalInputs) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetUseDigitalInputs(useDigitalInputs);
+	}));
+	classDefVhc.def("SetBrakeFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float brakeFactor) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetBrakeFactor(brakeFactor);
+	}));
+	classDefVhc.def("SetHandBrakeFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float brakeFactor) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetHandbrakeFactor(brakeFactor);
+	}));
+	classDefVhc.def("SetAccelerationFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float accFactor) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetAccelerationFactor(accFactor);
+	}));
+	classDefVhc.def("SetTurnFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float turnFactor) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetTurnFactor(turnFactor);
+	}));
+	classDefVhc.def("SetGear",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,uint32_t)>([](lua_State *l,pragma::physics::IVehicle *hPhys,uint32_t gear) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetGear(static_cast<pragma::physics::IVehicle::Gear>(gear));
+	}));
+	classDefVhc.def("SetGearDown",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetGearDown();
+	}));
+	classDefVhc.def("SetGearUp",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetGearUp();
+	}));
+	classDefVhc.def("SetGearSwitchTime",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float switchTime) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetGearSwitchTime(switchTime);
+	}));
+	classDefVhc.def("ChangeToGear",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,uint32_t)>([](lua_State *l,pragma::physics::IVehicle *hPhys,uint32_t gear) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->ChangeToGear(static_cast<pragma::physics::IVehicle::Gear>(gear));
+	}));
+	classDefVhc.def("SetUseAutoGears",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,bool)>([](lua_State *l,pragma::physics::IVehicle *hPhys,bool useAutoGears) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetUseAutoGears(useAutoGears);
+	}));
+	classDefVhc.def("ShouldUseAutoGears",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushBool(l,hPhys->ShouldUseAutoGears());
+	}));
+	classDefVhc.def("GetCurrentGear",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushInt(l,umath::to_integral(hPhys->GetCurrentGear()));
+	}));
+	classDefVhc.def("GetEngineRotationSpeed",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushNumber(l,hPhys->GetEngineRotationSpeed());
+	}));
+	classDefVhc.def("SetRestState",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetRestState();
+	}));
+	classDefVhc.def("ResetControls",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->ResetControls();
+	}));
+	classDefVhc.def("SetWheelRotationAngle",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,uint32_t,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,uint32_t wheelIdx,float angle) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetWheelRotationAngle(wheelIdx,angle);
+	}));
+	classDefVhc.def("SetWheelRotationSpeed",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,uint32_t,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,uint32_t wheelIdx,float speed) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->SetWheelRotationSpeed(wheelIdx,speed);
+	}));
+	classDefVhc.def("IsInAir",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushBool(l,hPhys->IsInAir());
+	}));
+	classDefVhc.def("GetWheelCount",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushInt(l,hPhys->GetWheelCount());
+	}));
+	classDefVhc.def("GetForwardSpeed",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushNumber(l,hPhys->GetForwardSpeed());
+	}));
+	classDefVhc.def("GetSidewaysSpeed",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		Lua::PushNumber(l,hPhys->GetSidewaysSpeed());
+	}));
+	physMod[classDefVhc];
 
 	auto classMat = luabind::class_<pragma::physics::IMaterial,pragma::physics::IBase>("Material");
 	classMat.def("SetFriction",static_cast<void(*)(lua_State*,pragma::physics::IMaterial&,float)>([](lua_State *l,pragma::physics::IMaterial &mat,float friction) {
@@ -277,6 +455,31 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		Lua::PushString(l,mat);
 	}));
 	physMod[classDefRayCastResult];
+
+	auto classDefChassisCreateInfo = luabind::class_<pragma::physics::ChassisCreateInfo>("ChassisCreateInfo");
+	classDefChassisCreateInfo.def(luabind::constructor<>());
+	classDefChassisCreateInfo.def_readwrite("mass",&pragma::physics::ChassisCreateInfo::mass);
+	classDefChassisCreateInfo.def_readwrite("momentOfInertia",&pragma::physics::ChassisCreateInfo::momentOfInertia);
+	classDefChassisCreateInfo.def_readwrite("cmOffset",&pragma::physics::ChassisCreateInfo::cmOffset);
+	classDefChassisCreateInfo.def_readwrite("shape",&pragma::physics::ChassisCreateInfo::shape);
+	physMod[classDefChassisCreateInfo];
+
+	auto classDefWheelCreateInfo = luabind::class_<pragma::physics::WheelCreateInfo>("WheelCreateInfo");
+	classDefWheelCreateInfo.def(luabind::constructor<>());
+	classDefWheelCreateInfo.def_readwrite("mass",&pragma::physics::WheelCreateInfo::mass);
+	classDefWheelCreateInfo.def_readwrite("width",&pragma::physics::WheelCreateInfo::width);
+	classDefWheelCreateInfo.def_readwrite("radius",&pragma::physics::WheelCreateInfo::radius);
+	classDefWheelCreateInfo.property("momentOfInertia",static_cast<void(*)(lua_State*,pragma::physics::WheelCreateInfo&)>([](lua_State *l,pragma::physics::WheelCreateInfo &wheelCreateInfo) {
+		if(wheelCreateInfo.momentOfInertia.has_value())
+			Lua::PushNumber(l,*wheelCreateInfo.momentOfInertia);
+	}),static_cast<void(*)(lua_State*,pragma::physics::WheelCreateInfo&,float)>([](lua_State *l,pragma::physics::WheelCreateInfo &wheelCreateInfo,float moi) {
+		wheelCreateInfo.momentOfInertia = moi;
+	}));
+	classDefWheelCreateInfo.def_readwrite("chassisOffset",&pragma::physics::WheelCreateInfo::chassisOffset);
+	classDefWheelCreateInfo.def_readwrite("shape",&pragma::physics::WheelCreateInfo::shape);
+	classDefWheelCreateInfo.def_readwrite("maxHandBrakeTorque",&pragma::physics::WheelCreateInfo::maxHandbrakeTorque);
+	classDefWheelCreateInfo.def_readwrite("maxSteeringAngle",&pragma::physics::WheelCreateInfo::maxSteeringAngle);
+	physMod[classDefWheelCreateInfo];
 
 	auto classDefTransform = luabind::class_<pragma::physics::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<>());
@@ -859,7 +1062,7 @@ int Lua::physenv::create_convex_hull_shape(lua_State *l)
 	auto *env = game->GetPhysicsEnvironment();
 	if(env == nullptr)
 		return 0;
-	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,1);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,1);
 	auto shape = env->CreateConvexHullShape(mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexHullShape>>(l,shape);
 	return 1;
@@ -874,7 +1077,7 @@ int Lua::physenv::create_box_shape(lua_State *l)
 	auto *env = game->GetPhysicsEnvironment();
 	if(env == nullptr)
 		return 0;
-	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,2);
 	auto shape = env->CreateBoxShape(*halfExtents,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
 	return 1;
@@ -890,7 +1093,7 @@ int Lua::physenv::create_capsule_shape(lua_State *l)
 	auto *env = game->GetPhysicsEnvironment();
 	if(env == nullptr)
 		return 0;
-	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
@@ -905,7 +1108,7 @@ int Lua::physenv::create_sphere_shape(lua_State *l)
 	auto *env = game->GetPhysicsEnvironment();
 	if(env == nullptr)
 		return 0;
-	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,2);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,2);
 
 	auto shape = env->CreateSphereShape(CFloat(radius),mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
@@ -921,7 +1124,7 @@ int Lua::physenv::create_cylinder_shape(lua_State *l)
 	auto *env = game->GetPhysicsEnvironment();
 	if(env == nullptr)
 		return 0;
-	auto &mat = Lua::Check<pragma::physics::IMaterial>(l,3);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCylinderShape(radius,height,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
@@ -940,11 +1143,9 @@ int Lua::physenv::create_heightfield_terrain_shape(lua_State *l)
 	auto length = Lua::CheckInt(l,2);
 	auto maxHeight = Lua::CheckNumber(l,3);
 	auto upAxis = Lua::CheckInt(l,4);
-	auto &hMat = Lua::Check<util::TWeakSharedHandle<pragma::physics::IMaterial>>(l,5);
-	if(Lua::CheckHandle<pragma::physics::IMaterial>(l,hMat) == false)
-		return 0;
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,5);
 
-	auto shape = env->CreateHeightfieldTerrainShape(width,length,maxHeight,upAxis,*hMat);
+	auto shape = env->CreateHeightfieldTerrainShape(width,length,maxHeight,upAxis,mat);
 	Lua::Push<std::shared_ptr<pragma::physics::IShape>>(l,shape);
 	return 1;
 }
@@ -983,6 +1184,23 @@ int Lua::physenv::create_ghost_object(lua_State *l)
 	if(ghost == nullptr)
 		return 0;
 	ghost->Push(l);
+	return 1;
+}
+
+int Lua::physenv::create_plane(lua_State *l)
+{
+	auto *state = engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
+	auto &n = Lua::Check<Vector3>(l,1);
+	auto d = Lua::CheckNumber(l,2);
+	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,3);
+	auto plane = env->CreatePlane(n,d,mat);
+	if(plane == nullptr)
+		return 0;
+	plane->Push(l);
 	return 1;
 }
 
@@ -1155,6 +1373,23 @@ int Lua::physenv::create_surface_material(lua_State *l)
 	Lua::Push<SurfaceMaterial*>(l,&mat);
 	return 1;
 }
+
+int Lua::physenv::create_material(lua_State *l)
+{
+	auto *state = engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
+	auto staticFriction = Lua::CheckNumber(l,1);
+	auto dynamicFriction = Lua::CheckNumber(l,2);
+	auto restitution = Lua::CheckNumber(l,3);
+	auto mat = env->CreateMaterial(staticFriction,dynamicFriction,restitution);
+	if(mat == nullptr)
+		return 0;
+	mat->Push(l);
+	return 1;
+}
 int Lua::physenv::get_surface_material(lua_State *l)
 {
 	auto *state = engine->GetNetworkState(l);
@@ -1257,3 +1492,4 @@ int Lua::physenv::calc_linear_velocity_from_force(lua_State *l)
 	Lua::Push<Vector3>(l,linVel);
 	return 1;
 }
+#pragma optimize("",on)

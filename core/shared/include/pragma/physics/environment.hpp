@@ -104,6 +104,7 @@ namespace pragma::physics
 
 		IEnvironment(NetworkState &state);
 		virtual ~IEnvironment();
+		virtual void OnRemove();
 		NetworkState &GetNetworkState() const;
 		double GetTimeScale() const;
 		void AddEventCallback(Event eventid,const CallbackHandle &hCb);

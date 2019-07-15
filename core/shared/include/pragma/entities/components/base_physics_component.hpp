@@ -65,8 +65,7 @@ namespace pragma
 		enum class PhysFlags : uint32_t
 		{
 			None = 0u,
-			Dynamic = 1u,
-			Trigger = Dynamic<<1u
+			Dynamic = 1u
 		};
 
 		static ComponentEventId EVENT_ON_PHYSICS_INITIALIZED;

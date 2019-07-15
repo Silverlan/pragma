@@ -288,10 +288,16 @@ void PhysObj::GetCollisionFilter(CollisionMask *filterGroup,CollisionMask *filte
 bool PhysObj::IsTrigger() const
 {
 	auto *colObj = GetCollisionObject();
-	if(colObj == nullptr)
-		return false;
-	auto *shape = colObj->GetCollisionShape();
-	return shape ? shape->IsTrigger() : false;
+	return colObj && colObj->IsTrigger();
+}
+void PhysObj::SetTrigger(bool bTrigger)
+{
+	for(auto &hColObj : m_collisionObjects)
+	{
+		if(hColObj.IsExpired())
+			continue;
+		hColObj->SetTrigger(bTrigger);
+	}
 }
 
 void PhysObj::SetLinearVelocity(const Vector3&) {}

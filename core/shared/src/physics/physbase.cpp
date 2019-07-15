@@ -43,11 +43,19 @@ void pragma::physics::IBase::InitializeLuaHandle(lua_State *l,const util::TWeakS
 }
 
 bool pragma::physics::IWorldObject::IsSpawned() const {return m_bSpawned;}
-void pragma::physics::IWorldObject::AddWorldObject()
+void pragma::physics::IWorldObject::Spawn()
 {
-	if(m_bSpawned == true)
+	if(IsSpawned())
 		return;
 	m_bSpawned = true;
+	AddWorldObject();
+	DoSpawn();
+}
+void pragma::physics::IWorldObject::AddWorldObject()
+{
+	if(m_bSpawned == false)
+		return;
 	//RemoveWorldObject();
 	DoAddWorldObject();
 }
+void pragma::physics::IWorldObject::DoSpawn() {}

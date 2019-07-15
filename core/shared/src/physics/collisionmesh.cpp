@@ -79,8 +79,6 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 	std::shared_ptr<pragma::physics::IShape> shape = nullptr;
 	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
 
-	auto &origin = GetOrigin();
-	auto scaledOrigin = bScale ? Vector3{origin.x *scale.x,origin.y *scale.y,origin.z *scale.z} : origin;
 	pragma::physics::IMaterial *mat = nullptr;
 	if(materials.empty())
 		mat = &physEnv->GetGenericMaterial();
@@ -136,7 +134,6 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 		}
 		ptrShape->Build(&materials);
 	}
-	shape->SetLocalPose(pragma::physics::Transform{scaledOrigin,Quat{}});
 	return shape;
 }
 void CollisionMesh::UpdateShape()

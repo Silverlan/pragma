@@ -50,6 +50,7 @@ public:
 	virtual void Enable();
 	virtual void Disable();
 	bool IsTrigger() const;
+	void SetTrigger(bool bTrigger);
 	void GetAABB(Vector3 &min,Vector3 &max) const;
 	bool IsDisabled() const;
 	virtual bool IsStatic() const;

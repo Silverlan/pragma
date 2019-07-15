@@ -337,11 +337,12 @@ Game::~Game()
 	GetNetworkState()->ClearConsoleCommandOverrides();
 	GetNetworkState()->TerminateLuaModules(state);
 	pragma::BaseLuaBaseEntityComponent::ClearMembers(state);
+	m_surfaceMaterialManager = nullptr; // Has to be destroyed before physics environment!
+	m_physEnvironment = nullptr; // Physics environment has to be destroyed before the Lua state! (To make sure Lua-handles are destroyed)
 	m_lua = nullptr;
 	GetNetworkState()->DeregisterLuaModules(state,identifier); // Has to be called AFTER Lua instance has been released!
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
-	m_physEnvironment = nullptr;
 }
 
 void Game::InitializeLuaScriptWatcher()
@@ -533,7 +534,7 @@ void Game::InitializeGame()
 	auto dllHandle = GetNetworkState()->InitializeLibrary(physEngineLibName,&err);
 	if(dllHandle)
 	{
-		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::physics::IEnvironment>&)>("initialize_physics_engine");
+		auto *fInitPhysicsEngine = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::physics::IEnvironment,void(*)(pragma::physics::IEnvironment*)>&)>("initialize_physics_engine");
 		if(fInitPhysicsEngine != nullptr)
 			fInitPhysicsEngine(*GetNetworkState(),m_physEnvironment);
 		else
@@ -1004,10 +1005,12 @@ SurfaceMaterial &Game::CreateSurfaceMaterial(const std::string &identifier,Float
 }
 SurfaceMaterial *Game::GetSurfaceMaterial(const std::string &id)
 {
-	return m_surfaceMaterialManager->GetMaterial(id);
+	return m_surfaceMaterialManager ? m_surfaceMaterialManager->GetMaterial(id) : nullptr;
 }
 SurfaceMaterial *Game::GetSurfaceMaterial(UInt32 id)
 {
+	if(m_surfaceMaterialManager == nullptr)
+		return nullptr;
 	auto &materials = m_surfaceMaterialManager->GetMaterials();
 	if(id >= materials.size())
 		return nullptr;

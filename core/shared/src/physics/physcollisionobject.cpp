@@ -64,11 +64,9 @@ void pragma::physics::ICollisionObject::InitializeLuaHandle(lua_State *l,const u
 	UpdateSurfaceMaterial();
 }
 
-void pragma::physics::ICollisionObject::Spawn()
+void pragma::physics::ICollisionObject::DoSpawn()
 {
-	if(IsSpawned())
-		return;
-	SetCollisionShape(m_shape.get()); // Add it to the physics environment
+	IWorldObject::DoSpawn();
 }
 
 Bool pragma::physics::ICollisionObject::HasOrigin() const {return umath::is_flag_set(m_stateFlags,StateFlags::HasOrigin);}
@@ -106,7 +104,8 @@ void pragma::physics::ICollisionObject::SetCollisionShape(pragma::physics::IShap
 {
 	m_shape = shape ? std::static_pointer_cast<pragma::physics::IShape>(shape->shared_from_this()) : nullptr;
 	ApplyCollisionShape(shape);
-	AddWorldObject();
+	if(IsSpawned())
+		AddWorldObject();
 	UpdateSurfaceMaterial();
 }
 

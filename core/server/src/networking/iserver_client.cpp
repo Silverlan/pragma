@@ -3,6 +3,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/resource.h>
 
+#pragma optimize("",off)
 pragma::networking::IServerClient::~IServerClient() {ClearResourceTransfer();}
 bool pragma::networking::IServerClient::Drop(DropReason reason,pragma::networking::Error &outErr)
 {
@@ -76,3 +77,4 @@ void pragma::networking::IServerClient::ScheduleResource(const std::string &file
 }
 
 std::vector<std::string> &pragma::networking::IServerClient::GetScheduledResources() {return m_scheduledResources;}
+#pragma optimize("",on)

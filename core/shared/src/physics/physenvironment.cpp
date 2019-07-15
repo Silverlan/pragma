@@ -42,7 +42,7 @@ pragma::physics::IEnvironment::IEnvironment(NetworkState &state)
 
 	m_buoyancySim = std::make_shared<physics::WaterBuoyancySimulator>();
 }
-pragma::physics::IEnvironment::~IEnvironment()
+void pragma::physics::IEnvironment::OnRemove()
 {
 	ClearConstraints();
 	ClearCollisionObjects();
@@ -51,9 +51,10 @@ pragma::physics::IEnvironment::~IEnvironment()
 }
 bool pragma::physics::IEnvironment::Initialize()
 {
-	m_genericMaterial = CreateMaterial(1.f,1.f,0.f);
+	m_genericMaterial = CreateMaterial(0.5f,0.5f,0.6f);
 	return m_genericMaterial != nullptr;
 }
+pragma::physics::IEnvironment::~IEnvironment() {}
 NetworkState &pragma::physics::IEnvironment::GetNetworkState() const {return m_nwState;}
 double pragma::physics::IEnvironment::GetTimeScale() const
 {

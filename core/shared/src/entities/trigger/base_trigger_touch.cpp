@@ -81,7 +81,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 		{
 			auto &colObjs = physObj->GetCollisionObjects();
 			auto it = std::find_if(colObjs.begin(),colObjs.end(),[](const util::TSharedHandle<pragma::physics::ICollisionObject> &hColObj) {
-				return hColObj.IsValid() && hColObj->GetCollisionShape() && hColObj->GetCollisionShape()->IsTrigger();
+				return hColObj.IsValid() && hColObj->IsTrigger();
 			});
 			if(it != colObjs.end())
 				Con::cwar<<"WARNING: Trigger entity has non-trigger physics shapes!"<<Con::endl;
@@ -104,7 +104,11 @@ void BaseTouchComponent::OnEntitySpawn()
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent.valid())
-		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC,BasePhysicsComponent::PhysFlags::Trigger);
+	{
+		auto *physObj = pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+		if(physObj)
+			physObj->SetTrigger(true);
+	}
 }
 util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {

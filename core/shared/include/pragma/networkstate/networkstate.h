@@ -82,9 +82,14 @@ protected:
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 
-	std::vector<std::shared_ptr<util::Library>> m_libHandles;
+	// Library handles are stored as shared_ptrs of shared_ptr because we need the
+	// use count of each library in the network states to determine when to detach
+	// the library (use count = 0 => not used in any network state => detach),
+	// but this doesn't work if shared_ptr instances exist outside of the
+	// network states.
+	std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
 	std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
-	static std::unordered_map<std::string,std::shared_ptr<util::Library>> s_loadedLibraries;
+	static std::unordered_map<std::string,std::shared_ptr<std::shared_ptr<util::Library>>> s_loadedLibraries;
 	std::unordered_map<lua_State*,std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
 
 	void InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module);

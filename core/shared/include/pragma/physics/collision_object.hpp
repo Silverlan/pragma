@@ -49,7 +49,6 @@ namespace pragma::physics
 			ContactReportEnabled = UpdateAABB<<1u
 		};
 
-		virtual void Spawn();
 		virtual void OnRemove() override;
 		int GetSurfaceMaterial() const;
 		void SetSurfaceMaterial(int id);
@@ -70,6 +69,12 @@ namespace pragma::physics
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 
+		virtual void SetTrigger(bool bTrigger)=0;
+		virtual bool IsTrigger() const=0;
+
+		virtual void SetLocalPose(const Transform &t)=0;
+		virtual Transform GetLocalPose() const=0;
+
 		virtual void SetActivationState(ActivationState state)=0;
 		virtual ActivationState GetActivationState() const=0;
 
@@ -88,8 +93,6 @@ namespace pragma::physics
 		virtual void WakeUp(bool forceActivation=false)=0;
 		virtual void PutToSleep()=0;
 		virtual bool IsAsleep() const=0;
-
-		virtual bool IsTrigger()=0;
 
 		virtual void SetSimulationEnabled(bool b)=0;
 		void DisableSimulation();
@@ -133,6 +136,7 @@ namespace pragma::physics
 		virtual void ApplyCollisionShape(pragma::physics::IShape *optShape)=0;
 		virtual void DoSetCollisionFilterGroup(CollisionMask group)=0;
 		virtual void DoSetCollisionFilterMask(CollisionMask mask)=0;
+		virtual void DoSpawn() override;
 
 		std::shared_ptr<pragma::physics::IShape> m_shape;
 		UInt32 m_boneId = 0u;
@@ -175,6 +179,7 @@ namespace pragma::physics
 		virtual void SetMassProps(float mass,const Vector3 &inertia)=0;
 		virtual float GetMass() const=0;
 		virtual void SetMass(float mass)=0;
+		virtual Vector3 GetCenterOfMass() const=0;
 		virtual Vector3 &GetInertia()=0;
 		virtual Mat3 GetInvInertiaTensorWorld() const=0;
 		virtual void SetInertia(const Vector3 &inertia)=0;

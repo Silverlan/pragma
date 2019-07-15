@@ -91,7 +91,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		SortedShape()
 			: body(nullptr)
 		{}
-		std::vector<std::shared_ptr<pragma::physics::IShape>> shapes;
+		std::vector<std::pair<std::shared_ptr<pragma::physics::IShape>,Vector3>> shapes;
 		util::TSharedHandle<pragma::physics::IRigidBody> body;
 	};
 	std::unordered_map<int,SortedShape> sortedShapes;
@@ -106,12 +106,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		auto shape = (bScale == false) ? mesh->GetShape() : mesh->CreateShape(scale);
 		if(shape != nullptr)
 		{
-			shape->SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 			auto bone = mesh->GetBoneParent();
 			auto itMesh = sortedShapes.find(bone);
 			if(itMesh == sortedShapes.end())
 				itMesh = sortedShapes.insert(std::unordered_map<int,SortedShape>::value_type(bone,SortedShape())).first;
-			itMesh->second.shapes.push_back(shape);
+			itMesh->second.shapes.push_back({shape,mesh->GetOrigin() *scale});
 			sortedShapeMap[meshId] = bone;
 		}
 		meshId++;
@@ -150,14 +149,14 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		auto &shapes = sortedShape.shapes;
 		std::shared_ptr<pragma::physics::IShape> shape;
 		if(shapes.size() == 1)
-			shape = shapes.front();
+			shape = shapes.front().first;
 		else
 		{
 			if(umath::is_flag_set(flags,PhysFlags::Dynamic) == false)
 			{
 				for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto body = CreateRigidBody(**it,mass,umath::is_flag_set(flags,PhysFlags::Dynamic));//-it->origin);
+					auto body = CreateRigidBody(*it->first,mass,umath::is_flag_set(flags,PhysFlags::Dynamic),-it->second);
 					if(body == nullptr)
 						continue;
 					if(bPhys == false)
@@ -191,7 +190,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 			{
 				auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
 				for(auto it=shapes.begin();it!=shapes.end();++it)
-					cmpShape->AddShape(**it);
+					cmpShape->AddShape(*it->first,-it->second);
 			}
 		}
 		if(shape == nullptr)
@@ -483,7 +482,6 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags
 		if(bConvex == true) // Create a single convex mesh
 		{
 			auto shape = mesh->GetShape();
-			shape->SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 
 			Vector3 localInertia(0.f,0.f,0.f);
 			shape->CalculateLocalInertia(mass,&localInertia);
@@ -603,7 +601,6 @@ void BasePhysicsComponent::InitializePhysObj()
 PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags,float mass)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
-	shape.SetTrigger(umath::is_flag_set(flags,PhysFlags::Trigger));
 	auto bDynamic = mass == 0.f;
 	auto body = CreateRigidBody(shape,mass,bDynamic);
 

@@ -6,6 +6,7 @@
 #include "pragma/physics/transform.hpp"
 #include <memory>
 #include <sharedutils/def_handle.h>
+#include <sharedutils/util_weak_handle.hpp>
 #include <mathutil/glmutil.h>
 #include <vector>
 
@@ -31,8 +32,6 @@ namespace pragma::physics
 		virtual void CalculateLocalInertia(float mass,Vector3 *localInertia) const=0;
 		virtual void GetAABB(Vector3 &min,Vector3 &max) const=0;
 
-		virtual void SetTrigger(bool bTrigger)=0;
-		virtual bool IsTrigger() const=0;
 		virtual bool IsValid() const;
 
 		virtual bool IsConvex() const;
@@ -40,9 +39,6 @@ namespace pragma::physics
 		virtual bool IsCompoundShape() const;
 		virtual bool IsHeightfield() const;
 		virtual bool IsTriangleShape() const;
-
-		virtual void SetLocalPose(const Transform &t)=0;
-		virtual Transform GetLocalPose() const=0;
 
 		virtual IConvexShape *GetConvexShape();
 		const IConvexShape *GetConvexShape() const;
@@ -57,14 +53,12 @@ namespace pragma::physics
 
 		virtual void GetBoundingSphere(Vector3 &outCenter,float &outRadius) const=0;
 
-		virtual float GetMass() const=0;
-		virtual void SetMass(float mass)=0;
-		virtual Vector3 GetCenterOfMass() const=0;
-
 		virtual void ApplySurfaceMaterial(IMaterial &mat)=0;
 		void SetSurfaceMaterial(int32_t surfMatIdx); // TODO: Apply density from surface material
 		int32_t GetSurfaceMaterialIndex() const;
-		SurfaceMaterial *GetSurfaceMaterial();
+		SurfaceMaterial *GetSurfaceMaterial() const;
+		void SetMaterial(const IMaterial &mat);
+		IMaterial *GetMaterial() const;
 
 		virtual void SetDensity(float density);
 		float GetDensity() const;
@@ -74,7 +68,7 @@ namespace pragma::physics
 	protected:
 		IShape(IEnvironment &env);
 		float m_density = 1.f;
-		int32_t m_surfaceMaterialIdx = -1;
+		util::WeakHandle<IMaterial> m_material = {};
 	};
 
 	class DLLNETWORK IConvexShape
@@ -147,17 +141,21 @@ namespace pragma::physics
 		: virtual public IShape
 	{
 	public:
+		struct DLLNETWORK ShapeInfo
+		{
+			std::shared_ptr<pragma::physics::IShape> shape;
+			Vector3 origin;
+		};
 		virtual void InitializeLuaObject(lua_State *lua) override;
-		virtual void AddShape(pragma::physics::IShape &shape)=0;
+		void AddShape(pragma::physics::IShape &shape,const Vector3 &origin={});
 
 		virtual bool IsCompoundShape() const override;
 		virtual ICompoundShape *GetCompoundShape() override;
-		const std::vector<std::shared_ptr<pragma::physics::IShape>> &GetShapes() const;
+		const std::vector<ShapeInfo> &GetShapes() const;
 	protected:
 		ICompoundShape(IEnvironment &env);
-		ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape);
-		ICompoundShape(IEnvironment &env,const std::vector<pragma::physics::IShape*> &shapes);
-		std::vector<std::shared_ptr<pragma::physics::IShape>> m_shapes;
+		ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape,const Vector3 &origin);
+		std::vector<ShapeInfo> m_shapes;
 	};
 
 	class DLLNETWORK IHeightfield

@@ -397,7 +397,7 @@ protected:
 	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr)=0;
 	virtual void LoadMapMaterials(uint32_t version,VFilePtr f,std::vector<Material*> &materials);
 	BaseEntity *CreateMapEntity(uint32_t version,const std::string &classname,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,uint64_t offsetToEndOfEntity,std::vector<EntityHandle> &ents,std::vector<EntityHandle> *entities=nullptr);
-	std::unique_ptr<pragma::physics::IEnvironment> m_physEnvironment = nullptr;
+	std::unique_ptr<pragma::physics::IEnvironment,void(*)(pragma::physics::IEnvironment*)> m_physEnvironment = std::unique_ptr<pragma::physics::IEnvironment,void(*)(pragma::physics::IEnvironment*)>{nullptr,[](pragma::physics::IEnvironment*) {}};
 
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager()=0;
 	virtual void OnEntityCreated(BaseEntity *ent);

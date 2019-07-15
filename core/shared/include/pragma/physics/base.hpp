@@ -59,8 +59,11 @@ namespace pragma::physics
 	public:
 		bool IsSpawned() const;
 		void AddWorldObject();
+		void Spawn();
 		virtual void RemoveWorldObject()=0;
 		virtual void DoAddWorldObject()=0;
+	protected:
+		virtual void DoSpawn();
 	private:
 		bool m_bSpawned = false;
 	};

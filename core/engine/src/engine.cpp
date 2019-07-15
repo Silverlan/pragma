@@ -167,12 +167,12 @@ upad::PackageManager *Engine::GetPADPackageManager() const {return m_padPackageM
 void Engine::Close()
 {
 	m_bRunning = false;
+	util::close_external_archive_manager();
 	CloseServerState();
 
 	CloseConsole();
 	EndLogging();
 
-	util::close_external_archive_manager();
 	Con::set_output_callback(nullptr);
 }
 

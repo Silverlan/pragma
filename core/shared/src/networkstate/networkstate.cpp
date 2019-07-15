@@ -88,12 +88,22 @@ NetworkState::~NetworkState()
 	}
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
-	for(unsigned int i=0;i<m_libHandles.size();i++)
+
+	m_libHandles.clear();
+	for(auto it=s_loadedLibraries.begin();it!=s_loadedLibraries.end();)
 	{
-		auto *ptrDetach = m_libHandles[i]->FindSymbolAddress<void(*)()>("pragma_detach");
+		auto &hLib = it->second;
+		if(hLib.use_count() > 1)
+		{
+			++it;
+			continue; // Library is still in use by another network state
+		}
+		auto *ptrDetach = (*hLib)->FindSymbolAddress<void(*)()>("pragma_detach");
 		if(ptrDetach != nullptr)
 			ptrDetach();
+		it = s_loadedLibraries.erase(it);
 	}
+
 	for(auto &hCb : m_luaEnumRegisterCallbacks)
 	{
 		if(hCb.IsValid() == false)
@@ -487,13 +497,13 @@ std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string 
 	auto it = s_loadedLibraries.find(lib);
 	if(it == s_loadedLibraries.end())
 		return nullptr;
-	return it->second;
+	return *it->second;
 }
 
 void NetworkState::InitializeLuaModules(lua_State *l)
 {
 	for(auto &pair : s_loadedLibraries)
-		InitializeDLLModule(l,pair.second);
+		InitializeDLLModule(l,*pair.second);
 }
 
 void NetworkState::InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module)
@@ -569,15 +579,21 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 					return nullptr;
 				}
 			}
-			m_libHandles.push_back(dllHandle);
-			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs,dllHandle));
+			auto ptrDllHandle = std::make_shared<std::shared_ptr<util::Library>>(dllHandle);
+			m_libHandles.push_back(ptrDllHandle);
+			s_loadedLibraries.insert(decltype(s_loadedLibraries)::value_type(libAbs,ptrDllHandle));
 		}
 	}
 	else
 	{
 		if(err != nullptr)
 			*err = "";
-		dllHandle = it->second;
+		auto ptrDllHandle = it->second;
+		dllHandle = *ptrDllHandle;
+		auto it = std::find(m_libHandles.begin(),m_libHandles.end(),ptrDllHandle);
+		if(it != m_libHandles.end())
+			return dllHandle; // DLL has already been initialized for this network state
+		m_libHandles.push_back(ptrDllHandle);
 	}
 	if(dllHandle != nullptr)
 	{

@@ -4,6 +4,8 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 #include "pragma/physics/transform.hpp"
+#include "pragma/physics/surface_type_manager.hpp"
+#include "pragma/physics/tire_type_manager.hpp"
 #include <sharedutils/functioncallback.h>
 #include <sharedutils/util_shared_handle.hpp>
 #include <pragma/math/vector/wvvector3.h>
@@ -75,11 +77,15 @@ namespace pragma::physics
 		virtual void OnSleep(ICollisionObject &o)=0;
 	};
 
-	class ChassisCreateInfo;
-	class WheelCreateInfo;
+	class VehicleCreateInfo;
 	class DLLNETWORK IEnvironment
 	{
 	public:
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			SurfacesDirty = 1u
+		};
 		enum class Event : uint32_t
 		{
 			OnConstraintCreated = 0,
@@ -151,9 +157,9 @@ namespace pragma::physics
 		virtual std::shared_ptr<IShape> CreateHeightfieldTerrainShape(uint32_t width,uint32_t length,Scalar maxHeight,uint32_t upAxis,const IMaterial &mat)=0;
 		virtual std::shared_ptr<IMaterial> CreateMaterial(float staticFriction,float dynamicFriction,float restitution)=0;
 
-		virtual util::TSharedHandle<IVehicle> CreateVehicle(const ChassisCreateInfo &chassisDesc,const std::vector<WheelCreateInfo> &wheelDescs)=0;
+		virtual util::TSharedHandle<IVehicle> CreateVehicle(const VehicleCreateInfo &vhcDesc)=0;
 
-		virtual RemainingDeltaTime StepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
+		RemainingDeltaTime StepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f));
 
 		virtual Bool Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults=nullptr) const=0;
 		virtual Bool RayCast(const TraceData &data,std::vector<TraceResult> *optOutResults=nullptr) const=0;
@@ -167,6 +173,13 @@ namespace pragma::physics
 		std::vector<util::TSharedHandle<IController>> &GetControllers();
 		const std::vector<util::TSharedHandle<IVehicle>> &GetVehicles() const;
 		std::vector<util::TSharedHandle<IVehicle>> &GetVehicles();
+
+		const SurfaceTypeManager &GetSurfaceTypeManager() const;
+		SurfaceTypeManager &GetSurfaceTypeManager();
+		const TireTypeManager &GetTireTypeManager() const;
+		TireTypeManager &GetTireTypeManager();
+
+		void SetSurfaceTypesDirty();
 
 		virtual void RemoveConstraint(IConstraint &constraint);
 		virtual void RemoveCollisionObject(ICollisionObject &obj);
@@ -202,16 +215,22 @@ namespace pragma::physics
 		void OnWake(ICollisionObject &o);
 		void OnSleep(ICollisionObject &o);
 		void OnConstraintBroken(IConstraint &constraint);
+		virtual RemainingDeltaTime DoStepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
+		virtual void UpdateSurfaceTypes()=0;
 
 		std::unique_ptr<pragma::physics::IVisualDebugger> m_visualDebugger = nullptr;
 	private:
 		NetworkState &m_nwState;
+		StateFlags m_stateFlags = StateFlags::SurfacesDirty;
 		std::unordered_map<Event,std::vector<CallbackHandle>> m_callbacks = {};
 		std::shared_ptr<WaterBuoyancySimulator> m_buoyancySim = nullptr;
 		std::shared_ptr<IMaterial> m_genericMaterial = nullptr;
 		std::unique_ptr<IEventCallback> m_eventCallback = nullptr;
+		SurfaceTypeManager m_surfTypeManager = {};
+		TireTypeManager m_tireTypeManager = {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::IEnvironment::StateFlags)
 
 template<class T,typename... TARGS>
 std::shared_ptr<T> pragma::physics::IEnvironment::CreateSharedPtr(TARGS&& ...args)

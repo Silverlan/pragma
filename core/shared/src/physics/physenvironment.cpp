@@ -41,6 +41,7 @@ pragma::physics::IEnvironment::IEnvironment(NetworkState &state)
 		m_callbacks.insert(std::unordered_map<Event,std::vector<CallbackHandle>>::value_type(static_cast<Event>(i),std::vector<CallbackHandle>()));
 
 	m_buoyancySim = std::make_shared<physics::WaterBuoyancySimulator>();
+	m_surfTypeManager.RegisterType("generic");
 }
 void pragma::physics::IEnvironment::OnRemove()
 {
@@ -253,3 +254,20 @@ const std::vector<util::TSharedHandle<pragma::physics::IController>> &pragma::ph
 std::vector<util::TSharedHandle<pragma::physics::IController>> &pragma::physics::IEnvironment::GetControllers() {return m_controllers;}
 const std::vector<util::TSharedHandle<pragma::physics::IVehicle>> &pragma::physics::IEnvironment::GetVehicles() const {return const_cast<IEnvironment*>(this)->GetVehicles();}
 std::vector<util::TSharedHandle<pragma::physics::IVehicle>> &pragma::physics::IEnvironment::GetVehicles() {return m_vehicles;}
+
+const pragma::physics::SurfaceTypeManager &pragma::physics::IEnvironment::GetSurfaceTypeManager() const {return const_cast<IEnvironment*>(this)->GetSurfaceTypeManager();}
+pragma::physics::SurfaceTypeManager &pragma::physics::IEnvironment::GetSurfaceTypeManager() {return m_surfTypeManager;}
+const pragma::physics::TireTypeManager &pragma::physics::IEnvironment::GetTireTypeManager() const {return const_cast<IEnvironment*>(this)->GetTireTypeManager();}
+pragma::physics::TireTypeManager &pragma::physics::IEnvironment::GetTireTypeManager() {return m_tireTypeManager;}
+
+void pragma::physics::IEnvironment::SetSurfaceTypesDirty() {umath::set_flag(m_stateFlags,StateFlags::SurfacesDirty,true);}
+
+pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment::StepSimulation(float timeStep,int maxSubSteps,float fixedTimeStep)
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::SurfacesDirty))
+	{
+		umath::set_flag(m_stateFlags,StateFlags::SurfacesDirty,false);
+		UpdateSurfaceTypes();
+	}
+	return DoStepSimulation(timeStep,maxSubSteps,fixedTimeStep);
+}

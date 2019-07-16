@@ -26,7 +26,7 @@ protected:
 
 namespace pragma
 {
-	namespace physics {class IMaterial;};
+	namespace physics {class IMaterial; class SurfaceType;};
 	namespace nav
 	{
 		enum class PolyFlags : uint16_t;
@@ -49,9 +49,8 @@ public:
 		float highFreqTransmission = 0.030f;
 	};
 public:
-	SurfaceMaterial(const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
+	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
 	SurfaceMaterial(const SurfaceMaterial &other);
-	SurfaceMaterial &operator=(const SurfaceMaterial &other);
 	void Reset();
 
 	const std::string &GetIdentifier() const;
@@ -64,6 +63,8 @@ public:
 	Float GetRestitution() const;
 
 	pragma::physics::IMaterial &GetPhysicsMaterial() const;
+	pragma::physics::SurfaceType *GetSurfaceType() const;
+	void SetSurfaceType(const std::string &surfaceType);
 
 	void SetRestitution(Float restitution);
 	const std::string &GetFootstepType() const;
@@ -108,6 +109,7 @@ public:
 	void SetAudioHighFrequencyTransmission(float transmission);
 	float GetAudioHighFrequencyTransmission() const;
 protected:
+	pragma::physics::IEnvironment &m_physEnv;
 	UInt m_index;
 	std::string m_identifier;
 	std::string m_footstepType;
@@ -118,6 +120,7 @@ protected:
 	pragma::nav::PolyFlags m_navigationFlags;
 	std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
 	std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;
+	mutable util::TWeakSharedHandle<pragma::physics::SurfaceType> m_surfaceType = {};
 	AudioInfo m_audioInfo = {};
 	PhysLiquid &InitializeLiquid();
 };

@@ -546,6 +546,38 @@ void Game::InitializeGame()
 	{
 		m_surfaceMaterialManager = std::make_unique<SurfaceMaterialManager>(*m_physEnvironment);
 		m_physEnvironment->SetEventCallback(std::make_unique<PhysEventCallback>());
+
+		auto &tireTypeManager = m_physEnvironment->GetTireTypeManager();
+		auto &surfTypeManager = m_physEnvironment->GetSurfaceTypeManager();
+		auto data = ds::System::LoadData("scripts/physics/tire_types.txt");
+		if(data)
+		{
+			auto *values = data->GetData();
+			for(auto it=values->begin();it!=values->end();it++)
+			{
+				auto &val = it->second;
+				if(val->IsBlock() == false || it->first.empty())
+					continue;
+				auto hTireType = tireTypeManager.RegisterType(it->first);
+				if(hTireType.IsExpired())
+					continue;
+				auto *blockData = static_cast<ds::Block*>(val.get());
+				auto frictionMods = blockData->GetBlock("friction_modifiers",0);
+				auto *frictionModsData = frictionMods ? frictionMods->GetData() : nullptr;
+				if(frictionModsData == nullptr || frictionMods->IsBlock() == false)
+					continue;
+				auto *frictionBlock = static_cast<ds::Block*>(frictionMods.get());
+				for(auto &pair : *frictionModsData)
+				{
+					auto &surfaceType = pair.first;
+					auto surfType = surfTypeManager.RegisterType(surfaceType);
+					auto friction = 1.f;
+					if(surfType.IsExpired() || frictionBlock->GetFloat(surfaceType,&friction) == false)
+						continue;
+					hTireType->SetFrictionModifier(*surfType,friction);
+				}
+			}
+		}
 	}
 
 	m_cbProfilingHandle = engine->AddProfilingHandler([this](bool profilingEnabled) {

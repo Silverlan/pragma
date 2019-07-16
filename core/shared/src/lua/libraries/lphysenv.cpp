@@ -20,6 +20,7 @@
 #include "pragma/physics/ik/ik_controller.hpp"
 #include <mathutil/color.h>
 #include <luainterface.hpp>
+#include <luabind/iterator_policy.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLENGINE Engine *engine;
@@ -40,6 +41,7 @@ namespace Lua
 		static int create_capsule_shape(lua_State *l);
 		static int create_sphere_shape(lua_State *l);
 		static int create_cylinder_shape(lua_State *l);
+		static int create_compound_shape(lua_State *l);
 		static int create_heightfield_terrain_shape(lua_State *l);
 		static int create_character_controller(lua_State *l);
 		static int create_fixed_constraint(lua_State *l);
@@ -74,6 +76,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_capsule_shape",create_capsule_shape},
 		{"create_sphere_shape",create_sphere_shape},
 		{"create_cylinder_shape",create_cylinder_shape},
+		{"create_compound_shape",create_compound_shape},
 		{"create_heightfield_terrain_shape",create_heightfield_terrain_shape},
 		{"create_rigid_body",create_rigid_body},
 		{"create_ghost_object",create_ghost_object},
@@ -93,23 +96,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			auto *env = game->GetPhysicsEnvironment();
 			if(env == nullptr)
 				return 0;
-			auto &chassisCreateInfo = Lua::Check<pragma::physics::ChassisCreateInfo>(l,1);
-
-			auto tWheels = 2;
-			Lua::CheckTable(l,tWheels);
-			auto numWheels = Lua::GetObjectLength(l,tWheels);
-			std::vector<pragma::physics::WheelCreateInfo> wheelDescs {};
-			wheelDescs.reserve(numWheels);
-			for(auto i=decltype(numWheels){0u};i<numWheels;++i)
-			{
-				Lua::PushInt(l,i +1);
-				Lua::GetTableValue(l,tWheels);
-				auto &wheelDesc = Lua::Check<pragma::physics::WheelCreateInfo>(l,-1);
-				wheelDescs.push_back(wheelDesc);
-				Lua::Pop(l,1);
-			}
-
-			auto vhc = env->CreateVehicle(chassisCreateInfo,wheelDescs);
+			auto &vhcCreateInfo = Lua::Check<pragma::physics::VehicleCreateInfo>(l,1);
+			auto vhc = env->CreateVehicle(vhcCreateInfo);
 			if(vhc == nullptr)
 				return 0;
 			vhc->Push(l);
@@ -461,14 +449,114 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefChassisCreateInfo.def_readwrite("mass",&pragma::physics::ChassisCreateInfo::mass);
 	classDefChassisCreateInfo.def_readwrite("momentOfInertia",&pragma::physics::ChassisCreateInfo::momentOfInertia);
 	classDefChassisCreateInfo.def_readwrite("cmOffset",&pragma::physics::ChassisCreateInfo::cmOffset);
-	classDefChassisCreateInfo.def_readwrite("shape",&pragma::physics::ChassisCreateInfo::shape);
+	classDefChassisCreateInfo.def_readwrite("shapeIndex",&pragma::physics::ChassisCreateInfo::shapeIndex);
 	physMod[classDefChassisCreateInfo];
 
+	auto classDefSuspensionInfo = luabind::class_<pragma::physics::WheelCreateInfo::SuspensionInfo>("SuspensionInfo");
+	classDefSuspensionInfo.def(luabind::constructor<>());
+	classDefSuspensionInfo.def_readwrite("maxCompression",&pragma::physics::WheelCreateInfo::SuspensionInfo::maxCompression);
+	classDefSuspensionInfo.def_readwrite("maxDroop",&pragma::physics::WheelCreateInfo::SuspensionInfo::maxDroop);
+	classDefSuspensionInfo.def_readwrite("springStrength",&pragma::physics::WheelCreateInfo::SuspensionInfo::springStrength);
+	classDefSuspensionInfo.def_readwrite("springDamperRate",&pragma::physics::WheelCreateInfo::SuspensionInfo::springDamperRate);
+	classDefSuspensionInfo.def_readwrite("camberAngleAtRest",&pragma::physics::WheelCreateInfo::SuspensionInfo::camberAngleAtRest);
+	classDefSuspensionInfo.def_readwrite("camberAngleAtMaxDroop",&pragma::physics::WheelCreateInfo::SuspensionInfo::camberAngleAtMaxDroop);
+	classDefSuspensionInfo.def_readwrite("camberAngleAtMaxCompression",&pragma::physics::WheelCreateInfo::SuspensionInfo::camberAngleAtMaxCompression);
+
+	auto classDefVhcCreateInfo = luabind::class_<pragma::physics::VehicleCreateInfo>("VehicleCreateInfo");
+	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",static_cast<void(*)(lua_State*,luabind::object,float,float,float,float)>([](lua_State *l,luabind::object oWheelCenterOffsets,float chassisMass,float wheelMass,float wheelWidth,float wheelRadius) {
+		auto tWheelCenterOffsets = 1;
+		Lua::CheckTable(l,tWheelCenterOffsets);
+		std::array<Vector3,pragma::physics::VehicleCreateInfo::WHEEL_COUNT_4W_DRIVE> centerOffsets {};
+		auto i = 1;
+		for(auto &centerOffset : centerOffsets)
+		{
+			centerOffset = {};
+			Lua::PushInt(l,i++);
+			Lua::GetTableValue(l,tWheelCenterOffsets);
+			if(Lua::IsSet(l,-1))
+				centerOffset = *Lua::CheckVector(l,-1);
+			Lua::Pop(l,1);
+		}
+		Lua::Push<pragma::physics::VehicleCreateInfo>(l,pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(centerOffsets,chassisMass,wheelMass,wheelWidth,wheelRadius));
+	}))];
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FRONT",umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Front));
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_REAR",umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Rear));
+	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FOUR",umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Four));
+	classDefVhcCreateInfo.def(luabind::constructor<>());
+	classDefVhcCreateInfo.property("actor",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcDesc) {
+		if(vhcDesc.actor.IsValid())
+			vhcDesc.actor->Push(l);
+	}),static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&,util::TSharedHandle<pragma::physics::IRigidBody>&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcDesc,util::TSharedHandle<pragma::physics::IRigidBody> &actor) {
+		vhcDesc.actor = actor;
+	}));
+	classDefVhcCreateInfo.def_readwrite("chassis",&pragma::physics::VehicleCreateInfo::chassis);
+	classDefVhcCreateInfo.def_readwrite("maxEngineTorque",&pragma::physics::VehicleCreateInfo::maxEngineTorque);
+	classDefVhcCreateInfo.def_readwrite("maxEngineRotationSpeed",&pragma::physics::VehicleCreateInfo::maxEngineRotationSpeed);
+	classDefVhcCreateInfo.def_readwrite("gearSwitchTime",&pragma::physics::VehicleCreateInfo::gearSwitchTime);
+	classDefVhcCreateInfo.def_readwrite("clutchStrength",&pragma::physics::VehicleCreateInfo::clutchStrength);
+	classDefVhcCreateInfo.def_readwrite("gravityFactor",&pragma::physics::VehicleCreateInfo::gravityFactor);
+	classDefVhcCreateInfo.def_readwrite("wheelDrive",reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::VehicleCreateInfo::wheelDrive)> pragma::physics::VehicleCreateInfo::*>(&pragma::physics::VehicleCreateInfo::wheelDrive));
+	classDefVhcCreateInfo.def("AddWheel",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&,pragma::physics::WheelCreateInfo&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo,pragma::physics::WheelCreateInfo &wheelCreateInfo) {
+		auto wheelType = umath::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelCreateInfo));
+		auto it = std::find_if(vhcCreateInfo.wheels.begin(),vhcCreateInfo.wheels.end(),[wheelType](const pragma::physics::WheelCreateInfo &wheelDescOther) {
+			return wheelType < umath::to_integral(pragma::physics::VehicleCreateInfo::GetWheelType(wheelDescOther));
+		});
+		// Wheels have to be inserted in the correct order! (FrontLeft -> FrontRight -> RearLeft -> RearRight)
+		vhcCreateInfo.wheels.insert(it,wheelCreateInfo);
+	}));
+	classDefVhcCreateInfo.def("GetWheels",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo) {
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &wheel : vhcCreateInfo.wheels)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push<pragma::physics::WheelCreateInfo*>(l,&wheel);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefVhcCreateInfo.def("AddAntiRollBar",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&,pragma::physics::VehicleCreateInfo::AntiRollBar&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo,pragma::physics::VehicleCreateInfo::AntiRollBar &antiRollBar) {
+		vhcCreateInfo.antiRollBars.push_back(antiRollBar);
+	}));
+	classDefVhcCreateInfo.def("GetAntiRollBars",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo) {
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &antiRollBar : vhcCreateInfo.antiRollBars)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push<pragma::physics::VehicleCreateInfo::AntiRollBar*>(l,&antiRollBar);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefVhcCreateInfo.scope[classDefSuspensionInfo];
+	physMod[classDefVhcCreateInfo];
+
+	auto classDefAntiRollBar = luabind::class_<pragma::physics::VehicleCreateInfo::AntiRollBar>("AntiRollBar");
+	classDefAntiRollBar.def(luabind::constructor<>());
+	classDefAntiRollBar.def_readwrite("wheel0",reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::VehicleCreateInfo::AntiRollBar::wheel0)> pragma::physics::VehicleCreateInfo::AntiRollBar::*>(&pragma::physics::VehicleCreateInfo::AntiRollBar::wheel0));
+	classDefAntiRollBar.def_readwrite("wheel1",reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::VehicleCreateInfo::AntiRollBar::wheel1)> pragma::physics::VehicleCreateInfo::AntiRollBar::*>(&pragma::physics::VehicleCreateInfo::AntiRollBar::wheel1));
+	classDefAntiRollBar.def_readwrite("stiffness",&pragma::physics::VehicleCreateInfo::AntiRollBar::stiffness);
+	classDefVhcCreateInfo.scope[classDefAntiRollBar];
+	physMod[classDefAntiRollBar];
+
 	auto classDefWheelCreateInfo = luabind::class_<pragma::physics::WheelCreateInfo>("WheelCreateInfo");
+	classDefWheelCreateInfo.scope[luabind::def("CreateStandardFrontWheel",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		Lua::Push<pragma::physics::WheelCreateInfo>(l,pragma::physics::WheelCreateInfo::CreateStandardFrontWheel());
+	}))];
+	classDefWheelCreateInfo.scope[luabind::def("CreateStandardRearWheel",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		Lua::Push<pragma::physics::WheelCreateInfo>(l,pragma::physics::WheelCreateInfo::CreateStandardRearWheel());
+	}))];
+	classDefWheelCreateInfo.add_static_constant("FLAG_NONE",umath::to_integral(pragma::physics::WheelCreateInfo::Flags::None));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_FRONT",umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Front));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_REAR",umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Rear));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_LEFT",umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Left));
+	classDefWheelCreateInfo.add_static_constant("FLAG_BIT_RIGHT",umath::to_integral(pragma::physics::WheelCreateInfo::Flags::Right));
 	classDefWheelCreateInfo.def(luabind::constructor<>());
+	classDefWheelCreateInfo.def_readwrite("suspension",&pragma::physics::WheelCreateInfo::suspension);
 	classDefWheelCreateInfo.def_readwrite("mass",&pragma::physics::WheelCreateInfo::mass);
 	classDefWheelCreateInfo.def_readwrite("width",&pragma::physics::WheelCreateInfo::width);
 	classDefWheelCreateInfo.def_readwrite("radius",&pragma::physics::WheelCreateInfo::radius);
+	classDefWheelCreateInfo.def_readwrite("shapeIndex",&pragma::physics::WheelCreateInfo::shapeIndex);
+	classDefWheelCreateInfo.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(pragma::physics::WheelCreateInfo::flags)> pragma::physics::WheelCreateInfo::*>(&pragma::physics::WheelCreateInfo::flags));
 	classDefWheelCreateInfo.property("momentOfInertia",static_cast<void(*)(lua_State*,pragma::physics::WheelCreateInfo&)>([](lua_State *l,pragma::physics::WheelCreateInfo &wheelCreateInfo) {
 		if(wheelCreateInfo.momentOfInertia.has_value())
 			Lua::PushNumber(l,*wheelCreateInfo.momentOfInertia);
@@ -476,7 +564,6 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		wheelCreateInfo.momentOfInertia = moi;
 	}));
 	classDefWheelCreateInfo.def_readwrite("chassisOffset",&pragma::physics::WheelCreateInfo::chassisOffset);
-	classDefWheelCreateInfo.def_readwrite("shape",&pragma::physics::WheelCreateInfo::shape);
 	classDefWheelCreateInfo.def_readwrite("maxHandBrakeTorque",&pragma::physics::WheelCreateInfo::maxHandbrakeTorque);
 	classDefWheelCreateInfo.def_readwrite("maxSteeringAngle",&pragma::physics::WheelCreateInfo::maxSteeringAngle);
 	physMod[classDefWheelCreateInfo];
@@ -1064,7 +1151,9 @@ int Lua::physenv::create_convex_hull_shape(lua_State *l)
 		return 0;
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,1);
 	auto shape = env->CreateConvexHullShape(mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IConvexHullShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 
@@ -1079,7 +1168,9 @@ int Lua::physenv::create_box_shape(lua_State *l)
 		return 0;
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,2);
 	auto shape = env->CreateBoxShape(*halfExtents,mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 
@@ -1096,7 +1187,9 @@ int Lua::physenv::create_capsule_shape(lua_State *l)
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCapsuleShape(CFloat(halfWidth),CFloat(halfHeight),mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 
@@ -1111,7 +1204,9 @@ int Lua::physenv::create_sphere_shape(lua_State *l)
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,2);
 
 	auto shape = env->CreateSphereShape(CFloat(radius),mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 
@@ -1127,7 +1222,37 @@ int Lua::physenv::create_cylinder_shape(lua_State *l)
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,3);
 
 	auto shape = env->CreateCylinderShape(radius,height,mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IConvexShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
+	return 1;
+}
+
+int Lua::physenv::create_compound_shape(lua_State *l)
+{
+	auto tShapes = 1;
+	Lua::CheckTable(l,tShapes);
+	std::vector<pragma::physics::IShape*> shapes {};
+	auto numShapes = Lua::GetObjectLength(l,tShapes);
+	shapes.reserve(numShapes);
+	for(auto i=decltype(numShapes){0u};i<numShapes;++i)
+	{
+		Lua::PushInt(l,i +1);
+		Lua::GetTableValue(l,tShapes);
+		auto &shape = Lua::Check<pragma::physics::IShape>(l,2);
+		shapes.push_back(&shape);
+		Lua::Pop(l,1);
+	}
+
+	auto *state = engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
+	auto shape = env->CreateCompoundShape(shapes);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 
@@ -1146,7 +1271,9 @@ int Lua::physenv::create_heightfield_terrain_shape(lua_State *l)
 	auto &mat = Lua::CheckHandle<pragma::physics::IMaterial>(l,5);
 
 	auto shape = env->CreateHeightfieldTerrainShape(width,length,maxHeight,upAxis,mat);
-	Lua::Push<std::shared_ptr<pragma::physics::IShape>>(l,shape);
+	if(shape == nullptr)
+		return 0;
+	shape->Push(l);
 	return 1;
 }
 

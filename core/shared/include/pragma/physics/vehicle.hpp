@@ -8,28 +8,110 @@
 namespace pragma::physics
 {
 	class IConvexHullShape;
+	constexpr auto DEFAULT_CHASSIS_MASS = 1'500.f;
+	constexpr auto DEFAULT_WHEEL_MASS = 20.f;
+	constexpr auto DEFAULT_WHEEL_WIDTH = 16.f;
+	constexpr auto DEFAULT_WHEEL_RADIUS = 20.f;
 	struct DLLNETWORK ChassisCreateInfo
 	{
-		float mass = 0.f;
+		float mass = DEFAULT_CHASSIS_MASS;
 		Vector3 momentOfInertia = {};
 		Vector3 cmOffset = {};
-		std::shared_ptr<pragma::physics::IConvexHullShape> shape = nullptr;
+		int32_t shapeIndex = -1;
 	};
 
 	struct DLLNETWORK WheelCreateInfo
 	{
-		float mass = 0.f;
-		float width = 0.f;
-		float radius = 0.f;
+		struct DLLNETWORK SuspensionInfo
+		{
+			float maxCompression = 0.3f;
+			float maxDroop = 0.1f;
+			float springStrength = 35'000.0f;
+			float springDamperRate = 4'500.0f;
+
+			float camberAngleAtRest = 0.f;
+			float camberAngleAtMaxDroop = 0.01f;
+			float camberAngleAtMaxCompression = -0.01f;
+		};
+
+		static WheelCreateInfo CreateStandardFrontWheel();
+		static WheelCreateInfo CreateStandardRearWheel();
+		enum class Flags : uint32_t
+		{
+			None = 0u,
+			Front = 1u,
+			Rear = Front<<1u,
+			Left = Rear<<1u,
+			Right = Left<<1u
+		};
+		Flags flags = Flags::None;
+		float mass = DEFAULT_WHEEL_MASS;
+		float width = DEFAULT_WHEEL_WIDTH;
+		float radius = DEFAULT_WHEEL_RADIUS;
 		float maxHandbrakeTorque = 0.f;
+		// The index of the shape of the vehicle's rigid body
+		// for this wheel. -1 means no shape is associated with
+		// the wheel.
+		int32_t shapeIndex = -1;
 		umath::Degree maxSteeringAngle = 0.f;
 		Vector3 chassisOffset = {};
-		std::shared_ptr<pragma::physics::IConvexHullShape> shape = nullptr;
+		SuspensionInfo suspension = {};
 
 		std::optional<float> momentOfInertia = {};
 		// Returns moi if specified, otherwise calculates
 		// moi for a cylinder of the specified radius and mass.
 		float GetMomentOfInertia() const;
+	};
+
+	class IRigidBody;
+	struct DLLNETWORK VehicleCreateInfo
+	{
+		static constexpr uint32_t WHEEL_COUNT_4W_DRIVE = 4u;
+		enum class WheelDrive : uint8_t
+		{
+			Front = 0u,
+			Rear,
+			Four
+		};
+		enum class Wheel : uint8_t
+		{
+			// Note: Order is important!
+			FrontLeft = 0,
+			FrontRight,
+			RearLeft,
+			RearRight,
+
+			Dummy
+		};
+		struct DLLNETWORK AntiRollBar
+		{
+			AntiRollBar(Wheel wheel0,Wheel wheel1,float stiffness=10'000.0f)
+				: wheel0{wheel0},wheel1{wheel1},stiffness{stiffness}
+			{}
+			AntiRollBar()=default;
+			Wheel wheel0 = Wheel::FrontLeft;
+			Wheel wheel1 = Wheel::FrontRight;
+			float stiffness = 10'000.0f;
+		};
+		static Wheel GetWheelType(const WheelCreateInfo &wheelDesc);
+		static VehicleCreateInfo CreateStandardFourWheelDrive(
+			const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
+			float chassisMass=DEFAULT_CHASSIS_MASS,
+			float wheelMass=DEFAULT_WHEEL_MASS,
+			float wheelWidth=DEFAULT_WHEEL_WIDTH,
+			float wheelRadius=DEFAULT_WHEEL_RADIUS
+		);
+
+		ChassisCreateInfo chassis = {};
+		std::vector<WheelCreateInfo> wheels = {};
+		WheelDrive wheelDrive = WheelDrive::Four;
+		std::vector<AntiRollBar> antiRollBars = {};
+		float maxEngineTorque = 500.f;
+		umath::Radian maxEngineRotationSpeed = 600.f;
+		float gearSwitchTime = 0.5f;
+		float clutchStrength = 10.f;
+		float gravityFactor = 1.f; // TODO
+		util::TSharedHandle<IRigidBody> actor = nullptr;
 	};
 
 	class ICollisionObject;
@@ -127,5 +209,6 @@ namespace pragma::physics
 		IWheel(IEnvironment &env);
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::WheelCreateInfo::Flags)
 
 #endif

@@ -61,6 +61,9 @@ void SurfaceMaterialManager::Load(const std::string &path)
 					physMat.SetSoftImpactSound(strVal);
 				if(mat->GetString("impact_hard",&strVal))
 					physMat.SetHardImpactSound(strVal);
+				if(mat->GetString("surface_type",&strVal))
+					physMat.SetSurfaceType(strVal);
+
 				if(mat->GetFloat("density",&val))
 					physMat.SetDensity(val);
 				if(mat->GetFloat("linear_drag_coefficient",&val))
@@ -109,7 +112,7 @@ SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier,Fl
 		auto physMat = m_physEnv.CreateMaterial(staticFriction,dynamicFriction,restitution);
 		const auto numReserve = 50;
 		m_materials.reserve((m_materials.size() /numReserve) *numReserve +numReserve);
-		m_materials.push_back(SurfaceMaterial(identifier,m_materials.size(),*physMat));
+		m_materials.push_back(SurfaceMaterial(m_physEnv,identifier,m_materials.size(),*physMat));
 		mat = &m_materials.back();
 	}
 	return *mat;
@@ -132,19 +135,7 @@ std::vector<SurfaceMaterial> &SurfaceMaterialManager::GetMaterials() {return m_m
 ////////////////////////////////////
 
 SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other)
-	: m_navigationFlags(pragma::nav::PolyFlags::Walk)
-{
-	*this = other;
-}
-
-SurfaceMaterial::SurfaceMaterial(const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat)
-	: m_physMaterial{std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())},m_index(idx),m_identifier(identifier),
-	m_footstepType("fx.fst_concrete")
-{
-	physMat.SetSurfaceMaterial(*this);
-}
-
-SurfaceMaterial &SurfaceMaterial::operator=(const SurfaceMaterial &other)
+	: m_physEnv{other.m_physEnv},m_navigationFlags(pragma::nav::PolyFlags::Walk)
 {
 	m_index = other.m_index;
 	m_identifier = other.m_identifier;
@@ -155,13 +146,20 @@ SurfaceMaterial &SurfaceMaterial::operator=(const SurfaceMaterial &other)
 	m_impactParticle = other.m_impactParticle;
 	m_navigationFlags = other.m_navigationFlags;
 	m_physMaterial = other.m_physMaterial;
+	m_surfaceType = other.m_surfaceType;
 	if(other.m_liquidInfo != nullptr)
 	{
 		m_liquidInfo = std::make_unique<PhysLiquid>();
 		*m_liquidInfo = *other.m_liquidInfo;
 	}
 	m_audioInfo = other.m_audioInfo;
-	return *this;
+}
+
+SurfaceMaterial::SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat)
+	: m_physEnv{env},m_physMaterial{std::static_pointer_cast<pragma::physics::IMaterial>(physMat.shared_from_this())},m_index(idx),m_identifier(identifier),
+	m_footstepType("fx.fst_concrete")
+{
+	physMat.SetSurfaceMaterial(*this);
 }
 
 void SurfaceMaterial::SetSoftImpactSound(const std::string &snd) {m_softImpactSound = snd;}
@@ -244,6 +242,8 @@ void SurfaceMaterial::Reset()
 }
 
 pragma::physics::IMaterial &SurfaceMaterial::GetPhysicsMaterial() const {return *m_physMaterial;}
+pragma::physics::SurfaceType *SurfaceMaterial::GetSurfaceType() const {return m_surfaceType.Get();}
+void SurfaceMaterial::SetSurfaceType(const std::string &surfaceType) {m_surfaceType = m_physEnv.GetSurfaceTypeManager().RegisterType(surfaceType);}
 const std::string &SurfaceMaterial::GetIdentifier() const {return m_identifier;}
 void SurfaceMaterial::SetFriction(Float friction)
 {

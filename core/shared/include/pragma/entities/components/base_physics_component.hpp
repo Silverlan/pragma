@@ -118,7 +118,7 @@ namespace pragma
 		PhysObj *GetPhysicsObject() const;
 		pragma::physics::ICollisionObject *GetCollisionObject(UInt32 boneId) const;
 		virtual PhysObj *InitializePhysics(PHYSICSTYPE type,PhysFlags flags=PhysFlags::None);
-		PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags=PhysFlags::None,float mass=0.f);
+		PhysObj *InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags=PhysFlags::None);
 		virtual void DestroyPhysicsObject();
 		PHYSICSTYPE GetPhysicsType() const;
 		void DropToFloor();
@@ -208,10 +208,10 @@ namespace pragma
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
-		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,float mass=0.f,const Vector3 &origin=Vector3(0.f,0.f,0.f));
+		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const Vector3 &origin=Vector3(0.f,0.f,0.f));
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
-		util::WeakHandle<PhysObj> InitializeBrushPhysics(PhysFlags flags=PhysFlags::None,float mass=0.f);
+		util::WeakHandle<PhysObj> InitializeBrushPhysics(PhysFlags flags=PhysFlags::None);
 		util::WeakHandle<PhysObj> InitializeBoxControllerPhysics();
 		util::WeakHandle<PhysObj> InitializeCapsuleControllerPhysics();
 		virtual void OnPhysicsInitialized();

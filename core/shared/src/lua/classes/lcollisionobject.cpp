@@ -270,6 +270,16 @@ void Lua::PhysRigidBody::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("GetLinearSleepingThreshold",&GetLinearSleepingThreshold);
 	classDef.def("GetAngularSleepingThreshold",&GetAngularSleepingThreshold);
 	classDef.def("GetSleepingThreshold",&GetSleepingThreshold);
+	classDef.def("GetCenterOfMassOffset",static_cast<void(*)(lua_State*,pragma::physics::IRigidBody*)>([](lua_State *l,pragma::physics::IRigidBody *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IRigidBody>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetCenterOfMassOffset());
+	}));
+	classDef.def("SetCenterOfMassOffset",static_cast<void(*)(lua_State*,pragma::physics::IRigidBody*,const Vector3&)>([](lua_State *l,pragma::physics::IRigidBody *hPhys,const Vector3 &offset) {
+		if(Lua::CheckHandle<pragma::physics::IRigidBody>(l,hPhys) == false)
+			return;
+		hPhys->SetCenterOfMassOffset(offset);
+	}));
 	classDef.def("SetKinematic",static_cast<void(*)(lua_State*,pragma::physics::IRigidBody*,bool)>([](lua_State *l,pragma::physics::IRigidBody *hPhys,bool bKinematic) {
 		if(Lua::CheckHandle<pragma::physics::IRigidBody>(l,hPhys) == false)
 			return;

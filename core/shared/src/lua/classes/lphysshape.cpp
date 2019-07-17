@@ -46,6 +46,12 @@ void Lua::PhysShape::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("IsConvexHull",&IsConvexHull);
 	classDef.def("IsHeightfield",&IsHeightField);
 	classDef.def("IsTriangleShape",&IsTriangleShape);
+	classDef.def("SetMass",static_cast<void(*)(lua_State*,pragma::physics::IShape&,float)>([](lua_State *l,pragma::physics::IShape &shape,float mass) {
+		shape.SetMass(mass);
+	}));
+	classDef.def("GetMass",static_cast<void(*)(lua_State*,pragma::physics::IShape&)>([](lua_State *l,pragma::physics::IShape &shape) {
+		Lua::PushNumber(l,shape.GetMass());
+	}));
 	classDef.def("CalculateLocalInertia",static_cast<void(*)(lua_State*,pragma::physics::IShape&,float)>([](lua_State *l,pragma::physics::IShape &shape,float mass) {
 		Vector3 localInertia;
 		shape.CalculateLocalInertia(mass,&localInertia);

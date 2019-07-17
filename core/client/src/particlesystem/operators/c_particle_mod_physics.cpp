@@ -46,13 +46,12 @@ void CParticleOperatorPhysics::Initialize()
 	auto mass = m_mass;
 	if(mass <= 0.f)
 		mass = 1.f; // Mas has to be larger than 0
+	shape->SetMass(mass);
 
-	Vector3 localInertia {};
-	shape->CalculateLocalInertia(mass,&localInertia);
 	m_physicsObjects.resize(maxParticles);
 	for(auto i=decltype(maxParticles){0};i<maxParticles;++i)
 	{
-		auto rigidBody = c_physEnv->CreateRigidBody(mass,*shape,localInertia);
+		auto rigidBody = c_physEnv->CreateRigidBody(*shape);
 		if(rigidBody != nullptr)
 		{
 			m_physicsObjects[i] = rigidBody;

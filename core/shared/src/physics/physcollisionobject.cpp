@@ -175,7 +175,7 @@ void pragma::physics::IGhostObject::InitializeLuaObject(lua_State *lua)
 
 //////////////////////////
 
-pragma::physics::IRigidBody::IRigidBody(IEnvironment &env,float mass,pragma::physics::IShape &shape,const Vector3 &localInertia)
+pragma::physics::IRigidBody::IRigidBody(IEnvironment &env,pragma::physics::IShape &shape)
 	: ICollisionObject{env,shape}
 {}
 bool pragma::physics::IRigidBody::IsRigid() const {return true;}

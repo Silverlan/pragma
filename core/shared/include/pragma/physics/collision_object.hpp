@@ -203,10 +203,13 @@ namespace pragma::physics
 		virtual float GetAngularSleepingThreshold() const=0;
 		std::pair<float,float> GetSleepingThreshold() const;
 
+		virtual void SetCenterOfMassOffset(const Vector3 &offset)=0;
+		virtual Vector3 GetCenterOfMassOffset() const=0;
+
 		virtual void SetKinematic(bool bKinematic)=0;
 		virtual bool IsKinematic() const=0;
 	protected:
-		IRigidBody(IEnvironment &env,float mass,pragma::physics::IShape &shape,const Vector3 &localInertia);
+		IRigidBody(IEnvironment &env,pragma::physics::IShape &shape);
 	};
 
 	class DLLNETWORK ISoftBody

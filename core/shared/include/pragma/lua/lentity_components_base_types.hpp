@@ -21,18 +21,18 @@ namespace Lua
 	namespace Physics
 	{
 		template<class THandle>
-			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t flags,float mass)
+			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t flags)
 		{
 			pragma::Lua::check_component(l,hEnt);
 
-			auto *phys = hEnt->InitializePhysics(*shape,static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags),mass);
+			auto *phys = hEnt->InitializePhysics(*shape,static_cast<pragma::BasePhysicsComponent::PhysFlags>(flags));
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}
 		template<class THandle>
-			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,float mass)
+			void InitializePhysics(lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape)
 			{
-				InitializePhysics<THandle>(l,hEnt,shape,umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None),mass);
+				InitializePhysics<THandle>(l,hEnt,shape,umath::to_integral(pragma::BasePhysicsComponent::PhysFlags::None));
 			}
 	};
 	namespace Shooter
@@ -984,14 +984,14 @@ namespace Lua
 			if(phys != NULL)
 				luabind::object(l,phys->GetHandle()).push(l);
 		}));
-		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,uint32_t,float)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t physFlags,float mass) {
-			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,physFlags,mass);
+		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,uint32_t)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t physFlags) {
+			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,physFlags);
 		}));
 		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&,uint32_t)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape,uint32_t physFlags) {
 			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,physFlags);
 		}));
 		def.def("InitializePhysics",static_cast<void(*)(lua_State*,THandle&,::util::TSharedHandle<pragma::physics::IConvexShape>&)>([](lua_State *l,THandle &hEnt,::util::TSharedHandle<pragma::physics::IConvexShape> &shape) {
-			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,0,0.f);
+			Lua::Physics::InitializePhysics<THandle>(l,hEnt,shape,0);
 		}));
 		def.def("DestroyPhysicsObject",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);

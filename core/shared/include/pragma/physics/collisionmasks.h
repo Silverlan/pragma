@@ -4,7 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/umath.h>
 
-enum class DLLNETWORK CollisionMask : uint32_t
+enum class CollisionMask : uint32_t
 {
 	None = 0,
 	Static = 1,

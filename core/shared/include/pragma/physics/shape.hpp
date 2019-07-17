@@ -62,6 +62,8 @@ namespace pragma::physics
 
 		virtual void SetDensity(float density);
 		float GetDensity() const;
+		virtual void SetMass(float mass)=0;
+		virtual float GetMass() const=0;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		void *userData = nullptr;
@@ -148,6 +150,9 @@ namespace pragma::physics
 		};
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		void AddShape(pragma::physics::IShape &shape,const Vector3 &origin={});
+
+		virtual void SetMass(float mass) override;
+		virtual float GetMass() const override;
 
 		virtual bool IsCompoundShape() const override;
 		virtual ICompoundShape *GetCompoundShape() override;

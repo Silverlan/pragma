@@ -140,7 +140,7 @@ namespace pragma::physics
 		virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth,float halfHeight,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
 		virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
 		virtual util::TSharedHandle<ICollisionObject> CreateCollisionObject(IShape &shape)=0;
-		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(float mass,IShape &shape,const Vector3 &localInertia,bool dynamic=true)=0;
+		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(IShape &shape,bool dynamic=true)=0;
 		virtual util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info,float mass,const std::vector<Vector3> &verts,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)=0;
 		virtual util::TSharedHandle<IGhostObject> CreateGhostObject(IShape &shape)=0;
 		virtual util::TSharedHandle<ICollisionObject> CreatePlane(const Vector3 &n,float d,const IMaterial &mat)=0;

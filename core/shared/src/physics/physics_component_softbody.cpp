@@ -129,7 +129,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 			if(pRigid == nullptr)
 			{
 				auto shape = physEnv->CreateBoxShape({1.f,1.f,1.f},physEnv->GetGenericMaterial());
-				auto rigid = physEnv->CreateRigidBody(0.f,*shape,{});
+				auto rigid = physEnv->CreateRigidBody(*shape);
 				rigid->SetPos({});
 				rigid->SetSimulationEnabled(false);
 				rigid->Spawn();

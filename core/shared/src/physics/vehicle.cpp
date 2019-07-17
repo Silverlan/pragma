@@ -1,7 +1,9 @@
 #include "stdafx_shared.h"
 #include "pragma/physics/vehicle.hpp"
 #include "pragma/physics/environment.hpp"
+#include "pragma/physics/shape.hpp"
 
+#pragma optimize("",off)
 pragma::physics::WheelCreateInfo pragma::physics::WheelCreateInfo::CreateStandardFrontWheel()
 {
 	WheelCreateInfo createInfo {};
@@ -13,6 +15,42 @@ pragma::physics::WheelCreateInfo pragma::physics::WheelCreateInfo::CreateStandar
 	WheelCreateInfo createInfo {};
 	createInfo.maxHandbrakeTorque = 6'400'000.f;
 	return createInfo;
+}
+
+///////////////
+
+static pragma::physics::IShape *get_shape_from_shape_index(const pragma::physics::IRigidBody &body,int32_t shapeIndex)
+{
+	auto *pShape = body.GetCollisionShape();
+	if(pShape == nullptr || pShape->IsCompoundShape() == false)
+		return nullptr;
+	auto &pCompoundShape = *pShape->GetCompoundShape();
+	auto &subShapes = pCompoundShape.GetShapes();
+	if(shapeIndex < 0 || shapeIndex >= subShapes.size())
+		return nullptr;
+	auto &subShape = subShapes.at(shapeIndex);
+	return subShape.shape.get();
+}
+const pragma::physics::IShape *pragma::physics::ChassisCreateInfo::GetShape(const pragma::physics::IRigidBody &body) const
+{
+	return get_shape_from_shape_index(body,shapeIndex);
+}
+Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
+{
+	if(momentOfInertia.has_value())
+		return *momentOfInertia;
+	auto *shape = GetShape(body);
+	if(shape == nullptr)
+		return Vector3{};
+	auto mass = shape->GetMass();
+	Vector3 min,max;
+	shape->GetAABB(min,max);
+	auto dims = (max -min) *0.5f;
+	return Vector3 {
+		(umath::pow2(dims.y) +umath::pow2(dims.z)) *mass /12.0,
+		(umath::pow2(dims.x) +umath::pow2(dims.z)) *0.8 *mass /12.0,
+		(umath::pow2(dims.x) +umath::pow2(dims.y)) *mass /12.0
+	};
 }
 
 ///////////////
@@ -36,7 +74,7 @@ pragma::physics::VehicleCreateInfo::Wheel pragma::physics::VehicleCreateInfo::Ge
 	return Wheel::Dummy;
 }
 pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(
-	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,float chassisMass,float wheelMass,float wheelWidth,float wheelRadius
+	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,float wheelWidth,float wheelRadius
 )
 {
 	VehicleCreateInfo vhcCreateInfo {};
@@ -44,7 +82,6 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 		{Wheel::FrontLeft,Wheel::FrontRight},
 		{Wheel::RearLeft,Wheel::RearRight}
 	};
-	vhcCreateInfo.chassis.mass = chassisMass;
 	vhcCreateInfo.wheelDrive = VehicleCreateInfo::WheelDrive::Four;
 
 	constexpr auto handBrakeTorque = 6'400'000.0;
@@ -55,7 +92,6 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 	{
 		vhcCreateInfo.wheels.push_back({});
 		auto &wheelInfo = vhcCreateInfo.wheels.at(i);
-		wheelInfo.mass = wheelMass;
 		wheelInfo.width = wheelWidth;
 		wheelInfo.radius = wheelRadius;
 		wheelInfo.chassisOffset = wheelCenterOffsets.at(i);
@@ -84,12 +120,19 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 
 ///////////////
 
-float pragma::physics::WheelCreateInfo::GetMomentOfInertia() const
+const pragma::physics::IShape *pragma::physics::WheelCreateInfo::GetShape(const pragma::physics::IRigidBody &body) const
+{
+	return get_shape_from_shape_index(body,shapeIndex);
+}
+float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
 		return *momentOfInertia;
+	auto *pShape = GetShape(body);
+	if(pShape == nullptr)
+		return 0.f;
 	// MOI of a cylinder
-	return 0.5f *mass *umath::pow2(radius);
+	return 0.5f *pShape->GetMass() *umath::pow2(radius);
 }
 
 pragma::physics::IVehicle::IVehicle(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject)
@@ -114,3 +157,4 @@ void pragma::physics::IVehicle::OnRemove()
 pragma::physics::IWheel::IWheel(IEnvironment &env)
 	: IBase{env}
 {}
+#pragma optimize("",on)

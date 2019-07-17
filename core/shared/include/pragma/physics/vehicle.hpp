@@ -3,21 +3,22 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
+#include "pragma/util/util_typed_manager.hpp"
 #include <optional>
 
 namespace pragma::physics
 {
 	class IConvexHullShape;
-	constexpr auto DEFAULT_CHASSIS_MASS = 1'500.f;
-	constexpr auto DEFAULT_WHEEL_MASS = 20.f;
+	class IShape;
+	class IRigidBody;
 	constexpr auto DEFAULT_WHEEL_WIDTH = 16.f;
 	constexpr auto DEFAULT_WHEEL_RADIUS = 20.f;
 	struct DLLNETWORK ChassisCreateInfo
 	{
-		float mass = DEFAULT_CHASSIS_MASS;
-		Vector3 momentOfInertia = {};
-		Vector3 cmOffset = {};
+		std::optional<Vector3> momentOfInertia = {};
 		int32_t shapeIndex = -1;
+		Vector3 GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
+		const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
 	};
 
 	struct DLLNETWORK WheelCreateInfo
@@ -45,7 +46,6 @@ namespace pragma::physics
 			Right = Left<<1u
 		};
 		Flags flags = Flags::None;
-		float mass = DEFAULT_WHEEL_MASS;
 		float width = DEFAULT_WHEEL_WIDTH;
 		float radius = DEFAULT_WHEEL_RADIUS;
 		float maxHandbrakeTorque = 0.f;
@@ -56,11 +56,15 @@ namespace pragma::physics
 		umath::Degree maxSteeringAngle = 0.f;
 		Vector3 chassisOffset = {};
 		SuspensionInfo suspension = {};
+		// Has to match one of the tire types defined in
+		// the tire type manager of the physics environment
+		TypeId tireType = 0;
 
 		std::optional<float> momentOfInertia = {};
 		// Returns moi if specified, otherwise calculates
 		// moi for a cylinder of the specified radius and mass.
-		float GetMomentOfInertia() const;
+		float GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
+		const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
 	};
 
 	class IRigidBody;
@@ -96,8 +100,6 @@ namespace pragma::physics
 		static Wheel GetWheelType(const WheelCreateInfo &wheelDesc);
 		static VehicleCreateInfo CreateStandardFourWheelDrive(
 			const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
-			float chassisMass=DEFAULT_CHASSIS_MASS,
-			float wheelMass=DEFAULT_WHEEL_MASS,
 			float wheelWidth=DEFAULT_WHEEL_WIDTH,
 			float wheelRadius=DEFAULT_WHEEL_RADIUS
 		);
@@ -111,7 +113,7 @@ namespace pragma::physics
 		float gearSwitchTime = 0.5f;
 		float clutchStrength = 10.f;
 		float gravityFactor = 1.f; // TODO
-		util::TSharedHandle<IRigidBody> actor = nullptr;
+		mutable util::TSharedHandle<IRigidBody> actor = nullptr;
 	};
 
 	class ICollisionObject;

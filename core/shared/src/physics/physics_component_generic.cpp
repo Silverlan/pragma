@@ -26,16 +26,14 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,float mass,const Vector3 &origin)
+util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const Vector3 &origin)
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
-	Vector3 localInertia(0.f,0.f,0.f);
-	shape.CalculateLocalInertia(mass,&localInertia);
-	auto body = physEnv->CreateRigidBody(mass,shape,localInertia,dynamic);
+	auto body = physEnv->CreateRigidBody(shape,dynamic);
 	if(body == nullptr)
 		return nullptr;
 	body->SetOrigin(origin);
@@ -57,7 +55,7 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 		body->SetCollisionFilterMask(mask);
 	body->SetWorldTransform(startTransform);
 	body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
-	if(mass == 0.f)
+	if(shape.GetMass() == 0.f)
 	{
 		body->SetStatic(true);
 		body->UpdateAABB();
@@ -73,10 +71,6 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
 		return {};
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	float mass = hMdl->GetMass();
-	auto bStaticMass = (mass == 0.f) ? true : false;
-	if(umath::is_flag_set(flags,PhysFlags::Dynamic) && bStaticMass == true) // If a mesh has been initialized with a mass of 0, it can't be changed anymore? (TODO: Then why does it work for the world? CHECK AND CONFIRM/DISCONFIRM!)
-		mass = 1.f;
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
 		return {};
@@ -156,7 +150,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 			{
 				for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto body = CreateRigidBody(*it->first,mass,umath::is_flag_set(flags,PhysFlags::Dynamic),-it->second);
+					auto body = CreateRigidBody(*it->first,umath::is_flag_set(flags,PhysFlags::Dynamic),-it->second);
 					if(body == nullptr)
 						continue;
 					if(bPhys == false)
@@ -195,7 +189,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		}
 		if(shape == nullptr)
 			continue;
-		auto body = CreateRigidBody(*shape,mass,umath::is_flag_set(flags,PhysFlags::Dynamic));
+		auto body = CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic));
 		if(body == nullptr)
 			continue;
 		body->SetBoneID(it->first);
@@ -457,13 +451,11 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		SetMoveType(MOVETYPE::NONE);
 	}
 	InitializePhysObj();
-	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true && bStaticMass == true)
-		m_physObject->SetMass(0.f);
 	OnPhysicsInitialized();
 	return m_physObject;
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags flags,float mass) // Obsolete?
+util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags flags) // Obsolete?
 {
 	auto &ent = GetEntity();
 	NetworkState *state = ent.GetNetworkState();
@@ -483,20 +475,17 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags
 		{
 			auto shape = mesh->GetShape();
 
-			Vector3 localInertia(0.f,0.f,0.f);
-			shape->CalculateLocalInertia(mass,&localInertia);
-
 			physics::Transform startTransform;
 			startTransform.SetIdentity();
 			startTransform.SetOrigin(origin);
 			auto contactProcessingThreshold = 1e30;
 
-			auto body = physEnv->CreateRigidBody(mass,*shape,localInertia,umath::is_flag_set(flags,PhysFlags::Dynamic));
+			auto body = physEnv->CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic));
 			//PhysRigidBody *body = physEnv->CreateRigid
 			//btRigidBody *body = new btRigidBody(mass,NULL,shape,localInertia);
 			body->SetWorldTransform(startTransform);
 			body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
-			if(mass == 0.f)
+			if(shape->GetMass() == 0.f)
 				body->SetStatic(true);
 
 			if(bPhys == false)
@@ -598,11 +587,11 @@ void BasePhysicsComponent::InitializePhysObj()
 	//	pos -= o->GetOrigin();
 	//SetPosition(pos);//,true); // Update our position, since our origin may have changed
 }
-PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags,float mass)
+PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &shape,PhysFlags flags)
 {
 	//btScalar contactProcessingThreshold = BT_LARGE_FLOAT;
-	auto bDynamic = mass == 0.f;
-	auto body = CreateRigidBody(shape,mass,bDynamic);
+	auto bDynamic = umath::is_flag_set(flags,PhysFlags::Dynamic);
+	auto body = CreateRigidBody(shape,bDynamic);
 
 	if(m_physObject != NULL)
 		DestroyPhysicsObject();

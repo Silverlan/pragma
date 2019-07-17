@@ -145,6 +145,19 @@ void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape,co
 {
 	m_shapes.push_back({std::static_pointer_cast<IShape>(shape.shared_from_this()),origin});
 }
+void pragma::physics::ICompoundShape::SetMass(float mass)
+{
+	Con::cwar<<"WARNING: Attempted to set mass of compound shape. This is illegal, change the mass of the individual sub-shapes instead!"<<Con::endl;
+}
+float pragma::physics::ICompoundShape::GetMass() const
+{
+	if(m_shapes.empty())
+		return 0.f;
+	auto mass = 0.f;
+	for(auto &shape : m_shapes)
+		mass += shape.shape->GetMass();
+	return mass;
+}
 bool pragma::physics::ICompoundShape::IsCompoundShape() const {return true;}
 pragma::physics::ICompoundShape *pragma::physics::ICompoundShape::GetCompoundShape() {return this;}
 const std::vector<pragma::physics::ICompoundShape::ShapeInfo> &pragma::physics::ICompoundShape::GetShapes() const {return m_shapes;}

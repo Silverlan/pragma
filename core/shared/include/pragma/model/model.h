@@ -13,6 +13,7 @@
 #include "pragma/math/surfacematerial.h"
 #include "pragma/model/modelupdateflags.hpp"
 #include "pragma/model/model_flexes.hpp"
+#include "pragma/model/model_handle.hpp"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
 #include <sharedutils/def_handle.h>
@@ -93,12 +94,10 @@ struct DLLNETWORK BodyGroup
 
 #define MODEL_NO_MESH (unsigned int)(-1)
 
-class Model;
-DECLARE_BASE_HANDLE(DLLNETWORK,Model,Model);
-
 class CollisionMesh;
 class Game;
 class VertexAnimation;
+namespace pragma::physics{class ScaledTransform;};
 class DLLNETWORK Model
 {
 	friend Con::c_cout& operator<<(Con::c_cout&,const Model&);
@@ -125,73 +124,6 @@ public:
 
 		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshes
 	};
-private:
-	void Construct();
-	NetworkState *m_networkState = nullptr;
-	ModelHandle m_handle = {};
-	mutable MetaInfo m_metaInfo = {};
-	bool m_bValid = false;
-	float m_mass = 0.f;
-	uint32_t m_meshCount = 0u;
-	uint32_t m_subMeshCount = 0u;
-	uint32_t m_vertexCount = 0u;
-	uint32_t m_triangleCount = 0u;
-	PhonemeMap m_phonemeMap = {};
-	std::vector<BlendController> m_blendControllers;
-	std::vector<std::shared_ptr<ModelMeshGroup>> m_meshGroups;
-	std::vector<BodyGroup> m_bodyGroups;
-	std::unordered_map<uint32_t,Hitbox> m_hitboxes;
-	//std::vector<std::vector<VertexWeight>*> m_weights;
-	static std::unordered_map<std::string,std::shared_ptr<Model>> m_models;
-	std::shared_ptr<Frame> m_reference = nullptr;
-	std::string m_name;
-	bool m_bAllMaterialsLoaded = false;
-	std::vector<std::shared_ptr<Animation>> m_animations;
-	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
-	std::unordered_map<std::string,unsigned int> m_animationIDs;
-	std::unique_ptr<Skeleton> m_skeleton = nullptr;
-
-	std::vector<FlexController> m_flexControllers;
-	std::vector<Flex> m_flexes;
-
-	std::vector<std::shared_ptr<IKController>> m_ikControllers;
-
-	// Bind pose matrices are currently unused; Bind pose is extracted from reference pose instead!
-	std::vector<Mat4> m_bindPose;
-	Vector3 m_eyeOffset = {};
-	Vector3 m_collisionMin = {};
-	Vector3 m_collisionMax = {};
-	Vector3 m_renderMin = {};
-	Vector3 m_renderMax = {};
-	std::vector<std::shared_ptr<CollisionMesh>> m_collisionMeshes;
-	std::vector<JointInfo> m_joints;
-	std::vector<unsigned int> m_baseMeshes; // Meshes in LOD 0
-	std::vector<LODInfo> m_lods; // LODs have to be in order!
-	std::vector<Attachment> m_attachments;
-	std::vector<ObjectAttachment> m_objectAttachments;
-	std::vector<MaterialHandle> m_materials;
-	std::vector<TextureGroup> m_textureGroups;
-	std::vector<CallbackHandle> m_matLoadCallbacks;
-	std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;
-	void OnMaterialLoaded();
-protected:
-	virtual void OnMaterialMissing(const std::string &matName);
-	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
-	void LoadMaterials(const std::vector<uint32_t> &textureGroups,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
-	bool FindMaterial(const std::string &texture,std::string &matPath,const std::function<Material*(const std::string&,bool)> &loadMaterial) const;
-
-	virtual std::shared_ptr<VertexAnimation> CreateVertexAnimation(const std::string &name) const;
-	std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
-	std::vector<std::shared_ptr<VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
-
-	std::vector<FlexController>::const_iterator FindFlexController(const std::string &name) const;
-	std::vector<FlexController>::iterator FindFlexController(const std::string &name);
-
-	std::vector<std::shared_ptr<IKController>>::const_iterator FindIKController(const std::string &name) const;
-	std::vector<std::shared_ptr<IKController>>::iterator FindIKController(const std::string &name);
-
-	std::vector<Flex>::const_iterator FindFlex(const std::string &name) const;
-	std::vector<Flex>::iterator FindFlex(const std::string &name);
 public:
 	enum class DLLNETWORK MergeFlags : uint32_t
 	{
@@ -353,6 +285,7 @@ public:
 	void RemoveAttachment(const std::string &name);
 	void RemoveAttachment(uint32_t idx);
 	int32_t LookupAttachment(const std::string &name);
+	std::optional<pragma::physics::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
 
 	const std::vector<ObjectAttachment> &GetObjectAttachments() const;
 	std::vector<ObjectAttachment> &GetObjectAttachments();
@@ -434,6 +367,73 @@ public:
 	JointInfo &AddJoint(uint8_t type,uint32_t src,uint32_t tgt);
 
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
+protected:
+	virtual void OnMaterialMissing(const std::string &matName);
+	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
+	void LoadMaterials(const std::vector<uint32_t> &textureGroups,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
+	bool FindMaterial(const std::string &texture,std::string &matPath,const std::function<Material*(const std::string&,bool)> &loadMaterial) const;
+
+	virtual std::shared_ptr<VertexAnimation> CreateVertexAnimation(const std::string &name) const;
+	std::vector<std::shared_ptr<VertexAnimation>>::const_iterator FindVertexAnimation(const std::string &name) const;
+	std::vector<std::shared_ptr<VertexAnimation>>::iterator FindVertexAnimation(const std::string &name);
+
+	std::vector<FlexController>::const_iterator FindFlexController(const std::string &name) const;
+	std::vector<FlexController>::iterator FindFlexController(const std::string &name);
+
+	std::vector<std::shared_ptr<IKController>>::const_iterator FindIKController(const std::string &name) const;
+	std::vector<std::shared_ptr<IKController>>::iterator FindIKController(const std::string &name);
+
+	std::vector<Flex>::const_iterator FindFlex(const std::string &name) const;
+	std::vector<Flex>::iterator FindFlex(const std::string &name);
+private:
+	void Construct();
+	NetworkState *m_networkState = nullptr;
+	ModelHandle m_handle = {};
+	mutable MetaInfo m_metaInfo = {};
+	bool m_bValid = false;
+	float m_mass = 0.f;
+	uint32_t m_meshCount = 0u;
+	uint32_t m_subMeshCount = 0u;
+	uint32_t m_vertexCount = 0u;
+	uint32_t m_triangleCount = 0u;
+	PhonemeMap m_phonemeMap = {};
+	std::vector<BlendController> m_blendControllers;
+	std::vector<std::shared_ptr<ModelMeshGroup>> m_meshGroups;
+	std::vector<BodyGroup> m_bodyGroups;
+	std::unordered_map<uint32_t,Hitbox> m_hitboxes;
+	//std::vector<std::vector<VertexWeight>*> m_weights;
+	static std::unordered_map<std::string,std::shared_ptr<Model>> m_models;
+	std::shared_ptr<Frame> m_reference = nullptr;
+	std::string m_name;
+	bool m_bAllMaterialsLoaded = false;
+	std::vector<std::shared_ptr<Animation>> m_animations;
+	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
+	std::unordered_map<std::string,unsigned int> m_animationIDs;
+	std::unique_ptr<Skeleton> m_skeleton = nullptr;
+
+	std::vector<FlexController> m_flexControllers;
+	std::vector<Flex> m_flexes;
+
+	std::vector<std::shared_ptr<IKController>> m_ikControllers;
+
+	// Bind pose matrices are currently unused; Bind pose is extracted from reference pose instead!
+	std::vector<Mat4> m_bindPose;
+	Vector3 m_eyeOffset = {};
+	Vector3 m_collisionMin = {};
+	Vector3 m_collisionMax = {};
+	Vector3 m_renderMin = {};
+	Vector3 m_renderMax = {};
+	std::vector<std::shared_ptr<CollisionMesh>> m_collisionMeshes;
+	std::vector<JointInfo> m_joints;
+	std::vector<unsigned int> m_baseMeshes; // Meshes in LOD 0
+	std::vector<LODInfo> m_lods; // LODs have to be in order!
+	std::vector<Attachment> m_attachments;
+	std::vector<ObjectAttachment> m_objectAttachments;
+	std::vector<MaterialHandle> m_materials;
+	std::vector<TextureGroup> m_textureGroups;
+	std::vector<CallbackHandle> m_matLoadCallbacks;
+	std::vector<CallbackHandle> m_onAllMatsLoadedCallbacks;
+	void OnMaterialLoaded();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Model::CopyFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::MergeFlags);

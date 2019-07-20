@@ -328,116 +328,7 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_wheel_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("IsAttached",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushBool(l,hEnt->IsAttached());
-		}));
-		def.def("IsFrontWheel",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Bool>(l,hEnt->IsFrontWheel());
-		}));
-		def.def("GetChassisConnectionPoint",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetChassisConnectionPoint());
-		}));
-		def.def("GetWheelAxle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetWheelAxle());
-		}));
-		def.def("GetWheelDirection",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetWheelDirection());
-		}));
-		def.def("GetMaxSuspensionLength",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetMaxSuspensionLength());
-		}));
-		def.def("GetMaxSuspensionCompression",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetMaxSuspensionCompression());
-		}));
-		def.def("GetMaxDampingRelaxation",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetMaxDampingRelaxation());
-		}));
-		def.def("GetWheelRadius",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetWheelRadius());
-		}));
-		def.def("GetSuspensionStiffness",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetSuspensionStiffness());
-		}));
-		def.def("GetWheelDampingCompression",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetWheelDampingCompression());
-		}));
-		def.def("GetFrictionSlip",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetFrictionSlip());
-		}));
-		def.def("GetSteeringAngle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetSteeringAngle());
-		}));
-		def.def("GetWheelRotation",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetWheelRotation());
-		}));
-		def.def("GetRollInfluence",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetRollInfluence());
-		}));
-		def.def("GetVehicle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			auto ent = hEnt->GetVehicle();
-			if(ent.expired())
-				return;
-			ent->PushLuaObject(l);
-		}));
-		def.def("GetRelativeSuspensionSpeed",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetRelativeSuspensionSpeed());
-		}));
-		def.def("GetSuspensionForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetSuspensionForce());
-		}));
-		def.def("GetSkidGrip",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetSkidGrip());
-		}));
-		def.def("GetContactNormal",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetContactNormal());
-		}));
-		def.def("GetContactPoint",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetContactPoint());
-		}));
-		def.def("IsInContact",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Bool>(l,hEnt->IsInContact());
-		}));
-		def.def("GetSuspensionLength",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Float>(l,hEnt->GetSuspensionLength());
-		}));
-		def.def("GetWorldSpaceWheelAxle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetWorldSpaceWheelAxle());
-		}));
-		def.def("GetWorldSpaceWheelDirection",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt->GetWorldSpaceWheelDirection());
-		}));
-		def.def("GetGroundObject",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			auto *o = hEnt->GetGroundObject();
-			if(o == nullptr)
-				return;
-			o->Push(l);
-		}));
+		// TODO
 	}
 	template<class TLuaClass,class THandle>
 		void register_base_decal_component_methods(lua_State *l,TLuaClass &def)
@@ -1183,6 +1074,7 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_WAKE",pragma::BasePhysicsComponent::EVENT_ON_WAKE);
 		def.add_static_constant("EVENT_ON_SLEEP",pragma::BasePhysicsComponent::EVENT_ON_SLEEP);
 		def.add_static_constant("EVENT_HANDLE_RAYCAST",pragma::BasePhysicsComponent::EVENT_HANDLE_RAYCAST);
+		def.add_static_constant("EVENT_INITIALIZE_PHYSICS",pragma::BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS);
 
 		def.add_static_constant("MOVETYPE_NONE",umath::to_integral(MOVETYPE::NONE));
 		def.add_static_constant("MOVETYPE_WALK",umath::to_integral(MOVETYPE::WALK));
@@ -2473,114 +2365,7 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_vehicle_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("GetWheelCount",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushInt(l,hEnt.get()->GetWheelCount());
-		}));
-		def.def("GetWheels",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			auto wheels = hEnt.get()->GetWheels();
-			lua_newtable(l);
-			auto top = lua_gettop(l);
-			auto n = 1;
-			for(auto it=wheels.begin();it!=wheels.end();++it)
-			{
-				auto &hWheel = *it;
-				if(hWheel.valid())
-				{
-					hWheel->PushLuaObject(l);
-					lua_rawseti(l,top,n);
-					n++;
-				}
-			}
-		}));
-		def.def("GetWheel",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,UInt32 wheelId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto ent = hEnt.get()->GetWheel(CUChar(wheelId));
-			if(ent.expired())
-				return;
-			ent->PushLuaObject(l);
-		}));
-		def.def("GetSpeedKmh",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetSpeedKmh());
-		}));
-		def.def("GetMaxEngineForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxEngineForce());
-		}));
-		def.def("GetMaxReverseEngineForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxReverseEngineForce());
-		}));
-		def.def("GetMaxBrakeForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxBrakeForce());
-		}));
-		def.def("GetEngineForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetEngineForce());
-		}));
-		def.def("GetBrakeForce",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetBrakeForce());
-		}));
-		def.def("SetEngineForce",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,Float force) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt.get()->SetEngineForce(force);
-		}));
-		def.def("SetBrakeForce",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,Float force) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt.get()->SetBrakeForce(force);
-		}));
-		def.def("GetWheelDirection",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<Vector3>(l,hEnt.get()->GetWheelDirection());
-		}));
-		def.def("GetMaxSuspensionLength",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxSuspensionLength());
-		}));
-		def.def("GetMaxSuspensionCompression",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxSuspensionCompression());
-		}));
-		def.def("GetWheelRadius",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetWheelRadius());
-		}));
-		def.def("GetSuspensionStiffness",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetSuspensionStiffness());
-		}));
-		def.def("GetWheelDampingCompression",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetWheelDampingCompression());
-		}));
-		def.def("GetFrictionSlip",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetFrictionSlip());
-		}));
-		def.def("GetSteeringAngle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetSteeringAngle());
-		}));
-		def.def("GetRollInfluence",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetRollInfluence());
-		}));
-		def.def("GetAcceleration",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetAcceleration());
-		}));
-		def.def("GetTurnSpeed",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetTurnSpeed());
-		}));
-		def.def("GetMaxTurnAngle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
-			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetMaxTurnAngle());
-		}));
+		// TODO
 		def.def("GetSteeringWheel",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			auto *ent = hEnt.get()->GetSteeringWheel();
@@ -2602,6 +2387,13 @@ namespace Lua
 		def.def("ClearDriver",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt.get()->ClearDriver();
+		}));
+		def.def("GetPhysicsVehicle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			auto *physVehicle = hEnt.get()->GetPhysicsVehicle();
+			if(physVehicle == nullptr)
+				return;
+			physVehicle->Push(l);
 		}));
 	}
 

@@ -22,12 +22,15 @@ void SWheel::Initialize()
 
 ////////////
 
-SWheelComponent::~SWheelComponent() {Detach();}
+SWheelComponent::~SWheelComponent()
+{
+	//Detach();
+}
 
 void SWheelComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl)
 {
-	packet->Write<Float>(GetSteeringAngle());
-	packet->Write<Float>(GetWheelRotation());
+	//packet->Write<Float>(GetSteeringAngle());
+	//packet->Write<Float>(GetWheelRotation());
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info != nullptr)
@@ -50,6 +53,7 @@ void SWheelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 {
 	nwm::write_entity(packet,m_vehicle.valid() ? &m_vehicle->GetEntity() : nullptr);
 	packet->Write<UChar>(m_wheelId);
+#if 0
 	packet->Write<Bool>(m_wheelInfo.bFrontWheel);
 	packet->Write<Vector3>(m_wheelInfo.connectionPoint);
 	packet->Write<Vector3>(m_wheelInfo.wheelAxle);
@@ -64,6 +68,7 @@ void SWheelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 	packet->Write<Float>(m_wheelInfo.steeringAngle);
 	packet->Write<Float>(m_wheelInfo.wheelRotation);
 	packet->Write<Float>(m_wheelInfo.rollInfluence);
+#endif
 }
 
 void SWheelComponent::Initialize()
@@ -71,7 +76,7 @@ void SWheelComponent::Initialize()
 	BaseWheelComponent::Initialize();
 	static_cast<SBaseEntity&>(GetEntity()).SetShared(true);
 }
-
+/*
 void SWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 {
 	BaseWheelComponent::Attach(ent,wheelId);
@@ -205,21 +210,11 @@ void SWheelComponent::SetSteeringAngle(Float ang)
 {
 	BaseWheelComponent::SetSteeringAngle(ang);
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	/*if(!ent.IsShared())
-		return;
-	NetPacket p;
-	p->Write<Float>(ang);
-	ent.SendNetEventTCP(m_netEvSteeringAngle,p);*/
 }
 void SWheelComponent::SetWheelRotation(Float rot)
 {
 	BaseWheelComponent::SetWheelRotation(rot);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	/*if(!ent.IsShared())
-		return;
-	NetPacket p;
-	p->Write<Float>(rot);
-	ent.SendNetEventTCP(m_netEvRotation,p);*/
+
 }
 void SWheelComponent::SetRollInfluence(Float influence)
 {
@@ -231,3 +226,4 @@ void SWheelComponent::SetRollInfluence(Float influence)
 	p->Write<Float>(influence);
 	ent.SendNetEvent(m_netEvRollInfluence,p,pragma::networking::Protocol::SlowReliable);
 }
+*/

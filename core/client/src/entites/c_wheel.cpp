@@ -20,49 +20,19 @@ void CWheel::Initialize()
 luabind::object CWheelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWheelComponentHandleWrapper>(l);}
 void CWheelComponent::ReceiveData(NetPacket &packet)
 {
-	auto *ent = nwm::read_entity(packet);
-	auto wheelId = packet->Read<UChar>();
-	auto bFrontWheel = packet->Read<Bool>();
-	auto conPoint = packet->Read<Vector3>();
-	auto axle = packet->Read<Vector3>();
-	auto dir = packet->Read<Vector3>();
-	auto suspensionLength = packet->Read<Float>();
-	auto suspensionCompression = packet->Read<Float>();
-	auto dampingRelaxation = packet->Read<Float>();
-	auto radius = packet->Read<Float>();
-	auto stiffness = packet->Read<Float>();
-	auto dampingCompression = packet->Read<Float>();
-	auto slip = packet->Read<Float>();
-	auto steeringAngle = packet->Read<Float>();
-	auto wheelRot = packet->Read<Float>();
-	auto rollInfluence = packet->Read<Float>();
-	if(ent != nullptr && ent->IsVehicle())
-		Attach(ent,wheelId);
-	SetFrontWheel(bFrontWheel);
-	SetChassisConnectionPoint(conPoint);
-	SetWheelAxle(axle);
-	SetWheelDirection(dir);
-	SetMaxSuspensionLength(suspensionLength);
-	SetMaxSuspensionCompression(suspensionCompression);
-	SetMaxDampingRelaxation(dampingRelaxation);
-	SetWheelRadius(radius);
-	SetSuspensionStiffness(stiffness);
-	SetWheelDampingCompression(dampingCompression);
-	SetFrictionSlip(slip);
-	SetSteeringAngle(steeringAngle);
-	SetWheelRotation(wheelRot);
-	SetRollInfluence(rollInfluence);
+	// TODO
 }
 
 void CWheelComponent::ReceiveSnapshotData(NetPacket &packet)
 {
+	// TODO
+#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto steeringAngle = packet->Read<Float>();
 	SetSteeringAngle(steeringAngle);
 	auto wheelRot = packet->Read<Float>();
 	SetWheelRotation(wheelRot);
 	auto origin = packet->Read<Vector3>();
 	auto rot = packet->Read<Quat>();
-#ifdef ENABLE_DEPRECATED_PHYSICS
 	auto *info = GetWheelInfo();
 	if(info == nullptr)
 		return;
@@ -74,6 +44,7 @@ void CWheelComponent::ReceiveSnapshotData(NetPacket &packet)
 
 Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
+#if 0
 	if(eventId == m_netEvAttach)
 	{
 		auto *ent = nwm::read_entity(packet);
@@ -157,5 +128,7 @@ Bool CWheelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pack
 	}
 	else
 		return false;
-	return true;
+#endif
+	// TODO
+	return false;
 }

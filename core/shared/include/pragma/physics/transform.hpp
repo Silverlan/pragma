@@ -34,6 +34,30 @@ namespace pragma::physics
 		Vector3 m_translation = {};
 		Quat m_rotation = uquat::identity();
 	};
+
+	class DLLNETWORK ScaledTransform
+		: public Transform
+	{
+	public:
+		using Transform::Transform;
+		ScaledTransform(const Transform &t);
+		ScaledTransform(const Vector3 &pos,const Quat &rot,const Vector3 &scale);
+		void SetIdentity();
+		const Vector3 &GetScale() const;
+		void SetScale(const Vector3 &scale);
+		void Scale(const Vector3 &scale);
+		Transform GetInverse() const;
+		ScaledTransform operator*(const ScaledTransform &tOther) const;
+		ScaledTransform operator*(const Transform &tOther) const;
+		ScaledTransform &operator*=(const ScaledTransform &tOther);
+		ScaledTransform &operator*=(const Transform &tOther);
+		Vector3 operator*(const Vector3 &translation) const;
+		Quat operator*(const Quat &rot) const;
+
+		Mat4 ToMatrix() const;
+	private:
+		Vector3 m_scale = {1.f,1.f,1.f};
+	};
 };
 
 #endif

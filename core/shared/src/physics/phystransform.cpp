@@ -46,13 +46,15 @@ void pragma::physics::Transform::SetIdentity()
 pragma::physics::Transform pragma::physics::Transform::operator*(const Transform &tOther) const
 {
 	auto res = *this;
-	uvec::rotate(&res.m_translation,tOther.m_rotation);
-	res.m_rotation *= tOther.m_rotation;
+	res *= tOther;
 	return res;
 }
 pragma::physics::Transform &pragma::physics::Transform::operator*=(const Transform &tOther)
 {
-	*this = *this *tOther;
+	auto translation = tOther.m_translation;
+	uvec::rotate(&translation,m_rotation);
+	m_rotation *= tOther.m_rotation;
+	m_translation += translation;
 	return *this;
 }
 Vector3 pragma::physics::Transform::operator*(const Vector3 &translation) const
@@ -64,7 +66,64 @@ Vector3 pragma::physics::Transform::operator*(const Vector3 &translation) const
 }
 Quat pragma::physics::Transform::operator*(const Quat &rot) const
 {
-	auto result = rot;
-	result *= m_rotation;
-	return result;
+	return m_rotation *rot;
+}
+
+/////////////
+
+pragma::physics::ScaledTransform::ScaledTransform(const Transform &t)
+	: Transform{t}
+{}
+pragma::physics::ScaledTransform::ScaledTransform(const Vector3 &pos,const Quat &rot,const Vector3 &scale)
+	: Transform{pos,rot},m_scale{scale}
+{}
+void pragma::physics::ScaledTransform::SetIdentity()
+{
+	Transform::SetIdentity();
+	m_scale = {1.f,1.f,1.f};
+}
+const Vector3 &pragma::physics::ScaledTransform::GetScale() const {return m_scale;}
+void pragma::physics::ScaledTransform::SetScale(const Vector3 &scale) {m_scale = scale;}
+void pragma::physics::ScaledTransform::Scale(const Vector3 &scale) {m_scale *= scale;}
+pragma::physics::Transform pragma::physics::ScaledTransform::GetInverse() const
+{
+	ScaledTransform inverse {Transform::GetInverse()};
+	inverse.SetScale(GetScale());
+	return inverse;
+}
+pragma::physics::ScaledTransform pragma::physics::ScaledTransform::operator*(const ScaledTransform &tOther) const
+{
+	auto res = *this;
+	res *= tOther;
+	return res;
+}
+pragma::physics::ScaledTransform pragma::physics::ScaledTransform::operator*(const Transform &tOther) const
+{
+	auto res = *this;
+	res *= tOther;
+	return res;
+}
+pragma::physics::ScaledTransform &pragma::physics::ScaledTransform::operator*=(const ScaledTransform &tOther)
+{
+	Transform::operator*=(tOther);
+	m_scale *= tOther.m_scale;
+	return *this;
+}
+pragma::physics::ScaledTransform &pragma::physics::ScaledTransform::operator*=(const Transform &tOther)
+{
+	Transform::operator*=(tOther);
+	return *this;
+}
+Vector3 pragma::physics::ScaledTransform::operator*(const Vector3 &translation) const
+{
+	return Transform::operator*(translation);
+}
+Quat pragma::physics::ScaledTransform::operator*(const Quat &rot) const
+{
+	return Transform::operator*(rot);
+}
+
+Mat4 pragma::physics::ScaledTransform::ToMatrix() const
+{
+	return glm::scale(glm::mat4{1.f},m_scale) *Transform::ToMatrix();
 }

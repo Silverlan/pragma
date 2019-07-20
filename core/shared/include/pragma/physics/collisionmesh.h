@@ -52,6 +52,7 @@ private:
 	Vector3 m_min = {};
 	Vector3 m_max = {};
 	Vector3 m_origin = {};
+	float m_mass = 0.f;
 	std::shared_ptr<pragma::physics::IShape> m_shape = nullptr;
 	bool m_bConvex = true;
 	int m_boneID = -1;
@@ -81,6 +82,8 @@ public:
 	void SetSurfaceMaterial(int id);
 	void SetSurfaceMaterial(const std::string &surfMat);
 	int GetSurfaceMaterial() const;
+	void SetMass(float mass);
+	float GetMass() const;
 	void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData);
 	void AddVertex(const Vector3 &v);
 	void Rotate(const Quat &rot);

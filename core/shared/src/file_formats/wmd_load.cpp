@@ -281,6 +281,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 	Vector3 collisionMin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
 	unsigned char numMeshes = Read<unsigned char>();
+	auto massPerMesh = mass /static_cast<float>(numMeshes); // TODO: Allow individual mass per collision mesh
 	for(unsigned char i=0;i<numMeshes;i++)
 	{
 		int boneParent = Read<int>();
@@ -307,6 +308,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 		auto mesh = CollisionMesh::Create(game);
 		if(matSurface != nullptr)
 			mesh->SetSurfaceMaterial(CInt32(matSurface->GetIndex()));
+		mesh->SetMass(massPerMesh);
 		mesh->SetOrigin(origin);
 		std::vector<Vector3> &colVerts = mesh->GetVertices();
 		mesh->SetBoneParent(boneParent);

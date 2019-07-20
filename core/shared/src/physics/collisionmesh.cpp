@@ -33,7 +33,8 @@ CollisionMesh::CollisionMesh(const CollisionMesh &other)
 	m_volume = other.m_volume;
 	m_softBodyInfo = (m_softBodyInfo != nullptr) ? std::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
 }
-
+void CollisionMesh::SetMass(float mass) {m_mass = mass;}
+float CollisionMesh::GetMass() const {return m_mass;}
 int CollisionMesh::GetSurfaceMaterial() const {return m_surfaceMaterialId;}
 void CollisionMesh::SetSurfaceMaterial(int id) {m_surfaceMaterialId = id;}
 void CollisionMesh::SetSurfaceMaterial(const std::string &surfMat)
@@ -133,6 +134,11 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 				ptrShape->AddTriangle(a *scale,b *scale,c *scale,mat);
 		}
 		ptrShape->Build(&materials);
+	}
+	if(shape)
+	{
+		shape->SetMass(GetMass());
+		shape->SetLocalPose(pragma::physics::Transform{-GetOrigin(),uquat::identity()});
 	}
 	return shape;
 }

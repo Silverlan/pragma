@@ -1146,6 +1146,24 @@ int32_t Model::LookupAttachment(const std::string &name)
 	return -1;
 }
 
+std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceAttachmentPose(int32_t attId) const
+{
+	auto *att = const_cast<Model*>(this)->GetAttachment(attId);
+	if(att == nullptr)
+		return {};
+	pragma::physics::ScaledTransform t {att->offset,uquat::create(att->angles)};
+	auto &reference = GetReference();
+	auto *bonePos = reference.GetBonePosition(att->bone);
+	auto *boneRot = reference.GetBoneOrientation(att->bone);
+	auto *boneScale = reference.GetBoneScale(att->bone);
+	t = pragma::physics::ScaledTransform {
+		bonePos ? *bonePos : Vector3{},
+		boneRot ? *boneRot : uquat::identity(),
+		boneScale ? *boneScale : Vector3{1.f,1.f,1.f}
+	} *t;
+	return t;
+}
+
 uint32_t Model::GetBoneCount() const {return m_skeleton->GetBoneCount();}
 
 Mat4 *Model::GetBindPoseBoneMatrix(uint32_t boneID)

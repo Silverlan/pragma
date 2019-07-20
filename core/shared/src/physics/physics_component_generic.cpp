@@ -26,7 +26,40 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const Vector3 &origin)
+#pragma optimize("",off)
+uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose,BoneId boneId)
+{
+	if(shape.IsCompoundShape())
+	{
+		uint32_t numShapes = 0;
+		for(auto &subShapeInfo : shape.GetCompoundShape()->GetShapes())
+			numShapes += AddShape(*subShapeInfo.shape,localPose *subShapeInfo.localPose,boneId);
+		return numShapes;
+	}
+	auto it = m_shapes.find(boneId);
+	if(it == m_shapes.end())
+		it = m_shapes.insert(std::make_pair(boneId,std::vector<ShapeInfo>{})).first;
+	it->second.push_back({});
+	auto &shapeInfo = it->second.back();
+	shapeInfo.shape = std::static_pointer_cast<physics::IShape>(shape.shared_from_this());
+	shapeInfo.localPose = localPose;
+	return 1;
+}
+void pragma::physics::PhysObjCreateInfo::SetModelMeshBoneMapping(MeshIndex modelMeshIndex,BoneId boneIndex)
+{
+	m_modelMeshIndexToShapeIndex[modelMeshIndex] = boneIndex;
+}
+void pragma::physics::PhysObjCreateInfo::SetModel(Model &model)
+{
+	m_model = model.GetHandle();
+}
+Model *pragma::physics::PhysObjCreateInfo::GetModel() const {return m_model.get();}
+const std::unordered_map<pragma::physics::PhysObjCreateInfo::BoneId,std::vector<pragma::physics::PhysObjCreateInfo::ShapeInfo>> &pragma::physics::PhysObjCreateInfo::GetShapes() const {return m_shapes;}
+const std::unordered_map<pragma::physics::PhysObjCreateInfo::MeshIndex,pragma::physics::PhysObjCreateInfo::BoneId> &pragma::physics::PhysObjCreateInfo::GetModelMeshBoneMappings() const {return m_modelMeshIndexToShapeIndex;}
+
+/////////////
+
+util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const physics::Transform &localPose)
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -36,10 +69,10 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	auto body = physEnv->CreateRigidBody(shape,dynamic);
 	if(body == nullptr)
 		return nullptr;
-	body->SetOrigin(origin);
+	body->TransformLocalPose(localPose);
 	auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
-	auto tOrigin = origin;
+	auto rot = (pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity()) *localPose.GetRotation();
+	auto tOrigin = localPose.GetOrigin();
 	uvec::rotate(&tOrigin,rot);
 	physics::Transform startTransform;
 	startTransform.SetIdentity();
@@ -64,56 +97,28 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	return body;
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
+util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId)
 {
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
 		return {};
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	auto &meshes = hMdl->GetCollisionMeshes();
-	if(meshes.empty())
+
+	auto &physObjShapes = physObjCreateInfo.GetShapes();
+	if(physObjShapes.empty())
 		return {};
 
 	auto bPhys = false;
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
-	auto &joints = hMdl->GetJoints();
-	struct SortedShape
-	{
-		SortedShape()
-			: body(nullptr)
-		{}
-		std::vector<std::pair<std::shared_ptr<pragma::physics::IShape>,Vector3>> shapes;
-		util::TSharedHandle<pragma::physics::IRigidBody> body;
-	};
-	std::unordered_map<int,SortedShape> sortedShapes;
-	std::unordered_map<unsigned int,unsigned int> sortedShapeMap; // meshes -> sortedShapes
-	unsigned int meshId = 0;
-	sortedShapeMap.reserve(meshes.size());
-	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
-	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
-	for(auto &mesh : meshes)
-	{
-		auto shape = (bScale == false) ? mesh->GetShape() : mesh->CreateShape(scale);
-		if(shape != nullptr)
-		{
-			auto bone = mesh->GetBoneParent();
-			auto itMesh = sortedShapes.find(bone);
-			if(itMesh == sortedShapes.end())
-				itMesh = sortedShapes.insert(std::unordered_map<int,SortedShape>::value_type(bone,SortedShape())).first;
-			itMesh->second.shapes.push_back({shape,mesh->GetOrigin() *scale});
-			sortedShapeMap[meshId] = bone;
-		}
-		meshId++;
-	}
-	if(sortedShapes.empty())
-		return {};
-	auto itRoot = sortedShapes.find(meshes.front()->GetBoneParent()); // Find root mesh
+	auto *mdl = physObjCreateInfo.GetModel();
+	auto *joints = mdl ? &mdl->GetJoints() : nullptr;
+
+	std::unordered_map<physics::PhysObjCreateInfo::BoneId,util::TSharedHandle<physics::IRigidBody>> boneIdToRigidBody = {};
+	auto itRoot = physObjShapes.find(rootMeshBoneId); // Find root mesh
 	auto it = itRoot;
-	auto bHasRoot = (it != sortedShapes.end()) ? true : false;
+	auto bHasRoot = (it != physObjShapes.end()) ? true : false;
 	auto bUseRoot = bHasRoot;
 	for(;;)
 	{
@@ -124,7 +129,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 				if(bUseRoot == false)
 				{
 					bHasRoot = false;
-					it = sortedShapes.begin();
+					it = physObjShapes.begin();
 					if(it == itRoot)
 						++it;
 				}
@@ -134,23 +139,31 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		}
 		else
 			++it;
-		if(it == sortedShapes.end())
+		if(it == physObjShapes.end())
 			break;
 		else if(it == itRoot && bHasRoot == false)
 			continue;
 		//auto bone = it->first;
 		auto &sortedShape = it->second;
-		auto &shapes = sortedShape.shapes;
+		auto &shapes = sortedShape;
 		std::shared_ptr<pragma::physics::IShape> shape;
+		pragma::physics::Transform localPose {};
 		if(shapes.size() == 1)
-			shape = shapes.front().first;
+		{
+			auto &shapeInfo = shapes.front();
+			shape = shapeInfo.shape.lock();
+			localPose = shapeInfo.localPose;
+		}
 		else
 		{
 			if(umath::is_flag_set(flags,PhysFlags::Dynamic) == false)
 			{
-				for(auto it=shapes.begin();it!=shapes.end();++it)
+				/*for(auto it=shapes.begin();it!=shapes.end();++it)
 				{
-					auto body = CreateRigidBody(*it->first,umath::is_flag_set(flags,PhysFlags::Dynamic),-it->second);
+					auto shape = it->shape.lock();
+					if(shape == nullptr)
+						continue;
+					auto body = CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic),it->localPose);
 					if(body == nullptr)
 						continue;
 					if(bPhys == false)
@@ -162,21 +175,28 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 					}
 					else
 						m_physObject->AddCollisionObject(*body);
-				}
-				/*shape = physEnv->CreateCompoundShape();
-				auto cmpShape = std::static_pointer_cast<PhysCompoundShape>(shape);
+				}*/
+				// Compound mesh for all geometry; This may cause a crash in btAdjustInternalEdgeContacts
+				// when bullet physics is used? If so, try the code above instead!
+				shape = physEnv->CreateCompoundShape();
+				auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
 				for(auto it=shapes.begin();it!=shapes.end();++it)
-					cmpShape->AddShape(it->shape,-it->origin);
-				auto *body = CreateRigidBody(shape,mass,Vector3{});//-it->origin);
+				{
+					auto subShape = it->shape.lock();
+					if(subShape == nullptr)
+						continue;
+					cmpShape->AddShape(*subShape,it->localPose);
+				}
+				auto body = CreateRigidBody(*cmpShape,umath::is_flag_set(flags,PhysFlags::Dynamic));
 				if(bPhys == false)
 				{
 					bPhys = true;
 					if(m_physObject != nullptr)
 						DestroyPhysicsObject();
-					m_physObject = new RigidPhysObj(this,body);
+					m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
 				}
 				else
-					m_physObject->AddCollisionObject(body);*/ // Compound mesh for all geometry; Causes crash in btAdjustInternalEdgeContacts
+				m_physObject->AddCollisionObject(*body);
 				continue;
 			}
 			shape = physEnv->CreateCompoundShape();
@@ -184,18 +204,23 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 			{
 				auto cmpShape = std::dynamic_pointer_cast<pragma::physics::ICompoundShape>(shape);
 				for(auto it=shapes.begin();it!=shapes.end();++it)
-					cmpShape->AddShape(*it->first,-it->second);
+				{
+					auto subShape = it->shape.lock();
+					if(subShape == nullptr)
+						continue;
+					cmpShape->AddShape(*subShape,it->localPose);
+				}
 			}
 		}
 		if(shape == nullptr)
 			continue;
-		auto body = CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic));
+		auto body = CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic),localPose);
 		if(body == nullptr)
 			continue;
 		body->SetBoneID(it->first);
-		if(it->first >= 0 && umath::is_flag_set(flags,PhysFlags::Dynamic) == true && joints.empty() == false) // Static physics and non-ragdolls can still play animation
+		if(it->first >= 0 && umath::is_flag_set(flags,PhysFlags::Dynamic) == true && joints && joints->empty() == false) // Static physics and non-ragdolls can still play animation
 			umath::set_flag(m_stateFlags,StateFlags::Ragdoll);
-		sortedShape.body = body;
+		boneIdToRigidBody[it->first] = body;
 		if(bPhys == false)
 		{
 			bPhys = true;
@@ -206,144 +231,154 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		else
 			m_physObject->AddCollisionObject(*body);
 	}
-	for(auto it=joints.begin();it!=joints.end();++it)
+	auto &modelMeshIndexToShapeIndex = physObjCreateInfo.GetModelMeshBoneMappings();
+	if(joints)
 	{
-		auto &joint = *it;
-		auto itSrc = sortedShapeMap.find(joint.dest);//joint.src); // TODO: Swap variable names
-		auto itDest = sortedShapeMap.find(joint.src);
-		if(itSrc != sortedShapeMap.end() && itDest != sortedShapeMap.end())
+		for(auto it=joints->begin();it!=joints->end();++it)
 		{
-			auto &src = sortedShapes[itSrc->second]; // Bone Id
-			auto &dest = sortedShapes[itDest->second]; // Bone Id
-			auto &bodySrc = src.body;
-			auto &bodyTgt = dest.body;
-			if(bodySrc == nullptr || bodyTgt == nullptr)
-				continue;
-			util::TSharedHandle<pragma::physics::IConstraint> c = nullptr;
-
-			auto boneId = itDest->second;
-
-			auto &pose = hMdl->GetReference();
-			// Constraint position/rotation
-			auto posConstraint = *pose.GetBonePosition(boneId);
-			auto rotConstraint = *pose.GetBoneOrientation(boneId);
-
-			auto posTgt = posConstraint +bodyTgt->GetOrigin();
-
-			posConstraint = posConstraint +bodySrc->GetOrigin();
-			//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
-			//
-			if(joint.type == JOINT_TYPE_FIXED)
-				c = util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc,posConstraint,uquat::identity(),*bodyTgt,posTgt,uquat::identity()));
-			else if(joint.type == JOINT_TYPE_CONETWIST)
+			auto &joint = *it;
+			auto itSrc = modelMeshIndexToShapeIndex.find(joint.dest);//joint.src); // TODO: Swap variable names
+			auto itDest = modelMeshIndexToShapeIndex.find(joint.src);
+			if(itSrc != modelMeshIndexToShapeIndex.end() && itDest != modelMeshIndexToShapeIndex.end())
 			{
-				// Conetwist constraints are deprecated for ragdolls and should be avoided.
-				// Use DoF constraints instead!
-				auto sp = Vector2(0.f,0.f);
-				auto sp2 = Vector2(0.f,0.f);
-				auto ts = Vector2(0.f,0.f);
+				auto it0 = physObjShapes.find(itSrc->second);
+				auto it1 = physObjShapes.find(itDest->second);
+				if(it0 == physObjShapes.end() || it1 == physObjShapes.end())
+					continue;
+				auto &src = *it0; // Bone Id
+				auto &dest = *it1; // Bone Id
+				auto itBodySrc = boneIdToRigidBody.find(src.first);
+				auto itBodyDst = boneIdToRigidBody.find(dest.first);
+				auto bodySrc = (itBodySrc != boneIdToRigidBody.end()) ? itBodySrc->second : nullptr;
+				auto bodyTgt = (itBodyDst != boneIdToRigidBody.end()) ? itBodyDst->second : nullptr;
+				if(bodySrc == nullptr || bodyTgt == nullptr)
+					continue;
+				util::TSharedHandle<pragma::physics::IConstraint> c = nullptr;
 
-				auto sp1l = joint.args.find("sp1l");
-				if(sp1l != joint.args.end())
-					sp[0] = CFloat(atof(sp1l->second.c_str()));
-				auto sp1u = joint.args.find("sp1u");
-				if(sp1u != joint.args.end())
-					sp[1] = CFloat(atof(sp1u->second.c_str()));
+				auto boneId = itDest->second;
 
-				auto sp2l = joint.args.find("sp2l");
-				if(sp2l != joint.args.end())
-					sp2[0] = CFloat(atof(sp2l->second.c_str()));
-				auto sp2u = joint.args.find("sp2u");
-				if(sp2u != joint.args.end())
-					sp2[1] = CFloat(atof(sp2u->second.c_str()));
+				auto &pose = mdl->GetReference();
+				// Constraint position/rotation
+				auto posConstraint = *pose.GetBonePosition(boneId);
+				auto rotConstraint = *pose.GetBoneOrientation(boneId);
 
-				auto tsl = joint.args.find("tsl");
-				if(tsl != joint.args.end())
-					ts[0] = CFloat(atof(tsl->second.c_str()));
-				auto tsu = joint.args.find("tsu");
-				if(tsu != joint.args.end())
-					ts[1] = CFloat(atof(tsu->second.c_str()));
+				auto posTgt = posConstraint +bodyTgt->GetOrigin();
 
-				// Notes:
-				// bodySrc is the parent collision object. The constraint origin is relative to this parent.
-				// We want the origin to be at the position of the parent's bone, so we need to define it as the
-				// difference between the two, which is 'posConstraint'.
-				// Since the parent collision object doesn't have a rotation, we can just use the bone's rotation for
-				// the constraint ('rotConstraint').
-				// The same applies for the constraint child, which is the collision object affected by the constraint.
-				// However, since the constraint limits are defined as min and max values, but bullet uses a single span value (=(max -min) /2.0),
-				// the rotation has to be changed to point to the 'center' of the limits ('rotOffset').
-				auto rotOffset = uquat::create(EulerAngles((sp.y +sp.x) *0.5f,(ts.y +ts.x) *0.5f,(sp2.y +sp2.x) *0.5f));
-				auto ct = physEnv->CreateConeTwistConstraint(*bodySrc,posConstraint,rotConstraint,*bodyTgt,posTgt,rotOffset);
-				auto softness = 1.f;
-				auto biasFactor = 0.3f;
-				auto relaxationFactor = 1.f;
+				posConstraint = posConstraint +bodySrc->GetOrigin();
+				//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
+				//
+				if(joint.type == JOINT_TYPE_FIXED)
+					c = util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc,posConstraint,uquat::identity(),*bodyTgt,posTgt,uquat::identity()));
+				else if(joint.type == JOINT_TYPE_CONETWIST)
+				{
+					// Conetwist constraints are deprecated for ragdolls and should be avoided.
+					// Use DoF constraints instead!
+					auto sp = Vector2(0.f,0.f);
+					auto sp2 = Vector2(0.f,0.f);
+					auto ts = Vector2(0.f,0.f);
 
-				auto sftn = joint.args.find("sftn");
-				if(sftn != joint.args.end())
-					softness = CFloat(atof(sftn->second.c_str()));
-				auto bias = joint.args.find("bias");
-				if(bias != joint.args.end())
-					biasFactor = CFloat(atof(bias->second.c_str()));
-				auto rlx = joint.args.find("rlx");
-				if(rlx != joint.args.end())
-					relaxationFactor = CFloat(atof(rlx->second.c_str()));
+					auto sp1l = joint.args.find("sp1l");
+					if(sp1l != joint.args.end())
+						sp[0] = CFloat(atof(sp1l->second.c_str()));
+					auto sp1u = joint.args.find("sp1u");
+					if(sp1u != joint.args.end())
+						sp[1] = CFloat(atof(sp1u->second.c_str()));
 
-				auto swingSpan1 = (sp.y -sp.x) *0.5f;
-				auto swingSpan2 = (sp2.y -sp2.x) *0.5f;
-				auto twistSpan = (ts.y -ts.x) *0.5f;
+					auto sp2l = joint.args.find("sp2l");
+					if(sp2l != joint.args.end())
+						sp2[0] = CFloat(atof(sp2l->second.c_str()));
+					auto sp2u = joint.args.find("sp2u");
+					if(sp2u != joint.args.end())
+						sp2[1] = CFloat(atof(sp2u->second.c_str()));
 
-				ct->SetLimit(
-					CFloat(umath::deg_to_rad(swingSpan1)),
-					CFloat(umath::deg_to_rad(swingSpan2)),
-					CFloat(umath::deg_to_rad(twistSpan)),
-					softness,biasFactor,relaxationFactor
-				);
-				c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
-			}
-			else if(joint.type == JOINT_TYPE_DOF)
-			{
-				auto limitLinMin = Vector3(0.f,0.f,0.f);
-				auto limitLinMax = Vector3(0.f,0.f,0.f);
+					auto tsl = joint.args.find("tsl");
+					if(tsl != joint.args.end())
+						ts[0] = CFloat(atof(tsl->second.c_str()));
+					auto tsu = joint.args.find("tsu");
+					if(tsu != joint.args.end())
+						ts[1] = CFloat(atof(tsu->second.c_str()));
 
-				auto limitAngMin = EulerAngles(0.f,0.f,0.f);
-				auto limitAngMax = EulerAngles(0.f,0.f,0.f);
+					// Notes:
+					// bodySrc is the parent collision object. The constraint origin is relative to this parent.
+					// We want the origin to be at the position of the parent's bone, so we need to define it as the
+					// difference between the two, which is 'posConstraint'.
+					// Since the parent collision object doesn't have a rotation, we can just use the bone's rotation for
+					// the constraint ('rotConstraint').
+					// The same applies for the constraint child, which is the collision object affected by the constraint.
+					// However, since the constraint limits are defined as min and max values, but bullet uses a single span value (=(max -min) /2.0),
+					// the rotation has to be changed to point to the 'center' of the limits ('rotOffset').
+					auto rotOffset = uquat::create(EulerAngles((sp.y +sp.x) *0.5f,(ts.y +ts.x) *0.5f,(sp2.y +sp2.x) *0.5f));
+					auto ct = physEnv->CreateConeTwistConstraint(*bodySrc,posConstraint,rotConstraint,*bodyTgt,posTgt,rotOffset);
+					auto softness = 1.f;
+					auto biasFactor = 0.3f;
+					auto relaxationFactor = 1.f;
 
-				auto itLimitLinMin = joint.args.find("lin_limit_l");
-				if(itLimitLinMin != joint.args.end())
-					limitLinMin = uvec::create(itLimitLinMin->second);
+					auto sftn = joint.args.find("sftn");
+					if(sftn != joint.args.end())
+						softness = CFloat(atof(sftn->second.c_str()));
+					auto bias = joint.args.find("bias");
+					if(bias != joint.args.end())
+						biasFactor = CFloat(atof(bias->second.c_str()));
+					auto rlx = joint.args.find("rlx");
+					if(rlx != joint.args.end())
+						relaxationFactor = CFloat(atof(rlx->second.c_str()));
 
-				auto itLimitLinMax = joint.args.find("lin_limit_u");
-				if(itLimitLinMax != joint.args.end())
-					limitLinMax = uvec::create(itLimitLinMax->second);
+					auto swingSpan1 = (sp.y -sp.x) *0.5f;
+					auto swingSpan2 = (sp2.y -sp2.x) *0.5f;
+					auto twistSpan = (ts.y -ts.x) *0.5f;
 
-				auto itLimitAngMin = joint.args.find("ang_limit_l");
-				if(itLimitAngMin != joint.args.end())
-					limitAngMin = EulerAngles(itLimitAngMin->second);
+					ct->SetLimit(
+						CFloat(umath::deg_to_rad(swingSpan1)),
+						CFloat(umath::deg_to_rad(swingSpan2)),
+						CFloat(umath::deg_to_rad(twistSpan)),
+						softness,biasFactor,relaxationFactor
+					);
+					c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
+				}
+				else if(joint.type == JOINT_TYPE_DOF)
+				{
+					auto limitLinMin = Vector3(0.f,0.f,0.f);
+					auto limitLinMax = Vector3(0.f,0.f,0.f);
 
-				auto itLimitAngMax = joint.args.find("ang_limit_u");
-				if(itLimitAngMax != joint.args.end())
-					limitAngMax = EulerAngles(itLimitAngMax->second);
+					auto limitAngMin = EulerAngles(0.f,0.f,0.f);
+					auto limitAngMax = EulerAngles(0.f,0.f,0.f);
 
-				auto ct = physEnv->CreateDoFSpringConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
-				//auto *ct = physEnv->CreateDoFConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
+					auto itLimitLinMin = joint.args.find("lin_limit_l");
+					if(itLimitLinMin != joint.args.end())
+						limitLinMin = uvec::create(itLimitLinMin->second);
 
-				//ct->SetLinearLimit(limitLinMin,limitLinMax);
-				//ct->SetAngularLimit(limitAngMin,limitAngMax);
-				ct->SetLinearLowerLimit(limitLinMin);
-				ct->SetLinearUpperLimit(limitLinMax);
+					auto itLimitLinMax = joint.args.find("lin_limit_u");
+					if(itLimitLinMax != joint.args.end())
+						limitLinMax = uvec::create(itLimitLinMax->second);
 
-				ct->SetAngularLowerLimit(Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)));
-				ct->SetAngularUpperLimit(Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r)));
+					auto itLimitAngMin = joint.args.find("ang_limit_l");
+					if(itLimitAngMin != joint.args.end())
+						limitAngMin = EulerAngles(itLimitAngMin->second);
 
-				c = util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(ct);
-			}
-			if(c != nullptr)
-			{
-				c->SetCollisionsEnabled(joint.collide);
-				m_joints.push_back(PhysJoint(itSrc->second,itDest->second));
-				auto &jointData = m_joints.back();
-				jointData.constraint = c;
+					auto itLimitAngMax = joint.args.find("ang_limit_u");
+					if(itLimitAngMax != joint.args.end())
+						limitAngMax = EulerAngles(itLimitAngMax->second);
+
+					auto ct = physEnv->CreateDoFSpringConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
+					//auto *ct = physEnv->CreateDoFConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
+
+					//ct->SetLinearLimit(limitLinMin,limitLinMax);
+					//ct->SetAngularLimit(limitAngMin,limitAngMax);
+					ct->SetLinearLowerLimit(limitLinMin);
+					ct->SetLinearUpperLimit(limitLinMax);
+
+					ct->SetAngularLowerLimit(Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)));
+					ct->SetAngularUpperLimit(Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r)));
+
+					c = util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(ct);
+				}
+				if(c != nullptr)
+				{
+					c->SetCollisionsEnabled(joint.collide);
+					m_joints.push_back(PhysJoint(itSrc->second,itDest->second));
+					auto &jointData = m_joints.back();
+					jointData.constraint = c;
+				}
 			}
 		}
 	}
@@ -353,6 +388,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
 	auto animComponent = ent.GetAnimatedComponent();
 	pragma::physics::ICollisionObject *root = nullptr;
+	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 	if(!collisionObjs.empty())
 	{
@@ -375,68 +411,72 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 			fUpdateCollisionObjects(it.second->children);
 		}
 	};
-	auto &skeleton = hMdl->GetSkeleton();
-	//auto &rootBones = skeleton.GetRootBones();
-	//fUpdateCollisionObjects(rootBones);
 
-	if(m_joints.empty() == false) // Is this a ragdoll?
+	if(mdl)
 	{
-		// Set collision object positions to current bone positions to
-		// transition the current animation smoothly into the ragdoll
-		auto &reference = hMdl->GetReference();
-		for(auto &colObj : collisionObjs)
+		auto &skeleton = mdl->GetSkeleton();
+		//auto &rootBones = skeleton.GetRootBones();
+		//fUpdateCollisionObjects(rootBones);
+
+		if(m_joints.empty() == false) // Is this a ragdoll?
 		{
-			auto boneId = colObj->GetBoneID();
-			auto *posRef = reference.GetBonePosition(boneId);
-			if(posRef == nullptr)
-				continue;
-			auto *rotRef = reference.GetBoneOrientation(boneId);
-				
-			Vector3 pos = {};
-			Quat rot = uquat::identity();
-			if(animComponent.valid())
-				animComponent->GetLocalBonePosition(boneId,pos,rot);
-			rot = rot *uquat::get_inverse(*rotRef);
-			auto offset = *posRef +colObj->GetOrigin();
-			uvec::rotate(&offset,rot);
-			pos = pos +(-offset);
-			if(pTrComponent.valid())
-				pTrComponent->LocalToWorld(&pos,&rot);
-
-			colObj->SetPos(pos);
-			colObj->SetRotation(rot);
-		}
-	}
-
-	// Update position
-	//SetPosition(posRoot,true);
-
-	// Transform all bones, which don't have a shape assigned to them, to the reference pose (As they won't be affected by ragdoll physics)
-	// TODO: This can look ugly, because it 'snaps' the bones in place. This should be done over several frames to make the transition smoother!
-	if(animComponent.valid())
-	{
-		auto refAnim = hMdl->GetAnimation(0);
-		if(refAnim != nullptr)
-		{
-			auto frame = refAnim->GetFrame(0); // Reference frame with local bone transformations
-			if(frame != nullptr)
+			// Set collision object positions to current bone positions to
+			// transition the current animation smoothly into the ragdoll
+			auto &reference = mdl->GetReference();
+			for(auto &colObj : collisionObjs)
 			{
-				auto &bones = skeleton.GetBones();
-				for(auto &bone : bones)
+				auto boneId = colObj->GetBoneID();
+				auto *posRef = reference.GetBonePosition(boneId);
+				if(posRef == nullptr)
+					continue;
+				auto *rotRef = reference.GetBoneOrientation(boneId);
+
+				Vector3 pos = {};
+				Quat rot = uquat::identity();
+				if(animComponent.valid())
+					animComponent->GetLocalBonePosition(boneId,pos,rot);
+				rot = rot *uquat::get_inverse(*rotRef);
+				auto offset = *posRef +colObj->GetOrigin();
+				uvec::rotate(&offset,rot);
+				pos = pos +(-offset);
+				if(pTrComponent.valid())
+					pTrComponent->LocalToWorld(&pos,&rot);
+
+				colObj->SetPos(pos);
+				colObj->SetRotation(rot);
+			}
+		}
+
+		// Update position
+		//SetPosition(posRoot,true);
+
+		// Transform all bones, which don't have a shape assigned to them, to the reference pose (As they won't be affected by ragdoll physics)
+		// TODO: This can look ugly, because it 'snaps' the bones in place. This should be done over several frames to make the transition smoother!
+		if(animComponent.valid())
+		{
+			auto refAnim = mdl->GetAnimation(0);
+			if(refAnim != nullptr)
+			{
+				auto frame = refAnim->GetFrame(0); // Reference frame with local bone transformations
+				if(frame != nullptr)
 				{
-					auto it = sortedShapes.find(bone->ID);
-					if(it == sortedShapes.end())
+					auto &bones = skeleton.GetBones();
+					for(auto &bone : bones)
 					{
-						auto *pos = frame->GetBonePosition(bone->ID);
-						auto *rot = frame->GetBoneOrientation(bone->ID);
-						if(pos != nullptr)
-							animComponent->SetBonePosition(bone->ID,*pos,*rot);
+						auto it = physObjShapes.find(bone->ID);
+						if(it == physObjShapes.end())
+						{
+							auto *pos = frame->GetBonePosition(bone->ID);
+							auto *rot = frame->GetBoneOrientation(bone->ID);
+							if(pos != nullptr)
+								animComponent->SetBonePosition(bone->ID,*pos,*rot);
+						}
 					}
 				}
 			}
 		}
+		//
 	}
-	//
 
 	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
 	{
@@ -453,6 +493,38 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	InitializePhysObj();
 	OnPhysicsInitialized();
 	return m_physObject;
+}
+
+util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
+{
+	physics::PhysObjCreateInfo physObjCreateInfo {};
+
+	auto &ent = GetEntity();
+	auto mdlComponent = ent.GetModelComponent();
+	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
+		return {};
+	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &meshes = hMdl->GetCollisionMeshes();
+	if(meshes.empty())
+		return {};
+	unsigned int meshId = 0;
+	auto pTrComponent = ent.GetTransformComponent();
+	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
+	for(auto &mesh : meshes)
+	{
+		auto shape = (bScale == false) ? mesh->GetShape() : mesh->CreateShape(scale);
+		if(shape != nullptr)
+		{
+			auto bone = mesh->GetBoneParent();
+			// Note: Collision mesh origin has already been applied as local pose to the shape when it was created,
+			// so we don't need to define any pose transform here!
+			physObjCreateInfo.AddShape(*shape,physics::Transform{},bone);
+			physObjCreateInfo.SetModelMeshBoneMapping(meshId,bone);
+		}
+		meshId++;
+	}
+	return InitializePhysics(physObjCreateInfo,flags,meshes.front()->GetBoneParent());
 }
 
 util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags flags) // Obsolete?
@@ -639,6 +711,9 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type,PhysFlags flag
 		ent.AddComponent<pragma::VelocityComponent>();
 		ent.AddComponent<pragma::GravityComponent>();
 	}
+	auto evInitPhysics = CEInitializePhysics{type,flags};
+	if(BroadcastEvent(EVENT_INITIALIZE_PHYSICS,evInitPhysics) == util::EventReply::Handled)
+		return GetPhysicsObject(); // Handled by an external component
 	switch(type)
 	{
 		case PHYSICSTYPE::BOXCONTROLLER:
@@ -838,3 +913,4 @@ float BasePhysicsComponent::GetMass() const
 		return 0.f;
 	return phys->GetMass();
 }
+#pragma optimize("",on)

@@ -4,6 +4,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/physics/physicstypes.h"
+#include "pragma/model/model_handle.hpp"
 #include <sharedutils/util_shared_handle.hpp>
 
 class BrushMesh;
@@ -13,7 +14,32 @@ enum class MOVETYPE : int;
 enum class COLLISIONTYPE : int;
 namespace pragma
 {
-	namespace physics {class IConvexShape; class IRigidBody; class IConstraint; class IShape;};
+	namespace physics
+	{
+		class IConvexShape; class IRigidBody; class IConstraint; class IShape; class PhysObjCreateInfo;
+
+		struct DLLNETWORK PhysObjCreateInfo
+		{
+			using BoneId = int32_t;
+			using MeshIndex = uint32_t;
+			struct DLLNETWORK ShapeInfo
+			{
+				std::weak_ptr<pragma::physics::IShape> shape = {};
+				physics::Transform localPose = {};
+			};
+			// Returns the number of shapes that have been added
+			uint32_t AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose={},BoneId boneId=-1);
+			void SetModelMeshBoneMapping(MeshIndex modelMeshIndex,BoneId boneIndex);
+			void SetModel(Model &model);
+			Model *GetModel() const;
+			const std::unordered_map<BoneId,std::vector<ShapeInfo>> &GetShapes() const;
+			const std::unordered_map<MeshIndex,BoneId> &GetModelMeshBoneMappings() const;
+		private:
+			std::unordered_map<BoneId,std::vector<ShapeInfo>> m_shapes = {};
+			std::unordered_map<MeshIndex,BoneId> m_modelMeshIndexToShapeIndex = {};
+			ModelHandle m_model = {};
+		};
+	};
 	struct DLLNETWORK CEPhysicsUpdateData
 		: public ComponentEvent
 	{
@@ -77,6 +103,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_SLEEP;
 		static ComponentEventId EVENT_ON_WAKE;
 		static ComponentEventId EVENT_HANDLE_RAYCAST;
+		static ComponentEventId EVENT_INITIALIZE_PHYSICS;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		virtual void Initialize() override;
@@ -191,6 +218,9 @@ namespace pragma
 		bool IsSleepReportEnabled() const;
 		void OnWake();
 		void OnSleep();
+
+		// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
+		util::WeakHandle<PhysObj> InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId=-1);
 	protected:
 		BasePhysicsComponent(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -208,7 +238,7 @@ namespace pragma
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
-		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const Vector3 &origin=Vector3(0.f,0.f,0.f));
+		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const physics::Transform &localPose={});
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
 		util::WeakHandle<PhysObj> InitializeBrushPhysics(PhysFlags flags=PhysFlags::None);
@@ -232,6 +262,14 @@ namespace pragma
 		float m_colRadius = 0.f;
 		Vector3 m_colMin = {};
 		Vector3 m_colMax = {};
+	};
+	struct DLLNETWORK CEInitializePhysics
+		: public ComponentEvent
+	{
+		CEInitializePhysics(PHYSICSTYPE type,BasePhysicsComponent::PhysFlags flags);
+		virtual void PushArguments(lua_State *l) override;
+		PHYSICSTYPE physicsType;
+		BasePhysicsComponent::PhysFlags flags;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::StateFlags);

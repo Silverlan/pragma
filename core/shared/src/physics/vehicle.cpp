@@ -31,20 +31,51 @@ static pragma::physics::IShape *get_shape_from_shape_index(const pragma::physics
 	auto &subShape = subShapes.at(shapeIndex);
 	return subShape.shape.get();
 }
-const pragma::physics::IShape *pragma::physics::ChassisCreateInfo::GetShape(const pragma::physics::IRigidBody &body) const
+std::vector<const pragma::physics::IShape*> pragma::physics::ChassisCreateInfo::GetShapes(const pragma::physics::IRigidBody &body) const
 {
-	return get_shape_from_shape_index(body,shapeIndex);
+	std::vector<const pragma::physics::IShape*> shapes {};
+	shapes.reserve(shapeIndices.size());
+	for(auto shapeIndex : shapeIndices)
+	{
+		auto *shape = get_shape_from_shape_index(body,shapeIndex);
+		if(shape == nullptr)
+			continue;
+		shapes.push_back(shape);
+	}
+	return shapes;
+}
+float pragma::physics::ChassisCreateInfo::GetMass(const pragma::physics::IRigidBody &body) const
+{
+	auto shapes = GetShapes(body);
+	auto mass = 0.f;
+	for(auto *pShape : shapes)
+		mass += pShape->GetMass();
+	return mass;
+}
+void pragma::physics::ChassisCreateInfo::GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const
+{
+	auto shapes = GetShapes(body);
+	min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+	max = {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+	for(auto *pShape : shapes)
+	{
+		Vector3 shapeMin,shapeMax;
+		pShape->GetAABB(shapeMin,shapeMax);
+		uvec::min(&min,shapeMin);
+		uvec::max(&max,shapeMax);
+	}
 }
 Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
 		return *momentOfInertia;
-	auto *shape = GetShape(body);
-	if(shape == nullptr)
+	auto shapes = GetShapes(body);
+	if(shapes.empty())
 		return Vector3{};
-	auto mass = shape->GetMass();
+	auto mass = GetMass(body);
 	Vector3 min,max;
-	shape->GetAABB(min,max);
+	GetAABB(body,min,max);
+
 	auto dims = (max -min) *0.5f;
 	return Vector3 {
 		(umath::pow2(dims.y) +umath::pow2(dims.z)) *mass /12.0,
@@ -74,7 +105,8 @@ pragma::physics::VehicleCreateInfo::Wheel pragma::physics::VehicleCreateInfo::Ge
 	return Wheel::Dummy;
 }
 pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(
-	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,float wheelWidth,float wheelRadius
+	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,float wheelWidth,float wheelRadius,
+	float handBrakeTorque,float maxSteeringAngle
 )
 {
 	VehicleCreateInfo vhcCreateInfo {};
@@ -84,8 +116,6 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 	};
 	vhcCreateInfo.wheelDrive = VehicleCreateInfo::WheelDrive::Four;
 
-	constexpr auto handBrakeTorque = 6'400'000.0;
-	constexpr auto maxSteeringAngle = 60.0;
 	auto numWheels = WHEEL_COUNT_4W_DRIVE;
 	vhcCreateInfo.wheels.reserve(numWheels);
 	for(auto i=decltype(numWheels){0u};i<numWheels;++i)

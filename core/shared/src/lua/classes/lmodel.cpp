@@ -278,6 +278,12 @@ void Lua::Model::register_class(
 	classDef.def("GetFlexControllerCount",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 		Lua::PushInt(l,mdl.GetFlexControllerCount());
 	}));
+	classDef.def("CalcReferenceAttachmentPose",static_cast<void(*)(lua_State*,::Model&,int32_t)>([](lua_State *l,::Model &mdl,int32_t attIdx) {
+		auto t = mdl.CalcReferenceAttachmentPose(attIdx);
+		if(t.has_value() == false)
+			return;
+		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
+	}));
 
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
 	classDef.def("GetIKController",&Lua::Model::GetIKController);

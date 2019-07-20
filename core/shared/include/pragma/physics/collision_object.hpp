@@ -72,8 +72,7 @@ namespace pragma::physics
 		virtual void SetTrigger(bool bTrigger)=0;
 		virtual bool IsTrigger() const=0;
 
-		virtual void SetLocalPose(const Transform &t)=0;
-		virtual Transform GetLocalPose() const=0;
+		virtual void TransformLocalPose(const Transform &t)=0;
 
 		virtual void SetActivationState(ActivationState state)=0;
 		virtual ActivationState GetActivationState() const=0;

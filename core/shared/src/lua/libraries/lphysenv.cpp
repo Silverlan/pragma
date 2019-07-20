@@ -452,7 +452,19 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}),static_cast<void(*)(lua_State*,pragma::physics::ChassisCreateInfo&,const Vector3&)>([](lua_State *l,pragma::physics::ChassisCreateInfo &chassisCreateInfo,const Vector3 &moi) {
 		chassisCreateInfo.momentOfInertia = moi;
 	}));
-	classDefChassisCreateInfo.def_readwrite("shapeIndex",&pragma::physics::ChassisCreateInfo::shapeIndex);
+	classDefChassisCreateInfo.def("AddShapeIndex",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&,uint32_t)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo,uint32_t shapeIndex) {
+		vhcCreateInfo.chassis.shapeIndices.push_back(shapeIndex);
+	}));
+	classDefChassisCreateInfo.def("GetShapeIndices",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo) {
+		auto t = Lua::CreateTable(l);
+		auto i = 1;
+		for(auto idx : vhcCreateInfo.chassis.shapeIndices)
+		{
+			Lua::PushInt(l,i++);
+			Lua::PushInt(l,idx);
+			Lua::SetTableValue(l,t);
+		}
+	}));
 	physMod[classDefChassisCreateInfo];
 
 	auto classDefSuspensionInfo = luabind::class_<pragma::physics::WheelCreateInfo::SuspensionInfo>("SuspensionInfo");
@@ -572,12 +584,24 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefWheelCreateInfo];
 
 	auto classDefTransform = luabind::class_<pragma::physics::Transform>("Transform");
+	classDefTransform.def(luabind::constructor<const Mat4&>());
+	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
-	classDefTransform.def("GetOrigin",&pragma::physics::Transform::GetOrigin);
-	classDefTransform.def("GetRotation",&pragma::physics::Transform::GetRotation);
-	classDefTransform.def("SetOrigin",&pragma::physics::Transform::SetOrigin);
-	classDefTransform.def("SetRotation",&pragma::physics::Transform::SetRotation);
-	classDefTransform.def("SetIdentity",&pragma::physics::Transform::SetIdentity);
+	classDefTransform.def("GetOrigin",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+		Lua::Push<Vector3>(l,t.GetOrigin());
+	}));
+	classDefTransform.def("GetRotation",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+		Lua::Push<Quat>(l,t.GetRotation());
+	}));
+	classDefTransform.def("SetOrigin",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &origin) {
+		t.SetOrigin(origin);
+	}));
+	classDefTransform.def("SetRotation",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rotation) {
+		t.SetRotation(rotation);
+	}));
+	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+		t.SetIdentity();
+	}));
 	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
 		Lua::Push<pragma::physics::Transform>(l,t.GetInverse());
 	}));
@@ -599,6 +623,26 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
+
+	auto classDefScaledTransform = luabind::class_<pragma::physics::ScaledTransform,pragma::physics::Transform>("ScaledTransform");
+	classDefScaledTransform.def(luabind::constructor<const Mat4&>());
+	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&>());
+	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
+	classDefScaledTransform.def(luabind::constructor<>());
+	classDefScaledTransform.def("GetScale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
+		Lua::Push<Vector3>(l,t.GetScale());
+	}));
+	classDefScaledTransform.def("SetScale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,const Vector3&)>([](lua_State *l,pragma::physics::ScaledTransform &t,const Vector3 &scale) {
+		t.SetScale(scale);
+	}));
+	classDefScaledTransform.def("Scale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,const Vector3&)>([](lua_State *l,pragma::physics::ScaledTransform &t,const Vector3 &scale) {
+		t.Scale(scale);
+	}));
+	classDefScaledTransform.def(luabind::const_self *pragma::physics::Transform());
+	classDefScaledTransform.def(luabind::const_self *pragma::physics::ScaledTransform());
+	classDefScaledTransform.def(luabind::const_self *Vector3());
+	classDefScaledTransform.def(luabind::const_self *Quat());
+	physMod[classDefScaledTransform];
 
 	auto classTreeIkTree = luabind::class_<Tree>("IKTree");
 	classTreeIkTree.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>([](lua_State *l) {

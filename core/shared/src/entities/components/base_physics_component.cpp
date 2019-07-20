@@ -28,6 +28,7 @@ ComponentEventId BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE = INVALID_
 ComponentEventId BasePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
+ComponentEventId BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPONENT_ID;
 void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	auto componentType = std::type_index(typeid(BasePhysicsComponent));
@@ -40,6 +41,7 @@ void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &compon
 	EVENT_ON_SLEEP = componentManager.RegisterEvent("EVENT_ON_SLEEP",componentType);
 	EVENT_ON_WAKE = componentManager.RegisterEvent("EVENT_ON_WAKE",componentType);
 	EVENT_HANDLE_RAYCAST = componentManager.RegisterEvent("HANDLE_RAYCAST",componentType);
+	EVENT_INITIALIZE_PHYSICS = componentManager.RegisterEvent("INITIALIZE_PHYSICS");
 }
 BasePhysicsComponent::BasePhysicsComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_collisionType(COLLISIONTYPE::NONE),
@@ -961,3 +963,13 @@ CEHandleRaycast::CEHandleRaycast(
 {}
 void CEHandleRaycast::PushArguments(lua_State *l) {}
 
+///////////////
+
+CEInitializePhysics::CEInitializePhysics(PHYSICSTYPE type,BasePhysicsComponent::PhysFlags flags)
+	: physicsType{type},flags{flags}
+{}
+void CEInitializePhysics::PushArguments(lua_State *l)
+{
+	Lua::PushInt(l,umath::to_integral(physicsType));
+	Lua::PushInt(l,umath::to_integral(flags));
+}

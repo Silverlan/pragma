@@ -23,12 +23,6 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 
-		virtual void SetMaxEngineForce(Float force) override;
-		virtual void SetMaxReverseEngineForce(Float force) override;
-		virtual void SetMaxBrakeForce(Float force) override;
-		virtual void SetAcceleration(Float acc) override;
-		virtual void SetTurnSpeed(Float speed) override;
-		virtual void SetMaxTurnAngle(Float ang) override;
 		virtual void SetSteeringWheelModel(const std::string &mdl) override;
 		virtual void SetFirstPersonCameraEnabled(bool b) override;
 		virtual void SetThirdPersonCameraEnabled(bool b) override;

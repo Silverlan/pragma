@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
+#include "pragma/physics/transform.hpp"
 #include "pragma/util/util_typed_manager.hpp"
 #include <optional>
 
@@ -16,9 +17,12 @@ namespace pragma::physics
 	struct DLLNETWORK ChassisCreateInfo
 	{
 		std::optional<Vector3> momentOfInertia = {};
-		int32_t shapeIndex = -1;
+		// Indices for all of the actor shapes that make up the chassis
+		std::vector<uint32_t> shapeIndices = {};
+		float GetMass(const pragma::physics::IRigidBody &body) const;
+		void GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const;
 		Vector3 GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
-		const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
+		std::vector<const pragma::physics::IShape*> GetShapes(const pragma::physics::IRigidBody &body) const;
 	};
 
 	struct DLLNETWORK WheelCreateInfo
@@ -101,7 +105,9 @@ namespace pragma::physics
 		static VehicleCreateInfo CreateStandardFourWheelDrive(
 			const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
 			float wheelWidth=DEFAULT_WHEEL_WIDTH,
-			float wheelRadius=DEFAULT_WHEEL_RADIUS
+			float wheelRadius=DEFAULT_WHEEL_RADIUS,
+			float handBrakeTorque=6'400'000.0,
+			float maxSteeringAngle=60.0
 		);
 
 		ChassisCreateInfo chassis = {};
@@ -194,6 +200,7 @@ namespace pragma::physics
 
 		virtual bool IsInAir() const=0;
 
+		virtual std::optional<physics::Transform> GetLocalWheelPose(uint32_t wheelIndex) const=0;
 		virtual uint32_t GetWheelCount() const=0;
 		virtual float GetForwardSpeed() const=0;
 		virtual float GetSidewaysSpeed() const=0;

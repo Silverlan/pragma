@@ -60,6 +60,9 @@ namespace pragma::physics
 		void SetMaterial(const IMaterial &mat);
 		IMaterial *GetMaterial() const;
 
+		virtual void SetLocalPose(const physics::Transform &localPose)=0;
+		virtual physics::Transform GetLocalPose() const=0;
+
 		virtual void SetDensity(float density);
 		float GetDensity() const;
 		virtual void SetMass(float mass)=0;
@@ -146,10 +149,10 @@ namespace pragma::physics
 		struct DLLNETWORK ShapeInfo
 		{
 			std::shared_ptr<pragma::physics::IShape> shape;
-			Vector3 origin;
+			Transform localPose;
 		};
 		virtual void InitializeLuaObject(lua_State *lua) override;
-		void AddShape(pragma::physics::IShape &shape,const Vector3 &origin={});
+		void AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose={});
 
 		virtual void SetMass(float mass) override;
 		virtual float GetMass() const override;

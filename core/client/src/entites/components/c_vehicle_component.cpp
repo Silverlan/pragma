@@ -67,6 +67,7 @@ void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 
 void CVehicleComponent::ReceiveData(NetPacket &packet)
 {
+#if 0
 	SetMaxEngineForce(packet->Read<Float>());
 	SetMaxReverseEngineForce(packet->Read<Float>());
 	SetMaxBrakeForce(packet->Read<Float>());
@@ -95,6 +96,7 @@ void CVehicleComponent::ReceiveData(NetPacket &packet)
 	auto numWheels = packet->Read<UChar>();
 	for(UChar i=0;i<numWheels;i++)
 		ReadWheelInfo(packet);
+#endif
 }
 void CVehicleComponent::ClearDriver()
 {
@@ -185,6 +187,7 @@ void CVehicleComponent::Initialize()
 }
 Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
+#if 0
 	switch(eventId)
 	{
 		case NET_EVENT_VEHICLE_ADD_WHEEL:
@@ -263,5 +266,6 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 		default:
 			return false;
 	}
+#endif
 	return true;
 }

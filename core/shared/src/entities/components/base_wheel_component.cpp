@@ -4,34 +4,31 @@
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_generic_component.hpp"
+#include "pragma/entities/components/logic_component.hpp"
 #include <sharedutils/scope_guard.h>
 
 //#define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
 
-WheelInfo::WheelInfo()
-	: bFrontWheel(false),wheelAxle(1.f,0.f,0.f),
-	wheelDirection(0.f,-1.f,0.f),
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	suspensionLength(static_cast<float>(0.6f /PhysEnv::WORLD_SCALE)),
-	suspensionCompression(static_cast<float>(1.f /PhysEnv::WORLD_SCALE)),
-#endif
-	wheelRadius(15.f),
-	suspensionStiffness(50.f),wheelDampingCompression(0.2f),
-	frictionSlip(0.8f),steeringAngle(0.f),wheelRotation(0.f),
-	rollInfluence(1.f),connectionPoint(0.f,0.f,0.f),
-	dampingRelaxation(0.3f)
-{}
-
+#pragma optimize("",off)
 BaseWheelComponent::BaseWheelComponent(BaseEntity &ent)
-	: BaseEntityComponent(ent),m_wheelInfo(),m_wheelId(UChar(-1))
+	: BaseEntityComponent(ent)
 {}
 
 void BaseWheelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	m_netEvAttach = SetupNetEvent("attach");
+
+	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		Think();
+	});
+	auto &ent = GetEntity();
+	ent.AddComponent<LogicComponent>();
+	ent.AddComponent("render");
+	ent.AddComponent("transform");
+	ent.AddComponent("model");
+	/*m_netEvAttach = SetupNetEvent("attach");
 	m_netEvDetach = SetupNetEvent("detach");
 	m_netEvFrontWheel = SetupNetEvent("front_wheel");
 	m_netEvAxle = SetupNetEvent("axle");
@@ -46,7 +43,7 @@ void BaseWheelComponent::Initialize()
 	m_netEvRotation = SetupNetEvent("rotation");
 	m_netEvRollInfluence = SetupNetEvent("roll_influence");
 	m_netEvChassisConnectionPoint = SetupNetEvent("chassis_connection_point");
-	m_netEvMaxDampingRelaxation = SetupNetEvent("max_damping_relaxation");
+	m_netEvMaxDampingRelaxation = SetupNetEvent("max_damping_relaxation");*/
 }
 
 BaseWheelComponent::~BaseWheelComponent()
@@ -54,7 +51,7 @@ BaseWheelComponent::~BaseWheelComponent()
 	if(m_cbOnSpawn.IsValid())
 		m_cbOnSpawn.Remove();
 }
-
+#if 0
 void BaseWheelComponent::Attach(BaseEntity *ent,UChar wheelId)
 {
 	Detach();
@@ -141,7 +138,7 @@ void BaseWheelComponent::SetModelTranslation(const Vector3 &v) {m_modelTranslati
 Vector3 &BaseWheelComponent::GetModelTranslation() {return m_modelTranslation;}
 void BaseWheelComponent::SetModelRotation(const Quat &rot) {m_modelRotation = rot;}
 Quat &BaseWheelComponent::GetModelRotation() {return m_modelRotation;}
-
+#endif
 void BaseWheelComponent::UpdateWheel()
 {
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -167,11 +164,40 @@ void BaseWheelComponent::UpdateWheel()
 #endif
 }
 
-void BaseWheelComponent::Think(double)
+void BaseWheelComponent::Think()
 {
 	UpdateWheel();
+	UpdatePose();
 }
 
+void BaseWheelComponent::SetupWheel(BaseVehicleComponent &vhc,const pragma::physics::WheelCreateInfo &createInfo,uint8_t wheelId)
+{
+	m_createInfo = createInfo;
+	m_vehicle = vhc.GetHandle<BaseVehicleComponent>();
+	m_wheelId = wheelId;
+}
+
+void BaseWheelComponent::UpdatePose()
+{
+	if(m_vehicle.expired())
+		return;
+	auto *physVhc = m_vehicle->GetPhysicsVehicle();
+	auto *body = physVhc ? physVhc->GetCollisionObject() : nullptr;
+	if(physVhc == nullptr)
+		return;
+	auto pose = physVhc->GetLocalWheelPose(m_wheelId);
+	if(pose.has_value() == false)
+		return;
+	auto &entVhc = m_vehicle->GetEntity();
+	auto t = physics::Transform{entVhc.GetPosition(),entVhc.GetRotation()};
+	t *= *pose;
+
+	auto &ent = GetEntity();
+	ent.SetPosition(t.GetOrigin());
+	ent.SetRotation(t.GetRotation());
+}
+
+#if 0
 Bool BaseWheelComponent::IsAttached() const {return m_vehicle.valid();}
 #ifdef ENABLE_DEPRECATED_PHYSICS
 btWheelInfo *BaseWheelComponent::GetWheelInfo() const
@@ -454,3 +480,5 @@ pragma::physics::ICollisionObject *BaseWheelComponent::GetGroundObject() const
 	return nullptr;
 #endif
 }
+#endif
+#pragma optimize("",on)

@@ -73,6 +73,16 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
 	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
 	*/
+	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		pragma::physics::Transform t;
+		hEnt->GetPose(t);
+		Lua::Push<pragma::physics::Transform>(l,t);
+	}));
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const pragma::physics::Transform&)>([](lua_State *l,EntityHandle &hEnt,const pragma::physics::Transform &t) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetPose(t);
+	}));
 	classDef.def("GetPos",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		if(hEnt->GetTransformComponent().expired())

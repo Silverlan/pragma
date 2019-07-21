@@ -11,6 +11,7 @@
 class NetPacket;
 namespace pragma::networking
 {
+	class IServerClient;
 	enum class Protocol : uint8_t;
 	class ServerEventInterface
 	{
@@ -27,8 +28,8 @@ namespace pragma::networking
 		: public pragma::networking::MessageTracker
 	{
 	public:
-		template<class TServer,class... Args>
-			static std::unique_ptr<TServer,void(*)(TServer*)> Create(Args... args);
+		template<class TServer,typename... TARGS>
+			static std::unique_ptr<TServer,void(*)(TServer*)> Create(TARGS&& ...args);
 		virtual ~IServer()=default;
 		virtual bool Start(Error &outErr)=0;
 		virtual bool Heartbeat()=0;
@@ -40,8 +41,8 @@ namespace pragma::networking
 		bool Shutdown(Error &outErr);
 		bool SendPacket(Protocol protocol,NetPacket &packet,const ClientRecipientFilter &rf,Error &outErr);
 		void AddClient(const std::shared_ptr<IServerClient> &client);
-		template<class TServerClient,class... Args>
-			std::shared_ptr<TServerClient> AddClient(Args... args);
+		template<class TServerClient,typename... TARGS>
+			std::shared_ptr<TServerClient> AddClient(TARGS&& ...args);
 		bool DropClient(const IServerClient &client,pragma::networking::DropReason reason,Error &outErr);
 
 		void SetEventInterface(const ServerEventInterface &eventHandler);
@@ -60,20 +61,20 @@ namespace pragma::networking
 	};
 };
 
-template<class TServerClient,class... Args>
-	std::shared_ptr<TServerClient> pragma::networking::IServer::AddClient(Args... args)
+template<class TServerClient,typename... TARGS>
+	std::shared_ptr<TServerClient> pragma::networking::IServer::AddClient(TARGS&& ...args)
 {
-	auto cl = TServerClient::Create<TServerClient>(args...);
+	auto cl = TServerClient::Create<TServerClient>(std::forward<TARGS>(args)...);
 	AddClient(cl);
 	if(m_eventInterface.onClientConnected)
 		m_eventInterface.onClientConnected(*cl);
 	return cl;
 }
 
-template<class TServer,class... Args>
-	std::unique_ptr<TServer,void(*)(TServer*)> pragma::networking::IServer::Create(Args... args)
+template<class TServer,typename... TARGS>
+	std::unique_ptr<TServer,void(*)(TServer*)> pragma::networking::IServer::Create(TARGS&& ...args)
 {
-	std::unique_ptr<TServer,void(*)(TServer*)> r {new TServer{args...},[](TServer *ptr) {
+	std::unique_ptr<TServer,void(*)(TServer*)> r {new TServer{std::forward<TARGS>(args)...},[](TServer *ptr) {
 		ptr->Shutdown();
 		delete ptr;
 	}};

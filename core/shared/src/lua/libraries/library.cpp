@@ -640,6 +640,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	utilMod[dataStreamClassDef];
 }
 
+namespace Lua::doc
+{
+	void register_library(Lua::Interface &lua);
+};
+
 void Game::RegisterLuaLibraries()
 {
 	NetworkState::RegisterSharedLuaLibraries(GetLuaInterface());
@@ -906,4 +911,5 @@ void Game::RegisterLuaLibraries()
 		{"FORMAT_FIRST_ONLY",umath::to_integral(std::regex_constants::format_first_only)}
 	});
 	Lua::physenv::register_library(GetLuaInterface());
+	Lua::doc::register_library(GetLuaInterface());
 }

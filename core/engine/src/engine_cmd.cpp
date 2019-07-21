@@ -5,6 +5,7 @@
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/physics/environment.hpp>
+#include <pragma/networking/networking_modules.hpp>
 #include <sharedutils/util_file.h>
 #include <util_pragma_doc.hpp>
 #include <unordered_set>
@@ -36,6 +37,26 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			++it;
 			return name;
 			},similarCandidates,15);
+
+		autoCompleteOptions.reserve(similarCandidates.size());
+		for(auto &candidate : similarCandidates)
+		{
+			auto strOption = std::string{candidate};
+			ufile::remove_extension_from_filename(strOption);
+			autoCompleteOptions.push_back(strOption);
+		}
+	});
+	map.RegisterConVar("net_library","steam_networking",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying networking library to use for multiplayer games.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+		auto &netLibs = pragma::networking::GetAvailableNetworkingModules();
+		auto it = netLibs.begin();
+		std::vector<std::string_view> similarCandidates {};
+		ustring::gather_similar_elements(arg,[&it,&netLibs]() -> std::optional<std::string_view> {
+			if(it == netLibs.end())
+				return {};
+			auto &name = *it;
+			++it;
+			return name;
+		},similarCandidates,15);
 
 		autoCompleteOptions.reserve(similarCandidates.size());
 		for(auto &candidate : similarCandidates)

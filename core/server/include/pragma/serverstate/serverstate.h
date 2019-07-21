@@ -50,6 +50,8 @@ protected:
 	void ClearConCommands();
 	void OnMasterServerRegistered(bool b,std::string reason);
 	void RegisterServerInfo();
+	void InitializeGameServer();
+	void ResetGameServer();
 	WMServerData m_serverData;
 public:
 	virtual void Initialize() override;

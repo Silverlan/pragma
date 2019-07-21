@@ -43,7 +43,6 @@ namespace pragma::networking
 		virtual bool PollEvents(pragma::networking::Error &outErr) override;
 		virtual uint16_t GetLatency() const override;
 		virtual void SetTimeoutDuration(float duration) override;
-		virtual std::optional<nwm::IPAddress> GetIPAddress() const override;
 		virtual std::optional<std::string> GetIP() const override;
 		virtual std::optional<Port> GetLocalTCPPort() const override;
 		virtual std::optional<Port> GetLocalUDPPort() const override;

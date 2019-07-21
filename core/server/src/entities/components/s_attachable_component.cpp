@@ -14,6 +14,8 @@ void SAttachableComponent::Initialize()
 }
 luabind::object SAttachableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SAttachableComponentHandleWrapper>(l);}
 
+void SAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAttachableComponent));}
+
 AttachmentData *SAttachableComponent::SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo)
 {
 	auto *attData = BaseAttachableComponent::SetupAttachment(ent,attInfo);

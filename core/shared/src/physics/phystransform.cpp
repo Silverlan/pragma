@@ -43,6 +43,19 @@ void pragma::physics::Transform::SetIdentity()
 	m_translation = {};
 	m_rotation = uquat::identity();
 }
+void pragma::physics::Transform::TranslateGlobal(const Vector3 &v) {m_translation += v;}
+void pragma::physics::Transform::TranslateLocal(const Vector3 &v)
+{
+	auto vrot = v;
+	uvec::rotate(&vrot,m_rotation);
+	m_translation += vrot;
+}
+void pragma::physics::Transform::RotateGlobal(const Quat &rot)
+{
+	uvec::rotate(&m_translation,rot);
+	m_rotation = rot *m_rotation;
+}
+void pragma::physics::Transform::RotateLocal(const Quat &rot) {m_rotation *= rot;}
 pragma::physics::Transform pragma::physics::Transform::operator*(const Transform &tOther) const
 {
 	auto res = *this;

@@ -65,6 +65,24 @@ namespace Lua
 	};
 };
 
+static void create_standard_four_wheel_drive(lua_State *l,luabind::object oWheelCenterOffsets,float handBrakeTorque=6'400'000.0,float maxSteeringAngle=60.0)
+{
+	auto tWheelCenterOffsets = 1;
+	Lua::CheckTable(l,tWheelCenterOffsets);
+	std::array<Vector3,pragma::physics::VehicleCreateInfo::WHEEL_COUNT_4W_DRIVE> centerOffsets {};
+	auto i = 1;
+	for(auto &centerOffset : centerOffsets)
+	{
+		centerOffset = {};
+		Lua::PushInt(l,i++);
+		Lua::GetTableValue(l,tWheelCenterOffsets);
+		if(Lua::IsSet(l,-1))
+			centerOffset = *Lua::CheckVector(l,-1);
+		Lua::Pop(l,1);
+	}
+	Lua::Push<pragma::physics::VehicleCreateInfo>(l,pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(centerOffsets,handBrakeTorque,maxSteeringAngle));
+}
+
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -245,10 +263,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 			return;
 		hPhys->SetAccelerationFactor(accFactor);
 	}));
-	classDefVhc.def("SetTurnFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float turnFactor) {
+	classDefVhc.def("SetSteerFactor",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,float)>([](lua_State *l,pragma::physics::IVehicle *hPhys,float turnFactor) {
 		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
 			return;
-		hPhys->SetTurnFactor(turnFactor);
+		hPhys->SetSteerFactor(turnFactor);
 	}));
 	classDefVhc.def("SetGear",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*,uint32_t)>([](lua_State *l,pragma::physics::IVehicle *hPhys,uint32_t gear) {
 		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
@@ -452,6 +470,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}),static_cast<void(*)(lua_State*,pragma::physics::ChassisCreateInfo&,const Vector3&)>([](lua_State *l,pragma::physics::ChassisCreateInfo &chassisCreateInfo,const Vector3 &moi) {
 		chassisCreateInfo.momentOfInertia = moi;
 	}));
+	classDefChassisCreateInfo.property("centerOfMass",static_cast<void(*)(lua_State*,pragma::physics::ChassisCreateInfo&)>([](lua_State *l,pragma::physics::ChassisCreateInfo &chassisCreateInfo) {
+		if(chassisCreateInfo.centerOfMass.has_value())
+			Lua::Push<Vector3>(l,*chassisCreateInfo.centerOfMass);
+	}),static_cast<void(*)(lua_State*,pragma::physics::ChassisCreateInfo&,const Vector3&)>([](lua_State *l,pragma::physics::ChassisCreateInfo &chassisCreateInfo,const Vector3 &com) {
+			chassisCreateInfo.centerOfMass = com;
+	}));
 	classDefChassisCreateInfo.def("AddShapeIndex",static_cast<void(*)(lua_State*,pragma::physics::VehicleCreateInfo&,uint32_t)>([](lua_State *l,pragma::physics::VehicleCreateInfo &vhcCreateInfo,uint32_t shapeIndex) {
 		vhcCreateInfo.chassis.shapeIndices.push_back(shapeIndex);
 	}));
@@ -478,21 +502,14 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefSuspensionInfo.def_readwrite("camberAngleAtMaxCompression",&pragma::physics::WheelCreateInfo::SuspensionInfo::camberAngleAtMaxCompression);
 
 	auto classDefVhcCreateInfo = luabind::class_<pragma::physics::VehicleCreateInfo>("VehicleCreateInfo");
-	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",static_cast<void(*)(lua_State*,luabind::object,float,float)>([](lua_State *l,luabind::object oWheelCenterOffsets,float wheelWidth,float wheelRadius) {
-		auto tWheelCenterOffsets = 1;
-		Lua::CheckTable(l,tWheelCenterOffsets);
-		std::array<Vector3,pragma::physics::VehicleCreateInfo::WHEEL_COUNT_4W_DRIVE> centerOffsets {};
-		auto i = 1;
-		for(auto &centerOffset : centerOffsets)
-		{
-			centerOffset = {};
-			Lua::PushInt(l,i++);
-			Lua::GetTableValue(l,tWheelCenterOffsets);
-			if(Lua::IsSet(l,-1))
-				centerOffset = *Lua::CheckVector(l,-1);
-			Lua::Pop(l,1);
-		}
-		Lua::Push<pragma::physics::VehicleCreateInfo>(l,pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(centerOffsets,wheelWidth,wheelRadius));
+	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",static_cast<void(*)(lua_State*,luabind::object,float,float)>([](lua_State *l,luabind::object oWheelCenterOffsets,float handBrakeTorque,float maxSteeringAngle) {
+		create_standard_four_wheel_drive(l,oWheelCenterOffsets,handBrakeTorque,maxSteeringAngle);
+	}))];
+	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",static_cast<void(*)(lua_State*,luabind::object,float)>([](lua_State *l,luabind::object oWheelCenterOffsets,float handBrakeTorque) {
+		create_standard_four_wheel_drive(l,oWheelCenterOffsets,handBrakeTorque);
+	}))];
+	classDefVhcCreateInfo.scope[luabind::def("CreateStandardFourWheelDrive",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object oWheelCenterOffsets) {
+		create_standard_four_wheel_drive(l,oWheelCenterOffsets);
 	}))];
 	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_FRONT",umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Front));
 	classDefVhcCreateInfo.add_static_constant("WHEEL_DRIVE_REAR",umath::to_integral(pragma::physics::VehicleCreateInfo::WheelDrive::Rear));
@@ -601,6 +618,18 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
 		t.SetIdentity();
+	}));
+	classDefTransform.def("TranslateGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &v) {
+		t.TranslateGlobal(v);
+	}));
+	classDefTransform.def("TranslateLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &v) {
+		t.TranslateLocal(v);
+	}));
+	classDefTransform.def("RotateGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rot) {
+		t.RotateGlobal(rot);
+	}));
+	classDefTransform.def("RotateLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rot) {
+		t.RotateLocal(rot);
 	}));
 	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
 		Lua::Push<pragma::physics::Transform>(l,t.GetInverse());

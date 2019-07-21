@@ -170,6 +170,15 @@ void BaseEntity::Initialize()
 
 std::string BaseEntity::GetClass() const {return m_class;}
 
+void BaseEntity::GetPose(pragma::physics::Transform &outTransform) const
+{
+	outTransform = {GetPosition(),GetRotation()};
+}
+void BaseEntity::SetPose(const pragma::physics::Transform &outTransform)
+{
+	SetPosition(outTransform.GetOrigin());
+	SetRotation(outTransform.GetRotation());
+}
 const Vector3 &BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();

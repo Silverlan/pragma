@@ -243,7 +243,7 @@ void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *p
 
 	TraceData data {};
 	data.SetFilter(ent);
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);
 	auto r = c_game->RayCast(data);
@@ -270,7 +270,7 @@ void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,
 
 	TraceData data {};
 	data.SetFilter(ent);
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetSource(origin);
 	data.SetTarget(origin +dir *65'536.f);
 	auto r = c_game->RayCast(data);

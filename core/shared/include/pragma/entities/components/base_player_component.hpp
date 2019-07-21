@@ -28,8 +28,8 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-	public:
 		static ComponentEventId EVENT_HANDLE_ACTION_INPUT;
+		static ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		friend Engine;
 		virtual ~BasePlayerComponent() override;
@@ -40,7 +40,7 @@ namespace pragma
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(Activity activity);
 
-		virtual void SetObserverMode(OBSERVERMODE mode);
+		void SetObserverMode(OBSERVERMODE mode);
 		OBSERVERMODE GetObserverMode() const;
 		const util::PEnumProperty<OBSERVERMODE> &GetObserverModeProperty() const;
 
@@ -119,10 +119,6 @@ namespace pragma
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent);
 		BaseObservableComponent *GetObserverTarget() const;
-		virtual void SetObserverCameraOffset(const Vector3 &offset);
-		const Vector3 &GetObserverCameraOffset() const;
-		bool IsObserverCameraLocked() const;
-		virtual void SetObserverCameraLocked(bool b);
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f)=0;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
@@ -136,6 +132,7 @@ namespace pragma
 			Uncrouching = 1
 		};
 		BasePlayerComponent(BaseEntity &ent);
+		virtual void DoSetObserverMode(OBSERVERMODE mode) {};
 		virtual void OnPhysicsInitialized();
 		void OnRespawn();
 		bool m_bFlashlightOn;
@@ -144,12 +141,8 @@ namespace pragma
 		mutable EntityHandle m_hBasePlayer = {};
 
 		util::WeakHandle<BaseObservableComponent> m_hEntObserverTarget = {};
-		Vector3 m_observerOffset;
-		bool m_bObserverCameraLocked;
 
 		pragma::NetEventId m_netEvSetObserverTarget = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetObserverCameraOffset = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetObserverCameraLocked = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvApplyViewRotationOffset = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvPrintMessage = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvRespawn = pragma::INVALID_NET_EVENT;

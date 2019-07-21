@@ -409,7 +409,7 @@ void BaseNPC::ResolvePathObstruction(Vector3 &dir)
 	data.SetSource(m_entity);
 	data.SetTarget(pos +dir *(m_entity->GetCollisionRadius() *1.1f));
 	data.SetFilter(m_obstruction.sweepFilter);
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(m_entity->GetCollisionFilter());
 	data.SetCollisionFilterMask(m_entity->GetCollisionFilterMask());
 	

@@ -3,51 +3,59 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include <sharedutils/property/util_property_vector.h>
+#include <optional>
 
 namespace pragma
 {
+	struct DLLNETWORK ObserverCameraData
+	{
+		ObserverCameraData();
+		ObserverCameraData(const ObserverCameraData&)=default;
+		ObserverCameraData &operator=(const ObserverCameraData&)=default;
+		util::PBoolProperty enabled;
+		// If not set, the entity's eye offset will be used as origin instead
+		std::optional<Vector3> localOrigin = {};
+		util::PVector3Property offset;
+		bool rotateWithObservee = false;
+		std::optional<std::pair<EulerAngles,EulerAngles>> angleLimits = {};
+	};
 	class DLLNETWORK BaseObservableComponent
 		: public BaseEntityComponent
 	{
 	public:
+		enum class CameraType : uint8_t
+		{
+			FirstPerson,
+			ThirdPerson,
+
+			Count
+		};
 		virtual void Initialize() override;
 
-		virtual void SetFirstPersonObserverOffset(const Vector3 &offset);
-		virtual void SetThirdPersonObserverOffset(const Vector3 &offset);
-		void SetObserverOffset(const Vector3 &offset);
-		bool GetFirstPersonObserverOffset(Vector3 &offset) const;
-		bool GetThirdPersonObserverOffset(Vector3 &offset) const;
-		const Vector3 &GetFirstPersonObserverOffset() const;
-		const Vector3 &GetThirdPersonObserverOffset() const;
-		void ResetFirstPersonObserverOffset();
-		void ResetThirdPersonObserverOffset();
-		void ResetObserverOffset();
+		virtual void SetLocalCameraOrigin(CameraType type,const Vector3 &origin);
+		void ClearLocalCameraOrigin(CameraType type);
+		const Vector3 &GetLocalCameraOrigin(CameraType type) const;
 
-		void SetFirstPersonObserverOffsetEnabled(bool bEnabled);
-		void SetThirdPersonObserverOffsetEnabled(bool bEnabled);
-		bool IsFirstPersonObserverOffsetEnabled() const;
-		bool IsThirdPersonObserverOffsetEnabled() const;
+		virtual void SetLocalCameraOffset(CameraType type,const Vector3 &offset);
+		const Vector3 &GetLocalCameraOffset(CameraType type) const;
 
-		const util::PBoolProperty &GetFirstPersonModeEnabledProperty() const;
-		const util::PBoolProperty &GetThirdPersonModeEnabledProperty() const;
-		bool IsFirstPersonModeEnabled() const;
-		bool IsThirdPersonModeEnabled() const;
+		const ObserverCameraData &GetCameraData(CameraType type) const;
+		ObserverCameraData &GetCameraData(CameraType type);
+		
+		void SetCameraEnabled(CameraType type,bool enabled);
+		bool IsCameraEnabled(CameraType type) const;
 
-		const util::PVector3Property &GetFirstPersonObserverOffsetProperty() const;
-		const util::PVector3Property &GetThirdPersonObserverOffsetProperty() const;
+		const util::PBoolProperty &GetCameraEnabledProperty(CameraType type) const;
+		const util::PVector3Property &GetCameraOffsetProperty(CameraType type) const;
 
 		virtual void Save(DataStream &ds) override;
 		virtual void Load(DataStream &ds,uint32_t version) override;
 	protected:
 		BaseObservableComponent(BaseEntity &ent);
 
-		pragma::NetEventId m_netEvSetFirstPersonObserverOffset = pragma::INVALID_NET_EVENT;
-		pragma::NetEventId m_netEvSetThirdPersonObserverOffset = pragma::INVALID_NET_EVENT;
-
-		util::PBoolProperty m_bFirstPersonEnabled;
-		util::PBoolProperty m_bThirdPersonEnabled;
-		util::PVector3Property m_firstPersonObserverOffset;
-		util::PVector3Property m_thirdPersonObserverOffset;
+		pragma::NetEventId m_netSetObserverOffset = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netSetObserverOrigin = pragma::INVALID_NET_EVENT;
+		std::array<ObserverCameraData,umath::to_integral(CameraType::Count)> m_cameraData = {};
 	};
 };
 

@@ -19,6 +19,7 @@
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/physics/environment.hpp>
+#include <pragma/networking/networking_modules.hpp>
 #include <rapidxml.hpp>
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>
@@ -301,9 +302,10 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 
 	// Networking library
 	std::unordered_map<std::string,std::string> netLibs {};
-	// TODO: Boost asio, GameNetworkingSockets, Steamworks
-	auto *pPhysNetLibList = pList->AddDropDownMenu(Locale::GetText("networking_library"),netLibs,"net_library");
-	pPhysNetLibList->SizeToContents();
+	for(auto &lib : pragma::networking::GetAvailableNetworkingModules())
+		netLibs.insert(std::make_pair(Locale::GetText("networking_library_" +lib),lib));
+	auto *pNetLibList = pList->AddDropDownMenu(Locale::GetText("networking_library"),netLibs,"net_library");
+	pNetLibList->SizeToContents();
 	//
 
 	pList->AddToggleChoice(Locale::GetText("enable_steamworks"),"steam_steamworks_enabled");

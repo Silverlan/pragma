@@ -34,6 +34,7 @@ namespace pragma
 	class BasePhysicsComponent;
 	class BaseTimeScaleComponent;
 	class BaseTransformComponent;
+	namespace physics {class Transform;};
 
 	using NetEventId = uint32_t;
 };
@@ -89,6 +90,8 @@ public:
 	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
 	// Returns ORIGIN if the entity has no transform component
+	void GetPose(pragma::physics::Transform &outTransform) const;
+	void SetPose(const pragma::physics::Transform &outTransform);
 	const Vector3 &GetPosition() const;
 	void SetPosition(const Vector3 &pos);
 	Vector3 GetCenter() const;

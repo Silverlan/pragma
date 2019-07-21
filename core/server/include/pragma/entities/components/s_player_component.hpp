@@ -4,6 +4,7 @@
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/networking/ip_address.hpp>
 #include <networkmanager/wrappers/nwm_ip_address.hpp>
 
 class Player;
@@ -36,7 +37,7 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual std::string GetClientIP() override;
 		virtual unsigned short GetClientPort() override;
-		nwm::IPAddress GetClientIPAddress() const;
+		networking::IPAddress GetClientIPAddress() const;
 		void InitializeGlobalNameComponent();
 		bool IsAuthed();
 		void SetAuthed(bool b);
@@ -44,15 +45,13 @@ namespace pragma
 		void SetCrouchHeight(float height);
 		void SetStandEyeLevel(float eyelevel);
 		void SetCrouchEyeLevel(float eyelevel);
-		virtual void SetObserverMode(OBSERVERMODE mode) override;
+		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
 		bool IsGameReady() const;
 		void SetGameReady(bool b);
 		bool SendResource(const std::string &fileName) const;
 		virtual void PrintMessage(std::string message,MESSAGE type) override;
 
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
-		virtual void SetObserverCameraOffset(const Vector3 &offset) override;
-		virtual void SetObserverCameraLocked(bool b) override;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
 
 		virtual bool ShouldTransmitNetData() const override {return true;};

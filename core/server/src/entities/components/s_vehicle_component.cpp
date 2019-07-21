@@ -137,209 +137,26 @@ void SVehicleComponent::WriteWheelInfo(NetPacket &p,WheelData &data,btWheelInfo 
 
 void SVehicleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-#if 0
-	packet->Write<Float>(GetMaxEngineForce());
-	packet->Write<Float>(GetMaxReverseEngineForce());
-	packet->Write<Float>(GetMaxBrakeForce());
-	packet->Write<Float>(GetAcceleration());
-	packet->Write<Float>(GetTurnSpeed());
-	packet->Write<Float>(GetMaxTurnAngle());
-	packet->Write<bool>(IsFirstPersonCameraEnabled());
-	packet->Write<bool>(IsThirdPersonCameraEnabled());
-	packet->Write<Float>(GetBrakeForce());
-	packet->Write<Float>(GetEngineForce());
-	packet->Write<Float>(GetSteeringAngle());
-	packet->Write<Float>(GetFrictionSlip());
-	packet->Write<Float>(GetMaxSuspensionCompression());
-	packet->Write<Float>(GetMaxSuspensionLength());
-	packet->Write<Float>(GetRollInfluence());
-	packet->Write<Float>(GetSuspensionStiffness());
-	packet->Write<Float>(GetWheelDampingCompression());
-	packet->Write<Vector3>(GetWheelDirection());
-	packet->Write<Float>(GetWheelRadius());
-	packet->Write<WheelInfo>(m_wheelInfo);
-	nwm::write_entity(packet,GetSteeringWheel());
-	auto numWheels = GetWheelCount();
-	packet->Write<UChar>(numWheels);
-#ifdef ENABLE_DEPRECATED_PHYSICS
-	for(UChar i=0;i<numWheels;i++)
-	{
-		auto *info = GetWheelInfo(i);
-		WriteWheelInfo(packet,m_wheels[i],info);
-	}
-#endif
-#endif
-}
-
-BaseEntity *SVehicleComponent::AddWheel(const std::string &mdl,const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset,const Quat &mdlRotOffset)
-{
-	UChar wheelId = 0;
-	if(AddWheel(connectionPoint,wheelAxle,bIsFrontWheel,&wheelId,mdlOffset,mdlRotOffset) == false)
-		return nullptr;
-	auto *ent = s_game->CreateEntity<SWheel>();
-	if(ent == nullptr)
-		return nullptr;
-	ent->SetSynchronized(false);
-	auto pWheelComponent = ent->GetComponent<pragma::SWheelComponent>();
-	if(pWheelComponent.valid())
-	{
-#if 0
-		pWheelComponent->SetChassisConnectionPoint(connectionPoint);
-		pWheelComponent->SetWheelAxle(wheelAxle);
-		pWheelComponent->SetFrontWheel(bIsFrontWheel);
-		pWheelComponent->Attach(&GetEntity(),wheelId);
-#endif
-	}
-	if(!mdl.empty())
-	{
-		auto pMdlComponent = ent->GetModelComponent();
-		if(pMdlComponent.valid())
-			pMdlComponent->SetModel(mdl.c_str());
-	}
-	ent->Spawn();
-	GetEntity().RemoveEntityOnRemoval(ent);
-	return ent;
+	nwm::write_entity(packet,m_steeringWheel);
 }
 
 void SVehicleComponent::SetSteeringWheelModel(const std::string &mdl)
 {
-	m_steeringWheelMdl = mdl;
-	auto &entThis = static_cast<SBaseEntity&>(GetEntity());
-	if(!entThis.IsSpawned())
-		return;
-	if(!m_steeringWheel.IsValid())
-	{
-		auto *ent = s_game->CreateEntity<PropDynamic>();
-		auto mdlComponent = ent->GetModelComponent();
-		if(mdlComponent.valid())
-			mdlComponent->SetModel(mdl.c_str());
-		auto pAttachableComponent = ent->AddComponent<SAttachableComponent>();
-		if(pAttachableComponent.valid())
-		{
-			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
-			pAttachableComponent->AttachToAttachment(&GetEntity(),"steering_wheel",attInfo);
-		}
-		ent->SetSynchronized(false);
-		ent->Spawn();
-		m_steeringWheel = ent->GetHandle();
-		entThis.RemoveEntityOnRemoval(ent);
-		InitializeSteeringWheel();
-		// TODO
-	//	NetPacket p;
-	//	nwm::write_entity(p,ent);
-		//entThis.SendNetEvent(NET_EVENT_VEHICLE_SET_STEERING_WHEEL,p,pragma::networking::Protocol::SlowReliable);
-		return;
-	}
 	BaseVehicleComponent::SetSteeringWheelModel(mdl);
+	NetPacket p;
+	nwm::write_entity(p,m_steeringWheel);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSteeringWheelModel,p,pragma::networking::Protocol::SlowReliable);
 }
 
-BaseEntity *SVehicleComponent::AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset,const Quat &mdlRotOffset)
+BaseWheelComponent *SVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
 {
-	return AddWheel("",connectionPoint,wheelAxle,bIsFrontWheel,mdlOffset,mdlRotOffset);
+	auto *wheel = BaseVehicleComponent::CreateWheelEntity(wheelIndex);
+	if(wheel == nullptr)
+		return nullptr;
+	static_cast<SBaseEntity&>(wheel->GetEntity()).SetSynchronized(false);
+	return wheel;
 }
 
-Bool SVehicleComponent::AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,UChar *wheelId,const Vector3 &mdlOffset,const Quat &mdlRotOffset)
-{
-	if(BaseVehicleComponent::AddWheel(connectionPoint,wheelAxle,bIsFrontWheel,wheelId,mdlOffset,mdlRotOffset) == false)
-		return false;
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared() && ent.IsSpawned())
-	{
-#ifdef ENABLE_DEPRECATED_PHYSICS
-		auto *info = GetWheelInfo(GetWheelCount() -1);
-		if(info != nullptr)
-		{
-			NetPacket p;
-			WriteWheelInfo(p,m_wheels.back(),info);
-			ent.SendNetEvent(NET_EVENT_VEHICLE_ADD_WHEEL,p,pragma::networking::Protocol::SlowReliable);
-		}
-#endif
-	}
-	return true;
-}
-#if 0
-void SVehicleComponent::SetMaxEngineForce(Float force)
-{
-	BaseVehicleComponent::SetMaxEngineForce(force);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(force);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_ENGINE_FORCE,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetMaxReverseEngineForce(Float force)
-{
-	BaseVehicleComponent::SetMaxReverseEngineForce(force);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(force);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_REVERSE_ENGINE_FORCE,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetMaxBrakeForce(Float force)
-{
-	BaseVehicleComponent::SetMaxBrakeForce(force);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(force);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_BRAKE_FORCE,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetAcceleration(Float acc)
-{
-	BaseVehicleComponent::SetAcceleration(acc);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(acc);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_ACCELERATION,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetTurnSpeed(Float speed)
-{
-	BaseVehicleComponent::SetTurnSpeed(speed);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(speed);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_TURN_SPEED,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetMaxTurnAngle(Float ang)
-{
-	BaseVehicleComponent::SetMaxTurnAngle(ang);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	NetPacket p;
-	p->Write<Float>(ang);
-	ent.SendNetEvent(NET_EVENT_VEHICLE_MAX_TURN_ANGLE,p,pragma::networking::Protocol::SlowReliable);
-}
-#endif
-void SVehicleComponent::SetFirstPersonCameraEnabled(bool b)
-{
-	BaseVehicleComponent::SetFirstPersonCameraEnabled(b);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	//NetPacket p;
-	//p->Write<bool>(b);
-	//ent.SendNetEvent(NET_EVENT_VEHICLE_SET_FIRST_PERSON_CAMERA_ENABLED,p,pragma::networking::Protocol::SlowReliable);
-}
-void SVehicleComponent::SetThirdPersonCameraEnabled(bool b)
-{
-	BaseVehicleComponent::SetThirdPersonCameraEnabled(b);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(!ent.IsNetworked())
-		return;
-	//NetPacket p;
-//	p->Write<bool>(b);
-//	ent.SendNetEvent(NET_EVENT_VEHICLE_SET_THIRD_PERSON_CAMERA_ENABLED,p,pragma::networking::Protocol::SlowReliable);
-}
 void SVehicleComponent::OnPostSpawn()
 {
 	if(!m_steeringWheelMdl.empty())

@@ -24,6 +24,32 @@ namespace pragma
 		virtual ~CPlayerComponent() override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+	public:
+		static unsigned int GetPlayerCount();
+		static const std::vector<CPlayerComponent*> &GetAll();
+		Con::c_cout& print(Con::c_cout&);
+		std::ostream& print(std::ostream&);
+		virtual void Initialize() override;
+		virtual void ReceiveData(NetPacket &packet) override;
+		virtual void Think(double tDelta) override;
+		Vector3 &GetViewOffset();
+		void SetViewOffset(Vector3 offset);
+		virtual void OnCrouch() override;
+		virtual void OnUnCrouch() override;
+		virtual void SetLocalPlayer(bool b) override;
+		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+
+		void UpdateObserverOffset();
+		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
+		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
+		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
+		virtual void PrintMessage(std::string message,MESSAGE type) override;
+
+		// Returns true if observer mode is first-person and observer target is this player (Only works for the local player)
+		bool IsInFirstPersonMode() const;
+
+		void UpdateViewModelTransform();
+		void UpdateViewFOV();
 	protected:
 		CallbackHandle m_cbCalcOrientationView = {};
 		Vector3 m_viewOffset = {};
@@ -45,33 +71,6 @@ namespace pragma
 		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-	public:
-		static unsigned int GetPlayerCount();
-		static const std::vector<CPlayerComponent*> &GetAll();
-		Con::c_cout& print(Con::c_cout&);
-		std::ostream& print(std::ostream&);
-		virtual void Initialize() override;
-		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void Think(double tDelta) override;
-		Vector3 &GetViewOffset();
-		void SetViewOffset(Vector3 offset);
-		virtual void OnCrouch() override;
-		virtual void OnUnCrouch() override;
-		virtual void SetLocalPlayer(bool b) override;
-		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
-
-		void UpdateObserverOffset();
-		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
-		virtual void SetObserverMode(OBSERVERMODE mode) override;
-		virtual void SetObserverCameraOffset(const Vector3 &offset) override;
-		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
-		virtual void PrintMessage(std::string message,MESSAGE type) override;
-
-		// Returns true if observer mode is first-person and observer target is this player (Only works for the local player)
-		bool IsInFirstPersonMode() const;
-
-		void UpdateViewModelTransform();
-		void UpdateViewFOV();
 	};
 };
 

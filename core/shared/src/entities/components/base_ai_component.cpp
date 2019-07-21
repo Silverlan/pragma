@@ -259,15 +259,15 @@ void BaseAIComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	m_seqIdle = -1;
 	auto *pObservableComponent = static_cast<pragma::BaseObservableComponent*>(GetEntity().FindComponent("observable").get());
 	if(pObservableComponent != nullptr)
-		pObservableComponent->ResetThirdPersonObserverOffset();
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,false);
 	if(model == nullptr)
 		return;
 	if(pObservableComponent != nullptr)
 	{
 		Vector3 min,max;
 		model->GetRenderBounds(min,max);
-		pObservableComponent->SetThirdPersonObserverOffsetEnabled(true);
-		pObservableComponent->SetThirdPersonObserverOffset(Vector3{0.f,(max.y -min.y) *0.25f,-umath::max(umath::abs(min.x),umath::abs(min.y),umath::abs(min.z),umath::abs(max.x),umath::abs(max.y),umath::abs(max.z))});
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,true);
+		pObservableComponent->SetLocalCameraOrigin(BaseObservableComponent::CameraType::ThirdPerson,Vector3{0.f,(max.y -min.y) *0.25f,-umath::max(umath::abs(min.x),umath::abs(min.y),umath::abs(min.z),umath::abs(max.x),umath::abs(max.y),umath::abs(max.z))});
 	}
 
 	// Update animation move speed

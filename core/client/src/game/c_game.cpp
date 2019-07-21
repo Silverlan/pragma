@@ -169,7 +169,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("RenderPrepass");
 	RegisterCallback<void>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
-	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView");
+	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset");
 	RegisterCallback<
 		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,

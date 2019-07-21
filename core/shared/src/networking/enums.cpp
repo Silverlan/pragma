@@ -15,6 +15,7 @@ std::string pragma::networking::drop_reason_to_string(DropReason reason)
 	case DropReason::Shutdown:
 		return "Server shut down!";
 	case DropReason::Error:
+	default:
 		return "User has been dropped due to an error!";
 	}
 	static_assert(umath::to_integral(DropReason::Count) == 5);
@@ -44,6 +45,7 @@ nwm::ClientDropped pragma::networking::get_nwm_drop_reason(DropReason reason)
 	case DropReason::Shutdown:
 		return nwm::ClientDropped::Shutdown;
 	case DropReason::Error:
+	default:
 		return nwm::ClientDropped::Error;
 	}
 	static_assert(umath::to_integral(DropReason::Count) == 5);

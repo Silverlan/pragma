@@ -39,12 +39,14 @@
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	auto componentType = std::type_index(typeid(BasePlayerComponent));
 	EVENT_HANDLE_ACTION_INPUT = componentManager.RegisterEvent("HANDLE_ACTION_INPUT",componentType);
+	EVENT_ON_OBSERVATION_MODE_CHANGED = componentManager.RegisterEvent("ON_OBSERVATION_MODE_CHANGED");
 }
 
 void BasePlayerComponent::SetStandHeight(float height)
@@ -256,8 +258,7 @@ BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
 	m_standHeight(72),m_crouchHeight(36),
 	m_standEyeLevel(64),m_crouchEyeLevel(28),
 	m_tCrouch(0),m_bFlashlightOn(false),
-	m_obsMode(util::TEnumProperty<OBSERVERMODE>::Create(OBSERVERMODE::FIRSTPERSON)),
-	m_bObserverCameraLocked(false)
+	m_obsMode(util::TEnumProperty<OBSERVERMODE>::Create(OBSERVERMODE::FIRSTPERSON))
 {
 	m_bLocalPlayer = false;
 	m_timeConnected = 0;
@@ -285,8 +286,6 @@ void BasePlayerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetObserverTarget = SetupNetEvent("set_observer_target");
-	m_netEvSetObserverCameraOffset = SetupNetEvent("set_observer_camera_offset");
-	m_netEvSetObserverCameraLocked = SetupNetEvent("set_observer_camera_locked");
 	m_netEvApplyViewRotationOffset = SetupNetEvent("apply_view_rotation_offset");
 	m_netEvPrintMessage = SetupNetEvent("print_message");
 	m_netEvRespawn = SetupNetEvent("respawn");
@@ -366,9 +365,9 @@ void BasePlayerComponent::Initialize()
 	if(whObservableComponent.valid())
 	{
 		auto *pObservableComponent = static_cast<BaseObservableComponent*>(whObservableComponent.get());
-		pObservableComponent->SetFirstPersonObserverOffsetEnabled(true);
-		pObservableComponent->SetThirdPersonObserverOffsetEnabled(true);
-		pObservableComponent->SetThirdPersonObserverOffset({0.f,10.f,-80.f});
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::FirstPerson,true);
+		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,true);
+		pObservableComponent->SetLocalCameraOffset(BaseObservableComponent::CameraType::ThirdPerson,{0.f,10.f,-80.f});
 	}
 }
 
@@ -585,7 +584,12 @@ double BasePlayerComponent::ConnectionTime() const {return m_timeConnected;}
 
 std::string BasePlayerComponent::GetPlayerName() const {return m_playerName;}
 
-void BasePlayerComponent::SetObserverMode(OBSERVERMODE mode) {*m_obsMode = mode;}
+void BasePlayerComponent::SetObserverMode(OBSERVERMODE mode)
+{
+	*m_obsMode = mode;
+	DoSetObserverMode(mode);
+	BroadcastEvent(EVENT_ON_OBSERVATION_MODE_CHANGED);
+}
 OBSERVERMODE BasePlayerComponent::GetObserverMode() const {return *m_obsMode;}
 const util::PEnumProperty<OBSERVERMODE> &BasePlayerComponent::GetObserverModeProperty() const {return m_obsMode;}
 void BasePlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
@@ -605,10 +609,6 @@ BaseObservableComponent *BasePlayerComponent::GetObserverTarget() const
 	}
 	return r;
 }
-void BasePlayerComponent::SetObserverCameraOffset(const Vector3 &offset) {m_observerOffset = offset;}
-const Vector3 &BasePlayerComponent::GetObserverCameraOffset() const {return m_observerOffset;}
-bool BasePlayerComponent::IsObserverCameraLocked() const {return m_bObserverCameraLocked;}
-void BasePlayerComponent::SetObserverCameraLocked(bool b) {m_bObserverCameraLocked = b;}
 
 void BasePlayerComponent::SetViewPos(const Vector3 &pos) {m_posView = pos;}
 const Vector3 &BasePlayerComponent::GetViewPos() const {return m_posView;}
@@ -881,3 +881,4 @@ void CEHandleActionInput::PushArguments(lua_State *l)
 	Lua::PushBool(l,pressed);
 	Lua::PushNumber(l,magnitude);
 }
+#pragma optimize("",on)

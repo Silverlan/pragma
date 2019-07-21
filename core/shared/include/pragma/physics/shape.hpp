@@ -153,6 +153,7 @@ namespace pragma::physics
 		};
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		void AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose={});
+		virtual void GetAABB(Vector3 &min,Vector3 &max) const override;
 
 		virtual void SetMass(float mass) override;
 		virtual float GetMass() const override;
@@ -164,6 +165,8 @@ namespace pragma::physics
 		ICompoundShape(IEnvironment &env);
 		ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape,const Vector3 &origin);
 		std::vector<ShapeInfo> m_shapes;
+		Vector3 m_min = {};
+		Vector3 m_max = {};
 	};
 
 	class DLLNETWORK IHeightfield

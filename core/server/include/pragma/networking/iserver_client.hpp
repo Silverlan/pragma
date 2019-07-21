@@ -3,11 +3,11 @@
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/networking/enums.hpp"
+#include "pragma/networking/ip_address.hpp"
 #include <cinttypes>
 
 class Resource;
 class NetPacket;
-namespace nwm {class IPAddress;};
 namespace pragma {class SPlayerComponent;};
 namespace pragma::networking
 {
@@ -17,14 +17,14 @@ namespace pragma::networking
 		: public std::enable_shared_from_this<IServerClient>
 	{
 	public:
-		template<class TServerClient,class... Args>
-			static std::shared_ptr<TServerClient> Create(Args... args);
+		template<class TServerClient,typename... TARGS>
+			static std::shared_ptr<TServerClient> Create(TARGS&& ...args);
 		~IServerClient();
 		virtual void Initialize() {};
 		virtual bool Drop(DropReason reason,pragma::networking::Error &outErr)=0;
 		virtual uint16_t GetLatency() const=0;
 		virtual std::string GetIdentifier() const=0;
-		virtual std::optional<nwm::IPAddress> GetIPAddress() const=0;
+		std::optional<IPAddress> GetIPAddress() const;
 		virtual std::optional<std::string> GetIP() const=0;
 		virtual std::optional<Port> GetPort() const=0;
 		virtual bool IsListenServerHost() const=0;
@@ -66,10 +66,10 @@ namespace pragma::networking
 	};
 };
 
-template<class TServerClient,class... Args>
-	std::shared_ptr<TServerClient> pragma::networking::IServerClient::Create(Args... args)
+template<class TServerClient,typename... TARGS>
+	std::shared_ptr<TServerClient> pragma::networking::IServerClient::Create(TARGS&& ...args)
 {
-	auto p = std::shared_ptr<TServerClient>{new TServerClient{args...}};
+	auto p = std::shared_ptr<TServerClient>{new TServerClient{std::forward<TARGS>(args)...}};
 	p->Initialize();
 	return p;
 }

@@ -15,8 +15,10 @@
 #include <pragma/console/convars.h>
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
+#include "pragma/networking/networking_modules.hpp"
 #include <pragma/networking/error.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_library.hpp>
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ServerState::GetConVarPtrs() {return *conVarPtrs;}
@@ -48,9 +50,7 @@ ServerState::ServerState()
 	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketTCP");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>,std::reference_wrapper<const nwm::RecipientFilter>>("OnSendPacketUDP");
 
-	m_server = std::make_unique<pragma::networking::LocalServer>();
-	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
-	m_server->AddClient(m_localClient);
+	ResetGameServer();
 }
 
 ServerState::~ServerState()
@@ -63,6 +63,47 @@ ServerState::~ServerState()
 	ResourceManager::ClearResources();
 	ModelManager::Clear();
 	GetMaterialManager().ClearUnused();
+}
+
+void ServerState::InitializeGameServer()
+{
+	// TODO: Don't re-initialize server if local
+	m_server = nullptr;
+	auto netLibName = GetConVarString("net_library");
+	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,true);
+	std::string err;
+	auto dllHandle = InitializeLibrary(netModPath,&err);
+	if(dllHandle)
+	{
+		auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IServer>&)>("initialize_game_server");
+		if(fInitNetLib != nullptr)
+		{
+			fInitNetLib(*this,m_server);
+			pragma::networking::Error err;
+			if(m_server->Start(err) == false)
+			{
+				m_server = nullptr;
+				Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+			}
+		}
+		else
+			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
+	}
+	else
+		Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+	if(m_server == nullptr)
+	{
+		ResetGameServer();
+		return;
+	}
+	m_server->AddClient(m_localClient);
+}
+void ServerState::ResetGameServer()
+{
+	m_server = std::make_unique<pragma::networking::LocalServer>();
+	if(m_localClient == nullptr)
+		m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
+	m_server->AddClient(m_localClient);
 }
 
 void ServerState::Initialize()
@@ -159,6 +200,7 @@ std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 void ServerState::StartGame()
 {
 	NetworkState::StartGame();
+	InitializeGameServer();
 	m_game = new SGame{this};
 	s_game = m_game;
 

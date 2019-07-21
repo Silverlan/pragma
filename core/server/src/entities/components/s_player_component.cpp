@@ -158,9 +158,9 @@ void SPlayerComponent::Kick(const std::string&)
 bool SPlayerComponent::IsGameReady() const {return m_bGameReady;}
 void SPlayerComponent::SetGameReady(bool b) {m_bGameReady = b;}
 
-void SPlayerComponent::SetObserverMode(OBSERVERMODE mode)
+void SPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
 {
-	BasePlayerComponent::SetObserverMode(mode);
+	BasePlayerComponent::DoSetObserverMode(mode);
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared())
 	{
@@ -186,32 +186,6 @@ void SPlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
 	auto *session = GetClientSession();
 	if(session)
 		entThis.SendNetEvent(m_netEvSetObserverTarget,p,pragma::networking::Protocol::SlowReliable,*session);
-}
-void SPlayerComponent::SetObserverCameraOffset(const Vector3 &offset)
-{
-	BasePlayerComponent::SetObserverCameraOffset(offset);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared() == false)
-		return;
-	NetPacket p {};
-	p->Write<Vector3>(offset);
-
-	auto *session = GetClientSession();
-	if(session)
-		ent.SendNetEvent(m_netEvSetObserverCameraOffset,p,pragma::networking::Protocol::SlowReliable,*session);
-}
-void SPlayerComponent::SetObserverCameraLocked(bool b)
-{
-	BasePlayerComponent::SetObserverCameraLocked(b);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared() == false)
-		return;
-	NetPacket p {};
-	p->Write<bool>(b);
-
-	auto *session = GetClientSession();
-	if(session)
-		ent.SendNetEvent(m_netEvSetObserverCameraLocked,p,pragma::networking::Protocol::SlowReliable,*session);
 }
 
 void SPlayerComponent::OnEntitySpawn()
@@ -268,12 +242,12 @@ void SPlayerComponent::InitializeGlobalNameComponent()
 	globalNameComponent->SetGlobalName(address.ToString());
 }
 
-nwm::IPAddress SPlayerComponent::GetClientIPAddress() const
+networking::IPAddress SPlayerComponent::GetClientIPAddress() const
 {
 	if(m_session.expired())
 		return {};
 	auto ipAddress = m_session->GetIPAddress();
-	return ipAddress.has_value() ? *ipAddress : nwm::IPAddress{};
+	return ipAddress.has_value() ? *ipAddress : networking::IPAddress{};
 }
 
 std::string SPlayerComponent::GetClientIP()

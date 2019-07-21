@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <cinttypes>
+#include <string>
 
 namespace nwm {enum class Protocol : uint32_t; enum class ClientDropped : int8_t;};
 namespace pragma::networking
@@ -14,6 +15,7 @@ namespace pragma::networking
 		UnableToStartServer,
 		UnableToConnect,
 		UnableToAcceptClient,
+		UnableToListenOnPort,
 		ServerNotRunning,
 		GenericError,
 		UnknownError,

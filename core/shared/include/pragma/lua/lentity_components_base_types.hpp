@@ -442,6 +442,8 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Property::push(l,*hComponent->GetIgnitableProperty());
 		}));
+		def.add_static_constant("EVENT_ON_IGNITED",pragma::BaseFlammableComponent::EVENT_ON_IGNITED);
+		def.add_static_constant("EVENT_ON_EXTINGUISHED",pragma::BaseFlammableComponent::EVENT_ON_EXTINGUISHED);
 	}
 
 	template<class TLuaClass,class THandle>
@@ -744,68 +746,73 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_observable_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("SetFirstPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &offset) {
+		def.def("SetLocalCameraOrigin",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t camType,const Vector3 &origin) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetFirstPersonObserverOffset(offset);
+			hEnt->SetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType),origin);
 		}));
-		def.def("SetThirdPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &offset) {
+		def.def("GetLocalCameraOrigin",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t camType) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetThirdPersonObserverOffset(offset);
+			Lua::Push<Vector3>(l,hEnt->GetLocalCameraOrigin(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 		}));
-		def.def("SetObserverOffset",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &offset) {
+		def.def("SetLocalCameraOffset",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t camType,const Vector3 &offset) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetObserverOffset(offset);
-		}));
-		def.def("GetFirstPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			hEnt->SetLocalCameraOffset(static_cast<pragma::BaseObservableComponent::CameraType>(camType),offset);
+			}));
+		def.def("GetLocalCameraOffset",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t camType) {
 			pragma::Lua::check_component(l,hEnt);
-			Vector3 offset {};
-			if(hEnt->GetFirstPersonObserverOffset(offset) == false)
-				Lua::PushBool(l,false);
-			else
-			{
-				Lua::PushBool(l,true);
-				Lua::Push<Vector3>(l,offset);
-			}
+			Lua::Push<Vector3>(l,hEnt->GetLocalCameraOffset(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 		}));
-		def.def("GetThirdPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+		def.def("GetCameraData",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t camType) {
 			pragma::Lua::check_component(l,hEnt);
-			Vector3 offset {};
-			if(hEnt->GetThirdPersonObserverOffset(offset) == false)
-				Lua::PushBool(l,false);
-			else
-			{
-				Lua::PushBool(l,true);
-				Lua::Push<Vector3>(l,offset);
-			}
+			Lua::Push<pragma::ObserverCameraData*>(l,&hEnt->GetCameraData(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 		}));
-		def.def("ResetFirstPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+		def.def("SetCameraEnabled",static_cast<void(*)(lua_State*,THandle&,uint32_t,bool)>([](lua_State *l,THandle &hEnt,uint32_t camType,bool enabled) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->ResetFirstPersonObserverOffset();
+			hEnt->SetCameraEnabled(static_cast<pragma::BaseObservableComponent::CameraType>(camType),enabled);
 		}));
-		def.def("ResetThirdPersonObserverOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+		def.def("GetCameraEnabledProperty",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t camType) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->ResetThirdPersonObserverOffset();
+			Lua::Property::push(l,*hEnt->GetCameraEnabledProperty(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 		}));
-		def.def("ResetObserverOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+		def.def("GetCameraOffsetProperty",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t camType) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->ResetObserverOffset();
+			Lua::Property::push(l,*hEnt->GetCameraOffsetProperty(static_cast<pragma::BaseObservableComponent::CameraType>(camType)));
 		}));
-		def.def("GetFirstPersonModeEnabledProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetFirstPersonModeEnabledProperty());
+		def.add_static_constant("CAMERA_TYPE_FIRST_PERSON",umath::to_integral(pragma::BaseObservableComponent::CameraType::FirstPerson));
+		def.add_static_constant("CAMERA_TYPE_THIRD_PERSON",umath::to_integral(pragma::BaseObservableComponent::CameraType::ThirdPerson));
+
+		auto defObsCamData = luabind::class_<pragma::ObserverCameraData>("CameraData");
+		defObsCamData.def_readwrite("rotateWithObservee",&pragma::ObserverCameraData::rotateWithObservee);
+		defObsCamData.def("SetAngleLimits",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&,const EulerAngles&,const EulerAngles&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData,const EulerAngles &min,const EulerAngles &max) {
+			obsCamData.angleLimits = {min,max};
 		}));
-		def.def("GetThirdPersonModeEnabledProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetThirdPersonModeEnabledProperty());
+		defObsCamData.def("GetAngleLimits",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData) {
+			if(obsCamData.angleLimits.has_value() == false)
+				return;
+			Lua::Push<EulerAngles>(l,obsCamData.angleLimits->first);
+			Lua::Push<EulerAngles>(l,obsCamData.angleLimits->second);
 		}));
-		def.def("GetFirstPersonObserverOffsetProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetFirstPersonObserverOffsetProperty());
+		defObsCamData.def("ClearAngleLimits",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData) {
+			obsCamData.angleLimits = {};
 		}));
-		def.def("GetThirdPersonObserverOffsetProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetThirdPersonObserverOffsetProperty());
+		defObsCamData.property("enabled",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData) {
+			Lua::PushBool(l,*obsCamData.enabled);
+		}),static_cast<void(*)(lua_State*,pragma::ObserverCameraData&,bool)>([](lua_State *l,pragma::ObserverCameraData &obsCamData,bool enabled) {
+			*obsCamData.enabled = enabled;
 		}));
+		defObsCamData.property("localOrigin",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData) {
+			if(obsCamData.localOrigin.has_value() == false)
+				return;
+			Lua::Push<Vector3>(l,*obsCamData.localOrigin);
+		}),static_cast<void(*)(lua_State*,pragma::ObserverCameraData&,const Vector3&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData,const Vector3 &origin) {
+			obsCamData.localOrigin = origin;
+		}));
+		defObsCamData.property("offset",static_cast<void(*)(lua_State*,pragma::ObserverCameraData&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData) {
+			Lua::Push<Vector3>(l,*obsCamData.offset);
+		}),static_cast<void(*)(lua_State*,pragma::ObserverCameraData&,const Vector3&)>([](lua_State *l,pragma::ObserverCameraData &obsCamData,const Vector3 &offset) {
+			*obsCamData.offset = offset;
+		}));
+		def.scope[defObsCamData];
 	}
 
 	template<class TLuaClass,class THandle>
@@ -2365,7 +2372,14 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_vehicle_component_methods(lua_State *l,TLuaClass &def)
 	{
-		// TODO
+		def.def("GetSpeedKmh",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			Lua::PushNumber(l,hEnt.get()->GetSpeedKmh());
+		}));
+		def.def("GetSteeringAngle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			Lua::PushNumber(l,hEnt.get()->GetSteeringAngle());
+		}));
 		def.def("GetSteeringWheel",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			auto *ent = hEnt.get()->GetSteeringWheel();
@@ -2384,9 +2398,18 @@ namespace Lua
 				return;
 			driver->GetLuaObject()->push(l);
 		}));
+		def.def("SetDriver",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hDriver) {
+			pragma::Lua::check_component(l,hEnt);
+			LUA_CHECK_ENTITY(l,hDriver);
+			hEnt.get()->SetDriver(hDriver.get());
+		}));
 		def.def("ClearDriver",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt.get()->ClearDriver();
+		}));
+		def.def("SetSteeringWheelModel",static_cast<void(*)(lua_State*,THandle&,const std::string&)>([](lua_State *l,THandle &hEnt,const std::string &model) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt.get()->SetSteeringWheelModel(model);
 		}));
 		def.def("GetPhysicsVehicle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -2395,6 +2418,24 @@ namespace Lua
 				return;
 			physVehicle->Push(l);
 		}));
+		def.def("SetupPhysics",static_cast<void(*)(lua_State*,THandle&,const pragma::physics::VehicleCreateInfo&,luabind::object)>([](lua_State *l,THandle &hEnt,const pragma::physics::VehicleCreateInfo &vhcCreateInfo,luabind::object oWheelModels) {
+			pragma::Lua::check_component(l,hEnt);
+			auto tWheelModels = 3;
+			Lua::CheckTable(l,tWheelModels);
+			auto numWheels = Lua::GetObjectLength(l,tWheelModels);
+			std::vector<std::string> wheelModels {};
+			wheelModels.reserve(numWheels);
+			for(auto i=decltype(numWheels){0u};i<numWheels;++i)
+			{
+				Lua::PushInt(l,i +1u);
+				Lua::GetTableValue(l,tWheelModels);
+				wheelModels.push_back(Lua::CheckString(l,-1));
+				Lua::Pop(l,1);
+			}
+			hEnt.get()->SetupVehicle(vhcCreateInfo,wheelModels);
+		}));
+		def.add_static_constant("EVENT_ON_DRIVER_ENTERED",pragma::BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
+		def.add_static_constant("EVENT_ON_DRIVER_EXITED",pragma::BaseVehicleComponent::EVENT_ON_DRIVER_EXITED);
 	}
 
 	template<class TLuaClass,class THandle>
@@ -2708,22 +2749,6 @@ namespace Lua
 				return;
 			ent->PushLuaObject(l);
 		}));
-		def.def("SetObserverCameraOffset",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hPl,const Vector3 &offset) {
-			pragma::Lua::check_component(l,hPl);
-			hPl.get()->SetObserverCameraOffset(offset);
-		}));
-		def.def("GetObserverCameraOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
-			pragma::Lua::check_component(l,hPl);
-			Lua::Push<Vector3>(l,hPl.get()->GetObserverCameraOffset());
-		}));
-		def.def("IsObserverCameraLocked",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
-			pragma::Lua::check_component(l,hPl);
-			Lua::PushBool(l,hPl.get()->IsObserverCameraLocked());
-		}));
-		def.def("SetObserverCameraLocked",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hPl,bool bLocked) {
-			pragma::Lua::check_component(l,hPl);
-			hPl.get()->SetObserverCameraLocked(bLocked);
-		}));
 
 		def.def("GetViewPos",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
 			pragma::Lua::check_component(l,hPl);
@@ -2761,6 +2786,7 @@ namespace Lua
 		}));
 
 		def.add_static_constant("EVENT_HANDLE_ACTION_INPUT",pragma::BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT);
+		def.add_static_constant("EVENT_ON_OBSERVATION_MODE_CHANGED",pragma::BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED);
 
 		def.add_static_constant("MESSAGE_TYPE_CONSOLE",umath::to_integral(MESSAGE::PRINTCONSOLE));
 		def.add_static_constant("MESSAGE_TYPE_CHAT",umath::to_integral(MESSAGE::PRINTCHAT));

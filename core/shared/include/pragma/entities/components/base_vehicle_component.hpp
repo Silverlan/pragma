@@ -13,6 +13,9 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static ComponentEventId EVENT_ON_DRIVER_ENTERED;
+		static ComponentEventId EVENT_ON_DRIVER_EXITED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		BaseEntity *GetDriver();
@@ -23,19 +26,13 @@ namespace pragma
 
 		virtual void Think(double tDelta);
 
-		// TODO: Allow different models per wheel
-		void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo,const std::string &wheelModel);
+		void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo,const std::vector<std::string> &wheelModels);
 
 		BaseEntity *GetSteeringWheel();
 		float GetSpeedKmh() const;
 		float GetSteeringAngle() const;
 
 		virtual void SetSteeringWheelModel(const std::string &mdl);
-
-		bool IsFirstPersonCameraEnabled() const;
-		bool IsThirdPersonCameraEnabled() const;
-		virtual void SetFirstPersonCameraEnabled(bool b);
-		virtual void SetThirdPersonCameraEnabled(bool b);
 
 		physics::IVehicle *GetPhysicsVehicle();
 		const physics::IVehicle *GetPhysicsVehicle() const;
@@ -47,18 +44,18 @@ namespace pragma
 			util::WeakHandle<pragma::BaseWheelComponent> hWheel = {};
 			std::string model = "";
 		};
+		pragma::NetEventId m_netEvSteeringWheelModel = pragma::INVALID_NET_EVENT;
 		std::vector<WheelData> m_wheels = {};
 		physics::VehicleCreateInfo m_vhcCreateInfo = {};
 		util::TSharedHandle<physics::IVehicle> m_physVehicle = nullptr;
+		std::string m_steeringWheelMdl;
 		EntityHandle m_steeringWheel = {};
 		CallbackHandle m_cbSteeringWheel = {};
 		EntityHandle m_driver = {};
-		bool m_bFirstPersonCameraEnabled = true;
-		bool m_bThirdPersonCameraEnabled = true;
+		bool m_bHasDriver = false;
 		void InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysicsComponent::PhysFlags flags);
 		void DestroyVehiclePhysics();
-		virtual Bool AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,UChar *wheelId,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={});
-		BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
+		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
 		void InitializeWheelEntities();
 		void InitializeSteeringWheel();
 	};

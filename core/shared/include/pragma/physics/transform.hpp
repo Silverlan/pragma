@@ -23,6 +23,10 @@ namespace pragma::physics
 		void SetOrigin(const Vector3 &origin);
 		void SetRotation(const Quat &rot);
 		void SetIdentity();
+		void TranslateGlobal(const Vector3 &v);
+		void TranslateLocal(const Vector3 &v);
+		void RotateGlobal(const Quat &rot);
+		void RotateLocal(const Quat &rot);
 		Transform GetInverse() const;
 		Transform operator*(const Transform &tOther) const;
 		Transform &operator*=(const Transform &tOther);

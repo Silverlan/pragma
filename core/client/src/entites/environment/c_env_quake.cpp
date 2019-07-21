@@ -39,7 +39,8 @@ void CQuakeComponent::StartShake()
 	auto perlin = std::make_shared<noise::module::Perlin>();
 	perlin->SetSeed(CInt32(c_engine->GetTickCount()));
 	m_tStartShake = CFloat(c_game->CurTime());
-	m_cbScreenShake = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([this,perlin](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat>) {
+	m_cbScreenShake = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
+		[this,perlin](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>) {
 		auto &pos = refPos.get();
 		//auto &rot = refRot.get();
 		

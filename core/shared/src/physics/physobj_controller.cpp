@@ -89,7 +89,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(owner);
 	data.SetTarget(origin);
 	data.SetFilter(GetHandle());
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	m_groundRayResult = std::make_shared<TraceResult>(game->Overlap(data));*/
@@ -105,7 +105,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(origin +up *upDist);
 	data.SetTarget(origin +up *downDist);
 	data.SetFilter(GetHandle());
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	auto pPhysComponent = owner->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 	{
@@ -136,7 +136,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetSource(owner->GetPosition() +up *10.f);
 	data.SetTarget(owner->GetPosition() -up *100.f);
 	data.SetFilter(GetHandle());
-	data.SetFlags(RayCastFlags::InvertFilter);
+	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	data.SetCollisionFilterGroup(owner->GetCollisionFilter());
 	data.SetCollisionFilterMask(owner->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
 	// See also: BaseCharacter::GetAimTraceData

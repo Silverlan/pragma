@@ -15,7 +15,6 @@ void pragma::networking::LocalServer::SetTimeoutDuration(float duration) {}
 pragma::networking::LocalServerClient::~LocalServerClient() {}
 uint16_t pragma::networking::LocalServerClient::GetLatency() const {return 0;}
 std::string pragma::networking::LocalServerClient::GetIdentifier() const {return "localhost";}
-std::optional<nwm::IPAddress> pragma::networking::LocalServerClient::GetIPAddress() const {return {};}
 std::optional<std::string> pragma::networking::LocalServerClient::GetIP() const {return {};}
 std::optional<pragma::networking::Port> pragma::networking::LocalServerClient::GetPort() const {return {};}
 bool pragma::networking::LocalServerClient::IsListenServerHost() const {return true;}

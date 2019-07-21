@@ -18,25 +18,20 @@ namespace pragma
 		virtual ~SVehicleComponent() override;
 		virtual void ClearDriver() override;
 		virtual void SetDriver(BaseEntity *ent) override;
-		BaseEntity *AddWheel(const std::string &mdl,const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={});
-		BaseEntity *AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={});
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
 
 		virtual void SetSteeringWheelModel(const std::string &mdl) override;
-		virtual void SetFirstPersonCameraEnabled(bool b) override;
-		virtual void SetThirdPersonCameraEnabled(bool b) override;
 
 		virtual bool ShouldTransmitNetData() const override {return true;};
 	protected:
 		void WriteWheelInfo(NetPacket &p,WheelData &data);
 		CallbackHandle m_playerAction;
-		std::string m_steeringWheelMdl;
 		void OnActionInput(Action action, bool b);
 		virtual void OnRemove() override;
 		void OnPostSpawn();
 		void OnUse(BaseEntity *pl);
-		virtual Bool AddWheel(const Vector3 &connectionPoint,const Vector3 &wheelAxle,Bool bIsFrontWheel,UChar *wheelId,const Vector3 &mdlOffset={},const Quat &mdlRotOffset={}) override;
+		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	private:
 		static std::vector<SVehicleComponent*> s_vehicles;

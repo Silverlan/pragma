@@ -55,10 +55,6 @@ void pragma::networking::StandardClient::SetTimeoutDuration(float duration)
 {
 	m_clientConnection->SetTimeoutDuration(duration);
 }
-std::optional<nwm::IPAddress> pragma::networking::StandardClient::GetIPAddress() const
-{
-	return m_clientConnection->GetLocalAddress();
-}
 std::optional<std::string> pragma::networking::StandardClient::GetIP() const
 {
 	return m_clientConnection->GetIP();

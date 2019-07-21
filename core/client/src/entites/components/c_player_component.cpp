@@ -42,6 +42,7 @@ unsigned int CPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size()
 extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
+#pragma optimize("",off)
 Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = GetEntity();
@@ -199,33 +200,8 @@ void CPlayerComponent::OnWaterEmerged()
 
 void CPlayerComponent::UpdateObserverOffset()
 {
-	auto *tgt = GetObserverTarget();
-	Vector3 offset {};
-	switch(GetObserverMode())
-	{
-		case OBSERVERMODE::FIRSTPERSON:
-		{
-			if(tgt->GetFirstPersonObserverOffset(offset) == false)
-				;
-			break;
-		}
-		case OBSERVERMODE::THIRDPERSON:
-		{
-			if(tgt->GetThirdPersonObserverOffset(offset) == false)
-			{
-				auto pRenderComponent = static_cast<CBaseEntity&>(tgt->GetEntity()).GetRenderComponent();
-				if(pRenderComponent.valid())
-				{
-					auto sphere = pRenderComponent->GetRenderSphereBounds();
-					offset.z = -sphere.radius;
-				}
-			}
-			break;
-		}
-		default:
-			return;
-	}
-	SetObserverCameraOffset(offset);
+	// Obsolete
+	// TODO: Remove this function
 }
 
 bool CPlayerComponent::IsInFirstPersonMode() const
@@ -253,32 +229,44 @@ void CPlayerComponent::UpdateObserverCallback()
 			m_cbObserver.Remove();
 		return;
 	}
-	auto &offset = GetObserverCameraOffset();
-	if(obsMode == OBSERVERMODE::FIRSTPERSON)
-	{
-		if(uvec::cmp(offset,uvec::ORIGIN) == true)
-		{
-			m_cbObserver.Remove();
-			return;
-		}
-	}
 	if(m_cbObserver.IsValid())
 		return;
-	m_cbObserver = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot) {
-		auto *ent = GetObserverTarget();
+	// TODO
+	//m_lastObserveeRotation = GetEntity().GetRotation();
+	m_cbObserver = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
+		[this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot,
+			std::reference_wrapper<Quat> rotMod
+			) {
+		auto *obsC = GetObserverTarget();
+		if(obsC == nullptr)
+			return;
+		pragma::ObserverCameraData *obsCamData = nullptr;
+		switch(GetObserverMode())
+		{
+		case OBSERVERMODE::FIRSTPERSON:
+			obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::FirstPerson);
+			break;
+		case OBSERVERMODE::THIRDPERSON:
+			obsCamData = &obsC->GetCameraData(BaseObservableComponent::CameraType::ThirdPerson);
+			break;
+		}
 		auto &pos = refPos.get();
 		auto &rot = refRot.get();
-
 		//auto physType = ent->GetPhysicsType();
-		auto pTrComponentObs = ent->GetEntity().GetTransformComponent();
-		auto camRot = (m_bObserverCameraLocked == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
-		auto origin = pTrComponentObs.valid() ? pTrComponentObs->GetEyePosition() : Vector3{};
-		auto npos = origin +uquat::forward(camRot) *m_observerOffset.z +uquat::up(camRot) *m_observerOffset.y -uquat::right(camRot) *m_observerOffset.x;
+		auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
+		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
+
+		physics::Transform pose;
+		obsC->GetEntity().GetPose(pose);
+		if(obsCamData && obsCamData->localOrigin.has_value())
+			pose.TranslateLocal(*obsCamData->localOrigin);
+		else if(pTrComponentObs.valid())
+			pose.SetOrigin(pTrComponentObs->GetEyePosition());
 
 		auto &entThis = GetEntity();
 		auto charComponent = entThis.GetCharacterComponent();
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(m_bObserverCameraLocked == false)
+		if(obsCamData == nullptr || obsCamData->angleLimits.has_value() == false)
 		{
 			if(charComponent.valid())
 				rot = charComponent->GetViewOrientation();
@@ -287,30 +275,40 @@ void CPlayerComponent::UpdateObserverCallback()
 		}
 		else
 			rot = pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
-		if(GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
+
+		auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
+		auto rotPos = camRot;
+		if(rotateWithObservee)
+		{
+			// Apply entity rotation for the current frame
+			auto &entRot = obsC->GetEntity().GetRotation() *rotMod.get();
+			rotMod.get() = entRot;
+			rotPos = entRot *rotPos;
+		}
+
+		auto camLookAtPos = pose.GetOrigin();
+		auto camPos = camLookAtPos;
+		if(obsCamData)
+			camPos += uquat::forward(rotPos) *(*obsCamData->offset)->z +uquat::up(rotPos) *(*obsCamData->offset)->y -uquat::right(rotPos) *(*obsCamData->offset)->x;
+
+		if(obsCamData != nullptr && uvec::length_sqr(*obsCamData->offset) > 0.f)
 		{
 			TraceData data {};
-			data.SetSource(origin);
-			data.SetTarget(npos);
-			data.SetFlags(RayCastFlags::InvertFilter);
-			data.SetFilter(ent->GetEntity());
+			data.SetSource(camLookAtPos);
+			data.SetTarget(camPos);
+			data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
+			data.SetFilter(obsC->GetEntity());
 			auto r = c_game->RayCast(data);
-			pos = r.position;
+			pos = (r.hitType == RayCastHitType::Block) ? r.position : camPos;
 		}
 		else
-			pos = npos;
+			pos = camPos;
 	}));
 }
 
-void CPlayerComponent::SetObserverCameraOffset(const Vector3 &offset)
+void CPlayerComponent::DoSetObserverMode(OBSERVERMODE mode)
 {
-	BasePlayerComponent::SetObserverCameraOffset(offset);
-	UpdateObserverCallback();
-}
-
-void CPlayerComponent::SetObserverMode(OBSERVERMODE mode)
-{
-	BasePlayerComponent::SetObserverMode(mode);
+	BasePlayerComponent::DoSetObserverMode(mode);
 	UpdateObserverOffset();
 	UpdateObserverCallback();
 }
@@ -350,16 +348,6 @@ bool CPlayerComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pac
 		auto *ent = nwm::read_entity(packet);
 		auto pObsComponent = ent->GetComponent<pragma::CObservableComponent>();
 		SetObserverTarget(pObsComponent.get());
-	}
-	else if(eventId == m_netEvSetObserverCameraOffset)
-	{
-		auto offset = packet->Read<Vector3>();
-		SetObserverCameraOffset(offset);
-	}
-	else if(eventId == m_netEvSetObserverCameraLocked)
-	{
-		auto b = packet->Read<bool>();
-		SetObserverCameraLocked(b);
 	}
 	else if(eventId == m_netEvApplyViewRotationOffset)
 	{
@@ -741,3 +729,4 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		// TODO: Remove callback on complete!!
 	}));*/
 }
+#pragma optimize("",on)

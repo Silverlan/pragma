@@ -9,6 +9,14 @@ bool pragma::networking::IServerClient::Drop(DropReason reason,pragma::networkin
 {
 	return false;
 }
+std::optional<pragma::networking::IPAddress> pragma::networking::IServerClient::GetIPAddress() const
+{
+	auto ip = GetIP();
+	auto port = GetPort();
+	if(ip.has_value() == false || port.has_value() == false)
+		return {};
+	return pragma::networking::IPAddress{*ip,*port};
+}
 pragma::SPlayerComponent *pragma::networking::IServerClient::GetPlayer() const {return m_player.get();}
 void pragma::networking::IServerClient::SetTransferComplete(bool b) {m_bTransferring = !b;}
 bool pragma::networking::IServerClient::IsTransferring() const {return m_bTransferring;}

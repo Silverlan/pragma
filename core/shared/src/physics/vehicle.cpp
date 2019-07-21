@@ -65,6 +65,19 @@ void pragma::physics::ChassisCreateInfo::GetAABB(const pragma::physics::IRigidBo
 		uvec::max(&max,shapeMax);
 	}
 }
+Vector3 pragma::physics::ChassisCreateInfo::GetCenterOfMass(const pragma::physics::IRigidBody &body) const
+{
+	if(centerOfMass.has_value())
+		return *centerOfMass;
+	Vector3 min,max;
+	GetAABB(body,min,max);
+
+	auto dim = (max -min) /2.f;
+	// Move center of mass to center of shape AABB, then move it slightly forward and down.
+	// This approximately represents the center of mass of real vehicles and usually
+	// results in good handling.
+	return (min +max) /2.f +Vector3{0.f,dim.y *-0.35f,dim.z *0.1f};
+}
 Vector3 pragma::physics::ChassisCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
@@ -105,7 +118,7 @@ pragma::physics::VehicleCreateInfo::Wheel pragma::physics::VehicleCreateInfo::Ge
 	return Wheel::Dummy;
 }
 pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(
-	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,float wheelWidth,float wheelRadius,
+	const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
 	float handBrakeTorque,float maxSteeringAngle
 )
 {
@@ -122,8 +135,6 @@ pragma::physics::VehicleCreateInfo pragma::physics::VehicleCreateInfo::CreateSta
 	{
 		vhcCreateInfo.wheels.push_back({});
 		auto &wheelInfo = vhcCreateInfo.wheels.at(i);
-		wheelInfo.width = wheelWidth;
-		wheelInfo.radius = wheelRadius;
 		wheelInfo.chassisOffset = wheelCenterOffsets.at(i);
 		switch(static_cast<Wheel>(i))
 		{
@@ -154,6 +165,35 @@ const pragma::physics::IShape *pragma::physics::WheelCreateInfo::GetShape(const 
 {
 	return get_shape_from_shape_index(body,shapeIndex);
 }
+void pragma::physics::WheelCreateInfo::GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const
+{
+	auto *shape = GetShape(body);
+	if(shape == nullptr)
+	{
+		min = {};
+		max = {};
+		return;
+	}
+	shape->GetAABB(min,max);
+}
+float pragma::physics::WheelCreateInfo::GetRadius(const pragma::physics::IRigidBody &body) const
+{
+	if(radius.has_value())
+		return *radius;
+	Vector3 min,max;
+	GetAABB(body,min,max);
+	auto dims = (max -min) *0.5f;
+	return dims.z;
+}
+float pragma::physics::WheelCreateInfo::GetWidth(const pragma::physics::IRigidBody &body) const
+{
+	if(width.has_value())
+		return *width;
+	Vector3 min,max;
+	GetAABB(body,min,max);
+	auto dims = (max -min) *0.5f;
+	return dims.x;
+}
 float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics::IRigidBody &body) const
 {
 	if(momentOfInertia.has_value())
@@ -162,7 +202,7 @@ float pragma::physics::WheelCreateInfo::GetMomentOfInertia(const pragma::physics
 	if(pShape == nullptr)
 		return 0.f;
 	// MOI of a cylinder
-	return 0.5f *pShape->GetMass() *umath::pow2(radius);
+	return 0.5f *pShape->GetMass() *umath::pow2(GetRadius(body));
 }
 
 pragma::physics::IVehicle::IVehicle(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject)

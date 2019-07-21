@@ -31,7 +31,10 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl != nullptr)
 			pl->SetObserverMode(OBSERVERMODE::THIRDPERSON);
-		m_cbCameraUpdate = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot) {
+		m_cbCameraUpdate = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
+			[this](std::reference_wrapper<Vector3> refPos,std::reference_wrapper<Quat> refRot,
+				std::reference_wrapper<Quat> rotMod
+			) {
 			auto &ent = GetEntity();
 			auto *pToggleComponent = static_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
 			if(pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false)

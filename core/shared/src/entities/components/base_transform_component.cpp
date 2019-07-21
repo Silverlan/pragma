@@ -3,6 +3,7 @@
 #include "pragma/game/game_limits.h"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/lua/luacallback.h"
 #include "pragma/lua/luafunction_call.h"
@@ -88,7 +89,10 @@ Vector3 BaseTransformComponent::GetEyePosition() const
 	return eyePos;
 }
 Vector3 BaseTransformComponent::GetEyeOffset() const {return m_eyeOffset *GetScale();}
-void BaseTransformComponent::SetEyeOffset(const Vector3 &offset) {m_eyeOffset = offset;}
+void BaseTransformComponent::SetEyeOffset(const Vector3 &offset)
+{
+	m_eyeOffset = offset;
+}
 
 float BaseTransformComponent::GetMaxAxisScale() const
 {
@@ -296,7 +300,7 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	trData.SetSource(origin);
 	trData.SetTarget(origin +dir *static_cast<float>(GameLimits::MaxRayCastRange));
 	trData.SetFilter(component.GetEntity());
-	trData.SetFlags(RayCastFlags::InvertFilter);
+	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	auto pPhysComponent = component.GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 	{

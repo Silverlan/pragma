@@ -9,6 +9,13 @@
 
 using namespace pragma;
 
+ComponentEventId BaseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
+void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	EVENT_ON_IGNITED = componentManager.RegisterEvent("ON_IGNITED");
+	EVENT_ON_EXTINGUISHED = componentManager.RegisterEvent("ON_EXTINGUISHED");
+}
 BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bIsOnFire(util::BoolProperty::Create(false)),
 	m_bIgnitable(util::BoolProperty::Create(true))
@@ -92,12 +99,12 @@ const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const {re
 const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const {return m_bIgnitable;}
 bool BaseFlammableComponent::IsOnFire() const {return *m_bIsOnFire;}
 bool BaseFlammableComponent::IsIgnitable() const {return *m_bIgnitable;}
-void BaseFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
+util::EventReply BaseFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
 {
 	auto &ent = GetEntity();
 	auto pSubmergibleComponent = ent.GetComponent<pragma::SubmergibleComponent>();
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
-		return;
+		return util::EventReply::Handled;
 	*m_bIsOnFire = true;
 	if(duration == 0.f)
 		m_tExtinguishTime = 0.f;
@@ -107,15 +114,42 @@ void BaseFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEnti
 		if(tNew > m_tExtinguishTime)
 			m_tExtinguishTime = static_cast<float>(tNew);
 	}
+	CEOnIgnited igniteData {duration,attacker,inflictor};
+	return BroadcastEvent(EVENT_ON_IGNITED,igniteData);
+
 }
 void BaseFlammableComponent::Extinguish()
 {
+	if(*m_bIsOnFire == false)
+		return;
 	*m_bIsOnFire = false;
 	m_tExtinguishTime = 0.f;
+	BroadcastEvent(EVENT_ON_EXTINGUISHED);
 }
 void BaseFlammableComponent::SetIgnitable(bool b)
 {
 	*m_bIgnitable = b;
 	if(b == false)
 		Extinguish();
+}
+
+////////////
+
+CEOnIgnited::CEOnIgnited(float duration,BaseEntity *attacker,BaseEntity *inflictor)
+	: duration{duration},attacker{attacker ? attacker->GetHandle() : EntityHandle{}},
+	inflictor{inflictor ? inflictor->GetHandle() : EntityHandle{}}
+{}
+void CEOnIgnited::PushArguments(lua_State *l)
+{
+	Lua::PushNumber(l,duration);
+
+	if(attacker.IsValid())
+		attacker->GetLuaObject()->push(l);
+	else
+		Lua::PushNil(l);
+
+	if(inflictor.IsValid())
+		inflictor->GetLuaObject()->push(l);
+	else
+		Lua::PushNil(l);
 }

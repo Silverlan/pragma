@@ -1,30 +1,25 @@
 #include "pr_module.hpp"
+#include <pr_steam_networking_shared.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <pragma/networking/iserver.hpp>
 #include <pragma/networking/iserver_client.hpp>
 #include <pragma/networking/error.hpp>
+#include <pragma/networking/ip_address.hpp>
 #include <mathutil/umath.h>
 #include <iostream>
 #include <array>
-
-#undef ENABLE_STEAM_SERVER_SUPPORT
-
-#include <steam/steamnetworkingsockets.h>
-#include <steam/isteamnetworkingutils.h>
-#ifdef ENABLE_STEAM_SERVER_SUPPORT
-#include <steam/steam_api.h>
-#endif
 #include <string>
 
+#pragma optimize("",off)
+class SteamServer;
 class SteamServerClient
 	: public pragma::networking::IServerClient
 {
 public:
-	SteamServerClient(HSteamNetConnection con);
+	SteamServerClient(SteamServer &sv,HSteamNetConnection con);
 	virtual bool Drop(pragma::networking::DropReason reason,pragma::networking::Error &outErr) override;
 	virtual uint16_t GetLatency() const override;
 	virtual std::string GetIdentifier() const override;
-	virtual std::optional<nwm::IPAddress> GetIPAddress() const override;
 	virtual std::optional<std::string> GetIP() const override;
 	virtual std::optional<pragma::networking::Port> GetPort() const override;
 	virtual bool IsListenServerHost() const override;
@@ -32,10 +27,11 @@ public:
 private:
 	ISteamNetworkingSockets &GetInterface() const;
 	HSteamNetConnection m_hConnection = k_HSteamNetConnection_Invalid;
+	SteamServer &m_server;
 };
 
-SteamServerClient::SteamServerClient(HSteamNetConnection con)
-	: m_hConnection{con}
+SteamServerClient::SteamServerClient(SteamServer &sv,HSteamNetConnection con)
+	: m_hConnection{con},m_server{sv}
 {}
 
 bool SteamServerClient::Drop(pragma::networking::DropReason reason,pragma::networking::Error &outErr)
@@ -61,15 +57,16 @@ std::string SteamServerClient::GetIdentifier() const
 		return "";
 	return conName.data();
 }
-std::optional<nwm::IPAddress> SteamServerClient::GetIPAddress() const
+std::optional<std::string> SteamServerClient::GetIP() const
 {
 	SteamNetConnectionInfo_t info;
 	if(GetInterface().GetConnectionInfo(m_hConnection,&info) == false)
 		return {};
 	auto &address = info.m_addrRemote;
-	return nwm::IPAddress{}; // TODO;
+	std::array<char,MAX_IP_CHAR_LENGTH> ip;
+	address.ToString(ip.data(),ip.size(),true);
+	return ip.data();
 }
-std::optional<std::string> SteamServerClient::GetIP() const {return {};}
 std::optional<pragma::networking::Port> SteamServerClient::GetPort() const {return {};}
 bool SteamServerClient::IsListenServerHost() const
 {
@@ -77,17 +74,7 @@ bool SteamServerClient::IsListenServerHost() const
 }
 bool SteamServerClient::SendPacket(pragma::networking::Protocol protocol,NetPacket &packet,pragma::networking::Error &outErr)
 {
-	int sendFlags = k_nSteamNetworkingSend_NoNagle; // TODO: Allow caller to control nagle?
-	switch(protocol)
-	{
-	case pragma::networking::Protocol::FastUnreliable:
-		sendFlags |= k_nSteamNetworkingSend_Unreliable;
-		break;
-	case pragma::networking::Protocol::SlowReliable:
-	default:
-		sendFlags |= k_nSteamNetworkingSend_Reliable;
-		break;
-	}
+	auto sendFlags = get_send_flags(protocol);
 	auto res = GetInterface().SendMessageToConnection(m_hConnection,packet->GetData(true),packet->GetInternalSize(),sendFlags);
 	if(res != EResult::k_EResultOK)
 	{
@@ -112,7 +99,8 @@ public:
 	virtual std::optional<pragma::networking::Port> GetLocalUDPPort() const override;
 	virtual bool PollEvents(pragma::networking::Error &outErr) override;
 	virtual void SetTimeoutDuration(float duration) override;
-	virtual util::WeakHandle<pragma::networking::IServerClient> OnClientConnected() override;
+
+	ISteamNetworkingSockets &GetInterface() const;
 
 	// Steam callbacks
 	virtual void OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t *info) override;
@@ -143,6 +131,17 @@ bool SteamServer::Start(pragma::networking::Error &outErr)
 	}
 	m_logTimeZero = SteamNetworkingUtils()->GetLocalTimestamp();
 	SteamNetworkingUtils()->SetDebugOutputFunction(k_ESteamNetworkingSocketsDebugOutputType_Msg,DebugOutput);
+	m_pInterface = SteamNetworkingSockets();
+
+	SteamNetworkingIPAddr serverLocalAddr;
+	serverLocalAddr.Clear();
+	serverLocalAddr.m_port = 29150; // TODO
+	m_hListenSock = m_pInterface->CreateListenSocketIP(serverLocalAddr);
+	if(m_hListenSock == k_HSteamListenSocket_Invalid)
+	{
+		outErr = {pragma::networking::ErrorCode::UnableToListenOnPort,"Failed to listen on port " +std::to_string(serverLocalAddr.m_port) +"!"};
+		return false;
+	}
 	return true;
 }
 bool SteamServer::DoShutdown(pragma::networking::Error &outErr)
@@ -152,11 +151,11 @@ bool SteamServer::DoShutdown(pragma::networking::Error &outErr)
 }
 bool SteamServer::Heartbeat()
 {
-
+	return true; // TODO
 }
 std::optional<std::string> SteamServer::GetHostIP() const
 {
-
+	return {}; // TODO
 }
 std::optional<pragma::networking::Port> SteamServer::GetLocalTCPPort() const {return {};}
 std::optional<pragma::networking::Port> SteamServer::GetLocalUDPPort() const {return {};}
@@ -189,10 +188,8 @@ bool SteamServer::PollEvents(pragma::networking::Error &outErr)
 	return success;
 }
 void SteamServer::SetTimeoutDuration(float duration) {}
-util::WeakHandle<pragma::networking::IServerClient> SteamServer::OnClientConnected()
-{
 
-}
+ISteamNetworkingSockets &SteamServer::GetInterface() const {return *m_pInterface;}
 
 void SteamServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t *pInfo)
 {
@@ -214,7 +211,7 @@ void SteamServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 		if(itClient == m_conHandleToClient.end())
 		{
 			// New client
-			auto cl = AddClient<SteamServerClient>(pInfo->m_hConn);
+			auto cl = AddClient<SteamServerClient>(*this,pInfo->m_hConn);
 			m_conHandleToClient[pInfo->m_hConn] = cl.get();
 		}
 		break;
@@ -234,7 +231,12 @@ void SteamServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 			break;
 		}
 		m_conHandleToClient.erase(itCl);
-		DropClient(*itCl->second,(pInfo->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) ? pragma::networking::DropReason::Disconnected : pragma::networking::DropReason::Error);
+		pragma::networking::Error err;
+		DropClient(
+			*itCl->second,
+			(pInfo->m_info.m_eState == k_ESteamNetworkingConnectionState_ClosedByPeer) ? pragma::networking::DropReason::Disconnected : pragma::networking::DropReason::Error,
+			err
+		);
 		break;
 	}
 	case k_ESteamNetworkingConnectionState_FinWait:
@@ -246,99 +248,18 @@ void SteamServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChan
 	}
 }
 
-/////////////
 
-#include <pragma/networking/iclient.hpp>
-class SteamClient
-	: public pragma::networking::IClient,
-	private ISteamNetworkingSocketsCallbacks
+ISteamNetworkingSockets &SteamServerClient::GetInterface() const
 {
-public:
-	virtual std::string GetIdentifier() const override;
-	virtual bool Connect(const std::string &ip,pragma::networking::Port port,pragma::networking::Error &outErr) override;
-	virtual bool Disconnect(pragma::networking::Error &outErr) override;
-	virtual bool SendPacket(pragma::networking::Protocol protocol,NetPacket &packet,pragma::networking::Error &outErr) override;
-	virtual bool IsRunning() const override;
-	virtual bool IsDisconnected() const override;
-	virtual bool PollEvents(pragma::networking::Error &outErr) override;
-	virtual uint16_t GetLatency() const override;
-	virtual void SetTimeoutDuration(float duration) override;
-	virtual std::optional<nwm::IPAddress> GetIPAddress() const override;
-	virtual std::optional<std::string> GetIP() const override;
-	virtual std::optional<pragma::networking::Port> GetLocalTCPPort() const override;
-	virtual std::optional<pragma::networking::Port> GetLocalUDPPort() const override;
-protected:
-	bool PollMessages(pragma::networking::Error &outErr);
-private:
-	ISteamNetworkingSockets *m_pInterface = nullptr;
-	HSteamNetConnection m_hConnection = k_HSteamNetConnection_Invalid;
+	return m_server.GetInterface();
+}
+
+class NetworkState;
+extern "C"
+{
+	PRAGMA_EXPORT void initialize_game_server(NetworkState &nw,std::unique_ptr<pragma::networking::IServer> &outServer)
+	{
+		outServer = std::make_unique<SteamServer>();
+	}
 };
-
-std::string SteamClient::GetIdentifier() const
-{
-	std::array<char,4'096> conName;
-	if(m_pInterface->GetConnectionName(m_hConnection,conName.data(),conName.size()) == false)
-		return "";
-	return conName.data();
-}
-bool SteamClient::Connect(const std::string &ip,pragma::networking::Port port,pragma::networking::Error &outErr)
-{
-	SteamNetworkingIPAddr ipAddr {};
-	if(ipAddr.ParseString((ip +':' +std::to_string(port)).c_str()) == false)
-		return false;
-	m_hConnection = m_pInterface->ConnectByIPAddress(ipAddr);
-	return !!m_hConnection;
-}
-bool SteamClient::Disconnect(pragma::networking::Error &outErr)
-{
-	return m_pInterface->CloseConnection(m_hConnection,reason,debugString,enableLinger);
-}
-bool SteamClient::SendPacket(pragma::networking::Protocol protocol,NetPacket &packet,pragma::networking::Error &outErr)
-{
-	m_pInterface->SendMessageToConnection(m_hConnection,data,dataSize,sendFlags);
-}
-bool SteamClient::IsRunning() const
-{
-	// TODO
-}
-bool SteamClient::IsDisconnected() const
-{
-	// TODO
-}
-bool SteamClient::PollMessages(pragma::networking::Error &outErr)
-{
-	ISteamNetworkingMessage *pIncomingMsg = nullptr;
-	auto numMsgs = m_pInterface->ReceiveMessagesOnConnection(m_hConnection,&pIncomingMsg,1);
-	if(numMsgs < 0)
-		return false;
-	if(numMsgs == 0)
-		return true;
-	ScopeGuard sgMsg {[pIncomingMsg]() {
-		pIncomingMsg->Release();
-	}};
-	//fwrite( pIncomingMsg->m_pData, 1, pIncomingMsg->m_cbSize, stdout );
-	// Just echo anything we get from the server
-	
-}
-bool SteamClient::PollEvents(pragma::networking::Error &outErr)
-{
-	auto success = PollMessages(outErr);
-	m_pInterface->RunCallbacks(this);
-	return success;
-}
-uint16_t SteamClient::GetLatency() const
-{
-	return 0; // TODO
-}
-void SteamClient::SetTimeoutDuration(float duration) {}
-std::optional<nwm::IPAddress> SteamClient::GetIPAddress() const
-{
-	SteamNetConnectionInfo_t info;
-	if(m_pInterface->GetConnectionInfo(m_hConnection,&info) == false)
-		return {};
-	auto &address = info.m_addrRemote;
-	return nwm::IPAddress{}; // TODO;
-}
-std::optional<std::string> SteamClient::GetIP() const {return {};}
-std::optional<pragma::networking::Port> SteamClient::GetLocalTCPPort() const {return {};}
-std::optional<pragma::networking::Port> SteamClient::GetLocalUDPPort() const {return {};}
+#pragma optimize("",on)

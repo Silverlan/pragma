@@ -20,6 +20,7 @@ namespace pragma
 
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
+		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo) override;
 	};
 };

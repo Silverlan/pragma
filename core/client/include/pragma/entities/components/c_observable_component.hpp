@@ -13,10 +13,7 @@ namespace pragma
 	{
 	public:
 		CObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
-		using BaseObservableComponent::SetFirstPersonObserverOffset;
-		using BaseObservableComponent::SetThirdPersonObserverOffset;
-		virtual void SetFirstPersonObserverOffset(const Vector3 &offset) override;
-		virtual void SetThirdPersonObserverOffset(const Vector3 &offset) override;
+		virtual void SetLocalCameraOrigin(CameraType type,const Vector3 &offset) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;

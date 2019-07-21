@@ -18,6 +18,8 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) override;
+	protected:
+		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };
 

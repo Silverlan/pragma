@@ -12,17 +12,26 @@ namespace pragma::physics
 	class IConvexHullShape;
 	class IShape;
 	class IRigidBody;
-	constexpr auto DEFAULT_WHEEL_WIDTH = 16.f;
-	constexpr auto DEFAULT_WHEEL_RADIUS = 20.f;
 	struct DLLNETWORK ChassisCreateInfo
 	{
 		std::optional<Vector3> momentOfInertia = {};
 		// Indices for all of the actor shapes that make up the chassis
 		std::vector<uint32_t> shapeIndices = {};
+		// Optional custom center of mass.
+		// If not specified, center of mass will be calculated automatically
+		std::optional<Vector3> centerOfMass = {};
 		float GetMass(const pragma::physics::IRigidBody &body) const;
 		void GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const;
 		Vector3 GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
+		Vector3 GetCenterOfMass(const pragma::physics::IRigidBody &body) const;
 		std::vector<const pragma::physics::IShape*> GetShapes(const pragma::physics::IRigidBody &body) const;
+		bool operator==(const ChassisCreateInfo &other) const
+		{
+			return momentOfInertia == other.momentOfInertia &&
+				shapeIndices == other.shapeIndices &&
+				centerOfMass == other.centerOfMass;
+		}
+		bool operator!=(const ChassisCreateInfo &other) const {return !operator==(other);}
 	};
 
 	struct DLLNETWORK WheelCreateInfo
@@ -37,10 +46,36 @@ namespace pragma::physics
 			float camberAngleAtRest = 0.f;
 			float camberAngleAtMaxDroop = 0.01f;
 			float camberAngleAtMaxCompression = -0.01f;
+
+			bool operator==(const SuspensionInfo &other) const
+			{
+				return maxCompression == other.maxCompression &&
+					maxDroop == other.maxDroop &&
+					springStrength == other.springStrength &&
+					springDamperRate == other.springDamperRate &&
+					camberAngleAtRest == other.camberAngleAtRest &&
+					camberAngleAtMaxDroop == other.camberAngleAtMaxDroop &&
+					camberAngleAtMaxCompression == other.camberAngleAtMaxCompression;
+			}
+			bool operator!=(const SuspensionInfo &other) const {return !operator==(other);}
 		};
 
 		static WheelCreateInfo CreateStandardFrontWheel();
 		static WheelCreateInfo CreateStandardRearWheel();
+		bool operator==(const WheelCreateInfo &other) const
+		{
+			return flags == other.flags &&
+				width == other.width &&
+				radius == other.radius &&
+				maxHandbrakeTorque == other.maxHandbrakeTorque &&
+				shapeIndex == other.shapeIndex &&
+				maxSteeringAngle == other.maxSteeringAngle &&
+				chassisOffset == other.chassisOffset &&
+				suspension == other.suspension &&
+				tireType == other.tireType &&
+				momentOfInertia == other.momentOfInertia;
+		}
+		bool operator!=(const WheelCreateInfo &other) const {return !operator==(other);}
 		enum class Flags : uint32_t
 		{
 			None = 0u,
@@ -50,8 +85,10 @@ namespace pragma::physics
 			Right = Left<<1u
 		};
 		Flags flags = Flags::None;
-		float width = DEFAULT_WHEEL_WIDTH;
-		float radius = DEFAULT_WHEEL_RADIUS;
+		// If width or radius are not specified, they will be
+		// determined by the physics shape AABB!
+		std::optional<float> width = {};
+		std::optional<float> radius = {};
 		float maxHandbrakeTorque = 0.f;
 		// The index of the shape of the vehicle's rigid body
 		// for this wheel. -1 means no shape is associated with
@@ -69,6 +106,9 @@ namespace pragma::physics
 		// moi for a cylinder of the specified radius and mass.
 		float GetMomentOfInertia(const pragma::physics::IRigidBody &body) const;
 		const pragma::physics::IShape *GetShape(const pragma::physics::IRigidBody &body) const;
+		void GetAABB(const pragma::physics::IRigidBody &body,Vector3 &min,Vector3 &max) const;
+		float GetRadius(const pragma::physics::IRigidBody &body) const;
+		float GetWidth(const pragma::physics::IRigidBody &body) const;
 	};
 
 	class IRigidBody;
@@ -97,6 +137,13 @@ namespace pragma::physics
 				: wheel0{wheel0},wheel1{wheel1},stiffness{stiffness}
 			{}
 			AntiRollBar()=default;
+			bool operator==(const AntiRollBar &other) const
+			{
+				return wheel0 == other.wheel0 &&
+					wheel1 == other.wheel1 &&
+					stiffness == other.stiffness;
+			}
+			bool operator!=(const AntiRollBar &other) const {return !operator==(other);}
 			Wheel wheel0 = Wheel::FrontLeft;
 			Wheel wheel1 = Wheel::FrontRight;
 			float stiffness = 10'000.0f;
@@ -104,11 +151,22 @@ namespace pragma::physics
 		static Wheel GetWheelType(const WheelCreateInfo &wheelDesc);
 		static VehicleCreateInfo CreateStandardFourWheelDrive(
 			const std::array<Vector3,WHEEL_COUNT_4W_DRIVE> &wheelCenterOffsets,
-			float wheelWidth=DEFAULT_WHEEL_WIDTH,
-			float wheelRadius=DEFAULT_WHEEL_RADIUS,
 			float handBrakeTorque=6'400'000.0,
 			float maxSteeringAngle=60.0
 		);
+		bool operator==(const VehicleCreateInfo &other) const
+		{
+			return chassis == other.chassis &&
+				wheels == other.wheels &&
+				wheelDrive == other.wheelDrive &&
+				antiRollBars == other.antiRollBars &&
+				maxEngineTorque == other.maxEngineTorque &&
+				gearSwitchTime == other.gearSwitchTime &&
+				clutchStrength == other.clutchStrength &&
+				gravityFactor == other.gravityFactor &&
+				actor.Get() == other.actor.Get();
+		}
+		bool operator!=(const VehicleCreateInfo &other) const {return !operator==(other);}
 
 		ChassisCreateInfo chassis = {};
 		std::vector<WheelCreateInfo> wheels = {};
@@ -178,7 +236,7 @@ namespace pragma::physics
 		virtual void SetBrakeFactor(float f)=0;
 		virtual void SetHandbrakeFactor(float f)=0;
 		virtual void SetAccelerationFactor(float f)=0;
-		virtual void SetTurnFactor(float f)=0;
+		virtual void SetSteerFactor(float f)=0;
 
 		virtual void SetGear(Gear gear)=0;
 		virtual void SetGearDown()=0;
@@ -202,6 +260,7 @@ namespace pragma::physics
 
 		virtual std::optional<physics::Transform> GetLocalWheelPose(uint32_t wheelIndex) const=0;
 		virtual uint32_t GetWheelCount() const=0;
+		virtual float GetSteerFactor() const=0;
 		virtual float GetForwardSpeed() const=0;
 		virtual float GetSidewaysSpeed() const=0;
 	protected:

@@ -113,6 +113,8 @@ protected:
 	
 	virtual void InitializeResourceManager() override;
 	void StartResourceTransfer();
+	void InitializeGameClient();
+	void ResetGameClient();
 
 	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
 public:

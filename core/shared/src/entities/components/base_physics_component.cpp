@@ -814,7 +814,7 @@ void BasePhysicsComponent::DropToFloor()
 
 	TraceData trace;
 	trace.SetFilter(GetEntity());
-	trace.SetFlags(RayCastFlags::InvertFilter);
+	trace.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	trace.SetSource(origin);
 	trace.SetShape(*shape);
 	trace.SetTarget(dest);

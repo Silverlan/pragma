@@ -24,7 +24,7 @@ namespace pragma
 		} m_igniteInfo;
 	public:
 		SFlammableComponent(BaseEntity &ent) : BaseFlammableComponent(ent) {}
-		virtual void Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
+		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
 		virtual void Extinguish() override;
 		virtual void SetIgnitable(bool b) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;

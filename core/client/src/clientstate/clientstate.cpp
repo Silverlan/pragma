@@ -29,10 +29,12 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/networking/resources.h>
+#include <pragma/networking/networking_modules.hpp>
 #include <pragma/engine_version.h>
 #include <luainterface.hpp>
 #include <alsoundsystem.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
+#include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
@@ -115,13 +117,39 @@ ClientState::ClientState()
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
 
 	// Initialize default client
-	m_client = std::make_unique<pragma::networking::LocalClient>();
+	ResetGameClient();
 }
 
 ClientState::~ClientState()
 {
 	Disconnect();
 	FileManager::RemoveCustomMountDirectory("downloads");
+}
+
+void ClientState::InitializeGameClient()
+{
+	// TODO: Don't re-initialize client if local
+	m_client = nullptr;
+	auto netLibName = GetConVarString("net_library");
+	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,false);
+	std::string err;
+	auto dllHandle = InitializeLibrary(netModPath,&err);
+	if(dllHandle)
+	{
+		auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IClient>&)>("initialize_game_client");
+		if(fInitNetLib != nullptr)
+			fInitNetLib(*this,m_client);
+		else
+			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_client' not found in module!"<<Con::endl;
+	}
+	else
+		Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+	if(m_client == nullptr)
+		ResetGameClient();
+}
+void ClientState::ResetGameClient()
+{
+	m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
 static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
@@ -538,6 +566,7 @@ void ClientState::StartGame() {StartGame("");}
 void ClientState::StartGame(const std::string &gameMode)
 {
 	NetworkState::StartGame();
+	InitializeGameClient();
 	m_game = new CGame(this);
 	m_game->SetGameMode(gameMode);
 	CallCallbacks<void,CGame*>("OnGameStart",m_game);

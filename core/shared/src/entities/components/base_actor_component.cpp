@@ -62,8 +62,8 @@ void BaseActorComponent::Initialize()
 	if(whObservableComponent.valid())
 	{
 		auto *pObservableComponent = static_cast<BaseObservableComponent*>(whObservableComponent.get());
-		pObservableComponent->SetFirstPersonObserverOffsetEnabled(false);
-		pObservableComponent->SetThirdPersonObserverOffsetEnabled(true);
+		pObservableComponent->SetCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson,false);
+		pObservableComponent->SetCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson,true);
 	}
 	ent.AddComponent("submergible");
 	ent.AddComponent("physics");

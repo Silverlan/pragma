@@ -84,7 +84,6 @@ namespace pragma::networking
 		StandardServerClient();
 		virtual uint16_t GetLatency() const override;
 		virtual std::string GetIdentifier() const override;
-		virtual std::optional<nwm::IPAddress> GetIPAddress() const override;
 		virtual std::optional<std::string> GetIP() const override;
 		virtual std::optional<Port> GetPort() const override;
 		virtual bool IsListenServerHost() const override;

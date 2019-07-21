@@ -6,54 +6,45 @@
 
 using namespace pragma;
 
-void SObservableComponent::SetFirstPersonObserverOffset(const Vector3 &offset)
+void SObservableComponent::SetLocalCameraOrigin(CameraType type,const Vector3 &origin)
 {
-	BaseObservableComponent::SetFirstPersonObserverOffset(offset);
+	BaseObservableComponent::SetLocalCameraOrigin(type,origin);
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
 	NetPacket p;
-	if(IsFirstPersonModeEnabled() == false)
-		p->Write<bool>(false);
-	else
-	{
-		p->Write<bool>(true);
-		p->Write<Vector3>(offset);
-	}
-	ent.SendNetEvent(m_netEvSetFirstPersonObserverOffset,p,pragma::networking::Protocol::SlowReliable);
+	p->Write<CameraType>(type);
+	p->Write<Vector3>(origin);
+	ent.SendNetEvent(m_netSetObserverOrigin,p,pragma::networking::Protocol::SlowReliable);
+}
+void SObservableComponent::SetLocalCameraOffset(CameraType type,const Vector3 &offset)
+{
+	BaseObservableComponent::SetLocalCameraOffset(type,offset);
+	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	if(ent.IsShared() == false)
+		return;
+	NetPacket p;
+	p->Write<CameraType>(type);
+	p->Write<Vector3>(offset);
+	ent.SendNetEvent(m_netSetObserverOffset,p,pragma::networking::Protocol::SlowReliable);
 }
 luabind::object SObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SObservableComponentHandleWrapper>(l);}
-void SObservableComponent::SetThirdPersonObserverOffset(const Vector3 &offset)
-{
-	BaseObservableComponent::SetThirdPersonObserverOffset(offset);
-	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared() == false)
-		return;
-	NetPacket p;
-	if(IsThirdPersonModeEnabled() == false)
-		p->Write<bool>(false);
-	else
-	{
-		p->Write<bool>(true);
-		p->Write<Vector3>(offset);
-	}
-	ent.SendNetEvent(m_netEvSetThirdPersonObserverOffset,p,pragma::networking::Protocol::SlowReliable);
-}
 void SObservableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	if(*m_bFirstPersonEnabled == false)
-		packet->Write<bool>(false);
-	else
+	constexpr auto numTypes = umath::to_integral(CameraType::Count);
+	for(auto i=0u;i<numTypes;++i)
 	{
-		packet->Write<bool>(true);
-		packet->Write<Vector3>(*m_firstPersonObserverOffset);
-	}
-
-	if(*m_bThirdPersonEnabled == false)
-		packet->Write<bool>(false);
-	else
-	{
-		packet->Write<bool>(true);
-		packet->Write<Vector3>(*m_thirdPersonObserverOffset);
+		auto &data = GetCameraData(static_cast<CameraType>(i));
+		packet->Write<bool>(*data.enabled);
+		packet->Write<Vector3>(*data.localOrigin);
+		packet->Write<Vector3>(*data.offset);
+		packet->Write<bool>(data.rotateWithObservee);
+		auto hasLimits = data.angleLimits.has_value();
+		packet->Write<bool>(hasLimits);
+		if(hasLimits)
+		{
+			packet->Write<EulerAngles>(data.angleLimits->first);
+			packet->Write<EulerAngles>(data.angleLimits->second);
+		}
 	}
 }

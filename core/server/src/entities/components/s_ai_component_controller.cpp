@@ -111,7 +111,6 @@ void SAIComponent::EndControl()
 		{
 			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 			pl->SetObserverTarget(pObservableComponent.get());
-			pObservableComponent->ResetObserverOffset();
 		}
 	}
 	OnEndControl();

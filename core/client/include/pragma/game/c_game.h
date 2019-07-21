@@ -464,6 +464,7 @@ private:
 	void CalcLocalPlayerOrientation();
 	Vector3 *m_camPosOverride = nullptr;
 	Quat *m_camRotOverride = nullptr;
+	Quat m_curFrameRotationModifier = uquat::identity();
 	void UpdateShaderTimeData();
 
 	// Entities

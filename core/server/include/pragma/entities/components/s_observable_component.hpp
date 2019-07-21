@@ -14,8 +14,8 @@ namespace pragma
 	public:
 		SObservableComponent(BaseEntity &ent) : BaseObservableComponent(ent) {}
 
-		virtual void SetFirstPersonObserverOffset(const Vector3 &offset) override;
-		virtual void SetThirdPersonObserverOffset(const Vector3 &offset) override;
+		virtual void SetLocalCameraOrigin(CameraType type,const Vector3 &origin) override;
+		virtual void SetLocalCameraOffset(CameraType type,const Vector3 &offset) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;

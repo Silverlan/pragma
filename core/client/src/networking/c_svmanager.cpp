@@ -21,7 +21,7 @@ void ClientState::Connect(std::string ip,std::string port)
 	Con::ccl<<"Connecting to "<<ip<<":"<<port<<"..."<<Con::endl;
 #endif
 	Disconnect();
-	m_client = std::make_unique<pragma::networking::StandardClient>();
+	InitializeGameClient();
 	if(m_client == nullptr)
 		return;
 	pragma::networking::Error err;

@@ -52,6 +52,7 @@ set_target_properties(pr_spiral_knights PROPERTIES FOLDER modules)
 set_target_properties(pr_sqlite PROPERTIES FOLDER modules)
 set_target_properties(pr_xml PROPERTIES FOLDER modules)
 set_target_properties(pr_video_recorder PROPERTIES FOLDER modules)
-set_target_properties(pr_steam_networking PROPERTIES FOLDER modules)
+set_target_properties(pr_steam_networking_server PROPERTIES FOLDER modules)
+set_target_properties(pr_steam_networking_client PROPERTIES FOLDER modules)
 
 set(CMAKE_CXX_STANDARD 17)

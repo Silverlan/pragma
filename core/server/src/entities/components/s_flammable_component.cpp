@@ -49,10 +49,10 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	pDamageableComponent->TakeDamage(info);
 }
 luabind::object SFlammableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFlammableComponentHandleWrapper>(l);}
-void SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
+util::EventReply SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
 {
 	if(!IsIgnitable())
-		return;
+		return util::EventReply::Handled;
 	NetPacket p {};
 	p->Write<float>(duration);
 	nwm::write_entity(p,attacker);
@@ -77,7 +77,7 @@ void SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity 
 	m_igniteInfo.hAttacker = (attacker != nullptr) ? attacker->GetHandle() : EntityHandle{};
 	m_igniteInfo.hInflictor = (inflictor != nullptr) ? inflictor->GetHandle() : EntityHandle{};
 
-	BaseFlammableComponent::Ignite(duration,attacker,inflictor);
+	return BaseFlammableComponent::Ignite(duration,attacker,inflictor);
 }
 void SFlammableComponent::Extinguish()
 {

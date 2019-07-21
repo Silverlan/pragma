@@ -8,6 +8,7 @@
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/iserver.hpp>
+#include <pragma/game/game_limits.h>
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_io_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
@@ -175,9 +176,9 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 	Vector3 dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
 	TraceData trData;
 	trData.SetSource(origin);
-	trData.SetTarget(origin +dir *std::numeric_limits<Float>::max());
+	trData.SetTarget(origin +dir *static_cast<float>(GameLimits::MaxRayCastRange));
 	trData.SetFilter(ent);
-	trData.SetFlags(RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
+	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter | RayCastFlags::IgnoreDynamic);
 	auto r = s_game->RayCast(trData);
 	if(r.hitType == RayCastHitType::None)
 	{

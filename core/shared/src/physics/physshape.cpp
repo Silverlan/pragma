@@ -144,6 +144,22 @@ pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env,pragma::physic
 void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose)
 {
 	m_shapes.push_back({std::static_pointer_cast<IShape>(shape.shared_from_this()),localPose});
+	if(m_shapes.size() == 1)
+	{
+		shape.GetAABB(m_min,m_max);
+		m_min = localPose *m_min;
+		m_max = localPose *m_max;
+		return;
+	}
+	Vector3 min,max;
+	shape.GetAABB(min,max);
+	uvec::min(&m_min,localPose *min);
+	uvec::max(&m_max,localPose *max);
+}
+void pragma::physics::ICompoundShape::GetAABB(Vector3 &min,Vector3 &max) const
+{
+	min = m_min;
+	max = m_max;
 }
 void pragma::physics::ICompoundShape::SetMass(float mass)
 {

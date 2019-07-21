@@ -324,7 +324,10 @@ static void update_turn_callbacks()
 	}
 	if(!cbCalcView.IsValid())
 	{
-		cbCalcView = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>::Create([](std::reference_wrapper<Vector3>,std::reference_wrapper<Quat> rot) {
+		cbCalcView = c_game->AddCallback("CalcView",FunctionCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>::Create(
+			[](std::reference_wrapper<Vector3>,std::reference_wrapper<Quat> rot,
+				std::reference_wrapper<Quat> rotMod
+			) {
 			const auto tFactor = 0.016f; // 60 FPS as reference
 			auto t = c_game->DeltaRealTime() /tFactor;
 			EulerAngles angVertical(-turn_speeds.up +turn_speeds.down,0.f,0.f);

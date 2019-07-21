@@ -4,6 +4,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_message_tracker.hpp>
+#include <pragma/networking/ip_address.hpp>
 #include <string>
 #include <optional>
 
@@ -24,10 +25,10 @@ namespace pragma::networking
 		virtual bool PollEvents(pragma::networking::Error &outErr)=0;
 		virtual uint16_t GetLatency() const=0;
 		virtual void SetTimeoutDuration(float duration)=0;
-		virtual std::optional<nwm::IPAddress> GetIPAddress() const=0;
 		virtual std::optional<std::string> GetIP() const=0;
 		virtual std::optional<Port> GetLocalTCPPort() const {return {};}
 		virtual std::optional<Port> GetLocalUDPPort() const {return {};}
+		std::optional<networking::IPAddress> GetIPAddress() const;
 	};
 };
 

@@ -37,7 +37,7 @@ void CDecalComponent::OnEntitySpawn()
 	TraceData tr {};
 	tr.SetSource(pos);
 	tr.SetTarget(pos +dir *18.f);
-	tr.SetFlags(RayCastFlags::IgnoreDynamic);
+	tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
 	auto r = c_game->RayCast(tr);
 	if(r.hitType != RayCastHitType::None)
 	{

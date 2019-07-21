@@ -15,7 +15,7 @@ namespace pragma
 	public:
 		CFlammableComponent(BaseEntity &ent) : BaseFlammableComponent(ent) {}
 		virtual void Initialize() override;
-		virtual void Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
+		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
 		virtual void Extinguish() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;

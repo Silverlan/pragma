@@ -234,10 +234,6 @@ std::string pragma::networking::StandardServerClient::GetIdentifier() const
 {
 	return m_nwmClient->GetAddress().ToString();
 }
-std::optional<nwm::IPAddress> pragma::networking::StandardServerClient::GetIPAddress() const
-{
-	return m_nwmClient->GetAddress();
-}
 std::optional<std::string> pragma::networking::StandardServerClient::GetIP() const
 {
 	return m_nwmClient->GetIP();

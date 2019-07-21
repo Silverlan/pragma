@@ -30,6 +30,9 @@ void CGame::CalcLocalPlayerOrientation()
 		return;
 	//Vector3 pos = pl->GetPosition();
 	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	uquat::inverse(m_curFrameRotationModifier);
+	orientation = m_curFrameRotationModifier *orientation;
+	m_curFrameRotationModifier = uquat::identity();
 	//Con::cerr<<"Actual ("<<pl->GetIndex()<<"): "<<&(*pl->GetViewOrientation())<<Con::endl;
 
 	auto w = c_engine->GetWindowWidth();
@@ -125,9 +128,6 @@ void CGame::CalcLocalPlayerOrientation()
 	// TODO: Does this work with custom player up directions? Is there a direct way, without converting to euler angles?
 
 	EulerAngles ang(orientation);
-	static auto bEnable = true;
-	if(bEnable == true)
-	{
 	if(ang.p < -90.f || ang.p > 90.f)
 	{
 		//ang.r = 0.f;
@@ -148,7 +148,6 @@ void CGame::CalcLocalPlayerOrientation()
 			//ang.p = 90.f;
 		}
 		orientation = uquat::create(ang);
-	}
 	}
 	//
 	orientation = uquat::get_inverse(rot) *orientation;
@@ -218,8 +217,12 @@ void CGame::CalcView()
 	else
 		orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
 
-	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation));
-	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation));
+	auto rotModifier = uquat::identity();
+	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
+	CallLuaCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
+
+	orientation = rotModifier *orientation;
+	m_curFrameRotationModifier = rotModifier;
 
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(orientation);

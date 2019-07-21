@@ -39,7 +39,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
 {
 	if(!state->IsGameActive())
@@ -60,6 +60,15 @@ void CMD_thirdperson(NetworkState *state,pragma::BasePlayerComponent *pl,std::ve
 		bThirdPerson = (atoi(argv.front().c_str()) != 0) ? true : false;
 	else
 		bThirdPerson = (pl->GetObserverMode() != OBSERVERMODE::THIRDPERSON) ? true : false;
+	auto obsTarget = pl->GetObserverTarget();
+	if(obsTarget)
+	{
+		if(
+			(bThirdPerson && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::ThirdPerson) == false) ||
+			(bThirdPerson == false && obsTarget->IsCameraEnabled(pragma::BaseObservableComponent::CameraType::FirstPerson) == false)
+		)
+			return;
+	}
 	pl->SetObserverMode((bThirdPerson == true) ? OBSERVERMODE::THIRDPERSON : OBSERVERMODE::FIRSTPERSON);
 }
 
@@ -847,3 +856,4 @@ static void cvar_net_graph(bool val)
 REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
 	cvar_net_graph(val);
 })
+#pragma optimize("",on)

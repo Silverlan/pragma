@@ -9,7 +9,7 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 using namespace pragma;
 

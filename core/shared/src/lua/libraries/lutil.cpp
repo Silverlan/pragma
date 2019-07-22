@@ -26,7 +26,7 @@
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
 #include <se_scene.hpp>

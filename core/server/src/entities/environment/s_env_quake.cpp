@@ -3,7 +3,7 @@
 #include "pragma/entities/s_entityfactories.h"
 #include <sharedutils/util_string.h>
 #include "pragma/lua/s_lentity_handles.hpp"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;

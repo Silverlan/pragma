@@ -16,6 +16,8 @@ static std::vector<std::string> s_lastConnection {};
 void ClientState::Connect(std::string ip,std::string port)
 {
 	EndGame();
+	if(ip == "localhost")
+		ip = "127.0.0.1";
 	s_lastConnection = {ip,port};
 #ifdef DEBUG_SOCKET
 	Con::ccl<<"Connecting to "<<ip<<":"<<port<<"..."<<Con::endl;

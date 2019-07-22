@@ -4,7 +4,7 @@
 
 extern DLLENGINE Engine *engine;
 
-bool pragma::networking::LocalServer::Start(Error &outErr) {return true;}
+bool pragma::networking::LocalServer::DoStart(Error &outErr) {return true;}
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) {return true;}
 bool pragma::networking::LocalServer::DoShutdown(Error &outErr) {return true;}
 bool pragma::networking::LocalServer::Heartbeat() {return true;}
@@ -22,11 +22,11 @@ bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Proto
 {
 	packet.SetTimeActivated(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
 	packet->SetOffset(0);
-	engine->HandleLocalPlayerClientPacket(packet);
+	engine->HandleLocalHostPlayerClientPacket(packet);
 	return true;
 }
 bool pragma::networking::LocalServerClient::Drop(DropReason reason,pragma::networking::Error &outErr)
 {
-	// Local player can't be dropped from server; Just pretend that we did
+	// Local player can't actually be dropped from server; Just pretend that we did
 	return true;
 }

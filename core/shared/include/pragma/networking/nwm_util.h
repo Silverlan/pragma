@@ -3,7 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <sharedutils/functioncallback.h>
 
 class EulerAngles;

@@ -66,8 +66,7 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 	c_engine->EndGame();
 	pOptionsList->RunUpdateConVars(false);
 	c_engine->LoadMap(map.c_str());
-	if(maxPlayers > 1)
-		c_engine->StartServer();
+	c_engine->Connect("localhost");
 }
 
 void WIMainMenuNewGame::Initialize()

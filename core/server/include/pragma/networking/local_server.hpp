@@ -11,12 +11,12 @@ namespace pragma::networking
 		: public IServer
 	{
 	public:
-		virtual bool Start(Error &outErr) override;
 		virtual bool PollEvents(Error &outErr) override;
 		virtual bool Heartbeat() override;
 		virtual void SetTimeoutDuration(float duration) override;
 	protected:
 		virtual bool DoShutdown(Error &outErr) override;
+		virtual bool DoStart(Error &outErr) override;
 	};
 
 	class DLLSERVER LocalServerClient

@@ -1,7 +1,7 @@
 #ifndef __NETMESSAGES_H__
 #define __NETMESSAGES_H__
 #include "pragma/networkdefinitions.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <networkmanager/nwm_message.h>
 #include <pragma/engine.h>
 

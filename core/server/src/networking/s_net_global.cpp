@@ -154,8 +154,8 @@ DLLSERVER void NET_sv_rcon(pragma::networking::IServerClient &session,NetPacket 
 DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	std::string password = packet->ReadString();
-	std::string passSv = server->GetConVarString("sv_password");
-	if(passSv != "" && passSv != password && session.IsListenServerHost())
+	std::string passSv = server->GetConVarString("sv_password").c_str();
+	if(passSv.empty() == false && passSv != password && session.IsListenServerHost() == false)
 	{
 		NetPacket p;
 		server->SendPacket("invalidpassword",p,pragma::networking::Protocol::SlowReliable,session);

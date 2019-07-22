@@ -13,6 +13,7 @@ namespace nwm {enum class Protocol : uint32_t;};
 namespace pragma {class SPlayerComponent;};
 namespace pragma::networking
 {
+	class StandardServer;
 	class StandardServerClient;
 	class DLLSERVER NWMActiveServer
 		: public nwm::Server
@@ -20,12 +21,12 @@ namespace pragma::networking
 	public:
 		static std::unique_ptr<NWMActiveServer> Create(uint16_t tcpPort,uint16_t udpPort,nwm::ConnectionType conType=nwm::ConnectionType::UDP);
 		static std::unique_ptr<NWMActiveServer> Create(uint16_t port,nwm::ConnectionType conType=nwm::ConnectionType::UDP);
+		void SetServer(StandardServer &server);
 		void Heartbeat();
 		virtual void PollEvents() override;
 
 		nwm::ServerClient &GetNWMClient(StandardServerClient &cl) const;
 		StandardServerClient &GetPragmaClient(nwm::ServerClient &cl) const;
-		void SetPragmaServer(IServer *sv);
 
 		friend nwm::Server;
 	protected:
@@ -39,9 +40,9 @@ namespace pragma::networking
 		virtual void OnPacketReceived(const NWMEndpoint &ep,nwm::ServerClient *cl,unsigned int id,NetPacket &packet) override;
 
 		virtual std::shared_ptr<nwm::ServerClient> CreateClient() override;
-		IServer *m_server = nullptr;
 		std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
 		ChronoTimePoint m_lastHeartBeat;
+		StandardServer *m_server;
 
 		std::unordered_map<nwm::ServerClient*,StandardServerClient*> m_nwmToPragmaClient = {};
 
@@ -64,7 +65,6 @@ namespace pragma::networking
 		: public IServer
 	{
 	public:
-		virtual bool Start(Error &outErr) override;
 		virtual bool Heartbeat() override;
 		virtual std::optional<std::string> GetHostIP() const override;
 		virtual std::optional<Port> GetLocalTCPPort() const override;
@@ -72,6 +72,7 @@ namespace pragma::networking
 		virtual bool PollEvents(Error &outErr) override;
 		virtual void SetTimeoutDuration(float duration) override;
 	protected:
+		virtual bool DoStart(Error &outErr) override;
 		virtual bool DoShutdown(Error &outErr) override;
 	private:
 		std::unique_ptr<NWMActiveServer> m_server = nullptr;

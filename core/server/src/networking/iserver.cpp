@@ -27,6 +27,15 @@ bool pragma::networking::IServer::SendPacket(Protocol protocol,NetPacket &packet
 void pragma::networking::IServer::AddClient(const std::shared_ptr<IServerClient> &client)
 {
 	m_clients.push_back(client);
+	if(m_eventInterface.onClientConnected)
+		m_eventInterface.onClientConnected(*client);
+}
+bool pragma::networking::IServer::Start(Error &outErr)
+{
+	auto result = DoStart(outErr);
+	if(result)
+		m_bRunning = true;
+	return result;
 }
 bool pragma::networking::IServer::DropClient(const IServerClient &client,pragma::networking::DropReason reason,Error &outErr)
 {
@@ -51,4 +60,14 @@ void pragma::networking::IServer::HandlePacket(IServerClient &client,NetPacket &
 {
 	if(m_eventInterface.handlePacket)
 		m_eventInterface.handlePacket(client,packet);
+}
+void pragma::networking::IServer::OnClientConnected(IServerClient &client)
+{
+	if(m_eventInterface.onClientConnected)
+		m_eventInterface.onClientConnected(client);
+}
+void pragma::networking::IServer::OnClientDropped(IServerClient &client,DropReason reason)
+{
+	if(m_eventInterface.onClientDropped)
+		m_eventInterface.onClientDropped(client,reason);
 }

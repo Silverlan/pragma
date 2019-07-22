@@ -13,7 +13,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/physics/collisiontypes.h>
 

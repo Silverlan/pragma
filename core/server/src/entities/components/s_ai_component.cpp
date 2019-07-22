@@ -18,7 +18,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_io_component.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 
 extern DLLSERVER SGame *s_game;

@@ -27,7 +27,7 @@
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/engine_version.h"
@@ -490,12 +490,19 @@ void Engine::AddLaunchConVar(std::string cvar,std::string val) {m_launchCommands
 
 void Engine::ShutDown() {m_bRunning = false;}
 
-void Engine::HandleLocalPlayerClientPacket(NetPacket &p) {}
-void Engine::HandleLocalPlayerServerPacket(NetPacket &p)
+void Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
+void Engine::HandleLocalHostPlayerServerPacket(NetPacket &p)
 {
 	if(server == nullptr)
 		return;
 	server->HandlePacket(*server->GetLocalClient(),p);
+}
+
+bool Engine::ConnectLocalHostPlayerClient()
+{
+	if(server == nullptr)
+		return false;
+	return server->ConnectLocalHostPlayerClient();
 }
 
 Engine::~Engine()

@@ -1,7 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/networking/enums.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 extern DLLSERVER ServerState *server;
 

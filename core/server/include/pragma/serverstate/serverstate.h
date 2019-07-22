@@ -92,6 +92,7 @@ public:
 	void HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPacket &packet);
 	bool HandlePacket(pragma::networking::IServerClient &session,NetPacket &packet);
 	void ReceiveUserInput(pragma::networking::IServerClient &session,NetPacket &packet);
+	bool ConnectLocalHostPlayerClient();
 public:
 	ServerState();
 	virtual ~ServerState() override;

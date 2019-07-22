@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/networking/iclient.hpp"
 
+#pragma optimize("",off)
 std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPAddress() const
 {
 	auto ip = GetIP();
@@ -9,3 +10,33 @@ std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPA
 		return {};
 	return pragma::networking::IPAddress{*ip,*port};
 }
+
+void pragma::networking::IClient::SetEventInterface(const ClientEventInterface &eventHandler) {m_eventInterface = eventHandler;}
+const pragma::networking::ClientEventInterface &pragma::networking::IClient::GetEventInterface() const {return m_eventInterface;}
+
+void pragma::networking::IClient::HandlePacket(NetPacket &packet)
+{
+	if(m_eventInterface.handlePacket)
+		m_eventInterface.handlePacket(packet);
+}
+void pragma::networking::IClient::OnPacketSent(Protocol protocol,NetPacket &packet)
+{
+	if(m_eventInterface.onPacketSent)
+		m_eventInterface.onPacketSent(protocol,packet);
+}
+void pragma::networking::IClient::OnConnected()
+{
+	if(m_eventInterface.onConnected)
+		m_eventInterface.onConnected();
+}
+void pragma::networking::IClient::OnDisconnected()
+{
+	if(m_eventInterface.onDisconnected)
+		m_eventInterface.onDisconnected();
+}
+void pragma::networking::IClient::OnConnectionClosed()
+{
+	if(m_eventInterface.onConnectionClosed)
+		m_eventInterface.onConnectionClosed();
+}
+#pragma optimize("",on)

@@ -7,7 +7,7 @@
 #include "pragma/util/bulletinfo.h"
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/classes/ldef_vector.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 using namespace pragma;
 

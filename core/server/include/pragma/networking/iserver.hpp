@@ -13,7 +13,7 @@ namespace pragma::networking
 {
 	class IServerClient;
 	enum class Protocol : uint8_t;
-	class ServerEventInterface
+	class DLLSERVER ServerEventInterface
 	{
 	public:
 		std::function<void(IServerClient&)> onClientConnected = nullptr;
@@ -31,7 +31,7 @@ namespace pragma::networking
 		template<class TServer,typename... TARGS>
 			static std::unique_ptr<TServer,void(*)(TServer*)> Create(TARGS&& ...args);
 		virtual ~IServer()=default;
-		virtual bool Start(Error &outErr)=0;
+		bool Start(Error &outErr);
 		virtual bool Heartbeat()=0;
 		virtual bool PollEvents(Error &outErr)=0;
 		virtual void SetTimeoutDuration(float duration)=0;
@@ -49,10 +49,15 @@ namespace pragma::networking
 
 		bool IsRunning() const;
 		const std::vector<std::shared_ptr<IServerClient>> &GetClients() const;
+
+		// These have to be called by the implementation of IServer
+		void HandlePacket(IServerClient &client,NetPacket &packet);
+		void OnClientConnected(IServerClient &client);
+		void OnClientDropped(IServerClient &client,DropReason reason);
 	protected:
 		IServer()=default;
+		virtual bool DoStart(Error &outErr)=0;
 		const ServerEventInterface &GetEventInterface() const;
-		void HandlePacket(IServerClient &client,NetPacket &packet);
 		virtual bool DoShutdown(Error &outErr)=0;
 	private:
 		bool m_bRunning = true;

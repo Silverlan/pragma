@@ -14,7 +14,10 @@ enum class DLLENGINE ConVarFlags : uint32_t
 	Archive = Replicated<<1,
 	Notify = Archive<<1,
 	JoystickAxisContinuous = Notify<<1,
-	JoystickAxisSingle = JoystickAxisContinuous<<1
+	JoystickAxisSingle = JoystickAxisContinuous<<1,
+	Hidden = JoystickAxisSingle<<1,
+
+	Last = Hidden
 };
 REGISTER_BASIC_ARITHMETIC_OPERATORS(ConVarFlags);
 

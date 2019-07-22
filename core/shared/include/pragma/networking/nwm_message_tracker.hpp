@@ -6,7 +6,7 @@
 #include <chrono>
 #include <mutex>
 #include <networkmanager/nwm_endpoint.h>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <sharedutils/scope_guard.h>
 
 namespace pragma

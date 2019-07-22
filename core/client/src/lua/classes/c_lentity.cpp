@@ -6,7 +6,7 @@
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 
 void Lua::Entity::Client::register_class(luabind::class_<EntityHandle> &classDef)

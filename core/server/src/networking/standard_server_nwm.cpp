@@ -38,7 +38,7 @@ pragma::networking::StandardServerClient &pragma::networking::NWMActiveServer::G
 {
 	return *m_nwmToPragmaClient.find(&cl)->second;
 }
-void pragma::networking::NWMActiveServer::SetPragmaServer(IServer *sv) {m_server = sv;}
+void pragma::networking::NWMActiveServer::SetServer(StandardServer &server) {m_server = &server;}
 
 void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep,const NetPacket &packet)
 {
@@ -109,10 +109,8 @@ bool pragma::networking::NWMActiveServer::HandlePacket(const NWMEndpoint &ep,nwm
 	if(it == m_nwmToPragmaClient.end())
 		return false;
 	auto *prCl = it->second;
-	if(server->HandlePacket(*prCl,packet) == false)
-		;
+	m_server->HandlePacket(*prCl,packet);
 	return true;
-	//return server->HandlePacket(static_cast<pragma::networking::NWMActiveServerClient*>(cl),packet);
 }
 void pragma::networking::NWMActiveServer::OnClientConnected(nwm::ServerClient *nwmCl)
 {
@@ -127,6 +125,7 @@ void pragma::networking::NWMActiveServer::OnClientConnected(nwm::ServerClient *n
 	}
 	prCl->SetNWMClient(nwmCl);
 	m_nwmToPragmaClient[nwmCl] = prCl.get();
+	m_server->OnClientConnected(*prCl);
 }
 
 void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,nwm::ClientDropped reason)
@@ -145,6 +144,7 @@ void pragma::networking::NWMActiveServer::OnClientDropped(nwm::ServerClient *cl,
 
 	pragma::networking::Error err;
 	m_server->DropClient(*prCl,get_pragma_drop_reason(reason),err);
+	m_server->OnClientDropped(*prCl,get_pragma_drop_reason(reason));
 }
 
 void pragma::networking::NWMActiveServer::OnClosed()

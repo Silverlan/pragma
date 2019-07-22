@@ -6,7 +6,7 @@
 #include <pragma/audio/alsound.h>
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 

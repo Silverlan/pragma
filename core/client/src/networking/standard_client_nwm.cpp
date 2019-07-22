@@ -3,9 +3,9 @@
 #include <iostream>
 #include <pragma/networking/netmessages.h>
 
-#define DEBUG_CLIENT_VERBOSE 1
-
 extern DLLCLIENT ClientState *client;
+
+#define DEBUG_CLIENT_VERBOSE 1
 
 void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep,const NetPacket &packet)
 {
@@ -46,7 +46,7 @@ bool pragma::networking::NWMClientConnection::HandlePacket(const NWMEndpoint &ep
 #endif
 	if(nwm::Client::HandlePacket(ep,id,packet) == true)
 		return true;
-	client->HandlePacket(packet);
+	m_client->HandlePacket(packet);
 	return true;
 }
 void pragma::networking::NWMClientConnection::OnConnected()
@@ -54,7 +54,7 @@ void pragma::networking::NWMClientConnection::OnConnected()
 #if DEBUG_CLIENT_VERBOSE == 1
 	Con::ccl<<"Connected to server..."<<Con::endl;
 #endif
-	client->HandleConnect();
+	m_client->OnConnected();
 }
 void pragma::networking::NWMClientConnection::OnClosed()
 {
@@ -62,6 +62,7 @@ void pragma::networking::NWMClientConnection::OnClosed()
 #if DEBUG_CLIENT_VERBOSE == 1
 	Con::ccl<<"Connection to server has closed: "<<err.Message()<<Con::endl;
 #endif
+	m_client->OnConnectionClosed();
 }
 void pragma::networking::NWMClientConnection::OnDisconnected(nwm::ClientDropped reason)
 {
@@ -69,6 +70,7 @@ void pragma::networking::NWMClientConnection::OnDisconnected(nwm::ClientDropped 
 	Con::ccl<<"Disconnected from server ("<<nwm::client_dropped_enum_to_string(reason)<<")..."<<Con::endl;
 #endif
 	m_bDisconnected = true;
+	m_client->OnDisconnected();
 }
 
 pragma::networking::NWMClientConnection::NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp,std::shared_ptr<CLNWMTCPConnection> &tcp)
@@ -105,6 +107,8 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 	cl->Start();
 	return cl;
 }
+
+void pragma::networking::NWMClientConnection::SetClient(StandardClient &client) {m_client = &client;}
 
 bool pragma::networking::NWMClientConnection::IsDisconnected() const {return m_bDisconnected;}
 

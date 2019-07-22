@@ -19,8 +19,10 @@ void ConConf::Print(const std::string &name)
 	if(type == ConType::Var)
 	{
 		ConVar *cvar = static_cast<ConVar*>(this);
-		Con::cout<<"\""<<name<<"\" = \""<<cvar->GetString()<<"\""<<Con::endl;
 		auto flags = cvar->GetFlags();
+		if(umath::is_flag_set(flags,ConVarFlags::Hidden))
+			return;
+		Con::cout<<"\""<<name<<"\" = \""<<cvar->GetString()<<"\""<<Con::endl;
 		if(flags > ConVarFlags::None)
 		{
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
@@ -37,6 +39,7 @@ void ConConf::Print(const std::string &name)
 			if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
 				Con::cout<<" notify";
 			Con::cout<<Con::endl;
+			static_assert(umath::to_integral(ConVarFlags::Last) == 256);
 		}
 	}
 	else

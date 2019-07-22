@@ -2,7 +2,7 @@
 #include "pragma/entities/components/s_color_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/networking/enums.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 using namespace pragma;
 

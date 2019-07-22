@@ -17,11 +17,18 @@ namespace pragma::networking
 		UnableToAcceptClient,
 		UnableToListenOnPort,
 		ServerNotRunning,
-		GenericError,
 		UnknownError,
-		UnableToSendPacket,
 		UnableToDropClient,
 		InvalidClient,
+
+		// Clientside
+		InvalidConnectionHandle,
+		UnableToInitializeClient,
+
+		// Generic
+		GenericError,
+		UnableToSendPacket,
+		MessageTooLarge,
 
 		Count
 	};

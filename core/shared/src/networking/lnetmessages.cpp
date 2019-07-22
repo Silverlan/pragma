@@ -1,7 +1,7 @@
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
 #include "pragma/lua/lnetmessages.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 bool NetIncludePacketID(NetworkState *state,std::string identifier,NetPacket &src,NetPacket &tgt)
 {

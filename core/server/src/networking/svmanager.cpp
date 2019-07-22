@@ -47,32 +47,18 @@ void ServerState::RegisterServerInfo()
 
 void ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)
 {
-	CloseServer();
-	m_server = std::move(iserver);
-
-	pragma::networking::ServerEventInterface eventInterface {};
-	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client,pragma::networking::DropReason reason) {
-		auto *game = GetGameState();
-		if(game == nullptr)
-			return;
-		game->OnClientDropped(client,reason);
-	};
+	// TODO: Remove this file
+	//CloseServer();
+	//m_server = std::move(iserver);
 }
 
 void ServerState::StartServer()
 {
 	CloseServer();
+	InitializeGameServer();
 	if(m_server == nullptr)
 		return;
-	SetServerInterface(std::make_unique<pragma::networking::StandardServer>());
-	m_server->AddClient(m_localClient);
 
-	pragma::networking::Error err;
-	if(m_server->Start(err) == false)
-	{
-		Con::cerr<<"ERROR: "<<err.GetMessage()<<Con::endl;
-		return;
-	}
 	if(IsGameActive())
 		RegisterServerInfo();
 }

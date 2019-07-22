@@ -6,6 +6,7 @@
 
 namespace pragma::networking
 {
+	class StandardClient;
 	class NWMClientConnection
 		: public nwm::Client,
 		public pragma::networking::MessageTracker
@@ -13,6 +14,7 @@ namespace pragma::networking
 	public:
 		friend nwm::Client;
 		static std::unique_ptr<NWMClientConnection> Create(const std::string &serverIp,unsigned short serverPort);
+		void SetClient(StandardClient &client);
 
 		bool IsDisconnected() const;
 	protected:
@@ -27,6 +29,7 @@ namespace pragma::networking
 		NWMClientConnection(const std::shared_ptr<CLNWMUDPConnection> &udp,std::shared_ptr<CLNWMTCPConnection> &tcp);
 	private:
 		bool m_bDisconnected = false;
+		StandardClient *m_client = nullptr;
 	};
 
 	class Error;

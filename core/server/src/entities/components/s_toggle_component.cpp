@@ -2,7 +2,7 @@
 #include "pragma/entities/components/s_toggle_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/networking/enums.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 extern DLLSERVER SGame *s_game;
 

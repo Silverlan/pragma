@@ -18,14 +18,14 @@ static void pragma_recipient_filter_to_nwm(const pragma::networking::NWMActiveSe
 		outRf.Add(cl.get());
 	}
 }
-bool pragma::networking::StandardServer::Start(Error &outErr)
+bool pragma::networking::StandardServer::DoStart(Error &outErr)
 {
 	auto tcpPort = server->GetConVarInt("sv_port_tcp");
 	auto udpPort = server->GetConVarInt("sv_port_udp");
 	try
 	{
 		m_server = NWMActiveServer::Create(static_cast<uint16_t>(tcpPort),static_cast<uint16_t>(udpPort),nwm::ConnectionType::TCPUDP);
-		m_server->SetPragmaServer(this);
+		m_server->SetServer(*this);
 	}
 	catch(const NWMException &e)
 	{

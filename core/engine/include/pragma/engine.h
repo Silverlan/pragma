@@ -165,8 +165,9 @@ public:
 	// Config
 	bool ExecConfig(const std::string &cfg);
 
-	void HandleLocalPlayerServerPacket(NetPacket &p);
-	virtual void HandleLocalPlayerClientPacket(NetPacket &p);
+	void HandleLocalHostPlayerServerPacket(NetPacket &p);
+	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p);
+	bool ConnectLocalHostPlayerClient();
 
 	void SetMountExternalGameResources(bool b);
 	bool ShouldMountExternalGameResources() const;

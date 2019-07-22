@@ -7,7 +7,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 
 using namespace pragma;
 

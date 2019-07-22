@@ -11,6 +11,7 @@
 #include "pragma/gui/wiframe.h"
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
+#include "pragma/networking/iclient.hpp"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
@@ -836,12 +837,15 @@ void CEngine::ReloadShaderPipelines()
 
 CEngine::~CEngine() {}
 
-void CEngine::HandleLocalPlayerClientPacket(NetPacket &p)
+void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {
 	auto *client = GetClientState();
 	if(client == nullptr)
 		return;
-	static_cast<ClientState*>(client)->HandlePacket(p);
+	auto *cl = static_cast<ClientState*>(client)->GetClient();
+	if(cl == nullptr)
+		return;
+	cl->HandlePacket(p);
 }
 
 void CEngine::Connect(const std::string &ip,const std::string &port)
@@ -850,7 +854,8 @@ void CEngine::Connect(const std::string &ip,const std::string &port)
 	if(cl == NULL)
 		return;
 	cl->Disconnect();
-	c_engine->CloseServerState();
+	if(ip != "localhost")
+		c_engine->CloseServerState();
 	cl->Connect(ip,port);
 }
 

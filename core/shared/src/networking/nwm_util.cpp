@@ -2,7 +2,7 @@
 #include <pragma/engine.h>
 #include <pragma/game/game.h>
 #include "pragma/networkstate/networkstate.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include "pragma/networking/nwm_util.h"
 #include <pragma/math/angle/wvangle.h>
 #include "pragma/entities/baseentity.h"

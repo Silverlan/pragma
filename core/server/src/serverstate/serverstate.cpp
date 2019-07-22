@@ -69,6 +69,22 @@ void ServerState::InitializeGameServer()
 {
 	// TODO: Don't re-initialize server if local
 	m_server = nullptr;
+
+	pragma::networking::ServerEventInterface eventInterface {};
+	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client,pragma::networking::DropReason reason) {
+		auto *game = GetGameState();
+		if(game == nullptr)
+			return;
+		game->OnClientDropped(client,reason);
+	};
+	eventInterface.onClientConnected = [](pragma::networking::IServerClient &client) {
+
+	};
+	eventInterface.handlePacket = [this](pragma::networking::IServerClient &client,NetPacket &packet) {
+		HandlePacket(client,packet);
+	};
+#define USE_LOCAL_HOST 0
+#if USE_LOCAL_HOST != 1
 	auto netLibName = GetConVarString("net_library");
 	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,true);
 	std::string err;
@@ -79,11 +95,15 @@ void ServerState::InitializeGameServer()
 		if(fInitNetLib != nullptr)
 		{
 			fInitNetLib(*this,m_server);
-			pragma::networking::Error err;
-			if(m_server->Start(err) == false)
+			if(m_server)
 			{
-				m_server = nullptr;
-				Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+				m_server->SetEventInterface(eventInterface);
+				pragma::networking::Error err;
+				if(m_server->Start(err) == false)
+				{
+					m_server = nullptr;
+					Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+				}
 			}
 		}
 		else
@@ -96,14 +116,29 @@ void ServerState::InitializeGameServer()
 		ResetGameServer();
 		return;
 	}
+	//m_server->AddClient(m_localClient);
+#else
+	{
+		m_server = std::make_unique<pragma::networking::LocalServer>();
+		pragma::networking::Error err;
+		m_server->Start(err);
+	}
+#endif
+}
+bool ServerState::ConnectLocalHostPlayerClient()
+{
+	if(m_server == nullptr)
+		return false;
+	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
 	m_server->AddClient(m_localClient);
+	return true;
 }
 void ServerState::ResetGameServer()
 {
 	m_server = std::make_unique<pragma::networking::LocalServer>();
-	if(m_localClient == nullptr)
-		m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
-	m_server->AddClient(m_localClient);
+	//if(m_localClient == nullptr)
+	//	m_localClient = std::make_shared<pragma::networking::LocalServerClient>();
+	//m_server->AddClient(m_localClient);
 }
 
 void ServerState::Initialize()
@@ -200,7 +235,7 @@ std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 void ServerState::StartGame()
 {
 	NetworkState::StartGame();
-	InitializeGameServer();
+	StartServer();
 	m_game = new SGame{this};
 	s_game = m_game;
 

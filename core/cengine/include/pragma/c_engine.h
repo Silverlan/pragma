@@ -158,7 +158,7 @@ public:
 	void CloseClientState();
 	void Connect(const std::string &ip,const std::string &port="29150");
 	void Disconnect();
-	virtual void HandleLocalPlayerClientPacket(NetPacket &p) override;
+	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p) override;
 	// KeyMappings
 	void MapKey(short c,std::string cmd);
 	void MapKey(short c,int function);

@@ -3,7 +3,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/classes/lproperty_generic.hpp"
 #include "pragma/networking/nwm_util.h"
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <sharedutils/datastream.h>
 #include <mathutil/color.h>
 

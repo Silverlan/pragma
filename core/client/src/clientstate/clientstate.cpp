@@ -53,7 +53,7 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 DLLCENGINE CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
-
+#pragma optimize("",off)
 static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
 {
 	// Class specific handles have to also be defined in CGame::InitializeGUIElement!
@@ -87,6 +87,7 @@ static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
 	return std::make_shared<WIHandle>();
 }
 
+
 ClientState::ClientState()
 	: NetworkState(),m_client(nullptr),m_svInfo(nullptr),m_resDownload(nullptr),
 	m_game(NULL),m_volMaster(1.f),
@@ -115,9 +116,6 @@ ClientState::ClientState()
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnReceivePacket");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketTCP");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnSendPacketUDP");
-
-	// Initialize default client
-	ResetGameClient();
 }
 
 ClientState::~ClientState()
@@ -130,6 +128,25 @@ void ClientState::InitializeGameClient()
 {
 	// TODO: Don't re-initialize client if local
 	m_client = nullptr;
+
+	pragma::networking::ClientEventInterface eventInterface {};
+	eventInterface.onConnected = [this]() {
+		Con::cerr<<"OnConnected..."<<Con::endl;
+		HandleConnect();
+	};
+	eventInterface.onDisconnected = []() {
+		Con::cerr<<"OnDisconnected..."<<Con::endl;
+	};
+	eventInterface.onConnectionClosed = []() {
+		Con::cerr<<"OnConnectionClosed..."<<Con::endl;
+	};
+	//eventInterface.onPacketSent = [](pragma::networking::Protocol protocol,NetPacket &packet) {
+	//};
+	eventInterface.handlePacket = [this](NetPacket &packet) {
+		HandlePacket(packet);
+	};
+#define USE_LOCAL_HOST 0
+#if USE_LOCAL_HOST != 1
 	auto netLibName = GetConVarString("net_library");
 	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,false);
 	std::string err;
@@ -146,10 +163,15 @@ void ClientState::InitializeGameClient()
 		Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
 	if(m_client == nullptr)
 		ResetGameClient();
+#else
+	m_client = std::make_unique<pragma::networking::LocalClient>();
+#endif
+	if(m_client)
+		m_client->SetEventInterface(eventInterface);
 }
 void ClientState::ResetGameClient()
 {
-	m_client = std::make_unique<pragma::networking::LocalClient>();
+	//m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
 static auto cvSteamAudioEnabled = GetClientConVar("cl_steam_audio_enabled");
@@ -358,6 +380,16 @@ bool ClientState::RunConsoleCommand(std::string scmd,std::vector<std::string> &a
 	if(bUseClientside == true)
 		return NetworkState::RunConsoleCommand(scmd,argv,pl,pressState,magnitude,callback);
 
+	if(m_client == nullptr)
+	{
+		// No client exists and this is probably a serverside command.
+		// In this case, we'll redirect the command to the server directly
+		// (if this is a locally hosted game)
+		auto *svState = c_engine->GetServerNetworkState();
+		if(svState)
+			svState->RunConsoleCommand(scmd,argv,nullptr,pressState,magnitude,nullptr);
+		return true;
+	}
 	NetPacket p;
 	p->WriteString(scmd);
 	p->Write<uint8_t>(static_cast<uint8_t>(pressState));
@@ -496,9 +528,8 @@ void ClientState::Disconnect()
 		pragma::networking::Error err;
 		if(m_client->Disconnect(err) == false)
 			Con::cwar<<"WARNING: Unable to disconnect from server: "<<err.GetMessage()<<Con::endl;
+		m_client = nullptr;
 	}
-	// Initialize default client for single player
-	m_client = std::make_unique<pragma::networking::LocalClient>();
 }
 
 bool ClientState::IsConnected() const {return (m_client != nullptr) ? true : false;}
@@ -566,7 +597,6 @@ void ClientState::StartGame() {StartGame("");}
 void ClientState::StartGame(const std::string &gameMode)
 {
 	NetworkState::StartGame();
-	InitializeGameClient();
 	m_game = new CGame(this);
 	m_game->SetGameMode(gameMode);
 	CallCallbacks<void,CGame*>("OnGameStart",m_game);
@@ -707,3 +737,4 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
+#pragma optimize("",on)

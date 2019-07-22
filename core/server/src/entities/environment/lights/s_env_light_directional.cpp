@@ -4,7 +4,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include <pragma/networking/enums.hpp>
 
 using namespace pragma;

@@ -3,7 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
-#include <networkmanager/nwm_packet.h>
+#include <sharedutils/netpacket.hpp>
 #include "pragma/entities/baseentity.h"
 #include "pragma/audio/alsound.h"
 #include "luasystem.h"

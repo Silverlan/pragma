@@ -18,6 +18,8 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_observable_component.hpp>
+#include <pragma/entities/components/base_score_component.hpp>
+#include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
@@ -36,7 +38,8 @@ unsigned int SPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size()
 Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameC = ent.GetNameComponent();
+	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
@@ -49,7 +52,8 @@ Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
 std::ostream& SPlayerComponent::print(std::ostream &os)
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameC = ent.GetNameComponent();
+	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
@@ -144,10 +148,7 @@ void SPlayerComponent::Kick(const std::string&)
 {
 	auto *session = GetClientSession();
 	if(session != nullptr)
-	{
-		pragma::networking::Error err;
-		session->Drop(pragma::networking::DropReason::Kicked,err); // Player will be removed automatically
-	}
+		server->DropClient(*session,pragma::networking::DropReason::Kicked);
 	else
 	{
 		auto &ent = static_cast<SBaseEntity&>(GetEntity());
@@ -273,6 +274,12 @@ void SPlayerComponent::Initialize()
 	BindEventUnhandled(DamageableComponent::EVENT_ON_TAKE_DAMAGE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnTakeDamage(static_cast<CEOnTakeDamage&>(evData.get()).damageInfo);
 	});
+	BindEventUnhandled(BaseScoreComponent::EVENT_ON_SCORE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		server->UpdatePlayerScore(*this,static_cast<CEOnScoreChanged&>(evData.get()).score);
+	});
+	BindEventUnhandled(BaseNameComponent::EVENT_ON_NAME_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		server->UpdatePlayerName(*this,static_cast<CEOnNameChanged&>(evData.get()).name);
+	});
 }
 
 void SPlayerComponent::OnSetSlopeLimit(float limit)
@@ -309,6 +316,7 @@ void SPlayerComponent::UpdateViewOrientation(const Quat &rot)
 
 void SPlayerComponent::OnSetViewOrientation(const Quat &orientation)
 {
+	/*// Obsolete: View rotation is sent via snapshot	
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	if(ent.IsShared() == false)
 		return;
@@ -317,14 +325,13 @@ void SPlayerComponent::OnSetViewOrientation(const Quat &orientation)
 		return;
 	NetPacket p;
 	p->Write<Quat>(orientation);
-	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::FastUnreliable,*session);
+	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::FastUnreliable,*session);*/
 }
 
 networking::IServerClient *SPlayerComponent::GetClientSession() {return m_session.get();}
 
 void SPlayerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	packet->WriteString(GetPlayerName());
 	packet->Write<double>(ConnectionTime());
 	if(m_entFlashlight == nullptr)
 		nwm::write_unique_entity(packet,nullptr);

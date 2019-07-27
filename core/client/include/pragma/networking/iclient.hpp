@@ -29,6 +29,8 @@ namespace pragma::networking
 		virtual ~IClient()=default;
 		virtual std::string GetIdentifier() const=0;
 		virtual bool Connect(const std::string &ip,Port port,Error &outErr)=0;
+		// Steamworks only!
+		virtual bool Connect(uint64_t steamId,Error &outErr)=0;
 		virtual bool Disconnect(Error &outErr)=0;
 		virtual bool SendPacket(Protocol protocol,NetPacket &packet,Error &outErr)=0;
 		virtual bool IsRunning() const=0;
@@ -39,6 +41,7 @@ namespace pragma::networking
 		virtual std::optional<std::string> GetIP() const=0;
 		virtual std::optional<Port> GetLocalTCPPort() const {return {};}
 		virtual std::optional<Port> GetLocalUDPPort() const {return {};}
+		virtual std::string GetNetworkLayerIdentifier() const=0;
 		std::optional<networking::IPAddress> GetIPAddress() const;
 		void SetEventInterface(const ClientEventInterface &eventHandler);
 

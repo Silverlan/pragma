@@ -11,6 +11,7 @@
 #include "pragma/entities/components/c_networked_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_score_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -100,6 +101,7 @@
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CAI,BaseAIComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CCharacter,BaseCharacterComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CColor,BaseColorComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CScore,BaseScoreComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFlammable,BaseFlammableComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CHealth,BaseHealthComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CName,BaseNameComponentHandleWrapper);

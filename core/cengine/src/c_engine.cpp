@@ -65,7 +65,7 @@ CEngine::CEngine(int argc,char* argv[])
 	m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z),//10.0f), //0.1f
 	m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z),
 	m_fps(0),m_tFPSTime(0.f),
-	m_tLastFrame(std::chrono::high_resolution_clock::now()),m_tDeltaFrameTime(0)
+	m_tLastFrame(util::Clock::now()),m_tDeltaFrameTime(0)
 {
 	c_engine = this;
 
@@ -202,7 +202,7 @@ Vector2i CEngine::GetRenderResolution() const
 
 UInt32 CEngine::GetFPS() const {return m_fps;}
 UInt32 CEngine::GetFrameTime() const {return CUInt32(m_tFPSTime *1000.f);}
-Double CEngine::GetDeltaFrameTime() const {return std::chrono::duration_cast<std::chrono::nanoseconds>(m_tDeltaFrameTime).count() /1'000'000'000.0;}
+Double CEngine::GetDeltaFrameTime() const {return util::clock::to_seconds(m_tDeltaFrameTime);}
 
 static auto cvFrameLimit = GetClientConVar("cl_max_fps");
 float CEngine::GetFPSLimit() const {return cvFrameLimit->GetFloat();}
@@ -856,7 +856,27 @@ void CEngine::Connect(const std::string &ip,const std::string &port)
 	cl->Disconnect();
 	if(ip != "localhost")
 		c_engine->CloseServerState();
+	else
+	{
+		auto steamId = c_engine->GetServerSteamId();
+		if(steamId.has_value())
+		{
+			// Listen server is peer-to-peer; Connect via steam ID
+			cl->Connect(*steamId);
+			return;
+		}
+	}
 	cl->Connect(ip,port);
+}
+
+void CEngine::Connect(uint64_t steamId)
+{
+	auto *cl = static_cast<ClientState*>(GetClientState());
+	if(cl == NULL)
+		return;
+	cl->Disconnect();
+	c_engine->CloseServerState();
+	cl->Connect(steamId);
 }
 
 void CEngine::Disconnect()
@@ -1067,7 +1087,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 {
 	auto bProfiling = cvProfiling->GetBool();
 	auto *cl = static_cast<ClientState*>(GetClientState());
-	auto tStart = std::chrono::steady_clock::now();
+	auto tStart = util::Clock::now();
 	if(cl != nullptr)
 	{
 		StartProfilingStage(GPUProfilingPhase::DrawScene);
@@ -1101,7 +1121,7 @@ void CEngine::Think()
 {
 	GLFW::poll_joystick_events();
 
-	auto tNow = std::chrono::high_resolution_clock::now();
+	auto tNow = util::Clock::now();
 
 	std::chrono::nanoseconds tDelta;
 	if(m_fixedFrameDeltaTimeInterpretation.has_value() == false)
@@ -1172,7 +1192,7 @@ void CEngine::UpdateTickCount()
 		Engine::UpdateTickCount();
 		return;
 	}
-	m_ctTick.UpdateByDelta(m_tDeltaFrameTime.count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds{1}).count()));
+	m_ctTick.UpdateByDelta(util::clock::to_seconds(m_tDeltaFrameTime));
 }
 
 void CEngine::Tick()

@@ -8,6 +8,7 @@
 
 extern DLLENGINE Engine *engine;
 
+// TODO: Remove this file
 namespace Lua
 {
 	namespace PhysKinematicCharacterController
@@ -19,10 +20,10 @@ namespace Lua
 
 void Lua::PhysKinematicCharacterController::register_class(lua_State *l,luabind::module_ &mod)
 {
-	auto classDef = luabind::class_<::pragma::physics::IController>("CharacterController");
+	/*auto classDef = luabind::class_<::pragma::physics::IController>("CharacterController");
 	classDef.def("SetOrigin",&SetOrigin);
 	classDef.def("GetOrigin",&GetOrigin);
-	mod[classDef];
+	mod[classDef];*/
 }
 void Lua::PhysKinematicCharacterController::SetOrigin(lua_State*,::pragma::physics::IController &controller,Vector3 &origin)
 {

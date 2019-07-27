@@ -13,6 +13,7 @@
 #include <pragma/networking/netmessages.h>
 #include <pragma/networking/error.hpp>
 #include <servermanager/interface/sv_nwm_manager_create.hpp>
+#include <sharedutils/util_clock.hpp>
 
 #define DEBUG_SERVER_VERBOSE 1
 
@@ -159,7 +160,7 @@ void pragma::networking::NWMActiveServer::PollEvents()
 	nwm::Server::PollEvents();
 	if(m_dispatcher != nullptr)
 		m_dispatcher->Poll();
-	auto t = std::chrono::high_resolution_clock::now();
+	auto t = util::Clock::now();
 	auto tDelta = t -m_lastHeartBeat;
 	if(std::chrono::duration_cast<std::chrono::minutes>(tDelta).count() >= 5)
 	{

@@ -49,12 +49,12 @@ std::shared_ptr<CPUTimer> CPUTimer::Create()
 }
 bool CPUTimer::Start()
 {
-	m_startTime = std::chrono::high_resolution_clock::now();
+	m_startTime = util::Clock::now();
 	return true;
 }
 bool CPUTimer::Stop()
 {
-	m_stopTime = std::chrono::high_resolution_clock::now();
+	m_stopTime = util::Clock::now();
 	return true;
 }
 std::unique_ptr<ProfilerResult> CPUTimer::GetResult() const

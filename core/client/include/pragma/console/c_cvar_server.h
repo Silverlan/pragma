@@ -20,7 +20,7 @@ DLLCLIENT void CMD_cl_rcon(NetworkState *state,pragma::BasePlayerComponent *pl,s
 REGISTER_CONCOMMAND_CL(rcon,CMD_cl_rcon,ConVarFlags::None,"Sends the given command to the server and runs it serverside. Usage: rcon <command>");
 
 DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
-REGISTER_CONCOMMAND_CL(connect,CMD_connect,ConVarFlags::None,"Attempts to connect to the specified server. Usage: connect <ip>");
+REGISTER_CONCOMMAND_CL(connect,CMD_connect,ConVarFlags::None,"Attempts to connect to the specified server. Usage: connect <ipV6/ipV4> or connect <steamId> or without arguments to re-try the last attempt.");
 
 DLLCLIENT void CMD_disconnect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 REGISTER_CONCOMMAND_CL(disconnect,CMD_disconnect,ConVarFlags::None,"Disconnects from the server (if a connection is active), or closes the game if in single player mode.");

@@ -1,10 +1,11 @@
 #include "stdafx_server.h"
 #include "pragma/networking/local_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include <sharedutils/util_clock.hpp>
 
 extern DLLENGINE Engine *engine;
 
-bool pragma::networking::LocalServer::DoStart(Error &outErr) {return true;}
+bool pragma::networking::LocalServer::DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable) {return true;}
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) {return true;}
 bool pragma::networking::LocalServer::DoShutdown(Error &outErr) {return true;}
 bool pragma::networking::LocalServer::Heartbeat() {return true;}
@@ -20,7 +21,7 @@ std::optional<pragma::networking::Port> pragma::networking::LocalServerClient::G
 bool pragma::networking::LocalServerClient::IsListenServerHost() const {return true;}
 bool pragma::networking::LocalServerClient::SendPacket(pragma::networking::Protocol protocol,NetPacket &packet,pragma::networking::Error &outErr)
 {
-	packet.SetTimeActivated(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
 	engine->HandleLocalHostPlayerClientPacket(packet);
 	return true;

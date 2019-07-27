@@ -328,18 +328,19 @@ void ControllerPhysObj::SetDimensions(const Vector3 &dimensions)
 }
 void ControllerPhysObj::SetPosition(const Vector3 &pos)
 {
-	auto t = m_collisionObject->GetWorldTransform();
-	Vector3 posCur = t.GetOrigin();
 	if(m_controller == nullptr)
+	{
 		PhysObj::SetPosition(pos);
-	else
-		m_controller->SetFootPos(pos);
+		return;
+	}
+	auto posCur = m_controller->GetFootPos();
+	m_controller->SetFootPos(pos);
 	m_posLast += pos -posCur;
 }
 Vector3 ControllerPhysObj::GetPosition() const
 {
 	if(m_controller == nullptr)
-		return GetPosition();
+		return PhysObj::GetPosition();
 	return m_controller->GetFootPos();
 }
 unsigned int ControllerPhysObj::Move(const Vector3&,float,float)

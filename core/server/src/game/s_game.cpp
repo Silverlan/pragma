@@ -53,6 +53,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/entities/components/global_component.hpp>
+#include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -814,24 +815,22 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 	if(version != plVersion)
 	{
 		Con::csv<<"Client "<<session.GetIdentifier()<<" has a different engine version ("<<plVersion.ToString()<<") from server's. Dropping client..."<<Con::endl;
-		pragma::networking::Error err;
-		session.Drop(pragma::networking::DropReason::Kicked,err);
+		server->DropClient(session,pragma::networking::DropReason::Kicked);
 		return;
 	}
+
 	auto *plEnt = CreateEntity<Player>();
 	if(plEnt == nullptr)
 	{
 		Con::csv<<"Unable to create player entity for client "<<session.GetIdentifier()<<". Dropping client..."<<Con::endl;
-		pragma::networking::Error err;
-		session.Drop(pragma::networking::DropReason::Kicked,err);
+		server->DropClient(session,pragma::networking::DropReason::Kicked);
 		return;
 	}
 	if(plEnt->IsPlayer() == false)
 	{
 		Con::csv<<"Unable to create player component for client "<<session.GetIdentifier()<<". Dropping client..."<<Con::endl;
 		plEnt->RemoveSafely();
-		pragma::networking::Error err;
-		session.Drop(pragma::networking::DropReason::Kicked,err);
+		server->DropClient(session,pragma::networking::DropReason::Kicked);
 		return;
 	}
 	pl = static_cast<pragma::SPlayerComponent*>(plEnt->GetPlayerComponent().get());
@@ -850,7 +849,9 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 	name = name.substr(0,20);
 	if(name.empty())
 		name = "player";
-	pl->SetPlayerName(name);
+	auto nameC = plEnt->GetNameComponent();
+	if(nameC.valid())
+		nameC->SetName(name);
 	plEnt->Spawn();
 	pl->SetAuthed(true);
 	std::unordered_map<std::string,std::string> *cvars;
@@ -986,7 +987,9 @@ void SGame::OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cv
 	if(cvar == "playername")
 	{
 		value = value.substr(0,20);
-		pl.SetPlayerName(value);
+		auto nameC = pl.GetEntity().GetNameComponent();
+		if(nameC.valid())
+			nameC->SetName(value);
 		NetPacket p;
 		nwm::write_player(p,&pl);
 		p->WriteString(value);

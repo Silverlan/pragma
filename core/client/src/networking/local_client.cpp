@@ -22,7 +22,7 @@ bool pragma::networking::LocalClient::Disconnect(Error &outErr)
 }
 bool pragma::networking::LocalClient::SendPacket(Protocol protocol,NetPacket &packet,Error &outErr)
 {
-	packet.SetTimeActivated(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+	packet.SetTimeActivated(util::clock::to_int(util::clock::get_duration_since_start()));
 	packet->SetOffset(0);
 	engine->HandleLocalHostPlayerServerPacket(packet);
 	OnPacketSent(protocol,packet);

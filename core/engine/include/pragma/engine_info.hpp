@@ -17,6 +17,11 @@ namespace engine_info
 	DLLENGINE std::string get_wiki_url();
 	DLLENGINE std::string get_forums_url();
 	DLLENGINE std::string get_patreon_url();
+	DLLENGINE uint32_t get_steam_app_id();
+
+	constexpr uint16_t DEFAULT_SERVER_PORT = 29150;
+	constexpr uint16_t DEFAULT_QUERY_PORT = 29155;
+	constexpr uint16_t DEFAULT_AUTH_PORT = 8766;
 
 	// Returns the extensions for the supported audio formats
 	DLLENGINE const std::vector<std::string> get_supported_audio_formats();

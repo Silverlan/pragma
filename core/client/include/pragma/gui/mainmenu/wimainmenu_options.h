@@ -3,6 +3,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/mainmenu/wimainmenu_base.h"
+#include <sharedutils/util_clock.hpp>
 
 class WIDropDownMenu;
 class WICheckbox;
@@ -57,7 +58,7 @@ protected:
 	WIHandle m_hPssmSplitCount;
 	bool m_bInitialized = false;
 
-	std::chrono::high_resolution_clock::time_point m_tLastMemoryUsageUpdate = {};
+	util::Clock::time_point m_tLastMemoryUsageUpdate = {};
 
 	CallbackHandle m_joystickStateChanged = {};
 	int m_yOffset;

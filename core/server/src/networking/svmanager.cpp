@@ -5,6 +5,8 @@
 #include "pragma/networking/iserver.hpp"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include "pragma/networking/standard_server.hpp"
+#include "pragma/networking/master_server.hpp"
+#include <pragma/networking/game_server_data.hpp>
 #include <pragma/networking/enums.hpp>
 #include <wms_shared.h>
 #include <pragma/engine_version.h>
@@ -34,15 +36,25 @@ void ServerState::RegisterServerInfo()
 	m_serverData.map = s_game->GetMapName();
 	if(gameMode != nullptr)
 		m_serverData.gameMode = gameMode->name;
-	auto tcpPort = m_server->GetLocalTCPPort();
-	auto udpPort = m_server->GetLocalUDPPort();
+	auto port = m_server->GetHostPort();
+	auto password = GetConVarString("password");
 	m_serverData.players = s_game->GetPlayerCount();
-	m_serverData.tcpPort = tcpPort.has_value() ? *tcpPort : 0;
-	m_serverData.udpPort = udpPort.has_value() ? *udpPort : 0;
+	m_serverData.tcpPort = port.has_value() ? *port : 0;
+	m_serverData.udpPort = port.has_value() ? *port : 0;
 	m_serverData.engineVersion = get_engine_version();
-	//m_serverData.maxPlayers
-	//m_serverData.password
+	m_serverData.maxPlayers = GetConVarInt("sv_maxplayers");
+	m_serverData.password = password.empty() == false;
 	//m_serverData.bots
+
+	if(m_serverReg)
+	{
+		auto &serverInfo = m_serverReg->GetServerInfo();
+		serverInfo.name = m_serverData.name;
+		serverInfo.mapName = m_serverData.map;
+		serverInfo.gameMode = m_serverData.gameMode;
+		serverInfo.maxPlayers = m_serverData.maxPlayers;
+		serverInfo.passwordProtected = m_serverData.password;
+	}
 }
 
 void ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver)

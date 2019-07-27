@@ -40,6 +40,10 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_color_component_methods<luabind::class_<SColorHandle,BaseEntityComponentHandle>,SColorHandle>(l,defSColor);
 	entsMod[defSColor];
 
+	auto defSScore = luabind::class_<SScoreHandle,BaseEntityComponentHandle>("ScoreComponent");
+	Lua::register_base_score_component_methods<luabind::class_<SScoreHandle,BaseEntityComponentHandle>,SScoreHandle>(l,defSScore);
+	entsMod[defSScore];
+
 	auto defSFlammable = luabind::class_<SFlammableHandle,BaseEntityComponentHandle>("FlammableComponent");
 	Lua::register_base_flammable_component_methods<luabind::class_<SFlammableHandle,BaseEntityComponentHandle>,SFlammableHandle>(l,defSFlammable);
 	entsMod[defSFlammable];

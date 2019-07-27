@@ -7,6 +7,7 @@
 #include "pragma/rendering/c_render_context.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/input/c_keybind.h"
+#include <sharedutils/util_clock.hpp>
 #include <unordered_map>
 
 class ClientState;
@@ -157,6 +158,8 @@ public:
 	ClientState *OpenClientState();
 	void CloseClientState();
 	void Connect(const std::string &ip,const std::string &port="29150");
+	// Peer-to-peer only
+	void Connect(uint64_t steamId);
 	void Disconnect();
 	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p) override;
 	// KeyMappings
@@ -207,8 +210,8 @@ private:
 	// FPS
 	UInt32 m_fps;
 	Float m_tFPSTime;
-	std::chrono::high_resolution_clock::time_point m_tLastFrame;
-	std::chrono::high_resolution_clock::duration m_tDeltaFrameTime;
+	util::Clock::time_point m_tLastFrame;
+	util::Clock::duration m_tDeltaFrameTime;
 	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;

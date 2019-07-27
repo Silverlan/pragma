@@ -38,6 +38,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_wheel_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
+#include "pragma/entities/components/base_score_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/base_shooter_component.hpp"
@@ -177,6 +178,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseSoftBody);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseSoundEmitter);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseTransform);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseColor);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseScore);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseRadius);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseGeneric);
 

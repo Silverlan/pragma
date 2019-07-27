@@ -9,6 +9,7 @@
 #include "pragma/networking/iserver_client.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
+#include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/console/util_cmd.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -159,7 +160,8 @@ DLLSERVER void CMD_status_sv(NetworkState*,pragma::BasePlayerComponent*,std::vec
 	{
 		auto *pl = players.at(i);
 		auto *session = pl->GetClientSession();
-		Con::cout<<"# \t"<<i<<"\t"<<"\""<<pl->GetPlayerName()<<"\""<<"\t"<<FormatTime(pl->TimeConnected())<<"     \t";
+		auto nameC = pl->GetEntity().GetNameComponent();
+		Con::cout<<"# \t"<<i<<"\t"<<"\""<<(nameC.valid() ? nameC->GetName() : "")<<"\""<<"\t"<<FormatTime(pl->TimeConnected())<<"     \t";
 		if(session != nullptr)
 			Con::cout<<session->GetLatency();
 		else

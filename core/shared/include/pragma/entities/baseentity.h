@@ -33,6 +33,7 @@ namespace pragma
 	class BasePlayerComponent;
 	class BasePhysicsComponent;
 	class BaseTimeScaleComponent;
+	class BaseNameComponent;
 	class BaseTransformComponent;
 	namespace physics {class Transform;};
 
@@ -110,6 +111,7 @@ public:
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
 	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
+	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
 	util::WeakHandle<pragma::BaseTransformComponent> GetTransformComponent() const;
 
 	// Returns true if this entity is local to the current network state (i.e. clientside/serverside only)

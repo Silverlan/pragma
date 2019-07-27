@@ -85,4 +85,7 @@ void pragma::networking::IServerClient::ScheduleResource(const std::string &file
 }
 
 std::vector<std::string> &pragma::networking::IServerClient::GetScheduledResources() {return m_scheduledResources;}
+
+void pragma::networking::IServerClient::SetSteamId(uint64_t steamId) {m_steamId = steamId;}
+uint64_t pragma::networking::IServerClient::GetSteamId() const {return m_steamId;}
 #pragma optimize("",on)

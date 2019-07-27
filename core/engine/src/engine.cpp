@@ -37,6 +37,7 @@
 #include <util_zip.h>
 #include <pragma/game/game_resources.hpp>
 #include <util_pad.hpp>
+#include <pragma/networking/iserver.hpp>
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/model/animation/activities.h>
 #include <pragma/model/animation/animation_event.h>
@@ -113,6 +114,19 @@ Engine::Engine(int,char*[])
 void Engine::ClearConsole()
 {
 	std::system("cls");
+}
+
+void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
+{
+	auto *client = GetClientState();
+	if(client == nullptr)
+		return;
+	auto flags = client->GetConVarFlags(cvar);
+	if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
+		Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
+	if((flags &ConVarFlags::Replicated) == ConVarFlags::None)
+		return;
+	client->SetConVar(cvar,val);
 }
 
 std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
@@ -361,6 +375,15 @@ void Engine::LoadMap(const char *map)
 	if(sv == NULL)
 		return;
 	sv->LoadMap(map);
+}
+
+std::optional<uint64_t> Engine::GetServerSteamId() const
+{
+	auto *svState = GetServerState();
+	if(svState == nullptr)
+		return {};
+	auto *sv = svState->GetServer();
+	return sv ? sv->GetSteamId() : std::optional<uint64_t>{};
 }
 
 static auto cvRemoteDebugging = GetConVar("sh_lua_remote_debugging");

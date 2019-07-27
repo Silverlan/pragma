@@ -11,6 +11,7 @@
 #include "pragma/entities/components/s_networked_component.hpp"
 #include "pragma/entities/components/s_observable_component.hpp"
 #include "pragma/entities/components/s_color_component.hpp"
+#include "pragma/entities/components/s_score_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_radius_component.hpp"
 #include "pragma/entities/components/s_render_component.hpp"
@@ -96,6 +97,7 @@
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SAI,BaseAIComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SCharacter,BaseCharacterComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SColor,BaseColorComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SScore,BaseScoreComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SFlammable,BaseFlammableComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SHealth,BaseHealthComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SName,BaseNameComponentHandleWrapper);

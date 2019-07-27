@@ -21,6 +21,7 @@
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
+#include "pragma/entities/components/s_name_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
@@ -235,6 +236,11 @@ util::WeakHandle<pragma::BaseTimeScaleComponent> SBaseEntity::GetTimeScaleCompon
 {
 	auto pComponent = GetComponent<pragma::STimeScaleComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseTimeScaleComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseTimeScaleComponent>{};
+}
+util::WeakHandle<pragma::BaseNameComponent> SBaseEntity::GetNameComponent() const
+{
+	auto pComponent = GetComponent<pragma::SNameComponent>();
+	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseNameComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseNameComponent>{};
 }
 bool SBaseEntity::IsCharacter() const {return HasComponent<pragma::SCharacterComponent>();}
 bool SBaseEntity::IsPlayer() const {return HasComponent<pragma::SPlayerComponent>();}

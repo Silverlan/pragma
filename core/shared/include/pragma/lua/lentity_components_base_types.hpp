@@ -1406,6 +1406,32 @@ namespace Lua
 	}
 
 	template<class TLuaClass,class THandle>
+		void register_base_score_component_methods(lua_State *l,TLuaClass &def)
+		{
+			def.def("GetScoreProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+				pragma::Lua::check_component(l,hComponent);
+				Lua::Property::push(l,*hComponent->GetScoreProperty());
+			}));
+			def.def("GetScore",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+				pragma::Lua::check_component(l,hComponent);
+				Lua::Push<pragma::BaseScoreComponent::Score>(l,hComponent->GetScore());
+			}));
+			def.def("SetScore",static_cast<void(*)(lua_State*,THandle&,pragma::BaseScoreComponent::Score)>([](lua_State *l,THandle &hComponent,pragma::BaseScoreComponent::Score score) {
+				pragma::Lua::check_component(l,hComponent);
+				hComponent->SetScore(score);
+			}));
+			def.def("AddScore",static_cast<void(*)(lua_State*,THandle&,pragma::BaseScoreComponent::Score)>([](lua_State *l,THandle &hComponent,pragma::BaseScoreComponent::Score score) {
+				pragma::Lua::check_component(l,hComponent);
+				hComponent->AddScore(score);
+			}));
+			def.def("SubtractScore",static_cast<void(*)(lua_State*,THandle&,pragma::BaseScoreComponent::Score)>([](lua_State *l,THandle &hComponent,pragma::BaseScoreComponent::Score score) {
+				pragma::Lua::check_component(l,hComponent);
+				hComponent->SubtractScore(score);
+			}));
+			def.add_static_constant("EVENT_ON_SCORE_CHANGED",pragma::BaseScoreComponent::EVENT_ON_SCORE_CHANGED);
+		}
+
+	template<class TLuaClass,class THandle>
 		void register_base_radius_component_methods(lua_State *l,TLuaClass &def)
 	{
 		def.def("GetRadiusProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
@@ -1818,6 +1844,7 @@ namespace Lua
 			LUA_CHECK_ENTITY(l,hEnt);
 			Lua::PushBool(l,hComponent->ShouldPass(*hEnt.get()));
 		}));
+		def.add_static_constant("EVENT_ON_NAME_CHANGED",pragma::BaseNameComponent::EVENT_ON_NAME_CHANGED);
 	}
 
 	template<class TLuaClass,class THandle>
@@ -2720,10 +2747,6 @@ namespace Lua
 		def.def("SetCrouchEyeLevel",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hPl,float eyelevel) {
 			pragma::Lua::check_component(l,hPl);
 			hPl.get()->SetCrouchEyeLevel(eyelevel);
-		}));
-		def.def("GetPlayerName",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
-			pragma::Lua::check_component(l,hPl);
-			Lua::PushString(l,hPl.get()->GetPlayerName());
 		}));
 		def.def("SetObserverMode",static_cast<void(*)(lua_State*,THandle&,int32_t)>([](lua_State *l,THandle &hPl,int mode) {
 			pragma::Lua::check_component(l,hPl);

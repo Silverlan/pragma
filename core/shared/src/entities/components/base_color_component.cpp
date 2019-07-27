@@ -44,7 +44,7 @@ void BaseColorComponent::Initialize()
 	});
 
 	auto &ent = GetEntity();
-	ent.AddComponent("io");
+	//ent.AddComponent("io");
 	m_netEvSetColor = SetupNetEvent("set_color");
 }
 const Color &BaseColorComponent::GetColor() const {return *m_color;}

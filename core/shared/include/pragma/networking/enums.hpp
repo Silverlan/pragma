@@ -46,6 +46,7 @@ namespace pragma::networking
 		Kicked,
 		Shutdown,
 		Error,
+		AuthenticationFailed,
 
 		Count
 	};

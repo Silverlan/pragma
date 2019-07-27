@@ -18,10 +18,10 @@ static void pragma_recipient_filter_to_nwm(const pragma::networking::NWMActiveSe
 		outRf.Add(cl.get());
 	}
 }
-bool pragma::networking::StandardServer::DoStart(Error &outErr)
+bool pragma::networking::StandardServer::DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable)
 {
-	auto tcpPort = server->GetConVarInt("sv_port_tcp");
-	auto udpPort = server->GetConVarInt("sv_port_udp");
+	auto tcpPort = port;
+	auto udpPort = port;
 	try
 	{
 		m_server = NWMActiveServer::Create(static_cast<uint16_t>(tcpPort),static_cast<uint16_t>(udpPort),nwm::ConnectionType::TCPUDP);
@@ -58,13 +58,9 @@ std::optional<std::string> pragma::networking::StandardServer::GetHostIP() const
 {
 	return m_server->GetLocalIP();
 }
-std::optional<pragma::networking::Port> pragma::networking::StandardServer::GetLocalTCPPort() const
+std::optional<pragma::networking::Port> pragma::networking::StandardServer::GetHostPort() const
 {
 	return m_server->GetLocalTCPPort();
-}
-std::optional<pragma::networking::Port> pragma::networking::StandardServer::GetLocalUDPPort() const
-{
-	return m_server->GetLocalUDPPort();
 }
 bool pragma::networking::StandardServer::PollEvents(Error &outErr)
 {

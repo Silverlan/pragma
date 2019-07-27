@@ -31,13 +31,16 @@ namespace pragma::networking
 		template<class TServer,typename... TARGS>
 			static std::unique_ptr<TServer,void(*)(TServer*)> Create(TARGS&& ...args);
 		virtual ~IServer()=default;
-		bool Start(Error &outErr);
+		bool Start(Error &outErr,uint16_t port,bool useP2PIfAvailable=false);
 		virtual bool Heartbeat()=0;
 		virtual bool PollEvents(Error &outErr)=0;
 		virtual void SetTimeoutDuration(float duration)=0;
 		virtual std::optional<std::string> GetHostIP() const {return {};}
-		virtual std::optional<Port> GetLocalTCPPort() const {return {};}
-		virtual std::optional<Port> GetLocalUDPPort() const {return {};}
+		virtual std::optional<Port> GetHostPort() const {return {};}
+		virtual std::optional<uint64_t> GetSteamId() const {return {};}
+		virtual bool IsPeerToPeer() const=0;
+		// Note: The identifier HAS to match the directory name of the networking module!
+		virtual std::string GetNetworkLayerIdentifier() const=0;
 		bool Shutdown(Error &outErr);
 		bool SendPacket(Protocol protocol,NetPacket &packet,const ClientRecipientFilter &rf,Error &outErr);
 		void AddClient(const std::shared_ptr<IServerClient> &client);
@@ -56,7 +59,7 @@ namespace pragma::networking
 		void OnClientDropped(IServerClient &client,DropReason reason);
 	protected:
 		IServer()=default;
-		virtual bool DoStart(Error &outErr)=0;
+		virtual bool DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable=false)=0;
 		const ServerEventInterface &GetEventInterface() const;
 		virtual bool DoShutdown(Error &outErr)=0;
 	private:

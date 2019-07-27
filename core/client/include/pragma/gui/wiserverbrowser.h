@@ -4,39 +4,35 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/wiframe.h"
 #include "wmserverdata.h"
+#include <pragma/networking/game_server_data.hpp>
 #include <networkmanager/udp_handler/udp_message_dispatcher.h>
+
+
+#include <pragma/networking/master_server_query_dispatcher.hpp>
+
+namespace pragma::networking
+{
+	class DLLCLIENT DefaultMasterServerQueryDispatcher
+		: public IMasterServerQueryDispatcher
+	{
+	public:
+		virtual void DoQueryServers(const Filter &filter) override;
+	protected:
+		DefaultMasterServerQueryDispatcher();
+		virtual void DoCancelQuery() override;
+		virtual void DoPoll() override;
+		virtual void DoPingServer(uint32_t serverIdx) override;
+		friend IMasterServerQueryDispatcher;
+	private:
+		std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
+	};
+};
+
 
 class WITableRow;
 class DLLCLIENT WIServerBrowser
 	: public WIFrame
 {
-protected:
-	class DLLCLIENT ServerInfo
-	{
-	public:
-		ServerInfo(WITableRow *row,std::unique_ptr<WMServerData> &info);
-		std::unique_ptr<WMServerData> info;
-		WIHandle row;
-	};
-private:
-	void RemoveQueuedServer(WMServerData *info,bool addToList=false);
-protected:
-	std::vector<std::unique_ptr<WMServerData>> m_dispatchQueue; // To be dispatched
-	std::vector<std::unique_ptr<WMServerData>> m_waitQueue; // Waiting for response
-	std::vector<std::unique_ptr<ServerInfo>> m_servers;
-	unsigned int m_batchCount;
-	WIHandle m_hServerList;
-	WIHandle m_hRefresh;
-	WIHandle m_hConnect;
-	std::unique_ptr<UDPMessageDispatcher> m_dispatcher;
-	bool m_bRefreshScheduled;
-	bool m_bDisconnectScheduled;
-	void AddServer(std::unique_ptr<WMServerData> &data);
-	void ReceiveServerList(bool b);
-	void OnServerDoubleClick(unsigned int idx);
-	void DisplayMessage(std::string msg);
-	void DoRefresh();
-	void DispatchBatch();
 public:
 	WIServerBrowser();
 	virtual ~WIServerBrowser() override;
@@ -44,6 +40,22 @@ public:
 	virtual void Think() override;
 	virtual void SetSize(int x,int y) override;
 	void Refresh();
+protected:
+	struct ServerData
+	{
+		pragma::networking::MasterServerQueryResult queryResult;
+		WIHandle row = {};
+	};
+	std::vector<ServerData> m_servers;
+	WIHandle m_hServerList;
+	WIHandle m_hRefresh;
+	WIHandle m_hConnect;
+	bool m_bRefreshScheduled;
+	std::unique_ptr<pragma::networking::IMasterServerQueryDispatcher,void(*)(pragma::networking::IMasterServerQueryDispatcher*)> m_msQueryDispatcher = {nullptr,[](pragma::networking::IMasterServerQueryDispatcher*) {}};
+	void AddServer(const pragma::networking::MasterServerQueryResult &queryResult);
+	void OnServerDoubleClick(unsigned int idx);
+	void DisplayMessage(std::string msg);
+	void DoRefresh();
 };
 
 #endif

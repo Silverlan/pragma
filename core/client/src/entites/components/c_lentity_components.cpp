@@ -125,6 +125,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_color_component_methods<luabind::class_<CColorHandle,BaseEntityComponentHandle>,CColorHandle>(l,defCColor);
 	entsMod[defCColor];
 
+	auto defCScore = luabind::class_<CScoreHandle,BaseEntityComponentHandle>("ScoreComponent");
+	Lua::register_base_score_component_methods<luabind::class_<CScoreHandle,BaseEntityComponentHandle>,CScoreHandle>(l,defCScore);
+	entsMod[defCScore];
+
 	auto defCFlammable = luabind::class_<CFlammableHandle,BaseEntityComponentHandle>("FlammableComponent");
 	Lua::register_base_flammable_component_methods<luabind::class_<CFlammableHandle,BaseEntityComponentHandle>,CFlammableHandle>(l,defCFlammable);
 	entsMod[defCFlammable];

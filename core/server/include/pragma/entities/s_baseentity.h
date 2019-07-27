@@ -50,6 +50,7 @@ public:
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
 	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const override;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
+	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;
 	virtual bool IsPlayer() const override;
 	virtual bool IsWeapon() const override;

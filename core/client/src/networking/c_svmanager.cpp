@@ -12,23 +12,49 @@
 #include <pragma/networking/netmessages.h>
 
 extern DLLCENGINE CEngine *c_engine;
-static std::vector<std::string> s_lastConnection {};
-void ClientState::Connect(std::string ip,std::string port)
+struct LastConnectionInfo
+{
+	std::optional<std::pair<std::string,uint16_t>> address = {};
+	std::optional<uint64_t> steamId = {};
+};
+static LastConnectionInfo s_lastConnection {};
+void ClientState::Connect(std::string ip,std::string sport)
 {
 	EndGame();
-	if(ip == "localhost")
+	// "localhost" is ALWAYS single-player!
+	auto localGame = (ip == "localhost");
+	if(localGame)
 		ip = "127.0.0.1";
-	s_lastConnection = {ip,port};
+	s_lastConnection = {};
+	auto port = static_cast<uint16_t>(util::to_int(sport));
+	s_lastConnection.address = {ip,port};
 #ifdef DEBUG_SOCKET
 	Con::ccl<<"Connecting to "<<ip<<":"<<port<<"..."<<Con::endl;
 #endif
 	Disconnect();
-	InitializeGameClient();
+	InitializeGameClient(localGame);
 	if(m_client == nullptr)
 		return;
 	pragma::networking::Error err;
-	if(m_client->Connect(ip,CUInt16(util::to_int(port)),err) == false)
+	if(m_client->Connect(ip,port,err) == false)
 		Con::cwar<<"WARNING: Unable to connect to '"<<ip<<":"<<port<<"': "<<err.GetMessage()<<"!"<<Con::endl;
+}
+
+void ClientState::Connect(uint64_t steamId)
+{
+	EndGame();
+	s_lastConnection = {};
+	s_lastConnection.steamId = steamId;
+#ifdef DEBUG_SOCKET
+	Con::ccl<<"Connecting to host with Steam ID "<<steamId<<"..."<<Con::endl;
+#endif
+	Disconnect();
+	InitializeGameClient(false);
+	if(m_client == nullptr)
+		return;
+	pragma::networking::Error err;
+	if(m_client->Connect(steamId,err) == false)
+		Con::cwar<<"WARNING: Unable to connect to host with Steam ID "<<steamId<<": "<<err.GetMessage()<<"!"<<Con::endl;
 }
 
 ///////////////////////////
@@ -49,12 +75,15 @@ DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,s
 {
 	if(argv.empty())
 	{
-		if(s_lastConnection.empty())
+		if(s_lastConnection.address.has_value() == false && s_lastConnection.steamId.has_value() == false)
 		{
 			Con::cout<<"No previous connection attempt has been made! Please supply a destination address."<<Con::endl;
 			return;
 		}
-		CMD_connect(state,pl,s_lastConnection);
+		if(s_lastConnection.address.has_value())
+			CMD_connect(state,pl,std::vector<std::string>{s_lastConnection.address->first,std::to_string(s_lastConnection.address->second)});
+		else if(s_lastConnection.steamId.has_value())
+			CMD_connect(state,pl,std::vector<std::string>{std::to_string(*s_lastConnection.steamId)});
 		return;
 	}
 	if(argv.size() == 1)
@@ -75,6 +104,12 @@ DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,s
 			}
 			else
 				ip = address;
+		}
+		else if(address.find('.') == std::string::npos) // SteamId
+		{
+			auto steamId = util::to_int(address);
+			c_engine->Connect(steamId);
+			return;
 		}
 		else
 		{

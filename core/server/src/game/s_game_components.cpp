@@ -15,6 +15,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SAIComponent>("ai");
 	componentManager.RegisterComponentType<pragma::SCharacterComponent>("character");
 	componentManager.RegisterComponentType<pragma::SColorComponent>("color");
+	componentManager.RegisterComponentType<pragma::SScoreComponent>("score");
 	componentManager.RegisterComponentType<pragma::SFlammableComponent>("flammable");
 	componentManager.RegisterComponentType<pragma::SHealthComponent>("health");
 	componentManager.RegisterComponentType<pragma::SNameComponent>("name");

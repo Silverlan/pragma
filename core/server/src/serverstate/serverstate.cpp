@@ -10,13 +10,18 @@
 #include <pragma/audio/soundscript.h>
 #include "luasystem.h"
 #include "pragma/networking/local_server.hpp"
+#include "pragma/networking/recipient_filter.hpp"
+#include <pragma/game/gamemode/gamemodemanager.h>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/console/convars.h>
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
 #include "pragma/networking/networking_modules.hpp"
+#include "pragma/networking/master_server.hpp"
+#include <pragma/networking/game_server_data.hpp>
 #include <pragma/networking/error.hpp>
+#include <pragma/engine_version.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 
@@ -65,10 +70,10 @@ ServerState::~ServerState()
 	GetMaterialManager().ClearUnused();
 }
 
-void ServerState::InitializeGameServer()
+void ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 {
-	// TODO: Don't re-initialize server if local
 	m_server = nullptr;
+	m_serverReg = nullptr;
 
 	pragma::networking::ServerEventInterface eventInterface {};
 	eventInterface.onClientDropped = [this](pragma::networking::IServerClient &client,pragma::networking::DropReason reason) {
@@ -83,47 +88,108 @@ void ServerState::InitializeGameServer()
 	eventInterface.handlePacket = [this](pragma::networking::IServerClient &client,NetPacket &packet) {
 		HandlePacket(client,packet);
 	};
-#define USE_LOCAL_HOST 0
-#if USE_LOCAL_HOST != 1
-	auto netLibName = GetConVarString("net_library");
-	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,true);
-	std::string err;
-	auto dllHandle = InitializeLibrary(netModPath,&err);
-	if(dllHandle)
+
+	if(singlePlayerLocalGame == false)
 	{
-		auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IServer>&)>("initialize_game_server");
-		if(fInitNetLib != nullptr)
+		auto netLibName = GetConVarString("net_library");
+		auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,true);
+		auto port = GetConVarInt("sv_port_tcp");
+		auto usePeerToPeer = GetConVarBool("sv_use_p2p_if_available");
+		std::string err;
+		auto dllHandle = InitializeLibrary(netModPath,&err);
+		if(dllHandle)
 		{
-			fInitNetLib(*this,m_server);
-			if(m_server)
+			auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IServer>&)>("initialize_game_server");
+			if(fInitNetLib != nullptr)
 			{
-				m_server->SetEventInterface(eventInterface);
-				pragma::networking::Error err;
-				if(m_server->Start(err) == false)
+				fInitNetLib(*this,m_server);
+				if(m_server)
 				{
-					m_server = nullptr;
-					Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+					m_server->SetEventInterface(eventInterface);
+					pragma::networking::Error err;
+					if(m_server->Start(err,port,usePeerToPeer) == false)
+					{
+						m_server = nullptr;
+						m_serverReg = nullptr;
+						Con::cerr<<"ERROR: Unable to start "<<netLibName<<" server: "<<err.GetMessage()<<Con::endl;
+					}
 				}
 			}
+			else
+				Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
 		}
 		else
-			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_server' not found in module!"<<Con::endl;
+			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+
+		if(m_server)
+		{
+			std::string err;
+			auto hLib = InitializeLibrary("steamworks/pr_steamworks",&err);
+			if(hLib)
+			{
+				auto *game = static_cast<SGame*>(GetGameState());
+				auto *gameMode = game ? game->GetGameMode() : nullptr;
+				GameModeInfo;
+				pragma::networking::GameServerInfo serverInfo {};
+				serverInfo.port = port;
+				serverInfo.gameName = engine_info::get_name();
+				serverInfo.gameDirectory = serverInfo.gameName;
+				serverInfo.gameMode = gameMode ? gameMode->name : "";
+
+				// Note: This version has to match the version specified in steamworks
+				serverInfo.version = get_engine_version();
+
+				serverInfo.name = engine_info::get_name(); // Temporary name until actual server name has been set
+				serverInfo.maxPlayers = 0;
+				serverInfo.botCount = 0;
+				serverInfo.mapName = game ? game->GetMapName() : "";
+				serverInfo.passwordProtected = false;
+				serverInfo.networkLayerIdentifier = m_server->GetNetworkLayerIdentifier();
+				serverInfo.peer2peer = m_server->IsPeerToPeer();
+				serverInfo.steamId = m_server->GetSteamId();
+				m_serverReg = pragma::networking::MasterServerRegistration::Register(*hLib,serverInfo);
+				if(m_serverReg)
+				{
+					pragma::networking::MasterServerRegistration::CallbackEvents cbEvents {};
+					cbEvents.onAuthCompleted = [this](pragma::networking::MasterServerRegistration::SteamId steamId,bool authSuccess) {
+						if(m_server == nullptr)
+							return;
+						auto &clients = m_server->GetClients();
+						auto itCl = std::find_if(clients.begin(),clients.end(),[steamId](const std::shared_ptr<pragma::networking::IServerClient> &client) {
+							return client->GetSteamId() == steamId;
+							});
+						if(itCl == clients.end())
+							return;
+						OnClientAuthenticated(**itCl,authSuccess);
+					};
+					m_serverReg->SetCallbackEvents(cbEvents);
+				}
+			}
+			else
+				Con::cerr<<"ERROR: Steamworks module could not be loaded! Server will not show up in steam server browser!"<<Con::endl;
+		}
 	}
 	else
-		Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
-	if(m_server == nullptr)
-	{
-		ResetGameServer();
-		return;
-	}
-	//m_server->AddClient(m_localClient);
-#else
 	{
 		m_server = std::make_unique<pragma::networking::LocalServer>();
 		pragma::networking::Error err;
-		m_server->Start(err);
+		m_server->Start(err,0);
 	}
-#endif
+	if(m_server == nullptr)
+		ResetGameServer();
+}
+void ServerState::OnClientAuthenticated(pragma::networking::IServerClient &session,std::optional<bool> wasAuthenticationSuccessful)
+{
+	if(wasAuthenticationSuccessful.has_value() && wasAuthenticationSuccessful == false)
+	{
+		Con::cout<<"Authentication for client with steam id '"<<session.GetSteamId()<<"' has failed, dropping client..."<<Con::endl;
+		DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+		return;
+	}
+	NetPacket p;
+	unsigned int numResources = ResourceManager::GetResourceCount();
+	p->Write<unsigned int>(numResources);
+	SendPacket("start_resource_transfer",p,pragma::networking::Protocol::SlowReliable,session);
 }
 bool ServerState::ConnectLocalHostPlayerClient()
 {
@@ -181,11 +247,16 @@ void ServerState::Close()
 void ServerState::Think()
 {
 	NetworkState::Think();
-	if(m_server != nullptr && m_server->IsRunning())
+	if(m_server)
 	{
-		pragma::networking::Error err;
-		if(m_server->PollEvents(err) == false)
-			Con::cwar<<"WARNING: Server polling failed: "<<err.GetMessage()<<Con::endl;
+		if(m_server->IsRunning())
+		{
+			pragma::networking::Error err;
+			if(m_server->PollEvents(err) == false)
+				Con::cwar<<"WARNING: Server polling failed: "<<err.GetMessage()<<Con::endl;
+		}
+		if(m_serverReg)
+			m_serverReg->UpdateServerData();
 	}
 }
 
@@ -293,6 +364,13 @@ ConVar *ServerState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 	auto flags = cvar->GetFlags();
 	if(((flags &ConVarFlags::Replicated) == ConVarFlags::Replicated || (flags &ConVarFlags::Notify) == ConVarFlags::Notify))
 	{
+		auto *cl = engine->GetClientState();
+		if(cl != nullptr)
+		{
+			// This is a locally hosted game, just inform the client directly
+			engine->SetReplicatedConVar(scmd,cvar->GetString());
+			return cvar;
+		}
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());

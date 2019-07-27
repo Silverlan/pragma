@@ -4,6 +4,7 @@
 #include <pragma/networkstate/networkstate.h>
 #include "pragma/game/s_game.h"
 #include <pragma/input/inkeys.h>
+#include <pragma/networking/enums.hpp>
 #include <sharedutils/chronoutil.h>
 #include "wmserverdata.h"
 
@@ -16,7 +17,10 @@ namespace pragma
 	class SPlayerComponent;
 	namespace networking
 	{
-		class IServer; class IServerClient; class ClientRecipientFilter;
+		class IServer;
+		class IServerClient;
+		class ClientRecipientFilter;
+		class MasterServerRegistration;
 		enum class Protocol : uint8_t;
 	};
 };
@@ -38,6 +42,10 @@ private:
 	unsigned int m_conCommandID;
 	std::unique_ptr<pragma::networking::IServer> m_server = nullptr;
 	std::shared_ptr<pragma::networking::IServerClient> m_localClient = {};
+
+	// Handles the connection to the master server
+	std::unique_ptr<pragma::networking::MasterServerRegistration> m_serverReg = nullptr;
+
 	ChronoTimePoint m_tNextWMSConnect;
 	unsigned int m_alsoundID;
 
@@ -50,7 +58,7 @@ protected:
 	void ClearConCommands();
 	void OnMasterServerRegistered(bool b,std::string reason);
 	void RegisterServerInfo();
-	void InitializeGameServer();
+	void InitializeGameServer(bool singlePlayerLocalGame);
 	void ResetGameServer();
 	WMServerData m_serverData;
 public:
@@ -76,8 +84,13 @@ public:
 	virtual void StartGame() override;
 	virtual void LoadMap(const char *map,bool bDontReload=false) override;
 
+	void UpdatePlayerScore(pragma::SPlayerComponent &pl,int32_t score);
+	void UpdatePlayerName(pragma::SPlayerComponent &pl,const std::string &name);
+
 	virtual Lua::ErrorColorMode GetLuaErrorColorMode() override;
 	void OnClientConVarChanged(pragma::BasePlayerComponent &pl,std::string cvar,std::string value);
+	// if 'wasAuthenticationSuccessful' is not set, no authentication was required
+	void OnClientAuthenticated(pragma::networking::IServerClient &session,std::optional<bool> wasAuthenticationSuccessful);
 	pragma::SPlayerComponent *GetPlayer(const pragma::networking::IServerClient &session);
 
 	virtual bool IsMultiPlayer() const override;
@@ -124,8 +137,9 @@ public:
 	void SendPacket(const std::string &name,pragma::networking::Protocol protocol);
 
 	pragma::networking::IServer *GetServer();
+	pragma::networking::MasterServerRegistration *GetMasterServerRegistration();
 	bool IsServerRunning() const;
-	void DropClient(pragma::networking::IServerClient &session);
+	void DropClient(pragma::networking::IServerClient &session,pragma::networking::DropReason reason=pragma::networking::DropReason::Disconnected);
 };
 #pragma warning(pop)
 #endif

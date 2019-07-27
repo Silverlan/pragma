@@ -42,5 +42,6 @@ REGISTER_CONCOMMAND_SV(sv_debug_netmessages,CMD_sv_debug_netmessages,ConVarFlags
 
 REGISTER_CONVAR_SV(sv_port_tcp,"29150",ConVarFlags::Archive,"TCP port which will be used when starting a server.");
 REGISTER_CONVAR_SV(sv_port_udp,"29150",ConVarFlags::Archive,"UDP port which will be used when starting a server.");
+REGISTER_CONVAR_SV(sv_use_p2p_if_available,"1",ConVarFlags::Archive,"Use a peer-to-peer connection if the selected networking layer supports it.");
 
 #endif

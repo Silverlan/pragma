@@ -97,7 +97,7 @@ void Console::commands::cl_gpu_timer_queries_dump(NetworkState *state,pragma::Ba
 			auto result = stage.GetResult();
 			if(result && result->duration.has_value())
 			{
-				auto t = result->duration->count() /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count());
+				auto t = util::clock::to_milliseconds(*result->duration);
 				sTime = util::round_string(t,2) +" ms";
 				sTime += " (" +std::to_string(result->duration->count()) +" ns)";
 			}

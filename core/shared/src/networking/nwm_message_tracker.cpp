@@ -43,7 +43,7 @@ void pragma::networking::MessageTracker::MemorizeNetMessage(MessageType mt,uint3
 	msgInfo.id = id;
 	msgInfo.endpoint = ep;
 	msgInfo.packet = packet;
-	msgInfo.tp = std::chrono::high_resolution_clock::now();
+	msgInfo.tp = util::Clock::now();
 }
 
 void pragma::networking::MessageTracker::SetMemoryCount(uint32_t count)
@@ -85,7 +85,7 @@ void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileNa
 			f->Write<uint32_t>(msg.id);
 			auto msgName = (it != regMsgs.end()) ? it->first : "Unknown";
 			f->WriteString(msgName);
-			f->Write<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(msg.tp.time_since_epoch()).count());
+			f->Write<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(util::clock::get_duration_since_start(msg.tp)).count());
 			f->WriteString(msg.endpoint.GetIP());
 			f->Write<uint64_t>(msg.packet->GetSize());
 			f->Write(msg.packet->GetData(),msg.packet->GetSize());
@@ -95,7 +95,7 @@ void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileNa
 
 void pragma::networking::MessageTracker::DebugPrint(const std::unordered_map<std::string,uint32_t> &inMsgs,const std::unordered_map<std::string,uint32_t> &outMsgs)
 {
-	auto tNow = std::chrono::high_resolution_clock::now();
+	auto tNow = util::Clock::now();
 	for(auto type : {MessageType::Incoming,MessageType::Outgoing})
 	{
 		auto pair = GetTrackedMessages(type);

@@ -9,6 +9,7 @@
 #define PRAGMA_MODDING_HUB_URL "https://mods.pragma-engine.com/"
 #define PRAGMA_WIKI_URL "https://wiki.pragma-engine.com/"
 #define PRAGMA_PATREON_URL "https://www.patreon.com/pragma"
+#define PRAGMA_STEAM_APP_ID 947'100
 
 std::string engine_info::get_identifier()
 {
@@ -37,6 +38,7 @@ std::string engine_info::get_modding_hub_url() {return PRAGMA_MODDING_HUB_URL;}
 std::string engine_info::get_wiki_url() {return PRAGMA_WIKI_URL;}
 std::string engine_info::get_forums_url() {return PRAGMA_FORUMS_URL;}
 std::string engine_info::get_patreon_url() {return PRAGMA_PATREON_URL;}
+uint32_t engine_info::get_steam_app_id() {return PRAGMA_STEAM_APP_ID;}
 
 const std::vector<std::string> engine_info::get_supported_audio_formats()
 {

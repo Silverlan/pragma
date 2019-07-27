@@ -46,7 +46,8 @@ extern CGame *c_game;
 Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = GetEntity();
-	os<<"CPlayer["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameC = ent.GetNameComponent();
+	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
@@ -60,7 +61,8 @@ Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
 std::ostream& CPlayerComponent::print(std::ostream &os)
 {
 	auto &ent = GetEntity();
-	os<<"CPlayer["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameC = ent.GetNameComponent();
+	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
@@ -612,7 +614,6 @@ void CPlayerComponent::OnUnCrouch()
 void CPlayerComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePlayerComponent));}
 void CPlayerComponent::ReceiveData(NetPacket &packet)
 {
-	m_playerName = packet->ReadString();
 	m_timeConnected = packet->Read<double>();
 	auto hThis = GetHandle();
 	nwm::read_unique_entity(packet,[hThis,this](BaseEntity *ent) {

@@ -1527,12 +1527,13 @@ uint32_t CGame::GetLostPacketCount()
 	return static_cast<uint32_t>(m_lostPackets.size());
 }
 
+#include <pragma/physics/controller.hpp>
 void CGame::ReceiveSnapshot(NetPacket &packet)
 {
 	//Con::ccl<<"[CLIENT] Received snapshot.."<<Con::endl;
 	//auto tOld = m_tServer;
 	auto latency = GetLatency() /2.f; // Latency is entire roundtrip; We need the time for one way
-	auto tActivated = (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() -packet.GetTimeActivated()) /1'000'000.0;
+	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) -packet.GetTimeActivated()) /1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency +tActivated) /1'000.0);
 
@@ -1569,6 +1570,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			auto correctionVel = pos -posEnt;
 			auto l = uvec::length_sqr(correctionVel);
 #ifdef ENABLE_DEPRECATED_PHYSICS
+			// TODO: This should be enabled for bullet! -> Move into bullet module somehow?
 			if(l > maxCorrectionDistance)
 #endif
 			{
@@ -1576,6 +1578,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 					pTrComponent->SetPosition(pos); // Too far away, just snap into position
 			}
 #ifdef ENABLE_DEPRECATED_PHYSICS
+			// TODO: This should be enabled for bullet! -> Move into bullet module somehow?
 			else
 			{
 				auto *pPhysComponent = static_cast<pragma::CPhysicsComponent*>(ent->GetPhysicsComponent().get());

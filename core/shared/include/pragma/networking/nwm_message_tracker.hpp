@@ -3,9 +3,9 @@
 
 #include "pragma/networkdefinitions.h"
 #include <deque>
-#include <chrono>
 #include <mutex>
 #include <networkmanager/nwm_endpoint.h>
+#include <sharedutils/util_clock.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/scope_guard.h>
 
@@ -20,7 +20,7 @@ namespace pragma
 			{
 				NWMEndpoint endpoint;
 				NetPacket packet;
-				std::chrono::high_resolution_clock::time_point tp;
+				util::Clock::time_point tp;
 				uint32_t id = std::numeric_limits<uint32_t>::max();
 			};
 			enum class MessageType : uint8_t

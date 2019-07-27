@@ -27,6 +27,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/entities/components/c_name_component.hpp"
 #include <pragma/util/bulletinfo.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/collisionmasks.h>
@@ -295,6 +296,11 @@ util::WeakHandle<pragma::BaseTimeScaleComponent> CBaseEntity::GetTimeScaleCompon
 {
 	auto pComponent = GetComponent<pragma::CTimeScaleComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseTimeScaleComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseTimeScaleComponent>{};
+}
+util::WeakHandle<pragma::BaseNameComponent> CBaseEntity::GetNameComponent() const
+{
+	auto pComponent = GetComponent<pragma::CNameComponent>();
+	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseNameComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseNameComponent>{};
 }
 bool CBaseEntity::IsCharacter() const {return HasComponent<pragma::CCharacterComponent>();}
 bool CBaseEntity::IsPlayer() const {return HasComponent<pragma::CPlayerComponent>();}

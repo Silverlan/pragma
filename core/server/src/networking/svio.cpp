@@ -4,6 +4,7 @@
 #include "pragma/networking/netmessages.h"
 #include "pragma/networking/standard_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/master_server.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/error.hpp>
@@ -12,6 +13,7 @@
 extern DLLNETWORK ServerMessageMap *g_NetMessagesSv;
 
 pragma::networking::IServer *ServerState::GetServer() {return m_server.get();}
+pragma::networking::MasterServerRegistration *ServerState::GetMasterServerRegistration() {return m_serverReg.get();}
 bool ServerState::IsServerRunning() const {return m_server && m_server->IsRunning();}
 unsigned int ServerState::GetClientMessageID(std::string identifier)
 {
@@ -26,12 +28,35 @@ SVNetMessage *ServerState::GetNetMessage(unsigned int ID)
 	return map->GetNetMessage(ID);
 }
 
-void ServerState::DropClient(pragma::networking::IServerClient &session)
+void ServerState::UpdatePlayerScore(pragma::SPlayerComponent &pl,int32_t score)
+{
+	auto *reg = GetMasterServerRegistration();
+	auto *session = pl.GetClientSession();
+	if(reg == nullptr || session == nullptr)
+		return;
+	reg->SetClientScore(session->GetSteamId(),score);
+}
+
+void ServerState::UpdatePlayerName(pragma::SPlayerComponent &pl,const std::string &name)
+{
+	auto *reg = GetMasterServerRegistration();
+	auto *session = pl.GetClientSession();
+	if(reg == nullptr || session == nullptr)
+		return;
+	reg->SetClientName(session->GetSteamId(),name);
+}
+
+void ServerState::DropClient(pragma::networking::IServerClient &session,pragma::networking::DropReason reason)
 {
 	auto *pl = session.GetPlayer();
 	session.ClearResourceTransfer();
+
+	auto *reg = GetMasterServerRegistration();
+	if(reg)
+		reg->DropClient(session.GetSteamId());
+
 	pragma::networking::Error err;
-	if(session.Drop(pragma::networking::DropReason::Disconnected,err) == false)
+	if(session.Drop(reason,err) == false)
 		Con::cwar<<"WARNING: An error has occurred trying to drop client: '"<<err.GetMessage()<<"'!"<<Con::endl;
 	if(pl == nullptr)
 		return;

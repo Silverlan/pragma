@@ -29,6 +29,7 @@ ComponentEventId BasePhysicsComponent::EVENT_ON_SLEEP = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_WAKE = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_HANDLE_RAYCAST = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS = INVALID_COMPONENT_ID;
+#pragma optimize("",off)
 void BasePhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	auto componentType = std::type_index(typeid(BasePhysicsComponent));
@@ -973,3 +974,4 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(physicsType));
 	Lua::PushInt(l,umath::to_integral(flags));
 }
+#pragma optimize("",on)

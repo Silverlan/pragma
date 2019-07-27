@@ -14,7 +14,9 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include "pragma/networking/master_server.hpp"
 #include <pragma/networking/enums.hpp>
+#include <pragma/networking/error.hpp>
 #include <pragma/debug/debugbehaviortree.h>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
@@ -22,6 +24,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <sharedutils/util_library.hpp>
 
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
@@ -164,17 +167,60 @@ DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &sess
 	}
 	NetPacket p;
 	auto *sv = server->GetServer();
-	if(sv && sv->GetLocalUDPPort().has_value())
+	if(sv && sv->GetHostPort().has_value())
 	{
-		auto port = sv->GetLocalUDPPort();
+		auto port = sv->GetHostPort();
 		p->Write<unsigned char>(1);
 		p->Write<unsigned short>(*port);
 	}
 	else
 		p->Write<unsigned char>((unsigned char)(0));
-	unsigned int numResources = ResourceManager::GetResourceCount();
-	p->Write<unsigned int>(numResources);
+
+	p->Write<bool>(server->GetConVarBool("sv_require_authentication"));
 	server->SendPacket("serverinfo",p,pragma::networking::Protocol::SlowReliable,session);
+}
+
+DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session,NetPacket packet)
+{
+	auto hasAuth = packet->Read<bool>();
+	if(server->GetConVarBool("sv_require_authentication"))
+	{
+		if(hasAuth == false)
+		{
+			Con::cerr<<"ERROR: Unable to authenticate client '"<<session.GetIdentifier()<<"': Client did not transmit authentication information!"<<Con::endl;
+			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+			return;
+		}
+		auto *reg = server->GetMasterServerRegistration();
+		if(reg == nullptr)
+		{
+			Con::cerr<<"ERROR: Unable to authenticate client '"<<session.GetIdentifier()<<"': Server is not connected to master server!"<<Con::endl;
+			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+			return;
+		}
+		auto steamId = packet->Read<uint64_t>();
+		auto lenToken = packet->Read<uint16_t>();
+		std::vector<char> token;
+		token.resize(lenToken);
+		packet->Read(token.data(),token.size() *sizeof(token.front()));
+
+		std::string err;
+		auto libSteamworks = server->InitializeLibrary("steamworks/pr_steamworks",&err);
+		if(libSteamworks == nullptr)
+		{
+			Con::cerr<<"ERROR: Unable to authenticate client with steam id '"<<steamId<<"': Steamworks module could not be loaded: "<<err<<Con::endl;
+			server->DropClient(session,pragma::networking::DropReason::AuthenticationFailed);
+			reg->DropClient(steamId);
+			return;
+		}
+		session.SetSteamId(steamId);
+		// Authentication will end with 'OnClientAuthenticated' callback,
+		// which will handle the rest
+		reg->AuthenticateAndAddClient(steamId,token,"Player");
+		return;
+	}
+	// No authentication required; Continue immediately
+	server->OnClientAuthenticated(session,{});
 }
 
 DLLSERVER void NET_sv_cvar_set(pragma::networking::IServerClient &session,NetPacket packet)

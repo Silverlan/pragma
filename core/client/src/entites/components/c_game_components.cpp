@@ -14,6 +14,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CAIComponent>("ai");
 	componentManager.RegisterComponentType<pragma::CCharacterComponent>("character");
 	componentManager.RegisterComponentType<pragma::CColorComponent>("color");
+	componentManager.RegisterComponentType<pragma::CScoreComponent>("score");
 	componentManager.RegisterComponentType<pragma::CFlammableComponent>("flammable");
 	componentManager.RegisterComponentType<pragma::CHealthComponent>("health");
 	componentManager.RegisterComponentType<pragma::CNameComponent>("name");

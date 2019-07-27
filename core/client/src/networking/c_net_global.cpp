@@ -46,6 +46,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 DLLCLIENT void NET_cl_serverinfo(NetPacket packet) {client->HandleClientReceiveServerInfo(packet);}
+DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) {client->HandleClientStartResourceTransfer(packet);}
 
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 CBaseEntity *NET_cl_ent_create(NetPacket &packet,bool bSpawn,bool bIgnoreMapInit=false)
@@ -595,12 +596,7 @@ DLLCLIENT void NET_cl_cvar_set(NetPacket packet)
 {
 	std::string cvar = packet->ReadString();
 	std::string val = packet->ReadString();
-	auto flags = client->GetConVarFlags(cvar);
-	if((flags &ConVarFlags::Notify) == ConVarFlags::Notify)
-		Con::cout<<"ConVar '"<<cvar<<"' has been changed to '"<<val<<"'"<<Con::endl;
-	if((flags &ConVarFlags::Replicated) == ConVarFlags::None)
-		return;
-	client->SetConVar(cvar,val);
+	c_engine->SetReplicatedConVar(cvar,val);
 }
 
 DLLCLIENT void NET_cl_luacmd_reg(NetPacket packet)
@@ -756,7 +752,9 @@ void NET_cl_pl_changedname(NetPacket packet)
 	if(pl == nullptr)
 		return;
 	auto name = packet->ReadString();
-	pl->SetPlayerName(name);
+	auto nameC = pl->GetEntity().GetNameComponent();
+	if(nameC.valid())
+		nameC->SetName(name);
 }
 
 DLLCLIENT void NET_cl_wep_deploy(NetPacket packet)

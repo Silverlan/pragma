@@ -27,6 +27,7 @@
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_health_component.hpp"
+#include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/baseplayer.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -220,7 +221,8 @@ bool BasePlayerComponent::IsSprinting() const {return (!IsWalking() && GetAction
 Con::c_cout& BasePlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = GetEntity();
-	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameComponent = ent.GetNameComponent();
+	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
@@ -234,7 +236,8 @@ Con::c_cout& BasePlayerComponent::print(Con::c_cout &os)
 std::ostream& BasePlayerComponent::print(std::ostream &os)
 {
 	auto &ent = GetEntity();
-	os<<"Player["<<GetPlayerName()<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
+	auto nameComponent = ent.GetNameComponent();
+	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
@@ -249,7 +252,6 @@ extern DLLENGINE Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_portUDP(0),
-	m_playerName(""),
 	m_speedWalk(63.33f),
 	m_speedRun(190),
 	m_speedSprint(320),
@@ -293,6 +295,8 @@ void BasePlayerComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent("character");
+	ent.AddComponent("name");
+	ent.AddComponent("score");
 	m_hBasePlayer = ent.GetHandle();
 
 	BindEvent(BaseCharacterComponent::EVENT_CALC_MOVEMENT_SPEED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -513,11 +517,6 @@ void BasePlayerComponent::SetLocalPlayer(bool b) {m_bLocalPlayer = b;}
 
 unsigned short BasePlayerComponent::GetUDPPort() const {return m_portUDP;}
 
-void BasePlayerComponent::SetPlayerName(std::string name)
-{
-	m_playerName = name;
-}
-
 std::string BasePlayerComponent::GetClientIP() {return "[::]:0";}
 unsigned short BasePlayerComponent::GetClientPort() {return 0;}
 
@@ -581,8 +580,6 @@ bool BasePlayerComponent::GetConVarBool(std::string cvar) const
 double BasePlayerComponent::TimeConnected() const {return GetEntity().GetNetworkState()->RealTime() -m_timeConnected;}
 
 double BasePlayerComponent::ConnectionTime() const {return m_timeConnected;}
-
-std::string BasePlayerComponent::GetPlayerName() const {return m_playerName;}
 
 void BasePlayerComponent::SetObserverMode(OBSERVERMODE mode)
 {

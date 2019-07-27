@@ -194,7 +194,8 @@ DLLCLIENT void CMD_status_cl(NetworkState*,pragma::BasePlayerComponent*,std::vec
 	auto i = 0u;
 	for(auto *plComponent : players)
 	{
-		Con::cout<<"# \t"<<i<<"\t"<<"\""<<plComponent->GetPlayerName()<<"\""<<"\t"<<FormatTime(plComponent->TimeConnected())<<"     \t";
+		auto nameC = plComponent->GetEntity().GetNameComponent();
+		Con::cout<<"# \t"<<i<<"\t"<<"\""<<(nameC.valid() ? nameC->GetName() : "")<<"\""<<"\t"<<FormatTime(plComponent->TimeConnected())<<"     \t";
 		if(plComponent->IsLocalPlayer() == true)
 			Con::cout<<cl->GetLatency();
 		else

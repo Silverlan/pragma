@@ -53,6 +53,10 @@ namespace pragma::networking
 		void Reset();
 		void ScheduleResource(const std::string &fileName);
 		std::vector<std::string> &GetScheduledResources();
+
+		// TODO: These don't really belong here
+		void SetSteamId(uint64_t steamId);
+		uint64_t GetSteamId() const;
 	protected:
 		IServerClient()=default;
 	private:
@@ -63,6 +67,9 @@ namespace pragma::networking
 
 		uint8_t m_snapshotId = 0;
 		std::vector<std::string> m_scheduledResources; // Scheduled resource files for download
+
+		// TODO: Move this somewhere else?
+		uint64_t m_steamId = 0;
 	};
 };
 

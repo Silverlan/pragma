@@ -3,6 +3,7 @@
 #include "pragma/networking/c_net_definitions.h"
 
 DECLARE_NETMESSAGE_CL(serverinfo);
+DECLARE_NETMESSAGE_CL(start_resource_transfer);
 
 DECLARE_NETMESSAGE_CL(snd_ev);
 DECLARE_NETMESSAGE_CL(snd_create);

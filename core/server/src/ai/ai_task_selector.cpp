@@ -1,6 +1,7 @@
 #include "stdafx_server.h"
 #include "pragma/ai/ai_behavior.h"
 #include <random>
+#include <sharedutils/util_clock.hpp>
 
 using namespace pragma;
 
@@ -34,5 +35,5 @@ void ai::TaskSelectorRandomShuffle::Reset(uint32_t taskCount)
 	m_tasks.resize(taskCount);
 	for(auto i=decltype(taskCount){0};i<taskCount;++i)
 		m_tasks[i] = i;
-	std::shuffle(m_tasks.begin(),m_tasks.end(),std::default_random_engine(static_cast<uint32_t>(std::chrono::system_clock::now().time_since_epoch().count())));
+	std::shuffle(m_tasks.begin(),m_tasks.end(),std::default_random_engine(util::clock::to_int(util::clock::get_duration_since_start())));
 }

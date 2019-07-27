@@ -3,6 +3,7 @@
 
 #include "pragma/definitions.h"
 #include <mathutil/umath.h>
+#include <sharedutils/util_clock.hpp>
 #include <optional>
 #include <memory>
 #include <unordered_map>
@@ -121,8 +122,8 @@ namespace pragma
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 		private:
 			CPUTimer()=default;
-			std::chrono::high_resolution_clock::time_point m_startTime = {};
-			std::chrono::high_resolution_clock::time_point m_stopTime = {};
+			util::Clock::time_point m_startTime = {};
+			util::Clock::time_point m_stopTime = {};
 		};
 
 		class DLLENGINE CPUProfiler

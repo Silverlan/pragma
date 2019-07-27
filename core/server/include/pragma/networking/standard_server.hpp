@@ -67,12 +67,11 @@ namespace pragma::networking
 	public:
 		virtual bool Heartbeat() override;
 		virtual std::optional<std::string> GetHostIP() const override;
-		virtual std::optional<Port> GetLocalTCPPort() const override;
-		virtual std::optional<Port> GetLocalUDPPort() const override;
+		virtual std::optional<Port> GetHostPort() const override;
 		virtual bool PollEvents(Error &outErr) override;
 		virtual void SetTimeoutDuration(float duration) override;
 	protected:
-		virtual bool DoStart(Error &outErr) override;
+		virtual bool DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable=false) override;
 		virtual bool DoShutdown(Error &outErr) override;
 	private:
 		std::unique_ptr<NWMActiveServer> m_server = nullptr;

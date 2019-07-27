@@ -89,13 +89,11 @@ namespace pragma
 
 		void SetUDPPort(unsigned short port);
 		unsigned short GetUDPPort() const;
-		void SetPlayerName(std::string name);
 		bool IsLocalPlayer() const;
 		virtual void SetLocalPlayer(bool b);
 		virtual bool IsKeyDown(int key);
 		virtual std::string GetClientIP();
 		virtual unsigned short GetClientPort();
-		std::string GetPlayerName() const;
 		double ConnectionTime() const;
 		double TimeConnected() const;
 		virtual void PrintMessage(std::string message,MESSAGE type)=0;
@@ -148,7 +146,6 @@ namespace pragma
 		pragma::NetEventId m_netEvRespawn = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetViewOrientation = pragma::INVALID_NET_EVENT;
 
-		std::string m_playerName;
 		double m_timeConnected;
 		bool m_bForceAnimationUpdate = false;
 		float m_standHeight;

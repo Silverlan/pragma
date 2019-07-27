@@ -128,10 +128,10 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 
 							// Write Minidump
 							VFilePtrReal f = nullptr;
-							auto t = std::chrono::high_resolution_clock::now();
+							auto t = util::Clock::now();
 							while(f == nullptr) // Wait until dump has been written
 							{
-								auto tNow = std::chrono::high_resolution_clock::now();
+								auto tNow = util::Clock::now();
 								auto tDelta = std::chrono::duration_cast<std::chrono::seconds>(tNow -t).count();
 								if(tDelta >= 4) // Don't wait more than 4 seconds
 									break;

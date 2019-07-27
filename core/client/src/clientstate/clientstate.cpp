@@ -124,48 +124,44 @@ ClientState::~ClientState()
 	FileManager::RemoveCustomMountDirectory("downloads");
 }
 
-void ClientState::InitializeGameClient()
+void ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 {
-	// TODO: Don't re-initialize client if local
-	m_client = nullptr;
+	DestroyClient();
 
 	pragma::networking::ClientEventInterface eventInterface {};
 	eventInterface.onConnected = [this]() {
-		Con::cerr<<"OnConnected..."<<Con::endl;
 		HandleConnect();
 	};
 	eventInterface.onDisconnected = []() {
-		Con::cerr<<"OnDisconnected..."<<Con::endl;
 	};
 	eventInterface.onConnectionClosed = []() {
-		Con::cerr<<"OnConnectionClosed..."<<Con::endl;
 	};
 	//eventInterface.onPacketSent = [](pragma::networking::Protocol protocol,NetPacket &packet) {
 	//};
 	eventInterface.handlePacket = [this](NetPacket &packet) {
 		HandlePacket(packet);
 	};
-#define USE_LOCAL_HOST 0
-#if USE_LOCAL_HOST != 1
-	auto netLibName = GetConVarString("net_library");
-	auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,false);
-	std::string err;
-	auto dllHandle = InitializeLibrary(netModPath,&err);
-	if(dllHandle)
+	if(singlePlayerLocalGame == false)
 	{
-		auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IClient>&)>("initialize_game_client");
-		if(fInitNetLib != nullptr)
-			fInitNetLib(*this,m_client);
+		auto netLibName = GetConVarString("net_library");
+		auto netModPath = pragma::networking::GetNetworkingModuleLocation(netLibName,false);
+		std::string err;
+		auto dllHandle = InitializeLibrary(netModPath,&err);
+		if(dllHandle)
+		{
+			auto *fInitNetLib = dllHandle->FindSymbolAddress<void(*)(NetworkState&,std::unique_ptr<pragma::networking::IClient>&)>("initialize_game_client");
+			if(fInitNetLib != nullptr)
+				fInitNetLib(*this,m_client);
+			else
+				Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_client' not found in module!"<<Con::endl;
+		}
 		else
-			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': Function 'initialize_game_client' not found in module!"<<Con::endl;
+			Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
+		if(m_client == nullptr)
+			ResetGameClient();
 	}
 	else
-		Con::cerr<<"ERROR: Unable to initialize networking system '"<<netLibName<<"': "<<err<<Con::endl;
-	if(m_client == nullptr)
-		ResetGameClient();
-#else
-	m_client = std::make_unique<pragma::networking::LocalClient>();
-#endif
+		m_client = std::make_unique<pragma::networking::LocalClient>();
 	if(m_client)
 		m_client->SetEventInterface(eventInterface);
 }
@@ -528,8 +524,14 @@ void ClientState::Disconnect()
 		pragma::networking::Error err;
 		if(m_client->Disconnect(err) == false)
 			Con::cwar<<"WARNING: Unable to disconnect from server: "<<err.GetMessage()<<Con::endl;
-		m_client = nullptr;
+		DestroyClient();
 	}
+}
+
+void ClientState::DestroyClient()
+{
+	m_client = nullptr;
+	m_svInfo = nullptr;
 }
 
 bool ClientState::IsConnected() const {return (m_client != nullptr) ? true : false;}
@@ -567,7 +569,17 @@ void ClientState::SendUserInfo()
 	}
 	else
 		packet->Write<unsigned char>((unsigned char)(0));
-	packet->WriteString(GetConVarString("playername"));
+
+	auto name = GetConVarString("playername");
+	auto libSteamworks = GetLibraryModule("steamworks/pr_steamworks");
+	if(libSteamworks)
+	{
+		auto *fGetClientName = libSteamworks->FindSymbolAddress<void(*)(std::string&)>("pr_steamworks_get_client_steam_name");
+		if(fGetClientName)
+			fGetClientName(name);
+	}
+	// TODO: Allow client to override steam user name?
+	packet->WriteString(name);
 
 	auto &convars = client->GetConVars();
 	unsigned int numUserInfo = 0;

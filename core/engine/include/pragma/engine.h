@@ -161,6 +161,8 @@ public:
 	void CloseServerState();
 	void StartServer();
 	void CloseServer();
+	// Returns the steam id of the active listen server
+	std::optional<uint64_t> GetServerSteamId() const;
 	virtual void LoadMap(const char *map);
 	// Config
 	bool ExecConfig(const std::string &cfg);
@@ -175,6 +177,9 @@ public:
 	int32_t GetRemoteDebugging() const;
 
 	void ShutDown();
+
+	// For internal use only
+	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
 protected:
 	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
 	void WriteServerConfig(VFilePtrReal f);

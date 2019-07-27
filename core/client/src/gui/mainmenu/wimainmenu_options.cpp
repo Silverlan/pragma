@@ -25,6 +25,7 @@
 #include <rapidxml_print.hpp>
 #include <alsoundsystem.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
 
@@ -353,7 +354,7 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 {
 	if(IsVisible() == false)
 		return;
-	auto t = std::chrono::high_resolution_clock::now();
+	auto t = util::Clock::now();
 	if(std::chrono::duration_cast<std::chrono::seconds>(t -m_tLastMemoryUsageUpdate).count() < 1)
 		return;
 	m_tLastMemoryUsageUpdate = t;

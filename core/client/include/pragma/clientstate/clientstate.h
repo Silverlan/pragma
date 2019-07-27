@@ -22,6 +22,11 @@ public:
 	~ServerInfo();
 	std::string address;
 	unsigned short portUDP;
+
+	// Only used if server authentication is enabled.
+	// Must be kept alive for the entire duration of the connection to the server!
+	std::shared_ptr<void> authTokenHandle;
+
 	const std::string &GetDownloadPath() const;
 	void SetDownloadPath(const std::string &path);
 };
@@ -113,8 +118,9 @@ protected:
 	
 	virtual void InitializeResourceManager() override;
 	void StartResourceTransfer();
-	void InitializeGameClient();
+	void InitializeGameClient(bool singlePlayerLocalGame);
 	void ResetGameClient();
+	void DestroyClient();
 
 	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
 public:
@@ -163,6 +169,8 @@ public:
 	ConVar *SetConVar(std::string scmd,std::string value,bool bApplyIfEqual=false);
 	// Sockets
 	void Connect(std::string ip,std::string port=sci::DEFAULT_PORT_TCP);
+	// Peer-to-peer only!
+	void Connect(uint64_t steamId);
 	CLNetMessage *GetNetMessage(unsigned int ID);
 	ClientMessageMap *GetNetMessageMap();
 	void SendUserInfo();
@@ -210,6 +218,7 @@ public:
 	void HandleReceiveGameInfo(NetPacket &packet);
 	void RequestServerInfo();
 
+	void HandleClientStartResourceTransfer(NetPacket &packet);
 	void HandleClientReceiveServerInfo(NetPacket &packet);
 	void HandleClientResource(NetPacket &packet);
 	void HandleClientResourceFragment(NetPacket &packet);

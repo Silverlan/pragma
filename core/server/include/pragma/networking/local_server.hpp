@@ -14,9 +14,11 @@ namespace pragma::networking
 		virtual bool PollEvents(Error &outErr) override;
 		virtual bool Heartbeat() override;
 		virtual void SetTimeoutDuration(float duration) override;
+		virtual bool IsPeerToPeer() const override {return false;}
+		virtual std::string GetNetworkLayerIdentifier() const override {return "local";}
 	protected:
 		virtual bool DoShutdown(Error &outErr) override;
-		virtual bool DoStart(Error &outErr) override;
+		virtual bool DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable=false) override;
 	};
 
 	class DLLSERVER LocalServerClient

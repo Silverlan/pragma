@@ -30,9 +30,9 @@ void pragma::networking::IServer::AddClient(const std::shared_ptr<IServerClient>
 	if(m_eventInterface.onClientConnected)
 		m_eventInterface.onClientConnected(*client);
 }
-bool pragma::networking::IServer::Start(Error &outErr)
+bool pragma::networking::IServer::Start(Error &outErr,uint16_t port,bool useP2PIfAvailable)
 {
-	auto result = DoStart(outErr);
+	auto result = DoStart(outErr,port,useP2PIfAvailable);
 	if(result)
 		m_bRunning = true;
 	return result;

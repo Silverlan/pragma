@@ -66,6 +66,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(strOption);
 		}
 	});
+	map.RegisterConVar("sv_require_authentication","1",ConVarFlags::Archive | ConVarFlags::Replicated,"If enabled, clients will have to authenticate via steam to join the server.");
 }
 
 void Engine::RegisterConsoleCommands()

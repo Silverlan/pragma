@@ -179,7 +179,7 @@ namespace pragma::physics
 		virtual float GetMass() const=0;
 		virtual void SetMass(float mass)=0;
 		virtual Vector3 GetCenterOfMass() const=0;
-		virtual Vector3 &GetInertia()=0;
+		virtual Vector3 GetInertia()=0;
 		virtual Mat3 GetInvInertiaTensorWorld() const=0;
 		virtual void SetInertia(const Vector3 &inertia)=0;
 		virtual Vector3 GetLinearVelocity() const=0;

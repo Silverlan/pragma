@@ -248,7 +248,7 @@ void ServerState::ReceiveUserInput(pragma::networking::IServerClient &client,Net
 	if(pl == nullptr)
 		return;
 	auto latency = client.GetLatency() /2.f; // Latency is entire roundtrip; We need the time for one way
-	auto tActivated = (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() -packet.GetTimeActivated()) /1'000'000.0;
+	auto tActivated = (util::clock::to_int(util::clock::get_duration_since_start()) -packet.GetTimeActivated()) /1'000'000.0;
 	//Con::ccl<<"Snapshot delay: "<<+latency<<"+ "<<tActivated<<" = "<<(latency +tActivated)<<Con::endl;
 	auto tDelta = static_cast<float>((latency +tActivated) /1'000.0);
 

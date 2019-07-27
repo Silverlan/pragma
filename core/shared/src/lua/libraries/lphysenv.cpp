@@ -14,6 +14,7 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/vehicle.hpp"
+#include "pragma/physics/controller.hpp"
 #include "pragma/physics/ik/util_ik.hpp"
 #include "pragma/buss_ik/Tree.h"
 #include "pragma/buss_ik/Jacobian.h"
@@ -52,6 +53,8 @@ namespace Lua
 		static int create_DoF_constraint(lua_State *l);
 		static int create_dof_spring_constraint(lua_State *l);
 		static int create_surface_material(lua_State *l);
+		static int create_box_controller(lua_State *l);
+		static int create_capsule_controller(lua_State *l);
 		static int create_material(lua_State *l);
 		static int create_ghost_object(lua_State *l);
 		static int create_plane(lua_State *l);
@@ -108,6 +111,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		{"create_dof_spring_constraint",create_dof_spring_constraint},
 		{"create_surface_material",create_surface_material},
 		{"create_material",create_material},
+		{"create_box_controller",create_box_controller},
+		{"create_capsule_controller",create_capsule_controller},
 		{"create_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto *state = engine->GetNetworkState(l);
 			auto *game = state->GetGameState();
@@ -198,6 +203,174 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto classBase = luabind::class_<pragma::physics::IBase>("Base");
 	physMod[classBase];
 
+	auto classDefCon = luabind::class_<pragma::physics::IController,pragma::physics::IBase>("Controller");
+	classDefCon.def("IsValid",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		Lua::PushBool(l,hPhys != nullptr);
+	}));
+	classDefCon.def("Remove",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->ClaimOwnership().Remove();
+	}));
+	classDefCon.def("Spawn",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->Spawn();
+	}));
+	classDefCon.def("Move",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &disp) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto v = disp;
+		hPhys->Move(v);
+	}));
+	classDefCon.def("GetCollisionFlags",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::PushInt(l,umath::to_integral(hPhys->GetCollisionFlags()));
+	}));
+	classDefCon.def("GetGroundShape",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto *groundShape = hPhys->GetGroundShape();
+		if(groundShape == nullptr)
+			return;
+		groundShape->Push(l);
+	}));
+	classDefCon.def("GetGroundBody",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto *groundBody = hPhys->GetGroundBody();
+		if(groundBody == nullptr)
+			return;
+		groundBody->Push(l);
+	}));
+	classDefCon.def("GetGroundMaterial",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto *groundMat = hPhys->GetGroundMaterial();
+		if(groundMat == nullptr)
+			return;
+		groundMat->Push(l);
+	}));
+	classDefCon.def("IsTouchingGround",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::PushBool(l,hPhys->IsTouchingGround());
+	}));
+	classDefCon.def("GetGroundTouchPos",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto touchPos = hPhys->GetGroundTouchPos();
+		if(touchPos.has_value() == false)
+			return;
+		Lua::Push<Vector3>(l,*touchPos);
+	}));
+	classDefCon.def("GetGroundTouchNormal",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto touchNormal = hPhys->GetGroundTouchNormal();
+		if(touchNormal.has_value() == false)
+			return;
+		Lua::Push<Vector3>(l,*touchNormal);
+	}));
+	classDefCon.def("GetDimensions",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetDimensions());
+	}));
+	classDefCon.def("GetPos",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetPos());
+	}));
+	classDefCon.def("GetFootPos",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetFootPos());
+	}));
+	classDefCon.def("GetUpDirection",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetUpDirection());
+	}));
+	classDefCon.def("GetMoveVelocity",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::Push<Vector3>(l,hPhys->GetMoveVelocity());
+	}));
+	classDefCon.def("GetSlopeLimit",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::PushNumber(l,hPhys->GetSlopeLimit());
+	}));
+	classDefCon.def("GetStepHeight",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		Lua::PushNumber(l,hPhys->GetStepHeight());
+	}));
+	classDefCon.def("GetCollisionObject",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto *colObj = hPhys->GetCollisionObject();
+		if(colObj == nullptr)
+			return;
+		colObj->Push(l);
+	}));
+	classDefCon.def("GetShape",static_cast<void(*)(lua_State*,pragma::physics::IController*)>([](lua_State *l,pragma::physics::IController *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		auto *shape = hPhys->GetShape();
+		if(shape == nullptr)
+			return;
+		shape->Push(l);
+	}));
+	classDefCon.def("SetDimensions",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &dims) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetDimensions(dims);
+	}));
+	classDefCon.def("SetPos",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &pos) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetPos(pos);
+	}));
+	classDefCon.def("SetFootPos",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &pos) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetFootPos(pos);
+	}));
+	classDefCon.def("SetUpDirection",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &up) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetUpDirection(up);
+	}));
+	classDefCon.def("SetMoveVelocity",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &vel) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetMoveVelocity(vel);
+	}));
+	classDefCon.def("AddMoveVelocity",static_cast<void(*)(lua_State*,pragma::physics::IController*,const Vector3&)>([](lua_State *l,pragma::physics::IController *hPhys,const Vector3 &vel) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->AddMoveVelocity(vel);
+	}));
+	classDefCon.def("Resize",static_cast<void(*)(lua_State*,pragma::physics::IController*,float)>([](lua_State *l,pragma::physics::IController *hPhys,float newHeight) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->Resize(newHeight);
+	}));
+	classDefCon.def("SetSlopeLimit",static_cast<void(*)(lua_State*,pragma::physics::IController*,float)>([](lua_State *l,pragma::physics::IController *hPhys,float slopeLimit) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetSlopeLimit(slopeLimit);
+	}));
+	classDefCon.def("SetStepHeight",static_cast<void(*)(lua_State*,pragma::physics::IController*,float)>([](lua_State *l,pragma::physics::IController *hPhys,float stepHeight) {
+		if(Lua::CheckHandle<pragma::physics::IController>(l,hPhys) == false)
+			return;
+		hPhys->SetStepHeight(stepHeight);
+	}));
+	physMod[classDefCon];
+
 	auto classDefVhc = luabind::class_<pragma::physics::IVehicle,pragma::physics::IBase>("Vehicle");
 	classDefVhc.add_static_constant("GEAR_REVERSE",umath::to_integral(pragma::physics::IVehicle::Gear::Reverse));
 	classDefVhc.add_static_constant("GEAR_NEUTRAL",umath::to_integral(pragma::physics::IVehicle::Gear::Neutral));
@@ -234,6 +407,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefVhc.add_static_constant("GEAR_COUNT",umath::to_integral(pragma::physics::IVehicle::Gear::Count));
 	classDefVhc.def("IsValid",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
 		Lua::PushBool(l,hPhys != nullptr);
+	}));
+	classDefVhc.def("Remove",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
+			return;
+		hPhys->ClaimOwnership().Remove();
 	}));
 	classDefVhc.def("GetCollisionObject",static_cast<void(*)(lua_State*,pragma::physics::IVehicle*)>([](lua_State *l,pragma::physics::IVehicle *hPhys) {
 		if(Lua::CheckHandle<pragma::physics::IVehicle>(l,hPhys) == false)
@@ -1572,6 +1750,52 @@ int Lua::physenv::create_surface_material(lua_State *l)
 	auto *game = state->GetGameState();
 	auto &mat = game->CreateSurfaceMaterial(name,CFloat(friction),CFloat(restitution));
 	Lua::Push<SurfaceMaterial*>(l,&mat);
+	return 1;
+}
+
+int Lua::physenv::create_box_controller(lua_State *l)
+{
+	auto *state = engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
+	auto argIdx = 1;
+	auto &halfExtents = Lua::Check<Vector3>(l,argIdx++);
+	auto stepHeight = Lua::CheckNumber(l,argIdx++);
+	auto slopeLimit = 45.f;
+	pragma::physics::Transform startTransform = {};
+	if(Lua::IsSet(l,argIdx))
+		slopeLimit = Lua::CheckNumber(l,argIdx++);
+	if(Lua::IsSet(l,argIdx))
+		startTransform = Lua::Check<pragma::physics::Transform>(l,argIdx++);
+	auto controller = env->CreateBoxController(halfExtents,stepHeight,slopeLimit,startTransform);
+	if(controller == nullptr)
+		return 0;
+	controller->Push(l);
+	return 1;
+}
+int Lua::physenv::create_capsule_controller(lua_State *l)
+{
+	auto *state = engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *env = game->GetPhysicsEnvironment();
+	if(env == nullptr)
+		return 0;
+	auto argIdx = 1;
+	auto halfWidth = Lua::CheckNumber(l,argIdx++);
+	auto halfHeight = Lua::CheckNumber(l,argIdx++);
+	auto stepHeight = Lua::CheckNumber(l,argIdx++);
+	auto slopeLimit = 45.f;
+	pragma::physics::Transform startTransform = {};
+	if(Lua::IsSet(l,argIdx))
+		slopeLimit = Lua::CheckNumber(l,argIdx++);
+	if(Lua::IsSet(l,argIdx))
+		startTransform = Lua::Check<pragma::physics::Transform>(l,argIdx++);
+	auto controller = env->CreateCapsuleController(halfWidth,halfHeight,stepHeight,slopeLimit,startTransform);
+	if(controller == nullptr)
+		return 0;
+	controller->Push(l);
 	return 1;
 }
 

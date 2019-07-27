@@ -6,6 +6,7 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/networking/iclient.hpp"
 #include <sharedutils/util_string.h>
+#include <sharedutils/util_library.hpp>
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/c_world.h"
 #include <pragma/networking/enums.hpp>
@@ -61,10 +62,53 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 	}
 	else
 		m_svInfo->address = "[::1]";
+
 	if(packet->Read<unsigned char>() == 1)
 		m_svInfo->portUDP = packet->Read<unsigned short>();
 	else m_svInfo->portUDP = 0;
 
+	auto authRequired = packet->Read<bool>();
+	NetPacket outAuthPacket {};
+	outAuthPacket->Write<bool>(authRequired);
+	if(authRequired)
+	{
+		// Authentication requires steamworks
+		std::string err;
+		auto libSteamworks = InitializeLibrary("steamworks/pr_steamworks",&err);
+		if(libSteamworks == nullptr)
+		{
+			m_svInfo = nullptr;
+			Con::cerr<<"ERROR: Unable to authenticate client: Steamworks module could not be loaded: "<<err<<Con::endl;
+			Disconnect();
+			return;
+		}
+		auto *fRequestAuthTicket = libSteamworks->FindSymbolAddress<bool(*)(std::vector<char>&,uint64_t&,std::shared_ptr<void>&)>("pr_steamworks_get_auth_session_ticket");
+		uint64_t steamId;
+		std::vector<char> token;
+		std::shared_ptr<void> tokenHandle;
+		if(fRequestAuthTicket == nullptr || fRequestAuthTicket(token,steamId,tokenHandle) == false)
+		{
+			m_svInfo = nullptr;
+			Con::cerr<<"ERROR: Authentication failed! Disconnecting from server..."<<Con::endl;
+			Disconnect();
+			return;
+		}
+
+		m_svInfo->authTokenHandle = tokenHandle;
+		outAuthPacket->Write<uint64_t>(steamId);
+		outAuthPacket->Write<uint16_t>(token.size());
+		outAuthPacket->Write(reinterpret_cast<uint8_t*>(token.data()),token.size() *sizeof(token.front()));
+	}
+	SendPacket("authenticate",outAuthPacket,pragma::networking::Protocol::SlowReliable);
+}
+
+void ClientState::HandleClientStartResourceTransfer(NetPacket &packet)
+{
+	if(m_svInfo == nullptr)
+	{
+		Disconnect();
+		return;
+	}
 	auto svPath = m_svInfo->address;
 	ustring::replace(svPath,":","_");
 	ustring::replace(svPath,"[","");
@@ -76,7 +120,7 @@ void ClientState::HandleClientReceiveServerInfo(NetPacket &packet)
 
 	unsigned int numResources = packet->Read<unsigned int>();
 	Con::ccl<<"Downloading "<<numResources<<" files from server..."<<Con::endl;
-	
+
 	StartResourceTransfer();
 }
 

@@ -199,8 +199,12 @@ copy_output_file(modules/pr_source/${BINARY_PRAGMA_DIR} "modules/mount_external"
 copy_output_file(modules/pr_dmx/${BINARY_PRAGMA_DIR} "modules" pr_dmx)
 copy_output_file(modules/pr_dds/${BINARY_PRAGMA_DIR} "modules" pr_dds)
 copy_output_file(modules/pr_steamworks/${BINARY_PRAGMA_DIR} "modules/steamworks" pr_steamworks)
-copy_output_file(modules/pr_steam_networking/client/${BINARY_PRAGMA_DIR} "modules/networking/steam_networking" pr_steam_networking_client)
-copy_output_file(modules/pr_steam_networking/server/${BINARY_PRAGMA_DIR} "modules/networking/steam_networking" pr_steam_networking_server)
+
+copy_output_file(modules/pr_game_networking/client/${BINARY_PRAGMA_DIR} "modules/networking/game_networking" pr_game_networking_client)
+copy_output_file(modules/pr_game_networking/server/${BINARY_PRAGMA_DIR} "modules/networking/game_networking" pr_game_networking_server)
+copy_output_file(modules/pr_game_networking/steam_client/${BINARY_PRAGMA_DIR} "modules/networking/steam_networking" pr_steam_networking_client)
+copy_output_file(modules/pr_game_networking/steam_server/${BINARY_PRAGMA_DIR} "modules/networking/steam_networking" pr_steam_networking_server)
+
 copy_output_file(modules/pr_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" pr_pcl)
 copy_output_file(modules/pr_video_recorder/${BINARY_PRAGMA_DIR} "modules/video_recorder" pr_video_recorder)
 copy_output_file(modules/pr_bullet/${BINARY_PRAGMA_DIR} "modules/physics_engines/bullet" pr_bullet)

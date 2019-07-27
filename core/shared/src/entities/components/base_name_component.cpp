@@ -6,9 +6,19 @@
 
 using namespace pragma;
 
+ComponentEventId BaseNameComponent::EVENT_ON_NAME_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseNameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	EVENT_ON_NAME_CHANGED = componentManager.RegisterEvent("ON_NAME_CHANGED");
+}
 BaseNameComponent::BaseNameComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_name(util::StringProperty::Create())
 {}
+BaseNameComponent::~BaseNameComponent()
+{
+	if(m_cbOnNameChanged.IsValid())
+		m_cbOnNameChanged.Remove();
+}
 void BaseNameComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -29,11 +39,17 @@ void BaseNameComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	GetEntity().AddComponent("io");
+	m_cbOnNameChanged = m_name->AddCallback([this](std::reference_wrapper<const std::string> oldName,std::reference_wrapper<const std::string> newName) {
+		pragma::CEOnNameChanged onNameChanged{newName.get()};
+		BroadcastEvent(EVENT_ON_NAME_CHANGED,onNameChanged);
+	});
 }
 
 const std::string &BaseNameComponent::GetName() const {return *m_name;}
-void BaseNameComponent::SetName(std::string name) {*m_name = name;}
+void BaseNameComponent::SetName(std::string name)
+{
+	*m_name = name;
+}
 const util::PStringProperty &BaseNameComponent::GetNameProperty() const {return m_name;}
 
 void BaseNameComponent::Save(DataStream &ds)
@@ -47,4 +63,14 @@ void BaseNameComponent::Load(DataStream &ds,uint32_t version)
 	BaseEntityComponent::Load(ds,version);
 	auto name = ds->ReadString();
 	SetName(name);
+}
+
+/////////////////
+
+CEOnNameChanged::CEOnNameChanged(const std::string &newName)
+	: name{newName}
+{}
+void CEOnNameChanged::PushArguments(lua_State *l)
+{
+	Lua::PushString(l,name);
 }

@@ -10,6 +10,7 @@
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/lua/c_listener_handle.hpp"
+#include <material.h>
 #include <pragma/game/game.h>
 #include <pragma/input/inkeys.h>
 #include <mathutil/color.h>
@@ -92,6 +93,7 @@ public:
 public:
 	CGame(NetworkState *state);
 	virtual ~CGame() override;
+	virtual void OnRemove() override;
 
 	enum class SoundCacheFlags : uint32_t
 	{
@@ -229,7 +231,7 @@ public:
 	// Game
 	void Think();
 	void Tick();
-	virtual bool LoadMap(const char *map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
+	virtual bool LoadMap(const std::string &map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
 	void BuildVMF(const char *map);
 	double &ServerTime();
 	void SetServerTime(double t);

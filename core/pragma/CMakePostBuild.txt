@@ -75,8 +75,8 @@ function(copy_output_file_abs SRC_PATH DST_PATH FILE_NAME)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
-		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
-		  COMMENT "Copying ${FILE_NAME}..."
+		  COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
+		  # COMMENT "Copying ${FILE_NAME}..."
 		)
 	endif()
 endfunction(copy_output_file_abs)
@@ -120,8 +120,8 @@ function(copy_output_file_ext SRC_PATH DST_PATH)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
-		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
-		  COMMENT "Copying ${LIB_NAME}..."
+		  COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
+		  # COMMENT "Copying ${LIB_NAME}..."
 		)
 	endif()
 endfunction(copy_output_file_ext)
@@ -153,8 +153,8 @@ function(copy_output_file_extc SRC_PATH DST_PATH DST_FILE_NAME)
 		  TARGET build_core
 		  POST_BUILD
 		  COMMAND ${COPY_CMD} "${SRC_PATH}" "${DST_PATH}"
-		  # COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
-		  COMMENT "Copying ${DST_FILE_NAME}..."
+		  COMMENT "Copying  ${COPY_CMD} ${SRC_PATH} ${DST_PATH}..."
+		  # COMMENT "Copying ${DST_FILE_NAME}..."
 		)
 	endif()
 endfunction(copy_output_file_extc)
@@ -198,6 +198,7 @@ copy_output_file(external_libs/util_archive/${BINARY_PRAGMA_DIR} "modules/mount_
 copy_output_file(modules/pr_source/${BINARY_PRAGMA_DIR} "modules/mount_external" pr_mount_external)
 copy_output_file(modules/pr_dmx/${BINARY_PRAGMA_DIR} "modules" pr_dmx)
 copy_output_file(modules/pr_dds/${BINARY_PRAGMA_DIR} "modules" pr_dds)
+copy_output_file(modules/pr_openvr/${BINARY_PRAGMA_DIR} "modules/openvr" pr_openvr)
 copy_output_file(modules/pr_steamworks/${BINARY_PRAGMA_DIR} "modules/steamworks" pr_steamworks)
 
 copy_output_file(modules/pr_game_networking/client/${BINARY_PRAGMA_DIR} "modules/networking/game_networking" pr_game_networking_client)

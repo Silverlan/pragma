@@ -5,6 +5,7 @@
 #include "pragma/opengl/renderobject.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_entitymeshinfo.h"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
 #include <vector>
 #include <deque>
 

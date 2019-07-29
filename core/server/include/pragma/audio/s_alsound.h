@@ -29,8 +29,10 @@ protected:
 	void SendEvent(NetEvent evId,const std::function<void(NetPacket&)> &write=nullptr,bool bUDP=true) const;
 	uint32_t m_entityIndex = std::numeric_limits<uint32_t>::max();
 public:
-	SALSound(NetworkState *nw,unsigned int idx,float duration,bool bShared=true);
+	SALSound(NetworkState *nw,unsigned int idx,float duration,const std::string &soundName,ALCreateFlags createFlags);
 	virtual ~SALSound() override;
+	const std::string &GetSoundName() const;
+	ALCreateFlags GetCreateFlags() const;
 	virtual ALState GetState() const override;
 	virtual unsigned int GetIndex() const override;
 	virtual void FadeIn(float time) override;
@@ -114,5 +116,8 @@ public:
 
 	// Special index required for steam audio
 	void SetEntityMapIndex(uint32_t idx);
+private:
+	std::string m_soundName = "";
+	ALCreateFlags m_createFlags = ALCreateFlags::None;
 };
 #endif

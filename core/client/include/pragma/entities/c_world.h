@@ -5,7 +5,6 @@
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseworld.h>
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
-#include "pragma/rendering/occlusion_culling/chc.hpp"
 #include <unordered_map>
 
 #pragma warning(push)
@@ -13,6 +12,7 @@
 namespace bsp {class File;};
 namespace prosper {class Buffer;};
 namespace util {class BSPTree;};
+class CHC;
 namespace pragma
 {
 	class DLLCLIENT CWorldComponent final

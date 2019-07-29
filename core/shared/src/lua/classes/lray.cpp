@@ -79,6 +79,9 @@ void Lua_TraceData_SetFilter(lua_State *l,TraceData &data,luabind::object)
 			shape.Push(l);
 			body.Push(l);
 			return Lua::StatusCode::Ok;
-		},0);
+		},1);
+		if(c != Lua::StatusCode::Ok || Lua::IsSet(l,-1) == false || Lua::IsNumber(l,-1) == false)
+			return RayCastHitType::Block;
+		return static_cast<RayCastHitType>(Lua::CheckInt(l,-1));
 	});
 }

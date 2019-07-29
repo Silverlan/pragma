@@ -182,11 +182,12 @@ void WIMainMenu::Initialize()
 	}));
 	/*menu->AddMenuItem(Locale::GetText("menu_credits"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hCredits);
-	}));
-	menu->AddMenuItem(Locale::GetText("menu_addons"),FunctionCallback<>::Create([this]() {
-		SetActiveMenu(m_hMods);
-		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
 	}));*/
+	menu->AddMenuItem(Locale::GetText("menu_addons"),FunctionCallback<>::Create([this]() {
+		//SetActiveMenu(m_hMods);
+		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
+		util::open_url_in_browser("steam://SteamWorkshopPage/" +std::to_string(engine_info::get_steam_app_id()));
+	}));
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen",FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hLoadScreen);

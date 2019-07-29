@@ -5,12 +5,13 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/c_prepass.hpp"
 #include "pragma/rendering/c_forwardplus.hpp"
+#include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
 #include <memory>
 #include <sharedutils/util_weak_handle.hpp>
 #include <unordered_set>
 
-namespace pragma {class Shader; class ShaderTextured3D; class OcclusionCullingHandler; class OcclusionMeshInfo;};
+namespace pragma {class Shader; class ShaderTextured3D; class OcclusionCullingHandler; struct OcclusionMeshInfo;};
 namespace prosper {class BlurSet; class RenderPass; class Fence;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -27,7 +28,7 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma {class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
+namespace pragma {class CLightComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
 class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
 {

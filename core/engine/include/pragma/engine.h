@@ -148,7 +148,7 @@ public:
 	std::optional<ConsoleOutput> PollConsoleOutput();
 	void SetRecordConsoleOutput(bool record);
 
-	bool IsMultiPlayer() const;
+	virtual bool IsMultiPlayer() const;
 	bool IsSinglePlayer() const;
 	bool IsActiveState(NetworkState *state);
 	bool IsServerRunning();
@@ -159,11 +159,17 @@ public:
 	ServerState *OpenServerState();
 	virtual NetworkState *GetClientState() const;
 	void CloseServerState();
-	void StartServer();
+	void StartServer(bool singlePlayer);
 	void CloseServer();
 	// Returns the steam id of the active listen server
 	std::optional<uint64_t> GetServerSteamId() const;
-	virtual void LoadMap(const char *map);
+
+	virtual void StartNewGame(const std::string &map,bool singlePlayer);
+
+	// When run in game-client: Starts a new single-player game, loads the specified map and connects the local client to the local server.
+	// When run in dedicated-server: Starts a new game, loads the specified map and automatically starts a listener server.
+	virtual void StartDefaultGame(const std::string &map);
+
 	// Config
 	bool ExecConfig(const std::string &cfg);
 
@@ -271,7 +277,7 @@ inline DLLENGINE std::shared_ptr<Engine> InitializeServer(int argc,char *argv[])
 	en->OpenConsole();
 	if(en->Initialize(argc,argv) == false)
 		return nullptr;
-	en->StartServer();
+	en->StartServer(false);
 	en->Start();
 	return en;
 }

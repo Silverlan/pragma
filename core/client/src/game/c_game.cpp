@@ -289,7 +289,9 @@ CGame::CGame(NetworkState *state)
 	});
 }
 
-CGame::~CGame()
+CGame::~CGame() {}
+
+void CGame::OnRemove()
 {
 	c_engine->WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
@@ -345,8 +347,17 @@ CGame::~CGame()
 	ShadowMap::ClearShadowMapDepthBuffers();
 
 	c_physEnv = nullptr;
+	m_renderScene = nullptr;
+	m_worldEnvironment = nullptr;
+	m_globalRenderSettingsBufferData = nullptr;
+	m_luaGUIElements = {};
+	m_luaShaderManager = nullptr;
+	m_gpuProfilingStageManager = nullptr;
+	m_profilingStageManager = nullptr;
 
 	ClearSoundCache();
+
+	Game::OnRemove();
 }
 
 void CGame::UpdateTime()
@@ -646,7 +657,10 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		c_engine->GetNearZ(),c_engine->GetFarZ()
 	);
 	if(cam)
+	{
 		m_scene->SetActiveCamera(*cam);
+		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
+	}
 
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
@@ -1223,7 +1237,7 @@ void CGame::SetMaxHDRExposure(Float exposure)
 	static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetMaxHDRExposure(exposure);
 }
 
-bool CGame::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHandle> *entities)
+bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
 	ClearResources<CModelManager>();
@@ -1774,13 +1788,27 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 {
 	DebugRenderer::DrawPlane(n,dist,color,duration);
 }
+static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
+static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
 void CGame::RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
-	auto *physEnv = GetPhysicsEnvironment();
-	auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
-	if(pVisualDebugger == nullptr)
-		return;
-	static_cast<CPhysVisualDebugger&>(*pVisualDebugger).Render(drawCmd,cam);
+	if(cvRenderPhysics->GetBool())
+	{
+		auto *physEnv = GetPhysicsEnvironment();
+		auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
+		if(pVisualDebugger)
+			static_cast<CPhysVisualDebugger&>(*pVisualDebugger).Render(drawCmd,cam);
+	}
+	if(cvSvRenderPhysics->GetBool())
+	{
+		// Serverside physics (singleplayer only)
+		auto *svState = c_engine->GetServerNetworkState();
+		auto *game = svState ? svState->GetGameState() : nullptr;
+		auto *physEnv = game ? game->GetPhysicsEnvironment() : nullptr;
+		auto *pVisualDebugger = physEnv ? physEnv->GetVisualDebugger() : nullptr;
+		if(pVisualDebugger)
+			static_cast<CPhysVisualDebugger&>(*pVisualDebugger).Render(drawCmd,cam);
+	}
 }
 
 bool CGame::LoadAuxEffects(const std::string &fname)

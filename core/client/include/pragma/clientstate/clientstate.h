@@ -77,7 +77,7 @@ enum class ClientEvent : int;
 struct ALResource;
 struct ALAudio;
 class WIMainMenu;
-struct WILuaHandleWrapper;
+class WILuaHandleWrapper;
 enum class ALSoundType : Int32;
 namespace al {class SoundBuffer;class Decoder;};
 namespace pragma::networking
@@ -94,7 +94,6 @@ public:
 	static ConVarHandle GetConVarHandle(std::string scvar);
 //
 private:
-	CGame *m_game;
 	std::unique_ptr<pragma::networking::IClient> m_client = nullptr;
 	std::unique_ptr<ServerInfo> m_svInfo;
 	std::unique_ptr<ResourceDownload> m_resDownload; // Current resource file being downloaded
@@ -107,7 +106,7 @@ private:
 	void InitializeSound(CALSound &snd);
 	std::vector<std::shared_ptr<ALSound>> m_soundScripts; // 'Regular' sounds are already handled by sound engine, but we still have to take care of sound-scripts
 	float m_volMaster;
-	std::unordered_map<Int32,float> m_volTypes; // c++14 std::unordered_map<ALSoundType,float> m_volTypes;
+	std::unordered_map<ALSoundType,float> m_volTypes;
 
 	WIHandle m_hMainMenu;
 	WIHandle m_hFps;
@@ -209,7 +208,7 @@ public:
 	void SetSoundVolume(ALSoundType type,float vol);
 	float GetSoundVolume(ALSoundType type);
 	void UpdateSoundVolume();
-	std::unordered_map<Int32,float> &GetSoundVolumes();
+	std::unordered_map<ALSoundType,float> &GetSoundVolumes();
 
 	// Handles
 	void LoadLuaCache(std::string cache,unsigned int cacheSize);
@@ -233,8 +232,8 @@ public:
 	// Game
 	virtual bool IsMultiPlayer() const override;
 	virtual bool IsSinglePlayer() const override;
-	virtual void StartGame() override;
-	void StartGame(const std::string &gameMode);
+	virtual void StartGame(bool singlePlayer) override;
+	void StartNewGame(const std::string &gameMode);
 	CGame *GetGameState();
 	void EndGame();
 	bool IsGameActive();

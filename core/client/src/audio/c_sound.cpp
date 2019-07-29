@@ -426,17 +426,17 @@ void ClientState::SetSoundVolume(ALSoundType type,float vol)
 {
 	auto values = umath::get_power_of_2_values(CUInt64(type));
 	for(auto it=values.begin();it!=values.end();it++)
-		m_volTypes[CInt32(*it)] = vol; // c++14 m_volTypes[static_cast<ALSoundType>(*it)] = vol;
+		m_volTypes[static_cast<ALSoundType>(*it)] = vol;
 	UpdateSoundVolume();
 }
 float ClientState::GetSoundVolume(ALSoundType type)
 {
-	auto it = m_volTypes.find(CUInt32(type)); // c++14 auto it = m_volTypes.find(type);
+	auto it = m_volTypes.find(type);
 	if(it == m_volTypes.end())
 		return 1.f;
 	return it->second;
 }
-std::unordered_map<Int32,float> &ClientState::GetSoundVolumes() {return m_volTypes;}
+std::unordered_map<ALSoundType,float> &ClientState::GetSoundVolumes() {return m_volTypes;}
 
 
 REGISTER_CONVAR_CALLBACK_CL(cl_audio_master_volume,[](NetworkState*,ConVar*,float,float vol) {

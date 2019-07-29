@@ -334,20 +334,14 @@ bool Engine::IsMultiPlayer() const
 		return false;
 	return sv->IsMultiPlayer();
 }
-bool Engine::IsSinglePlayer() const
-{
-	auto *sv = GetServerState();
-	if(sv == nullptr)
-		return false;
-	return sv->IsSinglePlayer();
-}
+bool Engine::IsSinglePlayer() const {return !IsMultiPlayer();}
 
-void Engine::StartServer()
+void Engine::StartServer(bool singlePlayer)
 {
 	auto *sv = GetServerState();
 	if(sv == NULL)
 		return;
-	sv->StartServer();
+	sv->StartServer(singlePlayer);
 }
 
 void Engine::CloseServer()
@@ -368,13 +362,19 @@ bool Engine::IsServerRunning()
 	return sv->IsServerRunning();
 }
 
-void Engine::LoadMap(const char *map)
+void Engine::StartNewGame(const std::string &map,bool singlePlayer)
 {
 	EndGame();
 	auto *sv = GetServerState();
-	if(sv == NULL)
+	if(sv == nullptr)
 		return;
-	sv->LoadMap(map);
+	sv->StartNewGame(map,singlePlayer);
+}
+
+void Engine::StartDefaultGame(const std::string &map)
+{
+	EndGame();
+	StartNewGame(map.c_str(),false);
 }
 
 std::optional<uint64_t> Engine::GetServerSteamId() const
@@ -402,7 +402,7 @@ void Engine::Start()
 		RunConsoleCommand("sv_gamemode",argv);
 	}
 	if(!__lp_map.empty())
-		LoadMap(__lp_map.c_str());
+		StartNewGame(__lp_map,true);
 
 	InvokeConVarChangeCallbacks("steam_steamworks_enabled");
 

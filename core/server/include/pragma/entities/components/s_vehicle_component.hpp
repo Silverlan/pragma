@@ -9,7 +9,7 @@ namespace pragma
 {
 	class DLLSERVER SVehicleComponent final
 		: public BaseVehicleComponent,
-		public SBaseNetComponent
+		public SBaseSnapshotComponent
 	{
 	public:
 		static unsigned int GetVehicleCount();
@@ -20,10 +20,13 @@ namespace pragma
 		virtual void SetDriver(BaseEntity *ent) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
+		virtual void Think(double tDelta) override;
 
-		virtual void SetSteeringWheelModel(const std::string &mdl) override;
+		virtual void SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle) override;
 
 		virtual bool ShouldTransmitNetData() const override {return true;};
+		virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl) override;
+		virtual bool ShouldTransmitSnapshotData() const override;
 	protected:
 		void WriteWheelInfo(NetPacket &p,WheelData &data);
 		CallbackHandle m_playerAction;

@@ -18,7 +18,7 @@ namespace pragma::networking
 
 		ClientRecipientFilter(const std::function<bool(const IServerClient&)> &filter);
 		ClientRecipientFilter(const IServerClient &client,FilterType filterType=FilterType::Include);
-		ClientRecipientFilter(); // Default: ALlow all!!
+		ClientRecipientFilter();
 		bool operator()(const IServerClient&) const;
 	private:
 		std::function<bool(const IServerClient&)> m_filter = nullptr;

@@ -15,7 +15,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-const std::string OPENVR_MODULE_PATH = "openvr/wv_openvr";
+const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
 
 static std::string lastMessage = "";
 static Color lastColor = Color::White;
@@ -84,6 +84,7 @@ static void cl_render_vr_enabled(bool b)
 	}
 	else
 	{
+		/* // Obsolete: All extensions are enabled by default by Anvil
 		auto &dev = c_engine->GetDevice();
 		auto fCheckExtension = [&dev](const std::string &ext,bool instanceExtension=false) -> bool {
 			if((instanceExtension == false && dev.is_extension_enabled(ext) == true) || (instanceExtension == true && dev.get_parent_instance()->is_instance_extension_enabled(ext)))
@@ -105,7 +106,7 @@ static void cl_render_vr_enabled(bool b)
 		{
 			if(fCheckExtension(ext) == false)
 				return;
-		}
+		}*/
 
 		lastMessage = Locale::GetText("vr_msg_switch_display");
 		lastColor = Color::White;

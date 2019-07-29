@@ -90,6 +90,7 @@ public:
 	virtual void Initialize() override;
 	SGame(NetworkState *state);
 	virtual ~SGame() override;
+	virtual void OnRemove() override;
 	virtual bool IsServer() override;
 	virtual bool IsClient() override;
 	virtual void RegisterLua() override;
@@ -168,7 +169,7 @@ public:
 	virtual bool IsPhysicsSimulationEnabled() const override;
 
 	// Map
-	virtual bool LoadMap(const char *map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
+	virtual bool LoadMap(const std::string &map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
 
 	// Debug
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f) override;

@@ -65,8 +65,7 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 		return;
 	c_engine->EndGame();
 	pOptionsList->RunUpdateConVars(false);
-	c_engine->LoadMap(map.c_str());
-	c_engine->Connect("localhost");
+	c_engine->StartDefaultGame(map);
 }
 
 void WIMainMenuNewGame::Initialize()

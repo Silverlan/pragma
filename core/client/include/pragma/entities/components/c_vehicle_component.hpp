@@ -11,7 +11,7 @@ namespace pragma
 {
 	class DLLCLIENT CVehicleComponent final
 		: public BaseVehicleComponent,
-		public CBaseNetComponent
+		public CBaseSnapshotComponent
 	{
 	public:
 		CVehicleComponent(BaseEntity &ent);
@@ -22,7 +22,10 @@ namespace pragma
 		virtual void SetDriver(BaseEntity *ent) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+
+		virtual void ReceiveSnapshotData(NetPacket &packet) override;
 	protected:
 		void ReadWheelInfo(NetPacket &packet);
 		CallbackHandle m_hCbSteeringWheel;

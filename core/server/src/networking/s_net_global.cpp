@@ -176,14 +176,19 @@ DLLSERVER void NET_sv_serverinfo_request(pragma::networking::IServerClient &sess
 	else
 		p->Write<unsigned char>((unsigned char)(0));
 
-	p->Write<bool>(server->GetConVarBool("sv_require_authentication"));
+	p->Write<bool>(server->IsClientAuthenticationRequired());
 	server->SendPacket("serverinfo",p,pragma::networking::Protocol::SlowReliable,session);
+}
+
+bool ServerState::IsClientAuthenticationRequired() const
+{
+	return IsMultiPlayer() && server->GetConVarBool("sv_require_authentication");
 }
 
 DLLSERVER void NET_sv_authenticate(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	auto hasAuth = packet->Read<bool>();
-	if(server->GetConVarBool("sv_require_authentication"))
+	if(server->IsClientAuthenticationRequired())
 	{
 		if(hasAuth == false)
 		{

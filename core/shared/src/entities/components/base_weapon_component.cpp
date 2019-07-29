@@ -88,8 +88,8 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 	{
 		auto rot = uquat::identity();
 		auto &ent = GetEntity();
-		auto animComponent = ent.GetAnimatedComponent();
-		if(animComponent.valid() && animComponent->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
+		auto mdlC = ent.GetModelComponent();
+		if(mdlC.valid() && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
 		{
 			auto pTrComponent = ent.GetTransformComponent();
 			if(pTrComponent.valid())

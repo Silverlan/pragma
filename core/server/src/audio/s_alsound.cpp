@@ -20,8 +20,8 @@ void SALSoundBase::SetShared(bool b) {m_bShared = b;}
 SALSoundBase *SALSound::GetBase(ALSound *snd) {return dynamic_cast<SALSoundBase*>(snd);}//(snd->IsSoundScript() == false) ? static_cast<SALSoundBase*>(static_cast<SALSound*>(snd)) : static_cast<SALSoundBase*>(static_cast<SALSoundScript*>(snd));}
 
 #pragma warning(disable: 4056)
-SALSound::SALSound(NetworkState *nw,unsigned int idx,float duration,bool bShared)
-	: ALSound(nw),SALSoundBase(bShared)
+SALSound::SALSound(NetworkState *nw,unsigned int idx,float duration,const std::string &soundName,ALCreateFlags createFlags)
+	: ALSound(nw),SALSoundBase(umath::is_flag_set(createFlags,ALCreateFlags::DontTransmit) == false),m_soundName{soundName},m_createFlags{createFlags}
 {
 	m_index = idx;
 	m_duration = duration;
@@ -39,6 +39,9 @@ SALSound::~SALSound()
 	//for(int i=0;i<m_luaCallbacks.size();i++)
 	//	lua_removereference(game->GetLuaState(),m_luaCallbacks[i]);
 }
+
+const std::string &SALSound::GetSoundName() const {return m_soundName;}
+ALCreateFlags SALSound::GetCreateFlags() const {return m_createFlags;}
 
 void SALSound::SendEvent(NetEvent evId,const std::function<void(NetPacket&)> &write,bool bUDP) const
 {

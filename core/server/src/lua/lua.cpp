@@ -12,6 +12,7 @@
 #include "pragma/ai/ai_behavior.h"
 #include "pragma/networking/resourcemanager.h"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/iserver.hpp"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/lrecipientfilter.h"
 #include "pragma/lua/classes/s_lnetpacket.h"
@@ -29,6 +30,8 @@
 #include <pragma/lua/libraries/lnet.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <luainterface.hpp>
+
+extern DLLSERVER ServerState *server;
 
 void SGame::RegisterLua()
 {
@@ -147,6 +150,27 @@ void SGame::RegisterLua()
 	classDefRp.add_static_constant("TYPE_INCLUDE",umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Include));
 	classDefRp.add_static_constant("TYPE_EXCLUDE",umath::to_integral(pragma::networking::ClientRecipientFilter::FilterType::Exclude));
 	modNet[classDefRp];
+
+	auto classDefClRp = luabind::class_<pragma::networking::ClientRecipientFilter>("ClientRecipientFilter");
+	classDefClRp.def("GetRecipients",static_cast<void(*)(lua_State*,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,pragma::networking::ClientRecipientFilter &rp) {
+		auto *sv = server->GetServer();
+		if(sv == nullptr)
+			return;
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &cl : sv->GetClients())
+		{
+			if(rp(*cl) == false)
+				continue;
+			auto *pl = server->GetPlayer(*cl);
+			if(pl == nullptr)
+				continue;
+			Lua::PushInt(l,idx++);
+			pl->PushLuaObject(l);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	modNet[classDefClRp];
 
 	Lua::RegisterLibrary(GetLuaState(),"input",{});
 	Game::RegisterLua();

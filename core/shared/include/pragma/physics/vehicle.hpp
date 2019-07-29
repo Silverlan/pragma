@@ -185,7 +185,7 @@ namespace pragma::physics
 		: public IBase,public IWorldObject
 	{
 	public:
-		enum class Gear : uint16_t
+		enum class Gear : uint8_t
 		{
 			Reverse = 0,
 			Neutral,
@@ -247,7 +247,8 @@ namespace pragma::physics
 
 		virtual bool ShouldUseAutoGears() const=0;
 		virtual Gear GetCurrentGear() const=0;
-		virtual float GetEngineRotationSpeed() const=0;
+		virtual umath::Radian GetEngineRotationSpeed() const=0;
+		virtual void SetEngineRotationSpeed(umath::Radian speed) const=0;
 
 		virtual void SetRestState()=0;
 
@@ -258,11 +259,18 @@ namespace pragma::physics
 
 		virtual bool IsInAir() const=0;
 
-		virtual std::optional<physics::Transform> GetLocalWheelPose(uint32_t wheelIndex) const=0;
+		virtual std::optional<physics::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const=0;
 		virtual uint32_t GetWheelCount() const=0;
 		virtual float GetSteerFactor() const=0;
+		virtual umath::Radian GetWheelYawAngle(WheelIndex wheel) const=0;
+		virtual umath::Radian GetWheelRollAngle(WheelIndex wheel) const=0;
 		virtual float GetForwardSpeed() const=0;
 		virtual float GetSidewaysSpeed() const=0;
+
+		virtual float GetBrakeFactor() const=0;
+		virtual float GetHandbrakeFactor() const=0;
+		virtual float GetAccelerationFactor() const=0;
+		virtual umath::Radian GetWheelRotationSpeed(WheelIndex wheel) const=0;
 	protected:
 		IVehicle(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject);
 		virtual bool ShouldUseDigitalInputs() const=0;

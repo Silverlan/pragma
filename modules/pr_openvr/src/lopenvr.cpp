@@ -6,6 +6,8 @@
 #include <pragma/lua/classes/ldef_color.h>
 #include <sharedutils/datastream.h>
 #include <pragma/lua/libraries/c_lua_vulkan.h>
+#include <pragma/entities/environment/c_env_camera.h>
+#include <pragma/rendering/scene/scene.h>
 #include <luainterface.hpp>
 #include <sharedutils/functioncallback.h>
 #include <pragma/pragma_module.hpp>
@@ -597,8 +599,9 @@ int Lua::openvr::lib::get_eye_to_head_transform(lua_State *l)
 		return 0;
 	auto *sys = s_vrInstance->GetSystemInterface();
 	auto eEye = static_cast<vr::EVREye>(Lua::CheckInt(l,1));
+	auto &cam = Lua::Check<pragma::CCameraComponent>(l,2);
 	auto &eye = (eEye == vr::EVREye::Eye_Left) ? s_vrInstance->GetLeftEye() : s_vrInstance->GetRightEye();
-	Lua::Push<Mat4>(l,eye.GetEyeViewMatrix());
+	Lua::Push<Mat4>(l,eye.GetEyeViewMatrix(cam));
 	return 1;
 }
 
@@ -957,7 +960,19 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 		{"get_controller_states",Lua::openvr::lib::get_controller_states},
 		{"get_controller_state_with_pose",Lua::openvr::lib::get_controller_state_with_pose},
 
-		{"get_pose_transform",Lua::openvr::lib::get_pose_transform}
+		{"get_pose_transform",Lua::openvr::lib::get_pose_transform},
+		{"get_render_target",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto eyeIdx = Lua::CheckInt(l,1);
+			auto &eye = static_cast<vr::EVREye>(eyeIdx) == vr::EVREye::Eye_Left ? s_vrInstance->GetLeftEye() : s_vrInstance->GetRightEye();
+			Lua::Push(l,eye.vkRenderTarget);
+			return 1;
+		})},
+		{"get_scene",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto eyeIdx = Lua::CheckInt(l,1);
+			auto &eye = static_cast<vr::EVREye>(eyeIdx) == vr::EVREye::Eye_Left ? s_vrInstance->GetLeftEye() : s_vrInstance->GetRightEye();
+			Lua::Push(l,const_cast<IScene&>(eye.scene).GetInternalScene().shared_from_this());
+			return 1;
+		})}
 	});
 
 	std::unordered_map<std::string,int32_t> propErrorEnums {

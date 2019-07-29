@@ -12,6 +12,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/math/intersection.h>
 
+#pragma optimize("",off)
 bool Game::IsServer() {return false;}
 bool Game::IsClient() {return false;}
 
@@ -67,7 +68,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			auto pTrComponent = ent->GetTransformComponent();
 			if(pTrComponent.expired())
 				continue;
-			auto pos = c.position;
+			auto pos = c.position +pTrComponent->GetPosition();
 
 			auto dir = pos -origin;
 			auto l = uvec::length(dir);
@@ -95,6 +96,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			data.SetSource(origin);
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);
+			data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 			if(entOrigin != nullptr && pPhysComponent.valid())
 			{
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
@@ -208,3 +210,4 @@ TraceResult Game::Sweep(const TraceData &data) const
 	}
 	return results.front();
 }
+#pragma optimize("",on)

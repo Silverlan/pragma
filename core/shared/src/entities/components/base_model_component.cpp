@@ -35,6 +35,66 @@ void BaseModelComponent::Initialize()
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
 }
 
+bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const
+{
+	Quat rot;
+	if(GetAttachment(attID,pos,&rot) == false)
+		return false;
+	if(angles)
+		*angles = EulerAngles{rot};
+	return true;
+}
+bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const
+{
+	auto mdlComponent = GetEntity().GetModelComponent();
+	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	if(hMdl == nullptr)
+		return false;
+	int attID = hMdl->LookupAttachment(name);
+	if(attID == -1)
+		return false;
+	return GetAttachment(attID,pos,angles);
+}
+bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const
+{
+	auto &ent = GetEntity();
+	auto &mdl = GetModel();
+	auto *att = mdl ? mdl->GetAttachment(attID) : nullptr;
+	if(att == nullptr)
+		return false;
+	physics::Transform pose {};
+	// ent.GetPose(pose);
+	auto animC = ent.GetAnimatedComponent();
+	if(animC.valid())
+	{
+		Quat rotBone;
+		Vector3 posBone;
+		if(animC->GetLocalBonePosition(att->bone,posBone,rotBone) == false)
+			return false;
+		pose *= physics::Transform{posBone,rotBone};
+		pose *= physics::Transform{att->offset,uquat::create(att->angles)};
+	}
+	else
+	{
+		auto attPose = mdl->CalcReferenceAttachmentPose(attID);
+		if(attPose.has_value())
+			pose *= *attPose;
+	}
+	if(pos)
+		*pos = pose.GetOrigin();
+	if(rot)
+		*rot = pose.GetRotation();
+	return true;
+}
+bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const
+{
+	auto mdlComponent = GetEntity().GetModelComponent();
+	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	if(hMdl == nullptr)
+		return false;
+	return GetAttachment(hMdl->LookupAttachment(name),pos,rot);
+}
+
 void BaseModelComponent::OnRemove()
 {
 	SetModel(std::shared_ptr<Model>{nullptr});

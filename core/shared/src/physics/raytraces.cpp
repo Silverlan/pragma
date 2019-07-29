@@ -124,7 +124,7 @@ TraceData::TraceData()
 TraceData::TraceData(const TraceData &other)
 	: m_tStart(other.m_tStart),m_tEnd(other.m_tEnd),
 	m_flags(other.m_flags),m_bHasTarget(other.m_bHasTarget),
-	m_shape{other.m_shape},
+	m_shape{other.m_shape},m_filter{other.m_filter},
 	m_filterMask(other.m_filterMask),m_filterGroup(other.m_filterGroup)
 {}
 void TraceData::SetShape(const pragma::physics::IConvexShape &shape)

@@ -19,12 +19,13 @@ using namespace pragma;
 
 extern DLLSERVER SGame *s_game;
 
+#pragma optimize("",off)
 std::vector<SVehicleComponent*> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent*> &SVehicleComponent::GetAll() {return s_vehicles;}
 unsigned int SVehicleComponent::GetVehicleCount() {return CUInt32(s_vehicles.size());}
 
 SVehicleComponent::SVehicleComponent(BaseEntity &ent)
-	: BaseVehicleComponent(ent),SBaseNetComponent()
+	: BaseVehicleComponent(ent),SBaseSnapshotComponent()
 {
 	static_cast<SBaseEntity&>(ent).SetShared(true);
 	s_vehicles.push_back(this);
@@ -45,18 +46,28 @@ void SVehicleComponent::OnUse(BaseEntity *pl)
 	SetDriver(pl);
 }
 
+void SVehicleComponent::Think(double tDelta)
+{
+	BaseVehicleComponent::Think(tDelta);
+	if(HasDriver())
+		GetEntity().MarkForSnapshot();
+}
+
 void SVehicleComponent::ClearDriver()
 {
 	auto *driver = BaseVehicleComponent::GetDriver();
-	if(driver->IsCharacter())
+	if(driver && driver->IsCharacter())
 		driver->GetCharacterComponent()->SetFrozen(false);
 	BaseVehicleComponent::ClearDriver();
 	if(m_playerAction.IsValid())
 		m_playerAction.Remove();
-	// TODO
-	//NetPacket p;
-	//nwm::write_entity(p,nullptr);
-	//static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(NET_EVENT_VEHICLE_SET_DRIVER,p,pragma::networking::Protocol::SlowReliable);
+
+	auto &entThis = static_cast<SBaseEntity&>(GetEntity());
+	if(!entThis.IsShared() || !entThis.IsSpawned())
+		return;
+	NetPacket p;
+	nwm::write_entity(p,nullptr);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetDriver,p,pragma::networking::Protocol::SlowReliable);
 }
 void SVehicleComponent::OnActionInput(Action action, bool b)
 {
@@ -109,10 +120,9 @@ void SVehicleComponent::SetDriver(BaseEntity *ent)
 	auto &entThis = static_cast<SBaseEntity&>(GetEntity());
 	if(!entThis.IsShared() || !entThis.IsSpawned())
 		return;
-	// TODO
-	//NetPacket p;
-	//nwm::write_entity(p,ent);
-	//entThis.SendNetEvent(NET_EVENT_VEHICLE_SET_DRIVER,p,pragma::networking::Protocol::SlowReliable);
+	NetPacket p;
+	nwm::write_entity(p,ent);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetDriver,p,pragma::networking::Protocol::SlowReliable);
 }
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -138,15 +148,34 @@ void SVehicleComponent::WriteWheelInfo(NetPacket &p,WheelData &data,btWheelInfo 
 void SVehicleComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_entity(packet,m_steeringWheel);
+	nwm::write_entity(packet,GetDriver());
 }
 
-void SVehicleComponent::SetSteeringWheelModel(const std::string &mdl)
+void SVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle)
 {
-	BaseVehicleComponent::SetSteeringWheelModel(mdl);
+	BaseVehicleComponent::SetupSteeringWheel(mdl,maxSteeringAngle);
+	if(m_steeringWheel.IsValid())
+		static_cast<SBaseEntity&>(*m_steeringWheel.get()).SetSynchronized(false);
 	NetPacket p;
 	nwm::write_entity(p,m_steeringWheel);
+	p->Write<float>(maxSteeringAngle);
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSteeringWheelModel,p,pragma::networking::Protocol::SlowReliable);
 }
+
+void SVehicleComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl)
+{
+	auto *physVehicle = GetPhysicsVehicle();
+	packet->Write<float>(physVehicle ? physVehicle->GetSteerFactor() : 0.f);
+	packet->Write<pragma::physics::IVehicle::Gear>(physVehicle ? physVehicle->GetCurrentGear() : pragma::physics::IVehicle::Gear::First);
+	packet->Write<float>(physVehicle ? physVehicle->GetBrakeFactor() : 0.f);
+	packet->Write<float>(physVehicle ? physVehicle->GetHandbrakeFactor() : 0.f);
+	packet->Write<float>(physVehicle ? physVehicle->GetAccelerationFactor() : 0.f);
+	packet->Write<umath::Radian>(physVehicle ? physVehicle->GetEngineRotationSpeed() : 0.f);
+	auto numWheels = GetWheelCount();
+	for(auto i=decltype(numWheels){0u};i<numWheels;++i)
+		packet->Write<float>(physVehicle ? physVehicle->GetWheelRotationSpeed(i) : 0.f);
+}
+bool SVehicleComponent::ShouldTransmitSnapshotData() const {return HasDriver();}
 
 BaseWheelComponent *SVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
 {
@@ -161,7 +190,8 @@ void SVehicleComponent::OnPostSpawn()
 {
 	if(!m_steeringWheelMdl.empty())
 	{
-		SetSteeringWheelModel(m_steeringWheelMdl);
+		SetupSteeringWheel(m_steeringWheelMdl,m_maxSteeringWheelAngle);
 		m_steeringWheelMdl.clear();
 	}
 }
+#pragma optimize("",on)

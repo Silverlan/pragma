@@ -27,7 +27,6 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
@@ -300,8 +299,7 @@ void RasterizationRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer
 
 		if(cam.valid())
 			DebugRenderer::Render(drawCmd,*cam);
-		if(cvRenderPhysics->GetBool())
-			c_game->RenderDebugPhysics(drawCmd,*cam);
+		c_game->RenderDebugPhysics(drawCmd,*cam);
 		c_game->CallCallbacks("PostRenderDebug");
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
 	}

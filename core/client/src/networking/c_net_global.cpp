@@ -532,7 +532,7 @@ DLLCLIENT void NET_cl_game_start(NetPacket packet)
 {
 	float timeScale = packet->Read<float>();
 	auto gameMode = packet->ReadString();
-	client->StartGame(gameMode);
+	client->StartNewGame(gameMode);
 	if(!client->IsGameActive())
 		return;
 	CGame *game = client->GetGameState();

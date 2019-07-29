@@ -4,6 +4,7 @@
 #include "pragma/c_engine.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/console/c_cvar.h"
+#include "pragma/networking/c_nwm_util.h"
 #include "luasystem.h"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -28,12 +29,88 @@ DLLCLIENT void NET_cl_snd_precache(NetPacket packet)
 DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 {
 	std::string snd = packet->ReadString();
+	auto type = packet->Read<ALSoundType>();
 	unsigned int idx = packet->Read<unsigned int>();
-	auto createFlags = static_cast<ALCreateFlags>(packet->Read<uint32_t>());
+	auto createFlags = packet->Read<ALCreateFlags>();
 	auto as = client->CreateSound(snd,ALSoundType::Generic,createFlags);
 	if(as == nullptr)
 		return;
 	client->IndexSound(as,idx);
+
+	auto fullUpdate = packet->Read<bool>();
+	if(fullUpdate == false)
+		return;
+	auto state = packet->Read<ALState>();
+
+	as->SetOffset(packet->Read<float>());
+	as->SetPitch(packet->Read<float>());
+	as->SetLooping(packet->Read<bool>());
+	as->SetGain(packet->Read<float>());
+	as->SetPosition(packet->Read<Vector3>());
+	as->SetVelocity(packet->Read<Vector3>());
+	as->SetDirection(packet->Read<Vector3>());
+	as->SetRelative(packet->Read<bool>());
+	as->SetReferenceDistance(packet->Read<float>());
+	as->SetRolloffFactor(packet->Read<float>());
+	as->SetRoomRolloffFactor(packet->Read<float>());
+	as->SetMaxDistance(packet->Read<float>());
+	as->SetMinGain(packet->Read<float>());
+	as->SetMaxGain(packet->Read<float>());
+	as->SetInnerConeAngle(packet->Read<float>());
+	as->SetOuterConeAngle(packet->Read<float>());
+	as->SetOuterConeGain(packet->Read<float>());
+	as->SetOuterConeGainHF(packet->Read<float>());
+	as->SetFlags(packet->Read<uint32_t>());
+
+	auto start = packet->Read<float>();
+	auto end = packet->Read<float>();
+	as->SetRange(start,end);
+
+	as->SetFadeInDuration(packet->Read<float>());
+	as->SetFadeOutDuration(packet->Read<float>());
+	as->SetPriority(packet->Read<uint32_t>());
+
+	auto at = packet->Read<Vector3>();
+	auto up = packet->Read<Vector3>();
+	as->SetOrientation(at,up);
+
+	as->SetDopplerFactor(packet->Read<float>());
+	as->SetLeftStereoAngle(packet->Read<float>());
+	as->SetRightStereoAngle(packet->Read<float>());
+
+	as->SetAirAbsorptionFactor(packet->Read<float>());
+
+	auto directHF = packet->Read<bool>();
+	auto send = packet->Read<bool>();
+	auto sendHF = packet->Read<bool>();
+	as->SetGainAuto(directHF,send,sendHF);
+
+	auto gain = packet->Read<float>();
+	auto gainHF = packet->Read<float>();
+	auto gainLF = packet->Read<float>();
+	as->SetDirectFilter({gain,gainHF,gainLF});
+
+	std::weak_ptr<ALSound> wpSnd = as;
+	nwm::read_unique_entity(packet,[wpSnd](BaseEntity *ent) {
+		if(ent == nullptr || wpSnd.expired())
+			return;
+		wpSnd.lock()->SetSource(ent);
+	});
+
+	switch(state)
+	{
+	case ALState::Paused:
+		as->Pause();
+		break;
+	case ALState::Playing:
+		as->Play();
+		break;
+	case ALState::Stopped:
+		as->Stop();
+		break;
+	case ALState::Initial:
+		break;
+	}
 }
 
 DLLCLIENT void NET_cl_snd_ev(NetPacket packet)
@@ -390,7 +467,7 @@ void CALSound::UpdateVolume()
 		auto minGain = 1.f;
 		for(auto it=volumes.begin();it!=volumes.end();++it)
 		{
-			if((umath::to_integral(m_type) &it->first) != 0)
+			if((umath::to_integral(m_type) &umath::to_integral(it->first)) != 0)
 			{
 				if(it->second < minGain)
 					minGain = it->second;

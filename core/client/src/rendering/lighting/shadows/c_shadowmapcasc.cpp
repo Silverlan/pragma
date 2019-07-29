@@ -31,6 +31,7 @@ extern DLLCLIENT CGame *c_game;
 
 #define CSM_MAX_SHADOW_DISTANCE 10'000
 #define CSM_SHADOW_SPLIT_FACTOR 0.9f
+#pragma optimize("",off)
 FrustumSplit::FrustumSplit()
 	: neard(0.f),fard(0.f)
 {}
@@ -629,3 +630,4 @@ void ShadowMapCasc::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuffer> &
 		//img->SetInternalLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
 	}
 }
+#pragma optimize("",on)

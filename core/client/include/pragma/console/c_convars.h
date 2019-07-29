@@ -20,7 +20,8 @@ REGISTER_CONVAR_CL(cl_fov_viewmodel,"70",ConVarFlags::Archive,"Horizontal view m
 REGISTER_CONVAR_CL(debug_csm_show_cascades,"0",ConVarFlags::Cheat,"Displays the cascades in different colors.");
 REGISTER_CONVAR_CL(debug_light_depth,"0",ConVarFlags::Cheat,"1 = Display depth values from shadow maps in light sources, 2 = Display depth values in shadow space.");
 REGISTER_CONVAR_CL(debug_nav_show_meshes,"0",ConVarFlags::Cheat,"Shows the navigation mesh for this map.");
-REGISTER_CONVAR_CL(debug_physics_draw,"0",ConVarFlags::Cheat,"Draws various physics information as wireframe. 1 = Draw all available information, 2 = Draw physics geometry only, 3 = Draw constraints only, 4 = Draw normals only.");
+REGISTER_CONVAR_CL(debug_physics_draw,"0",ConVarFlags::Cheat,"Draws various physics information as wireframe.");
+REGISTER_CONVAR_CL(sv_debug_physics_draw,"0",ConVarFlags::Cheat | ConVarFlags::Singleplayer,"Draws various serverside physics information as wireframe.");
 REGISTER_CONVAR_CL(debug_bsp_nodes,"0",ConVarFlags::Cheat,"Prints and draws various debug information about the binary space partitioning of the level (if available). 1 = Draw leaf of camera location and all visible leaves, 2 = Same, but doesn't update continuously.");
 REGISTER_CONVAR_CL(debug_bsp_lock,"0",ConVarFlags::Cheat,"Locks BSP culling so it doesn't change when the camera moves.");
 REGISTER_CONVAR_CL(debug_render_octree_static_draw,"0",ConVarFlags::Cheat,"Draws the octree for static world geometry.");

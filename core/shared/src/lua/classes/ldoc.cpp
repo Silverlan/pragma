@@ -39,7 +39,76 @@ private:
 };
 #endif
 
-static void get_class_info(lua_State *L,luabind::detail::class_rep * crep)
+#undef GetClassInfo
+
+struct LuaFunctionInfo
+{
+	std::string name;
+};
+
+struct LuaClassInfo
+{
+	std::string name;
+	std::vector<LuaFunctionInfo> methods;
+};
+
+class DocValidator
+{
+public:
+private:
+	template<class TItem>
+		static const TItem *FindItem(const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
+	{
+		return nullptr;
+	}
+	template<class TItem>
+		static const TItem *FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const);
+	void GetClassInfo(lua_State *L,luabind::detail::class_rep *crep);
+	void FindFunction(const std::string &name) {}
+	void WriteToLog(const std::stringstream &log) {}
+	void ValidateCollection(const pragma::doc::Collection &collection);
+	std::vector<LuaClassInfo> m_classes;
+};
+
+template<class TItem>
+	static const TItem *DocValidator::FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
+{
+	auto &items = (collection.*fPt)();
+	auto it = std::find_if(items.begin(),items.end(),[&name](const TItem &el) {
+		return el.GetName() == name;
+	});
+	if(it != items.end())
+		return &*it;
+	for(auto &child : collection.GetChildren())
+	{
+		auto *pItem = find_item(*child,name,fPt);
+		if(pItem)
+			return pItem;
+	}
+	return nullptr;
+}
+
+static bool find_function(const pragma::doc::Collection &collection,const std::string &name)
+{
+
+}
+
+void DocValidator::ValidateCollection(const pragma::doc::Collection &collection)
+{
+	auto name = collection.GetName();
+	auto it = std::find_if(m_classes.begin(),m_classes.end(),[&name](const LuaClassInfo &luaClass) {
+		return luaClass.name == name;
+	});
+	if(it == m_classes.end())
+		Con::cout<<"CLASS NOT FOUND!"<<Con::endl;
+	//find_item<pragma::doc::Function>(collection,name,&pragma::doc::Collection::GetFunctions);
+	for(auto &f : collection.GetFunctions())
+	{
+
+	}
+}
+
+void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 {
 	crep->get_table(L);
 	luabind::object table(luabind::from_stack(L, -1));
@@ -49,33 +118,47 @@ static void get_class_info(lua_State *L,luabind::detail::class_rep * crep)
 
 	for(luabind::iterator i(table), e; i != e; ++i)
 	{
+		std::string key;
+		auto lkey = i.key();
+		lkey.push(L);
+		if(Lua::IsString(L,-1))
+			key = Lua::CheckString(L,-1);
+		Lua::Pop(L,1);
+
 		auto type = luabind::type(*i);
+		switch(type)
+		{
+		case LUA_TFUNCTION:
+		{
+			auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
+			if(f == nullptr)
+			{
+				std::stringstream ss;
+				ss<<"Function '"<<key<<"' not found!";
+				WriteToLog(ss);
+			}
+			break;
+		}
+		case LUA_TBOOLEAN:
+			break;
+		case LUA_TNUMBER:
+			break;
+		case LUA_TSTRING:
+			break;
+		case LUA_TTABLE:
+			break;
+		case LUA_TUSERDATA:
+			break;
+		case LUA_TLIGHTUSERDATA:
+			break;
+		}
 		if(type != LUA_TFUNCTION)
 			Con::cout<<"Type: "<<type<<Con::endl;
 		if(type == LUA_TNUMBER)
 		{
-			auto key = i.key();
-			key.push(L);
-			if(Lua::IsString(L,-1))
-				Con::cout<<"Key: "<<Lua::CheckString(L,-1)<<Con::endl;
-			Lua::Pop(L,1);
 		}
 		if(type != LUA_TFUNCTION)
 			continue;
-
-/*
-#define LUA_TNONE		(-1)
-
-#define LUA_TNIL		0
-#define LUA_TBOOLEAN		1
-#define LUA_TLIGHTUSERDATA	2
-#define LUA_TNUMBER		3
-#define LUA_TSTRING		4
-#define LUA_TTABLE		5
-#define LUA_TFUNCTION		6
-#define LUA_TUSERDATA		7
-#define LUA_TTHREAD		8
-*/
 
 		// We have to create a temporary `object` here, otherwise the proxy
 		// returned by operator->() will mess up the stack. This is a known
@@ -123,7 +206,7 @@ static luabind::object get_class_names(lua_State* L)
 		std::vector<pragma::doc::PCollection> collections {};
 		// TODO
 
-		get_class_info(L,cl.second);
+		//get_class_info(L,cl.second);
 	}
 
 	luabind::detail::class_registry* r = luabind::detail::class_registry::get_registry(L);

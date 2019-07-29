@@ -18,6 +18,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_environment,CEnvLightDirectional);
 
+#pragma optimize("",off)
 void CLightDirectionalComponent::Initialize()
 {
 	BaseEnvLightDirectionalComponent::Initialize();
@@ -340,3 +341,4 @@ void CLightDirectionalComponent::UpdateFrustum()
 		return;
 	csm->UpdateFrustum(*cam,GetViewMatrix(),pTrComponent->GetForward());
 }
+#pragma optimize("",on)

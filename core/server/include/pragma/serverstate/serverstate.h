@@ -25,6 +25,7 @@ namespace pragma
 	};
 };
 struct Resource;
+class SALSound;
 enum class ServerEvent : int;
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -37,7 +38,6 @@ public:
 	static ConVarHandle GetConVarHandle(std::string scvar);
 //
 private:
-	SGame *m_game = nullptr;
 	std::unordered_map<std::string,ConCommand*> m_luaConCommands;
 	unsigned int m_conCommandID;
 	std::unique_ptr<pragma::networking::IServer> m_server = nullptr;
@@ -71,6 +71,7 @@ public:
 	void SendResourceFile(const std::string &f);
 	void SendRoughModel(const std::string &f,const std::vector<pragma::networking::IServerClient*> &clients);
 	void SendRoughModel(const std::string &f);
+	void SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,const pragma::networking::ClientRecipientFilter *rf=nullptr);
 	// ConVars
 	virtual ConVar *SetConVar(std::string scmd,std::string value,bool bApplyIfEqual=false) override;
 	// Sound
@@ -81,8 +82,8 @@ public:
 	virtual void StopSounds() override;
 	virtual void StopSound(std::shared_ptr<ALSound> pSnd) override;
 	// Game
-	virtual void StartGame() override;
-	virtual void LoadMap(const char *map,bool bDontReload=false) override;
+	virtual void StartGame(bool singlePlayer) override;
+	virtual void ChangeLevel(const std::string &map) override;
 
 	void UpdatePlayerScore(pragma::SPlayerComponent &pl,int32_t score);
 	void UpdatePlayerName(pragma::SPlayerComponent &pl,const std::string &name);
@@ -95,7 +96,7 @@ public:
 
 	virtual bool IsMultiPlayer() const override;
 	virtual bool IsSinglePlayer() const override;
-	void StartServer();
+	void StartServer(bool singlePlayer);
 	void CloseServer();
 	pragma::networking::IServerClient *GetLocalClient();
 	void InitResourceTransfer(pragma::networking::IServerClient &session);
@@ -120,10 +121,11 @@ public:
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="") override;
 	void GetLuaConCommands(std::unordered_map<std::string,ConCommand*> **cmds);
 
+	bool IsClientAuthenticationRequired() const;
 	void SetServerInterface(std::unique_ptr<pragma::networking::IServer> iserver);
 
 	// Game
-	virtual SGame *GetGameState() override;
+	SGame *GetGameState();
 	virtual void EndGame() override;
 	virtual bool IsGameActive() override;
 	virtual Material *LoadMaterial(const std::string &path,bool bReload=false) override;

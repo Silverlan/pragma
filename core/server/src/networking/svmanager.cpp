@@ -64,10 +64,10 @@ void ServerState::SetServerInterface(std::unique_ptr<pragma::networking::IServer
 	//m_server = std::move(iserver);
 }
 
-void ServerState::StartServer()
+void ServerState::StartServer(bool singlePlayer)
 {
 	CloseServer();
-	InitializeGameServer();
+	InitializeGameServer(singlePlayer);
 	if(m_server == nullptr)
 		return;
 
@@ -87,14 +87,5 @@ void ServerState::CloseServer()
 
 /////////////////////////////////
 
-DLLSERVER void CMD_startserver(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
-{
-	if(argv.empty())
-	{
-		engine->StartServer();
-		return;
-	}
-	engine->StartServer(); // atoi(argv[0].c_str())); // WVTODO
-}
-
+DLLSERVER void CMD_startserver(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {engine->StartServer(false);}
 DLLSERVER void CMD_closeserver(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {engine->CloseServer();}

@@ -2,6 +2,9 @@
 #include "vr_eye.hpp"
 #include "vr_instance.hpp"
 #include "wvmodule.h"
+#include <pragma/game/c_game.h>
+#include <pragma/entities/environment/c_env_camera.h>
+#include <pragma/rendering/renderers/rasterization_renderer.hpp>
 #include <prosper_context.hpp>
 #include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
@@ -9,6 +12,8 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
+
+extern DLLCLIENT CGame *c_game;
 
 openvr::Eye::Eye(Instance *instance,vr::EVREye _eye)
 	: 
@@ -110,16 +115,28 @@ bool openvr::Eye::Initialize(uint32_t w,uint32_t h)
 #if LOPENVR_VERBOSE == 1
 		std::cout<<"[VR] Creating render scene..."<<std::endl;
 #endif
-	scene = IScene::Create(w,h,mainScene.GetFOV(),mainScene.GetViewFOV(),static_cast<float>(w) /static_cast<float>(h),mainScene.GetZNear(),mainScene.GetZFar());
+	scene = IScene::Create(w,h);
 	scene.InitializeRenderTarget();
 	scene.SetWorldEnvironment(mainScene.GetWorldEnvironment());
 	scene.SetLightSourceListInfo(mainScene.GetLightSourceListInfo());
 	scene.LinkEntities(mainScene);
-	auto *vrInterface = m_instance->GetSystemInterface();
-	auto mProj = vrInterface->GetProjectionMatrix(eye,scene.GetZNear(),scene.GetZFar());
-	auto m = glm::transpose(reinterpret_cast<Mat4&>(mProj.m));
-	m = glm::scale(m,Vector3(1.f,-1.f,1.f));
-	scene.SetProjectionMatrix(reinterpret_cast<IMat4&>(m));
+
+	auto &pragmaScene = scene.GetInternalScene();
+	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(pragmaScene);
+	pragmaScene.SetRenderer(renderer);
+
+	auto *cam = c_game->GetPrimaryCamera();
+	auto *camEye = cam ? c_game->CreateCamera(width,height,cam->GetFOV(),cam->GetNearZ(),cam->GetFarZ()) : nullptr;
+	if(camEye)
+	{
+		camera = camEye->GetHandle<pragma::CCameraComponent>();
+		auto *vrInterface = m_instance->GetSystemInterface();
+		auto mProj = vrInterface->GetProjectionMatrix(eye,camEye->GetNearZ(),camEye->GetFarZ());
+		auto m = glm::transpose(reinterpret_cast<Mat4&>(mProj.m));
+		m = glm::scale(m,Vector3(1.f,-1.f,1.f));
+		camEye->SetProjectionMatrix(m);
+		pragmaScene.SetActiveCamera(*camera);
+	}
 
 #ifdef USE_VULKAN
 	auto extents = img->GetExtents();
@@ -155,10 +172,10 @@ void openvr::Eye::UpdateImage(const prosper::Image &src)
 #endif
 }
 
-Mat4 openvr::Eye::GetEyeViewMatrix() const
+Mat4 openvr::Eye::GetEyeViewMatrix(pragma::CCameraComponent &cam) const
 {
 	auto *vrInterface = m_instance->GetSystemInterface();
-	auto &matView = reinterpret_cast<const Mat4&>(scene.GetViewMatrix());
+	auto &matView = cam.GetViewMatrix();
 
 	auto eyeTransform = vrInterface->GetEyeToHeadTransform(eye);
 	Mat4 m(

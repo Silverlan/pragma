@@ -119,7 +119,7 @@ void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysics
 
 	InitializeWheelEntities();
 	if(m_steeringWheelMdl.empty() == false)
-		SetSteeringWheelModel(m_steeringWheelMdl);
+		SetupSteeringWheel(m_steeringWheelMdl,m_maxSteeringWheelAngle);
 }
 
 void BaseVehicleComponent::DestroyVehiclePhysics()
@@ -141,30 +141,35 @@ float BaseVehicleComponent::GetSpeedKmh() const
 void BaseVehicleComponent::InitializeSteeringWheel()
 {
 	auto *ent = GetSteeringWheel();
-	if(ent == nullptr)
+	if(ent == nullptr)// || umath::is_flag_set(m_stateFlags,StateFlags::SteeringWheelInitialized))
 		return;
+	umath::set_flag(m_stateFlags,StateFlags::SteeringWheelInitialized);
 	if(m_cbSteeringWheel.IsValid())
 		m_cbSteeringWheel.Remove();
-	auto *pAttComponent = static_cast<BaseAttachableComponent*>(ent->FindComponent("attachable").get());
-	if(pAttComponent != nullptr)
-	{
-		m_cbSteeringWheel = pAttComponent->AddEventCallback(BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE,[this,pAttComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			auto pTrComponentSteeringWheel = pAttComponent->GetEntity().GetTransformComponent();
-			if(pTrComponentSteeringWheel.expired())
-				return util::EventReply::Unhandled;
-			auto ang = EulerAngles(-GetSteeringAngle(),0.f,0.f);
-			auto rot = uquat::create(ang);
-			auto rotEnt = pTrComponentSteeringWheel->GetOrientation();
-			rotEnt = rotEnt *rot;
-			pTrComponentSteeringWheel->SetOrientation(rotEnt);
+	auto pAttachableComponent = ent->AddComponent("attachable");
+	if(pAttachableComponent.expired())
+		return;
+	AttachmentInfo attInfo {};
+	attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
+	static_cast<BaseAttachableComponent*>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(),"steering_wheel",attInfo);
+
+	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE,[this,pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
+		if(pTrComponentSteeringWheel.expired())
 			return util::EventReply::Unhandled;
-		});
-	}
+		auto ang = EulerAngles(-GetSteeringFactor() *m_maxSteeringWheelAngle,0.f,0.f);
+		auto rot = uquat::create(ang);
+		auto rotEnt = pTrComponentSteeringWheel->GetOrientation();
+		rotEnt = rotEnt *rot;
+		pTrComponentSteeringWheel->SetOrientation(rotEnt);
+		return util::EventReply::Unhandled;
+	});
 }
 
-void BaseVehicleComponent::SetSteeringWheelModel(const std::string &mdl)
+void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle)
 {
 	m_steeringWheelMdl = mdl;
+	m_maxSteeringWheelAngle = maxSteeringAngle;
 	auto &entThis = GetEntity();
 	if(!entThis.IsSpawned())
 		return;
@@ -173,34 +178,23 @@ void BaseVehicleComponent::SetSteeringWheelModel(const std::string &mdl)
 		auto *ent = entThis.GetNetworkState()->GetGameState()->CreateEntity("prop_dynamic");
 		if(ent == nullptr)
 			return;
-		auto mdlComponent = ent->GetModelComponent();
-		if(mdlComponent.valid())
-			mdlComponent->SetModel(mdl.c_str());
-		auto pAttachableComponent = ent->AddComponent("attachable");
-		if(pAttachableComponent.valid())
-		{
-			AttachmentInfo attInfo {};
-			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
-			static_cast<BaseAttachableComponent*>(pAttachableComponent.get())->AttachToAttachment(&GetEntity(),"steering_wheel",attInfo);
-		}
-		ent->Spawn();
 		m_steeringWheel = ent->GetHandle();
+		ent->Spawn();
 		entThis.RemoveEntityOnRemoval(ent);
-		InitializeSteeringWheel();
-		return;
 	}
 	auto mdlComponent = m_steeringWheel->GetModelComponent();
 	if(mdlComponent.expired())
 		return;
 	mdlComponent->SetModel(mdl.c_str());
+	InitializeSteeringWheel();
 }
 
 void BaseVehicleComponent::ClearDriver()
 {
-	if(m_bHasDriver == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::HasDriver) == false)
 		return;
 	BroadcastEvent(EVENT_ON_DRIVER_EXITED);
-	m_bHasDriver = false;
+	umath::set_flag(m_stateFlags,StateFlags::HasDriver,false);
 	m_driver = EntityHandle();
 	if(m_physVehicle.IsValid())
 		m_physVehicle->ResetControls();
@@ -211,7 +205,7 @@ void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 	if(m_driver.IsValid())
 		ClearDriver();
 	m_driver = ent->GetHandle();
-	m_bHasDriver = true;
+	umath::set_flag(m_stateFlags,StateFlags::HasDriver,true);
 	BroadcastEvent(EVENT_ON_DRIVER_ENTERED);
 }
 
@@ -269,7 +263,7 @@ void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo
 void BaseVehicleComponent::Think(double tDelta)
 {
 	auto *driver = GetDriver();
-	if(m_physVehicle == nullptr || m_bHasDriver == false)
+	if(m_physVehicle == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::HasDriver) == false)
 		return;
 	if(driver == nullptr || driver->IsPlayer() == false)
 	{
@@ -328,14 +322,15 @@ void BaseVehicleComponent::Initialize()
 	if(whRenderComponent.valid())
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
 	m_netEvSteeringWheelModel = SetupNetEvent("steering_wheel");
+	m_netEvSetDriver = SetupNetEvent("set_driver");
 }
 
 uint8_t BaseVehicleComponent::GetWheelCount() const {return static_cast<uint8_t>(m_wheels.size());}
 
-Float BaseVehicleComponent::GetSteeringAngle() const
+Float BaseVehicleComponent::GetSteeringFactor() const
 {
-	if(m_physVehicle == nullptr)
+	if(m_physVehicle == nullptr || m_vhcCreateInfo.wheels.empty())
 		return 0.f;
-	return m_physVehicle->GetSteerFactor();
+	return umath::clamp(static_cast<float>(umath::rad_to_deg(m_physVehicle->GetWheelYawAngle(0)) /m_vhcCreateInfo.wheels.front().maxSteeringAngle),-1.f,1.f);
 }
 #pragma optimize("",on)

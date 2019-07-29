@@ -12,7 +12,7 @@ class DLLSERVER SALSoundScript
 protected:
 	virtual std::shared_ptr<ALSound> CreateSound(const std::string &name,ALChannel channel,ALCreateFlags createFlags) override;
 public:
-	SALSoundScript(NetworkState *nw,unsigned int idx,SoundScript *script,NetworkState *state,bool bStream,bool bShared=true);
+	SALSoundScript(NetworkState *nw,unsigned int idx,SoundScript *script,NetworkState *state,const std::string &soundName,ALCreateFlags createFlags);
 	virtual ALState GetState() const override;
 	virtual unsigned int GetIndex() const override;
 	virtual void FadeIn(float time) override;

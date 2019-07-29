@@ -3,7 +3,7 @@
 
 #include "pragma/clientdefinitions.h"
 
-struct DLLCLIENT WILuaHandleWrapper
+class DLLCLIENT WILuaHandleWrapper
 {
 private:
 	WILuaHandleWrapper()

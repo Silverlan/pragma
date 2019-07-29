@@ -4,8 +4,8 @@
 
 extern DLLSERVER ServerState *server;
 
-SALSoundScript::SALSoundScript(NetworkState *nw,unsigned int idx,SoundScript *script,NetworkState *state,bool bStream,bool bShared)
-	: ALSoundScript(nw,idx,script,state,bStream),SALSound(nw,idx,0.f,bShared),ALSound(nw)
+SALSoundScript::SALSoundScript(NetworkState *nw,unsigned int idx,SoundScript *script,NetworkState *state,const std::string &soundName,ALCreateFlags createFlags)
+	: ALSoundScript(nw,idx,script,state,umath::is_flag_set(createFlags,ALCreateFlags::Stream)),SALSound(nw,idx,0.f,soundName,createFlags),ALSound(nw)
 {}
 std::shared_ptr<ALSound> SALSoundScript::CreateSound(const std::string &name,ALChannel channel,ALCreateFlags createFlags)
 {

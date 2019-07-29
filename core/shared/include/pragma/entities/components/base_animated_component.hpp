@@ -76,11 +76,6 @@ namespace pragma
 
 		virtual void Initialize() override;
 
-		bool GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const;
-		bool GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const;
-		bool GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const;
-		bool GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const;
-
 		virtual void MaintainAnimationMovement(const Vector3 &disp);
 
 		void SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale);

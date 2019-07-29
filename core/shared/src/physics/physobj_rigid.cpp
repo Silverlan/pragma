@@ -131,7 +131,7 @@ void RigidPhysObj::ApplyMass(float mass)
 	{
 		auto &body = m_rigidBodies[i];
 		if(body.IsValid())
-			body->GetRigidBody()->SetMass(mass);
+			body->GetRigidBody()->SetMassAndUpdateInertia(mass);
 	}
 }
 float RigidPhysObj::GetMass() const {return m_mass;}
@@ -272,10 +272,11 @@ void RigidPhysObj::SetStatic(bool b)
 		if(body.IsValid())
 			body->SetStatic(b);
 	}
+	/* Mass mustn't be changed here, since changing it also affects center-of-mass and inertia!
 	if(b == true)
 		ApplyMass(0.f);
 	else
-		ApplyMass(m_mass);
+		ApplyMass(m_mass);*/
 }
 bool RigidPhysObj::IsRigid() const {return true;}
 void RigidPhysObj::AddCollisionObject(pragma::physics::ICollisionObject &o)

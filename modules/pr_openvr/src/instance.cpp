@@ -14,10 +14,14 @@
 #include <shader/prosper_shader.hpp>
 #include <prosper_util.hpp>
 #include <pragma/iscene.h>
+#include <pragma/game/c_game.h>
+#include <pragma/entities/environment/c_env_camera.h>
 #include <sharedutils/util_string.h>
 #ifdef _DEBUG
 #include <iostream>
 #endif
+
+extern DLLCLIENT CGame *c_game;
 
 using namespace openvr;
 
@@ -492,20 +496,25 @@ void Instance::DrawScene()
 	};
 
 	auto gameScene = IState::get_render_scene();
+	auto camGame = gameScene.GetInternalScene().GetActiveCamera();
+	if(camGame.expired())
+		return;
 	std::array<Eye*,2> eyes = {m_leftEye.get(),m_rightEye.get()};
 	for(auto *eye : eyes)
 	{
 		auto &rt = eye->vkRenderTarget;
 		auto &vkTexture = rt->GetTexture();
 		auto &vkImg = vkTexture->GetImage();
-
+		auto &cam = eye->camera;
+		if(cam.expired())
+			continue;
+		cam->GetEntity().SetPosition(camGame->GetEntity().GetPosition());
+		cam->GetEntity().SetRotation(camGame->GetEntity().GetRotation());
+		cam->SetViewMatrix(camGame->GetViewMatrix());
 		auto &scene = eye->scene;
-		scene.SetPos(gameScene.GetPos());
-		scene.SetForward(gameScene.GetForward());
-		scene.SetUp(gameScene.GetUp());
-		scene.UpdateViewMatrix();
-		auto mView = m_hmdPoseMatrix *eye->GetEyeViewMatrix();
-		scene.SetViewMatrix(reinterpret_cast<IMat4&>(mView));
+		auto mViewCam = cam->GetViewMatrix();
+		auto mView = m_hmdPoseMatrix *eye->GetEyeViewMatrix(*cam);
+		cam->SetViewMatrix(mView);
 
 		// TODO
 		//auto mProj = eye->GetEyeProjectionMatrix(scene.GetZNear(),scene.GetZFar());
@@ -518,6 +527,10 @@ void Instance::DrawScene()
 		{
 #ifdef USE_VULKAN
 			prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+			//prosper::util::record_clear_image(**drawCmdInfo.commandBuffer,**vkImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,std::array<float,4>{1.f,0.f,0.f,1.f});
+			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+
 #endif
 			IState::draw_scene(scene,drawCmdInfo.commandBuffer,rt);
 			eye->UpdateImage(*vkImg);
@@ -531,6 +544,8 @@ void Instance::DrawScene()
 			drawCmdInfo.commandBuffer->GetContext().SubmitCommandBuffer(*drawCmdInfo.commandBuffer,false,&drawCmdInfo.fence->GetAnvilFence());
 			m_commandBuffers.push_front(drawCmdInfo);
 		}
+		// Reset old view matrix
+		cam->SetViewMatrix(mViewCam);
 	}
 	for(auto *eye : eyes)
 		fCheckError(m_compositor->Submit(eye->eye,&eye->vrTexture));

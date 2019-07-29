@@ -16,6 +16,13 @@ namespace pragma
 		static ComponentEventId EVENT_ON_DRIVER_ENTERED;
 		static ComponentEventId EVENT_ON_DRIVER_EXITED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			HasDriver = 1u,
+			SteeringWheelInitialized = HasDriver<<1u
+		};
+
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		BaseEntity *GetDriver();
@@ -30,9 +37,9 @@ namespace pragma
 
 		BaseEntity *GetSteeringWheel();
 		float GetSpeedKmh() const;
-		float GetSteeringAngle() const;
+		float GetSteeringFactor() const;
 
-		virtual void SetSteeringWheelModel(const std::string &mdl);
+		virtual void SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle);
 
 		physics::IVehicle *GetPhysicsVehicle();
 		const physics::IVehicle *GetPhysicsVehicle() const;
@@ -45,6 +52,7 @@ namespace pragma
 			std::string model = "";
 		};
 		pragma::NetEventId m_netEvSteeringWheelModel = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netEvSetDriver = pragma::INVALID_NET_EVENT;
 		std::vector<WheelData> m_wheels = {};
 		physics::VehicleCreateInfo m_vhcCreateInfo = {};
 		util::TSharedHandle<physics::IVehicle> m_physVehicle = nullptr;
@@ -52,7 +60,8 @@ namespace pragma
 		EntityHandle m_steeringWheel = {};
 		CallbackHandle m_cbSteeringWheel = {};
 		EntityHandle m_driver = {};
-		bool m_bHasDriver = false;
+		StateFlags m_stateFlags = StateFlags::None;
+		float m_maxSteeringWheelAngle = 0.f;
 		void InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysicsComponent::PhysFlags flags);
 		void DestroyVehiclePhysics();
 		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex);
@@ -60,5 +69,6 @@ namespace pragma
 		void InitializeSteeringWheel();
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseVehicleComponent::StateFlags)
 
 #endif

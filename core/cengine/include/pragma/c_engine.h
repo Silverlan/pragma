@@ -92,10 +92,10 @@ public:
 	virtual bool IsConsoleOpen() const override;
 	void UseFullbrightShader(bool b);
 	float GetFPSLimit() const;
+	virtual void StartDefaultGame(const std::string &map) override;
 	virtual void EndGame() override;
 	virtual bool IsClientConnected() override;
 	bool IsWindowFocused() const;
-	virtual void LoadMap(const char *map) override;
 	bool IsValidAxisInput(float axisInput) const;
 	void GetMappedKeys(const std::string &cmd,std::vector<GLFW::Key> &keys,uint32_t maxKeys=1);
 	// Returns true if the input is a valid button input state (pressed or released)
@@ -161,6 +161,7 @@ public:
 	// Peer-to-peer only
 	void Connect(uint64_t steamId);
 	void Disconnect();
+	virtual bool IsMultiPlayer() const override;
 	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p) override;
 	// KeyMappings
 	void MapKey(short c,std::string cmd);

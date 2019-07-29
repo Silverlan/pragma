@@ -30,7 +30,6 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual bool ShouldTransmitNetData() const override {return false;}
 		virtual void ReceiveSnapshotData(NetPacket &packet) override;
-		virtual bool ShouldTransmitSnapshotData() const override {return true;}
 	};
 };
 

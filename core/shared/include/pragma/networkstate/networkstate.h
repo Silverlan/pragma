@@ -63,40 +63,6 @@ public:
 		UpdateSounds = 0u,
 		Count
 	};
-protected:
-	static UInt8 STATE_COUNT;
-	std::unique_ptr<MapInfo> m_mapInfo = nullptr;
-	bool m_bTCPOnly;
-	bool m_bTerminateSocket;
-	std::vector<CallbackHandle> m_luaEnumRegisterCallbacks;
-	std::unique_ptr<ResourceWatcherManager> m_resourceWatcher;
-
-	std::unordered_map<std::string,std::string> m_conOverrides;
-	ChronoTime m_ctReal;
-	double m_tReal;
-	double m_tDelta;
-	double m_tLast;
-	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
-	std::vector<CallbackHandle> m_thinkCallbacks;
-	std::vector<CallbackHandle> m_tickCallbacks;
-	CallbackHandle m_cbProfilingHandle = {};
-	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
-
-	// Library handles are stored as shared_ptrs of shared_ptr because we need the
-	// use count of each library in the network states to determine when to detach
-	// the library (use count = 0 => not used in any network state => detach),
-	// but this doesn't work if shared_ptr instances exist outside of the
-	// network states.
-	std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
-	std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
-	static std::unordered_map<std::string,std::shared_ptr<std::shared_ptr<util::Library>>> s_loadedLibraries;
-	std::unordered_map<lua_State*,std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
-
-	void InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module);
-
-	virtual void InitializeResourceManager();
-	void ClearGameConVars();
-	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
 public:
 	// Internal
 	std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
@@ -164,11 +130,12 @@ public:
 	void ClearConsoleCommandOverrides();
 
 	// Game
-	virtual void StartGame();
+	virtual void StartGame(bool singlePlayer);
 	virtual void EndGame();
-	virtual Game *GetGameState();
+	Game *GetGameState();
 	virtual bool IsGameActive();
-	virtual void LoadMap(const char *map,bool bDontReload=false);
+	virtual void StartNewGame(const std::string &map,bool singlePlayer);
+	virtual void ChangeLevel(const std::string &map);
 
 	// Sound
 	float GetSoundDuration(std::string snd);
@@ -193,6 +160,42 @@ public:
 
 	ConVar *CreateConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="");
 	virtual ConCommand *CreateConCommand(const std::string &scmd,LuaFunction fc,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
+protected:
+	static UInt8 STATE_COUNT;
+	std::unique_ptr<MapInfo> m_mapInfo = nullptr;
+	bool m_bTCPOnly;
+	bool m_bTerminateSocket;
+	std::vector<CallbackHandle> m_luaEnumRegisterCallbacks;
+	std::unique_ptr<ResourceWatcherManager> m_resourceWatcher;
+
+	std::unordered_map<std::string,std::string> m_conOverrides;
+	ChronoTime m_ctReal;
+	double m_tReal;
+	double m_tDelta;
+	double m_tLast;
+
+	std::unique_ptr<Game,void(*)(Game*)> m_game = std::unique_ptr<Game,void(*)(Game*)>{nullptr,[](Game*) {}};
+	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
+	std::vector<CallbackHandle> m_thinkCallbacks;
+	std::vector<CallbackHandle> m_tickCallbacks;
+	CallbackHandle m_cbProfilingHandle = {};
+	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
+
+	// Library handles are stored as shared_ptrs of shared_ptr because we need the
+	// use count of each library in the network states to determine when to detach
+	// the library (use count = 0 => not used in any network state => detach),
+	// but this doesn't work if shared_ptr instances exist outside of the
+	// network states.
+	std::vector<std::shared_ptr<std::shared_ptr<util::Library>>> m_libHandles;
+	std::shared_ptr<util::Library> m_lastModuleHandle = nullptr;
+	static std::unordered_map<std::string,std::shared_ptr<std::shared_ptr<util::Library>>> s_loadedLibraries;
+	std::unordered_map<lua_State*,std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
+
+	void InitializeDLLModule(lua_State *l,std::shared_ptr<util::Library> module);
+
+	virtual void InitializeResourceManager();
+	void ClearGameConVars();
+	virtual void implFindSimilarConVars(const std::string &input,std::vector<SimilarCmdInfo> &similarCmds) const override;
 };
 
 #endif

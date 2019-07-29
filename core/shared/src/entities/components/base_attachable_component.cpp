@@ -260,9 +260,9 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,uint
 		auto &entParent = parent->GetEntity();
 		Vector3 pos {};
 		auto rot = uquat::identity();
-		auto animComponentParent = entParent.GetAnimatedComponent();
-		if(animComponentParent.valid())
-			animComponentParent->GetAttachment(m_attachment->attachment,&pos,&rot);
+		auto mdlCParent = entParent.GetModelComponent();
+		if(mdlCParent.valid())
+			mdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
 		if(pTrComponentParent.valid())
 			pTrComponentParent->LocalToWorld(&pos,&rot);
@@ -420,9 +420,9 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 			}
 			else if(m_attachment->attachment != -1)
 			{
-				auto pAnimComponentParent = entParent.GetAnimatedComponent();
-				if(pAnimComponentParent.valid())
-					pAnimComponentParent->GetAttachment(m_attachment->attachment,&pos,&orientation);
+				auto pMdlCParent = entParent.GetModelComponent();
+				if(pMdlCParent.valid())
+					pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&orientation);
 			}
 			auto pTrComponentParent = entParent.GetTransformComponent();
 			if(pTrComponentParent.valid())

@@ -23,7 +23,6 @@ namespace pragma
 	{
 	public:
 		virtual void ReceiveSnapshotData(NetPacket &packet)=0;
-		virtual bool ShouldTransmitSnapshotData() const=0;
 	};
 
 	/////////////////////////////

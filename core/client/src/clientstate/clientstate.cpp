@@ -90,8 +90,7 @@ static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
 
 ClientState::ClientState()
 	: NetworkState(),m_client(nullptr),m_svInfo(nullptr),m_resDownload(nullptr),
-	m_game(NULL),m_volMaster(1.f),
-	m_hMainMenu(),m_luaGUI(NULL)
+	m_volMaster(1.f),m_hMainMenu(),m_luaGUI(NULL)
 {
 	client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
@@ -416,7 +415,7 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 	if(m_game != nullptr)
-		m_game->RenderScenes(drawCmd,rt);
+		GetGameState()->RenderScenes(drawCmd,rt);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
 	{
 		auto img = rt->GetTexture().lock()->GetImage().lock();
@@ -481,11 +480,20 @@ void ClientState::EndGame()
 {
 	if(!IsGameActive())
 		return;
-	CallCallbacks<void,CGame*>("EndGame",m_game);
+	CallCallbacks<void,CGame*>("EndGame",GetGameState());
 	m_game->CallCallbacks<void>("EndGame");
-	delete m_game;
-	m_game = NULL;
-	c_game = NULL;
+
+	// Game::OnRemove requires that NetworkState::GetGameState returns
+	// a valid game instance, but this is not the case if we destroy
+	// m_game directly. Instead we move it into a temporary
+	// variable and destroy that instead.
+	// TODO: This is really ugly, do it another way!
+	auto game = std::move(m_game);
+	m_game = {game.get(),[](Game*) {}};
+	game = nullptr;
+	m_game = nullptr;
+
+	c_game = nullptr;
 	NetworkState::EndGame();
 	m_conCommandIDs.clear();
 	if(m_hMainMenu.IsValid())
@@ -495,9 +503,9 @@ void ClientState::EndGame()
 	}
 }
 
-bool ClientState::IsGameActive() {return m_game != NULL;}
+bool ClientState::IsGameActive() {return m_game != nullptr;}
 
-CGame *ClientState::GetGameState() {return m_game;}
+CGame *ClientState::GetGameState() {return static_cast<CGame*>(NetworkState::GetGameState());}
 
 void ClientState::HandleLuaNetPacket(NetPacket &packet)
 {
@@ -605,13 +613,13 @@ void ClientState::SendUserInfo()
 
 Lua::ErrorColorMode ClientState::GetLuaErrorColorMode() {return Lua::ErrorColorMode::Magenta;}
 
-void ClientState::StartGame() {StartGame("");}
-void ClientState::StartGame(const std::string &gameMode)
+void ClientState::StartGame(bool) {StartNewGame("");}
+void ClientState::StartNewGame(const std::string &gameMode)
 {
-	NetworkState::StartGame();
-	m_game = new CGame(this);
+	EndGame();
+	m_game = {new CGame{this},[](Game *game) {game->OnRemove(); delete game;}};
 	m_game->SetGameMode(gameMode);
-	CallCallbacks<void,CGame*>("OnGameStart",m_game);
+	CallCallbacks<void,CGame*>("OnGameStart",GetGameState());
 	m_game->Initialize();
 	//if(!IsConnected())
 	//	RequestServerInfo(); // Deprecated; Now handled through NET_cl_map_ready

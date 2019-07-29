@@ -4,8 +4,10 @@
 #include <openvr.h>
 #include <mathutil/umat.h>
 #include <pragma/iscene.h>
+#include <sharedutils/util_weak_handle.hpp>
 
 namespace prosper {class RenderTarget; class Image; class PrimaryCommandBuffer; class Fence;};
+namespace pragma {class CCameraComponent;};
 namespace openvr
 {
 	class Instance;
@@ -19,6 +21,7 @@ namespace openvr
 		bool Initialize(uint32_t w,uint32_t h);
 		vr::EVREye eye;
 		IScene scene;
+		util::WeakHandle<pragma::CCameraComponent> camera;
 #ifdef USE_VULKAN
 		std::shared_ptr<prosper::RenderTarget> vkRenderTarget = nullptr;
 		vr::VRVulkanTextureData_t vrTextureData {};
@@ -30,7 +33,7 @@ namespace openvr
 		uint32_t height;
 		vr::Texture_t vrTexture;
 		void UpdateImage(const prosper::Image &src);
-		Mat4 GetEyeViewMatrix() const;
+		Mat4 GetEyeViewMatrix(pragma::CCameraComponent &cam) const;
 		Mat4 GetEyeProjectionMatrix(float nearZ,float farZ) const;
 	};
 };

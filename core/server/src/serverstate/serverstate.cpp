@@ -41,8 +41,7 @@ extern DLLENGINE Engine *engine;
 DLLSERVER ServerState *server = nullptr;
 DLLSERVER SGame *s_game = nullptr;
 ServerState::ServerState()
-	: NetworkState(),m_server(nullptr),
-	m_game(nullptr)
+	: NetworkState(),m_server(nullptr)
 {
 	m_alsoundID = 1;
 	server = this;
@@ -274,7 +273,7 @@ void ServerState::implFindSimilarConVars(const std::string &input,std::vector<Si
 	NetworkState::FindSimilarConVars(input,svMap->GetConVars(),similarCmds);
 }
 
-SGame *ServerState::GetGameState() {return m_game;}
+SGame *ServerState::GetGameState() {return static_cast<SGame*>(NetworkState::GetGameState());}
 
 bool ServerState::IsGameActive() {return m_game != nullptr;}
 
@@ -282,10 +281,19 @@ void ServerState::EndGame()
 {
 	if(!IsGameActive())
 		return;
-	CallCallbacks<void,SGame*>("EndGame",m_game);
+	CallCallbacks<void,SGame*>("EndGame",GetGameState());
 	m_game->CallCallbacks<void>("EndGame");
-	delete m_game;
+
+	// Game::OnRemove requires that NetworkState::GetGameState returns
+	// a valid game instance, but this is not the case if we destroy
+	// m_game directly. Instead we move it into a temporary
+	// variable and destroy that instead.
+	// TODO: This is really ugly, do it another way!
+	auto game = std::move(m_game);
+	m_game = {game.get(),[](Game*) {}};
+	game = nullptr;
 	m_game = nullptr;
+
 	s_game = nullptr;
 
 	NetworkState::EndGame();
@@ -303,16 +311,16 @@ std::shared_ptr<ALSound> ServerState::GetSoundByIndex(unsigned int idx)
 	return it->get().shared_from_this();
 }
 
-void ServerState::StartGame()
+void ServerState::StartGame(bool singlePlayer)
 {
-	NetworkState::StartGame();
-	StartServer();
-	m_game = new SGame{this};
-	s_game = m_game;
+	NetworkState::StartGame(singlePlayer);
+	StartServer(singlePlayer);
+	m_game = {new SGame{this},[](Game *game) {game->OnRemove(); delete game;}};
+	s_game = static_cast<SGame*>(m_game.get());
 
 	// Register sound-scripts as game resources
 	for(auto &f : m_soundScriptManager->GetSoundScriptFiles())
-		m_game->RegisterGameResource(f);
+		GetGameState()->RegisterGameResource(f);
 	for(auto &pair : m_soundScriptManager->GetScripts())
 	{
 		auto &script = pair.second;
@@ -324,7 +332,7 @@ void ServerState::StartGame()
 				if(evPlaySound != nullptr)
 				{
 					for(auto &src : evPlaySound->sources)
-						m_game->RegisterGameResource("sounds\\" +src);
+						GetGameState()->RegisterGameResource("sounds\\" +src);
 				}
 				fIterateScript(*ev);
 			}
@@ -332,7 +340,7 @@ void ServerState::StartGame()
 		fIterateScript(*script);
 	}
 
-	CallCallbacks<void,SGame*>("OnGameStart",m_game);
+	CallCallbacks<void,SGame*>("OnGameStart",GetGameState());
 	m_game->Initialize();
 	if(IsServerRunning())
 		RegisterServerInfo();
@@ -340,9 +348,9 @@ void ServerState::StartGame()
 
 Lua::ErrorColorMode ServerState::GetLuaErrorColorMode() {return Lua::ErrorColorMode::Cyan;}
 
-void ServerState::LoadMap(const char *map,bool bDontReload)
+void ServerState::ChangeLevel(const std::string &map)
 {
-	NetworkState::LoadMap(map,bDontReload);
+	NetworkState::ChangeLevel(map);
 	auto *game = GetGameState();
 	if(game != nullptr)
 	{
@@ -353,7 +361,7 @@ void ServerState::LoadMap(const char *map,bool bDontReload)
 	game->OnGameReady();
 }
 
-bool ServerState::IsMultiPlayer() const {return (m_server == nullptr) ? false : true;}
+bool ServerState::IsMultiPlayer() const {return m_server && typeid(*m_server) != typeid(pragma::networking::LocalServer);}
 bool ServerState::IsSinglePlayer() const {return !IsMultiPlayer();}
 
 ConVar *ServerState::SetConVar(std::string scmd,std::string value,bool bApplyIfEqual)

@@ -2403,9 +2403,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushNumber(l,hEnt.get()->GetSpeedKmh());
 		}));
-		def.def("GetSteeringAngle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+		def.def("GetSteeringFactor",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			Lua::PushNumber(l,hEnt.get()->GetSteeringAngle());
+			Lua::PushNumber(l,hEnt.get()->GetSteeringFactor());
 		}));
 		def.def("GetSteeringWheel",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -2434,9 +2434,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			hEnt.get()->ClearDriver();
 		}));
-		def.def("SetSteeringWheelModel",static_cast<void(*)(lua_State*,THandle&,const std::string&)>([](lua_State *l,THandle &hEnt,const std::string &model) {
+		def.def("SetupSteeringWheel",static_cast<void(*)(lua_State*,THandle&,const std::string&,float)>([](lua_State *l,THandle &hEnt,const std::string &model,float maxSteeringAngle) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt.get()->SetSteeringWheelModel(model);
+			hEnt.get()->SetupSteeringWheel(model,maxSteeringAngle);
 		}));
 		def.def("GetPhysicsVehicle",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -2955,6 +2955,24 @@ namespace Lua
 			int bone = hEnt->LookupBone(boneName);
 			Lua::PushInt(l,bone);
 		}));
+		def.def("GetAttachmentTransform",static_cast<void(*)(lua_State*,THandle&,std::string)>([](lua_State *l,THandle &hEnt,std::string attachment) {
+			pragma::Lua::check_component(l,hEnt);
+			Vector3 offset(0,0,0);
+			auto rot = uquat::identity();
+			if(hEnt->GetAttachment(attachment,&offset,&rot) == false)
+				return;
+			Lua::Push<Vector3>(l,offset);
+			Lua::Push<Quat>(l,rot);
+		}));
+		def.def("GetAttachmentTransform",static_cast<void(*)(lua_State*,THandle&,int)>([](lua_State *l,THandle &hEnt,int attachment) {
+			pragma::Lua::check_component(l,hEnt);
+			Vector3 offset(0,0,0);
+			auto rot = uquat::identity();
+			if(hEnt->GetAttachment(attachment,&offset,&rot) == false)
+				return;
+			Lua::Push<Vector3>(l,offset);
+			Lua::Push<Quat>(l,rot);
+		}));
 
 		def.add_static_constant("EVENT_ON_MODEL_CHANGED",pragma::BaseModelComponent::EVENT_ON_MODEL_CHANGED);
 		def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED",pragma::BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
@@ -3319,24 +3337,6 @@ namespace Lua
 		def.def("GetBlendController",static_cast<void(*)(lua_State*,THandle&,unsigned int)>([](lua_State *l,THandle &hEnt,unsigned int controller) {
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushNumber(l,hEnt->GetBlendController(controller));
-		}));
-		def.def("GetAttachmentTransform",static_cast<void(*)(lua_State*,THandle&,std::string)>([](lua_State *l,THandle &hEnt,std::string attachment) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 offset(0,0,0);
-			auto rot = uquat::identity();
-			if(hEnt->GetAttachment(attachment,&offset,&rot) == false)
-				return;
-			Lua::Push<Vector3>(l,offset);
-			Lua::Push<Quat>(l,rot);
-		}));
-		def.def("GetAttachmentTransform",static_cast<void(*)(lua_State*,THandle&,int)>([](lua_State *l,THandle &hEnt,int attachment) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 offset(0,0,0);
-			auto rot = uquat::identity();
-			if(hEnt->GetAttachment(attachment,&offset,&rot) == false)
-				return;
-			Lua::Push<Vector3>(l,offset);
-			Lua::Push<Quat>(l,rot);
 		}));
 		def.def("GetBoneCount",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);

@@ -10,12 +10,80 @@
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
+#include "pragma/networking/recipient_filter.hpp"
+#include "pragma/networking/s_nwm_util.h"
 #include <pragma/lua/luafunction_call.h>
 #include <sharedutils/util_file.h>
 #include <pragma/audio/sound_util.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <util_sound.hpp>
 
+void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,const pragma::networking::ClientRecipientFilter *rf)
+{
+	NetPacket p;
+	p->WriteString(sound.GetSoundName());
+	p->Write<ALSoundType>(sound.GetType());
+	p->Write<unsigned int>(sound.GetIndex());
+	p->Write<ALCreateFlags>(sound.GetCreateFlags());
+	p->Write<bool>(sendFullUpdate);
+	if(sendFullUpdate)
+	{
+		p->Write<ALState>(sound.GetState());
+		p->Write<float>(sound.GetOffset());
+		p->Write<float>(sound.GetPitch());
+		p->Write<bool>(sound.IsLooping());
+		p->Write<float>(sound.GetGain());
+		p->Write<Vector3>(sound.GetPosition());
+		p->Write<Vector3>(sound.GetVelocity());
+		p->Write<Vector3>(sound.GetDirection());
+		p->Write<bool>(sound.IsRelative());
+		p->Write<float>(sound.GetReferenceDistance());
+		p->Write<float>(sound.GetRolloffFactor());
+		p->Write<float>(sound.GetRoomRolloffFactor());
+		p->Write<float>(sound.GetMaxDistance());
+		p->Write<float>(sound.GetMinGain());
+		p->Write<float>(sound.GetMaxGain());
+		p->Write<float>(sound.GetInnerConeAngle());
+		p->Write<float>(sound.GetOuterConeAngle());
+		p->Write<float>(sound.GetOuterConeGain());
+		p->Write<float>(sound.GetOuterConeGainHF());
+		p->Write<uint32_t>(sound.GetFlags());
+		
+		auto range = sound.GetRange();
+		p->Write<float>(range.first);
+		p->Write<float>(range.second);
+
+		p->Write<float>(sound.GetFadeInDuration());
+		p->Write<float>(sound.GetFadeOutDuration());
+		p->Write<uint32_t>(sound.GetPriority());
+
+		auto orientation = sound.GetOrientation();
+		p->Write<Vector3>(orientation.first);
+		p->Write<Vector3>(orientation.second);
+
+		p->Write<float>(sound.GetDopplerFactor());
+		p->Write<float>(sound.GetLeftStereoAngle());
+		p->Write<float>(sound.GetRightStereoAngle());
+
+		p->Write<float>(sound.GetAirAbsorptionFactor());
+
+		auto gainAuto = sound.GetGainAuto();
+		p->Write<bool>(std::get<0>(gainAuto));
+		p->Write<bool>(std::get<1>(gainAuto));
+		p->Write<bool>(std::get<2>(gainAuto));
+
+		auto directFilter = sound.GetDirectFilter();
+		p->Write<float>(directFilter.gain);
+		p->Write<float>(directFilter.gainHF);
+		p->Write<float>(directFilter.gainLF);
+
+		nwm::write_unique_entity(p,sound.GetSource());
+	}
+	if(rf != nullptr)
+		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable,*rf);
+	else
+		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable);
+}
 std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType type,ALCreateFlags flags)
 {
 	std::transform(snd.begin(),snd.end(),snd.begin(),::tolower);
@@ -77,14 +145,12 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 		idx = m_alsoundID;
 		m_alsoundID++;
 	}
-	auto bTransmit = (flags &ALCreateFlags::DontTransmit) == ALCreateFlags::None;
-	auto bStream = (flags &ALCreateFlags::Stream) != ALCreateFlags::None;
 	ALSound *as = NULL;
 	std::shared_ptr<ALSound> pAs;
 	if(script == NULL)
-		as = new SALSound(this,idx,duration,bTransmit);
+		as = new SALSound(this,idx,duration,snd,flags);
 	else
-		as = new SALSoundScript(this,idx,script,this,bStream,bTransmit);
+		as = new SALSoundScript(this,idx,script,this,snd,flags);
 	pAs = std::shared_ptr<ALSound>(as);
 	m_sounds.push_back(*as);
 	m_serverSounds.push_back(pAs);
@@ -106,14 +172,8 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 		game->CallCallbacks<void,ALSound*>("OnSoundCreated",as);
 		game->CallLuaCallbacks<void,std::shared_ptr<ALSound>>("OnSoundCreated",pAs);
 	}
-	if(bTransmit == true)
-	{
-		NetPacket p;
-		p->WriteString(snd);
-		p->Write<unsigned int>(idx);
-		p->Write<uint32_t>(umath::to_integral(flags));
-		SendPacket("snd_create",p,pragma::networking::Protocol::FastUnreliable);
-	}
+	if(umath::is_flag_set(flags,ALCreateFlags::DontTransmit) == false)
+		SendSoundSourceToClient(dynamic_cast<SALSound&>(*pAs),false);
 	return pAs;
 }
 
@@ -190,7 +250,7 @@ bool ServerState::PrecacheSound(std::string snd,ALChannel mode)
 	inf->duration = duration;
 	m_soundsPrecached.insert(std::unordered_map<std::string,SoundCacheInfo*>::value_type(snd,inf));
 	if(m_game != nullptr)
-		m_game->RegisterGameResource(subPath);
+		GetGameState()->RegisterGameResource(subPath);
 	NetPacket p;
 	p->WriteString(snd);
 	p->Write<uint8_t>(umath::to_integral(mode));

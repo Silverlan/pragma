@@ -65,6 +65,11 @@ namespace pragma
 		void SetBodyGroup(const std::string &name,UInt32 id);
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id);
 
+		bool GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const;
+		bool GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const;
+		bool GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const;
+		bool GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const;
+
 		uint32_t GetFlexControllerCount() const;
 		bool LookupFlexController(const std::string &name,uint32_t &flexId) const;
 

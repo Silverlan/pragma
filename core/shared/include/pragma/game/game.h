@@ -21,6 +21,8 @@
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_weak_handle.hpp>
+#include <pragma/console/fcvar.h>
+#include <pragma/debug/debug_performance_profiler.hpp>
 #ifdef __linux__
 #include "pragma/lua/lua_script_watcher.h"
 #include "pragma/physics/environment.hpp"
@@ -180,7 +182,7 @@ public:
 	bool IsMapInitialized();
 	template<class TWorld,class TPolyMesh,class TPoly,class TBrushMesh>
 		void BuildVMF(const char *map);
-	virtual bool LoadMap(const char *map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr);
+	virtual bool LoadMap(const std::string &map,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr);
 	// Called when map and gamemode has been fully loaded and the game can start proper
 	virtual void OnGameReady();
 	bool LoadNavMesh(bool bReload=false);
@@ -228,6 +230,7 @@ public:
 	};
 	Game(NetworkState *state);
 	virtual ~Game();
+	virtual void OnRemove();
 	virtual bool IsServer();
 	virtual bool IsClient();
 	NetworkState *GetNetworkState();

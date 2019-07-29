@@ -215,8 +215,8 @@ void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulle
 		*effectsOrigin = bulletInfo.effectOrigin;
 		return;
 	}
-	auto pAnimComponent = ent.GetAnimatedComponent();
-	if(pAnimComponent.valid() && pAnimComponent->GetAttachment(m_attMuzzle,effectsOrigin,static_cast<Quat*>(nullptr)) == true)
+	auto pMdlC = ent.GetModelComponent();
+	if(pMdlC.valid() && pMdlC->GetAttachment(m_attMuzzle,effectsOrigin,static_cast<Quat*>(nullptr)) == true)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
 		if(pTrComponent.valid())

@@ -31,6 +31,7 @@ UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
 extern DLLENGINE Engine *engine;
+#pragma optimize("",off)
 NetworkState::NetworkState()
 	: CallbackHandler(),CVarHandler()
 {
@@ -120,27 +121,19 @@ bool NetworkState::ShouldRemoveSound(ALSound &snd) {return snd.IsPlaying() == fa
 
 void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 {
-	static auto bskip = false;
-	if(bskip)
-		return;
-	for(auto it=sounds.begin();it!=sounds.end();)
+	for(auto i=static_cast<int32_t>(sounds.size()) -1;i>=0;--i)
 	{
-		auto &psnd = *it;
+		auto psnd = sounds.at(i);
 		if(psnd != nullptr)
 		{
 			auto &snd = *psnd;
 			snd.Update();
-			if(it->use_count() == 1 && ShouldRemoveSound(snd))
+			if(psnd.use_count() == 2 && ShouldRemoveSound(snd))
 			{
-				auto idx = it -sounds.begin();
-				*it = nullptr; // Cleanup occurs in "OnDestroyed" callback
-				it = sounds.begin() +idx;
-				//m_sounds.erase(m_sounds.begin() +(it -sounds.begin()));
-				//it = sounds.erase(it);
+				psnd = nullptr; // Cleanup occurs in "OnDestroyed" callback
 				continue;
 			}
 		}
-		++it;
 	}
 	for(auto &snd : sounds)
 	{
@@ -226,10 +219,15 @@ float NetworkState::GetSoundDuration(std::string snd)
 	return it->second->duration;
 }
 
-void NetworkState::LoadMap(const char *map,bool bDontReload)
+void NetworkState::StartNewGame(const std::string &map,bool singlePlayer)
 {
-	if(!IsGameActive() || bDontReload == false)
-		StartGame();
+	if(!IsGameActive())
+		StartGame(singlePlayer);
+	ChangeLevel(map);
+}
+
+void NetworkState::ChangeLevel(const std::string &map)
+{
 	m_mapInfo = std::make_unique<MapInfo>();
 	m_mapInfo->name = map;
 	Game *game = GetGameState();
@@ -253,7 +251,7 @@ lua_State *NetworkState::GetLuaState()
 	return GetGameState()->GetLuaState();
 }
 
-void NetworkState::StartGame()
+void NetworkState::StartGame(bool singlePlayer)
 {
 	if(IsGameActive())
 		EndGame();
@@ -266,7 +264,7 @@ void NetworkState::EndGame()
 
 bool NetworkState::IsGameActive() {return false;}
 
-Game *NetworkState::GetGameState() {return NULL;}
+Game *NetworkState::GetGameState() {return m_game.get();}
 
 void NetworkState::Initialize()
 {
@@ -726,3 +724,4 @@ void NetworkState::AddTickCallback(CallbackHandle callback)
 {
 	m_tickCallbacks.push_back(callback);
 }
+#pragma optimize("",on)

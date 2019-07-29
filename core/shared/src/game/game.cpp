@@ -322,7 +322,9 @@ Game::Game(NetworkState *state)
 	LoadSoundScripts("fx_physics_impact.txt");
 }
 
-Game::~Game()
+Game::~Game() {}
+
+void Game::OnRemove()
 {
 	pragma::BaseAIComponent::ReleaseNavThread();
 	CallCallbacks<void>("OnLuaReleased",GetLuaState());
@@ -786,7 +788,7 @@ std::vector<std::string> &Game::GetNetEventIds() {return m_entNetEventManager.Ge
 const MapInfo &Game::GetMapInfo() const {return m_mapInfo;}
 
 bool Game::LoadSoundScripts(const char *file) {return m_stateNetwork->LoadSoundScripts(file,true);}
-bool Game::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHandle> *entities)
+bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	std::string smap = "maps\\";
 	smap += map;
@@ -988,7 +990,7 @@ bool Game::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHandl
 			f->Read(dispLightmapSamplePositions.data(),dispLightmapSamplePositions.size() *sizeof(dispLightmapSamplePositions.front()));
 		}
 
-		LoadMapEntities(version,map,f,bspInputData,materials,origin,entities);
+		LoadMapEntities(version,map.c_str(),f,bspInputData,materials,origin,entities);
 		Con::cout<<"Successfully loaded map '"<<map<<"'!"<<Con::endl;
 	}
 	else

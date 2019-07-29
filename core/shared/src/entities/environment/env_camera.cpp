@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/umat.h>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #define EPSILON 0.001f
 
@@ -64,9 +65,18 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 	auto whTrComponent = GetEntity().GetTransformComponent();
 	if(whTrComponent.valid())
 	{
-		Vector3 forward,right,up;
-		umat::to_axes(mat,forward,right,up);
-		whTrComponent->SetOrientation(uquat::create(forward,right,up));
+		// Vector3 forward,right,up;
+		// umat::to_axes(mat,forward,right,up);
+		// whTrComponent->SetOrientation(uquat::create(forward,right,up));
+		Vector3 scale;
+		Quat rotation;
+		Vector3 translation;
+		Vector3 skew;
+		Vector4 perspective;
+		glm::decompose(mat,scale,rotation,translation,skew,perspective);
+
+		whTrComponent->SetPosition(translation);
+		whTrComponent->SetOrientation(rotation);
 	}
 }
 void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat) {*m_projectionMatrix = mat;}

@@ -13,12 +13,15 @@ extern DLLENGINE Engine *engine;
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
 	: m_physEnv{env}
 {
-	Create("generic",1.f,0.8f);
-	auto &surface = m_materials.back();
-	surface.SetSoftImpactSound("fx.phys_impact_generic_soft");
-	surface.SetHardImpactSound("fx.phys_impact_generic_hard");
-	surface.SetBulletImpactSound("fx.phys_impact_generic_bullet");
-	surface.SetImpactParticleEffect("impact_dust");
+	auto &genericPhysMat = env.GetGenericMaterial();
+	m_materials.push_back(SurfaceMaterial{m_physEnv,"generic",m_materials.size(),genericPhysMat});
+	auto &surfMat = m_materials.back();
+	surfMat.SetSoftImpactSound("fx.phys_impact_generic_soft");
+	surfMat.SetHardImpactSound("fx.phys_impact_generic_hard");
+	surfMat.SetBulletImpactSound("fx.phys_impact_generic_bullet");
+	surfMat.SetImpactParticleEffect("impact_dust");
+
+	genericPhysMat.SetSurfaceMaterial(surfMat);
 }
 
 void SurfaceMaterialManager::Load(const std::string &path)

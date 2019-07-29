@@ -14,13 +14,13 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 std::vector<CVehicleComponent*> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent*> &CVehicleComponent::GetAll() {return s_vehicles;}
 unsigned int CVehicleComponent::GetVehicleCount() {return CUInt32(s_vehicles.size());}
 
 CVehicleComponent::CVehicleComponent(BaseEntity &ent)
-	: BaseVehicleComponent(ent)
+	: BaseVehicleComponent(ent),CBaseSnapshotComponent{}
 {
 	s_vehicles.push_back(this);
 }
@@ -37,6 +37,29 @@ CVehicleComponent::~CVehicleComponent()
 			s_vehicles.erase(s_vehicles.begin() +i);
 			break;
 		}
+	}
+}
+
+void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
+{
+	auto *physVehicle = GetPhysicsVehicle();
+	auto steerFactor = packet->Read<float>();
+	auto gear = packet->Read<pragma::physics::IVehicle::Gear>();
+	auto brakeFactor = packet->Read<float>();
+	auto handbrakeFactor = packet->Read<float>();
+	auto accFactor = packet->Read<float>();
+	auto engineRotSpeed = packet->Read<umath::Radian>();
+	if(physVehicle)
+	{
+		physVehicle->SetSteerFactor(steerFactor);
+		physVehicle->SetGear(gear);
+		physVehicle->SetBrakeFactor(brakeFactor);
+		physVehicle->SetHandbrakeFactor(handbrakeFactor);
+		physVehicle->SetAccelerationFactor(accFactor);
+		physVehicle->SetEngineRotationSpeed(engineRotSpeed);
+		auto numWheels = GetWheelCount();
+		for(auto i=decltype(numWheels){0u};i<numWheels;++i)
+			physVehicle->SetWheelRotationSpeed(i,packet->Read<float>());
 	}
 }
 
@@ -69,8 +92,20 @@ void CVehicleComponent::ReceiveData(NetPacket &packet)
 {
 	auto *entSteeringWheel = nwm::read_entity(packet);
 	m_steeringWheel = entSteeringWheel ? entSteeringWheel->GetHandle() : EntityHandle{};
+
+	auto *driver = nwm::read_entity(packet);
+	if(driver)
+		SetDriver(driver);
+	else
+		ClearDriver();
+}
+
+void CVehicleComponent::OnEntitySpawn()
+{
+	BaseVehicleComponent::OnEntitySpawn();
 	InitializeSteeringWheel();
 }
+
 void CVehicleComponent::ClearDriver()
 {
 	auto *entDriver = GetDriver();
@@ -123,11 +158,21 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 {
 	if(eventId == m_netEvSteeringWheelModel)
 	{
-		auto ent = nwm::read_entity(packet);
+		auto *ent = nwm::read_entity(packet);
 		m_steeringWheel = ent ? ent->GetHandle() : EntityHandle{};
+		m_maxSteeringWheelAngle = packet->Read<float>();
 		InitializeSteeringWheel();
+	}
+	else if(eventId == m_netEvSetDriver)
+	{
+		auto *ent = nwm::read_entity(packet);
+		if(ent)
+			SetDriver(ent);
+		else
+			ClearDriver();
 	}
 	else
 		return false;
 	return true;
 }
+#pragma optimize("",on)

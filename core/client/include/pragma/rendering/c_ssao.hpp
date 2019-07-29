@@ -5,7 +5,7 @@
 #include <memory>
 #include <image/prosper_texture.hpp>
 
-namespace prosper {class Context; class RenderTarget; class DescriptorSetGroup;};
+namespace prosper {class Shader; class Context; class RenderTarget; class DescriptorSetGroup;};
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

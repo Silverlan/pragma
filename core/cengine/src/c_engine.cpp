@@ -12,6 +12,7 @@
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/networking/iclient.hpp"
+#include "pragma/networking/local_client.hpp"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
@@ -441,16 +442,6 @@ void CEngine::OnFilesDropped(GLFW::Window &window,std::vector<std::string> &file
 	client->OnFilesDropped(files);
 }
 bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,StateFlags::WindowFocused);}
-void CEngine::LoadMap(const char *cmap)
-{
-	Engine::LoadMap(cmap);
-	/*if(client == nullptr)
-		return;
-	auto *pMenu = client->GetMainMenu();
-	if(pMenu == nullptr)
-		return;
-	pMenu->OpenLoadScreen();*/
-}
 
 bool CEngine::Initialize(int argc,char *argv[])
 {
@@ -890,6 +881,24 @@ void CEngine::Disconnect()
 		OpenServerState();
 	}
 	cl->OpenMainMenu();
+}
+
+bool CEngine::IsMultiPlayer() const
+{
+	if(Engine::IsMultiPlayer())
+		return true;
+	auto *clState = static_cast<ClientState*>(GetClientState());
+	if(clState == nullptr)
+		return false;
+	auto *cl = clState ? clState->GetClient() : nullptr;
+	return cl && typeid(*cl) != typeid(pragma::networking::LocalClient);
+}
+
+void CEngine::StartDefaultGame(const std::string &map)
+{
+	EndGame();
+	StartNewGame(map.c_str(),true);
+	Connect("localhost");
 }
 
 Lua::Interface *CEngine::GetLuaInterface(lua_State *l)

@@ -67,15 +67,24 @@ REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled,CVAR_CALLBACK_render_vsync_enab
 #include <pragma/physics/environment.hpp>
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
-static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
+static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,bool serverside)
 {
 	if(cbDrawPhysics.IsValid())
 		cbDrawPhysics.Remove();
 	if(cbDrawPhysicsEnd.IsValid())
 		cbDrawPhysicsEnd.Remove();
-	if(c_game == NULL)
+	//auto *physEnv = c_game->GetPhysicsEnvironment();
+	Game *game;
+	if(serverside)
+	{
+		auto *nw = c_engine->GetServerNetworkState();
+		game = nw ? nw->GetGameState() : nullptr;
+	}
+	else
+		game = c_game;
+	if(game == nullptr)
 		return;
-	auto *physEnv = c_game->GetPhysicsEnvironment();
+	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
 	if(val == 0)
@@ -90,8 +99,18 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 		visDebugger->SetDebugMode(pragma::physics::IVisualDebugger::DebugMode::None);
 		return;
 	}*/
-	cbDrawPhysics = c_game->AddCallback("Think",FunctionCallback<>::Create([]() {
-		auto *physEnv = c_game->GetPhysicsEnvironment();
+	cbDrawPhysics = c_game->AddCallback("Think",FunctionCallback<>::Create([serverside]() {
+		Game *game;
+		if(serverside)
+		{
+			auto *nw = c_engine->GetServerNetworkState();
+			game = nw ? nw->GetGameState() : nullptr;
+		}
+		else
+			game = c_game;
+		if(game == nullptr)
+			return;
+		auto *physEnv = game->GetPhysicsEnvironment();
 		auto *debugDraw = physEnv ? physEnv->GetVisualDebugger() : nullptr;
 		if(debugDraw == nullptr)
 			return;
@@ -131,7 +150,8 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val)
 		mode = pragma::physics::IVisualDebugger::DebugMode::Normals;
 	visDebugger->SetDebugMode(mode);
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,CVAR_CALLBACK_debug_physics_draw);
+REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,false);});
+REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,true);});
 
 static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,bool val)
 {

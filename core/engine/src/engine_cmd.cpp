@@ -74,14 +74,13 @@ void Engine::RegisterConsoleCommands()
 	auto &conVarMap = *console_system::server::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
 	// Note: Serverside ConVars HAVE to be registered shared if the command is replicated!
-	conVarMap.RegisterConCommand("map",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+	conVarMap.RegisterConCommand("map",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{
 			Con::cout<<state->GetMap()<<Con::endl;
 			return;
 		}
-		state->EndGame();
-		state->LoadMap(argv[0].c_str());
+		StartDefaultGame(argv.front());
 	},ConVarFlags::None,"Loads the given map immediately. Usage: map <mapName>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
 		FileManager::FindFiles("maps\\*.wld",&resFiles,nullptr);

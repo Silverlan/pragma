@@ -50,6 +50,7 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/info/s_info_landmark.hpp"
+#include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
 #include <pragma/entities/components/global_component.hpp>
@@ -160,7 +161,9 @@ SGame::SGame(NetworkState *state)
 	});
 }
 
-SGame::~SGame()
+SGame::~SGame() {}
+
+void SGame::OnRemove()
 {
 	CallCallbacks<void,SGame*>("OnGameEnd",this);
 	m_luaCache = nullptr;
@@ -177,6 +180,9 @@ SGame::~SGame()
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
 	s_physEnv = nullptr;
+	m_taskManager = nullptr;
+
+	Game::OnRemove();
 }
 
 bool SGame::RunLua(const std::string &lua) {return Game::RunLua(lua,"lua_run");}
@@ -247,7 +253,7 @@ std::shared_ptr<Model> SGame::LoadModel(const std::string &mdl,bool bReload)
 }
 std::unordered_map<std::string,std::shared_ptr<Model>> &SGame::GetModels() const {return ModelManager::GetModels();}
 
-bool SGame::LoadMap(const char *map,const Vector3 &origin,std::vector<EntityHandle> *entities)
+bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool b = Game::LoadMap(map,origin,entities);
 	if(b == false)
@@ -497,14 +503,14 @@ void SGame::Tick()
 
 		auto mapName = m_changeLevelInfo->map;
 		server->EndGame();
-		server->StartGame();
+		server->StartGame(true); // TODO: Keep the current state (i.e. if in multiplayer, stay in multiplayer)
 
 		// Note: 'this' is no longer valid at this point, since the game state has changed
 		auto *game = server->GetGameState();
 		game->m_flags |= GameFlags::LevelTransition; // Level transition flag has to be set before the map was loaded to make sure it's transmitted to the client(s)
 		game->m_preTransitionWorldState = worldState;
 
-		server->LoadMap(mapName.c_str(),true);
+		server->ChangeLevel(mapName);
 
 		if(game != nullptr)
 		{
@@ -963,6 +969,16 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 	if(IsMapInitialized() == true)
 		SpawnPlayer(*pl);
 	OnPlayerJoined(*pl);
+
+	// Send sound sources
+	auto &sounds = server->GetSounds();
+	for(auto &sndRef : sounds)
+	{
+		auto *snd = dynamic_cast<SALSound*>(&sndRef.get());
+		if(snd == nullptr || umath::is_flag_set(snd->GetCreateFlags(),ALCreateFlags::DontTransmit))
+			continue;
+		server->SendSoundSourceToClient(*snd,true,&rp);
+	}
 }
 
 pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)

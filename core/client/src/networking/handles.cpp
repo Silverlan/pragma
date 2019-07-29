@@ -242,7 +242,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	GameModeManager::Initialize();
 	//if(IsConnected())
 	if(IsGameActive() == false)
-		StartGame(GetConVarString("sv_gamemode"));
+		StartNewGame(GetConVarString("sv_gamemode"));
 	auto *game = static_cast<CGame*>(GetGameState());
 	game->InitializeGame();
 
@@ -325,7 +325,7 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 		auto pWorldComponent = wrld->GetComponent<pragma::CWorldComponent>();
 		game->SetWorld(pWorldComponent.get());
 	}
-	LoadMap(map.c_str(),true);
+	ChangeLevel(map.c_str());
 	game->ReloadSoundCache();
 
 	SendPacket("game_ready",pragma::networking::Protocol::SlowReliable);

@@ -73,7 +73,7 @@ void SGame::RegisterLua()
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",{
 		LUA_LIB_ENTS_SHARED
 		{"register_component",Lua::ents::register_component<pragma::SLuaBaseEntityComponent>},
-		{"register_component_event",Lua::ents::register_component_event}
+		{"register_component_net_event",Lua::ents::register_component_event}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"ents",{

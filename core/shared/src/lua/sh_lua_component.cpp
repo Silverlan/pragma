@@ -114,23 +114,6 @@ static std::any string_to_any(Game &game,const std::string &value,util::VarType 
 	}
 	return {};
 }
-static bool push_lua_function_from_string(lua_State *l,const std::string &luaFunction,const std::string &chunkName,std::string &outErrMsg)
-{
-	auto bufLuaFunction = "return " +luaFunction;
-	auto r = static_cast<Lua::StatusCode>(luaL_loadbuffer(l,bufLuaFunction.c_str(),bufLuaFunction.length(),chunkName.c_str())); /* 1 */
-	if(r != Lua::StatusCode::Ok)
-	{
-		outErrMsg = Lua::CheckString(l,-1);
-		Lua::Pop(l); /* 0 */
-		return false;
-	}
-	if(Lua::ProtectedCall(l,0,1,&outErrMsg) != Lua::StatusCode::Ok)
-	{
-		Lua::Pop(l); /* 0 */
-		return false;
-	}
-	return true;
-}
 void BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version)
 {
 	if(memberName.empty())
@@ -174,7 +157,7 @@ void BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,co
 		getter += " end";
 
 		std::string err;
-		if(push_lua_function_from_string(l,getter,"EntityComponentGetter",err) == false)
+		if(Lua::PushLuaFunctionFromString(l,getter,"EntityComponentGetter",err) == false)
 			Con::cwar<<"WARNING: Unable to register getter-function for member '"<<memberName<<"' for entity component: "<<err<<Con::endl;
 		else
 		{
@@ -196,7 +179,7 @@ void BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,co
 		{
 			std::string getterProperty = "function(self) return self." +lmemberName +" end";
 			std::string err;
-			if(push_lua_function_from_string(l,getterProperty,"EntityComponentGetterProperty",err) == false)
+			if(Lua::PushLuaFunctionFromString(l,getterProperty,"EntityComponentGetterProperty",err) == false)
 				Con::cwar<<"WARNING: Unable to register property-get-function for member '"<<memberName<<"' for entity component: "<<err<<Con::endl;
 			else
 			{
@@ -226,7 +209,7 @@ void BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,co
 			setter += " self:OnMemberValueChanged(" +std::to_string(it->memberDeclarations.size() -1u) +")";
 		setter += " end";
 		std::string err;
-		if(push_lua_function_from_string(l,setter,"EntityComponentSetter",err) == false)
+		if(Lua::PushLuaFunctionFromString(l,setter,"EntityComponentSetter",err) == false)
 		{
 			bSetterValid = false;
 			Con::cwar<<"WARNING: Unable to register setter-function for member '"<<memberName<<"' for entity component: "<<err<<Con::endl;

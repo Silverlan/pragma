@@ -19,7 +19,7 @@ void CPointConstraintConeTwistComponent::ReceiveData(NetPacket &packet)
 	m_kvSwingSpan2 = packet->Read<float>();
 	m_kvTwistSpan = packet->Read<float>();
 	m_kvSoftness = packet->Read<float>();
-	m_kvBiasFactor = packet->Read<float>();
+	// m_kvBiasFactor = packet->Read<float>();
 	m_kvRelaxationFactor = packet->Read<float>();
 }
 luabind::object CPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPointConstraintConeTwistComponentHandleWrapper>(l);}

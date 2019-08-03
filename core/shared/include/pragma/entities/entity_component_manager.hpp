@@ -24,7 +24,16 @@ namespace pragma
 	enum class ComponentFlags : uint8_t
 	{
 		None = 0u,
-		Networked = 1u
+		Networked = 1u,
+
+		// Component isn't networked, but wants to be.
+		// (e.g. because a networked event has been registered).
+		// In this case the component will be networked the next time
+		// it is created. Note: This flag only works for
+		// Lua-based components! It also has no effect if the
+		// component has already been created at least one
+		// in the past.
+		MakeNetworked = Networked<<1u
 	};
 	class DLLNETWORK BaseNetComponent
 	{

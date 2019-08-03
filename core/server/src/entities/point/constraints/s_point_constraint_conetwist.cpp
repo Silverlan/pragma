@@ -21,7 +21,6 @@ void SPointConstraintConeTwistComponent::SendData(NetPacket &packet,networking::
 	packet->Write<float>(m_kvSwingSpan2);
 	packet->Write<float>(m_kvTwistSpan);
 	packet->Write<float>(m_kvSoftness);
-	packet->Write<float>(m_kvBiasFactor);
 	packet->Write<float>(m_kvRelaxationFactor);
 }
 

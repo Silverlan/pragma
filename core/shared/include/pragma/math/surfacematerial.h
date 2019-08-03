@@ -5,6 +5,7 @@
 #include "pragma/physics/phys_liquid.hpp"
 #include <string>
 #include <unordered_map>
+#include <sharedutils/util_shared_handle.hpp>
 
 namespace pragma::physics {class IEnvironment;};
 class SurfaceMaterial;

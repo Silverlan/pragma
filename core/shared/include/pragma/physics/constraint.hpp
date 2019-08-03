@@ -26,12 +26,14 @@ namespace pragma::physics
 		virtual void OnRemove() override;
 		virtual void SetEnabled(bool b)=0;
 		virtual bool IsEnabled() const=0;
-		void SetCollisionsEnabled(Bool b);
+		virtual bool IsBroken() const=0;
+		virtual void Break()=0;
+		void SetCollisionsEnabled(bool b);
 		Bool GetCollisionsEnabled() const;
-		virtual void EnableCollisions()=0;
-		virtual void DisableCollisions()=0;
-		virtual pragma::physics::IRigidBody *GetSourceObject()=0;
-		virtual pragma::physics::IRigidBody *GetTargetObject()=0;
+		void EnableCollisions();
+		void DisableCollisions();
+		virtual pragma::physics::IRigidBody *GetSourceActor()=0;
+		virtual pragma::physics::IRigidBody *GetTargetActor()=0;
 		Transform &GetSourceTransform();
 		Transform &GetTargetTransform();
 		Vector3 GetSourcePosition();
@@ -43,11 +45,19 @@ namespace pragma::physics
 		BaseEntity *GetEntity() const;
 		void SetEntity(BaseEntity &ent);
 
-		virtual void SetOverrideSolverIterationCount(int32_t count)=0;
-		virtual int32_t GetOverrideSolverIterationCount() const=0;
-		virtual float GetBreakingImpulseThreshold() const=0;
-		virtual void SetBreakingImpulseThreshold(float threshold)=0;
+		virtual float GetBreakForce() const=0;
+		virtual void SetBreakForce(float threshold)=0;
+		virtual float GetBreakTorque() const=0;
+		virtual void SetBreakTorque(float torque)=0;
 		virtual void InitializeLuaObject(lua_State *lua) override;
+
+		virtual void SetSoftness(float softness)=0;
+		virtual void SetDamping(float damping)=0;
+		virtual void SetRestitution(float restitution)=0;
+
+		virtual float GetSoftness() const=0;
+		virtual float GetDamping() const=0;
+		virtual float GetRestitution() const=0;
 
 		void OnBroken();
 	protected:
@@ -83,6 +93,9 @@ namespace pragma::physics
 	{
 	public:
 		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void SetLimit(umath::Radian lowerLimit,umath::Radian upperLimit)=0;
+		virtual std::pair<umath::Radian,umath::Radian> GetLimit() const=0;
+		virtual void DisableLimit()=0;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -92,6 +105,9 @@ namespace pragma::physics
 	{
 	public:
 		virtual void InitializeLuaObject(lua_State *lua) override;
+		virtual void SetLimit(float lowerLimit,float upperLimit)=0;
+		virtual void DisableLimit()=0;
+		virtual std::pair<float,float> GetLimit() const=0;
 	protected:
 		using IConstraint::IConstraint;
 	};
@@ -102,7 +118,9 @@ namespace pragma::physics
 	protected:
 		using IConstraint::IConstraint;
 	public:
-		virtual void SetLimit(float swingSpan1,float swingSpan2,float twistSpan,float softness=1.f,float biasFactor=0.3f,float relaxationFactor=1.f)=0;
+		virtual void SetLimit(const Vector3 &lowerLimits,const Vector3 &upperLimits)=0;
+		virtual void SetLimit(float swingSpan1,float swingSpan2,float twistSpan)=0;
+		virtual void GetLimit(float &outSwingSpan1,float &outSwingSpan2,float &outTwistSpan)=0;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	};
 

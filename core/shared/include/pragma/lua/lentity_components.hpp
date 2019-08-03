@@ -8,7 +8,6 @@ namespace luabind {class module_;};
 struct BaseSoundEmitterComponentHandleWrapper;
 namespace Lua
 {
-	DLLNETWORK void register_entity_component(lua_State *l,luabind::module_ &module);
 	DLLNETWORK void register_gravity_component(luabind::module_ &module);
 };
 

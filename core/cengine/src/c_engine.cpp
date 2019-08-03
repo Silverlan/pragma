@@ -894,12 +894,14 @@ bool CEngine::IsMultiPlayer() const
 	return cl && typeid(*cl) != typeid(pragma::networking::LocalClient);
 }
 
-void CEngine::StartDefaultGame(const std::string &map)
+void CEngine::StartDefaultGame(const std::string &map,bool singlePlayer)
 {
 	EndGame();
-	StartNewGame(map.c_str(),true);
+	StartNewGame(map.c_str(),singlePlayer);
 	Connect("localhost");
 }
+
+void CEngine::StartDefaultGame(const std::string &map) {StartDefaultGame(map,true);}
 
 Lua::Interface *CEngine::GetLuaInterface(lua_State *l)
 {

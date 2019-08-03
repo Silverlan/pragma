@@ -21,6 +21,7 @@
 #include "pragma/lua/sh_lua_component.hpp"
 
 extern DLLENGINE Engine *engine;
+#pragma optimize("",off)
 int Lua::ents::create(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
@@ -620,11 +621,24 @@ int Lua::ents::register_class(lua_State *l)
 
 int Lua::ents::register_component_event(lua_State *l)
 {
-	std::string name = Lua::CheckString(l,1);
+	auto componentId = Lua::CheckInt(l,1);
+	auto *name = Lua::CheckString(l,2);
+
 	auto *state = ::engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
-	auto eventId = componentManager.RegisterEvent(name);
+	auto *componentInfo = componentManager.GetComponentInfo(componentId);
+	if(componentInfo == nullptr)
+	{
+		Con::cwar<<"WARNING: Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		return 0;
+	}
+	if(umath::is_flag_set(componentInfo->flags,pragma::ComponentFlags::Networked) == false)
+		componentInfo->flags |= pragma::ComponentFlags::MakeNetworked;
+
+	auto netName = componentInfo->name +'_' +std::string{name};
+	auto eventId = componentManager.RegisterEvent(netName);
 	Lua::PushInt(l,eventId);
 	return 1;
 }
+#pragma optimize("",on)

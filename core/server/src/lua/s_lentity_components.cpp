@@ -2,6 +2,7 @@
 #include "pragma/game/s_game.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
+#include "pragma/networking/recipient_filter.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -16,6 +17,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
+#include <sharedutils/netpacket.hpp>
 
 namespace Lua
 {
@@ -25,10 +27,34 @@ namespace Lua
 		static void EmitSound(lua_State *l,SSoundEmitterHandle &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch,bool bTransmit);
 	};
 };
-
+void SGame::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &def)
+{
+	Game::RegisterLuaEntityComponent(def);
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t,NetPacket&,pragma::networking::TargetRecipientFilter&)>(
+		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet,pragma::networking::TargetRecipientFilter &rf) {
+			pragma::Lua::check_component(l,hComponent);
+			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol),rf);
+	}));
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t,NetPacket&)>(
+		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet) {
+			pragma::Lua::check_component(l,hComponent);
+			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol));
+	}));
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t)>(
+		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId) {
+			pragma::Lua::check_component(l,hComponent);
+			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,static_cast<pragma::networking::Protocol>(protocol));
+	}));
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,NetPacket&)>(
+		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,NetPacket &packet) {
+			pragma::Lua::check_component(l,hComponent);
+			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet);
+	}));
+}
 void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);
+
 	auto *l = GetLuaState();
 	Lua::register_sv_ai_component(l,entsMod);
 	Lua::register_sv_character_component(l,entsMod);

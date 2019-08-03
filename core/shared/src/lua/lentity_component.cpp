@@ -25,9 +25,8 @@ namespace Lua
 		static void GetName(lua_State *l,BaseEntityComponentHandle &component);
 	};
 };
-void Lua::register_entity_component(lua_State *l,luabind::module_ &module)
+void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &def)
 {
-	auto def = luabind::class_<BaseEntityComponentHandle>("EntityComponent");
 	def.def("BroadcastEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->BroadcastEvent(eventId);
@@ -69,11 +68,11 @@ void Lua::register_entity_component(lua_State *l,luabind::module_ &module)
 				oCallback.push(l);
 				ev.get().PushArguments(l);
 				return Lua::StatusCode::Ok;
-			},1);
+				},1);
 			if(c == Lua::StatusCode::Ok && Lua::IsSet(lTmp,-1))
 				return static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1));
 			return util::EventReply::Unhandled;
-		});
+			});
 		Lua::Push<CallbackHandle>(l,hCb);
 	}));
 	def.def("InjectEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
@@ -104,8 +103,6 @@ void Lua::register_entity_component(lua_State *l,luabind::module_ &module)
 
 	def.add_static_constant("CALLBACK_TYPE_ENTITY",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	def.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
-
-	module[def];
 }
 void Lua::BaseEntityComponent::GetEntity(lua_State *l,BaseEntityComponentHandle &component)
 {

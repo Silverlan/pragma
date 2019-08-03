@@ -330,9 +330,10 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 					ct->SetLimit(
 						CFloat(umath::deg_to_rad(swingSpan1)),
 						CFloat(umath::deg_to_rad(swingSpan2)),
-						CFloat(umath::deg_to_rad(twistSpan)),
-						softness,biasFactor,relaxationFactor
+						CFloat(umath::deg_to_rad(twistSpan))
 					);
+					ct->SetSoftness(softness);
+					ct->SetDamping(relaxationFactor);
 					c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
 				}
 				else if(joint.type == JOINT_TYPE_DOF)
@@ -359,6 +360,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 					if(itLimitAngMax != joint.args.end())
 						limitAngMax = EulerAngles(itLimitAngMax->second);
 
+#if 0
 					auto ct = physEnv->CreateDoFSpringConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
 					//auto *ct = physEnv->CreateDoFConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
 
@@ -369,8 +371,24 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 
 					ct->SetAngularLowerLimit(Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)));
 					ct->SetAngularUpperLimit(Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r)));
+#endif
+					auto ct = physEnv->CreateConeTwistConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
+					//auto *ct = physEnv->CreateDoFConstraint(bodyTgt,posTgt,rotConstraint,bodySrc,posConstraint,rotConstraint);
 
-					c = util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(ct);
+					ct->SetLimit(
+						Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)),
+						Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r))
+					);
+
+					/*auto ct = physEnv->CreateConeTwistConstraint(*bodyTgt,posTgt,rotConstraint,*bodySrc,posConstraint,rotConstraint);
+					ct->SetLimit(span1,span2,twistSpan);
+					ct->SetLinearLowerLimit(limitLinMin);
+					ct->SetLinearUpperLimit(limitLinMax);
+
+					ct->SetAngularLowerLimit(Vector3(umath::deg_to_rad(limitAngMin.p),umath::deg_to_rad(limitAngMin.y),umath::deg_to_rad(limitAngMin.r)));
+					ct->SetAngularUpperLimit(Vector3(umath::deg_to_rad(limitAngMax.p),umath::deg_to_rad(limitAngMax.y),umath::deg_to_rad(limitAngMax.r)));
+
+					c = util::shared_handle_cast<pragma::physics::IDoFSpringConstraint,pragma::physics::IConstraint>(ct);*/
 				}
 				if(c != nullptr)
 				{
@@ -507,6 +525,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
 		return {};
+	physObjCreateInfo.SetModel(*hMdl);
 	unsigned int meshId = 0;
 	auto pTrComponent = ent.GetTransformComponent();
 	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};

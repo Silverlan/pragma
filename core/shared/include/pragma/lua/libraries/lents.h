@@ -4,6 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/lua/class_manager.hpp"
 
 extern DLLENGINE Engine *engine;
 
@@ -48,8 +49,9 @@ namespace Lua
 		{
 			std::string name = Lua::CheckString(l,1);
 			ustring::to_lower(name);
-			Lua::CheckUserData(l,2);
-			auto o = luabind::object(luabind::from_stack(l,2));
+			auto idxClass = 2;
+			Lua::CheckUserData(l,idxClass);
+			auto o = luabind::object(luabind::from_stack(l,idxClass));
 			if(!o)
 				return 0;
 			auto *state = ::engine->GetNetworkState(l);
@@ -57,11 +59,78 @@ namespace Lua
 			auto &manager = game->GetLuaEntityManager();
 			manager.RegisterComponent(name,o);
 
+			auto &classManager = game->GetLuaClassManager();
 			auto componentFlags = pragma::ComponentFlags::None;
 			if(Lua::IsSet(l,3))
 				componentFlags = static_cast<pragma::ComponentFlags>(Lua::CheckInt(l,3));
 
-			auto componentId = game->GetEntityComponentManager().RegisterComponentType(name,[o,game,name](BaseEntity &ent) -> std::shared_ptr<pragma::BaseEntityComponent> {
+			// Check if there's an __init-method defined for this class.
+			// If there isn't, generate one!
+			if(classManager.IsClassMethodDefined(o,"__init") == false)
+			{
+				std::string luaStr = "function(self) BaseEntityComponent.__init(self) end";
+				std::string err;
+				if(Lua::PushLuaFunctionFromString(l,luaStr,"ComponentInit",err) == false)
+					Con::cwar<<"WARNING: Unable to register __init method for component class '"<<name<<"': "<<err<<Con::endl;
+				else
+				{
+					Lua::CheckFunction(l,-1);
+					o["__init"] = luabind::object{luabind::from_stack{l,-1}};
+
+					Lua::Pop(l,1);
+				}
+			}
+
+			auto firstCreation = true;
+			auto componentId = game->GetEntityComponentManager().RegisterComponentType(name,[o,game,name,firstCreation](BaseEntity &ent) mutable -> std::shared_ptr<pragma::BaseEntityComponent> {
+				if(firstCreation)
+				{
+					firstCreation = false;
+
+					auto &game = *ent.GetNetworkState()->GetGameState();
+					auto &componentManager = game.GetEntityComponentManager();
+					pragma::ComponentId componentId;
+					if(componentManager.GetComponentTypeId(name,componentId))
+					{
+						auto &componentInfo = *game.GetEntityComponentManager().GetComponentInfo(componentId);
+						if(umath::is_flag_set(componentInfo.flags,pragma::ComponentFlags::Networked | pragma::ComponentFlags::MakeNetworked) == false)
+						{
+							// Component has not been marked as networked, check if it has any networked
+							// methods to be sure.
+							std::vector<std::string> networkedMethodNames {};
+							if(game.IsClient())
+							{
+								networkedMethodNames.reserve(3);
+								networkedMethodNames.push_back("ReceiveData");
+								networkedMethodNames.push_back("ReceiveNetEvent");
+								networkedMethodNames.push_back("ReceiveSnapshotData");
+							}
+							else
+							{
+								networkedMethodNames.reserve(3);
+								networkedMethodNames.push_back("SendData");
+								networkedMethodNames.push_back("ReceiveNetEvent");
+								networkedMethodNames.push_back("SendSnapshotData");
+							}
+							auto &classManager = game.GetLuaClassManager();
+							auto it = std::find_if(networkedMethodNames.begin(),networkedMethodNames.end(),[&classManager,&o](const std::string &methodName) {
+								return classManager.IsClassMethodDefined(o,methodName);
+								});
+							if(it != networkedMethodNames.end())
+								componentInfo.flags |= pragma::ComponentFlags::MakeNetworked;
+						}
+						if(umath::is_flag_set(componentInfo.flags,pragma::ComponentFlags::MakeNetworked))
+						{
+							umath::set_flag(componentInfo.flags,pragma::ComponentFlags::MakeNetworked,false);
+							// Note: We could automatically set the component as networked here, but this has several disadvantages, so
+							// we just print a warning instead and require the user to specify the networked-flag when registering the component.
+							// If this behavior should be changed in the future, a 'register_entity_component' net-message will have to be sent
+							// to all clients, in addition to setting the networked-flag below! (See SEntityComponentManager::OnComponentTypeRegistered)
+							// umath::set_flag(componentInfo.flags,pragma::ComponentFlags::Networked);
+							Con::cwar<<"WARNING: Component '"<<name<<"' has networked methods or uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"<<Con::endl;
+						}
+					}
+				}
 				return std::static_pointer_cast<pragma::BaseEntityComponent>(std::shared_ptr<TComponent>(static_cast<TComponent*>(game->CreateLuaEntityComponent(ent,name))));
 			},componentFlags);
 			Lua::PushInt(l,componentId);

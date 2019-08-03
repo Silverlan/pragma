@@ -97,7 +97,10 @@ AnimationEvent Lua::get_animation_event(lua_State *l,int32_t tArgs,uint32_t even
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 {
-	Lua::register_entity_component(GetLuaState(),gameMod);
+	auto def = luabind::class_<BaseEntityComponentHandle>("EntityComponent");
+	RegisterLuaEntityComponent(def);
+	gameMod[def];
+
 	Lua::register_gravity_component(gameMod);
 
 	auto defVelocity = luabind::class_<VelocityHandle,BaseEntityComponentHandle>("VelocityComponent");

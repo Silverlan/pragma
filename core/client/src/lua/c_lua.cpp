@@ -134,7 +134,7 @@ void CGame::RegisterLua()
 		{"get_instance_buffer",Lua::ents::Client::get_instance_buffer},
 		{"get_instance_bone_buffer",Lua::ents::Client::get_instance_bone_buffer},
 		{"register_component",Lua::ents::register_component<pragma::CLuaBaseEntityComponent>},
-		{"register_component_event",Lua::ents::register_component_event},
+		{"register_component_net_event",Lua::ents::register_component_event},
 		{"create_camera",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto width = Lua::CheckNumber(l,1);
 			auto height = Lua::CheckNumber(l,2);

@@ -210,9 +210,15 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 	if(pRenderComponent.expired())
 		return false;
 	m_boundEntity = &ent;
+	auto *descSet = pRenderComponent->GetRenderDescriptorSet();
+	if(descSet == nullptr)
+	{
+		Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
+		return false;
+	}
 	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())
 	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
-	return BindInstanceDescriptorSet(*pRenderComponent->GetRenderDescriptorSet());
+	return BindInstanceDescriptorSet(*descSet);
 }
 
 void ShaderEntity::EndDraw()

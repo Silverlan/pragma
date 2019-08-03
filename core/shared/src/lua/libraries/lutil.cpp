@@ -7,6 +7,7 @@
 #include "pragma/lua/classes/ldef_damageinfo.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/class_manager.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"
@@ -422,6 +423,11 @@ int Lua::util::register_class(lua_State *l)
 	auto r = Lua::RunString(l,ss.str(),1,"internal"); /* 1 */
 	if(r == Lua::StatusCode::Ok)
 	{
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw->GetGameState();
+		luabind::object oClass {luabind::from_stack(l,-1)};
+		game->GetLuaClassManager().RegisterClass(className,oClass);
+
 		for(auto i=decltype(nParentClasses){2};i<=(nParentClasses +1);++i)
 		{
 			Lua::PushValue(l,-1); /* 2 */

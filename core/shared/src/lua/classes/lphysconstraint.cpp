@@ -24,10 +24,10 @@ namespace Lua
 		static void GetTargetPosition(lua_State *l,pragma::physics::IConstraint *hConstraint);
 		static void GetTargetRotation(lua_State *l,pragma::physics::IConstraint *hConstraint);
 
-		static void SetOverrideSolverIterationCount(lua_State *l,pragma::physics::IConstraint *hConstraint,int32_t count);
-		static void GetOverrideSolverIterationCount(lua_State *l,pragma::physics::IConstraint *hConstraint);
-		static void GetBreakingImpulseThreshold(lua_State *l,pragma::physics::IConstraint *hConstraint);
-		static void SetBreakingImpulseThreshold(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold);
+		static void GetBreakForce(lua_State *l,pragma::physics::IConstraint *hConstraint);
+		static void SetBreakForce(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold);
+		static void GetBreakTorque(lua_State *l,pragma::physics::IConstraint *hConstraint);
+		static void SetBreakTorque(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold);
 
 		static void SetEnabled(lua_State *l,pragma::physics::IConstraint *hConstraint,bool b);
 		static void IsEnabled(lua_State *l,pragma::physics::IConstraint *hConstraint);
@@ -115,8 +115,8 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	auto classDef = luabind::class_<pragma::physics::IConstraint>("Constraint");
 	classDef.def("IsValid",&IsValid);
 	classDef.def("Remove",&Remove);
-	classDef.def("GetSourceObject",&GetSourceObject);
-	classDef.def("GetTargetObject",&GetTargetObject);
+	classDef.def("GetSourceActor",&GetSourceObject);
+	classDef.def("GetTargetActor",&GetTargetObject);
 	classDef.def("GetSourceTransform",&GetSourceTransform);
 	classDef.def("GetTargetTransform",&GetTargetTransform);
 	classDef.def("GetSourcePosition",&GetSourcePosition);
@@ -124,10 +124,10 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("GetTargetPosition",&GetTargetPosition);
 	classDef.def("GetTargetRotation",&GetTargetRotation);
 
-	classDef.def("SetOverrideSolverIterationCount",&SetOverrideSolverIterationCount);
-	classDef.def("GetOverrideSolverIterationCount",&GetOverrideSolverIterationCount);
-	classDef.def("GetBreakingImpulseThreshold",&GetBreakingImpulseThreshold);
-	classDef.def("SetBreakingImpulseThreshold",&SetBreakingImpulseThreshold);
+	classDef.def("GetBreakForce",&GetBreakForce);
+	classDef.def("SetBreakForce",&SetBreakForce);
+	classDef.def("GetBreakTorque",&GetBreakTorque);
+	classDef.def("SetBreakTorque",&SetBreakTorque);
 
 	classDef.def("SetEnabled",&SetEnabled);
 	classDef.def("IsEnabled",&IsEnabled);
@@ -158,6 +158,53 @@ void Lua::PhysConstraint::register_class(lua_State *l,luabind::module_ &mod)
 	auto sliderClassDef = luabind::class_<pragma::physics::ISliderConstraint,pragma::physics::IConstraint>("SliderConstraint");
 	sliderClassDef.def("IsValid",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
 		Lua::PushBool(l,constraint != nullptr);
+	}));
+	sliderClassDef.def("SetLimits",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*,float,float)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint,float lower,float upper) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		constraint->SetLimit(lower,upper);
+	}));
+	sliderClassDef.def("SetSoftness",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*,float)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint,float softness) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		constraint->SetSoftness(softness);
+	}));
+	sliderClassDef.def("SetDamping",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*,float)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint,float damping) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		constraint->SetDamping(damping);
+	}));
+	sliderClassDef.def("SetRestitution",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*,float)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint,float restitution) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		constraint->SetRestitution(restitution);
+	}));
+	sliderClassDef.def("DisableLimit",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		constraint->DisableLimit();
+	}));
+	sliderClassDef.def("GetLimits",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		auto limit = constraint->GetLimit();
+		Lua::PushNumber(l,limit.first);
+		Lua::PushNumber(l,limit.second);
+	}));
+	sliderClassDef.def("GetSoftness",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetSoftness());
+	}));
+	sliderClassDef.def("GetDamping",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetDamping());
+	}));
+	sliderClassDef.def("GetRestitution",static_cast<void(*)(lua_State*,pragma::physics::ISliderConstraint*)>([](lua_State *l,pragma::physics::ISliderConstraint *constraint) {
+		if(Lua::CheckHandle<pragma::physics::ISliderConstraint>(l,constraint) == false)
+			return;
+		Lua::PushNumber(l,constraint->GetRestitution());
 	}));
 
 	auto coneTwistClassDef = luabind::class_<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>("ConeTwistConstraint");
@@ -675,7 +722,7 @@ void Lua::PhysConstraint::GetSourceObject(lua_State *l,pragma::physics::IConstra
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	auto *o = hConstraint->GetSourceObject();
+	auto *o = hConstraint->GetSourceActor();
 	if(o == nullptr)
 		return;
 	o->Push(l);
@@ -684,7 +731,7 @@ void Lua::PhysConstraint::GetTargetObject(lua_State *l,pragma::physics::IConstra
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	auto *o = hConstraint->GetTargetObject();
+	auto *o = hConstraint->GetTargetActor();
 	if(o == nullptr)
 		return;
 	o->Push(l);
@@ -731,29 +778,29 @@ void Lua::PhysConstraint::GetTargetRotation(lua_State *l,pragma::physics::IConst
 		return;
 	Lua::Push<Quat>(l,hConstraint->GetTargetRotation());
 }
-void Lua::PhysConstraint::SetOverrideSolverIterationCount(lua_State *l,pragma::physics::IConstraint *hConstraint,int32_t count)
+void Lua::PhysConstraint::GetBreakForce(lua_State *l,pragma::physics::IConstraint *hConstraint)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	hConstraint->SetOverrideSolverIterationCount(count);
+	Lua::PushNumber(l,hConstraint->GetBreakForce());
 }
-void Lua::PhysConstraint::GetOverrideSolverIterationCount(lua_State *l,pragma::physics::IConstraint *hConstraint)
+void Lua::PhysConstraint::SetBreakForce(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	Lua::PushInt(l,hConstraint->GetOverrideSolverIterationCount());
+	hConstraint->SetBreakForce(threshold);
 }
-void Lua::PhysConstraint::GetBreakingImpulseThreshold(lua_State *l,pragma::physics::IConstraint *hConstraint)
+void Lua::PhysConstraint::GetBreakTorque(lua_State *l,pragma::physics::IConstraint *hConstraint)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	Lua::PushNumber(l,hConstraint->GetBreakingImpulseThreshold());
+	Lua::PushNumber(l,hConstraint->GetBreakTorque());
 }
-void Lua::PhysConstraint::SetBreakingImpulseThreshold(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold)
+void Lua::PhysConstraint::SetBreakTorque(lua_State *l,pragma::physics::IConstraint *hConstraint,float threshold)
 {
 	if(Lua::CheckHandle<pragma::physics::IConstraint>(l,hConstraint) == false)
 		return;
-	hConstraint->SetBreakingImpulseThreshold(threshold);
+	hConstraint->SetBreakTorque(threshold);
 }
 void Lua::PhysConstraint::SetEnabled(lua_State *l,pragma::physics::IConstraint *hConstraint,bool b)
 {

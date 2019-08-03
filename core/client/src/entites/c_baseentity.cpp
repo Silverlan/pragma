@@ -49,6 +49,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
@@ -307,4 +308,4 @@ bool CBaseEntity::IsPlayer() const {return HasComponent<pragma::CPlayerComponent
 bool CBaseEntity::IsWeapon() const {return HasComponent<pragma::CWeaponComponent>();}
 bool CBaseEntity::IsVehicle() const {return HasComponent<pragma::CVehicleComponent>();}
 bool CBaseEntity::IsNPC() const {return HasComponent<pragma::CAIComponent>();}
-
+#pragma optimize("",on)

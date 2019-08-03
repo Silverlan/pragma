@@ -28,8 +28,8 @@ void BasePointConstraintConeTwistComponent::Initialize()
 			m_kvTwistSpan = util::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"softness",false))
 			m_kvSoftness = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"biasfactor",false))
-			m_kvBiasFactor = util::to_float(kvData.value);
+		// else if(ustring::compare(kvData.key,"biasfactor",false))
+		// 	m_kvBiasFactor = util::to_float(kvData.value);
 		else if(ustring::compare(kvData.key,"relaxationfactor",false))
 			m_kvRelaxationFactor = util::to_float(kvData.value);
 		else
@@ -80,10 +80,10 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 	{
 		coneTwist->SetEntity(GetEntity());
 		coneTwist->SetLimit(
-			swingSpan1,swingSpan2,twistSpan,
-			m_kvSoftness,m_kvBiasFactor,
-			m_kvRelaxationFactor
+			swingSpan1,swingSpan2,twistSpan
 		);
+		coneTwist->SetSoftness(m_kvSoftness);
+		coneTwist->SetDamping(m_kvRelaxationFactor);
 		m_constraints.push_back(util::shared_handle_cast<physics::IConeTwistConstraint,physics::IConstraint>(coneTwist));
 	}
 }

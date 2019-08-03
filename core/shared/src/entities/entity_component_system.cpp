@@ -6,6 +6,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 BaseEntityComponentSystem::~BaseEntityComponentSystem()
 {
 	ClearComponents();
@@ -92,8 +93,15 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 	pragma::ComponentId componentId;
 	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
 	{
-		Con::cwar<<"WARNING: Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
-		return {};
+		if(
+			// Component isn't registered, try to load it dynamically
+			m_entity->GetNetworkState()->GetGameState()->LoadLuaComponentByName(name) == false ||
+			m_componentManager->GetComponentTypeId(name,componentId) == false
+		)
+		{
+			Con::cwar<<"WARNING: Attempted to add unknown component '"<<name<<"' to game object "<<this<<Con::endl;
+			return {};
+		}
 	}
 	return AddComponent(componentId,bForceCreateNew);
 }
@@ -172,3 +180,4 @@ util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(c
 		return {};
 	return FindComponent(componentId);
 }
+#pragma optimize("",on)

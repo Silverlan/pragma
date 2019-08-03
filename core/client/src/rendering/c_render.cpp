@@ -53,18 +53,19 @@
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/physics/visual_debugger.hpp>
+#include <pragma/physics/environment.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
 }
 REGISTER_CONVAR_CALLBACK_CL(render_vsync_enabled,CVAR_CALLBACK_render_vsync_enabled);
 
-#include <pragma/physics/environment.hpp>
 static CallbackHandle cbDrawPhysics;
 static CallbackHandle cbDrawPhysicsEnd;
 static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,bool serverside)
@@ -308,3 +309,4 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
+#pragma optimize("",on)

@@ -6,11 +6,34 @@ using namespace pragma;
 
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
+#pragma optimize("",off)
 std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
 	if(componentId >= m_componentInfos.size())
 		return nullptr;
 	auto &info = m_componentInfos.at(componentId);
+	if(info.id == INVALID_COMPONENT_ID)
+	{
+		// Component has been pre-registered, but its script has not yet been loaded!
+		// 'info'-members will not be valid, so we have to retrieve the component information
+		// (name, etc.) from the pre-register data
+		auto it = std::find_if(m_preRegistered.begin(),m_preRegistered.end(),[componentId](const ComponentInfo &componentInfo) {
+			return componentInfo.id == componentId;
+		});
+		if(it == m_preRegistered.end())
+		{
+			// Component has NOT been pre-registered? Then where did the component id come from?
+			// This should be unreachable!
+			Con::cerr<<"ERROR: Attempted to create unknown component '"<<componentId<<"'!"<<Con::endl;
+			return nullptr;
+		}
+		auto &preRegInfo = *it;
+		// Attempt to create the component by name instead.
+		// This will automatically attempt to load the appropriate
+		// component script.
+		auto name = preRegInfo.name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
+		return CreateComponent(name,ent);
+	}
 	auto r = info.factory(ent);
 	if(r == nullptr)
 		return nullptr;
@@ -283,4 +306,4 @@ void EntityComponentManager::ComponentContainerInfo::Pop(BaseEntityComponent &co
 }
 const std::vector<BaseEntityComponent*> &EntityComponentManager::ComponentContainerInfo::GetComponents() const {return m_components;}
 std::size_t EntityComponentManager::ComponentContainerInfo::GetCount() const {return m_count;}
-
+#pragma optimize("",on)

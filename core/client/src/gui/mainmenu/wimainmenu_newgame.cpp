@@ -65,7 +65,7 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 		return;
 	c_engine->EndGame();
 	pOptionsList->RunUpdateConVars(false);
-	c_engine->StartDefaultGame(map);
+	c_engine->StartDefaultGame(map,maxPlayers <= 1);
 }
 
 void WIMainMenuNewGame::Initialize()

@@ -70,9 +70,11 @@ namespace pragma
 	{
 		class Mesh;
 	};
+	namespace lua {class ClassManager;};
 	namespace networking {enum class DropReason : int8_t;};
 };
 
+struct BaseEntityComponentHandleWrapper;
 namespace pragma {namespace level {class BSPInputData;};};
 namespace pragma::physics {class IEnvironment;};
 class DLLNETWORK Game
@@ -290,6 +292,8 @@ public:
 	bool LoadLuaComponent(const std::string &mainPath,const std::string &componentName);
 	bool LoadLuaEntityByClass(const std::string &className);
 	bool LoadLuaComponentByName(const std::string &componentName);
+	const pragma::lua::ClassManager &GetLuaClassManager() const;
+	pragma::lua::ClassManager &GetLuaClassManager();
 
 	void AddConVarCallback(const std::string &cvar,LuaFunction function);
 	unsigned int GetNetMessageID(std::string name);
@@ -338,6 +342,7 @@ protected:
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
+	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager = nullptr;
 	uint32_t m_mapEntityIdx = 1u;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 	std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
@@ -389,6 +394,7 @@ protected:
 
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx,bool bInject);
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod);
+	virtual void RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &classDef);
 	void LoadConfig();
 	void SaveConfig();
 	void UpdateTimers();

@@ -17,7 +17,6 @@ namespace pragma
 		float m_kvSwingSpan2 = 0.f;
 		float m_kvTwistSpan = 0.f;
 		float m_kvSoftness = 1.f;
-		float m_kvBiasFactor = 0.3f;
 		float m_kvRelaxationFactor = 1.f;
 
 		virtual void InitializeConstraint(BaseEntity *src,BaseEntity *tgt) override;

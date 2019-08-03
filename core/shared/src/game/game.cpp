@@ -34,6 +34,7 @@
 #include "pragma/level/level_info.hpp"
 #include "pragma/entities/components/logic_component.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
+#include "pragma/lua/class_manager.hpp"
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <util_bsp.hpp>
@@ -341,6 +342,7 @@ void Game::OnRemove()
 	pragma::BaseLuaBaseEntityComponent::ClearMembers(state);
 	m_surfaceMaterialManager = nullptr; // Has to be destroyed before physics environment!
 	m_physEnvironment = nullptr; // Physics environment has to be destroyed before the Lua state! (To make sure Lua-handles are destroyed)
+	m_luaClassManager = nullptr;
 	m_lua = nullptr;
 	GetNetworkState()->DeregisterLuaModules(state,identifier); // Has to be called AFTER Lua instance has been released!
 	if(m_cbProfilingHandle.IsValid())

@@ -92,6 +92,7 @@ public:
 	virtual bool IsConsoleOpen() const override;
 	void UseFullbrightShader(bool b);
 	float GetFPSLimit() const;
+	void StartDefaultGame(const std::string &map,bool singlePlayer);
 	virtual void StartDefaultGame(const std::string &map) override;
 	virtual void EndGame() override;
 	virtual bool IsClientConnected() override;

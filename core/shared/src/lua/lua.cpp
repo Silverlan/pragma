@@ -6,6 +6,7 @@
 #include "pragma/lua/libraries/ldebug.h"
 #include <fsys/filesystem.h>
 #include "luasystem_file.h"
+#include "pragma/lua/class_manager.hpp"
 #include <pragma/console/conout.h>
 #include <pragma/console/cvar.h>
 #include <pragma/lua/lua_error_handling.hpp>
@@ -23,6 +24,8 @@ void Game::InitializeLua()
 	m_luaIncludeStack.clear();
 	m_lua = std::make_shared<Lua::Interface>();
 	m_lua->Open();
+
+	m_luaClassManager = std::make_unique<pragma::lua::ClassManager>(*m_lua->GetState());
 	
 	Lua::initialize_lua_state(GetLuaInterface());
 	RegisterLua();
@@ -47,6 +50,9 @@ void Game::InitializeLua()
 	if((remDeb == 1 && IsServer()) == true || (remDeb == 2 && IsClient() == true))
 		Lua::debug::enable_remote_debugging(GetLuaState());
 }
+
+const pragma::lua::ClassManager &Game::GetLuaClassManager() const {return const_cast<Game*>(this)->GetLuaClassManager();;}
+pragma::lua::ClassManager &Game::GetLuaClassManager() {return *m_luaClassManager;}
 
 void Game::SetupLua()
 {
@@ -203,6 +209,14 @@ bool Game::LoadLuaComponent(std::string path)
 		auto pathWithoutLuaDir = luaFilePath.substr(4);
 		return ExecuteLuaFile(pathWithoutLuaDir);
 	}
+
+	luaFilePath = path +'\\' +luaFileName;
+	if(FileManager::IsFile(luaFilePath))
+	{
+		auto pathWithoutLuaDir = luaFilePath.substr(4);
+		return ExecuteLuaFile(pathWithoutLuaDir);
+	}
+
 	auto pathWithoutLuaDir = (path +".lua").substr(4);
 	return ExecuteLuaFile(pathWithoutLuaDir);
 }

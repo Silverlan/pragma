@@ -27,7 +27,6 @@ namespace pragma
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
@@ -609,4 +608,3 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
-#pragma optimize("",on)

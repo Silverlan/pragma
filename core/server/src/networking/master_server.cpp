@@ -1,7 +1,6 @@
 #include "pragma/networking/master_server.hpp"
 #include <sharedutils/util_library.hpp>
 
-#pragma optimize("",off)
 std::unique_ptr<pragma::networking::MasterServerRegistration> pragma::networking::MasterServerRegistration::Register(const util::Library &steamworksLibrary,const GameServerInfo &serverInfo)
 {
 	std::unique_ptr<MasterServerRegistration> reg {new MasterServerRegistration {}};
@@ -59,4 +58,3 @@ void pragma::networking::MasterServerRegistration::AuthenticateAndAddClient(uint
 void pragma::networking::MasterServerRegistration::DropClient(SteamId steamId) {m_steamworks_drop_client(steamId);}
 void pragma::networking::MasterServerRegistration::SetClientName(SteamId steamId,const std::string &name) {m_steamworks_set_client_name(steamId,name);}
 void pragma::networking::MasterServerRegistration::SetClientScore(SteamId steamId,int32_t score) {m_steamworks_set_client_score(steamId,score);}
-#pragma optimize("",on)

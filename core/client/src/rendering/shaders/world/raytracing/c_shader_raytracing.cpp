@@ -11,7 +11,6 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding { // Image
@@ -104,4 +103,3 @@ bool ShaderRayTracing::Compute(
 		&descSetLightSources
 	}) && RecordPushConstants(pushConstants) && RecordDispatch(workGroupsX,workGroupsY);
 }
-#pragma optimize("",on)

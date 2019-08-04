@@ -12,7 +12,6 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <pragma/math/intersection.h>
 
-#pragma optimize("",off)
 bool Game::IsServer() {return false;}
 bool Game::IsClient() {return false;}
 
@@ -210,4 +209,3 @@ TraceResult Game::Sweep(const TraceData &data) const
 	}
 	return results.front();
 }
-#pragma optimize("",on)

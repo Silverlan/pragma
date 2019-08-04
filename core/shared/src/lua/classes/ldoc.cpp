@@ -5,7 +5,6 @@
 
 #include <luabind/detail/class_rep.hpp>
 
-#pragma optimize("",off)
 #if 0
 struct LUABIND_API class_base : scope
 {
@@ -41,6 +40,7 @@ private:
 
 #undef GetClassInfo
 
+#if 0
 struct LuaFunctionInfo
 {
 	std::string name;
@@ -218,7 +218,7 @@ static void test()
 
 }
 
-
+#endif
 namespace Lua::doc
 {
 	void register_library(Lua::Interface &lua);
@@ -226,7 +226,7 @@ namespace Lua::doc
 void Lua::doc::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
-	get_class_names(l);
+	//get_class_names(l);
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
 	Lua::RegisterLibrary(l,libName,{
@@ -579,4 +579,3 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
-#pragma optimize("",on)

@@ -4,7 +4,6 @@
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/controller.hpp"
 
-#pragma optimize("",off)
 pragma::physics::IController::IController(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject)
 	: IBase{env},m_collisionObject{collisionObject}
 {}
@@ -46,4 +45,3 @@ void pragma::physics::IController::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<IController>(lua);
 }
-#pragma optimize("",on)

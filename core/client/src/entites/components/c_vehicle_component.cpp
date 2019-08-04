@@ -14,7 +14,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 std::vector<CVehicleComponent*> CVehicleComponent::s_vehicles;
 const std::vector<CVehicleComponent*> &CVehicleComponent::GetAll() {return s_vehicles;}
 unsigned int CVehicleComponent::GetVehicleCount() {return CUInt32(s_vehicles.size());}
@@ -175,4 +175,3 @@ Bool CVehicleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 		return false;
 	return true;
 }
-#pragma optimize("",on)

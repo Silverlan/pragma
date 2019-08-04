@@ -35,7 +35,6 @@ extern DLLENGINE Engine *engine;
 
 //////////////////
 
-#pragma optimize("",off)
 void BaseCharacterComponent::InitializeController()
 {
 	//auto &ent = GetEntity();
@@ -1022,4 +1021,3 @@ void CEViewRotation::PushArguments(lua_State *l)
 {
 	Lua::Push<Quat>(l,rotation);
 }
-#pragma optimize("",on)

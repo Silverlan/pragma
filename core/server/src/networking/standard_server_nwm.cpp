@@ -25,7 +25,6 @@
 
 extern DLLSERVER ServerState *server;
 
-#pragma optimize("",off)
 pragma::networking::NWMActiveServer::NWMActiveServer(const std::shared_ptr<SVNWMUDPConnection> &udp,const std::shared_ptr<SVNWMTCPConnection> &tcp)
 	: nwm::Server(udp,tcp),m_lastHeartBeat()
 {
@@ -270,4 +269,3 @@ static void sv_timeout_duration_callback(NetworkState*,ConVar*,float,float val)
 	sv->SetTimeoutDuration(GET_TIMEOUT_DURATION(val));
 }
 REGISTER_CONVAR_CALLBACK_SV(sv_timeout_duration,sv_timeout_duration_callback);
-#pragma optimize("",on)

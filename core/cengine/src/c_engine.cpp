@@ -51,7 +51,6 @@ extern "C"
 	}
 }
 
-#pragma optimize("",off)
 DLLCENGINE CEngine *c_engine = NULL;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -233,17 +232,6 @@ void CEngine::EndGame()
 
 void CEngine::Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude)
 {
-	if(key == static_cast<int>(GLFW::Key::GraveAccent))
-	{
-		if(pressState == GLFW::KeyState::Press)
-		{
-			if(IsConsoleOpen())
-				CloseConsole();
-			else
-				OpenConsole();
-		}
-		return;
-	}
 	if(inputState == GLFW::KeyState::Press || inputState == GLFW::KeyState::Release || inputState == GLFW::KeyState::Held)
 	{
 		if((mods &GLFW::Modifier::AxisNegative) != GLFW::Modifier::None)
@@ -406,6 +394,14 @@ void CEngine::CharInput(GLFW::Window &window,unsigned int c)
 		return;
 	if(WGUI::GetInstance().HandleCharInput(window,c))
 		return;
+	if(c == '`')
+	{
+		if(IsConsoleOpen())
+			CloseConsole();
+		else
+			OpenConsole();
+		return;
+	}
 	if(client != nullptr && client->CharInput(c) == false)
 		return;
 }
@@ -1306,4 +1302,3 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
-#pragma optimize("",on)

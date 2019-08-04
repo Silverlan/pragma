@@ -2784,6 +2784,9 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	}
 	//
 
+	// Models are rotated by 90 degree for some reason
+	mdl.Rotate(uquat::create(EulerAngles{0.f,90.f,0.f}));
+
 	mdl.Update(ModelUpdateFlags::All);
 
 	return ptrMdl;

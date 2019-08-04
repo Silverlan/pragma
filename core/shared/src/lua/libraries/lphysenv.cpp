@@ -28,7 +28,6 @@ extern DLLENGINE Engine *engine;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
-#pragma optimize("",off)
 namespace Lua
 {
 	namespace physenv
@@ -1917,4 +1916,3 @@ int Lua::physenv::calc_linear_velocity_from_force(lua_State *l)
 	Lua::Push<Vector3>(l,linVel);
 	return 1;
 }
-#pragma optimize("",on)

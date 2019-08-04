@@ -31,7 +31,7 @@ UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
 extern DLLENGINE Engine *engine;
-#pragma optimize("",off)
+
 NetworkState::NetworkState()
 	: CallbackHandler(),CVarHandler()
 {
@@ -270,9 +270,25 @@ void NetworkState::Initialize()
 {
 	CVarHandler::Initialize();
 	if(IsClient())
-		Con::cout<<"Initializing Client..."<<Con::endl;
+		Con::cout<<"Initializing client state..."<<Con::endl;
 	else
-		Con::cout<<"Initializing Server..."<<Con::endl;
+	{
+		Con::cout<<"Initializing server state..."<<Con::endl;
+		if(engine->IsServerOnly())
+		{
+			Con::cout<<"If you encounter problems, such as the server not showing up in the server browser, or clients not being able to connect to it, please make sure the following ports are forwarded:"<<Con::endl;
+			Con::cout<<engine_info::DEFAULT_SERVER_PORT<<" (TCP): Required if the boost asio networking layer is used"<<Con::endl;
+			Con::cout<<engine_info::DEFAULT_SERVER_PORT<<" (UDP): Required for clients to be able to connect to the server"<<Con::endl;
+			Con::cout<<engine_info::DEFAULT_QUERY_PORT<<" (UDP): Required for the server to be registered with the master server and show up in the server browser"<<Con::endl;
+			Con::cout<<Con::endl<<"Here's a list of useful console commands:"<<Con::endl;
+			Con::cout<<"map <mapName>: Loads the specified map and starts the server."<<Con::endl;
+			Con::cout<<"sv_maxplayers <maxPlayers>: Specifies the maximum number of players that can play on the server at a time."<<Con::endl;
+			Con::cout<<"sv_gamemode <gameMode>: The gamemode to use. Has to be specified before a map is loaded."<<Con::endl;
+			Con::cout<<"net_library <netLib>: The networking library module to use. The name has to match one of the modules located in the 'pragma/modules/networking' directory."<<Con::endl;
+			Con::cout<<"sv_use_p2p_if_available <1/0>: Only has an effect if the steam networking module is used. Network communication will be relayed through the steam servers, clients and the server will NOT communicate directly."<<Con::endl;
+		}
+	}
+
 	InitializeResourceManager();
 	m_resourceWatcher->MountDirectory("");
 	auto &addons = AddonSystem::GetMountedAddons();
@@ -724,4 +740,3 @@ void NetworkState::AddTickCallback(CallbackHandle callback)
 {
 	m_tickCallbacks.push_back(callback);
 }
-#pragma optimize("",on)

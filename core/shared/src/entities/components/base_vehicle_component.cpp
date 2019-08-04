@@ -21,7 +21,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_EXITED = pragma::INVALID_COMPONENT_ID;
 void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -333,4 +332,3 @@ Float BaseVehicleComponent::GetSteeringFactor() const
 		return 0.f;
 	return umath::clamp(static_cast<float>(umath::rad_to_deg(m_physVehicle->GetWheelYawAngle(0)) /m_vhcCreateInfo.wheels.front().maxSteeringAngle),-1.f,1.f);
 }
-#pragma optimize("",on)

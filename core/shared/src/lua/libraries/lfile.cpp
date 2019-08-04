@@ -6,7 +6,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 LFile::LFile()
 {}
 
@@ -587,4 +586,3 @@ int Lua::file::ComparePath(lua_State *l)
 	Lua::PushBool(l,p0 == p1);
 	return 1;
 }
-#pragma optimize("",on)

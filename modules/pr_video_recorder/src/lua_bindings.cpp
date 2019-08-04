@@ -12,8 +12,6 @@
 #include <image/prosper_image.hpp>
 #include <wrappers/memory_block.h>
 
-#pragma optimize("",off)
-
 struct VideoRecorderFileInterface
 	: public VideoRecorder::ICustomFile
 {
@@ -223,4 +221,3 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 		{"QUALITY_VERY_HIGH",umath::to_integral(VideoRecorder::Quality::VeryHigh)}
 	});
 }
-#pragma optimize("",on)

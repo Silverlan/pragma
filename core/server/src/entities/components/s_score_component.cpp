@@ -6,7 +6,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void SScoreComponent::Initialize()
 {
 	BaseScoreComponent::Initialize();
@@ -23,4 +22,3 @@ void SScoreComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 {
 	packet->Write<Score>(*m_score);
 }
-#pragma optimize("",on)

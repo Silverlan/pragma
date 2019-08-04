@@ -19,7 +19,6 @@ using namespace pragma;
 
 extern DLLSERVER SGame *s_game;
 
-#pragma optimize("",off)
 std::vector<SVehicleComponent*> SVehicleComponent::s_vehicles;
 const std::vector<SVehicleComponent*> &SVehicleComponent::GetAll() {return s_vehicles;}
 unsigned int SVehicleComponent::GetVehicleCount() {return CUInt32(s_vehicles.size());}
@@ -194,4 +193,3 @@ void SVehicleComponent::OnPostSpawn()
 		m_steeringWheelMdl.clear();
 	}
 }
-#pragma optimize("",on)

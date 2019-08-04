@@ -14,7 +14,6 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include <BulletCollision/CollisionShapes/btMultimaterialTriangleMeshShape.h>
 
-#pragma optimize("",off)
 ControllerPhysObj::~ControllerPhysObj()
 {
 	//NetworkState *state = m_networkState;
@@ -413,4 +412,3 @@ void CapsuleControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
 }
 pragma::physics::IController *ControllerPhysObj::GetController() {return m_controller.Get();}
 pragma::physics::ICollisionObject *ControllerPhysObj::GetCollisionObject() {return m_collisionObject.Get();}
-#pragma optimize("",on)

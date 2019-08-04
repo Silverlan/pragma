@@ -6,7 +6,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 BaseEntityComponentSystem::~BaseEntityComponentSystem()
 {
 	ClearComponents();
@@ -180,4 +179,3 @@ util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(c
 		return {};
 	return FindComponent(componentId);
 }
-#pragma optimize("",on)

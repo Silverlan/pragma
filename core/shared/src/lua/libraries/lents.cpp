@@ -21,7 +21,7 @@
 #include "pragma/lua/sh_lua_component.hpp"
 
 extern DLLENGINE Engine *engine;
-#pragma optimize("",off)
+
 int Lua::ents::create(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
@@ -641,4 +641,3 @@ int Lua::ents::register_component_event(lua_State *l)
 	Lua::PushInt(l,eventId);
 	return 1;
 }
-#pragma optimize("",on)

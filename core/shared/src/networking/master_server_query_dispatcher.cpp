@@ -1,6 +1,5 @@
 #include "pragma/networking/master_server_query_dispatcher.hpp"
 
-#pragma optimize("",off)
 void pragma::networking::IMasterServerQueryDispatcher::Release() {CancelQuery();}
 void pragma::networking::IMasterServerQueryDispatcher::SetEventCallbacks(const EventCallbacks &eventCallbacks) {m_eventCallbacks = eventCallbacks;}
 void pragma::networking::IMasterServerQueryDispatcher::CancelQuery()
@@ -79,4 +78,3 @@ void pragma::networking::IMasterServerQueryDispatcher::PingServers()
 	for(auto i=decltype(m_queryResults.size()){0u};i<m_queryResults.size();++i)
 		m_serverPingQueue.push(i);
 }
-#pragma optimize("",on)

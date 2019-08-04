@@ -42,7 +42,7 @@ unsigned int CPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size()
 extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
-#pragma optimize("",off)
+
 Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
 {
 	auto &ent = GetEntity();
@@ -730,4 +730,3 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		// TODO: Remove callback on complete!!
 	}));*/
 }
-#pragma optimize("",on)

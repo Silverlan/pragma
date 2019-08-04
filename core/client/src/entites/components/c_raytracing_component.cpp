@@ -17,7 +17,6 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
 static std::shared_ptr<MaterialDescriptorArrayManager> s_materialDescriptorArrayManager = nullptr;
@@ -248,4 +247,3 @@ void CRaytracingComponent::InitializeMeshForRayTracing()
 				When to deregister material from MaterialDescriptorArrayManager?
 }
 #endif
-#pragma optimize("",on)

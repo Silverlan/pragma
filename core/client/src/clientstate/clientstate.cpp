@@ -53,7 +53,7 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 DLLCENGINE CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
-#pragma optimize("",off)
+
 static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
 {
 	// Class specific handles have to also be defined in CGame::InitializeGUIElement!
@@ -757,4 +757,3 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
-#pragma optimize("",on)

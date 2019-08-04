@@ -6,7 +6,6 @@
 #include <util_bsp.hpp>
 #include <GuillotineBinPack.h>
 
-#pragma optimize("",off)
 bool util::bsp::FaceLightMapInfo::valid() const {return (flags &Flags::Valid) != Flags::None;}
 
 static util::bsp::LightMapInfo load_light_map_data(bsp::File &bsp)
@@ -154,4 +153,3 @@ util::bsp::GeometryData util::bsp::load_bsp_geometry(NetworkState &nw,::bsp::Fil
 	geometryData.lightMapData = load_light_map_data(bsp);
 	return geometryData;
 }
-#pragma optimize("",on)

@@ -4,7 +4,7 @@
 #include <image/prosper_render_target.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 ShadowMapCasc::TextureSet::TextureSet()
 {}
 
@@ -100,4 +100,3 @@ const std::shared_ptr<prosper::Framebuffer> &ShadowMapCasc::GetFramebuffer(pragm
 }
 
 bool ShadowMapCasc::IsDynamicValid() const {return (GetDepthTexture(pragma::CLightComponent::RenderPass::Dynamic) != nullptr) ? true : false;} // prosper TODO
-#pragma optimize("",on)

@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <sharedutils/util_file.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/IOSystem.hpp>
@@ -451,6 +452,18 @@ public:
 private:
 	VFilePtr m_rootFile = nullptr;
 };
+
+int Lua::import::export_model_asset(lua_State *l)
+{
+	/*Assimp::Exporter exporter;
+	aiScene scene {};
+	std::string formatId;
+	std::string path;
+	auto result = exporter.Export(&scene,formatId,path);
+	Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
+	return 1;*/
+	return 0;
+}
 
 int Lua::import::import_model_asset(lua_State *l)
 {

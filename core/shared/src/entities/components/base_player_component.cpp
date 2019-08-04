@@ -40,7 +40,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -878,4 +877,3 @@ void CEHandleActionInput::PushArguments(lua_State *l)
 	Lua::PushBool(l,pressed);
 	Lua::PushNumber(l,magnitude);
 }
-#pragma optimize("",on)

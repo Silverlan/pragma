@@ -3,7 +3,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 std::string pragma::networking::LocalClient::GetIdentifier() const {return "localhost";}
 bool pragma::networking::LocalClient::Connect(const std::string &ip,Port port,Error &outErr)
 {
@@ -36,4 +35,3 @@ void pragma::networking::LocalClient::SetTimeoutDuration(float duration) {}
 std::optional<std::string> pragma::networking::LocalClient::GetIP() const {return {};}
 std::optional<pragma::networking::Port> pragma::networking::LocalClient::GetLocalTCPPort() const {return {};}
 std::optional<pragma::networking::Port> pragma::networking::LocalClient::GetLocalUDPPort() const {return {};}
-#pragma optimize("",on)

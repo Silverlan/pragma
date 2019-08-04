@@ -5,7 +5,6 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/console/convars.h>
 
-#pragma optimize("",off)
 ConConf *CEngine::GetConVar(const std::string &cv)
 {
 	auto *cvar = Engine::GetConVar(cv);
@@ -44,4 +43,3 @@ bool CEngine::RunConsoleCommand(std::string cmd,std::vector<std::string> &argv,K
 	}
 	return true;
 }
-#pragma optimize("",on)

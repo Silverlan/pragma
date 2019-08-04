@@ -23,7 +23,6 @@
 #endif
 
 extern DLLENGINE Engine *engine;
-
 #pragma optimize("",off)
 static std::string invert_x_axis(std::string str)
 {
@@ -1059,8 +1058,10 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 				Remove
 			};
 			auto type = BrushType::World;
-			if(brush.contents &0x20)
+			if(brush.contents &umath::to_integral(ContentsFlags::Water))
 				type = BrushType::Water;
+			// else if(brush.contents &umath::to_integral(ContentsFlags::Detail))
+			// 	type = BrushType::Remove;
 			else
 			{
 				for(auto i=brush.firstside;i<brush.firstside +brush.numsides;++i)

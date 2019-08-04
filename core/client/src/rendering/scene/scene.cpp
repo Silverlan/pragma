@@ -32,7 +32,6 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -522,4 +521,3 @@ void Scene::SetActiveCamera(pragma::CCameraComponent &cam)
 	m_renderSettings.farZ = cam.GetFarZ();
 }
 void Scene::SetActiveCamera() {m_camera = {};}
-#pragma optimize("",on)

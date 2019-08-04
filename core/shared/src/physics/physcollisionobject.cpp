@@ -7,7 +7,6 @@
 
 const double EPSILON = 4.9406564584125e-2;
 
-#pragma optimize("",off)
 pragma::physics::ICollisionObject::ICollisionObject(IEnvironment &env,pragma::physics::IShape &shape)
 	: IBase{env},m_shape{std::static_pointer_cast<pragma::physics::IShape>(shape.shared_from_this())}
 {}
@@ -210,4 +209,3 @@ void pragma::physics::ISoftBody::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<ISoftBody>(lua);
 }
-#pragma optimize("",on)

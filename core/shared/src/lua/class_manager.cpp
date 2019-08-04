@@ -1,6 +1,5 @@
 #include "pragma/lua/class_manager.hpp"
 
-#pragma optimize("",off)
 pragma::lua::ClassManager::ClassManager(lua_State &l)
 	: m_luaState{l}
 {}
@@ -74,4 +73,3 @@ bool pragma::lua::ClassManager::IsClassMethodDefined(const ClassRef &classRef,co
 	}
 	return false;
 }
-#pragma optimize("",on)

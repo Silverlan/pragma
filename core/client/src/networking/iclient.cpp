@@ -1,7 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/networking/iclient.hpp"
 
-#pragma optimize("",off)
 std::optional<pragma::networking::IPAddress> pragma::networking::IClient::GetIPAddress() const
 {
 	auto ip = GetIP();
@@ -39,4 +38,3 @@ void pragma::networking::IClient::OnConnectionClosed()
 	if(m_eventInterface.onConnectionClosed)
 		m_eventInterface.onConnectionClosed();
 }
-#pragma optimize("",on)

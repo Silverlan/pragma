@@ -3,7 +3,6 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/shape.hpp"
 
-#pragma optimize("",off)
 pragma::physics::WheelCreateInfo pragma::physics::WheelCreateInfo::CreateStandardFrontWheel()
 {
 	WheelCreateInfo createInfo {};
@@ -227,4 +226,3 @@ void pragma::physics::IVehicle::OnRemove()
 pragma::physics::IWheel::IWheel(IEnvironment &env)
 	: IBase{env}
 {}
-#pragma optimize("",on)

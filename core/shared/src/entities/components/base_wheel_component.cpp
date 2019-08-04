@@ -11,7 +11,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 BaseWheelComponent::BaseWheelComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -481,4 +480,3 @@ pragma::physics::ICollisionObject *BaseWheelComponent::GetGroundObject() const
 #endif
 }
 #endif
-#pragma optimize("",on)

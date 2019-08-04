@@ -1,7 +1,6 @@
 #include "pragma/physics/raycast_filter.hpp"
 #include "pragma/physics/raytraces.h"
 
-#pragma optimize("",off)
 pragma::physics::EntityRayCastFilterCallback::EntityRayCastFilterCallback(BaseEntity &ent)
 	: m_hEnt{ent.GetHandle()}
 {}
@@ -87,4 +86,3 @@ RayCastHitType pragma::physics::CustomRayCastFilterCallback::PostFilter(pragma::
 }
 bool pragma::physics::CustomRayCastFilterCallback::HasPreFilter() const {return m_preFilter != nullptr;}
 bool pragma::physics::CustomRayCastFilterCallback::HasPostFilter() const {return m_postFilter != nullptr;}
-#pragma optimize("",on)

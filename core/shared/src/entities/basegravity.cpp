@@ -12,7 +12,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void BaseGravity::SetGravityScale(float scale) {m_gravityScale = scale;}
 void BaseGravity::SetGravityOverride(const Vector3 &dir)
 {
@@ -271,4 +270,3 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3
 
 	return true;
 }
-#pragma optimize("",on)

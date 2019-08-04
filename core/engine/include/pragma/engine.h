@@ -277,7 +277,7 @@ inline DLLENGINE std::shared_ptr<Engine> InitializeServer(int argc,char *argv[])
 	en->OpenConsole();
 	if(en->Initialize(argc,argv) == false)
 		return nullptr;
-	en->StartServer(false);
+	// en->StartServer(false);
 	en->Start();
 	return en;
 }

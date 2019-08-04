@@ -7,7 +7,6 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 CPhysVisualDebugger::CPhysVisualDebugger()
 {
 	InitializeBuffers();
@@ -116,4 +115,3 @@ void CPhysVisualDebugger::DrawText(const std::string &str,const Vector3 &locatio
 {
 	// TODO
 }
-#pragma optimize("",on)

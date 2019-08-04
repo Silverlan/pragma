@@ -12,7 +12,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ComponentEventId BaseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
@@ -365,4 +364,3 @@ void CETouchData::PushArguments(lua_State *l)
 	else
 		Lua::PushNil(l);
 }
-#pragma optimize("",on)

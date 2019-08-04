@@ -3,7 +3,6 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/networking/resource.h>
 
-#pragma optimize("",off)
 pragma::networking::IServerClient::~IServerClient() {ClearResourceTransfer();}
 bool pragma::networking::IServerClient::Drop(DropReason reason,pragma::networking::Error &outErr)
 {
@@ -88,4 +87,3 @@ std::vector<std::string> &pragma::networking::IServerClient::GetScheduledResourc
 
 void pragma::networking::IServerClient::SetSteamId(uint64_t steamId) {m_steamId = steamId;}
 uint64_t pragma::networking::IServerClient::GetSteamId() const {return m_steamId;}
-#pragma optimize("",on)

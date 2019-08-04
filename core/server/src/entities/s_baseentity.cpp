@@ -44,7 +44,6 @@ extern DLLENGINE Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 
-#pragma optimize("",off)
 SBaseEntity::SBaseEntity()
 	: BaseEntity(),
 	m_bShared(false),
@@ -248,4 +247,3 @@ bool SBaseEntity::IsPlayer() const {return HasComponent<pragma::SPlayerComponent
 bool SBaseEntity::IsWeapon() const {return HasComponent<pragma::SWeaponComponent>();}
 bool SBaseEntity::IsVehicle() const {return HasComponent<pragma::SVehicleComponent>();}
 bool SBaseEntity::IsNPC() const {return HasComponent<pragma::SAIComponent>();}
-#pragma optimize("",on)

@@ -9,7 +9,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void BaseFuncPhysicsComponent::Initialize()
 {
 	BaseFuncSurfaceMaterialComponent::Initialize();
@@ -69,4 +68,3 @@ PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
 		return nullptr;
 	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? PHYSICSTYPE::DYNAMIC : PHYSICSTYPE::STATIC);
 }
-#pragma optimize("",on)

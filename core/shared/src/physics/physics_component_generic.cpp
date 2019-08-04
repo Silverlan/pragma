@@ -26,7 +26,6 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose,BoneId boneId)
 {
 	if(shape.IsCompoundShape())
@@ -932,4 +931,3 @@ float BasePhysicsComponent::GetMass() const
 		return 0.f;
 	return phys->GetMass();
 }
-#pragma optimize("",on)

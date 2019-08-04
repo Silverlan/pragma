@@ -651,6 +651,11 @@ void RasterizationRenderer::RenderScenePostProcessing(std::shared_ptr<prosper::P
 					shaderFXAA.EndDraw();
 				}
 				prosper::util::record_end_render_pass(*(*drawCmd));
+
+				prosper::util::record_post_render_pass_image_barrier(
+					**drawCmd,**hdrInfo.hdrStagingRenderTarget->GetTexture()->GetImage(),
+					Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+				);
 			}
 			prosper::util::record_image_barrier(*(*drawCmd),*(*hdrInfo.hdrRenderTarget->GetTexture()->GetImage()),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 			prosper::util::record_image_barrier(*(*drawCmd),*(*hdrTex->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
@@ -755,7 +760,7 @@ void RasterizationRenderer::RenderScenePostProcessing(std::shared_ptr<prosper::P
 			Vector4(1.f,1.f,1.f,1.f),
 			blurSize,
 			kernelSize
-			});
+		});
 	}
 	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomTexture->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
@@ -795,6 +800,11 @@ void RasterizationRenderer::RenderSceneResolveHDR(std::shared_ptr<prosper::Prima
 			shaderPPHdr.EndDraw();
 		}
 		prosper::util::record_end_render_pass(*(*drawCmd));
+
+		prosper::util::record_post_render_pass_image_barrier(
+			**drawCmd,**hdrInfo.postHdrRenderTarget->GetTexture()->GetImage(),
+			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+		);
 	}
 	if(IsMultiSampled() == false)
 	{

@@ -10,7 +10,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 
 DEFINE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
-#pragma optimize("",off)
+
 PhysObj::PhysObj(pragma::BaseEntityComponent *owner)
 	: m_handle(new PtrPhysObj(this)),
 	m_collisionFilterGroup(CollisionMask::None),m_collisionFilterMask(CollisionMask::None)
@@ -80,11 +80,6 @@ void PhysObj::SetCCDEnabled(bool b)
 
 void PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
 {
-	pragma::physics::IBase *x;
-	auto *y = static_cast<pragma::physics::ICollisionObject*>(x);
-	//static_assert(std::is_convertible<pragma::physics::IBase*,pragma::physics::ICollisionObject*>::value);
-
-
 	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
 	obj.SetPhysObj(*this);
 	if(m_bSpawned == true)
@@ -323,5 +318,3 @@ void PhysObj::ApplyTorqueImpulse(const Vector3&) {}
 void PhysObj::ClearForces() {}
 Vector3 PhysObj::GetTotalForce() const {return Vector3(0.f,0.f,0.f);}
 Vector3 PhysObj::GetTotalTorque() const {return Vector3(0.f,0.f,0.f);}
-
-#pragma optimize("",on)

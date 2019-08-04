@@ -107,7 +107,7 @@ DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,s
 		}
 		else if(address.find('.') == std::string::npos) // SteamId
 		{
-			auto steamId = util::to_int(address);
+			auto steamId = util::to_uint64(address);
 			c_engine->Connect(steamId);
 			return;
 		}

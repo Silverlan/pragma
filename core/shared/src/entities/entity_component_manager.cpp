@@ -6,7 +6,7 @@ using namespace pragma;
 
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
-#pragma optimize("",off)
+
 std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
 	if(componentId >= m_componentInfos.size())
@@ -306,4 +306,3 @@ void EntityComponentManager::ComponentContainerInfo::Pop(BaseEntityComponent &co
 }
 const std::vector<BaseEntityComponent*> &EntityComponentManager::ComponentContainerInfo::GetComponents() const {return m_components;}
 std::size_t EntityComponentManager::ComponentContainerInfo::GetCount() const {return m_count;}
-#pragma optimize("",on)

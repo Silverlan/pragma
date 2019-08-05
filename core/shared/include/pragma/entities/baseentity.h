@@ -4,6 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/baseluaobj.h"
 #include "pragma/entities/entity_component_system.hpp"
+#include "pragma/model/animation/play_animation_flags.hpp"
 #include <pragma/console/conout.h>
 
 #define DECLARE_ENTITY_HANDLE \
@@ -20,6 +21,14 @@ class Engine;
 class NetworkState;
 class DamageInfo;
 class TraceData;
+class Model;
+class ALSound;
+class PhysObj;
+
+enum class ALSoundType : Int32;
+enum class Activity : uint16_t;
+enum class CollisionMask : uint32_t;
+enum class PHYSICSTYPE : int;
 
 namespace pragma
 {
@@ -35,6 +44,7 @@ namespace pragma
 	class BaseTimeScaleComponent;
 	class BaseNameComponent;
 	class BaseTransformComponent;
+	class BaseParentComponent;
 	namespace physics {class Transform;};
 
 	using NetEventId = uint32_t;
@@ -114,6 +124,68 @@ public:
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
 	util::WeakHandle<pragma::BaseTransformComponent> GetTransformComponent() const;
 
+	// These are quick-access functions for commonly used component functions.
+	// In some cases these may create the component, if it doesn't exist, and transmit
+	// it to the client if called serverside!
+	std::shared_ptr<ALSound> CreateSound(const std::string &snd,ALSoundType type);
+	std::shared_ptr<ALSound> EmitSound(const std::string &snd,ALSoundType type,float gain=1.f,float pitch=1.f);
+
+	std::string GetName() const;
+	void SetName(const std::string &name);
+
+	void SetModel(const std::string &mdl);
+	void SetModel(const std::shared_ptr<Model> &mdl);
+	std::shared_ptr<Model> GetModel() const;
+	std::string GetModelName() const;
+	std::optional<pragma::physics::Transform> GetAttachmentPose(uint32_t attId) const;
+	uint32_t GetSkin() const;
+	void SetSkin(uint32_t skin);
+	uint32_t GetBodyGroup(const std::string &name) const;
+	void SetBodyGroup(const std::string &name,uint32_t id);
+
+	pragma::BaseParentComponent *GetParent() const;
+
+	PhysObj *GetPhysicsObject() const;
+	PhysObj *InitializePhysics(PHYSICSTYPE type);
+	void DestroyPhysicsObject();
+	void DropToFloor();
+	std::pair<Vector3,Vector3> GetCollisionBounds() const;
+	void SetCollisionFilterMask(CollisionMask filterMask);
+	void SetCollisionFilterGroup(CollisionMask filterGroup);
+	CollisionMask GetCollisionFilterGroup() const;
+	CollisionMask GetCollisionFilterMask() const;
+
+	Vector3 GetForward() const;
+	Vector3 GetUp() const;
+	Vector3 GetRight() const;
+
+	void Input(const std::string &input,BaseEntity *activator=nullptr,BaseEntity *caller=nullptr,const std::string &data="");
+
+	uint16_t GetHealth() const;
+	uint16_t GetMaxHealth() const;
+	void SetHealth(uint16_t health);
+	void SetMaxHealth(uint16_t maxHealth);
+
+	void SetVelocity(const Vector3 &vel);
+	void AddVelocity(const Vector3 &vel);
+	Vector3 GetVelocity() const;
+	void SetAngularVelocity(const Vector3 &vel);
+	void AddAngularVelocity(const Vector3 &vel);
+	Vector3 GetAngularVelocity() const;
+
+	void PlayAnimation(int32_t animation,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	void PlayLayeredAnimation(int32_t slot,int32_t animation,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	bool PlayActivity(Activity activity,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	bool PlayLayeredActivity(int32_t slot,Activity activity,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	bool PlayLayeredAnimation(int32_t slot,std::string animation,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	void StopLayeredAnimation(int slot);
+	bool PlayAnimation(const std::string &animation,pragma::FPlayAnim flags=pragma::FPlayAnim::Default);
+	int32_t GetAnimation() const;
+	Activity GetActivity() const;
+
+	void TakeDamage(DamageInfo &info);
+	//
+
 	// Returns true if this entity is local to the current network state (i.e. clientside/serverside only)
 	virtual bool IsNetworkLocal() const=0;
 
@@ -173,6 +245,11 @@ protected:
 
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
+
+	// Should only be used by quick-access methods!
+	// Adds the component and trasmits the information
+	// to the clients if called serverside.
+	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name);
 protected:
 	uint32_t m_spawnFlags = 0u;
 

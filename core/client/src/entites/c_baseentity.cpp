@@ -307,3 +307,13 @@ bool CBaseEntity::IsPlayer() const {return HasComponent<pragma::CPlayerComponent
 bool CBaseEntity::IsWeapon() const {return HasComponent<pragma::CWeaponComponent>();}
 bool CBaseEntity::IsVehicle() const {return HasComponent<pragma::CVehicleComponent>();}
 bool CBaseEntity::IsNPC() const {return HasComponent<pragma::CAIComponent>();}
+
+std::pair<Vector3,Vector3> CBaseEntity::GetRenderBounds() const
+{
+	auto renderC = GetRenderComponent();
+	if(renderC.expired())
+		return {Vector3{},Vector3{}};
+	Vector3 min,max;
+	renderC->GetRenderBounds(&min,&max);
+	return {min,max};
+}

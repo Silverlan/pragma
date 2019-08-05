@@ -21,6 +21,7 @@ protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
 	void EraseFunction(int function);
+	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
 public:
 	virtual void DoSpawn() override;
 

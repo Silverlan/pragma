@@ -304,6 +304,259 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("IsStatic",&IsStatic);
 	classDef.def("IsDynamic",&IsDynamic);
 
+	// Quick-access methods
+	classDef.def("CreateSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		std::shared_ptr<ALSound> snd = hEnt->CreateSound(sndname,static_cast<ALSoundType>(soundType));
+		if(snd == nullptr)
+			return;
+		luabind::object(l,snd).push(l);
+	}));
+	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t,float,float)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
+		if(snd == nullptr)
+			return;
+		luabind::object(l,snd).push(l);
+	}));
+	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t,float)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType,float gain) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain);
+		if(snd == nullptr)
+			return;
+		luabind::object(l,snd).push(l);
+	}));
+	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType));
+		if(snd == nullptr)
+			return;
+		luabind::object(l,snd).push(l);
+	}));
+	classDef.def("GetName",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushString(l,hEnt->GetName());
+	}));
+	classDef.def("SetName",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetName(name);
+	}));
+	classDef.def("SetModel",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &mdl) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetModel(mdl);
+	}));
+	classDef.def("SetModel",static_cast<void(*)(lua_State*,EntityHandle&,const std::shared_ptr<Model>&)>([](lua_State *l,EntityHandle &hEnt,const std::shared_ptr<Model> &mdl) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetModel(mdl);
+	}));
+	classDef.def("GetModel",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto mdl = hEnt->GetModel();
+		if(mdl == nullptr)
+			return;
+		luabind::object(l,mdl).push(l);
+	}));
+	classDef.def("GetModelName",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushString(l,hEnt->GetModelName());
+	}));
+	classDef.def("GetAttachmentPose",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t attId) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto t = hEnt->GetAttachmentPose(attId);
+		if(t.has_value() == false)
+			return;
+		Lua::Push<pragma::physics::Transform>(l,*t);
+	}));
+	classDef.def("GetSkin",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetSkin());
+	}));
+	classDef.def("SetSkin",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t skin) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetSkin(skin);
+	}));
+	classDef.def("GetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetBodyGroup(name));
+	}));
+	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &group,uint32_t id) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetBodyGroup(group,id);
+	}));
+	classDef.def("GetParent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto *parent = hEnt->GetParent();
+		if(parent == nullptr)
+			return;
+		parent->PushLuaObject(l);
+	}));
+	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto *physObj = hEnt->GetPhysicsObject();
+		if(physObj == nullptr)
+			return;
+		luabind::object(l,physObj->GetHandle()).push(l);
+	}));
+	classDef.def("InitializePhysics",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t type) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto *physObj = hEnt->InitializePhysics(static_cast<PHYSICSTYPE>(type));
+		if(physObj == nullptr)
+			return;
+		luabind::object(l,physObj->GetHandle()).push(l);
+	}));
+	classDef.def("DestroyPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->DestroyPhysicsObject();
+	}));
+	classDef.def("DropToFloor",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->DropToFloor();
+	}));
+	classDef.def("GetCollisionBounds",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto bounds = hEnt->GetCollisionBounds();
+		Lua::Push<Vector3>(l,bounds.first);
+		Lua::Push<Vector3>(l,bounds.second);
+	}));
+	classDef.def("SetCollisionFilterMask",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t mask) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetCollisionFilterMask(static_cast<CollisionMask>(mask));
+	}));
+	classDef.def("SetCollisionFilterGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t group) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetCollisionFilterGroup(static_cast<CollisionMask>(group));
+	}));
+	classDef.def("GetCollisionFilterGroup",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,umath::to_integral(hEnt->GetCollisionFilterGroup()));
+	}));
+	classDef.def("GetCollisionFilterMask",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,umath::to_integral(hEnt->GetCollisionFilterMask()));
+	}));
+	classDef.def("GetForward",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::Push<Vector3>(l,hEnt->GetForward());
+	}));
+	classDef.def("GetUp",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::Push<Vector3>(l,hEnt->GetUp());
+	}));
+	classDef.def("GetRight",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::Push<Vector3>(l,hEnt->GetRight());
+	}));
+	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator,EntityHandle &hCaller,const std::string &data) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		LUA_CHECK_ENTITY(l,hActivator);
+		LUA_CHECK_ENTITY(l,hCaller);
+		hEnt->Input(input,hActivator.get(),hCaller.get(),data);
+	}));
+	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator,EntityHandle &hCaller) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		LUA_CHECK_ENTITY(l,hActivator);
+		LUA_CHECK_ENTITY(l,hCaller);
+		hEnt->Input(input,hActivator.get(),hCaller.get());
+	}));
+	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		LUA_CHECK_ENTITY(l,hActivator);
+		hEnt->Input(input,hActivator.get());
+	}));
+	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->Input(input);
+	}));
+	classDef.def("GetHealth",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetHealth());
+	}));
+	classDef.def("GetMaxHealth",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetMaxHealth());
+	}));
+	classDef.def("SetHealth",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t health) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetHealth(health);
+	}));
+	classDef.def("SetMaxHealth",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t health) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetMaxHealth(health);
+	}));
+	classDef.def("SetVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetVelocity(velocity);
+	}));
+	classDef.def("AddVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->AddVelocity(velocity);
+	}));
+	classDef.def("SetAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetAngularVelocity(velocity);
+	}));
+	classDef.def("AddAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->AddAngularVelocity(velocity);
+	}));
+	classDef.def("GetVelocity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::Push<Vector3>(l,hEnt->GetVelocity());
+	}));
+	classDef.def("GetAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::Push<Vector3>(l,hEnt->GetAngularVelocity());
+	}));
+	/*classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t animation,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->PlayAnimation(animation,static_cast<pragma::FPlayAnim>(flags));
+	}));
+	classDef.def("PlayLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,int32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,int32_t animation,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->PlayLayeredAnimation(slot,animation,static_cast<pragma::FPlayAnim>(flags));
+	}));*/
+	classDef.def("PlayActivity",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t activity,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayActivity(static_cast<Activity>(activity),static_cast<pragma::FPlayAnim>(flags)));
+	}));
+	classDef.def("PlayActivity",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t activity) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayActivity(static_cast<Activity>(activity),pragma::FPlayAnim::Default));
+	}));
+	classDef.def("PlayLayeredActivity",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,uint32_t activity,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayLayeredActivity(slot,static_cast<Activity>(activity),static_cast<pragma::FPlayAnim>(flags)));
+	}));
+	classDef.def("PlayLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,const std::string &anim,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayLayeredAnimation(slot,anim,static_cast<pragma::FPlayAnim>(flags)));
+	}));
+	classDef.def("StopLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->StopLayeredAnimation(slot);
+	}));
+	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &anim,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayAnimation(anim,static_cast<pragma::FPlayAnim>(flags)));
+	}));
+	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &anim) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->PlayAnimation(anim,pragma::FPlayAnim::Default));
+	}));
+	classDef.def("GetAnimation",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetAnimation());
+	}));
+	classDef.def("GetActivity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,umath::to_integral(hEnt->GetActivity()));
+	}));
+	classDef.def("TakeDamage",static_cast<void(*)(lua_State*,EntityHandle&,DamageInfo&)>([](lua_State *l,EntityHandle &hEnt,DamageInfo &dmgInfo) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->TakeDamage(dmgInfo);
+	}));
+	//
+
 	// Enums
 	classDef.add_static_constant("TYPE_DEFAULT",umath::to_integral(LuaEntityType::Default));
 	classDef.add_static_constant("TYPE_LOCAL",umath::to_integral(LuaEntityType::Default));

@@ -1564,6 +1564,20 @@ void NET_cl_cmd_call_response(NetPacket packet)
 	}
 }
 
+void NET_cl_add_shared_component(NetPacket packet)
+{
+	auto *ent = nwm::read_entity(packet);
+	if(ent == nullptr || c_game == nullptr)
+		return;
+	auto componentId = packet->Read<pragma::ComponentId>();
+	auto &componentManager = static_cast<pragma::CEntityComponentManager&>(c_game->GetEntityComponentManager());
+	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
+	auto &svComponentToClComponentTable = componentManager.GetServerComponentIdToClientComponentIdTable();
+	if(componentId >= svComponentToClComponentTable.size())
+		return;
+	ent->AddComponent(svComponentToClComponentTable.at(componentId));
+}
+
 REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation,[](NetworkState *state,ConVar*,bool,bool val) {
 	CHECK_CHEATS("debug_ai_navigation",state,);
 	if(c_game == nullptr)

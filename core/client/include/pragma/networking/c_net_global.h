@@ -110,4 +110,6 @@ DECLARE_NETMESSAGE_CL(cmd_call_response);
 
 DECLARE_NETMESSAGE_CL(ent_trigger_gravity_onstarttouch);
 
+DECLARE_NETMESSAGE_CL(add_shared_component);
+
 #endif

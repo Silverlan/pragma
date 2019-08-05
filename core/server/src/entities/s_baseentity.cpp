@@ -247,3 +247,19 @@ bool SBaseEntity::IsPlayer() const {return HasComponent<pragma::SPlayerComponent
 bool SBaseEntity::IsWeapon() const {return HasComponent<pragma::SWeaponComponent>();}
 bool SBaseEntity::IsVehicle() const {return HasComponent<pragma::SVehicleComponent>();}
 bool SBaseEntity::IsNPC() const {return HasComponent<pragma::SAIComponent>();}
+
+util::WeakHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedComponent(const std::string &name)
+{
+	auto c = FindComponent(name);
+	if(c.valid())
+		return c;
+	c = AddComponent(name);
+	if(c.expired() || IsShared() == false || c->ShouldTransmitNetData() == false)
+		return c;
+	auto componentId = c->GetComponentId();
+	NetPacket packet {};
+	nwm::write_entity(packet,this);
+	packet->Write<pragma::ComponentId>(componentId);
+	static_cast<ServerState*>(GetNetworkState())->SendPacket("add_shared_component",packet,pragma::networking::Protocol::SlowReliable);
+	return c;
+}

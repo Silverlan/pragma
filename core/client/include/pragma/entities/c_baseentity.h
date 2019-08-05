@@ -62,6 +62,10 @@ public:
 
 	unsigned int GetClientIndex();
 
+	// Quick-access
+	std::pair<Vector3,Vector3> GetRenderBounds() const;
+	//
+
 	void SendNetEventTCP(UInt32 eventId,NetPacket &data) const;
 	void SendNetEventTCP(UInt32 eventId) const;
 	void SendNetEventUDP(UInt32 eventId,NetPacket &data) const;

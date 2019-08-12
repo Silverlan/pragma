@@ -25,7 +25,7 @@ private:
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
 	virtual void OnTextEntered() override;
-	virtual void OnTextChanged(const std::string &text) override;
+	virtual void OnTextChanged(const std::string &text,bool changedByUser) override;
 	void InitializeAutoCompleteList();
 	std::vector<std::string> m_commandHistory = {};
 	std::function<void(const std::string&,std::vector<std::string>&)> m_fAutoCompleteHandler = nullptr;

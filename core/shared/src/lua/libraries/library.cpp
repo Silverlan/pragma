@@ -33,6 +33,7 @@
 #include "pragma/lua/libraries/limport.hpp"
 #include "pragma/math/util_easing.hpp"
 #include "pragma/lua/libraries/lnav.hpp"
+#include "pragma/lua/lua_call.hpp"
 #include "pragma/util/util_handled.hpp"
 #include "pragma/model/animation/animation.h"
 #include <pragma/math/vector/util_winding_order.hpp>
@@ -54,6 +55,17 @@ static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallbac
 		out<<"false";
 	out<<"]";
 	return out;
+}
+
+static void call_callback(CallbackHandle &cb,std::initializer_list<luabind::object> args)
+{
+	if(cb.IsValid() == false)
+		return;
+	cb.Call<void,std::function<Lua::StatusCode(lua_State*)>>([&args](lua_State *l) -> Lua::StatusCode {
+		for(auto &arg : args)
+			arg.push(l);
+		return Lua::StatusCode::Ok;
+	});
 }
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
@@ -426,6 +438,140 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	auto classDefCallback = luabind::class_<CallbackHandle>("Callback");
 	classDefCallback.def(luabind::tostring(luabind::self));
+	classDefCallback.scope[luabind::def("Create",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) {
+		Lua::CheckFunction(l,1);
+		Lua::Push<CallbackHandle>(l,FunctionCallback<void,std::function<Lua::StatusCode(lua_State*)>>::Create([o,l](std::function<Lua::StatusCode(lua_State*)> fPushArgs) {
+			Lua::CallFunction(l,[fPushArgs,&o](lua_State *l) -> Lua::StatusCode {
+				o.push(l);
+				return fPushArgs(l);
+			},LUA_MULTRET);
+		}));
+	}))];
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&)>([](lua_State *l,CallbackHandle &cb) {
+		call_callback(cb,{});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object)>([](lua_State *l,CallbackHandle &cb,luabind::object arg0) {
+		call_callback(cb,{arg0});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object,luabind::object)>([](lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1) {
+		call_callback(cb,{arg0,arg1});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2
+		) {
+		call_callback(cb,{arg0,arg1,arg2});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object)>([](
+		lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3
+		) {
+			call_callback(cb,{arg0,arg1,arg2,arg3});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>([](
+		lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4
+		) {
+			call_callback(cb,{arg0,arg1,arg2,arg3,arg4});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>([](
+		lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5
+		) {
+			call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object
+	)>([](
+		lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+		luabind::object arg6
+		) {
+			call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10,luabind::object arg11
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10,luabind::object arg11,luabind::object arg12
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10,luabind::object arg11,luabind::object arg12,
+			luabind::object arg13
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10,luabind::object arg11,luabind::object arg12,
+			luabind::object arg13,luabind::object arg14
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14});
+	}));
+	classDefCallback.def("Call",static_cast<void(*)(
+		lua_State*,CallbackHandle&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,
+		luabind::object,luabind::object,luabind::object
+		)>([](
+			lua_State *l,CallbackHandle &cb,luabind::object arg0,luabind::object arg1,luabind::object arg2,luabind::object arg3,luabind::object arg4,luabind::object arg5,
+			luabind::object arg6,luabind::object arg7,luabind::object arg8,luabind::object arg9,luabind::object arg10,luabind::object arg11,luabind::object arg12,
+			luabind::object arg13,luabind::object arg14,luabind::object arg15
+			) {
+				call_callback(cb,{arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15});
+		}));
 	classDefCallback.def("IsValid",&Lua_Callback_IsValid);
 	classDefCallback.def("Remove",&Lua_Callback_Remove);
 

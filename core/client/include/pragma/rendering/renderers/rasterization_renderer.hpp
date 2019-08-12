@@ -120,9 +120,6 @@ namespace pragma::rendering
 		bool ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
 		void PrepareRendering(RenderMode mode,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
 
-		OcclusionOctree<CBaseEntity*> &GetOcclusionOctree();
-		const OcclusionOctree<CBaseEntity*> &GetOcclusionOctree() const;
-
 		const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
 		pragma::OcclusionCullingHandler &GetOcclusionCullingHandler();
 		void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
@@ -160,7 +157,6 @@ namespace pragma::rendering
 
 		Anvil::SampleCountFlagBits m_sampleCount = Anvil::SampleCountFlagBits::_1_BIT;
 		std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
-		std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
 		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
 
 		LightMapInfo m_lightMapInfo = {};

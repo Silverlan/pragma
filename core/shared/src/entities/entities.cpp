@@ -15,6 +15,7 @@ BaseEntity *Game::CreateEntity() {return NULL;}
 BaseEntity *Game::CreateEntity(std::string classname) {return NULL;}
 void Game::SpawnEntity(BaseEntity *ent) {ent->OnSpawn();}
 BaseEntity *Game::GetEntity(unsigned int) {return NULL;}
+BaseEntity *Game::GetEntityByLocalIndex(uint32_t idx) {return GetEntity(idx);}
 
 BaseEntity *Game::CreateMapEntity(uint32_t version,const std::string &classname,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,uint64_t offsetToEndOfEntity,std::vector<EntityHandle> &ents,std::vector<EntityHandle> *entities)
 {

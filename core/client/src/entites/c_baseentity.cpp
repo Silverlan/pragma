@@ -43,7 +43,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-LINK_ENTITY_TO_CLASS(baseentity,CBaseEntity);
+LINK_ENTITY_TO_CLASS(entity,CBaseEntity);
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -101,6 +101,7 @@ void CBaseEntity::Construct(unsigned int idx,unsigned int clientIdx)
 }
 
 unsigned int CBaseEntity::GetClientIndex() {return m_clientIdx;}
+uint32_t CBaseEntity::GetLocalIndex() const {return const_cast<CBaseEntity*>(this)->GetClientIndex();}
 
 void CBaseEntity::Initialize()
 {

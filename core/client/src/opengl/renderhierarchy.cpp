@@ -1269,10 +1269,7 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BaseP
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
+	auto &octree = scene->GetOcclusionOctree();
 	octree.DebugPrint();
 }
 
@@ -1317,10 +1314,7 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
+	auto &octree = scene->GetOcclusionOctree();
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);

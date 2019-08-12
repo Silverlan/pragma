@@ -7,37 +7,34 @@
 
 Bool CGame::RawMouseInput(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
-	auto r = false;
-	if(m_inputCallbackHandler.CallLuaCallbacks<bool,int,int,int>("OnMouseInput",&r,static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)
-		return r;
+	if(m_inputCallbackHandler.CallLuaEvents<int,int,int>("OnMouseInput",static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods)) == util::EventReply::Handled)
+		return false;
 	return true;
 }
 Bool CGame::RawKeyboardInput(GLFW::Key key,int,GLFW::KeyState state,GLFW::Modifier mods,float magnitude)
 {
-	auto r = false;
-	if(m_inputCallbackHandler.CallLuaCallbacks<bool,int,int,int>("OnKeyboardInput",&r,static_cast<int>(key),static_cast<int>(state),static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)
-		return r;
+	if(m_inputCallbackHandler.CallLuaEvents<int,int,int>("OnKeyboardInput",static_cast<int>(key),static_cast<int>(state),static_cast<int>(mods)) == util::EventReply::Handled)
+		return false;
 	return true;
 }
 Bool CGame::RawCharInput(unsigned int c)
 {
-	auto r = false;
-	if(m_inputCallbackHandler.CallLuaCallbacks<bool,int>("OnCharInput",&r,c) == CallbackReturnType::HasReturnValue)
-		return r;
+	if(m_inputCallbackHandler.CallLuaEvents<int>("OnCharInput",c) == util::EventReply::Handled)
+		return false;
 	return true;
 }
 Bool CGame::RawScrollInput(Vector2 offset)
 {
-	auto r = false;
-	if(m_inputCallbackHandler.CallLuaCallbacks<bool,float,float>("OnScrollInput",&r,CFloat(offset.x),CFloat(offset.y)) == CallbackReturnType::HasReturnValue)
-		return r;
+	if(m_inputCallbackHandler.CallLuaEvents<float,float>("OnScrollInput",CFloat(offset.x),CFloat(offset.y)) == util::EventReply::Handled)
+		return false;
 	return true;
 }
 
 Bool CGame::MouseInput(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	auto r = false;
-	if(CallLuaCallbacks<bool,int,int,int>("OnMouseInput",&r,static_cast<int>(button),static_cast<int>(state),static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)
+	int bt = static_cast<int>(button) -static_cast<int>(GLFW::Key::Last);
+	if(CallLuaCallbacks<bool,int,int,int>("OnMouseInput",&r,bt,static_cast<int>(state),static_cast<int>(mods)) == CallbackReturnType::HasReturnValue)
 		return r;
 	return true;
 }

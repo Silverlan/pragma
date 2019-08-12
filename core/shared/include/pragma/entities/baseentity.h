@@ -143,6 +143,8 @@ public:
 	uint32_t GetBodyGroup(const std::string &name) const;
 	void SetBodyGroup(const std::string &name,uint32_t id);
 
+	void SetParent(BaseEntity *parent);
+	void ClearParent();
 	pragma::BaseParentComponent *GetParent() const;
 
 	PhysObj *GetPhysicsObject() const;
@@ -210,6 +212,7 @@ public:
 
 	virtual void Initialize();
 	unsigned int GetIndex() const;
+	virtual uint32_t GetLocalIndex() const;
 	uint64_t GetUniqueIndex() const;
 	void SetUniqueIndex(uint64_t idx);
 

@@ -56,6 +56,15 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 	def.def("IsValid",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
 		Lua::PushBool(l,hComponent.expired() == false);
 	}));
+	def.def("RegisterNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushInt(l,hComponent->SetupNetEvent(Lua::CheckString(l,1)));
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw->GetGameState();
+		auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent->GetComponentId());
+		if(componentInfo && umath::is_flag_set(componentInfo->flags,pragma::ComponentFlags::Networked) == false)
+			Con::cwar<<"WARNING: Component '"<<componentInfo->name<<"' has uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"<<Con::endl;
+	}));
 	def.def("GetComponentName",&Lua::BaseEntityComponent::GetName);
 	def.def("AddEventCallback",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object oCallback) {
 		pragma::Lua::check_component(l,hComponent);

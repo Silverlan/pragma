@@ -19,6 +19,8 @@ namespace Lua
 		DLLNETWORK int get_farthest(lua_State *l);
 		DLLNETWORK int get_sorted_by_distance(lua_State *l);
 		DLLNETWORK int get_random(lua_State *l);
+		DLLNETWORK int get_component_name(lua_State *l);
+		DLLNETWORK int get_component_id(lua_State *l);
 
 		DLLNETWORK int get_all(lua_State *l);
 		DLLNETWORK int get_spawned(lua_State *l);
@@ -28,6 +30,7 @@ namespace Lua
 		DLLNETWORK int get_vehicles(lua_State *l);
 		DLLNETWORK int get_world(lua_State *l);
 		DLLNETWORK int get_by_index(lua_State *l);
+		DLLNETWORK int get_by_local_index(lua_State *l);
 		DLLNETWORK int find_by_unique_index(lua_State *l);
 		DLLNETWORK int get_null(lua_State *l);
 		DLLNETWORK int create(lua_State *l);
@@ -148,6 +151,7 @@ namespace Lua
 	{"get_vehicles",Lua::ents::get_vehicles}, \
 	{"get_world",Lua::ents::get_world}, \
 	{"get_by_index",Lua::ents::get_by_index}, \
+	{"get_by_local_index",Lua::ents::get_by_local_index}, \
 	{"find_by_unique_index",Lua::ents::find_by_unique_index}, \
 	{"get_null",Lua::ents::get_null}, \
 	{"find_by_filter",Lua::ents::find_by_filter}, \
@@ -163,6 +167,8 @@ namespace Lua
 	{"get_closest",Lua::ents::get_closest}, \
 	{"get_farthest",Lua::ents::get_farthest}, \
 	{"get_sorted_by_distance",Lua::ents::get_sorted_by_distance}, \
-	{"get_random",Lua::ents::get_random},
+	{"get_random",Lua::ents::get_random}, \
+	{"get_component_name",Lua::ents::get_component_name}, \
+	{"get_component_id",Lua::ents::get_component_id},
 
 #endif

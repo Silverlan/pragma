@@ -141,6 +141,8 @@ public:
 
 	Model(NetworkState *nw,uint32_t numBones,const std::string &name="");
 	Model(const Model &other);
+	bool operator==(const Model &other) const;
+	bool operator!=(const Model &other) const;
 	virtual ~Model();
 	bool Save(Game *game,const std::string &name,const std::string &rootPath="") const;
 	std::shared_ptr<Model> Copy(Game *game,CopyFlags copyFlags=CopyFlags::ShallowCopy) const;

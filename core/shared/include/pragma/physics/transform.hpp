@@ -63,5 +63,14 @@ namespace pragma::physics
 		Vector3 m_scale = {1.f,1.f,1.f};
 	};
 };
+DLLNETWORK Vector3 operator*(const Vector3 &v,const pragma::physics::Transform &t);
+DLLNETWORK Vector3 &operator*=(Vector3 &v,const pragma::physics::Transform &t);
+DLLNETWORK Quat operator*(const Quat &v,const pragma::physics::Transform &t);
+DLLNETWORK Quat &operator*=(Quat &v,const pragma::physics::Transform &t);
+
+DLLNETWORK Vector3 operator*(const Vector3 &v,const pragma::physics::ScaledTransform &t);
+DLLNETWORK Vector3 &operator*=(Vector3 &v,const pragma::physics::ScaledTransform &t);
+DLLNETWORK Quat operator*(const Quat &v,const pragma::physics::ScaledTransform &t);
+DLLNETWORK Quat &operator*=(Quat &v,const pragma::physics::ScaledTransform &t);
 
 #endif

@@ -111,6 +111,15 @@ Model::~Model()
 	m_joints.clear();
 }
 
+bool Model::operator==(const Model &other) const
+{
+	return this == &other;
+}
+bool Model::operator!=(const Model &other) const
+{
+	return !operator==(other);
+}
+
 const PhonemeMap &Model::GetPhonemeMap() const {return const_cast<Model*>(this)->GetPhonemeMap();}
 PhonemeMap &Model::GetPhonemeMap() {return m_phonemeMap;}
 

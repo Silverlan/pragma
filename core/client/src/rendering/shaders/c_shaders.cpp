@@ -37,7 +37,12 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_solve_edges.hpp"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
+#include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
+#include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
+#include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
@@ -85,6 +90,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
 
 	shaderManager.RegisterShader("raytracing",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
+	shaderManager.RegisterShader("pbr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	shaderManager.RegisterShader("wireframe",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
@@ -112,6 +118,10 @@ void CGame::InitShaders()
 	// TODO: Transparent shaders
 	//shaderManager.RegisterShader("hdr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderHDR(context,identifier);});
 	
+	shaderManager.RegisterShader("equirectangular_to_cubemap",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderEquirectangularToCubemap(context,identifier);});
+	shaderManager.RegisterShader("convolute_cubemap_lighting",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderConvoluteCubemapLighting(context,identifier);});
+	shaderManager.RegisterShader("compute_irradiance_map_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderComputeIrradianceMapRoughness(context,identifier);});
+	shaderManager.RegisterShader("brdf_convolution",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderBRDFConvolution(context,identifier);});
 	shaderManager.RegisterShader("calcimagecolor",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderCalcImageColor(context,identifier);});
 	shaderManager.RegisterShader("watersplash",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWaterSplash(context,identifier);});
 	shaderManager.RegisterShader("watersurface",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWaterSurface(context,identifier);});

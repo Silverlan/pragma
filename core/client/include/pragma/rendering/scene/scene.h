@@ -7,6 +7,7 @@
 #include "pragma/rendering/c_forwardplus.hpp"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <memory>
 #include <sharedutils/util_weak_handle.hpp>
 #include <unordered_set>
@@ -29,6 +30,7 @@ class WorldEnvironment;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 namespace pragma {class CLightComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
+class CBaseEntity;
 class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
 {
@@ -129,6 +131,9 @@ public:
 	void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
 	pragma::rendering::BaseRenderer *GetRenderer();
 
+	OcclusionOctree<CBaseEntity*> &GetOcclusionOctree();
+	const OcclusionOctree<CBaseEntity*> &GetOcclusionOctree() const;
+
 	bool IsValid() const;
 private:
 	Scene(const CreateInfo &createInfo);
@@ -156,6 +161,7 @@ private:
 	std::shared_ptr<prosper::Buffer> m_renderSettingsBuffer = nullptr;
 	pragma::RenderSettings m_renderSettings = {};
 	pragma::CameraData m_cameraData = {};
+	std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
 
 	// Fog
 	pragma::FogData m_fogData = {};

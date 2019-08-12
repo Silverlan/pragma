@@ -366,10 +366,7 @@ static void render_shadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 			const std::function<void(const Model&,const CModelSubMesh*,uint32_t)> &subMeshCallback
 		) {
 		auto &scene = c_game->GetScene();
-		auto *renderer = scene->GetRenderer();
-		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-			return;
-		auto &octree = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetOcclusionOctree();
+		auto &octree = scene->GetOcclusionOctree();
 		octree.IterateObjects([&lightPos,&lightDist](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
 			auto &bounds = node.GetWorldBounds();
 			return Intersection::AABBSphere(bounds.first,bounds.second,lightPos,lightDist);

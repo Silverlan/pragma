@@ -238,7 +238,8 @@ public:
 	// Entities
 	CBaseEntity *CreateLuaEntity(std::string classname,bool bLoadIfNotExists=false);
 	CBaseEntity *CreateLuaEntity(std::string classname,unsigned int idx,bool bLoadIfNotExists=false);
-	CBaseEntity *GetEntity(unsigned int idx);
+	virtual CBaseEntity *GetEntity(unsigned int idx) override;
+	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx) override;
 	CBaseEntity *GetEntityByClientIndex(unsigned int idx);
 	virtual void GetPlayers(std::vector<BaseEntity*> *ents) override;
 	virtual void GetNPCs(std::vector<BaseEntity*> *ents) override;

@@ -104,6 +104,8 @@ CBaseEntity *CGame::GetEntity(unsigned int idx)
 	return m_shEnts[idx];
 }
 
+BaseEntity *CGame::GetEntityByLocalIndex(uint32_t idx) {return GetEntityByClientIndex(idx);}
+
 CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 {
 	if(idx >= m_ents.size())

@@ -3559,6 +3559,17 @@ namespace Lua
 			LUA_CHECK_ENTITY(l,hParent);
 			hEnt->AttachToBone(hParent.get(),bone);
 		}));
+		def.def("GetLocalPose",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			auto pose = hEnt->GetLocalPose();
+			if(pose.has_value() == false)
+				return;
+			Lua::Push<pragma::physics::Transform>(l,*pose);
+		}));
+		def.def("SetLocalPose",static_cast<void(*)(lua_State*,THandle&,const pragma::physics::Transform&)>([](lua_State *l,THandle &hEnt,const pragma::physics::Transform &pose) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetLocalPose(pose);
+		}));
 
 		def.def("GetParent",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);

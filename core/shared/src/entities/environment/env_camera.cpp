@@ -73,7 +73,14 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 		Vector3 translation;
 		Vector3 skew;
 		Vector4 perspective;
-		glm::decompose(mat,scale,rotation,translation,skew,perspective);
+		glm::decompose(glm::inverse(mat),scale,rotation,translation,skew,perspective);
+
+		// Invert forward vector
+		auto forward = -uquat::forward(rotation);
+		auto up = uquat::up(rotation);
+		auto right = uvec::cross(forward,up);
+		uvec::normalize(&right);
+		rotation = uquat::create(forward,right,up);
 
 		whTrComponent->SetPosition(translation);
 		whTrComponent->SetOrientation(rotation);

@@ -61,6 +61,7 @@ public:
 	virtual bool IsNetworkLocal() const override;
 
 	unsigned int GetClientIndex();
+	virtual uint32_t GetLocalIndex() const override;
 
 	// Quick-access
 	std::pair<Vector3,Vector3> GetRenderBounds() const;

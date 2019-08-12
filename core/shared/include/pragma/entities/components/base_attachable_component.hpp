@@ -18,6 +18,13 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			UpdatingPosition = 1u,
+			UpdatingRotation = UpdatingPosition<<1u
+		};
+
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		void UpdateAttachmentOffset();
@@ -37,21 +44,29 @@ namespace pragma
 		void UpdateAttachmentData(bool bForceReload=false);
 		void ClearAttachment();
 
+		std::optional<physics::Transform> GetLocalPose() const;
+		void SetLocalPose(const physics::Transform &pose);
+
 		void GetChildren(std::vector<BaseEntity*> &children) const;
 		const std::vector<BaseEntity*> &GetChildren() const;
 	protected:
 		BaseAttachableComponent(BaseEntity &ent);
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo);
-		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false);
+		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) const;
 		virtual void OnEntitySpawn() override;
 		void AddChild(BaseEntity *ent);
 		void RemoveChild(BaseEntity *ent);
+		std::optional<physics::Transform> GetParentPose() const;
 
+		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<BaseEntity*> m_children = {};
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
 		std::string m_parentName = {};
+		CallbackHandle m_posChangeCallback = {};
+		CallbackHandle m_rotChangeCallback = {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachableComponent::StateFlags)
 
 #endif

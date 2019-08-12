@@ -51,6 +51,8 @@
 	#define FILE_ATTRIBUTE_VIRTUAL 0x10000
 #endif
 
+extern DLLENGINE Engine *engine;
+
 void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 	lua_register(lua.GetState(),"include",Lua::global::include);
@@ -125,6 +127,13 @@ void Game::RegisterLuaGlobals()
 {
 	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
 
+	lua_register(GetLuaState(),"include_component",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		std::string componentName = Lua::CheckString(l,1);
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw->GetGameState();
+		Lua::PushBool(l,game->LoadLuaComponentByName(componentName));
+		return 1;
+	}));
 	Lua::RegisterLibraryEnums(GetLuaState(),"game",{
 		{"DAMAGETYPE_GENERIC",umath::to_integral(DAMAGETYPE::GENERIC)},
 		{"DAMAGETYPE_BULLET",umath::to_integral(DAMAGETYPE::BULLET)},

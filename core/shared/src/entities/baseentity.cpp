@@ -27,7 +27,7 @@ extern DLLENGINE Engine *engine;
 Con::c_cout& BaseEntity::print(Con::c_cout &os)
 {
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(FindComponent("name").get());
-	os<<"Entity["<<m_index<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
+	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
 	auto mdlComponent = GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
@@ -41,7 +41,7 @@ Con::c_cout& BaseEntity::print(Con::c_cout &os)
 std::ostream& BaseEntity::print(std::ostream &os)
 {
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(FindComponent("name").get());
-	os<<"Entity["<<m_index<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
+	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
 	auto mdlComponent = GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
@@ -261,6 +261,7 @@ bool BaseEntity::IsInert() const
 }
 
 unsigned int BaseEntity::GetIndex() const {return m_index;}
+uint32_t BaseEntity::GetLocalIndex() const {return GetIndex();}
 
 bool BaseEntity::IsWorld() const {return false;}
 bool BaseEntity::IsScripted() const {return false;}

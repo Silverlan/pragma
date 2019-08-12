@@ -4,6 +4,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/luacallback.h"
 #include <sharedutils/scope_guard.h>
+#include <sharedutils/util_event_reply.hpp>
 
 class DLLNETWORK LuaCallbackHandler
 {
@@ -16,6 +17,8 @@ public:
 		T CallLuaCallbacks(std::string name,TARGS ...args);
 	template<class T,typename... TARGS>
 		CallbackReturnType CallLuaCallbacks(std::string name,T *ret,TARGS ...args);
+	template<typename... TARGS>
+		util::EventReply CallLuaEvents(std::string name,TARGS ...args);
 protected:
 	std::unordered_map<std::string,std::vector<CallbackHandle>> m_luaCallbacks;
 private:
@@ -102,6 +105,47 @@ template<class T,typename... TARGS>
 			it = callbacks.erase(it);
 	}
 	return CallbackReturnType::NoReturnValue;
+}
+
+template<typename... TARGS>
+	util::EventReply LuaCallbackHandler::CallLuaEvents(std::string name,TARGS ...args)
+{
+	++m_callDepth;
+	ScopeGuard sg([this]() {
+		if(--m_callDepth == 0u)
+		{
+			while(m_addQueue.empty() == false)
+			{
+				auto &pair = m_addQueue.front();
+				auto it = m_luaCallbacks.find(pair.first);
+				if(it == m_luaCallbacks.end())
+					it = m_luaCallbacks.insert(std::unordered_map<std::string,std::vector<CallbackHandle>>::value_type(pair.first,std::vector<CallbackHandle>())).first;
+				it->second.push_back(pair.second);
+
+				m_addQueue.pop();
+			}
+		}
+	});
+	ustring::to_lower(name);
+	auto it = m_luaCallbacks.find(name);
+	if(it == m_luaCallbacks.end())
+		return util::EventReply::Unhandled;
+	auto &callbacks = it->second;
+	for(auto it=callbacks.begin();it!=callbacks.end();)
+	{
+		auto &hCallback = *it;
+		if(hCallback.IsValid())
+		{
+			auto *f = static_cast<LuaCallback*>(hCallback.get());
+			uint32_t reply = umath::to_integral(util::EventReply::Unhandled);
+			if(f->Call<uint32_t,TARGS...>(&reply,args...) == true && static_cast<util::EventReply>(reply) == util::EventReply::Handled)
+				return util::EventReply::Handled;
+			++it;
+		}
+		else
+			it = callbacks.erase(it);
+	}
+	return util::EventReply::Unhandled;
 }
 
 #endif

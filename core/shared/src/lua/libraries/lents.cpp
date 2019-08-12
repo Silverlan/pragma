@@ -226,6 +226,25 @@ int Lua::ents::get_random(lua_State *l)
 	return 1;
 }
 
+int Lua::ents::get_component_name(lua_State *l)
+{
+	auto componentId = Lua::CheckInt(l,1);
+	auto *info = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentInfo(componentId);
+	if(info == nullptr)
+		return 0;
+	Lua::PushString(l,info->name);
+	return 1;
+}
+int Lua::ents::get_component_id(lua_State *l)
+{
+	auto *componentName = Lua::CheckString(l,1);
+	pragma::ComponentId componentId;
+	if(engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName,componentId) == false)
+		return 0;
+	Lua::PushInt(l,componentId);
+	return 1;
+}
+
 int Lua::ents::get_all(lua_State *l)
 {
 	if(Lua::IsSet(l,1))
@@ -374,6 +393,18 @@ int Lua::ents::get_by_index(lua_State *l)
 	Game *game = state->GetGameState();
 	int idx = Lua::CheckInt<int>(l,1);
 	BaseEntity *ent = game->GetEntity(idx);
+	if(ent == NULL)
+		return 0;
+	lua_pushentity(l,ent);
+	return 1;
+}
+
+int Lua::ents::get_by_local_index(lua_State *l)
+{
+	NetworkState *state = engine->GetNetworkState(l);
+	Game *game = state->GetGameState();
+	int idx = Lua::CheckInt<int>(l,1);
+	BaseEntity *ent = game->GetEntityByLocalIndex(idx);
 	if(ent == NULL)
 		return 0;
 	lua_pushentity(l,ent);
@@ -630,11 +661,9 @@ int Lua::ents::register_component_event(lua_State *l)
 	auto *componentInfo = componentManager.GetComponentInfo(componentId);
 	if(componentInfo == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		Con::cwar<<"WARNING: Attempted to register component event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
 		return 0;
 	}
-	if(umath::is_flag_set(componentInfo->flags,pragma::ComponentFlags::Networked) == false)
-		componentInfo->flags |= pragma::ComponentFlags::MakeNetworked;
 
 	auto netName = componentInfo->name +'_' +std::string{name};
 	auto eventId = componentManager.RegisterEvent(netName);

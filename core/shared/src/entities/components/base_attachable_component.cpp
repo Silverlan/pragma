@@ -13,6 +13,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -71,6 +72,21 @@ void BaseAttachableComponent::OnEntitySpawn()
 	}
 }
 void BaseAttachableComponent::ClearAttachment() {AttachToEntity(nullptr);}
+std::optional<physics::Transform> BaseAttachableComponent::GetLocalPose() const
+{
+	auto *attData = GetAttachmentData();
+	if(attData == nullptr)
+		return {};
+	return physics::Transform{attData->offset,attData->rotation};
+}
+void BaseAttachableComponent::SetLocalPose(const physics::Transform &pose)
+{
+	auto *attData = GetAttachmentData();
+	if(attData == nullptr)
+		return;
+	attData->offset = pose.GetOrigin();
+	attData->rotation = pose.GetRotation();
+}
 void BaseAttachableComponent::UpdateAttachmentData(bool bForceReload)
 {
 	if(m_attachment == nullptr || m_attachment->parent.expired())
@@ -135,10 +151,12 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 			entParent->RemoveChild(*this);
 		}
 		m_attachment = nullptr;
+		if(m_posChangeCallback.IsValid())
+			m_posChangeCallback.Remove();
+		if(m_rotChangeCallback.IsValid())
+			m_rotChangeCallback.Remove();
 	}
-	if(ent == NULL)
-		m_attachment = NULL;
-	else
+	if(ent != nullptr)
 	{
 		auto *pParentComponent = static_cast<BaseParentComponent*>(ent->AddComponent("parent").get());
 		if(pParentComponent == nullptr)
@@ -186,6 +204,38 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		}
 		UpdateAttachmentData();
 		pParentComponent->AddChild(*this);
+
+		if(pTrComponent.valid())
+		{
+			// Update local pose (relative to parent) if absolute pose
+			// has been changed externally
+			auto &posProp = pTrComponent->GetPosProperty();
+			m_posChangeCallback = posProp->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> newPos) {
+				if(umath::is_flag_set(m_stateFlags,StateFlags::UpdatingPosition))
+					return;
+				auto parentPose = GetParentPose();
+				if(parentPose.has_value() == false)
+					return;
+				auto localOffset = parentPose->GetInverse() *newPos.get();
+				auto *attData = GetAttachmentData();
+				if(attData == nullptr)
+					return;
+				attData->offset = localOffset;
+			});
+			auto &rotProp = pTrComponent->GetOrientationProperty();
+			m_rotChangeCallback = rotProp->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> newRot) {
+				if(umath::is_flag_set(m_stateFlags,StateFlags::UpdatingRotation))
+					return;
+				auto parentPose = GetParentPose();
+				if(parentPose.has_value() == false)
+					return;
+				auto localRot = parentPose->GetInverse() *newRot.get();
+				auto *attData = GetAttachmentData();
+				if(attData == nullptr)
+					return;
+				attData->rotation = localRot;
+			});
+		}
 	}
 	return m_attachment.get();
 }
@@ -335,7 +385,7 @@ BaseParentComponent *BaseAttachableComponent::GetParent() const
 	return m_attachment->parent.get();
 }
 AttachmentData *BaseAttachableComponent::GetAttachmentData() const {return m_attachment.get();}
-void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly)
+void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly) const
 {
 	if(bYawOnly == false)
 	{
@@ -381,6 +431,55 @@ void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma:
 		rot = uquat::get_inverse(rotRef) *rot;*/
 	}
 }
+std::optional<physics::Transform> BaseAttachableComponent::GetParentPose() const
+{
+	if(m_attachment == nullptr || m_attachment->parent.expired())
+		return {};
+	physics::Transform pose {};
+	auto *parent = m_attachment->parent.get();
+	auto *pAttachableComponentParent = static_cast<BaseAttachableComponent*>(parent->GetEntity().FindComponent("attachable").get());
+	if(pAttachableComponentParent != nullptr)
+		pAttachableComponentParent->UpdateAttachmentOffset(); // TODO
+	auto &entParent = parent->GetEntity();
+	if(((m_attachment->flags &FAttachmentMode::PlayerView) != FAttachmentMode::None) && entParent.IsCharacter())
+	{
+		auto &charComponent = *entParent.GetCharacterComponent();
+		Vector3 pos;
+		Quat orientation;
+		UpdateViewAttachmentOffset(&entParent,charComponent,pos,orientation);
+		pose = {pos,orientation};
+	}
+	else if(((m_attachment->flags &FAttachmentMode::PlayerViewYaw) != FAttachmentMode::None) && entParent.IsCharacter())
+	{
+		auto &charComponent = *entParent.GetCharacterComponent();
+		Vector3 pos;
+		Quat orientation;
+		UpdateViewAttachmentOffset(&entParent,charComponent,pos,orientation,true);
+		pose = {pos,orientation};
+	}
+	else
+	{
+		Vector3 pos {};
+		auto rot = uquat::identity();
+		if(m_attachment->bone != -1)
+		{
+			auto animComponentParent = entParent.GetAnimatedComponent();
+			if(animComponentParent.valid())
+				animComponentParent->GetBonePosition(m_attachment->bone,pos,rot);
+		}
+		else if(m_attachment->attachment != -1)
+		{
+			auto pMdlCParent = entParent.GetModelComponent();
+			if(pMdlCParent.valid())
+				pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
+		}
+		auto pTrComponentParent = entParent.GetTransformComponent();
+		if(pTrComponentParent.valid())
+			pTrComponentParent->LocalToWorld(&pos,&rot);
+		pose = {pos,rot};
+	}
+	return pose;
+}
 void BaseAttachableComponent::UpdateAttachmentOffset()
 {
 	auto &entThis = GetEntity();
@@ -390,51 +489,33 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 	if(t <= m_tLastAttachmentUpdate)
 		return;
 	m_tLastAttachmentUpdate = t;
-	if(m_attachment != NULL && m_attachment->parent.valid())
+
+	auto pose = GetParentPose();
+	if(pose.has_value())
 	{
-		Vector3 pos {};
-		auto orientation = uquat::identity();
 		auto *parent = m_attachment->parent.get();
 		auto *pAttachableComponentParent = static_cast<BaseAttachableComponent*>(parent->GetEntity().FindComponent("attachable").get());
 		if(pAttachableComponentParent != nullptr)
 			pAttachableComponentParent->UpdateAttachmentOffset();
-		auto &entParent = parent->GetEntity();
-		if(((m_attachment->flags &FAttachmentMode::PlayerView) != FAttachmentMode::None) && entParent.IsCharacter())
-		{
-			auto &charComponent = *entParent.GetCharacterComponent();
-			UpdateViewAttachmentOffset(&entParent,charComponent,pos,orientation);
-		}
-		else if(((m_attachment->flags &FAttachmentMode::PlayerViewYaw) != FAttachmentMode::None) && entParent.IsCharacter())
-		{
-			auto &charComponent = *entParent.GetCharacterComponent();
-			UpdateViewAttachmentOffset(&entParent,charComponent,pos,orientation,true);
-		}
-		else
-		{
-			if(m_attachment->bone != -1)
-			{
-				auto animComponentParent = entParent.GetAnimatedComponent();
-				if(animComponentParent.valid())
-					animComponentParent->GetBonePosition(m_attachment->bone,pos,orientation);
-			}
-			else if(m_attachment->attachment != -1)
-			{
-				auto pMdlCParent = entParent.GetModelComponent();
-				if(pMdlCParent.valid())
-					pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&orientation);
-			}
-			auto pTrComponentParent = entParent.GetTransformComponent();
-			if(pTrComponentParent.valid())
-				pTrComponentParent->LocalToWorld(&pos,&orientation);
-		}
-		pos += glm::rotate(orientation,m_attachment->offset);
+
+		pose->TranslateLocal(m_attachment->offset);
 		auto pTrComponent = entThis.GetTransformComponent();
 		if(pTrComponent.valid())
-			pTrComponent->SetPosition(pos);
+		{
+			umath::set_flag(m_stateFlags,StateFlags::UpdatingPosition);
+			pTrComponent->SetPosition(pose->GetOrigin());
+			umath::set_flag(m_stateFlags,StateFlags::UpdatingPosition,false);
+		}
 		if((m_attachment->flags &FAttachmentMode::PositionOnly) == FAttachmentMode::None)
 		{
 			if(pTrComponent.valid())
-				pTrComponent->SetOrientation(orientation *m_attachment->rotation);
+			{
+				pose->RotateLocal(m_attachment->rotation);
+
+				umath::set_flag(m_stateFlags,StateFlags::UpdatingRotation);
+				pTrComponent->SetOrientation(pose->GetRotation());
+				umath::set_flag(m_stateFlags,StateFlags::UpdatingRotation,false);
+			}
 			if((m_attachment->flags &FAttachmentMode::BoneMerge) != FAttachmentMode::None && !m_attachment->boneMapping.empty())
 			{
 				auto mdlComponent = entThis.GetModelComponent();
@@ -442,6 +523,9 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 				auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 				if(hMdl != nullptr && animComponent.valid())
 				{
+					auto *parent = m_attachment->parent.get();
+					auto &entParent = parent->GetEntity();
+
 					Skeleton &skel = hMdl->GetSkeleton();
 					auto mdlComponentParent = entParent.GetModelComponent();
 					auto animComponentParent = entParent.GetAnimatedComponent();
@@ -469,5 +553,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 			}
 		}
 	}
+
 	InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
+#pragma optimize("",on)

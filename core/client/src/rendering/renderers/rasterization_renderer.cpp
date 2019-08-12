@@ -42,33 +42,11 @@ RasterizationRenderer::RasterizationRenderer(Scene &scene)
 
 	InitializeLightDescriptorSets();
 	ReloadOcclusionCullingHandler();
-	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity*>>(256.f,1'073'741'824.f,4096.f,[](const CBaseEntity *ent,Vector3 &min,Vector3 &max) {
-		auto pRenderComponent = ent->GetRenderComponent();
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pRenderComponent.valid())
-			pRenderComponent->GetRenderBounds(&min,&max);
-		else
-		{
-			min = {};
-			max = {};
-		}
-		if(pTrComponent.expired())
-			return;
-		auto &pos = pTrComponent->GetPosition();
-		min += pos;
-		max += pos;
-	});
-	m_occlusionOctree->Initialize();
-	m_occlusionOctree->SetSingleReferenceMode(true);
-	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string {
-		return ent->GetClass() +" " +std::to_string(ent->GetIndex());
-	});
 }
 
 RasterizationRenderer::~RasterizationRenderer()
 {
 	m_occlusionCullingHandler = nullptr;
-	m_occlusionOctree = nullptr;
 }
 
 bool RasterizationRenderer::Initialize() {return true;}
@@ -228,9 +206,6 @@ void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 	m_shaderOverrides.erase(it);
 }
 
-const OcclusionOctree<CBaseEntity*> &RasterizationRenderer::GetOcclusionOctree() const {return const_cast<RasterizationRenderer*>(this)->GetOcclusionOctree();}
-OcclusionOctree<CBaseEntity*> &RasterizationRenderer::GetOcclusionOctree() {return *m_occlusionOctree;}
-
 const std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() const {return m_culledMeshes;}
 std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() {return m_culledMeshes;}
 const std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() const {return m_culledParticles;}
@@ -386,77 +361,6 @@ bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 void RasterizationRenderer::OnEntityAddedToScene(CBaseEntity &ent)
 {
 	BaseRenderer::OnEntityAddedToScene(ent);
-
-	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>::Create(nullptr);
-	auto callbacks = std::make_shared<std::vector<CallbackHandle>>();
-	callbacks->push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
-	auto fInsertOctreeObject = [this,callbacks](CBaseEntity *ent) {
-		m_occlusionOctree->InsertObject(ent);
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pTrComponent.valid())
-		{
-			callbacks->push_back(pTrComponent->GetPosProperty()->AddCallback([this,ent](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-				m_occlusionOctree->UpdateObject(ent);
-				}));
-		}
-		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
-		if(pGenericComponent.valid())
-		{
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-				}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-				}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,callbacks,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->RemoveObject(ent);
-				m_occlusionOctree->IterateObjects([](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
-
-					return true;
-					},[&](const CBaseEntity *entOther) {
-						if(entOther == ent)
-							throw std::runtime_error("!!");
-					});
-				for(auto &cb : *callbacks)
-				{
-					if(cb.IsValid() == false)
-						continue;
-					cb.Remove();
-				}
-				}));
-		}
-	};
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
-		return;
-	std::weak_ptr<Scene> wpScene = GetScene().shared_from_this();
-	static_cast<Callback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,callbacks,wpScene,cbRenderMode](std::reference_wrapper<const RenderMode> old,std::reference_wrapper<const RenderMode> newMode) mutable {
-		if(wpScene.expired())
-		{
-			if(cbRenderMode.IsValid())
-				cbRenderMode.Remove();
-			return;
-		}
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetRenderMode() : RenderMode::None;
-		auto &occlusionTree = GetOcclusionOctree();
-		if(renderMode == RenderMode::World || renderMode == RenderMode::Skybox || renderMode == RenderMode::Water)
-		{
-			if(occlusionTree.ContainsObject(&ent) == false)
-				fInsertOctreeObject(&ent);
-		}
-		else
-			occlusionTree.RemoveObject(&ent);
-		});
-	pRenderComponent->GetRenderModeProperty()->AddCallback(cbRenderMode);
-	auto renderMode = pRenderComponent->GetRenderMode();
-	if(renderMode != RenderMode::World && renderMode != RenderMode::Skybox && renderMode != RenderMode::Water)
-		return;
-	fInsertOctreeObject(&ent);
 }
 
 Anvil::SampleCountFlagBits RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().hdrRenderTarget->GetTexture()->GetImage()->GetSampleCount();}

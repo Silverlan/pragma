@@ -211,7 +211,7 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name,const std::stri
 	{
 		auto hOptions = GetHandle();
 		pTextEntry->SetText(client->GetConVarString(cvarName));
-		pTextEntry->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hOptions,cvarName](std::reference_wrapper<const std::string> text) {
+		pTextEntry->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([hOptions,cvarName](std::reference_wrapper<const std::string> text,bool) {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = text;

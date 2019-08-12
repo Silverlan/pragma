@@ -157,6 +157,7 @@ public:
 	virtual void RemoveEntity(BaseEntity *ent);
 	void RemoveEntities();
 	virtual BaseEntity *GetEntity(unsigned int idx);
+	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx);
 	pragma::BaseWorldComponent *GetWorld();
 	unsigned char GetPlayerCount();
 	unsigned int GetEntityCount();

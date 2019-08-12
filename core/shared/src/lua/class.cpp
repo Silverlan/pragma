@@ -423,6 +423,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def(luabind::const_self -Vector3());
 	defVector.def(luabind::const_self ==Vector3());
 	defVector.def(luabind::const_self *Quat());
+	//defVector.def(luabind::const_self *pragma::physics::Transform());
+	//defVector.def(luabind::const_self *pragma::physics::ScaledTransform());
+	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const pragma::physics::Transform&)>([](lua_State *l,const Vector3 &a,const pragma::physics::Transform &b) {
+		Lua::Push<Vector3>(l,a *b);
+	}));
+	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const pragma::physics::ScaledTransform&)>([](lua_State *l,const Vector3 &a,const pragma::physics::ScaledTransform &b) {
+		Lua::Push<Vector3>(l,a *b);
+	}));
 	defVector.def(float() /luabind::const_self);
 	defVector.def(float() *luabind::const_self);
 	defVector.def(Quat() *luabind::const_self);
@@ -443,6 +451,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("Rotate",static_cast<void(*)(lua_State*,Vector3&,const Quat&)>(&Lua::Vector::Rotate));
 	defVector.def("RotateAround",&Lua::Vector::RotateAround);
 	defVector.def("Lerp",&Lua::Vector::Lerp);
+	defVector.def("Equals",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float epsilon) {
+		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
+	}));
+	defVector.def("Equals",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&)>([](lua_State *l,const Vector3 &a,const Vector3 &b) {
+		float epsilon = 0.001f;
+		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
+	}));
 	defVector.def("Slerp",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float factor) {
 		auto result = glm::slerp(a,b,factor);
 		Lua::Push<Vector3>(l,result);
@@ -450,6 +465,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("Copy",&Lua::Vector::Copy);
 	defVector.def("Set",static_cast<void(*)(lua_State*,Vector3&,const Vector3&)>(&Lua::Vector::Set));
 	defVector.def("Set",static_cast<void(*)(lua_State*,Vector3&,float,float,float)>(&Lua::Vector::Set));
+	defVector.def("Set",static_cast<void(*)(lua_State*,Vector3&,uint32_t,float)>([](lua_State *l,Vector3 &v,uint32_t idx,float val) {
+		v[idx] = val;
+	}));
 	defVector.def("Get",static_cast<void(*)(lua_State*,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &v,uint32_t idx) {
 		Lua::PushNumber(l,v[idx]);
 	}));
@@ -557,12 +575,22 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles.def("Normalize",static_cast<void(EulerAngles::*)(float)>(&EulerAngles::Normalize));
 	defEulerAngles.def("ToMatrix",&Lua::Angle::ToMatrix);
 	defEulerAngles.def("Copy",&Lua::Angle::Copy);
+	defEulerAngles.def("Equals",static_cast<void(*)(lua_State*,const EulerAngles&,const EulerAngles&,float)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b,float epsilon) {
+		Lua::PushBool(l,umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon);
+		}));
+	defEulerAngles.def("Equals",static_cast<void(*)(lua_State*,const EulerAngles&,const EulerAngles&)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b) {
+		float epsilon = 0.001f;
+		Lua::PushBool(l,umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon);
+	}));
 	defEulerAngles.def("ToQuaternion",Lua::Angle::ToQuaternion);
 	defEulerAngles.def("ToQuaternion",static_cast<void(*)(lua_State*,EulerAngles*)>([](lua_State *l,EulerAngles *ang) {
 		Lua::Angle::ToQuaternion(l,ang,umath::to_integral(pragma::RotationOrder::YXZ));
 	}));
 	defEulerAngles.def("Set",static_cast<void(EulerAngles::*)(const EulerAngles&)>(&EulerAngles::Set));
 	defEulerAngles.def("Set",&Lua::Angle::Set);
+	defEulerAngles.def("Set",static_cast<void(*)(lua_State*,EulerAngles&,uint32_t,float value)>([](lua_State *l,EulerAngles &ang,uint32_t idx,float value) {
+		ang[idx] = value;
+	}));
 	defEulerAngles.def("Get",static_cast<void(*)(lua_State*,const EulerAngles&,uint32_t)>([](lua_State *l,const EulerAngles &ang,uint32_t idx) {
 		Lua::PushNumber(l,ang[idx]);
 	}));
@@ -587,6 +615,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def(luabind::const_self *float());
 	defQuat.def(luabind::const_self *Quat());
 	defQuat.def(luabind::const_self ==Quat());
+	//defQuat.def(luabind::const_self *pragma::physics::Transform());
+	//defQuat.def(luabind::const_self *pragma::physics::ScaledTransform());
+	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const pragma::physics::Transform&)>([](lua_State *l,const Quat &a,const pragma::physics::Transform &b) {
+		Lua::Push<Quat>(l,a *b);
+		}));
+	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const pragma::physics::ScaledTransform&)>([](lua_State *l,const Quat &a,const pragma::physics::ScaledTransform &b) {
+		Lua::Push<Quat>(l,a *b);
+	}));
 	defQuat.def(float() *luabind::const_self);
 	defQuat.def("GetForward",&Lua::Quaternion::GetForward);
 	defQuat.def("GetRight",&Lua::Quaternion::GetRight);

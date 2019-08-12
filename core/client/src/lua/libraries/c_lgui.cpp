@@ -10,6 +10,7 @@
 #include "pragma/gui/wiluahandlewrapper.h"
 #include "pragma/gui/wiluaskin.h"
 #include "pragma/gui/wgui_luainterface.h"
+#include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -157,6 +158,42 @@ int Lua::gui::get_base_element(lua_State *l)
 		return 0;
 	auto o = WGUILuaInterface::GetLuaObject(l,*el);
 	o.push(l);
+	return 1;
+}
+
+int Lua::gui::get_element_at_position(lua_State *l,int32_t *optX,int32_t *optY)
+{
+	int32_t argIdx = 1;
+	::WIBase *baseElement = nullptr;
+	if(Lua::IsType<WIHandle>(l,argIdx))
+		baseElement = Lua::Check<WIHandle>(l,argIdx++).get();
+	auto x = optX ? *optX : Lua::CheckInt(l,argIdx++);
+	auto y = optY ? *optY : Lua::CheckInt(l,argIdx++);
+	std::function<bool(::WIBase*)> condition = nullptr;
+	if(Lua::IsSet(l,argIdx))
+	{
+		Lua::CheckFunction(l,argIdx);
+		auto oFunc = luabind::object{luabind::from_stack{l,argIdx}};
+		condition = [oFunc,l](::WIBase *el) -> bool {
+			auto result = Lua::CallFunction(l,[oFunc,el](lua_State *l) -> Lua::StatusCode {
+				oFunc.push(l);
+				auto o = WGUILuaInterface::GetLuaObject(l,*el);
+				o.push(l);
+				return Lua::StatusCode::Ok;
+				},1);
+			if(result != Lua::StatusCode::Ok)
+				return true;
+			if(Lua::IsSet(l,-1) == false)
+				return false;
+			return Lua::CheckBool(l,-1);
+		};
+		++argIdx;
+	}
+	auto *p = WGUI::GetInstance().GetGUIElement(baseElement,x,y,condition);
+	if(p == nullptr)
+		return 0;
+	auto oElement = WGUILuaInterface::GetLuaObject(l,*p);
+	oElement.push(l);
 	return 1;
 }
 

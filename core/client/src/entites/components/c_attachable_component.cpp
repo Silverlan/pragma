@@ -58,7 +58,7 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 
 void CAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAttachableComponent));}
 
-void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly)
+void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly) const
 {
 	auto &scene = c_game->GetRenderScene();
 	auto cam = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};

@@ -23,9 +23,9 @@ WIKeyEntry::~WIKeyEntry()
 		m_hMouseTrap->Remove();
 }
 
-void WIKeyEntry::OnTextChanged(const std::string &text)
+void WIKeyEntry::OnTextChanged(const std::string &text,bool changedByUser)
 {
-	WITextEntryBase::OnTextChanged(text);
+	WITextEntryBase::OnTextChanged(text,changedByUser);
 	if(!m_hText.IsValid())
 		return;
 	WIText *t = m_hText.get<WIText>();
@@ -48,7 +48,7 @@ void WIKeyEntry::Initialize()
 		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> newText) {
 			if(!hThis.IsValid())
 				return;
-			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(newText);
+			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(newText,false);
 		}));
 	}
 	ApplyKey(static_cast<GLFW::Key>(-1));
@@ -60,7 +60,7 @@ void WIKeyEntry::SetSize(int x,int y)
 	if(!m_hText.IsValid())
 		return;
 	WIText *t = m_hText.get<WIText>();
-	OnTextChanged(t->GetText());
+	OnTextChanged(t->GetText(),false);
 }
 
 util::EventReply WIKeyEntry::KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods)

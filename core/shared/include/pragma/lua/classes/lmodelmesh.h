@@ -30,10 +30,13 @@ namespace Lua
 	};
 	namespace ModelSubMesh
 	{
-		template<class TModelSubMesh>
-			void CreateBox(lua_State *l,const Vector3 &min,const Vector3 &max);
-		template<class TModelSubMesh>
-			void CreateSphere(lua_State *l,const Vector3 &origin,float radius,uint32_t recursionLevel=1);
+		DLLNETWORK void InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Vector3 &min,const Vector3 &max);
+		DLLNETWORK void InitializeSphere(lua_State *l,::ModelSubMesh &mesh,const Vector3 &origin,float radius,uint32_t recursionLevel=1);
+		DLLNETWORK void InitializeCylinder(lua_State *l,::ModelSubMesh &mesh,float startRadius,float length,uint32_t segmentCount=12);
+		DLLNETWORK void InitializeCone(lua_State *l,::ModelSubMesh &mesh,float startRadius,float length,float endRadius,uint32_t segmentCount=12);
+		DLLNETWORK void InitializeCircle(lua_State *l,::ModelSubMesh &mesh,float radius,bool doubleSided=true,uint32_t segmentCount=36);
+		DLLNETWORK void InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::optional<float> innerRadius,float outerRadius,bool doubleSided=true,uint32_t segmentCount=36);
+
 		DLLNETWORK void register_class(luabind::class_<::ModelSubMesh> &classDef);
 		DLLNETWORK void GetVertexCount(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl);
@@ -75,97 +78,5 @@ namespace Lua
 		DLLNETWORK void Scale(lua_State *l,::ModelSubMesh &mesh,const Vector3 &scale);
 	};
 };
-
-template<class TModelSubMesh>
-	void Lua::ModelSubMesh::CreateBox(lua_State *l,const Vector3 &cmin,const Vector3 &cmax)
-{
-	auto min = cmin;
-	auto max = cmax;
-	uvec::to_min_max(min,max);
-	auto mesh = std::make_shared<TModelSubMesh>();
-	std::vector<Vector3> uniqueVertices {
-		min, // 0
-		Vector3(max.x,min.y,min.z), // 1
-		Vector3(max.x,min.y,max.z), // 2
-		Vector3(max.x,max.y,min.z), // 3
-		max, // 4
-		Vector3(min.x,max.y,min.z), // 5
-		Vector3(min.x,min.y,max.z), // 6
-		Vector3(min.x,max.y,max.z) // 7
-	};
-	std::vector<Vector3> verts {
-		uniqueVertices[0],uniqueVertices[6],uniqueVertices[7], // 1
-		uniqueVertices[0],uniqueVertices[7],uniqueVertices[5], // 1
-		uniqueVertices[3],uniqueVertices[0],uniqueVertices[5], // 2
-		uniqueVertices[3],uniqueVertices[1],uniqueVertices[0], // 2
-		uniqueVertices[2],uniqueVertices[0],uniqueVertices[1], // 3
-		uniqueVertices[2],uniqueVertices[6],uniqueVertices[0], // 3
-		uniqueVertices[7],uniqueVertices[6],uniqueVertices[2], // 4
-		uniqueVertices[4],uniqueVertices[7],uniqueVertices[2], // 4
-		uniqueVertices[4],uniqueVertices[1],uniqueVertices[3], // 5
-		uniqueVertices[1],uniqueVertices[4],uniqueVertices[2], // 5
-		uniqueVertices[4],uniqueVertices[3],uniqueVertices[5], // 6
-		uniqueVertices[4],uniqueVertices[5],uniqueVertices[7], // 6
-	};
-	std::vector<Vector3> faceNormals {
-		Vector3(-1,0,0),Vector3(-1,0,0),
-		Vector3(0,0,-1),Vector3(0,0,-1),
-		Vector3(0,-1,0),Vector3(0,-1,0),
-		Vector3(0,0,1),Vector3(0,0,1),
-		Vector3(1,0,0),Vector3(1,0,0),
-		Vector3(0,1,0),Vector3(0,1,0)
-	};
-	std::vector<::Vector2> uvs {
-		::Vector2(0,1),::Vector2(1,1),::Vector2(1,0), // 1
-		::Vector2(0,1),::Vector2(1,0),::Vector2(0,0), // 1
-		::Vector2(0,0),::Vector2(1,1),::Vector2(1,0), // 2
-		::Vector2(0,0),::Vector2(0,1),::Vector2(1,1), // 2
-		::Vector2(0,1),::Vector2(1,0),::Vector2(0,0), // 3
-		::Vector2(0,1),::Vector2(1,1),::Vector2(1,0), // 3
-		::Vector2(0,0),::Vector2(0,1),::Vector2(1,1), // 4
-		::Vector2(1,0),::Vector2(0,0),::Vector2(1,1), // 4
-		::Vector2(0,0),::Vector2(1,1),::Vector2(1,0), // 5
-		::Vector2(1,1),::Vector2(0,0),::Vector2(0,1), // 5
-		::Vector2(1,1),::Vector2(1,0),::Vector2(0,0), // 6
-		::Vector2(1,1),::Vector2(0,0),::Vector2(0,1) // 6
-	};
-	for(auto &uv : uvs)
-		uv.y = 1.f -uv.y;
-	for(auto i=decltype(verts.size()){0};i<verts.size();i+=3)
-	{
-		auto &n = faceNormals[i /3];
-		mesh->AddVertex(::Vertex{verts[i],uvs[i],n});
-		mesh->AddVertex(::Vertex{verts[i +1],uvs[i +1],n});
-		mesh->AddVertex(::Vertex{verts[i +2],uvs[i +2],n});
-
-		mesh->AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
-	}
-	mesh->SetTexture(0);
-	mesh->Update();
-	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh);
-}
-
-template<class TModelSubMesh>
-	void Lua::ModelSubMesh::CreateSphere(lua_State *l,const Vector3 &origin,float radius,uint32_t recursionLevel)
-{
-	auto mesh = std::make_shared<TModelSubMesh>();
-	auto &meshVerts = mesh->GetVertices();
-	auto &triangles = mesh->GetTriangles();
-	std::vector<Vector3> verts;
-	IcoSphere::Create(origin,radius,verts,triangles,recursionLevel);
-	meshVerts.reserve(verts.size());
-	for(auto &v : verts)
-	{
-		meshVerts.push_back({});
-		auto &meshVert = meshVerts.back();
-		meshVert.position = v;
-		auto &n = meshVert.normal = uvec::get_normal(v -origin);
-		meshVert.uv = {umath::atan2(n.x,n.z) /(2.f *M_PI) +0.5f,n.y *0.5f +0.5f};
-	}
-	
-	mesh->SetTexture(0);
-	mesh->Update();
-	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh);
-}
 
 #endif

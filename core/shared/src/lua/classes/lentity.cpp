@@ -39,6 +39,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("Spawn",&Spawn);
 	classDef.def("Remove",&Remove);
 	classDef.def("GetIndex",&GetIndex);
+	classDef.def("GetLocalIndex",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushInt(l,hEnt->GetLocalIndex());
+	}));
 	classDef.def("IsCharacter",&IsCharacter);
 	classDef.def("IsPlayer",&IsPlayer);
 	classDef.def("IsWorld",&IsWorld);
@@ -389,6 +393,15 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		if(parent == nullptr)
 			return;
 		parent->PushLuaObject(l);
+	}));
+	classDef.def("ClearParent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->ClearParent();
+	}));
+	classDef.def("SetParent",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,EntityHandle &hParent) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		LUA_CHECK_ENTITY(l,hParent);
+		hEnt->SetParent(hParent.get());
 	}));
 	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

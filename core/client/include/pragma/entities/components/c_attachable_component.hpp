@@ -17,7 +17,7 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) override;
+		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) const override;
 	protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

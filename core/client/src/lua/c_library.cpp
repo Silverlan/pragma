@@ -18,6 +18,8 @@
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 
+extern DLLCENGINE CEngine *c_engine;
+
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -28,6 +30,14 @@ static void register_gui(Lua::Interface &lua)
 		{"create_checkbox",Lua::gui::create_checkbox},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
+		{"get_element_at_position",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			return Lua::gui::get_element_at_position(l);
+		})},
+		{"get_element_under_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			int32_t x,y;
+			WGUI::GetInstance().GetMousePos(x,y);
+			return Lua::gui::get_element_at_position(l,&x,&y);
+		})},
 		{"get_focused_element",Lua::gui::get_focused_element},
 		{"register_skin",Lua::gui::register_skin},
 		{"set_skin",Lua::gui::set_skin},
@@ -383,6 +393,12 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"add_callback",Lua::input::add_callback},
 		{"get_cursor_pos",Lua::input::get_cursor_pos},
 		{"set_cursor_pos",Lua::input::set_cursor_pos},
+		{"center_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &window = c_engine->GetWindow();
+			auto windowSize = window.GetSize();
+			window.SetCursorPos(windowSize /2);
+			return 0;
+		})},
 		{"get_controller_count",Lua::input::get_controller_count},
 		{"get_controller_name",Lua::input::get_controller_name},
 		{"get_controller_axes",Lua::input::get_joystick_axes},

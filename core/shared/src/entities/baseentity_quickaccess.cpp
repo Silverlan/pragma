@@ -117,6 +117,16 @@ void BaseEntity::SetBodyGroup(const std::string &name,uint32_t id)
 	mdlC->SetBodyGroup(name,id);
 }
 
+void BaseEntity::SetParent(BaseEntity *parent)
+{
+	auto *attC = static_cast<pragma::BaseAttachableComponent*>(AddNetworkedComponent("attachable").get());
+	if(attC == nullptr)
+		return;
+	attC->AttachToEntity(parent);
+}
+
+void BaseEntity::ClearParent() {SetParent(nullptr);}
+
 pragma::BaseParentComponent *BaseEntity::GetParent() const
 {
 	auto attC = FindComponent("attachable");

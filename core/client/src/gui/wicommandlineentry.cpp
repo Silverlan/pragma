@@ -171,9 +171,9 @@ void WICommandLineEntry::SetAutocompleteEnabled(bool enabled)
 		m_hAutoCompleteList->Remove();
 }
 bool WICommandLineEntry::IsAutocompleteEnabled() const {return m_bAutocompleteEnabled;}
-void WICommandLineEntry::OnTextChanged(const std::string &text)
+void WICommandLineEntry::OnTextChanged(const std::string &text,bool changedByUser)
 {
-	WITextEntry::OnTextChanged(text);
+	WITextEntry::OnTextChanged(text,changedByUser);
 	if(m_bSkipAutoComplete)
 		return;
 	InitializeAutoCompleteList();

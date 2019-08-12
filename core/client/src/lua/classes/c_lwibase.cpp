@@ -1285,15 +1285,16 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 	}
 	if(name == "ontextchanged")
 	{
-		hCallback = FunctionCallback<void,std::reference_wrapper<std::string>>::Create([l,hPanel,o](std::reference_wrapper<std::string> text) {
+		hCallback = FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([l,hPanel,o](std::reference_wrapper<const std::string> text,bool changedByUser) {
 			if(!hPanel.IsValid())
 				return;
-			Lua::CallFunction(l,[&o,hPanel,text](lua_State *l) {
+			Lua::CallFunction(l,[&o,hPanel,text,changedByUser](lua_State *l) {
 				o.push(l);
 
 				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
 				obj.push(l);
 				Lua::PushString(l,text.get());
+				Lua::PushBool(l,changedByUser);
 				return Lua::StatusCode::Ok;
 			},0);
 		});

@@ -20,7 +20,9 @@ pragma::physics::Transform::Transform(const Vector3 &translation,const Quat &rot
 
 pragma::physics::Transform pragma::physics::Transform::GetInverse() const
 {
-	return Transform{-m_translation,uquat::get_inverse(m_rotation)};
+	Transform result {-m_translation,uquat::get_inverse(m_rotation)};
+	uvec::rotate(&result.m_translation,result.m_rotation);
+	return result;
 }
 
 const Vector3 &pragma::physics::Transform::GetOrigin() const {return m_translation;}
@@ -62,6 +64,7 @@ pragma::physics::Transform pragma::physics::Transform::operator*(const Transform
 	res *= tOther;
 	return res;
 }
+
 pragma::physics::Transform &pragma::physics::Transform::operator*=(const Transform &tOther)
 {
 	auto translation = tOther.m_translation;
@@ -139,4 +142,42 @@ Quat pragma::physics::ScaledTransform::operator*(const Quat &rot) const
 Mat4 pragma::physics::ScaledTransform::ToMatrix() const
 {
 	return glm::scale(glm::mat4{1.f},m_scale) *Transform::ToMatrix();
+}
+
+/////////////
+
+Vector3 operator*(const Vector3 &v,const pragma::physics::Transform &t)
+{
+	return (pragma::physics::Transform{v,uquat::identity()} *t).GetOrigin();
+}
+Vector3 &operator*=(Vector3 &v,const pragma::physics::Transform &t)
+{
+	v = operator*(v,t);
+	return v;
+}
+Quat operator*(const Quat &v,const pragma::physics::Transform &t)
+{
+	return (pragma::physics::Transform{Vector3{},v} *t).GetOrigin();
+}
+Quat &operator*=(Quat &v,const pragma::physics::Transform &t)
+{
+	v = operator*(v,t);
+	return v;
+}
+
+Vector3 operator*(const Vector3 &v,const pragma::physics::ScaledTransform &t)
+{
+	return operator*(v,static_cast<const pragma::physics::Transform&>(t));
+}
+Vector3 &operator*=(Vector3 &v,const pragma::physics::ScaledTransform &t)
+{
+	return operator*=(v,static_cast<const pragma::physics::Transform&>(t));
+}
+Quat operator*(const Quat &v,const pragma::physics::ScaledTransform &t)
+{
+	return operator*(v,static_cast<const pragma::physics::Transform&>(t));
+}
+Quat &operator*=(Quat &v,const pragma::physics::ScaledTransform &t)
+{
+	return operator*=(v,static_cast<const pragma::physics::Transform&>(t));
 }

@@ -134,7 +134,7 @@ void Lua::Model::register_class(
 	luabind::class_<::ModelSubMesh> &classDefModelSubMesh
 )
 {
-	// classDef.def(luabind::const_self == ::Model());
+	classDef.def(luabind::const_self == ::Model());
 	classDef.def("GetCollisionMeshes",&GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes",&ClearCollisionMeshes);
 	classDef.def("GetSkeleton",&GetSkeleton);
@@ -608,10 +608,6 @@ void Lua::Model::GetAttachments(lua_State *l,::Model &mdl)
 	for(auto i=decltype(attachments.size()){0};i<attachments.size();++i)
 	{
 		auto &att = attachments[i];
-		att.angles;
-		att.bone;
-		att.name;
-		att.offset;
 
 		Lua::PushInt(l,i +1);
 		push_attachment(l,att);
@@ -674,7 +670,7 @@ void Lua::Model::AddAttachment(lua_State *l,::Model &mdl,const std::string &name
 struct LuaAttachmentData
 {
 	EulerAngles *angles = nullptr;
-	const char *bone = nullptr;
+	int32_t bone = -1;
 	const char *name = nullptr;
 	Vector3 *offset = nullptr;
 };
@@ -689,7 +685,7 @@ static void get_attachment(lua_State *l,LuaAttachmentData &att,int32_t t)
 	Lua::PushString(l,"bone");
 	Lua::GetTableValue(l,t);
 	if(Lua::IsNil(l,-1) == false)
-		att.bone = Lua::CheckString(l,-1);
+		att.bone = Lua::CheckInt(l,-1);
 	Lua::Pop(l,1);
 
 	Lua::PushString(l,"name");
@@ -716,8 +712,6 @@ void Lua::Model::SetAttachmentData(lua_State *l,::Model &mdl,const std::string &
 		return;
 	if(attNew.angles != nullptr)
 		att->angles = *attNew.angles;
-	if(attNew.bone != nullptr)
-		att->bone = mdl.LookupBone(attNew.bone);
 	if(attNew.name != nullptr)
 		att->name = attNew.name;
 	if(attNew.offset != nullptr)
@@ -735,8 +729,6 @@ void Lua::Model::SetAttachmentData(lua_State *l,::Model &mdl,uint32_t attId,luab
 		return;
 	if(attNew.angles != nullptr)
 		att->angles = *attNew.angles;
-	if(attNew.bone != nullptr)
-		att->bone = mdl.LookupBone(attNew.bone);
 	if(attNew.name != nullptr)
 		att->name = attNew.name;
 	if(attNew.offset != nullptr)

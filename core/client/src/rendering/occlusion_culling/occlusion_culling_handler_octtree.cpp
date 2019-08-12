@@ -48,7 +48,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 			culledMeshesOut.push_back({*static_cast<CBaseEntity*>(&pRenderComponent->GetEntity()),*static_cast<CModelMesh*>(mesh.get())});
 	}
 
-	auto &dynOctree = renderer.GetOcclusionOctree();
+	auto &dynOctree = scene.GetOcclusionOctree();
 	auto &root = dynOctree.GetRootNode();
 	// TODO: Planes
 	iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,renderer.GetFrustumPlanes(),[this,&renderer,&scene,&bUpdateLod,&posCam,&culledMeshesOut](const CBaseEntity *cent) {

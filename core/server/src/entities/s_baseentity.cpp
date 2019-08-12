@@ -44,6 +44,8 @@ extern DLLENGINE Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 
+LINK_ENTITY_TO_CLASS(entity,SBaseEntity);
+
 SBaseEntity::SBaseEntity()
 	: BaseEntity(),
 	m_bShared(false),

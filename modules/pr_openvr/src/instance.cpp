@@ -25,6 +25,7 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace openvr;
 
+#pragma optimize("",off)
 std::string openvr::to_string(vr::VREvent_t ev)
 {
 	switch(ev.eventType)
@@ -412,6 +413,8 @@ void Instance::UpdateHMDMatrixPose()
 	}
 }
 
+#include <glm/gtx/matrix_decompose.hpp>
+#include <iostream>
 void Instance::DrawScene()
 {
 	/*static std::array<vr::TrackedDevicePose_t,vr::k_unMaxTrackedDeviceCount> renderPoses {};
@@ -499,6 +502,7 @@ void Instance::DrawScene()
 	auto camGame = gameScene.GetInternalScene().GetActiveCamera();
 	if(camGame.expired())
 		return;
+	camGame->UpdateViewMatrix();
 	std::array<Eye*,2> eyes = {m_leftEye.get(),m_rightEye.get()};
 	for(auto *eye : eyes)
 	{
@@ -508,8 +512,6 @@ void Instance::DrawScene()
 		auto &cam = eye->camera;
 		if(cam.expired())
 			continue;
-		cam->GetEntity().SetPosition(camGame->GetEntity().GetPosition());
-		cam->GetEntity().SetRotation(camGame->GetEntity().GetRotation());
 		cam->SetViewMatrix(camGame->GetViewMatrix());
 		auto &scene = eye->scene;
 		auto mViewCam = cam->GetViewMatrix();
@@ -934,3 +936,4 @@ bool Instance::GetPoseTransform(uint32_t deviceIdx,vr::TrackedDevicePose_t &pose
 	return &m_poseTransforms.at(deviceIdx);*/
 }
 
+#pragma optimize("",on)

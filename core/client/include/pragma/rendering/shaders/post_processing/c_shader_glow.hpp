@@ -27,6 +27,7 @@ namespace pragma
 		bool BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindGlowMaterial(CMaterial &mat);
 	protected:
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;

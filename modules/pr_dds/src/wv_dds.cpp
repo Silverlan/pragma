@@ -227,7 +227,6 @@ static int32_t convert_dds(lua_State *l)
 
 	nvtt::CompressionOptions compressionOptions {};
 	compressionOptions.reset();
-	compressionOptions.setFormat(nvtt::Format_DXT1);
 
 	compressionOptions.setColorWeights(convertInfo.colorWeights.red,convertInfo.colorWeights.green,convertInfo.colorWeights.blue,convertInfo.colorWeights.alpha);
 	compressionOptions.setFormat(convertInfo.format);
@@ -420,6 +419,10 @@ extern "C"
 	void PRAGMA_EXPORT pragma_initialize_lua(Lua::Interface &l)
 	{
 		Lua::dds::register_lua_library(l);
+	}
+	bool PRAGMA_EXPORT save_image_as_ktx(prosper::Image &img,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler)
+	{
+		return save_prosper_image_as_ktx(img,fileName,imgCreateInfo,errorHandler);
 	}
 };
 #pragma optimize("",on)

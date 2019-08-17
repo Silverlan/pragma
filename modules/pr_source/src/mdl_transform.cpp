@@ -134,10 +134,9 @@ void import::MdlInfo::ConvertTransforms(const std::vector<std::shared_ptr<ModelS
 					v.position.y = v.position.z;
 					v.position.z = -y;
 
-					auto nCopy = v.normal;
-					v.normal.y = nCopy.z;
-					v.normal.z = nCopy.x;
-					v.normal.x = nCopy.y;
+					// Note: This works for regular props, but may not work properly with props that
+					// have the static flag set. If so, add a separate case for static props!
+					v.normal = {v.normal.x,v.normal.z,-v.normal.y};
 				}
 			}
 		}

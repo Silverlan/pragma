@@ -798,6 +798,12 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_env_weather_component_methods<luabind::class_<CWeatherHandle,BaseEntityComponentHandle>,CWeatherHandle>(l,defCWeather);
 	entsMod[defCWeather];
 
+	auto defCReflectionProbe = luabind::class_<CReflectionProbeHandle,BaseEntityComponentHandle>("ReflectionProbe");
+	entsMod[defCReflectionProbe];
+
+	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverter");
+	entsMod[defCPBRConverter];
+
 	auto defCWaterSurface = luabind::class_<CWaterSurfaceHandle,BaseEntityComponentHandle>("WaterSurfaceComponent");
 	entsMod[defCWaterSurface];
 

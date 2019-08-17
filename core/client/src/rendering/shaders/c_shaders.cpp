@@ -43,6 +43,8 @@
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
+#include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
+#include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
@@ -122,6 +124,9 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("convolute_cubemap_lighting",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderConvoluteCubemapLighting(context,identifier);});
 	shaderManager.RegisterShader("compute_irradiance_map_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderComputeIrradianceMapRoughness(context,identifier);});
 	shaderManager.RegisterShader("brdf_convolution",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderBRDFConvolution(context,identifier);});
+	shaderManager.RegisterShader("specular_to_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSpecularToRoughness(context,identifier);});
+	shaderManager.RegisterShader("extract_diffuse_ambient_occlusion",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderExtractDiffuseAmbientOcclusion(context,identifier);});
+
 	shaderManager.RegisterShader("calcimagecolor",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderCalcImageColor(context,identifier);});
 	shaderManager.RegisterShader("watersplash",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWaterSplash(context,identifier);});
 	shaderManager.RegisterShader("watersurface",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWaterSurface(context,identifier);});

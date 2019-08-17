@@ -84,6 +84,7 @@
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
+#include <sharedutils/util_library.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -1841,6 +1842,20 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 	return true;
 }
 std::shared_ptr<al::Effect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
+
+bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const ImageWriteInfo &imageWriteInfo) const
+{
+	std::string err;
+	auto libDds = client->InitializeLibrary("pr_dds",&err);
+	if(libDds == nullptr)
+		return false;
+	auto path = ufile::get_path_from_filename(fileName);
+	FileManager::CreatePath(path.c_str());
+	auto *fSaveImageAsKtx = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_image_as_ktx");
+	return fSaveImageAsKtx && fSaveImageAsKtx(image,fileName,imageWriteInfo,[fileName](const std::string &err) {
+		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+	});
+}
 
 static CVar cvFriction = GetClientConVar("sv_friction");
 Float CGame::GetFrictionScale() const

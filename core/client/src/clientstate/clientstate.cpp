@@ -102,6 +102,7 @@ ClientState::ClientState()
 
 	RegisterCallback<void,CGame*>("OnGameStart");
 	RegisterCallback<void,CGame*>("EndGame");
+	RegisterCallback<void,CMaterial*>("OnMaterialLoaded");
 
 	RegisterCallback<void>("Draw");
 	RegisterCallback<
@@ -681,10 +682,11 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 	auto bShaderInitialized = std::make_shared<bool>(false);
 
 	bool bFirstTimeError;
-	auto *mat = static_cast<CMaterialManager&>(GetMaterialManager()).Load(path,[onLoaded,bShaderInitialized](Material *mat) mutable {
+	auto *mat = static_cast<CMaterialManager&>(GetMaterialManager()).Load(path,[this,onLoaded,bShaderInitialized](Material *mat) mutable {
 		if(bShaderInitialized.use_count() > 1) // Callback has been called immediately
 			init_shader(mat);
 		bShaderInitialized = nullptr;
+		CallCallbacks<void,CMaterial*>("OnMaterialLoaded",static_cast<CMaterial*>(mat));
 		if(onLoaded != nullptr)
 			onLoaded(mat);
 		// Material has been fully loaded!
@@ -698,6 +700,15 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 			auto b = PortMaterial(path,[this,&mat,&onLoaded,bLoadInstantly](const std::string &path,bool bReload) -> Material* {
 				return mat = LoadMaterial(path,onLoaded,bReload,bLoadInstantly);
 			});
+			if(b)
+			{
+				// Note: Porting the material may have also ported the texture files.
+				// This would've happened AFTER the material has been loaded, however, which
+				// means the material's texture references would be invalid.
+				// We'll force the material to reload here, to make sure the texture references
+				// are up-to-date.
+				mat = LoadMaterial(path,onLoaded,true,bLoadInstantly);
+			}
 			bSkipPort = false;
 			if(b == true)
 				return mat;

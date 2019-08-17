@@ -19,6 +19,7 @@ namespace pragma
 			AmbientOcclusionMap,
 			MetallicMap,
 			RoughnessMap,
+			EmissionMap,
 
 			Count
 		};

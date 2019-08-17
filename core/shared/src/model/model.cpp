@@ -336,6 +336,19 @@ CallbackHandle Model::CallOnMaterialsLoaded(const std::function<void(void)> &f)
 	m_onAllMatsLoadedCallbacks.push_back(FunctionCallback<>::Create(f));
 	return m_onAllMatsLoadedCallbacks.back();
 }
+void Model::AddLoadingMaterial(Material &mat,std::optional<uint32_t> index)
+{
+	m_bAllMaterialsLoaded = false;
+	if(index.has_value())
+		m_materials.at(*index) = mat.GetHandle();
+	else
+		m_materials.push_back(mat.GetHandle());
+	auto cb = mat.CallOnLoaded([this]() {
+		OnMaterialLoaded();
+	});
+	if(cb.IsValid() == true)
+		m_matLoadCallbacks.push_back(cb);
+}
 uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
@@ -346,15 +359,7 @@ uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 	if(mat == nullptr)
 		m_materials.push_back(MaterialHandle{});
 	else
-	{
-		m_bAllMaterialsLoaded = false;
-		m_materials.push_back(mat->GetHandle());
-		auto cb = mat->CallOnLoaded([this]() {
-			OnMaterialLoaded();
-		});
-		if(cb.IsValid() == true)
-			m_matLoadCallbacks.push_back(cb);
-	}
+		AddLoadingMaterial(*mat);
 	return static_cast<uint32_t>(meta.textures.size() -1);
 }
 bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
@@ -365,16 +370,7 @@ bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
 	if(mat == nullptr)
 		m_materials.at(texIdx) = {};
 	else if(texIdx < m_materials.size())
-	{
-		m_bAllMaterialsLoaded = false;
-		
-		m_materials.at(texIdx) = mat->GetHandle();
-		auto cb = mat->CallOnLoaded([this]() {
-			OnMaterialLoaded();
-		});
-		if(cb.IsValid() == true)
-			m_matLoadCallbacks.push_back(cb);
-	}
+		AddLoadingMaterial(*mat,texIdx);
 	else
 		return false;
 	return true;
@@ -498,7 +494,7 @@ void Model::PrecacheTexture(uint32_t texId,const std::function<Material*(const s
 	{
 		auto *mat = loadMaterial(matPath,bReload);
 		if(mat != nullptr)
-			m_materials.at(texId) = mat->GetHandle();
+			AddLoadingMaterial(*mat,texId);
 	}
 }
 
@@ -594,7 +590,7 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 		{
 			auto *mat = loadMaterial(matPath,bReload);
 			if(mat != nullptr)
-				m_materials[i] = mat->GetHandle();
+				AddLoadingMaterial(*mat,i);
 		}
 	}
 }
@@ -1171,6 +1167,19 @@ std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceAttachmentPo
 		boneScale ? *boneScale : Vector3{1.f,1.f,1.f}
 	} *t;
 	return t;
+}
+
+std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceBonePose(int32_t boneId) const
+{
+	auto &reference = GetReference();
+	auto *bonePos = reference.GetBonePosition(boneId);
+	auto *boneRot = reference.GetBoneOrientation(boneId);
+	auto *boneScale = reference.GetBoneScale(boneId);
+	return pragma::physics::ScaledTransform {
+		bonePos ? *bonePos : Vector3{},
+		boneRot ? *boneRot : uquat::identity(),
+		boneScale ? *boneScale : Vector3{1.f,1.f,1.f}
+	};
 }
 
 uint32_t Model::GetBoneCount() const {return m_skeleton->GetBoneCount();}

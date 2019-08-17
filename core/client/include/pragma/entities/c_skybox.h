@@ -12,7 +12,12 @@ namespace pragma
 	public:
 		CSkyboxComponent(BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+	private:
+		bool CreateCubemapFromIndividualTextures(Material &mat,const std::string &postfix="") const;
+		void ValidateMaterials();
+		CallbackHandle m_cbOnModelMaterialsLoaded = {};
 	};
 };
 

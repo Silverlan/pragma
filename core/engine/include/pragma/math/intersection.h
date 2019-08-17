@@ -83,6 +83,7 @@ namespace Geometry
 
 	DLLENGINE bool calc_barycentric_coordinates(const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &hitPoint,float &b1,float &b2);
 	DLLENGINE bool calc_barycentric_coordinates(const Vector3 &p0,const Vector2 &uv0,const Vector3 &p1,const Vector2 &uv1,const Vector3 &p2,const Vector2 &uv2,const Vector3 &hitPoint,float &u,float &v);
+	DLLENGINE bool calc_barycentric_coordinates(const Vector2 uv0,const Vector2 &uv1,const Vector2 &uv2,const Vector2 &uv,float &a1,float &a2,float &a3);
 	DLLENGINE Quat calc_rotation_between_planes(const Vector3 &n0,const Vector3 &n1);
 
 	enum class LineSide : uint8_t
@@ -104,6 +105,9 @@ namespace Geometry
 	DLLENGINE std::optional<std::vector<uint32_t>> get_outline_vertices(const std::vector<Vector2> &polygons);
 	DLLENGINE WindingOrder get_triangle_winding_order(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,const Vector3 &n);
 	DLLENGINE WindingOrder get_triangle_winding_order(const Vector2 &v0,const Vector2 &v1,const Vector2 &v2);
+
+	DLLENGINE float calc_triangle_area(const Vector3 &p0,const Vector3 &p1,const Vector3 &p2);
+	DLLENGINE float calc_triangle_area(const Vector2 &p0,const Vector2 &p1,const Vector2 &p2,bool keepSign=false);
 };
 
 struct DLLENGINE AABB

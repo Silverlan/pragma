@@ -36,6 +36,7 @@ namespace Lua
 			DLLCLIENT int get_render_settings_descriptor_set(lua_State *l);
 
 			DLLCLIENT int load_map(lua_State *l);
+			DLLCLIENT int build_reflection_probes(lua_State *l);
 
 			DLLCLIENT int test(lua_State *l);
 		};

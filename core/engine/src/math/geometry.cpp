@@ -313,6 +313,25 @@ bool Geometry::calc_barycentric_coordinates(const Vector3 &p0,const Vector2 &uv0
 	return true;
 }
 
+bool Geometry::calc_barycentric_coordinates(const Vector2 uv0,const Vector2 &uv1,const Vector2 &uv2,const Vector2 &uv,float &a1,float &a2,float &a3)
+{
+	// See http://answers.unity.com/answers/372156/view.html
+
+	auto a = Geometry::calc_triangle_area(uv0,uv1,uv2,true);
+	if(a == 0)
+		return false;
+	a1 = Geometry::calc_triangle_area(uv1,uv2,uv,true) /a;
+	if(a1 < 0)
+		return false;
+	a2 = Geometry::calc_triangle_area(uv2,uv0,uv,true) /a;
+	if(a2 < 0)
+		return false;
+	a3 = Geometry::calc_triangle_area(uv0,uv1,uv,true) /a;
+	if(a3 < 0)
+		return false;
+	return true;
+}
+
 Quat Geometry::calc_rotation_between_planes(const Vector3 &n0,const Vector3 &n1)
 {
 	auto m = n0 +n1;
@@ -341,6 +360,17 @@ WindingOrder Geometry::get_triangle_winding_order(const Vector3 &v0,const Vector
 WindingOrder Geometry::get_triangle_winding_order(const Vector2 &v0,const Vector2 &v1,const Vector2 &v2)
 {
 	return get_triangle_winding_order(Vector3{v0.x,0.f,v0.y},Vector3{v1.x,0.f,v1.y},Vector3{v2.x,0.f,v2.y},uvec::UP);
+}
+float Geometry::calc_triangle_area(const Vector3 &p0,const Vector3 &p1,const Vector3 &p2)
+{
+	return uvec::length(uvec::cross(p0-p1, p0-p2));
+}
+float Geometry::calc_triangle_area(const Vector2 &p0,const Vector2 &p1,const Vector2 &p2,bool keepSign)
+{
+	auto dArea = ((p1.x -p0.x) *(p2.y -p0.y) -(p2.x -p0.x) *(p1.y -p0.y)) /2.0;
+	if(keepSign == false)
+		dArea = umath::abs(dArea);
+	return dArea;
 }
 
 const auto EPSILON = 0.1f;

@@ -284,6 +284,12 @@ void Lua::Model::register_class(
 			return;
 		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
 	}));
+	classDef.def("CalcReferenceBonePose",static_cast<void(*)(lua_State*,::Model&,int32_t)>([](lua_State *l,::Model &mdl,int32_t boneIdx) {
+		auto t = mdl.CalcReferenceBonePose(boneIdx);
+		if(t.has_value() == false)
+			return;
+		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
+	}));
 
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
 	classDef.def("GetIKController",&Lua::Model::GetIKController);

@@ -77,6 +77,11 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderGlow::InitializeMaterialDescr
 	prosper::util::set_descriptor_set_binding_texture(*descSet,*glowTexture->texture,0u);
 	return descSetGroup;
 }
+bool ShaderGlow::BindClipPlane(const Vector4 &clipPlane)
+{
+	// Clip plane currently not supported for glow shaders
+	return true;
+}
 bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 {
 	auto *glowMap = mat.GetGlowMap();
@@ -98,7 +103,7 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 	if(data != nullptr)
 		data->GetFloat("glow_scale",&scale);
 
-	return RecordPushConstants(Anvil::ShaderStageFlagBits::FRAGMENT_BIT,scale) &&
+	return RecordPushConstants(PushConstants{scale}) &&
 		RecordBindDescriptorSet(*(*descSetGroup)->get_descriptor_set(0u),GetMaterialDescriptorSetIndex());
 }
 

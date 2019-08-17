@@ -7,6 +7,7 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -1038,4 +1039,9 @@ int Lua::game::Client::load_map(lua_State *l)
 	std::string mapName;
 	Vector3 origin {};
 	return Lua::game::load_map(l,mapName,nullptr,origin).second;
+}
+int Lua::game::Client::build_reflection_probes(lua_State *l)
+{
+	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game);
+	return 0;
 }

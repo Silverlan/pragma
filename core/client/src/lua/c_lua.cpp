@@ -106,6 +106,7 @@ void CGame::RegisterLua()
 		{"get_camera_transform",Lua::game::Client::get_camera_position},
 		{"get_render_clip_plane",Lua::game::Client::get_render_clip_plane},
 		{"set_render_clip_plane",Lua::game::Client::set_render_clip_plane},
+		{"build_reflection_probes",Lua::game::Client::build_reflection_probes},
 
 		{"get_debug_buffer",Lua::game::Client::get_debug_buffer},
 		{"get_time_buffer",Lua::game::Client::get_time_buffer},

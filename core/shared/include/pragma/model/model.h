@@ -288,6 +288,7 @@ public:
 	void RemoveAttachment(uint32_t idx);
 	int32_t LookupAttachment(const std::string &name);
 	std::optional<pragma::physics::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
+	std::optional<pragma::physics::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
 
 	const std::vector<ObjectAttachment> &GetObjectAttachments() const;
 	std::vector<ObjectAttachment> &GetObjectAttachments();
@@ -371,6 +372,7 @@ public:
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
 protected:
 	virtual void OnMaterialMissing(const std::string &matName);
+	void AddLoadingMaterial(Material &mat,std::optional<uint32_t> index={});
 	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
 	void LoadMaterials(const std::vector<uint32_t> &textureGroups,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload=false);
 	bool FindMaterial(const std::string &texture,std::string &matPath,const std::function<Material*(const std::string&,bool)> &loadMaterial) const;

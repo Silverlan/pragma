@@ -14,9 +14,19 @@ link_external_library(zlib)
 link_external_library(materialsystem)
 link_external_library(cmaterialsystem)
 
+link_external_library(client)
+link_external_library(cengine)
+link_external_library(prosper)
+link_external_library(vulkan)
+link_external_library(anvil)
+link_external_library(glfw)
+link_external_library(iglfw)
+link_external_library(glslang)
+
 add_include_dir(glm)
 add_include_dir(lpng_build)
 add_include_dir(zlib_build)
+add_include_dir(anvil_build)
 
 add_external_library(luajit)
 add_external_library(lua)
@@ -28,6 +38,8 @@ add_external_library(nvidia_texture_tools_bc7)
 add_external_library(nvidia_texture_tools_bc6h)
 add_external_library(nvidia_texture_tools_thread)
 add_external_library(squish)
+
+add_def(ANVIL_VULKAN_CPP)
 
 link_generic_module_libraries()
 register_pragma_module(${PROJ_NAME})

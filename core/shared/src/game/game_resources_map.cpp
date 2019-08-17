@@ -764,21 +764,6 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 				skybox = "skybox/dawn2";
 			else
 				skybox = "skybox/" +skybox;
-			auto wmiFileName = skybox +".wmi";
-			if(FileManager::Exists(wmiFileName) == false)
-			{
-				if(FileManager::CreatePath("materials\\skybox") == true)
-				{
-					auto f = FileManager::OpenFile<VFilePtrReal>((IMPORT_PATH +"materials\\" +wmiFileName).c_str(),"w");
-					if(f != nullptr)
-					{
-						f->WriteString("\"skybox\"\n{\n");
-						f->WriteString("\t$cubemap skybox \"" +skybox +"\"\n");
-						f->WriteString("\t$int mipmap_load_mode -1\n}");
-						f = nullptr;
-					}
-				}
-			}
 			if(itSkybox != texStringData.end())
 				const_cast<std::string&>(*itSkybox) = skybox;
 			if(itSkybox2D != texStringData.end())

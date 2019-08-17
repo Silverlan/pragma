@@ -84,6 +84,8 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CTimeScaleComponent>("time_scale");
 	componentManager.RegisterComponentType<pragma::CAttachableComponent>("attachable");
 	componentManager.RegisterComponentType<pragma::CParentComponent>("parent");
+	componentManager.RegisterComponentType<pragma::CReflectionProbeComponent>("reflection_probe");
+	componentManager.RegisterComponentType<pragma::CPBRConverterComponent>("pbr_converter");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");

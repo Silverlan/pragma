@@ -367,6 +367,9 @@ public:
 	void SetActionInput(Action action,bool b,float magnitude=1.f);
 	bool GetActionInput(Action action);
 
+	// Util
+	bool SaveImage(prosper::Image &image,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
+
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 

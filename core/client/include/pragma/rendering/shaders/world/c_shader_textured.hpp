@@ -113,7 +113,7 @@ namespace pragma
 
 		ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
-		bool BindClipPlane(const Vector4 &clipPlane);
+		virtual bool BindClipPlane(const Vector4 &clipPlane);
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor

@@ -52,12 +52,6 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 					continue;
 				}
 				auto *dsTex = dynamic_cast<ds::Texture*>(dataVal.get());
-				auto bCubemap = false;
-				if(dsTex == nullptr)
-				{
-					dsTex = dynamic_cast<ds::Cubemap*>(dataVal.get());;
-					bCubemap = true;
-				}
 				if(dsTex != nullptr)
 				{
 					auto &texInfo = dsTex->GetValue();

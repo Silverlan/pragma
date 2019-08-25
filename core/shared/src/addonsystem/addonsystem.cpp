@@ -117,6 +117,19 @@ void AddonSystem::MountAddons()
 	FileManager::FindFiles("addons\\*",NULL,&resDirs);
 	FileManager::FindFiles("addons\\*.pad",&resFiles,NULL);
 	m_addons.reserve(resFiles.size() +resDirs.size());
+
+	// Make sure that the "converted" addon is always the first in the mount order!
+	// This addon contains asset files that were converted by the engine into a different
+	// format (e.g. traditional texture assets to pbr assets).
+	// The addon has to be the first, to allow it to override assets from other addons.
+	// TODO: Do this properly and allow changing the mount order of all addons arbitrarily!
+	auto itConverted = std::find(resDirs.begin(),resDirs.end(),"converted");
+	if(itConverted != resDirs.end())
+	{
+		resDirs.erase(itConverted);
+		resDirs.insert(resDirs.begin(),"converted");
+	}
+
 	for(auto &d : resDirs)
 		mount_directory_addon(d,m_addons);
 

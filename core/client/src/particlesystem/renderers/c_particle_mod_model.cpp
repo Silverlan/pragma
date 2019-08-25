@@ -6,7 +6,6 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/scene/scene.h"
 #include <pragma/math/intersection.h>
 #include <pragma/model/model.h>

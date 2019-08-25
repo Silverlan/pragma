@@ -199,7 +199,14 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 				return false;
 			};
 			if(fHasTexture(block) == true) // Material has texture, reload it
-				ReloadMaterial(mat->GetName());
+			{
+				auto matName = mat->GetName();
+				// A new material with a different extension may have just been
+				// moved into the game files. Remove the extension and let the material
+				// system decide which one to load.
+				ufile::remove_extension_from_filename(matName);
+				ReloadMaterial(matName);
+			}
 		}
 		CallChangeCallbacks(EResourceWatcherCallbackType::Texture,path,ext);
 	}

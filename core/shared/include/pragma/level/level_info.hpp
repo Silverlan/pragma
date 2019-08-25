@@ -31,6 +31,12 @@ namespace pragma
 			FaceMesh
 		};
 
+		enum class EntityFlags : uint64_t
+		{
+			None = 0ull,
+			ClientsideOnly = 1ull
+		};
+
 		void find_entity_components(const std::unordered_map<std::string,std::string> &keyValues,std::unordered_set<std::string> &outComponents);
 		std::vector<util::fgd::Data> load_fgds(class NetworkState &nwState,const std::function<void(const std::string&)> &messageLogger=nullptr);
 		void transform_class(
@@ -46,5 +52,6 @@ namespace pragma
 		);
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::level::EntityFlags)
 
 #endif

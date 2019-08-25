@@ -332,8 +332,10 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		}
 	}));
 	m_waterScene->hRenderScene = c_game->AddCallback("DrawScene",FunctionCallback<
-		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-	>::CreateWithOptionalReturn([this,shader,pos,surfaceNormal,waterNormal,lastPos,lastRot,waterPlaneDist,matReflect](bool *bSkipMainScene,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>> rt) mutable -> CallbackReturnType {
+		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+	>::CreateWithOptionalReturn([this,shader,pos,surfaceNormal,waterNormal,lastPos,lastRot,waterPlaneDist,matReflect](
+		bool *bSkipMainScene,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,prosper::Image *img
+	) mutable -> CallbackReturnType {
 		if(cvDrawWater->GetBool() == false)
 			return CallbackReturnType::NoReturnValue;
 		const auto offset = 0.005f; // Offset to avoid rendering artifacts
@@ -420,7 +422,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 					c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
 						c_game->SetRenderScene(sceneReflection);
-							c_game->RenderScene(drawCmd,rtReflection,renderFlags);
+							c_game->RenderScene(drawCmd,imgReflection,renderFlags,0u);
 						c_game->SetRenderScene(nullptr);
 					c_game->SetRenderClipPlane({});
 

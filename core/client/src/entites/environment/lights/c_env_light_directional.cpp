@@ -1,12 +1,12 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -48,15 +48,13 @@ void CLightDirectionalComponent::Initialize()
 		min += pos;
 		max += pos;
 
-		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
-		auto *pShadowMap = pLightComponent.valid() ? pLightComponent->GetShadowMap() : nullptr;
-		if(pShadowMap == nullptr || pShadowMap->GetType() != ShadowMap::Type::Cascaded)
+		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
+		if(hShadow.expired())
 			return util::EventReply::Unhandled;
-		auto &shadowMap = static_cast<ShadowMapCasc&>(*pShadowMap);
-		auto numLayers = shadowMap.GetLayerCount();
+		auto numLayers = hShadow->GetLayerCount();
 		for(auto i=decltype(numLayers){0};i<numLayers;++i)
 		{
-			auto &frustum = *shadowMap.GetFrustumSplit(i);
+			auto &frustum = *hShadow->GetFrustumSplit(i);
 			if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE)
 				shouldPassData.renderFlags |= 1<<i;
 		}
@@ -69,10 +67,8 @@ void CLightDirectionalComponent::Initialize()
 	});
 	BindEvent(CLightComponent::EVENT_SHOULD_PASS_ENTITY_MESH,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &shouldPassData = static_cast<CEShouldPassEntityMesh&>(evData.get());
-		auto &ent = static_cast<CBaseEntity&>(GetEntity());
-		auto pLightComponent = ent.GetComponent<CLightComponent>();
-		auto *pShadowMap = pLightComponent.valid() ? pLightComponent->GetShadowMap() : nullptr;
-		if(pShadowMap != nullptr && pShadowMap->GetType() == ShadowMap::Type::Cascaded)
+		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
+		if(hShadow.valid())
 		{
 			auto &entTgt = shouldPassData.entity;
 			auto pTrComponent = entTgt.GetTransformComponent();
@@ -88,11 +84,10 @@ void CLightDirectionalComponent::Initialize()
 			min += pos;
 			max += pos;
 
-			auto &shadowMap = static_cast<ShadowMapCasc&>(*pShadowMap);
-			auto numLayers = pShadowMap->GetLayerCount();
+			auto numLayers = hShadow->GetLayerCount();
 			for(auto i=decltype(numLayers){0};i<numLayers;++i)
 			{
-				auto &frustum = *shadowMap.GetFrustumSplit(i);
+				auto &frustum = *hShadow->GetFrustumSplit(i);
 				if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE)
 					shouldPassData.renderFlags |= 1<<i;
 			}
@@ -105,10 +100,7 @@ void CLightDirectionalComponent::Initialize()
 		return util::EventReply::Unhandled;
 	});
 	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		auto &shadowMap = static_cast<CEHandleShadowMap&>(evData.get()).shadowMap = std::make_unique<ShadowMapCasc>();
-		static_cast<ShadowMapCasc&>(*shadowMap).SetFrustumUpdateCallback([this]() {
-			//m_bFullUpdateRequired = true;
-		});
+		GetEntity().AddComponent<CShadowCSMComponent>();
 		return util::EventReply::Handled;
 	});
 
@@ -136,7 +128,7 @@ void CLightDirectionalComponent::Initialize()
 	if(pLightComponent.valid())
 	{
 		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
-		pLightComponent->SetStateFlag(CLightComponent::StateFlags::UseDualTextureSet,false);
+		// pLightComponent->SetStateFlag(CLightComponent::StateFlags::UseDualTextureSet,false);
 	}
 
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -157,6 +149,7 @@ void CLightDirectionalComponent::OnEntitySpawn()
 	if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
 		c_game->UpdateEnvironmentLightSource();
 }
+CShadowCSMComponent *CLightDirectionalComponent::GetShadowMap() {return m_shadowMap.get();}
 void CLightDirectionalComponent::ReceiveData(NetPacket &packet)
 {
 	auto r = packet->Read<short>();
@@ -277,12 +270,11 @@ const Vulkan::SwapCommandBuffer *CLightDirectionalComponent::GetShadowCommandBuf
 bool CLightDirectionalComponent::ShouldPass(uint32_t layer,const Vector3 &min,const Vector3 &max)
 {
 	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
-	auto *pShadowMap = pLightComponent.valid() ? pLightComponent->GetShadowMap() : nullptr;
-	if(pShadowMap == nullptr || pShadowMap->GetType() != ShadowMap::Type::Cascaded)
+	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
+	if(hShadow.expired())
 		return false;
-	auto &shadowMap = static_cast<ShadowMapCasc&>(*pShadowMap);
-	auto numLayers = pShadowMap->GetLayerCount();
-	auto &frustum = *shadowMap.GetFrustumSplit(layer);
+	auto numLayers = hShadow->GetLayerCount();
+	auto &frustum = *hShadow->GetFrustumSplit(layer);
 	return (Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE) ? true : false;
 }
 
@@ -296,9 +288,9 @@ void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 			auto &trComponent = static_cast<CTransformComponent&>(component);
 			SetViewMatrix(glm::lookAtRH(trComponent.GetPosition(),trComponent.GetPosition() +dir,uvec::get_perpendicular(dir)));
 
-			auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
-			if(pLightComponent.valid())
-				pLightComponent->SetStaticResolved(false);
+			//auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
+			//if(pLightComponent.valid())
+			//	pLightComponent->SetStaticResolved(false);
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CLightComponent))
@@ -313,14 +305,11 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
 	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
 		return;
-	auto *shadowMap = pLightComponent->GetShadowMap();
-	if(shadowMap->GetType() != ShadowMap::Type::Cascaded)
+	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
+	if(hShadow.expired())
 		return;
 	auto *cam = c_game->GetPrimaryCamera();
-	auto *csm = static_cast<ShadowMapCasc*>(shadowMap);
-	if(csm->IsValid() == false || cam == nullptr)
-		return;
-	csm->UpdateFrustum(frustumId,*cam,GetViewMatrix(),pTrComponent->GetForward());
+	hShadow->UpdateFrustum(frustumId,*cam,GetViewMatrix(),pTrComponent->GetForward());
 }
 
 void CLightDirectionalComponent::UpdateFrustum()
@@ -331,12 +320,9 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
 	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
 		return;
-	auto *shadowMap = pLightComponent->GetShadowMap();
-	if(shadowMap->GetType() != ShadowMap::Type::Cascaded)
+	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
+	if(hShadow.expired())
 		return;
 	auto *cam = c_game->GetPrimaryCamera();
-	auto *csm = static_cast<ShadowMapCasc*>(shadowMap);
-	if(csm->IsValid() == false || cam == nullptr)
-		return;
-	csm->UpdateFrustum(*cam,GetViewMatrix(),pTrComponent->GetForward());
+	hShadow->UpdateFrustum(*cam,GetViewMatrix(),pTrComponent->GetForward());
 }

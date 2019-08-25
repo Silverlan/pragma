@@ -38,7 +38,7 @@ std::vector<BaseEntity*> command::find_named_targets(NetworkState *state,const s
 	if(ents.empty())
 	{
 		auto index = ustring::to_int(targetName);
-		auto *ent = game->GetEntity(index);
+		auto *ent = game->GetEntityByLocalIndex(index);
 		if(ent != nullptr)
 			ents.push_back(ent);
 	}

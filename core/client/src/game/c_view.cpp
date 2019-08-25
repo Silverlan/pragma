@@ -202,20 +202,13 @@ void CGame::CalcView()
 		return;
 	Vector3 pos;
 	Quat orientation = uquat::identity();
-	if(m_camPosOverride != NULL)
-		pos = *m_camPosOverride;
-	else
-	{
-		pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-		Vector3 offset = pl->GetViewOffset();
-		Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
-		offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
-		pos += offset;
-	}
-	if(m_camRotOverride != NULL)
-		orientation = Quat(*m_camRotOverride);
-	else
-		orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	Vector3 offset = pl->GetViewOffset();
+	Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
+	offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
+	pos += offset;
+
+	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
 
 	auto rotModifier = uquat::identity();
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));

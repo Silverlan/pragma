@@ -6,7 +6,7 @@ using namespace pragma::rendering;
 BaseRenderer::BaseRenderer(Scene &scene)
 	: m_scene{scene}
 {}
-bool BaseRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags)
+bool BaseRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	BeginRendering(drawCmd);
 	return true;

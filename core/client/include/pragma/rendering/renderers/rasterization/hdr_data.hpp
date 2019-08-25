@@ -31,7 +31,7 @@ namespace pragma::rendering
 	public:
 		HDRData(RasterizationRenderer &rasterizer);
 		~HDRData();
-		void UpdateExposure(prosper::Texture &srcTexture);
+		void UpdateExposure();
 		bool Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 

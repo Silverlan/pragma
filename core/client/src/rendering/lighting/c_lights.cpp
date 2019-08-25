@@ -1,6 +1,5 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include <pragma/entities/entity_iterator.hpp>

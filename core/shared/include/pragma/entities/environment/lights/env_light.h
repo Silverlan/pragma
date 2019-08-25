@@ -15,11 +15,16 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		enum class DLLNETWORK SpawnFlag : uint32_t
+		enum class SpawnFlag : uint32_t
 		{
 			DontCastShadows = 512
 		};
-		enum class DLLNETWORK ShadowType : uint8_t
+		enum class LightFlags : uint32_t
+		{
+			None = 0u,
+			BakedLightSource = 1u
+		};
+		enum class ShadowType : uint8_t
 		{
 			None = 0,
 			StaticOnly = 1,
@@ -33,6 +38,7 @@ namespace pragma
 		virtual void SetFalloffExponent(float falloffExponent);
 	protected:
 		ShadowType m_shadowType = ShadowType::Full;
+		LightFlags m_lightFlags = LightFlags::None;
 		float m_falloffExponent = 1.f;
 		pragma::NetEventId m_netEvSetShadowType = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetFalloffExponent = pragma::INVALID_NET_EVENT;
@@ -41,5 +47,6 @@ namespace pragma
 		virtual void SetShadowType(ShadowType type);
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvLightComponent::LightFlags)
 
 #endif

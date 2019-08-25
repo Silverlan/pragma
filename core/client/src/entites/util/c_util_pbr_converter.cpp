@@ -32,7 +32,7 @@ namespace pragma
 {
 	struct PBRConverterMaterialMeshData
 	{
-		MaterialHandle hMaterial = {};
+		std::vector<MaterialHandle> hMaterials = {};
 		std::vector<Vector3> vertices = {};
 		std::vector<Vector2> uvs = {};
 		std::vector<uint16_t> indices = {};
@@ -418,13 +418,28 @@ void CPBRConverterComponent::GenerateGeometryBasedTextures(Model &mdl)
 	modelData->hModel = mdl.GetHandle();
 	for(auto &pair : materialToSubMesh)
 	{
-		auto *mat = mdl.GetMaterial(pair.first);
-		if(mat == nullptr)
+		std::vector<Material*> materials {};
+		auto matIdx = pair.first;
+		auto *mat = mdl.GetMaterial(matIdx);
+		if(mat)
+			materials.push_back(mat);
+		for(auto &texGroup : mdl.GetTextureGroups())
+		{
+			if(matIdx >= texGroup.textures.size())
+				continue;
+			auto skinMatIdx = texGroup.textures.at(matIdx);
+			auto *mat = mdl.GetMaterial(skinMatIdx);
+			if(mat)
+				materials.push_back(mat);
+		}
+		if(materials.empty())
 			continue;
 		auto matMesh = std::make_unique<pragma::PBRConverterMaterialMeshData>();
-		matMesh->hMaterial = mat->GetHandle();
 		matMesh->generateAoMapData = pair.second.generateAoMapData;
 		matMesh->generateNormalMapData = pair.second.generateNormalMapData;
+		matMesh->hMaterials.reserve(materials.size());
+		for(auto *mat : materials)
+			matMesh->hMaterials.push_back(mat->GetHandle());
 
 		// Build mesh from all sub-meshes using this material
 		auto &verts = matMesh->vertices;
@@ -488,6 +503,7 @@ void CPBRConverterComponent::GenerateGeometryBasedTextures(Model &mdl)
 				}
 			}
 			auto metalness = false;
+			std::string surfMatName = "undefined";
 			if(colMeshClosest)
 			{
 				auto surfMatIdx = colMeshClosest->GetSurfaceMaterial();
@@ -498,17 +514,23 @@ void CPBRConverterComponent::GenerateGeometryBasedTextures(Model &mdl)
 				if(surfMat)
 				{
 					auto name = surfMat->GetIdentifier();
+					surfMatName = name;
 					ustring::to_lower(name);
 					if(name.find("metal") != std::string::npos)
 						metalness = true;
 				}
 			}
-			Con::cout<<"Assigning "<<(metalness ? "metalness" : "non-metalness")<<" texture to material '"<<mat->GetName()<<"', based on surface material of model '"<<mdl.GetName()<<"'!"<<Con::endl;
-			if(metalness)
-				mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/metal"); // 100% metal
-			else
-				mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/nonmetal"); // 0% metal
-			mat->Save(mat->GetName(),"addons/converted/");
+			for(auto *mat : materials)
+			{
+				if(mat == nullptr)
+					continue;
+				Con::cout<<"Assigning "<<(metalness ? "metalness" : "non-metalness")<<" texture to material '"<<mat->GetName()<<"', based on surface material '"<<surfMatName<<"' of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+				if(metalness)
+					mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/metal"); // 100% metal
+				else
+					mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/nonmetal"); // 0% metal
+				mat->Save(mat->GetName(),"addons/converted/");
+			}
 		}
 		if(pair.second.generateAoMapData == false && pair.second.generateNormalMapData == false)
 			continue; // Nothing else to update!
@@ -536,13 +558,15 @@ void CPBRConverterComponent::PollEvents()
 		Con::cout<<"PBR texture generation for model '"<<item->hModel->GetName()<<"' has been completed! Saving texture files..."<<Con::endl;
 		for(auto &matMesh : item->materialMeshes)
 		{
-			if(matMesh->hMaterial.IsValid() == false)
+			// Mesh info may contain multiple materials. In this case, the first one is the base material and
+			// all others are alternative skins.
+			auto hMatMain = matMesh->hMaterials.empty() ? MaterialHandle{} : matMesh->hMaterials.front();
+			if(hMatMain.IsValid() == false)
 				continue;
-
 			auto &dev = c_engine->GetDevice();
 			prosper::util::ImageCreateInfo createInfo {};
 			createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-			createInfo.format = Anvil::Format::R32G32B32A32_SFLOAT; // ??
+			createInfo.format = Anvil::Format::R32G32B32A32_SFLOAT; // TODO: 16 bit should probably be enough for ambient occlusion values?
 			createInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 			createInfo.width = matMesh->imageResolution;
 			createInfo.height = matMesh->imageResolution;
@@ -553,34 +577,49 @@ void CPBRConverterComponent::PollEvents()
 			prosper::util::SamplerCreateInfo samplerCreateInfo {};
 
 			std::string materialsRootDir = "materials/";
-			auto matName = materialsRootDir +matMesh->hMaterial->GetName();
+			auto matName = materialsRootDir +hMatMain->GetName();
 			ufile::remove_extension_from_filename(matName);
 
 			ImageWriteInfo imgWriteInfo {};
-			imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;
 			imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R32G32B32A32_Float;
 			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC5; // TODO: Use BC1? Compare quality!
 			imgWriteInfo.flags |= ImageWriteInfo::Flags::GenerateMipmaps | ImageWriteInfo::Flags::SRGB;
-			auto &dataBlock = matMesh->hMaterial->GetDataBlock();
+			std::string aoName = "";
 			if(matMesh->aoMapPixelData.empty() == false)
 			{
 				auto imgAo = prosper::util::create_image(dev,createInfo,reinterpret_cast<uint8_t*>(matMesh->aoMapPixelData.data()));
-				auto aoName = matName +"_ao";
+				aoName = matName +"_ao";
 				Con::cout<<"Writing ambient occlusion map '"<<aoName<<"'..."<<Con::endl;
-				if(c_game->SaveImage(*imgAo,"addons/converted/" +aoName,imgWriteInfo) == true)
-					dataBlock->AddValue("texture","ao_map",aoName.substr(materialsRootDir.length()));
+				if(c_game->SaveImage(*imgAo,"addons/converted/" +aoName,imgWriteInfo) == false)
+					aoName = "";
 			}
 			imgWriteInfo.SetNormalMap();
 			// imgWriteInfo.flags |= ImageWriteInfo::Flags::ConvertToNormalMap;
+			std::string normalName = "";
 			if(matMesh->normalMapPixelData.empty() == false)
 			{
 				auto imgNormal = prosper::util::create_image(dev,createInfo,reinterpret_cast<uint8_t*>(matMesh->normalMapPixelData.data()));
-				auto normalName = matName +"_n";
+				normalName = matName +"_n";
 				Con::cout<<"Writing normal map '"<<normalName<<"'..."<<Con::endl;
-				if(c_game->SaveImage(*imgNormal,"addons/converted/" +normalName,imgWriteInfo) == true)
-					dataBlock->AddValue("texture","normal_map",normalName.substr(materialsRootDir.length()));
+				if(c_game->SaveImage(*imgNormal,"addons/converted/" +normalName,imgWriteInfo) == false)
+					normalName = "";
 			}
-			matMesh->hMaterial->Save(matMesh->hMaterial->GetName(),"addons/converted/");
+			for(auto &hMat : matMesh->hMaterials)
+			{
+				if(hMat.IsValid() == false)
+					continue;
+				auto &dataBlock = hMat->GetDataBlock();
+				if(aoName.empty() == false)
+					dataBlock->AddValue("texture","ao_map",aoName.substr(materialsRootDir.length()));
+				if(normalName.empty() == false)
+					dataBlock->AddValue("texture","normal_map",normalName.substr(materialsRootDir.length()));
+				if(hMat->Save(hMat->GetName(),"addons/converted/"))
+				{
+					auto nameNoExt = hMat->GetName();
+					ufile::remove_extension_from_filename(nameNoExt);
+					client->LoadMaterial(nameNoExt,true,true); // Reload material immediately
+				}
+			}
 		}
 	}
 	m_completeQueueMutex.unlock();
@@ -614,7 +653,6 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		{
 			auto roughnessName = matName +"_roughness";
 			ImageWriteInfo imgWriteInfo {};
-			imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;
 			imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
 			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC3;
 			imgWriteInfo.flags |= ImageWriteInfo::Flags::GenerateMipmaps | ImageWriteInfo::Flags::SRGB;
@@ -667,7 +705,8 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	//
 
 	// Overwrite old material with new PBR settings
-	matPbr->Save(matTraditional.GetName(),"addons/converted/");
+	if(matPbr->Save(matTraditional.GetName(),"addons/converted/"))
+		client->LoadMaterial(matName,true,true); // Reload material immediately
 	Con::cout<<"Conversion complete!"<<Con::endl;
 
 	/*

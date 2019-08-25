@@ -34,8 +34,6 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
@@ -199,25 +197,10 @@ static CVar cvDrawWorld = GetClientConVar("render_draw_world");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags,const Color *clearColor)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd,FRender renderFlags,const Color *clearColor)
+void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags,const Color *clearColor,uint32_t outLayerId)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
-	//auto &context = const_cast<Vulkan::Context&>(c_engine->GetRenderContext()); // prosper TODO
-	//context.SwapFrameIndex(); // prosper TODO
-
-	// We have to free all shadow map depth buffers because
-	// they might have to be re-assigned for this frame.
-	// This only has to be done once per frame, not per scene!
-	auto &shadowMaps = ShadowMap::GetAll();
-	auto numShadowMaps = shadowMaps.Size();
-	for(auto i=decltype(numShadowMaps){0};i<numShadowMaps;++i)
-	{
-		auto *shadowMap = shadowMaps[i];
-		if(shadowMap == nullptr)
-			continue;
-		shadowMap->FreeRenderTarget();
-	}
 
 	auto drawWorld = cvDrawWorld->GetInt();
 	if(drawWorld == 2)
@@ -266,7 +249,7 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 		//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 		auto frame = c_engine->GetLastFrameId();
 		if(frame > 0)
-			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure(*rt->GetTexture());
+			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
 		//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 	}
 
@@ -285,15 +268,15 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 
 
 		auto bSkipScene = CallCallbacksWithOptionalReturn<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-		>("DrawScene",ret,std::ref(drawCmd),std::ref(rt)) == CallbackReturnType::HasReturnValue;
+			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+		>("DrawScene",ret,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue;
 		m_bMainRenderPass = true;
 		if(bSkipScene == true && ret == true)
 			return;
 		m_bMainRenderPass = false;
 		if(CallLuaCallbacks<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-		>("DrawScene",&bSkipScene,std::ref(drawCmd),std::ref(rt)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
+			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+		>("DrawScene",&bSkipScene,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 		{
 			CallCallbacks("PostRenderScenes");
 			m_bMainRenderPass = true;
@@ -302,7 +285,7 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 		else
 			m_bMainRenderPass = true;
 	}
-	RenderScene(drawCmd,rt,renderFlags);
+	RenderScene(drawCmd,outImage,renderFlags,outLayerId);
 	CallCallbacks("PostRenderScenes");
 	CallLuaCallbacks("PostRenderScenes");
 }

@@ -348,6 +348,8 @@ void Game::OnRemove()
 		m_cbProfilingHandle.Remove();
 }
 
+void Game::OnMapLoaded() {}
+
 void Game::InitializeLuaScriptWatcher()
 {
 	m_scriptWatcher = std::make_unique<LuaDirectoryWatcherManager>(this);

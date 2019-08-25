@@ -584,6 +584,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	auto &nodes = bsp->GetNodes();
 	auto &leaves = bsp->GetLeaves();
 	auto &leafBrushes = bsp->GetLeafBrushes();
+	auto &cubemapSamples = bsp->GetCubemapSamples();
 
 	// Extract files
 	std::string mapName = ufile::get_file_from_filename(path);
@@ -649,6 +650,21 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		entData->keyvalues["model"] = {name};
 		auto idx = entities.size() -1;
 		staticPropLeafRanges[idx] = {lump.FirstLeaf,lump.LeafCount};
+	}
+
+	for(auto &cubemapSample : cubemapSamples)
+	{
+		entities.push_back(std::make_shared<vmf::DataFileBlock>());
+		auto &entData = entities.back();
+		entData->keyvalues["classname"] = {"env_cubemap"};
+		entData->keyvalues["origin"] = {std::to_string(cubemapSample.origin.at(0)) +" " +std::to_string(cubemapSample.origin.at(1)) +" " +std::to_string(cubemapSample.origin.at(2))};
+	}
+
+	for(auto &entData : entities)
+	{
+		auto className = entData->KeyValue("classname");
+		if(ustring::compare(className,"light",false) || ustring::compare(className,"light_spot",false) || ustring::compare(className,"light_environment",false))
+			entData->keyvalues["light_flags"] = {"1"};
 	}
 
 	auto itNodraw = std::find(texStringData.begin(),texStringData.end(),std::string("TOOLS/TOOLSNODRAW"));
@@ -730,11 +746,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		//"worldspawn",
 		"env_fog_controller", // TODO
 		"func_brush", // TODO
-		"info_node",
-
-		"light", // TODO
-		"light_spot", // TODO
-		"light_environment" // TODO
+		"info_node"
 	};
 	if(messageLogger != nullptr)
 		messageLogger("Transforming entity data...");
@@ -1409,7 +1421,11 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		auto offsetEntityLeaves = fOut->Tell();
 		fOut->Write<uint64_t>(0u); // Offset to entity leaves
 
-		fOut->Write<uint64_t>(0u); // Entity flags
+		auto flags = pragma::level::EntityFlags::None;
+		auto itCl = outEntity->keyvalues.find("wv_hint_clientsideonly");
+		if(itCl != outEntity->keyvalues.end() && util::to_boolean(itCl->second))
+			flags |= pragma::level::EntityFlags::ClientsideOnly;
+		fOut->Write<uint64_t>(umath::to_integral(flags));
 
 		fOut->WriteString(outEntity->className);
 

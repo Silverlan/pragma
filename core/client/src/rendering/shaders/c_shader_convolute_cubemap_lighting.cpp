@@ -31,7 +31,7 @@ void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(Anvil::GraphicsPipeli
 
 void ShaderConvoluteCubemapLighting::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderConvoluteCubemapLighting>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R32G32B32A32_SFLOAT}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderConvoluteCubemapLighting>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubemapLighting(prosper::Texture &cubemap,uint32_t resolution)

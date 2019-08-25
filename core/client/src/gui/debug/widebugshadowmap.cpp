@@ -1,8 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugshadowmap.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/rendering/c_cubemapside.h"
 #include <image/prosper_render_target.hpp>
@@ -29,6 +27,7 @@ void WIDebugShadowMap::SetContrastFactor(float contrastFactor)
 		el->SetContrastFactor(contrastFactor);
 	}
 }
+void WIDebugShadowMap::SetShadowMapType(pragma::CLightComponent::ShadowMapType type) {m_shadowMapType = type;}
 float WIDebugShadowMap::GetContrastFactor() const {return m_contrastFactor;}
 
 void WIDebugShadowMap::SetShadowMapSize(uint32_t w,uint32_t h) {m_shadowMapSize = {w,h};}
@@ -52,10 +51,16 @@ void WIDebugShadowMap::Update()
 	auto &lightSource = *m_lightHandle;
 	auto type = LightType::Invalid;
 	auto *pLight = lightSource.GetLight(type);
-	auto *shadow = lightSource.GetShadowMap();
-	if(pLight == nullptr || shadow == nullptr)
+	if(pLight == nullptr)
 		return;
-	auto &depthTexture = (type != LightType::Directional) ? shadow->GetDepthTexture() : static_cast<ShadowMapCasc*>(shadow)->GetDepthTexture(pragma::CLightComponent::RenderPass::Dynamic);
+	std::shared_ptr<prosper::Texture> depthTexture = nullptr;
+	auto hShadow = lightSource.GetShadowMap(m_shadowMapType);
+	auto hShadowCsm = lightSource.GetEntity().GetComponent<pragma::CShadowCSMComponent>();
+	if(hShadow.valid())
+		depthTexture = hShadow->GetDepthTexture();
+	else if(hShadowCsm.valid())
+		depthTexture = hShadowCsm->GetDepthTexture(m_shadowMapType);
+	
 	if(depthTexture == nullptr)
 		return;
 	auto &depthImage = depthTexture->GetImage();
@@ -121,21 +126,23 @@ void WIDebugShadowMap::Update()
 				dt->SetContrastFactor(GetContrastFactor());
 				m_shadowMapImages.push_back(dt->GetHandle());
 			}
-			auto csmMap = static_cast<ShadowMapCasc*>(shadow);
-			auto &staticDepthTex = csmMap->GetStaticPendingRenderTarget()->GetTexture();
-			if(staticDepthTex != nullptr)
+			if(hShadowCsm.valid())
 			{
-				auto &staticDepthImg = staticDepthTex->GetImage();
-				for(auto i=decltype(numLayers){0};i<numLayers;++i)
+				auto &staticDepthTex = hShadowCsm->GetStaticPendingRenderTarget()->GetTexture();
+				if(staticDepthTex != nullptr)
 				{
-					auto *dt = wgui.Create<WIDebugDepthTexture>(this);
-					dt->SetTexture(*staticDepthTex,barrierImageLayout,barrierImageLayout,i);
-					dt->SetSize(wLayer,hLayer);
-					dt->SetPos(i *wLayer,hLayer);
-					dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-					dt->SetName("dbg_shadowmap_static" +std::to_string(i));
-					dt->SetContrastFactor(GetContrastFactor());
-					m_shadowMapImages.push_back(dt->GetHandle());
+					auto &staticDepthImg = staticDepthTex->GetImage();
+					for(auto i=decltype(numLayers){0};i<numLayers;++i)
+					{
+						auto *dt = wgui.Create<WIDebugDepthTexture>(this);
+						dt->SetTexture(*staticDepthTex,barrierImageLayout,barrierImageLayout,i);
+						dt->SetSize(wLayer,hLayer);
+						dt->SetPos(i *wLayer,hLayer);
+						dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+						dt->SetName("dbg_shadowmap_static" +std::to_string(i));
+						dt->SetContrastFactor(GetContrastFactor());
+						m_shadowMapImages.push_back(dt->GetHandle());
+					}
 				}
 			}
 			hLayer *= 2.0;

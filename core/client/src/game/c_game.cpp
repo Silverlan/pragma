@@ -20,6 +20,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
+#include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/gui/wiluahandlewrapper.h"
@@ -56,7 +57,6 @@
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/audio/c_sound_efx.hpp"
 #include <pragma/lua/luafunction_call.h>
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/entities/c_entityfactories.h"
@@ -66,6 +66,8 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_physics_component.hpp"
+#include "pragma/entities/environment/c_env_reflection_probe.hpp"
+#include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/entities/baseplayer.hpp>
@@ -84,6 +86,7 @@
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
+#include <pragma/level/level_info.hpp>
 #include <sharedutils/util_library.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
@@ -135,7 +138,7 @@ CGame::CGame(NetworkState *state)
 	m_tServer(0),m_renderScene(NULL),
 	m_matOverride(NULL),m_colScale(1,1,1,1),
 	//m_shaderOverride(NULL), // prosper TODO
-	m_matLoad(),m_scene(nullptr),m_camPosOverride(nullptr),m_camRotOverride(nullptr),
+	m_matLoad(),m_scene(nullptr),
 	/*m_dummyVertexBuffer(nullptr),*/m_tLastClientUpdate(0.0), // prosper TODO
 	m_snapshotTracker{},m_userInputTracker{},
 	m_viewFov{util::FloatProperty::Create(pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV)}
@@ -161,7 +164,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
 	RegisterCallback<void>("PreRenderScenes");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("DrawScene");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,FRender>("RenderPostProcessing");
@@ -339,13 +342,6 @@ void CGame::OnRemove()
 			base->ClearLuaObject();
 	}*/ // prosper TODO
 
-	if(m_camPosOverride != NULL)
-		delete m_camPosOverride;
-	if(m_camRotOverride != NULL)
-		delete m_camRotOverride;
-
-	ShadowMap::ClearShadowMapDepthBuffers();
-
 	c_physEnv = nullptr;
 	m_renderScene = nullptr;
 	m_worldEnvironment = nullptr;
@@ -495,36 +491,6 @@ void CGame::OnEntityCreated(BaseEntity *ent)
 	Game::OnEntityCreated(ent);
 }
 
-void CGame::SetCameraPosition(Vector3 *pos,Quat *rot)
-{
-	if(m_camPosOverride != NULL)
-		delete m_camPosOverride;
-	if(pos == NULL)
-	{
-		m_camPosOverride = NULL;
-		//CPlayer *pl = GetLocalPlayer();
-		//if(pl != NULL)
-		//	pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
-	}
-	else
-	{
-		m_camPosOverride = new Vector3(*pos);
-		//CPlayer *pl = GetLocalPlayer();
-		//if(pl != NULL)
-		//	pl->SetObserverMode(OBSERVERMODE::ROAMING);
-	}
-	if(m_camRotOverride != NULL)
-		delete m_camRotOverride;
-	if(rot == NULL)
-		m_camRotOverride = NULL;
-	else
-		m_camRotOverride = new Quat(*rot);
-}
-void CGame::SetCameraOrientation(Quat *rot)
-{
-	m_camRotOverride = rot;
-}
-
 pragma::CViewModelComponent *CGame::GetViewModel()
 {
 	if(m_viewModel.expired())
@@ -580,7 +546,7 @@ void CGame::Initialize()
 	InitShaders();
 
 	m_globalRenderSettingsBufferData = std::make_unique<GlobalRenderSettingsBufferData>();
-	ShadowMap::InitializeDescriptorSet();
+	
 	pragma::CParticleSystemComponent::Precache("impact");
 	pragma::CParticleSystemComponent::Precache("muzzleflash");
 	pragma::CParticleSystemComponent::Precache("explosion");
@@ -960,9 +926,13 @@ void CGame::SetUp()
 
 	CViewBody *body = CreateEntity<CViewBody>();
 	m_viewBody = body->GetComponent<pragma::CViewBodyComponent>();
-}
 
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
+	auto *entPbrConverter = CreateEntity<CUtilPBRConverter>();
+	entPbrConverter->Spawn();
+
+	auto *entShadowManager = CreateEntity<CShadowManager>();
+	entShadowManager->Spawn();
+}
 
 bool WriteTGA(const char *name,int w,int h,unsigned char *pixels,int size);
 
@@ -1237,6 +1207,15 @@ void CGame::SetMaxHDRExposure(Float exposure)
 	static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetMaxHDRExposure(exposure);
 }
 
+void CGame::OnMapLoaded()
+{
+	Game::OnMapLoaded();
+
+	// Update reflection probes
+	// TODO: Make sure all map materials have been fully loaded before doing this!
+	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);
+}
+
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
@@ -1247,6 +1226,7 @@ bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 		CallLuaCallbacks<void>("OnMapLoaded");
 	}
 	m_flags |= GameFlags::MapLoaded;
+	OnMapLoaded();
 
 	std::string dsp = "fx_";
 	dsp += map;
@@ -1299,14 +1279,8 @@ void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 		auto bClientsideEntity = false;
 		if(version >= 4)
 		{
-			enum class EntityFlags : uint64_t
-			{
-				None = 0ull,
-				ClientsideOnly = 1ull
-			};
-			auto flags = f->Read<uint64_t>();
-			bClientsideEntity = (flags &umath::to_integral(EntityFlags::ClientsideOnly)) != 0;
-			if(bClientsideEntity == true)
+			auto flags = static_cast<pragma::level::EntityFlags>(f->Read<uint64_t>());
+			if(umath::is_flag_set(flags,pragma::level::EntityFlags::ClientsideOnly))
 			{
 				auto className = f->ReadString();
 				CreateMapEntity(version,className,f,bspInputData,materials,origin,offsetToEndOfEntity,ents,entities);

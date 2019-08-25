@@ -23,17 +23,7 @@
 #define INDEX_OFFSET_PHONEMES (INDEX_OFFSET_FLEXES +1)
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 
-struct VertexNormal
-{
-	VertexNormal(const Vector3 &p,const Vector3 &n);
-	Vector3 position;
-	Vector3 normal;
-};
-
-VertexNormal::VertexNormal(const Vector3 &p,const Vector3 &n)
-	: position(p),normal(n)
-{}
-
+#pragma optimize("",off)
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
 	auto cur = f->Tell();
@@ -42,7 +32,7 @@ static void write_offset(VFilePtrReal f,uint64_t offIndex)
 	f->Seek(cur);
 }
 
-static void to_vertex_list(ModelMesh &mesh,std::vector<VertexNormal> &vertices,std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> &vertexIds)
+static void to_vertex_list(ModelMesh &mesh,std::vector<Vertex> &vertices,std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> &vertexIds)
 {
 	vertices.reserve(mesh.GetVertexCount());
 	for(auto &subMesh : mesh.GetSubMeshes())
@@ -53,12 +43,10 @@ static void to_vertex_list(ModelMesh &mesh,std::vector<VertexNormal> &vertices,s
 		vertIds.reserve(verts.size());
 		for(auto &v : verts)
 		{
-			auto it = std::find_if(vertices.begin(),vertices.end(),[&v](const VertexNormal &vn) {
-				return (umath::abs(v.position.x -vn.position.x) < VERTEX_EPSILON && umath::abs(v.position.y -vn.position.y) < VERTEX_EPSILON && umath::abs(v.position.z -vn.position.z) < VERTEX_EPSILON) ? true : false;
-			});
+			auto it = std::find(vertices.begin(),vertices.end(),v);
 			if(it == vertices.end())
 			{
-				vertices.push_back({v.position,v.normal});
+				vertices.push_back({v.position,v.uv,v.normal,v.tangent,v.biTangent});
 				it = vertices.end() -1;
 			}
 			vertIds.push_back(static_cast<uint32_t>(it -vertices.begin()));
@@ -340,31 +328,6 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->Write<uint8_t>(static_cast<uint8_t>(meshes.size()));
 		for(auto &mesh : meshes)
 		{
-			std::vector<VertexNormal> vertexList;
-			std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> vertexIds;
-			to_vertex_list(*mesh,vertexList,vertexIds);
-			
-			f->Write<uint64_t>(vertexList.size());
-			for(auto &v : vertexList)
-			{
-				f->Write<Vector3>(v.position);
-				f->Write<Vector3>(v.normal);
-			}
-
-			std::unordered_map<uint32_t,std::vector<MeshBoneWeight>> boneWeights;
-			to_vertex_weight_list(*mesh,boneWeights,vertexIds);
-			f->Write<uint32_t>(static_cast<uint32_t>(boneWeights.size()));
-			for(auto &pair : boneWeights)
-			{
-				f->Write<uint32_t>(pair.first); // Bone Id
-				f->Write<uint64_t>(pair.second.size());
-				for(auto &w : pair.second)
-				{
-					f->Write<uint64_t>(w.vertId);
-					f->Write<float>(w.weight);
-				}
-			}
-
 			auto &subMeshes = mesh->GetSubMeshes();
 			f->Write<uint32_t>(static_cast<uint32_t>(subMeshes.size()));
 			for(auto &subMesh : subMeshes)
@@ -372,18 +335,25 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				f->Write<uint16_t>(static_cast<uint16_t>(subMesh->GetTexture()));
 
 				auto &verts = subMesh->GetVertices();
-				auto &meshVertIds = vertexIds.find(subMesh.get())->second;
-				f->Write<uint64_t>(verts.size());
-				for(auto i=decltype(verts.size()){0};i<verts.size();++i)
-					f->Write<uint64_t>(meshVertIds[i]);
+				auto numVerts = verts.size();
+				f->Write<uint64_t>(numVerts);
 				for(auto &v : verts)
+				{
+					f->Write<Vector3>(v.position);
+					f->Write<Vector3>(v.normal);
 					f->Write<Vector2>(v.uv);
+				}
+
+				auto &boneWeights = subMesh->GetVertexWeights();
+				f->Write<uint64_t>(boneWeights.size());
+				static_assert(sizeof(decltype(boneWeights.front())) == sizeof(Vector4) *2);
+				f->Write(boneWeights.data(),boneWeights.size() *sizeof(decltype(boneWeights.front())));
 
 				auto &triangles = subMesh->GetTriangles();
 				assert((triangles.size() %3) == 0);
-				f->Write<uint32_t>(static_cast<uint32_t>(triangles.size() /3));
-				for(auto id : triangles)
-					f->Write<uint64_t>(id);
+				f->Write<uint32_t>(triangles.size() /3);
+				static_assert(std::is_same_v<std::remove_reference_t<decltype(triangles.front())>,uint16_t>);
+				f->Write(triangles.data(),triangles.size() *sizeof(decltype(triangles.front())));
 			}
 		}
 	}
@@ -894,4 +864,4 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->WriteString(inc);
 	return true;
 }
-
+#pragma optimize("",on)

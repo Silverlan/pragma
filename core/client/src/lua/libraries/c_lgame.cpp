@@ -898,7 +898,10 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
-	auto &rt = Lua::Check<Lua::Vulkan::RenderTarget>(l,2);
+	auto &img = Lua::Check<Lua::Vulkan::Image>(l,2);
+	uint32_t layerId = 0;
+	if(Lua::IsSet(l,3))
+		layerId = Lua::CheckInt(l,3);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
 	if(cmdBuffer == nullptr || cmdBuffer->GetAnvilCommandBuffer().get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
 		return 0;
@@ -917,8 +920,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	}
 
 	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer);
-	auto pRenderTarget = rt.shared_from_this();
-	c_game->RenderScene(primCmdBuffer,pRenderTarget,renderFlags);
+	c_game->RenderScene(primCmdBuffer,img,renderFlags,layerId);
 	c_game->SetRenderScene(nullptr);
 	return 0;
 }
@@ -1042,6 +1044,9 @@ int Lua::game::Client::load_map(lua_State *l)
 }
 int Lua::game::Client::build_reflection_probes(lua_State *l)
 {
-	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game);
+	auto rebuild = false;
+	if(Lua::IsSet(l,1))
+		rebuild = Lua::CheckBool(l,1);
+	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*c_game,rebuild);
 	return 0;
 }

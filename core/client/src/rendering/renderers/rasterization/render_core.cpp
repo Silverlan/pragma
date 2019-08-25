@@ -765,7 +765,16 @@ void RasterizationRenderer::RenderScenePostProcessing(std::shared_ptr<prosper::P
 	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomTexture->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 	//
-
+	
+	if(umath::is_flag_set(renderFlags,FRender::HDR))
+	{
+		// Don't bother resolving HDR; Just apply the barrier
+		prosper::util::record_image_barrier(
+			*(*drawCmd),**hdrInfo.hdrRenderTarget->GetTexture()->GetImage(),
+			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+		);
+		return;
+	}
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 	auto &descSetGroupHdrResolve = hdrInfo.descSetGroupHdrResolve;
 	RenderSceneResolveHDR(drawCmd,*(*descSetGroupHdrResolve)->get_descriptor_set(0u));
@@ -850,6 +859,7 @@ void RasterizationRenderer::RenderScenePrepass(std::shared_ptr<prosper::PrimaryC
 			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
 			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 		);
+
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv->IsUnlit() == false)
 		{
@@ -868,6 +878,25 @@ void RasterizationRenderer::RenderScenePrepass(std::shared_ptr<prosper::PrimaryC
 					if(l == nullptr || scene.HasLightSource(*l) == false)
 						continue;
 					culledLightSources.push_back(l);
+
+					auto &renderBuffer = l->GetRenderBuffer();
+					if(renderBuffer)
+					{
+						prosper::util::record_buffer_barrier(
+							**drawCmd,*renderBuffer,
+							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+						);
+					}
+					auto &shadowBuffer = l->GetShadowBuffer();
+					if(shadowBuffer)
+					{
+						prosper::util::record_buffer_barrier(
+							**drawCmd,*shadowBuffer,
+							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
+							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+						);
+					}
 				}
 			}
 		}
@@ -900,22 +929,24 @@ void RasterizationRenderer::RenderScenePrepass(std::shared_ptr<prosper::PrimaryC
 		);
 
 		if(worldEnv->IsUnlit() == false)
+		{
+			// Note: We want light sources to re-use their previous render target texture if they have one.
+			// To achieve this, we simply update their render target by calling 'RequestRenderTarget' again.
+			// Shadowmaps that don't have a render target assigned, will get one in 'RenderSystem::RenderShadows'.
+			for(auto *l : culledLightSources)
+			{
+				auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Static);
+				if(hSm.valid() && hSm->HasRenderTarget())
+					hSm->RequestRenderTarget();
+
+				hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
+				if(hSm.valid() && hSm->HasRenderTarget())
+					hSm->RequestRenderTarget();
+			}
 			RenderSystem::RenderShadows(drawCmd,culledLightSources);
+		}
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 		//drawCmd->SetViewport(w,h); // Reset the viewport
-
-		for(auto *l : culledLightSources)
-		{
-			if(l == nullptr)
-				continue;
-			auto *shadowMap = l->GetShadowMap();
-			if(shadowMap == nullptr)
-				continue;
-			/*auto *depthTex = shadowMap->GetDepthTexture();
-			if(depthTex == nullptr || (*depthTex == nullptr))
-			continue;
-			(*depthTex)->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);*/ // prosper TODO
-		}
 
 		//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
 		//imgDepth->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
@@ -927,9 +958,9 @@ void RasterizationRenderer::RenderScenePrepass(std::shared_ptr<prosper::PrimaryC
 static auto cvDrawSky = GetClientConVar("render_draw_sky");
 static auto cvDrawWater = GetClientConVar("render_draw_water");
 static auto cvDrawView = GetClientConVar("render_draw_view");
-bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags)
+bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
-	if(BaseRenderer::RenderScene(drawCmd,rt,renderFlags) == false)
+	if(BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
 		return false;
 	auto &hdrInfo = GetHDRInfo();
 	//auto &rt = scene->GetRenderTarget();

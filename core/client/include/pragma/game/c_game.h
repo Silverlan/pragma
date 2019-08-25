@@ -325,8 +325,8 @@ public:
 	pragma::CViewBodyComponent *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
-	void RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All,const Color *clearColor=nullptr);
-	void RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All);
+	void RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags=FRender::All,const Color *clearColor=nullptr,uint32_t outLayerId=0u);
+	void RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags=FRender::All,uint32_t outLayerId=0u);
 
 	// GUI
 	void PreGUIDraw();
@@ -376,15 +376,12 @@ public:
 	void SetRenderScene(const std::shared_ptr<Scene> &scene);
 	std::shared_ptr<Scene> &GetRenderScene();
 	pragma::CCameraComponent *GetRenderCamera() const;
-	// If set to NULL, it will use the default camera position
-	void SetCameraPosition(Vector3 *pos,Quat *rot);
-	// If set to NULL, it will use the default camera orientation
-	void SetCameraOrientation(Quat *rot);
 
 	Anvil::DescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 protected:
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
+	virtual void OnMapLoaded() override;
 
 	template<class T>
 		void GetPlayers(std::vector<T*> *ents);
@@ -456,7 +453,7 @@ private:
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::PrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
-	void RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImg);
+	void RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImage,uint32_t layerId=0u);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
 
@@ -468,8 +465,6 @@ private:
 
 	void CalcView();
 	void CalcLocalPlayerOrientation();
-	Vector3 *m_camPosOverride = nullptr;
-	Quat *m_camRotOverride = nullptr;
 	Quat m_curFrameRotationModifier = uquat::identity();
 	void UpdateShaderTimeData();
 

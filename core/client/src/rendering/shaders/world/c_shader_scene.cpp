@@ -1,6 +1,5 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -156,7 +155,7 @@ ShaderSceneLit::ShaderSceneLit(prosper::Context &context,const std::string &iden
 bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources)
 {
 	return RecordBindDescriptorSets({
-		&descSetLightSources,&descSetShadowMaps,ShadowMap::GetDescriptorSet()
+		&descSetLightSources,&descSetShadowMaps,pragma::CShadowComponent::GetDescriptorSet()
 	},GetLightDescriptorSetIndex());
 }
 bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)

@@ -9,6 +9,7 @@
 
 namespace pragma
 {
+	class CShadowCSMComponent;
 	class DLLCLIENT CLightDirectionalComponent final
 		: public BaseEnvLightDirectionalComponent,
 		public CBaseNetComponent,
@@ -25,20 +26,20 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 
+		CShadowCSMComponent *GetShadowMap();
+
 		void UpdateFrustum(uint32_t frustumId);
 		void UpdateFrustum();
 		//void SetDirection(const Vector3 &dir);
 
 		void ReloadShadowCommandBuffers();
-		//const std::vector<Vulkan::SwapCommandBuffer> &GetShadowCommandBuffers() const; // prosper TODO
-		//const Vulkan::SwapCommandBuffer *GetShadowCommandBuffer(uint32_t layer) const; // prosper TODO
 		bool ShouldPass(uint32_t layer,const Vector3 &min,const Vector3 &max);
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void UpdateAmbientColor();
 
+		util::WeakHandle<CShadowCSMComponent> m_shadowMap = {};
 		bool m_bShadowBufferUpdateScheduled;
-		//std::vector<Vulkan::SwapCommandBuffer> m_cmdShadowBuffers; // prosper TODO
 		void RenderStaticWorldGeometry();
 	};
 };

@@ -5,6 +5,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
+#pragma optimize("",off)
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 {
 	auto &skeleton = mdl->GetSkeleton();
@@ -155,106 +156,153 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 	{
 		std::string name = ReadString();
 		auto group = mdl->AddMeshGroup(name);
-		unsigned char numSubMeshes = Read<unsigned char>();
-		for(unsigned char j=0;j<numSubMeshes;j++)
+		unsigned char numMeshes = Read<unsigned char>();
+		for(unsigned char j=0;j<numMeshes;j++)
 		{
-			unsigned long long numVerts = Read<unsigned long long>();
-			std::vector<FWMDVertex> vertices;
-			std::vector<Vector3> uvws;
-			for(unsigned long long j=0;j<numVerts;j++)
-			{
-				FWMDVertex v;
-				v.position.x = Read<float>();
-				v.position.y = Read<float>();
-				v.position.z = Read<float>();
-				v.normal.x = Read<float>();
-				v.normal.y = Read<float>();
-				v.normal.z = Read<float>();
-
-				vertices.push_back(v);
-			}
-			unsigned int numBones = Read<unsigned int>();
-			for(unsigned int j=0;j<numBones;j++)
-			{
-				unsigned int boneID = Read<unsigned int>();
-				unsigned long long numVerts = Read<unsigned long long>();
-				for(unsigned long long k=0;k<numVerts;k++)
-				{
-					unsigned long long vertID = Read<unsigned long long>();
-					float weight = Read<float>();
-					if(vertID < vertices.size())
-						vertices[vertID].weights.insert(std::unordered_map<unsigned long long,float>::value_type(boneID,weight));
-				}
-			}
-			unsigned int numMaps = Read<unsigned int>();
 			auto mesh = meshFactory();
-			for(unsigned int j=0;j<numMaps;j++)
+			if(version <= 0x0017)
 			{
-				auto subMesh = subMeshFactory();
-				auto &subVertices = subMesh->GetVertices();
-				auto &triangles = subMesh->GetTriangles();
-				auto &vertexWeights = subMesh->GetVertexWeights();
+				unsigned long long numVerts = Read<unsigned long long>();
 
-				auto texID = Read<unsigned short>();
-				subMesh->SetTexture(texID);
-
-				auto numMeshVerts = Read<unsigned long long>();
-				std::vector<unsigned long long> meshVertIDs(numMeshVerts);
-				for(unsigned long long k=0;k<numMeshVerts;k++)
+				std::vector<FWMDVertex> wmdVerts;
+				wmdVerts.reserve(numVerts);
+				for(unsigned long long j=0;j<numVerts;j++)
 				{
-					auto meshVertID = Read<unsigned long long>();
-					meshVertIDs[k] = meshVertID;
+					FWMDVertex v;
+					v.position.x = Read<float>();
+					v.position.y = Read<float>();
+					v.position.z = Read<float>();
+					v.normal.x = Read<float>();
+					v.normal.y = Read<float>();
+					v.normal.z = Read<float>();
 
-					auto &vert = vertices[meshVertID];
-					subVertices.push_back(Vertex{
-						vert.position,
-						vert.normal
-					});
-					if(!vert.weights.empty())
+					wmdVerts.push_back(v);
+				}
+				unsigned int numBones = Read<unsigned int>();
+				for(unsigned int j=0;j<numBones;j++)
+				{
+					unsigned int boneID = Read<unsigned int>();
+					unsigned long long numVerts = Read<unsigned long long>();
+					for(unsigned long long k=0;k<numVerts;k++)
 					{
-						vertexWeights.push_back(VertexWeight{
-							Vector4i{-1,-1,-1,-1},
-							Vector4{0.f,0.f,0.f,0.f}
-						});
-						auto &weight = vertexWeights.back();
-						int numWeights = 0;
-						for(auto m=vert.weights.begin();m!=vert.weights.end();m++)
+						unsigned long long vertID = Read<unsigned long long>();
+						float weight = Read<float>();
+						if(vertID < wmdVerts.size())
+							wmdVerts[vertID].weights.insert(std::unordered_map<unsigned long long,float>::value_type(boneID,weight));
+					}
+				}
+
+				unsigned int numMaps = Read<unsigned int>();
+				for(unsigned int j=0;j<numMaps;j++)
+				{
+					auto subMesh = subMeshFactory();
+					auto &subVertices = subMesh->GetVertices();
+					auto &triangles = subMesh->GetTriangles();
+					auto &vertexWeights = subMesh->GetVertexWeights();
+
+					auto texID = Read<unsigned short>();
+					subMesh->SetTexture(texID);
+
+					auto numMeshVerts = Read<unsigned long long>();
+					subVertices.reserve(numMeshVerts);
+
+					std::vector<unsigned long long> meshVertIDs(numMeshVerts);
+					for(unsigned long long k=0;k<numMeshVerts;k++)
+					{
+						auto meshVertID = Read<unsigned long long>();
+						meshVertIDs[k] = meshVertID;
+
+						auto &vert = wmdVerts[meshVertID];
+						subVertices.push_back(Vertex{
+							vert.position,
+							vert.normal
+							});
+						if(!vert.weights.empty())
 						{
-							weight.weights[numWeights] = m->second;
-							weight.boneIds[numWeights] = CInt32(m->first);
-							numWeights++;
-							if(numWeights == 4)
-								break;
+							vertexWeights.push_back(VertexWeight{
+								Vector4i{-1,-1,-1,-1},
+								Vector4{0.f,0.f,0.f,0.f}
+								});
+							auto &weight = vertexWeights.back();
+							int numWeights = 0;
+							for(auto m=vert.weights.begin();m!=vert.weights.end();m++)
+							{
+								weight.weights[numWeights] = m->second;
+								weight.boneIds[numWeights] = CInt32(m->first);
+								numWeights++;
+								if(numWeights == 4)
+									break;
+							}
 						}
 					}
-				}
-				std::vector<Vector2> uvs(numMeshVerts);
-				Read(uvs.data(),uvs.size() *sizeof(Vector2));
-				if(version <= 0x0005) // Version 5 and lower used OpenGL texture coordinates (lower left origin), they'll have to be flipped first
-				{
-					for(auto &uv : uvs)
-						uv.y = 1.f -uv.y;
-				}
-				for(auto i=decltype(subVertices.size()){0};i<subVertices.size();++i)
-				{
-					auto &v = subVertices[i];
-					v.uv = uvs[i];
-				}
-				// float w = Read<float>(); // We don't need 3D-Mapping for the time being
 
-				auto numFaces = Read<unsigned int>();
-				for(unsigned int k=0;k<numFaces;k++)
-				{
-					for(int l=0;l<3;l++)
+					std::vector<Vector2> uvs(numMeshVerts);
+					Read(uvs.data(),uvs.size() *sizeof(Vector2));
+					if(version <= 0x0005) // Version 5 and lower used OpenGL texture coordinates (lower left origin), they'll have to be flipped first
 					{
-						auto localID = Read<unsigned long long>();
-						//FWMDVertex &vert = vertices[meshVertIDs[localID]];
-						triangles.push_back(static_cast<uint16_t>(localID));
+						for(auto &uv : uvs)
+							uv.y = 1.f -uv.y;
 					}
+					for(auto i=decltype(subVertices.size()){0};i<subVertices.size();++i)
+					{
+						auto &v = subVertices[i];
+						v.uv = uvs[i];
+					}
+					// float w = Read<float>(); // We don't need 3D-Mapping for the time being
+
+					auto numFaces = Read<unsigned int>();
+					for(unsigned int k=0;k<numFaces;k++)
+					{
+						for(int l=0;l<3;l++)
+						{
+							auto localID = Read<unsigned long long>();
+							//FWMDVertex &vert = vertices[meshVertIDs[localID]];
+							triangles.push_back(static_cast<uint16_t>(localID));
+						}
+					}
+					if(subVertices.size() > 0)
+						mesh->AddSubMesh(subMesh);
 				}
-				if(subVertices.size() > 0)
-					mesh->AddSubMesh(subMesh);
 			}
+			else
+			{
+				auto numSubMeshes = Read<uint32_t>();
+				for(auto i=decltype(numSubMeshes){0u};i<numSubMeshes;++i)
+				{
+					auto subMesh = subMeshFactory();
+
+					auto texId = Read<uint16_t>();
+					subMesh->SetTexture(texId);
+
+					auto &verts = subMesh->GetVertices();
+					auto &tris = subMesh->GetTriangles();
+					auto &vertWeights = subMesh->GetVertexWeights();
+
+					auto numVerts = Read<uint64_t>();
+					verts.reserve(numVerts);
+					for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+					{
+						verts.push_back({});
+						auto &v = verts.back();
+						v.position = Read<Vector3>();
+						v.normal = Read<Vector3>();
+						v.uv = Read<Vector2>();
+					}
+
+					auto numVertWeights = Read<uint64_t>();
+					vertWeights.resize(numVertWeights);
+					static_assert(sizeof(decltype(vertWeights.front())) == sizeof(Vector4) *2);
+					Read(vertWeights.data(),vertWeights.size() *sizeof(decltype(vertWeights.front())));
+
+					auto numTris = Read<uint32_t>();
+					tris.resize(numTris *3);
+					static_assert(std::is_same_v<std::remove_reference_t<decltype(tris.front())>,uint16_t>);
+					Read(tris.data(),tris.size() *sizeof(decltype(tris.front())));
+
+					mesh->AddSubMesh(subMesh);
+				}
+			}
+
 			mesh->Update(ModelUpdateFlags::All);
 			group->AddMesh(mesh);
 		}
@@ -699,4 +747,4 @@ void FWMD::LoadBodygroups(Model *mdl)
 		}
 	}
 }
-
+#pragma optimize("",on)

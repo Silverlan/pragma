@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
+#include "pragma/math/c_util_math.hpp"
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -73,7 +74,7 @@ std::shared_ptr<prosper::Buffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNumV
 std::shared_ptr<prosper::Image> ShaderCubemap::CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
 {
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.format = Anvil::Format::R32G32B32A32_SFLOAT;
+	createInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
 	createInfo.width = width;
 	createInfo.height = height;
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
@@ -85,22 +86,30 @@ std::shared_ptr<prosper::Image> ShaderCubemap::CreateCubeMap(uint32_t width,uint
 	auto &dev = c_engine->GetDevice();
 	return prosper::util::create_image(dev,createInfo);
 }
+void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags,prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
+{
+	inOutSamplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	inOutSamplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	inOutSamplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	inOutSamplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
+	inOutSamplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
+	if(umath::is_flag_set(flags,prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
+		inOutSamplerCreateInfo.mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
+}
+void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo)
+{
+	inOutTextureCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
+}
 std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
 {
 	auto &dev = c_engine->GetDevice();
 	auto img = CreateCubeMap(width,height,flags);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-	if(umath::is_flag_set(flags,prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
-		samplerCreateInfo.mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
+	InitializeSamplerCreateInfo(flags,samplerCreateInfo);
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
-	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
+	InitializeTextureCreateInfo(texCreateInfo);
 	auto tex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
@@ -110,19 +119,10 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 
 const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const
 {
-	static auto projectionMatrix = glm::perspectiveRH(glm::radians(90.0f),aspectRatio,0.1f,10.0f);
-	return projectionMatrix;
+	return pragma::math::get_cubemap_projection_matrix(aspectRatio);
 }
 const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const
 {
-	static const std::array<Mat4,6> viewMatrices = {
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAt(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAt(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
-		glm::lookAt(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
-		glm::lookAt(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-		glm::lookAt(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
-	};
-	return viewMatrices.at(layerId);
+	return pragma::math::get_cubemap_view_matrices().at(layerId);
 }
 #pragma optimize("",on)

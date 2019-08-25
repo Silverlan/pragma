@@ -413,10 +413,10 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 	return cvar;
 }
 
-void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &img)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 	if(m_game != nullptr)
-		GetGameState()->RenderScenes(drawCmd,rt);
+		GetGameState()->RenderScenes(drawCmd,img);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
 	{
 		auto img = rt->GetTexture().lock()->GetImage().lock();
@@ -444,7 +444,7 @@ void ClientState::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 		>("PreRender",std::ref(drawCmd),std::ref(rt));
 		m_game->CallLuaCallbacks("PreRender");
 	}
-	Draw(drawCmd,rt);
+	Draw(drawCmd,*rt->GetTexture()->GetImage());
 	if(m_game != nullptr)
 	{
 		m_game->CallCallbacks<

@@ -62,6 +62,8 @@ REGISTER_CONCOMMAND_CL(debug_font,Console::commands::debug_font,ConVarFlags::Non
 REGISTER_CONCOMMAND_CL(debug_texture_mipmaps,Console::commands::debug_texture_mipmaps,ConVarFlags::None,"Displays the mipmaps of the given texture. Usage: debug_texture_mipmaps <texturePath>");
 REGISTER_CONCOMMAND_CL(debug_hitboxes,Console::commands::debug_hitboxes,ConVarFlags::None,"Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
 
+REGISTER_CONCOMMAND_CL(debug_pbr_ibl,Console::commands::debug_pbr_ibl,ConVarFlags::None,"Displays the irradiance, prefilter and brdf map for the closest cubemap.");
+
 #ifdef _DEBUG
 REGISTER_CONCOMMAND_CL(cl_dump_sounds,CMD_cl_dump_sounds,ConVarFlags::None,"Prints information about all active sounds to the console.");
 REGISTER_CONCOMMAND_CL(cl_dump_netmessages,CMD_cl_dump_netmessages,ConVarFlags::None,"Prints all registered netmessages to the console.");
@@ -70,5 +72,7 @@ REGISTER_CONCOMMAND_CL(cl_dump_netmessages,CMD_cl_dump_netmessages,ConVarFlags::
 REGISTER_CONCOMMAND_CL(cl_gpu_timer_queries_dump,Console::commands::cl_gpu_timer_queries_dump,ConVarFlags::None,"Prints all timer query results to the console.");
 
 REGISTER_CONCOMMAND_CL(cl_steam_audio_reload_scene,Console::commands::cl_steam_audio_reload_scene,ConVarFlags::None,"Reloads the steam audio scene cache.");
+
+REGISTER_CONCOMMAND_CL(map_rebuild_reflection_probes,Console::commands::map_rebuild_reflection_probes,ConVarFlags::None,"Rebuilds all reflection probes in the map. Use 'debug_pbr_ibl' to check the probes after they have been built.");
 
 #endif

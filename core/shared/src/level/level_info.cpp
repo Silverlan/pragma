@@ -306,6 +306,11 @@ void pragma::level::transform_class(
 			}
 		}
 	}
+	else if(ustring::compare(className,"env_cubemap"))
+	{
+		className = "env_reflection_probe";
+		outKeyValues.insert(std::make_pair("wv_hint_clientsideonly","1"));
+	}
 	/*else if(ustring::compare(className,"ambient_generic"))
 	{
 		className = "env_sound";

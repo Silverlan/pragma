@@ -4,7 +4,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 
 using namespace Shader;
 

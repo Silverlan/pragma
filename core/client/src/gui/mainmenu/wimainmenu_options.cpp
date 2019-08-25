@@ -15,7 +15,6 @@
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/localization.h"
 #include <sharedutils/util_string.h>
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/c_settings.hpp"
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/physics/environment.hpp>
@@ -490,7 +489,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 				bDynamicShadows = true;
 				shadowUpdateFrequency = 5;
 				pssmShadowUpdateFrequencyOffset = 2;
-				pssmSplitCount = umath::max(ShadowMapCasc::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
+				pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
 				mdlQuality = 2;
 				textureFiltering = 2;
 				shadowResolution = "1024";
@@ -512,7 +511,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 				bDynamicShadows = true;
 				shadowUpdateFrequency = 1;
 				pssmShadowUpdateFrequencyOffset = 2;
-				pssmSplitCount = umath::max(ShadowMapCasc::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
+				pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
 				mdlQuality = static_cast<WIChoiceList*>(el->m_hMdlQuality.get())->GetChoiceCount() -1;
 				textureFiltering = static_cast<WIChoiceList*>(el->m_hTextureFiltering.get())->GetChoiceCount() -1;
 				shadowResolution = "2048";
@@ -534,7 +533,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 				bDynamicShadows = true;
 				shadowUpdateFrequency = 0;
 				pssmShadowUpdateFrequencyOffset = 0;
-				pssmSplitCount = ShadowMapCasc::MAX_CASCADE_COUNT;
+				pssmSplitCount = pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;
 				mdlQuality = static_cast<WIChoiceList*>(el->m_hMdlQuality.get())->GetChoiceCount() -1;
 				textureFiltering = static_cast<WIChoiceList*>(el->m_hTextureFiltering.get())->GetChoiceCount() -1;
 				shadowResolution = "2048";
@@ -910,7 +909,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// PSSM Split Count
 	m_hPssmSplitCount = pList->AddSlider(Locale::GetText("shadow_pssm_split_count"),[](WISlider *pSlider) {
-		pSlider->SetRange(1.f,static_cast<float>(ShadowMapCasc::MAX_CASCADE_COUNT));
+		pSlider->SetRange(1.f,static_cast<float>(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT));
 	},"cl_render_shadow_pssm_split_count")->GetHandle();
 	//
 	// TODO Restore defaults

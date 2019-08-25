@@ -171,7 +171,10 @@ void CAnimatedComponent::UpdateBoneBuffer()
 	{
 		// Update bone buffer
 		auto buffer = wpBoneBuffer.lock();
-		c_engine->ScheduleRecordUpdateBuffer(buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
+		prosper::Context::BufferUpdateInfo updateInfo {};
+		updateInfo.postUpdateBarrierStageMask = Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT;
+		updateInfo.postUpdateBarrierAccessMask = Anvil::AccessFlagBits::SHADER_READ_BIT;
+		c_engine->ScheduleRecordUpdateBuffer(buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data(),updateInfo);
 	}
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const {return const_cast<CAnimatedComponent*>(this)->GetBoneMatrices();}

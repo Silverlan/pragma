@@ -3,7 +3,6 @@
 #include "pragma/game/c_game.h"
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/scene/scene.h"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>

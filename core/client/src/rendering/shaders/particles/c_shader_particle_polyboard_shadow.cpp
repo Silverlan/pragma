@@ -7,7 +7,6 @@
 #include "cmaterialmanager.h"
 #include "pragma/model/c_side.h"
 #include "pragma/rendering/uniformbinding.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/c_light_ranged.h"
 #include <textureinfo.h>
 #include <cmaterial.h>

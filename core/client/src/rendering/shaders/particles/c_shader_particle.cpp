@@ -35,33 +35,3 @@ void ShaderParticleRotational::GetParticleSystemOrientationInfo(
 		nearZ,farZ,material,cam
 	);
 }
-
- // prosper TODO
-#if 0
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
-#include "c_shader_particle.h"
-#include "cmaterialmanager.h"
-#include "pragma/model/c_side.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
-#include "pragma/rendering/uniformbinding.h"
-#include <textureinfo.h>
-#include <cmaterial.h>
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(Particle,particle);
-LINK_SHADER_TO_CLASS(ParticleUnlit,particleunlit);
-
-extern DLLCLIENT CGame *c_game;
-
-Particle::Particle()
-	: ParticleBase("particle","particles/vs_particle","particles/fs_particle")
-{
-	m_bEnableLighting = true;
-}
-
-ParticleUnlit::ParticleUnlit()
-	: ParticleBase("particle","particles/vs_particle_unlit","particles/fs_particle_unlit")
-{}
-#endif

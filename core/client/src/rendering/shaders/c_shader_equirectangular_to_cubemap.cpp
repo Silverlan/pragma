@@ -32,7 +32,7 @@ void ShaderEquirectangularToCubemap::InitializeGfxPipeline(Anvil::GraphicsPipeli
 
 void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R32G32B32A32_SFLOAT}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName,uint32_t resolution)
@@ -124,9 +124,10 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 		if(success == false)
 			break;
 	}
-	prosper::util::record_post_render_pass_image_barrier(**setupCmd,**rt->GetTexture()->GetImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	auto &img = **rt->GetTexture()->GetImage();
+	prosper::util::record_post_render_pass_image_barrier(**setupCmd,img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	prosper::util::record_generate_mipmaps(
-		**setupCmd,**rt->GetTexture()->GetImage(),
+		**setupCmd,img,
 		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 		Anvil::AccessFlagBits::SHADER_READ_BIT,
 		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT

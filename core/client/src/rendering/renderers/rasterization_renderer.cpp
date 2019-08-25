@@ -72,11 +72,12 @@ void RasterizationRenderer::UpdateLightDescriptorSets(const std::vector<pragma::
 		auto *pLight = light.GetLight(type);
 		if(type != LightType::Directional)
 			continue;
-		auto *shadowMap = light.GetShadowMap();
-		auto texture = (shadowMap != nullptr) ? shadowMap->GetDepthTexture() : nullptr;
+		// TODO: Dynamic!
+		auto hShadowMap = light.GetShadowMap(pragma::CLightComponent::ShadowMapType::Static);
+		auto texture = hShadowMap.valid() ? hShadowMap->GetDepthTexture() : nullptr;
 		if(texture != nullptr)
 		{
-			auto numLayers = shadowMap->GetLayerCount();
+			auto numLayers = hShadowMap->GetLayerCount();
 			for(auto i=decltype(numLayers){0};i<numLayers;++i)
 			{
 				prosper::util::set_descriptor_set_binding_array_texture(
@@ -357,6 +358,7 @@ void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> 
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetSceneTexture() const {return m_hdrInfo.hdrRenderTarget->GetTexture();}
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetPresentationTexture() const {return m_hdrInfo.postHdrRenderTarget->GetTexture();}
+const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetHDRPresentationTexture() const {return m_hdrInfo.hdrRenderTarget->GetTexture();}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 void RasterizationRenderer::OnEntityAddedToScene(CBaseEntity &ent)
 {

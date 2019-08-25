@@ -2,6 +2,7 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
@@ -40,6 +41,10 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 		prosper::Shader::DescriptorSetInfo::Binding { // Emission Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Parallax Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		}
 	}
 };
@@ -69,21 +74,57 @@ bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 	return ShaderTextured3DBase::BindMaterialParameters(mat);
 }
 prosper::Shader::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-bool ShaderPBR::BindMaterial(CMaterial &mat)
+void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
+bool ShaderPBR::BeginDraw(
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,
+	RecordFlags recordFlags
+)
 {
-	if(ShaderTextured3DBase::BindMaterial(mat) == false)
+	m_extMatFlags = MaterialFlags::None;
+	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags);
+}
+bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
+{
+	if(ShaderTextured3DBase::BindSceneCamera(renderer,bView) == false)
 		return false;
-	// TODO: Grab closest probe when scene is bound
-	EntityIterator entIt {*c_game};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
-	auto it = entIt.begin();
-	if(it == entIt.end())
+	auto &scene = renderer.GetScene();
+	auto hCam = scene.GetActiveCamera();
+	if(hCam.expired())
 		return false;
-	auto &reflectionProbeC = *it->GetComponent<pragma::CReflectionProbeComponent>();
-	auto *ds = reflectionProbeC.GetIBLDescriptorSet();
-	if(ds == nullptr)
-		return false;
-	return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
+	auto pos = hCam->GetEntity().GetPosition();
+	if(m_bNonIBLMode == false)
+	{
+		// Find closest reflection probe to camera position
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
+		auto dClosest = std::numeric_limits<float>::max();
+		BaseEntity *entClosest = nullptr;
+		for(auto *ent : entIt)
+		{
+			auto posEnt = ent->GetPosition();
+			auto d = uvec::distance_sqr(pos,posEnt);
+			if(d >= dClosest)
+				continue;
+			dClosest = d;
+			entClosest = ent;
+		}
+		if(entClosest)
+		{
+			auto &reflectionProbeC = *entClosest->GetComponent<pragma::CReflectionProbeComponent>();
+			auto *ds = reflectionProbeC.GetIBLDescriptorSet();
+			if(ds)
+				return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
+		}
+	}
+
+	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
+	m_extMatFlags |= MaterialFlags::NoIBL;
+	return true;
+}
+void ShaderPBR::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const
+{
+	ShaderTextured3DBase::ApplyMaterialFlags(mat,outFlags);
+	outFlags |= m_extMatFlags;
 }
 void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -133,23 +174,26 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	prosper::util::set_descriptor_set_binding_texture(*descSet,*albedoTexture->texture,umath::to_integral(MaterialBinding::AlbedoMap));
 
 	// TODO: Don't use normal map if not available
-	if(bind_texture(mat,*descSet,"normal_map",umath::to_integral(MaterialBinding::NormalMap),"materials/black") == false)
+	if(bind_texture(mat,*descSet,"normal_map",umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
 
 	if(
 		bind_texture(mat,*descSet,"ambient_occlusion_map",umath::to_integral(MaterialBinding::AmbientOcclusionMap)) == false &&
-		bind_texture(mat,*descSet,"ao_map",umath::to_integral(MaterialBinding::AmbientOcclusionMap),"materials/white") == false
+		bind_texture(mat,*descSet,"ao_map",umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false
 	)
 		return false;
 
-	if(bind_texture(mat,*descSet,"metalness_map",umath::to_integral(MaterialBinding::MetallicMap),"materials/black") == false)
+	if(bind_texture(mat,*descSet,"metalness_map",umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,"roughness_map",umath::to_integral(MaterialBinding::RoughnessMap),"materials/white") == false)
+	if(bind_texture(mat,*descSet,"roughness_map",umath::to_integral(MaterialBinding::RoughnessMap),"white") == false)
 		return false;
 
 	if(bind_texture(mat,*descSet,"glowmap",umath::to_integral(MaterialBinding::EmissionMap)) == false)
 		bind_texture(mat,*descSet,"emission_map",umath::to_integral(MaterialBinding::EmissionMap));
+
+	if(bind_texture(mat,*descSet,"parallax_map",umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+		return false;
 	return descSetGroup;
 }
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)

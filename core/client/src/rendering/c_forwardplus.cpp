@@ -19,6 +19,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 {
 	if(c_game == NULL)
@@ -150,14 +151,14 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 	// Light source data barrier
 	prosper::util::record_buffer_barrier(
 		*cmdBuffer,bufLightSources,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 	);
 	// Shadow data barrier
 	prosper::util::record_buffer_barrier(
 		*cmdBuffer,bufShadowData,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 	);
 	
 	// Visible light tile index buffer
@@ -187,7 +188,6 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 
 	shaderLightCulling.EndCompute();
 
-	// TODO: Synchronize this somehow
 	const auto szRead = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
 	m_bufVisLightIndex->Read(0ull,szRead,m_shadowLightBits.data());
 }
@@ -200,3 +200,4 @@ Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCo
 Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_descSetGroupDepthBuffer)->get_descriptor_set(0u);}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
+#pragma optimize("",on)

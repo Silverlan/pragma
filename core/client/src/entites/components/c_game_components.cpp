@@ -86,6 +86,8 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CParentComponent>("parent");
 	componentManager.RegisterComponentType<pragma::CReflectionProbeComponent>("reflection_probe");
 	componentManager.RegisterComponentType<pragma::CPBRConverterComponent>("pbr_converter");
+	componentManager.RegisterComponentType<pragma::CShadowComponent>("shadow_map");
+	componentManager.RegisterComponentType<pragma::CShadowManagerComponent>("shadow_manager");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");

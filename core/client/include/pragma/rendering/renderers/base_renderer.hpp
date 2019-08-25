@@ -15,10 +15,11 @@ namespace pragma::rendering
 		template<class TRenderer>
 			static std::shared_ptr<TRenderer> Create(Scene &scene);
 		virtual ~BaseRenderer()=default;
-		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All);
+		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All);
 		virtual bool ReloadRenderTarget()=0;
 		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const=0;
 		virtual const std::shared_ptr<prosper::Texture> &GetPresentationTexture() const;
+		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const=0;
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings);
 		virtual void UpdateCameraData(pragma::CameraData &cameraData);
 		virtual void OnEntityAddedToScene(CBaseEntity &ent);

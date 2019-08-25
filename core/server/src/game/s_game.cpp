@@ -264,6 +264,7 @@ bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 	CallCallbacks<void>("OnMapLoaded");
 	CallLuaCallbacks<void>("OnMapLoaded");
 	m_flags |= GameFlags::MapLoaded;
+	OnMapLoaded();
 	return true;
 }
 

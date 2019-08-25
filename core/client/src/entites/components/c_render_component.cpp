@@ -374,7 +374,13 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 			auto &m = GetTransformationMatrix();
 			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,0ull,instanceData);
+			prosper::Context::BufferUpdateInfo updateInfo {};
+			updateInfo.postUpdateBarrierStageMask = Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT;
+			updateInfo.postUpdateBarrierAccessMask = Anvil::AccessFlagBits::SHADER_READ_BIT;
+			c_engine->ScheduleRecordUpdateBuffer(
+				renderBuffer,0ull,instanceData,
+				updateInfo
+			);
 		}
 
 		m_lastRender = frameId;
@@ -382,32 +388,6 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 
 	CEOnUpdateRenderData evData {updateRenderBuffer};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
-	//Camera *cam = c_game->GetRenderTarget();
-	//Mat4 *matTrans = GetTransformationMatrix();
-	//unsigned int bufferViewProj;
-	//if(GLUniformBlockManager::GetBuffer(UNIFORM_BINDING_VIEWPROJECTION,&bufferViewProj) == true)
-	//{
-	//	OpenGL::BindBuffer(bufferViewProj,GL_UNIFORM_BUFFER);
-	//	OpenGL::BindBufferSubData(0,sizeof(Mat4),&(*matTrans)[0][0],GL_UNIFORM_BUFFER);
-	//	Mat4 mvp = cam->GetProjectionMatrix() *cam->GetViewMatrix() *(*matTrans);
-	//	OpenGL::BindBufferSubData(sizeof(Mat4) *3,sizeof(Mat4),&mvp[0][0],GL_UNIFORM_BUFFER);
-	//	OpenGL::BindBuffer(0,GL_UNIFORM_BUFFER);
-	//}
-	///*CALL_ENTITY_HOOK(this,"Render",0,1,,{
-	//	bool b = lua_toboolean(lstate,-1);
-	//	if(b == true)
-	//		return;
-	//});*/
-	//UpdateLightData();
-	//RenderBrushMeshes();
-
-	///*static ShaderBase *shaderStatic = game->GetShader("Model");
-	//static ShaderBase *shaderAnimated = game->GetShader("ModelAnimated");
-	//if(IsAnimated())
-	//	shaderAnimated->Use();
-	//else
-	//	shaderStatic->Use();*/
-	//RenderModel(); // Vulkan TODO
 }
 
 void CRenderComponent::Render(RenderMode) {}

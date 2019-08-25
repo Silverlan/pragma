@@ -52,7 +52,6 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 				pos = pTrComponent->GetPosition();
 				rot = pTrComponent->GetOrientation();
 			}
-			//c_game->SetCameraPosition(&GetPosition(),&GetOrientation());
 		}));
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
@@ -62,7 +61,6 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 		if(m_cbCameraUpdate.IsValid())
 			m_cbCameraUpdate.Remove();
-		c_game->SetCameraPosition(NULL,NULL);
 	}
 	return util::EventReply::Unhandled;
 }

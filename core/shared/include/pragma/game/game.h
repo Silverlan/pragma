@@ -416,6 +416,7 @@ protected:
 	virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname);
 	void SetupEntity(BaseEntity *ent);
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager);
+	virtual void OnMapLoaded();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Game::GameFlags)
 

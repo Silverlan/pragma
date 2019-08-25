@@ -1,8 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/shaders/debug/c_shader_debugdepthbuffer.h"
 #include <wgui/types/wirect.h>
 #include "pragma/gui/mainmenu/wimainmenu.h"
@@ -88,7 +86,7 @@ static void OnGameEnd(EntityHandle hEntity)
 	numShadowmapTargets = 0;
 }
 
-static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragma::CLightComponent **light)
+static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragma::CLightComponent **light,pragma::CLightComponent::ShadowMapType smType)
 {
 	if(argv.empty())
 		return false;
@@ -108,7 +106,8 @@ static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragm
 		Con::cwar<<"Entity '"<<ent->GetClass()<<"'("<<argv.front()<<") has no light attached!"<<Con::endl;
 		return false;
 	}
-	if((*light)->GetShadowMap() == nullptr)
+	auto hShadowmap = (*light)->GetShadowMap(smType);
+	if(hShadowmap.expired())
 	{
 		Con::cwar<<"Invalid shadowmap for this entity!"<<Con::endl;
 		return false;
@@ -125,8 +124,12 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 	if(pEl != nullptr)
 		pEl->Remove();
 
+	auto smType = pragma::CLightComponent::ShadowMapType::Static;
+	if(argv.size() > 1 && util::to_boolean(argv.at(1)))
+		smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+
 	pragma::CLightComponent *light;
-	if(get_shadow_map(nw,argv,&light) == false)
+	if(get_shadow_map(nw,argv,&light,smType) == false)
 		return;
 	if(c_game == nullptr || argv.empty() || pRoot == nullptr)
 		return;
@@ -134,10 +137,9 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 	if(pElSm == nullptr)
 		return;
 	auto size = 256u;
-	if(argv.size() > 1)
-		size = util::to_int(argv.at(1));
 	pElSm->SetLightSource(*light);
 	pElSm->SetShadowMapSize(size,size);
+	pElSm->SetShadowMapType(smType);
 	pElSm->SetName(name);
 	pElSm->Update();
 }

@@ -609,7 +609,7 @@ int Lua::Vulkan::create_framebuffer(lua_State *l)
 	auto arg = 1;
 	auto width = Lua::CheckInt(l,arg++);
 	auto height = Lua::CheckInt(l,arg++);
-	std::vector<Anvil::ImageView*> attachments;
+	std::vector<prosper::ImageView*> attachments;
 	auto tAttachments = arg++;
 	Lua::CheckTable(l,tAttachments);
 	auto numAttachments = Lua::GetObjectLength(l,tAttachments);
@@ -619,7 +619,7 @@ int Lua::Vulkan::create_framebuffer(lua_State *l)
 		Lua::PushInt(l,i +1); /* 1 */
 		Lua::GetTableValue(l,tAttachments);
 
-		attachments.push_back(&Lua::Check<ImageView>(l,-1).GetAnvilImageView());
+		attachments.push_back(&Lua::Check<ImageView>(l,-1));
 
 		Lua::Pop(l,1); /* 0 */
 	}

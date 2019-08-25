@@ -6,7 +6,6 @@
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/rendering/c_cubemapside.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcube.h"
 #include <pragma/math/intersection.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -27,6 +26,7 @@ static const std::array<Vector3,6> directions = {
 	Vector3(0.f,0.f,-1.f)
 };
 
+#pragma optimize("",off)
 void CLightPointComponent::Initialize()
 {
 	BaseEnvLightPointComponent::Initialize();
@@ -40,21 +40,20 @@ void CLightPointComponent::Initialize()
 		}
 		const auto ang = 0.7853982f; // 45 Degree
 
+		auto &ent = shouldPassData.entity;
+		auto pRenderComponent = ent.GetRenderComponent();
+		auto pTrComponent = ent.GetTransformComponent();
+		auto pTrComponentThis = GetEntity().GetTransformComponent();
+		if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+		{
+			shouldPassData.shouldPass = false;
+			return util::EventReply::Handled;
+		}
+		//auto &start = pTrComponentThis->GetPosition();
+		auto sphere = pRenderComponent->GetRenderSphereBounds();
 		for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 		{
-			auto &dir = directions[i];
-			auto &ent = shouldPassData.entity;
-			auto pRenderComponent = ent.GetRenderComponent();
-			auto pTrComponent = ent.GetTransformComponent();
-			auto pTrComponentThis = GetEntity().GetTransformComponent();
-			if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
-			{
-				shouldPassData.shouldPass = false;
-				return util::EventReply::Handled;
-			}
-			auto &start = pTrComponentThis->GetPosition();
-			auto sphere = pRenderComponent->GetRenderSphereBounds();
-
+			//auto &dir = directions[i];
 			if(Intersection::SphereInPlaneMesh(pTrComponent->GetPosition() +sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != INTERSECT_OUTSIDE)
 				shouldPassData.renderFlags |= 1<<i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
@@ -79,7 +78,11 @@ void CLightPointComponent::Initialize()
 			UpdateTransformationMatrix(i);
 	});
 	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		static_cast<CEHandleShadowMap&>(evData.get()).shadowMap = std::make_unique<ShadowMapCube>();
+		auto shadowC = GetEntity().AddComponent<CShadowComponent>(true);
+		if(shadowC.expired())
+			return util::EventReply::Unhandled;
+		static_cast<CEHandleShadowMap&>(evData.get()).resultShadow = shadowC.get();
+		shadowC->SetType(CShadowComponent::Type::Cube);
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
@@ -115,8 +118,6 @@ void CLightPointComponent::UpdateFrustumPlanes()
 	auto radius = pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f;
 	for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 	{
-		auto &trComponent = GetEntity().GetTransformComponent();
-		auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
 		m_frustumPlanes.at(i).clear();
 		pragma::CCameraComponent::GetFrustumPlanes(
 			m_frustumPlanes.at(i),
@@ -124,7 +125,7 @@ void CLightPointComponent::UpdateFrustumPlanes()
 			radius /* farZ */,
 			90.f /* fov */,
 			1.f /* aspectRatio */,
-			pos,
+			Vector3{},
 			directions.at(i),
 			upDirs.at(i)
 		);
@@ -204,3 +205,4 @@ void CLightPointComponent::UpdateTransformationMatrix(unsigned int j) // TODO Th
 	std::array<Mat4,3> matrices = {GetBiasTransformationMatrix(),GetViewMatrix(4),GetProjectionMatrix()};
 	c_engine->ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
 }
+#pragma optimize("",on)

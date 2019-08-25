@@ -4,7 +4,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/entities/entity_iterator.hpp>
@@ -18,68 +17,6 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
-CLightComponent::MeshInfo::MeshInfo(CModelSubMesh *_mesh,uint32_t _renderFlags)
-	: mesh(_mesh),renderFlags(_renderFlags)
-{}
-CLightComponent::EntityInfo::EntityInfo(CLightComponent *light,BaseEntity *ent,uint32_t _renderFlags)
-	: hEntity(ent->GetHandle()),tLastMoved(0.0),renderFlags(_renderFlags)
-{
-	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.valid())
-		tLastMoved = pTrComponent->GetLastMoveTime();
-	auto &mdlComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent()->GetModelComponent();
-	if(mdlComponent.valid() && mdlComponent->HasModelMaterialsLoaded() == false)
-	{
-		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
-		if(pGenericComponent.valid())
-		{
-			hCbMaterialsLoaded = pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED,[light,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				light->UpdateEntity(static_cast<CBaseEntity*>(&pGenericComponent->GetEntity()));
-			});
-		}
-	}
-}
-CLightComponent::EntityInfo::~EntityInfo()
-{
-	if(hCbMaterialsLoaded.IsValid())
-		hCbMaterialsLoaded.Remove();
-}
-
-CLightComponent::ParticleInfo::ParticleInfo(pragma::CParticleSystemComponent &pt)
-	: hParticle(pt.GetHandle<pragma::CParticleSystemComponent>())
-{}
-
-std::vector<std::shared_ptr<CLightComponent::EntityInfo>>::iterator CLightComponent::ShadowInfoSet::FindEntity(CBaseEntity *ent)
-{
-	return std::find_if(meshInfo.begin(),meshInfo.end(),[ent](std::shared_ptr<EntityInfo> &info) {
-		return (info->hEntity.IsValid() && info->hEntity.get() == ent) ? true : false;
-	});
-}
-
-//////////////////////////////////
-/*
-CLightComponent::BufferUpdateInfo::BufferUpdateInfo(const Vulkan::SwapBufferObject *swapBuffer,const std::function<void(const Vulkan::Context&,const Vulkan::Buffer&)> &f)
-	: m_fUpdate(f),m_swapBuffer(const_cast<Vulkan::SwapBufferObject*>(swapBuffer))
-{
-	auto &context = c_engine->GetRenderContext();
-	auto numBuffers = context.GetSwapBufferRequirementCount();
-	m_swapchainUpdateFlags = (1<<numBuffers) -1;
-}
-
-bool CLightComponent::BufferUpdateInfo::ExecSwapchainUpdate()
-{
-	auto &context = c_engine->GetRenderContext();
-	auto swapchainId = context.GetFrameSwapIndex();
-	auto &buf = *m_swapBuffer->GetBuffer(swapchainId);
-	auto swapFlag = 1<<swapchainId;
-	m_swapchainUpdateFlags &= ~swapFlag;
-	m_fUpdate(context,buf);
-	return IsComplete();
-}
-bool CLightComponent::BufferUpdateInfo::IsComplete() const {return (m_swapchainUpdateFlags == 0) ? true : false;}
-*/ // prosper TODO
-//////////////////////////////////
 
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 const prosper::UniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -118,11 +55,10 @@ void CLightComponent::ClearBuffers()
 }
 
 CLightComponent::CLightComponent(BaseEntity &ent)
-	: CBaseLightComponent(ent),m_stateFlags{StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::UseDualTextureSet | StateFlags::RenderScheduled | StateFlags::AddToGameScene}
+	: CBaseLightComponent(ent),m_stateFlags{StateFlags::StaticUpdateRequired | StateFlags::FullUpdateRequired | StateFlags::AddToGameScene}
 {}
 CLightComponent::~CLightComponent()
 {
-	m_onModelChanged.Remove();
 	--s_lightCount;
 	DestroyRenderBuffer();
 	DestroyShadowBuffer();
@@ -163,60 +99,6 @@ void CLightComponent::DestroyShadowBuffer()
 	ShadowDataBufferManager::GetInstance().Free(m_shadowBuffer);
 	m_shadowBuffer = nullptr;
 }
-/*
-const Vulkan::Buffer &CLightComponent::GetRenderBuffer() const
-{
-	if(m_renderBuffer == nullptr)
-	{
-		static Vulkan::Buffer n(nullptr);
-		return n;
-	}
-	auto &context = c_engine->GetRenderContext();
-	return *m_renderBuffer->GetBuffer(context.GetFrameSwapIndex());
-}
-const Vulkan::SwapBuffer &CLightComponent::GetRenderSwapBuffer() const {return m_renderBuffer;}
-
-const Vulkan::Buffer &CLightComponent::GetShadowBuffer() const
-{
-	if(m_shadowBuffer == nullptr)
-	{
-		static Vulkan::Buffer n(nullptr);
-		return n;
-	}
-	auto &context = c_engine->GetRenderContext();
-	return *m_shadowBuffer->GetBuffer(context.GetFrameSwapIndex());
-}
-const Vulkan::SwapBuffer &CLightComponent::GetShadowSwapBuffer() const {return m_shadowBuffer;}
-
-void CLightComponent::ScheduleBufferUpdate(DataSlot offsetId,const std::function<void(const Vulkan::Context&,const Vulkan::Buffer&)> &f)
-{
-	auto &buf = (offsetId >= DataSlot::ShadowStart) ? m_shadowBuffer : m_renderBuffer;
-	if(buf == nullptr)
-		return;
-	auto offset = umath::to_integral(offsetId);
-	if(offset >= m_bufferUpdateInfo.size())
-		m_bufferUpdateInfo.resize(offset +1);
-	auto &updateInfo = m_bufferUpdateInfo.at(offset) = std::unique_ptr<BufferUpdateInfo>(new BufferUpdateInfo(buf,f));
-	if(updateInfo->ExecSwapchainUpdate() == true) // Update buffer for current swapchain index immediately
-		m_bufferUpdateInfo.erase(m_bufferUpdateInfo.begin() +offset);
-}
-*/ // prosper TODO
-void CLightComponent::ExecSwapchainUpdate()
-{
-	/*for(auto it=m_bufferUpdateInfo.begin();it!=m_bufferUpdateInfo.end();)
-	{
-		auto &updateInfo = *it;
-		if(updateInfo != nullptr)
-		{
-			if(m_renderBuffer == nullptr || updateInfo->ExecSwapchainUpdate() == true)
-			{
-				it = m_bufferUpdateInfo.erase(it);
-				continue;
-			}
-		}
-		++it;
-	}*/ // prosper TODO
-}
 
 bool CLightComponent::ShouldRender() {return true;}
 
@@ -233,155 +115,6 @@ bool CLightComponent::ShouldPass(const Model &mdl,const CModelSubMesh &mesh)
 	CEShouldPassMesh evData {mdl,mesh};
 	InvokeEventCallbacks(EVENT_SHOULD_PASS_MESH,evData);
 	return evData.shouldPass;
-}
-
-static auto cvShadowQuality = GetClientConVar("cl_render_shadow_quality");
-void CLightComponent::UpdateMeshes(CBaseEntity *ent,std::vector<MeshInfo> &meshes)
-{
-	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.expired())
-		return;
-	auto &mdlComponent = pRenderComponent->GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(mdl == nullptr)
-		return;
-	if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())
-		pRenderComponent->UpdateRenderData(c_engine->GetDrawCommandBuffer());
-	meshes.clear();
-
-	uint32_t lod = 0;
-	auto quality = cvShadowQuality->GetInt();
-	switch(quality)
-	{
-		case 1:
-			lod = 10'000;
-			break;
-		case 2:
-			lod = (ent->IsWorld() == true) ? (WORLD_BASE_LOD +WORLD_LOD_OFFSET *1) : 2;
-			break;
-		case 3:
-			lod = (ent->IsWorld() == true) ? WORLD_BASE_LOD : 1;
-			break;
-		default:
-			break;
-	};
-	auto meshIds = mdl->GetBaseMeshes();
-	mdl->TranslateLODMeshes(lod,meshIds);
-
-	std::vector<std::shared_ptr<ModelMesh>> lodMeshes;
-	mdl->GetMeshes(meshIds,lodMeshes);
-	meshes.reserve(lodMeshes.size());
-	for(auto it=lodMeshes.begin();it!=lodMeshes.end();++it)
-	{
-		auto *mesh = static_cast<CModelMesh*>(it->get());
-		uint32_t meshRenderFlags = 0;
-		if(ShouldPass(*ent,*mesh,meshRenderFlags) == true)
-		{
-			auto &subMeshes = mesh->GetSubMeshes();
-			meshes.reserve(meshes.size() +subMeshes.size());
-			for(auto it=subMeshes.begin();it!=subMeshes.end();++it)
-			{
-				auto *subMesh = it->get();
-				if(ShouldPass(*mdl,*static_cast<CModelSubMesh*>(subMesh)) == false)
-					continue;
-				meshes.push_back(MeshInfo{static_cast<CModelSubMesh*>(it->get()),meshRenderFlags});
-			}
-		}
-	}
-}
-
-void CLightComponent::UpdateCulledMeshes()
-{
-	UpdateAllParticleSystems(); // TODO: Don't update all particles every frame
-	if((m_stateFlags &StateFlags::FullUpdateRequired) != StateFlags::None)
-		UpdateAllEntities();
-	else
-	{
-		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
-		{
-			auto &pos = pTrComponent->GetPosition();
-			for(auto i=decltype(m_shadowInfoSets.size()){0};i<m_shadowInfoSets.size();++i)
-			{
-				auto &info = m_shadowInfoSets[i];
-				auto rp = static_cast<CLightComponent::RenderPass>(i);
-				auto sz = info.meshInfo.size();
-				for(auto i=0;i<sz;)
-				{
-					auto &entInfo = info.meshInfo[i];
-					if(!entInfo->hEntity.IsValid())
-					{
-						info.meshInfo.erase(info.meshInfo.begin() +i);
-						sz--;
-					}
-					else
-					{
-						auto *ent = static_cast<CBaseEntity*>(entInfo->hEntity.get());
-						auto pRenderComponent = ent->GetRenderComponent();
-						if(pRenderComponent.expired() || pRenderComponent->ShouldDrawShadow(pos) == false)
-						{
-							info.meshInfo.erase(info.meshInfo.begin() +i);
-							sz--;
-						}
-						else
-						{
-							auto pTrComponent = ent->GetTransformComponent();
-							auto t = pTrComponent.valid() ? pTrComponent->GetLastMoveTime() : 0.0;
-							if(t > entInfo->tLastMoved)
-							{
-								umath::set_flag(m_stateFlags,StateFlags::RenderScheduled,true);
-								UpdateMeshes(ent,entInfo->meshes);
-								entInfo->tLastMoved = t;
-								if(rp == CLightComponent::RenderPass::Static)
-									m_stateFlags |= StateFlags::StaticUpdateRequired;
-							}
-							else
-							{
-								auto pAnimComponent = ent->GetAnimatedComponent();
-								if(pAnimComponent.valid() || ent->HasStateFlag(BaseEntity::StateFlags::RotationChanged))
-									umath::set_flag(m_stateFlags,StateFlags::RenderScheduled,true);
-							}
-							i++;
-						}
-					}
-				}
-			}
-
-			EntityIterator entIt {*c_game};
-			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
-			for(auto *ent : entIt)
-			{
-				//if(ent != nullptr)// && ent->HasChangeFlag(FENTITY_CHANGED_POSITION))
-				auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-				if(pRenderComponent->ShouldDrawShadow(pos) == false)
-					continue;
-				auto bUpdate = ent->IsDynamic();
-				if(bUpdate == false)
-				{
-					auto &set = m_shadowInfoSets[umath::to_integral(CLightComponent::RenderPass::Static)];
-					auto it = set.FindEntity(static_cast<CBaseEntity*>(ent));
-					auto pTrComponent = ent->GetTransformComponent();
-					auto t = pTrComponent.valid() ? pTrComponent->GetLastMoveTime() : 0.0;
-					bUpdate = (it == set.meshInfo.end() || t > (*it)->tLastMoved) ? true : false;
-					//if(bUpdate == true)
-					//{
-					//	Con::cwar<<"Static Position Change: "<<ent->GetClass()<<Con::endl;
-					//	if(it != set.meshInfo.end())
-					//		(*it)->tLastMoved = t;
-					//}
-				}
-				if(bUpdate == true)
-					UpdateEntity(static_cast<CBaseEntity*>(ent));
-			}
-		}
-	}
-}
-
-void CLightComponent::UpdateParticleSystem(pragma::CParticleSystemComponent &pt)
-{
-	if(pt.IsActive() == false || pt.GetCastShadows() == false)
-		return;
-	m_particleInfo.push_back(std::make_unique<ParticleInfo>(pt));
 }
 
 void CLightComponent::InitializeLight(BaseEntityComponent &component)
@@ -406,38 +139,9 @@ void CLightComponent::InitializeLight(BaseEntityComponent &component)
 	}
 }
 
-void CLightComponent::UpdateAllParticleSystems()
-{
-	m_particleInfo.clear();
-	EntityIterator itParticles {*c_game};
-	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
-	for(auto *ent : itParticles)
-	{
-		auto pt = ent->GetComponent<pragma::CParticleSystemComponent>();
-		if(pt.expired())
-			continue;
-		UpdateParticleSystem(*pt);
-	}
-}
-
-void CLightComponent::UpdateAllEntities()
-{
-	m_stateFlags &= ~StateFlags::FullUpdateRequired;
-	for(auto &info : m_shadowInfoSets)
-		info.meshInfo.clear();
-	std::vector<BaseEntity*> *ents;
-	c_game->GetEntities(&ents);
-	for(auto it=ents->begin();it!=ents->end();++it)
-	{
-		auto *ent = static_cast<CBaseEntity*>(*it);
-		if(ent != nullptr)
-			UpdateEntity(ent);
-	}
-}
-
 bool CLightComponent::ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags)
 {
-	if(m_shadow == nullptr)
+	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntity evData {ent,renderFlags};
 	if(InvokeEventCallbacks(EVENT_SHOULD_PASS_ENTITY,evData) == util::EventReply::Handled)
@@ -446,7 +150,7 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags)
 }
 bool CLightComponent::ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t &renderFlags)
 {
-	if(m_shadow == nullptr)
+	if(ShouldCastShadows() == false)
 		return false;
 	CEShouldPassEntityMesh evData {ent,mesh,renderFlags};
 	InvokeEventCallbacks(EVENT_SHOULD_PASS_ENTITY_MESH,evData);
@@ -495,94 +199,14 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) c
 	max += pos;
 	return Intersection::AABBSphere(min,max,origin,radius);
 }
-/*
-bool CLightRanged::ShouldPass(const CBaseEntity &ent)
-{
 
-}
-bool CLightRanged::ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t&)
-*/
-
-void CLightComponent::UpdateEntity(CBaseEntity *ent)
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
-		return;
-	std::array<bool,2> visible = {false,false};
-	auto &pos = pTrComponent->GetPosition();
-	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.valid() && pRenderComponent->ShouldDrawShadow(pos))
-	{
-		auto &mdlComponent = pRenderComponent->GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-		if(mdl != nullptr)
-		{
-			uint32_t renderFlags = 0;
-			if(ShouldPass(*ent,renderFlags) == true)
-			{
-				umath::set_flag(m_stateFlags,StateFlags::RenderScheduled,true);
-				auto bDynamic = ((m_stateFlags &StateFlags::UseDualTextureSet) != StateFlags::None && ent->IsDynamic()) ? true : false;
-				auto rp = (bDynamic == true) ? RenderPass::Dynamic : RenderPass::Static;
-				auto &info = m_shadowInfoSets[umath::to_integral(rp)];
-				visible[umath::to_integral(rp)] = true;
-				auto it = info.FindEntity(ent);
-				if(it == info.meshInfo.end())
-				{
-					info.meshInfo.push_back(std::make_unique<EntityInfo>(this,ent,renderFlags));
-					it = info.meshInfo.end() -1;
-					UpdateMeshes(ent,(*it)->meshes);
-				}
-				else
-				{
-					(*it)->renderFlags = renderFlags;
-					auto pTrComponent = ent->GetTransformComponent();
-					(*it)->tLastMoved = pTrComponent.valid() ? pTrComponent->GetLastMoveTime() : 0.0;
-				}
-				if(bDynamic == false)
-					m_stateFlags |= StateFlags::StaticUpdateRequired;
-			}
-		}
-	}
-	for(auto i=decltype(visible.size()){0};i<visible.size();++i)
-	{
-		if(visible[i] == true)
-			continue;
-		auto rp = static_cast<RenderPass>(i);
-		auto &info = m_shadowInfoSets[i];
-		auto it = info.FindEntity(ent);
-		if(it != info.meshInfo.end())
-		{
-			info.meshInfo.erase(it);
-			if(visible[umath::to_integral(RenderPass::Dynamic)] == false)
-				m_stateFlags |= StateFlags::StaticUpdateRequired;
-		}
-	}
-}
-
-void CLightComponent::SetStaticResolved(bool b)
-{
-	umath::set_flag(m_stateFlags,StateFlags::StaticUpdateRequired,!b);
-	m_nextDynamicUpdate = 0;
-}
-
-static CVar cvUpdateFrequency = GetClientConVar("cl_render_shadow_update_frequency");
-void CLightComponent::PostRenderShadow()
-{
-	m_nextDynamicUpdate = c_engine->GetLastFrameId() +cvUpdateFrequency->GetInt() +1; // +1 because this won't start having an effect until the NEXT frame
-}
-
-bool CLightComponent::ShouldUpdateRenderPass(RenderPass rp) const
+bool CLightComponent::ShouldUpdateRenderPass(ShadowMapType smType) const
 {
 	CEShouldUpdateRenderPass evData {};
 	if(InvokeEventCallbacks(EVENT_SHOULD_UPDATE_RENDER_PASS,evData) == util::EventReply::Handled)
 		return evData.shouldUpdate;
-	if(rp == RenderPass::Static)
-		return umath::is_flag_set(m_stateFlags,StateFlags::StaticUpdateRequired);
-	return (c_engine->GetLastFrameId() >= m_nextDynamicUpdate) ? true : false;
+	return umath::is_flag_set(m_stateFlags,(smType == ShadowMapType::Static) ? StateFlags::StaticUpdateRequired : StateFlags::DynamicUpdateRequired);
 }
-
-std::vector<std::shared_ptr<CLightComponent::EntityInfo>> &CLightComponent::GetCulledMeshes(RenderPass rp) {return m_shadowInfoSets[umath::to_integral(rp)].meshInfo;}
-std::vector<std::shared_ptr<CLightComponent::ParticleInfo>> &CLightComponent::GetCulledParticleSystems() {return m_particleInfo;}
 
 void CLightComponent::UpdateBuffers()
 {
@@ -615,7 +239,9 @@ void CLightComponent::UpdateShadowTypes()
 	if(m_renderBuffer != nullptr)
 		c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,shadowIndex),m_bufferData.shadowIndex);
 }
-bool CLightComponent::ShouldCastShadows() const {return (GetShadowType() != ShadowType::None) ? true : false;}
+bool CLightComponent::ShouldCastShadows() const {return GetShadowType() != ShadowType::None;}
+bool CLightComponent::ShouldCastDynamicShadows() const {return GetShadowType() == ShadowType::Full;}
+bool CLightComponent::ShouldCastStaticShadows() const {return ShouldCastShadows();}
 void CLightComponent::SetShadowType(ShadowType type)
 {
 	if(type == GetShadowType())
@@ -623,8 +249,11 @@ void CLightComponent::SetShadowType(ShadowType type)
 	CBaseLightComponent::SetShadowType(type);
 	if(type != ShadowType::None)
 		InitializeShadowMap();
-	else if(m_shadow != nullptr)
-		m_shadow = nullptr;
+	else
+	{
+		m_shadowMapStatic = {};
+		m_shadowMapDynamic = {};
+	}
 	UpdateShadowTypes(); // Has to be called AFTER the shadowmap has been initialized!
 }
 
@@ -638,36 +267,62 @@ void CLightComponent::SetFalloffExponent(float falloffExponent)
 		c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,falloffExponent),m_bufferData.falloffExponent);
 }
 
-uint32_t CLightComponent::GetShadowMapIndex() const {return m_bufferData.shadowMapIndex;}
-
-void CLightComponent::SetShadowMapIndex(uint32_t idx)
+uint32_t CLightComponent::GetShadowMapIndex(ShadowMapType smType) const
 {
-	idx = (idx == std::numeric_limits<uint32_t>::max()) ? 0u : (idx +1);
-	if(idx == m_bufferData.shadowMapIndex)
-		return;
-	m_bufferData.shadowMapIndex = idx;
-	if(m_renderBuffer != nullptr)
-		c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,shadowMapIndex),m_bufferData.shadowMapIndex);
+	switch(smType)
+	{
+	case ShadowMapType::Dynamic:
+		return m_bufferData.shadowMapIndexDynamic;
+	case ShadowMapType::Static:
+		return m_bufferData.shadowMapIndexStatic;
+	}
+	return 0u;
 }
 
-void CLightComponent::InitializeShadowMap(ShadowMap &sm)
+void CLightComponent::SetShadowMapIndex(uint32_t idx,ShadowMapType smType)
+{
+	idx = (idx == std::numeric_limits<uint32_t>::max()) ? 0u : (idx +1);
+	auto &target = (smType == ShadowMapType::Dynamic) ? m_bufferData.shadowMapIndexDynamic : m_bufferData.shadowMapIndexStatic;
+	if(idx == target)
+		return;
+	target = idx;
+	if(m_renderBuffer != nullptr)
+	{
+		c_engine->ScheduleRecordUpdateBuffer(
+			m_renderBuffer,(smType == ShadowMapType::Dynamic) ? offsetof(LightBufferData,shadowMapIndexDynamic) : offsetof(LightBufferData,shadowMapIndexStatic)
+			,target
+		);
+	}
+}
+
+void CLightComponent::InitializeShadowMap(CShadowComponent &sm)
 {
 	sm.Initialize();
 	sm.SetTextureReloadCallback([this]() {
 		UpdateShadowTypes();
-		ClearCache();
 	});
 	UpdateShadowTypes();
 }
 
 void CLightComponent::InitializeShadowMap()
 {
-	if(m_shadow != nullptr || GetShadowType() == ShadowType::None)
+	if(GetShadowType() == ShadowType::None)
 		return;
-	CEHandleShadowMap ceData {m_shadow};
+	CEHandleShadowMap ceData {};
 	if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP,ceData) == util::EventReply::Unhandled)
-		m_shadow = std::make_unique<ShadowMap>();
-	InitializeShadowMap(*m_shadow);
+		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true);
+	else if(ceData.resultShadow)
+		m_shadowMapStatic = ceData.resultShadow->GetHandle<CShadowComponent>();
+	InitializeShadowMap(*m_shadowMapStatic);
+	if(GetShadowType() == ShadowType::Full)
+	{
+		CEHandleShadowMap ceData {};
+		if(BroadcastEvent(EVENT_HANDLE_SHADOW_MAP,ceData) == util::EventReply::Unhandled)
+			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true);
+		else if(ceData.resultShadow)
+			m_shadowMapDynamic = ceData.resultShadow->GetHandle<CShadowComponent>();
+		InitializeShadowMap(*m_shadowMapDynamic);
+	}
 }
 
 void CLightComponent::SetStateFlag(StateFlags flag,bool enabled) {umath::set_flag(m_stateFlags,flag,enabled);}
@@ -678,6 +333,7 @@ void CLightComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
+	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<ComponentEvent> evData) {
 		umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,true);
@@ -709,8 +365,6 @@ void CLightComponent::Initialize()
 			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
 				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
 		}
-
-		ExecSwapchainUpdate();
 	});
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.valid())
@@ -719,17 +373,6 @@ void CLightComponent::Initialize()
 		m_bufferData.direction.z = 1.f;
 
 	++s_lightCount;
-	m_onModelChanged = c_game->AddCallback("UpdateEntityModel",FunctionCallback<void,CBaseEntity*>::Create([this](CBaseEntity *ent) {
-		for(auto &info : m_shadowInfoSets)
-		{
-			auto it = std::find_if(info.meshInfo.begin(),info.meshInfo.end(),[this,ent](std::shared_ptr<EntityInfo> &info) {
-				return (info->hEntity.IsValid() && info->hEntity.get() == ent) ? true : false;
-			});
-			if(it != info.meshInfo.end())
-				info.meshInfo.erase(it);
-		}
-		UpdateEntity(ent);
-	}));
 }
 void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix,const Mat4 &viewMatrix,const Mat4 &projectionMatrix)
 {
@@ -753,10 +396,13 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 			reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
 			if(m_renderBuffer != nullptr)
 				c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
-			m_stateFlags |= StateFlags::FullUpdateRequired;
-			SetStaticResolved(false);
+			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
 		}),CallbackType::Component,&component);
 		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
+			LightType lightType;
+			GetLight(lightType);
+			if(lightType == LightType::Point)
+				return;
 			auto dir = uquat::forward(rot);
 			if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == true)
 				return;
@@ -765,7 +411,7 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 				m_bufferData.direction.z = 1.f;
 			if(m_renderBuffer != nullptr)
 				c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
-			umath::set_flag(m_stateFlags,StateFlags::RenderScheduled,true);
+			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CRadiusComponent))
@@ -776,7 +422,7 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 			m_bufferData.position.w = radius;
 			if(m_renderBuffer != nullptr)
 				c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position) +offsetof(Vector4,w),m_bufferData.position.w);
-			umath::set_flag(m_stateFlags,StateFlags::RenderScheduled,true);
+			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CColorComponent))
@@ -822,7 +468,13 @@ void CLightComponent::OnEntitySpawn()
 {
 	CBaseLightComponent::OnEntitySpawn();
 	InitializeShadowMap();
-	UpdateEntity(&static_cast<CBaseEntity&>(GetEntity()));
+
+	if(umath::is_flag_set(m_lightFlags,LightFlags::BakedLightSource))
+	{
+		m_bufferData.flags |= LightBufferData::BufferFlags::BakedLightSource;
+		if(m_renderBuffer != nullptr)
+			c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
+	}
 }
 
 const pragma::LightBufferData &CLightComponent::GetBufferData() const {return const_cast<CLightComponent*>(this)->GetBufferData();}
@@ -830,18 +482,7 @@ pragma::LightBufferData &CLightComponent::GetBufferData() {return m_bufferData;}
 const pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() const {return const_cast<CLightComponent*>(this)->GetShadowBufferData();}
 pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() {return m_shadowBufferData.get();}
 
-uint64_t CLightComponent::GetLastTimeShadowRendered() const {return m_lastShadowRendered;}
-void CLightComponent::SetLastTimeShadowRendered(uint64_t t) {m_lastShadowRendered = t;}
-
-ShadowMap *CLightComponent::GetShadowMap() {return m_shadow.get();}
-
-void CLightComponent::ClearCache()
-{
-	m_stateFlags |= StateFlags::FullUpdateRequired;
-	SetStaticResolved(false);
-	for(auto &info : m_shadowInfoSets)
-		info.meshInfo.clear();
-}
+util::WeakHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const {return (type == ShadowMapType::Dynamic) ? m_shadowMapDynamic : m_shadowMapStatic;}
 
 Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 {
@@ -921,7 +562,8 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 				type = "Directional";
 			Con::cout<<"\t\tPosition: ("<<data.position.x<<","<<data.position.y<<","<<data.position.z<<")"<<Con::endl;
 			Con::cout<<"\t\tShadow Index: "<<data.shadowIndex<<Con::endl;
-			Con::cout<<"\t\tShadow Map Index: "<<data.shadowMapIndex<<Con::endl;
+			Con::cout<<"\t\tShadow Map Index (static): "<<data.shadowMapIndexStatic<<Con::endl;
+			Con::cout<<"\t\tShadow Map Index (dynamic): "<<data.shadowMapIndexDynamic<<Con::endl;
 			Con::cout<<"\t\tType: "<<type<<Con::endl;
 			Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<","<<data.color.a<<")"<<Con::endl;
 			Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
@@ -981,8 +623,7 @@ void CEGetTransformationMatrix::PushArguments(lua_State *l) {}
 
 /////////////////
 
-CEHandleShadowMap::CEHandleShadowMap(std::unique_ptr<ShadowMap> &shadowMap)
-	: shadowMap{shadowMap}
+CEHandleShadowMap::CEHandleShadowMap()
 {}
 void CEHandleShadowMap::PushArguments(lua_State *l) {}
 

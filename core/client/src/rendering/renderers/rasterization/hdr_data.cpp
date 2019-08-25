@@ -486,7 +486,7 @@ const Vulkan::Texture &HDRData::GetTargetDepthTexture() const {return prepass.te
 
 void HDRData::ResetIOTextureIndex() {m_curTex = 0u;}
 
-void HDRData::UpdateExposure(prosper::Texture &srcTexture)
+void HDRData::UpdateExposure()
 {
 	auto &avgColor = m_exposure.UpdateColor();
 	const auto inc = 0.05f;

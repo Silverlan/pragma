@@ -82,7 +82,9 @@ namespace pragma
 
 			FMAT_GLOW_MODE_1 = BlackToAlpha<<1,
 			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1<<1,
-			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1
+			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1,
+
+			NoIBL = FMAT_GLOW_MODE_3<<1u // PBR only (see PBR shader)
 		};
 
 		enum class StateFlags : uint32_t
@@ -125,6 +127,7 @@ namespace pragma
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh);
+		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
 		virtual void OnPipelineBound() override;
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);

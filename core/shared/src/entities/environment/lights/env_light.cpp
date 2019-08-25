@@ -21,6 +21,8 @@ void BaseEnvLightComponent::Initialize()
 			GetEntity().SetKeyValue("color",kvData.value);
 		else if(ustring::compare(kvData.key,"falloff_exponent",false))
 			SetFalloffExponent(util::to_float(kvData.value));
+		else if(ustring::compare(kvData.key,"light_flags",false))
+			m_lightFlags = static_cast<LightFlags>(util::to_int(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;

@@ -17,7 +17,8 @@ namespace pragma
 			TurnedOn = 1,
 			TypeSpot = TurnedOn<<1,
 			TypePoint = TypeSpot<<1,
-			TypeDirectional = TypePoint<<1
+			TypeDirectional = TypePoint<<1,
+			BakedLightSource = TypeDirectional<<1
 		};
 		Vector4 position {}; // position.w = distance
 		Vector4 color {};
@@ -28,12 +29,10 @@ namespace pragma
 		float cutoffInner = 0.f;
 		float attenuation = 0.f;
 		BufferFlags flags = BufferFlags::None;
-		uint32_t shadowMapIndex = 0u;
+		uint32_t shadowMapIndexStatic = 0u;
+		uint32_t shadowMapIndexDynamic = 0u;
 
 		float falloffExponent = 1.f;
-
-			// Alignment to vec4
-		float dummy0 = 0.f;
 	};
 	struct ShadowBufferData
 	{

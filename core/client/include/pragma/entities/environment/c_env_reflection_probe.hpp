@@ -23,20 +23,28 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		static void BuildAllReflectionProbes(Game &game);
+		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		bool CaptureIBLReflectionsFromScene();
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
-		bool LoadIBLReflectionsFromFile(const std::string &fileName);
-		bool SaveIBLReflectionsToFile(const std::string &fileName);
+		bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);
+		bool LoadIBLReflectionsFromFile();
+		bool SaveIBLReflectionsToFile();
 		const rendering::IBLData *GetIBLData() const;
 		Anvil::DescriptorSet *GetIBLDescriptorSet();
+
+		bool UpdateIBLData(bool rebuild=false);
 	private:
 		void InitializeDescriptorSet();
+		std::string GetCubemapIBLMaterialPath() const;
+		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;
 		std::shared_ptr<prosper::DescriptorSetGroup> m_iblDsg = nullptr;
+
+		std::string m_srcEnvMap = "";
 	};
 };
 

@@ -23,12 +23,15 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-void CGame::RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImg)
+#pragma optimize("",off)
+void CGame::RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImage,uint32_t layerId)
 {
-	prosper::util::record_image_barrier(*(*drawCmd),*outImg,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-	prosper::util::record_blit_texture(*(*drawCmd),texPostHdr,*outImg);
+	prosper::util::record_image_barrier(*(*drawCmd),*outImage,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+	prosper::util::BlitInfo blitInfo {};
+	blitInfo.dstSubresourceLayer.base_array_layer = layerId;
+	prosper::util::record_blit_image(**drawCmd,blitInfo,**texPostHdr.GetImage(),*outImage);
 	prosper::util::record_image_barrier(*(*drawCmd),*(*texPostHdr.GetImage()),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-	prosper::util::record_image_barrier(*(*drawCmd),*outImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+	prosper::util::record_image_barrier(*(*drawCmd),*outImage,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 }
 
 std::shared_ptr<prosper::PrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
@@ -36,7 +39,7 @@ std::shared_ptr<prosper::PrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffe
 //Shader::Base *CGame::GetShaderOverride() {return m_shaderOverride;} // prosper TODO
 //void CGame::SetShaderOverride(Shader::Base *shader) {m_shaderOverride = shader;} // prosper TODO
 
-void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags)
+void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags,uint32_t outLayerId)
 {
 	m_currentDrawCmd = drawCmd;
 	ScopeGuard sgCurrentDrawCmd {[this]() {
@@ -47,11 +50,19 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 	auto *renderer = scene->GetRenderer();
 	if(renderer)
 	{
-		renderer->RenderScene(drawCmd,rt,renderFlags);
+		renderer->RenderScene(drawCmd,renderFlags);
 		StartProfilingStage(CGame::GPUProfilingPhase::Present);
 		StartProfilingStage(CGame::CPUProfilingPhase::Present);
-		RenderScenePresent(drawCmd,*renderer->GetPresentationTexture(),*rt->GetTexture()->GetImage());
+
+		prosper::Texture *presentationTexture = nullptr;
+		if(umath::is_flag_set(renderFlags,FRender::HDR))
+			presentationTexture = renderer->GetHDRPresentationTexture().get();
+		else
+			presentationTexture = renderer->GetPresentationTexture().get();
+
+		RenderScenePresent(drawCmd,*presentationTexture,outImage,outLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);
 		StopProfilingStage(CGame::GPUProfilingPhase::Present);
 	}
 }
+#pragma optimize("",on)

@@ -8,7 +8,6 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadowmapcasc.h"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
@@ -32,6 +31,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -104,7 +104,7 @@ Scene::Scene(const CreateInfo &createInfo)
 	m_lightSources(std::make_shared<LightListInfo>()),
 	m_entityList(std::make_shared<EntityListInfo>())
 {
-	for(auto i=decltype(ShadowMapCasc::MAX_CASCADE_COUNT){0};i<ShadowMapCasc::MAX_CASCADE_COUNT;++i)
+	for(auto i=decltype(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT){0};i<pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;++i)
 		m_csmDescriptors.push_back(std::unique_ptr<CSMCascadeDescriptor>(new CSMCascadeDescriptor()));
 	InitializeCameraBuffer();
 	InitializeFogBuffer();
@@ -218,6 +218,11 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 	if(bView == false && m_renderer)
 		m_renderer->UpdateCameraData(m_cameraData);
 
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*bufCam,
+		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
+		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+	);
 	prosper::util::record_update_buffer(**drawCmd,*bufCam,0ull,m_cameraData);
 }
 void Scene::UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
@@ -619,3 +624,4 @@ void Scene::SetActiveCamera(pragma::CCameraComponent &cam)
 	m_renderSettings.farZ = cam.GetFarZ();
 }
 void Scene::SetActiveCamera() {m_camera = {};}
+#pragma optimize("",on)

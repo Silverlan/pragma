@@ -232,11 +232,13 @@ bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat)
 
 	if(mat.IsTranslucent() == true)
 		matFlags |= MaterialFlags::Translucent;
+	ApplyMaterialFlags(mat,matFlags);
 	return RecordPushConstants(ShaderTextured3DBase::PushConstants::Material{
 		phong,matFlags,0u,glowScale,
 		parallaxHeightScale,alphaDiscardThreshold,phongIntensity
 	},offsetof(ShaderTextured3DBase::PushConstants,material));
 }
+void ShaderTextured3DBase::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);

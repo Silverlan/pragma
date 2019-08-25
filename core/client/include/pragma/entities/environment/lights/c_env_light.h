@@ -4,7 +4,6 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/components/c_entity_component.hpp"
-#include "pragma/rendering/lighting/shadows/c_shadowmap.h"
 #include "pragma/rendering/lighting/c_light_data.hpp"
 
 enum class LightType : uint32_t
@@ -63,12 +62,13 @@ namespace pragma
 		uint32_t index;
 		Mat4 *transformation = nullptr;
 	};
+	class CShadowComponent;
 	struct DLLCLIENT CEHandleShadowMap
 		: public ComponentEvent
 	{
-		CEHandleShadowMap(std::unique_ptr<ShadowMap> &shadowMap);
+		CEHandleShadowMap();
 		virtual void PushArguments(lua_State *l) override;
-		std::unique_ptr<ShadowMap> &shadowMap;
+		CShadowComponent *resultShadow = nullptr;
 	};
 	struct DLLCLIENT CEOnShadowBufferInitialized
 		: public ComponentEvent
@@ -132,82 +132,38 @@ namespace pragma
 		const std::shared_ptr<prosper::Buffer> &GetRenderBuffer() const;
 		const std::shared_ptr<prosper::Buffer> &GetShadowBuffer() const;
 
-		enum class RenderPass : uint8_t
-		{
-			Static = 0,
-			Dynamic = 1
-		};
 		enum class StateFlags : uint32_t
 		{
 			None = 0u,
 			StaticUpdateRequired = 1u,
+			DynamicUpdateRequired = StaticUpdateRequired<<1u,
 			FullUpdateRequired = StaticUpdateRequired<<1u,
-			UseDualTextureSet = FullUpdateRequired<<1u,
-			RenderScheduled = UseDualTextureSet<<1u, // TODO: Deprecated? Remove this flag!
-			AddToGameScene = RenderScheduled<<1u
+			AddToGameScene = FullUpdateRequired<<1u
 		};
-		struct MeshInfo
+		enum class ShadowMapType : uint8_t
 		{
-			MeshInfo(CModelSubMesh *mesh,uint32_t renderFlags=0);
-			CModelSubMesh *mesh;
-			uint32_t renderFlags;
+			Static = 0,
+			Dynamic
 		};
-		struct EntityInfo
-		{
-			EntityInfo(CLightComponent *light,BaseEntity *ent,uint32_t renderFlags=0);
-			~EntityInfo();
-			EntityInfo(const EntityInfo&)=delete;
-			EntityInfo &operator=(const EntityInfo&)=delete;
-			EntityHandle hEntity;
-			CallbackHandle hCbMaterialsLoaded;
-			uint32_t renderFlags;
-			double tLastMoved;
-			std::vector<MeshInfo> meshes;
-		};
-		struct ParticleInfo
-		{
-			ParticleInfo(pragma::CParticleSystemComponent &pt);
-			ParticleInfo(const ParticleInfo&)=delete;
-			ParticleInfo &operator=(const ParticleInfo&)=delete;
-			util::WeakHandle<pragma::CParticleSystemComponent> hParticle;
-		};
-		struct ShadowInfoSet
-		{
-			std::vector<std::shared_ptr<EntityInfo>>::iterator FindEntity(CBaseEntity *ent);
-			std::vector<std::shared_ptr<EntityInfo>> meshInfo;
-		};
-		/*class BufferUpdateInfo
-		{
-		private:
-			std::function<void(const Vulkan::Context &context,const Vulkan::Buffer&)> m_fUpdate;
-			Vulkan::SwapBufferObject *m_swapBuffer;
-			uint32_t m_swapchainUpdateFlags; // 1 Bit per swapchain image
-		public:
-			BufferUpdateInfo(const Vulkan::SwapBufferObject *swapBuffer,const std::function<void(const Vulkan::Context&,const Vulkan::Buffer&)> &f);
-			bool ExecSwapchainUpdate();
-			bool IsComplete() const;
-		};*/ // prosper TODO
 
 		CLightComponent(BaseEntity &ent);
 		virtual ~CLightComponent() override;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
-		bool ShouldUpdateRenderPass(RenderPass rp) const;
-		void PostRenderShadow(); // Called once the light's shadows have been rendered
-		void SetStaticResolved(bool b=true);
+		bool ShouldUpdateRenderPass(ShadowMapType smType) const;
 		virtual bool ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t &renderFlags);
 		virtual bool ShouldPass(const Model &mdl,const CModelSubMesh &mesh);
-		ShadowMap *GetShadowMap();
-		void UpdateCulledMeshes();
-		std::vector<std::shared_ptr<EntityInfo>> &GetCulledMeshes(RenderPass rp);
-		std::vector<std::shared_ptr<ParticleInfo>> &GetCulledParticleSystems();
+		util::WeakHandle<CShadowComponent> GetShadowMap(ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix,const Mat4 &viewMatrix,const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		void SetStateFlag(StateFlags flag,bool enabled);
 
+		bool ShouldCastShadows() const;
+		bool ShouldCastDynamicShadows() const;
+		bool ShouldCastStaticShadows() const;
 		bool IsInRange(const CBaseEntity &ent) const;
 		bool IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) const;
 		bool IsInCone(const CBaseEntity &ent,const Vector3 &dir,float angle) const;
@@ -215,16 +171,13 @@ namespace pragma
 		// Used for debug purposes only
 		void UpdateBuffers();
 
-		uint64_t GetLastTimeShadowRendered() const;
-		void SetLastTimeShadowRendered(uint64_t t);
-
 		const LightBufferData &GetBufferData() const;
 		LightBufferData &GetBufferData();
 		const ShadowBufferData *GetShadowBufferData() const;
 		ShadowBufferData *GetShadowBufferData();
 
-		void SetShadowMapIndex(uint32_t idx);
-		uint32_t GetShadowMapIndex() const;
+		void SetShadowMapIndex(uint32_t idx,ShadowMapType smType);
+		uint32_t GetShadowMapIndex(ShadowMapType smType) const;
 		virtual void SetShadowType(ShadowType type) override;
 
 		virtual void SetFalloffExponent(float falloffExponent) override;
@@ -266,30 +219,13 @@ namespace pragma
 			// Shadow Buffer End
 		};
 
-		//std::vector<std::unique_ptr<BufferUpdateInfo>> m_bufferUpdateInfo; // Index corresponds to LIGHT_BUFFER_OFFSET_* ID // prosper TODO
-		//virtual void ScheduleBufferUpdate(DataSlot offsetId,const std::function<void(const Vulkan::Context&,const Vulkan::Buffer&)> &f); // prosper TODO
-		void ExecSwapchainUpdate();
-		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
-		uint64_t m_lastShadowRendered = std::numeric_limits<uint64_t>::max();
-		std::array<ShadowInfoSet,2> m_shadowInfoSets;
-		std::vector<std::shared_ptr<ParticleInfo>> m_particleInfo;
-		uint64_t m_nextDynamicUpdate = 0ull;
-
-		// Entity Info
-		CallbackHandle m_onModelChanged;
-		void ClearCache();
-		virtual void UpdateEntity(CBaseEntity *ent);
-		void UpdateAllEntities();
-		virtual void UpdateParticleSystem(pragma::CParticleSystemComponent &pt);
-		void UpdateAllParticleSystems();
-		void UpdateMeshes(CBaseEntity *ent,std::vector<MeshInfo> &meshes);
-		//
 		StateFlags m_stateFlags;
 		double m_tTurnedOff = 0.0;
-		std::unique_ptr<ShadowMap> m_shadow;
-		bool ShouldCastShadows() const;
+		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
+		util::WeakHandle<CShadowComponent> m_shadowMapStatic = {};
+		util::WeakHandle<CShadowComponent> m_shadowMapDynamic = {};
 		void UpdateShadowTypes();
-		void InitializeShadowMap(ShadowMap &sm);
+		void InitializeShadowMap(CShadowComponent &sm);
 		virtual void InitializeShadowMap();
 	};
 };

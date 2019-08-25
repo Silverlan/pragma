@@ -804,6 +804,12 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverter");
 	entsMod[defCPBRConverter];
 
+	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMap");
+	entsMod[defShadow];
+
+	auto defShadowManager = luabind::class_<CShadowManagerHandle,BaseEntityComponentHandle>("ShadowManager");
+	entsMod[defShadowManager];
+
 	auto defCWaterSurface = luabind::class_<CWaterSurfaceHandle,BaseEntityComponentHandle>("WaterSurfaceComponent");
 	entsMod[defCWaterSurface];
 

@@ -29,6 +29,8 @@
 #include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
@@ -97,6 +99,8 @@
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
+#include "pragma/entities/game/c_game_shadow_manager.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include <pragma/lua/l_entity_handles.hpp>
 #include <pragma/lua/ldefinitions.h>
 
@@ -204,5 +208,8 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CBSP);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CBSPLeaf);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CReflectionProbe);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CPBRConverter);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowManager);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadow);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowCSM);
 
 #endif

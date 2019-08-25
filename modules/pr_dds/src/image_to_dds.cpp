@@ -184,7 +184,6 @@ private:
 bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler)
 {
 	std::shared_ptr<prosper::Image> imgRead = image.shared_from_this();
-	auto extents = image.GetExtents();
 	auto srcFormat = image.GetFormat();
 	Anvil::Format dstFormat;
 	nvtt::InputFormat nvttFormat;
@@ -217,10 +216,8 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 		auto &context = image.GetContext();
 		auto &setupCmd = context.GetSetupCommandBuffer();
 		prosper::util::ImageCreateInfo copyCreateInfo {};
+		image.GetCreateInfo(copyCreateInfo);
 		copyCreateInfo.format = dstFormat;
-		copyCreateInfo.width = extents.width;
-		copyCreateInfo.height = extents.height;
-		copyCreateInfo.layers = image.GetLayerCount();
 		copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
 		copyCreateInfo.postCreateLayout = Anvil::ImageLayout::GENERAL;
 		copyCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
@@ -229,6 +226,7 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 	}
 
 	auto szPerPixel = prosper::util::get_byte_size(dstFormat);
+	auto extents = image.GetExtents();
 	auto size = extents.width *extents.height *szPerPixel;
 
 	nvtt::InputOptions inputOptions {};
@@ -240,13 +238,17 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 	inputOptions.setNormalMap(umath::is_flag_set(ktxCreateInfo.flags,ImageWriteInfo::Flags::NormalMap));
 	inputOptions.setNormalizeMipmaps(true);
 	inputOptions.setConvertToNormalMap(umath::is_flag_set(ktxCreateInfo.flags,ImageWriteInfo::Flags::ConvertToNormalMap));
-	inputOptions.setMipmapGeneration(umath::is_flag_set(ktxCreateInfo.flags,ImageWriteInfo::Flags::GenerateMipmaps));
+
+	auto numMipmaps = imgRead->GetMipmapCount();
+	if(umath::is_flag_set(ktxCreateInfo.flags,ImageWriteInfo::Flags::GenerateMipmaps))
+		inputOptions.setMipmapGeneration(true);
+	else
+		inputOptions.setMipmapGeneration(numMipmaps > 1,numMipmaps -1u);
 
 	auto bCubemap = imgRead->IsCubemap();
 	auto texType = bCubemap ? nvtt::TextureType_Cube : nvtt::TextureType_2D;
 	auto numLayers = imgRead->GetLayerCount();
-	auto numMipmaps = imgRead->GetMipmapCount();
-	inputOptions.setTextureLayout(texType,extents.width,extents.height,1,bCubemap ? 1 : numLayers);
+	inputOptions.setTextureLayout(texType,extents.width,extents.height);
 	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
 	{
 		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
@@ -258,7 +260,9 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 			auto *memBlock = (*imgRead)->get_memory_block();
 			if(memBlock->map(subresourceLayout->offset,subresourceLayout->size,&data) == false)
 				continue;
-			inputOptions.setMipmapData(data,extents.width,extents.height,1,iLayer,iMipmap);
+			uint32_t wMipmap,hMipmap;
+			prosper::util::calculate_mipmap_size(extents.width,extents.height,&wMipmap,&hMipmap,iMipmap);
+			inputOptions.setMipmapData(data,wMipmap,hMipmap,1,iLayer,iMipmap);
 			memBlock->unmap(); // Note: setMipmapData copies the data, so we don't need to keep it mapped
 		}
 	}

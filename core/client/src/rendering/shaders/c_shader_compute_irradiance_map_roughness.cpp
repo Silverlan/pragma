@@ -43,7 +43,7 @@ void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(Anvil::GraphicsP
 
 void ShaderComputeIrradianceMapRoughness::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderComputeIrradianceMapRoughness>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R32G32B32A32_SFLOAT}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderComputeIrradianceMapRoughness>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRoughness(prosper::Texture &cubemap,uint32_t resolution)
@@ -51,7 +51,8 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	auto &cubemapImg = cubemap.GetImage();
 	auto w = resolution;
 	auto h = resolution;
-	auto img = CreateCubeMap(w,h,prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
+	prosper::util::ImageCreateInfo::Flags flags = prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
+	auto img = CreateCubeMap(w,h,flags);
 
 	auto &dev = c_engine->GetDevice();
 	constexpr uint8_t layerCount = 6u;
@@ -78,7 +79,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 			mipLevelFramebuffer.imageView = prosper::util::create_image_view(dev,imgViewCreateInfo,img);
 			uint32_t wMipmap,hMipmap;
 			prosper::util::calculate_mipmap_size(w,h,&wMipmap,&hMipmap,mipLevel);
-			std::vector<Anvil::ImageView*> imgViewAttachments {&mipLevelFramebuffer.imageView->GetAnvilImageView()};
+			std::vector<prosper::ImageView*> imgViewAttachments {mipLevelFramebuffer.imageView.get()};
 			mipLevelFramebuffer.framebuffer = prosper::util::create_framebuffer(dev,wMipmap,hMipmap,1u,imgViewAttachments);
 		}
 	}
@@ -137,6 +138,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 				range.levelCount = 1u;
 				auto &mipLevelFramebuffer = imgViews.at(layerId).at(mipLevel);
 				auto &fb = *mipLevelFramebuffer.framebuffer;
+
 				if(
 					prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,range) == false ||
 					prosper::util::record_begin_render_pass(**setupCmd,*img,*rp,fb) == false
@@ -145,6 +147,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 					success = false;
 					goto endLoop;
 				}
+
 				if(BeginDrawViewport(setupCmd,fb.GetWidth(),fb.GetHeight()) == true)
 				{
 					pushConstants.view = GetViewMatrix(layerId);
@@ -154,12 +157,6 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 				}
 				success = success && prosper::util::record_end_render_pass(**setupCmd);
 				success = success && prosper::util::record_post_render_pass_image_barrier(**setupCmd,**img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,range);
-
-				success = success && prosper::util::record_buffer_barrier(
-					**setupCmd,*buf,
-					Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::HOST_BIT,
-					Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::HOST_WRITE_BIT
-				);
 
 				if(success == false)
 					goto endLoop;
@@ -171,7 +168,11 @@ endLoop:
 		return nullptr;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo{};
-	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	InitializeSamplerCreateInfo(flags,samplerCreateInfo);
+	prosper::util::TextureCreateInfo texCreateInfo {};
+	InitializeTextureCreateInfo(texCreateInfo);
+	auto tex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
 	return success ? tex : nullptr;
+
 }
 #pragma optimize("",on)

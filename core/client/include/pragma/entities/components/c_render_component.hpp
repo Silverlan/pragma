@@ -81,6 +81,7 @@ namespace pragma
 
 		void SetRenderBufferDirty();
 	protected:
+		void UpdateRenderBuffer() const;
 		virtual void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;

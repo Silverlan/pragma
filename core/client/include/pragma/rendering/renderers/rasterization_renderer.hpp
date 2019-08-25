@@ -69,6 +69,7 @@ namespace pragma::rendering
 		virtual void OnEntityAddedToScene(CBaseEntity &ent) override;
 		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const override;
 		virtual const std::shared_ptr<prosper::Texture> &GetPresentationTexture() const override;
+		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const override;
 		virtual bool IsRasterizationRenderer() const override;
 
 		void SetPrepassMode(PrepassMode mode);
@@ -140,7 +141,7 @@ namespace pragma::rendering
 		// rendering has finished.
 		void SetFrameDepthBufferSamplingRequired();
 
-		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags=FRender::All) override;
+		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);

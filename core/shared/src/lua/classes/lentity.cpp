@@ -578,6 +578,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.add_static_constant("EVENT_HANDLE_KEY_VALUE",BaseEntity::EVENT_HANDLE_KEY_VALUE);
 	classDef.add_static_constant("EVENT_ON_SPAWN",BaseEntity::EVENT_ON_SPAWN);
 	classDef.add_static_constant("EVENT_ON_POST_SPAWN",BaseEntity::EVENT_ON_POST_SPAWN);
+	classDef.add_static_constant("EVENT_ON_REMOVE",BaseEntity::EVENT_ON_REMOVE);
 
 	classDef.add_static_constant("EVENT_ON_COMPONENT_ADDED",pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
 	classDef.add_static_constant("EVENT_ON_COMPONENT_REMOVED",pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);

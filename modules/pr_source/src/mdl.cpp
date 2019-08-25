@@ -1179,6 +1179,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	if(it != files.end())
 	{
 		import::mdl::load_vvd(it->second,vvdVerts,vvdVertWeights,mdlInfo.fixedLodVertexIndices);
+		auto c = 0;
 		if(mdlInfo.header.flags &STUDIOHDR_FLAGS_STATIC_PROP)
 		{
 			for(auto &v : vvdVerts)

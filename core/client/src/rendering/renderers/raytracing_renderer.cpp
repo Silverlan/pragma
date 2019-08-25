@@ -38,10 +38,10 @@ bool RaytracingRenderer::Initialize()
 }
 bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
 void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
-#include <wgui/types/wirect.h>
-bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt,FRender renderFlags)
+//#include <wgui/types/wirect.h>
+bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
-	if(m_whShader.expired() || BaseRenderer::RenderScene(drawCmd,rt,renderFlags) == false)
+	if(m_whShader.expired() || BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
 		return false;
 	auto &imgOutput = GetSceneTexture()->GetImage();
 	prosper::util::record_image_barrier(
@@ -101,5 +101,10 @@ bool RaytracingRenderer::ReloadRenderTarget()
 	return true;
 }
 const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetSceneTexture() const {return m_outputTexture;}
+const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetHDRPresentationTexture() const
+{
+	// TODO: Add actual HDR texture
+	return m_outputTexture;
+}
 void RaytracingRenderer::EndRendering() {}
 Anvil::DescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0);}

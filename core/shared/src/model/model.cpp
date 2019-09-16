@@ -138,6 +138,8 @@ void Model::Rotate(const Quat &rot)
 			continue; // Don't rotate delta animations
 		anim->Rotate(skeleton,rot);
 	}
+	for(auto &vertAnim : m_vertexAnimations)
+		vertAnim->Rotate(rot);
 	for(auto &meshGroup : m_meshGroups)
 	{
 		for(auto &mesh : meshGroup->GetMeshes())
@@ -168,6 +170,27 @@ void Model::Translate(const Vector3 &t)
 			mesh->Translate(t);
 	}
 	m_reference->Translate(t);
+	GenerateBindPoseMatrices();
+}
+
+void Model::Scale(const Vector3 &scale)
+{
+	m_collisionMin *= scale;
+	m_collisionMax *= scale;
+	m_renderMin *= scale;
+	m_renderMax *= scale;
+	for(auto &colMesh : m_collisionMeshes)
+		colMesh->Scale(scale);
+	for(auto &anim : m_animations)
+		anim->Scale(scale);
+	for(auto &vertAnim : m_vertexAnimations)
+		vertAnim->Scale(scale);
+	for(auto &meshGroup : m_meshGroups)
+	{
+		for(auto &mesh : meshGroup->GetMeshes())
+			mesh->Scale(scale);
+	}
+	m_reference->Scale(scale);
 	GenerateBindPoseMatrices();
 }
 
@@ -630,13 +653,9 @@ void Model::PrecacheTextureGroups()
 std::vector<std::string> &Model::GetTexturePaths() {return m_metaInfo.texturePaths;}
 void Model::AddTexturePath(const std::string &path)
 {
-	if(path.empty())
-		return;
 	auto npath = path;
 	npath = FileManager::GetCanonicalizedPath(npath);
-	if(npath.empty())
-		return;
-	if(npath.back() != '/' && npath.back() != '\\')
+	if(npath.empty() == false && npath.back() != '/' && npath.back() != '\\')
 		npath += '\\';
 	auto it = std::find_if(m_metaInfo.texturePaths.begin(),m_metaInfo.texturePaths.end(),[&npath](const std::string &pathOther) {
 		return ustring::compare(npath,pathOther,false);

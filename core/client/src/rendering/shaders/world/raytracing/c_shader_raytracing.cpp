@@ -2,6 +2,7 @@
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include <misc/compute_pipeline_create_info.h>
@@ -70,6 +71,22 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_S
 		}
 	}
 };
+decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {
+	{
+		prosper::Shader::DescriptorSetInfo::Binding { // Irradiance Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Prefilter Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // BRDF Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		}
+	}
+};
 ShaderRayTracing::ShaderRayTracing(prosper::Context &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"world/raytracing/raytracing.gls")
 {}
@@ -87,12 +104,14 @@ void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_GAME_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IBL);
 }
 
 bool ShaderRayTracing::Compute(
 	const PushConstants &pushConstants,
 	Anvil::DescriptorSet &descSetOutputImage,Anvil::DescriptorSet &descSetGameScene,
 	Anvil::DescriptorSet &descSetCamera,Anvil::DescriptorSet &descSetLightSources,
+	Anvil::DescriptorSet *descSetIBL,
 	uint32_t workGroupsX,uint32_t workGroupsY
 )
 {
@@ -101,5 +120,5 @@ bool ShaderRayTracing::Compute(
 		&descSetGameScene,
 		&descSetCamera,
 		&descSetLightSources
-	}) && RecordPushConstants(pushConstants) && RecordDispatch(workGroupsX,workGroupsY);
+	}) && (descSetIBL == nullptr || RecordBindDescriptorSet(*descSetIBL,DESCRIPTOR_SET_IBL.setIndex)) && RecordPushConstants(pushConstants) && RecordDispatch(workGroupsX,workGroupsY);
 }

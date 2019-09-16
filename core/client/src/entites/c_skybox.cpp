@@ -117,7 +117,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	ImageWriteInfo imgWriteInfo {};
 	imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::KTX;;
 	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
-	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC1;
+	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::ColorMap;
 	imgWriteInfo.wrapMode = ImageWriteInfo::WrapMode::Clamp;
 	auto fullPath = "addons/converted/materials/" +matName;
 	if(c_game->SaveImage(*imgCubemap,fullPath,imgWriteInfo))

@@ -21,6 +21,7 @@ namespace Lua
 		namespace Client
 		{
 			DLLCLIENT void Create(lua_State *l);
+			DLLCLIENT void CreateQuad(lua_State *l,float size);
 			DLLCLIENT void CreateBox(lua_State *l,const Vector3 &min,const Vector3 &max);
 			DLLCLIENT void CreateSphere(lua_State *l,const Vector3 &origin,float radius,uint32_t recursionLevel);
 			DLLCLIENT void CreateSphere(lua_State *l,const Vector3 &origin,float radius);

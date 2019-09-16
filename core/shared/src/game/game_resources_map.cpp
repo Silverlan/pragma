@@ -660,13 +660,6 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		entData->keyvalues["origin"] = {std::to_string(cubemapSample.origin.at(0)) +" " +std::to_string(cubemapSample.origin.at(1)) +" " +std::to_string(cubemapSample.origin.at(2))};
 	}
 
-	for(auto &entData : entities)
-	{
-		auto className = entData->KeyValue("classname");
-		if(ustring::compare(className,"light",false) || ustring::compare(className,"light_spot",false) || ustring::compare(className,"light_environment",false))
-			entData->keyvalues["light_flags"] = {"1"};
-	}
-
 	auto itNodraw = std::find(texStringData.begin(),texStringData.end(),std::string("TOOLS/TOOLSNODRAW"));
 	if(itNodraw == texStringData.end())
 		const_cast<std::vector<std::string>&>(texStringData).push_back("TOOLS/TOOLSNODRAW");

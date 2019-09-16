@@ -15,7 +15,9 @@
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/winetgraph.h"
 #include "pragma/util/util_tga.hpp"
+#include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/raytracing/cycles.hpp"
 #include <wgui/wgui.h>
 #include <cmaterialmanager.h>
 #include <pragma/networking/netmessages.h>
@@ -33,13 +35,17 @@
 #include <image/prosper_image.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/console/command_options.hpp>
 #include <wrappers/memory_block.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
 {
 	if(!state->IsGameActive())
@@ -279,19 +285,8 @@ void CMD_cl_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vec
 }
 #endif
 
-void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+static std::string get_screenshot_name(Game *game)
 {
-	auto *game = client->GetGameState();
-	if(game == nullptr)
-		return;
-	auto scene = game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
-	if(renderer == nullptr)
-		return;
-	/*int32_t mode = 0;
-	if(!argv.empty())
-		mode = atoi(argv.front().c_str());*/
-	FileManager::CreateDirectory("screenshot");
 	std::string map;
 	if(game == nullptr)
 		map = engine_info::get_identifier();
@@ -308,42 +303,247 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		i++;
 	}
 	while(FileManager::Exists(path.c_str()/*,fsys::SearchFlags::Local*/));
+	return path;
+}
 
-	auto rt = renderer->GetHDRInfo().postHdrRenderTarget;
-	if(rt == nullptr)
+#include <image/prosper_sampler.hpp>
+#include <image/prosper_texture.hpp>
+void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+{
+	auto *game = client->GetGameState();
+	if(game == nullptr)
 		return;
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
-	if(f == nullptr)
+	// Determine file name for screenshot
+	FileManager::CreateDirectory("screenshot");
+
+	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv,commandOptions);
+
+	auto mode = pragma::console::get_command_option_parameter_value(commandOptions,"mode");
+	if(ustring::compare(mode,"raytracing",false))
+	{
+		auto *pCam = c_game->GetRenderCamera();
+		Con::cout<<"Taking raytraced screenshot..."<<Con::endl;
+		Con::cout<<"Preparing scene for raytracing..."<<Con::endl;
+
+		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
+		auto resolution = c_engine->GetRenderResolution();
+		pragma::rendering::cycles::Scene::CreateInfo createInfo {};
+		createInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
+		createInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
+		createInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
+		createInfo.type = pragma::rendering::cycles::Scene::Type::BakeAmbientOcclusion; // TODO
+		if(pCam)
+		{
+			createInfo.cameraPosition = pCam->GetEntity().GetPosition();
+			createInfo.cameraRotation = pCam->GetEntity().GetRotation();
+			createInfo.nearZ = pCam->GetNearZ();
+			createInfo.farZ = pCam->GetFarZ();
+			createInfo.fov = pCam->GetFOV();
+		}
+		auto itDenoise = commandOptions.find("denoise");
+		if(itDenoise != commandOptions.end())
+			createInfo.denoise = true;
+		createInfo.outputHandler = [](const uint8_t *data,int w,int h) {
+			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr);
+			Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
+			auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+			if(f == nullptr)
+				return;
+
+			{
+				auto &dev = c_engine->GetDevice();
+				prosper::util::ImageCreateInfo lightMapCreateInfo {};
+				lightMapCreateInfo.width = w;
+				lightMapCreateInfo.height = h;
+				lightMapCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+				lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+				lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+				lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+				lightMapCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
+				auto img = prosper::util::create_image(dev,lightMapCreateInfo,data);
+
+				prosper::util::SamplerCreateInfo samplerCreateInfo {};
+				samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
+				samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
+				samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE; // Doesn't really matter since lightmaps have their own border either way
+				samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+				prosper::util::ImageViewCreateInfo imgViewCreateInfo {}; // TODO: Is this needed?
+				auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+
+				//auto &ent = c_game->GetWorld()->GetEntity();
+				//auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
+
+				auto &scene = c_game->GetRenderScene();
+				static_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer())->SetLightMap(tex);
+			}
+
+			auto numInputChannels = 4u;
+			std::vector<uint8_t> rgbData {};
+			rgbData.resize(w *h *3);
+			for(auto x=decltype(h){0};x<h;++x)
+			{
+				for(auto y=decltype(w){0};y<w;++y)
+				{
+					auto offset = x *w +y;
+					auto *pxData = data +(offset *numInputChannels);
+
+					auto outOffset = x *w +y;
+					auto *outPixelData = rgbData.data() +outOffset *3;
+					for(uint8_t i=0;i<3;++i)
+						outPixelData[i] = (i < numInputChannels) ? pxData[i] : 0;
+				}
+			}
+			util::tga::write_tga(f,w,h,rgbData);
+			return;
+		};
+		Con::cout<<"Executing raytracer... This may take a few minutes!"<<Con::endl;
+		auto scene = pragma::rendering::cycles::Scene::Create(*client,createInfo);
+		if(scene.valid())
+		{
+			auto currentProgress = 0.f;
+			scene->SetProgressCallback([currentProgress](float progress) mutable {
+				for(auto fstep : {0.25f,0.5f,0.75f,1.f})
+				{
+					if(currentProgress < fstep && progress >= fstep)
+					{
+						currentProgress = progress;
+						Con::cout<<"Raytracing for screenshot at "<<(fstep *100.f)<<"%!"<<Con::endl;
+						break;
+					}
+				}
+			});
+		}
 		return;
-	c_engine->WaitIdle(); // Make sure rendering is complete
+	}
 
-	uint32_t queueFamilyIndex;
-	auto cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::UNIVERSAL,queueFamilyIndex);
-	
-	auto &img = rt->GetTexture()->GetImage();
-	auto extents = img->GetExtents();
-	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-	createInfo.width = extents.width;
-	createInfo.height = extents.height;
-	createInfo.tiling = Anvil::ImageTiling::LINEAR;
-	createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	auto imgDst = prosper::util::create_image(c_engine->GetDevice(),createInfo);
+	auto scene = game->GetScene();
+	std::shared_ptr<prosper::Image> imgScreenshot = nullptr;
+#if 0
+	{
+		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"1"});
+		/*
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
+		auto technique = static_cast<RenderingTechnique>(val);
+		switch(technique)
+		{
+		case RenderingTechnique::Raytracing:
+		{
+		CRaytracingComponent::InitializeBuffers();
+		for(auto *ent : entIt)
+		ent->AddComponent<CRaytracingComponent>();
+		break;
+		}
+		default:
+		{
+		CRaytracingComponent::ClearBuffers();
+		for(auto *ent : entIt)
+		ent->RemoveComponent<CRaytracingComponent>();
+		break;
+		}
+		}
+		*/
+		auto rtRenderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*scene);
+		auto oldRenderer = scene->GetRenderer() ? scene->GetRenderer()->shared_from_this() : nullptr;
+		scene->SetRenderer(rtRenderer);
 
-	// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
-	// before issuing the copy command
-	cmdBuffer->StartRecording();
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+		std::queue<EntityHandle> entsRevertRaytracingComponent = {};
+		for(auto *ent : entIt)
+		{
+			if(ent->HasComponent<pragma::CRaytracingComponent>() || ent->IsPlayer()) // TODO
+				continue;
+			// This entity didn't have a raytracing component, so we'll add a temporary one here.
+			// We'll want to make sure to remove it again once we're done.
+			ent->AddComponent<pragma::CRaytracingComponent>();
+			entsRevertRaytracingComponent.push(ent->GetHandle());
+		}
+
+		prosper::util::ImageCreateInfo createInfo {};
+		createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+		//createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
+
+		createInfo.width = 2'048;
+		createInfo.height = 2'048;
+		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+		createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
+		createInfo.tiling = Anvil::ImageTiling::LINEAR;
+		createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+		auto &dev = c_engine->GetDevice();
+		imgScreenshot = prosper::util::create_image(dev,createInfo);
+
+		// TODO: Render
+		auto drawCmd = c_engine->GetSetupCommandBuffer();
+		c_game->RenderScene(drawCmd,*imgScreenshot,FRender::All &~FRender::View);
+
+		// We're flushing the command buffer for each layer
+		// individually to make sure we're not gonna hit the TDR
+		c_engine->FlushSetupCommandBuffer();
+
+		static auto keepRtAlive = false;
+		if(keepRtAlive)
+			return;
+		
+		// Reset renderer
+		scene->SetRenderer(oldRenderer);
+
+		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"0"});
+		while(entsRevertRaytracingComponent.empty() == false)
+		{
+			auto &hEnt = entsRevertRaytracingComponent.front();
+			if(hEnt.IsValid())
+				hEnt->RemoveComponent<pragma::CRaytracingComponent>();
+			entsRevertRaytracingComponent.pop();
+		}
+	}
+	else
+#endif
+	{
+		// Just use the last rendered image
+		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		if(renderer == nullptr)
+			return;
+
+		auto rt = renderer->GetHDRInfo().toneMappedRenderTarget;
+		if(rt == nullptr)
+			return;
+		c_engine->WaitIdle(); // Make sure rendering is complete
+
+		uint32_t queueFamilyIndex;
+		auto cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::UNIVERSAL,queueFamilyIndex);
+
+		auto &img = rt->GetTexture()->GetImage();
+		auto extents = img->GetExtents();
+		prosper::util::ImageCreateInfo createInfo {};
+		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+		createInfo.width = extents.width;
+		createInfo.height = extents.height;
+		createInfo.tiling = Anvil::ImageTiling::LINEAR;
+		createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+		createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
+		createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+		imgScreenshot = prosper::util::create_image(c_engine->GetDevice(),createInfo);
+
+		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
+		// before issuing the copy command
+		cmdBuffer->StartRecording();
 		prosper::util::record_image_barrier(**cmdBuffer,**img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		prosper::util::record_copy_image(**cmdBuffer,{},**img,**imgDst);
+		prosper::util::record_copy_image(**cmdBuffer,{},**img,**imgScreenshot);
 		prosper::util::record_image_barrier(**cmdBuffer,**img,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//prosper::util::record_blit_image(**cmdBuffer,{},**img,**imgDst);
-	cmdBuffer->StopRecording();
-	c_engine->SubmitCommandBuffer(*cmdBuffer,true);
-
-	auto format = createInfo.format;
+		cmdBuffer->StopRecording();
+		c_engine->SubmitCommandBuffer(*cmdBuffer,true);
+	}
+	if(imgScreenshot == nullptr)
+		return;
+	auto path = get_screenshot_name(game);
+	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+	if(f == nullptr)
+		return;
+	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
 	if(format == Anvil::Format::B8G8R8A8_UNORM)
 	{
@@ -358,22 +558,23 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 	void *data;
 	auto byteSize = prosper::util::get_byte_size(format);
-	auto numBytes = createInfo.width *createInfo.height *byteSize;
-	imgDst->GetAnvilImage().get_memory_block()->map(0ull,numBytes,&data);
+	auto extents = imgScreenshot->GetExtents();
+	auto numBytes = extents.width *extents.height *byteSize;
+	imgScreenshot->GetAnvilImage().get_memory_block()->map(0ull,numBytes,&data);
 	Anvil::SubresourceLayout layout;
-	imgDst->GetAnvilImage().get_aspect_subresource_layout(Anvil::ImageAspectFlagBits::COLOR_BIT,0u,0u,&layout);
+	imgScreenshot->GetAnvilImage().get_aspect_subresource_layout(Anvil::ImageAspectFlagBits::COLOR_BIT,0u,0u,&layout);
 	auto offset = layout.offset;
 	auto rowPitch = layout.row_pitch;
 	std::vector<unsigned char> pixels(numBytes);
 	size_t pos = 0;
 	auto *ptr = static_cast<const char*>(data);
-	for(auto y=decltype(createInfo.height){0u};y<createInfo.height;++y)
+	for(auto y=decltype(extents.height){0u};y<extents.height;++y)
 	{
 		ptr = static_cast<const char*>(data) +offset +y *rowPitch;
 		auto *row = ptr;
 		if(format == Anvil::Format::R8G8B8A8_UNORM)
 		{
-			for(auto x=decltype(createInfo.width){0};x<createInfo.width;++x)
+			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
 				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
 				pixels[pos] = (bSwapped == false) ? px[0] : px[2];
@@ -385,7 +586,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 		else if(format == Anvil::Format::R8G8B8_UNORM)
 		{
-			for(auto x=decltype(createInfo.width){0};x<createInfo.width;++x)
+			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
 				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
 				pixels[pos] = (bSwapped == false) ? px[0] : px[2];
@@ -397,7 +598,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 		else if(format == Anvil::Format::R8_UNORM)
 		{
-			for(auto x=decltype(createInfo.width){0};x<createInfo.width;++x)
+			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
 				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
 				pixels[pos] = px[0];
@@ -409,7 +610,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 		else if(format == Anvil::Format::R16_UNORM)
 		{
-			for(auto x=decltype(createInfo.width){0};x<createInfo.width;++x)
+			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
 				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
 				pixels[pos] = px[0];
@@ -421,7 +622,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 		else if(format == Anvil::Format::D16_UNORM)
 		{
-			for(auto x=decltype(createInfo.width){0};x<createInfo.width;++x)
+			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
 				auto val = 0.f;
 				auto *px = static_cast<const unsigned char*>(static_cast<const void*>(row));
@@ -435,7 +636,8 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			}
 		}
 	}
-	util::tga::write_tga(f,createInfo.width,createInfo.height,pixels);
+	util::tga::write_tga(f,extents.width,extents.height,pixels);
+	Con::cout<<"Saved screenshot as '"<<path<<"'!"<<Con::endl;
 }
 
 DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -857,3 +1059,4 @@ static void cvar_net_graph(bool val)
 REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
 	cvar_net_graph(val);
 })
+#pragma optimize("",on)

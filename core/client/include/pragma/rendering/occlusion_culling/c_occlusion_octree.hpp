@@ -6,6 +6,7 @@
 #include <vector>
 #include <cinttypes>
 #include <memory>
+#include <queue>
 #include <functional>
 
 namespace DebugRenderer {class BaseObject;};

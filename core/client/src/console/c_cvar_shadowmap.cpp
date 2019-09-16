@@ -107,7 +107,7 @@ static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragm
 		return false;
 	}
 	auto hShadowmap = (*light)->GetShadowMap(smType);
-	if(hShadowmap.expired())
+	if(hShadowmap.expired() && (*light)->GetEntity().HasComponent<pragma::CShadowCSMComponent>() == false)
 	{
 		Con::cwar<<"Invalid shadowmap for this entity!"<<Con::endl;
 		return false;

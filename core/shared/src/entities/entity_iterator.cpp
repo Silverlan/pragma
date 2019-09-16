@@ -2,7 +2,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 
-
+#pragma optimize("",off)
 std::size_t EntityContainer::Size() const {return ents.size();}
 BaseEntity *EntityContainer::At(std::size_t index) {return ents.at(index);}
 
@@ -136,3 +136,4 @@ void EntityIterator::SetBaseComponentType(const std::string &componentName)
 	componentManager.GetComponentTypeId(componentName,componentId);
 	SetBaseComponentType(componentId);
 }
+#pragma optimize("",on)

@@ -24,3 +24,10 @@ bool ShaderPPFXAA::Draw(Anvil::DescriptorSet &descSetTexture,const PushConstants
 	return RecordPushConstants(pushConstants) &&
 		ShaderPPBase::Draw(descSetTexture);
 }
+void ShaderPPFXAA::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+{
+	CreateCachedRenderPass<ShaderPPFXAA>({{{
+		Anvil::Format::R8G8B8A8_UNORM,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,
+		Anvil::AttachmentStoreOp::STORE,Anvil::SampleCountFlagBits::_1_BIT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+	}}},outRenderPass,pipelineIdx);
+}

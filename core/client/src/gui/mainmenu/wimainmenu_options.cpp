@@ -64,7 +64,7 @@ void WIMainMenuOptions::ApplyOptions()
 		auto *pChoice = static_cast<WIChoiceList*>(m_hAntiAliasing.get())->GetSelectedChoice();
 		if(pChoice->value == "fxaa")
 		{
-			std::vector<std::string> argv{std::to_string(umath::to_integral(AntiAliasing::FXAA))};
+			std::vector<std::string> argv{std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::FXAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
 		}
 		else if(ustring::substr(pChoice->value,0,4) == "msaa")
@@ -84,12 +84,12 @@ void WIMainMenuOptions::ApplyOptions()
 				mssaaSamples = "6";
 			std::vector<std::string> argv {mssaaSamples};
 			client->RunConsoleCommand("cl_render_msaa_samples",argv);
-			argv = {std::to_string(umath::to_integral(AntiAliasing::MSAA))};
+			argv = {std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::MSAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
 		}
 		else
 		{
-			std::vector<std::string> argv {std::to_string(umath::to_integral(AntiAliasing::None))};
+			std::vector<std::string> argv {std::to_string(umath::to_integral(pragma::rendering::AntiAliasing::None))};
 			client->RunConsoleCommand("cl_render_anti_aliasing",argv);
 		}
 	}
@@ -735,13 +735,13 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr)
 	{
-		auto antiAliasingType = static_cast<AntiAliasing>(client->GetConVarInt("cl_render_anti_aliasing"));
+		auto antiAliasingType = static_cast<pragma::rendering::AntiAliasing>(client->GetConVarInt("cl_render_anti_aliasing"));
 		switch(antiAliasingType)
 		{
-			case AntiAliasing::FXAA:
+			case pragma::rendering::AntiAliasing::FXAA:
 				antiAlias->SelectChoice("fxaa");
 				break;
-			case AntiAliasing::MSAA:
+			case pragma::rendering::AntiAliasing::MSAA:
 			{
 				auto msaaSamples = client->GetConVarInt("cl_render_msaa_samples");
 				//antiAlias->SelectChoice("msaa" +std::to_string(static_cast<int32_t>(sqrt(msaaSamples))));
@@ -749,6 +749,17 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			}
 		}
 	}
+	//
+	// Tone Mapping
+	auto *pToneMappingList = pList->AddChoiceList(Locale::GetText("tone_mapping"),[](WIChoiceList *pList) {
+		pList->AddChoice(Locale::GetText("default"),"-1");
+		pList->AddChoice(Locale::GetText("gamma_correction"),"0");
+		pList->AddChoice(Locale::GetText("tone_mapping_reinhard"),"1");
+		pList->AddChoice(Locale::GetText("tone_mapping_hejil_richard"),"2");
+		pList->AddChoice(Locale::GetText("tone_mapping_uncharted"),"3");
+		pList->AddChoice(Locale::GetText("tone_mapping_aces"),"4");
+		pList->AddChoice(Locale::GetText("tone_mapping_gran_turismo"),"5");
+	},"cl_render_tone_mapping");
 	//
 	// SSAO
 	m_hSsao = pList->AddToggleChoice(Locale::GetText("ssao"),"cl_render_ssao")->GetHandle();

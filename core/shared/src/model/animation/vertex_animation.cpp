@@ -10,6 +10,7 @@ MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other)
 const std::vector<std::array<uint16_t,3>> &MeshVertexFrame::GetVertices() const {return const_cast<MeshVertexFrame*>(this)->GetVertices();}
 std::vector<std::array<uint16_t,3>> &MeshVertexFrame::GetVertices() {return m_vertices;}
 void MeshVertexFrame::SetVertexCount(uint32_t count) {m_vertices.resize(count,std::array<uint16_t,3>{0,0,0});}
+uint32_t MeshVertexFrame::GetVertexCount() const {return m_vertices.size();}
 void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const Vector3 &pos) {SetVertexPosition(vertId,std::array<uint16_t,3>{umath::float32_to_float16(pos.x),umath::float32_to_float16(pos.y),umath::float32_to_float16(pos.z)});}
 void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos)
 {
@@ -24,6 +25,30 @@ bool MeshVertexFrame::GetVertexPosition(uint32_t vertId,Vector3 &pos) const
 	auto &v = m_vertices.at(vertId);
 	pos = {umath::float16_to_float32(v.at(0)),umath::float16_to_float32(v.at(1)),umath::float16_to_float32(v.at(2))};
 	return true;
+}
+void MeshVertexFrame::Rotate(const Quat &rot)
+{
+	auto numVerts = GetVertexCount();
+	for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+	{
+		Vector3 pos;
+		if(GetVertexPosition(i,pos) == false)
+			continue;
+		uvec::rotate(&pos,rot);
+		SetVertexPosition(i,pos);
+	}
+}
+void MeshVertexFrame::Scale(const Vector3 &scale)
+{
+	auto numVerts = GetVertexCount();
+	for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+	{
+		Vector3 pos;
+		if(GetVertexPosition(i,pos) == false)
+			continue;
+		pos *= scale;
+		SetVertexPosition(i,pos);
+	}
 }
 
 /////////////////////
@@ -53,6 +78,16 @@ std::shared_ptr<MeshVertexFrame> MeshVertexAnimation::AddFrame()
 	m_frames.push_back(std::make_shared<MeshVertexFrame>());
 	m_frames.back()->SetVertexCount(m_wpSubMesh.lock()->GetVertexCount());
 	return m_frames.back();
+}
+void MeshVertexAnimation::Rotate(const Quat &rot)
+{
+	for(auto &frame : m_frames)
+		frame->Rotate(rot);
+}
+void MeshVertexAnimation::Scale(const Vector3 &scale)
+{
+	for(auto &frame : m_frames)
+		frame->Scale(scale);
 }
 
 /////////////////////
@@ -129,3 +164,14 @@ const std::string &VertexAnimation::GetName() const {return m_name;}
 
 const std::vector<std::shared_ptr<MeshVertexAnimation>> &VertexAnimation::GetMeshAnimations() const {return const_cast<VertexAnimation*>(this)->GetMeshAnimations();}
 std::vector<std::shared_ptr<MeshVertexAnimation>> &VertexAnimation::GetMeshAnimations() {return m_meshAnims;}
+
+void VertexAnimation::Rotate(const Quat &rot)
+{
+	for(auto &meshAnim : m_meshAnims)
+		meshAnim->Rotate(rot);
+}
+void VertexAnimation::Scale(const Vector3 &scale)
+{
+	for(auto &meshAnim : m_meshAnims)
+		meshAnim->Scale(scale);
+}

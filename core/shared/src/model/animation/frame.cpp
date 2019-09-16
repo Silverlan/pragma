@@ -187,6 +187,11 @@ void Frame::Translate(const Animation &anim,const Skeleton &skeleton,const Vecto
 		transform.pos += t;
 	}
 }
+void Frame::Scale(const Vector3 &scale)
+{
+	for(auto &t : m_bones)
+		t.pos *= scale;
+}
 
 const std::vector<OrientedPoint> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
 const std::vector<Vector3> &Frame::GetBoneScales() const {return const_cast<Frame*>(this)->GetBoneScales();}

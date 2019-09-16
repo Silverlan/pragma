@@ -75,6 +75,7 @@ public:
 	void Localize(const Skeleton &skeleton);
 	void Rotate(const Skeleton &skeleton,const Quat &rot);
 	void Translate(const Skeleton &skeleton,const Vector3 &t);
+	void Scale(const Vector3 &scale);
 	// Reverses all frames in the animation
 	void Reverse();
 

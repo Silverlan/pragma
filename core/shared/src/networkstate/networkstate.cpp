@@ -48,6 +48,7 @@ NetworkState::NetworkState()
 
 	RegisterCallback<void>("Think");
 	RegisterCallback<void>("Tick");
+	RegisterCallback<void>("OnClose");
 
 	RegisterCallback<void,std::reference_wrapper<struct ISteamworks>>("OnSteamworksInitialized");
 	RegisterCallback<void>("OnSteamworksShutdown");
@@ -242,6 +243,7 @@ void NetworkState::ChangeLevel(const std::string &map)
 void NetworkState::Close()
 {
 	EndGame();
+	CallCallbacks("OnClose");
 }
 
 lua_State *NetworkState::GetLuaState()

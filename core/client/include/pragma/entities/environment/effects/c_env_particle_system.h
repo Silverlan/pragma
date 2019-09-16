@@ -7,6 +7,7 @@
 #include "pragma/particlesystem/c_particle.h"
 #include "pragma/rendering/c_alpha_mode.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
+#include <fsys/vfileptr.h>
 
 class CParticleSystemData;
 namespace pragma

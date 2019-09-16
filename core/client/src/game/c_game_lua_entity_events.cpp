@@ -8,7 +8,7 @@ bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t ev
 	if(Game::InvokeEntityEvent(component,eventId,argsIdx,bInject))
 		return true;
 	auto *l = GetLuaState();
-	if(eventId == pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA)
+	/*if(eventId == pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA)
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
@@ -20,7 +20,7 @@ bool CGame::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t ev
 			component.InjectEvent(eventId,evData);
 		else
 			component.BroadcastEvent(eventId,evData);
-	}
+	}*/
 	if(eventId == pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED)
 	{
 		Lua::PushInt(l,1);

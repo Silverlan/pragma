@@ -606,6 +606,7 @@ void CGame::RegisterLuaClasses()
 	subModelMeshClassDef.def("GetIndexBuffer",&Lua::ModelSubMesh::Client::GetIndexBuffer);
 	subModelMeshClassDef.def("GetVkMesh",&Lua::ModelSubMesh::Client::GetVkMesh);
 	subModelMeshClassDef.scope[luabind::def("Create",&Lua::ModelSubMesh::Client::Create)];
+	subModelMeshClassDef.scope[luabind::def("CreateQuad",&Lua::ModelSubMesh::Client::CreateQuad)];
 	subModelMeshClassDef.scope[luabind::def("CreateBox",&Lua::ModelSubMesh::Client::CreateBox)];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float,uint32_t)>(&Lua::ModelSubMesh::Client::CreateSphere))];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float)>(&Lua::ModelSubMesh::Client::CreateSphere))];

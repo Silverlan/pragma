@@ -39,6 +39,7 @@ void CBaseLightComponent::ReceiveData(NetPacket &packet)
 {
 	m_shadowType = packet->Read<decltype(m_shadowType)>();
 	SetFalloffExponent(packet->Read<float>());
+	m_lightFlags = packet->Read<LightFlags>();
 }
 
 BaseEntityComponent *CBaseLightComponent::GetLight(LightType &outType) const

@@ -15,9 +15,13 @@ public:
 	const std::vector<std::array<uint16_t,3>> &GetVertices() const;
 	std::vector<std::array<uint16_t,3>> &GetVertices();
 	void SetVertexCount(uint32_t count);
+	uint32_t GetVertexCount() const;
 	void SetVertexPosition(uint32_t vertId,const Vector3 &pos);
 	void SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos);
 	bool GetVertexPosition(uint32_t vertId,Vector3 &pos) const;
+
+	void Rotate(const Quat &rot);
+	void Scale(const Vector3 &scale);
 private:
 	// Each uint16_t is a half-float
 	std::vector<std::array<uint16_t,3>> m_vertices = {};
@@ -41,6 +45,9 @@ public:
 	ModelMesh *GetMesh() const;
 	ModelSubMesh *GetSubMesh() const;
 	void SetMesh(ModelMesh &mesh,ModelSubMesh &subMesh);
+
+	void Rotate(const Quat &rot);
+	void Scale(const Vector3 &scale);
 private:
 	mutable std::weak_ptr<ModelMesh> m_wpMesh = {};
 	mutable std::weak_ptr<ModelSubMesh> m_wpSubMesh = {};
@@ -71,6 +78,9 @@ public:
 
 	void SetName(const std::string &name);
 	const std::string &GetName() const;
+
+	void Rotate(const Quat &rot);
+	void Scale(const Vector3 &scale);
 protected:
 	VertexAnimation()=default;
 	VertexAnimation(const VertexAnimation &other);

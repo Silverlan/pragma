@@ -148,6 +148,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 	// Update animation
 	if(IsAnimated() == false)
 		return;
+	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto numRenderParticles = m_particleSystem.GetRenderParticleCount();
 	for(auto i=decltype(numRenderParticles){0u};i<numRenderParticles;++i)
 	{
@@ -157,7 +158,7 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 		if(animComponent.expired())
 			continue;
 		animComponent->MaintainAnimations(c_game->DeltaTime());
-		animComponent->UpdateBoneBuffer();
+		animComponent->UpdateBoneBuffer(*drawCmd);
 	}
 }
 

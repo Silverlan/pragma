@@ -15,6 +15,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount,bool bReflection)
 {
 	if(sampleCount == Anvil::SampleCountFlagBits::_1_BIT)
@@ -130,6 +131,11 @@ static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabl
 bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat)
 {
 	auto matFlags = MaterialFlags::Diffuse;
+
+	auto *diffuseMap = mat.GetDiffuseMap();
+	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->HasFlag(Texture::Flags::SRGB))
+		matFlags |= MaterialFlags::DiffuseSRGB;
+
 	auto &data = mat.GetDataBlock();
 	float parallaxHeightScale = DefaultParallaxHeightScale;
 	auto *parallaxMap = mat.GetParallaxMap();
@@ -193,10 +199,12 @@ bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat)
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap != nullptr && glowMap->texture != nullptr)
 	{
+		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
+		if(texture->HasFlag(Texture::Flags::SRGB))
+			matFlags |= MaterialFlags::GlowSRGB;
 		auto bUseGlow = true;
 		if(data->GetBool("glow_alpha_only") == true)
 		{
-			auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 			if(prosper::util::has_alpha(texture->internalFormat) == false)
 				bUseGlow = false;
 		}
@@ -407,3 +415,4 @@ REGISTER_CONVAR_CALLBACK_CL(debug_light_depth,[](NetworkState*,ConVar*,int,int v
 REGISTER_CONVAR_CALLBACK_CL(debug_forwardplus_heatmap,[](NetworkState*,ConVar*,bool,bool val) {
 	set_debug_flag(pragma::ShaderScene::DebugFlags::ForwardPlusHeatmap,val);
 });
+#pragma optimize("",on)

@@ -197,7 +197,7 @@ std::pair<uint32_t,uint32_t> pragma::rendering::ForwardPlusInstance::GetWorkGrou
 uint32_t pragma::rendering::ForwardPlusInstance::GetTileCount() const {return m_tileCount;}
 Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetGraphics() const {return (*m_descSetGroupLightSourcesGraphics)->get_descriptor_set(0u);}
 Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCompute() const {return (*m_descSetGroupLightSourcesCompute)->get_descriptor_set(0u);}
-Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_descSetGroupDepthBuffer)->get_descriptor_set(0u);}
+Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_dsgSceneDepthBuffer)->get_descriptor_set(0u);}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
 #pragma optimize("",on)

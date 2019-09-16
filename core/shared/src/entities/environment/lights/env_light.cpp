@@ -9,6 +9,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseEnvLightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -46,3 +47,4 @@ BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const {
 void BaseEnvLightComponent::SetShadowType(ShadowType type) {m_shadowType = type;}
 float BaseEnvLightComponent::GetFalloffExponent() const {return m_falloffExponent;}
 void BaseEnvLightComponent::SetFalloffExponent(float falloffExponent) {m_falloffExponent = falloffExponent;}
+#pragma optimize("",on)

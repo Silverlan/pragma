@@ -30,6 +30,7 @@ namespace Lua
 	};
 	namespace ModelSubMesh
 	{
+		DLLNETWORK void InitializeQuad(lua_State *l,::ModelSubMesh &mesh,float size);
 		DLLNETWORK void InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Vector3 &min,const Vector3 &max);
 		DLLNETWORK void InitializeSphere(lua_State *l,::ModelSubMesh &mesh,const Vector3 &origin,float radius,uint32_t recursionLevel=1);
 		DLLNETWORK void InitializeCylinder(lua_State *l,::ModelSubMesh &mesh,float startRadius,float length,uint32_t segmentCount=12);

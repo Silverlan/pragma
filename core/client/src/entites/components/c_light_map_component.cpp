@@ -1,6 +1,8 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/model/c_model.h"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/util/util_tga.hpp>
 #include <pragma/level/mapgeometry.h>
 #include <GuillotineBinPack.h>
@@ -16,6 +18,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
+#pragma optimize("",off)
 luabind::object CLightMapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapComponentHandleWrapper>(l);}
 void CLightMapComponent::Initialize()
 {
@@ -41,9 +44,42 @@ prosper::Buffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) c
 		return nullptr;
 	return m_meshLightMapUvBuffers.at(meshIdx).get();
 }
+std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GetGlobalLightMapUvBuffer() const {return m_meshLightMapUvBuffer;}
 
 const std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() const {return const_cast<CLightMapComponent*>(this)->GetMeshLightMapUvBuffers();}
 std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() {return m_meshLightMapUvBuffers;}
+
+void CLightMapComponent::ReadLightmapUvCoordinates(std::vector<std::vector<Vector2>> &uvs) const
+{
+	// Note: We need the lightmap uv coordinates, however these are not available on the CPU after the map has been loaded.
+	// Therefore we will have to map the lightmap uv buffer instead and copy the values from the GPU.
+	auto uvBuffer = GetGlobalLightMapUvBuffer();
+	auto mdl = GetEntity().GetModel();
+	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
+	if(uvBuffer == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize()) == false || meshGroup == nullptr)
+		return;
+
+	// Note: There is one uv buffer per sub-mesh of the model, which contains one uv-set per vertex.
+	auto uvBuffers = GetMeshLightMapUvBuffers();
+	uvs.reserve(uvBuffers.size());
+	for(auto &mesh : meshGroup->GetMeshes())
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
+		{
+			auto refId = subMesh->GetReferenceId();
+			if(refId >= uvBuffers.size())
+				continue;
+			auto &subBuffer = uvBuffers.at(refId);
+			if(refId >= uvs.size())
+				uvs.resize(refId +1);
+			auto &meshUvs = uvs.at(refId);
+			auto numVerts = subMesh->GetVertexCount();
+			meshUvs.resize(numVerts);
+			uvBuffer->Read(subBuffer->GetStartOffset(),numVerts *sizeof(Vector2),meshUvs.data());
+		}
+	}
+	uvBuffer->Unmap();
+}
 
 std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::LoadLightMapUvBuffers(const std::vector<std::vector<Vector2>> &meshUvData,std::vector<std::shared_ptr<prosper::Buffer>> &outMeshLightMapUvBuffers)
 {
@@ -240,20 +276,32 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::LoadLightMap(pragma::level
 	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE; // Doesn't really matter since lightmaps have their own border either way
 	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {}; // TODO: Is this needed?
-
-	// Write lightmap atlas to file; For debugging purposes only
-	static auto writeLightMap = false;
-	if(writeLightMap)
-	{
-		std::vector<uint8_t> rgbData {};
-		rgbData.reserve(lightMapImageData.size() *3);
-		for(auto &v : lightMapImageData)
-		{
-			rgbData.push_back(umath::clamp(v.x,0.f,255.f));
-			rgbData.push_back(umath::clamp(v.y,0.f,255.f));
-			rgbData.push_back(umath::clamp(v.z,0.f,255.f));
-		}
-		util::tga::write_tga("lightmap.tga",lightMapCreateInfo.width,lightMapCreateInfo.height,rgbData);
-	}
 	return prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
 }
+
+void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	if(c_game == nullptr)
+	{
+		Con::cwar<<"WARNING: No map loaded!"<<Con::endl;
+		return;
+	}
+	auto *world = c_game->GetWorld();
+	if(world == nullptr)
+	{
+		Con::cwar<<"WARNING: World is invalid!"<<Con::endl;
+		return;
+	}
+	auto &ent = world->GetEntity();
+	auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
+	if(lightmapC.expired())
+	{
+		Con::cwar<<"WARNING: World has no lightmap component! Lightmaps cannot be generated!"<<Con::endl;
+		return;
+	}
+	// TODO:
+	// 1) Generate new lightmaps
+	// 2) Overwrite lightmap atlas texture of lightmap component
+	// 3) Overwrite lightmap data in map file
+}
+#pragma optimize("",on)

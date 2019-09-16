@@ -14,8 +14,10 @@ enum class FRender : uint32_t
 	Glow = Particles<<1,
 	Debug = Glow<<1,
 	Water = Debug<<1,
-	All = (Water <<1) -1,
-	Reflection = Water<<1,
+	Static = Water<<1,
+	Dynamic = Static<<1,
+	All = (Dynamic <<1) -1,
+	Reflection = Dynamic<<1,
 	HDR = Reflection<<1
 };
 REGISTER_BASIC_BITWISE_OPERATORS(FRender)

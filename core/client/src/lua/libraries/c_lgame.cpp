@@ -913,7 +913,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	{
 		auto clearCol = clearColor->ToVector4();
 		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
-		auto &hdrImg = hdrInfo.hdrRenderTarget->GetTexture()->GetImage();
+		auto &hdrImg = hdrInfo.sceneRenderTarget->GetTexture()->GetImage();
 		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 		prosper::util::record_clear_image(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
 		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);

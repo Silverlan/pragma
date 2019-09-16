@@ -74,5 +74,6 @@ REGISTER_CONCOMMAND_CL(cl_gpu_timer_queries_dump,Console::commands::cl_gpu_timer
 REGISTER_CONCOMMAND_CL(cl_steam_audio_reload_scene,Console::commands::cl_steam_audio_reload_scene,ConVarFlags::None,"Reloads the steam audio scene cache.");
 
 REGISTER_CONCOMMAND_CL(map_rebuild_reflection_probes,Console::commands::map_rebuild_reflection_probes,ConVarFlags::None,"Rebuilds all reflection probes in the map. Use 'debug_pbr_ibl' to check the probes after they have been built.");
+REGISTER_CONCOMMAND_CL(map_rebuild_lightmaps,Console::commands::map_rebuild_lightmaps,ConVarFlags::None,"Rebuilds the lightmaps for the current map. Note that this will only work if the map was compiled with lightmap uvs.");
 
 #endif

@@ -4,6 +4,7 @@
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
 #include <prosper_util.hpp>
+#include <prosper_command_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -60,7 +61,7 @@ void CAnimatedComponent::Initialize()
 		if(umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty) == false)
 			return;
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
-		UpdateBoneBuffer();
+		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderData&>(evData.get()).commandBuffer);
 	});
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
@@ -162,7 +163,7 @@ void CAnimatedComponent::InitializeBoneBuffer()
 	CEOnBoneBufferInitialized evData{m_boneBuffer};
 	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED,evData);
 }
-void CAnimatedComponent::UpdateBoneBuffer()
+void CAnimatedComponent::UpdateBoneBuffer(prosper::PrimaryCommandBuffer &commandBuffer)
 {
 	// Update Bone Buffer
 	auto wpBoneBuffer = GetBoneBuffer();
@@ -171,10 +172,7 @@ void CAnimatedComponent::UpdateBoneBuffer()
 	{
 		// Update bone buffer
 		auto buffer = wpBoneBuffer.lock();
-		prosper::Context::BufferUpdateInfo updateInfo {};
-		updateInfo.postUpdateBarrierStageMask = Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT;
-		updateInfo.postUpdateBarrierAccessMask = Anvil::AccessFlagBits::SHADER_READ_BIT;
-		c_engine->ScheduleRecordUpdateBuffer(buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data(),updateInfo);
+		prosper::util::record_update_generic_shader_read_buffer(*commandBuffer,*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
 	}
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const {return const_cast<CAnimatedComponent*>(this)->GetBoneMatrices();}

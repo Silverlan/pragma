@@ -16,6 +16,7 @@ void SLightComponent::SendData(NetPacket &packet,networking::ClientRecipientFilt
 {
 	packet->Write<pragma::BaseEnvLightComponent::ShadowType>(GetShadowType());
 	packet->Write<float>(m_falloffExponent);
+	packet->Write<LightFlags>(m_lightFlags);
 }
 
 void SLightComponent::SetShadowType(ShadowType type)

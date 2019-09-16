@@ -4,10 +4,14 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma::rendering;
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
 bool RaytracingRenderer::Initialize()
 {
 	auto &dev = c_engine->GetDevice();
@@ -58,41 +62,106 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 		pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount(),
 		extents.width,extents.height,cam.valid() ? cam->GetFOVRad() : umath::deg_to_rad(pragma::CCameraComponent::DEFAULT_FOV)
 	};
+	pushConstants.renderFlags = ShaderRayTracing::RenderFlags::None;
+	if(umath::is_flag_set(renderFlags,FRender::Skybox))
+		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderSkybox);
+	if(umath::is_flag_set(renderFlags,FRender::View))
+		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderView);
+	if(umath::is_flag_set(renderFlags,FRender::Water))
+		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWater);
+	if(umath::is_flag_set(renderFlags,FRender::World))
+		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWorld);
+
+	auto *dsIBL = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(cam->GetEntity().GetPosition());
+	if(dsIBL == nullptr)
+		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::NoIBL);
 
 	auto &dsgCam = scene.GetCameraDescriptorSetGroup(vk::PipelineBindPoint::eCompute);
 	auto dsgGameScene = CRaytracingComponent::GetGameSceneDescriptorSetGroup();
 	if(dsgGameScene == nullptr)
 		return false;
 
-	auto swapChainWidth = 256;
-	auto swapChainHeight = 256;
-	auto &shader = static_cast<ShaderRayTracing&>(*m_whShader);
-	if(shader.BeginCompute(drawCmd) == false)
-		return false;
-	shader.Compute(
-		pushConstants,GetOutputImageDescriptorSet(),
-		*(*dsgGameScene)->get_descriptor_set(0),*(*dsgCam)->get_descriptor_set(0),
-		*(*m_dsgLights)->get_descriptor_set(0),
-		swapChainWidth,swapChainHeight
-	);
-
-	/*static auto initialized = false;
-	if(initialized == false)
+	// Update entity buffers
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CRaytracingComponent>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
+	for(auto *ent : entIt)
 	{
-		initialized = true;
-		auto &wgui = WGUI::GetInstance();
-		auto *p = wgui.Create<WITexturedRect>();
-		p->SetTexture(*GetSceneTexture());
-		p->SetSize(1280,1024);
+		auto renderC = ent->GetComponent<CRenderComponent>();
+		renderC->UpdateRenderData(drawCmd);
 	}
-	*/
+
+	constexpr uint8_t localWorkGroupSize = 4;
+	auto width = extents.width;
+	auto height = extents.height;
+	if((width %localWorkGroupSize) != 0 || (height %localWorkGroupSize) != 0)
+		Con::cwar<<"WARNING: Raytracing output image resolution "<<width<<"x"<<height<<" is not a multiple of 4! Image may become partially black."<<Con::endl;
+
+	// Resolution is limited by ShaderRaytracing::PushConstants::pxOffset only
+	constexpr auto maxResolution = std::numeric_limits<uint16_t>::max();
+	if(width > maxResolution || height > maxResolution)
+		Con::cwar<<"WARNING: Raytracing output image resolution exceeds limit of "<<maxResolution<<"! Image may become partially black."<<Con::endl;
+	width = umath::min(width,static_cast<uint32_t>(maxResolution));
+	height = umath::min(height,static_cast<uint32_t>(maxResolution));
+
+	auto numWorkGroupsX = width /localWorkGroupSize;
+	auto numWorkGroupsY = height /localWorkGroupSize;
+
+	//
+	const auto fFlushCommandBuffer = [&drawCmd]() {
+		drawCmd->StopRecording();
+
+		auto &dev = c_engine->GetDevice();
+		dev.get_universal_queue(0)->submit(Anvil::SubmitInfo::create(
+			&drawCmd->GetAnvilCommandBuffer(),0u,nullptr,
+			0u,nullptr,nullptr,true
+		));
+		drawCmd->StartRecording();
+	};
+	//
+	fFlushCommandBuffer();
+
+	auto &shader = static_cast<ShaderRayTracing&>(*m_whShader);
+	constexpr uint8_t numWorkGroupsPerIterationSqr = 2; // Lower this value if the GPU's TDR is being hit
+	// Number of batches to record before flushing the command buffer. If this value is too low, execution time will
+	// increase drastically. If the value is too high, the GPU's TDR may be hit!
+	constexpr uint8_t flushBatchCount = 20;
+	uint8_t batchCounter = 0;
+	auto numWorkGroupsTotal = numWorkGroupsX *numWorkGroupsY;
+	for(auto x=decltype(numWorkGroupsX){0u};x<numWorkGroupsX;x+=numWorkGroupsPerIterationSqr)
+	{
+		for(auto y=decltype(numWorkGroupsY){0u};y<numWorkGroupsY;y+=numWorkGroupsPerIterationSqr)
+		{
+			if(shader.BeginCompute(drawCmd) == false)
+				return false;
+			auto &pixelOffset = pushConstants.pxOffset;
+			pixelOffset = y *localWorkGroupSize;
+			pixelOffset<<=16;
+			pixelOffset |= static_cast<uint16_t>(x *localWorkGroupSize);
+			shader.Compute(
+				pushConstants,GetOutputImageDescriptorSet(),
+				*(*dsgGameScene)->get_descriptor_set(0),*(*dsgCam)->get_descriptor_set(0),
+				*(*m_dsgLights)->get_descriptor_set(0),
+				dsIBL,numWorkGroupsPerIterationSqr,numWorkGroupsPerIterationSqr
+			);
+			shader.EndCompute();
+
+			if(++batchCounter == flushBatchCount)
+			{
+				batchCounter = 0;
+				fFlushCommandBuffer();
+			}
+
+			auto progress = ((x *numWorkGroupsY) +y) /static_cast<float>(numWorkGroupsTotal);
+			Con::cout<<"Raytracing progress: "<<(progress *100.f)<<"%"<<Con::endl;
+		}
+	}
 	prosper::util::record_image_barrier(
 		**drawCmd,**imgOutput,
 		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
 		Anvil::ImageLayout::GENERAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
 	);
-	shader.EndCompute();
 	return true;
 }
 bool RaytracingRenderer::ReloadRenderTarget()
@@ -108,3 +177,4 @@ const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetHDRPresentationT
 }
 void RaytracingRenderer::EndRendering() {}
 Anvil::DescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0);}
+#pragma optimize("",on)

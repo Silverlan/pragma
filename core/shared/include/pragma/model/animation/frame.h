@@ -41,6 +41,7 @@ public:
 	void Translate(const Skeleton &skeleton,const Vector3 &t);
 	void Rotate(const Animation &anim,const Skeleton &skeleton,const Quat &rot);
 	void Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t);
+	void Scale(const Vector3 &scale);
 
 	bool HasScaleTransforms() const;
 

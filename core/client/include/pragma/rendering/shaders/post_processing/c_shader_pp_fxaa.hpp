@@ -28,6 +28,7 @@ namespace pragma
 		bool Draw(Anvil::DescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

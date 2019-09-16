@@ -14,6 +14,8 @@ enum class LightType : uint32_t
 	Spot = 3
 };
 
+class CBaseEntity;
+class CModelMesh;
 namespace pragma
 {
 	class CLightSpotComponent;
@@ -185,6 +187,7 @@ namespace pragma
 		// For internal use only!
 		void SetRenderBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
 		void SetShadowBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
+		void UpdateShadowTypes();
 	protected:
 		static std::size_t s_lightCount;
 		void InitializeRenderBuffer();
@@ -224,7 +227,6 @@ namespace pragma
 		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
 		util::WeakHandle<CShadowComponent> m_shadowMapStatic = {};
 		util::WeakHandle<CShadowComponent> m_shadowMapDynamic = {};
-		void UpdateShadowTypes();
 		void InitializeShadowMap(CShadowComponent &sm);
 		virtual void InitializeShadowMap();
 	};

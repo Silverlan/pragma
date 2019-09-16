@@ -14,6 +14,11 @@ void Lua::ModelSubMesh::Client::Create(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,std::make_shared<::CModelSubMesh>());
 }
+void Lua::ModelSubMesh::Client::CreateQuad(lua_State *l,float size)
+{
+	auto subMesh = std::make_shared<::CModelSubMesh>();
+	Lua::ModelSubMesh::InitializeQuad(l,*subMesh,size);
+}
 void Lua::ModelSubMesh::Client::CreateBox(lua_State *l,const Vector3 &min,const Vector3 &max)
 {
 	auto subMesh = std::make_shared<::CModelSubMesh>();

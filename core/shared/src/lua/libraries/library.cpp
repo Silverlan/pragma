@@ -803,7 +803,8 @@ void Game::RegisterLuaLibraries()
 		//{"import_smd",Lua::import::import_smd},
 		{"import_obj",Lua::import::import_obj},
 		{"import_pmx",Lua::import::import_pmx},
-		{"import_model_asset",Lua::import::import_model_asset}
+		{"import_model_asset",Lua::import::import_model_asset},
+		{"export_model_asset",Lua::import::export_model_asset}
 	});
 
 	auto activityEnums = ::Animation::GetActivityEnumRegister().GetEnums();
@@ -915,6 +916,7 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("Read",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds,uint32_t)>(&Lua_LFile_Read));
 	classDefFile.def("Write",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds)>(&Lua_LFile_Write));
 	classDefFile.def("Write",static_cast<void(*)(lua_State*,LFile&,::DataStream &ds,uint32_t)>(&Lua_LFile_Write));
+	classDefFile.def("GetPath",&Lua_LFile_GetPath);
 	fileMod[classDefFile];
 
 	Lua::RegisterLibrary(GetLuaState(),"time",{

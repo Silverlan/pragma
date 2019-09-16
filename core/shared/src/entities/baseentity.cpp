@@ -15,7 +15,7 @@ DEFINE_BASE_HANDLE(DLLNETWORK,BaseEntity,Entity);
 
 bool BaseEntity::IsStatic() const
 {
-	if(GetAnimatedComponent().expired())
+	if(GetAnimatedComponent().valid())
 		return false;
 	auto physComponent = GetPhysicsComponent();
 	auto type = physComponent.valid() ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;

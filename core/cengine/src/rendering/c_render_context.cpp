@@ -33,8 +33,14 @@ VkBool32 RenderContext::ValidationCallback(
 	if((severityFlags &Anvil::DebugMessageSeverityFlagBits::ERROR_BIT) != Anvil::DebugMessageSeverityFlagBits::NONE)
 	{
 		std::string strMsg = message;
-		prosper::debug::add_debug_object_information(strMsg);
-		Con::cerr<<"[VK] "<<strMsg<<Con::endl;
+		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
+		// We'll just ignore it for now, since it doesn't affect us in any way.
+		// TODO: Remove this condition once the Anvil bug has been dealt with.
+		if(ustring::compare(strMsg.c_str(),"VkImageStencilUsageCreateInfoEXT",true,strlen("VkImageStencilUsageCreateInfoEXT")) == false)
+		{
+			prosper::debug::add_debug_object_information(strMsg);
+			Con::cerr<<"[VK] "<<strMsg<<Con::endl;
+		}
 	}
     return prosper::Context::ValidationCallback(severityFlags,message);
 }

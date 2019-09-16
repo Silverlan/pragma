@@ -24,6 +24,7 @@ namespace pragma
 	{
 	public:
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
+		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
@@ -37,8 +38,13 @@ namespace pragma
 		Anvil::DescriptorSet *GetIBLDescriptorSet();
 
 		bool UpdateIBLData(bool rebuild=false);
+		bool RequiresRebuild() const;
 	private:
 		void InitializeDescriptorSet();
+		void CaptureRaytracedIBLReflectionsFromScene(
+			prosper::Image &imgCubemap,uint32_t layerIndex,
+			const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+		);
 		std::string GetCubemapIBLMaterialPath() const;
 		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;

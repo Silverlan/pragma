@@ -2,11 +2,13 @@
 #include "pragma/level/level_info.hpp"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/entities/components/basetoggle.h"
+#include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/environment/audio/env_sound.h"
 #include <util_fgd.hpp>
 
-const auto LIGHT_SOURCE_FLAGS = /*umath::to_integral(pragma::BaseEnvLightComponent::SpawnFlag::DontCastShadows) | */umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn);
+const auto LIGHT_SOURCE_FLAGS = /*umath::to_integral(pragma::BaseEnvLightComponent::SpawnFlag::DontCastShadows) | */
+	umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn) | umath::to_integral(pragma::BaseEnvLightComponent::SpawnFlag::DontCastShadows);
 
 const decltype(pragma::level::WLD_DEFAULT_AMBIENT_COLOR) pragma::level::WLD_DEFAULT_AMBIENT_COLOR = Color{255,255,255,80};
 void pragma::level::find_entity_components(const std::unordered_map<std::string,std::string> &keyValues,std::unordered_set<std::string> &outComponents)
@@ -241,6 +243,7 @@ void pragma::level::transform_class(
 		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
 		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
 		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));
+		outKeyValues.insert(std::make_pair("light_flags","1")); // Baked light source
 	}
 	else if(ustring::compare(className,"light_spot"))
 	{
@@ -258,6 +261,7 @@ void pragma::level::transform_class(
 		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
 		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
 		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));
+		outKeyValues.insert(std::make_pair("light_flags","1")); // Baked light source
 
 		auto &pitch = fGetKeyValue("pitch");
 		if(pitch.empty() == false)
@@ -293,23 +297,14 @@ void pragma::level::transform_class(
 			ambientColor *= 2.f;
 		outKeyValues.insert(std::make_pair("color_ambient",std::to_string(ambientColor[0]) +" " +std::to_string(ambientColor[1]) +" " +std::to_string(ambientColor[2]) +" " +std::to_string(ambientColor[3])));
 		outKeyValues.insert(std::make_pair("spawnflags","1024"));
+		outKeyValues.insert(std::make_pair("light_flags","1")); // Baked light source
 
 		auto &pitch = fGetKeyValue("pitch");
 		if(pitch.empty() == false)
 		{
-			auto itAng = outKeyValues.find("angles");
-			if(itAng != outKeyValues.end())
-			{
-				auto ang = uvec::create(itAng->second);
-				ang.x = umath::normalize_angle(-util::to_float(pitch));
-				itAng->second = std::to_string(ang.x) +" " +std::to_string(ang.y) +" " +std::to_string(ang.z);
-			}
+			angles.x = umath::normalize_angle(-util::to_float(pitch));
+			bUseAngles = true;
 		}
-	}
-	else if(ustring::compare(className,"env_cubemap"))
-	{
-		className = "env_reflection_probe";
-		outKeyValues.insert(std::make_pair("wv_hint_clientsideonly","1"));
 	}
 	/*else if(ustring::compare(className,"ambient_generic"))
 	{
@@ -325,6 +320,12 @@ void pragma::level::transform_class(
 	}*/
 	else // Just use it unchanged
 	{
+		if(ustring::compare(className,"env_cubemap") || ustring::compare(className,"util_cubemap"))
+		{
+			className = "env_reflection_probe";
+			outKeyValues.insert(std::make_pair("wv_hint_clientsideonly","1"));
+		}
+
 		bUseOrigin = false;
 		bUseAngles = false;
 		for(auto &pair : inKeyValues)

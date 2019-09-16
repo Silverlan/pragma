@@ -12,6 +12,7 @@
 
 class Animation;
 class Frame;
+class ModelSubMesh;
 struct AnimationEvent;
 enum class ALSoundType : int32_t;
 namespace pragma

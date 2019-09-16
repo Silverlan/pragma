@@ -137,7 +137,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("ssao",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSSAO(context,identifier);});
 	shaderManager.RegisterShader("ssao_blur",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSSAOBlur(context,identifier);});
 	shaderManager.RegisterShader("glow",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderGlow(context,identifier);});
-	shaderManager.RegisterShader("pp_hdr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
+	m_gameShaders.at(umath::to_integral(GameShader::PPTonemapping)) = shaderManager.RegisterShader("pp_hdr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPPHDR(context,identifier);});
 	m_gameShaders.at(umath::to_integral(GameShader::PPFog)) = shaderManager.RegisterShader("pp_fog",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPPFog(context,identifier);});
 	shaderManager.RegisterShader("pp_water",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPPWater(context,identifier);});
 	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.RegisterShader("pp_fxaa",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPPFXAA(context,identifier);});

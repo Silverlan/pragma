@@ -1179,7 +1179,6 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	if(it != files.end())
 	{
 		import::mdl::load_vvd(it->second,vvdVerts,vvdVertWeights,mdlInfo.fixedLodVertexIndices);
-		auto c = 0;
 		if(mdlInfo.header.flags &STUDIOHDR_FLAGS_STATIC_PROP)
 		{
 			for(auto &v : vvdVerts)
@@ -1481,6 +1480,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 							auto scale = 1.f -side;
 
 							Vector3 v{float16::Convert16bitFloatTo32bits(t->flDelta.at(1)),float16::Convert16bitFloatTo32bits(t->flDelta.at(2)),float16::Convert16bitFloatTo32bits(t->flDelta.at(0))};
+							v = {v.z,v.y,-v.x}; // Determined by testing
 							if(pairMeshFrame != nullptr)
 							{
 								pairMeshFrame->SetVertexPosition(it->second,v *(1.f -scale));

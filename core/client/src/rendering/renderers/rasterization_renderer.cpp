@@ -15,6 +15,7 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
 
@@ -59,37 +60,25 @@ CulledMeshData *RasterizationRenderer::GetRenderInfo(RenderMode renderMode) cons
 	return it->second.get();
 }
 
-void RasterizationRenderer::UpdateLightDescriptorSets(const std::vector<pragma::CLightComponent*> &lightSources)
+void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource)
 {
 	auto *descSetShadowMaps = GetCSMDescriptorSet();
 	if(descSetShadowMaps == nullptr)
 		return;
-	auto numLights = lightSources.size();
-	for(auto i=decltype(numLights){0};i<numLights;++i)
+	auto *pShadowMap = lightSource.GetShadowMap();
+	auto texture = pShadowMap ? pShadowMap->GetDepthTexture() : nullptr;
+	if(texture == nullptr)
+		return;
+	auto numLayers = pShadowMap->GetLayerCount();
+	for(auto i=decltype(numLayers){0};i<numLayers;++i)
 	{
-		auto &light = *lightSources.at(i);
-		auto type = LightType::Invalid;
-		auto *pLight = light.GetLight(type);
-		if(type != LightType::Directional)
-			continue;
-		// TODO: Dynamic!
-		auto hShadowMap = light.GetShadowMap(pragma::CLightComponent::ShadowMapType::Static);
-		auto texture = hShadowMap.valid() ? hShadowMap->GetDepthTexture() : nullptr;
-		if(texture != nullptr)
-		{
-			auto numLayers = hShadowMap->GetLayerCount();
-			for(auto i=decltype(numLayers){0};i<numLayers;++i)
-			{
-				prosper::util::set_descriptor_set_binding_array_texture(
-					*descSetShadowMaps,*texture,0u,i,i
-				);
-			}
-		}
-		break;
+		prosper::util::set_descriptor_set_binding_array_texture(
+			*descSetShadowMaps,*texture,0u,i,i
+		);
 	}
 }
 
-Anvil::DescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.descSetGroupDepth != nullptr) ? (*m_hdrInfo.descSetGroupDepth)->get_descriptor_set(0u) : nullptr;}
+Anvil::DescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? (*m_hdrInfo.dsgSceneDepth)->get_descriptor_set(0u) : nullptr;}
 
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
@@ -98,6 +87,90 @@ void RasterizationRenderer::InitializeLightDescriptorSets()
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
+
+void RasterizationRenderer::AdvanceRenderStage(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+{
+	switch(m_stage)
+	{
+	case Stage::Initial:
+		m_stage = Stage::OcclusionCulling;
+		break;
+	case Stage::OcclusionCulling:
+		PerformOcclusionCulling();
+		m_stage = Stage::CollectRenderObjects;
+		break;
+	case Stage::CollectRenderObjects:
+		c_game->CallCallbacks<void>("OnPreRender");
+		CollectRenderObjects(renderFlags);
+		m_stage = Stage::Prepass;
+		break;
+	case Stage::Prepass:
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
+		RenderPrepass(drawCmd,renderFlags);
+		m_stage = Stage::SSAOPass;
+		break;
+	case Stage::SSAOPass:
+		RenderSSAO(drawCmd);
+		m_stage = Stage::LightCullingPass;
+		break;
+	case Stage::LightCullingPass:
+		CullLightSources(drawCmd);
+		m_stage = Stage::LightingPass;
+		break;
+	case Stage::LightingPass:
+		RenderLightingPass(drawCmd,renderFlags);
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
+		m_stage = Stage::PostProcessingPass;
+		break;
+	case Stage::PostProcessingPass:
+		c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
+		m_stage = Stage::PPFog;
+		break;
+	case Stage::PPFog:
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+		RenderSceneFog(drawCmd);
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+		m_stage = Stage::PPGlow;
+		break;
+	case Stage::PPGlow:
+		RenderGlowObjects(drawCmd);
+		c_game->CallCallbacks<void,FRender>("RenderPostProcessing",renderFlags);
+		c_game->CallLuaCallbacks("RenderPostProcessing");
+		m_stage = Stage::PPBloom;
+		break;
+	case Stage::PPBloom:
+		RenderBloom(drawCmd);
+		m_stage = Stage::PPToneMapping;
+		break;
+	case Stage::PPToneMapping:
+	{
+		if(umath::is_flag_set(renderFlags,FRender::HDR))
+		{
+			// Don't bother resolving HDR; Just apply the barrier
+			prosper::util::record_image_barrier(
+				*(*drawCmd),**GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage(),
+				Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+			);
+			return;
+		}
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+		auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
+		RenderToneMapping(drawCmd,*(*dsgBloomTonemapping)->get_descriptor_set(0u));
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+		m_stage = Stage::PPFXAA;
+		break;
+	}
+	case Stage::PPFXAA:
+		m_stage = Stage::Final;
+		RenderFXAA(drawCmd);
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
+		c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+		break;
+	}
+	if(m_stage != Stage::Final)
+		AdvanceRenderStage(drawCmd,renderFlags);
+}
 
 bool RasterizationRenderer::ReloadRenderTarget()
 {
@@ -112,7 +185,7 @@ bool RasterizationRenderer::ReloadRenderTarget()
 		)
 		return false;
 
-	auto &descSetHdrResolve = *(*m_hdrInfo.descSetGroupHdrResolve)->get_descriptor_set(0u);
+	auto &descSetHdrResolve = *(*m_hdrInfo.dsgBloomTonemapping)->get_descriptor_set(0u);
 	auto resolvedGlowTex = GetGlowInfo().renderTarget->GetTexture();
 	if(resolvedGlowTex->IsMSAATexture())
 		resolvedGlowTex = static_cast<prosper::MSAATexture&>(*resolvedGlowTex).GetResolvedTexture();
@@ -356,22 +429,22 @@ void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> 
 	prosper::util::set_descriptor_set_binding_texture(descSetCamView,*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 }
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetSceneTexture() const {return m_hdrInfo.hdrRenderTarget->GetTexture();}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetPresentationTexture() const {return m_hdrInfo.postHdrRenderTarget->GetTexture();}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetHDRPresentationTexture() const {return m_hdrInfo.hdrRenderTarget->GetTexture();}
+const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetSceneTexture() const {return m_hdrInfo.sceneRenderTarget->GetTexture();}
+const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetPresentationTexture() const {return m_hdrInfo.toneMappedRenderTarget->GetTexture();}
+const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetHDRPresentationTexture() const {return m_hdrInfo.sceneRenderTarget->GetTexture();}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 void RasterizationRenderer::OnEntityAddedToScene(CBaseEntity &ent)
 {
 	BaseRenderer::OnEntityAddedToScene(ent);
 }
 
-Anvil::SampleCountFlagBits RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().hdrRenderTarget->GetTexture()->GetImage()->GetSampleCount();}
+Anvil::SampleCountFlagBits RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage()->GetSampleCount();}
 bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != Anvil::SampleCountFlagBits::_1_BIT;}
 
 bool RasterizationRenderer::BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass)
 {
 	auto &hdrInfo = GetHDRInfo();
-	auto &tex = hdrInfo.hdrRenderTarget->GetTexture();
+	auto &tex = hdrInfo.sceneRenderTarget->GetTexture();
 	if(tex->IsMSAATexture())
 		static_cast<prosper::MSAATexture&>(*tex).Reset();
 	return hdrInfo.BeginRenderPass(drawCmd,customRenderPass);

@@ -31,20 +31,15 @@ bool BaseAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,u
 	auto &verts = const_cast<ModelSubMesh&>(subMesh).GetVertices();
 	if(vertexId >= verts.size())
 		return false;
-	auto &v = verts.at(vertexId);
-	pos = v.position;
-	return true;
-}
-bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
-{
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(hMdl == nullptr || GetLocalVertexPosition(subMesh,vertexId,pos) == false)
+	if(hMdl == nullptr)
 		return false;
+	auto &v = verts.at(vertexId);
+	pos = v.position;
+
 	auto &vertWeights = const_cast<ModelSubMesh&>(subMesh).GetVertexWeights();
-	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	auto transformMatrix = umat::identity();
 	if(vertexId < vertWeights.size())
 	{
@@ -86,12 +81,23 @@ bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32
 			//
 		}
 	}
-
 	auto vpos = transformMatrix *Vector4{pos.x,pos.y,pos.z,1.f};
-	auto mdlMatrix = umat::identity();
-	if(pTrComponent.valid())
-		mdlMatrix = glm::translate(umat::identity(),pTrComponent->GetOrigin()) *umat::create(pTrComponent->GetOrientation()) *glm::scale(umat::identity(),scale);
-	vpos = mdlMatrix *vpos;
 	pos = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
+	return true;
+}
+bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
+{
+	auto &ent = GetEntity();
+	auto mdlComponent = ent.GetModelComponent();
+	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	if(hMdl == nullptr || GetLocalVertexPosition(subMesh,vertexId,pos) == false)
+		return false;
+	auto pTrComponent = ent.GetTransformComponent();
+	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	physics::Transform t;
+	ent.GetPose(t);
+	physics::ScaledTransform st {t};
+	st.SetScale(scale);
+	pos *= st;
 	return true;
 }

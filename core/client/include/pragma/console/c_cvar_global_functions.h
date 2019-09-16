@@ -75,6 +75,7 @@ namespace Console
 		DLLCENGINE void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void map_rebuild_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 	};
 };
 

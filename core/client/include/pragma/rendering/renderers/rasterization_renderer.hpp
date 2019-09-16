@@ -4,6 +4,7 @@
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
+#include "pragma/rendering/c_rendermode.h"
 #include <pragma/math/plane.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <misc/types.h>
@@ -22,8 +23,9 @@ namespace pragma
 	class ShaderPrepassBase;
 	class CLightComponent;
 	class CParticleSystemComponent;
-	class OcclusionMeshInfo;
+	struct OcclusionMeshInfo;
 	class OcclusionCullingHandler;
+	class CLightDirectionalComponent;
 };
 namespace Anvil
 {
@@ -54,6 +56,25 @@ namespace pragma::rendering
 
 			SSAOEnabled = RenderResolved<<1u,
 			PrepassEnabled = SSAOEnabled<<1u
+		};
+
+		enum class Stage : uint8_t
+		{
+			Initial = 0,
+			OcclusionCulling,
+			CollectRenderObjects,
+			Prepass,
+			SSAOPass,
+			LightCullingPass,
+			LightingPass,
+			PostProcessingPass,
+			PPFog,
+			PPGlow,
+			PPBloom,
+			PPToneMapping,
+			PPFXAA,
+
+			Final
 		};
 
 		struct DLLCLIENT LightMapInfo
@@ -106,7 +127,7 @@ namespace pragma::rendering
 		SSAOInfo &GetSSAOInfo();
 
 		Anvil::DescriptorSet *GetDepthDescriptorSet() const;
-		void UpdateLightDescriptorSets(const std::vector<pragma::CLightComponent*> &lightSources);
+		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
 		void SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup);
 
 		pragma::rendering::Prepass &GetPrepass();
@@ -119,7 +140,7 @@ namespace pragma::rendering
 		bool BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass=nullptr);
 		bool EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
 		bool ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void PrepareRendering(RenderMode mode,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
+		void PrepareRendering(RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
 
 		const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
 		pragma::OcclusionCullingHandler &GetOcclusionCullingHandler();
@@ -129,9 +150,7 @@ namespace pragma::rendering
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,float interpolation,FRender renderFlags);
-		void GetRenderEntities(std::vector<CBaseEntity*> &entsRender);
-		void RenderParticleSystems(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,float interpolation,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
+		void RenderParticleSystems(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode);
@@ -145,14 +164,24 @@ namespace pragma::rendering
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);
+
+		void AdvanceRenderStage(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void PerformOcclusionCulling();
+		void CollectRenderObjects(FRender renderFlags);
+		void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderSSAO(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void CullLightSources(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderGlowObjects(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void RenderBloom(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void RenderToneMapping(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Anvil::DescriptorSet &descSetHdrResolve);
+		void RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+
 		void InitializeLightDescriptorSets();
 		virtual bool Initialize() override;
 		virtual void BeginRendering(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd) override;
 
-		void RenderScenePrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderScenePostProcessing(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
 		void RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderSceneResolveHDR(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Anvil::DescriptorSet &descSetHdrResolve,bool toneMappingOnly=false);
 
 		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
 
@@ -167,6 +196,7 @@ namespace pragma::rendering
 		// HDR
 		HDRData m_hdrInfo;
 		GlowData m_glowInfo;
+		Stage m_stage = Stage::Initial;
 
 		// Frustum planes (Required for culling)
 		std::vector<Plane> m_frustumPlanes = {};

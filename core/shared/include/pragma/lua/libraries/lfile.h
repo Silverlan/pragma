@@ -108,6 +108,7 @@ DLLNETWORK void Lua_LFile_Read(lua_State *l,LFile &f,uint32_t size);
 DLLNETWORK void Lua_LFile_Read(lua_State *l,LFile &f,::DataStream &ds,uint32_t size);
 DLLNETWORK void Lua_LFile_Write(lua_State *l,LFile &f,::DataStream &ds);
 DLLNETWORK void Lua_LFile_Write(lua_State *l,LFile &f,::DataStream &ds,uint32_t size);
+DLLNETWORK void Lua_LFile_GetPath(lua_State *l,LFile &f);
 
 ////////////////////////////////////
 

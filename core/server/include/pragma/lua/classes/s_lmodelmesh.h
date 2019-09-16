@@ -20,6 +20,7 @@ namespace Lua
 		namespace Server
 		{
 			DLLSERVER void Create(lua_State *l);
+			DLLSERVER void CreateQuad(lua_State *l,float size);
 			DLLSERVER void CreateBox(lua_State *l,const Vector3 &min,const Vector3 &max);
 			DLLSERVER void CreateSphere(lua_State *l,const Vector3 &origin,float radius,uint32_t recursionLevel);
 			DLLSERVER void CreateSphere(lua_State *l,const Vector3 &origin,float radius);

@@ -60,7 +60,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				auto &hdrInfo = renderer->GetHDRInfo();
 				auto *pReflection = wgui.Create<WITexturedRect>(r);
 				pReflection->SetSize(size,size);
-				pReflection->SetTexture(*hdrInfo.hdrRenderTarget->GetTexture());
+				pReflection->SetTexture(*hdrInfo.sceneRenderTarget->GetTexture());
 				pReflection->SetName("dbg_water_reflection");
 
 				auto *pRefractionDepth = wgui.Create<WIDebugDepthTexture>(r);

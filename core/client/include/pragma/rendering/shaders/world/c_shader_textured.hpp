@@ -84,7 +84,10 @@ namespace pragma
 			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1<<1,
 			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1,
 
-			NoIBL = FMAT_GLOW_MODE_3<<1u // PBR only (see PBR shader)
+			NoIBL = FMAT_GLOW_MODE_3<<1u, // PBR only (see PBR shader)
+
+			DiffuseSRGB = NoIBL<<1u,
+			GlowSRGB = DiffuseSRGB<<1u
 		};
 
 		enum class StateFlags : uint32_t

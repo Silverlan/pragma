@@ -35,9 +35,9 @@ void CShadowCSMComponent::InitializeDepthTextures(uint32_t size)
 	}
 }
 
+static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
 void CShadowCSMComponent::ReloadDepthTextures()
 {
-	c_engine->WaitIdle(); // Wait until all active rendering commands have been completed
 	for(auto &t : m_textureSets)
 		t.renderTarget = nullptr;
 	/*
@@ -48,11 +48,10 @@ void CShadowCSMComponent::ReloadDepthTextures()
 	}};
 	if(cvShadowQuality->GetInt() <= 0)
 		return;
-	auto size = cvShadowmapSize->GetInt();
-	if(size <= 0)
-		return;
-	InitializeDepthTextures(size);
 	*/
+	auto size = cvShadowmapSize->GetInt();
+	if(size > 0)
+		InitializeDepthTextures(size);
 	InitializeTextureSet(m_pendingInfo.staticTextureSet,pragma::CLightComponent::ShadowMapType::Static);
 }
 

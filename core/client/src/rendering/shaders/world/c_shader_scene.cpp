@@ -154,8 +154,11 @@ ShaderSceneLit::ShaderSceneLit(prosper::Context &context,const std::string &iden
 {}
 bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources)
 {
+	auto *descSetShadow = pragma::CShadowComponent::GetDescriptorSet();
+	if(descSetShadow == nullptr)
+		return false;
 	return RecordBindDescriptorSets({
-		&descSetLightSources,&descSetShadowMaps,pragma::CShadowComponent::GetDescriptorSet()
+		&descSetLightSources,&descSetShadowMaps,descSetShadow
 	},GetLightDescriptorSetIndex());
 }
 bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)

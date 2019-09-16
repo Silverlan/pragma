@@ -303,13 +303,13 @@ void CGame::RegisterLua()
 		Lua::Push(l,depthTex);
 	}));
 	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &rt = renderer.GetHDRInfo().hdrStagingRenderTarget;
+		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt);
 	}));
 	classDefRasterizationRenderer.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &dsg = renderer.GetHDRInfo().descSetGroupHdr;
+		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
 		if(dsg == nullptr)
 			return;
 		Lua::Push(l,dsg);

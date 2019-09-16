@@ -52,6 +52,7 @@ namespace Lua
 		DLLNETWORK void GetRenderBounds(lua_State *l,::Animation &anim,const std::shared_ptr<::Model> &mdl);
 		DLLNETWORK void Rotate(lua_State *l,::Animation &anim,::Skeleton *skeleton,const Quat &rot);
 		DLLNETWORK void Translate(lua_State *l,::Animation &anim,::Skeleton *skeleton,const Vector3 &t);
+		DLLNETWORK void Scale(lua_State *l,::Animation &anim,const Vector3 &scale);
 		DLLNETWORK void Reverse(lua_State *l,::Animation &anim);
 		DLLNETWORK void RemoveEvent(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx);
 		DLLNETWORK void SetEventData(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type,luabind::object tArgs);
@@ -82,6 +83,7 @@ namespace Lua
 		DLLNETWORK void CalcRenderBounds(lua_State *l,::Frame &frame,::Animation &anim,const std::shared_ptr<::Model> &mdl);
 		DLLNETWORK void Rotate(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Quat &rot);
 		DLLNETWORK void Translate(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Vector3 &t);
+		DLLNETWORK void Scale(lua_State *l,::Frame &frame,const Vector3 &scale);
 		DLLNETWORK void GetMoveTranslation(lua_State *l,::Frame &frame);
 		DLLNETWORK void GetMoveTranslationX(lua_State *l,::Frame &frame);
 		DLLNETWORK void GetMoveTranslationZ(lua_State *l,::Frame &frame);

@@ -179,6 +179,7 @@ void ControllerPhysObj::GetCollisionBounds(Vector3 *min,Vector3 *max)
 void ControllerPhysObj::SetLinearVelocity(const Vector3 &vel)
 {
 	m_velocity = vel;
+	m_controller->SetLinearVelocity(vel);
 }
 
 bool ControllerPhysObj::IsController() const {return true;}
@@ -251,25 +252,9 @@ void ControllerPhysObj::UpdateVelocity()
 		scale = 1;
 	else
 		scale = 1.f /static_cast<float>(delta);
-	//auto t = m_collisionObject->GetWorldTransform();
-	Vector3 pos = GetPosition();//t.GetOrigin();
-	//m_velocity = (pos -m_posLast) *scale;
-	m_velocity = pos -m_posLast;
-	m_posLast = pos;
-	if(m_velocity.y < 0.f && IsOnGround())
-	{
-		//m_velocity.y = 0.f;
-		//m_originLast.y = 0.f;
-	}
-	m_velocity *= scale;
-	//m_velocity = (m_velocity -m_originLast) *scale;
-	/*m_velocity = ((pos -m_posLast) -m_originLast) *scale;
-	if(m_velocity.y < 0.f && IsOnGround())
-		m_velocity.y = 0.f;*/
-	//else
-	//	std::cout<<"!!"<<std::endl;
+	Vector3 pos = GetPosition();
+	m_velocity = m_controller->GetLinearVelocity();
 	m_originLast = pos;
-	//m_posLast = Vector3(0.f,0.f,0.f);
 }
 
 bool CapsuleControllerPhysObj::IsCapsule() const {return true;}
@@ -290,7 +275,6 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents,unsigned int st
 	pragma::physics::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
-	m_posLast = pos;
 	NetworkState *state = m_networkState;
 	Game *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
@@ -334,7 +318,6 @@ void ControllerPhysObj::SetPosition(const Vector3 &pos)
 	}
 	auto posCur = m_controller->GetFootPos();
 	m_controller->SetFootPos(pos);
-	m_posLast += pos -posCur;
 }
 Vector3 ControllerPhysObj::GetPosition() const
 {
@@ -371,7 +354,6 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width,unsigned int height
 	pragma::physics::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
-	m_posLast = pos;
 
 	NetworkState *state = m_networkState;
 	Game *game = state->GetGameState();

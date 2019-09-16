@@ -342,7 +342,6 @@ protected:
 
 	util::TSharedHandle<pragma::physics::IController> m_controller = nullptr;
 	util::TSharedHandle<pragma::physics::ICollisionObject> m_collisionObject = nullptr;
-	Vector3 m_posLast = {0.f,0.f,0.f};
 	Vector3 m_originLast = {0.f,0.f,0.f};
 	float m_stepHeight = 0.f;
 	ControllerPhysObj(pragma::BaseEntityComponent *owner);

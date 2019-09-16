@@ -26,7 +26,7 @@ void ShaderCubemap::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pip
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
 }
 
 void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)

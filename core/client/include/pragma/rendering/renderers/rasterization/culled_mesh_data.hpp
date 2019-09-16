@@ -2,11 +2,13 @@
 #define __CULLED_MESH_DATA_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/rendersystem.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
 
 class BaseEntity;
+struct ShaderMeshContainer;
 namespace pragma::rendering
 {
 	struct DLLCLIENT CulledMeshData

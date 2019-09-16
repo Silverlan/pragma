@@ -1,6 +1,7 @@
 #include "wv_dds.hpp"
 #include "pr_dds.hpp"
 #include <image/prosper_image.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <prosper_context.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
@@ -9,6 +10,8 @@
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <fsys/filesystem.h>
+#include <gli/save.hpp>
+#include <gli/texture2d.hpp>
 
 #undef small
 
@@ -69,8 +72,10 @@ static nvtt::Format to_nvtt_enum(ImageWriteInfo::OutputFormat format)
 		return nvtt::Format_ETC2_RGB_A1;
 	case ImageWriteInfo::OutputFormat::ETC2_RGBM:
 		return nvtt::Format_ETC2_RGBM;
+	case ImageWriteInfo::OutputFormat::KeepInputImageFormat:
+		break;
 	}
-	static_assert(umath::to_integral(ImageWriteInfo::OutputFormat::Count) == 26);
+	static_assert(umath::to_integral(ImageWriteInfo::OutputFormat::Count) == 27);
 	return {};
 }
 
@@ -185,7 +190,7 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 {
 	std::shared_ptr<prosper::Image> imgRead = image.shared_from_this();
 	auto srcFormat = image.GetFormat();
-	Anvil::Format dstFormat;
+	auto dstFormat = srcFormat;
 	nvtt::InputFormat nvttFormat;
 	switch(ktxCreateInfo.inputFormat)
 	{
@@ -205,7 +210,91 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 		dstFormat = Anvil::Format::R32_SFLOAT;
 		nvttFormat = nvtt::InputFormat_R_32F;
 		break;
+	case ImageWriteInfo::InputFormat::KeepInputImageFormat:
+		break;
 	}
+
+	auto path = ufile::get_path_from_filename(fileName);
+	FileManager::CreatePath(path.c_str());
+	auto fileNameWithExt = fileName;
+	ufile::remove_extension_from_filename(fileNameWithExt);
+	switch(ktxCreateInfo.containerFormat)
+	{
+	case ImageWriteInfo::ContainerFormat::DDS:
+		fileNameWithExt += ".dds";
+		break;
+	case ImageWriteInfo::ContainerFormat::KTX:
+		fileNameWithExt += ".ktx";
+		break;
+	}
+	auto fullFileName = FileManager::GetProgramPath() +'/' +fileNameWithExt;
+
+	if(ktxCreateInfo.outputFormat == ImageWriteInfo::OutputFormat::KeepInputImageFormat || prosper::util::is_compressed_format(imgRead->GetFormat()))
+	{
+		// No compression needed, just copy the image data to a buffer and save it directly
+
+		auto extents = imgRead->GetExtents();
+		auto numLayers = imgRead->GetLayerCount();
+		auto numLevels = imgRead->GetMipmapCount();
+		auto &context = image.GetContext();
+		auto &setupCmd = context.GetSetupCommandBuffer();
+
+		gli::extent2d gliExtents {extents.width,extents.height};
+		gli::texture2d gliTex {static_cast<gli::texture::format_type>(imgRead->GetFormat()),gliExtents,numLevels};
+
+		prosper::util::BufferCreateInfo bufCreateInfo {};
+		bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+		bufCreateInfo.size = gliTex.size();
+		bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+		auto buf = prosper::util::create_buffer(context.GetDevice(),bufCreateInfo);
+		buf->SetPermanentlyMapped(true);
+
+		// Initialize buffer with image data
+		size_t bufferOffset = 0;
+		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+		{
+			for(auto iMipmap=decltype(numLevels){0u};iMipmap<numLevels;++iMipmap)
+			{
+				auto extents = imgRead->GetExtents(iMipmap);
+				auto mipmapSize = gliTex.size(iMipmap);
+				prosper::util::BufferImageCopyInfo copyInfo {};
+				copyInfo.baseArrayLayer = iLayer;
+				copyInfo.bufferOffset = bufferOffset;
+				copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
+				copyInfo.width = extents.width;
+				copyInfo.height = extents.height;
+				copyInfo.layerCount = 1;
+				copyInfo.mipLevel = iMipmap;
+				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+
+				bufferOffset += mipmapSize;
+			}
+		}
+		context.FlushSetupCommandBuffer();
+
+		// Copy the data to a gli texture object
+		bufferOffset = 0ull;
+		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+		{
+			for(auto iMipmap=decltype(numLevels){0u};iMipmap<numLevels;++iMipmap)
+			{
+				auto extents = imgRead->GetExtents(iMipmap);
+				auto mipmapSize = gliTex.size(iMipmap);
+				auto *dstData = gliTex.data(iLayer,0u /* face */,iMipmap);
+				buf->Read(bufferOffset,mipmapSize,dstData);
+				bufferOffset += mipmapSize;
+			}
+		}
+		switch(ktxCreateInfo.containerFormat)
+		{
+		case ImageWriteInfo::ContainerFormat::DDS:
+			return gli::save_dds(gliTex,fullFileName);
+		case ImageWriteInfo::ContainerFormat::KTX:
+			return gli::save_ktx(gliTex,fullFileName);
+		}
+		return false;
+	}
+
 	if(
 		image.GetTiling() != Anvil::ImageTiling::LINEAR ||
 		(image.GetAnvilImage().get_memory_block()->get_create_info_ptr()->get_memory_features() &Anvil::MemoryFeatureFlagBits::MAPPABLE_BIT) == Anvil::MemoryFeatureFlagBits::NONE ||
@@ -219,9 +308,11 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 		image.GetCreateInfo(copyCreateInfo);
 		copyCreateInfo.format = dstFormat;
 		copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-		copyCreateInfo.postCreateLayout = Anvil::ImageLayout::GENERAL;
+		copyCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
 		copyCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
+		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 		imgRead = image.Copy(*setupCmd,copyCreateInfo);
+		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 		context.FlushSetupCommandBuffer();
 	}
 
@@ -267,19 +358,6 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 		}
 	}
 
-	auto path = ufile::get_path_from_filename(fileName);
-	FileManager::CreatePath(path.c_str());
-	auto fileNameWithExt = fileName;
-	ufile::remove_extension_from_filename(fileNameWithExt);
-	switch(ktxCreateInfo.containerFormat)
-	{
-	case ImageWriteInfo::ContainerFormat::DDS:
-		fileNameWithExt += ".dds";
-		break;
-	case ImageWriteInfo::ContainerFormat::KTX:
-		fileNameWithExt += ".ktx";
-		break;
-	}
 	static_assert(umath::to_integral(ImageWriteInfo::ContainerFormat::Count) == 2);
 	/*auto f = FileManager::OpenFile<VFilePtrReal>(fileNameWithExt.c_str(),"wb");
 	if(f == nullptr)
@@ -296,7 +374,6 @@ bool save_prosper_image_as_ktx(prosper::Image &image,const std::string &fileName
 	outputOptions.setContainer(to_nvtt_enum(ktxCreateInfo.containerFormat));
 	outputOptions.setSrgbFlag(umath::is_flag_set(ktxCreateInfo.flags,ImageWriteInfo::Flags::SRGB));
 	//outputOptions.setOutputHandler(&outputHandler); // Does not seem to work? TODO: FIXME
-	auto fullFileName = FileManager::GetProgramPath() +'/' +fileNameWithExt;
 	outputOptions.setFileName(fullFileName.c_str());
 	outputOptions.setErrorHandler(&errHandler);
 

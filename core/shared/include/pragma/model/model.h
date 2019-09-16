@@ -354,6 +354,7 @@ public:
 	Frame &GetReference();
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
+	void Scale(const Vector3 &scale);
 
 	// Merges meshes with same materials (Only within mesh groups)
 	void Optimize();

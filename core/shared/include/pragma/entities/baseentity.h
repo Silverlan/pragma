@@ -50,7 +50,7 @@ namespace pragma
 	using NetEventId = uint32_t;
 };
 
-const double ENT_EPSILON = 4.9406564584125e-8;
+const double ENT_EPSILON = 0.000'01;
 
 class EntityHandle;
 class DataStream;

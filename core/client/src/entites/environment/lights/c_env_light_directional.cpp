@@ -18,6 +18,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_environment,CEnvLightDirectional);
 
+#pragma optimize("",off)
 void CLightDirectionalComponent::Initialize()
 {
 	BaseEnvLightDirectionalComponent::Initialize();
@@ -100,7 +101,14 @@ void CLightDirectionalComponent::Initialize()
 		return util::EventReply::Unhandled;
 	});
 	BindEvent(CLightComponent::EVENT_HANDLE_SHADOW_MAP,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-		GetEntity().AddComponent<CShadowCSMComponent>();
+		auto csmC = GetEntity().AddComponent<CShadowCSMComponent>();
+		if(csmC.valid())
+			csmC->ReloadDepthTextures();
+		m_shadowMap = csmC;
+
+		auto lightC = GetEntity().GetComponent<CLightComponent>();
+		if(lightC.valid())
+			lightC->UpdateShadowTypes();
 		return util::EventReply::Handled;
 	});
 
@@ -141,6 +149,12 @@ void CLightDirectionalComponent::Initialize()
 			return;
 		c_game->UpdateEnvironmentLightSource();
 	});
+}
+void CLightDirectionalComponent::SetShadowDirty()
+{
+	/*auto shadowMapC = GetEntity().GetComponent<CShadowCSMComponent>();
+	if(shadowMapC.valid())
+		shadowMapC->SetDirty(true);*/ // TODO
 }
 void CLightDirectionalComponent::OnEntitySpawn()
 {
@@ -326,3 +340,4 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto *cam = c_game->GetPrimaryCamera();
 	hShadow->UpdateFrustum(*cam,GetViewMatrix(),pTrComponent->GetForward());
 }
+#pragma optimize("",on)

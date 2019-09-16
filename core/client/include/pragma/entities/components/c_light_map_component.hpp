@@ -29,6 +29,10 @@ namespace pragma
 		prosper::Buffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
 		const std::vector<std::shared_ptr<prosper::Buffer>> &GetMeshLightMapUvBuffers() const;
 		std::vector<std::shared_ptr<prosper::Buffer>> &GetMeshLightMapUvBuffers();
+
+		// Reads the uv coordinates from the buffer
+		void ReadLightmapUvCoordinates(std::vector<std::vector<Vector2>> &uvs) const;
+		std::shared_ptr<prosper::DynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
 	protected:
 		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
 

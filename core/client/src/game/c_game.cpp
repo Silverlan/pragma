@@ -96,6 +96,7 @@ extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
 
+#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -1036,7 +1037,7 @@ static CVar cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static CVar cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
 uint32_t CGame::GetMSAASampleCount()
 {
-	auto bMsaaEnabled = static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) == AntiAliasing::MSAA;
+	auto bMsaaEnabled = static_cast<pragma::rendering::AntiAliasing>(cvAntiAliasing->GetInt()) == pragma::rendering::AntiAliasing::MSAA;
 	unsigned int numSamples = bMsaaEnabled ? umath::pow(2,cvMsaaSamples->GetInt()) : 0;
 	ClampMSAASampleCount(&numSamples);
 	return numSamples;
@@ -1213,7 +1214,7 @@ void CGame::OnMapLoaded()
 
 	// Update reflection probes
 	// TODO: Make sure all map materials have been fully loaded before doing this!
-	pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);
+	// pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);
 }
 
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
@@ -1825,7 +1826,7 @@ bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const Im
 		return false;
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	auto *fSaveImageAsKtx = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_image_as_ktx");
+	auto *fSaveImageAsKtx = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_image");
 	return fSaveImageAsKtx && fSaveImageAsKtx(image,fileName,imageWriteInfo,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
@@ -1841,3 +1842,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

@@ -118,6 +118,7 @@ public:
 
 		PPFog,
 		PPFXAA,
+		PPTonemapping,
 
 		Debug,
 		DebugTexture,

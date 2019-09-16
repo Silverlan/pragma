@@ -6,6 +6,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
 #include <shader/prosper_shader.hpp>
 
+class CModelSubMesh;
 namespace pragma
 {
 	namespace rendering {class RasterizationRenderer;};

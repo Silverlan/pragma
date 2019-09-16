@@ -24,6 +24,7 @@ link_external_library(iglfw)
 link_external_library(glslang)
 
 add_include_dir(glm)
+add_include_dir(gli)
 add_include_dir(lpng_build)
 add_include_dir(zlib_build)
 add_include_dir(anvil_build)

@@ -31,6 +31,50 @@ int32_t Lua::string::find_longest_common_substring(lua_State *l)
 	Lua::PushInt(l,endIdx);
 	return 3;
 }
+int32_t Lua::string::find_similar_elements(lua_State *l)
+{
+	std::string baseElement = Lua::CheckString(l,1);
+	auto tElements = 2;
+	Lua::CheckTable(l,tElements);
+	auto limit = Lua::CheckInt(l,3);
+	auto numElements = Lua::GetObjectLength(l,tElements);
+	std::vector<std::string> elements {};
+	elements.reserve(numElements);
+	for(auto i=decltype(numElements){0u};i<numElements;++i)
+	{
+		Lua::PushInt(l,i +1);
+		Lua::GetTableValue(l,tElements);
+		elements.push_back(Lua::CheckString(l,-1));
+		Lua::Pop(l,1);
+	}
+	std::vector<std::string_view> similarElements {};
+	std::vector<float> similarities {};
+	uint32_t offset = 0u;
+	ustring::gather_similar_elements(baseElement,[&elements,&offset]() mutable -> std::optional<std::string_view> {
+		if(offset >= elements.size())
+			return std::optional<std::string_view>{};
+		return elements.at(offset++);
+	},similarElements,limit,&similarities);
+
+	auto tOutElements = Lua::CreateTable(l);
+	offset = 0u;
+	for(auto &el : similarElements)
+	{
+		Lua::PushInt(l,offset++);
+		Lua::PushString(l,std::string{el});
+		Lua::SetTableValue(l,tOutElements);
+	}
+
+	auto tSimilarities = Lua::CreateTable(l);
+	offset = 0u;
+	for(auto &val : similarities)
+	{
+		Lua::PushInt(l,offset++);
+		Lua::PushNumber(l,val);
+		Lua::SetTableValue(l,tSimilarities);
+	}
+	return 2;
+}
 int32_t Lua::string::join(lua_State *l)
 {
 	int32_t t = 1;

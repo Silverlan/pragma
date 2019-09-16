@@ -5,6 +5,7 @@
 #include <pragma/model/modelmesh.h>
 #include <memory>
 
+namespace prosper {class DynamicResizableBuffer;};
 namespace pragma {class VkMesh;};
 struct VertexBufferData;
 class DLLCLIENT CModelSubMesh

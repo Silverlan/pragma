@@ -1,6 +1,8 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
+#include "pragma/model/c_model.h"
+#include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/libraries/c_ldebugoverlay.h"
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/libraries/c_lsound.h"
@@ -14,12 +16,23 @@
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/ai/c_lai.hpp"
+#include <pragma/lua/libraries/limport.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
+#include <pragma/lua/classes/ldef_entity.h>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
+#include <pr_dds.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
 
+extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -594,19 +607,152 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 }
 void CGame::RegisterLuaLibraries()
 {
-	GetLuaInterface().RegisterLibrary("util",{
+	auto &utilMod = GetLuaInterface().RegisterLibrary("util",{
 		REGISTER_SHARED_UTIL
 		{"calc_world_direction_from_2d_coordinates",Lua::util::Client::calc_world_direction_from_2d_coordinates},
 		{"create_particle_tracer",Lua::util::Client::create_particle_tracer},
 		{"fire_bullets",Lua::util::fire_bullets},
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
-		{"create_giblet",Lua::util::Client::create_giblet}
+		{"create_giblet",Lua::util::Client::create_giblet},
+		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &img = Lua::Check<prosper::Image>(l,1);
+			std::string fileName = Lua::CheckString(l,2);
+			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
+			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
+			return 1;
+		})}
 	});
+
+	auto imgWriteInfoDef = luabind::class_<ImageWriteInfo>("ImageSaveInfo");
+	imgWriteInfoDef.def(luabind::constructor<>());
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(ImageWriteInfo::InputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R16G16B16A16_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R16G16B16A16_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32G32B32A32_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R32G32B32A32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R8G8B8A8_UINT",umath::to_integral(ImageWriteInfo::InputFormat::R8G8B8A8_UInt));
+
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(ImageWriteInfo::OutputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGB",umath::to_integral(ImageWriteInfo::OutputFormat::RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGBA",umath::to_integral(ImageWriteInfo::OutputFormat::RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1A",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT3",umath::to_integral(ImageWriteInfo::OutputFormat::DXT3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5",umath::to_integral(ImageWriteInfo::OutputFormat::DXT5));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5N",umath::to_integral(ImageWriteInfo::OutputFormat::DXT5n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1",umath::to_integral(ImageWriteInfo::OutputFormat::BC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1A",umath::to_integral(ImageWriteInfo::OutputFormat::BC1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC2",umath::to_integral(ImageWriteInfo::OutputFormat::BC2));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3",umath::to_integral(ImageWriteInfo::OutputFormat::BC3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N",umath::to_integral(ImageWriteInfo::OutputFormat::BC3n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4",umath::to_integral(ImageWriteInfo::OutputFormat::BC4));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5",umath::to_integral(ImageWriteInfo::OutputFormat::BC5));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1",umath::to_integral(ImageWriteInfo::OutputFormat::CTX1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6",umath::to_integral(ImageWriteInfo::OutputFormat::BC6));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7",umath::to_integral(ImageWriteInfo::OutputFormat::BC7));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM",umath::to_integral(ImageWriteInfo::OutputFormat::BC3_RGBM));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1",umath::to_integral(ImageWriteInfo::OutputFormat::ETC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_R));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RG));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBA",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB_A1",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGB_A1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBM",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGBM));
+
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_1BIT_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMap1BitAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SHARP_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMapSharpAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SMOOTH_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMapSmoothAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_NORMAL_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::NormalMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_HDR_COLOR_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::HDRColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_GRADIENT_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::GradientMap));
+
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_DDS",umath::to_integral(ImageWriteInfo::ContainerFormat::DDS));
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX",umath::to_integral(ImageWriteInfo::ContainerFormat::KTX));
+
+	imgWriteInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(ImageWriteInfo::Flags::None));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_MAP",umath::to_integral(ImageWriteInfo::Flags::NormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_CONVERT_TO_NORMAL_MAP",umath::to_integral(ImageWriteInfo::Flags::ConvertToNormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_SRGB",umath::to_integral(ImageWriteInfo::Flags::SRGB));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_GENERATE_MIPMAPS",umath::to_integral(ImageWriteInfo::Flags::GenerateMipmaps));
+
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX",umath::to_integral(ImageWriteInfo::MipmapFilter::Box));
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER",umath::to_integral(ImageWriteInfo::MipmapFilter::Kaiser));
+
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_CLAMP",umath::to_integral(ImageWriteInfo::WrapMode::Clamp));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_REPEAT",umath::to_integral(ImageWriteInfo::WrapMode::Repeat));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_MIRROR",umath::to_integral(ImageWriteInfo::WrapMode::Mirror));
+
+	imgWriteInfoDef.def_readwrite("inputFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::inputFormat)> ImageWriteInfo::*>(&ImageWriteInfo::inputFormat));
+	imgWriteInfoDef.def_readwrite("outputFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::outputFormat)> ImageWriteInfo::*>(&ImageWriteInfo::outputFormat));
+	imgWriteInfoDef.def_readwrite("containerFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::containerFormat)> ImageWriteInfo::*>(&ImageWriteInfo::containerFormat));
+	imgWriteInfoDef.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::flags)> ImageWriteInfo::*>(&ImageWriteInfo::flags));
+	imgWriteInfoDef.def_readwrite("mipMapFilter",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::mipMapFilter)> ImageWriteInfo::*>(&ImageWriteInfo::mipMapFilter));
+	imgWriteInfoDef.def_readwrite("wrapMode",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::wrapMode)> ImageWriteInfo::*>(&ImageWriteInfo::wrapMode));
+
+	imgWriteInfoDef.def("SetNormalMap",static_cast<void(*)(lua_State*,ImageWriteInfo&)>([](lua_State *l,ImageWriteInfo &writeInfo) {
+		writeInfo.SetNormalMap();
+	}));
+	utilMod[imgWriteInfoDef];
 
 	Lua::ai::client::register_library(GetLuaInterface());
 
 	Game::RegisterLuaLibraries();
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
+
+	auto &utilImport = GetLuaInterface().RegisterLibrary("import",{
+		{"export_entity_model",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &hEnt = Lua::Check<EntityHandle>(l,1);
+			LUA_CHECK_ENTITY_RET(l,hEnt,0);
+			auto mdl = hEnt->GetModel();
+			if(mdl == nullptr)
+				return 0;
+			Assimp::Exporter exporter;
+			aiScene scene {};
+			Lua::import::initialize_assimp_scene(scene,*mdl);
+
+			auto lightmapC = hEnt->GetComponent<pragma::CLightMapComponent>();
+			if(lightmapC.valid())
+			{
+				std::vector<std::vector<Vector2>> uvs;
+				lightmapC->ReadLightmapUvCoordinates(uvs);
+
+				auto *pMesh = scene.mMeshes[0];
+				auto numVerts = pMesh->mNumVertices;
+				pMesh->mTextureCoords[1] = new aiVector3D[numVerts];
+				pMesh->mNumUVComponents[1] = 2;
+				uint32_t absVertexIndex = 0u;
+				for(auto &meshGroup : mdl->GetMeshGroups())
+				{
+					for(auto &mesh : meshGroup->GetMeshes())
+					{
+						for(auto &subMesh : mesh->GetSubMeshes())
+						{
+							auto refId = subMesh->GetReferenceId();
+							if(refId >= uvs.size())
+								continue;
+							auto &lightmapUvs = uvs.at(refId);
+							uint32_t localVertexIndex = 0u;
+							for(auto &v : subMesh->GetVertices())
+							{
+								auto &lightmapUv = lightmapUvs.at(localVertexIndex++);
+								pMesh->mTextureCoords[1][absVertexIndex] = aiVector3D{lightmapUv.x,1.f -lightmapUv.y,0.f};
+								++absVertexIndex;
+							}
+						}
+					}
+				}
+			}
+
+			auto result = exporter.Export(&scene,"fbx","E:/projects/pragma/build_winx64/output/box.fbx");
+			Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
+
+			auto *error = exporter.GetErrorString();
+			Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
+
+			return 1;
+		})}
+	});
 
 	std::vector<luaL_Reg> debugFuncs = {
 		{"draw_points",Lua::DebugRenderer::Client::DrawPoints},
@@ -631,3 +777,4 @@ void CGame::RegisterLuaLibraries()
 		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
 	}
 }
+#pragma optimize("",on)

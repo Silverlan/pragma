@@ -22,14 +22,29 @@ namespace pragma
 		static const std::shared_ptr<prosper::DescriptorSetGroup> &GetGameSceneDescriptorSetGroup();
 		static uint32_t GetBufferMeshCount();
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			RenderBufferDirty = 1u,
+			BoneBufferDirty = RenderBufferDirty<<1u
+		};
+
 		#pragma pack(push,1)
 		struct SubMeshRenderInfoBufferData
 		{
 			enum class Flags : uint32_t
 			{
 				None = 0,
-				Visible = 1
+				Visible = 1,
+
+				RenderModeWorld = Visible<<1u,
+				RenderModeView = RenderModeWorld<<1u,
+				RenderModeSkybox = RenderModeView<<1u,
+				RenderModeWater = RenderModeSkybox<<1u,
+
+				UseNormalMap = RenderModeWater<<1u
 			};
+			static_assert(umath::to_integral(RenderMode::Count) == 6);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};
@@ -53,12 +68,18 @@ namespace pragma
 
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	private:
-		void UpdateModelRaytracingBuffers();
-		void UpdateRenderBuffer();
-		void UpdateBoneBuffer();
+		void InitializeModelRaytracingBuffers();
+		void InitializeBufferUpdateCallback();
+		void SetRenderBufferDirty();
+		void SetBoneBufferDirty();
+		void UpdateBuffers(prosper::PrimaryCommandBuffer &cmd);
 
 		std::vector<std::shared_ptr<prosper::Buffer>> m_subMeshBuffers = {};
+		CallbackHandle m_cbUpdateBuffers = {};
+		StateFlags m_stateFlags = StateFlags::None;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::StateFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags)
 
 #endif

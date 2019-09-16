@@ -23,6 +23,7 @@ namespace pragma
 		std::array<std::vector<Plane>,6u> m_frustumPlanes = {};
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void UpdateTransformationMatrix(unsigned int j) override;
+		void SetShadowDirty();
 		void UpdateViewMatrices();
 	};
 };

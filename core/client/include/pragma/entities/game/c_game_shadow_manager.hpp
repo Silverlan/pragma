@@ -5,6 +5,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace prosper {class PrimaryCommandBuffer; class RenderTarget; class DescriptorSetGroup; class Shader;};
@@ -49,7 +50,10 @@ namespace pragma
 			Vector3 position;
 			float radius;
 		};
-		void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType);
+		void RenderShadows(
+			std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
+			LightType type,bool drawParticleShadows
+		);
 		bool UpdateShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType);
 		void UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
 		void UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
@@ -58,6 +62,7 @@ namespace pragma
 			pragma::CLightComponent &light,uint32_t layerId,const Mat4 &depthMVP,
 			pragma::ShaderShadow &shader,bool bTranslucent
 		);
+		void RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows);
 
 		std::vector<ShadowRenderInfo> m_shadowCasters = {};
 
@@ -67,6 +72,8 @@ namespace pragma
 		util::WeakHandle<prosper::Shader> m_shaderTransparent = {};
 		util::WeakHandle<prosper::Shader> m_shaderSpot = {};
 		util::WeakHandle<prosper::Shader> m_shaderSpotTransparent = {};
+		util::WeakHandle<prosper::Shader> m_shaderCSM = {};
+		util::WeakHandle<prosper::Shader> m_shaderCSMTransparent = {};
 
 		// Current entity when iterating entity meshes in an octree
 		const CBaseEntity *m_currentEntity = nullptr;

@@ -37,7 +37,7 @@ namespace pragma
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
 		void UpdateBoneMatrices();
-		void UpdateBoneBuffer();
+		void UpdateBoneBuffer(prosper::PrimaryCommandBuffer &commandBuffer);
 		void InitializeBoneBuffer();
 		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const override;
 

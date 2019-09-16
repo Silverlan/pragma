@@ -77,11 +77,15 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 				oCallback.push(l);
 				ev.get().PushArguments(l);
 				return Lua::StatusCode::Ok;
-				},1);
-			if(c == Lua::StatusCode::Ok && Lua::IsSet(lTmp,-1))
-				return static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1));
+			},1);
+			if(c == Lua::StatusCode::Ok && Lua::IsNone(lTmp,-1) == false)
+			{
+				auto result = Lua::IsNumber(l,-1) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1)) : util::EventReply::Unhandled;
+				Lua::Pop(l,1); // Pop result
+				return result;
+			}
 			return util::EventReply::Unhandled;
-			});
+		});
 		Lua::Push<CallbackHandle>(l,hCb);
 	}));
 	def.def("InjectEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {

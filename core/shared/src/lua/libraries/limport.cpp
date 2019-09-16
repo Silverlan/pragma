@@ -453,16 +453,89 @@ private:
 	VFilePtr m_rootFile = nullptr;
 };
 
+void Lua::import::initialize_assimp_scene(aiScene &scene,Model &mdl)
+{
+	scene.mRootNode = new aiNode{};
+
+	scene.mMaterials = new aiMaterial*[1];
+	scene.mMaterials[0] = new aiMaterial{};
+	scene.mNumMaterials = 1;
+
+	//aiString name {"soldier_d.dds"};
+	//scene.mMaterials[0]->AddProperty(&name,AI_MATKEY_NAME);
+
+	scene.mMeshes = new aiMesh*[1];
+	scene.mMeshes[0] = nullptr;
+	scene.mNumMeshes = 1;
+
+	scene.mMeshes[0] = new aiMesh{};
+	scene.mMeshes[0]->mMaterialIndex = 0;
+
+	scene.mRootNode->mMeshes = new unsigned int[1];
+	scene.mRootNode->mMeshes[0] = 0;
+	scene.mRootNode->mNumMeshes = 1;
+
+	auto pMesh = scene.mMeshes[0];
+
+	auto numVerts = mdl.GetVertexCount();
+	pMesh->mVertices = new aiVector3D[numVerts];
+	pMesh->mNormals = new aiVector3D[numVerts];
+	pMesh->mNumVertices = numVerts;
+
+	pMesh->mTextureCoords[0] = new aiVector3D[numVerts];
+	pMesh->mNumUVComponents[0] = 2;
+
+	auto numTris = mdl.GetTriangleCount();
+	pMesh->mFaces = new aiFace[numTris];
+	pMesh->mNumFaces = numTris;
+
+	uint32_t vertexIndex = 0u;
+	uint32_t triIndex = 0u;
+	for(auto &meshGroup : mdl.GetMeshGroups())
+	{
+		for(auto &mesh : meshGroup->GetMeshes())
+		{
+			for(auto &subMesh : mesh->GetSubMeshes())
+			{
+				auto vertexOffset = vertexIndex;
+				for(auto &v : subMesh->GetVertices())
+				{
+					pMesh->mVertices[vertexIndex] = aiVector3D{v.position.x,v.position.y,v.position.z};
+					pMesh->mNormals[vertexIndex] = aiVector3D{v.normal.x,v.normal.y,v.normal.z};
+					pMesh->mTextureCoords[0][vertexIndex] = aiVector3D{v.uv.x,1.f -v.uv.y,0.f};
+					++vertexIndex;
+				}
+
+				auto &tris = subMesh->GetTriangles();
+				for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+				{
+					auto &face = pMesh->mFaces[triIndex++];
+					face.mIndices = new unsigned int[3];
+					face.mNumIndices = 3;
+
+					face.mIndices[0] = vertexOffset +tris.at(i);
+					face.mIndices[1] = vertexOffset +tris.at(i +1);
+					face.mIndices[2] = vertexOffset +tris.at(i +2);
+				}
+			}
+		}
+	}
+}
+
 int Lua::import::export_model_asset(lua_State *l)
 {
-	/*Assimp::Exporter exporter;
+	auto &mdl = Lua::Check<Model>(l,1);
+
+	Assimp::Exporter exporter;
 	aiScene scene {};
-	std::string formatId;
-	std::string path;
-	auto result = exporter.Export(&scene,formatId,path);
+	initialize_assimp_scene(scene,mdl);
+	auto result = exporter.Export(&scene,"fbx","E:/projects/pragma/build_winx64/output/box.fbx");
 	Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
-	return 1;*/
-	return 0;
+	
+	auto *error = exporter.GetErrorString();
+	Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
+
+	return 1;
 }
 
 int Lua::import::import_model_asset(lua_State *l)
@@ -474,10 +547,11 @@ int Lua::import::import_model_asset(lua_State *l)
 	auto hFileLocal = std::static_pointer_cast<VFilePtrInternalReal>(hFile);
 
 	Assimp::Importer importer;
-	//importer.SetIOHandler(new AssimpPragmaIo{hFile});
+	importer.SetIOHandler(new AssimpPragmaIo{hFile});
 	auto *aiScene = importer.ReadFile(
 		hFileLocal->GetPath(),
-		aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_FindDegenerates | aiProcess_FindInvalidData | aiProcess_LimitBoneWeights | aiProcess_GenSmoothNormals
+		aiProcess_JoinIdenticalVertices | aiProcess_GenUVCoords | aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_FindDegenerates | 
+		aiProcess_FindInvalidData | aiProcess_LimitBoneWeights | aiProcess_GenSmoothNormals | aiProcess_EmbedTextures
 	);
 	if(aiScene == nullptr)
 	{

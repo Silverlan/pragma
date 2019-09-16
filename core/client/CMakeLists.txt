@@ -30,6 +30,7 @@ link_external_library(bzip2)
 link_external_library(libvorbis)
 link_external_library(glslang)
 link_external_library(util_formatted_text)
+link_external_library(assimp)
 
 add_external_library(luajit)
 add_external_library(clientmanager)

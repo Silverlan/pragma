@@ -88,6 +88,7 @@ public:
 	void AddVertex(const Vector3 &v);
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
+	void Scale(const Vector3 &scale);
 	void Centralize();
 
 	// Triangles can be empty if the collision point-cloud was never triangulated

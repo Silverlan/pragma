@@ -275,6 +275,16 @@ void Lua_LFile_Write(lua_State*,LFile &f,::DataStream &ds,uint32_t size)
 	auto offset = ds->GetOffset();
 	f.Write(ds->GetData() +offset,size -offset);
 }
+void Lua_LFile_GetPath(lua_State *l,LFile &f)
+{
+	if(!f.IsValid())
+		return;
+	auto file = f.GetHandle();
+	if(file->GetType() != VFILE_LOCAL)
+		return;
+	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(file);
+	Lua::PushString(l,freal->GetPath());
+}
 
 ////////////////////////////////////
 

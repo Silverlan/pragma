@@ -62,7 +62,7 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	m_renderTarget = prosper::util::create_render_target(dev,{tex},shader.GetRenderPass());
 	m_renderTarget->SetDebugName("debug_depth_rt");
 
-	m_descSetGroupDepthTex = prosper::util::create_descriptor_set_group(dev,pragma::ShaderDepthToRGB::DESCRIPTOR_SET);
+	m_dsgSceneDepthTex = prosper::util::create_descriptor_set_group(dev,pragma::ShaderDepthToRGB::DESCRIPTOR_SET);
 
 	imgViewCreateInfo = {};
 	imgViewCreateInfo.baseLayer = layerId;
@@ -72,9 +72,9 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	m_srcDepthRenderTarget = prosper::util::create_render_target(dev,{texDepthSrc});
 	m_srcDepthRenderTarget->SetDebugName("debug_depth_src_rt");
 	if(inputImg.GetLayerCount() == 1u)
-		prosper::util::set_descriptor_set_binding_texture(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u);
+		prosper::util::set_descriptor_set_binding_texture(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u);
 	else
-		prosper::util::set_descriptor_set_binding_array_texture(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u,0u);
+		prosper::util::set_descriptor_set_binding_array_texture(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u,0u);
 
 	if(m_hTextureRect.IsValid())
 		static_cast<WITexturedRect&>(*m_hTextureRect.get()).SetTexture(*m_renderTarget->GetTexture());
@@ -186,7 +186,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 		m_depthToRgbCallback.Remove();
 	m_depthToRgbCallback = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([this,nearZ,farZ](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> refDrawCmd) {
 		auto &drawCmd = refDrawCmd.get();
-		if(m_whDepthToRgbShader.expired() || m_srcDepthRenderTarget == nullptr || m_renderTarget == nullptr || m_descSetGroupDepthTex == nullptr)
+		if(m_whDepthToRgbShader.expired() || m_srcDepthRenderTarget == nullptr || m_renderTarget == nullptr || m_dsgSceneDepthTex == nullptr)
 			return;
 		auto &img = *m_renderTarget->GetTexture()->GetImage();
 		prosper::util::record_image_barrier(*(*drawCmd),*img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
@@ -204,7 +204,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderCubeDepthToRGB&>(*m_whCubeDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
+					shader.Draw(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}
@@ -213,7 +213,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderCSMDepthToRGB&>(*m_whCsmDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
+					shader.Draw(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),nearZ,farZ,m_imageLayer,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}
@@ -222,7 +222,7 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 				auto &shader = static_cast<pragma::ShaderDepthToRGB&>(*m_whDepthToRgbShader.get());
 				if(shader.BeginDraw(drawCmd) == true)
 				{
-					shader.Draw(*(*m_descSetGroupDepthTex)->get_descriptor_set(0u),nearZ,farZ,GetContrastFactor());
+					shader.Draw(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),nearZ,farZ,GetContrastFactor());
 					shader.EndDraw();
 				}
 			}

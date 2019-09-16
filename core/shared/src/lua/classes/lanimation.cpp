@@ -263,6 +263,10 @@ void Lua::Animation::Translate(lua_State*,::Animation &anim,::Skeleton *skeleton
 {
 	anim.Translate(*skeleton,t);
 }
+void Lua::Animation::Scale(lua_State *l,::Animation &anim,const Vector3 &scale)
+{
+	anim.Scale(scale);
+}
 void Lua::Animation::Reverse(lua_State *l,::Animation &anim)
 {
 	anim.Reverse();
@@ -424,6 +428,10 @@ void Lua::Frame::Rotate(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *
 void Lua::Frame::Translate(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
 {
 	frame.Translate(anim,*skeleton,t);
+}
+void Lua::Frame::Scale(lua_State *l,::Frame &frame,const Vector3 &scale)
+{
+	frame.Scale(scale);
 }
 void Lua::Frame::GetMoveTranslation(lua_State *l,::Frame &frame)
 {

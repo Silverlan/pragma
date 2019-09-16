@@ -214,7 +214,7 @@ void Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l,pragma::re
 }
 void Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
 {
-	auto &rt = renderer.GetHDRInfo().hdrRenderTarget;
+	auto &rt = renderer.GetHDRInfo().sceneRenderTarget;
 	if(rt == nullptr)
 		return;
 	Lua::Push(l,rt);

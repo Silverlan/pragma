@@ -70,6 +70,14 @@ void CollisionMesh::Translate(const Vector3 &t)
 	m_min += t;
 	m_max += t;
 }
+void CollisionMesh::Scale(const Vector3 &scale)
+{
+	for(auto &v : m_vertices)
+		v *= scale;
+	m_origin *= scale;
+	m_min *= scale;
+	m_max *= scale;
+}
 std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector3 &scale) const
 {
 	auto *physEnv = m_game->GetPhysicsEnvironment();

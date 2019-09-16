@@ -152,7 +152,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 	if(m_waterScene->texScene == nullptr)
 	{
-		auto &sceneImg = renderer->GetHDRInfo().hdrRenderTarget->GetTexture()->GetImage();
+		auto &sceneImg = renderer->GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage();
 		auto extents = sceneImg->GetExtents();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
@@ -184,7 +184,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	}
 
 	auto &descSetEffects = *(*m_waterScene->descSetGroupTexEffects)->get_descriptor_set(0u);
-	auto &reflectionTex = renderer->GetHDRInfo().hdrRenderTarget->GetTexture();
+	auto &reflectionTex = renderer->GetHDRInfo().sceneRenderTarget->GetTexture();
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*reflectionTex,umath::to_integral(pragma::ShaderWater::WaterBinding::ReflectionMap));
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texScene,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texSceneDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
@@ -229,7 +229,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		renderer->EndRenderPass(drawCmd); // The current render pass needs to be ended so we can blit the scene texture and depth texture
 
 		auto &hdrInfo = renderer->GetHDRInfo();
-		auto &tex = hdrInfo.hdrRenderTarget->GetTexture();
+		auto &tex = hdrInfo.sceneRenderTarget->GetTexture();
 		//auto &tex = hdrInfo.texture->GetTexture();
 
 		auto &waterScene = *m_waterScene;
@@ -297,7 +297,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		{
 			auto &hdrInfo = renderer->GetHDRInfo();
 
-			auto &descSetHdr = *(*hdrInfo.descSetGroupHdr)->get_descriptor_set(0u);
+			auto &descSetHdr = *(*hdrInfo.dsgHDRPostProcessing)->get_descriptor_set(0u);
 			auto *imgTex = prosper::util::get_descriptor_set_image(descSetHdr,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 			auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
 			if(imgTex != nullptr)
@@ -305,7 +305,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 			std::function<void(prosper::CommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
-			if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.hdrStagingRenderTarget) == true)
+			if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				auto &prepass = renderer->GetPrepass();
 				//auto &texDepth = prepass.textureDepth->Resolve(); // prosper TODO
@@ -317,7 +317,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				{
 					shaderPPWater.Draw(
 						descSetHdr,
-						*(*hdrInfo.descSetGroupDepth)->get_descriptor_set(0u),
+						*(*hdrInfo.dsgSceneDepth)->get_descriptor_set(0u),
 						*scene->GetCameraDescriptorSetGraphics(),
 						c_game->GetGlobalRenderSettingsDescriptorSet(),
 						*(*waterScene.fogDescSetGroup)->get_descriptor_set(0u),
@@ -390,7 +390,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				auto *renderer = sceneReflection ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(sceneReflection->GetRenderer()) : nullptr;
 				if(renderer)
 				{
-					auto &rtReflection = renderer->GetHDRInfo().hdrRenderTarget;
+					auto &rtReflection = renderer->GetHDRInfo().sceneRenderTarget;
 					auto &camReflection = sceneReflection->GetActiveCamera();
 					if(camReflection.valid())
 					{

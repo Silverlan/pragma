@@ -418,6 +418,41 @@ void Lua::ModelSubMesh::ApplyUVMapping(lua_State *l,::ModelSubMesh &mesh,::Model
 }
 void Lua::ModelSubMesh::Scale(lua_State *l,::ModelSubMesh &mesh,const Vector3 &scale) {mesh.Scale(scale);}
 
+void Lua::ModelSubMesh::InitializeQuad(lua_State *l,::ModelSubMesh &mesh,float size)
+{
+	Vector3 min {-size,0.f,-size};
+	Vector3 max {size,0.f,size};
+	std::vector<Vector3> uniqueVertices {
+		min, // 0
+		Vector3{max.x,min.y,min.z}, // 1
+		Vector3{max.x,min.y,max.z}, // 2
+		Vector3{min.x,min.y,max.z} // 3
+	};
+	std::vector<Vector3> verts {
+		uniqueVertices.at(0),uniqueVertices.at(2),uniqueVertices.at(1),
+		uniqueVertices.at(2),uniqueVertices.at(0),uniqueVertices.at(3)
+	};
+	std::vector<Vector3> faceNormals {
+		uvec::UP,uvec::UP
+	};
+	std::vector<::Vector2> uvs {
+		::Vector2{0.f,0.f},::Vector2{1.f,1.f},::Vector2{1.f,0.f},
+		::Vector2{1.f,1.f},::Vector2{0.f,0.f},::Vector2{0.f,1.f}
+	};
+	for(auto i=decltype(verts.size()){0};i<verts.size();i+=3)
+	{
+		auto &n = faceNormals[i /3];
+		mesh.AddVertex(::Vertex{verts[i],uvs[i],n});
+		mesh.AddVertex(::Vertex{verts[i +1],uvs[i +1],n});
+		mesh.AddVertex(::Vertex{verts[i +2],uvs[i +2],n});
+
+		mesh.AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
+	}
+	mesh.SetTexture(0);
+	mesh.Update();
+	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh.shared_from_this());
+}
+
 void Lua::ModelSubMesh::InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Vector3 &cmin,const Vector3 &cmax)
 {
 	auto min = cmin;

@@ -61,6 +61,9 @@ namespace pragma::physics
 		virtual void SetStepHeight(float stepHeight)=0;
 		virtual float GetStepHeight() const=0;
 
+		virtual Vector3 GetLinearVelocity() const=0;
+		virtual void SetLinearVelocity(const Vector3 &vel)=0;
+
 		ICollisionObject *GetCollisionObject();
 		const ICollisionObject *GetCollisionObject() const;
 

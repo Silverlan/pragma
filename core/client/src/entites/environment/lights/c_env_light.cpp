@@ -18,6 +18,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 const prosper::UniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 const prosper::UniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -297,7 +298,6 @@ void CLightComponent::SetShadowMapIndex(uint32_t idx,ShadowMapType smType)
 
 void CLightComponent::InitializeShadowMap(CShadowComponent &sm)
 {
-	sm.Initialize();
 	sm.SetTextureReloadCallback([this]() {
 		UpdateShadowTypes();
 	});
@@ -313,7 +313,8 @@ void CLightComponent::InitializeShadowMap()
 		m_shadowMapStatic = GetEntity().AddComponent<CShadowComponent>(true);
 	else if(ceData.resultShadow)
 		m_shadowMapStatic = ceData.resultShadow->GetHandle<CShadowComponent>();
-	InitializeShadowMap(*m_shadowMapStatic);
+	if(m_shadowMapStatic.valid())
+		InitializeShadowMap(*m_shadowMapStatic);
 	if(GetShadowType() == ShadowType::Full)
 	{
 		CEHandleShadowMap ceData {};
@@ -321,7 +322,8 @@ void CLightComponent::InitializeShadowMap()
 			m_shadowMapDynamic = GetEntity().AddComponent<CShadowComponent>(true);
 		else if(ceData.resultShadow)
 			m_shadowMapDynamic = ceData.resultShadow->GetHandle<CShadowComponent>();
-		InitializeShadowMap(*m_shadowMapDynamic);
+		if(m_shadowMapDynamic.valid())
+			InitializeShadowMap(*m_shadowMapDynamic);
 	}
 }
 
@@ -636,3 +638,4 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
+#pragma optimize("",on)

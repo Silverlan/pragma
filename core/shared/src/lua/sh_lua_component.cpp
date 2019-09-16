@@ -11,6 +11,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 struct ClassMembers
 {
 	ClassMembers(const luabind::object &classObject)
@@ -747,3 +748,4 @@ LuaBaseEntityComponentWrapper::LuaBaseEntityComponentWrapper(const util::WeakHan
 LuaBaseEntityComponentWrapper::LuaBaseEntityComponentWrapper()
 	: LuaBaseEntityComponentWrapper(util::WeakHandle<pragma::BaseEntityComponent>{})
 {}
+#pragma optimize("",on)

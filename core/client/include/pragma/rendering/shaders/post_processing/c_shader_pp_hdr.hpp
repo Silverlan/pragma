@@ -5,6 +5,10 @@
 
 namespace pragma
 {
+	namespace rendering
+	{
+		enum class ToneMapping : uint32_t;
+	};
 	class DLLCLIENT ShaderPPHDR
 		: public ShaderPPBase
 	{
@@ -24,12 +28,12 @@ namespace pragma
 			float exposure;
 			float bloomScale;
 			float glowScale;
-			int32_t toneMappingOnly;
+			rendering::ToneMapping toneMapping;
 		};
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale,bool toneMappingOnly=false);
+		bool Draw(Anvil::DescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;

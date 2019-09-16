@@ -17,6 +17,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create",&Create)];
@@ -244,6 +245,7 @@ void Lua::Model::register_class(
 	classDef.def("ClearMaterials",&Lua::Model::ClearTextures);
 	classDef.def("Rotate",&Lua::Model::Rotate);
 	classDef.def("Translate",&Lua::Model::Translate);
+	classDef.def("Scale",&Lua::Model::Scale);
 	classDef.def("GetEyeOffset",&Lua::Model::GetEyeOffset);
 	classDef.def("SetEyeOffset",&Lua::Model::SetEyeOffset);
 	classDef.def("AddAnimation",&Lua::Model::AddAnimation);
@@ -353,6 +355,7 @@ void Lua::Model::register_class(
 		.def("CalcRenderBounds",&Lua::Frame::CalcRenderBounds)
 		.def("Rotate",&Lua::Frame::Rotate)
 		.def("Translate",&Lua::Frame::Translate)
+		.def("Scale",&Lua::Frame::Scale)
 		.def("GetMoveTranslation",&Lua::Frame::GetMoveTranslation)
 		.def("GetMoveTranslationX",&Lua::Frame::GetMoveTranslationX)
 		.def("GetMoveTranslationZ",&Lua::Frame::GetMoveTranslationZ)
@@ -400,6 +403,7 @@ void Lua::Model::register_class(
 		.def("GetRenderBounds",&Lua::Animation::GetRenderBounds)
 		.def("Rotate",&Lua::Animation::Rotate)
 		.def("Translate",&Lua::Animation::Translate)
+		.def("Scale",&Lua::Animation::Scale)
 		.def("Reverse",&Lua::Animation::Reverse)
 		.def("RemoveEvent",&Lua::Animation::RemoveEvent)
 		.def("SetEventData",&Lua::Animation::SetEventData)
@@ -441,15 +445,24 @@ void Lua::Model::register_class(
 
 	// Vertex Animation
 	auto classDefVertexAnimation = luabind::class_<::VertexAnimation>("VertexAnimation")
+		.def("Rotate",static_cast<void(*)(lua_State*,::VertexAnimation&,const Quat&)>([](lua_State *l,::VertexAnimation &vertAnim,const Quat &rot) {
+			vertAnim.Rotate(rot);
+		}))
 		.def("GetMeshAnimations",&Lua::VertexAnimation::GetMeshAnimations)
 		.def("GetName",&Lua::VertexAnimation::GetName);
 
 	auto classDefMeshVertexFrame = luabind::class_<::MeshVertexFrame>("Frame")
+		.def("Rotate",static_cast<void(*)(lua_State*,::MeshVertexFrame&,const Quat&)>([](lua_State *l,::MeshVertexFrame &meshVertFrame,const Quat &rot) {
+			meshVertFrame.Rotate(rot);
+		}))
 		.def("GetVertices",&Lua::MeshVertexFrame::GetVertices)
 		.def("SetVertexCount",&Lua::MeshVertexFrame::SetVertexCount)
 		.def("SetVertexPosition",&Lua::MeshVertexFrame::SetVertexPosition)
 		.def("GetVertexPosition",&Lua::MeshVertexFrame::GetVertexPosition);
 	auto classDefMeshVertexAnimation = luabind::class_<::MeshVertexAnimation>("MeshAnimation")
+		.def("Rotate",static_cast<void(*)(lua_State*,::MeshVertexAnimation&,const Quat&)>([](lua_State *l,::MeshVertexAnimation &meshVertAnim,const Quat &rot) {
+			meshVertAnim.Rotate(rot);
+		}))
 		.def("GetFrames",&Lua::MeshVertexAnimation::GetFrames)
 		.def("GetMesh",&Lua::MeshVertexAnimation::GetMesh);
 	classDefMeshVertexAnimation.scope[
@@ -1443,6 +1456,11 @@ void Lua::Model::Translate(lua_State*,::Model &mdl,const Vector3 &t)
 	//Lua::CheckModel(l,1);
 	mdl.Translate(t);
 }
+void Lua::Model::Scale(lua_State*,::Model &mdl,const Vector3 &scale)
+{
+	//Lua::CheckModel(l,1);
+	mdl.Scale(scale);
+}
 void Lua::Model::GetEyeOffset(lua_State *l,::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
@@ -1947,3 +1965,4 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l,::Model &mdl,uint32_t idx)
 	//Lua::CheckModel(l,1);
 	mdl.RemoveObjectAttachment(idx);
 }
+#pragma optimize("",on)

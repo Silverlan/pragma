@@ -152,6 +152,7 @@ namespace Lua
 		DLLNETWORK void ClearTextures(lua_State *l,::Model &mdl);
 		DLLNETWORK void Rotate(lua_State *l,::Model &mdl,const Quat &rot);
 		DLLNETWORK void Translate(lua_State *l,::Model &mdl,const Vector3 &t);
+		DLLNETWORK void Scale(lua_State *l,::Model &mdl,const Vector3 &scale);
 		DLLNETWORK void GetEyeOffset(lua_State *l,::Model &mdl);
 		DLLNETWORK void SetEyeOffset(lua_State *l,::Model &mdl,const Vector3 &offset);
 		DLLNETWORK void AddAnimation(lua_State *l,::Model &mdl,const std::string &name,::Animation &anim);

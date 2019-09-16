@@ -180,7 +180,7 @@ endLoop:
 	for(auto &pair : data)
 	{
 		m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
-		c_engine->ScheduleRecordUpdateBuffer(buf.shared_from_this(),bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
+		prosper::util::record_update_generic_shader_read_buffer(**drawCmd,buf,bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
 		bufferOffset += pair.second.size();
 
 		//for(auto &vaData : pair.second)

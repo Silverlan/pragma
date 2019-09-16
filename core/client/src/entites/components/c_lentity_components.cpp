@@ -798,16 +798,19 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_base_env_weather_component_methods<luabind::class_<CWeatherHandle,BaseEntityComponentHandle>,CWeatherHandle>(l,defCWeather);
 	entsMod[defCWeather];
 
-	auto defCReflectionProbe = luabind::class_<CReflectionProbeHandle,BaseEntityComponentHandle>("ReflectionProbe");
+	auto defCReflectionProbe = luabind::class_<CReflectionProbeHandle,BaseEntityComponentHandle>("ReflectionProbeComponent");
 	entsMod[defCReflectionProbe];
 
-	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverter");
+	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverterComponent");
 	entsMod[defCPBRConverter];
 
-	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMap");
+	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMapComponent");
 	entsMod[defShadow];
 
-	auto defShadowManager = luabind::class_<CShadowManagerHandle,BaseEntityComponentHandle>("ShadowManager");
+	auto defShadowCsm = luabind::class_<CShadowCSMHandle,BaseEntityComponentHandle>("CSMComponent");
+	entsMod[defShadowCsm];
+
+	auto defShadowManager = luabind::class_<CShadowManagerHandle,BaseEntityComponentHandle>("ShadowManagerComponent");
 	entsMod[defShadowManager];
 
 	auto defCWaterSurface = luabind::class_<CWaterSurfaceHandle,BaseEntityComponentHandle>("WaterSurfaceComponent");
@@ -996,6 +999,13 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCBSP];
 
 	auto defCLightMap = luabind::class_<CLightMapHandle,BaseEntityComponentHandle>("LightMapComponent");
+	defCLightMap.def("GetLightmapTexture",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
+		pragma::Lua::check_component(l,hLightMapC);
+		auto lightMap = hLightMapC->GetLightMap();
+		if(lightMap == nullptr)
+			return;
+		Lua::Push<std::shared_ptr<prosper::Texture>>(l,lightMap);
+	}));
 	entsMod[defCLightMap];
 
 	auto defCGeneric = luabind::class_<CGenericHandle,BaseEntityComponentHandle>("EntityComponent");

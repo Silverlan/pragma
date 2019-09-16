@@ -91,30 +91,11 @@ bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer
 	auto hCam = scene.GetActiveCamera();
 	if(hCam.expired())
 		return false;
-	auto pos = hCam->GetEntity().GetPosition();
 	if(m_bNonIBLMode == false)
 	{
-		// Find closest reflection probe to camera position
-		EntityIterator entIt {*c_game};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
-		auto dClosest = std::numeric_limits<float>::max();
-		BaseEntity *entClosest = nullptr;
-		for(auto *ent : entIt)
-		{
-			auto posEnt = ent->GetPosition();
-			auto d = uvec::distance_sqr(pos,posEnt);
-			if(d >= dClosest)
-				continue;
-			dClosest = d;
-			entClosest = ent;
-		}
-		if(entClosest)
-		{
-			auto &reflectionProbeC = *entClosest->GetComponent<pragma::CReflectionProbeComponent>();
-			auto *ds = reflectionProbeC.GetIBLDescriptorSet();
-			if(ds)
-				return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
-		}
+		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(hCam->GetEntity().GetPosition());
+		if(ds)
+			return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}
 
 	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
@@ -132,7 +113,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreat
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
-static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,const std::string &textureIdentifier,uint32_t bindingIndex,const std::string &defaultTexName="")
+static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName="")
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -142,9 +123,8 @@ static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,const std::strin
 	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
 
 	std::shared_ptr<Texture> tex = nullptr;
-	auto *pMap = mat.GetTextureInfo(textureIdentifier);
-	if(pMap && pMap->texture)
-		tex = std::static_pointer_cast<Texture>(pMap->texture);
+	if(texInfo && texInfo->texture)
+		tex = std::static_pointer_cast<Texture>(texInfo->texture);
 	else if(defaultTexName.empty())
 		return false;
 	else
@@ -161,7 +141,7 @@ static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,const std::strin
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo)
 {
 	auto &dev = c_engine->GetDevice();
-	auto *albedoMap = mat.GetTextureInfo("albedo_map");
+	auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
 
@@ -173,26 +153,21 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
 	prosper::util::set_descriptor_set_binding_texture(*descSet,*albedoTexture->texture,umath::to_integral(MaterialBinding::AlbedoMap));
 
-	// TODO: Don't use normal map if not available
-	if(bind_texture(mat,*descSet,"normal_map",umath::to_integral(MaterialBinding::NormalMap),"black") == false)
+	if(bind_texture(mat,*descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
 
-	if(
-		bind_texture(mat,*descSet,"ambient_occlusion_map",umath::to_integral(MaterialBinding::AmbientOcclusionMap)) == false &&
-		bind_texture(mat,*descSet,"ao_map",umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false
-	)
+	if(bind_texture(mat,*descSet,mat.GetAmbientOcclusionMap(),umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,"metalness_map",umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
+	if(bind_texture(mat,*descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,"roughness_map",umath::to_integral(MaterialBinding::RoughnessMap),"white") == false)
+	if(bind_texture(mat,*descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"white") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,"glowmap",umath::to_integral(MaterialBinding::EmissionMap)) == false)
-		bind_texture(mat,*descSet,"emission_map",umath::to_integral(MaterialBinding::EmissionMap));
+	bind_texture(mat,*descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
 
-	if(bind_texture(mat,*descSet,"parallax_map",umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+	if(bind_texture(mat,*descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
 		return false;
 	return descSetGroup;
 }

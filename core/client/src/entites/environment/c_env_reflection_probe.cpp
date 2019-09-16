@@ -27,6 +27,7 @@
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/pbr/stb_image_write.h"
+#include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pr_dds.hpp"
@@ -51,12 +52,34 @@ void Console::commands::map_rebuild_reflection_probes(NetworkState *state,pragma
 	CReflectionProbeComponent::BuildAllReflectionProbes(*c_game,true);
 }
 
+static void print_status(uint32_t i,uint32_t count)
+{
+	auto percent = umath::ceil((count > 0u) ? (i /static_cast<float>(count) *100.f) : 100.f);
+	Con::cout<<"Reflection probe update at "<<percent<<"%"<<Con::endl;
+}
+
 //static auto *GUI_EL_NAME = "cubemap_generation_image";
 void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild)
 {
 	EntityIterator entIt {game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
+	auto numProbes = entIt.GetCount();
+	std::vector<BaseEntity*> probes {};
+	probes.reserve(numProbes);
+	uint32_t idx = 0u;
+	Con::cout<<"Updating "<<numProbes<<" reflection probes..."<<Con::endl;
 	for(auto *ent : entIt)
+	{
+		auto reflProbeC = ent->GetComponent<CReflectionProbeComponent>();
+		if(reflProbeC->RequiresRebuild() == false)
+		{
+			reflProbeC->LoadIBLReflectionsFromFile();
+			print_status(++idx,numProbes);
+			continue;
+		}
+		probes.push_back(ent);
+	}
+	for(auto *ent : probes)
 	{
 		auto reflProbeC = ent->GetComponent<CReflectionProbeComponent>();
 		auto pos = ent->GetPosition();
@@ -68,6 +91,7 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 			reflProbeC->LoadIBLReflectionsFromFile();
 			Con::cout<<"Done!"<<Con::endl;
 		}
+		print_status(++idx,numProbes);
 	}
 
 	/*auto &wgui = WGUI::GetInstance();
@@ -80,6 +104,32 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 				hEl.get()->Remove();
 		}),TimerType::RealTime);
 	}*/
+}
+
+Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const Vector3 &origin)
+{
+	if(c_game == nullptr)
+		return nullptr;
+	// Find closest reflection probe to camera position
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CReflectionProbeComponent>>();
+	auto dClosest = std::numeric_limits<float>::max();
+	BaseEntity *entClosest = nullptr;
+	for(auto *ent : entIt)
+	{
+		auto posEnt = ent->GetPosition();
+		auto d = uvec::distance_sqr(origin,posEnt);
+		if(d >= dClosest)
+			continue;
+		dClosest = d;
+		entClosest = ent;
+	}
+	if(entClosest)
+	{
+		auto &reflectionProbeC = *entClosest->GetComponent<pragma::CReflectionProbeComponent>();
+		return reflectionProbeC.GetIBLDescriptorSet();
+	}
+	return nullptr;
 }
 
 void CReflectionProbeComponent::Initialize()
@@ -97,11 +147,18 @@ void CReflectionProbeComponent::Initialize()
 	});
 }
 
-bool CReflectionProbeComponent::UpdateIBLData(bool rebuild)
+bool CReflectionProbeComponent::RequiresRebuild() const
 {
 	auto matPath = "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +".wmi";
-	if(rebuild == false && FileManager::Exists(matPath))
-		return true; // IBL textures already exist; nothing to be done!
+	if(FileManager::Exists(matPath))
+		return false; // IBL textures already exist; nothing to be done!
+	return true;
+}
+
+bool CReflectionProbeComponent::UpdateIBLData(bool rebuild)
+{
+	if(rebuild == false && RequiresRebuild() == false)
+		return true;
 	if(m_srcEnvMap.empty() == false)
 	{
 		if(GenerateIBLReflectionsFromEnvMap("materials/" +m_srcEnvMap) == false)
@@ -137,7 +194,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	{
 		ImageWriteInfo imgWriteInfo {};
 		imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R16G16B16A16_Float;
-		imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC6;
+		imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::HDRColorMap;
 		if(c_game->SaveImage(*imgBrdf,"materials/env/brdf",imgWriteInfo) == false)
 		{
 			fErrorHandler("Unable to save BRDF map!");
@@ -147,7 +204,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 
 	ImageWriteInfo imgWriteInfo {};
 	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R16G16B16A16_Float;
-	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC6;
+	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::HDRColorMap;
 	auto prefix = identifier +"_";
 	if(c_game->SaveImage(*imgPrefilter,absPath +prefix +"prefilter",imgWriteInfo) == false)
 	{
@@ -168,6 +225,99 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	dataBlock->AddValue("texture","irradiance",relPath +prefix +"irradiance");
 	dataBlock->AddValue("texture","brdf","env/brdf");
 	return mat->Save(relPath +identifier +".wmi");
+}
+
+void CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
+	prosper::Image &imgCubemap,uint32_t layerIndex,
+	const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+)
+{
+	auto extents = imgCubemap.GetExtents();
+	rendering::cycles::Scene::CreateInfo sceneCreateInfo {};
+	sceneCreateInfo.width = extents.width;
+	sceneCreateInfo.height = extents.height;
+	sceneCreateInfo.cameraPosition = camPos;
+	sceneCreateInfo.cameraRotation = camRot;
+	sceneCreateInfo.nearZ = nearZ;
+	sceneCreateInfo.farZ = farZ;
+	sceneCreateInfo.fov = fov;
+	// We'll take just a few samples and then denoise the result,
+	// since we only care about the irradiance anyway
+	// TODO: De-noising currently doesn't work because the cycles module uses progressive rendering.
+	// These lines should be uncommented once progressive rendering is disabled.
+	sceneCreateInfo.samples = 16;
+	sceneCreateInfo.denoise = true;
+	sceneCreateInfo.hdrOutput = true;
+
+	// Top and bottom layers have to be flipped vertically, all others horizontally.
+	// Most likely to do with the view matrices being set up incorrectly.
+	auto flipHorizontally = (layerIndex != 2 && layerIndex != 3);
+	std::vector<std::array<uint16_t,4>> imgData {};
+	auto complete = false;
+	sceneCreateInfo.outputHandler = [&complete,&imgData,flipHorizontally](const uint8_t *data,int width,int height) {
+		complete = true;
+		prosper::util::ImageCreateInfo createInfo {};
+		createInfo.width = width;
+		createInfo.height = height;
+		createInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
+		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+		createInfo.tiling = Anvil::ImageTiling::LINEAR;
+		createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+
+		imgData.resize(width *height);
+		for(auto x=decltype(height){0};x<height;++x)
+		{
+			for(auto y=decltype(width){0};y<width;++y)
+			{
+				auto offset = x *width +y;
+				auto *pxData = reinterpret_cast<const uint16_t*>(data) +offset *4;
+
+				auto outOffset = (flipHorizontally ? x : (height -x -1)) *width +(flipHorizontally ? (width -y -1) : y);
+				auto *outPixelData = reinterpret_cast<uint16_t*>(imgData.data()) +outOffset *4;
+				for(uint8_t i=0;i<4;++i)
+					outPixelData[i] = pxData[i];
+			}
+		}
+	};
+	sceneCreateInfo.entityFilter = [](BaseEntity &ent) -> bool {
+		return ent.IsStatic();
+	};
+	auto scene = rendering::cycles::Scene::Create(*client,sceneCreateInfo);
+	if(scene.expired())
+		return;
+	auto startProgress = layerIndex /6.f;
+	constexpr auto progressPerFace = 1.f /6.f;
+	auto currentProgress = 0.f;
+	scene->SetProgressCallback([currentProgress,startProgress,progressPerFace](float progress) mutable {
+		for(auto fstep : {0.25f,0.5f,0.75f,1.f})
+		{
+			if(currentProgress < fstep && progress >= fstep)
+			{
+				currentProgress = progress;
+				auto printProgress = startProgress +fstep *progressPerFace;
+				Con::cout<<"Reflection probe progress at "<<(printProgress *100.f)<<"%!"<<Con::endl;
+				break;
+			}
+		}
+	});
+	while(scene->Update() == false)
+		;
+
+	auto *memBlock = imgCubemap.GetAnvilImage().get_memory_block();
+	auto totalSize = memBlock->get_create_info_ptr()->get_size();
+	auto sizePerImg = util::get_size_in_bytes(imgData);
+	auto expectedTotalSize = sizePerImg *6;
+
+	auto layout = imgCubemap.GetSubresourceLayout(layerIndex,0);
+	auto imgDataSize = util::get_size_in_bytes(imgData);
+	assert(layout->size == imgDataSize);
+	if(layout->size < imgDataSize)
+		throw std::logic_error{"Size mismatch between raytraced reflection probe image and target cubemap!"};
+
+	void *pData;
+	memBlock->map(layout->offset,layout->size,&pData);
+	memcpy(pData,imgData.data(),imgDataSize);
+	memBlock->unmap();
 }
 
 bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
@@ -209,42 +359,86 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	auto &dev = c_engine->GetDevice();
 	auto img = prosper::util::create_image(dev,createInfo);
 
+	constexpr auto useRaytracing = true;
 	auto oldRenderResolution = c_engine->GetRenderResolution();
-	//c_engine->SetRenderResolution(Vector2i{createInfo.width,createInfo.height});
+	if(useRaytracing == false)
+	{
+		Con::cerr<<"ERROR: Custom render resolutions currently not supported for reflection probes!"<<Con::endl;
+		c_engine->SetRenderResolution(Vector2i{createInfo.width,createInfo.height});
+	}
 
 	auto oldProjMat = hCam->GetProjectionMatrix();
 	auto oldViewMat = hCam->GetViewMatrix();
 
 	auto mProj = glm::perspectiveRH<float>(glm::radians(90.0f),1.f,hCam->GetNearZ(),hCam->GetFarZ());
-	mProj = glm::scale(mProj,Vector3(1.f,-1.f,1.f));
+	mProj = glm::scale(mProj,Vector3(-1.f,-1.f,1.f));
 	hCam->SetProjectionMatrix(mProj);
 
+	static const std::array<std::pair<Vector3,Vector3>,6> forwardUpDirs = {
+		std::pair<Vector3,Vector3>{Vector3{1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}},
+		std::pair<Vector3,Vector3>{Vector3{-1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}},
+		std::pair<Vector3,Vector3>{Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,0.0f,1.0f}},
+		std::pair<Vector3,Vector3>{Vector3{0.0f,-1.0f,0.0f},Vector3{0.0f,0.0f,-1.0f}},
+		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,1.0f},Vector3{0.0f,1.0f,0.0f}},
+		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,-1.0f},Vector3{0.0f,1.0f,0.0f}}
+	};
 	static const std::array<Mat4,6> cubemapViewMatrices = {
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,1.0f,0.0f)),
-		glm::lookAtRH(glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,1.0f,0.0f))
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(0).first,forwardUpDirs.at(0).second),
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(1).first,forwardUpDirs.at(1).second),
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(2).first,forwardUpDirs.at(2).second),
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(3).first,forwardUpDirs.at(3).second),
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(4).first,forwardUpDirs.at(4).second),
+		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(5).first,forwardUpDirs.at(5).second)
 	};
 
-	for(uint8_t iLayer=0;iLayer<6;++iLayer)
+	if(useRaytracing)
 	{
-		hCam->SetViewMatrix(cubemapViewMatrices.at(iLayer));
-		hCam->GetEntity().SetPosition(pos);
-		hCam->UpdateViewMatrix(); // TODO: Remove this?
+		std::array<std::array<float,4>,6> colors = {
+			std::array<float,4>{1.f,0.f,0.f,1.f},
+			std::array<float,4>{0.f,1.f,0.f,1.f},
+			std::array<float,4>{0.f,0.f,1.f,1.f},
+			std::array<float,4>{1.f,1.f,0.f,1.f},
+			std::array<float,4>{0.f,1.f,1.f,1.f},
+			std::array<float,4>{1.f,0.f,1.f,1.f}
+		};
+		for(uint8_t iLayer=0;iLayer<6;++iLayer)
+		{
+			auto &forward = forwardUpDirs.at(iLayer).first;
+			auto &up = forwardUpDirs.at(iLayer).second;
+			auto right = uvec::cross(forward,up);
+			uvec::normalize(&right);
+			auto rot = uquat::create(forward,right,up);
+			CaptureRaytracedIBLReflectionsFromScene(*img,iLayer,pos,rot,hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */);
 
-		auto drawCmd = c_engine->GetSetupCommandBuffer();
-		scene->UpdateBuffers(drawCmd); // TODO: Remove this?
-
-		c_game->RenderScene(drawCmd,*img,(FRender::All | FRender::HDR) &~FRender::View,iLayer);
-		prosper::util::ClearImageInfo clearImgInfo {};
-		clearImgInfo.subresourceRange.baseArrayLayer = iLayer;
-
-		// We're flushing the command buffer for each layer
-		// individually to make sure we're not gonna hit the TDR
-		c_engine->FlushSetupCommandBuffer();
+			/*auto drawCmd = c_engine->GetSetupCommandBuffer();
+			prosper::util::ClearImageInfo clearInfo {};
+			clearInfo.subresourceRange.baseArrayLayer = iLayer;
+			prosper::util::record_clear_image(**drawCmd,**img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,colors.at(iLayer),clearInfo);
+			c_engine->FlushSetupCommandBuffer();*/
+		}
 	}
+	else
+	{
+		for(uint8_t iLayer=0;iLayer<6;++iLayer)
+		{
+			hCam->SetViewMatrix(cubemapViewMatrices.at(iLayer));
+			hCam->GetEntity().SetPosition(pos);
+			hCam->UpdateViewMatrix(); // TODO: Remove this?
+
+			auto drawCmd = c_engine->GetSetupCommandBuffer();
+			scene->UpdateBuffers(drawCmd); // TODO: Remove this?
+
+			// TODO: FRender::Reflection is required to flip the winding order, but why is this needed in the first place?
+			c_game->RenderScene(drawCmd,*img,(FRender::All | FRender::HDR | FRender::Reflection) &~(FRender::View | FRender::Dynamic),iLayer);
+
+			// We're flushing the command buffer for each layer
+			// individually to make sure we're not gonna hit the TDR
+			c_engine->FlushSetupCommandBuffer();
+		}
+	}
+
+	hCam->SetProjectionMatrix(oldProjMat);
+	hCam->SetViewMatrix(oldViewMat);
 
 	auto drawCmd = c_engine->GetSetupCommandBuffer();
 	// Generate cubemap mipmaps
@@ -257,11 +451,19 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	);
 	c_engine->FlushSetupCommandBuffer();
 
-	// Restore old render resolution TODO: Do this only once when capturing all cubemaps
-	//c_engine->SetRenderResolution(oldRenderResolution);
+	if(useRaytracing == false)
+	{
+		// Restore old render resolution TODO: Do this only once when capturing all cubemaps
+		c_engine->SetRenderResolution(oldRenderResolution);
+	}
 	
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
+	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
+	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
 	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
 
 	Con::cout<<"Generating IBL reflection textures from reflection probe..."<<Con::endl;
@@ -313,6 +515,19 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	m_iblDsg = nullptr;
 	m_iblData = std::make_unique<rendering::IBLData>(irradianceMap,prefilterMap,brdfTex);
 	InitializeDescriptorSet();
+	
+	// Debug test: Apply texture to skybox
+	/*{
+		for(auto &pair : client->GetMaterialManager().GetMaterials())
+		{
+			if(pair.first.find("skybox") == std::string::npos)
+				continue;
+			auto *texInfo = pair.second.get()->GetTextureInfo("skybox");
+			std::static_pointer_cast<Texture>(texInfo->texture)->texture = m_iblData->prefilterMap;
+			c_game->ReloadMaterialShader(static_cast<CMaterial*>(pair.second.get()));
+			break;
+		}
+	}*/
 	return true;
 }
 

@@ -63,7 +63,7 @@ namespace pragma
 			std::shared_ptr<prosper::PrimaryCommandBuffer> m_cmdBuffer = nullptr;
 			uint32_t m_cmdBufferQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 
-			std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupDepthBuffer = nullptr;
+			std::shared_ptr<prosper::DescriptorSetGroup> m_dsgSceneDepthBuffer = nullptr;
 		};
 	};
 };

@@ -37,6 +37,7 @@ namespace pragma
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		void UpdateAmbientColor();
+		void SetShadowDirty();
 
 		util::WeakHandle<CShadowCSMComponent> m_shadowMap = {};
 		bool m_bShadowBufferUpdateScheduled;

@@ -388,7 +388,7 @@ void CPBRConverterComponent::GenerateGeometryBasedTextures(Model &mdl)
 					continue;
 				auto *normalMap = mat->GetNormalMap();
 				auto *aoMap = mat->GetAmbientOcclusionMap();
-				auto *metalnessMap = mat->GetTextureInfo("metalness_map");
+				auto *metalnessMap = mat->GetMetalnessMap();
 				// Note: Generating normal map currently has wrong results, and would not
 				// provide any advantage over regular vertex normals anyway.
 				// This behavior is therefore disabled for now.
@@ -524,12 +524,16 @@ void CPBRConverterComponent::GenerateGeometryBasedTextures(Model &mdl)
 			{
 				if(mat == nullptr)
 					continue;
-				Con::cout<<"Assigning "<<(metalness ? "metalness" : "non-metalness")<<" texture to material '"<<mat->GetName()<<"', based on surface material '"<<surfMatName<<"' of model '"<<mdl.GetName()<<"'!"<<Con::endl;
-				if(metalness)
-					mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/metal"); // 100% metal
-				else
-					mat->GetDataBlock()->AddValue("texture","metalness_map","pbr/nonmetal"); // 0% metal
-				mat->Save(mat->GetName(),"addons/converted/");
+				if(ShouldConvertMaterial(static_cast<CMaterial&>(*mat)) == false || ConvertToPBR(static_cast<CMaterial&>(*mat)) == true)
+				{
+					Con::cout<<"Assigning "<<(metalness ? "metalness" : "non-metalness")<<" texture to material '"<<mat->GetName()<<"', based on surface material '"<<surfMatName<<"' of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+					if(metalness)
+						mat->GetDataBlock()->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal"); // 100% metal
+					else
+						mat->GetDataBlock()->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/nonmetal"); // 0% metal
+					mat->UpdateTextures();
+					mat->Save(mat->GetName(),"addons/converted/");
+				}
 			}
 		}
 		if(pair.second.generateAoMapData == false && pair.second.generateNormalMapData == false)
@@ -582,7 +586,7 @@ void CPBRConverterComponent::PollEvents()
 
 			ImageWriteInfo imgWriteInfo {};
 			imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R32G32B32A32_Float;
-			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC5; // TODO: Use BC1? Compare quality!
+			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::GradientMap;
 			imgWriteInfo.flags |= ImageWriteInfo::Flags::GenerateMipmaps | ImageWriteInfo::Flags::SRGB;
 			std::string aoName = "";
 			if(matMesh->aoMapPixelData.empty() == false)
@@ -610,9 +614,10 @@ void CPBRConverterComponent::PollEvents()
 					continue;
 				auto &dataBlock = hMat->GetDataBlock();
 				if(aoName.empty() == false)
-					dataBlock->AddValue("texture","ao_map",aoName.substr(materialsRootDir.length()));
+					dataBlock->AddValue("texture",Material::AO_MAP_IDENTIFIER,aoName.substr(materialsRootDir.length()));
 				if(normalName.empty() == false)
-					dataBlock->AddValue("texture","normal_map",normalName.substr(materialsRootDir.length()));
+					dataBlock->AddValue("texture",Material::NORMAL_MAP_IDENTIFIER,normalName.substr(materialsRootDir.length()));
+				hMat->UpdateTextures();
 				if(hMat->Save(hMat->GetName(),"addons/converted/"))
 				{
 					auto nameNoExt = hMat->GetName();
@@ -641,7 +646,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// TODO: Remove ambient occlusion from diffuse map, if possible
 	auto *diffuseMap = matTraditional.GetDiffuseMap();
 	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->texture)
-		dataPbr->AddValue("texture","albedo_map",diffuseMap->name);
+		dataPbr->AddValue("texture",Material::ALBEDO_MAP_IDENTIFIER,diffuseMap->name);
 	//
 
 	// Roughness map
@@ -654,28 +659,28 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 			auto roughnessName = matName +"_roughness";
 			ImageWriteInfo imgWriteInfo {};
 			imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
-			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::BC3;
+			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::GradientMap;
 			imgWriteInfo.flags |= ImageWriteInfo::Flags::GenerateMipmaps | ImageWriteInfo::Flags::SRGB;
 			c_game->SaveImage(*roughnessMap->GetImage(),"addons/converted/materials/" +roughnessName,imgWriteInfo);
-			dataPbr->AddValue("texture","roughness_map",roughnessName);
+			dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,roughnessName);
 		}
 	}
 	else
-		dataPbr->AddValue("texture","roughness_map","pbr/rough"); // Generic roughness map with 100% roughness
+		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough"); // Generic roughness map with 100% roughness
 	//
 
 	// Normal map
 	auto bGenerateNormalMap = false;
 	auto *normalMap = matTraditional.GetNormalMap();
 	if(normalMap && normalMap->texture && std::static_pointer_cast<Texture>(normalMap->texture)->texture)
-		dataPbr->AddValue("texture","normal_map",normalMap->name);
+		dataPbr->AddValue("texture",Material::NORMAL_MAP_IDENTIFIER,normalMap->name);
 	//
 
 	// Ambient occlusion map
 	auto bGenerateAOMap = false;
-	auto *aoMap = matTraditional.GetTextureInfo("ao_map"); // TODO
+	auto *aoMap = matTraditional.GetAmbientOcclusionMap();
 	if(aoMap && aoMap->texture && std::static_pointer_cast<Texture>(aoMap->texture)->texture)
-		dataPbr->AddValue("texture","ao_map",aoMap->name);
+		dataPbr->AddValue("texture",Material::AO_MAP_IDENTIFIER,aoMap->name);
 	//
 
 	// Metalness map
@@ -686,7 +691,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		std::string strVal = valSurfMat->GetString();
 		ustring::to_lower(strVal);
 		if(strVal.find("metal") != std::string::npos)
-			dataPbr->AddValue("texture","metalness_map","pbr/metal"); // 100% metalness
+			dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal"); // 100% metalness
 	}
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.
@@ -696,7 +701,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto *glowMap = matTraditional.GetGlowMap();
 	if(glowMap && glowMap->texture && std::static_pointer_cast<Texture>(glowMap->texture)->texture)
 	{
-		dataPbr->AddValue("texture","emission_map",glowMap->name);
+		dataPbr->AddValue("texture",Material::EMISSION_MAP_IDENTIFIER,glowMap->name);
 		dataPbr->AddValue("bool","glow_alpha_only","1");
 		dataPbr->AddValue("float","glow_scale","1.0");
 		dataPbr->AddValue("int","glow_blend_diffuse_mode","1");
@@ -704,6 +709,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	}
 	//
 
+	matPbr->UpdateTextures();
 	// Overwrite old material with new PBR settings
 	if(matPbr->Save(matTraditional.GetName(),"addons/converted/"))
 		client->LoadMaterial(matName,true,true); // Reload material immediately

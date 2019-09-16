@@ -374,19 +374,13 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 			auto &m = GetTransformationMatrix();
 			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			prosper::Context::BufferUpdateInfo updateInfo {};
-			updateInfo.postUpdateBarrierStageMask = Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT;
-			updateInfo.postUpdateBarrierAccessMask = Anvil::AccessFlagBits::SHADER_READ_BIT;
-			c_engine->ScheduleRecordUpdateBuffer(
-				renderBuffer,0ull,instanceData,
-				updateInfo
-			);
+			prosper::util::record_update_generic_shader_read_buffer(**drawCmd,*renderBuffer,0ull,sizeof(instanceData),&instanceData);
 		}
 
 		m_lastRender = frameId;
 	}
 
-	CEOnUpdateRenderData evData {updateRenderBuffer};
+	CEOnUpdateRenderData evData {drawCmd,updateRenderBuffer};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
 }
 
@@ -568,8 +562,8 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(bool bufferUpdateRequired)
-	: bufferUpdateRequired{bufferUpdateRequired}
+CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired)
+	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer}
 {}
 void CEOnUpdateRenderData::PushArguments(lua_State *l)
 {

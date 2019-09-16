@@ -16,6 +16,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}
@@ -32,6 +33,7 @@ void CLightSpotComponent::Initialize()
 		UpdateTransformMatrix();
 	});
 	BindEventUnhandled(CRadiusComponent::EVENT_ON_RADIUS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		SetShadowDirty();
 		UpdateProjectionMatrix();
 	});
 	m_angInnerCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
@@ -45,6 +47,7 @@ void CLightSpotComponent::Initialize()
 			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInner),bufferData.cutoffInner);
 	});
 	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
+		SetShadowDirty();
 		UpdateProjectionMatrix();
 		auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 		if(pLightComponent.expired())
@@ -79,11 +82,22 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(CTransformComponent))
 	{
 		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+			SetShadowDirty();
 			UpdateViewMatrices();
 		}),CallbackType::Component,&component);
 		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
+			SetShadowDirty();
 			UpdateViewMatrices();
 		}),CallbackType::Component,&component);
+	}
+}
+void CLightSpotComponent::SetShadowDirty()
+{
+	for(auto &pComponent : GetEntity().GetComponents())
+	{
+		if(typeid(*pComponent) != typeid(CShadowComponent))
+			continue;
+		static_cast<CShadowComponent&>(*pComponent).SetDirty(true);
 	}
 }
 void CLightSpotComponent::UpdateViewMatrices()
@@ -156,3 +170,4 @@ void CEnvLightSpot::Initialize()
 	AddComponent<CLightComponent>();
 	AddComponent<CLightSpotComponent>();
 }
+#pragma optimize("",on)

@@ -10,6 +10,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <material_descriptor_array.hpp>
 
 using namespace pragma;
@@ -26,7 +27,7 @@ void CRaytracingComponent::RegisterEvents(pragma::EntityComponentManager &compon
 bool CRaytracingComponent::InitializeBuffers()
 {
 	if(s_allResourcesInitialized)
-		return false;
+		return true;
 	auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
 	auto instanceCount = 32'768;
 	auto maxInstanceCount = instanceCount *10u;
@@ -85,101 +86,149 @@ void CRaytracingComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateBoneBuffer();
+		SetBoneBufferDirty();
 	});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateRenderBuffer();
+		SetRenderBufferDirty();
 	});
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateModelRaytracingBuffers();
+		InitializeModelRaytracingBuffers();
 	});
-	UpdateModelRaytracingBuffers();
+	InitializeModelRaytracingBuffers();
 }
-void CRaytracingComponent::UpdateModelRaytracingBuffers()
+void CRaytracingComponent::InitializeModelRaytracingBuffers()
 {
 	if(s_entityMeshInfoBuffer == nullptr || s_materialDescriptorArrayManager == nullptr)
 		return;
-	auto wpMdlComponent = GetEntity().GetModelComponent();
+	auto &ent = GetEntity();
+	auto wpMdlComponent = ent.GetModelComponent();
 	auto mdl = wpMdlComponent.valid() ? wpMdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 	{
 		m_subMeshBuffers.clear();
 		return;
 	}
-
-	for(auto &meshGroup : mdl->GetMeshGroups())
+	auto renderC = ent.GetComponent<CRenderComponent>();
+	auto renderMode = renderC.valid() ? renderC->GetRenderMode() : RenderMode::World;
+	auto flags = SubMeshRenderInfoBufferData::Flags::None;
+	switch(renderMode)
 	{
-		for(auto &mesh : meshGroup->GetMeshes())
+	case RenderMode::World:
+		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWorld;
+		break;
+	case RenderMode::View:
+		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeView;
+		break;
+	case RenderMode::Skybox:
+		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeSkybox;
+		break;
+	case RenderMode::Water:
+		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWater;
+		break;
+	}
+
+	std::vector<std::shared_ptr<ModelMesh>> lodMeshes {};
+	std::vector<uint32_t> bodyGroups {};
+	bodyGroups.resize(mdl->GetBodyGroupCount());
+	mdl->GetBodyGroupMeshes(bodyGroups,0,lodMeshes);
+	for(auto &mesh : lodMeshes)
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			for(auto &subMesh : mesh->GetSubMeshes())
+			auto &cSubMesh = static_cast<CModelSubMesh&>(*subMesh);
+			auto &vkMesh = cSubMesh.GetVKMesh();
+			if(vkMesh == nullptr)
+				continue;
+			auto matIdx = cSubMesh.GetTexture();
+			auto *mat = mdl->GetMaterial(matIdx);
+			if(mat == nullptr)
+				continue;
+			auto matArrayIndex = s_materialDescriptorArrayManager->RegisterMaterial(*mat);
+
+			SubMeshRenderInfoBufferData subMeshBufferData {};
+
+			static_assert((sizeof(CModelSubMesh::VertexType) %sizeof(Vector4)) == 0,"Invalid base alignment for Vertex structure!");
+			auto &vertexBuffer = vkMesh->GetVertexBuffer();
+			if(vertexBuffer)
+				subMeshBufferData.vertexBufferStartIndex = vertexBuffer->GetStartOffset() /sizeof(CModelSubMesh::VertexType);
+
+			auto &indexBuffer = vkMesh->GetIndexBuffer();
+			if(indexBuffer)
+				subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() /sizeof(CModelSubMesh::IndexType);
+
+			auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
+			if(vertexWeightBuffer)
+				subMeshBufferData.vertexWeightBufferIndex = vertexWeightBuffer->GetStartOffset() /sizeof(CModelSubMesh::VertexWeightType);
+
+			if(matArrayIndex.has_value())
+				subMeshBufferData.materialArrayIndex = *matArrayIndex;
+
+			subMeshBufferData.flags = flags | SubMeshRenderInfoBufferData::Flags::Visible;
+			if(mat->GetNormalMap())
+				subMeshBufferData.flags |= SubMeshRenderInfoBufferData::Flags::UseNormalMap;
+
+			Vector3 min,max;
+			subMesh->GetBounds(min,max);
+			subMeshBufferData.aabbMin = {min.x,min.y,min.z,0.f};
+			subMeshBufferData.aabbMax = {max.x,max.y,max.z,0.f};
+			subMeshBufferData.numTriangles = subMesh->GetTriangleCount();
+			auto buf = s_entityMeshInfoBuffer->AllocateBuffer(&subMeshBufferData);
+			if(buf)
 			{
-				auto &cSubMesh = static_cast<CModelSubMesh&>(*subMesh);
-				auto &vkMesh = cSubMesh.GetVKMesh();
-				if(vkMesh == nullptr)
-					continue;
-				auto matIdx = cSubMesh.GetTexture();
-				auto *mat = mdl->GetMaterial(matIdx);
-				if(mat == nullptr)
-					continue;
-				auto matArrayIndex = s_materialDescriptorArrayManager->RegisterMaterial(*mat);
-
-				SubMeshRenderInfoBufferData subMeshBufferData {};
-
-				static_assert((sizeof(CModelSubMesh::VertexType) %sizeof(Vector4)) == 0,"Invalid base alignment for Vertex structure!");
-				auto &vertexBuffer = vkMesh->GetVertexBuffer();
-				if(vertexBuffer)
-					subMeshBufferData.vertexBufferStartIndex = vertexBuffer->GetStartOffset() /sizeof(CModelSubMesh::VertexType);
-
-				auto &indexBuffer = vkMesh->GetIndexBuffer();
-				if(indexBuffer)
-					subMeshBufferData.indexBufferStartIndex = indexBuffer->GetStartOffset() /sizeof(CModelSubMesh::IndexType);
-
-				auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
-				if(vertexWeightBuffer)
-					subMeshBufferData.vertexWeightBufferIndex = vertexWeightBuffer->GetStartOffset() /sizeof(CModelSubMesh::VertexWeightType);
-
-				if(matArrayIndex.has_value())
-					subMeshBufferData.materialArrayIndex = *matArrayIndex;
-
-				subMeshBufferData.flags = SubMeshRenderInfoBufferData::Flags::Visible;
-				Vector3 min,max;
-				subMesh->GetBounds(min,max);
-				subMeshBufferData.aabbMin = {min.x,min.y,min.z,0.f};
-				subMeshBufferData.aabbMax = {max.x,max.y,max.z,0.f};
-				subMeshBufferData.numTriangles = subMesh->GetTriangleCount();
-				auto buf = s_entityMeshInfoBuffer->AllocateBuffer(&subMeshBufferData);
-				if(buf)
-				{
-					m_subMeshBuffers.push_back(buf);
-					m_entityMeshCount = std::max(m_entityMeshCount,buf->GetBaseIndex() +1);
-				}
+				m_subMeshBuffers.push_back(buf);
+				m_entityMeshCount = std::max(m_entityMeshCount,buf->GetBaseIndex() +1);
 			}
 		}
 	}
-	UpdateRenderBuffer();
-	UpdateBoneBuffer();
+	SetRenderBufferDirty();
+	SetBoneBufferDirty();
 }
-void CRaytracingComponent::UpdateRenderBuffer()
+void CRaytracingComponent::UpdateBuffers(prosper::PrimaryCommandBuffer &cmd)
 {
 	auto whRenderComponent = GetEntity().GetComponent<CRenderComponent>();
 	if(whRenderComponent.expired())
 		return;
-	auto &renderComponent = *whRenderComponent;
-	auto wpRenderBuffer = renderComponent.GetRenderBuffer();
-	auto index = wpRenderBuffer.expired() == false ? static_cast<prosper::Buffer::SmallOffset>(wpRenderBuffer.lock()->GetBaseIndex()) : prosper::Buffer::INVALID_SMALL_OFFSET;
-	for(auto &buf : m_subMeshBuffers)
-		c_engine->ScheduleRecordUpdateBuffer(buf,offsetof(SubMeshRenderInfoBufferData,entityBufferIndex),sizeof(index),&index);
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty))
+	{
+		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
+		auto &renderComponent = *whRenderComponent;
+		auto wpRenderBuffer = renderComponent.GetRenderBuffer();
+		auto index = wpRenderBuffer.expired() == false ? static_cast<prosper::Buffer::SmallOffset>(wpRenderBuffer.lock()->GetBaseIndex()) : prosper::Buffer::INVALID_SMALL_OFFSET;
+		for(auto &buf : m_subMeshBuffers)
+			prosper::util::record_update_generic_shader_read_buffer(*cmd,*buf,offsetof(SubMeshRenderInfoBufferData,entityBufferIndex),sizeof(index),&index);
+	}
+	if(umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty))
+	{
+		auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
+		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
+		auto wpBoneBuffer = whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::Buffer>{};
+		auto index = wpBoneBuffer.expired() == false ? static_cast<prosper::Buffer::SmallOffset>(wpBoneBuffer.lock()->GetBaseIndex()) : prosper::Buffer::INVALID_SMALL_OFFSET;
+		for(auto &buf : m_subMeshBuffers)
+			prosper::util::record_update_generic_shader_read_buffer(*cmd,*buf,offsetof(SubMeshRenderInfoBufferData,boneBufferStartIndex),sizeof(index),&index);
+	}
+	if(m_cbUpdateBuffers.IsValid())
+		m_cbUpdateBuffers.Remove();
 }
-void CRaytracingComponent::UpdateBoneBuffer()
+void CRaytracingComponent::SetRenderBufferDirty()
 {
-	auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
-	if(whAnimatedComponent.expired())
+	umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);
+	InitializeBufferUpdateCallback();
+}
+void CRaytracingComponent::SetBoneBufferDirty()
+{
+	umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty);
+	InitializeBufferUpdateCallback();
+}
+void CRaytracingComponent::InitializeBufferUpdateCallback()
+{
+	if(m_cbUpdateBuffers.IsValid())
 		return;
-	auto &animatedComponent = *whAnimatedComponent;
-	auto wpAnimatedComponent = animatedComponent.GetBoneBuffer();
-	auto index = wpAnimatedComponent.expired() == false ? static_cast<prosper::Buffer::SmallOffset>(wpAnimatedComponent.lock()->GetBaseIndex()) : prosper::Buffer::INVALID_SMALL_OFFSET;
-	for(auto &buf : m_subMeshBuffers)
-		c_engine->ScheduleRecordUpdateBuffer(buf,offsetof(SubMeshRenderInfoBufferData,boneBufferStartIndex),sizeof(index),&index);
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.valid())
+		renderC->SetRenderBufferDirty();
+	m_cbUpdateBuffers = BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateBuffers(*static_cast<CEOnUpdateRenderData&>(evData.get()).commandBuffer);
+	});
 }
 
 static void cmd_render_technique(NetworkState*,ConVar*,int32_t,int32_t val)

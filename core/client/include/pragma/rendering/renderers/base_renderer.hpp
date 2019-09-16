@@ -2,10 +2,15 @@
 #define __BASE_RENDERER_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/c_renderflags.h"
+#include <prosper_command_buffer.hpp>
+#include <image/prosper_texture.hpp>
 #include <cinttypes>
 #include <memory>
 
 class Scene;
+class CBaseEntity;
+namespace pragma {struct RenderSettings; struct CameraData;};
 namespace pragma::rendering
 {
 	class DLLCLIENT BaseRenderer

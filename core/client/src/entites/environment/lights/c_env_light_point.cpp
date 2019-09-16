@@ -102,6 +102,15 @@ void CLightPointComponent::Initialize()
 		pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix());
 	UpdateFrustumPlanes();
 }
+void CLightPointComponent::SetShadowDirty()
+{
+	for(auto &pComponent : GetEntity().GetComponents())
+	{
+		if(typeid(*pComponent) != typeid(CShadowComponent))
+			continue;
+		static_cast<CShadowComponent&>(*pComponent).SetDirty(true);
+	}
+}
 void CLightPointComponent::UpdateFrustumPlanes()
 {
 	// Note: Up direction doesn't matter, as long as it's axis-aligned
@@ -146,12 +155,14 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	if(typeid(component) == typeid(CRadiusComponent))
 	{
 		static_cast<CRadiusComponent&>(component).GetRadiusProperty()->AddCallback([this](std::reference_wrapper<const float> oldRadius,std::reference_wrapper<const float> radius) {
+			SetShadowDirty();
 			UpdateProjectionMatrix();
 		});
 	}
 	else if(typeid(component) == typeid(CTransformComponent))
 	{
 		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+			SetShadowDirty();
 			UpdateViewMatrices();
 		}),CallbackType::Component,&component);
 	}

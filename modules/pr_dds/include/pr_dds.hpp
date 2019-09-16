@@ -12,14 +12,16 @@ struct ImageWriteInfo
 {
 	enum class InputFormat : uint8_t
 	{
-		R8G8B8A8_UInt = 0u,
+		KeepInputImageFormat = 0u,
+		R8G8B8A8_UInt,
 		R16G16B16A16_Float,
 		R32G32B32A32_Float,
 		R32_Float
 	};
 	enum class OutputFormat : uint8_t
 	{
-		RGB = 0u,
+		KeepInputImageFormat,
+		RGB,
 		RGBA,
 		DXT1,
 		DXT1a,
@@ -46,7 +48,16 @@ struct ImageWriteInfo
 		ETC2_RGB_A1,
 		ETC2_RGBM,
 
-		Count
+		Count,
+
+		// Helper types for common use-cases
+		ColorMap = DXT1,
+		ColorMap1BitAlpha = DXT1a,
+		ColorMapSharpAlpha = DXT3,
+		ColorMapSmoothAlpha = DXT5,
+		NormalMap = DXT5n, // TODO: BC5 might be a better choice, but is not supported by cycles!
+		HDRColorMap = BC6,
+		GradientMap = BC1 // TODO: Is this a good idea?
 	};
 	enum class ContainerFormat : uint8_t
 	{

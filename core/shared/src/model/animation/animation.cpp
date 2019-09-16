@@ -76,6 +76,14 @@ void Animation::Translate(const Skeleton &skeleton,const Vector3 &t)
 		frame->Translate(*this,skeleton,t);
 }
 
+void Animation::Scale(const Vector3 &scale)
+{
+	m_renderBounds.first *= scale;
+	m_renderBounds.second *= scale;
+	for(auto &frame : m_frames)
+		frame->Scale(scale);
+}
+
 int32_t Animation::LookupBone(uint32_t boneId) const
 {
 	if(boneId < m_boneIds.size() && m_boneIds.at(boneId) == boneId) // Faster than map lookup and this statement is true for most cases

@@ -34,7 +34,7 @@ protected:
 	std::shared_ptr<prosper::RenderTarget> m_renderTarget = nullptr;
 	prosper::util::BarrierImageLayout m_srcBarrierImageLayout = {};
 	prosper::util::BarrierImageLayout m_dstBarrierImageLayout = {};
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupDepthTex = nullptr;
+	std::shared_ptr<prosper::DescriptorSetGroup> m_dsgSceneDepthTex = nullptr;
 	//Vulkan::TextureHandle m_hTexture; // prosper TODO
 	//Vulkan::RenderTarget m_renderTarget; // prosper TODO
 	uint32_t m_imageLayer = 0u;

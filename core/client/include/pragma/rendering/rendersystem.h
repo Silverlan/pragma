@@ -124,7 +124,7 @@ public:
 	static void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes);
 	static uint32_t Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode=RenderMode::World,bool bReflection=false);
 	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode=RenderMode::World,bool bReflection=false);
-	static void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CLightComponent*> &lights);
+	static void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights);
 };
 #pragma warning(pop)
 

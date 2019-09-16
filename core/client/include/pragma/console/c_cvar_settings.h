@@ -29,6 +29,7 @@ REGISTER_CONVAR_CL(cl_render_texture_filtering,"3",ConVarFlags::Archive,"0 = Nea
 REGISTER_CONVAR_CL(cl_render_occlusion_culling,"4",ConVarFlags::Archive,"0 = Off, 1 = Brute-Force, 2 = CHC++, 3 = Octree, 4 = BSP +Octree");
 REGISTER_CONVAR_CL(cl_render_depth_of_field,"0",ConVarFlags::Archive,"Depth of field scale.");
 REGISTER_CONVAR_CL(cl_render_reflection_quality,"2",ConVarFlags::Archive,"Changes the quality of reflections. 0 = Only static reflections, 1 = Dynamic reflections, 2 = Reflections with particle effects.");
+REGISTER_CONVAR_CL(cl_render_tone_mapping,"-1",ConVarFlags::Archive,"Changes the tone-mapping algorithm to use. -1 = Use the default, 0 = Gamma correction only, 1 = Reinhard, 2 = Hejil-Richard, 3 = Uncharted, 4 = Aces, 5 = Gran Turismo");
 
 REGISTER_CONVAR_CL(cl_render_preset,"-1",ConVarFlags::Archive,"Selected preset in display options.");
 REGISTER_CONVAR_CL(cl_render_shadow_resolution,"1024",ConVarFlags::Archive,"Shadowmap Resolution. Higher resolution equals higher quality shadows, but is also more expensive to render.");

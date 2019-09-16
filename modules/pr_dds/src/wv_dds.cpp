@@ -420,7 +420,7 @@ extern "C"
 	{
 		Lua::dds::register_lua_library(l);
 	}
-	bool PRAGMA_EXPORT save_image_as_ktx(prosper::Image &img,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler)
+	bool PRAGMA_EXPORT save_image(prosper::Image &img,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler)
 	{
 		return save_prosper_image_as_ktx(img,fileName,imgCreateInfo,errorHandler);
 	}

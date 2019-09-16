@@ -44,6 +44,7 @@ void SGame::RegisterLuaClasses()
 	auto subModelMeshClassDef = luabind::class_<ModelSubMesh>("Sub");
 	Lua::ModelSubMesh::register_class(subModelMeshClassDef);
 	subModelMeshClassDef.scope[luabind::def("Create",&Lua::ModelSubMesh::Server::Create)];
+	subModelMeshClassDef.scope[luabind::def("CreateQuad",&Lua::ModelSubMesh::Server::CreateQuad)];
 	subModelMeshClassDef.scope[luabind::def("CreateBox",&Lua::ModelSubMesh::Server::CreateBox)];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float,uint32_t)>(&Lua::ModelSubMesh::Server::CreateSphere))];
 	subModelMeshClassDef.scope[luabind::def("CreateSphere",static_cast<void(*)(lua_State*,const Vector3&,float)>(&Lua::ModelSubMesh::Server::CreateSphere))];

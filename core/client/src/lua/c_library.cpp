@@ -15,19 +15,13 @@
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
+#include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/ai/c_lai.hpp"
-#include <pragma/lua/libraries/limport.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 #include <pr_dds.hpp>
-#include <assimp/Importer.hpp>
-#include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/IOSystem.hpp>
-#include <assimp/IOStream.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
@@ -701,57 +695,7 @@ void CGame::RegisterLuaLibraries()
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	auto &utilImport = GetLuaInterface().RegisterLibrary("import",{
-		{"export_entity_model",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto &hEnt = Lua::Check<EntityHandle>(l,1);
-			LUA_CHECK_ENTITY_RET(l,hEnt,0);
-			auto mdl = hEnt->GetModel();
-			if(mdl == nullptr)
-				return 0;
-			Assimp::Exporter exporter;
-			aiScene scene {};
-			Lua::import::initialize_assimp_scene(scene,*mdl);
-
-			auto lightmapC = hEnt->GetComponent<pragma::CLightMapComponent>();
-			if(lightmapC.valid())
-			{
-				std::vector<std::vector<Vector2>> uvs;
-				lightmapC->ReadLightmapUvCoordinates(uvs);
-
-				auto *pMesh = scene.mMeshes[0];
-				auto numVerts = pMesh->mNumVertices;
-				pMesh->mTextureCoords[1] = new aiVector3D[numVerts];
-				pMesh->mNumUVComponents[1] = 2;
-				uint32_t absVertexIndex = 0u;
-				for(auto &meshGroup : mdl->GetMeshGroups())
-				{
-					for(auto &mesh : meshGroup->GetMeshes())
-					{
-						for(auto &subMesh : mesh->GetSubMeshes())
-						{
-							auto refId = subMesh->GetReferenceId();
-							if(refId >= uvs.size())
-								continue;
-							auto &lightmapUvs = uvs.at(refId);
-							uint32_t localVertexIndex = 0u;
-							for(auto &v : subMesh->GetVertices())
-							{
-								auto &lightmapUv = lightmapUvs.at(localVertexIndex++);
-								pMesh->mTextureCoords[1][absVertexIndex] = aiVector3D{lightmapUv.x,1.f -lightmapUv.y,0.f};
-								++absVertexIndex;
-							}
-						}
-					}
-				}
-			}
-
-			auto result = exporter.Export(&scene,"fbx","E:/projects/pragma/build_winx64/output/box.fbx");
-			Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
-
-			auto *error = exporter.GetErrorString();
-			Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
-
-			return 1;
-		})}
+		{"export_scene",static_cast<int32_t(*)(lua_State*)>(Lua::lib_export::export_scene)}
 	});
 
 	std::vector<luaL_Reg> debugFuncs = {

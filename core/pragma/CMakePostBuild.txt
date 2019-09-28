@@ -202,6 +202,7 @@ copy_output_file(modules/pr_openvr/${BINARY_PRAGMA_DIR} "modules/openvr" pr_open
 copy_output_file(modules/pr_steamworks/${BINARY_PRAGMA_DIR} "modules/steamworks" pr_steamworks)
 copy_output_file(modules/pr_gpl/${BINARY_PRAGMA_DIR} "modules" pr_gpl)
 copy_output_file(modules/pr_cycles/${BINARY_PRAGMA_DIR} "modules/cycles" pr_cycles)
+copy_output_file(modules/pr_uvatlas/${BINARY_PRAGMA_DIR} "modules" pr_uvatlas)
 
 copy_output_file(modules/pr_game_networking/client/${BINARY_PRAGMA_DIR} "modules/networking/game_networking" pr_game_networking_client)
 copy_output_file(modules/pr_game_networking/server/${BINARY_PRAGMA_DIR} "modules/networking/game_networking" pr_game_networking_server)

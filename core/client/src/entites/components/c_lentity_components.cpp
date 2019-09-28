@@ -1006,6 +1006,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			return;
 		Lua::Push<std::shared_ptr<prosper::Texture>>(l,lightMap);
 	}));
+	defCLightMap.def("ConvertLightmapToBSPLuxelData",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
+		pragma::Lua::check_component(l,hLightMapC);
+		hLightMapC->ConvertLightmapToBSPLuxelData();
+	}));
 	entsMod[defCLightMap];
 
 	auto defCGeneric = luabind::class_<CGenericHandle,BaseEntityComponentHandle>("EntityComponent");

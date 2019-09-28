@@ -796,6 +796,9 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	std::string smap = "maps\\";
 	smap += map;
 	smap += ".wld";
+
+	m_mapInfo.name = map;
+	m_mapInfo.fileName = smap;
 	auto f = FileManager::OpenFile(smap.c_str(),"rb");
 	if(f != nullptr)
 	{
@@ -1016,8 +1019,6 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 		}
 	}
 	m_flags |= GameFlags::MapInitialized;
-	m_mapInfo.name = map;
-	m_mapInfo.fileName = smap;
 	return true;
 }
 

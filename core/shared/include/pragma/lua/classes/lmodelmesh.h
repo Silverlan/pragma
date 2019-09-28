@@ -42,7 +42,7 @@ namespace Lua
 		DLLNETWORK void GetVertexCount(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangleCount(lua_State *l,::ModelSubMesh &mdl);
-		DLLNETWORK void GetTexture(lua_State *l,::ModelSubMesh &mdl);
+		DLLNETWORK void GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetVertices(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangles(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetUVMapping(lua_State *l,::ModelSubMesh &mdl);
@@ -50,7 +50,7 @@ namespace Lua
 		DLLNETWORK void GetVertexWeights(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,const ::Vertex &v1,const ::Vertex &v2,const ::Vertex &v3);
 		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,uint32_t a,uint32_t b,uint32_t c);
-		DLLNETWORK void SetTexture(lua_State *l,::ModelSubMesh &mdl,uint32_t texture);
+		DLLNETWORK void SetSkinTextureIndex(lua_State *l,::ModelSubMesh &mdl,uint32_t texture);
 		DLLNETWORK void Update(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void Update(lua_State *l,::ModelSubMesh &mdl,uint32_t flags);
 		DLLNETWORK void AddVertex(lua_State *l,::ModelSubMesh &mdl,const ::Vertex &v);

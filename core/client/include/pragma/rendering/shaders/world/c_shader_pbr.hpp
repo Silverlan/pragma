@@ -19,6 +19,7 @@ namespace pragma
 			AmbientOcclusionMap,
 			MetallicMap,
 			RoughnessMap,
+			MaterialSettings, // Has to match the index specified in ShaderTextured3DBase::MaterialBinding!
 			EmissionMap,
 			ParallaxMap,
 
@@ -45,13 +46,13 @@ namespace pragma
 		void SetForceNonIBLMode(bool b);
 	protected:
 		using ShaderEntity::Draw;
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
-		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const override;
 		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
 
-		MaterialFlags m_extMatFlags = MaterialFlags::None;
+		RenderFlags m_extRenderFlags = RenderFlags::None;
 		bool m_bNonIBLMode = false;
 	};
 };

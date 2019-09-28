@@ -367,7 +367,8 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 									auto &cSubMesh = *static_cast<CModelSubMesh*>(subMesh.get());
 									if(pLightComponent->ShouldPass(*mdl,cSubMesh) == true)
 									{
-										auto *mat = mdl->GetMaterial(cSubMesh.GetTexture());
+										auto matIdx = mdl->GetMaterialIndex(cSubMesh);
+										auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 										if(mat != nullptr && mat->IsTranslucent())
 										{
 											meshesInfo.translucentMeshes.push_back({});
@@ -419,7 +420,8 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 								if(wpSubMesh.expired() == false)
 								{
 									auto *cSubMesh = static_cast<CModelSubMesh*>(wpSubMesh.lock().get());
-									auto *mat = mdl->GetMaterial(cSubMesh->GetTexture());
+									auto matIdx = mdl->GetMaterialIndex(*cSubMesh);
+									auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 									if(mat != nullptr)
 									{
 										if(mat == prevMat || shaderCsmTransparent->BindMaterial(static_cast<CMaterial&>(*mat)) == true)

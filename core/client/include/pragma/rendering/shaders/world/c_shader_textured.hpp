@@ -53,6 +53,7 @@ namespace pragma
 			SpecularMap,
 			ParallaxMap,
 			GlowMap,
+			MaterialSettings,
 
 			Count
 		};
@@ -84,9 +85,7 @@ namespace pragma
 			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1<<1,
 			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1,
 
-			NoIBL = FMAT_GLOW_MODE_3<<1u, // PBR only (see PBR shader)
-
-			DiffuseSRGB = NoIBL<<1u,
+			DiffuseSRGB = FMAT_GLOW_MODE_3<<1u,
 			GlowSRGB = DiffuseSRGB<<1u
 		};
 
@@ -98,26 +97,36 @@ namespace pragma
 		};
 
 #pragma pack(push,1)
+		enum class RenderFlags : uint32_t
+		{
+			None = 0,
+			LightmapsEnabled = 1,
+
+			// PBR only
+			NoIBL = LightmapsEnabled<<1
+		};
+
 		struct PushConstants
 		{
-			struct Material
-			{
-				Vector4 phong;
-				MaterialFlags flags;
-				uint32_t lightmapFlags;
-				float glowScale;
-				float parallaxHeightScale;
-				float alphaDiscardThreshold;
-				float phongIntensity;
-			};
 			Vector3 clipPlane;
 			uint32_t vertexAnimInfo;
-			Material material;
+			RenderFlags flags;
+		};
+
+		struct MaterialData
+		{
+			Vector4 phong = {1.f,1.f,1.f,1.f}; // TODO: Obsolete?
+			MaterialFlags flags = MaterialFlags::Diffuse;
+			float glowScale = 1.f;
+			float parallaxHeightScale = DefaultParallaxHeightScale;
+			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
+			float phongIntensity = 1.f;
+			float metalnessFactor = 0.f;
 		};
 #pragma pack(pop)
 
 		ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-
+		virtual ~ShaderTextured3DBase() override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane);
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx=Pipeline::Regular,
@@ -127,14 +136,17 @@ namespace pragma
 		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		void UpdateMaterialBuffer(CMaterial &mat) const;
 	protected:
 		using ShaderEntity::Draw;
-		bool BindLightMapUvBuffer(CModelSubMesh &mesh);
+		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);
 		virtual void OnPipelineBound() override;
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
 		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
+		void InitializeMaterialBuffer(Anvil::DescriptorSet &descSet,CMaterial &mat);
 		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
@@ -159,6 +171,7 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::MaterialFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::RenderFlags)
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::StateFlags)
 
 #endif

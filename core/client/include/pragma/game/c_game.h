@@ -69,6 +69,7 @@ namespace pragma
 	class CLightDirectionalComponent;
 	class CCameraComponent;
 };
+namespace util {class ImageBuffer;};
 namespace prosper {class DescriptorSetGroup; class Image;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -370,6 +371,11 @@ public:
 
 	// Util
 	bool SaveImage(prosper::Image &image,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
+	bool SaveImage(
+		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
+		const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo
+	) const;
+	bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
 
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;

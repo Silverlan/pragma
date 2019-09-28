@@ -67,6 +67,7 @@ namespace Console
 		DLLCLIENT void debug_light_sources(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_gui_cursor(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_steam_audio_dump_scene(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void debug_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void debug_audio_aux_effect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_audio_sounds(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
@@ -74,7 +75,7 @@ namespace Console
 
 		DLLCENGINE void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
-		DLLCLIENT void map_rebuild_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 	};
 };

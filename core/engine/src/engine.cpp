@@ -34,6 +34,8 @@
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include <sharedutils/util.h>
+#include <sharedutils/util_clock.hpp>
+#include <sharedutils/util_parallel_job.hpp>
 #include <util_zip.h>
 #include <pragma/game/game_resources.hpp>
 #include <util_pad.hpp>
@@ -53,6 +55,7 @@ extern "C"
 	}
 }
 
+#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle Engine::GetConVarHandle(std::string scvar)
@@ -178,8 +181,27 @@ void Engine::SetProfilingEnabled(bool bEnabled)
 
 upad::PackageManager *Engine::GetPADPackageManager() const {return m_padPackageManager;}
 
+void Engine::AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName)
+{
+	m_parallelJobMutex.lock();
+	m_parallelJobs.push_back({});
+	m_parallelJobs.back().job = job;
+	m_parallelJobs.back().name = jobName;
+	m_parallelJobs.back().lastNotification = std::chrono::steady_clock::now();
+	m_parallelJobs.back().lastProgressUpdate = std::chrono::steady_clock::now();
+	m_parallelJobMutex.unlock();
+}
+
 void Engine::Close()
 {
+	// Cancel all running jobs, then wait until
+	// they have completed
+	for(auto &jobInfo : m_parallelJobs)
+		jobInfo.job->Cancel();
+	for(auto &jobInfo : m_parallelJobs)
+		jobInfo.job->Wait();
+	m_parallelJobs.clear();
+
 	m_bRunning = false;
 	util::close_external_archive_manager();
 	CloseServerState();
@@ -243,6 +265,56 @@ void Engine::Tick()
 		sv->Tick();
 	StopProfilingStage(CPUProfilingPhase::ServerTick);
 	StopProfilingStage(CPUProfilingPhase::Tick);
+
+	UpdateParallelJobs();
+}
+
+void Engine::UpdateParallelJobs()
+{
+	// Update background tasks
+	// Note: We can't use iterators here, since 'Poll' can potentially add new jobs which can invalidate the iterator
+	for(auto i=decltype(m_parallelJobs.size()){0u};i<m_parallelJobs.size();)
+	{
+		auto &jobInfo = m_parallelJobs.at(i);
+		auto progress = jobInfo.job->GetProgress();
+		auto t = std::chrono::steady_clock::now();
+		auto tDelta = t -jobInfo.lastProgressUpdate;
+		if(progress != jobInfo.lastProgress)
+		{
+			jobInfo.timeRemaining = util::clock::to_seconds(tDelta) /(progress -jobInfo.lastProgress) *(1.f -progress);
+			jobInfo.lastProgress = progress;
+			jobInfo.lastProgressUpdate = t;
+		}
+		if((t -jobInfo.lastNotification) >= jobInfo.notificationFrequency)
+		{
+			auto percent = progress *100.f;
+			Con::cout<<"Progress of worker '"<<jobInfo.name<<"' at "<<umath::floor(percent)<<"%.";
+			if(jobInfo.timeRemaining.has_value())
+			{
+				auto msgDur = util::get_pretty_duration(*jobInfo.timeRemaining *std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds{1}).count());
+				Con::cout<<" Approximately "<<msgDur<<" remaining!";
+			}
+			Con::cout<<Con::endl;
+			jobInfo.lastNotification = t;
+		}
+
+		if(jobInfo.job->Poll() == false)
+		{
+			++i;
+			continue;
+		}
+		m_parallelJobs.erase(m_parallelJobs.begin() +i);
+	}
+/*
+struct JobInfo
+{
+util::ParallelJobWrapper job = {};
+std::string name = "";
+float lastProgress = 0.f;
+float lastTimeRemaining = 0.f;
+std::chrono::time_point lastProgressUpdate = {};
+};
+*/
 }
 
 ConVarMap *Engine::GetConVarMap() {return console_system::engine::get_convar_map();}
@@ -540,3 +612,4 @@ REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*
 		return;
 	engine->SetProfilingEnabled(enabled);
 });
+#pragma optimize("",on)

@@ -16,6 +16,7 @@ namespace pragma
 		struct PushConstants
 		{
 			float coneLength;
+			uint32_t boundLightIndex;
 		};
 #pragma pack(pop)
 

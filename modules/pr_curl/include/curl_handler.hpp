@@ -12,7 +12,7 @@
 #include <atomic>
 #include <unordered_map>
 
-__declspec(dllexport) class CurlHandler
+class CurlHandler
 {
 public:
 	enum class ResultCode : uint32_t

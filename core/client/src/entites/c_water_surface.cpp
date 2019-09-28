@@ -144,7 +144,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 		auto *texGroup = mdl->GetTextureGroup(0);
 		texGroup->textures.push_back(0);
 	}
-	subMesh->SetTexture(0);
+	subMesh->SetSkinTextureIndex(0);
 
 	auto mesh = std::make_shared<CModelMesh>();
 	mesh->AddSubMesh(subMesh);

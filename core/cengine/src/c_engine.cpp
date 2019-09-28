@@ -1220,6 +1220,8 @@ void CEngine::Tick()
 		sv->Tick();
 	Engine::StopProfilingStage(Engine::CPUProfilingPhase::ServerTick);
 	Engine::StopProfilingStage(Engine::CPUProfilingPhase::Tick);
+
+	UpdateParallelJobs();
 }
 
 bool CEngine::IsServerOnly() {return false;}

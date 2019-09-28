@@ -16,6 +16,7 @@
 #include <mutex>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/scope_guard.h>
+#include <sharedutils/util_parallel_job.hpp>
 
 #ifdef _DEBUG
 #define ENGINE_DEFAULT_TICK_RATE 33
@@ -33,6 +34,7 @@ class ConVarMap;
 struct Color;
 namespace Con {enum class MessageFlags : uint8_t;};
 namespace upad {class PackageManager;};
+namespace util {class ParallelJobWrapper;};
 class DLLENGINE Engine
 	: public CVarHandler,public CallbackHandler
 {
@@ -183,10 +185,12 @@ public:
 	int32_t GetRemoteDebugging() const;
 
 	void ShutDown();
+	void AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName);
 
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
 protected:
+	void UpdateParallelJobs();
 	bool RunEngineConsoleCommand(std::string cmd,std::vector<std::string> &argv,KeyState pressState=KeyState::Press,float magnitude=1.f,const std::function<bool(ConConf*,float&)> &callback=nullptr);
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
@@ -216,6 +220,20 @@ protected:
 	long long m_lastTick;
 	uint64_t m_tickCount = 0;
 	std::shared_ptr<VFilePtrInternalReal> m_logFile;
+
+	struct JobInfo
+	{
+		util::ParallelJobWrapper job = {};
+		std::string name = "";
+		float lastProgress = 0.f;
+		std::optional<float> timeRemaining = {};
+		std::chrono::steady_clock::time_point lastProgressUpdate = {};
+		std::chrono::steady_clock::time_point lastNotification = {};
+		std::chrono::seconds notificationFrequency = std::chrono::seconds{10};
+	};
+	// Background tasks that usually take a long time to complete and run on a separate thread
+	std::vector<JobInfo> m_parallelJobs {};
+	std::mutex m_parallelJobMutex = {};
 
 	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
 	std::vector<CallbackHandle> m_profileHandlers = {};

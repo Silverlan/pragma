@@ -35,11 +35,11 @@ public:
 	uint32_t GetVertexCount() const;
 	uint32_t GetTriangleVertexCount() const;
 	uint32_t GetTriangleCount() const;
-	uint32_t GetTexture() const;
+	uint32_t GetSkinTextureIndex() const;
 	// Only works correctly if there are no duplicate vertices
 	void GenerateNormals();
 	void NormalizeUVCoordinates();
-	void SetTexture(uint32_t texture);
+	void SetSkinTextureIndex(uint32_t texture);
 	std::vector<Vertex> &GetVertices();
 	std::vector<Vector2> &GetAlphas();
 	std::vector<uint16_t> &GetTriangles();
@@ -77,7 +77,7 @@ public:
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
 protected:
-	uint32_t m_texture;
+	uint32_t m_skinTextureIndex;
 	Vector3 m_center;
 	std::shared_ptr<std::vector<Vertex>> m_vertices;
 	std::shared_ptr<std::vector<Vector2>> m_alphas;

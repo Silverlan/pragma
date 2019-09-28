@@ -12,11 +12,13 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_library.hpp>
 
 DEFINE_BASE_HANDLE(DLLNETWORK,Model,Model);
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -398,7 +400,7 @@ bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
 		return false;
 	return true;
 }
-uint32_t Model::AddMaterial(uint32_t skin,Material *mat)
+uint32_t Model::AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> *optOutSkinTexIdx)
 {
 	auto texName = mat->GetName();
 	AddTexturePath(ufile::get_path_from_filename(texName));
@@ -412,7 +414,12 @@ uint32_t Model::AddMaterial(uint32_t skin,Material *mat)
 		auto &textures = m_textureGroups.at(skin).textures;
 		auto itTexId = std::find(textures.begin(),textures.end(),r);
 		if(itTexId == textures.end())
+		{
 			textures.push_back(r);
+			itTexId = textures.end() -1;
+		}
+		if(optOutSkinTexIdx)
+			*optOutSkinTexIdx = *itTexId;
 	}
 	return r;
 }
@@ -540,7 +547,7 @@ void Model::Optimize()
 		{
 			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				auto texId = subMesh->GetTexture();
+				auto texId = subMesh->GetSkinTextureIndex();
 				auto it = groupedMeshes.find(texId);
 				if(it == groupedMeshes.end())
 					it = groupedMeshes.insert(decltype(groupedMeshes)::value_type(texId,{})).first;
@@ -674,6 +681,14 @@ void Model::SetTexturePaths(const std::vector<std::string> &paths)
 {
 	m_metaInfo.texturePaths = paths;
 }
+std::optional<uint32_t> Model::GetMaterialIndex(const ModelSubMesh &mesh,uint32_t skinId) const
+{
+	auto idx = mesh.GetSkinTextureIndex();
+	auto *texGroup = GetTextureGroup(skinId);
+	if(texGroup == nullptr || idx >= texGroup->textures.size())
+		return {};
+	return texGroup->textures.at(idx);
+}
 std::vector<MaterialHandle> &Model::GetMaterials() {return m_materials;}
 const std::vector<MaterialHandle> &Model::GetMaterials() const {return m_materials;}
 std::vector<std::string> &Model::GetTextures() {return m_metaInfo.textures;}
@@ -708,6 +723,8 @@ TextureGroup *Model::GetTextureGroup(uint32_t i)
 		return nullptr;
 	return &m_textureGroups[i];
 }
+
+const TextureGroup *Model::GetTextureGroup(uint32_t i) const {return const_cast<Model*>(this)->GetTextureGroup(i);}
 
 uint32_t Model::GetLODCount() const {return static_cast<uint32_t>(m_lods.size());}
 uint32_t Model::GetLOD(uint32_t id) const
@@ -1346,5 +1363,5 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 	for(auto &cmesh : m_collisionMeshes)
 		cmesh->UpdateShape();
 }
-
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
+#pragma optimize("",on)

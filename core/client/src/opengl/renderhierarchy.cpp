@@ -277,14 +277,14 @@ void RenderOctTree::DebugPrint(RenderNode *node,std::vector<BaseEntity*> &ents,u
 			if(!subMeshes.empty())
 			{
 				auto *subMesh = subMeshes.front().get();
-				auto textureId = subMesh->GetTexture();
 				auto mdlComponent = ent->GetModelComponent();
 				auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 				if(mdl != nullptr)
 				{
+					auto textureId = mdl->GetMaterialIndex(*subMesh);
 					auto &textures = mdl->GetTextures();
-					if(textureId < textures.size())
-						texture = textures[textureId];
+					if(textureId.has_value() && *textureId < textures.size())
+						texture = textures[*textureId];
 				}
 			}
 			Con::cout<<strIndent<<"\t"<<ent->GetClass()<<" ("<<ent->GetIndex()<<")";

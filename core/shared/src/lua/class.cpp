@@ -1157,6 +1157,30 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4.def("ToEulerAngles",&Lua::Mat4::ToEulerAngles);
 	defMat4.def("ToQuaternion",&Lua::Mat4::ToQuaternion);
 	defMat4.def("Decompose",&Lua::Mat4::Decompose);
+	defMat4.def("MulRow",static_cast<void(*)(lua_State*,Mat4&,uint32_t,float)>([](lua_State *l,Mat4 &m,uint32_t rowIndex,float factor) {
+		for(uint8_t i=0;i<4;++i)
+			m[rowIndex][i] *= factor;
+	}));
+	defMat4.def("MulCol",static_cast<void(*)(lua_State*,Mat4&,uint32_t,float)>([](lua_State *l,Mat4 &m,uint32_t colIndex,float factor) {
+		for(uint8_t i=0;i<4;++i)
+			m[i][colIndex] *= factor;
+	}));
+	defMat4.def("SwapRows",static_cast<void(*)(lua_State*,Mat4&,uint32_t,uint32_t)>([](lua_State *l,Mat4 &m,uint32_t rowSrc,uint32_t rowDst) {
+		std::array<float,4> tmpRow = {m[rowSrc][0],m[rowSrc][1],m[rowSrc][2],m[rowSrc][3]};
+		for(uint8_t i=0;i<4;++i)
+		{
+			m[rowSrc][i] = m[rowDst][i];
+			m[rowDst][i] = tmpRow.at(i);
+		}
+	}));
+	defMat4.def("SwapColumns",static_cast<void(*)(lua_State*,Mat4&,uint32_t,uint32_t)>([](lua_State *l,Mat4 &m,uint32_t colSrc,uint32_t colDst) {
+		std::array<float,4> tmpCol = {m[0][colSrc],m[1][colSrc],m[2][colSrc],m[3][colSrc]};
+		for(uint8_t i=0;i<4;++i)
+		{
+			m[i][colSrc] = m[i][colDst];
+			m[i][colDst] = tmpCol.at(i);
+		}
+	}));
 	defMat4.def(luabind::const_self ==Mat4());
 	defMat4.def(luabind::const_self +Mat4());
 	defMat4.def(luabind::const_self -Mat4());

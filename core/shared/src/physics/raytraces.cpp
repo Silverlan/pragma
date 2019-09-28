@@ -86,11 +86,11 @@ Material *TraceResult::GetMaterial()
 	GetMeshes(&mesh,&subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return nullptr;
-	auto texId = subMesh->GetTexture();
+	auto texId = hMdl->GetMaterialIndex(*subMesh,entity->GetSkin());
 	auto &materials = hMdl->GetMaterials();
-	if(texId >= materials.size())
+	if(texId.has_value() == false || *texId >= materials.size())
 		return nullptr;
-	return materials.at(texId).get();
+	return materials.at(*texId).get();
 }
 bool TraceResult::GetMaterial(std::string &mat)
 {
@@ -105,11 +105,11 @@ bool TraceResult::GetMaterial(std::string &mat)
 	GetMeshes(&mesh,&subMesh);
 	if(mesh == nullptr || subMesh == nullptr)
 		return false;
-	auto texId = subMesh->GetTexture();
-	auto &textures = hMdl->GetTextures();
-	if(texId >= textures.size())
+	auto texId = hMdl->GetMaterialIndex(*subMesh,entity->GetSkin());
+	auto *pMat = texId.has_value() ? hMdl->GetMaterial(*texId) : nullptr;
+	if(pMat == nullptr)
 		return false;
-	mat = textures.at(texId);
+	mat = pMat->GetName();
 	return true;
 }
 

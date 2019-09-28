@@ -661,7 +661,7 @@ bool import::load_nif(NetworkState *nw,std::shared_ptr<::Model> &mdl,const std::
 
 		auto matId = (geoMatId >= meshMaterials.size()) ? 0 : meshMaterials.at(geoMatId);
 		auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
-		subMesh->SetTexture(matId);
+		subMesh->SetSkinTextureIndex(matId);
 		auto &meshVerts = subMesh->GetVertices();
 		auto &meshIndices = subMesh->GetTriangles();
 

@@ -215,7 +215,7 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 	auto *descSet = pRenderComponent->GetRenderDescriptorSet();
 	if(descSet == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
+		// Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
 		return false;
 	}
 	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())

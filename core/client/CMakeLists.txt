@@ -31,6 +31,10 @@ link_external_library(libvorbis)
 link_external_library(glslang)
 link_external_library(util_formatted_text)
 link_external_library(assimp)
+link_external_library(util_vmf)
+if(CONFIG_ENABLE_VTF_SUPPORT)
+	link_external_library(VTFLib)
+endif()
 
 add_external_library(luajit)
 add_external_library(clientmanager)
@@ -51,6 +55,10 @@ add_def(WMS_STATIC)
 add_def(ALSYS_LIBRARY_TYPE)
 add_def(ENGINE_CLIENT)
 add_def(ANVIL_VULKAN_CPP)
+
+if(CONFIG_ENABLE_VTF_SUPPORT)
+	list(APPEND DEFINITIONS ENABLE_VMT_SUPPORT)
+endif()
 
 set(PRECOMPILED_HEADER "stdafx_client")
 

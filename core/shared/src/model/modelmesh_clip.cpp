@@ -255,7 +255,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 		}
 	}
 
-	clippedMesh.m_texture = m_texture;
+	clippedMesh.m_skinTextureIndex = m_skinTextureIndex;
 	clippedMesh.m_center = m_center;
 	clippedMesh.m_numAlphas = m_numAlphas;
 	clippedMesh.m_min = m_min;

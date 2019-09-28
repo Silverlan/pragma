@@ -126,12 +126,12 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 }
 
 ModelSubMesh::ModelSubMesh()
-	: std::enable_shared_from_this<ModelSubMesh>(),m_texture(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
+	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
 	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<VertexWeight>>()),
 	m_vertices(std::make_shared<std::vector<Vertex>>())
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
-	: m_texture(other.m_texture),m_center(other.m_center),m_vertices(other.m_vertices),
+	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
 	m_vertexWeights(other.m_vertexWeights),m_min(other.m_min),m_max(other.m_max)
 {}
@@ -269,8 +269,8 @@ const Vector3 &ModelSubMesh::GetCenter() const {return m_center;}
 uint32_t ModelSubMesh::GetVertexCount() const {return static_cast<uint32_t>(m_vertices->size());}
 uint32_t ModelSubMesh::GetTriangleVertexCount() const {return static_cast<uint32_t>(m_triangles->size());}
 uint32_t ModelSubMesh::GetTriangleCount() const {return static_cast<uint32_t>(m_triangles->size()) /3;}
-uint32_t ModelSubMesh::GetTexture() const {return m_texture;}
-void ModelSubMesh::SetTexture(uint32_t texture) {m_texture = texture;}
+uint32_t ModelSubMesh::GetSkinTextureIndex() const {return m_skinTextureIndex;}
+void ModelSubMesh::SetSkinTextureIndex(uint32_t texture) {m_skinTextureIndex = texture;}
 std::vector<Vertex> &ModelSubMesh::GetVertices() {return *m_vertices;}
 std::vector<Vector2> &ModelSubMesh::GetAlphas() {return *m_alphas;}
 std::vector<uint16_t> &ModelSubMesh::GetTriangles() {return *m_triangles;}

@@ -207,7 +207,7 @@ bool import::load_fbx(NetworkState *nw,Model &mdl,VFilePtr &f,std::vector<std::s
 					{
 						textures.push_back(texture);
 						auto texId = import::util::add_texture(*nw,mdl,texture);
-						subMesh->SetTexture(texId);
+						subMesh->SetSkinTextureIndex(texId);
 						break;
 					}
 				}

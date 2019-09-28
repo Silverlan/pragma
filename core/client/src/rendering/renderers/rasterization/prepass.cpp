@@ -239,8 +239,8 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 				for(auto it=meshes.begin();it!=meshes.end();++it)
 				{
 					auto *subMesh = static_cast<CModelSubMesh*>(it->get());
-					auto idxTexture = subMesh->GetTexture();
-					auto *mat = mdl->GetMaterial(mdlComponent->GetSkin(),idxTexture);
+					auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
+					auto *mat = idxTexture.has_value() ? mdl->GetMaterial(*idxTexture) : nullptr;
 					if(mat == nullptr)
 						mat = client->GetMaterialManager().GetErrorMaterial();
 					/*else

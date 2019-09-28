@@ -85,12 +85,19 @@ struct ImageWriteInfo
 		Repeat,
 		Mirror
 	};
+	enum class AlphaMode : uint8_t
+	{
+		Auto = 0u,
+		Transparency,
+		None
+	};
 	InputFormat inputFormat = InputFormat::R8G8B8A8_UInt;
 	OutputFormat outputFormat = OutputFormat::BC3;
 	ContainerFormat containerFormat = ContainerFormat::KTX;
 	Flags flags = Flags::None;
 	MipmapFilter mipMapFilter = MipmapFilter::Box;
 	WrapMode wrapMode = WrapMode::Mirror;
+	AlphaMode alphaMode = AlphaMode::Auto;
 	void SetNormalMap()
 	{
 		flags = static_cast<Flags>(umath::to_integral(flags) | umath::to_integral(Flags::NormalMap));

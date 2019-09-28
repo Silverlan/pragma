@@ -32,9 +32,11 @@
 #include <luainterface.hpp>
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
+#include <luabind/class_info.hpp>
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -840,3 +842,14 @@ int Lua::util::round_string(lua_State *l)
 	Lua::PushString(l,::util::round_string(value,places));
 	return 1;
 }
+
+int Lua::util::get_type_name(lua_State *l)
+{
+	if(Lua::IsSet(l,1) == false)
+		return 0;
+	auto o = luabind::from_stack(l,1);
+	auto classInfo = luabind::get_class_info(o);
+	Lua::PushString(l,classInfo.name);
+	return 1;
+}
+#pragma optimize("",on)

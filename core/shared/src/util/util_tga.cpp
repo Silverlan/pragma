@@ -23,23 +23,27 @@ static void flip_y(std::vector<uint8_t> &pixels,uint32_t w,uint32_t h)
 		memcpy(high,row.data(),stride);
 	}
 }
-void util::tga::write_tga(VFilePtrReal &f,uint32_t w,uint32_t h,const std::vector<uint8_t> &pixels)
+void util::tga::write_tga(std::shared_ptr<VFilePtrInternalReal> &f,uint32_t w,uint32_t h,const uint8_t *pixelData)
 {
+	std::vector<uint8_t> pixels {};
+	pixels.resize(w *h *3);
+	memcpy(pixels.data(),pixelData,pixels.size() *sizeof(pixels.front()));
+
 	auto outPixels = pixels;
 	swap_red_blue(outPixels,w,h);
 	flip_y(outPixels,w,h);
 	f->Write<char>((char)(0)); // Length of image ID field
 	f->Write<char>((char)(0)); // No color map included
 	f->Write<char>(2); // Uncompressed true-color image
-	
-	// Color map
+
+					   // Color map
 	f->Write<short>((short)(0));
 	f->Write<short>((short)(0));
 	f->Write<char>((char)(0));
 
 	f->Write<short>((short)(0)); // x-origin (origin = lower-left corner)
 	f->Write<short>((short)(0)); // y-origin
-	
+
 	f->Write<char>(w %256);
 	f->Write<char>(CInt8(w /256));
 
@@ -51,6 +55,7 @@ void util::tga::write_tga(VFilePtrReal &f,uint32_t w,uint32_t h,const std::vecto
 
 	f->Write(outPixels.data(),outPixels.size());
 }
+void util::tga::write_tga(VFilePtrReal &f,uint32_t w,uint32_t h,const std::vector<uint8_t> &pixels) {write_tga(f,w,h,pixels.data());}
 bool util::tga::write_tga(const std::string &fileName,uint32_t w,uint32_t h,const std::vector<uint8_t> &pixels)
 {
 	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");

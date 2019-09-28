@@ -236,10 +236,7 @@ void pragma::level::transform_class(
 
 		auto bHdr = false;
 		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
-		if(bHdr == true)
-			lightColor *= 2.f;
-		else
-			lightColor *= 2.f;
+		lightColor *= 4.f;
 		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
 		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
 		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));
@@ -254,10 +251,7 @@ void pragma::level::transform_class(
 
 		auto bHdr = false;
 		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
-		if(bHdr == true)
-			lightColor *= 2.f;
-		else
-			lightColor *= 2.f;
+		lightColor *= 4.f;
 		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
 		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
 		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));

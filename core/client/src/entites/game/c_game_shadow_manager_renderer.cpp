@@ -61,7 +61,8 @@ ShadowRenderer::ShadowRenderer()
 		{
 			if(m_lightSourceData.light->ShouldPass(*m_currentModel,*static_cast<CModelSubMesh*>(subMesh.get())) == false)
 				continue;
-			auto *mat = m_currentModel->GetMaterial(subMesh->GetTexture());
+			auto matIdx = m_currentModel->GetMaterialIndex(*subMesh);
+			auto *mat = matIdx.has_value() ? m_currentModel->GetMaterial(*matIdx) : nullptr;
 			if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO: Do this properly
 				continue;
 			m_octreeCallbacks.subMeshCallback(*m_currentModel,*static_cast<CModelSubMesh*>(subMesh.get()),m_currentRenderFlags);
@@ -69,7 +70,8 @@ ShadowRenderer::ShadowRenderer()
 	};
 
 	m_octreeCallbacks.subMeshCallback = [this](const Model &mdl,const CModelSubMesh &subMesh,uint32_t renderFlags) {
-		auto *mat = const_cast<Model&>(mdl).GetMaterial(subMesh.GetTexture());
+		auto matIdx = mdl.GetMaterialIndex(subMesh);
+		auto *mat = matIdx.has_value() ? const_cast<Model&>(mdl).GetMaterial(*matIdx) : nullptr;
 		m_shadowCasters.push_back({});
 		auto &info = m_shadowCasters.back();
 		info.mesh = &subMesh;
@@ -127,7 +129,8 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryC
 					{
 						if(light.ShouldPass(*mdl,*static_cast<CModelSubMesh*>(subMesh.get())) == false)
 							continue;
-						auto *mat = mdl->GetMaterial(subMesh->GetTexture());
+						auto matIdx = mdl->GetMaterialIndex(*subMesh);
+						auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx) : nullptr;
 						if(mat == nullptr || mat->GetShaderIdentifier() == "nodraw") // TODO
 							continue;
 						m_octreeCallbacks.subMeshCallback(*mdl,*static_cast<CModelSubMesh*>(subMesh.get()),renderFlags);

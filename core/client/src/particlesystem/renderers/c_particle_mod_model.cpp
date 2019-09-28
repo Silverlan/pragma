@@ -232,13 +232,13 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					auto *cSubMesh = static_cast<CModelSubMesh*>(subMesh.get());
-					auto texId = cSubMesh->GetTexture();
+					auto texId = mdl.GetMaterialIndex(*cSubMesh);
 					auto *mat = matPt;
-					if(mat == nullptr && texGroup != nullptr && texId < texGroup->textures.size())
+					if(mat == nullptr && texGroup != nullptr && texId.has_value() && *texId < texGroup->textures.size())
 					{
-						texId = texGroup->textures.at(texId);
+						texId = texGroup->textures.at(*texId);
 						if(texId < materials.size())
-							mat = materials.at(texId).get();
+							mat = materials.at(*texId).get();
 					}
 					if(mat == nullptr)
 						continue;

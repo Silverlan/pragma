@@ -35,28 +35,19 @@
 uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name)
 {
 	auto fname = name;
-	std::string ext;
-	if(ufile::get_extension(name,&ext) == true)
-		fname = fname.substr(0,fname.length() -(ext.length() +1));
+	ufile::remove_extension_from_filename(fname);
 	auto &meta = mdl.GetMetaInfo();
 	auto it = std::find(meta.textures.begin(),meta.textures.end(),fname);
 	auto idx = 0u;
 	if(it != meta.textures.end())
 		idx = it -meta.textures.begin();
 	else
-	{
-		meta.textures.push_back(fname);
-		idx = meta.textures.size() -1;
-	}
+		idx = mdl.AddTexture(fname,nw.LoadMaterial(fname));
+
 	auto *texGroup = mdl.GetTextureGroup(0);
 	if(texGroup == nullptr)
 		texGroup = mdl.CreateTextureGroup();
 	texGroup->textures.push_back(idx);
-	auto *mat = nw.LoadMaterial(name);
-	if(mat == nullptr)
-		mat = nw.GetMaterialManager().GetErrorMaterial();
-	if(mat != nullptr)
-		mdl.AddMaterial(0,mat);
 	return idx;
 }
 

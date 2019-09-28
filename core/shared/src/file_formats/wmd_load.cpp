@@ -201,7 +201,7 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 					auto &vertexWeights = subMesh->GetVertexWeights();
 
 					auto texID = Read<unsigned short>();
-					subMesh->SetTexture(texID);
+					subMesh->SetSkinTextureIndex(texID);
 
 					auto numMeshVerts = Read<unsigned long long>();
 					subVertices.reserve(numMeshVerts);
@@ -272,7 +272,7 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 					auto subMesh = subMeshFactory();
 
 					auto texId = Read<uint16_t>();
-					subMesh->SetTexture(texId);
+					subMesh->SetSkinTextureIndex(texId);
 
 					auto &verts = subMesh->GetVertices();
 					auto &tris = subMesh->GetTriangles();

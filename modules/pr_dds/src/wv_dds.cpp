@@ -420,9 +420,22 @@ extern "C"
 	{
 		Lua::dds::register_lua_library(l);
 	}
-	bool PRAGMA_EXPORT save_image(prosper::Image &img,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler)
+	bool PRAGMA_EXPORT save_prosper_image(prosper::Image &img,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler)
 	{
-		return save_prosper_image_as_ktx(img,fileName,imgCreateInfo,errorHandler);
+		return Lua::dds::save_image(img,fileName,imgCreateInfo,errorHandler);
+	}
+	bool PRAGMA_EXPORT save_data_image(
+		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
+		const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler
+	)
+	{
+		return Lua::dds::save_image(imgLayerMipmapData,width,height,fileName,imgCreateInfo,errorHandler);
+	}
+	bool PRAGMA_EXPORT save_buffer_image(
+		util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler
+	)
+	{
+		return Lua::dds::save_image(imgBuffer,fileName,imgCreateInfo,errorHandler);
 	}
 };
 #pragma optimize("",on)

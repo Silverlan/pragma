@@ -44,8 +44,8 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 		for(auto it=subMeshes.begin();it!=subMeshes.end();)
 		{
 			auto &subMesh = *it;
-			auto matId = subMesh->GetTexture();
-			if(matId >= materials.size() || ustring::compare(materials.at(matId)->GetShaderIdentifier(),"nodraw"))
+			auto matId = hMdl->GetMaterialIndex(*subMesh);
+			if(matId.has_value() == false || *matId >= materials.size() || ustring::compare(materials.at(*matId)->GetShaderIdentifier(),"nodraw"))
 			{
 				it = subMeshes.erase(it);
 				continue;

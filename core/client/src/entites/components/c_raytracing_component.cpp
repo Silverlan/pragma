@@ -139,8 +139,8 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 			auto &vkMesh = cSubMesh.GetVKMesh();
 			if(vkMesh == nullptr)
 				continue;
-			auto matIdx = cSubMesh.GetTexture();
-			auto *mat = mdl->GetMaterial(matIdx);
+			auto matIdx = mdl->GetMaterialIndex(cSubMesh);
+			auto *mat = matIdx.has_value() ? mdl->GetMaterial(*matIdx,ent.GetSkin()) : nullptr;
 			if(mat == nullptr)
 				continue;
 			auto matArrayIndex = s_materialDescriptorArrayManager->RegisterMaterial(*mat);

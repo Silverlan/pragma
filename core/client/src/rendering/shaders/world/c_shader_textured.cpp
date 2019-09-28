@@ -7,6 +7,7 @@
 #include <datasystem_color.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -14,6 +15,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
+
 
 #pragma optimize("",off)
 ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount,bool bReflection)
@@ -62,6 +64,10 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DE
 		prosper::Shader::DescriptorSetInfo::Binding { // Glow Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
+			Anvil::DescriptorType::UNIFORM_BUFFER,
+			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
 		}
 	}
 };
@@ -70,10 +76,31 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderTextured3DB
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS) ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderEntity::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CSM) ShaderTextured3DBase::DESCRIPTOR_SET_CSM = {&ShaderEntity::DESCRIPTOR_SET_CSM};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS) ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderEntity::DESCRIPTOR_SET_SHADOWS};
+
+static std::shared_ptr<prosper::UniformResizableBuffer> g_materialSettingsBuffer = nullptr;
+static uint32_t g_instanceCount = 0;
+static void initialize_material_settings_buffer()
+{
+	if(g_materialSettingsBuffer)
+		return;
+	prosper::util::BufferCreateInfo bufCreateInfo {};
+	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
+	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT | Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
+	g_materialSettingsBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
+	g_materialSettingsBuffer->SetPermanentlyMapped(true);
+}
 ShaderTextured3DBase::ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderEntity(context,identifier,vsShader,fsShader,gsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	if(g_instanceCount++ == 0u)
+		initialize_material_settings_buffer();
+}
+ShaderTextured3DBase::~ShaderTextured3DBase()
+{
+	if(--g_instanceCount == 0)
+		g_materialSettingsBuffer = nullptr;
 }
 prosper::Shader::DescriptorSetInfo &ShaderTextured3DBase::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -128,124 +155,7 @@ void ShaderTextured3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateIn
 }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
-bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat)
-{
-	auto matFlags = MaterialFlags::Diffuse;
-
-	auto *diffuseMap = mat.GetDiffuseMap();
-	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->HasFlag(Texture::Flags::SRGB))
-		matFlags |= MaterialFlags::DiffuseSRGB;
-
-	auto &data = mat.GetDataBlock();
-	float parallaxHeightScale = DefaultParallaxHeightScale;
-	auto *parallaxMap = mat.GetParallaxMap();
-	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
-	{
-		matFlags |= MaterialFlags::Parallax;
-
-		if(data != nullptr)
-			data->GetFloat("parallax_height_scale",&parallaxHeightScale);
-	}
-
-	if(cvNormalMappingEnabled->GetBool() == true)
-	{
-		auto *normalMap = mat.GetNormalMap();
-		if(normalMap != nullptr && normalMap->texture != nullptr)
-			matFlags |= MaterialFlags::Normal;
-	}
-
-	Vector4 phong {1.f,1.f,1.f,1.f};
-	auto *specularMap = mat.GetSpecularMap();
-	if(specularMap != nullptr && specularMap->texture != nullptr)
-		matFlags |= MaterialFlags::SpecularMap;
-
-	auto phongIntensity = 1.f;
-	if(data != nullptr)
-	{
-		if(data->GetBool("black_to_alpha") == true)
-			matFlags |= MaterialFlags::BlackToAlpha;
-
-		auto &phongColor = data->GetValue("phong_color");
-		if(phongColor != nullptr)
-		{
-			const auto &colorType = typeid(ds::Color);
-			if(typeid(*phongColor) == colorType)
-			{
-				matFlags |= MaterialFlags::Specular;
-				auto &col = static_cast<ds::Color*>(phongColor.get())->GetValue();
-				phong.x = col.r /255.f;
-				phong.y = col.g /255.f;
-				phong.z = col.b /255.f;
-				phong.w = col.a /255.f;
-			}
-		}
-		if(data->GetFloat("phong_shininess",&phong.w) == true)
-			matFlags |= MaterialFlags::Specular;
-		if(data->GetFloat("phong_intensity",&phongIntensity) == true)
-			matFlags |= MaterialFlags::Specular;
-	}
-
-	if(data != nullptr && (matFlags &MaterialFlags::Specular) != MaterialFlags::None && (matFlags &MaterialFlags::SpecularMapDefined) == MaterialFlags::None)
-	{
-		// Check if diffuse alpha should be used as specular component,
-		// but only if phong is enabled and no other specular map has been specified
-		if(data->GetBool("phong_diffuse_alpha") == true)
-			matFlags |= MaterialFlags::DiffuseSpecular;
-		else if((matFlags &MaterialFlags::Normal) != MaterialFlags::None && data->GetBool("phong_normal_alpha") == true)
-			matFlags |= MaterialFlags::NormalSpecular;
-	}
-
-	float glowScale = 1.f;
-	auto *glowMap = mat.GetGlowMap();
-	if(glowMap != nullptr && glowMap->texture != nullptr)
-	{
-		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
-		if(texture->HasFlag(Texture::Flags::SRGB))
-			matFlags |= MaterialFlags::GlowSRGB;
-		auto bUseGlow = true;
-		if(data->GetBool("glow_alpha_only") == true)
-		{
-			if(prosper::util::has_alpha(texture->internalFormat) == false)
-				bUseGlow = false;
-		}
-		if(bUseGlow == true)
-		{
-			int32_t glowMode = 1;
-			if(data != nullptr)
-				data->GetInt("glow_blend_diffuse_mode",&glowMode);
-			if(glowMode != 0)
-			{
-				matFlags |= MaterialFlags::Glow;
-				if(data != nullptr)
-					data->GetFloat("glow_blend_diffuse_scale",&glowScale);
-			}
-			switch(glowMode)
-			{
-				case 1:
-					matFlags |= MaterialFlags::FMAT_GLOW_MODE_1;
-					break;
-				case 2:
-					matFlags |= MaterialFlags::FMAT_GLOW_MODE_2;
-					break;
-				case 3:
-					matFlags |= MaterialFlags::FMAT_GLOW_MODE_3;
-					break;
-			}
-		}
-	}
-
-	auto alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
-	if(data != nullptr)
-		data->GetFloat("alpha_discard_threshold",&alphaDiscardThreshold);
-
-	if(mat.IsTranslucent() == true)
-		matFlags |= MaterialFlags::Translucent;
-	ApplyMaterialFlags(mat,matFlags);
-	return RecordPushConstants(ShaderTextured3DBase::PushConstants::Material{
-		phong,matFlags,0u,glowScale,
-		parallaxHeightScale,alphaDiscardThreshold,phongIntensity
-	},offsetof(ShaderTextured3DBase::PushConstants,material));
-}
+bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat) {return true;}
 void ShaderTextured3DBase::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
@@ -267,12 +177,132 @@ bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryComma
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true;
 }
-bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh)
+void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 {
+	auto *buf = mat.GetSettingsBuffer();
+	if(buf == nullptr)
+		return;
+	MaterialData matData {};
+
+	auto &matFlags = matData.flags;
+
+	auto *diffuseMap = mat.GetDiffuseMap();
+	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->HasFlag(Texture::Flags::SRGB))
+		matFlags |= MaterialFlags::DiffuseSRGB;
+
+	auto &data = mat.GetDataBlock();
+	auto *parallaxMap = mat.GetParallaxMap();
+	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
+	{
+		matFlags |= MaterialFlags::Parallax;
+
+		if(data != nullptr)
+			data->GetFloat("parallax_height_scale",&matData.parallaxHeightScale);
+	}
+
+	if(cvNormalMappingEnabled->GetBool() == true)
+	{
+		auto *normalMap = mat.GetNormalMap();
+		if(normalMap != nullptr && normalMap->texture != nullptr)
+			matFlags |= MaterialFlags::Normal;
+	}
+
+	auto *specularMap = mat.GetSpecularMap();
+	if(specularMap != nullptr && specularMap->texture != nullptr)
+		matFlags |= MaterialFlags::SpecularMap;
+
+	if(data != nullptr)
+	{
+		if(data->GetBool("black_to_alpha") == true)
+			matFlags |= MaterialFlags::BlackToAlpha;
+
+		auto &phongColor = data->GetValue("phong_color");
+		if(phongColor != nullptr)
+		{
+			const auto &colorType = typeid(ds::Color);
+			if(typeid(*phongColor) == colorType)
+			{
+				matFlags |= MaterialFlags::Specular;
+				auto &col = static_cast<ds::Color*>(phongColor.get())->GetValue();
+				matData.phong.x = col.r /255.f;
+				matData.phong.y = col.g /255.f;
+				matData.phong.z = col.b /255.f;
+				matData.phong.w = col.a /255.f;
+			}
+		}
+		if(data->GetFloat("phong_shininess",&matData.phong.w) == true)
+			matFlags |= MaterialFlags::Specular;
+		if(data->GetFloat("phong_intensity",&matData.phongIntensity) == true)
+			matFlags |= MaterialFlags::Specular;
+	}
+
+	if(data != nullptr && (matFlags &MaterialFlags::Specular) != MaterialFlags::None && (matFlags &MaterialFlags::SpecularMapDefined) == MaterialFlags::None)
+	{
+		// Check if diffuse alpha should be used as specular component,
+		// but only if phong is enabled and no other specular map has been specified
+		if(data->GetBool("phong_diffuse_alpha") == true)
+			matFlags |= MaterialFlags::DiffuseSpecular;
+		else if((matFlags &MaterialFlags::Normal) != MaterialFlags::None && data->GetBool("phong_normal_alpha") == true)
+			matFlags |= MaterialFlags::NormalSpecular;
+	}
+
+	auto *glowMap = mat.GetGlowMap();
+	if(glowMap != nullptr && glowMap->texture != nullptr)
+	{
+		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
+		if(texture->HasFlag(Texture::Flags::SRGB))
+			matFlags |= MaterialFlags::GlowSRGB;
+		auto bUseGlow = true;
+		if(data->GetBool("glow_alpha_only") == true)
+		{
+			if(prosper::util::has_alpha(texture->internalFormat) == false)
+				bUseGlow = false;
+		}
+		if(bUseGlow == true)
+		{
+			int32_t glowMode = 1;
+			if(data != nullptr)
+				data->GetInt("glow_blend_diffuse_mode",&glowMode);
+			if(glowMode != 0)
+			{
+				matFlags |= MaterialFlags::Glow;
+				if(data != nullptr)
+					data->GetFloat("glow_blend_diffuse_scale",&matData.glowScale);
+			}
+			switch(glowMode)
+			{
+			case 1:
+				matFlags |= MaterialFlags::FMAT_GLOW_MODE_1;
+				break;
+			case 2:
+				matFlags |= MaterialFlags::FMAT_GLOW_MODE_2;
+				break;
+			case 3:
+				matFlags |= MaterialFlags::FMAT_GLOW_MODE_3;
+				break;
+			}
+		}
+	}
+
+	if(data != nullptr)
+		data->GetFloat("alpha_discard_threshold",&matData.alphaDiscardThreshold);
+
+	matData.metalnessFactor = mat.GetMetalnessMap() ? 1.f : 0.f;
+	if(data != nullptr)
+		data->GetFloat("metalness_factor",&matData.metalnessFactor);
+
+	if(mat.IsTranslucent() == true)
+		matFlags |= MaterialFlags::Translucent;
+	ApplyMaterialFlags(mat,matFlags);
+
+	buf->Write(0,matData);
+}
+bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps)
+{
+	outShouldUseLightmaps = false;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
 		return true;
-	uint32_t useLightMap = (mesh.GetReferenceId() != std::numeric_limits<uint32_t>::max()) ? 1u : 0u;
-	RecordPushConstants(useLightMap,offsetof(ShaderTextured3DBase::PushConstants,material) +offsetof(ShaderTextured3DBase::PushConstants::Material,lightmapFlags));
+	outShouldUseLightmaps = (mesh.GetReferenceId() != std::numeric_limits<uint32_t>::max()) ? 1u : 0u;
 	prosper::Buffer *pLightMapUvBuffer = nullptr;
 	auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
 	if(pLightMapComponent.valid())
@@ -288,11 +318,18 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh)
 		pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
 	return RecordBindVertexBuffer(pLightMapUvBuffer->GetAnvilBuffer(),2u);
 }
+void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
 		return false;
-	return BindLightMapUvBuffer(mesh) && ShaderEntity::Draw(mesh);
+	auto shouldUseLightmaps = false;
+	if(BindLightMapUvBuffer(mesh,shouldUseLightmaps) == false)
+		return false;
+	auto renderFlags = RenderFlags::None;
+	umath::set_flag(renderFlags,RenderFlags::LightmapsEnabled,shouldUseLightmaps);
+	UpdateRenderFlags(mesh,renderFlags);
+	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 size_t ShaderTextured3DBase::GetBaseTypeHashCode() const {return HASH_TYPE;}
 uint32_t ShaderTextured3DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
@@ -358,7 +395,20 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 		if(texture->texture != nullptr)
 			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::GlowMap));
 	}
+	InitializeMaterialBuffer(*descSet,mat);
+
 	return descSetGroup;
+}
+void ShaderTextured3DBase::InitializeMaterialBuffer(Anvil::DescriptorSet &descSet,CMaterial &mat)
+{
+	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
+	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
+		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
+	if(settingsBuffer == nullptr)
+		return;
+	prosper::util::set_descriptor_set_binding_uniform_buffer(descSet,*settingsBuffer,umath::to_integral(MaterialBinding::MaterialSettings));
+	mat.SetSettingsBuffer(*settingsBuffer);
+	UpdateMaterialBuffer(mat);
 }
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {

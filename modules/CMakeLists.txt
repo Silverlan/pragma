@@ -7,6 +7,7 @@ function(register_module MODULE_NAME)
 	add_subdirectory(${MODULE_NAME})
 endfunction(register_module)
 
+# TODO: Just register all child directories in this directory as modules
 register_module(interfaces)
 register_module(pr_steamworks)
 register_module(pr_chromium)
@@ -26,6 +27,7 @@ register_module(pr_video_recorder)
 register_module(pr_steam_networking)
 register_module(pr_gpl)
 register_module(pr_cycles)
+register_module(pr_uvatlas)
 
 set(CONFIG_ENABLE_BULLET_PHYSICS ON CACHE BOOL "Enable Bullet physics engine")
 if(CONFIG_ENABLE_BULLET_PHYSICS MATCHES ON)
@@ -60,5 +62,6 @@ set_target_properties(pr_steam_networking_server PROPERTIES FOLDER modules)
 set_target_properties(pr_steam_networking_client PROPERTIES FOLDER modules)
 set_target_properties(pr_gpl PROPERTIES FOLDER modules)
 set_target_properties(pr_cycles PROPERTIES FOLDER modules)
+set_target_properties(pr_uvatlas PROPERTIES FOLDER modules)
 
 set(CMAKE_CXX_STANDARD 17)

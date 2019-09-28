@@ -281,7 +281,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 				{
 					std::unordered_map<Material*,unsigned int>::iterator it = textures.find(mat);
 					if(it != textures.end())
-						cSubMesh->SetTexture(it->second);
+						cSubMesh->SetSkinTextureIndex(it->second);
 					auto &data = mat->GetDataBlock();
 					if(data != nullptr)
 					{

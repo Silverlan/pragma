@@ -5,6 +5,8 @@
 #include "pragma/lua/classes/ldef_model.h"
 #include "pragma/lua/classes/ldef_skeleton.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/game/scene_snapshot.hpp"
+#include <pragma/util/util_game.hpp>
 #include <smdmodel.h>
 #include <unordered_set>
 #include <sharedutils/util_file.h>
@@ -262,7 +264,7 @@ int Lua::import::import_wrmi(lua_State *l)
 
 			//meta.textures.push_back(map); // TODO: Only if not exists yet
 			//texGroup.textures.push_back(meta.textures.size() -1u);
-			subMesh->SetTexture(j);
+			subMesh->SetSkinTextureIndex(j);
 
 			auto numFaces = f.Read<uint32_t>();
 			meshTriangles.reserve(numFaces *3u);
@@ -453,73 +455,93 @@ private:
 	VFilePtr m_rootFile = nullptr;
 };
 
-void Lua::import::initialize_assimp_scene(aiScene &scene,Model &mdl)
+std::shared_ptr<aiScene> Lua::import::snapshot_to_assimp_scene(const pragma::SceneSnapshot &snapshot)
 {
-	scene.mRootNode = new aiNode{};
+	auto &materials = snapshot.GetMaterials();
+	std::unordered_map<Material*,uint32_t> materialToIndex {};
+	uint32_t matIdx = 0u;
+	for(auto &hMat : materials)
+		materialToIndex.insert(std::make_pair(hMat.get(),matIdx++));
 
-	scene.mMaterials = new aiMaterial*[1];
-	scene.mMaterials[0] = new aiMaterial{};
-	scene.mNumMaterials = 1;
+	auto scene = std::make_shared<aiScene>();
+	scene->mRootNode = new aiNode{};
+	scene->mRootNode->mNumChildren = 1;
+	scene->mRootNode->mChildren = new aiNode*[1];
+	auto *node = new aiNode {};
+	scene->mRootNode->mChildren[0] = node;
+	node->mName = "mesh";
+
+	scene->mMaterials = new aiMaterial*[materials.size()];
+	for(auto i=decltype(materials.size()){0u};i<materials.size();++i)
+		scene->mMaterials[i] = new aiMaterial{};
+	scene->mNumMaterials = materials.size();
 
 	//aiString name {"soldier_d.dds"};
 	//scene.mMaterials[0]->AddProperty(&name,AI_MATKEY_NAME);
-
-	scene.mMeshes = new aiMesh*[1];
-	scene.mMeshes[0] = nullptr;
-	scene.mNumMeshes = 1;
-
-	scene.mMeshes[0] = new aiMesh{};
-	scene.mMeshes[0]->mMaterialIndex = 0;
-
-	scene.mRootNode->mMeshes = new unsigned int[1];
-	scene.mRootNode->mMeshes[0] = 0;
-	scene.mRootNode->mNumMeshes = 1;
-
-	auto pMesh = scene.mMeshes[0];
-
-	auto numVerts = mdl.GetVertexCount();
-	pMesh->mVertices = new aiVector3D[numVerts];
-	pMesh->mNormals = new aiVector3D[numVerts];
-	pMesh->mNumVertices = numVerts;
-
-	pMesh->mTextureCoords[0] = new aiVector3D[numVerts];
-	pMesh->mNumUVComponents[0] = 2;
-
-	auto numTris = mdl.GetTriangleCount();
-	pMesh->mFaces = new aiFace[numTris];
-	pMesh->mNumFaces = numTris;
-
-	uint32_t vertexIndex = 0u;
-	uint32_t triIndex = 0u;
-	for(auto &meshGroup : mdl.GetMeshGroups())
+	
+	std::vector<uint32_t> nodeIds {};
+	auto &meshes = snapshot.GetMeshes();
+	scene->mMeshes = new aiMesh*[meshes.size()];
+	scene->mNumMeshes = meshes.size();
+	nodeIds.reserve(meshes.size());
+	for(auto i=decltype(meshes.size()){0u};i<meshes.size();++i)
 	{
-		for(auto &mesh : meshGroup->GetMeshes())
+		auto &mesh = meshes.at(i);
+		scene->mMeshes[i] = new aiMesh{};
+		auto &aiMesh = *scene->mMeshes[i];
+
+		auto numVerts = mesh->verts.size();
+		aiMesh.mVertices = new aiVector3D[numVerts];
+		aiMesh.mNormals = new aiVector3D[numVerts];
+		aiMesh.mNumVertices = numVerts;
+
+		aiMesh.mTextureCoords[0] = new aiVector3D[numVerts];
+		aiMesh.mNumUVComponents[0] = 2;
+
+		auto &lightmapUvs = mesh->lightmapUvs;
+		if(lightmapUvs.empty() == false)
 		{
-			for(auto &subMesh : mesh->GetSubMeshes())
+			aiMesh.mTextureCoords[1] = new aiVector3D[numVerts];
+			aiMesh.mNumUVComponents[1] = 2;
+		}
+
+		auto numTris = mesh->tris.size() /3;
+		aiMesh.mFaces = new aiFace[numTris];
+		aiMesh.mNumFaces = numTris;
+		aiMesh.mName = "mesh";
+
+		auto itMat = materialToIndex.find(mesh->material.get());
+		aiMesh.mMaterialIndex = (itMat != materialToIndex.end()) ? itMat->second : 0u;
+
+		for(uint32_t vertIdx=0u;vertIdx<numVerts;++vertIdx)
+		{
+			auto &v = mesh->verts.at(vertIdx);
+			aiMesh.mVertices[vertIdx] = aiVector3D{v.position.x,v.position.y,v.position.z} *static_cast<float>(util::units_to_metres(1.0));
+			aiMesh.mNormals[vertIdx] = aiVector3D{v.normal.x,v.normal.y,v.normal.z};
+			aiMesh.mTextureCoords[0][vertIdx] = aiVector3D{v.uv.x,1.f -v.uv.y,0.f};
+			if(lightmapUvs.empty() == false)
 			{
-				auto vertexOffset = vertexIndex;
-				for(auto &v : subMesh->GetVertices())
-				{
-					pMesh->mVertices[vertexIndex] = aiVector3D{v.position.x,v.position.y,v.position.z};
-					pMesh->mNormals[vertexIndex] = aiVector3D{v.normal.x,v.normal.y,v.normal.z};
-					pMesh->mTextureCoords[0][vertexIndex] = aiVector3D{v.uv.x,1.f -v.uv.y,0.f};
-					++vertexIndex;
-				}
-
-				auto &tris = subMesh->GetTriangles();
-				for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
-				{
-					auto &face = pMesh->mFaces[triIndex++];
-					face.mIndices = new unsigned int[3];
-					face.mNumIndices = 3;
-
-					face.mIndices[0] = vertexOffset +tris.at(i);
-					face.mIndices[1] = vertexOffset +tris.at(i +1);
-					face.mIndices[2] = vertexOffset +tris.at(i +2);
-				}
+				auto &uv = lightmapUvs.at(vertIdx);
+				aiMesh.mTextureCoords[1][vertIdx] = aiVector3D{uv.x,1.f -uv.y,0.f};
 			}
 		}
+
+		for(uint32_t triIdx=0u;triIdx<numTris;++triIdx)
+		{
+			auto &face = aiMesh.mFaces[triIdx];
+			face.mIndices = new unsigned int[3];
+			face.mNumIndices = 3;
+
+			for(uint8_t i=0;i<3;++i)
+				face.mIndices[i] = mesh->tris.at(triIdx *3 +i);
+		}
+		nodeIds.push_back(i);
 	}
+	node->mNumMeshes = nodeIds.size();
+	node->mMeshes = new uint32_t[nodeIds.size()];
+	for(auto i=decltype(nodeIds.size()){0u};i<nodeIds.size();++i)
+		node->mMeshes[i] = nodeIds.at(i);
+	return scene;
 }
 
 int Lua::import::export_model_asset(lua_State *l)
@@ -527,14 +549,15 @@ int Lua::import::export_model_asset(lua_State *l)
 	auto &mdl = Lua::Check<Model>(l,1);
 
 	Assimp::Exporter exporter;
-	aiScene scene {};
-	initialize_assimp_scene(scene,mdl);
-	auto result = exporter.Export(&scene,"fbx","E:/projects/pragma/build_winx64/output/box.fbx");
+	auto sceneSnapshot = pragma::SceneSnapshot::Create();
+	sceneSnapshot->AddModel(mdl);
+
+	auto aiScene = snapshot_to_assimp_scene(*sceneSnapshot);
+	auto result = exporter.Export(aiScene.get(),"fbx","E:/projects/pragma/build_winx64/output/box.fbx");
 	Lua::PushBool(l,result == aiReturn::aiReturn_SUCCESS);
 	
 	auto *error = exporter.GetErrorString();
 	Con::cwar<<"WARNING: Export error: '"<<error<<"'!"<<Con::endl;
-
 	return 1;
 }
 
@@ -598,7 +621,7 @@ int Lua::import::import_model_asset(lua_State *l)
 			triangles.push_back(face.mIndices[1]);
 			triangles.push_back(face.mIndices[2]);
 		}
-		subMesh->SetTexture(mesh->mMaterialIndex);
+		subMesh->SetSkinTextureIndex(mesh->mMaterialIndex);
 
 		Lua::PushInt(l,i +1);
 		Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);

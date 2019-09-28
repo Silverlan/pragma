@@ -39,6 +39,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/console/command_options.hpp>
+#include <sharedutils/util_image_buffer.hpp>
 #include <wrappers/memory_block.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -328,91 +329,48 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 		auto resolution = c_engine->GetRenderResolution();
-		pragma::rendering::cycles::Scene::CreateInfo createInfo {};
-		createInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
-		createInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
-		createInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
-		createInfo.type = pragma::rendering::cycles::Scene::Type::BakeAmbientOcclusion; // TODO
+		pragma::rendering::cycles::SceneInfo sceneInfo {};
+		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
+		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
+		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
+
+		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 		if(pCam)
 		{
-			createInfo.cameraPosition = pCam->GetEntity().GetPosition();
-			createInfo.cameraRotation = pCam->GetEntity().GetRotation();
-			createInfo.nearZ = pCam->GetNearZ();
-			createInfo.farZ = pCam->GetFarZ();
-			createInfo.fov = pCam->GetFOV();
+			renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
+			renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
+			renderImgInfo.nearZ = pCam->GetNearZ();
+			renderImgInfo.farZ = pCam->GetFarZ();
+			renderImgInfo.fov = pCam->GetFOV();
 		}
 		auto itDenoise = commandOptions.find("denoise");
 		if(itDenoise != commandOptions.end())
-			createInfo.denoise = true;
-		createInfo.outputHandler = [](const uint8_t *data,int w,int h) {
-			auto path = get_screenshot_name(client ? client->GetGameState() : nullptr);
-			Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
-			auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
-			if(f == nullptr)
-				return;
-
-			{
-				auto &dev = c_engine->GetDevice();
-				prosper::util::ImageCreateInfo lightMapCreateInfo {};
-				lightMapCreateInfo.width = w;
-				lightMapCreateInfo.height = h;
-				lightMapCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-				lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-				lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-				lightMapCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
-				auto img = prosper::util::create_image(dev,lightMapCreateInfo,data);
-
-				prosper::util::SamplerCreateInfo samplerCreateInfo {};
-				samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-				samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-				samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE; // Doesn't really matter since lightmaps have their own border either way
-				samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-				prosper::util::ImageViewCreateInfo imgViewCreateInfo {}; // TODO: Is this needed?
-				auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
-
-				//auto &ent = c_game->GetWorld()->GetEntity();
-				//auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
-
-				auto &scene = c_game->GetRenderScene();
-				static_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer())->SetLightMap(tex);
-			}
-
-			auto numInputChannels = 4u;
-			std::vector<uint8_t> rgbData {};
-			rgbData.resize(w *h *3);
-			for(auto x=decltype(h){0};x<h;++x)
-			{
-				for(auto y=decltype(w){0};y<w;++y)
-				{
-					auto offset = x *w +y;
-					auto *pxData = data +(offset *numInputChannels);
-
-					auto outOffset = x *w +y;
-					auto *outPixelData = rgbData.data() +outOffset *3;
-					for(uint8_t i=0;i<3;++i)
-						outPixelData[i] = (i < numInputChannels) ? pxData[i] : 0;
-				}
-			}
-			util::tga::write_tga(f,w,h,rgbData);
-			return;
-		};
+			sceneInfo.denoise = true;
 		Con::cout<<"Executing raytracer... This may take a few minutes!"<<Con::endl;
-		auto scene = pragma::rendering::cycles::Scene::Create(*client,createInfo);
-		if(scene.valid())
+		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
+		if(job.IsValid())
 		{
-			auto currentProgress = 0.f;
-			scene->SetProgressCallback([currentProgress](float progress) mutable {
-				for(auto fstep : {0.25f,0.5f,0.75f,1.f})
+			job.SetCompletionHandler([](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+				if(worker.IsSuccessful() == false)
 				{
-					if(currentProgress < fstep && progress >= fstep)
-					{
-						currentProgress = progress;
-						Con::cout<<"Raytracing for screenshot at "<<(fstep *100.f)<<"%!"<<Con::endl;
-						break;
-					}
+					Con::cwar<<"WARNING: Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
+					return;
 				}
+
+				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr);
+				Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
+				auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+				if(f == nullptr)
+				{
+					Con::cwar<<"WARNING: Unable to open file '"<<path<<"' for writing!"<<Con::endl;
+					return;
+				}
+				auto imgBuffer = worker.GetResult();
+				imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
+				util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 			});
+			job.Start();
+			c_engine->AddParallelJob(job,"Raytraced screenshot");
 		}
 		return;
 	}

@@ -38,6 +38,10 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
+			Anvil::DescriptorType::UNIFORM_BUFFER,
+			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		},
 		prosper::Shader::DescriptorSetInfo::Binding { // Emission Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
@@ -80,7 +84,7 @@ bool ShaderPBR::BeginDraw(
 	RecordFlags recordFlags
 )
 {
-	m_extMatFlags = MaterialFlags::None;
+	m_extRenderFlags = RenderFlags::None;
 	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags);
 }
 bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
@@ -97,15 +101,14 @@ bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer
 		if(ds)
 			return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}
-
 	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-	m_extMatFlags |= MaterialFlags::NoIBL;
+	m_extRenderFlags |= RenderFlags::NoIBL;
 	return true;
 }
-void ShaderPBR::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const
+void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags)
 {
-	ShaderTextured3DBase::ApplyMaterialFlags(mat,outFlags);
-	outFlags |= m_extMatFlags;
+	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
+	inOutFlags |= m_extRenderFlags;
 }
 void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -152,6 +155,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
 	prosper::util::set_descriptor_set_binding_texture(*descSet,*albedoTexture->texture,umath::to_integral(MaterialBinding::AlbedoMap));
+	InitializeMaterialBuffer(*descSet,mat);
 
 	if(bind_texture(mat,*descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
@@ -162,7 +166,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	if(bind_texture(mat,*descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"white") == false)
+	if(bind_texture(mat,*descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"pbr/rough_half") == false)
 		return false;
 
 	bind_texture(mat,*descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));

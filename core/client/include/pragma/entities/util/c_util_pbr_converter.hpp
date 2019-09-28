@@ -4,6 +4,8 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include <sharedutils/util_parallel_job.hpp>
+#include <pragma/model/model_handle.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <memory>
 #include <optional>
@@ -13,10 +15,19 @@
 #include <mutex>
 
 namespace prosper {class Texture; class Image;};
+namespace util {class ImageBuffer;};
 namespace pragma
 {
-	struct PBRConverterMaterialMeshData;
-	struct PBRConverterModelData;
+	namespace rendering::cycles {class Scene;};
+	struct PBRAOBakeJob
+	{
+		PBRAOBakeJob(Model &mdl,Material &mat);
+		ModelHandle hModel = {};
+		MaterialHandle hMaterial = {};
+		util::ParallelJob<std::shared_ptr<util::ImageBuffer>> job = {};
+		bool isRunning = false;
+	};
+
 	class DLLCLIENT CPBRConverterComponent final
 		: public BaseEntityComponent
 	{
@@ -29,26 +40,21 @@ namespace pragma
 
 		bool ConvertToPBR(CMaterial &matTraditional);
 		void PollEvents();
-
-		void GenerateGeometryBasedTextures(Model &mdl);
 	private:
-		void StartThread();
-		void EndThread();
-		bool ShouldConvertMaterial(CMaterial &mat) const;
-		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
-		void GenerateImageDataFromGeometryData(
-			const PBRConverterMaterialMeshData &meshData,uint32_t resolution,
-			std::function<void(uint16_t,uint16_t,uint16_t,const std::array<float,3>&,std::array<float,4>&)> applyPixelData,
-			std::vector<std::array<float,4>> &outPixelData
-		);
+		static bool IsSurfaceMaterialMetal(std::string surfMat);
+		void ConvertMaterialsToPBR(Model &mdl);
+		void UpdateMetalness(Model &mdl);
+		void UpdateMetalness(Model &mdl,CMaterial &mat);
+		void UpdateAmbientOcclusion(Model &mdl);
 
-		std::thread m_worker = {};
-		std::queue<std::shared_ptr<PBRConverterModelData>> m_workQueue = {};
-		std::mutex m_workQueueMutex = {};
-		std::queue<std::shared_ptr<PBRConverterModelData>> m_completeQueue = {};
-		std::mutex m_completeQueueMutex = {};
-		std::atomic<bool> m_running = false;
-		std::atomic<bool> m_hasWork = false;
+		void ProcessQueue();
+		void WriteAOMap(Model &mdl,CMaterial &mat,util::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;
+		void ApplyAOMap(CMaterial &mat,const std::string &aoName) const;
+		bool ShouldConvertMaterial(CMaterial &mat) const;
+		bool IsPBR(CMaterial &mat) const;
+		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
+
+		std::queue<PBRAOBakeJob> m_workQueue = {};
 
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};

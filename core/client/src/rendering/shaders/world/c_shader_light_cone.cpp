@@ -67,7 +67,7 @@ bool ShaderLightCone::Draw(CModelSubMesh &mesh)
 {
 	return RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes
 		static_cast<uint32_t>(m_boundLightIndex),
-		offsetof(ShaderTextured3DBase::PushConstants,material) +offsetof(ShaderTextured3DBase::PushConstants::Material,lightmapFlags)
+		sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,boundLightIndex)
 	) && ShaderTextured3DBase::Draw(mesh);
 }
 
@@ -81,7 +81,7 @@ bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)
 		coneLength = data->GetFloat("cone_height");
 	return RecordPushConstants(
 		PushConstants{coneLength},
-		sizeof(ShaderTextured3DBase::PushConstants)
+		sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,coneLength)
 	);
 }
 

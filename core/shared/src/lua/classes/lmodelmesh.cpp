@@ -109,7 +109,7 @@ void Lua::ModelMesh::Scale(lua_State *l,::ModelMesh &mdl,const Vector3 &scale) {
 void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef)
 {
 	classDef.def(luabind::const_self == ::ModelSubMesh());
-	classDef.def("GetMaterialIndex",&Lua::ModelSubMesh::GetTexture);
+	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelSubMesh::GetTriangleCount);
@@ -120,7 +120,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vertex&,const Vertex&,const Vertex&)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,uint32_t,uint32_t)>(&Lua::ModelSubMesh::AddTriangle));
-	classDef.def("SetMaterialIndex",&Lua::ModelSubMesh::SetTexture);
+	classDef.def("SetSkinTextureIndex",&Lua::ModelSubMesh::SetSkinTextureIndex);
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>(&Lua::ModelSubMesh::Update));
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelSubMesh&)>(&Lua::ModelSubMesh::Update));
 	classDef.def("AddVertex",&Lua::ModelSubMesh::AddVertex);
@@ -154,9 +154,9 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		mesh.Rotate(rotation);
 	}));
 }
-void Lua::ModelSubMesh::GetTexture(lua_State *l,::ModelSubMesh &mesh)
+void Lua::ModelSubMesh::GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mesh)
 {
-	Lua::PushInt(l,mesh.GetTexture());
+	Lua::PushInt(l,mesh.GetSkinTextureIndex());
 }
 void Lua::ModelSubMesh::GetVertexCount(lua_State *l,::ModelSubMesh &mdl)
 {
@@ -248,9 +248,9 @@ void Lua::ModelSubMesh::AddTriangle(lua_State*,::ModelSubMesh &mdl,uint32_t a,ui
 {
 	mdl.AddTriangle(a,b,c);
 }
-void Lua::ModelSubMesh::SetTexture(lua_State*,::ModelSubMesh &mdl,uint32_t texture)
+void Lua::ModelSubMesh::SetSkinTextureIndex(lua_State*,::ModelSubMesh &mdl,uint32_t texture)
 {
-	mdl.SetTexture(texture);
+	mdl.SetSkinTextureIndex(texture);
 }
 void Lua::ModelSubMesh::Update(lua_State*,::ModelSubMesh &mdl)
 {
@@ -401,8 +401,8 @@ void Lua::ModelSubMesh::ApplyUVMapping(lua_State *l,::ModelSubMesh &mdl,const Ve
 }
 void Lua::ModelSubMesh::ApplyUVMapping(lua_State *l,::ModelSubMesh &mesh,::Model &mdl,const Vector3 &nu,const Vector3 &nv,float ou,float ov,float su,float sv)
 {
-	auto matId = mesh.GetTexture();
-	auto *mat = mdl.GetMaterial(matId);
+	auto matId = mdl.GetMaterialIndex(mesh);
+	auto *mat = mdl.GetMaterial(matId.has_value() ? *matId : 0);
 	auto w = 0u;
 	auto h = 0u;
 	if(mat != nullptr)
@@ -448,7 +448,7 @@ void Lua::ModelSubMesh::InitializeQuad(lua_State *l,::ModelSubMesh &mesh,float s
 
 		mesh.AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
 	}
-	mesh.SetTexture(0);
+	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh.shared_from_this());
 }
@@ -515,7 +515,7 @@ void Lua::ModelSubMesh::InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Ve
 
 		mesh.AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
 	}
-	mesh.SetTexture(0);
+	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh.shared_from_this());
 }
@@ -536,7 +536,7 @@ void Lua::ModelSubMesh::InitializeSphere(lua_State *l,::ModelSubMesh &mesh,const
 		meshVert.uv = {umath::atan2(n.x,n.z) /(2.f *M_PI) +0.5f,n.y *0.5f +0.5f};
 	}
 
-	mesh.SetTexture(0);
+	mesh.SetSkinTextureIndex(0);
 	mesh.Update();
 	Lua::Push<std::shared_ptr<::ModelSubMesh>>(l,mesh.shared_from_this());
 }

@@ -266,7 +266,7 @@ template<class T>
 	{
 		recursiveCount = std::numeric_limits<uint32_t>::max();
 		root.InsertObject(o,min,max,nodesInserted,true); // Force object into root node
-		Con::cwar<<"WARNING: Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
+		// Con::cwar<<"WARNING: Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
 		return;
 	}
 	--recursiveCount;

@@ -194,9 +194,9 @@ CMaterial *CWaterComponent::GetWaterMaterial() const
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return nullptr;
-	auto matIdx = m_waterMesh.lock()->GetTexture();
+	auto matIdx = mdl->GetMaterialIndex(*m_waterMesh.lock());
 	auto &mats = mdl->GetMaterials();
-	return (matIdx < mats.size()) ? static_cast<CMaterial*>(mats.at(matIdx).get()) : nullptr;
+	return (matIdx.has_value() && matIdx < mats.size()) ? static_cast<CMaterial*>(mats.at(*matIdx).get()) : nullptr;
 }
 
 std::shared_ptr<PhysWaterSurfaceSimulator> CWaterComponent::InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) {return std::make_shared<CPhysWaterSurfaceSimulator>(min,max,originY,GetSpacing(),GetStiffness(),GetPropagation());}
@@ -253,7 +253,8 @@ void CWaterComponent::SetupWater()
 	if(m_waterMesh.expired() == true)
 		return;
 	auto *meshSurface = static_cast<CModelSubMesh*>(m_waterMesh.lock().get());
-	auto *mat = static_cast<CMaterial*>(mats.at(meshSurface->GetTexture()).get());
+	auto matIdx = mdl->GetMaterialIndex(*meshSurface);
+	auto *mat = matIdx.has_value() ? static_cast<CMaterial*>(mats.at(*matIdx).get()) : nullptr;
 	Vector3 min,max;
 	mdl->GetCollisionBounds(min,max);
 	InitializeWaterScene(meshSurface->GetVertexPosition(0),meshSurface->GetVertexNormal(0),min,max);

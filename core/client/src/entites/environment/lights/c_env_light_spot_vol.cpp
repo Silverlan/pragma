@@ -133,7 +133,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 		for(auto idx=decltype(verts.size()){0};idx<verts.size();++idx)
 			meshVerts.push_back(Vertex{verts[idx],normals[idx]});
 
-		subMesh->SetTexture(0);
+		subMesh->SetSkinTextureIndex(0);
 		mesh->AddSubMesh(subMesh);
 	}
 	group->AddMesh(mesh);

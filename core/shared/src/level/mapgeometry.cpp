@@ -9,6 +9,7 @@
 #include "pragma/util/util_bsp_tree.hpp"
 #include <util_bsp.hpp>
 
+#pragma optimize("",off)
 static uint32_t get_next_row_neighbor(uint32_t vertId,uint32_t power,uint8_t decimateAmount)
 {
 	return vertId +power *decimateAmount;
@@ -93,7 +94,10 @@ static Vector2 calc_disp_surf_coords(const std::array<Vector2,4> &texCoords,uint
 	return endPts.at(0) +seg;
 }
 
-void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const BSPInputData &bspInputData,const std::vector<Material*> &materials,std::vector<std::vector<Vector2>> *outMeshLightMapUvCoordinates)
+void pragma::level::load_map_faces(
+	Game &game,VFilePtr f,BaseEntity &ent,const BSPInputData &bspInputData,
+	const std::vector<Material*> &materials,std::vector<std::vector<Vector2>> *outMeshLightMapUvCoordinates
+)
 {
 	auto numFaces = f->Read<uint32_t>();
 	if(numFaces == 0u)
@@ -120,13 +124,13 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 	auto &verts = bspInputData.verts;
 	auto &edges = bspInputData.edges;
 	std::vector<std::pair<uint64_t,uint64_t>> displacementRanges {};
+	auto useLightmaps = ent.IsWorld(); // TODO: Add support for static props?
 	for(auto faceIndex : faceIndices)
 	{
 		auto &face = faces.at(faceIndex);
 		if(face.numEdges == 0u)
 			continue;
 		auto &faceTexInfo = texInfo.at(face.texInfoIndex); // TODO: face.texInfoIndex == -1?
-
 		auto texId = faceTexInfo.materialIndex;
 		auto *mat = materials.at(texId);
 		auto *diffuseMap = (mat != nullptr) ? mat->GetDiffuseMap() : nullptr;
@@ -316,7 +320,7 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 					triInfo0.vertices.at(2) = Vertex{p2.first +p2.second,fCalculateUv(p2.first),normal};
 
 					auto *outLightMapUvs0 = (outMeshLightMapUvCoordinates != nullptr) ? &triInfo0.lightMapUvs : nullptr;
-					if(outLightMapUvs0 != nullptr)
+					if(outLightMapUvs0 != nullptr && useLightmaps)
 					{
 						// Note: Usually fCalcLightmapUv should be used to calculate the lightmap uvs, however
 						// for some reason that results in incorrect uv coordinates if the displacement brush has
@@ -337,7 +341,7 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 					triInfo1.vertices.at(1) = Vertex{p3.first +p3.second,fCalculateUv(p3.first),normal};
 					triInfo1.vertices.at(2) = Vertex{p2.first +p2.second,fCalculateUv(p2.first),normal};
 					auto *outLightMapUvs1 = (outMeshLightMapUvCoordinates != nullptr) ? &triInfo1.lightMapUvs : nullptr;
-					if(outLightMapUvs1 != nullptr)
+					if(outLightMapUvs1 != nullptr && useLightmaps)
 					{
 						outLightMapUvs1->at(0) = calc_disp_surf_coords(lightMapUvBaseCoords,dispInfo.power,x,y +1);
 						outLightMapUvs1->at(1) = calc_disp_surf_coords(lightMapUvBaseCoords,dispInfo.power,x +1,y +1);
@@ -500,11 +504,12 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 		for(auto &pairMat : clusterMesh.meshes)
 		{
 			auto &matMesh = pairMat.second;
-			auto matIdx = mdl->AddMaterial(0u,materials.at(pairMat.first));
+			std::optional<uint32_t> skinTexIdx {};
+			auto matIdx = mdl->AddMaterial(0u,materials.at(pairMat.first),&skinTexIdx);
 			auto mesh = game.CreateModelMesh();
 			auto subMesh = game.CreateModelSubMesh();
 			std::vector<Vector2> *meshLightMapUvs = nullptr;
-			if(outMeshLightMapUvCoordinates != nullptr)
+			if(outMeshLightMapUvCoordinates != nullptr && useLightmaps)
 			{
 				outMeshLightMapUvCoordinates->push_back({});
 				meshLightMapUvs = &outMeshLightMapUvCoordinates->back();
@@ -532,8 +537,9 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 					meshLightMapUvs->push_back(tri->lightMapUvs.at(2));
 				}
 			}
-			subMesh->SetTexture(matIdx);
-			subMesh->SetReferenceId(meshIndex++); // Mesh index; Needed to associate mesh with light map uv buffer
+			subMesh->SetSkinTextureIndex(skinTexIdx.has_value() ? *skinTexIdx : 0);
+			if(useLightmaps)
+				subMesh->SetReferenceId(meshIndex++); // Mesh index; Needed to associate mesh with light map uv buffer
 			mesh->AddSubMesh(subMesh);
 			mesh->SetReferenceId(pairCluster.first); // Cluster index; Needed to determine visibility in BSP occlusion culling (only used for world entity)
 
@@ -545,11 +551,12 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 	for(auto &range : displacementRanges)
 	{
 		auto &triInfo = bspTriangles.at(range.first);
-		auto matIdx = mdl->AddMaterial(0u,materials.at(triInfo.materialIndex));
+		std::optional<uint32_t> skinTexIdx {};
+		auto matIdx = mdl->AddMaterial(0u,materials.at(triInfo.materialIndex),&skinTexIdx);
 		auto mesh = game.CreateModelMesh();
 		auto subMesh = game.CreateModelSubMesh();
 		std::vector<Vector2> *meshLightMapUvs = nullptr;
-		if(outMeshLightMapUvCoordinates != nullptr)
+		if(outMeshLightMapUvCoordinates != nullptr && useLightmaps)
 		{
 			outMeshLightMapUvCoordinates->push_back({});
 			meshLightMapUvs = &outMeshLightMapUvCoordinates->back();
@@ -579,7 +586,7 @@ void pragma::level::load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const B
 				meshLightMapUvs->push_back(triInfo.lightMapUvs.at(2));
 			}
 		}
-		subMesh->SetTexture(matIdx);
+		subMesh->SetSkinTextureIndex(skinTexIdx.has_value() ? *skinTexIdx : 0);
 		subMesh->SetReferenceId(meshIndex++); // Mesh index; Needed to associate mesh with light map uv buffer
 		mesh->AddSubMesh(subMesh);
 		mesh->SetReferenceId(std::numeric_limits<uint32_t>::max());
@@ -988,3 +995,4 @@ void pragma::level::load_optimized_map_geometry(
 			pMdlComponent->SetModel(mdl);
 	}
 }
+#pragma optimize("",on)

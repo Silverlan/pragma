@@ -28,6 +28,7 @@ namespace pragma
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void OnEntitySpawn() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		bool CaptureIBLReflectionsFromScene();
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
@@ -40,15 +41,33 @@ namespace pragma
 		bool UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
 	private:
+		static std::shared_ptr<prosper::Image> CreateCubemapImage();
+
 		void InitializeDescriptorSet();
-		void CaptureRaytracedIBLReflectionsFromScene(
-			prosper::Image &imgCubemap,uint32_t layerIndex,
+		util::ParallelJob<std::shared_ptr<util::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
+			uint32_t width,uint32_t height,uint32_t layerIndex,
 			const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 		);
+		bool FinalizeCubemap(prosper::Image &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;
+		std::string GetCubemapIBLMaterialFilePath() const;
 		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;
 		std::shared_ptr<prosper::DescriptorSetGroup> m_iblDsg = nullptr;
+
+		struct RaytracingJobManager
+		{
+			RaytracingJobManager(CReflectionProbeComponent &probe);
+			~RaytracingJobManager();
+			std::array<util::ParallelJob<std::shared_ptr<util::ImageBuffer>>,6> jobs = {};
+			std::array<std::shared_ptr<util::ImageBuffer>,6> m_layerImageBuffers = {};
+			CReflectionProbeComponent &probe;
+			uint32_t m_nextJobIndex = 0u;
+			void StartNextJob();
+			void Finalize();
+		};
+		std::unique_ptr<RaytracingJobManager> m_raytracingJobManager = nullptr;
+		bool m_bBakingFailed = false;
 
 		std::string m_srcEnvMap = "";
 	};

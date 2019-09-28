@@ -187,6 +187,111 @@ static const std::unordered_map<std::string,Activity> translateActivities = {
 	{"ACT_GESTURE_TURN_RIGHT",Activity::GestureTurnRight}
 };
 
+// TODO: Match these with materialsystem/src/impl_surfacematerials.h
+static const std::unordered_map<std::string,std::string> surfMatTranslationTable = {
+	{"default","generic"},
+	{"default_silent","generic"},
+	{"floatingstandable","generic"},
+	{"item","generic"},
+	{"ladder","generic"},
+	{"no_decal","generic"},
+	{"player","generic"},
+	{"player_control_clip","generic"},
+
+	{"baserock","rock"},
+	{"boulder","rock"},
+	{"brick","brick"},
+	{"concrete","concrete"},
+	{"concrete_block","concrete"},
+	{"gravel","brick"},
+	{"rock","rock"},
+
+	{"canister","metal"},
+	{"chain","metal"},
+	{"chainlink","metal"},
+	{"combine_metal","metal"},
+	{"crowbar","metal"},
+	{"floating_metal_barrel","metal"},
+	{"grenade","metal"},
+	{"gunship","metal"},
+	{"metal","metal"},
+	{"metal_barrel","metal"},
+	{"metal_bouncy","metal"},
+	{"metal_box","metal"},
+	{"metal_seafloorcar","metal"},
+	{"metalgrate","metal"},
+	{"metalpanel","metal"},
+	{"metalvent","metal"},
+	{"metalvehicle","metal"},
+	{"paintcan","metal"},
+	{"popcan","metal"},
+	{"roller","metal"},
+	{"slipperymetal","metal"},
+	{"solidmetal","metal"},
+	{"strider","metal"},
+	{"weapon","metal"},
+
+	{"wood","wood"},
+	{"wood_box","wood"},
+	{"wood_crate","wood"},
+	{"wood_furniture","wood"},
+	{"wood_lowdensity","wood"},
+	{"wood_plank","wood"},
+	{"wood_panel","wood"},
+	{"wood_solid","wood"},
+
+	{"dirt","dirt"},
+	{"grass","grass"},
+	{"gravel","gravel"},
+	{"mud","dirt"},
+	{"quicksand","dirt"},
+	{"sand","dirt"},
+	{"slipperyslime","dirt"},
+	{"antlionsand","dirt"},
+
+	{"slime","water"},
+	{"water","water"},
+	{"wade","water"},
+
+	{"ice","ice"},
+	{"snow","snow"},
+
+	{"alienflesh","flesh"},
+	{"antlion","flesh"},
+	{"armorflesh","flesh"},
+	{"bloodyflesh","flesh"},
+	{"flesh","flesh"},
+	{"foliage","plant"},
+	{"watermelon","plant"},
+	{"zombieflesh","flesh"},
+
+	{"asphalt","concrete"},
+	{"glass","glass"},
+	{"glassbottle","glass"},
+	{"combine_glass","glass"},
+	{"tile","ceramic"},
+	{"paper","generic"},
+	{"papercup","generic"},
+	{"cardboard","wood"},
+	{"plaster","plaster"},
+	{"plastic_barrel","plastic"},
+	{"plastic_barrel_buoyant","plastic"},
+	{"plastic_box","plastic"},
+	{"plastic","plastic"},
+	{"rubber","generic"},
+	{"rubbertire","generic"},
+	{"slidingrubbertire","generic"},
+	{"slidingrubbertire_front","generic"},
+	{"slidingrubbertire_rear","generic"},
+	{"jeeptire","generic"},
+	{"brakingrubbertire","generic"},
+
+	{"carpet","carpet"},
+	{"ceiling_tile","ceramic"},
+	{"computer","plastic"},
+	{"pottery","ceramic"}
+};
+
 static const std::unordered_map<int32_t,AnimationEvent::Type> translateAnimEvent = {
 	{3,AnimationEvent::Type::EmitSound}
 };
@@ -1237,12 +1342,12 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 					std::shared_ptr<ModelSubMesh> rootMesh = nullptr;
 					for(auto lodIdx=decltype(vtxModel.lods.size()){0};lodIdx<vtxModel.lods.size();++lodIdx)
 					{
-						auto bgLogName = bgName +"_" +((lodIdx > 0) ? (std::string("lod") +std::to_string(lodIdx)) : "reference");
+						auto bgLodName = bgName +"_" +((lodIdx > 0) ? (std::string("lod") +std::to_string(lodIdx)) : "reference");
 						auto subId = 2u;
-						while(mdl.GetMeshGroup(bgLogName) != nullptr)
-							bgLogName = bgName +std::to_string(subId++) +"_" +((lodIdx > 0) ? (std::string("lod") +std::to_string(lodIdx)) : "reference");
+						while(mdl.GetMeshGroup(bgLodName) != nullptr)
+							bgLodName = bgName +std::to_string(subId++) +"_" +((lodIdx > 0) ? (std::string("lod") +std::to_string(lodIdx)) : "reference");
 						uint32_t meshGroupId = std::numeric_limits<uint32_t>::max();
-						auto meshGroup = mdl.AddMeshGroup(bgLogName,meshGroupId);
+						auto meshGroup = mdl.AddMeshGroup(bgLodName,meshGroupId);
 						if(lodIdx == 0u)
 						{
 							auto it = std::find(bgroup.meshGroups.begin(),bgroup.meshGroups.end(),meshGroupId);
@@ -1278,7 +1383,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 								bpMeshIndexToMeshIndices = &meshToBodyPart.back().bpMeshIndicesToMeshIndices;
 							}
 
-							lodSubMesh->SetTexture(mesh.stdMesh.material);
+							lodSubMesh->SetSkinTextureIndex(mesh.stdMesh.material);
 							auto meshVertexIndexStart = mesh.stdMesh.vertexoffset;
 							for(auto &stripGroup : vtxMesh.stripGroups)
 							{
@@ -2544,7 +2649,12 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 				}
 				
 				colMesh->Centralize();
-				colMesh->SetSurfaceMaterial(colObj.keyValues.surfaceProp);
+				auto surfProp = colObj.keyValues.surfaceProp;
+				ustring::to_lower(surfProp);
+				auto itSurfMat = surfMatTranslationTable.find(surfProp);
+				if(itSurfMat != surfMatTranslationTable.end())
+					surfProp = itSurfMat->second;
+				colMesh->SetSurfaceMaterial(surfProp);
 				colMesh->SetBoneParent(boneId);
 				colMesh->Update();
 				colMesh->SetVolume(colObj.keyValues.volume);
@@ -2784,6 +2894,48 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		}
 	}
 	//
+
+	// For some reason skin families in source contain a reference to all textures for each family, regardless of whether they're actually
+	// used by any of the meshes. We only care about the textures that are actually in use, so we'll discard the others.
+	auto *texGroup = mdl.GetTextureGroup(0);
+	if(texGroup)
+	{
+		// If value in vector is not set, that means the skin texture is not in use by any mesh and will be removed in the next step
+		std::vector<std::optional<uint32_t>> newSkinTextureIndices = {};
+		newSkinTextureIndices.resize(texGroup->textures.size());
+		uint32_t skinTexIdx = 0u;
+		for(auto &meshGroup : mdl.GetMeshGroups())
+		{
+			for(auto &mesh : meshGroup->GetMeshes())
+			{
+				for(auto &subMesh : mesh->GetSubMeshes())
+				{
+					auto texIdx = subMesh->GetSkinTextureIndex();
+					assert(texIdx < newSkinTextureIndices.size());
+					if(texIdx >= newSkinTextureIndices.size())
+						continue;
+					if(newSkinTextureIndices.at(texIdx).has_value() == false)
+						newSkinTextureIndices.at(texIdx) = skinTexIdx++;
+					subMesh->SetSkinTextureIndex(*newSkinTextureIndices.at(texIdx));
+				}
+			}
+		}
+		for(auto &texGroup : mdl.GetTextureGroups())
+		{
+			uint32_t oldSkinTexIdx = 0u;
+			for(auto it=texGroup.textures.begin();it!=texGroup.textures.end();)
+			{
+				if(oldSkinTexIdx >= newSkinTextureIndices.size() || newSkinTextureIndices.at(oldSkinTexIdx).has_value() == false)
+				{
+					it = texGroup.textures.erase(it);
+					++oldSkinTexIdx;
+					continue;
+				}
+				++it;
+				++oldSkinTexIdx;
+			}
+		}
+	}
 
 	// Models are rotated by 90 degree for some reason
 	mdl.Rotate(uquat::create(EulerAngles{0.f,90.f,0.f}));

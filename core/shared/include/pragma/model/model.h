@@ -97,6 +97,7 @@ struct DLLNETWORK BodyGroup
 class CollisionMesh;
 class Game;
 class VertexAnimation;
+class NetworkState;
 namespace pragma::physics{class ScaledTransform;};
 class DLLNETWORK Model
 {
@@ -328,7 +329,7 @@ public:
 	// Textures
 	uint32_t AddTexture(const std::string &tex,Material *mat);
 	bool SetTexture(uint32_t texIdx,const std::string &tex,Material *mat);
-	uint32_t AddMaterial(uint32_t skin,Material *mat);
+	uint32_t AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> *optOutSkinTexIdx=nullptr);
 	bool SetMaterial(uint32_t texIdx,Material *mat);
 	void RemoveTexture(uint32_t idx);
 	void ClearTextures();
@@ -343,12 +344,14 @@ public:
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false);
 	std::vector<TextureGroup> &GetTextureGroups();
 	TextureGroup *GetTextureGroup(uint32_t i);
+	const TextureGroup *GetTextureGroup(uint32_t i) const;
 	virtual void PrecacheTextureGroup(uint32_t i);
 	void PrecacheTextureGroups();
 	std::vector<std::string> &GetTexturePaths();
 	void AddTexturePath(const std::string &path);
 	void RemoveTexturePath(uint32_t idx);
 	void SetTexturePaths(const std::vector<std::string> &paths);
+	std::optional<uint32_t> GetMaterialIndex(const ModelSubMesh &mesh,uint32_t skinId=0) const;
 	void SetReference(std::shared_ptr<Frame> frame);
 	const Frame &GetReference() const;
 	Frame &GetReference();

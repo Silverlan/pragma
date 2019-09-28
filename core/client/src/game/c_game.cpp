@@ -1373,6 +1373,9 @@ void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 		auto lightMapUvBuffer = pragma::CLightMapComponent::LoadLightMapUvBuffers(lightMapUvCoordinates,uvBuffers);
 		if(lightMapUvBuffer != nullptr)
 		{
+			// Technically we don't need the lightmap information anymore, but it's useful to have in case we want to make changes to the lightmaps
+			// at a later date.
+			auto lightmapInfo = std::make_shared<util::bsp::LightMapInfo>(bspInputData.lightMapInfo);
 			for(auto &uvData : lightMapUvCoordinateRanges)
 			{
 				if(uvData.hEntity.IsValid() == false)
@@ -1384,10 +1387,17 @@ void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma
 				entityUvBuffers.reserve(uvData.numUvSets);
 				for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
 					entityUvBuffers.push_back(uvBuffers.at(i));
-				pLightMapComponent->InitializeLightMapData(lightMap,lightMapUvBuffer,entityUvBuffers);
+
+				std::vector<std::vector<Vector2>> lightmapUvs {};
+				lightmapUvs.resize(uvData.numUvSets);
+				uint32_t meshIndex = 0u;
+				for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
+					lightmapUvs.at(meshIndex++) = std::move(lightMapUvCoordinates.at(i));
+				pLightMapComponent->InitializeLightMapData(lightmapInfo,lightMap,lightMapUvBuffer,entityUvBuffers,lightmapUvs);
 			}
 		}
 	}
+	// Note: lightMapUvCoordinates should no longer be used after this point
 
 	for(auto &hEnt : ents)
 	{
@@ -1826,8 +1836,43 @@ bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const Im
 		return false;
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	auto *fSaveImageAsKtx = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_image");
-	return fSaveImageAsKtx && fSaveImageAsKtx(image,fileName,imageWriteInfo,[fileName](const std::string &err) {
+	auto *fSaveImage = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_prosper_image");
+	return fSaveImage && fSaveImage(image,fileName,imageWriteInfo,[fileName](const std::string &err) {
+		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+	});
+}
+
+bool CGame::SaveImage(
+	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
+	const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo
+) const
+{
+	std::string err;
+	auto libDds = client->InitializeLibrary("pr_dds",&err);
+	if(libDds == nullptr)
+		return false;
+	auto path = ufile::get_path_from_filename(fileName);
+	FileManager::CreatePath(path.c_str());
+	auto *fSaveImage = libDds->FindSymbolAddress<
+		bool(*)(const std::vector<std::vector<const void*>>&,uint32_t,uint32_t,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)
+	>("save_data_image");
+	return fSaveImage && fSaveImage(imgLayerMipmapData,width,height,fileName,imageWriteInfo,[fileName](const std::string &err) {
+		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
+	});
+}
+
+bool CGame::SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const
+{
+	std::string err;
+	auto libDds = client->InitializeLibrary("pr_dds",&err);
+	if(libDds == nullptr)
+		return false;
+	auto path = ufile::get_path_from_filename(fileName);
+	FileManager::CreatePath(path.c_str());
+	auto *fSaveImage = libDds->FindSymbolAddress<
+		bool(*)(util::ImageBuffer&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)
+	>("save_buffer_image");
+	return fSaveImage && fSaveImage(imgBuffer,fileName,imageWriteInfo,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }

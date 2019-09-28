@@ -106,10 +106,10 @@ bool CLightComponent::ShouldRender() {return true;}
 bool CLightComponent::ShouldPass(const Model &mdl,const CModelSubMesh &mesh)
 {
 	auto &materials = mdl.GetMaterials();
-	auto texId = mesh.GetTexture();
-	if(texId >= materials.size() || !materials[texId].IsValid()) // Ignore meshes with invalid materials
+	auto texId = mdl.GetMaterialIndex(mesh);
+	if(texId.has_value() == false || *texId >= materials.size() || !materials[*texId].IsValid()) // Ignore meshes with invalid materials
 		return false;
-	auto &mat = materials[texId];
+	auto &mat = materials[*texId];
 	auto *info = mat.get()->GetShaderInfo();
 	if(info == nullptr || const_cast<util::ShaderInfo*>(info)->GetShader() == nullptr) // Ignore meshes with nodraw (Or invalid) shaders
 		return false;

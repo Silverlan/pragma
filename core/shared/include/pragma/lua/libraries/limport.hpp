@@ -6,6 +6,8 @@
 
 struct aiScene;
 class Model;
+struct aiScene;
+namespace pragma {class SceneSnapshot;};
 namespace Lua
 {
 	namespace import
@@ -18,7 +20,7 @@ namespace Lua
 		DLLNETWORK int import_pmx(lua_State *l);
 		DLLNETWORK int import_model_asset(lua_State *l);
 
-		DLLNETWORK void initialize_assimp_scene(aiScene &scene,Model &mdl);
+		DLLNETWORK std::shared_ptr<aiScene> snapshot_to_assimp_scene(const pragma::SceneSnapshot &snapshot);
 		DLLNETWORK int export_model_asset(lua_State *l);
 	};
 };

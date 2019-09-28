@@ -205,10 +205,10 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto matId = subMesh->GetTexture();
-			if(matId >= mats.size())
+			auto matId = hMdl->GetMaterialIndex(*subMesh);
+			if(matId.has_value() == false || *matId >= mats.size())
 				continue;
-			auto &hMat = mats.at(matId);
+			auto &hMat = mats.at(*matId);
 			if(hMat.IsValid() == false)
 				continue;
 			auto shaderName = hMat->GetShaderIdentifier();

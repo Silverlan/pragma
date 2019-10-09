@@ -17,6 +17,7 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/ai/c_lai.hpp"
+#include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <alsoundsystem.hpp>
@@ -24,6 +25,7 @@
 #include <pr_dds.hpp>
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 #pragma optimize("",off)
@@ -613,6 +615,33 @@ void CGame::RegisterLuaLibraries()
 			std::string fileName = Lua::CheckString(l,2);
 			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
+			return 1;
+		})},
+		{"capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto width = Lua::CheckInt(l,1);
+			auto height = Lua::CheckInt(l,2);
+			uint32_t samples = 1'024;
+			if(Lua::IsSet(l,3))
+				samples = Lua::CheckInt(l,3);
+			constexpr auto denoise = true;
+
+			pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
+			auto *pCam = c_game->GetRenderCamera();
+			if(pCam)
+			{
+				renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
+				renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
+				renderImgInfo.nearZ = pCam->GetNearZ();
+				renderImgInfo.farZ = pCam->GetFarZ();
+				renderImgInfo.fov = pCam->GetFOV();
+			}
+			pragma::rendering::cycles::SceneInfo sceneInfo {};
+			sceneInfo.width = width;
+			sceneInfo.height = height;
+			sceneInfo.samples = samples;
+			sceneInfo.denoise = denoise;
+			auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
+			Lua::Push(l,job);
 			return 1;
 		})}
 	});

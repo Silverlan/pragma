@@ -27,6 +27,7 @@ namespace pragma
 		virtual ~BaseColorComponent() override;
 		void SetColor(const Color &color);
 		void SetColor(const Vector4 &color);
+		void SetColor(const Vector3 &color);
 	protected:
 		BaseColorComponent(BaseEntity &ent);
 		util::PColorProperty m_color;

@@ -53,6 +53,13 @@ void SLightSpotComponent::SetInnerCutoffAngle(float ang)
 
 luabind::object SLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightSpotComponentHandleWrapper>(l);}
 
+void SLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(SLightComponent))
+		static_cast<SLightComponent&>(component).SetLight(*this);
+}
+
 ///////////
 
 void EnvLightSpot::Initialize()

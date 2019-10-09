@@ -78,14 +78,16 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 	SetCycle(cycle);
 }
 
-bool CAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const
 {
-	if(BaseAnimatedComponent::GetLocalVertexPosition(subMesh,vertexId,pos) == false)
-		return false;
+	auto t = BaseAnimatedComponent::GetVertexTransformMatrix(subMesh,vertexId);
+	if(t.has_value() == false)
+		return {};
+	Vector3 vertexOffset;
 	auto pVertexAnimatedComponent = GetEntity().GetComponent<pragma::CVertexAnimatedComponent>();
-	if(pVertexAnimatedComponent.expired())
-		return true;
-	return pVertexAnimatedComponent->GetLocalVertexPosition(subMesh,vertexId,pos);
+	if(pVertexAnimatedComponent.expired() || pVertexAnimatedComponent->GetLocalVertexPosition(subMesh,vertexId,vertexOffset) == false)
+		return t;
+	return *t *glm::translate(umat::identity(),vertexOffset); // TODO: Confirm order!
 }
 
 void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
@@ -201,7 +203,6 @@ void CAnimatedComponent::UpdateBoneMatrices()
 	if(m_boneMatrices.empty())
 		return;
 	UpdateSkeleton(); // Costly
-	auto offset = umat::identity();
 	auto physRootBoneId = OnSkeletonUpdated();
 
 	CEOnSkeletonUpdated evData{physRootBoneId};
@@ -211,29 +212,25 @@ void CAnimatedComponent::UpdateBoneMatrices()
 	for(unsigned int i=0;i<GetBoneCount();i++)
 	{
 		auto &t = m_processedBones.at(i);
-		auto &pos = t.GetPosition();
-		auto &orientation = t.GetOrientation();
+		auto &pos = t.GetOrigin();
+		auto &orientation = t.GetRotation();
 		auto &scale = t.GetScale();
 
 		auto *posBind = refFrame.GetBonePosition(i);
 		auto *rotBind = refFrame.GetBoneOrientation(i);
 		if(posBind != nullptr && rotBind != nullptr)
 		{
-			auto &mat = m_boneMatrices[i] = umat::identity(); // Inverse of parent bones??
+			auto &mat = m_boneMatrices[i];
 			if(i != physRootBoneId)
 			{
-				auto rot = orientation *glm::inverse(*rotBind);
-				mat = glm::translate(mat,*posBind);
+				physics::Transform tBindPose {*posBind,*rotBind};
+				tBindPose = tBindPose.GetInverse();
+				physics::ScaledTransform tBone {pos,orientation,scale};
 
-				// TODO: Is this the correct order for translation/rotation/scale? (It looks correct?)
-				if(scale.x != 1.f || scale.y != 1.f || scale.z != 1.f)
-					mat = glm::scale(mat,scale);
-
-				mat = mat *glm::toMat4(rot);
-				mat = glm::translate(mat,-(*posBind));
-				mat = glm::translate(pos -(*posBind)) *mat;
-				mat = offset *mat;
+				mat = (tBone *tBindPose).ToMatrix();
 			}
+			else
+				mat = umat::identity();
 		}
 		else
 			Con::cwar<<"WARNING: Attempted to update bone "<<i<<" in "<<mdl->GetName()<<" which doesn't exist in the reference pose! Ignoring..."<<Con::endl;

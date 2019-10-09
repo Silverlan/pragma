@@ -169,6 +169,23 @@ bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float a
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
 	return Intersection::SphereCone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
 }
+void CLightComponent::SetLightIntensity(float intensity,LightIntensityType type)
+{
+	CBaseLightComponent::SetLightIntensity(intensity,type);
+	UpdateLightIntensity();
+}
+void CLightComponent::SetLightIntensityType(LightIntensityType type)
+{
+	CBaseLightComponent::SetLightIntensityType(type);
+	UpdateLightIntensity();
+}
+void CLightComponent::UpdateLightIntensity()
+{
+	m_bufferData.intensity = GetLightIntensityCandela();
+	if(m_renderBuffer == nullptr)
+		return;
+	c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,intensity),m_bufferData.intensity);
+}
 bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 {
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
@@ -430,7 +447,7 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(CColorComponent))
 	{
 		FlagCallbackForRemoval(static_cast<CColorComponent&>(component).GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldColor,std::reference_wrapper<const Color> color) {
-			m_bufferData.color = color.get().ToVector4();
+			m_bufferData.color = color.get().ToVector3();
 			if(m_renderBuffer != nullptr)
 				c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,color),m_bufferData.color);
 
@@ -529,7 +546,7 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 	{
 		Con::cout<<"Light #"<<lightId<<":"<<Con::endl;
 		Con::cout<<"\tType: ";
-		auto type = LightType::Invalid;
+		auto type = LightType::Undefined;
 		auto *pLight = l->GetLight(type);
 		switch(type)
 		{
@@ -567,12 +584,13 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 			Con::cout<<"\t\tShadow Map Index (static): "<<data.shadowMapIndexStatic<<Con::endl;
 			Con::cout<<"\t\tShadow Map Index (dynamic): "<<data.shadowMapIndexDynamic<<Con::endl;
 			Con::cout<<"\t\tType: "<<type<<Con::endl;
-			Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<","<<data.color.a<<")"<<Con::endl;
+			Con::cout<<"\t\tColor: ("<<data.color.r<<","<<data.color.g<<","<<data.color.b<<")"<<Con::endl;
+			Con::cout<<"\t\tIntensity (candela): "<<data.intensity<<Con::endl;
 			Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
 			Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
 			Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
-			Con::cout<<"\t\tOuter cutoff angle: "<<data.cutoffOuter<<Con::endl;
-			Con::cout<<"\t\tInner cutoff angle: "<<data.cutoffInner<<Con::endl;
+			Con::cout<<"\t\tOuter cutoff angle (cosine): "<<data.cutoffOuterCos<<Con::endl;
+			Con::cout<<"\t\tInner cutoff angle (cosine): "<<data.cutoffInnerCos<<Con::endl;
 			Con::cout<<"\t\tAttenuation: "<<data.attenuation<<Con::endl;
 			Con::cout<<"\t\tFlags: "<<umath::to_integral(data.flags)<<Con::endl;
 			Con::cout<<"\t\tTurned On: "<<(((data.flags &LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No")<<Con::endl;

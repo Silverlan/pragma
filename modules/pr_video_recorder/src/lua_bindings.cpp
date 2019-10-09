@@ -10,6 +10,7 @@
 #include <pragma/lua/libraries/lfile.h>
 #include <mathutil/umath.h>
 #include <image/prosper_image.hpp>
+#include <sharedutils/util_image_buffer.hpp>
 #include <wrappers/memory_block.h>
 
 struct VideoRecorderFileInterface
@@ -154,6 +155,14 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 			return;
 		}
 		Lua::PushInt(l,videoRecorder.WriteFrame(reinterpret_cast<VideoRecorder::Color*>(ds->GetData()),ds->GetSize(),frameIndex));
+	}));
+	classDefData.def("WriteFrame",static_cast<void(*)(lua_State*,VideoRecorder&,util::ImageBuffer&,double)>([](lua_State *l,VideoRecorder &videoRecorder,util::ImageBuffer &imgBuffer,double frameIndex) {
+		auto tgtImgBuffer = imgBuffer.shared_from_this();
+		if(tgtImgBuffer->GetFormat() != util::ImageBuffer::Format::RGBA8)
+			tgtImgBuffer = tgtImgBuffer->Copy(util::ImageBuffer::Format::RGBA8);
+		if(tgtImgBuffer->GetWidth() != videoRecorder.GetWidth() || tgtImgBuffer->GetHeight() != videoRecorder.GetHeight())
+			tgtImgBuffer->Resize(videoRecorder.GetWidth(),videoRecorder.GetHeight());
+		Lua::PushInt(l,videoRecorder.WriteFrame(reinterpret_cast<VideoRecorder::Color*>(tgtImgBuffer->GetData()),tgtImgBuffer->GetSize(),frameIndex));
 	}));
 
 	auto classDefEncodingSettings = luabind::class_<VideoRecorder::EncodingSettings>("EncodingSettings");

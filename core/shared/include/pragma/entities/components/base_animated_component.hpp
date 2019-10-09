@@ -7,7 +7,7 @@
 #include "pragma/model/animation/animation_event.h"
 #include <sharedutils/property/util_property.hpp>
 #include <pragma/math/orientation.h>
-#include <pragma/util/transform.h>
+#include <pragma/physics/transform.hpp>
 #include <mathutil/uvec.h>
 
 class Animation;
@@ -89,7 +89,7 @@ namespace pragma
 
 		void SetBoneScale(uint32_t boneId,const Vector3 &scale);
 		const Vector3 *GetBoneScale(uint32_t boneId) const;
-		const Mat4 *GetBoneMatrix(unsigned int boneID) const;
+		std::optional<Mat4> GetBoneMatrix(unsigned int boneID) const;
 
 		// Returns the bone position / rotation in world space. Very expensive.
 		Bool GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 *scale=nullptr) const;
@@ -170,8 +170,8 @@ namespace pragma
 
 		void SetLastAnimationBlendScale(float scale);
 
-		const std::vector<Transform> &GetProcessedBones() const;
-		std::vector<Transform> &GetProcessedBones();
+		const std::vector<physics::ScaledTransform> &GetProcessedBones() const;
+		std::vector<physics::ScaledTransform> &GetProcessedBones();
 
 		void SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 *scale,Bool updatePhysics);
 
@@ -180,10 +180,10 @@ namespace pragma
 
 		bool ShouldUpdateBones() const;
 		UInt32 GetBoneCount() const;
-		const std::vector<Transform> &GetBoneTransforms() const;
-		std::vector<Transform> &GetBoneTransforms();
-		const std::vector<Transform> &GetProcessedBoneTransforms() const;
-		std::vector<Transform> &GetProcessedBoneTransforms();
+		const std::vector<physics::ScaledTransform> &GetBoneTransforms() const;
+		std::vector<physics::ScaledTransform> &GetBoneTransforms();
+		const std::vector<physics::ScaledTransform> &GetProcessedBoneTransforms() const;
+		std::vector<physics::ScaledTransform> &GetProcessedBoneTransforms();
 		const AnimationSlotInfo &GetBaseAnimationInfo() const;
 		AnimationSlotInfo &GetBaseAnimationInfo();
 		const std::unordered_map<uint32_t,AnimationSlotInfo> &GetAnimationSlotInfos() const;
@@ -196,7 +196,8 @@ namespace pragma
 
 		virtual bool MaintainAnimations(double dt);
 
-		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const;
+		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const;
+		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,const std::optional<Vector3> &vertexOffset={}) const;
 		bool GetVertexPosition(uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId,Vector3 &pos) const;
 		bool GetVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const;
 
@@ -262,8 +263,8 @@ namespace pragma
 		AnimationSlotInfo m_baseAnim = {};
 
 		Vector3 m_animDisplacement = {};
-		std::vector<Transform> m_bones = {};
-		std::vector<Transform> m_processedBones = {}; // Bone positions / rotations in entity space
+		std::vector<physics::ScaledTransform> m_bones = {};
+		std::vector<physics::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
 	private:
 		// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 		std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem>{};

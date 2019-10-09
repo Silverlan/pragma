@@ -50,7 +50,7 @@ void WIDebugShadowMap::Update()
 	if(c_game == nullptr || m_lightHandle.expired())
 		return;
 	auto &lightSource = *m_lightHandle;
-	auto type = LightType::Invalid;
+	auto type = LightType::Undefined;
 	auto *pLight = lightSource.GetLight(type);
 	if(pLight == nullptr)
 		return;

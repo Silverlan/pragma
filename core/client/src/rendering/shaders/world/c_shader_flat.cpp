@@ -128,14 +128,15 @@ bool ShaderFlat::Draw(CModelSubMesh &mesh)
 	auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
 	if(vkMesh == nullptr || vertexBuffer == nullptr || indexBuffer == nullptr)
 	{
-		Con::cwar<<"WARNING: Attempted to render mesh with invalid ";
+		// TODO: Re-enable this once a logging system with categories is in place
+		/*Con::cwar<<"WARNING: Attempted to render mesh with invalid ";
 		if(vkMesh == nullptr)
 			Con::cwar<<"VKMesh";
 		else if(vertexBuffer == nullptr)
 			Con::cwar<<"Vertex Buffer";
 		else
 			Con::cwar<<"Index Buffer";
-		Con::cwar<<"! Skipping..."<<Con::endl;
+		Con::cwar<<"! Skipping..."<<Con::endl;*/
 		return false;
 	}
 

@@ -103,7 +103,7 @@ void Lua::Scene::SetLightSources(lua_State *l,::Scene &scene,luabind::object o)
 		auto pToggleComponent = pLight->GetEntity().GetComponent<pragma::CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
 			continue;
-		auto type = LightType::Invalid;
+		auto type = LightType::Undefined;
 		auto *pBaseLight = pLight->GetLight(type);
 		if(pBaseLight == nullptr)
 			continue;

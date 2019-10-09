@@ -323,6 +323,13 @@ void Lua::WIProgressBar::register_class(luabind::class_<WIProgressBarHandle,WIHa
 	classDef.def("SetOptions",&SetOptions);
 	classDef.def("AddOption",&AddOption);
 	classDef.def("SetPostFix",&SetPostFix);
+	classDef.def("GetRange",static_cast<void(*)(lua_State*,WIProgressBarHandle&)>([](lua_State *l,WIProgressBarHandle &hProgressBar) {
+		lua_checkgui(l,hProgressBar);
+		auto range = static_cast<::WIProgressBar*>(hProgressBar.get())->GetRange();
+		Lua::PushNumber(l,range.at(0));
+		Lua::PushNumber(l,range.at(1));
+		Lua::PushNumber(l,range.at(2));
+	}));
 	//classDef.def("SetValueTranslator",&SetValueTranslator);
 }
 

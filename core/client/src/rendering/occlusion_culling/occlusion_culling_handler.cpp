@@ -84,7 +84,7 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 		auto pToggleComponent = ent.GetComponent<pragma::CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
 		{
-			auto type = LightType::Invalid;
+			auto type = LightType::Undefined;
 			auto *pLight = light->GetLight(type);
 			if(type == LightType::Directional)
 			{
@@ -130,7 +130,7 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 	for(auto it=lightsOut.begin();it!=lightsOut.end();)
 	{
 		auto *light = *it;
-		auto type = LightType::Invalid;
+		auto type = LightType::Undefined;
 		auto *pLight = light->GetLight(type);
 		if(type == LightType::Spot)
 		{

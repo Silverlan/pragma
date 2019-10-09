@@ -45,6 +45,9 @@
 #include "pragma/game/game_coordinate_system.hpp"
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
+#include <sharedutils/util_parallel_job.hpp>
+#include <sharedutils/util_image_buffer.hpp>
+#include <mathutil/umath_lighting.hpp>
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 
@@ -133,8 +136,276 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushString(l,subject);
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"string","fill_zeroes",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		std::string str = Lua::CheckString(l,1);
+		auto numDigits = Lua::CheckInt(l,2);
+		str = ustring::fill_zeroes(str,numDigits);
+		Lua::PushString(l,str);
+		return 1;
+	}));
+
+	auto &modLight = lua.RegisterLibrary("light",{
+		{"get_color_temperature",[](lua_State *l) -> int {
+			auto type = static_cast<ulighting::NaturalLightType>(Lua::CheckInt(l,1));
+			auto range = ulighting::get_color_temperature(type);
+			Lua::PushInt(l,range.first);
+			Lua::PushInt(l,range.second);
+			return 2;
+		}},
+		{"get_average_color_temperature",[](lua_State *l) -> int {
+			auto type = static_cast<ulighting::NaturalLightType>(Lua::CheckInt(l,1));
+			Lua::PushInt(l,ulighting::get_average_color_temperature(type));
+			return 1;
+		}},
+		{"color_temperature_to_color",[](lua_State *l) -> int {
+			auto temperature = static_cast<Kelvin>(Lua::CheckInt(l,1));
+			Lua::Push<Vector3>(l,ulighting::color_temperature_to_color(temperature));
+			return 1;
+		}},
+		{"wavelength_to_color",[](lua_State *l) -> int {
+			auto wavelength = static_cast<Wavelength>(Lua::CheckInt(l,1));
+			Lua::Push<Vector3>(l,ulighting::wavelength_to_color(wavelength));
+			return 1;
+		}},
+		{"get_luminous_efficacy",[](lua_State *l) -> int {
+			auto lightType = static_cast<ulighting::LightSourceType>(Lua::CheckInt(l,1));
+			Lua::PushInt(l,ulighting::get_luminous_efficacy(lightType));
+			return 1;
+		}},
+		{"lumens_to_watts",[](lua_State *l) -> int {
+			auto lumens = static_cast<Lumen>(Lua::CheckInt(l,1));
+			if(Lua::IsSet(l,2))
+				Lua::PushNumber(l,ulighting::lumens_to_watts(lumens,static_cast<LuminousEfficacy>(Lua::CheckInt(l,2))));
+			else
+				Lua::PushNumber(l,ulighting::lumens_to_watts(lumens));
+			return 1;
+		}},
+		{"watts_to_lumens",[](lua_State *l) -> int {
+			auto watt = Lua::CheckNumber(l,1);
+			if(Lua::IsSet(l,2))
+				Lua::PushNumber(l,ulighting::watts_to_lumens(watt,static_cast<LuminousEfficacy>(Lua::CheckInt(l,2))));
+			else
+				Lua::PushNumber(l,ulighting::watts_to_lumens(watt));
+			return 1;
+		}},
+		{"irradiance_to_lux",[](lua_State *l) -> int {
+			auto irradiance = Lua::CheckInt(l,1);
+			Lua::PushInt(l,ulighting::irradiance_to_lux(irradiance));
+			return 1;
+		}},
+		{"lux_to_irradiance",[](lua_State *l) -> int {
+			auto lux = Lua::CheckInt(l,1);
+			Lua::PushInt(l,ulighting::lux_to_irradiance(lux));
+			return 1;
+		}}
+	});
+
+	Lua::RegisterLibraryEnums(lua.GetState(),"light",{
+		{"NATURAL_LIGHT_TYPE_MATCH_FLAME",umath::to_integral(ulighting::NaturalLightType::MatchFlame)},
+		{"NATURAL_LIGHT_TYPE_CANDLE",umath::to_integral(ulighting::NaturalLightType::Candle)},
+		{"NATURAL_LIGHT_TYPE_FLAME",umath::to_integral(ulighting::NaturalLightType::Flame)},
+		{"NATURAL_LIGHT_TYPE_SUNSET",umath::to_integral(ulighting::NaturalLightType::Sunset)},
+		{"NATURAL_LIGHT_TYPE_SUNRISE",umath::to_integral(ulighting::NaturalLightType::Sunrise)},
+		{"NATURAL_LIGHT_TYPE_HOUSEHOLD_TUNGSTEN_BULB",umath::to_integral(ulighting::NaturalLightType::HouseholdTungstenBulb)},
+		{"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_500W_TO_1K",umath::to_integral(ulighting::NaturalLightType::TungstenLamp500WTo1K)},
+		{"NATURAL_LIGHT_TYPE_INCANDESCENT_LAMP",umath::to_integral(ulighting::NaturalLightType::IncandescentLamp)},
+		{"NATURAL_LIGHT_TYPE_WARM_FLUORESCENT_LAMP",umath::to_integral(ulighting::NaturalLightType::WarmFluorescentLamp)},
+		{"NATURAL_LIGHT_TYPE_LED_LAMP",umath::to_integral(ulighting::NaturalLightType::LEDLamp)},
+		{"NATURAL_LIGHT_TYPE_QUARTZ_LIGHT",umath::to_integral(ulighting::NaturalLightType::QuartzLight)},
+		{"NATURAL_LIGHT_TYPE_STUDIO_LAMP",umath::to_integral(ulighting::NaturalLightType::StudioLamp)},
+		{"NATURAL_LIGHT_TYPE_FLOODLIGHT",umath::to_integral(ulighting::NaturalLightType::Floodlight)},
+		{"NATURAL_LIGHT_TYPE_FLUORESCENT_LIGHT",umath::to_integral(ulighting::NaturalLightType::FluorescentLight)},
+		{"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_2K",umath::to_integral(ulighting::NaturalLightType::TungstenLamp2K)},
+		{"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_5K",umath::to_integral(ulighting::NaturalLightType::TungstenLamp5K)},
+		{"NATURAL_LIGHT_TYPE_TUNGSTEN_LAMP_10K",umath::to_integral(ulighting::NaturalLightType::TungstenLamp10K)},
+		{"NATURAL_LIGHT_TYPE_MOONLIGHT",umath::to_integral(ulighting::NaturalLightType::Moonlight)},
+		{"NATURAL_LIGHT_TYPE_HORIZON_DAYLIGHT",umath::to_integral(ulighting::NaturalLightType::HorizonDaylight)},
+		{"NATURAL_LIGHT_TYPE_TUBULAR_FLUORESCENT_LAMP",umath::to_integral(ulighting::NaturalLightType::TubularFluorescentLamp)},
+		{"NATURAL_LIGHT_TYPE_VERTICAL_DAYLIGHT",umath::to_integral(ulighting::NaturalLightType::VerticalDaylight)},
+		{"NATURAL_LIGHT_TYPE_SUN_AT_NOON",umath::to_integral(ulighting::NaturalLightType::SunAtNoon)},
+		{"NATURAL_LIGHT_TYPE_DAYLIGHT",umath::to_integral(ulighting::NaturalLightType::Daylight)},
+		{"NATURAL_LIGHT_TYPE_SUN_THROUGH_CLOUDS",umath::to_integral(ulighting::NaturalLightType::SunThroughClouds)},
+		{"NATURAL_LIGHT_TYPE_OVERCAST",umath::to_integral(ulighting::NaturalLightType::Overcast)},
+		{"NATURAL_LIGHT_TYPE_RGB_MONITOR_WHITE_POINT",umath::to_integral(ulighting::NaturalLightType::RGBMonitorWhitePoint)},
+		{"NATURAL_LIGHT_TYPE_OUTDOOR_SHADE",umath::to_integral(ulighting::NaturalLightType::OutdoorShade)},
+		{"NATURAL_LIGHT_TYPE_PARTLY_CLOUDY",umath::to_integral(ulighting::NaturalLightType::PartlyCloudy)},
+		{"NATURAL_LIGHT_TYPE_CLEAR_BLUESKY",umath::to_integral(ulighting::NaturalLightType::ClearBlueSky)},
+		{"NATURAL_LIGHT_TYPE_CLEAR_COUNT",umath::to_integral(ulighting::NaturalLightType::Count)},
+
+		{"LIGHT_SOURCE_TYPE_TUNGSTEN_INCANDESCENT_LIGHT_BULB",umath::to_integral(ulighting::LightSourceType::TungstenIncandescentLightBulb)},
+		{"LIGHT_SOURCE_TYPE_HALOGEN_LAMP",umath::to_integral(ulighting::LightSourceType::HalogenLamp)},
+		{"LIGHT_SOURCE_TYPE_FLUORESCENT_LAMP",umath::to_integral(ulighting::LightSourceType::FluorescentLamp)},
+		{"LIGHT_SOURCE_TYPE_LED_LAMP",umath::to_integral(ulighting::LightSourceType::LEDLamp)},
+		{"LIGHT_SOURCE_TYPE_METAL_HALIDE_LAMP",umath::to_integral(ulighting::LightSourceType::MetalHalideLamp)},
+		{"LIGHT_SOURCE_TYPE_HIGH_PRESSURE_SODIUM_VAPOR_LAMP",umath::to_integral(ulighting::LightSourceType::HighPressureSodiumVaporLamp)},
+		{"LIGHT_SOURCE_TYPE_LOW_PRESSURE_SODIUM_VAPOR_LAMP",umath::to_integral(ulighting::LightSourceType::LowPressureSodiumVaporLamp)},
+		{"LIGHT_SOURCE_TYPE_MERCURY_VAPOR_LAMP",umath::to_integral(ulighting::LightSourceType::MercuryVaporLamp)},
+		{"LIGHT_SOURCE_TYPE_D65_STANDARD_ILLUMINANT",umath::to_integral(ulighting::LightSourceType::D65StandardIlluminant)}
+	});
 
 	auto &modUtil = lua.RegisterLibrary("util");
+
+	auto defParallelJob = luabind::class_<util::BaseParallelJob>("ParallelJob");
+	defParallelJob.add_static_constant("JOB_STATUS_FAILED",umath::to_integral(util::JobStatus::Failed));
+	defParallelJob.add_static_constant("JOB_STATUS_SUCCESSFUL",umath::to_integral(util::JobStatus::Successful));
+	defParallelJob.add_static_constant("JOB_STATUS_INITIAL",umath::to_integral(util::JobStatus::Initial));
+	defParallelJob.add_static_constant("JOB_STATUS_CANCELLED",umath::to_integral(util::JobStatus::Cancelled));
+	defParallelJob.add_static_constant("JOB_STATUS_PENDING",umath::to_integral(util::JobStatus::Pending));
+	defParallelJob.add_static_constant("JOB_STATUS_INVALID",umath::to_integral(util::JobStatus::Invalid));
+	defParallelJob.def("Cancel",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		job.Cancel();
+	}));
+	defParallelJob.def("Wait",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		job.Wait();
+	}));
+	defParallelJob.def("Start",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		job.Start();
+	}));
+	defParallelJob.def("IsComplete",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsComplete());
+	}));
+	defParallelJob.def("IsPending",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsPending());
+	}));
+	defParallelJob.def("IsCancelled",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsCancelled());
+	}));
+	defParallelJob.def("IsSuccessful",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsSuccessful());
+	}));
+	defParallelJob.def("IsThreadActive",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsThreadActive());
+	}));
+	defParallelJob.def("GetProgress",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushNumber(l,job.GetProgress());
+	}));
+	defParallelJob.def("GetStatus",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushInt(l,umath::to_integral(job.GetStatus()));
+	}));
+	defParallelJob.def("GetResultMessage",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushString(l,job.GetResultMessage());
+	}));
+	defParallelJob.def("IsValid",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.IsValid());
+	}));
+	defParallelJob.def("Poll",static_cast<void(*)(lua_State*,util::BaseParallelJob&)>([](lua_State *l,util::BaseParallelJob &job) {
+		Lua::PushBool(l,job.Poll());
+	}));
+	modUtil[defParallelJob];
+
+	auto defImageBuffer = luabind::class_<util::ImageBuffer>("ImageBuffer");
+	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(util::ImageBuffer::Format::None));
+	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(util::ImageBuffer::Format::RGB8));
+	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(util::ImageBuffer::Format::RGBA8));
+	defImageBuffer.add_static_constant("FORMAT_RGB16",umath::to_integral(util::ImageBuffer::Format::RGB16));
+	defImageBuffer.add_static_constant("FORMAT_RGBA16",umath::to_integral(util::ImageBuffer::Format::RGBA16));
+	defImageBuffer.add_static_constant("FORMAT_RGB32",umath::to_integral(util::ImageBuffer::Format::RGB32));
+	defImageBuffer.add_static_constant("FORMAT_RGBA32",umath::to_integral(util::ImageBuffer::Format::RGBA32));
+	defImageBuffer.add_static_constant("FORMAT_COUNT",umath::to_integral(util::ImageBuffer::Format::Count));
+
+	defImageBuffer.add_static_constant("FORMAT_RGB_LDR",umath::to_integral(util::ImageBuffer::Format::RGB_LDR));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_LDR",umath::to_integral(util::ImageBuffer::Format::RGBA_LDR));
+	defImageBuffer.add_static_constant("FORMAT_RGB_HDR",umath::to_integral(util::ImageBuffer::Format::RGB_HDR));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_HDR",umath::to_integral(util::ImageBuffer::Format::RGBA_HDR));
+	defImageBuffer.add_static_constant("FORMAT_RGB_FLOAT",umath::to_integral(util::ImageBuffer::Format::RGB_FLOAT));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_FLOAT",umath::to_integral(util::ImageBuffer::Format::RGBA_FLOAT));
+
+	defImageBuffer.add_static_constant("CHANNEL_RED",umath::to_integral(util::ImageBuffer::Channel::Red));
+	defImageBuffer.add_static_constant("CHANNEL_GREEN",umath::to_integral(util::ImageBuffer::Channel::Green));
+	defImageBuffer.add_static_constant("CHANNEL_BLUE",umath::to_integral(util::ImageBuffer::Channel::Blue));
+	defImageBuffer.add_static_constant("CHANNEL_ALPHA",umath::to_integral(util::ImageBuffer::Channel::Alpha));
+	defImageBuffer.add_static_constant("CHANNEL_R",umath::to_integral(util::ImageBuffer::Channel::R));
+	defImageBuffer.add_static_constant("CHANNEL_G",umath::to_integral(util::ImageBuffer::Channel::G));
+	defImageBuffer.add_static_constant("CHANNEL_B",umath::to_integral(util::ImageBuffer::Channel::B));
+	defImageBuffer.add_static_constant("CHANNEL_A",umath::to_integral(util::ImageBuffer::Channel::A));
+	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format) {
+		auto imgBuffer = util::ImageBuffer::Create(width,height,static_cast<util::ImageBuffer::Format>(format));
+		if(imgBuffer == nullptr)
+			return;
+		Lua::Push(l,imgBuffer);
+	}))];
+	defImageBuffer.def("GetFormat",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,umath::to_integral(imgBuffer.GetFormat()));
+	}));
+	defImageBuffer.def("GetWidth",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetWidth());
+	}));
+	defImageBuffer.def("GetHeight",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetHeight());
+	}));
+	defImageBuffer.def("GetChannelCount",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetChannelCount());
+	}));
+	defImageBuffer.def("GetChannelSize",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetChannelSize());
+	}));
+	defImageBuffer.def("GetPixelSize",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetPixelSize());
+	}));
+	defImageBuffer.def("GetPixelCount",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetPixelCount());
+	}));
+	defImageBuffer.def("HasAlphaChannel",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushBool(l,imgBuffer.HasAlphaChannel());
+	}));
+	defImageBuffer.def("IsLDRFormat",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushBool(l,imgBuffer.IsLDRFormat());
+	}));
+	defImageBuffer.def("IsHDRFormat",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushBool(l,imgBuffer.IsHDRFormat());
+	}));
+	defImageBuffer.def("IsFloatFormat",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushBool(l,imgBuffer.IsFloatFormat());
+	}));
+	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::Push(l,imgBuffer.Copy());
+	}));
+	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t format) {
+		Lua::Push(l,imgBuffer.Copy(static_cast<util::ImageBuffer::Format>(format)));
+	}));
+	defImageBuffer.def("Convert",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t format) {
+		imgBuffer.Convert(static_cast<util::ImageBuffer::Format>(format));
+	}));
+	defImageBuffer.def("ToLDR",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		imgBuffer.ToLDR();
+	}));
+	defImageBuffer.def("ToHDR",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		imgBuffer.ToHDR();
+	}));
+	defImageBuffer.def("ToFloat",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		imgBuffer.ToFloat();
+	}));
+	defImageBuffer.def("GetSize",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		Lua::PushInt(l,imgBuffer.GetSize());
+	}));
+	defImageBuffer.def("Clear",static_cast<void(*)(lua_State*,util::ImageBuffer&,const Color&)>([](lua_State *l,util::ImageBuffer &imgBuffer,const Color &color) {
+		imgBuffer.Clear(color);
+	}));
+	defImageBuffer.def("Clear",static_cast<void(*)(lua_State*,util::ImageBuffer&,const Vector4&)>([](lua_State *l,util::ImageBuffer &imgBuffer,const Vector4 &color) {
+		imgBuffer.Clear(color);
+	}));
+	defImageBuffer.def("GetPixelIndex",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
+		Lua::PushInt(l,imgBuffer.GetPixelIndex(x,y));
+	}));
+	defImageBuffer.def("GetPixelOffset",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
+		Lua::PushInt(l,imgBuffer.GetPixelOffset(x,y));
+	}));
+	defImageBuffer.def("Resize",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) {
+		imgBuffer.Resize(w,h);
+	}));
+	defImageBuffer.def("FlipHorizontally",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		imgBuffer.FlipHorizontally();
+	}));
+	defImageBuffer.def("FlipVertically",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
+		imgBuffer.FlipVertically();
+	}));
+	modUtil[defImageBuffer];
+
+	auto defImgParallelJob = luabind::class_<util::ParallelJob<std::shared_ptr<util::ImageBuffer>>,util::BaseParallelJob>("ParallelJobImage");
+	defImgParallelJob.def("GetResult",static_cast<void(*)(lua_State*,util::ParallelJob<std::shared_ptr<util::ImageBuffer>>&)>([](lua_State *l,util::ParallelJob<std::shared_ptr<util::ImageBuffer>> &job) {
+		Lua::Push(l,job.GetResult());
+	}));
+	modUtil[defImgParallelJob];
 
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
 	defDataBlock.def("GetInt",&Lua::DataBlock::GetInt);

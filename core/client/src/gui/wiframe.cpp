@@ -61,6 +61,7 @@ void WIFrame::Initialize()
 		m_hTitle = gui.Create<WIText>(pTitleBar)->GetHandle();
 		WIText *pTitle = m_hTitle.get<WIText>();
 		pTitle->AddStyleClass("frame_title");
+		pTitle->SetName("frame_title");
 		if(pTitle != nullptr)
 			pTitle->SetVisible(false);
 

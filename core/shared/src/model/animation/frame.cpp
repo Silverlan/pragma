@@ -197,6 +197,33 @@ const std::vector<OrientedPoint> &Frame::GetBoneTransforms() const {return const
 const std::vector<Vector3> &Frame::GetBoneScales() const {return const_cast<Frame*>(this)->GetBoneScales();}
 std::vector<OrientedPoint> &Frame::GetBoneTransforms() {return m_bones;}
 std::vector<Vector3> &Frame::GetBoneScales() {return m_scales;}
+bool Frame::GetBonePose(uint32_t boneId,pragma::physics::ScaledTransform &outTransform) const
+{
+	if(boneId >= m_bones.size())
+		return false;
+	auto &t = m_bones.at(boneId);
+	outTransform = pragma::physics::ScaledTransform{t.pos,t.rot,(boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3{1.f,1.f,1.f}};
+	return true;
+}
+void Frame::SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &pose)
+{
+	if(boneId >= m_bones.size())
+		return;
+	auto &t = m_bones.at(boneId);
+	t.pos = pose.GetOrigin();
+	t.rot = pose.GetRotation();
+	if(boneId < m_scales.size())
+		m_scales.at(boneId) = pose.GetScale();
+}
+
+void Frame::SetBonePose(uint32_t boneId,const pragma::physics::Transform &pose)
+{
+	if(boneId >= m_bones.size())
+		return;
+	auto &t = m_bones.at(boneId);
+	t.pos = pose.GetOrigin();
+	t.rot = pose.GetRotation();
+}
 
 /*
 	All animations are usually localized by the model compiler, except for the bind/reference pose, which is created on the fly when loading the model.

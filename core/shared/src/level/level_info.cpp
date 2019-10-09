@@ -119,8 +119,23 @@ static std::string swap_yz_coordinates(std::string str)
 	return vdat[0] +" " +vdat[2] +" "+vdat[1];
 }
 
-static auto lightIntensity = 400.f;
-static auto falloffExponent = 0.32f;
+// Attempts to convert the source engine attentuation values to an approximately similar falloff exponent
+static float calc_falloff_exponent(float quadraticAtt,float linearAtt,float constAtt)
+{
+	// These values have been determined by experimentation to create a relatively close match to the original source lighting for
+	// most common cases. A precise conversion is not possible.
+	constexpr float falloffExpForQuadraticAtt = 1.5f;
+	constexpr float falloffExpForLinearAtt = 0.95f;
+	constexpr float falloffExpForConstantAtt = 0.7f;
+	auto sum = quadraticAtt +linearAtt +constAtt;
+	if(sum == 0.f)
+		return 0.f; // TODO: What does source do for this case?
+	quadraticAtt /= sum;
+	linearAtt /= sum;
+	constAtt /= sum;
+	return falloffExpForQuadraticAtt *quadraticAtt +falloffExpForLinearAtt *linearAtt +falloffExpForConstantAtt *constAtt;
+}
+
 void pragma::level::transform_class(
 	const std::unordered_map<std::string,std::string> &inKeyValues,
 	std::unordered_map<std::string,std::string> &outKeyValues,
@@ -150,7 +165,7 @@ void pragma::level::transform_class(
 			lightColor.r = (vdat.size() > 0) ? util::to_float(vdat.at(0)) : 0.f;
 			lightColor.g = (vdat.size() > 1) ? util::to_float(vdat.at(1)) : 0.f;
 			lightColor.b = (vdat.size() > 2) ? util::to_float(vdat.at(2)) : 0.f;
-			lightColor.a = (vdat.size() > 3) ? util::to_float(vdat.at(3)) : lightIntensity;
+			lightColor.a = (vdat.size() > 3) ? util::to_float(vdat.at(3)) : 0.f;
 		}
 		bHdr = (lightHdr.empty() == false);
 		if(bHdr == true)
@@ -161,7 +176,7 @@ void pragma::level::transform_class(
 			lightColorHdr.r = (vdat.size() > 0) ? util::to_float(vdat.at(0)) : 0.f;
 			lightColorHdr.g = (vdat.size() > 1) ? util::to_float(vdat.at(1)) : 0.f;
 			lightColorHdr.b = (vdat.size() > 2) ? util::to_float(vdat.at(2)) : 0.f;
-			lightColorHdr.a = (vdat.size() > 3) ? util::to_float(vdat.at(3)) : lightIntensity;
+			lightColorHdr.a = (vdat.size() > 3) ? util::to_float(vdat.at(3)) : 0.f;
 			for(uint8_t i=0;i<4;++i)
 			{
 				if(lightColorHdr[i] == -1.f || (i == 3 && lightColorHdr[i] == 1.f))
@@ -172,7 +187,7 @@ void pragma::level::transform_class(
 		}
 		return lightColor;
 	};
-	const auto fGetMaxDistance = [&fGetKeyValue](const Vector4 &lightColor) -> float {
+	const auto fGetMaxDistance = [&fGetKeyValue](float lightIntensity) -> float {
 		// Source: https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
 		auto maxDistance = util::to_float(fGetKeyValue("_distance"));
 		if(maxDistance == 0.f)
@@ -180,8 +195,8 @@ void pragma::level::transform_class(
 			maxDistance = util::to_float(fGetKeyValue("_zero_percent_distance"));
 			if(maxDistance == 0.f)
 			{
-				auto lightIntensity = lightColor.a;// *100.f;
-				maxDistance = umath::sqrt(lightIntensity) *16.f;
+				// Just an approximation
+				maxDistance = umath::sqrt(lightIntensity) *113.f;
 			}
 		}
 		return maxDistance;
@@ -236,10 +251,14 @@ void pragma::level::transform_class(
 
 		auto bHdr = false;
 		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
-		lightColor *= 4.f;
-		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
-		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
-		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));
+		auto lightIntensity = lightColor[3];
+		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
+		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
+		outKeyValues.insert(std::make_pair("light_intensity_type",std::to_string(umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela))));
+		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightIntensity))));
+		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(calc_falloff_exponent(
+			util::to_float(fGetKeyValue("_quadratic_attn")),util::to_float(fGetKeyValue("_linear_attn")),util::to_float(fGetKeyValue("_constant_attn"))
+		))));
 		outKeyValues.insert(std::make_pair("light_flags","1")); // Baked light source
 	}
 	else if(ustring::compare(className,"light_spot"))
@@ -251,10 +270,14 @@ void pragma::level::transform_class(
 
 		auto bHdr = false;
 		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
-		lightColor *= 4.f;
-		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
-		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightColor))));
-		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(falloffExponent)));
+		auto lightIntensity = lightColor[3];
+		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
+		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
+		outKeyValues.insert(std::make_pair("light_intensity_type",std::to_string(umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela))));
+		outKeyValues.insert(std::make_pair("radius",std::to_string(fGetMaxDistance(lightIntensity))));
+		outKeyValues.insert(std::make_pair("falloff_exponent",std::to_string(calc_falloff_exponent(
+			util::to_float(fGetKeyValue("_quadratic_attn")),util::to_float(fGetKeyValue("_linear_attn")),util::to_float(fGetKeyValue("_constant_attn"))
+		))));
 		outKeyValues.insert(std::make_pair("light_flags","1")); // Baked light source
 
 		auto &pitch = fGetKeyValue("pitch");
@@ -276,12 +299,10 @@ void pragma::level::transform_class(
 
 		auto bHdr = false;
 		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
-		auto lightIntensity = lightColor.a *100.f;
-		if(bHdr == true)
-			lightColor *= 1.f;
-		else
-			lightColor *= 2.f;
-		outKeyValues.insert(std::make_pair("color",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2]) +" " +std::to_string(lightColor[3])));
+		auto lightIntensity = lightColor[3];
+		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
+		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
+		outKeyValues.insert(std::make_pair("light_intensity_type",std::to_string(umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux))));
 
 		bHdr = false;
 		auto ambientColor = fGetLightColor("_ambient","_ambientHDR",bHdr);

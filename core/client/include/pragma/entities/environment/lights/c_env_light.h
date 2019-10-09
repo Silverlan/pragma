@@ -6,14 +6,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/lighting/c_light_data.hpp"
 
-enum class LightType : uint32_t
-{
-	Invalid = 0,
-	Directional = 1,
-	Point = 2,
-	Spot = 3
-};
-
 class CBaseEntity;
 class CModelMesh;
 namespace pragma
@@ -92,20 +84,11 @@ namespace pragma
 
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 
-		void SetLight(CLightSpotComponent &light);
-		void SetLight(CLightPointComponent &light);
-		void SetLight(CLightDirectionalComponent &light);
-
-		BaseEntityComponent *GetLight(LightType &outType) const;
-		BaseEntityComponent *GetLight() const;
-
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
-		virtual void InitializeLight(BaseEntityComponent &component);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntitySpawn() override;
 
-		util::WeakHandle<BaseEntityComponent> m_hLight = {};
 		void InitializeLightSource();
 	};
 
@@ -169,6 +152,11 @@ namespace pragma
 		bool IsInRange(const CBaseEntity &ent) const;
 		bool IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) const;
 		bool IsInCone(const CBaseEntity &ent,const Vector3 &dir,float angle) const;
+
+		virtual void SetLightIntensityType(LightIntensityType type) override;
+		virtual void SetLightIntensity(float intensity,LightIntensityType type) override;
+		using CBaseLightComponent::SetLightIntensity;
+		void UpdateLightIntensity();
 
 		// Used for debug purposes only
 		void UpdateBuffers();

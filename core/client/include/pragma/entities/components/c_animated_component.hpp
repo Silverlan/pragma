@@ -39,7 +39,7 @@ namespace pragma
 		void UpdateBoneMatrices();
 		void UpdateBoneBuffer(prosper::PrimaryCommandBuffer &commandBuffer);
 		void InitializeBoneBuffer();
-		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const override;
+		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const override;
 
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;

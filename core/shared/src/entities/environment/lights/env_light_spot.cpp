@@ -36,10 +36,10 @@ void BaseEnvLightSpotComponent::Initialize()
 	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
 }
 
-void BaseEnvLightSpotComponent::SetOuterCutoffAngle(float ang) {*m_angOuterCutoff = ang;}
-float BaseEnvLightSpotComponent::GetOuterCutoffAngle() const {return *m_angOuterCutoff;}
-void BaseEnvLightSpotComponent::SetInnerCutoffAngle(float ang) {*m_angInnerCutoff = ang;}
-float BaseEnvLightSpotComponent::GetInnerCutoffAngle() const {return *m_angInnerCutoff;}
+void BaseEnvLightSpotComponent::SetOuterCutoffAngle(umath::Degree ang) {*m_angOuterCutoff = ang;}
+umath::Degree BaseEnvLightSpotComponent::GetOuterCutoffAngle() const {return *m_angOuterCutoff;}
+void BaseEnvLightSpotComponent::SetInnerCutoffAngle(umath::Degree ang) {*m_angInnerCutoff = ang;}
+umath::Degree BaseEnvLightSpotComponent::GetInnerCutoffAngle() const {return *m_angInnerCutoff;}
 
 void BaseEnvLightSpotComponent::SetConeStartOffset(float offset) {*m_coneStartOffset = offset;}
 float BaseEnvLightSpotComponent::GetConeStartOffset() const {return *m_coneStartOffset;}

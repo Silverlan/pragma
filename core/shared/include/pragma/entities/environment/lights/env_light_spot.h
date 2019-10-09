@@ -17,10 +17,15 @@ namespace pragma
 	public:
 		BaseEnvLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual void SetOuterCutoffAngle(float ang);
-		virtual void SetInnerCutoffAngle(float ang);
-		float GetOuterCutoffAngle() const;
-		float GetInnerCutoffAngle() const;
+		// Changes the half-angle for for outer cone
+		virtual void SetOuterCutoffAngle(umath::Degree ang);
+		// Changes the half-angle for for inner cone
+		virtual void SetInnerCutoffAngle(umath::Degree ang);
+
+		// The half-angle for for outer cone
+		umath::Degree GetOuterCutoffAngle() const;
+		// The half-angle for for inner cone
+		umath::Degree GetInnerCutoffAngle() const;
 
 		virtual void SetConeStartOffset(float offset);
 		float GetConeStartOffset() const;

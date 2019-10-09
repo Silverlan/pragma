@@ -52,6 +52,7 @@ const util::PColorProperty &BaseColorComponent::GetColorProperty() const {return
 
 void BaseColorComponent::SetColor(const Color &color) {*m_color = color;}
 void BaseColorComponent::SetColor(const Vector4 &color) {SetColor(Color(color));}
+void BaseColorComponent::SetColor(const Vector3 &color) {SetColor(Vector4{color.x,color.y,color.z,GetColor().ToVector4().w});}
 
 /////////////////
 

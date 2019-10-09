@@ -9,6 +9,7 @@
 
 class Animation;
 class Model;
+namespace pragma::physics {class Transform; class ScaledTransform;};
 class DLLNETWORK Frame
 	: public std::enable_shared_from_this<Frame>
 {
@@ -25,6 +26,9 @@ public:
 	const Vector3 *GetBonePosition(unsigned int boneID) const;
 	const Quat *GetBoneOrientation(unsigned int boneID) const;
 	const Vector3 *GetBoneScale(uint32_t boneId) const;
+	bool GetBonePose(uint32_t boneId,pragma::physics::ScaledTransform &outTransform) const;
+	void SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &pose);
+	void SetBonePose(uint32_t boneId,const pragma::physics::Transform &pose);
 	bool GetBoneMatrix(unsigned int boneID,Mat4 *mat);
 	Vector2 *GetMoveOffset();
 	void GetMoveOffset(float *x,float *z);

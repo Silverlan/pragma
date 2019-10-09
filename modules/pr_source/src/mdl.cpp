@@ -23,6 +23,7 @@
 #include <sharedutils/util_string.h>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_limits.h>
+#include <pragma/physics/transform.hpp>
 
 #pragma optimize("",off)
 static const std::unordered_map<std::string,Activity> translateActivities = {
@@ -1206,14 +1207,6 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	frameReference = Frame::Create(header.numbones);
 	for(auto i=decltype(header.numbones){0};i<header.numbones;++i)
 	{
-		const auto fAngToMat = [](const EulerAngles &ang) -> Mat4 {
-			Mat4 mat(1.0f);
-			mat = glm::rotate(mat,CFloat(umath::deg_to_rad(ang.r)),uvec::RIGHT);
-			mat = glm::rotate(mat,CFloat(umath::deg_to_rad(ang.y)),uvec::UP);
-			mat = glm::rotate(mat,CFloat(umath::deg_to_rad(ang.p)),uvec::FORWARD);
-			return mat;
-		};
-
 		auto &origBone = bones[i];
 		auto &pos = origBone->GetPos();
 		auto &ang = origBone->GetAngles();
@@ -1224,9 +1217,11 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		//uquat::normalize(rot);
 		//auto rot = Quat{0.0,ang.x,ang.y,ang.z};
 		auto rot = import::mdl::quaternion_to_euler_angles(origBone->GetRot());
-		
-		frameReference->SetBonePosition(i,{-pos.x,pos.y,pos.z});
-		frameReference->SetBoneOrientation(i,Quat{0.0,rot.x,rot.y,rot.z});//rot);
+		Vector3 bonePos {-pos.x,pos.y,pos.z};
+		Quat boneRot {0.0,rot.x,rot.y,rot.z};
+
+		frameReference->SetBonePosition(i,bonePos);
+		frameReference->SetBoneOrientation(i,boneRot);
 	}
 	reference->AddFrame(frameReference);
 

@@ -41,10 +41,10 @@ void CLightSpotComponent::Initialize()
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffInner = static_cast<float>(umath::cos(umath::deg_to_rad(newAng.get())));
+		bufferData.cutoffInnerCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInner),bufferData.cutoffInner);
+			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInnerCos),bufferData.cutoffInnerCos);
 	});
 	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		SetShadowDirty();
@@ -53,10 +53,17 @@ void CLightSpotComponent::Initialize()
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffOuter = static_cast<float>(umath::cos(umath::deg_to_rad(newAng.get())));
+		bufferData.cutoffOuterCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuter),bufferData.cutoffOuter);
+			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuterCos),bufferData.cutoffOuterCos);
+
+		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen)
+		{
+			// Lumen light intensity has to be converted to candela and the conversion requires knowledge of the cone radius,
+			// which means we have to update it here
+			pLightComponent->UpdateLightIntensity();
+		}
 	});
 
 	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();

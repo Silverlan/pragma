@@ -313,7 +313,7 @@ void ShadowRenderer::RenderShadows(
 
 void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
-	auto type = LightType::Invalid;
+	auto type = LightType::Undefined;
 	auto *pLight = light.GetLight(type);
 	auto bDrawParticleShadows = (cvParticleQuality->GetInt() >= 3) ? true : false;
 	if(type == LightType::Directional)

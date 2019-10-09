@@ -40,37 +40,10 @@ void CBaseLightComponent::ReceiveData(NetPacket &packet)
 	m_shadowType = packet->Read<decltype(m_shadowType)>();
 	SetFalloffExponent(packet->Read<float>());
 	m_lightFlags = packet->Read<LightFlags>();
-}
 
-BaseEntityComponent *CBaseLightComponent::GetLight(LightType &outType) const
-{
-	if(m_hLight.expired())
-		outType = LightType::Invalid;
-	else if(typeid(*m_hLight) == typeid(CLightSpotComponent))
-		outType = LightType::Spot;
-	else if(typeid(*m_hLight) == typeid(CLightPointComponent))
-		outType = LightType::Point;
-	else if(typeid(*m_hLight) == typeid(CLightDirectionalComponent))
-		outType = LightType::Directional;
-	else
-		outType = LightType::Invalid;
-	return m_hLight.get();
-}
-BaseEntityComponent *CBaseLightComponent::GetLight() const {return m_hLight.get();}
-
-void CBaseLightComponent::SetLight(CLightSpotComponent &light) {InitializeLight(light);}
-void CBaseLightComponent::SetLight(CLightPointComponent &light) {InitializeLight(light);}
-void CBaseLightComponent::SetLight(CLightDirectionalComponent &light) {InitializeLight(light);}
-
-void CBaseLightComponent::InitializeLight(BaseEntityComponent &component)
-{
-	auto pLightComponent = component.GetEntity().GetComponent<CLightComponent>();
-	if(pLightComponent.expired())
-	{
-		m_hLight = {};
-		return;
-	}
-	m_hLight = component.GetHandle();
+	auto lightIntensity = packet->Read<float>();
+	auto lightIntensityType = packet->Read<LightIntensityType>();
+	SetLightIntensity(lightIntensity,lightIntensityType);
 }
 
 Bool CBaseLightComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)

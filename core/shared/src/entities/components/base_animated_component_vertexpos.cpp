@@ -26,21 +26,19 @@ bool BaseAnimatedComponent::GetVertexPosition(uint32_t meshGroupId,uint32_t mesh
 	auto &subMesh = subMeshes.at(subMeshId);
 	return GetVertexPosition(*subMesh,vertexId,pos);
 }
-bool BaseAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
+std::optional<Mat4> BaseAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const
 {
 	auto &verts = const_cast<ModelSubMesh&>(subMesh).GetVertices();
 	if(vertexId >= verts.size())
-		return false;
+		return {};
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
-		return false;
-	auto &v = verts.at(vertexId);
-	pos = v.position;
-
+		return {};
 	auto &vertWeights = const_cast<ModelSubMesh&>(subMesh).GetVertexWeights();
-	auto transformMatrix = umat::identity();
+	auto transformMatrix = glm::mat4{0.f};
+	auto valid = false;
 	if(vertexId < vertWeights.size())
 	{
 		auto &processedBones = GetProcessedBones();
@@ -55,33 +53,37 @@ bool BaseAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,u
 
 			//
 			auto &refFrame = hMdl->GetReference();
-			auto &pos = t.GetPosition();
+			auto &pos = t.GetOrigin();
 
-			auto &orientation = t.GetOrientation();
+			auto &orientation = t.GetRotation();
 			auto &scale = t.GetScale();
 
 			auto *posBind = refFrame.GetBonePosition(boneId);
 			auto *rotBind = refFrame.GetBoneOrientation(boneId);
 			if(posBind != nullptr && rotBind != nullptr)
 			{
-				auto mat = umat::identity(); // Inverse of parent bones??
-				auto rot = orientation *glm::inverse(*rotBind);
-				mat = glm::translate(mat,*posBind);
+				physics::Transform tBindPose {*posBind,*rotBind};
+				tBindPose = tBindPose.GetInverse();
 
-				// TODO: Is this the correct order? (It looks correct?)
-				if(scale.x != 1.f || scale.y != 1.f || scale.z != 1.f)
-					mat = glm::scale(mat,scale);
-
-				mat = mat *glm::toMat4(rot);
-				mat = glm::translate(mat,-(*posBind));
-				mat = glm::translate(pos -(*posBind)) *mat;
-
+				auto mat = (t *tBindPose).ToMatrix();
 				transformMatrix += weight *mat;
+				valid = true;
 			}
 			//
 		}
 	}
-	auto vpos = transformMatrix *Vector4{pos.x,pos.y,pos.z,1.f};
+	if(valid == false)
+		return umat::identity();
+	return transformMatrix;
+}
+bool BaseAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,const std::optional<Vector3> &vertexOffset) const
+{
+	auto transformMatrix = GetVertexTransformMatrix(subMesh,vertexId);
+	if(transformMatrix.has_value() == false)
+		return false;
+	auto vpos = *transformMatrix *Vector4{pos.x,pos.y,pos.z,1.f};
+	if(vpos.w < 0.001f)
+		return true;
 	pos = Vector3{vpos.x,vpos.y,vpos.z} /vpos.w;
 	return true;
 }

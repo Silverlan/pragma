@@ -11,6 +11,13 @@ LINK_ENTITY_TO_CLASS(env_light_point,EnvLightPoint);
 
 luabind::object SLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightPointComponentHandleWrapper>(l);}
 
+void SLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(SLightComponent))
+		static_cast<SLightComponent&>(component).SetLight(*this);
+}
+
 void EnvLightPoint::Initialize()
 {
 	SBaseEntity::Initialize();

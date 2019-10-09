@@ -346,6 +346,39 @@ namespace Lua
 				return;
 			hEnt->SetFalloffExponent(falloffExponent);
 		}));
+		def.def("SetLightIntensityType",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t type) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			hEnt->SetLightIntensityType(static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(type));
+		}));
+		def.def("GetLightIntensityType",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			Lua::PushInt(l,umath::to_integral(hEnt->GetLightIntensityType()));
+		}));
+		def.def("SetLightIntensity",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,float intensity) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			hEnt->SetLightIntensity(intensity);
+		}));
+		def.def("SetLightIntensity",static_cast<void(*)(lua_State*,THandle&,float,uint32_t)>([](lua_State *l,THandle &hEnt,float intensity,uint32_t type) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			hEnt->SetLightIntensity(intensity,static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(type));
+		}));
+		def.def("GetLightIntensity",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			Lua::PushNumber(l,hEnt->GetLightIntensity());
+		}));
+		def.def("GetLightIntensityCandela",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			Lua::PushNumber(l,hEnt->GetLightIntensityCandela());
+		}));
+		def.add_static_constant("INTENSITY_TYPE_CANDELA",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Candela));
+		def.add_static_constant("INTENSITY_TYPE_LUMEN",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lumen));
+		def.add_static_constant("INTENSITY_TYPE_LUX",umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux));
 	}
 	template<class TLuaClass,class THandle>
 		void register_base_env_light_spot_component_methods(lua_State *l,TLuaClass &def)
@@ -1399,6 +1432,14 @@ namespace Lua
 			Lua::Push<Color>(l,hComponent->GetColor());
 		}));
 		def.def("SetColor",static_cast<void(*)(lua_State*,THandle&,const Color&)>([](lua_State *l,THandle &hComponent,const Color &color) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetColor(color);
+		}));
+		def.def("SetColor",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &color) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetColor(color);
+		}));
+		def.def("SetColor",static_cast<void(*)(lua_State*,THandle&,const Vector4&)>([](lua_State *l,THandle &hComponent,const Vector4 &color) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetColor(color);
 		}));
@@ -3051,8 +3092,8 @@ namespace Lua
 		}));
 		def.def("GetBoneMatrix",static_cast<void(*)(lua_State*,THandle&,unsigned int)>([](lua_State *l,THandle &hAnim,unsigned int boneID) {
 			pragma::Lua::check_component(l,hAnim);
-			auto *mat = hAnim->GetBoneMatrix(boneID);
-			if(mat == NULL)
+			auto mat = hAnim->GetBoneMatrix(boneID);
+			if(mat.has_value() == false)
 				return;
 			luabind::object(l,*mat).push(l);
 		}));

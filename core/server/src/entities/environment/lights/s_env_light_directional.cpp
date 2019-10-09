@@ -32,6 +32,13 @@ void SLightDirectionalComponent::SetAmbientColor(const Color &color)
 
 luabind::object SLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightDirectionalComponentHandleWrapper>(l);}
 
+void SLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(SLightComponent))
+		static_cast<SLightComponent&>(component).SetLight(*this);
+}
+
 //////////////
 
 void EnvLightDirectional::Initialize()

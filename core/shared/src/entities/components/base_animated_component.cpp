@@ -133,7 +133,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	}
 	Skeleton &skeleton = mdl->GetSkeleton();
 	for(unsigned int i=0;i<skeleton.GetBoneCount();i++)
-		m_bones.push_back(Transform());
+		m_bones.push_back({});
 	std::unordered_map<std::string,unsigned int> *animations;
 	mdl->GetAnimations(&animations);
 	std::unordered_map<std::string,unsigned int>::iterator it;
@@ -155,8 +155,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	{
 		for(UInt32 i=0;i<anim->GetBoneCount();i++)
 		{
-			m_bones[i].SetPosition(*frame->GetBonePosition(i));
-			m_bones[i].SetOrientation(*frame->GetBoneOrientation(i));
+			m_bones[i] = physics::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
 		}
 	}
 }
@@ -1020,8 +1019,8 @@ static void SetupMatrices(std::vector<Orientation> &boneOrientations,std::unorde
 }
 */
 
-const std::vector<Transform> &BaseAnimatedComponent::GetProcessedBones() const {return const_cast<BaseAnimatedComponent*>(this)->GetProcessedBones();}
-std::vector<Transform> &BaseAnimatedComponent::GetProcessedBones() {return m_processedBones;}
+const std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const {return const_cast<BaseAnimatedComponent*>(this)->GetProcessedBones();}
+std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() {return m_processedBones;}
 
 bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t frameOffset) const
 {

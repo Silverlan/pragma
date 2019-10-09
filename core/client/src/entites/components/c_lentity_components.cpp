@@ -892,7 +892,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		auto &transforms = hAnim->GetProcessedBones();
 		if(boneIdx >= transforms.size())
 			return;
-		Lua::Push<Transform*>(l,&transforms.at(boneIdx));
+		Lua::Push<pragma::physics::ScaledTransform*>(l,&transforms.at(boneIdx));
 	}));
 	defCAnimated.def("GetBoneBuffer",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);
@@ -930,7 +930,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		auto &m = mats.at(boneIndex);
 		Lua::Push<Mat4>(l,m);
 	}));
-	defCAnimated.def("GetLocalVertexPosition",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&,uint32_t)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh,uint32_t vertexId) {
+	defCAnimated.def("GetLocalVertexPosition",static_cast<void(*)(lua_State*,CAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&,uint32_t)>([](lua_State *l,CAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh,uint32_t vertexId) {
 		pragma::Lua::check_component(l,hAnim);
 		Vector3 pos;
 		auto b = hAnim->GetLocalVertexPosition(static_cast<CModelSubMesh&>(*subMesh),vertexId,pos);

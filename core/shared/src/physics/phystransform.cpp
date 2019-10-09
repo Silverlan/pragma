@@ -84,6 +84,19 @@ Quat pragma::physics::Transform::operator*(const Quat &rot) const
 {
 	return m_rotation *rot;
 }
+pragma::physics::Transform pragma::physics::Transform::operator*(float weight) const
+{
+	auto res = *this;
+	res *= weight;
+	return res;
+}
+pragma::physics::Transform &pragma::physics::Transform::operator*=(float weight)
+{
+	m_translation *= weight;
+	// Not entirely sure about this...
+	m_rotation = uquat::slerp(uquat::identity(),m_rotation,weight);
+	return *this;
+}
 
 /////////////
 
@@ -144,6 +157,19 @@ Mat4 pragma::physics::ScaledTransform::ToMatrix() const
 	return glm::scale(glm::mat4{1.f},m_scale) *Transform::ToMatrix();
 }
 
+pragma::physics::ScaledTransform pragma::physics::ScaledTransform::operator*(float weight) const
+{
+	auto res = *this;
+	res *= weight;
+	return res;
+}
+pragma::physics::ScaledTransform &pragma::physics::ScaledTransform::operator*=(float weight)
+{
+	Transform::operator*=(weight);
+	m_scale *= weight;
+	return *this;
+}
+
 /////////////
 
 Vector3 operator*(const Vector3 &v,const pragma::physics::Transform &t)
@@ -164,6 +190,10 @@ Quat &operator*=(Quat &v,const pragma::physics::Transform &t)
 	v = operator*(v,t);
 	return v;
 }
+pragma::physics::Transform operator*(float weight,const pragma::physics::Transform &t)
+{
+	return t *weight;
+}
 
 Vector3 operator*(const Vector3 &v,const pragma::physics::ScaledTransform &t)
 {
@@ -180,4 +210,8 @@ Quat operator*(const Quat &v,const pragma::physics::ScaledTransform &t)
 Quat &operator*=(Quat &v,const pragma::physics::ScaledTransform &t)
 {
 	return operator*=(v,static_cast<const pragma::physics::Transform&>(t));
+}
+pragma::physics::ScaledTransform operator*(float weight,const pragma::physics::ScaledTransform &t)
+{
+	return t *weight;
 }

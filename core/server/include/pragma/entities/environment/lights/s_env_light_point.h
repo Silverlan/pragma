@@ -13,6 +13,8 @@ namespace pragma
 	public:
 		SLightPointComponent(BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+	protected:
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 

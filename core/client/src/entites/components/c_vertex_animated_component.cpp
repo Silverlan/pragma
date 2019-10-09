@@ -216,7 +216,7 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 		auto *nextFrame = ma->GetFrame(animSlot.nextFrameId);
 		if(frame == nullptr || nextFrame == nullptr)
 			continue;
-		auto vaPos = Vector3{};
+		Vector3 vaPos;
 		if(frame->GetVertexPosition(vertexId,vaPos) == false)
 			continue;
 		pos += vaPos *animSlot.blend;

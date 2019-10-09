@@ -55,9 +55,10 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		auto &r = *hRect.get<WITexturedRect>();
 
 		auto &dev = context.GetDevice();
+		auto extents = img->GetExtents(mipmap);
 		prosper::util::ImageCreateInfo imgCreateInfo {};
-		imgCreateInfo.width = width;
-		imgCreateInfo.height = height;
+		imgCreateInfo.width = extents.width;
+		imgCreateInfo.height = extents.height;
 		imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
 		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
 		imgCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;

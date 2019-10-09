@@ -33,6 +33,9 @@ namespace pragma::physics
 		Vector3 operator*(const Vector3 &translation) const;
 		Quat operator*(const Quat &rot) const;
 
+		Transform operator*(float weight) const;
+		Transform &operator*=(float weight);
+
 		Mat4 ToMatrix() const;
 	private:
 		Vector3 m_translation = {};
@@ -58,6 +61,9 @@ namespace pragma::physics
 		Vector3 operator*(const Vector3 &translation) const;
 		Quat operator*(const Quat &rot) const;
 
+		ScaledTransform operator*(float weight) const;
+		ScaledTransform &operator*=(float weight);
+
 		Mat4 ToMatrix() const;
 	private:
 		Vector3 m_scale = {1.f,1.f,1.f};
@@ -67,10 +73,12 @@ DLLNETWORK Vector3 operator*(const Vector3 &v,const pragma::physics::Transform &
 DLLNETWORK Vector3 &operator*=(Vector3 &v,const pragma::physics::Transform &t);
 DLLNETWORK Quat operator*(const Quat &v,const pragma::physics::Transform &t);
 DLLNETWORK Quat &operator*=(Quat &v,const pragma::physics::Transform &t);
+DLLNETWORK pragma::physics::Transform operator*(float weight,const pragma::physics::Transform &t);
 
 DLLNETWORK Vector3 operator*(const Vector3 &v,const pragma::physics::ScaledTransform &t);
 DLLNETWORK Vector3 &operator*=(Vector3 &v,const pragma::physics::ScaledTransform &t);
 DLLNETWORK Quat operator*(const Quat &v,const pragma::physics::ScaledTransform &t);
 DLLNETWORK Quat &operator*=(Quat &v,const pragma::physics::ScaledTransform &t);
+DLLNETWORK pragma::physics::ScaledTransform operator*(float weight,const pragma::physics::ScaledTransform &t);
 
 #endif

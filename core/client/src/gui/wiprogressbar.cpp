@@ -25,6 +25,7 @@ void WIProgressBar::Initialize()
 	WIBase::Initialize();
 	m_hLabel = CreateChild<WIText>();
 	m_hLabel->SetAutoCenterToParent(true);
+	m_hLabel->AddStyleClass("progressbar_label_background");
 	m_hProgress = CreateChild<WIRect>();
 	m_hProgress->GetColorProperty()->Link(*GetColorProperty());
 

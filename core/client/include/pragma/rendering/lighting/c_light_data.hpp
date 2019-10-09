@@ -4,6 +4,7 @@
 #include "pragma/clientdefinitions.h"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <mathutil/uvec.h>
+#include <mathutil/umath_lighting.hpp>
 #include <cinttypes>
 
 namespace pragma
@@ -21,12 +22,13 @@ namespace pragma
 			BakedLightSource = TypeDirectional<<1
 		};
 		Vector4 position {}; // position.w = distance
-		Vector4 color {};
+		Vector3 color {};
+		Candela intensity = 0.f;
 		Vector4 direction {}; // direction.w is unused
 		uint32_t shadowIndex = 0u;
 
-		float cutoffOuter = 0.f;
-		float cutoffInner = 0.f;
+		umath::Radian cutoffOuterCos = 0.f;
+		umath::Radian cutoffInnerCos = 0.f;
 		float attenuation = 0.f;
 		BufferFlags flags = BufferFlags::None;
 		uint32_t shadowMapIndexStatic = 0u;

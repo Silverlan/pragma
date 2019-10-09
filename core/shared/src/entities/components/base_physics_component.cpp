@@ -555,7 +555,7 @@ void BasePhysicsComponent::PrePhysicsSimulate()
 	dynamic_cast<PhysObjDynamic*>(phys)->PreSimulate();
 }
 
-static void entity_space_to_bone_space(std::vector<Transform> &transforms,Bone &bone,Vector3 &pos,Quat &rot,Bool bSkip=true)
+static void entity_space_to_bone_space(std::vector<physics::ScaledTransform> &transforms,Bone &bone,Vector3 &pos,Quat &rot,Bool bSkip=true)
 {
 	auto parent = bone.parent.lock();
 	if(parent != nullptr)
@@ -563,8 +563,8 @@ static void entity_space_to_bone_space(std::vector<Transform> &transforms,Bone &
 	if(bSkip == false)
 	{
 		auto &t = transforms[bone.ID];
-		auto &posBone = t.GetPosition();
-		auto &rotBone = t.GetOrientation();
+		auto &posBone = t.GetOrigin();
+		auto &rotBone = t.GetRotation();
 		pos -= posBone;
 		auto inv = uquat::get_inverse(rotBone);
 		uvec::rotate(&pos,inv);

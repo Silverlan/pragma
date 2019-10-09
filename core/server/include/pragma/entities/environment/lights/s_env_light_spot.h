@@ -19,6 +19,8 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual void SetConeStartOffset(float offset) override;
+	protected:
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};
 };
 

@@ -193,7 +193,7 @@ DebugRenderer::TextObject::TextObject(WIText *elText)
 			c_engine->KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
 		auto tex = rt.get()->GetTexture();
 		m_descSetGroupText = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
-		prosper::util::set_descriptor_set_binding_texture(*(*m_descSetGroupText)->get_descriptor_set(0u),*tex,0u);
+		prosper::util::set_descriptor_set_binding_texture(*m_descSetGroupText->GetDescriptorSet(),*tex,0u);
 	}));
 }
 DebugRenderer::TextObject::~TextObject()

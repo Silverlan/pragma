@@ -403,19 +403,19 @@ static bool save_image(
 }
 
 bool Lua::dds::save_image(
-	util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler
+	util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 )
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
 	return ::save_image([&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		return static_cast<uint8_t*>(imgBuffer.GetData());
-	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,false /* cubemap */,fileName,ktxCreateInfo,errorHandler);
+	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
 }
 
 bool Lua::dds::save_image(
 	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,const std::string &fileName,
-	const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler
+	const ImageWriteInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 )
 {
 	auto numLayers = imgLayerMipmapData.size();
@@ -427,7 +427,7 @@ bool Lua::dds::save_image(
 		if(iMipmap >= mipmapData.size())
 			return nullptr;
 		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-	},width,height,get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,false /* cubemap */,fileName,ktxCreateInfo,errorHandler);
+	},width,height,get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
 }
 
 bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler)
@@ -458,6 +458,7 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 		auto buf = prosper::util::create_buffer(context.GetDevice(),bufCreateInfo);
 		buf->SetPermanentlyMapped(true);
 
+		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 		// Initialize buffer with image data
 		size_t bufferOffset = 0;
 		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
@@ -479,6 +480,7 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 				bufferOffset += mipmapSize;
 			}
 		}
+		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 		context.FlushSetupCommandBuffer();
 
 		// Copy the data to a gli texture object
@@ -505,6 +507,9 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 		return false;
 	}
 
+	std::shared_ptr<prosper::Buffer> buf = nullptr;
+	uint32_t sizePerLayer = 0u;
+	uint32_t sizePerPixel = 0u;
 	if(
 		image.GetTiling() != Anvil::ImageTiling::LINEAR ||
 		(image.GetAnvilImage().get_memory_block()->get_create_info_ptr()->get_memory_features() &Anvil::MemoryFeatureFlagBits::MAPPABLE_BIT) == Anvil::MemoryFeatureFlagBits::NONE ||
@@ -514,18 +519,71 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 		// Convert the image into the target format
 		auto &context = image.GetContext();
 		auto &setupCmd = context.GetSetupCommandBuffer();
+
 		prosper::util::ImageCreateInfo copyCreateInfo {};
 		image.GetCreateInfo(copyCreateInfo);
 		copyCreateInfo.format = dstFormat;
-		copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+		copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
 		copyCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		copyCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
+		copyCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
 		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 		imgRead = image.Copy(*setupCmd,copyCreateInfo);
 		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+
+		// Copy the image data to a buffer
+		uint64_t size = 0;
+		auto numLayers = image.GetLayerCount();
+		auto numMipmaps = image.GetMipmapCount();
+		sizePerPixel = prosper::util::get_byte_size(image.GetFormat());
+		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+		{
+			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
+			{
+				auto extents = image.GetExtents(iMipmap);
+				size += extents.width *extents.height *sizePerPixel;
+			}
+		}
+		buf = context.AllocateTemporaryBuffer(size);
+		prosper::util::record_image_barrier(**setupCmd,**imgRead,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+
+		prosper::util::BufferImageCopyInfo copyInfo {};
+		copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
+		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+		{
+			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
+			{
+				copyInfo.mipLevel = iMipmap;
+				copyInfo.baseArrayLayer = iLayer;
+				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgRead,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+
+				auto extents = image.GetExtents(iMipmap);
+				copyInfo.bufferOffset += extents.width *extents.height *sizePerPixel;
+				if(iLayer == 0)
+					sizePerLayer += extents.width *extents.height *sizePerPixel;
+			}
+		}
 		context.FlushSetupCommandBuffer();
 	}
+	auto numLayers = imgRead->GetLayerCount();
+	auto numMipmaps = imgRead->GetMipmapCount();
+	auto cubemap = imgRead->IsCubemap();
 	auto extents = imgRead->GetExtents();
+	if(buf != nullptr)
+	{
+		return ::save_image([imgRead,buf,sizePerLayer,sizePerPixel](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+			void *data;
+			auto *memBlock = (*buf)->get_memory_block(0u);
+			auto offset = iLayer *sizePerLayer;
+			auto extents = imgRead->GetExtents(iMipmap);
+			auto size = extents.width *extents.height *sizePerPixel;
+			if(memBlock->map(offset,sizePerPixel,&data) == false)
+				return nullptr;
+			outDeleter = [memBlock]() {
+				memBlock->unmap(); // Note: setMipmapData copies the data, so we don't need to keep it mapped
+			};
+			return static_cast<uint8_t*>(data);
+		},extents.width,extents.height,dstFormat,numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
+	}
 	return ::save_image([imgRead](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		auto subresourceLayout = imgRead->GetSubresourceLayout(iLayer,iMipmap);
 		if(subresourceLayout.has_value() == false)
@@ -538,6 +596,6 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 			memBlock->unmap(); // Note: setMipmapData copies the data, so we don't need to keep it mapped
 		};
 		return static_cast<uint8_t*>(data);
-	},extents.width,extents.height,dstFormat,imgRead->GetLayerCount(),imgRead->GetMipmapCount(),imgRead->IsCubemap(),fileName,ktxCreateInfo,errorHandler);
+	},extents.width,extents.height,dstFormat,numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
 }
 #pragma optimize("",on)

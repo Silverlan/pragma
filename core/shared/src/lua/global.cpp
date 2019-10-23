@@ -29,6 +29,7 @@
 #include "pragma/addonsystem/addonsystem.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/util/util_duration_type.hpp"
+#include "pragma/game/game_limits.h"
 #include <sharedutils/util_enum.h>
 #include <pragma/emessage.h>
 #include <luainterface.hpp>
@@ -152,6 +153,28 @@ void Game::RegisterLuaGlobals()
 		{"STATE_FLAG_BIT_MAP_LOADED",umath::to_integral(Game::GameFlags::MapLoaded)},
 		{"STATE_FLAG_BIT_INITIAL_TICK",umath::to_integral(Game::GameFlags::InitialTick)},
 		{"STATE_FLAG_BIT_LEVEL_TRANSITION",umath::to_integral(Game::GameFlags::LevelTransition)}
+	});
+
+	auto *l = GetLuaState();
+	Lua::GetGlobal(l,"game"); /* 1 */
+	auto t = Lua::GetStackTop(l);
+	Lua::PushString(l,"limits"); /* 2 */
+	Lua::CreateTable(l); /* 3 */
+	Lua::SetTableValue(l,t); /* 1 */
+	Lua::Pop(l,1); /* 0 */
+
+	Lua::RegisterLibraryEnums(l,"game.limits",{
+		{"MAX_ABSOLUTE_LIGHTS",umath::to_integral(GameLimits::MaxAbsoluteLights)},
+		{"MAX_ABSOLUTE_SHADOW_LIGHTS",umath::to_integral(GameLimits::MaxAbsoluteShadowLights)},
+		{"MAX_CSM_CASCADES",umath::to_integral(GameLimits::MaxCSMCascades)},
+		{"MAX_DIRECTIONAL_LIGHT_SOURCES",umath::to_integral(GameLimits::MaxDirectionalLightSources)},
+		{"MAX_ACTIVE_SHADOW_MAPS",umath::to_integral(GameLimits::MaxActiveShadowMaps)},
+		{"MAX_ACTIVE_SHADOW_CUBE_MAPS",umath::to_integral(GameLimits::MaxActiveShadowCubeMaps)},
+		{"MAX_MESH_VERTICES",umath::to_integral(GameLimits::MaxMeshVertices)},
+		{"MAX_WORLD_DISTANCE",umath::to_integral(GameLimits::MaxWorldDistance)},
+		{"MAX_RAY_CAST_RANGE",umath::to_integral(GameLimits::MaxRayCastRange)},
+		{"MAX_BONES",umath::to_integral(GameLimits::MaxBones)},
+		{"MAX_IMAGE_ARRAY_LAYERS",umath::to_integral(GameLimits::MaxImageArrayLayers)}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"sound",{

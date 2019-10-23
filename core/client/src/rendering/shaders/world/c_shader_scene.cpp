@@ -8,6 +8,7 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
@@ -108,7 +109,7 @@ bool ShaderScene::BindSceneCamera(const rendering::RasterizationRenderer &render
 {
 	auto &scene = renderer.GetScene();
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
+	return RecordBindDescriptorSet(**descSet,GetCameraDescriptorSetIndex());
 }
 
 /////////////////////
@@ -164,7 +165,7 @@ bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::D
 bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
 {
 	return BindSceneCamera(renderer,bView) &&
-		BindLights(*renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
+		BindLights(**renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
 }
 
 /////////////////////
@@ -220,7 +221,7 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 	}
 	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())
 	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
-	return BindInstanceDescriptorSet(*descSet);
+	return BindInstanceDescriptorSet(**descSet);
 }
 
 void ShaderEntity::EndDraw()

@@ -3,6 +3,7 @@
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
+#include <mathutil/umath_lighting.hpp>
 
 using namespace pragma;
 
@@ -10,7 +11,7 @@ void BaseFlashlightComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	auto &ent = GetEntity();
-	ent.AddComponent("light");
+	auto *pLightComponent = static_cast<pragma::BaseEnvLightComponent*>(ent.AddComponent("light").get());
 	auto *pLightSpotComponent = static_cast<pragma::BaseEnvLightSpotComponent*>(ent.AddComponent("light_spot").get());
 	ent.AddComponent("sound_emitter");
 	auto *pRadiusComponent = static_cast<pragma::BaseRadiusComponent*>(ent.AddComponent("radius").get());
@@ -24,5 +25,7 @@ void BaseFlashlightComponent::Initialize()
 	if(pRadiusComponent != nullptr)
 		pRadiusComponent->SetRadius(512.f);
 	if(pColorComponent != nullptr)
-		pColorComponent->SetColor(Color(355,355,153,6'000));
+		pColorComponent->SetColor(ulighting::color_temperature_to_color(3'500));
+	if(pLightComponent)
+		pLightComponent->SetLightIntensity(50.f,BaseEnvLightComponent::LightIntensityType::Lumen);
 }

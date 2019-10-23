@@ -7,6 +7,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
 #include <buffers/prosper_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 
 REGISTER_PARTICLE_RENDERER(sprite,CParticleRendererSprite);
 
@@ -48,7 +49,7 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::PrimaryComma
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(descSetShadows,descSetLightSources);
+	shader->BindLights(*descSetShadows,descSetLightSources);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
 	if(m_bPlanarRotation == false)

@@ -138,6 +138,8 @@ void CPBRConverterComponent::OnEntitySpawn()
 }
 bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const
 {
+	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end())
+		return false;
 	auto shader = mat.GetShaderIdentifier();
 	ustring::to_lower(shader);
 	return (shader == "textured" || shader == "texturedalphatransition") && shader != "pbr";
@@ -158,6 +160,7 @@ void CPBRConverterComponent::PollEvents()
 bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 {
 	Con::cout<<"Converting material '"<<matTraditional.GetName()<<"' to PBR..."<<Con::endl;
+	m_convertedMaterials.insert(matTraditional.GetName());
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto &dev = c_engine->GetDevice();
 
@@ -170,15 +173,15 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// Albedo map
 	// TODO: Extract ambient occlusion from diffuse map, if possible
 	auto *diffuseMap = matTraditional.GetDiffuseMap();
-	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->texture)
+	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->HasValidVkTexture())
 		dataPbr->AddValue("texture",Material::ALBEDO_MAP_IDENTIFIER,diffuseMap->name);
 	//
 
 	// Roughness map
 	auto *specularMap = matTraditional.GetSpecularMap();
-	if(specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->texture)
+	if(specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->HasValidVkTexture())
 	{
-		auto roughnessMap = ConvertSpecularMapToRoughness(*std::static_pointer_cast<Texture>(specularMap->texture)->texture);
+		auto roughnessMap = ConvertSpecularMapToRoughness(*std::static_pointer_cast<Texture>(specularMap->texture)->GetVkTexture());
 		if(roughnessMap)
 		{
 			auto roughnessName = matName +"_roughness";
@@ -193,20 +196,20 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		}
 	}
 	else
-		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half"); // Generic roughness map with 50% roughness
+		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough"); // Generic roughness map with 100% roughness
 	//
 
 	// Normal map
 	auto bGenerateNormalMap = false;
 	auto *normalMap = matTraditional.GetNormalMap();
-	if(normalMap && normalMap->texture && std::static_pointer_cast<Texture>(normalMap->texture)->texture)
+	if(normalMap && normalMap->texture && std::static_pointer_cast<Texture>(normalMap->texture)->HasValidVkTexture())
 		dataPbr->AddValue("texture",Material::NORMAL_MAP_IDENTIFIER,normalMap->name);
 	//
 
 	// Ambient occlusion map
 	auto bGenerateAOMap = false;
 	auto *aoMap = matTraditional.GetAmbientOcclusionMap();
-	if(aoMap && aoMap->texture && std::static_pointer_cast<Texture>(aoMap->texture)->texture)
+	if(aoMap && aoMap->texture && std::static_pointer_cast<Texture>(aoMap->texture)->GetVkTexture())
 		dataPbr->AddValue("texture",Material::AO_MAP_IDENTIFIER,aoMap->name);
 	//
 
@@ -224,7 +227,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 
 	// Emission map
 	auto *glowMap = matTraditional.GetGlowMap();
-	if(glowMap && glowMap->texture && std::static_pointer_cast<Texture>(glowMap->texture)->texture)
+	if(glowMap && glowMap->texture && std::static_pointer_cast<Texture>(glowMap->texture)->GetVkTexture())
 	{
 		dataPbr->AddValue("texture",Material::EMISSION_MAP_IDENTIFIER,glowMap->name);
 		dataPbr->AddValue("bool","glow_alpha_only","1");
@@ -250,7 +253,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	auto &dev = c_engine->GetDevice();
 	// Specular descriptor set
 	auto dsgSpecular = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsgSpecular)->get_descriptor_set(0u),specularMap,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsgSpecular->GetDescriptorSet(),specularMap,0u);
 
 	// Initialize roughness image
 	prosper::util::ImageCreateInfo createInfoRoughness {};

@@ -116,7 +116,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreat
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
-static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName="")
+static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName="")
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -137,10 +137,11 @@ static bool bind_texture(Material &mat,Anvil::DescriptorSet &ds,TextureInfo *tex
 			return false;
 		tex = std::static_pointer_cast<Texture>(ptrTex);
 	}
-	if(tex && tex->texture != nullptr)
-		prosper::util::set_descriptor_set_binding_texture(ds,*tex->texture,bindingIndex);
+	if(tex && tex->HasValidVkTexture())
+		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
 	return true;
 }
+
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo)
 {
 	auto &dev = c_engine->GetDevice();
@@ -149,29 +150,33 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 		return nullptr;
 
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
-	if(albedoTexture->texture == nullptr)
+	if(albedoTexture->HasValidVkTexture() == false)
 		return nullptr;
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
-	prosper::util::set_descriptor_set_binding_texture(*descSet,*albedoTexture->texture,umath::to_integral(MaterialBinding::AlbedoMap));
-	InitializeMaterialBuffer(*descSet,mat);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+	prosper::util::set_descriptor_set_binding_texture(descSet,*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
+	InitializeMaterialBuffer(descSet,mat);
 
-	if(bind_texture(mat,*descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
+	if(bind_texture(mat,descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,mat.GetAmbientOcclusionMap(),umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false)
+	if(bind_texture(mat,descSet,mat.GetAmbientOcclusionMap(),umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
+	if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,*descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"pbr/rough_half") == false)
+	if(bind_texture(mat,descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"pbr/rough_half") == false)
 		return false;
 
-	bind_texture(mat,*descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
+	bind_texture(mat,descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
 
-	if(bind_texture(mat,*descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+	if(bind_texture(mat,descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+		return false;
+	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
+	// that seems to cause crashes in some cases
+	if(descSet->update() == false)
 		return false;
 	return descSetGroup;
 }

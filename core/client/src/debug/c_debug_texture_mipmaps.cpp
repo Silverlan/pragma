@@ -62,11 +62,11 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 	auto &textureManager = materialManager.GetTextureManager();
 	auto texture = textureManager.FindTexture(texPath,true);
 
-	if(texture == nullptr || texture->texture == nullptr)
+	if(texture == nullptr || texture->HasValidVkTexture() == false)
 	{
 		auto *mat = materialManager.FindMaterial(texPath);
 		auto *diffuseMap = (mat != nullptr) ? mat->GetDiffuseMap() : nullptr;
-		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture*>(diffuseMap->texture.get())->texture == nullptr)
+		if(diffuseMap == nullptr || diffuseMap->texture == nullptr || static_cast<Texture*>(diffuseMap->texture.get())->HasValidVkTexture() == false)
 		{
 			Con::cwar<<"WARNING: No texture or material with name '"<<texPath<<"' found or loaded!"<<Con::endl;
 			return;
@@ -76,8 +76,8 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
 	if(dbg == nullptr)
 	{
-		auto &vkTexture = texture->texture;
-		auto numMipmaps = texture->texture->GetImage()->GetMipmapCount();
+		auto &vkTexture = texture->GetVkTexture();
+		auto numMipmaps = vkTexture->GetImage()->GetMipmapCount();
 		Con::cout<<"Mipmap count for '"<<texPath<<"': "<<numMipmaps<<Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = WGUI::GetInstance();

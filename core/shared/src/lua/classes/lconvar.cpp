@@ -5,6 +5,7 @@
 #include "luasystem.h"
 #include <pragma/game/game.h>
 #include <mathutil/umath.h>
+#include <pragma/console/command_options.hpp>
 
 extern DLLENGINE Engine *engine;
 int Lua_cvar_CreateConVar(lua_State *l)
@@ -166,6 +167,42 @@ int Lua::console::clear_override(lua_State *l)
 	std::string src = Lua::CheckString(l,1);
 	state->ClearConsoleCommandOverride(src);
 	return 0;
+}
+int Lua::console::parse_command_arguments(lua_State *l)
+{
+	int32_t tArgs = 1;
+	Lua::CheckTable(l,tArgs);
+	std::vector<std::string> args {};
+	auto numArgs = Lua::GetObjectLength(l,tArgs);
+	args.reserve(numArgs);
+	for(auto i=decltype(numArgs){0u};i<numArgs;++i)
+	{
+		Lua::PushInt(l,i +1); /* 1 */
+		Lua::GetTableValue(l,tArgs); /* 1 */
+		args.push_back(Lua::CheckString(l,-1));
+
+		Lua::Pop(l,1); /* 0 */
+	}
+
+	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(args,commandOptions);
+
+	auto t = Lua::CreateTable(l);
+	for(auto &pair : commandOptions)
+	{
+		Lua::PushString(l,pair.first); /* 1 */
+		auto tCmd = Lua::CreateTable(l); /* 2 */
+		auto &cmd = pair.second;
+		int32_t argIdx = 1;
+		for(auto &str : cmd.parameters)
+		{
+			Lua::PushInt(l,argIdx++); /* 3 */
+			Lua::PushString(l,str); /* 4 */
+			Lua::SetTableValue(l,tCmd); /* 2 */
+		}
+		Lua::SetTableValue(l,t); /* 0 */
+	}
+	return 1;
 }
 
 ////////////////////////////////////

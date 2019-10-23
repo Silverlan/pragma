@@ -40,6 +40,7 @@ private:
 	UInt32 m_numDecimals;
 	float UpdateProgress(float progress);
 	void UpdateText();
+	void UpdateTextPosition();
 	void UpdateOptions();
 	void SetRange(float min,float max,float stepSize,bool bEraseOptions);
 };

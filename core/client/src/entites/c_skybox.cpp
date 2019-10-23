@@ -8,6 +8,7 @@
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pr_dds.hpp>
 
@@ -65,7 +66,8 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	const std::array<std::string,6> sidePostfixes {
 		"ft","bk","up","dn","rt","lf"
 	};
-	std::array<std::shared_ptr<prosper::Image>,6> cubemapImages {};
+	constexpr uint32_t numLayers = 6u;
+	std::array<std::shared_ptr<prosper::Image>,numLayers> cubemapImages {};
 	auto bAllValid = true;
 	uint32_t largestWidth = 0u;
 	uint32_t largestHeight = 0u;
@@ -79,10 +81,11 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 		if(diffuseMapSide == nullptr || diffuseMapSide->texture == nullptr)
 			return false;
 		auto texture = std::static_pointer_cast<Texture>(diffuseMapSide->texture);
-		if(texture->texture == nullptr)
+		if(texture->HasValidVkTexture() == false || texture->IsError())
 			return false;
-		auto &img = texture->texture->GetImage();
+		auto &img = texture->GetVkTexture()->GetImage();
 		cubemapImages.at(i) = img;
+
 		auto extents = img->GetExtents();
 		largestWidth = umath::max(largestWidth,extents.width);
 		largestHeight = umath::max(largestHeight,extents.height);
@@ -90,37 +93,122 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	Con::cout<<"Found individual skybox textures for skybox '"<<mat.GetName()<<"'! Generating cubemap texture..."<<Con::endl;
 
 	// Merge textures into cubemap image
+
+	// Note: We need to transfer the individual images from their compressed format to RGBA8UNORM, as well as
+	// from optimal tiling to linear tiling. This can't be done in one step, because some GPUs do not support
+	// images with linear tiling and mipmaps, so we need to create a new image which will contain the RGBA8 data and
+	// optimal tiling, and then copy that data into a host-readable buffer.
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
 	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
 	imgCreateInfo.width = largestWidth;
 	imgCreateInfo.height = largestHeight;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
 	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	imgCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
+	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 	auto imgCubemap = prosper::util::create_image(c_engine->GetDevice(),imgCreateInfo);
-	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	for(auto iLayer=decltype(cubemapImages.size()){0u};iLayer<cubemapImages.size();++iLayer)
-	{
-		auto &img = cubemapImages.at(iLayer);
+	auto numMipmaps = imgCubemap->GetMipmapCount();
 
-		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+	struct ImageBufferInfo
+	{
+		uint32_t layerIndex = 0;
+		uint32_t mipmapIndex = 0;
+		uint64_t bufferOffset = 0;
+		uint64_t bufferSize = 0;
+
+		uint32_t width = 0;
+		uint32_t height = 0;
+	};
+	auto numBytesPerPixel = prosper::util::get_byte_size(imgCreateInfo.format);
+	std::vector<ImageBufferInfo> imageBufferInfos {};
+	imageBufferInfos.resize(numLayers *numMipmaps);
+	uint32_t i = 0;
+	uint64_t offset = 0;
+	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+	{
+		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
+		{
+			uint32_t wMipmap,hMipmap;
+			prosper::util::calculate_mipmap_size(largestWidth,largestHeight,&wMipmap,&hMipmap,iMipmap);
+			auto &imgBufferInfo = imageBufferInfos.at(i++);
+			imgBufferInfo.width = wMipmap;
+			imgBufferInfo.height = hMipmap;
+			imgBufferInfo.layerIndex = iLayer;
+			imgBufferInfo.mipmapIndex = iMipmap;
+			imgBufferInfo.bufferOffset = offset;
+			imgBufferInfo.bufferSize = wMipmap *hMipmap *numBytesPerPixel;
+
+			offset += imgBufferInfo.bufferSize;
+		}
+	}
+
+	prosper::util::BufferCreateInfo bufCreateInfo {};
+	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+	bufCreateInfo.size = offset;
+	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	auto buf = prosper::util::create_buffer(c_engine->GetDevice(),bufCreateInfo);
+
+	auto &setupCmd = c_engine->GetSetupCommandBuffer();
+	for(auto &imgBufferInfo : imageBufferInfos)
+	{
+		auto &img = cubemapImages.at(imgBufferInfo.layerIndex);
+
+		// Blit image into cubemap image
+		prosper::util::ImageSubresourceRange range {};
+		range.baseMipLevel = imgBufferInfo.mipmapIndex;
+		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,range);
 		prosper::util::BlitInfo blitInfo {};
-		blitInfo.dstSubresourceLayer.base_array_layer = iLayer;
+		blitInfo.dstSubresourceLayer.mip_level = imgBufferInfo.mipmapIndex;
 		prosper::util::record_blit_image(**setupCmd,blitInfo,**img,**imgCubemap);
-		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,range);
+
+		// Copy image data to host-readable buffer
+		prosper::util::record_image_barrier(**setupCmd,**imgCubemap,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,range);
+		// Note: No buffer barrier required, since we're writing to non-intersecting sections of the buffer
+		prosper::util::BufferImageCopyInfo copyInfo {};
+		copyInfo.width = imgBufferInfo.width;
+		copyInfo.height = imgBufferInfo.height;
+		copyInfo.mipLevel = imgBufferInfo.mipmapIndex;
+		copyInfo.bufferOffset = imgBufferInfo.bufferOffset;
+		prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgCubemap,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+		prosper::util::record_image_barrier(**setupCmd,**imgCubemap,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,range);
 	}
 	c_engine->FlushSetupCommandBuffer();
 
+	std::vector<std::vector<std::shared_ptr<util::ImageBuffer>>> cubemapBuffers {};
+	cubemapBuffers.resize(numLayers);
+	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+	{
+		auto &mipmapBuffers = cubemapBuffers.at(iLayer);
+		mipmapBuffers.reserve(numMipmaps);
+		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
+		{
+			auto &imgBufferInfo = imageBufferInfos.at(iLayer *numMipmaps +iMipmap);
+
+			auto imgBuffer = util::ImageBuffer::Create(imgBufferInfo.width,imgBufferInfo.height,util::ImageBuffer::Format::RGBA8);
+			buf->Read(imgBufferInfo.bufferOffset,imgBufferInfo.bufferSize,imgBuffer->GetData());
+			mipmapBuffers.push_back(imgBuffer);
+		}
+	}
+
+	std::vector<std::vector<const void*>> ptrCubemapBuffers {};
+	ptrCubemapBuffers.resize(numLayers);
+	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
+	{
+		ptrCubemapBuffers.at(iLayer).resize(numMipmaps);
+		for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
+			ptrCubemapBuffers.at(iLayer).at(iMipmap) = cubemapBuffers.at(iLayer).at(iMipmap)->GetData();
+	}
+
 	// Save the cubemap image on disk; It will automatically be reloaded
 	ImageWriteInfo imgWriteInfo {};
-	imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::KTX;;
+	imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;//KTX;;
 	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
 	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::ColorMap;
 	imgWriteInfo.wrapMode = ImageWriteInfo::WrapMode::Clamp;
 	auto fullPath = "addons/converted/materials/" +matName;
-	if(c_game->SaveImage(*imgCubemap,fullPath,imgWriteInfo))
+	if(c_game->SaveImage(ptrCubemapBuffers,largestWidth,largestHeight,fullPath,imgWriteInfo,true))
 	{
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;
 		auto *mat = client->CreateMaterial("skybox");

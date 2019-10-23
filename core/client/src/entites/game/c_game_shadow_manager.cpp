@@ -146,7 +146,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 
 	rt->index = set.buffers.size() -1;
 	prosper::util::set_descriptor_set_binding_array_texture(
-		*(*m_descSetGroup)->get_descriptor_set(0u),*depthTexture,
+		*m_descSetGroup->GetDescriptorSet(),*depthTexture,
 		umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),
 		rt->index
 	);

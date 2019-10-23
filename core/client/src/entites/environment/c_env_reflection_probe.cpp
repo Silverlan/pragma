@@ -17,6 +17,7 @@
 #include <wgui/types/wirect.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
+#include <pragma/util/stb_image_write.h>
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
@@ -28,7 +29,6 @@
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
-#include "pragma/rendering/pbr/stb_image_write.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -593,7 +593,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 
 	// Load BRDF texture from disk, if it already exists
 	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"env/brdf.ktx",loadInfo,&texPtr) == true)
-		brdfTex = std::static_pointer_cast<Texture>(texPtr)->texture;
+		brdfTex = std::static_pointer_cast<Texture>(texPtr)->GetVkTexture();
 
 	// Otherwise generate it
 	if(brdfTex == nullptr)
@@ -648,13 +648,13 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 	auto texIrradiance = std::static_pointer_cast<Texture>(pIrradiance->texture);
 	auto texBrdf = std::static_pointer_cast<Texture>(pBrdf->texture);
 	if(
-		texPrefilter == nullptr || texPrefilter->texture == nullptr ||
-		texIrradiance == nullptr || texIrradiance->texture == nullptr ||
-		texBrdf == nullptr || texBrdf->texture == nullptr
+		texPrefilter == nullptr || texPrefilter->HasValidVkTexture() == false ||
+		texIrradiance == nullptr || texIrradiance->HasValidVkTexture() == false ||
+		texBrdf == nullptr || texBrdf->HasValidVkTexture() == false
 	)
 		return false;
 	m_iblDsg = nullptr;
-	m_iblData = std::make_unique<rendering::IBLData>(texIrradiance->texture,texPrefilter->texture,texBrdf->texture);
+	m_iblData = std::make_unique<rendering::IBLData>(texIrradiance->GetVkTexture(),texPrefilter->GetVkTexture(),texBrdf->GetVkTexture());
 
 	// TODO: Do this properly (e.g. via material attributes)
 	static auto brdfSamplerInitialized = false;
@@ -668,11 +668,11 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
 		samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
 		auto sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
-		texIrradiance->texture->SetSampler(*sampler);
+		texIrradiance->GetVkTexture()->SetSampler(*sampler);
 
 		samplerCreateInfo.mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
 		sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
-		texPrefilter->texture->SetSampler(*sampler);
+		texPrefilter->GetVkTexture()->SetSampler(*sampler);
 	}
 
 	InitializeDescriptorSet();
@@ -685,7 +685,7 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 		return;
 	auto &dev = c_engine->GetDevice();
 	m_iblDsg = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
-	auto &ds = *(*m_iblDsg)->get_descriptor_set(0u);
+	auto &ds = *m_iblDsg->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->irradianceMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
 	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->prefilterMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
 	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->brdfMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));

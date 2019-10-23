@@ -16,6 +16,7 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 
 using namespace pragma::rendering;
 
@@ -156,7 +157,7 @@ void RasterizationRenderer::AdvanceRenderStage(std::shared_ptr<prosper::PrimaryC
 		}
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 		auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
-		RenderToneMapping(drawCmd,*(*dsgBloomTonemapping)->get_descriptor_set(0u));
+		RenderToneMapping(drawCmd,*dsgBloomTonemapping->GetDescriptorSet());
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 		m_stage = Stage::PPFXAA;
 		break;
@@ -185,7 +186,7 @@ bool RasterizationRenderer::ReloadRenderTarget()
 		)
 		return false;
 
-	auto &descSetHdrResolve = *(*m_hdrInfo.dsgBloomTonemapping)->get_descriptor_set(0u);
+	auto &descSetHdrResolve = *m_hdrInfo.dsgBloomTonemapping->GetDescriptorSet();
 	auto resolvedGlowTex = GetGlowInfo().renderTarget->GetTexture();
 	if(resolvedGlowTex->IsMSAATexture())
 		resolvedGlowTex = static_cast<prosper::MSAATexture&>(*resolvedGlowTex).GetResolvedTexture();
@@ -313,7 +314,7 @@ RasterizationRenderer::PrepassMode RasterizationRenderer::GetPrepassMode() const
 
 pragma::ShaderPrepassBase &RasterizationRenderer::GetPrepassShader() const {return const_cast<RasterizationRenderer*>(this)->GetPrepass().GetShader();}
 
-Anvil::DescriptorSet *RasterizationRenderer::GetCSMDescriptorSet() const {return (*m_descSetGroupCSM)->get_descriptor_set(0u);}
+prosper::DescriptorSet *RasterizationRenderer::GetCSMDescriptorSet() const {return m_descSetGroupCSM->GetDescriptorSet();}
 
 HDRData &RasterizationRenderer::GetHDRInfo() {return m_hdrInfo;}
 GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}

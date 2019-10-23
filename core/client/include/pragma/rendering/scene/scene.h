@@ -13,7 +13,7 @@
 #include <unordered_set>
 
 namespace pragma {class Shader; class ShaderTextured3D; class OcclusionCullingHandler; struct OcclusionMeshInfo;};
-namespace prosper {class BlurSet; class RenderPass; class Fence;};
+namespace prosper {class BlurSet; class RenderPass; class Fence; class DescriptorSet;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT ShaderMeshContainer
@@ -115,9 +115,9 @@ public:
 	const std::shared_ptr<prosper::Buffer> &GetFogBuffer() const;
 	const std::shared_ptr<prosper::DescriptorSetGroup> &GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint=vk::PipelineBindPoint::eGraphics) const;
 	const std::shared_ptr<prosper::DescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
-	Anvil::DescriptorSet *GetCameraDescriptorSetGraphics() const;
-	Anvil::DescriptorSet *GetCameraDescriptorSetCompute() const;
-	Anvil::DescriptorSet *GetViewCameraDescriptorSet() const;
+	prosper::DescriptorSet *GetCameraDescriptorSetGraphics() const;
+	prosper::DescriptorSet *GetCameraDescriptorSetCompute() const;
+	prosper::DescriptorSet *GetViewCameraDescriptorSet() const;
 	const std::shared_ptr<prosper::DescriptorSetGroup> &GetFogDescriptorSetGroup() const;
 
 	WorldEnvironment *GetWorldEnvironment() const;

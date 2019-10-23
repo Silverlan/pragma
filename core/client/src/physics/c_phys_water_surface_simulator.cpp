@@ -98,15 +98,15 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 	createInfo.size = size;
 	m_positionBuffer = prosper::util::create_buffer(dev,createInfo,verts.data());
 
-	auto &descSetParticles = *(*m_descSetGroupParticles)->get_descriptor_set(0u);
+	auto &descSetParticles = *m_descSetGroupParticles->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetParticles,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetParticles,*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
 
-	auto &descSetSplash = *(*m_descSetGroupSplash)->get_descriptor_set(0u);
+	auto &descSetSplash = *m_descSetGroupSplash->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetSplash,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetSplash,*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
 
-	auto &descSetIntegrate = *(*m_descSetGroupIntegrate)->get_descriptor_set(0u);
+	auto &descSetIntegrate = *m_descSetGroupIntegrate->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetIntegrate,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
 
 	// Initialize surface info buffer
@@ -115,7 +115,7 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 	createInfo.size = size;
 	m_surfaceInfoBuffer = prosper::util::create_buffer(dev,createInfo,&m_surfaceInfo);
 	m_descSetGroupSurfaceInfo = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
-	auto &descSetSurfaceInfo = *(*m_descSetGroupSurfaceInfo)->get_descriptor_set(0u);
+	auto &descSetSurfaceInfo = *m_descSetGroupSurfaceInfo->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetSurfaceInfo,*m_surfaceInfoBuffer,umath::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
 
 	// Initialize edge buffer
@@ -126,7 +126,7 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 	m_edgeBuffer = prosper::util::create_buffer(dev,createInfo,particleEdgeInfo.data());
 	auto &shaderWaterSurfaceSolveEdges = static_cast<pragma::ShaderWaterSurfaceSolveEdges&>(*m_whShaderSurfaceSolveEdges.get());
 	m_edgeDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
-	auto &descSetEdge = *(*m_edgeDescSetGroup)->get_descriptor_set(0u);
+	auto &descSetEdge = *m_edgeDescSetGroup->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetEdge,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
 	prosper::util::set_descriptor_set_binding_storage_buffer(descSetEdge,*m_edgeBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
 }

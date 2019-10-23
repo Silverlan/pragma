@@ -52,13 +52,6 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 					auto bUseVertexAnim = false;
 					if(vertAnimBuffer != nullptr)
 					{
-						// Vertex animation buffer barrier
-						prosper::util::record_buffer_barrier(
-							**drawCmd,*vertAnimBuffer,
-							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
-							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
-						);
-
 						auto pVertexAnimatedComponent = ent->GetComponent<pragma::CVertexAnimatedComponent>();
 						if(pVertexAnimatedComponent.valid())
 						{

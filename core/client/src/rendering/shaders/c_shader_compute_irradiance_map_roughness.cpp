@@ -1,6 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
-#include "pragma/rendering/pbr/stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <pragma/util/stb_image.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -86,7 +87,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 
 	// Shader input
 	auto dsg = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_IRRADIANCE);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsg)->get_descriptor_set(0u),cubemap,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsg->GetDescriptorSet(),cubemap,0u);
 
 	PushConstants pushConstants {};
 	pushConstants.projection = GetProjectionMatrix(w /static_cast<float>(h));
@@ -104,7 +105,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	buf->SetPermanentlyMapped(true);
 
 	auto dsgRoughness = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_ROUGHNESS);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*dsgRoughness)->get_descriptor_set(0u),*buf,0);
+	prosper::util::set_descriptor_set_binding_uniform_buffer(*dsgRoughness->GetDescriptorSet(),*buf,0);
 
 	// Shader execution
 	auto success = true;

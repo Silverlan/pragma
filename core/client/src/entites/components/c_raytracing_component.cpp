@@ -42,7 +42,7 @@ bool CRaytracingComponent::InitializeBuffers()
 	s_gameSceneDsg = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
 	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<MaterialDescriptorArrayManager>(s_gameSceneDsg,umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::TextureArray));
 
-	auto &ds = *(*s_gameSceneDsg)->get_descriptor_set(0);
+	auto &ds = *s_gameSceneDsg->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(ds,*s_materialDescriptorArrayManager->GetMaterialInfoBuffer(),umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::MaterialInfos));
 	prosper::util::set_descriptor_set_binding_storage_buffer(ds,*s_entityMeshInfoBuffer,umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::SubMeshInfos));
 	prosper::util::set_descriptor_set_binding_storage_buffer(ds,*CRenderComponent::GetInstanceBuffer(),umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::EntityInstanceData));

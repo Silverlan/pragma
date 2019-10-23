@@ -44,7 +44,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	// Shader input
 	auto &dev = c_engine->GetDevice();
 	auto dsg = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_CUBEMAP_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsg)->get_descriptor_set(0u),cubemap,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsg->GetDescriptorSet(),cubemap,0u);
 
 	PushConstants pushConstants {};
 	pushConstants.projection = GetProjectionMatrix(w /static_cast<float>(h));

@@ -137,8 +137,8 @@ void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 	m_descSetGroupKernel = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_SAMPLE_BUFFER);
 	m_descSetGroupTexture = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_NOISE_TEXTURE);
 	
-	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*m_descSetGroupKernel)->get_descriptor_set(0u),*m_kernelBuffer,0u);
-	prosper::util::set_descriptor_set_binding_texture(*(*m_descSetGroupTexture)->get_descriptor_set(0u),*m_noiseTexture,0u);
+	prosper::util::set_descriptor_set_binding_uniform_buffer(*m_descSetGroupKernel->GetDescriptorSet(),*m_kernelBuffer,0u);
+	prosper::util::set_descriptor_set_binding_texture(*m_descSetGroupTexture->GetDescriptorSet(),*m_noiseTexture,0u);
 }
 
 void ShaderSSAO::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -159,7 +159,7 @@ bool ShaderSSAO::Draw(const Scene &scene,Anvil::DescriptorSet &descSetPrepass,co
 	auto *descSetCamera = scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSets({
 		&descSetPrepass,(*m_descSetGroupTexture)->get_descriptor_set(0u),(*m_descSetGroupKernel)->get_descriptor_set(0u),
-		descSetCamera
+		&**descSetCamera
 	}) && RecordPushConstants(renderTargetDimensions.size() *sizeof(renderTargetDimensions.front()),renderTargetDimensions.data()) &&
 		prosper::ShaderBaseImageProcessing::Draw();
 }

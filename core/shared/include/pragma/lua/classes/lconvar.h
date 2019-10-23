@@ -29,6 +29,7 @@ namespace Lua
 	{
 		DLLNETWORK int register_override(lua_State *l);
 		DLLNETWORK int clear_override(lua_State *l);
+		DLLNETWORK int parse_command_arguments(lua_State *l);
 	};
 };
 

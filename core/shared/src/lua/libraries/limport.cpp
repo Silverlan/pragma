@@ -662,7 +662,6 @@ int Lua::import::import_model_asset(lua_State *l)
 				{
 					std::string ext = "";
 					ufile::get_extension(fName,&ext);
-					ext = '.' +ext;
 					auto it = std::find_if(suportedFormats.begin(),suportedFormats.end(),[&ext](const MaterialManager::ImageFormat &format) {
 						return ustring::compare(format.extension,ext,false);
 					});

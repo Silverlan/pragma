@@ -51,10 +51,10 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPPWater::InitializeMaterialDe
 		return nullptr;
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_REFRACTION_MAP);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
 	auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);
-	if(texture->texture != nullptr)
-		prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,0u);
+	if(texture->HasValidVkTexture())
+		prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),0u);
 	return descSetGroup;
 }
 

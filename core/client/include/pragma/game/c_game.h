@@ -373,9 +373,9 @@ public:
 	bool SaveImage(prosper::Image &image,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
 	bool SaveImage(
 		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
-		const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo
+		const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false
 	) const;
-	bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
+	bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false) const;
 
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;

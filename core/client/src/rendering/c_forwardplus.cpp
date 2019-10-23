@@ -85,18 +85,18 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &contex
 	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
 	m_descSetGroupLightSourcesGraphics = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_descSetGroupLightSourcesGraphics)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
 	);
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_descSetGroupLightSourcesGraphics)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
 	);
 
 	m_descSetGroupLightSourcesCompute = prosper::util::create_descriptor_set_group(dev,pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_descSetGroupLightSourcesCompute)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
+		*m_descSetGroupLightSourcesCompute->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
 	);
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_descSetGroupLightSourcesCompute)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
+		*m_descSetGroupLightSourcesCompute->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
 	);
 
 	auto workGroupCount = CalcWorkGroupCount(width,height);
@@ -124,10 +124,10 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &contex
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_descSetGroupLightSourcesGraphics)->get_descriptor_set(0u),*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
+		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
 	);
 
-	auto &descSetCompute = *(*m_descSetGroupLightSourcesCompute)->get_descriptor_set(0u);
+	auto &descSetCompute = *m_descSetGroupLightSourcesCompute->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_storage_buffer(
 		descSetCompute,*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer)
 	);

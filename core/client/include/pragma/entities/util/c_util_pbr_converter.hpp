@@ -13,6 +13,7 @@
 #include <queue>
 #include <atomic>
 #include <mutex>
+#include <unordered_set>
 
 namespace prosper {class Texture; class Image;};
 namespace util {class ImageBuffer;};
@@ -55,6 +56,7 @@ namespace pragma
 		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);
 
 		std::queue<PBRAOBakeJob> m_workQueue = {};
+		std::unordered_set<std::string> m_convertedMaterials = {};
 
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};

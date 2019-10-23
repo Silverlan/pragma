@@ -1496,7 +1496,11 @@ namespace Lua
 
 	template<class TLuaClass,class THandle>
 		void register_base_env_camera_component_methods(lua_State *l,TLuaClass &def)
-{
+	{
+		def.add_static_constant("DEFAULT_NEAR_Z",pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z);
+		def.add_static_constant("DEFAULT_FAR_Z",pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z);
+		def.add_static_constant("DEFAULT_FOV",pragma::BaseEnvCameraComponent::DEFAULT_FOV);
+		def.add_static_constant("DEFAULT_VIEWMODEL_FOV",pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
 		def.def("GetProjectionMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Push<Mat4>(l,hComponent->GetProjectionMatrix());
@@ -1812,6 +1816,18 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetOffset(offset);
 		}));
+		def.def("GetOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetOffset());
+		}));
+		def.def("SetTimeOffset",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float offset) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->SetTimeOffset(offset);
+		}));
+		def.def("GetTimeOffset",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushNumber(l,hComponent->GetTimeOffset());
+		}));
 		def.def("SetReferenceDistance",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float referenceDist) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetReferenceDistance(referenceDist);
@@ -1836,13 +1852,17 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetSoundType(static_cast<ALSoundType>(soundTypes));
 		}));
-		def.def("PlaySound",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+		def.def("Play",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->Play();
 		}));
-		def.def("StopSound",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+		def.def("Stop",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->Stop();
+		}));
+		def.def("Pause",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			hComponent->Pause();
 		}));
 		def.def("GetSound",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
@@ -1854,6 +1874,10 @@ namespace Lua
 		def.def("IsPlaying",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
 			Lua::PushBool(l,hComponent->IsPlaying());
+		}));
+		def.def("IsPaused",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::PushBool(l,hComponent->IsPaused());
 		}));
 	}
 

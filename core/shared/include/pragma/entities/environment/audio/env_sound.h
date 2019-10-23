@@ -44,8 +44,12 @@ namespace pragma
 		void SetInnerConeAngle(float angle);
 		void SetOuterConeAngle(float angle);
 		void SetOffset(float offset);
+		void SetTimeOffset(float offsetInSeconds);
 		void SetReferenceDistance(float referenceDist);
 		void SetMaxDistance(float maxDist);
+
+		float GetOffset() const;
+		float GetTimeOffset() const;
 
 		void SetRelativeToListener(bool bRelative);
 		void SetPlayOnSpawn(bool bPlayOnSpawn);
@@ -54,7 +58,9 @@ namespace pragma
 
 		void Play();
 		void Stop();
+		void Pause();
 
+		bool IsPaused() const;
 		bool IsPlaying() const;
 		const std::shared_ptr<ALSound> &GetSound() const;
 	protected:

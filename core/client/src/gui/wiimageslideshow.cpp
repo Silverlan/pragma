@@ -12,6 +12,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
 
+#pragma optimize("",off)
 WIImageSlideShow::PreloadImage::PreloadImage()
 	: ready(false),loading(false),image(-1)
 {}
@@ -29,7 +30,6 @@ void WIImageSlideShow::Initialize()
 	m_hImgPrev = CreateChild<WITexturedRect>();
 	m_hImgPrev->SetAutoAlignToParent(true);
 	Update();
-	PreloadNextRandomShuffle();
 }
 
 void WIImageSlideShow::SetColor(float r,float g,float b,float a)
@@ -78,7 +78,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	m_currentImg = wiImgPreload.image;
 	if(!wiImgPreload.ready)
 		return;
-	auto &texPreload = wiImgPreload.texture->texture;
+	auto texPreload = wiImgPreload.texture->GetVkTexture();
 	if(texPreload == nullptr)
 		return;
 	auto &imgPreload = texPreload->GetImage();
@@ -116,11 +116,18 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	}
 
 	auto &drawCmd = context.GetDrawCommandBuffer();
-	prosper::util::record_blur_image(dev,drawCmd,*m_blurSet,{
-		Vector4(1.f,1.f,1.f,1.f),
-		1.75f, /* Blur size */
-		9 /* Kernel size */
-	});
+	try
+	{
+		prosper::util::record_blur_image(dev,drawCmd,*m_blurSet,{
+			Vector4(1.f,1.f,1.f,1.f),
+			1.75f, /* Blur size */
+			9 /* Kernel size */
+		});
+	}
+	catch(const std::logic_error &e)
+	{
+		Con::cwar<<"WARNING: Unable to blur menu background image: '"<<e.what()<<"'!"<<Con::endl;
+	}
 	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture();
 
 	auto *pImgPrev = m_hImgPrev.get<WITexturedRect>();
@@ -206,7 +213,7 @@ void WIImageSlideShow::PreloadNextRandomShuffle()
 	{
 		m_randomShuffle.resize(m_files.size());
 		for(size_t i=0;i<m_files.size();i++)
-			m_randomShuffle.push_back(i);
+			m_randomShuffle.at(i) = i;
 	}
 	if(m_randomShuffle.empty())
 		return;
@@ -220,3 +227,4 @@ void WIImageSlideShow::PreloadNextRandomShuffle()
 	}
 	PreloadNextImage(Int32(img));
 }
+#pragma optimize("",on)

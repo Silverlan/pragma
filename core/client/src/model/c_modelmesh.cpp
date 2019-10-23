@@ -60,6 +60,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
+	s_vertexBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global vertex weight buffer
 	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
@@ -69,6 +70,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexWeightBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
+	s_vertexWeightBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global alpha buffer
 	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
@@ -78,6 +80,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_alphaBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
+	s_alphaBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global index buffer
 	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
@@ -87,6 +90,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_indexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
+	s_indexBuffer->SetPermanentlyMapped(true);
 }
 void CModelSubMesh::ClearBuffers()
 {

@@ -66,7 +66,7 @@ void CRenderComponent::InitializeBuffers()
 	pragma::initialize_articulated_buffers();
 }
 std::weak_ptr<prosper::Buffer> CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
-Anvil::DescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? (*m_renderDescSetGroup)->get_descriptor_set(0u) : nullptr;}
+prosper::DescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
 void CRenderComponent::ClearRenderObjects()
 {
 	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
@@ -418,7 +418,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
 	m_renderDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		*(*m_renderDescSetGroup)->get_descriptor_set(0u),*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
+		*m_renderDescSetGroup->GetDescriptorSet(),*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
 	);
 	UpdateBoneBuffer();
 	(*m_renderDescSetGroup)->get_descriptor_set(0u)->update();
@@ -438,7 +438,7 @@ void CRenderComponent::UpdateBoneBuffer()
 		return;
 	auto &dev = c_engine->GetDevice();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		*(*m_renderDescSetGroup)->get_descriptor_set(0u),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+		*m_renderDescSetGroup->GetDescriptorSet(),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 	);
 }
 void CRenderComponent::ClearRenderBuffers()

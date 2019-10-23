@@ -474,6 +474,10 @@ void Lua::WIFrame::register_class(luabind::class_<WIFrameHandle,luabind::bases<W
 {
 	classDef.def("SetTitle",&SetTitle);
 	classDef.def("GetTitle",&GetTitle);
+	classDef.def("SetCloseButtonEnabled",static_cast<void(*)(lua_State*,WIFrameHandle&,bool)>([](lua_State *l,WIFrameHandle &hPanel,bool enabled) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIFrame*>(hPanel.get())->SetCloseButtonEnabled(enabled);
+	}));
 }
 
 void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,luabind::bases<WITextEntryHandle,WIHandle>> &classDef)

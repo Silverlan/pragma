@@ -592,7 +592,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	auto mapMatPath = "materials/maps/" +mapName +'/';
 
 	if(messageLogger)
-		messageLogger("Extracing BSP files...");
+		messageLogger("Extracing embedded files...");
 	uint32_t numExtracted = 0;
 	uint32_t numSkippedLump = 0;
 	uint32_t numSkippedMapMats = 0;

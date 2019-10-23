@@ -106,12 +106,12 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderParticle2DBase::InitializeMat
 	if(diffuseMap != nullptr && diffuseMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap->texture);
-		if(texture->texture != nullptr)
+		if(texture->HasValidVkTexture())
 		{
 			auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this,descSetGroup);
-			auto descSet = (*descSetGroup)->get_descriptor_set(0u);
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,0u);
+			auto &descSet = *descSetGroup->GetDescriptorSet();
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),0u);
 			return descSetGroup;
 		}
 	}

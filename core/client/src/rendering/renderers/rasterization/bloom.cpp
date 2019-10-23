@@ -68,6 +68,12 @@ void RasterizationRenderer::RenderGlowObjects(std::shared_ptr<prosper::PrimaryCo
 
 	prosper::util::record_end_render_pass(*(*drawCmd));
 
+	// TODO: Implement according to http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
+	/*prosper::util::record_generate_mipmaps(
+		**drawCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT
+	);*/
+
 	const auto blurAmount = 5;
 	auto &blurImg = *glowInfo.blurSet->GetFinalRenderTarget()->GetTexture()->GetImage();
 	for(auto i=decltype(blurAmount){0u};i<blurAmount;++i)

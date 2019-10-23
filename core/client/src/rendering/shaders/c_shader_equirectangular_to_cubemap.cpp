@@ -1,6 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
-#include "pragma/rendering/pbr/stb_image.h"
+#include <pragma/util/stb_image.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -93,7 +93,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	// Shader input
 	auto &dev = c_engine->GetDevice();
 	auto dsg = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsg)->get_descriptor_set(0u),equirectangularTexture,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsg->GetDescriptorSet(),equirectangularTexture,0u);
 
 	PushConstants pushConstants {};
 	pushConstants.projection = GetProjectionMatrix(resolution /static_cast<float>(resolution));

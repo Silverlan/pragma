@@ -40,7 +40,7 @@ CGame::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferData()
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS.IsValid() == false)
 		return;
 	descSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS);
-	auto &descSet = *(*descSetGroup)->get_descriptor_set(0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
 		descSet,*debugBuffer,umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Debug)
 	);

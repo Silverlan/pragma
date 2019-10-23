@@ -152,6 +152,33 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 	if(util::port_file(this,"materials\\" +vmtPath) == false)
 		return false;
 	auto *mat = fLoadMaterial(vmtPath,true);
+	if(mat)
+	{
+		// Port textures as well
+		std::function<void(const std::shared_ptr<ds::Block>&)> fPortTextures = nullptr;
+		fPortTextures = [this,&fPortTextures](const std::shared_ptr<ds::Block> &block) {
+			auto *data = block->GetData();
+			if(data == nullptr)
+				return;
+			for(auto &pair : *data)
+			{
+				auto v = pair.second;
+				if(v->IsBlock() == true)
+					fPortTextures(std::static_pointer_cast<ds::Block>(v));
+				else
+				{
+					auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
+					if(dataTex)
+					{
+						auto path = "materials\\" +dataTex->GetValue().name;
+						if(FileManager::Exists(path) == false && util::port_file(this,path) == false)
+							Con::cwar<<"WARNING: Unable to port texture '"<<dataTex->GetValue().name<<"'!"<<Con::endl;
+					}
+				}
+			}
+		};
+		fPortTextures(mat->GetDataBlock());
+	}
 	return (mat != nullptr) ? true : false;
 }
 

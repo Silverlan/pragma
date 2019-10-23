@@ -47,12 +47,12 @@ bool SSAOInfo::Initialize(
 	renderTargetBlur = prosper::util::create_render_target(dev,{texBlur},rp);
 	renderTargetBlur->SetDebugName("ssao_blur_rt");
 	descSetGroupPrepass = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
-	auto &descSetPrepass = *(*descSetGroupPrepass)->get_descriptor_set(0u);
+	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_texture(descSetPrepass,*texNorm,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
 	prosper::util::set_descriptor_set_binding_texture(descSetPrepass,*texDepth,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
 
 	descSetGroupOcclusion = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*(*descSetGroupOcclusion)->get_descriptor_set(0u),*renderTarget->GetTexture(),0u);
+	prosper::util::set_descriptor_set_binding_texture(*descSetGroupOcclusion->GetDescriptorSet(),*renderTarget->GetTexture(),0u);
 	return true;
 }
 

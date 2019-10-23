@@ -8,6 +8,7 @@
 #include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 
 using namespace pragma;
 
@@ -53,6 +54,9 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 				rot = pTrComponent->GetOrientation();
 			}
 		}));
+		auto &renderScene = c_game->GetRenderScene();
+		if(renderScene)
+			renderScene->SetActiveCamera(*this);
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
 	{
@@ -61,6 +65,22 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 			pl->SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 		if(m_cbCameraUpdate.IsValid())
 			m_cbCameraUpdate.Remove();
+
+		auto &renderScene = c_game->GetRenderScene();
+		if(renderScene)
+		{
+			EntityIterator entIt {*c_game};
+			entIt.AttachFilter<TEntityIteratorFilterComponent<CCameraComponent>>();
+			for(auto *ent : entIt)
+			{
+				auto toggleC = ent->GetComponent<CToggleComponent>();
+				if(toggleC.valid() && toggleC->IsTurnedOn() == false)
+					continue;
+				auto camC = ent->GetComponent<CCameraComponent>();
+				renderScene->SetActiveCamera(*camC);
+				break;
+			}
+		}
 	}
 	return util::EventReply::Unhandled;
 }

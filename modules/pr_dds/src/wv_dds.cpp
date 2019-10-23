@@ -426,16 +426,16 @@ extern "C"
 	}
 	bool PRAGMA_EXPORT save_data_image(
 		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
-		const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler
+		const std::string &fileName,const ImageWriteInfo &imgCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 	)
 	{
-		return Lua::dds::save_image(imgLayerMipmapData,width,height,fileName,imgCreateInfo,errorHandler);
+		return Lua::dds::save_image(imgLayerMipmapData,width,height,fileName,imgCreateInfo,cubemap,errorHandler);
 	}
 	bool PRAGMA_EXPORT save_buffer_image(
-		util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,const std::function<void(const std::string&)> &errorHandler
+		util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &imgCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 	)
 	{
-		return Lua::dds::save_image(imgBuffer,fileName,imgCreateInfo,errorHandler);
+		return Lua::dds::save_image(imgBuffer,fileName,imgCreateInfo,cubemap,errorHandler);
 	}
 };
 #pragma optimize("",on)

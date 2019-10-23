@@ -16,6 +16,7 @@ namespace prosper
 	class Texture;
 	class DescriptorSetGroup;
 	class PrimaryCommandBuffer;
+	class DescriptorSet;
 };
 namespace pragma
 {
@@ -116,7 +117,7 @@ namespace pragma::rendering
 		const std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles() const;
 		std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles();
 		//const Vulkan::DescriptorSet &GetBloomGlowDescriptorSet() const; // prosper TODO
-		Anvil::DescriptorSet *GetCSMDescriptorSet() const;
+		prosper::DescriptorSet *GetCSMDescriptorSet() const;
 		//Anvil::DescriptorSet *GetLightSourceDescriptorSet() const;
 
 		Float GetHDRExposure() const;
@@ -174,7 +175,7 @@ namespace pragma::rendering
 		void RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
 		void RenderGlowObjects(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
 		void RenderBloom(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderToneMapping(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,Anvil::DescriptorSet &descSetHdrResolve);
+		void RenderToneMapping(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::DescriptorSet &descSetHdrResolve);
 		void RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
 
 		void InitializeLightDescriptorSets();

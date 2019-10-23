@@ -80,6 +80,12 @@ Engine::Engine(int,char*[])
 	m_lastTick = static_cast<long long>(m_ctTick());
 	engine = this;
 
+	// These need to exist, so they can be automatically mounted
+	if(FileManager::Exists("addons/imported") == false)
+		FileManager::CreatePath("addons/imported");
+	if(FileManager::Exists("addons/converted") == false)
+		FileManager::CreatePath("addons/converted");
+
 	// Link package system to file system
 	m_padPackageManager = upad::link_to_file_system();
 

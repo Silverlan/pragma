@@ -144,6 +144,23 @@ void BaseEnvSoundComponent::SetOffset(float offset)
 	if(m_sound != nullptr)
 		m_sound->SetOffset(offset);
 }
+void BaseEnvSoundComponent::SetTimeOffset(float offsetInSeconds)
+{
+	if(m_sound)
+		m_sound->SetTimeOffset(offsetInSeconds);
+}
+float BaseEnvSoundComponent::GetOffset() const
+{
+	if(m_sound)
+		return m_sound->GetOffset();
+	return m_kvOffset;
+}
+float BaseEnvSoundComponent::GetTimeOffset() const
+{
+	if(m_sound)
+		return m_sound->GetTimeOffset();
+	return 0.f;
+}
 void BaseEnvSoundComponent::SetReferenceDistance(float referenceDist)
 {
 	m_kvReferenceDist = referenceDist;
@@ -275,9 +292,19 @@ void BaseEnvSoundComponent::Stop()
 		return;
 	m_sound->Stop();
 }
+void BaseEnvSoundComponent::Pause()
+{
+	if(m_sound == nullptr)
+		return;
+	m_sound->Pause();
+}
 bool BaseEnvSoundComponent::IsPlaying() const
 {
 	return (m_sound != nullptr) ? m_sound->IsPlaying() : false;
+}
+bool BaseEnvSoundComponent::IsPaused() const
+{
+	return (m_sound != nullptr) ? m_sound->IsPaused() : true;
 }
 const std::shared_ptr<ALSound> &BaseEnvSoundComponent::GetSound() const {return m_sound;}
 

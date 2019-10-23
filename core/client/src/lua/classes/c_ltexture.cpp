@@ -5,15 +5,15 @@
 
 void Lua::Texture::GetWidth(lua_State *l,::Texture &tex)
 {
-	Lua::PushInt(l,tex.width);
+	Lua::PushInt(l,tex.GetWidth());
 }
 void Lua::Texture::GetHeight(lua_State *l,::Texture &tex)
 {
-	Lua::PushInt(l,tex.height);
+	Lua::PushInt(l,tex.GetHeight());
 }
 void Lua::Texture::GetVkTexture(lua_State *l,::Texture &tex)
 {
-	if(tex.texture == nullptr)
+	if(tex.HasValidVkTexture() == false)
 		return;
-	Lua::Push(l,tex.texture);
+	Lua::Push(l,tex.GetVkTexture());
 }

@@ -9,7 +9,7 @@
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
 
-namespace prosper {class UniformResizableBuffer;};
+namespace prosper {class UniformResizableBuffer; class DescriptorSet;};
 namespace pragma
 {
 	class CModelComponent;
@@ -33,7 +33,7 @@ namespace pragma
 
 		CRenderComponent(BaseEntity &ent);
 		std::weak_ptr<prosper::Buffer> GetRenderBuffer() const;
-		Anvil::DescriptorSet *GetRenderDescriptorSet() const;
+		prosper::DescriptorSet *GetRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent*> &GetViewEntities();
 		static const std::shared_ptr<prosper::UniformResizableBuffer> &GetInstanceBuffer();

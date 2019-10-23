@@ -16,10 +16,10 @@ namespace Lua
 		bool save_image(prosper::Image &image,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler=nullptr);
 		bool save_image(
 			const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,const std::string &fileName,
-			const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+			const ImageWriteInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr
 		);
 		bool save_image(
-			util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+			util::ImageBuffer &imgBuffer,const std::string &fileName,const ImageWriteInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr
 		);
 	};
 };

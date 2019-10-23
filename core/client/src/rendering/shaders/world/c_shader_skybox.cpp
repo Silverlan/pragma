@@ -52,12 +52,12 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderSkybox::InitializeMaterialDes
 	if(skyboxMap == nullptr || skyboxMap->texture == nullptr)
 		return nullptr;
 	auto skyboxTexture = std::static_pointer_cast<Texture>(skyboxMap->texture);
-	if(skyboxTexture->texture == nullptr)
+	if(skyboxTexture->HasValidVkTexture() == false)
 		return nullptr;
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
-	prosper::util::set_descriptor_set_binding_texture(*descSet,*skyboxTexture->texture,0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+	prosper::util::set_descriptor_set_binding_texture(descSet,*skyboxTexture->GetVkTexture(),0u);
 	return descSetGroup;
 }
 uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}

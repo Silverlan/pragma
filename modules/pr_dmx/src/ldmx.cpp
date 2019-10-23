@@ -261,6 +261,13 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 		el.DebugPrint(ss);
 		Lua::PushString(l,ss.str());
 	}));
+	classDefElement.def("__eq",static_cast<void(*)(lua_State*,::dmx::Element&,::dmx::Element&)>([](lua_State *l,::dmx::Element &el,::dmx::Element &elOther) {
+		Lua::PushBool(l,&el == &elOther);
+	}));
+	classDefElement.def("GetGUID",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
+		std::string guid = std::string{el.GUID.data(),el.GUID.size()};
+		Lua::PushString(l,guid);
+	}));
 	classDefElement.def("Get",static_cast<void(*)(lua_State*,::dmx::Element&,const std::string&)>([](lua_State *l,::dmx::Element &el,const std::string &name) {
 		auto child = el.Get(name);
 		if(child == nullptr)
@@ -351,6 +358,9 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 		std::stringstream ss;
 		attr.DebugPrint(ss);
 		Lua::PushString(l,ss.str());
+	}));
+	classDefAttribute.def("__eq",static_cast<void(*)(lua_State*,::dmx::Attribute&,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr,::dmx::Attribute &attrOther) {
+		Lua::PushBool(l,&attr == &attrOther);
 	}));
 	classDefAttribute.def("GetType",static_cast<void(*)(lua_State*,::dmx::Attribute&)>([](lua_State *l,::dmx::Attribute &attr) {
 		Lua::PushInt(l,umath::to_integral(attr.type));

@@ -69,12 +69,12 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderGlow::InitializeMaterialDescr
 	if(glowMap == nullptr || glowMap->texture == nullptr)
 		return nullptr;
 	auto glowTexture = std::static_pointer_cast<Texture>(glowMap->texture);
-	if(glowTexture->texture == nullptr)
+	if(glowTexture->HasValidVkTexture() == false)
 		return nullptr;
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
-	prosper::util::set_descriptor_set_binding_texture(*descSet,*glowTexture->texture,0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+	prosper::util::set_descriptor_set_binding_texture(descSet,*glowTexture->GetVkTexture(),0u);
 	return descSetGroup;
 }
 bool ShaderGlow::BindClipPlane(const Vector4 &clipPlane)
@@ -96,7 +96,7 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 	if(data != nullptr && data->GetBool("glow_alpha_only") == true)
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
-		if(prosper::util::has_alpha(texture->internalFormat) == false)
+		if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage()->GetFormat()) == false)
 			return false;
 	}
 	auto scale = 1.f;

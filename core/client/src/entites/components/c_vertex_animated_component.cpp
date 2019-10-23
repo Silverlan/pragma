@@ -186,6 +186,13 @@ endLoop:
 		//for(auto &vaData : pair.second)
 		//	bufferData.push_back(vaData);
 	}
+
+	// Vertex animation buffer barrier
+	prosper::util::record_buffer_barrier(
+		**drawCmd,*m_vertexAnimationBuffer,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
+		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	);
 }
 
 bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const

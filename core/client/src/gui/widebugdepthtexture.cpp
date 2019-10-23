@@ -72,9 +72,9 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	m_srcDepthRenderTarget = prosper::util::create_render_target(dev,{texDepthSrc});
 	m_srcDepthRenderTarget->SetDebugName("debug_depth_src_rt");
 	if(inputImg.GetLayerCount() == 1u)
-		prosper::util::set_descriptor_set_binding_texture(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u);
+		prosper::util::set_descriptor_set_binding_texture(*m_dsgSceneDepthTex->GetDescriptorSet(),*m_srcDepthRenderTarget->GetTexture(),0u);
 	else
-		prosper::util::set_descriptor_set_binding_array_texture(*(*m_dsgSceneDepthTex)->get_descriptor_set(0u),*m_srcDepthRenderTarget->GetTexture(),0u,0u);
+		prosper::util::set_descriptor_set_binding_array_texture(*m_dsgSceneDepthTex->GetDescriptorSet(),*m_srcDepthRenderTarget->GetTexture(),0u,0u);
 
 	if(m_hTextureRect.IsValid())
 		static_cast<WITexturedRect&>(*m_hTextureRect.get()).SetTexture(*m_renderTarget->GetTexture());

@@ -39,6 +39,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/console/command_options.hpp>
+#include <pragma/util/util_image.hpp>
 #include <sharedutils/util_image_buffer.hpp>
 #include <wrappers/memory_block.h>
 
@@ -286,7 +287,7 @@ void CMD_cl_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vec
 }
 #endif
 
-static std::string get_screenshot_name(Game *game)
+static std::string get_screenshot_name(Game *game,pragma::image::ImageOutputFormat format)
 {
 	std::string map;
 	if(game == nullptr)
@@ -300,7 +301,7 @@ static std::string get_screenshot_name(Game *game)
 		path = "screenshots\\";
 		path += map;
 		path += ustring::fill_zeroes(std::to_string(i),4);
-		path += ".tga";
+		path += "." +pragma::image::get_image_output_format_extension(format);
 		i++;
 	}
 	while(FileManager::Exists(path.c_str()/*,fsys::SearchFlags::Local*/));
@@ -328,12 +329,26 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		Con::cout<<"Preparing scene for raytracing..."<<Con::endl;
 
 		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
+
+		auto format = pragma::image::ImageOutputFormat::PNG;
+		auto itFormat = commandOptions.find("format");
+		if(itFormat != commandOptions.end())
+		{
+			std::string customFormat {};
+			if(itFormat->second.parameters.empty() == false)
+				customFormat = itFormat->second.parameters.front();
+			auto eCustomFormat = pragma::image::string_to_image_output_format(customFormat);
+			if(eCustomFormat.has_value())
+				format = *eCustomFormat;
+			else
+				Con::cwar<<"WARNING: Unsupported format '"<<customFormat<<"'! Using PNG instead..."<<Con::endl;
+		}
 		auto resolution = c_engine->GetRenderResolution();
 		pragma::rendering::cycles::SceneInfo sceneInfo {};
 		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
 		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
 		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
-
+		sceneInfo.hdrOutput = true;//(format == pragma::image::ImageOutputFormat::HDR);
 		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 		if(pCam)
 		{
@@ -343,21 +358,39 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			renderImgInfo.farZ = pCam->GetFarZ();
 			renderImgInfo.fov = pCam->GetFOV();
 		}
-		auto itDenoise = commandOptions.find("denoise");
+		sceneInfo.denoise = true;
+		auto itDenoise = commandOptions.find("nodenoise");
 		if(itDenoise != commandOptions.end())
-			sceneInfo.denoise = true;
+			sceneInfo.denoise = false;
+
+		auto quality = 1.f;
+		auto itQuality = commandOptions.find("quality");
+		if(itQuality != commandOptions.end() && itQuality->second.parameters.empty() == false)
+			quality = util::to_float(itQuality->second.parameters.front());
+
+		auto toneMapping = util::ImageBuffer::ToneMapping::GammaCorrection;
+		auto itToneMapping = commandOptions.find("tone_mapping");
+		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false)
+		{
+			auto customToneMapping = pragma::image::string_to_tone_mapping(itToneMapping->second.parameters.front());
+			if(customToneMapping.has_value() == false)
+				Con::cwar<<"WARNING: '"<<itToneMapping->second.parameters.front()<<"' is not a valid tone mapper!"<<Con::endl;
+			else
+				toneMapping = *customToneMapping;
+		}
+
 		Con::cout<<"Executing raytracer... This may take a few minutes!"<<Con::endl;
 		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 		if(job.IsValid())
 		{
-			job.SetCompletionHandler([](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
 				if(worker.IsSuccessful() == false)
 				{
 					Con::cwar<<"WARNING: Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
 					return;
 				}
 
-				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr);
+				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr,format);
 				Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
 				auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 				if(f == nullptr)
@@ -366,8 +399,14 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 					return;
 				}
 				auto imgBuffer = worker.GetResult();
-				imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
-				util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
+				if(imgBuffer->IsHDRFormat())
+					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
+				if(pragma::image::save_image(f,*imgBuffer,format,quality) == false)
+					Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
+
+				// Obsolete
+				// imgBuffer->Convert(util::ImageBuffer::Format::RGB8);
+				// util::tga::write_tga(f,imgBuffer->GetWidth(),imgBuffer->GetHeight(),static_cast<uint8_t*>(imgBuffer->GetData()));
 			});
 			job.Start();
 			c_engine->AddParallelJob(job,"Raytraced screenshot");
@@ -497,7 +536,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 	if(imgScreenshot == nullptr)
 		return;
-	auto path = get_screenshot_name(game);
+	auto path = get_screenshot_name(game,pragma::image::ImageOutputFormat::TGA); // TODO
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 	if(f == nullptr)
 		return;

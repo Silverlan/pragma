@@ -56,22 +56,22 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderWater::InitializeMaterialDesc
 	auto &dev = c_engine->GetDevice();
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
 
 	auto *dudvMap = mat.GetTextureInfo("dudvmap");
 	if(dudvMap != nullptr && dudvMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::DuDvMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DuDvMap));
 	}
 
 	auto *normalMap = mat.GetNormalMap();
 	if(normalMap != nullptr && normalMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(normalMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::NormalMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
 	}
 	return descSetGroup;
 }

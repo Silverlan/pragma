@@ -183,7 +183,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		m_waterScene->texSceneDepth = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
 	}
 
-	auto &descSetEffects = *(*m_waterScene->descSetGroupTexEffects)->get_descriptor_set(0u);
+	auto &descSetEffects = *m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
 	auto &reflectionTex = renderer->GetHDRInfo().sceneRenderTarget->GetTexture();
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*reflectionTex,umath::to_integral(pragma::ShaderWater::WaterBinding::ReflectionMap));
 	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texScene,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
@@ -203,7 +203,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	fogBufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
 	m_waterScene->fogBuffer = prosper::util::create_buffer(dev,fogBufCreateInfo,&fog);
 	m_waterScene->fogDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
-	auto &descSetFog = *(*m_waterScene->fogDescSetGroup)->get_descriptor_set(0u);
+	auto &descSetFog = *m_waterScene->fogDescSetGroup->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetFog,*m_waterScene->fogBuffer,0u);
 	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetEffects,*m_waterScene->fogBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterFog));
 
@@ -297,11 +297,11 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		{
 			auto &hdrInfo = renderer->GetHDRInfo();
 
-			auto &descSetHdr = *(*hdrInfo.dsgHDRPostProcessing)->get_descriptor_set(0u);
-			auto *imgTex = prosper::util::get_descriptor_set_image(descSetHdr,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
+			auto &descSetHdr = *hdrInfo.dsgHDRPostProcessing->GetDescriptorSet();
+			auto *imgTex = descSetHdr.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 			auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
 			if(imgTex != nullptr)
-				prosper::util::record_image_barrier(*(*drawCmd),*imgTex,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+				prosper::util::record_image_barrier(*(*drawCmd),**imgTex,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 
 			std::function<void(prosper::CommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
@@ -316,9 +316,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.BeginDraw(drawCmd) == true && shaderPPWater.BindRefractionMaterial(*mat))
 				{
 					shaderPPWater.Draw(
-						descSetHdr,
+						*descSetHdr,
 						*(*hdrInfo.dsgSceneDepth)->get_descriptor_set(0u),
-						*scene->GetCameraDescriptorSetGraphics(),
+						**scene->GetCameraDescriptorSetGraphics(),
 						c_game->GetGlobalRenderSettingsDescriptorSet(),
 						*(*waterScene.fogDescSetGroup)->get_descriptor_set(0u),
 						Vector4{n.x,n.y,n.z,planeDist}

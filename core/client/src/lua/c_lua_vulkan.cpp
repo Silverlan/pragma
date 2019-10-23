@@ -3212,31 +3212,31 @@ void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua_State *l,DescriptorSet &hD
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_texture(*hDescSet->get_descriptor_set(0u),texture,bindingIdx));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_texture(*hDescSet.GetDescriptorSet(),texture,bindingIdx));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t layerId)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_texture(*hDescSet->get_descriptor_set(0u),texture,bindingIdx,layerId));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_texture(*hDescSet.GetDescriptorSet(),texture,bindingIdx,layerId));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx,uint32_t layerId)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_array_texture(*hDescSet->get_descriptor_set(0u),texture,bindingIdx,arrayIdx,layerId));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_array_texture(*hDescSet.GetDescriptorSet(),texture,bindingIdx,arrayIdx,layerId));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_array_texture(*hDescSet->get_descriptor_set(0u),texture,bindingIdx,arrayIdx));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_array_texture(*hDescSet.GetDescriptorSet(),texture,bindingIdx,arrayIdx));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_storage_buffer(*hDescSet->get_descriptor_set(0u),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_storage_buffer(*hDescSet.GetDescriptorSet(),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_uniform_buffer(*hDescSet->get_descriptor_set(0u),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_uniform_buffer(*hDescSet.GetDescriptorSet(),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
 }
 void Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
 {
-	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_dynamic_uniform_buffer(*hDescSet->get_descriptor_set(0u),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
+	Lua::PushBool(l,prosper::util::set_descriptor_set_binding_dynamic_uniform_buffer(*hDescSet.GetDescriptorSet(),buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
 }
 
 /////////////////////////////////

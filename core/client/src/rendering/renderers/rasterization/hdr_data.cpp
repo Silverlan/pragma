@@ -68,13 +68,13 @@ bool HDRData::Exposure::Initialize(prosper::Texture &texture)
 	avgColorBuffer = prosper::util::create_buffer(dev,createInfo);
 	avgColorBuffer->SetDebugName("avg_color_buf");
 	descSetGroupAverageColorBuffer = prosper::util::create_descriptor_set_group(dev,pragma::ShaderCalcImageColor::DESCRIPTOR_SET_COLOR);
-	prosper::util::set_descriptor_set_binding_storage_buffer(*(*descSetGroupAverageColorBuffer)->get_descriptor_set(0u),*avgColorBuffer,0u);
+	prosper::util::set_descriptor_set_binding_storage_buffer(*descSetGroupAverageColorBuffer->GetDescriptorSet(),*avgColorBuffer,0u);
 	avgColorBuffer->SetPermanentlyMapped(true);
 
 	descSetGroupAverageColorTexture = nullptr; // Has to be cleared first! (To release any previous descriptor sets)
 	descSetGroupAverageColorTexture = prosper::util::create_descriptor_set_group(dev,pragma::ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE);
 	prosper::util::set_descriptor_set_binding_texture(
-		*(*descSetGroupAverageColorTexture)->get_descriptor_set(0u),
+		*descSetGroupAverageColorTexture->GetDescriptorSet(),
 		texture,0u
 	);
 	return true;
@@ -243,13 +243,13 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
 
 	dsgBloomTonemapping = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
-	auto &descSetHdrResolve = *(*dsgBloomTonemapping)->get_descriptor_set(0u);
+	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*resolvedTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*bloomBlurTexture,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 
 	dsgHDRPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
-	auto &descSetHdr = *(*dsgHDRPostProcessing)->get_descriptor_set(0u);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsgHDRPostProcessing)->get_descriptor_set(0u),*resolvedTex,0u);
+	auto &descSetHdr = *dsgHDRPostProcessing->GetDescriptorSet();
+	prosper::util::set_descriptor_set_binding_texture(*dsgHDRPostProcessing->GetDescriptorSet(),*resolvedTex,0u);
 
 	imgCreateInfo.format = pragma::ShaderPPHDR::RENDER_PASS_FORMAT;
 	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
@@ -260,7 +260,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	toneMappedRenderTarget = prosper::util::create_render_target(dev,{postHdrTex},static_cast<prosper::ShaderGraphics*>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 	dsgTonemappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsgTonemappedPostProcessing)->get_descriptor_set(0u),*postHdrTex,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsgTonemappedPostProcessing->GetDescriptorSet(),*postHdrTex,0u);
 
 	{
 		auto hShaderFXAA = c_engine->GetShader("pp_fxaa");
@@ -272,7 +272,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 			toneMappedPostProcessingRenderTarget = prosper::util::create_render_target(dev,{tmPpTex},static_cast<prosper::ShaderGraphics*>(hShaderFXAA.get())->GetRenderPass());
 			toneMappedPostProcessingRenderTarget->SetDebugName("scene_post_tonemapping_post_processing_rt");
 			dsgToneMappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
-			prosper::util::set_descriptor_set_binding_texture(*(*dsgToneMappedPostProcessing)->get_descriptor_set(0u),*tmPpTex,0u);
+			prosper::util::set_descriptor_set_binding_texture(*dsgToneMappedPostProcessing->GetDescriptorSet(),*tmPpTex,0u);
 		}
 	}
 
@@ -299,7 +299,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 		return false;
 
 	dsgDepthPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER);
-	prosper::util::set_descriptor_set_binding_texture(*(*dsgDepthPostProcessing)->get_descriptor_set(0u),*resolvedTexture,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsgDepthPostProcessing->GetDescriptorSet(),*resolvedTexture,0u);
 	return true;
 }
 
@@ -316,7 +316,7 @@ bool HDRData::InitializeDescriptorSets()
 	dsgSceneDepth = prosper::util::create_descriptor_set_group(dev,pragma::ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP);
 
 	auto &depthTex = prepass.textureDepthSampled;
-	prosper::util::set_descriptor_set_binding_texture(*(*dsgSceneDepth)->get_descriptor_set(0u),*depthTex,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsgSceneDepth->GetDescriptorSet(),*depthTex,0u);
 	return true;
 }
 

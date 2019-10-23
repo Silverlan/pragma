@@ -95,7 +95,7 @@ static bool is_image_format(const std::string &ext)
 {
 	auto &supportedFormats = MaterialManager::get_supported_image_formats();
 	return std::find_if(supportedFormats.begin(),supportedFormats.end(),[&ext](const MaterialManager::ImageFormat &format) {
-		return ustring::compare(ustring::substr(format.extension,1),ext,false);
+		return ustring::compare(format.extension,ext,false);
 	}) != supportedFormats.end();
 }
 

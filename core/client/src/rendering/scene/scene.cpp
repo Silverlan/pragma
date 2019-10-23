@@ -257,7 +257,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 		return;
 	auto &dev = c_engine->GetDevice();
 	m_camDescSetGroupGraphics = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
-	auto &descSetGraphics = *(*m_camDescSetGroupGraphics)->get_descriptor_set(0u);
+	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
 		descSetGraphics,*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
 	);
@@ -266,7 +266,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 	);
 
 	m_camDescSetGroupCompute = prosper::util::create_descriptor_set_group(dev,pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
-	auto &descSetCompute = *(*m_camDescSetGroupCompute)->get_descriptor_set(0u);
+	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
 		descSetCompute,*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
 	);
@@ -275,7 +275,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 	);
 
 	m_camViewDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
-	auto &descSetViewGraphics = *(*m_camViewDescSetGroup)->get_descriptor_set(0u);
+	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_uniform_buffer(
 		descSetViewGraphics,*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
 	);
@@ -284,7 +284,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 	);
 
 	m_fogDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(*(*m_fogDescSetGroup)->get_descriptor_set(0u),*m_fogBuffer,0u);
+	prosper::util::set_descriptor_set_binding_uniform_buffer(*m_fogDescSetGroup->GetDescriptorSet(),*m_fogBuffer,0u);
 }
 const std::shared_ptr<prosper::Buffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
 pragma::RenderSettings &Scene::GetRenderSettings() {return m_renderSettings;}
@@ -304,9 +304,9 @@ const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetCameraDescriptorSe
 	return nptr;
 }
 const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetViewCameraDescriptorSetGroup() const {return m_camViewDescSetGroup;}
-Anvil::DescriptorSet *Scene::GetCameraDescriptorSetGraphics() const {return (*m_camDescSetGroupGraphics)->get_descriptor_set(0u);}
-Anvil::DescriptorSet *Scene::GetCameraDescriptorSetCompute() const {return (*m_camDescSetGroupCompute)->get_descriptor_set(0u);}
-Anvil::DescriptorSet *Scene::GetViewCameraDescriptorSet() const {return (*m_camViewDescSetGroup)->get_descriptor_set(0u);}
+prosper::DescriptorSet *Scene::GetCameraDescriptorSetGraphics() const {return m_camDescSetGroupGraphics->GetDescriptorSet();}
+prosper::DescriptorSet *Scene::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
+prosper::DescriptorSet *Scene::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
 const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
 
 WorldEnvironment *Scene::GetWorldEnvironment() const {return m_worldEnvironment.get();}

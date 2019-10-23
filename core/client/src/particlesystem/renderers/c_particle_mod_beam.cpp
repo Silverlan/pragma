@@ -7,6 +7,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 
 REGISTER_PARTICLE_RENDERER(beam,CParticleRendererBeam);
 
@@ -111,7 +112,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommand
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(descSetShadows,descSetLightSources);
+	shader->BindLights(*descSetShadows,descSetLightSources);
 	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(renderer,m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,m_particleSystem.GetRadius(),m_curvature); // TODO: bloom

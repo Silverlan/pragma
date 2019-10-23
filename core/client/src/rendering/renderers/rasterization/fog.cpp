@@ -68,7 +68,7 @@ void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::PrimaryComma
 				shaderFog.Draw(
 					*(*hdrInfo.dsgHDRPostProcessing)->get_descriptor_set(0u),
 					*(*hdrInfo.dsgDepthPostProcessing)->get_descriptor_set(0u),
-					*scene.GetCameraDescriptorSetGraphics(),
+					**scene.GetCameraDescriptorSetGraphics(),
 					*(*scene.GetFogDescriptorSetGroup())->get_descriptor_set(0u)
 				);
 				shaderFog.EndDraw();

@@ -728,7 +728,7 @@ void CParticleSystemComponent::Start()
 						auto &dev = c_engine->GetDevice();
 						m_descSetGroupAnimation = prosper::util::create_descriptor_set_group(dev,pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
 						prosper::util::set_descriptor_set_binding_uniform_buffer(
-							*(*m_descSetGroupAnimation)->get_descriptor_set(0u),*m_bufAnim,0u
+							*m_descSetGroupAnimation->GetDescriptorSet(),*m_bufAnim,0u
 						);
 					}
 				}

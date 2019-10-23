@@ -303,19 +303,22 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint
 	lightMapCreateInfo.width = width;
 	lightMapCreateInfo.height = height;
 	lightMapCreateInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
-	lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-	lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
+	lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
+	lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 	lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
 	lightMapCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
 	auto imgStaging = prosper::util::create_image(dev,lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
 
 	lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	lightMapCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
+	lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
+	lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
 	auto img = prosper::util::create_image(dev,lightMapCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	if(prosper::util::record_blit_image(**setupCmd,{},**imgStaging,**img) == false)
 		; // TODO: Print warning
+	prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	c_engine->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};

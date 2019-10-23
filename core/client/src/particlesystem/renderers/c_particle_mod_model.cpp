@@ -72,7 +72,7 @@ CParticleRendererModel::CParticleRendererModel(pragma::CParticleSystemComponent 
 		s_instanceDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
 		s_instanceBuffer = prosper::util::create_buffer(dev,createInfo,&instanceData);
 		prosper::util::set_descriptor_set_binding_uniform_buffer(
-			*(*s_instanceDescSetGroup)->get_descriptor_set(0u),*s_instanceBuffer,0u
+			*s_instanceDescSetGroup->GetDescriptorSet(),*s_instanceBuffer,0u
 		);
 
 		instanceData.renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
@@ -100,10 +100,10 @@ CParticleRendererModel::CParticleRendererModel(pragma::CParticleSystemComponent 
 				auto &dev = c_engine->GetDevice();
 				ptComponent.instanceDescSetGroupAnimated = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
 				prosper::util::set_descriptor_set_binding_uniform_buffer(
-					*(*ptComponent.instanceDescSetGroupAnimated)->get_descriptor_set(0u),*s_instanceBufferAnimated,0u
+					*ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet(),*s_instanceBufferAnimated,0u
 				);
 				prosper::util::set_descriptor_set_binding_uniform_buffer(
-					*(*ptComponent.instanceDescSetGroupAnimated)->get_descriptor_set(0u),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+					*ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet(),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 				);
 			}
 		}
@@ -203,7 +203,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 		return;
 	auto &descSetShadowmps = *renderer.GetCSMDescriptorSet();
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	shader->BindLights(descSetShadowmps,descSetLightSources);
+	shader->BindLights(*descSetShadowmps,descSetLightSources);
 	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 

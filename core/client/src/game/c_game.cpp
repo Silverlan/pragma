@@ -1844,7 +1844,7 @@ bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const Im
 
 bool CGame::SaveImage(
 	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
-	const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo
+	const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap
 ) const
 {
 	std::string err;
@@ -1854,14 +1854,14 @@ bool CGame::SaveImage(
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
 	auto *fSaveImage = libDds->FindSymbolAddress<
-		bool(*)(const std::vector<std::vector<const void*>>&,uint32_t,uint32_t,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)
+		bool(*)(const std::vector<std::vector<const void*>>&,uint32_t,uint32_t,const std::string&,const ImageWriteInfo&,bool,const std::function<void(const std::string&)>&)
 	>("save_data_image");
-	return fSaveImage && fSaveImage(imgLayerMipmapData,width,height,fileName,imageWriteInfo,[fileName](const std::string &err) {
+	return fSaveImage && fSaveImage(imgLayerMipmapData,width,height,fileName,imageWriteInfo,cubemap,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 
-bool CGame::SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const
+bool CGame::SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap) const
 {
 	std::string err;
 	auto libDds = client->InitializeLibrary("pr_dds",&err);
@@ -1870,9 +1870,9 @@ bool CGame::SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,c
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
 	auto *fSaveImage = libDds->FindSymbolAddress<
-		bool(*)(util::ImageBuffer&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)
+		bool(*)(util::ImageBuffer&,const std::string&,const ImageWriteInfo&,bool,const std::function<void(const std::string&)>&)
 	>("save_buffer_image");
-	return fSaveImage && fSaveImage(imgBuffer,fileName,imageWriteInfo,[fileName](const std::string &err) {
+	return fSaveImage && fSaveImage(imgBuffer,fileName,imageWriteInfo,cubemap,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }

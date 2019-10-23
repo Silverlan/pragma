@@ -36,22 +36,22 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTexturedAlphaTransition::Init
 	auto descSetGroup = ShaderTextured3DBase::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 	if(descSetGroup == nullptr)
 		return nullptr;
-	auto &descSet = *(*descSetGroup)->get_descriptor_set(0u);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
 
 	auto *diffuseMap2 = mat.GetTextureInfo("diffusemap2");
 	if(diffuseMap2 != nullptr && diffuseMap2->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap2->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->texture,umath::to_integral(MaterialBinding::DiffuseMap2));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap2));
 	}
 
 	auto *diffuseMap3 = mat.GetTextureInfo("diffusemap3");
 	if(diffuseMap3 != nullptr && diffuseMap3->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap3->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->texture,umath::to_integral(MaterialBinding::DiffuseMap3));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap3));
 	}
 	return descSetGroup;
 }

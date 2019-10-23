@@ -7,6 +7,7 @@
 #include "pragma/game/c_game.h"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
+#include <prosper_descriptor_set_group.hpp>
 
 using namespace pragma::rendering;
 
@@ -52,9 +53,7 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv->IsUnlit() == false)
 		{
-
-
-			fp.Compute(*drawCmd,*(*depthTex->GetImage()),*scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd,*(*depthTex->GetImage()),**scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
 			{

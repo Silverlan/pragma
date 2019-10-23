@@ -128,6 +128,7 @@ int Lua::lib_export::export_scene(lua_State *l)
 	sceneSnapshot->MergeMeshesByMaterial();
 	auto scene = Lua::import::snapshot_to_assimp_scene(*sceneSnapshot);
 
+#if 0
 	// Export light sources
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightComponent>>();
@@ -135,7 +136,6 @@ int Lua::lib_export::export_scene(lua_State *l)
 	scene->mLights = new aiLight*[numLights];
 	scene->mNumLights = numLights;
 
-#if 0
 	auto *meshNode = scene->mRootNode->mChildren[0];
 	auto numNodesOld = scene->mRootNode->mNumChildren;
 	auto numNodes = numNodesOld +2; // +2 for the camera and the mesh nodes

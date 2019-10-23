@@ -255,7 +255,7 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 		auto bUseGlow = true;
 		if(data->GetBool("glow_alpha_only") == true)
 		{
-			if(prosper::util::has_alpha(texture->internalFormat) == false)
+			if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage()->GetFormat()) == false)
 				bUseGlow = false;
 		}
 		if(bUseGlow == true)
@@ -357,49 +357,49 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
 		return nullptr;
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
-	if(diffuseTexture->texture == nullptr)
+	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
 	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
-	auto descSet = (*descSetGroup)->get_descriptor_set(0u);
-	prosper::util::set_descriptor_set_binding_texture(*descSet,*diffuseTexture->texture,umath::to_integral(MaterialBinding::DiffuseMap));
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+	prosper::util::set_descriptor_set_binding_texture(descSet,*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap));
 
 	auto *normalMap = mat.GetNormalMap();
 	if(normalMap != nullptr && normalMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(normalMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::NormalMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
 	}
 
 	auto *specularMap = mat.GetSpecularMap();
 	if(specularMap != nullptr && specularMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(specularMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::SpecularMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::SpecularMap));
 	}
 
 	auto *parallaxMap = mat.GetParallaxMap();
 	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(parallaxMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::ParallaxMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::ParallaxMap));
 	}
 
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap != nullptr && glowMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
-		if(texture->texture != nullptr)
-			prosper::util::set_descriptor_set_binding_texture(*descSet,*texture->texture,umath::to_integral(MaterialBinding::GlowMap));
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::GlowMap));
 	}
-	InitializeMaterialBuffer(*descSet,mat);
+	InitializeMaterialBuffer(descSet,mat);
 
 	return descSetGroup;
 }
-void ShaderTextured3DBase::InitializeMaterialBuffer(Anvil::DescriptorSet &descSet,CMaterial &mat)
+void ShaderTextured3DBase::InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)

@@ -3,6 +3,7 @@
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
+namespace prosper {class DescriptorSet;};
 namespace pragma
 {
 	const float DefaultParallaxHeightScale = 0.025f;
@@ -146,7 +147,7 @@ namespace pragma
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
 		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
-		void InitializeMaterialBuffer(Anvil::DescriptorSet &descSet,CMaterial &mat);
+		void InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat);
 		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);

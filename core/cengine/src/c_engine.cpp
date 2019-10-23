@@ -536,7 +536,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 			ufile::remove_extension_from_filename(path);
 			for(auto &format : formats)
 			{
-				if(util::port_file(cl,path +format.extension) == true)
+				if(util::port_file(cl,path +'.' +format.extension) == true)
 					break;
 			}
 		}

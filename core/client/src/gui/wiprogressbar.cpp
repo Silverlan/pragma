@@ -23,6 +23,7 @@ WIProgressBar::~WIProgressBar()
 void WIProgressBar::Initialize()
 {
 	WIBase::Initialize();
+	SetSize(128,32);
 	m_hLabel = CreateChild<WIText>();
 	m_hLabel->SetAutoCenterToParent(true);
 	m_hLabel->AddStyleClass("progressbar_label_background");
@@ -31,7 +32,18 @@ void WIProgressBar::Initialize()
 
 	m_hLabel2 = WGUI::GetInstance().Create<WIText>(m_hProgress.get())->GetHandle();
 	m_hLabel2->AddStyleClass("progressbar_label_overlay");
-	SetHeight(32);
+	UpdateTextPosition();
+}
+
+void WIProgressBar::UpdateTextPosition()
+{
+	if(m_hLabel.IsValid() == false)
+		return;
+	auto x = GetWidth() /2 -m_hLabel->GetWidth() /2;
+	auto y = GetHeight() /2 -m_hLabel->GetHeight() /2;
+	m_hLabel->SetPos(x,y);
+	if(m_hLabel2.IsValid())
+		m_hLabel2->SetPos(x,y);
 }
 
 void WIProgressBar::SetValueTranslator(const std::function<std::string(float)> &translator) {m_valueTranslator = translator;}
@@ -45,6 +57,7 @@ void WIProgressBar::SetSize(int x,int y)
 		pProgress->SetHeight(y);
 	}
 	SetProgress(m_progress->GetValue());
+	UpdateTextPosition();
 }
 
 float WIProgressBar::GetProgress() const {return m_progress->GetValue();}

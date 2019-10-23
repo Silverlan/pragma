@@ -337,7 +337,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		{"add_change_callback",Lua_cvar_AddChangeCallback},
 
 		{"register_override",Lua::console::register_override},
-		{"clear_override",Lua::console::clear_override}
+		{"clear_override",Lua::console::clear_override},
+		{"parse_command_arguments",Lua::console::parse_command_arguments}
 	});
 
 	auto consoleMod = luabind::module(lua.GetState(),"console");

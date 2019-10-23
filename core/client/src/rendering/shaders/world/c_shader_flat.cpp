@@ -86,7 +86,7 @@ ShaderFlat::ShaderFlat(prosper::Context &context,const std::string &identifier)
 bool ShaderFlat::BindScene(const Scene &scene,bool bView)
 {
 	auto descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_CAMERA.setIndex);
+	return RecordBindDescriptorSet(**descSet,DESCRIPTOR_SET_CAMERA.setIndex);
 }
 bool ShaderFlat::BindEntity(CBaseEntity &ent)
 {
@@ -94,7 +94,7 @@ bool ShaderFlat::BindEntity(CBaseEntity &ent)
 	if(pRenderComponent.expired())
 		return false;
 	pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
-	return RecordBindDescriptorSet(*pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});
+	return RecordBindDescriptorSet(**pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});
 }
 bool ShaderFlat::BindMaterial(CMaterial &mat)
 {

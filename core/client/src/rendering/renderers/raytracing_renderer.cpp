@@ -29,12 +29,12 @@ bool RaytracingRenderer::Initialize()
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	m_outputTexture = prosper::util::create_texture(dev,prosper::util::TextureCreateInfo{},img,&imgViewCreateInfo,&samplerCreateInfo);
 	auto descSetImage = prosper::util::create_descriptor_set_group(dev,ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
-	prosper::util::set_descriptor_set_binding_storage_image(*(*descSetImage)->get_descriptor_set(0),*m_outputTexture,0u);
+	prosper::util::set_descriptor_set_binding_storage_image(*descSetImage->GetDescriptorSet(),*m_outputTexture,0u);
 	m_dsgOutputImage = descSetImage;
 
 	m_dsgLights = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
 	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*(*m_dsgLights)->get_descriptor_set(0u),const_cast<prosper::UniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
+		*m_dsgLights->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
 	);
 
 	m_whShader = c_engine->GetShader("raytracing");

@@ -170,12 +170,23 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
 
-	// Albedo map
+	auto fAddGenericTexture = [&matTraditional,&dataPbr](const std::string &identifier,TextureInfo *texInfo) {
+		if(texInfo && texInfo->texture && std::static_pointer_cast<Texture>(texInfo->texture)->HasValidVkTexture())
+			dataPbr->AddValue("texture",identifier,texInfo->name);
+	};
+	auto fAddGenericTextureByIdentifier = [&matTraditional,&dataPbr](const std::string &name) {
+		auto *map = matTraditional.GetTextureInfo(name);
+		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
+			dataPbr->AddValue("texture",name,map->name);
+	};
+
 	// TODO: Extract ambient occlusion from diffuse map, if possible
-	auto *diffuseMap = matTraditional.GetDiffuseMap();
-	if(diffuseMap && diffuseMap->texture && std::static_pointer_cast<Texture>(diffuseMap->texture)->HasValidVkTexture())
-		dataPbr->AddValue("texture",Material::ALBEDO_MAP_IDENTIFIER,diffuseMap->name);
-	//
+	fAddGenericTexture(Material::ALBEDO_MAP_IDENTIFIER,matTraditional.GetDiffuseMap()); // Albedo map
+	fAddGenericTexture(Material::NORMAL_MAP_IDENTIFIER,matTraditional.GetNormalMap()); // Normal map
+	fAddGenericTexture(Material::AO_MAP_IDENTIFIER,matTraditional.GetAmbientOcclusionMap()); // Ambient occlusion map
+	fAddGenericTextureByIdentifier(Material::WRINKLE_STRETCH_MAP_IDENTIFIER); // Wrinkle stretch map
+	fAddGenericTextureByIdentifier(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER); // Wrinkle compress map
+	fAddGenericTextureByIdentifier(Material::EXPONENT_MAP_IDENTIFIER); // Exponent map
 
 	// Roughness map
 	auto *specularMap = matTraditional.GetSpecularMap();
@@ -197,20 +208,6 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	}
 	else
 		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough"); // Generic roughness map with 100% roughness
-	//
-
-	// Normal map
-	auto bGenerateNormalMap = false;
-	auto *normalMap = matTraditional.GetNormalMap();
-	if(normalMap && normalMap->texture && std::static_pointer_cast<Texture>(normalMap->texture)->HasValidVkTexture())
-		dataPbr->AddValue("texture",Material::NORMAL_MAP_IDENTIFIER,normalMap->name);
-	//
-
-	// Ambient occlusion map
-	auto bGenerateAOMap = false;
-	auto *aoMap = matTraditional.GetAmbientOcclusionMap();
-	if(aoMap && aoMap->texture && std::static_pointer_cast<Texture>(aoMap->texture)->GetVkTexture())
-		dataPbr->AddValue("texture",Material::AO_MAP_IDENTIFIER,aoMap->name);
 	//
 
 	// Metalness map
@@ -236,6 +233,20 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		dataPbr->AddValue("float","glow_blend_diffuse_scale","3.0");
 	}
 	//
+
+	auto fCopyValue = [&dataPbr,&matTraditional](const std::string &name) {
+		auto dataBlock = matTraditional.GetDataBlock();
+		auto value = dataBlock ? dataBlock->GetDataValue(name) : nullptr;
+		if(value == nullptr)
+			return;
+		dataPbr->AddValue(value->GetTypeString(),name,value->GetString());
+	};
+	fCopyValue("black_to_alpha");
+	fCopyValue("phong_normal_alpha");
+	fCopyValue("phong_intensity");
+	fCopyValue("phong_shininess");
+	fCopyValue("parallax_height_scale");
+	fCopyValue("translucent");
 
 	matPbr->UpdateTextures();
 	// Overwrite old material with new PBR settings

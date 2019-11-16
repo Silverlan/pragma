@@ -257,6 +257,7 @@ BodyGroup *Model::GetBodyGroup(uint32_t id)
 uint32_t Model::GetBodyGroupCount() const {return static_cast<uint32_t>(m_bodyGroups.size());}
 std::vector<BodyGroup> &Model::GetBodyGroups() {return m_bodyGroups;}
 void Model::Remove() {delete this;}
+bool Model::IsRootBone(uint32_t boneId) const {return m_skeleton->IsRootBone(boneId);}
 bool Model::GetLocalBonePosition(uint32_t animId,uint32_t frameId,uint32_t boneId,Vector3 &rPos,Quat &rRot,Vector3 *scale)
 {
 	rPos = Vector3{0.f,0.f,0.f};

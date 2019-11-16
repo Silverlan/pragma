@@ -22,6 +22,9 @@ namespace pragma
 			MaterialSettings, // Has to match the index specified in ShaderTextured3DBase::MaterialBinding!
 			EmissionMap,
 			ParallaxMap,
+			WrinkleStretchMap,
+			WrinkleCompressMap,
+			ExponentMap,
 
 			Count
 		};

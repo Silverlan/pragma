@@ -299,6 +299,13 @@ LuaShaderManager::~LuaShaderManager()
 
 void LuaShaderManager::RegisterShader(std::string className,luabind::object &o)
 {
+	ustring::to_lower(className);
+	auto itShader = m_shaders.find(className);
+	if(itShader != m_shaders.end())
+	{
+		Con::cwar<<"WARNING: Attempted to register shader '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
+		return;
+	}
 	auto *l = o.interpreter();
 	luabind::object r;
 #ifndef LUABIND_NO_EXCEPTIONS
@@ -320,7 +327,6 @@ void LuaShaderManager::RegisterShader(std::string className,luabind::object &o)
 		return;
 	}
 	
-	ustring::to_lower(className);
 	auto &pair = m_shaders[className] = {};
 	pair.luaClassObject = o;
 	auto bOverwrite = true;

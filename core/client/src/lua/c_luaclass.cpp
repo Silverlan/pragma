@@ -48,6 +48,7 @@
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_render_pass.hpp>
 #include <luainterface.hpp>
 #include <misc/compute_pipeline_create_info.h>
 
@@ -314,6 +315,12 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderGraphics.def("GetRenderPass",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&)>([](lua_State *l,prosper::ShaderGraphics &shader) {
 		Lua::Shader::Graphics::GetRenderPass(l,shader,0u);
 	}));
+	defShaderGraphics.scope[luabind::def("GetRenderPass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		auto &rp = prosper::ShaderGraphics::GetRenderPass<prosper::ShaderGraphics>(*c_engine);
+		if(rp == nullptr)
+			return;
+		Lua::Push(l,rp);
+	}))];
 	modShader[defShaderGraphics];
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene,luabind::bases<prosper::ShaderGraphics,prosper::Shader>>("Scene3D");

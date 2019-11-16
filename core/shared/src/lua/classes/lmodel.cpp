@@ -280,6 +280,9 @@ void Lua::Model::register_class(
 	classDef.def("GetFlexControllerCount",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 		Lua::PushInt(l,mdl.GetFlexControllerCount());
 	}));
+	classDef.def("GetFlexCount",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		Lua::PushInt(l,mdl.GetFlexCount());
+	}));
 	classDef.def("CalcReferenceAttachmentPose",static_cast<void(*)(lua_State*,::Model&,int32_t)>([](lua_State *l,::Model &mdl,int32_t attIdx) {
 		auto t = mdl.CalcReferenceAttachmentPose(attIdx);
 		if(t.has_value() == false)
@@ -291,6 +294,9 @@ void Lua::Model::register_class(
 		if(t.has_value() == false)
 			return;
 		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
+	}));
+	classDef.def("IsRootBone",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t boneId) {
+		Lua::PushBool(l,mdl.IsRootBone(boneId));
 	}));
 
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
@@ -342,6 +348,77 @@ void Lua::Model::register_class(
 
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_MODEL",umath::to_integral(ObjectAttachment::Type::Model));
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_PARTICLE_SYSTEM",umath::to_integral(ObjectAttachment::Type::ParticleSystem));
+
+	// Flex
+	auto classDefFlex = luabind::class_<::Flex>("Flex");
+	classDefFlex.def("GetName",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		Lua::PushString(l,flex.GetName());
+	}));
+	classDefFlex.def("GetOperations",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		auto t = Lua::CreateTable(l);
+		auto &ops = flex.GetOperations();
+		for(auto i=decltype(ops.size()){0u};i<ops.size();++i)
+		{
+			Lua::PushInt(l,i +1u);
+			Lua::Push<::Flex::Operation*>(l,&ops.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefFlex.def("GetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		auto anim = flex.GetVertexAnimation() ? flex.GetVertexAnimation()->shared_from_this() : nullptr;
+		if(anim == nullptr)
+			return;
+		Lua::Push<std::shared_ptr<::VertexAnimation>>(l,anim);
+	}));
+	classDefFlex.def("GetMeshVertexAnimation",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		auto anim = flex.GetMeshVertexAnimation() ? flex.GetMeshVertexAnimation()->shared_from_this() : nullptr;
+		if(anim == nullptr)
+			return;
+		Lua::Push<std::shared_ptr<::MeshVertexAnimation>>(l,anim);
+	}));
+	classDefFlex.def("GetMeshVertexFrame",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		auto frame = flex.GetMeshVertexFrame() ? flex.GetMeshVertexFrame()->shared_from_this() : nullptr;
+		if(frame == nullptr)
+			return;
+		Lua::Push<std::shared_ptr<::MeshVertexFrame>>(l,frame);
+	}));
+	classDefFlex.def("SetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&,::VertexAnimation&,::MeshVertexAnimation&,::MeshVertexFrame&)>([](lua_State *l,::Flex &flex,::VertexAnimation &anim,::MeshVertexAnimation &meshAnim,::MeshVertexFrame &meshFrame) {
+		flex.SetVertexAnimation(anim,meshAnim,meshFrame);
+	}));
+	classDefFlex.add_static_constant("OP_NONE",umath::to_integral(::Flex::Operation::Type::None));
+	classDefFlex.add_static_constant("OP_CONST",umath::to_integral(::Flex::Operation::Type::Const));
+	classDefFlex.add_static_constant("OP_FETCH",umath::to_integral(::Flex::Operation::Type::Fetch));
+	classDefFlex.add_static_constant("OP_FETCH2",umath::to_integral(::Flex::Operation::Type::Fetch2));
+	classDefFlex.add_static_constant("OP_ADD",umath::to_integral(::Flex::Operation::Type::Add));
+	classDefFlex.add_static_constant("OP_SUB",umath::to_integral(::Flex::Operation::Type::Sub));
+	classDefFlex.add_static_constant("OP_MUL",umath::to_integral(::Flex::Operation::Type::Mul));
+	classDefFlex.add_static_constant("OP_DIV",umath::to_integral(::Flex::Operation::Type::Div));
+	classDefFlex.add_static_constant("OP_NEG",umath::to_integral(::Flex::Operation::Type::Neg));
+	classDefFlex.add_static_constant("OP_EXP",umath::to_integral(::Flex::Operation::Type::Exp));
+	classDefFlex.add_static_constant("OP_OPEN",umath::to_integral(::Flex::Operation::Type::Open));
+	classDefFlex.add_static_constant("OP_CLOSE",umath::to_integral(::Flex::Operation::Type::Close));
+	classDefFlex.add_static_constant("OP_COMMA",umath::to_integral(::Flex::Operation::Type::Comma));
+	classDefFlex.add_static_constant("OP_MAX",umath::to_integral(::Flex::Operation::Type::Max));
+	classDefFlex.add_static_constant("OP_MIN",umath::to_integral(::Flex::Operation::Type::Min));
+	classDefFlex.add_static_constant("OP_TWO_WAY0",umath::to_integral(::Flex::Operation::Type::TwoWay0));
+	classDefFlex.add_static_constant("OP_TWO_WAY1",umath::to_integral(::Flex::Operation::Type::TwoWay1));
+	classDefFlex.add_static_constant("OP_N_WAY",umath::to_integral(::Flex::Operation::Type::NWay));
+	classDefFlex.add_static_constant("OP_COMBO",umath::to_integral(::Flex::Operation::Type::Combo));
+	classDefFlex.add_static_constant("OP_DOMINATE",umath::to_integral(::Flex::Operation::Type::Dominate));
+	classDefFlex.add_static_constant("OP_DME_LOWER_EYELID",umath::to_integral(::Flex::Operation::Type::DMELowerEyelid));
+	classDefFlex.add_static_constant("OP_DME_UPPER_EYELID",umath::to_integral(::Flex::Operation::Type::DMEUpperEyelid));
+
+	// Operation
+	auto classDefFlexOp = luabind::class_<::Flex::Operation>("Operation");
+	classDefFlexOp.def_readwrite("type",reinterpret_cast<uint32_t Flex::Operation::*>(&Flex::Operation::type));
+	classDefFlexOp.def_readwrite("index",reinterpret_cast<int32_t Flex::Operation::*>(&Flex::Operation::d));
+	classDefFlexOp.def_readwrite("value",reinterpret_cast<float Flex::Operation::*>(&Flex::Operation::d));
+	classDefFlexOp.def("GetName",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		Lua::PushString(l,flex.GetName());
+	}));
+	classDefFlex.scope[classDefFlexOp];
+
+	classDef.scope[classDefFlex];
 
 	// Frame
 	auto classDefFrame = luabind::class_<::Frame>("Frame")
@@ -458,7 +535,28 @@ void Lua::Model::register_class(
 		.def("GetVertices",&Lua::MeshVertexFrame::GetVertices)
 		.def("SetVertexCount",&Lua::MeshVertexFrame::SetVertexCount)
 		.def("SetVertexPosition",&Lua::MeshVertexFrame::SetVertexPosition)
-		.def("GetVertexPosition",&Lua::MeshVertexFrame::GetVertexPosition);
+		.def("GetVertexPosition",&Lua::MeshVertexFrame::GetVertexPosition)
+		.def("GetVertexCount",static_cast<void(*)(lua_State*,::MeshVertexFrame&)>([](lua_State *l,::MeshVertexFrame &meshVertFrame) {
+			Lua::PushInt(l,meshVertFrame.GetVertexCount());
+		}))
+		.def("GetFlags",static_cast<void(*)(lua_State*,::MeshVertexFrame&)>([](lua_State *l,::MeshVertexFrame &meshVertFrame) {
+			Lua::PushInt(l,umath::to_integral(meshVertFrame.GetFlags()));
+		}))
+		.def("SetFlags",static_cast<void(*)(lua_State*,::MeshVertexFrame&,uint32_t)>([](lua_State *l,::MeshVertexFrame &meshVertFrame,uint32_t flags) {
+			meshVertFrame.SetFlags(static_cast<::MeshVertexFrame::Flags>(flags));
+		}))
+		.def("SetDeltaValue",static_cast<void(*)(lua_State*,::MeshVertexFrame&,uint32_t,float)>([](lua_State *l,::MeshVertexFrame &meshVertFrame,uint32_t vertId,float value) {
+			meshVertFrame.SetDeltaValue(vertId,value);
+		}))
+		.def("GetDeltaValue",static_cast<void(*)(lua_State*,::MeshVertexFrame&,uint32_t)>([](lua_State *l,::MeshVertexFrame &meshVertFrame,uint32_t vertId) {
+			float value;
+			if(meshVertFrame.GetDeltaValue(vertId,value) == false)
+				return;
+			Lua::PushNumber(l,value);
+		}));
+		classDefMeshVertexFrame.add_static_constant("FLAG_NONE",umath::to_integral(::MeshVertexFrame::Flags::None));
+		classDefMeshVertexFrame.add_static_constant("FLAG_BIT_HAS_DELTA_VALUES",umath::to_integral(::MeshVertexFrame::Flags::HasDeltaValues));
+
 	auto classDefMeshVertexAnimation = luabind::class_<::MeshVertexAnimation>("MeshAnimation")
 		.def("Rotate",static_cast<void(*)(lua_State*,::MeshVertexAnimation&,const Quat&)>([](lua_State *l,::MeshVertexAnimation &meshVertAnim,const Quat &rot) {
 			meshVertAnim.Rotate(rot);
@@ -483,6 +581,9 @@ void Lua::Model::register_class(
 	classDefSkeleton.def("Merge",&Lua::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone",Lua::Skeleton::MakeRootBone);
+	classDefSkeleton.def("IsRootBone",static_cast<void(*)(lua_State*,::Skeleton&,uint32_t)>([](lua_State *l,::Skeleton &skeleton,uint32_t boneId) {
+		Lua::PushBool(l,skeleton.IsRootBone(boneId));
+	}));
 	Lua::Bone::register_class(l,classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");
@@ -1741,7 +1842,7 @@ void Lua::Model::GetFlexes(lua_State *l,::Model &mdl)
 	for(auto &flex : flexes)
 	{
 		Lua::PushInt(l,flexIdx++);
-		Lua::PushString(l,flex.GetName());
+		Lua::Push<Flex*>(l,&flex);
 		Lua::SetTableValue(l,t);
 	}
 }

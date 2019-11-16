@@ -14,6 +14,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
 	auto colorMode = Lua::GetErrorColorMode(l);
@@ -242,7 +243,7 @@ int Lua::HandleTracebackError(lua_State *l)
 	}
 	else
 		ssMsg<<errMsg;
-	if(level != 1)
+	// if(level != 1)
 	{
 		level = 1;
 		if(bNl == true)
@@ -257,7 +258,7 @@ int Lua::HandleTracebackError(lua_State *l)
 				std::string t(level *4,' ');
 				if(level >= 10)
 				{
-					ssMsg<<t<<"...";
+					ssMsg<<"\n"<<t<<"...";
 					break;
 				}
 				else
@@ -383,7 +384,7 @@ void Lua::initialize_error_handler()
 			transform_path(d,luaMsg,d.currentline);
 			ssMsg<<luaMsg;
 			auto bNl = print_code_snippet(ssMsg,(d.source != nullptr) ? d.source : "",d.currentline,":");
-			if(level != 1)
+			// if(level != 1)
 			{
 				level = 1;
 				if(bNl == true)
@@ -418,3 +419,4 @@ void Lua::initialize_error_handler()
 		});
 	});
 }
+#pragma optimize("",on)

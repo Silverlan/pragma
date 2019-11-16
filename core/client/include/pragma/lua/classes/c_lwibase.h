@@ -79,6 +79,8 @@ namespace Lua
 		DLLCLIENT void GetSize(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetSize(lua_State *l,WIHandle &hPanel,Vector2 size);
 		DLLCLIENT void SetSize(lua_State *l,WIHandle &hPanel,float x,float y);
+		DLLCLIENT void Wrap(lua_State *l,WIHandle &hPanel,const std::string &wrapperClassName);
+		DLLCLIENT void Wrap(lua_State *l,WIHandle &hPanel,WIHandle &hWrapper);
 		DLLCLIENT void GetParent(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetParent(lua_State *l,WIHandle &hPanel,WIHandle &hParent);
 		DLLCLIENT void ClearParent(lua_State *l,WIHandle &hPanel);
@@ -440,7 +442,6 @@ namespace Lua
 	namespace WITreeList
 	{
 		DLLCLIENT void register_class(luabind::class_<WITreeListHandle,luabind::bases<WITableHandle,WIHandle>> &classDef);
-		DLLCLIENT void AddItem(lua_State *l,WITreeListHandle &hTreeList,const std::string &text);
 		DLLCLIENT void ExpandAll(lua_State *l,WITreeListHandle &hTreeList);
 		DLLCLIENT void CollapseAll(lua_State *l,WITreeListHandle &hTreeList);
 		DLLCLIENT void GetRootItem(lua_State *l,WITreeListHandle &hTreeList);

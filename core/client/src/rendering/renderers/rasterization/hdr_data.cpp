@@ -195,6 +195,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
 
 	prosper::util::ImageViewCreateInfo hdrImgViewCreateInfo {};
+	hdrImgViewCreateInfo.swizzleAlpha = Anvil::ComponentSwizzle::ONE;
 	prosper::util::SamplerCreateInfo hdrSamplerCreateInfo {};
 	hdrSamplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
 	hdrSamplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;

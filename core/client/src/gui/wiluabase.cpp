@@ -92,6 +92,11 @@ void WILuaBase::OnVisibilityChanged(bool bVisible)
 	WIBase::OnVisibilityChanged(bVisible);
 	CallLuaMember<void,bool>("OnVisibilityChanged",bVisible);
 }
+void WILuaBase::Update()
+{
+	WIBase::Update();
+	CallLuaMember<void>("OnUpdate");
+}
 void WILuaBase::SetColor(float r,float g,float b,float a)
 {
 	WIBase::SetColor(r,g,b,a);
@@ -152,6 +157,9 @@ void WILuaWrapper::default_CharCallback(lua_State*,WIHandle&,unsigned int,uint32
 
 void WILuaWrapper::ScrollCallback(double,double) {}
 void WILuaWrapper::default_ScrollCallback(lua_State*,WIHandle&,double,double) {}
+
+void WILuaWrapper::OnUpdate() {}
+void WILuaWrapper::default_OnUpdate(lua_State *l,WIHandle &hElement) {}
 
 void WILuaWrapper::OnSetSize(int,int) {}
 void WILuaWrapper::default_OnSetSize(lua_State*,WIHandle&,int,int) {}

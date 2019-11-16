@@ -356,6 +356,6 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 		// Sort translucent meshes by distance
 		std::sort(translucentMeshes.begin(),translucentMeshes.end(),[](const std::unique_ptr<RenderSystem::TranslucentMesh> &a,const std::unique_ptr<RenderSystem::TranslucentMesh> &b) {
 			return a->distance < b->distance;
-			});
+		});
 	}
 }

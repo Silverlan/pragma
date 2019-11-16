@@ -312,6 +312,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	//mathMod[complexNumberClassDef];
 
 	lua_pushtablecfunction(lua.GetState(),"debug","move_state_to_string",Lua::debug::move_state_to_string);
+	if(Lua::get_extended_lua_modules_enabled())
+	{
+		DLLLUA int lua_snapshot(lua_State *L);
+		lua_pushtablecfunction(lua.GetState(),"debug","snapshot",lua_snapshot);
+	}
 	//lua_pushtablecfunction(lua.GetState(),"debug","enable_remote_debugging",Lua::debug::enable_remote_debugging);
 
 	lua_register(lua.GetState(),"print",Lua_print);

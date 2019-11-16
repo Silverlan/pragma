@@ -54,7 +54,7 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIDebugSSAO,WIDe
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const WIHandle &handle)
 {
 	if(!handle.IsValid())
@@ -154,6 +154,8 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("GetSize",&GetSize);
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,WIHandle&,Vector2)>(&SetSize));
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,WIHandle&,float,float)>(&SetSize));
+	classDef.def("Wrap",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&Wrap));
+	classDef.def("Wrap",static_cast<void(*)(lua_State*,WIHandle&,WIHandle&)>(&Wrap));
 	classDef.def("GetParent",&GetParent);
 	classDef.def("SetParent",&SetParent);
 	classDef.def("ClearParent",&ClearParent);
@@ -398,19 +400,71 @@ void Lua::WIGridPanel::register_class(luabind::class_<WIGridPanelHandle,luabind:
 
 void Lua::WITreeList::register_class(luabind::class_<WITreeListHandle,luabind::bases<WITableHandle,WIHandle>> &classDef)
 {
-	classDef.def("AddItem",&AddItem);
+	classDef.def("AddItem",static_cast<void(*)(lua_State*,WITreeListHandle&,const std::string&)>([](lua_State *l,WITreeListHandle &hPanel,const std::string &text) {
+		lua_checkgui(l,hPanel);
+		auto *pEl = static_cast<::WITreeListElement*>(hPanel.get())->AddItem(text);
+		if(pEl != nullptr)
+		{
+			auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
+			o.push(l);
+		}
+	}));
+	classDef.def("AddItem",static_cast<void(*)(lua_State*,WITreeListHandle&,const std::string&,luabind::object)>([](lua_State *l,WITreeListHandle &hPanel,const std::string &text,luabind::object oPopulate) {
+		lua_checkgui(l,hPanel);
+		Lua::CheckFunction(l,3);
+		auto fPopulate = [l,oPopulate](::WITreeListElement &el) {
+			Lua::CallFunction(l,[&oPopulate,&el](lua_State *l) {
+				oPopulate.push(l);
+				auto o = WGUILuaInterface::GetLuaObject(l,el);
+				o.push(l);
+				return Lua::StatusCode::Ok;
+			});
+		};
+		auto *pEl = static_cast<::WITreeList*>(hPanel.get())->AddItem(text,fPopulate);
+		if(pEl != nullptr)
+		{
+			auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
+			o.push(l);
+		}
+	}));
 	classDef.def("ExpandAll",&ExpandAll);
 	classDef.def("CollapseAll",&CollapseAll);
 	classDef.def("GetRootItem",&GetRootItem);
 }
 void Lua::WITreeListElement::register_class(luabind::class_<WITreeListElementHandle,luabind::bases<WITableRowHandle,WIHandle>> &classDef)
 {
-	classDef.def("AddItem",&AddItem);
 	classDef.def("Expand",static_cast<void(*)(lua_State*,WITreeListElementHandle&,bool)>(&Expand));
 	classDef.def("Expand",static_cast<void(*)(lua_State*,WITreeListElementHandle&)>(&Expand));
 	classDef.def("Collapse",static_cast<void(*)(lua_State*,WITreeListElementHandle&,bool)>(&Collapse));
 	classDef.def("Collapse",static_cast<void(*)(lua_State*,WITreeListElementHandle&)>(&Collapse));
 	classDef.def("GetItems",&GetItems);
+	classDef.def("AddItem",static_cast<void(*)(lua_State*,WITreeListElementHandle&,const std::string&)>([](lua_State *l,WITreeListElementHandle &hPanel,const std::string &text) {
+		lua_checkgui(l,hPanel);
+		auto *pEl = static_cast<::WITreeListElement*>(hPanel.get())->AddItem(text);
+		if(pEl != nullptr)
+		{
+			auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
+			o.push(l);
+		}
+	}));
+	classDef.def("AddItem",static_cast<void(*)(lua_State*,WITreeListElementHandle&,const std::string&,luabind::object)>([](lua_State *l,WITreeListElementHandle &hPanel,const std::string &text,luabind::object oPopulate) {
+		lua_checkgui(l,hPanel);
+		Lua::CheckFunction(l,3);
+		auto fPopulate = [l,oPopulate](::WITreeListElement &el) {
+			Lua::CallFunction(l,[&oPopulate,&el](lua_State *l) {
+				oPopulate.push(l);
+				auto o = WGUILuaInterface::GetLuaObject(l,el);
+				o.push(l);
+				return Lua::StatusCode::Ok;
+			});
+		};
+		auto *pEl = static_cast<::WITreeListElement*>(hPanel.get())->AddItem(text,fPopulate);
+		if(pEl != nullptr)
+		{
+			auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
+			o.push(l);
+		}
+	}));
 }
 
 void Lua::WIContainer::register_class(luabind::class_<WIContainerHandle,WIHandle> &classDef)
@@ -430,6 +484,10 @@ void Lua::WIContainer::register_class(luabind::class_<WIContainerHandle,WIHandle
 
 void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
 {
+	classDef.def("GetRowHeight",static_cast<void(*)(lua_State*,WITableHandle&)>([](lua_State *l,WITableHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushInt(l,static_cast<::WITable*>(hPanel.get())->GetRowHeight());
+	}));
 	classDef.def("SetRowHeight",&SetRowHeight);
 	classDef.def("SetSelectable",&SetSelectable);
 	classDef.def("IsSelectable",&IsSelectable);
@@ -446,6 +504,18 @@ void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<W
 	classDef.def("GetSelectedRow",&GetSelectedRow);
 	classDef.def("GetRows",&GetRows);
 	classDef.def("RemoveRow",&RemoveRow);
+	classDef.def("MoveRow",static_cast<void(*)(lua_State*,WITableHandle&,WITableRowHandle&,WITableRowHandle&,bool)>([](lua_State *l,WITableHandle &hPanel,WITableRowHandle &rowA,WITableRowHandle &rowB,bool after) {
+		lua_checkgui(l,hPanel);
+		lua_checkgui(l,rowA);
+		lua_checkgui(l,rowB);
+		static_cast<::WITable*>(hPanel.get())->MoveRow(static_cast<::WITableRow*>(rowA.get()),static_cast<::WITableRow*>(rowB.get()),after);
+	}));
+	classDef.def("MoveRow",static_cast<void(*)(lua_State*,WITableHandle&,WITableRowHandle&,WITableRowHandle&)>([](lua_State *l,WITableHandle &hPanel,WITableRowHandle &rowA,WITableRowHandle &rowB) {
+		lua_checkgui(l,hPanel);
+		lua_checkgui(l,rowA);
+		lua_checkgui(l,rowB);
+		static_cast<::WITable*>(hPanel.get())->MoveRow(static_cast<::WITableRow*>(rowA.get()),static_cast<::WITableRow*>(rowB.get()));
+	}));
 }
 
 void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
@@ -459,6 +529,14 @@ void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle,luabind::b
 	classDef.def("InsertElement",&InsertElement);
 	classDef.def("GetCellCount",&GetCellCount);
 	classDef.def("GetCell",&GetCell);
+	classDef.def("GetRowIndex",static_cast<void(*)(lua_State*,WITableRowHandle&)>([](lua_State *l,WITableRowHandle &hRow) {
+		lua_checkgui(l,hRow);
+		auto *pTable = static_cast<::WITableRow*>(hRow.get())->GetTable();
+		uint32_t rowIndex = 0u;
+		if(pTable)
+			rowIndex = pTable->GetRowIndex(static_cast<::WITableRow*>(hRow.get()));
+		Lua::PushInt(l,rowIndex);
+	}));
 }
 
 void Lua::WITableCell::register_class(luabind::class_<WITableCellHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
@@ -936,6 +1014,27 @@ void Lua::WIBase::SetSize(lua_State *l,WIHandle &hPanel,float x,float y)
 {
 	lua_checkgui(l,hPanel);
 	hPanel->SetSize(CInt32(x),CInt32(y));
+}
+void Lua::WIBase::Wrap(lua_State *l,WIHandle &hPanel,const std::string &wrapperClassName)
+{
+	lua_checkgui(l,hPanel);
+	auto *el = c_game->CreateGUIElement(wrapperClassName);
+	if(el == nullptr)
+		return;
+	auto hWrapper = el->GetHandle();
+	if(hPanel->Wrap(*hWrapper.get()) == false)
+	{
+		el->RemoveSafely();
+		return;
+	}
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
+	o.push(l);
+}
+void Lua::WIBase::Wrap(lua_State *l,WIHandle &hPanel,WIHandle &hWrapper)
+{
+	lua_checkgui(l,hPanel);
+	lua_checkgui(l,hWrapper);
+	Lua::PushBool(l,hPanel->Wrap(*hWrapper.get()));
 }
 void Lua::WIBase::GetParent(lua_State *l,WIHandle &hPanel)
 {
@@ -3042,16 +3141,6 @@ void Lua::WIGridPanel::GetColumnCount(lua_State *l,WIGridPanelHandle &hGridPanel
 
 ////////////////////////////////////
 
-void Lua::WITreeList::AddItem(lua_State *l,WITreeListHandle &hTreeList,const std::string &text)
-{
-	lua_checkgui(l,hTreeList);
-	auto *pEl = static_cast<::WITreeList*>(hTreeList.get())->AddItem(text);
-	if(pEl != nullptr)
-	{
-		auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
-		o.push(l);
-	}
-}
 void Lua::WITreeList::ExpandAll(lua_State *l,WITreeListHandle &hTreeList)
 {
 	lua_checkgui(l,hTreeList);
@@ -3427,3 +3516,4 @@ void Lua::WIFrame::GetTitle(lua_State *l,WIFrameHandle &hFrame)
 	lua_checkgui(l,hFrame);
 	Lua::PushString(l,hFrame.get<::WIFrame>()->GetTitle());
 }
+#pragma optimize("",on)

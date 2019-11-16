@@ -265,8 +265,7 @@ void Lua::dmx::register_lua_library(Lua::Interface &l)
 		Lua::PushBool(l,&el == &elOther);
 	}));
 	classDefElement.def("GetGUID",static_cast<void(*)(lua_State*,::dmx::Element&)>([](lua_State *l,::dmx::Element &el) {
-		std::string guid = std::string{el.GUID.data(),el.GUID.size()};
-		Lua::PushString(l,guid);
+		Lua::PushString(l,el.GetGUIDAsString());
 	}));
 	classDefElement.def("Get",static_cast<void(*)(lua_State*,::dmx::Element&,const std::string&)>([](lua_State *l,::dmx::Element &el,const std::string &name) {
 		auto child = el.Get(name);

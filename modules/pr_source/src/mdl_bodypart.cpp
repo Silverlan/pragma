@@ -53,10 +53,15 @@ void import::mdl::BodyPart::ReadVertAnims(const VFilePtr &f,uint64_t offset,Mode
 	for(auto i=decltype(stdFlex.numverts){0};i<stdFlex.numverts;++i)
 	{
 		auto &flexVert = flexVerts.at(i);
-		if(stdFlex.vertanimtype == umath::to_integral(StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE))
+		switch(stdFlex.vertanimtype)
+		{
+		case StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE:
 			flexVert = std::make_shared<mstudiovertanim_wrinkle_t>();
-		else
+			break;
+		default:
 			flexVert = std::make_shared<mstudiovertanim_t>();
+			break;
+		}
 		flexVert->index = f->Read<uint16_t>();
 		flexVert->speed = f->Read<uint8_t>();
 		flexVert->side = f->Read<uint8_t>();
@@ -64,7 +69,7 @@ void import::mdl::BodyPart::ReadVertAnims(const VFilePtr &f,uint64_t offset,Mode
 		f->Read(flexVert->delta.data(),sizeof(flexVert->delta));
 		f->Read(flexVert->ndelta.data(),sizeof(flexVert->ndelta));
 
-		if(stdFlex.vertanimtype == umath::to_integral(StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE))
+		if(stdFlex.vertanimtype == StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE)
 			static_cast<mstudiovertanim_wrinkle_t&>(*flexVert).wrinkledelta = f->Read<int16_t>();
 	}
 }

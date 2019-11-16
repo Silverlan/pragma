@@ -56,6 +56,11 @@ Skeleton::Skeleton(const Skeleton &other)
 	fUpdateHierarchy(m_rootBones,nullptr);
 }
 
+bool Skeleton::IsRootBone(uint32_t boneId) const
+{
+	return m_rootBones.find(boneId) != m_rootBones.end();
+}
+
 int32_t Skeleton::LookupBone(const std::string &name) const
 {
 	auto &bones = GetBones();

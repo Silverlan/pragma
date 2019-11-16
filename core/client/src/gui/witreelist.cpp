@@ -6,6 +6,7 @@
 
 LINK_WGUI_TO_CLASS(WITreeList,WITreeList);
 
+#pragma optimize("",off)
 WITreeListElement::WITreeListElement()
 	: WITableRow(),m_bCollapsed(false),m_pTreeParent{},
 	m_pArrow{},m_pList{},m_xOffset(0),m_depth(0)
@@ -19,6 +20,15 @@ WITreeListElement::WITreeListElement()
 void WITreeListElement::Initialize()
 {
 	WITableRow::Initialize();
+}
+void WITreeListElement::OnRemove()
+{
+	WITableRow::OnRemove();
+	for(auto &hItem : m_items)
+	{
+		if(hItem.IsValid())
+			hItem->Remove();
+	}
 }
 uint32_t WITreeListElement::GetDepth() const {return m_depth;}
 void WITreeListElement::OnVisibilityChanged(bool bVisible)
@@ -53,6 +63,15 @@ void WITreeListElement::Collapse(bool bAll)
 {
 	if(m_bCollapsed == true)
 		return;
+	if(m_fPopulate)
+	{
+		for(auto &hItem : m_items)
+		{
+			if(hItem.IsValid())
+				hItem->Remove();
+		}
+		m_items.clear();
+	}
 	if(m_pArrow.IsValid())
 		static_cast<WIArrow*>(m_pArrow.get())->SetDirection(WIArrow::Direction::Right);
 	m_bCollapsed = true;
@@ -73,6 +92,8 @@ void WITreeListElement::Expand(bool bAll)
 {
 	if(m_bCollapsed == false)
 		return;
+	if(m_fPopulate)
+		m_fPopulate(*this);
 	if(m_pArrow.IsValid())
 		static_cast<WIArrow*>(m_pArrow.get())->SetDirection(WIArrow::Direction::Down);
 	m_bCollapsed = false;
@@ -115,6 +136,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 		auto *pArrow = WGUI::GetInstance().Create<WIArrow>(this);
 		m_pArrow = pArrow->GetHandle();
 		pArrow->SetSize(12,12);
+		pArrow->SetVisible(false);
 		pArrow->SetPos(m_xOffset,3);
 		pArrow->SetDirection(WIArrow::Direction::Down);
 		auto hThis = GetHandle();
@@ -150,7 +172,7 @@ WITreeListElement *WITreeListElement::GetLastItem() const
 }
 void WITreeListElement::SetTextElement(WIText *pText) {(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle{};}
 WIText *WITreeListElement::GetTextElement() const {return m_hText.IsValid() ? static_cast<WIText*>(m_hText.get()) : nullptr;}
-WITreeListElement *WITreeListElement::AddItem(const std::string &text)
+WITreeListElement *WITreeListElement::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)
 {
 	if(m_pList.IsValid() == false)
 		return nullptr;
@@ -161,6 +183,7 @@ WITreeListElement *WITreeListElement::AddItem(const std::string &text)
 	pEl->SetTextElement(static_cast<WIText*>(hText.get()));
 	pEl->SetTreeParent(this);
 	pEl->SetList(pList);
+	pEl->m_fPopulate = fPopulate;
 	auto hThis = GetHandle();
 	pEl->AddCallback("OnTreeUpdate",FunctionCallback<>::Create([hThis]() {
 		if(hThis.IsValid() == false)
@@ -172,6 +195,11 @@ WITreeListElement *WITreeListElement::AddItem(const std::string &text)
 	auto *pLast = GetLastItem();
 	pList->MoveRow(pEl,pLast);
 	m_items.push_back(pEl->GetHandle());
+
+	if(fPopulate)
+		pEl->Collapse();
+	if(pEl->m_pArrow.IsValid() && pEl->IsCollapsed())
+		pEl->m_pArrow->SetVisible(true);
 	return pEl;
 }
 
@@ -201,11 +229,11 @@ void WITreeList::Update()
 	WITable::Update();
 }
 WITreeListElement *WITreeList::GetRootItem() const {return static_cast<WITreeListElement*>(m_pRoot.get());}
-WITreeListElement *WITreeList::AddItem(const std::string &text)
+WITreeListElement *WITreeList::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)
 {
 	if(m_pRoot.IsValid() == false)
 		return nullptr;
-	return static_cast<WITreeListElement*>(m_pRoot.get())->AddItem(text);
+	return static_cast<WITreeListElement*>(m_pRoot.get())->AddItem(text,fPopulate);
 }
 util::EventReply WITreeList::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
@@ -232,3 +260,4 @@ void WITreeList::CollapseAll()
 		return;
 	static_cast<WITreeListElement*>(m_pRoot.get())->Collapse(true);
 }
+#pragma optimize("",on)

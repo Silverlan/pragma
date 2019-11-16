@@ -657,6 +657,23 @@ int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }
+int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
+{
+	auto w = Lua::CheckInt(l,1);
+	auto h = Lua::CheckInt(l,2);
+	auto aspectRatio = Lua::CheckNumber(l,3);
+	Vector2i size {w,h};
+	w = size.y *aspectRatio;
+	h = size.y;
+	if(w > size.x)
+	{
+		w = size.x;
+		h = size.x /aspectRatio;
+	}
+	Lua::PushNumber(l,w);
+	Lua::PushNumber(l,h);
+	return 2;
+}
 int Lua::util::get_pretty_bytes(lua_State *l)
 {
 	auto bytes = Lua::CheckInt(l,1);
@@ -846,7 +863,11 @@ int Lua::util::round_string(lua_State *l)
 int Lua::util::get_type_name(lua_State *l)
 {
 	if(Lua::IsSet(l,1) == false)
-		return 0;
+	{
+		Lua::PushString(l,Lua::IsNone(l,1) ? "none" : "nil");
+		return 1;
+	}
+
 	auto o = luabind::from_stack(l,1);
 	auto classInfo = luabind::get_class_info(o);
 	Lua::PushString(l,classInfo.name);

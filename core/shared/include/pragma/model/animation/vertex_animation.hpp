@@ -9,23 +9,39 @@ class DLLNETWORK MeshVertexFrame
 	: public std::enable_shared_from_this<MeshVertexFrame>
 {
 public:
+	enum class Flags : uint8_t
+	{
+		None = 0u,
+		HasDeltaValues = 1u
+	};
+
 	MeshVertexFrame()=default;
 	MeshVertexFrame(const MeshVertexFrame &other);
 
-	const std::vector<std::array<uint16_t,3>> &GetVertices() const;
-	std::vector<std::array<uint16_t,3>> &GetVertices();
+	const std::vector<std::array<uint16_t,4>> &GetVertices() const;
+	std::vector<std::array<uint16_t,4>> &GetVertices();
 	void SetVertexCount(uint32_t count);
 	uint32_t GetVertexCount() const;
 	void SetVertexPosition(uint32_t vertId,const Vector3 &pos);
 	void SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos);
+	void SetDeltaValue(uint32_t vertId,float deltaValue);
+	void SetDeltaValue(uint32_t vertId,uint16_t deltaValue);
+	bool GetDeltaValue(uint32_t vertId,float &deltaValue) const;
 	bool GetVertexPosition(uint32_t vertId,Vector3 &pos) const;
+
+	void SetFlags(Flags flags);
+	void SetFlagEnabled(Flags flags,bool enabled=true);
+	bool IsFlagEnabled(Flags flags) const;
+	Flags GetFlags() const;
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
 private:
 	// Each uint16_t is a half-float
-	std::vector<std::array<uint16_t,3>> m_vertices = {};
+	std::vector<std::array<uint16_t,4>> m_vertices = {}; // Fourth component is wrinkle data
+	Flags m_flags = Flags::None;
 };
+REGISTER_BASIC_BITWISE_OPERATORS(MeshVertexFrame::Flags)
 
 class DLLNETWORK MeshVertexAnimation
 	: public std::enable_shared_from_this<MeshVertexAnimation>

@@ -116,6 +116,15 @@ static void register_gui(Lua::Interface &lua)
 			auto *pFrame = pConsole ? pConsole->GetFrame() : nullptr;
 			Lua::PushBool(l,pFrame ? pFrame->IsVisible() : false);
 			return 1;
+		})},
+		{"get_render_scissor_rect",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			uint32_t x,y,w,h;
+			WGUI::GetInstance().GetScissor(x,y,w,h);
+			Lua::PushInt(l,x);
+			Lua::PushInt(l,y);
+			Lua::PushInt(l,w);
+			Lua::PushInt(l,h);
+			return 4;
 		})}
 	});
 	auto guiMod = luabind::module(l,"gui");
@@ -134,6 +143,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("KeyboardCallback",&WILuaWrapper::KeyboardCallback,&WILuaWrapper::default_KeyboardCallback);
 	wiBaseWIElement.def("CharCallback",&WILuaWrapper::CharCallback,&WILuaWrapper::default_CharCallback);
 	wiBaseWIElement.def("ScrollCallback",&WILuaWrapper::ScrollCallback,&WILuaWrapper::default_ScrollCallback);
+	wiBaseWIElement.def("OnUpdate",&WILuaWrapper::OnUpdate,&WILuaWrapper::default_OnUpdate);
 	wiBaseWIElement.def("OnVisibilityChanged",&WILuaWrapper::OnSetVisible,&WILuaWrapper::default_OnSetVisible);
 	wiBaseWIElement.def("OnSizeChanged",&WILuaWrapper::OnSetSize,&WILuaWrapper::default_OnSetSize);
 	wiBaseWIElement.def("OnColorChanged",&WILuaWrapper::OnSetColor,&WILuaWrapper::default_OnSetColor);

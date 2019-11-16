@@ -365,6 +365,7 @@ void WITable::SetRowHeight(int h)
 	m_rowHeight = h;
 	ScheduleUpdate();
 }
+int WITable::GetRowHeight() const {return m_rowHeight;}
 WITableRow *WITable::GetSelectedRow() const
 {
 	if(!m_rowSelected.IsValid())

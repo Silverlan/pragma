@@ -739,23 +739,38 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				f->Write<uint32_t>(frames.size());
 				for(auto &frame : frames)
 				{
+					auto flags = frame->GetFlags();
+					f->Write<MeshVertexFrame::Flags>(flags);
+					auto hasDeltaValues = umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues);
 					std::vector<uint16_t> usedVertIndices {};
 					auto &verts = frame->GetVertices();
 					usedVertIndices.reserve(verts.size());
 					auto vertIdx = 0u;
 					for(auto &v : verts)
 					{
-						if(v.at(0) != 0 || v.at(1) != 0 || v.at(2) != 0)
+						if(v.at(0) != 0 || v.at(1) != 0 || v.at(2) != 0 || (hasDeltaValues && v.at(3) != 0))
 							usedVertIndices.push_back(vertIdx);
 						++vertIdx;
 					}
 
 					f->Write<uint16_t>(usedVertIndices.size());
-					for(auto idx : usedVertIndices)
+					if(hasDeltaValues)
 					{
-						f->Write<uint16_t>(idx);
-						auto &v = verts.at(idx);
-						f->Write(v.data(),v.size() *sizeof(v.front()));
+						for(auto idx : usedVertIndices)
+						{
+							f->Write<uint16_t>(idx);
+							auto &v = verts.at(idx);
+							f->Write(v.data(),v.size() *sizeof(v.front()));
+						}
+					}
+					else
+					{
+						for(auto idx : usedVertIndices)
+						{
+							f->Write<uint16_t>(idx);
+							auto &v = verts.at(idx);
+							f->Write(v.data(),3u *sizeof(v.front()));
+						}
 					}
 				}
 			}

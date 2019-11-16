@@ -66,7 +66,6 @@ protected:
 	void OnRowCellCreated(WITableCell *cell);
 	static void OnHeaderCellPressed(WITableCell *cell);
 	static void OnScrollOffsetChanged(unsigned int offset,void *userData);
-	uint32_t GetRowIndex(WITableRow *pRow) const;
 	virtual void UpdateHeaderRowHeight(WITableRow *pRow,float defHeight);
 	virtual float UpdateRowHeights(float yOffset,float defHeight);
 	void UpdateCell(const WITableCell &cell);
@@ -84,10 +83,12 @@ public:
 	void MoveRow(WITableRow *a,WITableRow *pos,bool bAfter=true);
 	unsigned int GetRowCount() const;
 	virtual void SetSize(int x,int y) override;
+	uint32_t GetRowIndex(WITableRow *pRow) const;
 	void RemoveRow(uint32_t rowIdx);
 	void SetSortable(bool b);
 	bool IsSortable() const;
 	void SetRowHeight(int h);
+	int GetRowHeight() const;
 	void SetSelectable(bool b);
 	bool IsSelectable() const;
 	void SetScrollable(bool b);
@@ -124,7 +125,6 @@ protected:
 	std::unordered_map<unsigned int,int> m_cellWidths;
 	void SetCellCount(unsigned int numCells);
 	void UpdateCell(const WITableCell &cell);
-	WITable *GetTable();
 	friend void WITable::UpdateCell(const WITableCell &cell);
 	friend void WITableCell::SetRowSpan(int32_t span);
 	friend void WITableCell::SetColSpan(int32_t span);
@@ -148,6 +148,7 @@ public:
 	void AttachCell(uint32_t colid,const WITableCell &cell);
 	unsigned int GetCellCount() const;
 	WITableCell *GetCell(unsigned int id) const;
+	WITable *GetTable();
 };
 
 #endif

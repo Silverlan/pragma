@@ -495,15 +495,24 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 				auto numFrames = Read<uint32_t>();
 				for(auto k=decltype(numFrames){0};k<numFrames;++k)
 				{
+					auto flags = MeshVertexFrame::Flags::None;
+					if(version >= 25)
+						flags = Read<MeshVertexFrame::Flags>();
 					auto numUsedVerts = Read<uint16_t>();
 					if(subMesh != nullptr)
 					{
 						auto meshFrame = va->AddMeshFrame(*mesh,*subMesh);
+						meshFrame->SetFlags(flags);
 						for(auto l=decltype(numUsedVerts){0};l<numUsedVerts;++l)
 						{
 							auto idx = Read<uint16_t>();
 							auto v = Read<std::array<uint16_t,3>>();
 							meshFrame->SetVertexPosition(idx,v);
+							if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues))
+							{
+								auto deltaVal = Read<uint16_t>();
+								meshFrame->SetDeltaValue(idx,deltaVal);
+							}
 						}
 					}
 					else

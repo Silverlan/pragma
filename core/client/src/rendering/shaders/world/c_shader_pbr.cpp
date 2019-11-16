@@ -49,6 +49,18 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 		prosper::Shader::DescriptorSetInfo::Binding { // Parallax Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Wrinkle Compress Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Exponent Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		}
 	}
 };
@@ -116,7 +128,28 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreat
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
-static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName="")
+static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex=nullptr)
+{
+	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &texManager = matManager.GetTextureManager();
+
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly;
+	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
+
+	std::shared_ptr<Texture> tex = nullptr;
+	if(texInfo && texInfo->texture)
+		tex = std::static_pointer_cast<Texture>(texInfo->texture);
+	else if(optDefaultTex == nullptr)
+		return false;
+	else
+		tex = optDefaultTex->shared_from_this();
+	if(tex && tex->HasValidVkTexture())
+		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+	return true;
+}
+
+static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -174,6 +207,16 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 
 	if(bind_texture(mat,descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
 		return false;
+
+	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinkle_stretch_map"),umath::to_integral(MaterialBinding::WrinkleStretchMap),albedoTexture.get()) == false)
+		return false;
+
+	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinke_compress_map"),umath::to_integral(MaterialBinding::WrinkleCompressMap),albedoTexture.get()) == false)
+		return false;
+
+	if(bind_texture(mat,descSet,mat.GetTextureInfo("exponent_map"),umath::to_integral(MaterialBinding::ExponentMap),"white") == false)
+		return false;
+
 	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
 	// that seems to cause crashes in some cases
 	if(descSet->update() == false)

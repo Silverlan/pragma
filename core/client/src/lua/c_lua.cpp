@@ -308,6 +308,18 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,rt);
 	}));
+	classDefRasterizationRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &tex = renderer.GetPresentationTexture();
+		if(tex == nullptr)
+			return;
+		Lua::Push(l,tex);
+	}));
+	classDefRasterizationRenderer.def("GetHDRPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &tex = renderer.GetHDRPresentationTexture();
+		if(tex == nullptr)
+			return;
+		Lua::Push(l,tex);
+	}));
 	classDefRasterizationRenderer.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
 		if(dsg == nullptr)
@@ -354,11 +366,66 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push<std::shared_ptr<pragma::rendering::BaseRenderer>>(l,renderer->shared_from_this());
 	}));
+	classDefScene.def("SetRenderer",static_cast<void(*)(lua_State*,::Scene&,pragma::rendering::BaseRenderer&)>([](lua_State *l,::Scene &scene,pragma::rendering::BaseRenderer &renderer) {
+		scene.SetRenderer(renderer.shared_from_this());
+	}));
+	enum class RendererType : uint32_t
+	{
+		Rasterization = 0u,
+		Raytracing
+	};
+	classDefScene.def("CreateRenderer",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>([](lua_State *l,::Scene &scene,uint32_t type) {
+		switch(static_cast<RendererType>(type))
+		{
+		case RendererType::Rasterization:
+		{
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene);
+			if(renderer == nullptr)
+				return;
+			Lua::Push(l,renderer);
+			break;
+		}
+		case RendererType::Raytracing:
+		{
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene);
+			if(renderer == nullptr)
+				return;
+			Lua::Push(l,renderer);
+			break;
+		}
+		}
+	}));
+	classDefScene.def("SetRenderer",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>([](lua_State *l,::Scene &scene,uint32_t type) {
+		switch(static_cast<RendererType>(type))
+		{
+		case RendererType::Rasterization:
+		{
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene);
+			if(renderer == nullptr)
+				return;
+			scene.SetRenderer(renderer);
+			Lua::Push(l,renderer);
+			break;
+		}
+		case RendererType::Raytracing:
+		{
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene);
+			if(renderer == nullptr)
+				return;
+			scene.SetRenderer(renderer);
+			Lua::Push(l,renderer);
+			break;
+		}
+		}
+	}));
 
 	// Texture indices for scene render target
 	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_COLOR",0u);
 	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_BLOOM",1u);
 	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_DEPTH",2u);
+
+	classDefScene.add_static_constant("RENDERER_TYPE_RASTERIZATION",umath::to_integral(RendererType::Rasterization));
+	classDefScene.add_static_constant("RENDERER_TYPE_RAYTRACING",umath::to_integral(RendererType::Raytracing));
 
 	gameMod[classDefScene];
 	RegisterLuaGameClasses(gameMod);

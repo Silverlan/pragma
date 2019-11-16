@@ -54,7 +54,14 @@ void CModel::UpdateVertexAnimationBuffer()
 				std::vector<std::array<float,4>> floatData {};
 				floatData.reserve(verts.size());
 				for(auto &v : verts)
-					floatData.push_back(std::array<float,4>{umath::float16_to_float32(v.at(0)),umath::float16_to_float32(v.at(1)),umath::float16_to_float32(v.at(2)),0.f});
+				{
+					floatData.push_back(std::array<float,4>{
+						umath::float16_to_float32(v.at(0)),
+						umath::float16_to_float32(v.at(1)),
+						umath::float16_to_float32(v.at(2)),
+						umath::float16_to_float32(v.at(3))
+					});
+				}
 				memcpy(vertexAnimData.data() +offset,floatData.data(),floatData.size() *sizeof(floatData.front()));
 
 				offset += verts.size();

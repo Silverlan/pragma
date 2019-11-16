@@ -259,6 +259,7 @@ public:
 	Skeleton &GetSkeleton();
 	uint32_t GetBoneCount() const;
 	bool GetLocalBonePosition(uint32_t animId,uint32_t frameId,uint32_t boneId,Vector3 &rPos,Quat &rRot,Vector3 *scale=nullptr);
+	bool IsRootBone(uint32_t boneId) const;
 	bool IntersectAABB(Vector3 &min,Vector3 &max);
 	void CalculateRenderBounds();
 	void CalculateCollisionBounds();

@@ -21,6 +21,7 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util_square_shape.hpp>
+#include <prosper_util_line_shape.hpp>
 #include <wrappers/event.h>
 #include <wrappers/memory_block.h>
 #include <misc/fence_create_info.h>
@@ -66,6 +67,10 @@ namespace Lua
 		DLLCLIENT int get_square_vertex_count(lua_State *l);
 		DLLCLIENT int get_square_vertex_format(lua_State *l);
 		DLLCLIENT int get_square_uv_format(lua_State *l);
+		DLLCLIENT int get_line_vertex_buffer(lua_State *l);
+		DLLCLIENT int get_line_vertices(lua_State *l);
+		DLLCLIENT int get_line_vertex_count(lua_State *l);
+		DLLCLIENT int get_line_vertex_format(lua_State *l);
 		namespace VKContextObject
 		{
 			template<class T>
@@ -795,6 +800,37 @@ int Lua::Vulkan::wait_idle(lua_State *l)
 	c_engine->WaitIdle();
 	return 0;
 }
+int Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
+{
+	auto buf = prosper::util::get_line_vertex_buffer(c_engine->GetDevice());
+	Lua::Push(l,buf);
+	return 1;
+}
+int Lua::Vulkan::get_line_vertices(lua_State *l)
+{
+	auto &verts = prosper::util::get_line_vertices();
+	auto t = Lua::CreateTable(l);
+	auto idx = 1u;
+	for(auto &v : verts)
+	{
+		Lua::PushInt(l,idx++);
+		Lua::Push<Vector2>(l,v);
+		Lua::SetTableValue(l,t);
+	}
+	return 1;
+}
+int Lua::Vulkan::get_line_vertex_count(lua_State *l)
+{
+	auto numVerts = prosper::util::get_line_vertex_count();
+	Lua::PushInt(l,numVerts);
+	return 1;
+}
+int Lua::Vulkan::get_line_vertex_format(lua_State *l)
+{
+	auto format = prosper::util::get_line_vertex_format();
+	Lua::PushInt(l,umath::to_integral(format));
+	return 1;
+}
 int Lua::Vulkan::get_square_vertex_uv_buffer(lua_State *l)
 {
 	auto uvBuffer = prosper::util::get_square_vertex_uv_buffer(c_engine->GetDevice());
@@ -960,7 +996,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			luabind::def("get_square_uv_coordinates",&Lua::Vulkan::get_square_uv_coordinates),
 			luabind::def("get_square_vertex_count",&Lua::Vulkan::get_square_vertex_count),
 			luabind::def("get_square_vertex_format",&Lua::Vulkan::get_square_vertex_format),
-			luabind::def("get_square_uv_format",&Lua::Vulkan::get_square_uv_format)
+			luabind::def("get_square_uv_format",&Lua::Vulkan::get_square_uv_format),
+
+			luabind::def("get_line_vertex_buffer",&Lua::Vulkan::get_line_vertex_buffer),
+			luabind::def("get_line_vertices",&Lua::Vulkan::get_line_vertices),
+			luabind::def("get_line_vertex_count",&Lua::Vulkan::get_line_vertex_count),
+			luabind::def("get_line_vertex_format",&Lua::Vulkan::get_line_vertex_format)
 		]
 	];
 

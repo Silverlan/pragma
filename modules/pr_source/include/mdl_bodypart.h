@@ -89,6 +89,12 @@ namespace import
 			std::array<int32_t,8> unused; // remove as appropriate
 		};
 
+		enum class StudioVertAnimType_t : uint8_t
+		{
+			STUDIO_VERT_ANIM_NORMAL = 0,
+			STUDIO_VERT_ANIM_WRINKLE,
+		};
+
 		struct mstudioflex_t
 		{
 			int32_t flexdesc; // input value
@@ -102,7 +108,7 @@ namespace import
 			int32_t vertindex;
 
 			int32_t flexpair; // second flex desc
-			uint8_t vertanimtype; // See StudioVertAnimType_t
+			StudioVertAnimType_t vertanimtype;
 			std::array<uint8_t,3> unusedchar;
 			std::array<int32_t,6> unused;
 		};
@@ -134,12 +140,6 @@ namespace import
 		struct mstudiovertanim_wrinkle_t : public mstudiovertanim_t
 		{
 			int16_t wrinkledelta;
-		};
-
-		enum class StudioVertAnimType_t : uint32_t
-		{
-			STUDIO_VERT_ANIM_NORMAL = 0,
-			STUDIO_VERT_ANIM_WRINKLE,
 		};
 
 		class BodyPart

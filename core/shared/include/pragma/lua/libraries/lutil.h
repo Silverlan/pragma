@@ -42,6 +42,7 @@ namespace Lua
 
 		DLLNETWORK int calc_world_direction_from_2d_coordinates(lua_State *l);
 
+		DLLNETWORK int clamp_resolution_to_aspect_ratio(lua_State *l);
 		DLLNETWORK int get_pretty_bytes(lua_State *l);
 		DLLNETWORK int get_pretty_duration(lua_State *l);
 		DLLNETWORK int units_to_metres(lua_State *l);
@@ -106,7 +107,8 @@ namespace Lua
 	{"metres_to_units",Lua::util::metres_to_units}, \
 	{"fade_property",Lua::util::fade_property}, \
 	{"round_string",Lua::util::round_string}, \
-	{"get_type_name",Lua::util::get_type_name},
+	{"get_type_name",Lua::util::get_type_name}, \
+	{"clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio},
 
 #define REGISTER_SHARED_UTIL \
 	REGISTER_SHARED_UTIL_GENERIC \

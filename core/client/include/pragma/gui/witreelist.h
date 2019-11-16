@@ -9,20 +9,10 @@ class WIText;
 class DLLCLIENT WITreeListElement
 	: public WITableRow
 {
-protected:
-	std::vector<WIHandle> m_items;
-	bool m_bCollapsed;
-	uint32_t m_xOffset;
-	uint32_t m_depth;
-	WIHandle m_pTreeParent;
-	WIHandle m_pArrow;
-	WIHandle m_pList;
-	WIHandle m_hText = {};
-	WITreeListElement *GetLastItem() const;
-	void SetTextElement(WIText *pText);
 public:
 	WITreeListElement();
 	virtual void Initialize() override;
+	virtual void OnRemove() override;
 	virtual void OnVisibilityChanged(bool bVisible) override;
 	void SetTreeParent(WITreeListElement *pEl);
 	void SetXOffset(uint32_t x);
@@ -35,7 +25,19 @@ public:
 	void Clear();
 	WIText *GetTextElement() const;
 	const std::vector<WIHandle> &GetItems() const;
-	WITreeListElement *AddItem(const std::string &text);
+	WITreeListElement *AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate=nullptr);
+protected:
+	std::vector<WIHandle> m_items;
+	bool m_bCollapsed;
+	std::function<void(WITreeListElement&)> m_fPopulate = nullptr;
+	uint32_t m_xOffset;
+	uint32_t m_depth;
+	WIHandle m_pTreeParent;
+	WIHandle m_pArrow;
+	WIHandle m_pList;
+	WIHandle m_hText = {};
+	WITreeListElement *GetLastItem() const;
+	void SetTextElement(WIText *pText);
 };
 
 class DLLCLIENT WITreeList
@@ -49,7 +51,7 @@ public:
 	virtual void SetSize(int x,int y) override;
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual WITableRow *AddRow() override;
-	WITreeListElement *AddItem(const std::string &text);
+	WITreeListElement *AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate=nullptr);
 	virtual void Update() override;
 	WITreeListElement *GetRootItem() const;
 	void ExpandAll();

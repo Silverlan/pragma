@@ -916,6 +916,17 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defQuat.def("ToAxisAngle",&Lua::Quaternion::ToAxisAngle);
 	defQuat.def("Set",&Lua::Quaternion::Set);
+	defQuat.def("Set",static_cast<void(*)(Quat&,const Quat&)>([](Quat &rot,const Quat &rotNew) {
+		rot = rotNew;
+	}));
+	defQuat.def("Set",static_cast<void(*)(Quat&,uint32_t,float)>([](Quat &rot,uint32_t idx,float value) {
+		constexpr std::array<uint8_t,4> quatIndices = {3,0,1,2};
+		rot[quatIndices.at(idx)] = value;
+	}));
+	defQuat.def("Get",static_cast<void(*)(lua_State*,Quat&,uint32_t)>([](lua_State *l,Quat &rot,uint32_t idx) {
+		constexpr std::array<uint8_t,4> quatIndices = {3,0,1,2};
+		Lua::PushNumber(l,rot[quatIndices.at(idx)]);
+	}));
 	defQuat.def("RotateX",static_cast<void(*)(Quat&,float)>(&uquat::rotate_x));
 	defQuat.def("RotateY",static_cast<void(*)(Quat&,float)>(&uquat::rotate_y));
 	defQuat.def("RotateZ",static_cast<void(*)(Quat&,float)>(&uquat::rotate_z));

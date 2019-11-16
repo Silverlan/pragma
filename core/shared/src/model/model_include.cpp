@@ -3,6 +3,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 
+#pragma optimize("",off)
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
 	auto numBones = frameToSubtract.GetBoneCount(); // TODO
@@ -46,6 +47,11 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		auto &bones = skeleton.GetBones();
 		bones.reserve(bones.size() +bonesOther.size());
 		boneTranslations.reserve(bones.size() +bonesOther.size());
+
+		std::vector<uint32_t> newBoneIndicesToOtherBoneIndices {};
+		newBoneIndicesToOtherBoneIndices.reserve(bonesOther.size());
+		uint32_t otherBoneIndex = 0u;
+		auto numOldBones = skeleton.GetBoneCount();
 		for(auto &boneOther : bonesOther)
 		{
 			auto it = std::find_if(bones.begin(),bones.end(),[&boneOther](const std::shared_ptr<Bone> &bone) {
@@ -54,11 +60,13 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			if(it == bones.end())
 			{
 				auto boneId = skeleton.AddBone(new Bone());
+				newBoneIndicesToOtherBoneIndices.push_back(otherBoneIndex);
 				auto bone = skeleton.GetBone(boneId).lock();
 				bone->name = boneOther->name;
 				it = bones.end() -1;
 			}
 			boneTranslations.push_back(it -bones.begin());
+			++otherBoneIndex;
 		}
 		// Determine new bone parents (Has to be done AFTER all bones have been processed!)
 		for(auto idxOther=decltype(boneTranslations.size()){0};idxOther<boneTranslations.size();++idxOther)
@@ -69,6 +77,41 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			auto idxThis = boneTranslations.at(idxOther);
 			auto &boneThis = bones.at(idxThis);
 			boneThis->parent = bones.at(boneTranslations.at(boneOther->parent.lock()->ID));
+		}
+
+		// Copy reference pose transforms of new bones from other model to this model
+		auto numNewBones = skeleton.GetBoneCount();
+		auto &reference = GetReference();
+		if(numNewBones > numOldBones)
+		{
+			reference.SetBoneCount(numNewBones);
+			auto &referenceOther = other.GetReference();
+			for(auto i=decltype(newBoneIndicesToOtherBoneIndices.size()){0u};i<newBoneIndicesToOtherBoneIndices.size();++i)
+			{
+				auto boneIdx = numOldBones +i;
+				auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
+				pragma::physics::ScaledTransform t;
+				if(referenceOther.GetBonePose(otherBoneIdx,t))
+					reference.SetBonePose(boneIdx,t);
+			}
+
+			// Do the same for the reference animation
+			auto animReference = GetAnimation(LookupAnimation("reference"));
+			auto animReferenceOther = const_cast<Model&>(other).GetAnimation(other.LookupAnimation("reference"));
+			if(animReference && animReference->GetFrameCount() == 1 && animReferenceOther && animReferenceOther->GetFrameCount() == 1)
+			{
+				auto &frameRef = animReference->GetFrame(0);
+				auto &frameRefOther = animReferenceOther->GetFrame(0);
+				frameRef->SetBoneCount(numNewBones);
+				for(auto i=decltype(newBoneIndicesToOtherBoneIndices.size()){0u};i<newBoneIndicesToOtherBoneIndices.size();++i)
+				{
+					auto boneIdx = numOldBones +i;
+					auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
+					pragma::physics::ScaledTransform t;
+					if(frameRefOther->GetBonePose(otherBoneIdx,t))
+						frameRef->SetBonePose(boneIdx,t);
+				}
+			}
 		}
 	};
 
@@ -297,3 +340,4 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		}
 	}
 }
+#pragma optimize("",on)

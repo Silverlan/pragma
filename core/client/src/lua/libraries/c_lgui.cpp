@@ -34,6 +34,30 @@ int Lua::gui::create(lua_State *l)
 	}
 	if(p == NULL)
 		return 0;
+
+	if(Lua::IsSet(l,3))
+	{
+		auto x = Lua::CheckInt(l,3);
+		auto y = Lua::CheckInt(l,4);
+		p->SetPos(x,y);
+
+		if(Lua::IsSet(l,5))
+		{
+			auto w = Lua::CheckInt(l,5);
+			auto h = Lua::CheckInt(l,6);
+			p->SetSize(w,h);
+
+			if(Lua::IsSet(l,7))
+			{
+				auto anchorX = Lua::CheckInt(l,7);
+				auto anchorY = Lua::CheckInt(l,8);
+				auto anchorW = Lua::CheckInt(l,9);
+				auto anchorH = Lua::CheckInt(l,10);
+				p->SetAnchor(anchorX,anchorY,anchorW,anchorH);
+			}
+		}
+	}
+
 	auto data = p->GetUserData();
 	if(data != nullptr)
 	{

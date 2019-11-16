@@ -808,6 +808,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def("RotateLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rot) {
 		t.RotateLocal(rot);
 	}));
+	classDefTransform.def("TransformGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t,const pragma::physics::Transform &t2) {
+		t = t2 *t;
+	}));
+	classDefTransform.def("TransformLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t,const pragma::physics::Transform &t2) {
+		t *= t2;
+	}));
 	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
 		Lua::Push<pragma::physics::Transform>(l,t.GetInverse());
 	}));

@@ -1303,7 +1303,6 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		uint32_t bodyPartIdx = std::numeric_limits<uint32_t>::max();
 		uint32_t mdlIdx = std::numeric_limits<uint32_t>::max();
 		uint32_t meshIdx = std::numeric_limits<uint32_t>::max();
-		std::unordered_map<uint16_t,uint16_t> bpMeshIndicesToMeshIndices;
 	};
 	auto &bodyParts = mdlInfo.bodyParts;
 	std::vector<MeshBodyPartInfo> meshToBodyPart {};
@@ -1313,6 +1312,11 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 
 	// TODO: Add LOD info
 	std::vector<uint32_t> bgBaseMeshGroups = {};
+	std::vector<uint32_t> fixedLod0IndicesToPragmaModelIndices {};
+	if(mdlInfo.fixedLodVertexIndices.empty() == false)
+		fixedLod0IndicesToPragmaModelIndices.resize(mdlInfo.fixedLodVertexIndices.front().size());
+	else
+		fixedLod0IndicesToPragmaModelIndices.resize(vvdVerts.size());
 	if(it != files.end())
 	{
 		auto bVTX = import::mdl::load_vtx(it->second,vtxBodyParts);
@@ -1369,13 +1373,11 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 							auto &vtxMesh = vtxLod.meshes[meshIdx];
 							auto &mesh = model.meshes[meshIdx];
 
-							std::unordered_map<uint16_t,uint16_t> *bpMeshIndexToMeshIndices = nullptr;
 							if(lodIdx == 0u)
 							{
 								if(meshToBodyPart.size() == meshToBodyPart.capacity())
 									meshToBodyPart.reserve(meshToBodyPart.size() +50);
 								meshToBodyPart.push_back({*meshGroup,*lodMesh,*lodSubMesh,static_cast<uint32_t>(bodyPartIdx),static_cast<uint32_t>(mdlIdx),static_cast<uint32_t>(meshIdx)});
-								bpMeshIndexToMeshIndices = &meshToBodyPart.back().bpMeshIndicesToMeshIndices;
 							}
 
 							lodSubMesh->SetSkinTextureIndex(mesh.stdMesh.material);
@@ -1407,13 +1409,8 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 									}
 									else
 										vertIdx = it->second;
-									if(bpMeshIndexToMeshIndices != nullptr)
-									{
-										//(*bpMeshIndexToMeshIndices)[originalIdx] = vertIdx;
-										(*bpMeshIndexToMeshIndices)[vtxVert.origMeshVertID] = vertIdx;
-										//if(bodyPartIdx == 0 && mdlIdx == 0 && meshIdx == 1 && (fixedIdx == 301 || vtxVert.origMeshVertID == 301 || originalIdx == 301 || vtxVert.origMeshVertID +meshVertexIndexStart == 301 || vtxVert.origMeshVertID +meshVertexIndexStart +bodyPartVertexIndexStart == 301))
-										//	std::cout<<"!!!"<<std::endl;
-									}
+									if(lodIdx == 0)
+										fixedLod0IndicesToPragmaModelIndices.at(fixedIdx) = vertIdx;
 									triangles.push_back(vertIdx);
 								}
 							}
@@ -1505,6 +1502,7 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	};
 	std::unordered_map<uint32_t,PairInfo> flexPairs;
 	auto bpIdx = 0u;
+	uint32_t mdlVertexOffset = 0u;
 	for(auto &bp : mdlInfo.bodyParts)
 	{
 		auto mdlIdx = 0u;
@@ -1523,11 +1521,11 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 				}
 				auto &info = *it;
 				auto &meshFlexes = mesh.flexes;
-				for(auto &flex : meshFlexes)
+				for(auto &meshFlex : meshFlexes)
 				{
-					auto &stdFlex = flex.stdFlex;
-					auto &vertexTransforms = flex.vertAnim;
-
+					auto &stdFlex = meshFlex.stdFlex;
+					auto isWrinkle = (stdFlex.vertanimtype == import::mdl::StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE);
+					auto &vertexTransforms = meshFlex.vertAnim;
 					auto &stdFlexDesc = mdlInfo.flexDescs.at(stdFlex.flexdesc);
 					auto vertAnim = mdl.AddVertexAnimation("flex_" +stdFlexDesc.GetName());
 					auto meshFrame = vertAnim->AddMeshFrame(info.mesh,info.subMesh);
@@ -1573,9 +1571,15 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 					
 					for(auto &t : vertexTransforms)
 					{
-						auto it = info.bpMeshIndicesToMeshIndices.find(t->index);
-						if(it != info.bpMeshIndicesToMeshIndices.end())
+						auto fixedVertIdx = t->index +mesh.stdMesh.vertexoffset +mdlVertexOffset;
+						if(mdlInfo.fixedLodVertexIndices.empty() == false)
+							fixedVertIdx = mdlInfo.fixedLodVertexIndices.front().at(fixedVertIdx);
+						
+						if(fixedVertIdx < fixedLod0IndicesToPragmaModelIndices.size())
 						{
+							auto vertIdx = fixedLod0IndicesToPragmaModelIndices.at(fixedVertIdx);
+
+							auto &vvdVert = vvdVerts.at(fixedVertIdx);
 							auto side = t->side /255.f;
 							auto scale = 1.f -side;
 
@@ -1583,17 +1587,34 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 							v = {v.z,v.y,-v.x}; // Determined by testing
 							if(pairMeshFrame != nullptr)
 							{
-								pairMeshFrame->SetVertexPosition(it->second,v *(1.f -scale));
+								pairMeshFrame->SetVertexPosition(vertIdx,v *(1.f -scale));
 								v *= scale; // TODO: Unsure if this is correct
 							}
-							meshFrame->SetVertexPosition(it->second,v);
+							meshFrame->SetVertexPosition(vertIdx,v);
+
+							if(stdFlex.vertanimtype == import::mdl::StudioVertAnimType_t::STUDIO_VERT_ANIM_WRINKLE)
+							{
+								auto &wrinkle = static_cast<import::mdl::mstudiovertanim_wrinkle_t&>(*t);
+								const float g_VertAnimFixedPointScale = 1.0f / 4096.0f;
+								const float g_VertAnimFixedPointScaleInv = 1.0f / g_VertAnimFixedPointScale;
+								auto wrinkleDelta = wrinkle.wrinkledelta /g_VertAnimFixedPointScaleInv;
+
+							//	'		int nWrinkleDeltaInt = flWrinkle * g_VertAnimFixedPointScaleInv;
+							//		'		wrinkledelta = clamp( nWrinkleDeltaInt, -32767, 32767 );
+
+								//auto wrinkleDelta = float16::Convert16bitFloatTo32bits(wrinkle.wrinkledelta);
+								if(wrinkleDelta != 0.f)
+									meshFrame->SetFlagEnabled(MeshVertexFrame::Flags::HasDeltaValues);
+								meshFrame->SetDeltaValue(vertIdx,wrinkleDelta);
+							}
 						}
 						else
-							std::cout<<"WARNING: Missing flex vertex "<<t->index<<" for flex "<<stdFlexDesc.GetName()<<"! Skipping..."<<std::endl;
+							std::cout<<"WARNING: Missing flex vertex "<<fixedVertIdx<<" for flex "<<stdFlexDesc.GetName()<<"! Skipping..."<<std::endl;
 					}
 				}
 				++meshIdx;
 			}
+			mdlVertexOffset += bpMdl.vertexCount;
 			++mdlIdx;
 		}
 		++bpIdx;

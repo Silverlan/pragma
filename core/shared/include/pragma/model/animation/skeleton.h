@@ -41,6 +41,7 @@ public:
 	Skeleton(const Skeleton &other);
 	uint32_t AddBone(Bone *bone);
 	uint32_t GetBoneCount() const;
+	bool IsRootBone(uint32_t boneId) const;
 	int32_t LookupBone(const std::string &name) const;
 	std::weak_ptr<Bone> GetBone(uint32_t id) const;
 	const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &GetRootBones() const;

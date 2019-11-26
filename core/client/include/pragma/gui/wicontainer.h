@@ -8,8 +8,6 @@
 class DLLCLIENT WIContainer
 	: public WIBase
 {
-protected:
-	std::array<int32_t,4> m_padding;
 public:
 	WIContainer();
 	enum class DLLCLIENT Padding : uint32_t
@@ -33,6 +31,13 @@ public:
 	int32_t GetPaddingLeft() const;
 	int32_t GetPadding(Padding paddingType) const;
 	virtual void SizeToContents() override;
+	virtual void Update() override;
+
+	virtual void OnChildAdded(WIBase *child) override;
+	virtual void OnChildRemoved(WIBase *child) override;
+protected:
+	std::array<int32_t,4> m_padding;
+	std::unordered_map<WIBase*,std::array<CallbackHandle,2>> m_childCallbacks = {};
 };
 
 #endif

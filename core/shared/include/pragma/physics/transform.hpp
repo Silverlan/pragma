@@ -53,7 +53,7 @@ namespace pragma::physics
 		const Vector3 &GetScale() const;
 		void SetScale(const Vector3 &scale);
 		void Scale(const Vector3 &scale);
-		Transform GetInverse() const;
+		ScaledTransform GetInverse() const;
 		ScaledTransform operator*(const ScaledTransform &tOther) const;
 		ScaledTransform operator*(const Transform &tOther) const;
 		ScaledTransform &operator*=(const ScaledTransform &tOther);

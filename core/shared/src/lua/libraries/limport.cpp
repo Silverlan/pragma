@@ -6,6 +6,7 @@
 #include "pragma/lua/classes/ldef_skeleton.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/game/scene_snapshot.hpp"
+#include "pragma/game/game_resources.hpp"
 #include <pragma/util/util_game.hpp>
 #include <smdmodel.h>
 #include <unordered_set>
@@ -301,6 +302,41 @@ int Lua::import::import_wrmi(lua_State *l)
 
 int Lua::import::import_smd(lua_State *l)
 {
+	auto &nw = *engine->GetNetworkState(l);
+	std::string smdFileName = Lua::CheckString(l,1);
+	/*if(Lua::file::validate_write_operation(l,smdFileName) == false)
+	{
+		Lua::PushBool(l,false);
+		return 1;
+	}*/
+	auto f = FileManager::OpenFile(smdFileName.c_str(),"rb");
+	if(f == nullptr)
+	{
+		Lua::PushBool(l,false);
+		return 1;
+	}
+	auto &mdl = Lua::Check<::Model>(l,2);
+	std::string animName = Lua::CheckString(l,3);
+	auto isCollisionMesh = false;
+	if(Lua::IsSet(l,4))
+		isCollisionMesh = Lua::CheckBool(l,4);
+
+	std::vector<std::string> textures;
+	auto success = ::util::port_hl2_smd(nw,mdl,f,animName,isCollisionMesh,textures);
+	Lua::PushBool(l,success);
+	if(success)
+	{
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(textures.size()){0u};i<textures.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushString(l,textures.at(i));
+			Lua::SetTableValue(l,t);
+		}
+		return 2;
+	}
+	return 1;
+	//bool util::port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures)
 	/*auto &f = *Lua::CheckFile(l,1);
 	auto &skeleton = *Lua::CheckSkeleton(l,2);
 	auto smd = SMDModel::Load(f.GetHandle());
@@ -389,7 +425,7 @@ int Lua::import::import_smd(lua_State *l)
 	return true;
 	
 	//return smd;*/
-	return 0;
+	//return 0;
 }
 
 int Lua::import::import_obj(lua_State *l)

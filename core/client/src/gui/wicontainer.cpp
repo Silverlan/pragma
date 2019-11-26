@@ -7,6 +7,40 @@ WIContainer::WIContainer()
 	: WIBase(),m_padding{0,0,0,0}
 {}
 
+void WIContainer::OnChildAdded(WIBase *child)
+{
+	WIBase::OnChildAdded(child);
+	ScheduleUpdate();
+
+	auto it = m_childCallbacks.find(child);
+	if(it == m_childCallbacks.end())
+		it = m_childCallbacks.insert(std::make_pair(child,std::array<CallbackHandle,2>{})).first;
+	auto &callbacks = it->second;
+	for(auto i=decltype(callbacks.size()){0u};i<callbacks.size();++i)
+	{
+		auto &cb = callbacks.at(i);
+		cb = child->AddCallback((i == 0) ? "SetPos" : "SetSize",FunctionCallback<void>::Create([this]() {
+			ScheduleUpdate();
+		}));
+	}
+}
+void WIContainer::OnChildRemoved(WIBase *child)
+{
+	WIBase::OnChildRemoved(child);
+	ScheduleUpdate();
+
+	auto it = m_childCallbacks.find(child);
+	if(it == m_childCallbacks.end())
+		return;
+	auto &callbacks = it->second;
+	for(auto i=decltype(callbacks.size()){0u};i<callbacks.size();++i)
+	{
+		auto &cb = callbacks.at(i);
+		if(cb.IsValid())
+			cb.Remove();
+	}
+	m_childCallbacks.erase(it);
+}
 void WIContainer::SetPadding(int32_t padding)
 {
 	for(auto &v : m_padding)
@@ -35,6 +69,11 @@ void WIContainer::SizeToContents()
 {
 	WIBase::SizeToContents();
 	SetSize(GetWidth() +GetPaddingLeft() +GetPaddingRight(),GetHeight() +GetPaddingTop() +GetPaddingBottom());
+}
+void WIContainer::Update()
+{
+	WIBase::Update();
+	SizeToContents();
 }
 void WIContainer::SetPaddingTop(int32_t top) {m_padding[0] = top;}
 void WIContainer::SetPaddingRight(int32_t right) {m_padding[1] = right;}

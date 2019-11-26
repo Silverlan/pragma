@@ -48,13 +48,20 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 #pragma optimize("",off)
-DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
 	auto sortedEnts = util::cmd::get_sorted_entities(*c_game,pl);
+	std::optional<std::string> className = {};
+	if(argv.empty() == false)
+		className = '*' +argv.front() +'*';
 	for(auto &pair : sortedEnts)
+	{
+		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+			continue;
 		Con::cout<<*pair.first<<Con::endl;
+	}
 }
 
 void CMD_thirdperson(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

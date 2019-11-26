@@ -106,13 +106,20 @@ void CMD_sv_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vec
 }
 #endif
 
-DLLSERVER void CMD_entities_sv(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
+DLLSERVER void CMD_entities_sv(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
 		return;
 	auto sortedEnts = util::cmd::get_sorted_entities(*s_game,pl);
+	std::optional<std::string> className = {};
+	if(argv.empty() == false)
+		className = '*' +argv.front() +'*';
 	for(auto &pair : sortedEnts)
+	{
+		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+			continue;
 		Con::cout<<*pair.first<<Con::endl;
+	}
 }
 
 void CMD_list_maps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)

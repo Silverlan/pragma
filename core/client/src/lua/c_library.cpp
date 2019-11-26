@@ -20,6 +20,7 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
+#include <pragma/util/util_image.hpp>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 #include <pr_dds.hpp>
@@ -625,6 +626,17 @@ void CGame::RegisterLuaLibraries()
 			std::string fileName = Lua::CheckString(l,2);
 			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
+
+			//pragma::image::ImageOutputFormat::BMP;
+			//pragma::image::save_image( // TODO: Shared!!
+			//bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false) const;
+/*
+auto imgBuffer = worker.GetResult();
+if(imgBuffer->IsHDRFormat())
+imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
+if(pragma::image::save_image(f,*imgBuffer,format,quality) == false)
+Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
+*/
 			return 1;
 		})},
 		{"capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -633,6 +645,9 @@ void CGame::RegisterLuaLibraries()
 			uint32_t samples = 1'024;
 			if(Lua::IsSet(l,3))
 				samples = Lua::CheckInt(l,3);
+			auto hdrOutput = false;
+			if(Lua::IsSet(l,4))
+				hdrOutput = Lua::CheckBool(l,4);
 			constexpr auto denoise = true;
 
 			pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
@@ -650,6 +665,7 @@ void CGame::RegisterLuaLibraries()
 			sceneInfo.height = height;
 			sceneInfo.samples = samples;
 			sceneInfo.denoise = denoise;
+			sceneInfo.hdrOutput = hdrOutput;
 			auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 			Lua::Push(l,job);
 			return 1;

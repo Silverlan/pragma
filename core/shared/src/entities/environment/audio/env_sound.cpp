@@ -95,6 +95,12 @@ void BaseEnvSoundComponent::Initialize()
 	GetEntity().AddComponent("io");
 }
 
+void BaseEnvSoundComponent::OnRemove()
+{
+	Stop();
+	BaseEntityComponent::OnRemove();
+}
+
 void BaseEnvSoundComponent::SetSoundSource(const std::string &sndName) {m_kvSoundName = sndName;}
 void BaseEnvSoundComponent::SetPitch(float pitch)
 {

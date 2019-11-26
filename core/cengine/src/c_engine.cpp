@@ -75,6 +75,13 @@ CEngine::CEngine(int argc,char* argv[])
 	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PostDrawGUI");
 	RegisterCallback<void>("Draw");
 
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,unsigned int>("OnCharInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,Vector2>("OnScrollInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput");
+
 	AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
 		{
@@ -252,6 +259,9 @@ void CEngine::Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,
 void CEngine::Input(int key,GLFW::KeyState state,GLFW::Modifier mods,float magnitude) {Input(key,state,state,mods,magnitude);}
 void CEngine::MouseInput(GLFW::Window &window,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput",handled,window,button,state,mods) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	if(client != nullptr && client->RawMouseInput(button,state,mods) == false)
 		return;
 	if(WGUI::GetInstance().HandleMouseInput(window,button,state,mods))
@@ -307,10 +317,16 @@ void CEngine::GetMappedKeys(const std::string &cvarName,std::vector<GLFW::Key> &
 }
 void CEngine::JoystickButtonInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t key,GLFW::KeyState state)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput",handled,window,joystick,key,state) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	KeyboardInput(window,static_cast<GLFW::Key>(key),-1,state,{});
 }
 void CEngine::JoystickAxisInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t axis,GLFW::Modifier mods,float newVal,float deltaVal)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput",handled,window,joystick,axis,mods,newVal,deltaVal) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	auto oldVal = newVal -deltaVal;
 	auto key = static_cast<GLFW::Key>(axis);
 	auto state = (IsValidAxisInput(newVal) == true) ? GLFW::KeyState::Press : GLFW::KeyState::Release;
@@ -365,6 +381,9 @@ bool CEngine::GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyS
 }
 void CEngine::KeyboardInput(GLFW::Window &window,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods,float magnitude)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput",handled,window,key,scanCode,state,mods,magnitude) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	if(client != nullptr && client->RawKeyboardInput(key,scanCode,state,mods,magnitude) == false)
 		return;
 	if(key == GLFW::Key::Escape) // Escape key is hardcoded
@@ -390,6 +409,9 @@ void CEngine::KeyboardInput(GLFW::Window &window,GLFW::Key key,int scanCode,GLFW
 }
 void CEngine::CharInput(GLFW::Window &window,unsigned int c)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,unsigned int>("OnCharInput",handled,window,c) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	if(client != nullptr && client->RawCharInput(c) == false)
 		return;
 	if(WGUI::GetInstance().HandleCharInput(window,c))
@@ -407,6 +429,9 @@ void CEngine::CharInput(GLFW::Window &window,unsigned int c)
 }
 void CEngine::ScrollInput(GLFW::Window &window,Vector2 offset)
 {
+	auto handled = false;
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,Vector2>("OnScrollInput",handled,window,offset) == CallbackReturnType::HasReturnValue && handled == true)
+		return;
 	if(client != nullptr && client->RawScrollInput(offset) == false)
 		return;
 	if(WGUI::GetInstance().HandleScrollInput(window,offset))

@@ -85,8 +85,9 @@ namespace pragma
 			FMAT_GLOW_MODE_1 = BlackToAlpha<<1,
 			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1<<1,
 			FMAT_GLOW_MODE_3 = FMAT_GLOW_MODE_2<<1,
+			FMAT_GLOW_MODE_4 = FMAT_GLOW_MODE_3<<1,
 
-			DiffuseSRGB = FMAT_GLOW_MODE_3<<1u,
+			DiffuseSRGB = FMAT_GLOW_MODE_4<<1u,
 			GlowSRGB = DiffuseSRGB<<1u
 		};
 
@@ -104,7 +105,9 @@ namespace pragma
 			LightmapsEnabled = 1,
 
 			// PBR only
-			NoIBL = LightmapsEnabled<<1
+			NoIBL = LightmapsEnabled<<1,
+
+			TranslucencyEnabled = NoIBL<<1
 		};
 
 		struct PushConstants

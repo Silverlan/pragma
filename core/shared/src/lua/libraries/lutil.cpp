@@ -694,6 +694,36 @@ int Lua::util::get_pretty_duration(lua_State *l)
 	Lua::PushString(l,r);
 	return 1;
 }
+int Lua::util::is_same_object(lua_State *l)
+{
+	Lua::PushBool(l,lua_rawequal(l,1,2) == 1);
+	return 1;
+}
+int Lua::util::get_pretty_time(lua_State *l)
+{
+	auto t = Lua::CheckNumber(l,1);
+	auto sign = umath::sign(static_cast<float>(t));
+	t *= sign;
+	auto seconds = umath::floor(t);
+	auto milliseconds = umath::floor((t -seconds) *1'000.f);
+	auto minutes = umath::floor(seconds /60.f);
+	seconds -= minutes *60.0;
+	auto hours = umath::floor(minutes /60.f);
+	minutes -= hours *60.f;
+
+	auto prettyTime = ustring::fill_zeroes(::util::round_string(seconds),2) +'.' +
+		ustring::fill_zeroes(::util::round_string(milliseconds),3);
+
+	prettyTime = ustring::fill_zeroes(::util::round_string(minutes),2) +':' +prettyTime;
+
+	if(hours > 0.f)
+		prettyTime = ustring::fill_zeroes(::util::round_string(hours),2) +':' +prettyTime;
+
+	if(sign < 0)
+		prettyTime = '-' +prettyTime;
+	Lua::PushString(l,prettyTime);
+	return 1;
+}
 int Lua::util::units_to_metres(lua_State *l)
 {
 	auto units = Lua::CheckNumber(l,1);

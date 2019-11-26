@@ -114,10 +114,11 @@ void pragma::physics::ScaledTransform::SetIdentity()
 const Vector3 &pragma::physics::ScaledTransform::GetScale() const {return m_scale;}
 void pragma::physics::ScaledTransform::SetScale(const Vector3 &scale) {m_scale = scale;}
 void pragma::physics::ScaledTransform::Scale(const Vector3 &scale) {m_scale *= scale;}
-pragma::physics::Transform pragma::physics::ScaledTransform::GetInverse() const
+pragma::physics::ScaledTransform pragma::physics::ScaledTransform::GetInverse() const
 {
+	auto &scale = GetScale();
 	ScaledTransform inverse {Transform::GetInverse()};
-	inverse.SetScale(GetScale());
+	inverse.SetScale(Vector3{1.f /scale.x,1.f /scale.y,1.f /scale.z}); // TODO: What to do about division by zero cases?
 	return inverse;
 }
 pragma::physics::ScaledTransform pragma::physics::ScaledTransform::operator*(const ScaledTransform &tOther) const

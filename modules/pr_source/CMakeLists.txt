@@ -21,6 +21,8 @@ add_include_dir(niftools)
 add_include_dir(glm)
 add_include_dir(bullet)
 
+add_def(SMDMDL_STATIC)
+
 link_generic_module_libraries()
 register_pragma_module(${PROJ_NAME})
 

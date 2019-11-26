@@ -179,6 +179,16 @@ void BaseEntity::SetPose(const pragma::physics::Transform &outTransform)
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 }
+void BaseEntity::GetPose(pragma::physics::ScaledTransform &outTransform) const
+{
+	outTransform = {GetPosition(),GetRotation(),GetScale()};
+}
+void BaseEntity::SetPose(const pragma::physics::ScaledTransform &outTransform)
+{
+	SetPosition(outTransform.GetOrigin());
+	SetRotation(outTransform.GetRotation());
+	SetScale(outTransform.GetScale());
+}
 const Vector3 &BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();
@@ -213,6 +223,23 @@ void BaseEntity::SetRotation(const Quat &rot)
 	if(trComponent.expired())
 		return;
 	trComponent->SetOrientation(rot);
+}
+const Vector3 &BaseEntity::GetScale() const
+{
+	auto trComponent = GetTransformComponent();
+	if(trComponent.expired())
+	{
+		static Vector3 defaultScale {1.f,1.f,1.f};
+		return defaultScale;
+	}
+	return trComponent->GetScale();
+}
+void BaseEntity::SetScale(const Vector3 &scale)
+{
+	auto trComponent = GetTransformComponent();
+	if(trComponent.expired())
+		return;
+	trComponent->SetScale(scale);
 }
 
 void BaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)

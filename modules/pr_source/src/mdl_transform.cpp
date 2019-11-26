@@ -100,8 +100,9 @@ void import::MdlInfo::ConvertTransforms(const std::vector<std::shared_ptr<ModelS
 	if(anim != nullptr)
 		transform_animation(skeleton,anim,false); // Don't localize; Will be localized after reference pose has been assigned!
 
-
-	for(auto &anim : model.GetAnimations())
+	// TODO: This transformation may be required for some models/animations, but not for others.
+	// Figure out which ones!
+	/*for(auto &anim : model.GetAnimations())
 	{
 		if(anim->HasFlag(FAnim::Gesture))
 			continue;
@@ -117,7 +118,7 @@ void import::MdlInfo::ConvertTransforms(const std::vector<std::shared_ptr<ModelS
 				rot = uquat::create(EulerAngles{0.f,90.f,0.f}) *rot;
 			}
 		}
-	}
+	}*/
 
 	for(auto &meshGroup : model.GetMeshGroups())
 	{

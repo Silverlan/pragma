@@ -295,6 +295,10 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("SetAnchorRight",&SetAnchorRight);
 	classDef.def("SetAnchorTop",&SetAnchorTop);
 	classDef.def("SetAnchorBottom",&SetAnchorBottom);
+	classDef.def("ClearAnchor",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->ClearAnchor();
+	}));
 	classDef.def("GetAnchor",&GetAnchor);
 	classDef.def("HasAnchor",&HasAnchor);
 

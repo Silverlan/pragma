@@ -280,6 +280,9 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 			case 3:
 				matFlags |= MaterialFlags::FMAT_GLOW_MODE_3;
 				break;
+			case 4:
+				matFlags |= MaterialFlags::FMAT_GLOW_MODE_4;
+				break;
 			}
 		}
 	}

@@ -87,6 +87,7 @@ ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier)
 }
 bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 {
+	umath::set_flag(m_extRenderFlags,RenderFlags::TranslucencyEnabled,mat.IsTranslucent());
 	return ShaderTextured3DBase::BindMaterialParameters(mat);
 }
 prosper::Shader::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}

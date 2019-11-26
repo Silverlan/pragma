@@ -806,7 +806,7 @@ void Game::RegisterLuaLibraries()
 		{"import_wrci",Lua::import::import_wrci},
 		{"import_wad",Lua::import::import_wad},
 		{"import_wrmi",Lua::import::import_wrmi},
-		//{"import_smd",Lua::import::import_smd},
+		{"import_smd",Lua::import::import_smd},
 		{"import_obj",Lua::import::import_obj},
 		{"import_pmx",Lua::import::import_pmx},
 		{"import_model_asset",Lua::import::import_model_asset},

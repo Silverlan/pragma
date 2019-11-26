@@ -79,11 +79,15 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	*/
 	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		pragma::physics::Transform t;
+		pragma::physics::ScaledTransform t;
 		hEnt->GetPose(t);
-		Lua::Push<pragma::physics::Transform>(l,t);
+		Lua::Push<pragma::physics::ScaledTransform>(l,t);
 	}));
 	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const pragma::physics::Transform&)>([](lua_State *l,EntityHandle &hEnt,const pragma::physics::Transform &t) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetPose(t);
+	}));
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const pragma::physics::ScaledTransform&)>([](lua_State *l,EntityHandle &hEnt,const pragma::physics::ScaledTransform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->SetPose(t);
 	}));
@@ -118,6 +122,22 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetAngles(ang);
+	}));
+	classDef.def("SetScale",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &v) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
+		trComponent->SetScale(v);
+	}));
+	classDef.def("GetScale",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		if(hEnt->GetTransformComponent().expired())
+		{
+			Lua::Push<Vector3>(l,Vector3{1.f,1.f,1.f});
+			return;
+		}
+		Lua::Push<Vector3>(l,hEnt->GetTransformComponent()->GetScale());
 	}));
 	classDef.def("GetRotation",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

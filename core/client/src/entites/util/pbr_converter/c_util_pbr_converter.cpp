@@ -222,25 +222,31 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.
 	//
 
+	auto fCopyValue = [&dataPbr,&matTraditional](const std::string &name) -> bool {
+		auto dataBlock = matTraditional.GetDataBlock();
+		auto value = dataBlock ? dataBlock->GetDataValue(name) : nullptr;
+		if(value == nullptr)
+			return false;
+		dataPbr->AddValue(value->GetTypeString(),name,value->GetString());
+		return true;
+	};
+
 	// Emission map
 	auto *glowMap = matTraditional.GetGlowMap();
 	if(glowMap && glowMap->texture && std::static_pointer_cast<Texture>(glowMap->texture)->GetVkTexture())
 	{
 		dataPbr->AddValue("texture",Material::EMISSION_MAP_IDENTIFIER,glowMap->name);
-		dataPbr->AddValue("bool","glow_alpha_only","1");
-		dataPbr->AddValue("float","glow_scale","1.0");
-		dataPbr->AddValue("int","glow_blend_diffuse_mode","1");
-		dataPbr->AddValue("float","glow_blend_diffuse_scale","3.0");
+		if(fCopyValue("glow_alpha_only") == false)
+			dataPbr->AddValue("bool","glow_alpha_only","1");
+		if(fCopyValue("glow_scale") == false)
+			dataPbr->AddValue("float","glow_scale","1.0");
+		if(fCopyValue("glow_blend_diffuse_mode") == false)
+			dataPbr->AddValue("int","glow_blend_diffuse_mode","1");
+		if(fCopyValue("glow_blend_diffuse_scale") == false)
+			dataPbr->AddValue("float","glow_blend_diffuse_scale","3.0");
 	}
 	//
 
-	auto fCopyValue = [&dataPbr,&matTraditional](const std::string &name) {
-		auto dataBlock = matTraditional.GetDataBlock();
-		auto value = dataBlock ? dataBlock->GetDataValue(name) : nullptr;
-		if(value == nullptr)
-			return;
-		dataPbr->AddValue(value->GetTypeString(),name,value->GetString());
-	};
 	fCopyValue("black_to_alpha");
 	fCopyValue("phong_normal_alpha");
 	fCopyValue("phong_intensity");

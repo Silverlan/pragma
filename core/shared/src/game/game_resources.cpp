@@ -126,6 +126,14 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);
 }
 
+bool util::port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures)
+{
+	static auto *ptrConvertSmd = reinterpret_cast<bool(*)(NetworkState&,Model&,VFilePtr&,const std::string&,bool,std::vector<std::string>&)>(impl::get_module_func(&nw,"convert_smd"));
+	if(ptrConvertSmd == nullptr)
+		return false;
+	return ptrConvertSmd(nw,mdl,f,animName,isCollisionMesh,outTextures);
+}
+
 bool util::port_file(NetworkState *nw,const std::string &path)
 {
 	if(engine->ShouldMountExternalGameResources() == false)

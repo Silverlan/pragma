@@ -32,6 +32,7 @@ namespace pragma
 		
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		virtual void InjectStateChange(ALState oldState,ALState newState);
 		virtual void OnEntitySpawn() override;
 

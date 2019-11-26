@@ -68,18 +68,16 @@ std::string openvr::to_string(vr::VREvent_t ev)
 			return "Focus enter";
 		case vr::EVREventType::VREvent_FocusLeave:
 			return "Focus leave";
-		case vr::EVREventType::VREvent_Scroll:
-			return "Scroll";
+		case vr::EVREventType::VREvent_ScrollDiscrete:
+			return "ScrollDiscrete";
+		case vr::EVREventType::VREvent_ScrollSmooth:
+			return "ScrollSmooth";
 		case vr::EVREventType::VREvent_TouchPadMove:
 			return "Touch pad move";
 		case vr::EVREventType::VREvent_InputFocusCaptured:
 			return "Input focus captured";
 		case vr::EVREventType::VREvent_InputFocusReleased:
 			return "Input focus released";
-		case vr::EVREventType::VREvent_SceneFocusLost:
-			return "Scene focus lost";
-		case vr::EVREventType::VREvent_SceneFocusGained:
-			return "Scene focus gained";
 		case vr::EVREventType::VREvent_SceneApplicationChanged:
 			return "Scene application changed";
 		case vr::EVREventType::VREvent_SceneFocusChanged:
@@ -96,8 +94,6 @@ std::string openvr::to_string(vr::VREvent_t ev)
 			return "Dashboard activated";
 		case vr::EVREventType::VREvent_DashboardDeactivated:
 			return "Dashboard deactivated";
-		case vr::EVREventType::VREvent_DashboardThumbSelected:
-			return "Dashboard thumb selected";
 		case vr::EVREventType::VREvent_DashboardRequested:
 			return "Dashboard requested";
 		case vr::EVREventType::VREvent_ResetDashboard:
@@ -128,8 +124,6 @@ std::string openvr::to_string(vr::VREvent_t ev)
 			return "Quit";
 		case vr::EVREventType::VREvent_ProcessQuit:
 			return "Process quit";
-		case vr::EVREventType::VREvent_QuitAborted_UserPrompt:
-			return "Quit aborted user prompt";
 		case vr::EVREventType::VREvent_QuitAcknowledged:
 			return "Quit acknowledged";
 		case vr::EVREventType::VREvent_ChaperoneDataHasChanged:
@@ -160,16 +154,6 @@ std::string openvr::to_string(vr::VREvent_t ev)
 			return "Keyboard char input";
 		case vr::EVREventType::VREvent_KeyboardDone:
 			return "Keyboard done";
-		case vr::EVREventType::VREvent_ApplicationTransitionStarted:
-			return "Application transition started";
-		case vr::EVREventType::VREvent_ApplicationTransitionAborted:
-			return "Application transition aborted";
-		case vr::EVREventType::VREvent_ApplicationTransitionNewAppStarted:
-			return "Application transition new app started";
-		case vr::EVREventType::VREvent_Compositor_MirrorWindowShown:
-			return "Compositor mirror window shown";
-		case vr::EVREventType::VREvent_Compositor_MirrorWindowHidden:
-			return "Compositor mirror window hidden";
 		case vr::EVREventType::VREvent_Compositor_ChaperoneBoundsShown:
 			return "Composition chaperone bounds shown";
 		case vr::EVREventType::VREvent_Compositor_ChaperoneBoundsHidden:
@@ -330,8 +314,8 @@ bool Instance::InitializeScene()
 		return;
 	}));
 	m_cbDrawGame = IState::add_callback(IState::Callback::DrawScene,FunctionCallback<
-		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-	>::CreateWithOptionalReturn([this](bool *ret,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>> rt) -> CallbackReturnType {
+		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+	>::CreateWithOptionalReturn([this](bool *ret,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,prosper::Image *img) -> CallbackReturnType {
 		if(m_bHmdViewEnabled == false)
 			return CallbackReturnType::NoReturnValue;
 #if LOPENVR_VERBOSE == 1

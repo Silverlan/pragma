@@ -894,6 +894,13 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			return;
 		Lua::Push<pragma::physics::ScaledTransform*>(l,&transforms.at(boneIdx));
 	}));
+	defCAnimated.def("SetEffectiveBoneTransform",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t,const pragma::physics::ScaledTransform&)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIdx,const pragma::physics::ScaledTransform &t) {
+		pragma::Lua::check_component(l,hAnim);
+		auto &transforms = hAnim->GetProcessedBones();
+		if(boneIdx >= transforms.size())
+			return;
+		transforms.at(boneIdx) = t;
+	}));
 	defCAnimated.def("GetBoneBuffer",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);
 		auto *pAnimComponent = hAnim.get();

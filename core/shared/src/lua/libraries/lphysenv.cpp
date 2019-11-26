@@ -85,6 +85,23 @@ static void create_standard_four_wheel_drive(lua_State *l,luabind::object oWheel
 	Lua::Push<pragma::physics::VehicleCreateInfo>(l,pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(centerOffsets,handBrakeTorque,maxSteeringAngle));
 }
 
+static std::ostream &operator<<(std::ostream &out,const pragma::physics::Transform &t)
+{
+	auto &origin = t.GetOrigin();
+	auto &rot = t.GetRotation();
+	auto ang = EulerAngles{rot};
+	out<<"Transform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]";
+	return out;
+}
+static std::ostream &operator<<(std::ostream &out,const pragma::physics::ScaledTransform &t)
+{
+	auto &origin = t.GetOrigin();
+	auto &rot = t.GetRotation();
+	auto ang = EulerAngles{rot};
+	auto &scale = t.GetScale();
+	out<<"ScaledTransform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]["<<scale.x<<","<<scale.y<<","<<scale.z<<"]";
+	return out;
+}
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -781,6 +798,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::constructor<const Mat4&>());
 	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
+	classDefTransform.def(luabind::tostring(luabind::self));
 	classDefTransform.def("GetOrigin",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
 		Lua::Push<Vector3>(l,t.GetOrigin());
 	}));
@@ -841,6 +859,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
 	classDefScaledTransform.def(luabind::constructor<>());
+	classDefScaledTransform.def(luabind::tostring(luabind::self));
 	classDefScaledTransform.def("GetScale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
 		Lua::Push<Vector3>(l,t.GetScale());
 	}));
@@ -849,6 +868,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classDefScaledTransform.def("Scale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,const Vector3&)>([](lua_State *l,pragma::physics::ScaledTransform &t,const Vector3 &scale) {
 		t.Scale(scale);
+	}));
+	classDefScaledTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
+		Lua::Push<pragma::physics::ScaledTransform>(l,t.GetInverse());
 	}));
 	classDefScaledTransform.def(luabind::const_self *pragma::physics::Transform());
 	classDefScaledTransform.def(luabind::const_self *pragma::physics::ScaledTransform());

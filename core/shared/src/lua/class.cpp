@@ -318,6 +318,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.add_static_constant("CHANNEL_G",umath::to_integral(util::ImageBuffer::Channel::G));
 	defImageBuffer.add_static_constant("CHANNEL_B",umath::to_integral(util::ImageBuffer::Channel::B));
 	defImageBuffer.add_static_constant("CHANNEL_A",umath::to_integral(util::ImageBuffer::Channel::A));
+
+	defImageBuffer.add_static_constant("TONE_MAPPING_GAMMA_CORRECTION",umath::to_integral(util::ImageBuffer::ToneMapping::GammaCorrection));
+	defImageBuffer.add_static_constant("TONE_MAPPING_REINHARD",umath::to_integral(util::ImageBuffer::ToneMapping::Reinhard));
+	defImageBuffer.add_static_constant("TONE_MAPPING_HEJIL_RICHARD",umath::to_integral(util::ImageBuffer::ToneMapping::HejilRichard));
+	defImageBuffer.add_static_constant("TONE_MAPPING_UNCHARTED",umath::to_integral(util::ImageBuffer::ToneMapping::Uncharted));
+	defImageBuffer.add_static_constant("TONE_MAPPING_ACES",umath::to_integral(util::ImageBuffer::ToneMapping::Aces));
+	defImageBuffer.add_static_constant("TONE_MAPPING_GRAN_TURISMO",umath::to_integral(util::ImageBuffer::ToneMapping::GranTurismo));
+
 	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format) {
 		auto imgBuffer = util::ImageBuffer::Create(width,height,static_cast<util::ImageBuffer::Format>(format));
 		if(imgBuffer == nullptr)
@@ -398,6 +406,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defImageBuffer.def("FlipVertically",static_cast<void(*)(lua_State*,util::ImageBuffer&)>([](lua_State *l,util::ImageBuffer &imgBuffer) {
 		imgBuffer.FlipVertically();
+	}));
+	defImageBuffer.def("ApplyToneMapping",static_cast<void(*)(lua_State*,util::ImageBuffer&,uint32_t)>([](lua_State *l,util::ImageBuffer &imgBuffer,uint32_t toneMapping) {
+		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<util::ImageBuffer::ToneMapping>(toneMapping));
+		if(tonemappedImg == nullptr)
+			return;
+		Lua::Push(l,tonemappedImg);
 	}));
 	modUtil[defImageBuffer];
 

@@ -45,7 +45,7 @@ namespace pragma
 	class BaseNameComponent;
 	class BaseTransformComponent;
 	class BaseParentComponent;
-	namespace physics {class Transform;};
+	namespace physics {class Transform; class ScaledTransform;};
 
 	using NetEventId = uint32_t;
 };
@@ -101,7 +101,9 @@ public:
 	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
 	// Returns ORIGIN if the entity has no transform component
+	void GetPose(pragma::physics::ScaledTransform &outTransform) const;
 	void GetPose(pragma::physics::Transform &outTransform) const;
+	void SetPose(const pragma::physics::ScaledTransform &outTransform);
 	void SetPose(const pragma::physics::Transform &outTransform);
 	const Vector3 &GetPosition() const;
 	void SetPosition(const Vector3 &pos);
@@ -110,6 +112,9 @@ public:
 	// Returns unit quaternion if entity has no transform component
 	const Quat &GetRotation() const;
 	void SetRotation(const Quat &rot);
+	
+	const Vector3 &GetScale() const;
+	void SetScale(const Vector3 &scale);
 
 	// Helper functions
 	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const=0;

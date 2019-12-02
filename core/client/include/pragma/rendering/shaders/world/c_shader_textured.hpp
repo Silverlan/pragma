@@ -49,12 +49,12 @@ namespace pragma
 
 		enum class MaterialBinding : uint32_t
 		{
-			DiffuseMap = 0u,
+			MaterialSettings = 0u,
+			DiffuseMap,
 			NormalMap,
 			SpecularMap,
 			ParallaxMap,
 			GlowMap,
-			MaterialSettings,
 
 			Count
 		};

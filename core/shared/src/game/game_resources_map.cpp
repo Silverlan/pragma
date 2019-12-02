@@ -97,6 +97,26 @@ static std::string transform_model_path(std::string val)
 		val = val.substr(0,pext) +".wmd";
 }
 
+// In the source engine the x-axis points forward, but in Pragma it's the z-axis.
+// We can just rotate everything by 90 degrees to adapt.
+static Quat s_rotationConversion = uquat::create(EulerAngles{0.f,-90.f,0.f});
+
+
+static Quat s_rotationConversion2 = uquat::create(EulerAngles{0.f,0.f,-90.f});
+static Vector3 convert_vertex2(const Vector3 inPos)
+{
+	auto newPos = inPos;
+	uvec::rotate(&newPos,s_rotationConversion2);
+	return newPos;
+}
+
+static Vector3 convert_vertex(const Vector3 inPos)
+{
+	auto newPos = inPos;
+	uvec::rotate(&newPos,s_rotationConversion);
+	return newPos;
+}
+
 static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushMesh)
 {
 	std::vector<vmf::Poly*> *polys;
@@ -106,7 +126,9 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 
 	auto &info = brushMesh->GetCompiledData();
 	auto numPolys = polys->size();
-	auto &verts = info.vertexList;
+	auto verts = info.vertexList;
+	for(auto &v : verts)
+		v = convert_vertex(v);
 	auto numVerts = verts.size();
 
 	fOut->Write<uint32_t>(numVerts);
@@ -124,12 +146,8 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 		auto nv = polyInfo.nv;
 		uvec::normalize(&nu);
 		uvec::normalize(&nv);
-		fOut->Write<float>(nu.x);
-		fOut->Write<float>(nu.y);
-		fOut->Write<float>(nu.z);
-		fOut->Write<float>(nv.x);
-		fOut->Write<float>(nv.y);
-		fOut->Write<float>(nv.z);
+		fOut->Write<Vector3>(convert_vertex(nu));
+		fOut->Write<Vector3>(convert_vertex(nv));
 		//fOut->Write<float>(1.0f /width);
 		//fOut->Write<float>(1.0f /height);
 		fOut->Write<float>(texData->ou);
@@ -142,7 +160,7 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 		fOut->Write<uint32_t>(numPolyVerts);
 		for(unsigned int k=0;k<numPolyVerts;k++)
 		{
-			auto &va = (*polyVerts)[k]->pos;
+			auto va = convert_vertex((*polyVerts)[k]->pos);
 			auto bFound = false;
 			for(unsigned int l=0;l<numVerts;l++)
 			{
@@ -171,8 +189,15 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 				fOut->Write<uint8_t>(powerMerged);
 			if(dispInfo.vertices.size() != dispInfo.normals.size() || dispInfo.vertices.size() != dispInfo.uvs.size())
 				throw std::logic_error("Displacement vertex count does not match with normal or uv count!");
-			fOut->Write(dispInfo.vertices.data(),dispInfo.vertices.size() *sizeof(dispInfo.vertices.front()));
-			fOut->Write(dispInfo.normals.data(),dispInfo.normals.size() *sizeof(dispInfo.normals.front()));
+
+			auto dispVerts = dispInfo.vertices;
+			auto dispNormals = dispInfo.normals;
+			for(auto &v : dispVerts)
+				v = convert_vertex(v);
+			for(auto &n : dispNormals)
+				n = convert_vertex(n);
+			fOut->Write(dispVerts.data(),dispVerts.size() *sizeof(dispVerts.front()));
+			fOut->Write(dispNormals.data(),dispNormals.size() *sizeof(dispNormals.front()));
 			fOut->Write(dispInfo.uvs.data(),dispInfo.uvs.size() *sizeof(dispInfo.uvs.front()));
 
 			fOut->Write<uint8_t>(dispInfo.numAlpha);
@@ -198,9 +223,10 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 		{
 			for(auto *v : *polyVerts)
 			{
-				fOut->Write<float>(v->normal.x);
-				fOut->Write<float>(v->normal.y);
-				fOut->Write<float>(v->normal.z);
+				auto n = convert_vertex(v->normal);
+				fOut->Write<float>(n.x);
+				fOut->Write<float>(n.y);
+				fOut->Write<float>(n.z);
 			}
 		}
 	}
@@ -500,6 +526,7 @@ static std::unique_ptr<bsp::File> open_bsp_map(NetworkState *nw,const std::strin
 	return bsp::File::Open(f,code);
 }
 #endif
+
 bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 {
 #ifdef ENABLE_BSP_SUPPORT
@@ -524,6 +551,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	auto messageLogger = std::function<void(const std::string&)>([](const std::string &msg) {
 		Con::cout<<"> "<<msg<<Con::endl;
 	});
+	std::unordered_set<std::string> msgCache = {};
 	ScopeGuard sg([]() {
 		Con::cwar<<"----------- BSP Conversion LOG -----------"<<Con::endl;
 	});
@@ -884,7 +912,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 					bClassFound = true;
 				}
 				messageLogger(msg);
-			});
+			},&msgCache);
 		}
 
 		outEntity.className = className;
@@ -1174,8 +1202,8 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		std::function<void(const util::BSPTree::Node&)> fWriteNode = nullptr;
 		fWriteNode = [&fOut,&fWriteNode,&clusterVisibility,&bspNodes,&bspTree,numClusters](const util::BSPTree::Node &node) {
 			fOut->Write<bool>(node.leaf);
-			fOut->Write<Vector3>(node.min);
-			fOut->Write<Vector3>(node.max);
+			fOut->Write<Vector3>(convert_vertex2(node.min));
+			fOut->Write<Vector3>(convert_vertex2(node.max));
 			fOut->Write<int32_t>(node.firstFace);
 			fOut->Write<int32_t>(node.numFaces);
 			fOut->Write<int32_t>(node.originalNodeIndex);
@@ -1202,11 +1230,11 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 						}
 					}
 				}
-				fOut->Write<Vector3>(min);
-				fOut->Write<Vector3>(max);
+				fOut->Write<Vector3>(convert_vertex2(min));
+				fOut->Write<Vector3>(convert_vertex2(max));
 				return;
 			}
-			fOut->Write<Vector3>(node.plane.GetNormal());
+			fOut->Write<Vector3>(convert_vertex2(node.plane.GetNormal()));
 			fOut->Write<float>(node.plane.GetDistance());
 
 			fWriteNode(*node.children.at(0));
@@ -1326,7 +1354,9 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		fOut->Write<uint32_t>(edges.size());
 		fOut->Write(edges.data(),edges.size() *sizeof(edges.front()));
 
-		auto &verts = bsp->GetVertices();
+		auto verts = bsp->GetVertices();
+		for(auto &v : verts)
+			v = convert_vertex2(v);
 		fOut->Write<uint32_t>(verts.size());
 		fOut->Write(verts.data(),verts.size() *sizeof(verts.front()));
 
@@ -1337,13 +1367,17 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		{
 			simpleTexInfo.push_back({});
 			auto &simpleInfo = simpleTexInfo.back();
+			auto lv0 = convert_vertex2(Vector3(info.lightmapVecs.at(0).at(0),info.lightmapVecs.at(0).at(1),info.lightmapVecs.at(0).at(2)));
+			auto lv1 = convert_vertex2(Vector3(info.lightmapVecs.at(1).at(0),info.lightmapVecs.at(1).at(1),info.lightmapVecs.at(1).at(2)));
 			simpleInfo.lightMapVecs = {
-				Vector4{info.lightmapVecs.at(0).at(0),info.lightmapVecs.at(0).at(1),info.lightmapVecs.at(0).at(2),info.lightmapVecs.at(0).at(3)},
-				Vector4{info.lightmapVecs.at(1).at(0),info.lightmapVecs.at(1).at(1),info.lightmapVecs.at(1).at(2),info.lightmapVecs.at(1).at(3)}
+				Vector4{lv0.x,lv0.y,lv0.z,info.lightmapVecs.at(0).at(3)},
+				Vector4{lv1.x,lv1.y,lv1.z,info.lightmapVecs.at(1).at(3)}
 			};
+			auto v0 = convert_vertex2(Vector3(info.textureVecs.at(0).at(0),info.textureVecs.at(0).at(1),info.textureVecs.at(0).at(2)));
+			auto v1 = convert_vertex2(Vector3(info.textureVecs.at(1).at(0),info.textureVecs.at(1).at(1),info.textureVecs.at(1).at(2)));
 			simpleInfo.textureVecs = {
-				Vector4{info.textureVecs.at(0).at(0),info.textureVecs.at(0).at(1),info.textureVecs.at(0).at(2),info.textureVecs.at(0).at(3)},
-				Vector4{info.textureVecs.at(1).at(0),info.textureVecs.at(1).at(1),info.textureVecs.at(1).at(2),info.textureVecs.at(1).at(3)}
+				Vector4{v0.x,v0.y,v0.z,info.textureVecs.at(0).at(3)},
+				Vector4{v1.x,v1.y,v1.z,info.textureVecs.at(1).at(3)}
 			};
 			simpleInfo.materialIndex = (info.texdata != -1) ? texStringTable.at(texData.at(info.texdata).nameStringTableID) : -1;
 		}
@@ -1373,7 +1407,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 			auto n = plane.normal;
 			if(face.side)
 				n = -n;
-			fOut->Write<Vector3>(n);
+			fOut->Write<Vector3>(convert_vertex2(n));
 		}
 
 		auto &leafFaces = bsp->GetLeafFaces();
@@ -1388,9 +1422,13 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 			fOut->Write<int32_t>(disp.dispInfo.power);
 			fOut->Write<int32_t>(disp.dispInfo.DispVertStart);
 			fOut->Write<int32_t>(disp.dispInfo.LightmapSamplePositionStart);
-			fOut->Write<Vector3>(disp.dispInfo.startPosition);
-			fOut->Write<uint32_t>(disp.verts.size());
-			fOut->Write(disp.verts.data(),disp.verts.size() *sizeof(disp.verts.front()));
+			fOut->Write<Vector3>(convert_vertex2(disp.dispInfo.startPosition));
+
+			auto dispVerts = disp.verts;
+			for(auto &v : dispVerts)
+				v.vec = convert_vertex2(v.vec);
+			fOut->Write<uint32_t>(dispVerts.size());
+			fOut->Write(dispVerts.data(),dispVerts.size() *sizeof(dispVerts.front()));
 		}
 
 		auto &dispLightmapSamplePositions = bsp->GetDispLightmapSamplePositions();
@@ -1493,7 +1531,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 				origin = (mins +maxs) /2.f;
 			}*/
 			else
-				origin = outEntity->origin;
+				origin = convert_vertex2(outEntity->origin);
 		}
 		fOut->Write<Vector3>(origin);
 

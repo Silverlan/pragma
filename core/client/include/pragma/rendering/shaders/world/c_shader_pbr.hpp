@@ -14,12 +14,12 @@ namespace pragma
 
 		enum class MaterialBinding : uint32_t
 		{
-			AlbedoMap = 0u,
+			MaterialSettings = umath::to_integral(ShaderTextured3DBase::MaterialBinding::MaterialSettings),
+			AlbedoMap,
 			NormalMap,
 			AmbientOcclusionMap,
 			MetallicMap,
 			RoughnessMap,
-			MaterialSettings, // Has to match the index specified in ShaderTextured3DBase::MaterialBinding!
 			EmissionMap,
 			ParallaxMap,
 			WrinkleStretchMap,

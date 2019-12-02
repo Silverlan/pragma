@@ -255,13 +255,21 @@ namespace import
 		void ConvertTransforms(const std::vector<std::shared_ptr<ModelSubMesh>> &meshesSkip,Animation *reference);
 		void GenerateReference(const std::vector<std::shared_ptr<import::mdl::Bone>> &bones);
 	};
-	bool load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,MdlInfo &mdlInfo);
-	std::shared_ptr<Model> load_mdl(NetworkState *nw,const std::unordered_map<std::string,VFilePtr> &files,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,std::vector<std::string> &textures);
+	bool load_mdl(
+		NetworkState *nw,const VFilePtr &f,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,
+		bool bCollision,MdlInfo &mdlInfo,std::ostream *optLog=nullptr
+	);
+	std::shared_ptr<Model> load_mdl(
+		NetworkState *nw,const std::unordered_map<std::string,VFilePtr> &files,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,
+		std::vector<std::string> &textures,std::ostream *optLog=nullptr
+	);
 };
 #pragma pack(pop)
 
 extern "C" {
-	PRAGMA_EXPORT bool convert_hl2_model(NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,const std::string &path,const std::string &mdlName);
+	PRAGMA_EXPORT bool convert_hl2_model(NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,const std::string &path,const std::string &mdlName,std::ostream *optLog);
 };
 
 #endif

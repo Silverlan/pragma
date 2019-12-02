@@ -16,6 +16,7 @@ namespace Lua
 
 			int property_error_to_string(lua_State *l);
 			int init_error_to_string(lua_State *l);
+			int compositor_error_to_string(lua_State *l);
 			int button_id_to_string(lua_State *l);
 			int controller_axis_type_to_string(lua_State *l);
 

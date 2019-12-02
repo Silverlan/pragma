@@ -367,7 +367,9 @@ Mat4 openvr::steam_vr_matrix_to_engine_matrix(const vr::HmdMatrix34_t &matPose)
 	);
 }
 
-void Instance::UpdateHMDMatrixPose()
+const Mat4 &Instance::GetHMDPoseMatrix() const {return m_hmdPoseMatrix;}
+
+void Instance::UpdateHMDPoses()
 {
 	//auto t = std::chrono::high_resolution_clock::now();
 	m_compositor->WaitGetPoses(m_trackedPoses.data(),m_trackedPoses.size(),nullptr,0);
@@ -396,6 +398,18 @@ void Instance::UpdateHMDMatrixPose()
 		m_hmdPoseMatrix = glm::inverse(m_hmdPoseMatrix);
 	}
 }
+
+static bool check_error(vr::EVRCompositorError err)
+{
+	if(err == vr::EVRCompositorError::VRCompositorError_None)
+		return true;
+	std::cout<<"[VR] Eye submit error";
+#ifdef USE_OPENGL_OFFSCREEN_CONTEXT
+	std::cout<<" (Texture: "<<eye->texture<<")";
+#endif
+	std::cout<<": "<<openvr::to_string(err)<<std::endl;
+	return false;
+};
 
 #include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
@@ -471,17 +485,6 @@ void Instance::DrawScene()
 	}
 	*/
 
-	const auto fCheckError = [](vr::EVRCompositorError err) -> bool {
-		if(err == vr::EVRCompositorError::VRCompositorError_None)
-			return true;
-		std::cout<<"[VR] Eye submit error";
-#ifdef USE_OPENGL_OFFSCREEN_CONTEXT
-		std::cout<<" (Texture: "<<eye->texture<<")";
-#endif
-		std::cout<<": "<<openvr::to_string(err)<<std::endl;
-		return false;
-	};
-
 	auto gameScene = IState::get_render_scene();
 	auto camGame = gameScene.GetInternalScene().GetActiveCamera();
 	if(camGame.expired())
@@ -508,51 +511,66 @@ void Instance::DrawScene()
 
 		//scene.CullLightSources();
 
-		auto drawCmdInfo = GetDrawCommandBuffer();
-		if(drawCmdInfo.commandBuffer->StartRecording() == true)
+		auto drawCmdInfo = StartRecording();
+		if(drawCmdInfo.has_value())
 		{
 #ifdef USE_VULKAN
-			prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+			prosper::util::record_image_barrier(**drawCmdInfo->commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 			//prosper::util::record_clear_image(**drawCmdInfo.commandBuffer,**vkImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,std::array<float,4>{1.f,0.f,0.f,1.f});
 			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 
 #endif
-			IState::draw_scene(scene,drawCmdInfo.commandBuffer,rt);
+			IState::draw_scene(scene,drawCmdInfo->commandBuffer,rt);
 			eye->UpdateImage(*vkImg);
 
 #ifdef USE_VULKAN
-			prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+			prosper::util::record_image_barrier(**drawCmdInfo->commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 #endif
 
-			drawCmdInfo.commandBuffer->StopRecording();
-			fCheckError(m_compositor->SubmitExplicitTimingData());
-			drawCmdInfo.commandBuffer->GetContext().SubmitCommandBuffer(*drawCmdInfo.commandBuffer,false,&drawCmdInfo.fence->GetAnvilFence());
-			m_commandBuffers.push_front(drawCmdInfo);
+			StopRecording();
 		}
 		// Reset old view matrix
 		cam->SetViewMatrix(mViewCam);
 	}
 	for(auto *eye : eyes)
-		fCheckError(m_compositor->Submit(eye->eye,&eye->vrTexture));
+		check_error(m_compositor->Submit(eye->eye,&eye->vrTexture));
 
-	UpdateHMDMatrixPose();
+	UpdateHMDPoses();
 }
-Instance::CommandBufferInfo Instance::GetDrawCommandBuffer()
+std::optional<Instance::CommandBufferInfo> Instance::StartRecording()
 {
+	StopRecording(); // Note: Recording should already have been stopped by the user at this point, this is just a failsafe!
 	if(m_commandBuffers.empty() == false && m_commandBuffers.back().fence->IsSet() == true)
 	{
 		auto cmdBufferInfo = m_commandBuffers.back();
 		cmdBufferInfo.commandBuffer->Reset(true);
 		cmdBufferInfo.fence->Reset();
 		m_commandBuffers.pop_back();
-		return cmdBufferInfo;
+		if(cmdBufferInfo.commandBuffer->StartRecording() == false)
+			return {};
+		m_activeCommandBuffer = cmdBufferInfo;
+		return m_activeCommandBuffer;
 	}
 	auto &context = const_cast<prosper::Context&>(IState::get_render_context());
 	auto &dev = context.GetDevice();
 	auto cmdBuffer = prosper::PrimaryCommandBuffer::Create(context,dev.get_command_pool_for_queue_family_index(dev.get_universal_queue(0)->get_queue_family_index())->alloc_primary_level_command_buffer(),Anvil::QueueFamilyType::UNIVERSAL);
 	auto fence = prosper::Fence::Create(context);
-	return CommandBufferInfo{cmdBuffer,fence};
+	if(cmdBuffer->StartRecording() == false)
+		return {};
+	m_activeCommandBuffer = CommandBufferInfo{cmdBuffer,fence};
+	return m_activeCommandBuffer;
+}
+void Instance::StopRecording()
+{
+	if(m_activeCommandBuffer.has_value() == false)
+		return;
+	m_activeCommandBuffer->commandBuffer->StopRecording();
+	check_error(m_compositor->SubmitExplicitTimingData());
+	m_activeCommandBuffer->commandBuffer->GetContext().SubmitCommandBuffer(*m_activeCommandBuffer->commandBuffer,false,&m_activeCommandBuffer->fence->GetAnvilFence());
+	m_commandBuffers.push_front(*m_activeCommandBuffer);
+
+	m_activeCommandBuffer = {};
 }
 vr::IVRSystem *Instance::GetSystemInterface() {return m_system;}
 vr::IVRRenderModels *Instance::GetRenderInterface() {return m_renderInterface;}
@@ -682,7 +700,7 @@ std::unique_ptr<Instance> Instance::Create(vr::EVRInitError *err,std::vector<std
 	if(deviceExtLen > 0)
 	{
 		deviceExt.resize(deviceExtLen);
-		pCompositor->GetVulkanInstanceExtensionsRequired(const_cast<char*>(deviceExt.data()),0);
+		pCompositor->GetVulkanDeviceExtensionsRequired(vkDevice,const_cast<char*>(deviceExt.data()),0);
 	}
 	pCompositor->SetExplicitTimingMode(vr::EVRCompositorTimingMode::VRCompositorTimingMode_Explicit_RuntimePerformsPostPresentHandoff);
 
@@ -690,6 +708,23 @@ std::unique_ptr<Instance> Instance::Create(vr::EVRInitError *err,std::vector<std
 	ustring::explode(deviceExt," ",reqDeviceExtensions);
 	std::cout<<"[VR] Instance Extensions Required: "<<instanceExt<<std::endl;
 	std::cout<<"[VR] Device Extensions Required: "<<deviceExt<<std::endl;
+
+	for(auto &ext : reqInstanceExtensions)
+	{
+		if(const_cast<prosper::Context&>(vkContext).GetAnvilInstance().is_instance_extension_enabled(ext) == false)
+		{
+			Con::cerr<<"[VR] ERROR: Required instance extension '"<<ext<<"' is not enabled!"<<Con::endl;
+			break;
+		}
+	}
+	for(auto &ext : reqDeviceExtensions)
+	{
+		if(const_cast<prosper::Context&>(vkContext).GetDevice().is_extension_enabled(ext) == false)
+		{
+			Con::cerr<<"[VR] ERROR: Required device extension '"<<ext<<"' is not enabled!"<<Con::endl;
+			break;
+		}
+	}
 #endif
 
 	auto width = 1280u;
@@ -890,12 +925,6 @@ void Instance::SuspendRendering(bool b) const {m_compositor->SuspendRendering(b)
 //#include <chrono>
 bool Instance::GetPoseTransform(uint32_t deviceIdx,vr::TrackedDevicePose_t &pose,Mat4 &m) const
 {
-	static std::array<vr::TrackedDevicePose_t,vr::k_unMaxTrackedDeviceCount> renderPoses {};
-	//auto t = std::chrono::high_resolution_clock::now();
-	m_compositor->WaitGetPoses(renderPoses.data(),renderPoses.size(),nullptr,0);
-	//auto tDelta = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() -t).count() /1'000'000'000.0;
-	//std::cout<<"Delta: "<<tDelta<<std::endl;
-	
 	float fSecondsSinceLastVsync;
 	m_system->GetTimeSinceLastVsync(&fSecondsSinceLastVsync,NULL);
 
@@ -915,9 +944,6 @@ bool Instance::GetPoseTransform(uint32_t deviceIdx,vr::TrackedDevicePose_t &pose
 	if(std::isnan(m[0][0]))
 		return false;
 	return true;
-	/*if(deviceIdx >= m_poseTransforms.size())
-		return nullptr;
-	return &m_poseTransforms.at(deviceIdx);*/
 }
 
 #pragma optimize("",on)

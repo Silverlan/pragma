@@ -100,25 +100,6 @@ static std::string invert_x_coordinate(std::string str)
 	return str;
 }
 
-static std::string swap_yz_coordinates(std::string str)
-{
-	std::vector<std::string> vdat;
-	ustring::explode(str,ustring::WHITESPACE.c_str(),vdat);
-	size_t l = vdat.size();
-	if(l <= 1)
-		return str;
-	if(l >= 2)
-	{
-		if(vdat[1][0] != '-')
-			vdat[1] = "-" +vdat[1];
-		else
-			vdat[1] = vdat[1].substr(1,vdat[1].length());
-	}
-	if(l == 2)
-		return vdat[0] +" 0 " +vdat[1];
-	return vdat[0] +" " +vdat[2] +" "+vdat[1];
-}
-
 // Attempts to convert the source engine attentuation values to an approximately similar falloff exponent
 static float calc_falloff_exponent(float quadraticAtt,float linearAtt,float constAtt)
 {
@@ -369,7 +350,7 @@ static void transform_angles(std::string &val)
 	if(vdat.size() > 1)
 	{
 		float f = static_cast<float>(atof(vdat[1].c_str()));
-		f += 90.f;
+		//f += 90.f;
 		vdat[1] = std::to_string(f);
 		val = "";
 		for(char i=0;i<vdat.size();i++)
@@ -381,15 +362,39 @@ static void transform_angles(std::string &val)
 	}
 }
 
+static std::string swap_yz_coordinates(std::string str)
+{
+	std::vector<std::string> vdat;
+	ustring::explode(str,ustring::WHITESPACE.c_str(),vdat);
+	size_t l = vdat.size();
+	if(l <= 1)
+		return str;
+	if(l >= 2)
+	{
+		if(vdat[1][0] != '-')
+			vdat[1] = "-" +vdat[1];
+		else
+			vdat[1] = vdat[1].substr(1,vdat[1].length());
+	}
+	if(l == 2)
+		return vdat[0] +" 0 " +vdat[1];
+	return vdat[0] +" " +vdat[2] +" "+vdat[1];
+}
+
 inline void transform_origin(std::string &val)
 {
 	val = swap_yz_coordinates(val);
+
+	auto vec = uvec::create(val);
+	uvec::rotate(&vec,uquat::create(EulerAngles{0.f,-90.f,0.f}));
+	val = std::to_string(vec.x) +' ' +std::to_string(vec.y) +' ' +std::to_string(vec.z);
 }
 
 void pragma::level::transform_keyvalue(
 	const std::vector<util::fgd::Data> &fgdData,
 	const std::string &className,const std::string &key,std::string &val,
-	const std::function<void(const std::string&,uint8_t)> &messageLogger
+	const std::function<void(const std::string&,uint8_t)> &messageLogger,
+	std::unordered_set<std::string> *msgCache
 )
 {
 	auto bClassFound = false;
@@ -450,9 +455,25 @@ void pragma::level::transform_keyvalue(
 		if(bClassFound == false)
 		{
 			if(className != "world")
-				messageLogger("\tWARNING: Entity class '" +className +"' definition not found in any FGD file! This may cause issues.",0u);
+			{
+				auto cacheName = "kv_missing_fgd_class_" +className;
+				if(msgCache == nullptr || msgCache->find(cacheName) == msgCache->end())
+				{
+					if(msgCache)
+						msgCache->insert(cacheName);
+					messageLogger("\tWARNING: Entity class '" +className +"' definition not found in any FGD file! This may cause issues.",0u);
+				}
+			}
 		}
 		else if(bKeyFound == false)
-			messageLogger("\tWARNING: Keyvalue '" +key +"' definition for entity class '" +className +"' not found in any FGD file! This may cause issues.",1u);
+		{
+			auto cacheName = "kv_missing_fgd_keyvalue_" +className +'_' +key;
+			if(msgCache == nullptr || msgCache->find(cacheName) == msgCache->end())
+			{
+				if(msgCache)
+					msgCache->insert(cacheName);
+				messageLogger("\tWARNING: Keyvalue '" +key +"' definition for entity class '" +className +"' not found in any FGD file! This may cause issues.",1u);
+			}
+		}
 	}
 }

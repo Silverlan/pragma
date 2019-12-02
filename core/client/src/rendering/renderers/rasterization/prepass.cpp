@@ -27,6 +27,7 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
+#pragma optimize("",off)
 void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto prepassMode = GetPrepassMode();
@@ -231,117 +232,113 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 			auto &mdlComponent = pRenderComponent->GetModelComponent();
 			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 			assert(mdl != nullptr);
-			auto &materials = mdl->GetMaterials();
-			if(!materials.empty())
+			auto *mesh = static_cast<CModelMesh*>(info.mesh);
+			auto &meshes = mesh->GetSubMeshes();
+			for(auto it=meshes.begin();it!=meshes.end();++it)
 			{
-				auto *mesh = static_cast<CModelMesh*>(info.mesh);
-				auto &meshes = mesh->GetSubMeshes();
-				for(auto it=meshes.begin();it!=meshes.end();++it)
+				auto *subMesh = static_cast<CModelSubMesh*>(it->get());
+				auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
+				auto *mat = (idxTexture.has_value() && mdlComponent.valid()) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
+				if(mat == nullptr)
+					mat = static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
+				/*else
 				{
-					auto *subMesh = static_cast<CModelSubMesh*>(it->get());
-					auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
-					auto *mat = idxTexture.has_value() ? mdl->GetMaterial(*idxTexture) : nullptr;
-					if(mat == nullptr)
-						mat = client->GetMaterialManager().GetErrorMaterial();
-					/*else
+				auto *diffuse = mat->GetDiffuseMap();
+				if(diffuse == nullptr || diffuse->texture == nullptr)
+				mat = client->GetMaterialManager().GetErrorMaterial();
+				}*/
+				if(mat != nullptr)
+				{
+					if(!mat->IsLoaded())
+						mat = static_cast<CMaterial*>(matLoad);
+					//auto &hMat = materials[idxTexture];
+					//if(hMat.IsValid())
+					//{
+					if(mat != nullptr)// && mat->GetDiffuseMap() != nullptr && static_cast<Texture*>(mat->GetDiffuseMap()->texture) != nullptr &&static_cast<Texture*>(mat->GetDiffuseMap()->texture)->error == false && static_cast<Texture*>(mat->GetDiffuseMap()->texture)->GetTextureID() != 0)
 					{
-					auto *diffuse = mat->GetDiffuseMap();
-					if(diffuse == nullptr || diffuse->texture == nullptr)
-					mat = client->GetMaterialManager().GetErrorMaterial();
-					}*/
-					if(mat != nullptr)
-					{
-						if(!mat->IsLoaded())
-							mat = matLoad;
-						//auto &hMat = materials[idxTexture];
-						//if(hMat.IsValid())
-						//{
-						if(mat != nullptr)// && mat->GetDiffuseMap() != nullptr && static_cast<Texture*>(mat->GetDiffuseMap()->texture) != nullptr &&static_cast<Texture*>(mat->GetDiffuseMap()->texture)->error == false && static_cast<Texture*>(mat->GetDiffuseMap()->texture)->GetTextureID() != 0)
+						// Fill glow map
+						auto *glowMap = mat->GetGlowMap();
+						if(bUpdateGlowMeshes == true)
 						{
-							// Fill glow map
-							auto *glowMap = mat->GetGlowMap();
-							if(bUpdateGlowMeshes == true)
+							if(glowMap != nullptr)
 							{
-								if(glowMap != nullptr)
+								auto itMat = std::find_if(glowMeshes.begin(),glowMeshes.end(),[&mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
+									return (m->material == mat) ? true : false;
+									});
+								if(itMat == glowMeshes.end())
 								{
-									auto itMat = std::find_if(glowMeshes.begin(),glowMeshes.end(),[&mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
-										return (m->material == mat) ? true : false;
-										});
-									if(itMat == glowMeshes.end())
-									{
-										glowMeshes.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
-										itMat = glowMeshes.end() -1;
-									}
-									auto itEnt = (*itMat)->containers.find(ent);
-									if(itEnt == (*itMat)->containers.end())
-										itEnt = (*itMat)->containers.emplace(ent,EntityMeshInfo{ent}).first;
-									itEnt->second.meshes.push_back(subMesh);
+									glowMeshes.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
+									itMat = glowMeshes.end() -1;
 								}
+								auto itEnt = (*itMat)->containers.find(ent);
+								if(itEnt == (*itMat)->containers.end())
+									itEnt = (*itMat)->containers.emplace(ent,EntityMeshInfo{ent}).first;
+								itEnt->second.meshes.push_back(subMesh);
 							}
-							//
-							auto *info = mat->GetShaderInfo();
-							if(info != nullptr)
+						}
+						//
+						auto *info = mat->GetShaderInfo();
+						if(info != nullptr)
+						{
+							auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
+							prosper::Shader *shader = nullptr;
+							if(drawWorld == 2)
+								shader = m_whShaderWireframe.get();
+							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
+								shader = GetShaderOverride(static_cast<pragma::ShaderTextured3D*>(base));
+							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
 							{
-								auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
-								prosper::Shader *shader = nullptr;
-								if(drawWorld == 2)
-									shader = m_whShaderWireframe.get();
-								else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-									shader = GetShaderOverride(static_cast<pragma::ShaderTextured3D*>(base));
-								if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
+								// Translucent?
+								if(mat->IsTranslucent() == true)
 								{
-									// Translucent?
-									if(mat->IsTranslucent() == true)
+									if(bUpdateTranslucentMeshes == true)
 									{
-										if(bUpdateTranslucentMeshes == true)
+										auto pTrComponent = ent->GetTransformComponent();
+										auto pos = subMesh->GetCenter();
+										if(pTrComponent.valid())
 										{
-											auto pTrComponent = ent->GetTransformComponent();
-											auto pos = subMesh->GetCenter();
-											if(pTrComponent.valid())
-											{
-												uvec::rotate(&pos,pTrComponent->GetOrientation());
-												pos += pTrComponent->GetPosition();
-											}
-											auto distance = uvec::length_sqr(pos -posCam);
-											translucentMeshes.push_back(std::make_unique<RenderSystem::TranslucentMesh>(ent,subMesh,mat,shader->GetHandle(),distance));
+											uvec::rotate(&pos,pTrComponent->GetOrientation());
+											pos += pTrComponent->GetPosition();
 										}
-										continue; // Skip translucent meshes
+										auto distance = uvec::length_sqr(pos -posCam);
+										translucentMeshes.push_back(std::make_unique<RenderSystem::TranslucentMesh>(ent,subMesh,mat,shader->GetHandle(),distance));
 									}
-									//
-									ShaderMeshContainer *shaderContainer = nullptr;
-									auto itShader = std::find_if(containers.begin(),containers.end(),[shader](const std::unique_ptr<ShaderMeshContainer> &c) {
-										return (c->shader.get() == shader) ? true : false;
-										});
-									if(itShader != containers.end())
-										shaderContainer = itShader->get();
-									if(shaderContainer == nullptr)
-									{
-										if(containers.size() == containers.capacity())
-											containers.reserve(containers.capacity() +10);
-										containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3D*>(shader)));
-										shaderContainer = containers.back().get();
-									}
-									RenderSystem::MaterialMeshContainer *matContainer = nullptr;
-									auto itMat = std::find_if(shaderContainer->containers.begin(),shaderContainer->containers.end(),[mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
-										return (m->material == mat) ? true : false;
-										});
-									if(itMat != shaderContainer->containers.end())
-										matContainer = itMat->get();
-									if(matContainer == nullptr)
-									{
-										if(shaderContainer->containers.size() == shaderContainer->containers.capacity())
-											shaderContainer->containers.reserve(shaderContainer->containers.capacity() +10);
-										shaderContainer->containers.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
-										matContainer = shaderContainer->containers.back().get();
-									}
-									EntityMeshInfo *entContainer = nullptr;
-									auto itEnt = matContainer->containers.find(ent);
-									if(itEnt != matContainer->containers.end())
-										entContainer = &itEnt->second;
-									if(entContainer == nullptr)
-										entContainer = &matContainer->containers.emplace(ent,EntityMeshInfo{ent}).first->second;
-									entContainer->meshes.push_back(subMesh);
+									continue; // Skip translucent meshes
 								}
+								//
+								ShaderMeshContainer *shaderContainer = nullptr;
+								auto itShader = std::find_if(containers.begin(),containers.end(),[shader](const std::unique_ptr<ShaderMeshContainer> &c) {
+									return (c->shader.get() == shader) ? true : false;
+									});
+								if(itShader != containers.end())
+									shaderContainer = itShader->get();
+								if(shaderContainer == nullptr)
+								{
+									if(containers.size() == containers.capacity())
+										containers.reserve(containers.capacity() +10);
+									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3D*>(shader)));
+									shaderContainer = containers.back().get();
+								}
+								RenderSystem::MaterialMeshContainer *matContainer = nullptr;
+								auto itMat = std::find_if(shaderContainer->containers.begin(),shaderContainer->containers.end(),[mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
+									return (m->material == mat) ? true : false;
+									});
+								if(itMat != shaderContainer->containers.end())
+									matContainer = itMat->get();
+								if(matContainer == nullptr)
+								{
+									if(shaderContainer->containers.size() == shaderContainer->containers.capacity())
+										shaderContainer->containers.reserve(shaderContainer->containers.capacity() +10);
+									shaderContainer->containers.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
+									matContainer = shaderContainer->containers.back().get();
+								}
+								EntityMeshInfo *entContainer = nullptr;
+								auto itEnt = matContainer->containers.find(ent);
+								if(itEnt != matContainer->containers.end())
+									entContainer = &itEnt->second;
+								if(entContainer == nullptr)
+									entContainer = &matContainer->containers.emplace(ent,EntityMeshInfo{ent}).first->second;
+								entContainer->meshes.push_back(subMesh);
 							}
 						}
 					}
@@ -359,3 +356,4 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 		});
 	}
 }
+#pragma optimize("",on)

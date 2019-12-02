@@ -8,7 +8,9 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
 
+#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
@@ -26,6 +28,40 @@ void CModelComponent::Initialize()
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 		pRenderComponent->SetRenderBufferDirty();
+}
+
+void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOverride)
+{
+	if(idx >= m_materialOverrides.size())
+		m_materialOverrides.resize(idx +1);
+	m_materialOverrides.at(idx) = client->LoadMaterial(matOverride);
+}
+void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
+{
+	if(idx >= m_materialOverrides.size())
+		m_materialOverrides.resize(idx +1);
+	m_materialOverrides.at(idx) = mat.GetHandle();
+}
+void CModelComponent::ClearMaterialOverride(uint32_t idx)
+{
+	if(idx >= m_materialOverrides.size())
+		return;
+	m_materialOverrides.at(idx) = {};
+}
+CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
+{
+	return (idx < m_materialOverrides.size()) ? static_cast<CMaterial*>(m_materialOverrides.at(idx).get()) : nullptr;
+}
+
+CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
+{
+	auto *matOverride = GetMaterialOverride(idx);
+	if(matOverride)
+		return matOverride;
+	auto &mdl = GetModel();
+	if(mdl == nullptr)
+		return nullptr;
+	return static_cast<CMaterial*>(mdl->GetMaterial(idx));
 }
 
 Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
@@ -151,4 +187,4 @@ void CEOnUpdateLODByPos::PushArguments(lua_State *l)
 {
 	Lua::Push<Vector3>(l,posCam);
 }
-
+#pragma optimize("",on)

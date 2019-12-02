@@ -56,8 +56,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		Con::cwar<<"WARNING: Incompatible model format version "<<ver<<"!"<<Con::endl;
 		return nullptr;
 	}
-	unsigned int flags = Read<unsigned int>();
-	m_bStatic = ((flags &FWMD_STATIC) == FWMD_STATIC) ? true : false;
+	auto flags = Read<Model::Flags>();
+	m_bStatic = umath::is_flag_set(flags,Model::Flags::Static);
 
 	Vector3 eyeOffset {};
 	if(ver > 0x0007)

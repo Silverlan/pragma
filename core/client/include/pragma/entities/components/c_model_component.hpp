@@ -4,6 +4,8 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_model_component.hpp>
+#include <vector>
+#include <optional>
 
 namespace pragma
 {
@@ -25,6 +27,13 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void Initialize() override;
 
+		void SetMaterialOverride(uint32_t idx,const std::string &matOverride);
+		void SetMaterialOverride(uint32_t idx,CMaterial &mat);
+		void ClearMaterialOverride(uint32_t idx);
+		CMaterial *GetMaterialOverride(uint32_t idx) const;
+
+		CMaterial *GetRenderMaterial(uint32_t idx) const;
+
 		bool IsWeighted() const;
 
 		virtual void UpdateLOD(uint32_t lod);
@@ -42,6 +51,7 @@ namespace pragma
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 
+		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint8_t m_lod = 0u; // Current level of detail
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 	};

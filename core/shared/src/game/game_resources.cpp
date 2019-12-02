@@ -49,12 +49,12 @@ void util::close_external_archive_manager()
 
 static bool port_model(
 	NetworkState *nw,const std::string &path,std::string mdlName,const std::string &formatName,
-	bool(*ptrConvertModel)(
+	std::function<bool(
 		NetworkState*,
 		const std::function<std::shared_ptr<Model>()>&,
 		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,
-		const std::string&,const std::string&
-	)
+		const std::string&,const std::string&,std::ostream*
+	)> ptrConvertModel
 )
 {
 	if(nw->IsGameActive() == false || engine->ShouldMountExternalGameResources() == false)
@@ -91,7 +91,7 @@ static bool port_model(
 		if(r == true)
 			Con::cout<<"Successfully ported "<<formatName<<" Model '"<<(path +mdlName)<<"' and saved it as '"<<outPath<<"'!"<<Con::endl;
 		return r;
-	},path,mdlName) == false)
+	},path,mdlName,&std::cout) == false)
 		return false;
 	return true;
 }
@@ -112,7 +112,9 @@ bool util::port_nif_model(NetworkState *nw,const std::string &path,std::string m
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&)>(impl::get_module_func(nw,"convert_nif_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	return port_model(nw,path,mdlName,"nif",ptrConvertModel);
+	return port_model(nw,path,mdlName,"nif",[](NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,const std::string &path,const std::string &mdlName,std::ostream *optLog) -> bool {
+		return ptrConvertModel(nw,fCreateModel,fCallback,path,mdlName);
+	});
 }
 
 bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
@@ -120,7 +122,7 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 	std::string ext;
 	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
 		return false;
-	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&)>(impl::get_module_func(nw,"convert_hl2_model"));
+	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);

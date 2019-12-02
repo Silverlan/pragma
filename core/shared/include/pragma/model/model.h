@@ -105,13 +105,26 @@ class DLLNETWORK Model
 public:
 	Model();
 	virtual void Remove();
+	enum class Flags : uint32_t
+	{
+		None = 0u,
+		Static = 1u,
+		Inanimate = Static<<1u, // This flag has no effect and is merely a hint that the model doesn't have any animations or skeleton (except for the root bone)
+		Unused1 = Inanimate<<1u,
+		Unused2 = Unused1<<1u,
+		Unused3 = Unused2<<1u,
+		Unused4 = Unused3<<1u,
+		Unused5 = Unused4<<1u,
+		DontPrecacheTextureGroups = Unused5<<1u
+	};
+
 	struct DLLNETWORK MetaInfo
 	{
 		MetaInfo();
 		std::vector<std::string> includes;
 		std::vector<std::string> texturePaths;
 		std::vector<std::string> textures;
-		uint32_t flags;
+		Flags flags = Flags::None;
 	};
 	enum class CopyFlags : uint32_t
 	{
@@ -446,6 +459,7 @@ private:
 };
 REGISTER_BASIC_BITWISE_OPERATORS(Model::CopyFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::MergeFlags);
+REGISTER_BASIC_BITWISE_OPERATORS(Model::Flags);
 #pragma warning(pop)
 
 #endif // __MODEL_H__

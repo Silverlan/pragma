@@ -18,6 +18,10 @@ using namespace pragma;
 #pragma optimize("",off)
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
+		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
+			Anvil::DescriptorType::UNIFORM_BUFFER,
+			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		},
 		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
@@ -37,10 +41,6 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 		prosper::Shader::DescriptorSetInfo::Binding { // Roughness Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
 		},
 		prosper::Shader::DescriptorSetInfo::Binding { // Emission Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,

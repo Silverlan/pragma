@@ -26,9 +26,13 @@ endif()
 
 add_include_dir(glm)
 add_include_dir(anvil_build)
+add_include_dir(alsoundsystem)
+add_include_dir(materialsystem)
+add_include_dir(cmaterialsystem)
 
 add_def(ANVIL_VULKAN_CPP)
 add_def(USE_VULKAN)
+add_def(ALSYS_LIBRARY_TYPE)
 
 link_generic_module_libraries()
 register_pragma_module(${PROJ_NAME})

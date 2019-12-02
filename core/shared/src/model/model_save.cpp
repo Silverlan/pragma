@@ -190,7 +190,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 
 	f->Write("WMD",3);
 	f->Write<uint16_t>(WMD_VERSION);
-	f->Write<uint32_t>(flags);
+	f->Write<Flags>(flags);
 	f->Write<Vector3>(mdl.GetEyeOffset());
 
 	auto offIndex = f->Tell();
@@ -203,7 +203,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	//
 
 	f->Write<uint64_t>(0); // Offset to collision mesh (0 if there is none)
-	auto bStatic = ((flags &FWMD_STATIC) == FWMD_STATIC) ? true : false;
+	auto bStatic = umath::is_flag_set(flags,Model::Flags::Static);
 	if(!bStatic)
 	{
 		f->Write<uint64_t>(0); // Offset to bones

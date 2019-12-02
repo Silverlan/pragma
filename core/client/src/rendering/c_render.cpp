@@ -57,6 +57,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -257,6 +258,7 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 	UpdateShaderTimeData();
 
 	CallCallbacks("PreRenderScenes");
+	CallLuaCallbacks("PreRenderScenes");
 
 	static auto bSkipCallbacks = false;
 	if(bSkipCallbacks == false)
@@ -291,3 +293,4 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
+#pragma optimize("",on)

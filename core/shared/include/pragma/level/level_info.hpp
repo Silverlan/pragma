@@ -48,7 +48,8 @@ namespace pragma
 			const std::vector<util::fgd::Data> &fgdData,
 			const std::string &className,
 			const std::string &key,std::string &val,
-			const std::function<void(const std::string&,uint8_t)> &messageLogger=nullptr
+			const std::function<void(const std::string&,uint8_t)> &messageLogger=nullptr,
+			std::unordered_set<std::string> *msgCache=nullptr
 		);
 	};
 };

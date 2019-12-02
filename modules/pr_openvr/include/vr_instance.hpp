@@ -9,6 +9,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <unordered_map>
 #include <deque>
+#include <optional>
 #include <mathutil/color.h>
 #include <mathutil/umat.h>
 #include <mathutil/uvec.h>
@@ -166,6 +167,17 @@ namespace openvr
 		vr::Compositor_CumulativeStats GetCumulativeStats() const;
 		vr::ETrackingUniverseOrigin GetTrackingSpace() const;
 		void SetTrackingSpace(vr::ETrackingUniverseOrigin space) const;
+
+		void UpdateHMDPoses();
+
+		struct CommandBufferInfo
+		{
+			std::shared_ptr<prosper::PrimaryCommandBuffer> commandBuffer;
+			std::shared_ptr<prosper::Fence> fence;
+		};
+		std::optional<CommandBufferInfo> StartRecording();
+		void StopRecording();
+		const Mat4 &GetHMDPoseMatrix() const;
 	private:
 		Instance(vr::IVRSystem *system,uint32_t width,uint32_t height,vr::IVRRenderModels *i,vr::IVRCompositor *compositor
 #ifdef USE_OPENGL_OFFSCREEN_CONTEXT
@@ -194,16 +206,10 @@ namespace openvr
 		std::function<void(uint32_t,uint32_t,GLFW::KeyState)> m_controllerStateCallback = nullptr;
 		bool m_bHmdViewEnabled = false;
 
-		struct CommandBufferInfo
-		{
-			std::shared_ptr<prosper::PrimaryCommandBuffer> commandBuffer;
-			std::shared_ptr<prosper::Fence> fence;
-		};
 		std::deque<CommandBufferInfo> m_commandBuffers = {};
+		std::optional<CommandBufferInfo> m_activeCommandBuffer = {};
 
-		CommandBufferInfo GetDrawCommandBuffer();
 		void DrawScene();
-		void UpdateHMDMatrixPose();
 		void PollEvents();
 		void ProcessEvent(vr::VREvent_t ev);
 		void OnControllerStateChanged(uint32_t controllerId,uint32_t key,GLFW::KeyState state);

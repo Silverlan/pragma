@@ -1509,10 +1509,6 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Push<Mat4>(l,hComponent->GetViewMatrix());
 		}));
-		def.def("GetViewMatrix",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Push<Mat4>(l,hComponent->GetViewMatrix());
-		}));
 		def.def("LookAt",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &lookAtPos) {
 			pragma::Lua::check_component(l,hComponent);
 			auto &trComponent = hComponent->GetEntity().GetTransformComponent();

@@ -298,6 +298,18 @@ void Lua::Model::register_class(
 	classDef.def("IsRootBone",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t boneId) {
 		Lua::PushBool(l,mdl.IsRootBone(boneId));
 	}));
+	classDef.def("GetFlags",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		Lua::PushInt(l,mdl.GetMetaInfo().flags);
+	}));
+	classDef.def("SetFlags",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t flags) {
+		mdl.GetMetaInfo().flags = static_cast<::Model::Flags>(flags);
+	}));
+	classDef.def("HasFlag",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t flag) {
+		Lua::PushBool(l,umath::is_flag_set(mdl.GetMetaInfo().flags,static_cast<::Model::Flags>(flag)) != 0);
+	}));
+	classDef.def("IsStatic",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		Lua::PushBool(l,umath::is_flag_set(mdl.GetMetaInfo().flags,::Model::Flags::Static));
+	}));
 
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
 	classDef.def("GetIKController",&Lua::Model::GetIKController);
@@ -312,6 +324,11 @@ void Lua::Model::register_class(
 	
 	classDef.def("GetPhonemeMap",&Lua::Model::GetPhonemeMap);
 	classDef.def("SetPhonemeMap",&Lua::Model::SetPhonemeMap);
+
+	classDef.add_static_constant("FLAG_NONE",umath::to_integral(::Model::Flags::None));
+	classDef.add_static_constant("FLAG_BIT_STATIC",umath::to_integral(::Model::Flags::Static));
+	classDef.add_static_constant("FLAG_BIT_INANIMATE",umath::to_integral(::Model::Flags::Inanimate));
+	classDef.add_static_constant("FLAG_BIT_DONT_PRECACHE_TEXTURE_GROUPS",umath::to_integral(::Model::Flags::DontPrecacheTextureGroups));
 	
 	classDef.add_static_constant("FMERGE_NONE",umath::to_integral(::Model::MergeFlags::None));
 	classDef.add_static_constant("FMERGE_ANIMATIONS",umath::to_integral(::Model::MergeFlags::Animations));

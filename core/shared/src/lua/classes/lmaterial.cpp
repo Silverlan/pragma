@@ -4,6 +4,7 @@
 #include "material.h"
 #include <sharedutils/util_shaderinfo.hpp>
 
+#pragma optimize("",off)
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
 	classDef.def("IsValid",&Lua::Material::IsValid);
@@ -11,6 +12,15 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("GetName",&Lua::Material::GetName);
 	classDef.def("IsTranslucent",&Lua::Material::IsTranslucent);
 	classDef.def("GetDataBlock",&Lua::Material::GetDataBlock);
+	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		auto *matCopy = mat.Copy();
+		if(matCopy == nullptr)
+			return;
+		Lua::Push<::Material*>(l,matCopy);
+	}));
+	classDef.def("UpdateTextures",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		mat.UpdateTextures();
+	}));
 }
 
 void Lua::Material::IsTranslucent(lua_State *l,::Material &mat)
@@ -35,3 +45,4 @@ void Lua::Material::GetDataBlock(lua_State *l,::Material &mat)
 	auto &dataBlock = mat.GetDataBlock();
 	Lua::Push<std::shared_ptr<ds::Block>>(l,dataBlock);
 }
+#pragma optimize("",on)

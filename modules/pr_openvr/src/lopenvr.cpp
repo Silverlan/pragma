@@ -1,3 +1,5 @@
+#include <prosper_command_buffer.hpp>
+#include <prosper_fence.hpp>
 #include "stdafx_openvr.h"
 #include <config.h>
 #include <wrappers/image.h>
@@ -6,17 +8,36 @@
 #include <pragma/lua/classes/ldef_color.h>
 #include <sharedutils/datastream.h>
 #include <pragma/lua/libraries/c_lua_vulkan.h>
+#include <pragma/lua/lua_entity_component.hpp>
+#include <pragma/audio/e_alstate.h>
+#include <pragma/game/c_game.h>
+#include <pragma/physics/physobj.h>
+#include <pragma/physics/collision_object.hpp>
+#include <pragma/lua/c_lentity_handles.hpp>
 #include <pragma/entities/environment/c_env_camera.h>
 #include <pragma/rendering/scene/scene.h>
 #include <luainterface.hpp>
 #include <sharedutils/functioncallback.h>
 #include <pragma/pragma_module.hpp>
+#include <pragma/util/util_game.hpp>
 #include "vr_instance.hpp"
 #include "vr_eye.hpp"
 #include "lopenvr.h"
 #include "wvmodule.h"
 
 std::unique_ptr<openvr::Instance> s_vrInstance = nullptr;
+
+static const openvr::Eye &get_eye(lua_State *l,int32_t eyeIdIndex)
+{
+	auto eyeId = static_cast<vr::EVREye>(Lua::CheckInt(l,eyeIdIndex));
+	switch(eyeId)
+	{
+	case vr::EVREye::Eye_Left:
+		return s_vrInstance->GetLeftEye();
+	default:
+		return s_vrInstance->GetRightEye();
+	}
+}
 
 class Game;
 class CGame;
@@ -155,6 +176,13 @@ int Lua::openvr::lib::init_error_to_string(lua_State *l)
 {
 	auto err = Lua::CheckInt(l,1);
 	Lua::PushString(l,::openvr::to_string(static_cast<vr::EVRInitError>(err)));
+	return 1;
+}
+
+int Lua::openvr::lib::compositor_error_to_string(lua_State *l)
+{
+	auto err = Lua::CheckInt(l,1);
+	Lua::PushString(l,::openvr::to_string(static_cast<vr::VRCompositorError>(err)));
 	return 1;
 }
 
@@ -815,7 +843,7 @@ int Lua::openvr::lib::get_pose_transform(lua_State *l)
 	if(s_vrInstance->GetPoseTransform(deviceIdx,pose,m) == false)
 		return 0;
 	Lua::Push<Mat4>(l,m);
-	Lua::Push<Vector3>(l,Vector3(pose.vVelocity.v[0],pose.vVelocity.v[1],pose.vVelocity.v[2]) /0.025f); // TODO
+	Lua::Push<Vector3>(l,Vector3(pose.vVelocity.v[0],pose.vVelocity.v[1],pose.vVelocity.v[2]) *static_cast<float>(::util::metres_to_units(1.f)));
 	return 2;
 }
 
@@ -828,6 +856,7 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 
 		{"property_error_to_string",Lua::openvr::lib::property_error_to_string},
 		{"init_error_to_string",Lua::openvr::lib::init_error_to_string},
+		{"compositor_error_to_string",Lua::openvr::lib::compositor_error_to_string},
 		{"button_id_to_string",Lua::openvr::lib::button_id_to_string},
 		{"controller_axis_type_to_string",Lua::openvr::lib::controller_axis_type_to_string},
 
@@ -972,6 +1001,47 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 			auto &eye = static_cast<vr::EVREye>(eyeIdx) == vr::EVREye::Eye_Left ? s_vrInstance->GetLeftEye() : s_vrInstance->GetRightEye();
 			Lua::Push(l,const_cast<IScene&>(eye.scene).GetInternalScene().shared_from_this());
 			return 1;
+		})},
+		{"update_poses",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance)
+				s_vrInstance->UpdateHMDPoses();
+			return 0;
+		})},
+		{"get_pose_matrix",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance == nullptr)
+				return 0;
+			Lua::Push<Mat4>(l,s_vrInstance->GetHMDPoseMatrix());
+			return 1;
+		})},
+		{"get_eye",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance == nullptr)
+				return 0;
+			auto &eye = get_eye(l,1);
+			Lua::Push<::openvr::Eye*>(l,const_cast<::openvr::Eye*>(&eye));
+			return 1;
+		})},
+		{"submit_eye",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance == nullptr)
+				return 0;
+			auto &eye = get_eye(l,1);
+			Lua::PushInt(l,s_vrInstance->GetCompositorInterface()->Submit(eye.eye,&eye.vrTexture));
+			return 1;
+		})},
+		{"start_recording",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance == nullptr)
+				return 0;
+			auto cmdBufferInfo = s_vrInstance->StartRecording();
+			if(cmdBufferInfo.has_value() == false)
+				return 0;
+			Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l,cmdBufferInfo->commandBuffer);
+			Lua::Push<Lua::Vulkan::Fence*>(l,&cmdBufferInfo->fence->GetAnvilFence());
+			return 2;
+		})},
+		{"stop_recording",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(s_vrInstance == nullptr)
+				return 0;
+			s_vrInstance->StopRecording();
+			return 0;
 		})}
 	});
 
@@ -1111,7 +1181,9 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 		{"CONTROLLER_AXIS_TYPE_NONE",static_cast<int32_t>(vr::EVRControllerAxisType::k_eControllerAxis_None)},
 		{"CONTROLLER_AXIS_TYPE_TRACK_PAD",static_cast<int32_t>(vr::EVRControllerAxisType::k_eControllerAxis_TrackPad)},
 		{"CONTROLLER_AXIS_TYPE_JOYSTICK",static_cast<int32_t>(vr::EVRControllerAxisType::k_eControllerAxis_Joystick)},
-		{"CONTROLLER_AXIS_TYPE_TRIGGER",static_cast<int32_t>(vr::EVRControllerAxisType::k_eControllerAxis_Trigger)}
+		{"CONTROLLER_AXIS_TYPE_TRIGGER",static_cast<int32_t>(vr::EVRControllerAxisType::k_eControllerAxis_Trigger)},
+
+		{"MAX_TRACKED_DEVICE_COUNT",vr::k_unMaxTrackedDeviceCount}
 	};
 	Lua::RegisterLibraryEnums(lua,"openvr",initErrorEnums);
 
@@ -1125,6 +1197,32 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 		.def_readonly("velocity",reinterpret_cast<Vector3 vr::TrackedDevicePose_t::*>(&vr::TrackedDevicePose_t::vVelocity))
 	;
 	modVr[classDevDevicePose];
+
+	auto classDefEye = luabind::class_<::openvr::Eye>("Eye");
+	classDefEye.def("GetRenderTarget",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
+		Lua::Push(l,eye.vkRenderTarget);
+	}));
+	classDefEye.def("GetCamera",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
+		if(eye.camera.expired())
+			return;
+		eye.camera->PushLuaObject(l);
+	}));
+	classDefEye.def("GetScene",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
+		auto &scene = eye.scene.GetInternalScene();
+		Lua::Push(l,scene.shared_from_this());
+	}));
+	classDefEye.def("GetProjectionMatrix",static_cast<void(*)(lua_State*,::openvr::Eye&,float,float)>([](lua_State *l,::openvr::Eye &eye,float nearZ,float farZ) {
+		Lua::Push<Mat4>(l,eye.GetEyeProjectionMatrix(nearZ,farZ));
+	}));
+	classDefEye.def("GetViewMatrix",static_cast<void(*)(lua_State*,::openvr::Eye&,CCameraHandle&)>([](lua_State *l,::openvr::Eye &eye,CCameraHandle &cam) {
+		pragma::Lua::check_component(l,cam);
+		Lua::Push<Mat4>(l,eye.GetEyeViewMatrix(*cam));
+	}));
+	classDefEye.def("GetResolution",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
+		Lua::PushInt(l,eye.width);
+		Lua::PushInt(l,eye.height);
+	}));
+	modVr[classDefEye];
 
 	auto classDefControllerState = luabind::class_<LuaVRControllerState>("ControllerState")
 		.def_readonly("packetNum",&LuaVRControllerState::unPacketNum)

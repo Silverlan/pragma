@@ -5,6 +5,9 @@
 #include <pragma/game/c_game.h>
 #include <pragma/entities/environment/c_env_camera.h>
 #include <pragma/rendering/renderers/rasterization_renderer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/components/c_light_map_component.hpp>
+#include <pragma/entities/c_world.h>
 #include <prosper_context.hpp>
 #include <image/prosper_image.hpp>
 #include <prosper_util.hpp>
@@ -12,6 +15,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 
@@ -125,6 +129,19 @@ bool openvr::Eye::Initialize(uint32_t w,uint32_t h)
 	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(pragmaScene);
 	pragmaScene.SetRenderer(renderer);
 
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
+	auto it = entIt.begin();
+	if(it != entIt.end())
+	{
+		auto *entWorld = *it;
+		auto lightMapC = entWorld->GetComponent<pragma::CLightMapComponent>();
+		auto &lightMap = lightMapC->GetLightMap();
+		if(lightMap)
+			renderer->SetLightMap(lightMap);
+	}
+
 	auto *cam = c_game->GetPrimaryCamera();
 	auto *camEye = cam ? c_game->CreateCamera(width,height,cam->GetFOV(),cam->GetNearZ(),cam->GetFarZ()) : nullptr;
 	if(camEye)
@@ -190,11 +207,20 @@ Mat4 openvr::Eye::GetEyeViewMatrix(pragma::CCameraComponent &cam) const
 Mat4 openvr::Eye::GetEyeProjectionMatrix(float nearZ,float farZ) const
 {
 	auto *vrInterface = m_instance->GetSystemInterface();
-	auto eyeProj = vrInterface->GetProjectionMatrix(eye,nearZ,farZ);
-	return Mat4{
-		eyeProj.m[0][0],eyeProj.m[1][0],eyeProj.m[2][0],eyeProj.m[3][0],
-		eyeProj.m[0][1],eyeProj.m[1][1],eyeProj.m[2][1],eyeProj.m[3][1],
-		eyeProj.m[0][2],eyeProj.m[1][2],eyeProj.m[2][2],eyeProj.m[3][2],
-		eyeProj.m[0][3],eyeProj.m[1][3],eyeProj.m[2][3],eyeProj.m[3][3]
-	};
+
+	// Note: The documentation recommends using GetProjectionMatrix instead of
+	// GetProjectionRaw, but I have no idea what format it's in and couldn't get it
+	// to work with glm.
+	// auto eyeProj = vrInterface->GetProjectionMatrix(eye,nearZ,farZ);
+	// return Mat4{
+	//	eyeProj.m[0][0],eyeProj.m[1][0],eyeProj.m[2][0],eyeProj.m[3][0],
+	//	eyeProj.m[0][1],eyeProj.m[1][1],eyeProj.m[2][1],eyeProj.m[3][1],
+	//	eyeProj.m[0][2],eyeProj.m[1][2],eyeProj.m[2][2],eyeProj.m[3][2],
+	//	eyeProj.m[0][3],eyeProj.m[1][3],eyeProj.m[2][3],eyeProj.m[3][3]
+	// };
+
+	float left,right,top,bottom;
+	vrInterface->GetProjectionRaw(eye,&left,&right,&top,&bottom);
+
+	return glm::frustumRH(left,right,bottom,top,nearZ,farZ);
 }

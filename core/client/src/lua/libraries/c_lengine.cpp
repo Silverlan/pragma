@@ -143,6 +143,12 @@ int Lua::engine::load_material(lua_State *l)
 	return 1;
 }
 
+int Lua::engine::clear_unused_materials(lua_State *l)
+{
+	client->GetMaterialManager().ClearUnused();
+	return 0;
+}
+
 int Lua::engine::create_material(lua_State *l)
 {
 	if(Lua::IsString(l,2) == true)

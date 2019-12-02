@@ -428,6 +428,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString",&Lua::DataBlock::GetString);
 	defDataBlock.def("GetData",&Lua::DataBlock::GetData);
 	defDataBlock.def("SetValue",&Lua::DataBlock::SetValue);
+	defDataBlock.def("GetValueType",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>([](lua_State *l,ds::Block &dataBlock,const std::string &key) {
+		auto val = dataBlock.GetDataValue(key);
+		if(val == nullptr)
+			return;
+		Lua::PushString(l,val->GetTypeString());
+	}));
 	modUtil[defDataBlock];
 
 	// Properties

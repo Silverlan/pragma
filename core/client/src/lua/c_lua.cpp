@@ -81,6 +81,7 @@ void CGame::RegisterLua()
 		{"precache_material",Lua::engine::precache_material},
 		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
 		{"load_material",Lua::engine::load_material},
+		{"clear_unused_materials",Lua::engine::clear_unused_materials},
 		//{"create_texture",&Lua::engine::create_texture},
 		{"create_material",Lua::engine::create_material},
 		{"create_particle_system",&Lua::engine::create_particle_system},

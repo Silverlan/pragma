@@ -406,10 +406,12 @@ extern "C" {
 			return false;
 		return load_smd(&nw,animName,mdl,*smd,isCollisionMesh,outTextures);
 	}
-	PRAGMA_EXPORT bool convert_hl2_model(NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,const std::string &path,const std::string &mdlName)
+	PRAGMA_EXPORT bool convert_hl2_model(
+		NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,
+		const std::string &path,const std::string &mdlName,std::ostream *optLog
+	)
 	{
-		auto rot = uquat::create(EulerAngles(0.f,-90.f,0.f));
-
 		const std::array<std::string,7> extensions = {
 			"dx80.vtx",
 			"dx90.vtx",
@@ -419,13 +421,15 @@ extern "C" {
 			"vvd",
 			"ani"
 		};
+		std::optional<std::string> sourcePath = {};
 		std::unordered_map<std::string,VFilePtr> files;
 		for(auto &ext : extensions)
 		{
 			auto subPath = path +mdlName +"." +ext;
 			auto f = FileManager::OpenFile(subPath.c_str(),"rb");
 			if(f == nullptr)
-				f = uarch::load(subPath);
+				f = uarch::load(subPath,(ext == "mdl") ? &sourcePath : nullptr);
+			
 			if(f != nullptr)
 				files[ext] = f;
 		}
@@ -436,11 +440,13 @@ extern "C" {
 		else if(files.find("sw.vtx") != files.end())
 			files["vtx"] = files["sw.vtx"];
 
+		if(sourcePath.has_value())
+			Con::cout<<"Found model in '"<<*sourcePath<<"'! Porting..."<<Con::endl;
+
 		std::vector<std::string> textures;
-		auto r = ::import::load_mdl(nw,files,fCreateModel,fCallback,true,textures);
+		auto r = ::import::load_mdl(nw,files,fCreateModel,fCallback,true,textures,optLog);
 		if(r == nullptr)
 			return false;
-		r->Rotate(rot);
 		return fCallback(r,path,mdlName);
 	}
 	PRAGMA_EXPORT bool convert_nif_model(NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,const std::string &pathRoot,const std::string &mdlName)

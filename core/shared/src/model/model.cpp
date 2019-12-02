@@ -52,7 +52,6 @@ Con::c_cout &operator<<(Con::c_cout &os,const Model& mdl)
 }
 
 Model::MetaInfo::MetaInfo()
-	: flags(0)
 {}
 
 Model::Model()
@@ -629,7 +628,7 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 void Model::LoadMaterials(const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)
 {
 	auto &meta = GetMetaInfo();
-	auto bDontPrecacheTexGroups = ((meta.flags &FWMD_DONT_PRECACHE_TEXTURE_GROUPS) == FWMD_DONT_PRECACHE_TEXTURE_GROUPS) ? true : false;
+	auto bDontPrecacheTexGroups = umath::is_flag_set(meta.flags,Model::Flags::DontPrecacheTextureGroups);
 	std::vector<uint32_t> groupIds;
 	auto &texGroups = GetTextureGroups();
 	groupIds.reserve(texGroups.size());

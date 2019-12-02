@@ -40,6 +40,7 @@
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
@@ -95,6 +96,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("pbr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
+	shaderManager.RegisterShader("unlit",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);});
 	shaderManager.RegisterShader("wireframe",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
 	shaderManager.RegisterShader("texturedalphatransition",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSkybox(context,identifier);});

@@ -328,13 +328,38 @@ void transform_local_frame_to_global(const std::vector<std::shared_ptr<import::m
 	transform_local_transforms_to_global(bones,{},{});
 }
 
-bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,MdlInfo &mdlInfo)
+bool import::load_mdl(
+	NetworkState *nw,const VFilePtr &f,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+	const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,
+	bool bCollision,MdlInfo &mdlInfo,std::ostream *optLog
+)
 {
 	auto offset = f->Tell();
 	auto &header = mdlInfo.header = f->Read<mdl::studiohdr_t>();
 	auto *id = reinterpret_cast<uint8_t*>(&header.id);
+
+	if(optLog)
+		(*optLog)<<"Header ID: "<<id<<"\n";
+
 	if(id[0] != 0x49 || id[1] != 0x44 || id[2] != 0x53 || id[3] != 0x54)
+	{
+		if(optLog)
+			(*optLog)<<"Unknown header ID! Terminating...\n";
 		return false;
+	}
+
+	if(optLog)
+	{
+		(*optLog)<<
+			"Header information:\n"<<
+			"Version: "<<header.version<<"\n"<<
+			"Mass: "<<header.mass<<"\n"<<
+			"Flags: "<<header.flags<<"\n"<<
+			"Number of body parts: "<<header.numbodyparts<<"\n"<<
+			"Number of bones: "<<header.numbones<<"\n"<<
+			"Number of flex controllers: "<<header.numflexcontrollers<<"\n"<<
+			"Number of textures: "<<header.numtextures<<"\n";
+	}
 
 	auto eyePos = header.eyeposition;
 	umath::swap(eyePos.y,eyePos.z);
@@ -359,6 +384,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 			auto fileName = f->ReadString();
 			if(fileName.empty() == false)
 			{
+				if(optLog)
+					(*optLog)<<"Found include model '"<<fileName<<"'! Adding to list of includes...\n";
 				auto mdlName = FileManager::GetCanonicalizedPath(fileName);
 				if(ustring::substr(mdlName,0,7) == std::string("models") +FileManager::GetDirectorySeparator())
 					mdlName = ustring::substr(mdlName,7);
@@ -367,9 +394,12 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 				mdlInfo.model.GetMetaInfo().includes.push_back(wmdPath);
 				if(FileManager::Exists("models\\" +wmdPath) == false)
 				{
-					auto r = convert_hl2_model(nw,fCreateModel,fCallback,"models\\",mdlName);
+					auto r = convert_hl2_model(nw,fCreateModel,fCallback,"models\\",mdlName,optLog);
 					if(r == false)
-						std::cout<<"WARNING: Unable to convert model '"<<fileName<<"'!"<<std::endl;
+					{
+						if(optLog)
+							(*optLog)<<"WARNING: Unable to convert include model '"<<fileName<<"'!\n";
+					}
 				}
 			}
 		}
@@ -401,6 +431,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 
 		if(name.empty() == false)
 		{
+			if(optLog)
+				(*optLog)<<"Adding texture '"<<name<<"'...\n";
 			mdlInfo.textures.push_back(ufile::get_file_from_filename(name));
 			fAddPath(ufile::get_path_from_filename(name));
 		}
@@ -418,6 +450,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 		auto strOffset = f->Read<int32_t>();
 		f->Seek(offset +strOffset);
 		auto stdCdTex = f->ReadString();
+		if(optLog)
+			(*optLog)<<"Adding texture path '"<<stdCdTex<<"'...\n";
 		fAddPath(stdCdTex);
 	}
 	//
@@ -427,9 +461,16 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	auto &bones = mdlInfo.bones;
 	bones.reserve(header.numbones);
 	for(auto i=decltype(header.numbones){0};i<header.numbones;++i)
+	{
 		bones.push_back(std::make_shared<mdl::Bone>(i,f));
+		if(optLog)
+			(*optLog)<<"Adding bone '"<<bones.back()->GetName()<<"'...\n";
+	}
 	if(header.numbones > umath::to_integral(GameLimits::MaxBones))
-		std::cout<<"WARNING: Model has "<<header.numbones<<" bones, but the engine only supports up to "<<umath::to_integral(GameLimits::MaxBones)<<"! Expect issues!"<<std::endl;
+	{
+		if(optLog)
+			(*optLog)<<"WARNING: Model has "<<header.numbones<<" bones, but the engine only supports up to "<<umath::to_integral(GameLimits::MaxBones)<<"! Expect issues!\n";
+	}
 	mdl::Bone::BuildHierarchy(bones);
 
 	// Read animation names
@@ -449,6 +490,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 			auto offset = f->Tell();
 			f->Seek(header.szanimblocknameindex);
 			auto animBlockName = f->ReadString();
+			if(optLog)
+				(*optLog)<<"Found animation '"<<animBlockName<<"'!\n";
 			aniFileNames.push_back(animBlockName);
 
 			f->Seek(offset);
@@ -467,7 +510,11 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	animDescs.reserve(header.numlocalanim);
 	auto animDescOffset = f->Tell();
 	for(auto i=decltype(header.numlocalanim){0};i<header.numlocalanim;++i)
+	{
 		animDescs.push_back(mdl::AnimationDesc(i,f));
+		if(optLog)
+			(*optLog)<<"Found animation desc '"<<animDescs.back().GetName()<<"' with flags "<<animDescs.back().GetStudioDesc().flags<<"!\n";
+	}
 
 	// Read animation sections
 	for(auto i=decltype(header.numlocalanim){0};i<header.numlocalanim;++i)
@@ -477,6 +524,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	}
 	//
 
+	if(optLog)
+		(*optLog)<<"Reading animation data...\n";
 	for(auto it=animDescs.begin();it!=animDescs.end();++it)
 	{
 		auto &animDesc = *it;
@@ -485,6 +534,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Load sequences
+	if(optLog)
+		(*optLog)<<"Reading sequences...\n";
 	f->Seek(offset +header.localseqindex);
 	auto &sequences = mdlInfo.sequences;
 	sequences.reserve(header.numlocalseq);
@@ -493,6 +544,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read attachments
+	if(optLog)
+		(*optLog)<<"Reading attachments...\n";
 	f->Seek(offset +header.localattachmentindex);
 	auto &attachments = mdlInfo.attachments;
 	attachments.reserve(header.numlocalattachments);
@@ -501,6 +554,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read flex descs
+	if(optLog)
+		(*optLog)<<"Reading flex descs...\n";
 	f->Seek(offset +header.flexdescindex);
 	auto &flexDescs = mdlInfo.flexDescs;
 	flexDescs.reserve(header.numflexdesc);
@@ -509,6 +564,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read flex controllers
+	if(optLog)
+		(*optLog)<<"Reading flex controllers...\n";
 	f->Seek(offset +header.flexcontrollerindex);
 	auto &flexControllers = mdlInfo.flexControllers;
 	flexControllers.reserve(header.numflexcontrollers);
@@ -517,6 +574,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read flex rules
+	if(optLog)
+		(*optLog)<<"Reading flex rules...\n";
 	f->Seek(offset +header.flexruleindex);
 	auto &flexRules = mdlInfo.flexRules;
 	flexRules.reserve(header.numflexrules);
@@ -525,6 +584,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read flex controller uis
+	if(optLog)
+		(*optLog)<<"Reading flex controller uis...\n";
 	f->Seek(offset +header.flexcontrolleruiindex);
 	auto &flexControllerUis = mdlInfo.flexControllerUis;
 	flexControllerUis.reserve(header.numflexcontrollerui);
@@ -553,10 +614,11 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 
 			std::stack<OpExpression> opStack {};
 
-			auto fCheckStackCount = [&opStack,&flexName](uint32_t required,const std::string &identifier) -> bool {
+			auto fCheckStackCount = [&opStack,&flexName,&optLog](uint32_t required,const std::string &identifier) -> bool {
 				if(opStack.size() >= required)
 					return true;
-				std::cout<<"WARNING: Unable to evaluate flex operation '"<<identifier<<"' for flex "<<flexName<<"! Skipping..."<<std::endl;
+				if(optLog)
+					(*optLog)<<"WARNING: Unable to evaluate flex operation '"<<identifier<<"' for flex "<<flexName<<"! Skipping...\n";
 				opStack.push({"0.0"});
 				return false;
 			};
@@ -656,16 +718,20 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 						break;
 					}
 					case mdl::FlexRule::Operation::Type::Exp:
-						std::cout<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Exp)! Skipping..."<<std::endl;
+						if(optLog)
+							(*optLog)<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Exp)! Skipping...\n";
 						break;
 					case mdl::FlexRule::Operation::Type::Open:
-						std::cout<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Open)! Skipping..."<<std::endl;
+						if(optLog)
+							(*optLog)<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Open)! Skipping...\n";
 						break;
 					case mdl::FlexRule::Operation::Type::Close:
-						std::cout<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Close)! Skipping..."<<std::endl;
+						if(optLog)
+							(*optLog)<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Close)! Skipping...\n";
 						break;
 					case mdl::FlexRule::Operation::Type::Comma:
-						std::cout<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Comma)! Skipping..."<<std::endl;
+						if(optLog)
+							(*optLog)<<"WARNING: Invalid flex rule "<<umath::to_integral(op.type)<<" (Comma)! Skipping...\n";
 						break;
 					case mdl::FlexRule::Operation::Type::Max:
 					{
@@ -864,11 +930,16 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 				//std::cout<<"Final expression: "<<sop.str()<<std::endl;
 			}
 			else
-				std::cout<<"WARNING: Unable to evaluate flex rule for flex "<<flexName<<"! Skipping..."<<std::endl;
+			{
+				if(optLog)
+					(*optLog)<<"WARNING: Unable to evaluate flex rule for flex "<<flexName<<"! Skipping...\n";
+			}
 		}
 	}
 
 	// Read hitboxes
+	if(optLog)
+		(*optLog)<<"Reading hitboxes...\n";
 	f->Seek(offset +header.hitboxsetindex);
 	auto &hitboxSets = mdlInfo.hitboxSets;
 	hitboxSets.reserve(header.numhitboxsets);
@@ -877,6 +948,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read skins
+	if(optLog)
+		(*optLog)<<"Reading skins...\n";
 	f->Seek(offset +header.skinindex);
 	auto &skinFamilies = mdlInfo.skinFamilies;
 	skinFamilies.reserve(header.numskinfamilies);
@@ -890,6 +963,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read body parts
+	if(optLog)
+		(*optLog)<<"Reading body parts...\n";
 	f->Seek(offset +header.bodypartindex);
 	auto &bodyParts = mdlInfo.bodyParts;
 	bodyParts.reserve(header.numbodyparts);
@@ -898,6 +973,8 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	//
 
 	// Read pose parameters
+	if(optLog)
+		(*optLog)<<"Reading pose parameters...\n";
 	f->Seek(offset +header.localposeparamindex);
 	auto &poseParameters = mdlInfo.poseParameters;
 	poseParameters.reserve(header.numlocalposeparameters);
@@ -908,7 +985,11 @@ bool import::load_mdl(NetworkState *nw,const VFilePtr &f,const std::function<std
 	return true;
 }
 
-std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_map<std::string,VFilePtr> &files,const std::function<std::shared_ptr<Model>()> &fCreateModel,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,std::vector<std::string> &textures)
+std::shared_ptr<Model> import::load_mdl(
+	NetworkState *nw,const std::unordered_map<std::string,VFilePtr> &files,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+	const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,
+	std::vector<std::string> &textures,std::ostream *optLog
+)
 {
 	auto it = files.find("mdl");
 	if(it == files.end())
@@ -916,12 +997,16 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	auto ptrMdl = fCreateModel();
 	auto &mdl = *ptrMdl;
 	MdlInfo mdlInfo(mdl);
-	auto r = load_mdl(nw,it->second,fCreateModel,fCallback,bCollision,mdlInfo);
+	auto r = load_mdl(nw,it->second,fCreateModel,fCallback,bCollision,mdlInfo,optLog);
 	if(r == false)
 		return nullptr;
+	if(optLog)
+		(*optLog)<<"Building model...\n";
 	it = files.find("ani");
 	if(it != files.end())
 	{
+		if(optLog)
+			(*optLog)<<"Loading ani file '"<<it->second<<"'...\n";
 		import::mdl::load_ani(it->second,mdlInfo);
 		for(auto &animDesc : mdlInfo.animationDescs)
 		{
@@ -1186,7 +1271,8 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	auto bGlobalizeReference = false;
 	if(refId == -1 || bHasReferenceAnim == false)
 	{
-		std::cout<<"WARNING: No reference animation found; Attempting to generate reference from default bone transforms..."<<std::endl;
+		if(optLog)
+			(*optLog)<<"WARNING: No reference animation found; Attempting to generate reference from default bone transforms...\n";
 		reference = Animation::Create();
 		mdl.AddAnimation("reference",reference);
 	}
@@ -1609,7 +1695,10 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 							}
 						}
 						else
-							std::cout<<"WARNING: Missing flex vertex "<<fixedVertIdx<<" for flex "<<stdFlexDesc.GetName()<<"! Skipping..."<<std::endl;
+						{
+							if(optLog)
+								(*optLog)<<"WARNING: Missing flex vertex "<<fixedVertIdx<<" for flex "<<stdFlexDesc.GetName()<<"! Skipping...\n";
+						}
 					}
 				}
 				++meshIdx;
@@ -2824,7 +2913,10 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 	auto &baseMeshes = mdl.GetBaseMeshes();
 	baseMeshes.clear();
 	//baseMeshes = bgBaseMeshGroups;
-	baseMeshes.push_back(0);
+
+	// TODO: Some models mustn't have a base mesh set (like "models/a_hat_in_time/mustache_girl.mdl"), but
+	// some others might? Keep this under observation!
+	//baseMeshes.push_back(0);
 	//
 
 	// Generate reference
@@ -2953,10 +3045,17 @@ std::shared_ptr<Model> import::load_mdl(NetworkState *nw,const std::unordered_ma
 		}
 	}
 
-	// Models are rotated by 90 degree for some reason
-	mdl.Rotate(uquat::create(EulerAngles{0.f,90.f,0.f}));
+	auto isStaticProp = (mdlInfo.header.flags &STUDIOHDR_FLAGS_STATIC_PROP) != 0;
+	umath::set_flag(mdl.GetMetaInfo().flags,Model::Flags::Inanimate,isStaticProp);
+
+	mdl.Update(ModelUpdateFlags::AllData);
+	//auto rot = uquat::create(EulerAngles(0.f,90.f,0.f));
+	//mdl.Rotate(rot);
 
 	mdl.Update(ModelUpdateFlags::All);
+
+	if(optLog)
+		(*optLog)<<"Done!\n";
 
 	return ptrMdl;
 }

@@ -62,7 +62,7 @@ float WIGridPanel::UpdateRowHeights(float yOffset,float defHeight)
 	return WITable::UpdateRowHeights(yOffset,defHeight);
 }
 
-void WIGridPanel::Update()
+void WIGridPanel::DoUpdate()
 {
 	switch(m_resizeMode)
 	{
@@ -81,7 +81,7 @@ void WIGridPanel::Update()
 			}
 		}
 	}
-	WITable::Update();
+	WITable::DoUpdate();
 }
 
 WITableRow *WIGridPanel::AddRow() {return WITable::AddRow<WITableRow>();}

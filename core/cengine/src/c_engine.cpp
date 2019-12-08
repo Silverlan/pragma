@@ -483,7 +483,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 			contextCreateInfo.height = util::to_int(vals[1]);
 		}
 	}
-	SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
+	// SetResolution(Vector2i(contextCreateInfo.width,contextCreateInfo.height));
 
 	res = cmds.find("cl_render_resolution");
 	if(res != nullptr && !res->argv.empty())
@@ -508,7 +508,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		SetWindowedMode(false);
 	else
 		SetWindowedMode(true);
-	SetNoBorder((mode == 2) ? true : false);
+	GetWindowCreationInfo().decorated = ((mode == 2) ? false : true);
 
 	res = cmds.find("cl_render_monitor");
 	if(res != nullptr && !res->argv.empty())

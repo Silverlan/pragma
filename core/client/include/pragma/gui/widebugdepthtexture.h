@@ -12,7 +12,6 @@ public:
 	WIDebugDepthTexture();
 	virtual ~WIDebugDepthTexture() override;
 	virtual void Initialize() override;
-	virtual void Update() override;
 
 	void SetTexture(prosper::Texture &texture);
 	void SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId=0u);
@@ -20,9 +19,10 @@ public:
 	void SetContrastFactor(float contrastFactor);
 	float GetContrastFactor() const;
 
-	void Update(float nearZ,float farZ);
+	void Setup(float nearZ,float farZ);
 	void SetShouldResolveImage(bool b);
 protected:
+	virtual void DoUpdate() override;
 	void UpdateResolvedTexture();
 	WIHandle m_hTextureRect;
 

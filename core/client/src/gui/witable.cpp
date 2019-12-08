@@ -14,7 +14,7 @@ LINK_WGUI_TO_CLASS(WITableCell,WITableCell);
 extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
 WITable::WITable()
-	: WIContainer(),m_bSortAsc(true),m_sortColumn(CUInt32(-1)),m_rowHeight(-1),m_bSelectable(false),m_bSortable(false),m_bScrollable(false)
+	: WIContainer(),m_bSortAsc(true),m_sortColumn(CUInt32(-1)),m_rowHeight(-1),m_bSortable(false),m_bScrollable(false)
 {
 	RegisterCallback<void,WITableRow*>("OnRowCreated");
 }
@@ -41,11 +41,11 @@ void WITable::RemoveRow(uint32_t rowIdx)
 	Resize();
 }
 
-void WITable::SizeToContents()
+void WITable::SizeToContents(bool x,bool y)
 {
 	if(m_bScrollable == true && m_hScrollContainer.IsValid())
-		m_hScrollContainer->SizeToContents();
-	WIBase::SizeToContents();
+		m_hScrollContainer->SizeToContents(x,y);
+	WIBase::SizeToContents(x,y);
 }
 
 bool WITable::SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHandle &b)
@@ -283,31 +283,61 @@ WITableRow *WITable::GetHeaderRow()
 		return nullptr;
 	return m_hRowHeader.get<WITableRow>();
 }
-bool WITable::IsSelectable() const {return m_bSelectable;}
-void WITable::SetSelectable(bool b)
+WITable::SelectableMode WITable::GetSelectableMode() const {return m_selectableMode;}
+void WITable::SetSelectable(SelectableMode mode)
 {
-	if(m_bSelectable == b)
+	if(m_selectableMode == mode)
 		return;
-	m_bSelectable = b;
-	std::vector<WIHandle>::iterator it;
-	for(it=m_rows.begin();it!=m_rows.end();it++)
+	m_selectableMode = mode;
+	for(auto &hRow : m_rows)
 	{
-		WIHandle &hRow = *it;
-		if(hRow.IsValid())
-			hRow->SetMouseInputEnabled(b);
+		if(hRow.IsValid() == false)
+			continue;
+		hRow->SetMouseInputEnabled(true);
 	}
-	if(m_rowSelected.IsValid())
+
+	if(m_selectedRows.empty() || mode == SelectableMode::Multi)
+		return;
+	auto selectedRows = m_selectedRows;
+	auto itStart = selectedRows.begin();
+	if(mode == SelectableMode::Single)
+		++itStart; // We'll want to keep the first row selected
+	for(auto it=itStart;it!=selectedRows.end();++it)
 	{
-		if(b == false)
-			m_rowSelected.get<WITableRow>()->Deselect();
-		m_rowSelected = WIHandle();
+		auto &hRow = *it;
+		if(hRow.IsValid() == false)
+			continue;
+		static_cast<WITableRow*>(hRow.get())->Deselect();
 	}
+}
+void WITable::DeselectAllRows()
+{
+	auto selectedRows = m_selectedRows;
+	for(auto &hRow : selectedRows)
+	{
+		if(hRow.IsValid() == false)
+			continue;
+		static_cast<WITableRow*>(hRow.get())->Deselect();
+	}
+	m_selectedRows.clear();
+}
+void WITable::SelectRow(WITableRow &row)
+{
+	auto deselect = (m_selectableMode == SelectableMode::Single);
+	if(m_selectableMode == SelectableMode::Multi)
+	{
+		auto &window = WGUI::GetInstance().GetContext().GetWindow();
+		auto lctrl = window.GetKeyState(GLFW::Key::LeftControl);
+		auto rctrl = window.GetKeyState(GLFW::Key::RightControl);
+		deselect = !(lctrl == GLFW::KeyState::Press || lctrl == GLFW::KeyState::Held || rctrl == GLFW::KeyState::Press || rctrl == GLFW::KeyState::Held);
+	}
+	if(deselect)
+		DeselectAllRows();
+	row.Select();
 }
 void WITable::OnRowSelected(WITableRow *row)
 {
-	if(m_rowSelected.IsValid())
-		m_rowSelected.get<WITableRow>()->Deselect();
-	m_rowSelected = row->GetHandle();
+	m_selectedRows.push_back(row->GetHandle());
 }
 void WITable::InitializeRow(WITableRow *row,bool bHeader)
 {
@@ -319,7 +349,7 @@ void WITable::InitializeRow(WITableRow *row,bool bHeader)
 		)));
 	}
 	else
-		row->SetMouseInputEnabled(m_bSelectable);
+		row->SetMouseInputEnabled(GetSelectableMode() != SelectableMode::None);
 	if(m_rowHeight != -1)
 		row->SetHeight(m_rowHeight);
 	std::unordered_map<unsigned int,int>::iterator itCol;
@@ -366,12 +396,8 @@ void WITable::SetRowHeight(int h)
 	ScheduleUpdate();
 }
 int WITable::GetRowHeight() const {return m_rowHeight;}
-WITableRow *WITable::GetSelectedRow() const
-{
-	if(!m_rowSelected.IsValid())
-		return nullptr;
-	return m_rowSelected.get<WITableRow>();
-}
+const std::vector<WIHandle> &WITable::GetSelectedRows() const {return m_selectedRows;}
+WIHandle WITable::GetFirstSelectedRow() const {return (m_selectedRows.empty() == false) ? m_selectedRows.front() : WIHandle{};}
 WITableRow *WITable::GetRow(unsigned int id) const
 {
 	if(id >= m_rows.size())
@@ -450,9 +476,9 @@ void WITable::SetColumnWidth(unsigned int col,int width)
 	}
 }
 
-void WITable::Update()
+void WITable::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	Resize();
 }
 
@@ -602,7 +628,11 @@ util::EventReply WITableRow::MouseCallback(GLFW::MouseButton button,GLFW::KeySta
 	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
 		return util::EventReply::Handled;
 	if(button == GLFW::MouseButton::Left && state == GLFW::KeyState::Press)
-		Select();
+	{
+		auto *t = GetTable();
+		if(t)
+			t->SelectRow(*this);
+	}
 	return util::EventReply::Handled;
 }
 unsigned int WITableRow::GetCellCount() const {return CUInt32(m_cells.size());}
@@ -634,7 +664,7 @@ void WITableRow::Select()
 	if(m_bSelected == true)
 		return;
 	WITable *t = GetTable();
-	if(t == nullptr || !t->IsSelectable())
+	if(t == nullptr || t->GetSelectableMode() == WITable::SelectableMode::None)
 		return;
 	m_bSelected = true;
 	t->OnRowSelected(this);

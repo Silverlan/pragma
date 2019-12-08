@@ -10,8 +10,8 @@ class DLLCLIENT WIDebugGlowBloom
 public:
 	WIDebugGlowBloom();
 	virtual ~WIDebugGlowBloom() override;
-	virtual void Update() override;
 private:
+	virtual void DoUpdate() override;
 	void UpdateBloomImage();
 	CallbackHandle m_cbRenderHDRMap = {};
 	std::shared_ptr<prosper::RenderTarget> m_renderTarget = nullptr;

@@ -30,11 +30,11 @@ WIScrollContainer::~WIScrollContainer()
 	}
 }
 
-void WIScrollContainer::SizeToContents()
+void WIScrollContainer::SizeToContents(bool x,bool y)
 {
 	if(m_hWrapper.IsValid())
-		m_hWrapper->SizeToContents();
-	WIBase::SizeToContents();
+		m_hWrapper->SizeToContents(x,y);
+	WIBase::SizeToContents(x,y);
 }
 
 int WIScrollContainer::GetContentWidth()
@@ -195,11 +195,6 @@ void WIScrollContainer::OnChildAdded(WIBase *child)
 	if(m_hWrapper.IsValid())
 		child->SetParent(m_hWrapper.get());
 }
-void WIScrollContainer::Think()
-{
-	WIBase::Think();
-
-}
 void WIScrollContainer::OnChildRemoved(WIBase *child)
 {
 	WIBase::OnChildRemoved(child);
@@ -213,7 +208,7 @@ void WIScrollContainer::ScrollToBottom()
 	pScrollBar->SetScrollOffset(pScrollBar->GetElementCount());
 }
 
-void WIScrollContainer::Update()
+void WIScrollContainer::DoUpdate()
 {
 	if(m_hWrapper.IsValid())
 	{
@@ -261,5 +256,5 @@ void WIScrollContainer::Update()
 			pScrollBar->SetVisible(h > size.y);
 		}
 	}
-	WIBase::Update();
+	WIBase::DoUpdate();
 }

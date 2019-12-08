@@ -24,6 +24,7 @@ WIImageSlideShow::WIImageSlideShow()
 void WIImageSlideShow::Initialize()
 {
 	WIBase::Initialize();
+	EnableThinking();
 	m_hImgNext = CreateChild<WITexturedRect>();
 	m_hImgNext->SetAutoAlignToParent(true);
 
@@ -41,9 +42,9 @@ void WIImageSlideShow::SetColor(float r,float g,float b,float a)
 		m_hImgPrev->SetColor(r,g,b,a);
 }
 
-void WIImageSlideShow::Update()
+void WIImageSlideShow::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	InitializeBlur(GetWidth(),GetHeight());
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }

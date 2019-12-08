@@ -18,6 +18,7 @@ WIFPS::~WIFPS()
 void WIFPS::Initialize()
 {
 	WIBase::Initialize();
+	EnableThinking();
 	m_text = CreateChild<WIText>();
 	if(m_text.IsValid())
 	{

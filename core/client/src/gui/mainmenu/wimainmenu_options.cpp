@@ -180,6 +180,7 @@ void WIMainMenuOptions::SetActiveMenu(WIHandle &hMenu)
 void WIMainMenuOptions::Initialize()
 {
 	WIMainMenuBase::Initialize();
+	EnableThinking();
 	AddMenuItem(Locale::GetText("menu_options_general"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
 		ShowGeneralSettings();
 	}));

@@ -29,9 +29,9 @@ void WILineGraph::SetSize(int x,int y)
 		m_hOutline->SetY(y -1);
 }
 
-void WILineGraph::Update()
+void WILineGraph::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	UpdateGraph();
 }
 

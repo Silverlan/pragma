@@ -5,6 +5,7 @@
 #include <wgui/types/witext.h>
 
 LINK_WGUI_TO_CLASS(WITreeList,WITreeList);
+LINK_WGUI_TO_CLASS(WITreeListElement,WITreeListElement);
 
 #pragma optimize("",off)
 WITreeListElement::WITreeListElement()
@@ -135,6 +136,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 	{
 		auto *pArrow = WGUI::GetInstance().Create<WIArrow>(this);
 		m_pArrow = pArrow->GetHandle();
+		pArrow->SetName("arrow");
 		pArrow->SetSize(12,12);
 		pArrow->SetVisible(false);
 		pArrow->SetPos(m_xOffset,3);
@@ -170,7 +172,12 @@ WITreeListElement *WITreeListElement::GetLastItem() const
 	}
 	return const_cast<WITreeListElement*>(this);
 }
-void WITreeListElement::SetTextElement(WIText *pText) {(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle{};}
+void WITreeListElement::SetTextElement(WIText *pText)
+{
+	(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle{};
+	if(pText)
+		pText->GetColorProperty()->Link(*GetColorProperty());
+}
 WIText *WITreeListElement::GetTextElement() const {return m_hText.IsValid() ? static_cast<WIText*>(m_hText.get()) : nullptr;}
 WITreeListElement *WITreeListElement::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)
 {
@@ -224,9 +231,9 @@ void WITreeList::Initialize()
 		Update();
 	}));
 }
-void WITreeList::Update()
+void WITreeList::DoUpdate()
 {
-	WITable::Update();
+	WITable::DoUpdate();
 }
 WITreeListElement *WITreeList::GetRootItem() const {return static_cast<WITreeListElement*>(m_pRoot.get());}
 WITreeListElement *WITreeList::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)

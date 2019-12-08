@@ -161,6 +161,7 @@ void WIMainMenuMods::InitializeJavascript()
 void WIMainMenuMods::Initialize()
 {
 	WIMainMenuBase::Initialize();
+	EnableThinking();
 	AddMenuItem(Locale::GetText("back"),FunctionCallback<void,WIMainMenuElement*>::Create([this](WIMainMenuElement*) {
 		auto *mainMenu = dynamic_cast<WIMainMenu*>(GetParent());
 		if(mainMenu == nullptr)

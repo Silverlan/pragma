@@ -10,12 +10,12 @@ class DLLCLIENT WIDebugMSAATexture
 public:
 	WIDebugMSAATexture();
 	virtual void Initialize() override;
-	virtual void Update() override;
 	void SetTexture(prosper::Texture &texture);
 
 	// If set to false, all sub-images contained in the multi-sampled image will be displayed
 	void SetShouldResolveImage(bool b);
 protected:
+	virtual void DoUpdate() override;
 	void UpdateResolvedTexture();
 	WIHandle m_hTextureRect;
 

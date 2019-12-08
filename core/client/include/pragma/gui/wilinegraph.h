@@ -11,13 +11,13 @@ protected:
 	WIHandle m_hOutline;
 	std::vector<float> m_values;
 	std::vector<WIHandle> m_lines;
+	virtual void DoUpdate() override;
 	void UpdateGraph();
 	void UpdateLines();
 public:
 	WILineGraph();
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
-	virtual void Update() override;
 	using WIBase::SetSize;
 	void SetValue(uint32_t idx,float val);
 	void SetSegmentCount(uint32_t count);

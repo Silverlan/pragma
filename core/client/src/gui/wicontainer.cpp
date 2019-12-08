@@ -65,14 +65,14 @@ void WIContainer::SetPadding(Padding paddingType,int32_t padding)
 			break;
 	}
 }
-void WIContainer::SizeToContents()
+void WIContainer::SizeToContents(bool x,bool y)
 {
-	WIBase::SizeToContents();
+	WIBase::SizeToContents(x,y);
 	SetSize(GetWidth() +GetPaddingLeft() +GetPaddingRight(),GetHeight() +GetPaddingTop() +GetPaddingBottom());
 }
-void WIContainer::Update()
+void WIContainer::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	SizeToContents();
 }
 void WIContainer::SetPaddingTop(int32_t top) {m_padding[0] = top;}

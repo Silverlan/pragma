@@ -4,14 +4,16 @@
 #include "pragma/clientdefinitions.h"
 #include "wgui/wiskin.h"
 #include "luasystem.h"
+#include <optional>
 
 struct DLLCLIENT WISkinClass
 {
 	WISkinClass(lua_State *l);
-	~WISkinClass();
-	std::unordered_map<std::string,WISkinClass*> classes;
-	int referenceInitialize;
-	int referenceRelease;
+	WISkinClass(const WISkinClass&)=delete;
+	WISkinClass &operator=(const WISkinClass&)=delete;
+	std::unordered_map<std::string,std::unique_ptr<WISkinClass>> classes;
+	std::optional<luabind::object> initializeFunction = {};
+	std::optional<luabind::object> releaseFunction = {};
 	lua_State *lua;
 	WISkinClass *Copy();
 };
@@ -23,26 +25,25 @@ public:
 	struct Settings
 	{
 		Settings()
-			: vars(-1),skin(-1),base(nullptr)
+			: base(nullptr)
 		{}
-		int vars;
-		int skin;
+		std::optional<luabind::object> vars = {};
+		std::optional<luabind::object> skin = {};
 		WILuaSkin *base;
 	};
 protected:
 	lua_State *m_lua;
 	WISkinClass m_rootClass;
-	int m_refVars;
+	std::optional<luabind::object> m_vars = {};
 	void InitializeClasses(WISkinClass &cl);
 	void InitializeClasses();
-	void FindSkinClasses(WIBase *el,std::unordered_map<std::string,WISkinClass*> &classes,std::vector<WISkinClass*> &outClasses);
-	WISkinClass *FindSkinClass(const std::string &className,std::unordered_map<std::string,WISkinClass*> &classes);
+	void FindSkinClasses(WIBase *el,std::unordered_map<std::string,std::unique_ptr<WISkinClass>> &classes,std::vector<WISkinClass*> &outClasses);
+	WISkinClass *FindSkinClass(const std::string &className,std::unordered_map<std::string,std::unique_ptr<WISkinClass>> &classes);
 	
 	void InitializeBase(WILuaSkin *base);
 	void InitializeBaseClass(WISkinClass &base,WISkinClass &cl);
 public:
 	WILuaSkin(std::string id);
-	virtual ~WILuaSkin() override;
 	virtual void Release(WIBase *el) override;
 	virtual void Initialize(WIBase *el) override;
 	void Initialize(lua_State *l,Settings &settings);

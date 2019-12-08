@@ -44,6 +44,7 @@ class DLLCLIENT WITreeList
 	: public WITable
 {
 protected:
+	virtual void DoUpdate() override;
 	WIHandle m_pRoot;
 public:
 	WITreeList();
@@ -52,7 +53,6 @@ public:
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual WITableRow *AddRow() override;
 	WITreeListElement *AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate=nullptr);
-	virtual void Update() override;
 	WITreeListElement *GetRootItem() const;
 	void ExpandAll();
 	void CollapseAll();

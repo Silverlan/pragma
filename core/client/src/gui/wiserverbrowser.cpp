@@ -242,6 +242,7 @@ void WIServerBrowser::DisplayMessage(std::string msg)
 void WIServerBrowser::Initialize()
 {
 	WIFrame::Initialize();
+	EnableThinking();
 	AddStyleClass("serverbrowser");
 	SetTitle(Locale::GetText("server_browser"));
 	m_hServerList = CreateChild<WITable>();
@@ -252,7 +253,7 @@ void WIServerBrowser::Initialize()
 		t->SetScrollable(true);
 		if(m_hTitleBar.IsValid())
 			t->SetY(30);
-		t->SetSelectable(true);
+		t->SetSelectable(WITable::SelectableMode::Single);
 		WITableRow *row = t->AddHeaderRow();
 		if(row != nullptr)
 		{
@@ -297,10 +298,10 @@ void WIServerBrowser::Initialize()
 			WITable *t = sb->m_hServerList.get<WITable>();
 			if(t == nullptr)
 				return CallbackReturnType::HasReturnValue;
-			WITableRow *row = t->GetSelectedRow();
-			if(row == nullptr)
+			auto hRow = t->GetFirstSelectedRow();
+			if(hRow.IsValid() == false)
 				return CallbackReturnType::HasReturnValue;
-			auto data = std::static_pointer_cast<int32_t>(row->GetUserData3());
+			auto data = std::static_pointer_cast<int32_t>(hRow->GetUserData3());
 			OnServerDoubleClick(*data);
 			return CallbackReturnType::HasReturnValue;
 		}));

@@ -265,7 +265,7 @@ public:
 	bool BroadcastEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx);
 	bool InjectEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx);
 	Lua::StatusCode LoadLuaFile(std::string &fInOut,fsys::SearchFlags includeFlags=fsys::SearchFlags::All,fsys::SearchFlags excludeFlags=fsys::SearchFlags::None);
-	virtual bool ExecuteLuaFile(std::string &fInOut);
+	virtual bool ExecuteLuaFile(std::string &fInOut,lua_State *optCustomLuaState=nullptr);
 	// Same as ExecuteLuaFile, but uses the last value from the include stack
 	//bool IncludeLuaFile(std::string &fInOut); // Deprecated
 

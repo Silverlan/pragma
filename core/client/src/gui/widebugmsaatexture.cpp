@@ -102,9 +102,9 @@ void WIDebugMSAATexture::SetResolveImage(bool b)
 		m_hTextureRect.get<WITexturedRect>()->SetTexture(m_renderTarget->GetTexture());
 }*/ // prosper TODO
 
-void WIDebugMSAATexture::Update()
+void WIDebugMSAATexture::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())
 		return;
 	auto &context = *c_engine;

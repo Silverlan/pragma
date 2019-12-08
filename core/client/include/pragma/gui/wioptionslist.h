@@ -23,6 +23,7 @@ private:
 		WIChoiceList *AddChoiceList(const std::string &name,T list,const std::string &cvarName,const std::function<void(WIChoiceList*)> &initializer);
 	template<class T>
 		WIDropDownMenu *AddDropDownMenu(const std::string &name,T list,const std::string &cvarName,const std::function<void(WIDropDownMenu*)> &initializer);
+	virtual void DoUpdate() override;
 public:
 	WIOptionsList();
 	virtual ~WIOptionsList() override;
@@ -43,7 +44,7 @@ public:
 	WISlider *AddSlider(const std::string &name,const std::function<void(WISlider*)> &initializer,const std::string &cvarName="");
 	void AddKeyBinding(const std::string &keyName,const std::string &cvarName);
 	WITextEntry *AddTextEntry(const std::string &name,const std::string &cvarName="");
-	virtual void SizeToContents() override;
+	virtual void SizeToContents(bool x=true,bool y=true) override;
 	void SetTitle(const std::string &title);
 	void SetUpdateConVar(const std::string &cvar,const std::string &value);
 	void RunUpdateConVars(bool bClear=true);

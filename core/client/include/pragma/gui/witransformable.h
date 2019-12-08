@@ -52,7 +52,6 @@ public:
 	int GetMaxHeight();
 	const Vector2i &GetMaxSize() const;
 	void Close();
-	virtual void Update() override;
 	void SnapToTarget(WIBase &el);
 
 	void SetResizeRatioLocked(bool bLocked);
@@ -67,6 +66,7 @@ public:
 	void AddSnapTarget(WISnapArea &target);
 	void SetRemoveOnClose(bool remove);
 protected:
+	virtual void DoUpdate() override;
 	enum class ResizeMode
 	{
 		none = -1,

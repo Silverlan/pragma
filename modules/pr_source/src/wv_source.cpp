@@ -370,7 +370,14 @@ extern "C" {
 			})},
 		});
 	}
-	PRAGMA_EXPORT void initialize_archive_manager() {uarch::initialize();}
+	PRAGMA_EXPORT void initialize_archive_manager()
+	{
+		uarch::initialize();
+	}
+	PRAGMA_EXPORT void add_source_engine_game_mount_path(const std::string &path)
+	{
+		uarch::add_source_engine_game_path(path);
+	}
 	PRAGMA_EXPORT void close_archive_manager() {uarch::close();}
 	PRAGMA_EXPORT void find_files(const std::string &path,std::vector<std::string> *outFiles,std::vector<std::string> *outDirectories) {uarch::find_files(path,outFiles,outDirectories);}
 	PRAGMA_EXPORT void open_archive_file(const std::string &path,VFilePtr &f)

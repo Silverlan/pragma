@@ -65,7 +65,13 @@ void WIOptionsList::SetSize(int x,int y)
 	ScheduleUpdate();
 }
 
-void WIOptionsList::SizeToContents()
+void WIOptionsList::DoUpdate()
+{
+	WIBase::DoUpdate();
+	SizeToContents();
+}
+
+void WIOptionsList::SizeToContents(bool x,bool y)
 {
 	if(m_hTable.IsValid())
 	{

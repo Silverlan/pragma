@@ -16,9 +16,9 @@ WIDebugSSAO::WIDebugSSAO()
 
 void WIDebugSSAO::SetUseBlurredSSAOImage(bool b) {m_bUseBlurVariant = b;}
 
-void WIDebugSSAO::Update()
+void WIDebugSSAO::DoUpdate()
 {
-	WITexturedRect::Update();
+	WITexturedRect::DoUpdate();
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();

@@ -18,6 +18,7 @@ WISlider::~WISlider()
 void WISlider::Initialize()
 {
 	WIProgressBar::Initialize();
+	EnableThinking();
 }
 
 void WISlider::SetSize(int x,int y)

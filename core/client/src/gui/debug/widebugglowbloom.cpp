@@ -42,9 +42,9 @@ void WIDebugGlowBloom::UpdateBloomImage()
 	prosper::util::record_image_barrier(**drawCmd,**imgDst,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 }
 
-void WIDebugGlowBloom::Update()
+void WIDebugGlowBloom::DoUpdate()
 {
-	WITexturedRect::Update();
+	WITexturedRect::DoUpdate();
 	if(c_game == nullptr)
 		return;
 	auto &dev = c_engine->GetDevice();

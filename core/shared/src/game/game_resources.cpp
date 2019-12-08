@@ -9,6 +9,7 @@ extern DLLENGINE Engine *engine;
 
 static bool s_bModuleInitialized = false;
 
+#pragma optimize("",off)
 static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 {
 	static std::shared_ptr<util::Library> dllHandle = nullptr;
@@ -125,6 +126,27 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
+	static auto g_customMountDirsInitialized = false;
+	if(g_customMountDirsInitialized == false)
+	{
+		g_customMountDirsInitialized = true;
+		static auto *ptrAddGameMountPath = reinterpret_cast<void(*)(const std::string&)>(impl::get_module_func(nw,"add_source_engine_game_mount_path"));
+		if(ptrAddGameMountPath)
+		{
+			auto fMountList = FileManager::OpenFile("cfg/mount_source_game_paths.txt","r");
+			if(fMountList)
+			{
+				auto strList = fMountList->ReadString();
+				std::vector<std::string> list {};
+				ustring::explode(strList,"\n",list);
+				for(auto &path : list)
+				{
+					ustring::remove_whitespace(path);
+					ptrAddGameMountPath(path);
+				}
+			}
+		}
+	}
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);
 }
 
@@ -148,3 +170,4 @@ bool util::port_file(NetworkState *nw,const std::string &path)
 		return false;
 	return ptrExtractResource(nw,path,util::IMPORT_PATH);
 }
+#pragma optimize("",on)

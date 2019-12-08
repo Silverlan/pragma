@@ -139,6 +139,7 @@ std::string GUIDebugCursorManager::GetElementInfo(WIBase &el)
 	ss<<"Element: "<<std::string(typeid(el).name())<<
 		"; Class: "<<el.GetClass()<<
 		"; Name: "<<el.GetName()<<
+		"; Index: "<<el.GetIndex()<<
 		"; Size: ("<<size.x<<","<<size.y<<")"<<
 		"; Pos: ("<<pos.x<<","<<pos.y<<")";
 	auto debugInfo = el.GetDebugInfo();

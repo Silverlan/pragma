@@ -12,6 +12,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 OcclusionCullingHandlerBSP::OcclusionCullingHandlerBSP(const std::shared_ptr<util::BSPTree> &bspTree)
 	: m_bspTree{bspTree}
 {}
@@ -123,7 +124,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto &camPos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	Con::cout<<"Camera position: ("<<camPos.x<<" "<<camPos.y<<" "<<camPos.z<<")"<<Con::endl;
 	Con::cout<<"Leaf cluster id: "<<pCurrentNode->cluster<<Con::endl;
-	if(pCurrentNode->cluster >= clusterVisibility.size())
+	if(pCurrentNode->cluster >= clusterVisibility.size() || pCurrentNode->cluster == std::numeric_limits<uint16_t>::max())
 		Con::cwar<<"WARNING: Invalid cluster id "<<pCurrentNode->cluster<<"!"<<Con::endl;
 	else
 	{
@@ -279,3 +280,4 @@ static void debug_bsp_lock_callback(NetworkState*,ConVar*,int32_t,int32_t val)
 	pHandler->SetCurrentNodeLocked(val != 0);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_bsp_lock,debug_bsp_lock_callback);
+#pragma optimize("",on)

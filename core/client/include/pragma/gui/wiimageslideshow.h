@@ -39,6 +39,7 @@ private:
 	std::deque<size_t> m_randomShuffle;
 
 	PreloadImage m_imgPreload;
+	virtual void DoUpdate() override;
 	void PreloadNextImage(Int32 img);
 	void PreloadNextRandomShuffle();
 	void DisplayPreloadedImage();
@@ -48,7 +49,6 @@ public:
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
 	virtual void Think() override;
-	virtual void Update() override;
 	virtual void SetColor(float r,float g,float b,float a=1.f) override;
 	void SetImages(const std::vector<std::string> &images);
 };

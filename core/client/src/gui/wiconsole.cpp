@@ -136,6 +136,7 @@ void WIConsole::Initialize()
 {
 	WIBase::Initialize();
 
+	EnableThinking();
 	SetSize(512,256);
 	FontManager::LoadFont("console","vera/VeraMono",12);
 

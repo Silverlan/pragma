@@ -67,9 +67,9 @@ Lua::StatusCode Game::LoadLuaFile(std::string &fInOut,fsys::SearchFlags includeF
 	return r;
 }
 
-bool Game::ExecuteLuaFile(std::string &fInOut)
+bool Game::ExecuteLuaFile(std::string &fInOut,lua_State *optCustomLuaState)
 {
-	auto *l = GetLuaState();
+	auto *l = optCustomLuaState ? optCustomLuaState : GetLuaState();
 	auto r = Lua::ExecuteFile(l,fInOut,Lua::HandleTracebackError);
 	Lua::HandleSyntaxError(l,r,fInOut);
 	return r == Lua::StatusCode::Ok;

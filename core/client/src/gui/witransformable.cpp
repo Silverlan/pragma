@@ -24,7 +24,7 @@ WITransformable::~WITransformable()
 	if(m_resizeMode != ResizeMode::none)
 		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
 }
-void WITransformable::Update() {WIBase::Update(); Resize();}
+void WITransformable::DoUpdate() {WIBase::DoUpdate(); Resize();}
 void WITransformable::SetResizeRatioLocked(bool bLocked)
 {
 	if(bLocked == true && (GetWidth() == 0 || GetHeight() == 0))
@@ -150,6 +150,7 @@ void WITransformable::StartResizing()
 		return;
 	umath::set_flag(m_stateFlags,StateFlags::Resizing,true);
 	m_resizeLastPos = GetConfinedMousePos();
+	EnableThinking();
 }
 void WITransformable::EndResizing()
 {
@@ -200,7 +201,7 @@ WIBase *WITransformable::GetDragArea() const {return m_hMoveRect.get();}
 void WITransformable::Initialize()
 {
 	WIBase::Initialize();
-
+	EnableThinking();
 	SetDraggable(true);
 	SetResizable(true);
 	m_hMoveRect = CreateChild<WIBase>();

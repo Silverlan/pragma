@@ -92,9 +92,9 @@ void WILuaBase::OnVisibilityChanged(bool bVisible)
 	WIBase::OnVisibilityChanged(bVisible);
 	CallLuaMember<void,bool>("OnVisibilityChanged",bVisible);
 }
-void WILuaBase::Update()
+void WILuaBase::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	CallLuaMember<void>("OnUpdate");
 }
 void WILuaBase::SetColor(float r,float g,float b,float a)

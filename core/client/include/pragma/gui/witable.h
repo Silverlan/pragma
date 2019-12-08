@@ -34,6 +34,41 @@ class DLLCLIENT WITable
 {
 public:
 	friend WITableRow;
+public:
+	enum class SelectableMode : uint8_t
+	{
+		None = 0u,
+		Single,
+		Multi
+	};
+
+	WITable();
+	virtual ~WITable() override;
+	virtual void Initialize() override;
+	void SetColumnWidth(unsigned int col,int width);
+	virtual WITableRow *AddRow();
+	WITableRow *AddHeaderRow();
+	void MoveRow(WITableRow *a,WITableRow *pos,bool bAfter=true);
+	void SelectRow(WITableRow &row);
+	unsigned int GetRowCount() const;
+	virtual void SetSize(int x,int y) override;
+	uint32_t GetRowIndex(WITableRow *pRow) const;
+	void RemoveRow(uint32_t rowIdx);
+	void SetSortable(bool b);
+	bool IsSortable() const;
+	void SetRowHeight(int h);
+	int GetRowHeight() const;
+	void SetSelectable(SelectableMode mode);
+	SelectableMode GetSelectableMode() const;
+	void DeselectAllRows();
+	void SetScrollable(bool b);
+	bool IsScrollable() const;
+	// Removes all rows except for the first one, if it's a header row (Unless bAll is set to true)
+	void Clear(bool bAll=false);
+	WITableRow *GetRow(unsigned int id) const;
+	const std::vector<WIHandle> &GetSelectedRows() const;
+	WIHandle GetFirstSelectedRow() const;
+	virtual void SizeToContents(bool x=true,bool y=true) override;
 protected:
 	struct SortData
 	{
@@ -47,7 +82,7 @@ protected:
 	};
 	std::unordered_map<unsigned int,int> m_columnWidths;
 	int m_rowHeight;
-	bool m_bSelectable;
+	SelectableMode m_selectableMode = SelectableMode::None;
 	bool m_bSortable;
 	unsigned int m_sortColumn;
 	bool m_bSortAsc;
@@ -58,9 +93,10 @@ protected:
 	WIHandle m_hRowHeader;
 	std::vector<WIHandle> m_rows;
 	void OnRowSelected(WITableRow *row);
-	WIHandle m_rowSelected;
+	std::vector<WIHandle> m_selectedRows;
 	static bool SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHandle &b);
 	void Sort(bool bAsc=true,unsigned int col=0);
+	virtual void DoUpdate() override;
 	WITableRow *GetHeaderRow();
 	void InitializeRow(WITableRow *row,bool bHeader=false);
 	void OnRowCellCreated(WITableCell *cell);
@@ -70,35 +106,9 @@ protected:
 	virtual float UpdateRowHeights(float yOffset,float defHeight);
 	void UpdateCell(const WITableCell &cell);
 	template<class TRow>
-		TRow *AddRow();
+	TRow *AddRow();
 	friend void WITableCell::SetRowSpan(int32_t span);
 	friend void WITableCell::SetColSpan(int32_t span);
-public:
-	WITable();
-	virtual ~WITable() override;
-	virtual void Initialize() override;
-	void SetColumnWidth(unsigned int col,int width);
-	virtual WITableRow *AddRow();
-	WITableRow *AddHeaderRow();
-	void MoveRow(WITableRow *a,WITableRow *pos,bool bAfter=true);
-	unsigned int GetRowCount() const;
-	virtual void SetSize(int x,int y) override;
-	uint32_t GetRowIndex(WITableRow *pRow) const;
-	void RemoveRow(uint32_t rowIdx);
-	void SetSortable(bool b);
-	bool IsSortable() const;
-	void SetRowHeight(int h);
-	int GetRowHeight() const;
-	void SetSelectable(bool b);
-	bool IsSelectable() const;
-	void SetScrollable(bool b);
-	bool IsScrollable() const;
-	// Removes all rows except for the first one, if it's a header row (Unless bAll is set to true)
-	void Clear(bool bAll=false);
-	WITableRow *GetRow(unsigned int id) const;
-	WITableRow *GetSelectedRow() const;
-	virtual void Update() override;
-	virtual void SizeToContents() override;
 };
 
 template<class TRow>

@@ -9,9 +9,9 @@ class DLLCLIENT WIDebugSSAO
 {
 public:
 	WIDebugSSAO();
-	virtual void Update() override;
 	void SetUseBlurredSSAOImage(bool b);
 private:
+	virtual void DoUpdate() override;
 	bool m_bUseBlurVariant = false;
 };
 

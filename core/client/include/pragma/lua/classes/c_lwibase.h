@@ -478,7 +478,7 @@ namespace Lua
 	{
 		DLLCLIENT void register_class(luabind::class_<WITableHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef);
 		DLLCLIENT void SetRowHeight(lua_State *l,WITableHandle &hTable,int height);
-		DLLCLIENT void SetSelectable(lua_State *l,WITableHandle &hTable,bool b);
+		DLLCLIENT void SetSelectable(lua_State *l,WITableHandle &hTable,uint32_t mode);
 		DLLCLIENT void IsSelectable(lua_State *l,WITableHandle &hTable);
 		DLLCLIENT void SetColumnWidth(lua_State *l,WITableHandle &hTable,uint32_t colId,uint32_t width);
 		DLLCLIENT void AddRow(lua_State *l,WITableHandle &hTable);
@@ -490,7 +490,7 @@ namespace Lua
 		DLLCLIENT void IsScrollable(lua_State *l,WITableHandle &hTable);
 		DLLCLIENT void Clear(lua_State *l,WITableHandle &hTable);
 		DLLCLIENT void GetRow(lua_State *l,WITableHandle &hTable,uint32_t rowId);
-		DLLCLIENT void GetSelectedRow(lua_State *l,WITableHandle &hTable);
+		DLLCLIENT void GetSelectedRows(lua_State *l,WITableHandle &hTable);
 		DLLCLIENT void GetRows(lua_State *l,WITableHandle &hTable);
 		DLLCLIENT void RemoveRow(lua_State *l,WITableHandle &hTable,uint32_t rowIdx);
 	};

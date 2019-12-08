@@ -179,9 +179,8 @@ void WIDebugDepthTexture::SetResolveImage(bool b)
 	}
 }
 */
-void WIDebugDepthTexture::Update(float nearZ,float farZ)
+void WIDebugDepthTexture::Setup(float nearZ,float farZ)
 {
-	WIBase::Update();
 	if(m_depthToRgbCallback.IsValid())
 		m_depthToRgbCallback.Remove();
 	m_depthToRgbCallback = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([this,nearZ,farZ](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> refDrawCmd) {
@@ -305,10 +304,10 @@ void WIDebugDepthTexture::Update(float nearZ,float farZ)
 void WIDebugDepthTexture::SetContrastFactor(float contrastFactor) {m_contrastFactor = contrastFactor;}
 float WIDebugDepthTexture::GetContrastFactor() const {return m_contrastFactor;}
 
-void WIDebugDepthTexture::Update()
+void WIDebugDepthTexture::DoUpdate()
 {
 	auto *cam = c_game->GetPrimaryCamera();
 	if(cam == nullptr)
 		return;
-	Update(cam->GetNearZ(),cam->GetFarZ());
+	Setup(cam->GetNearZ(),cam->GetFarZ());
 }

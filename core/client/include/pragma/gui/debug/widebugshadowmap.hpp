@@ -9,7 +9,6 @@ class DLLCLIENT WIDebugShadowMap
 {
 public:
 	WIDebugShadowMap();
-	virtual void Update() override;
 
 	void SetLightSource(pragma::CLightComponent &lightSource);
 	void SetShadowMapSize(uint32_t w,uint32_t h);
@@ -19,6 +18,7 @@ public:
 
 	void SetShadowMapType(pragma::CLightComponent::ShadowMapType type);
 private:
+	virtual void DoUpdate() override;
 	std::vector<WIHandle> m_shadowMapImages = {};
 	util::WeakHandle<pragma::CLightComponent> m_lightHandle = {};
 	Vector2i m_shadowMapSize = {256,256};

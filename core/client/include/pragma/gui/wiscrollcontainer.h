@@ -13,10 +13,8 @@ public:
 	virtual ~WIScrollContainer() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
-	virtual void Update() override;
-	virtual void Think() override;
 	virtual util::EventReply ScrollCallback(Vector2 offset) override;
-	virtual void SizeToContents() override;
+	virtual void SizeToContents(bool x=true,bool y=true) override;
 	WIScrollBar *GetHorizontalScrollBar();
 	WIScrollBar *GetVerticalScrollBar();
 	int GetScrollBarWidthV();
@@ -30,6 +28,7 @@ public:
 	void SetAutoStickToBottom(bool autoStick);
 	bool ShouldAutoStickToBottom() const;
 protected:
+	virtual void DoUpdate() override;
 	bool m_bAutoStickToBottom = false;
 	WIHandle m_hScrollBarH = {};
 	WIHandle m_hScrollBarV = {};

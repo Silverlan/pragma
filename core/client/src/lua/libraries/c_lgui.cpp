@@ -231,8 +231,21 @@ int Lua::gui::get_focused_element(lua_State *l)
 	return 1;
 }
 
+int Lua::gui::load_skin(lua_State *l)
+{
+	std::string skinName = Lua::CheckString(l,1);
+	auto success = c_game->ExecuteLuaFile("gui/skins/" +skinName +".lua",client->GetGUILuaState());
+	Lua::PushBool(l,success);
+	return 1;
+}
+
 int Lua::gui::register_skin(lua_State *l)
 {
+	if(l != client->GetGUILuaState())
+	{
+		Lua::Error(l,"Attempted to register GUI skin with client lua state! This is not allowed, skins can only be registered with GUI lua state!");
+		return 0;
+	}
 	std::string skin = Lua::CheckString(l,1);
 	Lua::CheckTable(l,2);
 	Lua::CheckTable(l,3);
@@ -246,11 +259,9 @@ int Lua::gui::register_skin(lua_State *l)
 	}
 	WILuaSkin::Settings settings;
 
-	Lua::PushValue(l,2);
-	settings.vars = Lua::CreateReference(l);
+	settings.vars = luabind::object{luabind::from_stack(l,2)};
 
-	Lua::PushValue(l,3);
-	settings.skin = Lua::CreateReference(l);
+	settings.skin = luabind::object{luabind::from_stack(l,3)};
 	if(Lua::IsSet(l,4))
 	{
 		std::string baseName = Lua::CheckString(l,4);

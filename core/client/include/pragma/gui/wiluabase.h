@@ -54,7 +54,6 @@ public:
 	virtual util::EventReply ScrollCallback(Vector2 offset) override;
 	virtual void SetSize(int x,int y) override;
 	virtual void OnVisibilityChanged(bool bVisible) override;
-	virtual void Update() override;
 	virtual void SetColor(float r,float g,float b,float a=1.f) override;
 	virtual void SetAlpha(float alpha) override;
 	virtual void Render(int w,int h,const Mat4 &mat,const Vector2i &origin,const Mat4 &matParent) override;
@@ -63,6 +62,8 @@ public:
 	virtual void OnFocusGained() override;
 	virtual void OnFocusKilled() override;
 	virtual void OnRemove() override;
+protected:
+	virtual void DoUpdate() override;
 };
 
 struct DLLCLIENT WILuaWrapper

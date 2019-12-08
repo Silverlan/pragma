@@ -1027,6 +1027,7 @@ void Game::OnGameReady()
 	m_ctCur.Reset();
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
+	CallLuaCallbacks("OnGameReady");
 }
 
 void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : util::WeakHandle<pragma::BaseWorldComponent>{};}

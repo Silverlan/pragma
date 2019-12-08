@@ -50,6 +50,7 @@ static void register_gui(Lua::Interface &lua)
 		})},
 		{"get_focused_element",Lua::gui::get_focused_element},
 		{"register_skin",Lua::gui::register_skin},
+		{"load_skin",Lua::gui::load_skin},
 		{"set_skin",Lua::gui::set_skin},
 		{"skin_exists",Lua::gui::skin_exists},
 		{"get_cursor",Lua::gui::get_cursor},
@@ -70,6 +71,15 @@ static void register_gui(Lua::Interface &lua)
 			if(r == nullptr)
 				return 0;
 			auto oChild = WGUILuaInterface::GetLuaObject(l,*r);
+			oChild.push(l);
+			return 1;
+		})},
+		{"find_element_by_index",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto index = Lua::CheckInt(l,1);
+			auto *el = WGUI::GetInstance().FindByIndex(index);
+			if(el == nullptr)
+				return 0;
+			auto oChild = WGUILuaInterface::GetLuaObject(l,*el);
 			oChild.push(l);
 			return 1;
 		})},

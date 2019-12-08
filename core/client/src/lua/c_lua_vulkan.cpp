@@ -67,6 +67,8 @@ namespace Lua
 		DLLCLIENT int get_square_vertex_count(lua_State *l);
 		DLLCLIENT int get_square_vertex_format(lua_State *l);
 		DLLCLIENT int get_square_uv_format(lua_State *l);
+		DLLCLIENT int allocate_temporary_buffer(lua_State *l,uint32_t size);
+		DLLCLIENT int allocate_temporary_buffer(lua_State *l,::DataStream &ds);
 		DLLCLIENT int get_line_vertex_buffer(lua_State *l);
 		DLLCLIENT int get_line_vertices(lua_State *l);
 		DLLCLIENT int get_line_vertex_count(lua_State *l);
@@ -893,6 +895,22 @@ int Lua::Vulkan::get_square_uv_format(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(uvFormat));
 	return 1;
 }
+int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
+{
+	auto buf = c_engine->AllocateTemporaryBuffer(size);
+	if(buf == nullptr)
+		return 0;
+	Lua::Push(l,buf);
+	return 1;
+}
+int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,::DataStream &ds)
+{
+	auto buf = c_engine->AllocateTemporaryBuffer(ds->GetSize(),ds->GetData());
+	if(buf == nullptr)
+		return 0;
+	Lua::Push(l,buf);
+	return 1;
+}
 
 static std::vector<pragma::ShaderGradient::Node> get_gradient_nodes(lua_State *l,uint32_t argIdx)
 {
@@ -997,6 +1015,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			luabind::def("get_square_vertex_count",&Lua::Vulkan::get_square_vertex_count),
 			luabind::def("get_square_vertex_format",&Lua::Vulkan::get_square_vertex_format),
 			luabind::def("get_square_uv_format",&Lua::Vulkan::get_square_uv_format),
+			luabind::def("allocate_temporary_buffer",static_cast<int(*)(lua_State*,::DataStream&)>(&Lua::Vulkan::allocate_temporary_buffer)),
+			luabind::def("allocate_temporary_buffer",static_cast<int(*)(lua_State*,uint32_t)>(&Lua::Vulkan::allocate_temporary_buffer)),
 
 			luabind::def("get_line_vertex_buffer",&Lua::Vulkan::get_line_vertex_buffer),
 			luabind::def("get_line_vertices",&Lua::Vulkan::get_line_vertices),

@@ -62,7 +62,7 @@ DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const WIHandle &handle)
 	else
 	{
 		WIBase *p = handle.get();
-		os<<"WIElement["<<p->GetClass()<<"]["<<&handle<<"]";
+		os<<"WIElement["<<p->GetClass()<<"]["<<p->GetName()<<"]["<<p->GetIndex()<<"]["<<&handle<<"]";
 	}
 	return os;
 }
@@ -73,7 +73,7 @@ DLLCLIENT std::ostream& operator<<(std::ostream &os,const WIHandle &handle)
 	else
 	{
 		WIBase *p = handle.get();
-		os<<"WIElement["<<p->GetClass()<<"]["<<&handle<<"]";
+		os<<"WIElement["<<p->GetClass()<<"]["<<p->GetName()<<"]["<<p->GetIndex()<<"]["<<&handle<<"]";
 	}
 	return os;
 }
@@ -92,6 +92,10 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::self ==WIHandle());
 	classDef.def("IsValid",&IsValid);
+	classDef.def("GetIndex",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushInt(l,hPanel->GetIndex());
+	}));
 	classDef.def("Remove",&Remove);
 	classDef.def("RemoveSafely",&RemoveSafely);
 	classDef.def("SetZPos",&SetZPos);
@@ -102,8 +106,31 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("TrapFocus",static_cast<void(*)(lua_State*,WIHandle&,bool)>(&TrapFocus));
 	classDef.def("TrapFocus",static_cast<void(*)(lua_State*,WIHandle&)>(&TrapFocus));
 	classDef.def("IsFocusTrapped",&IsFocusTrapped);
-	classDef.def("IsVisible",&IsVisible);
+	classDef.def("IsHidden",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushBool(l,!hPanel->IsVisible());
+	}));
 	classDef.def("SetVisible",&SetVisible);
+	classDef.def("IsVisible",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushBool(l,hPanel->IsSelfVisible());
+	}));
+	classDef.def("IsParentVisible",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushBool(l,hPanel->IsParentVisible());
+	}));
+	classDef.def("SetAutoSizeToContents",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetAutoSizeToContents(true);
+	}));
+	classDef.def("SetAutoSizeToContents",static_cast<void(*)(lua_State*,WIHandle&,bool)>([](lua_State *l,WIHandle &hPanel,bool autoSize) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetAutoSizeToContents(autoSize);
+	}));
+	classDef.def("SetAutoSizeToContents",static_cast<void(*)(lua_State*,WIHandle&,bool,bool)>([](lua_State *l,WIHandle &hPanel,bool x,bool y) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetAutoSizeToContents(x,y);
+	}));
 	classDef.def("GetMouseInputEnabled",&GetMouseInputEnabled);
 	classDef.def("SetMouseInputEnabled",&SetMouseInputEnabled);
 	classDef.def("GetKeyboardInputEnabled",&GetKeyboardInputEnabled);
@@ -282,6 +309,18 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		lua_checkgui(l,hPanel);
 		hPanel->SetBottom(pos);
 	}));
+	classDef.def("EnableThinking",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->EnableThinking();
+	}));
+	classDef.def("DisableThinking",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->DisableThinking();
+	}));
+	classDef.def("SetThinkingEnabled",static_cast<void(*)(lua_State*,WIHandle&,bool)>([](lua_State *l,WIHandle &hPanel,bool enabled) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetThinkingEnabled(enabled);
+	}));
 
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>(&AddAttachment));
 	classDef.def("AddAttachment",static_cast<void(*)(lua_State*,WIHandle&,const std::string&,const Vector2&)>(&AddAttachment));
@@ -368,6 +407,10 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,
 	classDef.def("SetVertexUVCoord",&SetVertexUVCoord);
 	classDef.def("InvertVertexUVCoordinates",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,bool,bool)>(&InvertVertexUVCoordinates));
 	classDef.def("InvertVertexUVCoordinates",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>(&InvertVertexUVCoordinates));
+	classDef.def("SizeToTexture",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>([](lua_State *l,WITexturedShapeHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->SizeToTexture();
+	}));
 }
 
 void Lua::WIIcon::register_class(luabind::class_<WIIconHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef)
@@ -406,7 +449,7 @@ void Lua::WITreeList::register_class(luabind::class_<WITreeListHandle,luabind::b
 {
 	classDef.def("AddItem",static_cast<void(*)(lua_State*,WITreeListHandle&,const std::string&)>([](lua_State *l,WITreeListHandle &hPanel,const std::string &text) {
 		lua_checkgui(l,hPanel);
-		auto *pEl = static_cast<::WITreeListElement*>(hPanel.get())->AddItem(text);
+		auto *pEl = static_cast<::WITreeList*>(hPanel.get())->AddItem(text);
 		if(pEl != nullptr)
 		{
 			auto o = WGUILuaInterface::GetLuaObject(l,*pEl);
@@ -493,8 +536,8 @@ void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<W
 		Lua::PushInt(l,static_cast<::WITable*>(hPanel.get())->GetRowHeight());
 	}));
 	classDef.def("SetRowHeight",&SetRowHeight);
-	classDef.def("SetSelectable",&SetSelectable);
-	classDef.def("IsSelectable",&IsSelectable);
+	classDef.def("SetSelectableMode",&SetSelectable);
+	classDef.def("GetSelectableMode",&IsSelectable);
 	classDef.def("SetColumnWidth",&SetColumnWidth);
 	classDef.def("AddRow",&AddRow);
 	classDef.def("AddHeaderRow",&AddHeaderRow);
@@ -505,7 +548,7 @@ void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<W
 	classDef.def("IsScrollable",&IsScrollable);
 	classDef.def("Clear",&Clear);
 	classDef.def("GetRow",&GetRow);
-	classDef.def("GetSelectedRow",&GetSelectedRow);
+	classDef.def("GetSelectedRows",&GetSelectedRows);
 	classDef.def("GetRows",&GetRows);
 	classDef.def("RemoveRow",&RemoveRow);
 	classDef.def("MoveRow",static_cast<void(*)(lua_State*,WITableHandle&,WITableRowHandle&,WITableRowHandle&,bool)>([](lua_State *l,WITableHandle &hPanel,WITableRowHandle &rowA,WITableRowHandle &rowB,bool after) {
@@ -520,6 +563,22 @@ void Lua::WITable::register_class(luabind::class_<WITableHandle,luabind::bases<W
 		lua_checkgui(l,rowB);
 		static_cast<::WITable*>(hPanel.get())->MoveRow(static_cast<::WITableRow*>(rowA.get()),static_cast<::WITableRow*>(rowB.get()));
 	}));
+	classDef.def("SelectRow",static_cast<void(*)(lua_State*,WITableHandle&,WITableRowHandle&)>([](lua_State *l,WITableHandle &hPanel,WITableRowHandle &row) {
+		lua_checkgui(l,hPanel);
+		lua_checkgui(l,row);
+		static_cast<::WITable*>(hPanel.get())->SelectRow(*static_cast<::WITableRow*>(row.get()));
+	}));
+	classDef.def("GetFirstSelectedRow",static_cast<void(*)(lua_State*,WITableHandle&)>([](lua_State *l,WITableHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		auto hRow = static_cast<::WITable*>(hPanel.get())->GetFirstSelectedRow();
+		if(hRow.IsValid() == false)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*hRow.get());
+		o.push(l);
+	}));
+	classDef.add_static_constant("SELECTABLE_MODE_NONE",umath::to_integral(::WITable::SelectableMode::None));
+	classDef.add_static_constant("SELECTABLE_MODE_SINGLE",umath::to_integral(::WITable::SelectableMode::Single));
+	classDef.add_static_constant("SELECTABLE_MODE_MULTI",umath::to_integral(::WITable::SelectableMode::Multi));
 }
 
 void Lua::WITableRow::register_class(luabind::class_<WITableRowHandle,luabind::bases<WIContainerHandle,WIHandle>> &classDef)
@@ -3202,12 +3261,13 @@ void Lua::WITreeListElement::GetItems(lua_State *l,WITreeListElementHandle &hEle
 	lua_checkgui(l,hElement);
 	auto t = Lua::CreateTable(l);
 	auto &items = static_cast<::WITreeListElement*>(hElement.get())->GetItems();
+	int32_t idx = 1;
 	for(auto i=decltype(items.size()){0};i<items.size();++i)
 	{
 		auto &hItem = items[i];
 		if(hItem.IsValid() == true)
 		{
-			Lua::PushInt(l,i);
+			Lua::PushInt(l,idx++);
 			auto o = WGUILuaInterface::GetLuaObject(l,*hItem.get());
 			o.push(l);
 
@@ -3284,17 +3344,17 @@ void Lua::WITable::SetRowHeight(lua_State *l,WITableHandle &hTable,int height)
 	auto *t = hTable.get<::WITable>();
 	t->SetRowHeight(height);
 }
-void Lua::WITable::SetSelectable(lua_State *l,WITableHandle &hTable,bool b)
+void Lua::WITable::SetSelectable(lua_State *l,WITableHandle &hTable,uint32_t mode)
 {
 	lua_checkgui(l,hTable);
 	auto *t = hTable.get<::WITable>();
-	t->SetSelectable(b);
+	t->SetSelectable(static_cast<::WITable::SelectableMode>(mode));
 }
 void Lua::WITable::IsSelectable(lua_State *l,WITableHandle &hTable)
 {
 	lua_checkgui(l,hTable);
 	auto *t = hTable.get<::WITable>();
-	Lua::PushBool(l,t->IsSelectable());
+	Lua::PushInt(l,umath::to_integral(t->GetSelectableMode()));
 }
 
 void Lua::WITable::SetColumnWidth(lua_State *l,WITableHandle &hTable,uint32_t colId,uint32_t width)
@@ -3371,15 +3431,22 @@ void Lua::WITable::GetRow(lua_State *l,WITableHandle &hTable,uint32_t rowId)
 	auto oRow = WGUILuaInterface::GetLuaObject(l,*pRow);
 	oRow.push(l);
 }
-void Lua::WITable::GetSelectedRow(lua_State *l,WITableHandle &hTable)
+void Lua::WITable::GetSelectedRows(lua_State *l,WITableHandle &hTable)
 {
 	lua_checkgui(l,hTable);
-	auto *t = static_cast<::WITable*>(hTable.get());
-	auto *pRow = t->GetSelectedRow();
-	if(pRow == nullptr)
-		return;
-	auto oRow = WGUILuaInterface::GetLuaObject(l,*pRow);
-	oRow.push(l);
+	auto *tb = static_cast<::WITable*>(hTable.get());
+	auto &rows = tb->GetSelectedRows();
+	auto t = Lua::CreateTable(l);
+	int32_t idx = 1;
+	for(auto &hRow : rows)
+	{
+		if(hRow.IsValid() == false)
+			continue;
+		Lua::PushInt(l,idx++);
+		auto oRow = WGUILuaInterface::GetLuaObject(l,*hRow.get());
+		oRow.push(l);
+		Lua::SetTableValue(l,t);
+	}
 }
 void Lua::WITable::GetRows(lua_State *l,WITableHandle &hTable)
 {

@@ -38,9 +38,9 @@ void WIDebugShadowMap::SetLightSource(pragma::CLightComponent &lightSource)
 	m_lightHandle = lightSource.GetHandle<pragma::CLightComponent>();
 }
 
-void WIDebugShadowMap::Update()
+void WIDebugShadowMap::DoUpdate()
 {
-	WIBase::Update();
+	WIBase::DoUpdate();
 	for(auto &hEl : m_shadowMapImages)
 	{
 		if(hEl.IsValid() == false)
@@ -94,7 +94,7 @@ void WIDebugShadowMap::Update()
 					dt->SetPos(wLayer,hLayer); // Front
 				else
 					dt->SetPos(wLayer *3,hLayer); // Back
-				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+				dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 				dt->SetName("dbg_shadowmap" +std::to_string(i));
 				dt->SetContrastFactor(GetContrastFactor());
 				m_shadowMapImages.push_back(dt->GetHandle());
@@ -106,7 +106,7 @@ void WIDebugShadowMap::Update()
 			auto *dt = wgui.Create<WIDebugDepthTexture>(this);
 			dt->SetTexture(*depthTexture,barrierImageLayout,barrierImageLayout);
 			dt->SetSize(wLayer,hLayer);
-			dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+			dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 			dt->SetName("dbg_shadowmap" +std::to_string(0));
 			dt->SetContrastFactor(GetContrastFactor());
 			m_shadowMapImages.push_back(dt->GetHandle());
@@ -122,7 +122,7 @@ void WIDebugShadowMap::Update()
 				dt->SetTexture(*depthTexture,barrierImageLayout,barrierImageLayout,i);
 				dt->SetSize(wLayer,hLayer);
 				dt->SetPos(i *wLayer,0);
-				dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+				dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 				dt->SetName("dbg_shadowmap" +std::to_string(i));
 				dt->SetContrastFactor(GetContrastFactor());
 				m_shadowMapImages.push_back(dt->GetHandle());
@@ -139,7 +139,7 @@ void WIDebugShadowMap::Update()
 						dt->SetTexture(*staticDepthTex,barrierImageLayout,barrierImageLayout,i);
 						dt->SetSize(wLayer,hLayer);
 						dt->SetPos(i *wLayer,hLayer);
-						dt->Update(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+						dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
 						dt->SetName("dbg_shadowmap_static" +std::to_string(i));
 						dt->SetContrastFactor(GetContrastFactor());
 						m_shadowMapImages.push_back(dt->GetHandle());

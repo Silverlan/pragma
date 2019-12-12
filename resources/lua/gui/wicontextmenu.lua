@@ -66,6 +66,9 @@ function gui.WIContextMenu:KeyboardCallback(key,scanCode,action,mods)
 	engine.bind_key(keyStr,cmd)
 	pItem:SetRightText(keyStr)
 end
+function gui.WIContextMenu:AddLine()
+	-- TODO
+end
 function gui.WIContextMenu:AddItem(name,fcOnClick,keybind)
 	local pItem = gui.create("WIMenuItem",self)
 	if(pItem == nil) then return end
@@ -137,8 +140,6 @@ gui.close_context_menu = function()
 	if(contextMenu == nil or util.is_valid(contextMenu) == false) then return end
 	contextMenu:RemoveSafely()
 	contextMenu = nil
-	local size = gui.get_window_size()
-	input.set_cursor_pos(Vector2(size.x *0.5,size.y *0.5))
 end
 gui.open_context_menu = function()
 	gui.close_context_menu()

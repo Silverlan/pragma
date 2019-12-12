@@ -13,7 +13,7 @@
 	#include "../lighting/sh_light_sources.gls"
 	#include "sh_light_data.gls"
 #if USE_NORMAL_MAP == 1
-	#include "sh_mapping.gls"
+	#include "sh_material.gls"
 	#include "sh_light_data.gls"
 
 	layout(set = SHADER_UNIFORM_NORMAL_MAP_SET,binding = SHADER_UNIFORM_NORMAL_MAP_BINDING) uniform sampler2D u_normalMap;
@@ -32,7 +32,7 @@
 		return normalize((fs_in.vert_tangent *nmap.x) +(fs_in.vert_bitangent *nmap.y) +(fs_in.vert_normal *nmap.z));
 	}
 #endif
-	float calculate_normal_light_direction_angle(int lightIdx,vec2 uv)
+	float calculate_normal_light_direction_angle(uint lightIdx,vec2 uv)
 	{
 		float cosTheta;
 		LightSourceData light = get_light_source(lightIdx);

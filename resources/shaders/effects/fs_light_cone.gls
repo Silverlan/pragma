@@ -4,7 +4,8 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 #define PUSH_USER_CONSTANTS \
-	float coneLength;
+	float coneLength; \
+	uint boundLightIndex;
 
 #include "sh_light_cone.gls"
 #include "../../modules/sh_poisson_disk.gls"
@@ -20,7 +21,7 @@ void main()
 
 	mat4 m = get_model_matrix();
 	vec3 origin = vec3(m[3][0],m[3][1],m[3][2]); // Origin (Tip) of the cone in world-space
-	fs_color.a = 1.0 -min(length(fs_in.vert_pos_ws -origin) /u_material.coneLength,1.0);
+	fs_color.a = 1.0 -min(length(fs_in.vert_pos_ws -origin) /u_pushConstants.coneLength,1.0);
 
 	mat4 vm = get_view_matrix();
 	vec3 vertPosCs = normalize((get_view_matrix() *vec4(fs_in.vert_pos_ws.xyz,1.0)).xyz);
@@ -32,24 +33,21 @@ void main()
 	fs_color.a *= dt;
 	fs_color.a *= get_depth_smooth_factor(u_renderSettings.nearZ,u_renderSettings.farZ,get_scene_depth(u_renderSettings.viewportW,u_renderSettings.viewportH));
 
-	int lightIndex = int(u_material.lightMapFlags);
+	int lightIndex = int(u_pushConstants.boundLightIndex);
 	if(lightIndex != -1)
 	{
 		LightSourceData light = get_light_source(lightIndex);
-		if(light.shadowMapIndex > 0)
+		float shadow = 1.0;
+		if(light.shadowMapIndexStatic > 0)
+			shadow = get_spot_light_shadow_factor(lightIndex,false);
+		if(light.shadowMapIndexDynamic > 0)
+			shadow = min(shadow,get_spot_light_shadow_factor(lightIndex,true));
+		if(shadow < 1.0)
 		{
 			vec4 depthCoord = get_light_vertex_position(lightIndex);
 			depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
 			depthCoord = depthCoord /light.position.w;
-
-			float shadow = calculate_spot_shadow(
-				shadowMaps[light.shadowMapIndex -1],depthCoord,
-				0.0 /* bias */,
-				0.004, /* maxSampleOffset */
-				4, /* samples */
-				0.0008, /* sampleSpread */
-				2 /* numPoissonSamples */
-			);
+			
 			fs_color.a *= 1.0 -(1.0 -shadow) *0.8;
 		}
 	}

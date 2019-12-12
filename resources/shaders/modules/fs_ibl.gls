@@ -1,0 +1,8 @@
+#ifndef F_FS_IBL_GLS
+#define F_FS_IBL_GLS
+
+layout(set = SHADER_UNIFORM_IRRADIANCE_MAP_SET,binding = SHADER_UNIFORM_IRRADIANCE_MAP_BINDING) uniform samplerCube u_irradianceMap;
+layout(set = SHADER_UNIFORM_PREFILTER_MAP_SET,binding = SHADER_UNIFORM_PREFILTER_MAP_BINDING) uniform samplerCube u_prefilterMap;
+layout(set = SHADER_UNIFORM_BRDF_MAP_SET,binding = SHADER_UNIFORM_BRDF_MAP_BINDING) uniform sampler2D u_brdfLUT;
+
+#endif

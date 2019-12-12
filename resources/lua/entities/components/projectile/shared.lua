@@ -1,6 +1,5 @@
 util.register_class("ents.ProjectileComponent",BaseEntityComponent)
 
-ents.ProjectileComponent.EVENT_INITIALIZE_PHYSICS = ents.register_component_event("INITIALIZE_PROJECTILE_PHYSICS")
 function ents.ProjectileComponent:Initialize()
 	BaseEntityComponent.Initialize(self)
 	
@@ -42,3 +41,7 @@ function ents.ProjectileComponent:InitializePhysics(component)
 	self:SetupPhysics()
 end
 ents.COMPONENT_PROJECTILE = ents.register_component("projectile",ents.ProjectileComponent)
+
+ents.ProjectileComponent.EVENT_ON_PROJECTILE_IMPACT = ents.register_component_event(ents.COMPONENT_PROJECTILE,"impact")
+ents.ProjectileComponent.EVENT_ON_PROJECTILE_HIT_DAMAGE = ents.register_component_event(ents.COMPONENT_PROJECTILE,"hit_damage")
+ents.ProjectileComponent.EVENT_INITIALIZE_PHYSICS = ents.register_component_event(ents.COMPONENT_PROJECTILE,"initialize_physics")

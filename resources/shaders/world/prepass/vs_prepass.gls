@@ -22,9 +22,9 @@ void main()
 	{
 		uint offset = vertexAnimOffset +i;
 		VertexAnimationFrameData frameData = vaFrameData.data[offset];
-		vec3 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex].xyz;
-		vec3 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex].xyz;
-		vertPos += v0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+		vec4 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex];
+		vec4 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex];
+		vertPos += v0.xyz *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
 	}
 
 	mat4 mdlMatrix = get_model_matrix();

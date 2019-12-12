@@ -13,8 +13,6 @@ function gui.WIMenuBar:OnInitialize()
 
 	local pMain = gui.create("WIRect",self)
 	pMain:SetColor(Color.Beige)
-	pMain:SetAutoAlignToParent(true)
-	pMain:Update()
 	self.m_pMain = pMain
 
 	self.m_tItems = {}
@@ -25,6 +23,15 @@ function gui.WIMenuBar:OnInitialize()
 		self:CallCallbacks("OnClose")
 	end)
 	self.m_pClose = pClose
+
+	self:SetSize(128,24)
+
+	pMain:SetSize(self:GetSize())
+	pMain:SetAnchor(0,0,1,1)
+
+	pClose:SetSize(self:GetHeight(),self:GetHeight())
+	pClose:SetRight(self:GetRight())
+	pClose:SetAnchor(1,0,1,0)
 end
 function gui.WIMenuBar:AddItem(name,fcContextCallback)
 	local pItem = gui.create("WIMenuItem",self)
@@ -37,6 +44,7 @@ function gui.WIMenuBar:AddItem(name,fcContextCallback)
 			local pos = pItem:GetAbsolutePos()
 			pos.y = pos.y +pItem:GetHeight()
 			pContext:SetPos(pos)
+			-- pContext:SetZPos(10000)
 			fcContextCallback(pContext)
 		end
 	end)
@@ -56,10 +64,6 @@ function gui.WIMenuBar:Update()
 	end
 end
 function gui.WIMenuBar:OnSizeChanged(w,h)
-	if(util.is_valid(self.m_pClose) == true) then
-		self.m_pClose:SetPos(w -h,0)
-		self.m_pClose:SetSize(h,h)
-	end
 	self:Update()
 end
 gui.register("WIMenuBar",gui.WIMenuBar)

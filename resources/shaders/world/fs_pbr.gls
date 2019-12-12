@@ -1,0 +1,743 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#define ENABLE_LIGHT_DEBUG 1
+
+#define SHADER_UNIFORM_MATERIAL_SET 2
+#define SHADER_UNIFORM_MATERIAL_BINDING 0
+
+#define SHADER_UNIFORM_ALBEDO_MAP_SET SHADER_UNIFORM_MATERIAL_SET
+#define SHADER_UNIFORM_ALBEDO_MAP_BINDING (SHADER_UNIFORM_MATERIAL_BINDING +1)
+
+// #define SHADER_UNIFORM_NORMAL_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+// #define SHADER_UNIFORM_NORMAL_MAP_BINDING (SHADER_UNIFORM_ALBEDO_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_AO_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_AO_MAP_BINDING (SHADER_UNIFORM_NORMAL_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_METALNESS_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_METALNESS_MAP_BINDING (SHADER_UNIFORM_AO_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_ROUGHNESS_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_ROUGHNESS_MAP_BINDING (SHADER_UNIFORM_METALNESS_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_EMISSION_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_EMISSION_MAP_BINDING (SHADER_UNIFORM_ROUGHNESS_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_GLOW_MAP_SET SHADER_UNIFORM_EMISSION_MAP_SET
+#define SHADER_UNIFORM_GLOW_MAP_BINDING SHADER_UNIFORM_EMISSION_MAP_BINDING
+
+#define SHADER_UNIFORM_PARALLAX_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_PARALLAX_MAP_BINDING (SHADER_UNIFORM_EMISSION_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_WRINKLE_STRETCH_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_WRINKLE_STRETCH_MAP_BINDING (SHADER_UNIFORM_PARALLAX_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_WRINKLE_COMPRESS_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_WRINKLE_COMPRESS_MAP_BINDING (SHADER_UNIFORM_WRINKLE_STRETCH_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_EXPONENT_MAP_SET SHADER_UNIFORM_ALBEDO_MAP_SET
+#define SHADER_UNIFORM_EXPONENT_MAP_BINDING (SHADER_UNIFORM_WRINKLE_COMPRESS_MAP_BINDING +1)
+
+#include "../debug/fs_debug_csm.gls"
+#include "../modules/sh_csm.gls"
+#include "../modules/sh_material.gls"
+#include "../modules/sh_parallaxmapping.gls"
+#include "../modules/sh_pbr.gls"
+#include "../modules/sh_light_data.gls"
+#include "../modules/fs_scene.gls"
+#include "../modules/fs_glowmap.gls"
+#include "../modules/fs_ssao.gls"
+#include "../modules/fs_tonemapping.gls"
+#include "../modules/light_map/fs_lightmap.gls"
+#include "../lighting/sh_light_sources.gls"
+#include "../lighting/fs_lighting_spot.gls"
+#include "../lighting/fs_lighting_point.gls"
+#include "../lighting/fs_lighting_directional.gls"
+
+float calc_point_light_attenuation(uint lightIndex,vec3 fragWorldPos)
+{
+	return calc_point_light_attenuation(lightIndex);
+}
+
+#include "fs_pbr_lighting.gls"
+
+#define SHADER_UNIFORM_IRRADIANCE_MAP_SET 7
+#define SHADER_UNIFORM_IRRADIANCE_MAP_BINDING 0
+
+#define SHADER_UNIFORM_PREFILTER_MAP_SET SHADER_UNIFORM_IRRADIANCE_MAP_SET
+#define SHADER_UNIFORM_PREFILTER_MAP_BINDING (SHADER_UNIFORM_IRRADIANCE_MAP_BINDING +1)
+
+#define SHADER_UNIFORM_BRDF_MAP_SET SHADER_UNIFORM_IRRADIANCE_MAP_SET
+#define SHADER_UNIFORM_BRDF_MAP_BINDING (SHADER_UNIFORM_PREFILTER_MAP_BINDING +1)
+
+#include "/modules/fs_ibl.gls"
+
+layout(set = SHADER_UNIFORM_ALBEDO_MAP_SET,binding = SHADER_UNIFORM_ALBEDO_MAP_BINDING) uniform sampler2D u_albedoMap;
+layout(set = SHADER_UNIFORM_NORMAL_MAP_SET,binding = SHADER_UNIFORM_NORMAL_MAP_BINDING) uniform sampler2D u_normalMap;
+layout(set = SHADER_UNIFORM_AO_MAP_SET,binding = SHADER_UNIFORM_AO_MAP_BINDING) uniform sampler2D u_aoMap;
+layout(set = SHADER_UNIFORM_METALNESS_MAP_SET,binding = SHADER_UNIFORM_METALNESS_MAP_BINDING) uniform sampler2D u_metalnessMap;
+layout(set = SHADER_UNIFORM_ROUGHNESS_MAP_SET,binding = SHADER_UNIFORM_ROUGHNESS_MAP_BINDING) uniform sampler2D u_roughnessMap;
+// layout(set = SHADER_UNIFORM_EMISSION_MAP_SET,binding = SHADER_UNIFORM_EMISSION_MAP_BINDING) uniform sampler2D u_emissionMap;
+
+
+layout(set = SHADER_UNIFORM_WRINKLE_STRETCH_MAP_SET,binding = SHADER_UNIFORM_WRINKLE_STRETCH_MAP_BINDING) uniform sampler2D u_wrinkleStretchMap;
+layout(set = SHADER_UNIFORM_WRINKLE_COMPRESS_MAP_SET,binding = SHADER_UNIFORM_WRINKLE_COMPRESS_MAP_BINDING) uniform sampler2D u_wrinkleCompressMap;
+layout(set = SHADER_UNIFORM_EXPONENT_MAP_SET,binding = SHADER_UNIFORM_EXPONENT_MAP_BINDING) uniform sampler2D u_exponentMap;
+
+vec3 get_normal_from_map(vec2 texCoords)
+{
+	if(use_normal_map() == false)
+		return fs_in.vert_normal;
+	vec3 tangentNormal = texture(u_normalMap,texCoords).xyz *2.0 -1.0;
+
+	vec3 Q1 = dFdx(fs_in.vert_pos_ws.xyz);
+	vec3 Q2 = dFdy(fs_in.vert_pos_ws.xyz);
+	vec2 st1 = dFdx(texCoords);
+	vec2 st2 = dFdy(texCoords);
+
+	vec3 N = normalize(fs_in.vert_normal);
+	vec3 T = normalize(Q1 *st2.t -Q2 *st1.t);
+	vec3 B = -normalize(cross(N,T));
+	mat3 TBN = mat3(T,B,N); // TODO: use fs_in.TBN;
+
+	return normalize(TBN *tangentNormal);
+}
+vec4 calc_pbr_lighting()
+{
+	vec2 texCoords = fs_in.vert_uv;
+	vec3 camPos = u_renderSettings.posCam;
+	vec3 WorldPos = fs_in.vert_pos_ws.xyz;
+
+	vec3 albedo = pow(texture(u_albedoMap,texCoords).rgb,vec3(2.2));
+	float metallic  = texture(u_metalnessMap,texCoords).r;
+	float roughness = texture(u_roughnessMap,texCoords).r;
+
+	vec3 N = get_normal_from_map(texCoords);
+	N = normalize((get_model_matrix() *vec4(N.xyz,0.0)).xyz);
+	vec3 V = normalize(camPos -WorldPos);
+	vec3 R = reflect(-V,N);
+
+	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+	// of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)   
+	vec3 F0 = vec3(0.04);
+	F0 = mix(F0,albedo,metallic);
+
+	// reflectance equation
+	vec3 Lo = vec3(0.0);
+
+	ivec2 location = ivec2(gl_FragCoord.xy);
+	uint tileSize = get_tile_size();
+	ivec2 tileID = location /ivec2(tileSize,tileSize);
+	uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
+	uint offset = index *MAX_SCENE_LIGHTS;
+	// Accumulate lighting
+	bool useLightmaps = is_light_map_enabled();
+	if(useLightmaps == false)
+	{
+		for(uint i=0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
+		{
+			uint lightIndex = visibleLightTileIndicesBuffer.data[offset +i].index;
+			Lo += pbr_calc_light_radiance(lightIndex,WorldPos,N,V,F0,albedo,roughness,metallic);
+		}
+	}
+
+	float ao = texture(u_aoMap,texCoords).r;
+
+	// TODO
+	if(is_ssao_enabled() == true)
+		ao *= get_ssao_occlusion(); // TODO: Disable ssao if ao map exists?
+
+    vec3 ambient;
+    if(is_ibl_enabled() == false && useLightmaps == false)
+    {
+	    // ambient lighting (we now use IBL as the ambient term)
+	    vec3 F = fresnel_schlick_roughness(max(dot(N,V),0.0),F0,roughness);
+	    vec3 kS = F;
+	    vec3 kD = 1.0 -kS;
+	    kD *= 1.0 -metallic;
+	    vec3 irradiance = texture(u_irradianceMap,N).rgb;
+	    vec3 diffuse = irradiance *albedo;
+
+	    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+	    const float MAX_REFLECTION_LOD = 4.0;
+	    vec3 prefilteredColor = textureLod(u_prefilterMap,R,roughness *MAX_REFLECTION_LOD).rgb;
+	    vec2 brdf = texture(u_brdfLUT,vec2(max(dot(N,V),0.0),roughness)).rg;
+	    vec3 specular = prefilteredColor *(F *brdf.x +brdf.y);
+    	ambient = (kD *diffuse +specular) *ao;
+    }
+    else
+    {
+    	// TODO
+  		vec3 ambientColor = vec3(0.03);//u_renderSettings.ambientColor.rgb *u_renderSettings.ambientColor.a;
+    	ambient = vec3(0);//ambientColor *albedo *ao;
+    }
+   
+	if(true)
+		return vec4(Lo,1.0);
+
+    vec3 color = ambient +Lo;
+#if ENABLE_LIGHTMAP == 1
+	if(useLightmaps)
+	{
+		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+		colLightMap.rgb /= 255.0;
+
+		// Apply dynamic shadows
+		// We don't care about static shadows since those are already taken care of
+		// by the lightmaps.
+		for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
+		{
+			uint lightIndex = visibleLightTileIndicesBuffer.data[offset +i].index;
+			LightSourceData light = get_light_source(lightIndex);
+			float shadowFactor = 1.0;
+			if((light.flags &FLIGHT_TYPE_SPOT) != 0)
+			{
+				float staticSample = get_spot_light_shadow_sample(lightIndex,false);
+				float dynamicSample = get_spot_light_shadow_factor(lightIndex,true);
+				if(dynamicSample < staticSample)
+					shadowFactor *= dynamicSample *0.8 +0.2;
+			}
+			else if((light.flags &FLIGHT_TYPE_POINT) != 0)
+			{
+				float staticSample = get_point_light_shadow_sample(lightIndex,false);
+				float dynamicSample = get_point_light_shadow_factor(lightIndex,true);
+				if(dynamicSample < staticSample)
+					shadowFactor *= dynamicSample *0.8 +0.2;
+			}
+			else
+				; // TODO
+			colLightMap *= shadowFactor;
+		}
+
+		//colLightMap.rgb = vec3(pow(colLightMap.r,4),pow(colLightMap.g,4),pow(colLightMap.b,4)) *20;
+		color += albedo *colLightMap.rgb;
+	}
+	else
+#endif
+	{
+		// TODO
+
+	}
+
+    // HDR tonemapping
+    // TODO
+    //color = color /(color +vec3(1.0));
+    // gamma correct
+    color = pow(color,vec3(1.0 /2.2));
+
+    return vec4(color,1.0);
+}
+
+vec3 calc_pbr_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fragPosWs,vec3 fragNormal,bool bUseNormal,vec3 fragNormalWs)
+{
+	if(is_unlit() == true)
+		return texture(u_albedoMap,texCoords).rgb;
+
+	vec3 finalColor = vec3(0.0,0.0,0.0);
+#if ENABLE_LIGHTMAP == 1
+	if(is_light_map_enabled())
+	{
+		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+		colLightMap.rgb /= 255.0;
+		finalColor.rgb = diffuseColor *colLightMap.rgb;
+	}
+#endif
+	finalColor = calc_pbr_lighting().rgb;
+	
+#if ENABLE_LIGHT_DEBUG == 1
+	if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
+	{
+		ivec2 location = ivec2(gl_FragCoord.xy);
+		uint tileSize = get_tile_size();
+		ivec2 tileID = location / ivec2(tileSize, tileSize);
+		uint index = tileID.y * get_number_of_tiles_x() + tileID.x;
+		uint offset = index * MAX_SCENE_LIGHTS;
+		uint numLights = 0;
+		for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
+		{
+			uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
+			LightSourceData light = get_light_source(int(lightIndex));
+			if((light.flags &FLIGHT_TYPE_DIRECTIONAL) == 0)
+				++numLights;
+		}
+		if(numLights > 0)
+		{
+			const float dbgIntensity = 0.95;
+			finalColor.rgb = (vec3(tileID.x /float(tileSize),tileID.y /float(tileSize),0) *(numLights /float(5))) *pow(1.0,dbgIntensity *1.0)
+					+finalColor.rgb *(1.0 -dbgIntensity);
+		}
+	}
+#endif
+	return finalColor;
+}
+
+
+
+
+
+// Khronos
+struct MaterialInfo
+{
+    float perceptualRoughness;    // roughness value, as authored by the model creator (input to shader)
+    vec3 reflectance0;            // full reflectance color (normal incidence angle)
+
+    float alphaRoughness;         // roughness mapped to a more linear change in the roughness (proposed by [2])
+    vec3 diffuseColor;            // color contribution from diffuse lighting
+
+    vec3 reflectance90;           // reflectance color at grazing angle
+    vec3 specularColor;           // color contribution from specular lighting
+};
+
+const float u_MipCount = 4.0; // TODO
+#define USE_HDR
+#define USE_TEX_LOD
+vec3 getIBLContribution(MaterialInfo materialInfo, vec3 n, vec3 v)
+{
+    float NdotV = clamp(dot(n, v), 0.0, 1.0);
+
+    float lod = clamp(materialInfo.perceptualRoughness * float(u_MipCount), 0.0, float(u_MipCount));
+    vec3 reflection = normalize(reflect(-v, n));
+
+    vec2 brdfSamplePoint = clamp(vec2(NdotV, materialInfo.perceptualRoughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
+    // retrieve a scale and bias to F0. See [1], Figure 3
+    vec2 brdf = texture(u_brdfLUT, brdfSamplePoint).rg;
+
+    vec4 diffuseSample = texture(u_irradianceMap, n);
+
+#ifdef USE_TEX_LOD
+	// TODO: Use LOD!!
+    vec4 specularSample = texture(u_prefilterMap, reflection, lod);
+#else
+    vec4 specularSample = texture(u_prefilterMap, reflection);
+#endif
+
+#ifdef USE_HDR
+    // Already linear.
+    vec3 diffuseLight = diffuseSample.rgb;
+    vec3 specularLight = specularSample.rgb;
+#else
+    vec3 diffuseLight = srgb_to_linear(diffuseSample).rgb;
+    vec3 specularLight = srgb_to_linear(specularSample).rgb;
+#endif
+
+    vec3 diffuse = diffuseLight * materialInfo.diffuseColor;
+    vec3 specular = specularLight * (materialInfo.specularColor * brdf.x + brdf.y);
+
+    return diffuse + specular;
+}
+
+// Lambert lighting
+// see https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
+vec3 diffuse(MaterialInfo materialInfo)
+{
+    return materialInfo.diffuseColor / M_PI;
+}
+
+
+struct AngularInfo
+{
+    float NdotL;                  // cos angle between normal and light direction
+    float NdotV;                  // cos angle between normal and view direction
+    float NdotH;                  // cos angle between normal and half vector
+    float LdotH;                  // cos angle between light direction and half vector
+
+    float VdotH;                  // cos angle between view direction and half vector
+
+    vec3 padding;
+};
+
+AngularInfo getAngularInfo(vec3 pointToLight, vec3 normal, vec3 view)
+{
+    // Standard one-letter names
+    vec3 n = normalize(normal);           // Outward direction of surface point
+    vec3 v = normalize(view);             // Direction from surface point to view
+    vec3 l = normalize(pointToLight);     // Direction from surface point to light
+    vec3 h = normalize(l + v);            // Direction of the vector between l and v
+
+    float NdotL = clamp(dot(n, l), 0.0, 1.0);
+    float NdotV = clamp(dot(n, v), 0.0, 1.0);
+    float NdotH = clamp(dot(n, h), 0.0, 1.0);
+    float LdotH = clamp(dot(l, h), 0.0, 1.0);
+    float VdotH = clamp(dot(v, h), 0.0, 1.0);
+
+    return AngularInfo(
+        NdotL,
+        NdotV,
+        NdotH,
+        LdotH,
+        VdotH,
+        vec3(0, 0, 0)
+    );
+}
+
+// The following equation models the Fresnel reflectance term of the spec equation (aka F())
+// Implementation of fresnel from [4], Equation 15
+vec3 specularReflection(MaterialInfo materialInfo, AngularInfo angularInfo)
+{
+    return materialInfo.reflectance0 + (materialInfo.reflectance90 - materialInfo.reflectance0) * pow(clamp(1.0 - angularInfo.VdotH, 0.0, 1.0), 5.0);
+}
+
+// Smith Joint GGX
+// Note: Vis = G / (4 * NdotL * NdotV)
+// see Eric Heitz. 2014. Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs. Journal of Computer Graphics Techniques, 3
+// see Real-Time Rendering. Page 331 to 336.
+// see https://google.github.io/filament/Filament.md.html#materialsystem/specularbrdf/geometricshadowing(specularg)
+float visibilityOcclusion(MaterialInfo materialInfo, AngularInfo angularInfo)
+{
+    float NdotL = angularInfo.NdotL;
+    float NdotV = angularInfo.NdotV;
+    float alphaRoughnessSq = materialInfo.alphaRoughness * materialInfo.alphaRoughness;
+
+    float GGXV = NdotL * sqrt(NdotV * NdotV * (1.0 - alphaRoughnessSq) + alphaRoughnessSq);
+    float GGXL = NdotV * sqrt(NdotL * NdotL * (1.0 - alphaRoughnessSq) + alphaRoughnessSq);
+
+    float GGX = GGXV + GGXL;
+    if (GGX > 0.0)
+    {
+        return 0.5 / GGX;
+    }
+    return 0.0;
+}
+
+// The following equation(s) model the distribution of microfacet normals across the area being drawn (aka D())
+// Implementation from "Average Irregularity Representation of a Roughened Surface for Ray Reflection" by T. S. Trowbridge, and K. P. Reitz
+// Follows the distribution function recommended in the SIGGRAPH 2013 course notes from EPIC Games [1], Equation 3.
+float microfacetDistribution(MaterialInfo materialInfo, AngularInfo angularInfo)
+{
+    float alphaRoughnessSq = materialInfo.alphaRoughness * materialInfo.alphaRoughness;
+    float f = (angularInfo.NdotH * alphaRoughnessSq - angularInfo.NdotH) * angularInfo.NdotH + 1.0;
+    return alphaRoughnessSq / (M_PI * f * f);
+}
+
+vec3 getPointShade(vec3 pointToLight, MaterialInfo materialInfo, vec3 normal, vec3 view)
+{
+    AngularInfo angularInfo = getAngularInfo(pointToLight, normal, view);
+
+    if (angularInfo.NdotL > 0.0 || angularInfo.NdotV > 0.0)
+    {
+        // Calculate the shading terms for the microfacet specular shading model
+        vec3 F = specularReflection(materialInfo, angularInfo);
+        float Vis = visibilityOcclusion(materialInfo, angularInfo);
+        float D = microfacetDistribution(materialInfo, angularInfo);
+
+        // Calculation of analytical lighting contribution
+        vec3 diffuseContrib = (1.0 - F) * diffuse(materialInfo);
+        vec3 specContrib = F * Vis * D;
+
+        // Obtain final intensity as reflectance (BRDF) scaled by the energy of the light (cosine law)
+        return angularInfo.NdotL * (diffuseContrib + specContrib);
+    }
+
+    return vec3(0.0, 0.0, 0.0);
+}
+
+// https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_lights_punctual/README.md#range-property
+float getRangeAttenuation(float range, float distance)
+{
+    if (range <= 0.0)
+    {
+        // negative range means unlimited
+        return 1.0;
+    }
+    return max(min(1.0 - pow(distance / range, 4.0), 1.0), 0.0) / pow(distance, 2.0);
+}
+
+// https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_lights_punctual/README.md#inner-and-outer-cone-angles
+float getSpotAttenuation(vec3 pointToLight, vec3 spotDirection, float outerConeCos, float innerConeCos)
+{
+    float actualCos = dot(normalize(spotDirection), normalize(-pointToLight));
+    if (actualCos > outerConeCos)
+    {
+        if (actualCos < innerConeCos)
+        {
+            return smoothstep(outerConeCos, innerConeCos, actualCos);
+        }
+        return 1.0;
+    }
+    return 0.0;
+}
+
+vec3 applyDirectionalLight(LightSourceData light, uint lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+{
+    vec3 pointToLight = -light.direction.xyz;
+    vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
+    float shadowFactor = get_directional_light_shadow_factor(lightIndex);
+
+    // TODO
+    return 4.5 * light.color.rgb * shade *shadowFactor;
+}
+
+vec3 applyPointLight(LightSourceData light, uint lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+{
+    vec3 pointToLight = light.position.xyz - fs_in.vert_pos_ws.xyz;
+    float distance = length(pointToLight);
+    float attenuation = calc_light_falloff(distance,light.position.w);
+    attenuation = pow(attenuation,light.falloffExponent);
+    vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
+
+	float shadowFactor = min(
+		get_point_light_shadow_factor(lightIndex,false), // static sample
+		get_point_light_shadow_factor(lightIndex,true) // dynamic sample
+	);
+    return attenuation * light.color.a * light.color.rgb * shade *shadowFactor;
+}
+
+vec3 applySpotLight(LightSourceData light, uint lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+{
+    vec3 pointToLight = light.position.xyz - fs_in.vert_pos_ws.xyz;
+    float distance = length(pointToLight);
+    float rangeAttenuation = calc_light_falloff(distance,light.position.w);
+    rangeAttenuation = pow(rangeAttenuation,light.falloffExponent);
+    float spotAttenuation = getSpotAttenuation(pointToLight, light.direction.xyz, light.cutoffOuterCos, light.cutoffInnerCos);
+    vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
+
+	float shadowFactor = min(
+		get_spot_light_shadow_factor(lightIndex,false), // static sample
+		get_spot_light_shadow_factor(lightIndex,true) // dynamic sample
+	);
+    return rangeAttenuation * spotAttenuation * light.color.a * light.color.rgb * shade *shadowFactor;
+}
+
+// TODO: HAS_TANGENTS
+
+// Find the normal for this fragment, pulling either from a predefined normal map
+// or from the interpolated mesh normal and tangent attributes.
+vec3 getNormal()
+{
+    vec2 UV = fs_in.vert_uv;
+
+    // Retrieve the tangent space matrix
+#ifndef HAS_TANGENTS
+    vec3 pos_dx = dFdx(fs_in.vert_pos_ws.xyz);
+    vec3 pos_dy = dFdy(fs_in.vert_pos_ws.xyz);
+    vec3 tex_dx = dFdx(vec3(UV, 0.0));
+    vec3 tex_dy = dFdy(vec3(UV, 0.0));
+    vec3 t = (tex_dy.t * pos_dx - tex_dx.t * pos_dy) / (tex_dx.s * tex_dy.t - tex_dy.s * tex_dx.t);
+
+#ifdef HAS_NORMALS
+    vec3 ng = normalize(v_Normal);
+#else
+    vec3 ng = cross(pos_dx, pos_dy);
+#endif
+
+    t = normalize(t - ng * dot(ng, t));
+    vec3 b = normalize(cross(ng, t));
+    mat3 tbn = mat3(t, b, ng);
+#else // HAS_TANGENTS
+    mat3 tbn = v_TBN;
+#endif
+
+#ifdef HAS_NORMAL_MAP
+    vec3 n = texture2D(u_NormalSampler, UV).rgb;
+    n = normalize(tbn * ((2.0 * n - 1.0) * vec3(u_NormalScale, u_NormalScale, 1.0)));
+#else
+    // The tbn matrix is linearly interpolated, so we need to re-normalize
+    vec3 n = normalize(tbn[2].xyz);
+#endif
+
+    return n;
+}
+
+const vec4 u_DiffuseFactor = vec4(1.0); // TODO
+const float u_BaseColorFactor = 1.0; // TODO
+const float u_RoughnessFactor = 1.0; // TODO
+const float u_EmissiveFactor = 1.0; // TODO
+const float u_exposure = 1.0; // TODO
+const float u_OcclusionStrength = 1.0;
+vec3 calc_pbr_lighting_new(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
+{
+	if(is_unlit() == true)
+		return baseColor.rgb;
+    vec3 color = vec3(0.0, 0.0, 0.0);
+
+    vec3 normal = get_normal_from_map(uv);
+    normal = normalize((get_model_matrix() *vec4(normal.xyz,0.0)).xyz);
+
+    vec3 view = normalize(u_renderSettings.posCam - fs_in.vert_pos_ws.xyz);
+
+    bool useLightmaps = is_light_map_enabled();
+    if(useLightmaps)
+    {
+		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+		//baseColor.rgb *= colLightMap.rgb;
+		color = baseColor.rgb;
+	}
+	/*else */if(is_ibl_enabled())
+	    color += getIBLContribution(materialInfo, normal, view);
+
+    if(useLightmaps)
+    {
+		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+		color.rgb *= colLightMap.rgb;
+	}
+
+	ivec2 location = ivec2(gl_FragCoord.xy);
+	uint tileSize = get_tile_size();
+	ivec2 tileID = location /ivec2(tileSize,tileSize);
+	uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
+	uint offset = index *MAX_SCENE_LIGHTS;
+	for(uint i=0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
+	{
+		uint lightIndex = visibleLightTileIndicesBuffer.data[offset +i].index;
+		LightSourceData light = get_light_source(lightIndex);
+		if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+			continue;
+		float shadowFactor = 1.0;
+		if((light.flags &FLIGHT_TYPE_SPOT) != 0)
+			color += applySpotLight(light,lightIndex,materialInfo,normal,view);
+		else if((light.flags &FLIGHT_TYPE_POINT) != 0)
+			color += applyPointLight(light,lightIndex,materialInfo,normal,view);
+		else
+			color += applyDirectionalLight(light,lightIndex,materialInfo,normal,view);
+	}
+
+    // TODO
+	float ao = texture(u_aoMap,uv).r *0.7 +0.3;
+
+	// TODO
+	if(is_ssao_enabled() == true)
+		ao *= get_ssao_occlusion(); // TODO: Disable ssao if ao map exists?
+
+    // Apply optional PBR terms for additional (optional) shading
+    color = mix(color, color * ao, u_OcclusionStrength);
+
+	return color;
+}
+
+#define DEBUG_MODE_NONE 0
+#define DEBUG_MODE_AO 1
+#define DEBUG_MODE_ALBEDO 2
+#define DEBUG_MODE_METALNESS 3
+#define DEBUG_MODE_ROUGHNESS 4
+#define DEBUG_MODE_SPECULAR 5
+#define DEBUG_MODE_DIFFUSE 6
+#define DEBUG_MODE_NORMAL 7
+#define DEBUG_MODE_REFLECTANCE 8
+#define DEBUG_MODE_IBL_PREFILTER_MAP 9
+#define DEBUG_MODE_IBL_IRRADIANCE_MAP 10
+#define DEBUG_MODE_EMISSION_MAP 11
+
+#define DEBUG_MODE DEBUG_MODE_NONE
+
+void main()
+{
+	vec2 texCoords = apply_parallax(use_parallax_map(),fs_in.vert_uv);
+
+    // Metallic and Roughness material properties are packed together
+    // In glTF, these factors can be specified by fixed scalar values
+    // or from a metallic-roughness map
+    float perceptualRoughness = 0.0;
+    float metallic = 0.0;
+    vec4 baseColor = vec4(0.0, 0.0, 0.0, 1.0);
+    vec3 diffuseColor = vec3(0.0);
+    vec3 specularColor= vec3(0.0);
+    vec3 f0 = vec3(0.04);
+
+#if 0
+    baseColor = texture(u_albedoMap,texCoords);
+    if(u_srgb)
+    	baseColor = srgb_to_linear(baseColor);
+    baseColor *= u_DiffuseFactor;
+#endif
+	baseColor = u_DiffuseFactor;
+
+    // f0 = specular
+    specularColor = f0;
+    float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
+    diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
+
+    vec4 rSample = texture(u_roughnessMap,texCoords);
+    perceptualRoughness = rSample.r * u_RoughnessFactor;
+    vec4 mSample = texture(u_metalnessMap,texCoords);
+    metallic = mSample.r * u_material.metalnessFactor;
+
+    baseColor = texture(u_albedoMap,texCoords);
+    if(is_translucency_enabled() == false)
+    	baseColor.a = 1.0;
+
+	vec4 colorMod = get_instance_color();
+	baseColor.r *= colorMod.r;
+	baseColor.g *= colorMod.g;
+	baseColor.b *= colorMod.b;
+
+	if(fs_in.wrinkleDelta != 0.0)
+	{
+		if(fs_in.wrinkleDelta < 0.0)
+			baseColor.rgb = mix(baseColor.rgb,texture(u_wrinkleStretchMap,texCoords).rgb,abs(fs_in.wrinkleDelta));
+		else
+			baseColor.rgb = mix(baseColor.rgb,texture(u_wrinkleCompressMap,texCoords).rgb,fs_in.wrinkleDelta);
+	}
+
+    if(true)//is_diffuse_srgb()) // TODO
+    	baseColor = srgb_to_linear(baseColor);
+    baseColor *= u_DiffuseFactor;
+    diffuseColor = baseColor.rgb * (vec3(1.0) - f0) * (1.0 - metallic);
+    specularColor = mix(f0, baseColor.rgb, metallic);
+
+    perceptualRoughness = clamp(perceptualRoughness, 0.0, 1.0);
+    metallic = clamp(metallic, 0.0, 1.0);
+
+    // Roughness is authored as perceptual roughness; as is convention,
+    // convert to material roughness by squaring the perceptual roughness [2].
+    float alphaRoughness = perceptualRoughness * perceptualRoughness;
+
+    // Compute reflectance.
+    float reflectance = max(max(specularColor.r, specularColor.g), specularColor.b);
+
+    vec3 specularEnvironmentR0 = specularColor.rgb;
+    // Anything less than 2% is physically impossible and is instead considered to be shadowing. Compare to "Real-Time-Rendering" 4th editon on page 325.
+    vec3 specularEnvironmentR90 = vec3(clamp(reflectance * 50.0, 0.0, 1.0));
+
+    MaterialInfo materialInfo = MaterialInfo(
+        perceptualRoughness,
+        specularEnvironmentR0,
+        alphaRoughness,
+        diffuseColor,
+        specularEnvironmentR90,
+        specularColor
+    );
+
+	// Lighting
+	vec3 color = calc_pbr_lighting_new(texCoords,materialInfo,baseColor);
+
+	// regular shading
+	fs_color = vec4(color.rgb, baseColor.a); // TODO
+
+	if(use_glow_map())
+	{
+		vec4 emissiveColor = texture(u_glowMap,texCoords);
+    	if(true)//is_glow_srgb()) // TODO
+    		emissiveColor = srgb_to_linear(emissiveColor);
+		fs_color = add_glow_color(fs_color,texCoords,emissiveColor,baseColor);
+	}
+
+#if DEBUG_MODE == DEBUG_MODE_AO
+   float ao = texture(u_aoMap,texCoords).r;
+   fs_color = vec4(ao,ao,ao,1.0);
+#elif DEBUG_MODE == DEBUG_MODE_ALBEDO
+	fs_color = texture(u_albedoMap,texCoords);
+#elif DEBUG_MODE == DEBUG_MODE_METALNESS
+	fs_color = vec4(metallic,metallic,metallic,1.0);//texture(u_metalnessMap,texCoords);
+#elif DEBUG_MODE == DEBUG_MODE_ROUGHNESS
+	fs_color = texture(u_roughnessMap,texCoords);
+#elif DEBUG_MODE == DEBUG_MODE_SPECULAR
+	fs_color = vec4(specularColor,1.0);
+#elif DEBUG_MODE == DEBUG_MODE_DIFFUSE
+	fs_color = vec4(diffuseColor,1.0);
+#elif DEBUG_MODE == DEBUG_MODE_NORMAL
+	fs_color = vec4(get_normal_from_map(texCoords),1.0);//texture(u_normalMap,texCoords);
+#elif DEBUG_MODE == DEBUG_MODE_REFLECTANCE
+	fs_color = vec4(reflectance,reflectance,reflectance,1.0);
+#elif DEBUG_MODE == DEBUG_MODE_IBL_PREFILTER_MAP
+	fs_color = texture(u_prefilterMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam));
+#elif DEBUG_MODE == DEBUG_MODE_IBL_IRRADIANCE_MAP
+	fs_color = texture(u_irradianceMap,normalize(fs_in.vert_pos_ws.xyz -u_renderSettings.posCam));
+#elif DEBUG_MODE == DEBUG_MODE_EMISSION_MAP
+	fs_color = texture(u_glowMap,texCoords);
+#endif
+	fs_color = debug_get_csm_cascade_color(fs_color);
+	extract_bright_color(fs_color);
+}

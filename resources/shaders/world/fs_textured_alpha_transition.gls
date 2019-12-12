@@ -11,7 +11,7 @@
 #include "../modules/sh_csm.gls"
 #include "../modules/sh_parallaxmapping.gls"
 
-#define SHADER_UNIFORM_DIFFUSE2_MAP_BINDING (SHADER_UNIFORM_GLOW_MAP_BINDING +1)
+#define SHADER_UNIFORM_DIFFUSE2_MAP_BINDING (SHADER_UNIFORM_MATERIAL_BINDING +1)
 #define SHADER_UNIFORM_DIFFUSE3_MAP_BINDING (SHADER_UNIFORM_DIFFUSE2_MAP_BINDING +1)
 
 layout(set = SHADER_UNIFORM_DIFFUSE_MAP_SET,binding = SHADER_UNIFORM_DIFFUSE2_MAP_BINDING) uniform sampler2D u_diffuseMap2;
@@ -21,10 +21,10 @@ void main()
 {
 	vec2 texCoords = apply_parallax(use_parallax_map(),fs_in.vert_uv);
 	vec3 diffuse = get_processed_color(get_texture_color(u_diffuseMap,texCoords),texCoords).xyz;
-	if(u_material.alphaCount > 0)
+	if(u_pushConstants.alphaCount > 0)
 	{
 		vec3 diffuse2 = get_processed_color(get_texture_color(u_diffuseMap2,texCoords),texCoords).xyz;
-		if(u_material.alphaCount > 1)
+		if(u_pushConstants.alphaCount > 1)
 		{
 			vec3 diffuse3 = get_processed_color(get_texture_color(u_diffuseMap3,texCoords),texCoords).xyz;
 			diffuse = diffuse *(1.0 -(fs_disp_in.alpha.x +fs_disp_in.alpha.y)) +diffuse2 *fs_disp_in.alpha.x +diffuse3 *fs_disp_in.alpha.y;

@@ -1,7 +1,5 @@
 include("../shared.lua")
 
-ents.ProjectileComponent.EVENT_ON_PROJECTILE_IMPACT = ents.register_component_event("ON_PROJECTILE_IMPACT")
-ents.ProjectileComponent.EVENT_ON_PROJECTILE_HIT_DAMAGE = ents.register_component_event("ON_PROJECTILE_HIT_DAMAGE")
 function ents.ProjectileComponent:__init()
 	BaseEntityComponent.__init(self)
 	self.m_tRemove = 0

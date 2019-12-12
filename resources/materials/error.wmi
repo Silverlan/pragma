@@ -1,4 +1,5 @@
-"textured"
+"pbr"
 {
-	$texture diffusemap "error"
+	$texture albedo_map "error"
+	$texture roughness_map "pbr/rough"
 }

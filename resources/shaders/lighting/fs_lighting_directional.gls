@@ -6,61 +6,70 @@
 #include "fs_shadow.gls"
 #include "sh_light_sources.gls"
 
+float get_directional_light_shadow_factor(uint lightIdx)
+{
+	LightSourceData light = get_light_source(lightIdx);
+	vec4 shadowCoord = vec4(fs_in.vert_pos_ws.xyz,1.0);
+	float shadow = 1.0;
+	int layer = get_csm_cascade_index();
+	if(layer != -1 && light.shadowIndex != 0)
+	{
+		shadow = calculate_shadow(
+			layer,
+			shadowCoord,
+			0.0 // Bias is already applied in shader pipeline
+		);
+	}
+	return shadow;
+}
+
+float calc_directional_light_attenuation(uint lightIdx)
+{
+	LightSourceData light = get_light_source(lightIdx);
+	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *get_vertex_normal()); // Is this correct?
+
+	float lambertTerm = 1.0;
+#if LIGHTING_USE_INCIDENCE_ANGLE == 1
+	lambertTerm = max(dot(N,normalize(light.direction.xyz)),0.0);
+#endif
+	float attenuation = lambertTerm;
+	return attenuation *get_directional_light_shadow_factor(lightIdx);
+}
+
 vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragColor,vec3 specularColor,float cosTheta)
 {
 	LightSourceData light = get_light_source(lightIdx);
 	vec3 N = -normalize(transpose(inverse(mat3(get_model_matrix()))) *get_vertex_normal()); // Is this correct?
-#if LIGHTING_USE_INCIDENCE_ANGLE == 1
-	float lambertTerm = max(dot(N,normalize(light.direction.xyz)),0.0);
-#else
-	float lambertTerm = 1.0;
-#endif
-	if(lambertTerm > 0.0)
+
+	float attenuation = calc_directional_light_attenuation(lightIdx);
+	fragLightColor += fragColor *light.color.a *cosTheta *attenuation +specularColor;
+
+#if ENABLE_LIGHT_DEBUG == 1
+#if SHADOW_PCF_ENABLED == 0
+	vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
+	if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 	{
 		int layer = get_csm_cascade_index();
-		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
-#if ENABLE_LIGHT_DEBUG == 1
-
-#if SHADOW_PCF_ENABLED == 0
-		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+		vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
+		float shadow = 1.0;
+		if(layer != -1)
 		{
-			vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
-			float shadow = 1.0;
-			if(layer != -1)
-			{
-				shadowCoord.w = shadowCoord.z *0.5 +0.5;
-				shadowCoord.x = shadowCoord.x *0.5 +0.5;
-				shadowCoord.y = shadowCoord.y *0.5 +0.5;
-				shadow = texture(csmTextures[layer],vec2(shadowCoord.x,shadowCoord.y)).r;
-			}
-			fragLightColor += vec3(shadow,shadow,shadow);
+			shadowCoord.w = shadowCoord.z *0.5 +0.5;
+			shadowCoord.x = shadowCoord.x *0.5 +0.5;
+			shadowCoord.y = shadowCoord.y *0.5 +0.5;
+			shadow = texture(csmTextures[layer],vec2(shadowCoord.x,shadowCoord.y)).r;
 		}
-		else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
-		{
-			vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
-			float shadow = shadowCoord.z;
-			fragLightColor += vec3(shadow,shadow,shadow);
-		}
-		else
-#endif
-
-#endif
-		{
-			fragLightColor += fragColor *light.color.a *cosTheta *lambertTerm +specularColor;
-			float bias = 0.0; // Bias is already applied in shader pipeline
-			vec4 shadowCoord = lightVertPos;
-			float shadow = 1.0;
-			if(layer != -1 && light.shadowIndex != 0)
-			{
-				shadow = calculate_shadow(
-					layer,
-					shadowCoord,
-					bias
-				);
-			}
-			fragLightColor.rgb *= shadow;
-		}
+		fragLightColor += vec3(shadow,shadow,shadow);
 	}
+	else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+	{
+		vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
+		float shadow = shadowCoord.z;
+		fragLightColor += vec3(shadow,shadow,shadow);
+	}
+#endif
+
+#endif
 	return fragLightColor;
 }
 

@@ -1,0 +1,4 @@
+"pbr"
+{
+	$texture albedo_map "white_surface"
+}

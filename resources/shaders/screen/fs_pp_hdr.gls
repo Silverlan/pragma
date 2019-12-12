@@ -13,34 +13,22 @@ layout(push_constant) uniform RenderSettings {
 	float exposure;
 	float bloomScale;
 	float glowScale;
-	int toneMappingOnly;
+	uint toneMapping;
 } u_renderSettings;
 
 layout(location = 0) out vec4 fs_color;
 
-vec4 apply_tone_mapping(vec4 col)
-{
-	return vec4(vec3(1.0) -exp(-col.rgb *u_renderSettings.exposure),1.0);
-}
+#include "/modules/fs_tonemapping.gls"
 
 void main()
 {
 	vec4 col = texture(u_texture,vs_vert_uv);
-	if(u_renderSettings.toneMappingOnly == 1)
-	{
-		fs_color = apply_tone_mapping(col); // Note: This will be inversed in fxaa shader
-		//fs_color.rgb = sqrt(fs_color.rgb); // gamma 2.0 color output
-		fs_color.a = dot(fs_color.rgb,vec3(0.299,0.587,0.114)); // Compute luma (required for fxaa)
-	}
-	else
-	{
-		vec3 colBloom = texture(u_bloom,vs_vert_uv).rgb;
-		col.rgb += colBloom *u_renderSettings.bloomScale;
+	vec3 colBloom = texture(u_bloom,vs_vert_uv).rgb;
+	col.rgb += colBloom *u_renderSettings.bloomScale;
 
-		vec3 colGlow = texture(u_glow,vs_vert_uv).rgb;
-		col.rgb += colGlow *u_renderSettings.glowScale;
-
-		// Apply HDR Exposure
-		fs_color = apply_tone_mapping(col); // Note: This will be inversed in fxaa shader
-	}
+	vec3 colGlow = texture(u_glow,vs_vert_uv).rgb;
+	col.rgb += colGlow *u_renderSettings.glowScale;
+	
+	fs_color = vec4(apply_tone_mapping(col.rgb,u_renderSettings.toneMapping,u_renderSettings.exposure),col.a);
+	fs_color.a = dot(fs_color.rgb,vec3(0.299,0.587,0.114)); // Compute luma (required for fxaa)
 }

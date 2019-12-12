@@ -42,7 +42,7 @@ vec4 get_processed_color(vec4 texCol,vec2 texCoords)
 		vec4 colorMod = get_color_modifier();
 		colProcessed.rgb = calculate_lighting(diffuseColor,texCoords,get_model_matrix(),get_vertex_position_ws(),fs_in.vert_normal);
 #if USE_GLOW_MAP == 1
-		colProcessed = add_glow_map_color(colProcessed,texCoords);
+		colProcessed = add_glow_map_color(colProcessed,texCoords,colProcessed);
 #endif
 		colProcessed.r *= colorMod.r;
 		colProcessed.g *= colorMod.g;
@@ -58,7 +58,7 @@ vec4 get_processed_color(vec4 texCol,vec2 texCoords)
 	{
 		colProcessed.rgb = diffuseColor.rgb;
 #if USE_GLOW_MAP == 1
-		colProcessed = add_glow_map_color(colProcessed,texCoords);
+		colProcessed = add_glow_map_color(colProcessed,texCoords,colProcessed);
 #endif
 		colProcessed.a = texCol.a;
 	}

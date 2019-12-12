@@ -1,7 +1,7 @@
 #ifndef F_FS_MATERIAL_GLS
 #define F_FS_MATERIAL_GLS
 
-#include "sh_mapping.gls"
+#include "sh_material.gls"
 
 vec4 get_texture_color(sampler2D tex,vec2 uv)
 {

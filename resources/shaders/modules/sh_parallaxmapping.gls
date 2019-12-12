@@ -5,6 +5,7 @@
 #include "sh_tangentspace.gls"
 #include "sh_vertex_data.gls"
 #include "sh_instance_info.gls"
+#include "sh_camera_info.gls"
 
 //uniform bool u_useParallaxMap; // Defined in push constants
 #ifdef GLS_FRAGMENT_SHADER

@@ -45,7 +45,7 @@ function gui.WIFileExplorer:OnInitialize()
 	local t = gui.create("WITable",self)
 	t:SetAutoAlignToParent(true)
 	t:SetScrollable(true)
-	t:SetSelectable(true)
+	t:SetSelectableMode(gui.Table.SELECTABLE_MODE_SINGLE)
 	t:SetRowHeight(20)
 	local row = t:AddHeaderRow()
 	row:SetValue(0,locale.get_text("name"))
@@ -54,7 +54,6 @@ function gui.WIFileExplorer:OnInitialize()
 	self.m_pFileList = t
 
 	self:SetPath("/")
-	self:Update()
 end
 function gui.WIFileExplorer:GetSelectedFile()
 	local path = self:GetAbsolutePath()

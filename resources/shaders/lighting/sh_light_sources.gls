@@ -16,7 +16,7 @@ layout(std430,set = SHADER_UNIFORM_LIGHT_SOURCES_SET,binding = SHADER_UNIFORM_LI
 	LightSourceData data[];
 } lightBuffer;
 
-LightSourceData get_light_source(int i)
+LightSourceData get_light_source(uint i)
 {
 	return lightBuffer.data[i];
 }
@@ -39,6 +39,31 @@ float calc_light_falloff(in float distance,in float radius)
 	falloff = pow2(clamp(1.0 -fDistOverRadius,0.0,1.0));
 	falloff /= pow2(units_to_meters(distance)) +1.0;
 	return falloff;
+}
+
+float calc_physical_light_falloff(in float distance)
+{
+	return 1.0 /pow2(units_to_meters(distance));
+}
+
+float calc_solid_angle(float apexAngleCos)
+{
+	return 2 *M_PI *(1.0 -apexAngleCos);
+}
+
+float candela_to_lumens(float candela,float apexAngleCos)
+{
+	return candela *calc_solid_angle(apexAngleCos);
+}
+
+float lumens_to_candela(float lumens,float apexAngleCos)
+{
+	return lumens /calc_solid_angle(apexAngleCos);
+}
+
+float lux_to_candela(float lux,float distance)
+{
+	return lux *pow2(distance);
 }
 
 #endif

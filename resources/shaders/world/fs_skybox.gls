@@ -18,7 +18,8 @@ void main()
 {
 	vec3 camOffset = (inverse(get_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
 	vec3 pos = fs_in.vert_pos_ws -camOffset;
-	fs_color = texture(u_skyboxTexture,pos).rgba;
+	fs_color = textureLod(u_skyboxTexture, pos, 0).rgba; 
 	fs_color *= get_instance_color();
+
 	extract_bright_color(fs_color);
 }

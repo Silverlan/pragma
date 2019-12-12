@@ -10,23 +10,25 @@ void export_light_fragment_data(vec4 vertPosWs
 #endif
 )
 {
+	// Obsolete?
+#if 0
 #if USE_NORMAL_MAP == 1
-	/*vec3 tangent = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
+	vec3 tangent = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
 	vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
-	mat3 MV3 = mat3(MV);
+	mat3 MV3 = mat3(get_view_matrix() *mdlMatrix);
 	mat3 TBN = transpose(mat3( // Required for normal mapping
 		MV3 *tangent,
 		MV3 *bitangent,
 		MV3 *normal
-	));*/
-	vec3 tangent = normalize((mBone *vec4(-in_vert_tangent.xyz,0.0)).xyz);
+	));
+	/*vec3 tangent = normalize((mBone *vec4(-in_vert_tangent.xyz,0.0)).xyz);
 	vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent.xyz,0.0)).xyz);
 	mat3 V = mat3(get_view_matrix());
 	mat3 TBN = transpose(V *mat3(
 		normalize((mdlMatrix *vec4(tangent,0.0)).xyz),
 		normalize((mdlMatrix *vec4(bitangent,0.0)).xyz),
 		normalize((mdlMatrix *vec4(normal,0.0)).xyz)
-	));
+	));*/
 	vs_out.TBN = TBN;
 #else
 	vs_out.TBN = mat4(1.0);
@@ -70,6 +72,7 @@ void export_light_fragment_data(vec4 vertPosWs
 #endif
 		}
 	}*/
+#endif
 }
 
 #endif

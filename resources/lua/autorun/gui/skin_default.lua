@@ -41,6 +41,7 @@ t.MENU_ITEM_FONT_FILE = "vera/VeraBd.ttf"
 
 -- WIProgressMenu
 t.PROGRESS_BAR_LABEL_OVERLAY_COLOR = Color(0,0,0,255)
+t.PROGRESS_BAR_LABEL_BACKGROUND_COLOR = Color.White
 
 -------------------------------------------
 ------------- END OF SETTINGS -------------
@@ -462,6 +463,11 @@ skin["wiprogressbar"] = {
 		["progressbar_label_overlay"] = {
 			Initialize = function(GUI,pElement)
 				pElement:SetColorRGB(GUI.PROGRESS_BAR_LABEL_OVERLAY_COLOR)
+			end
+		},
+		["progressbar_label_background"] = {
+			Initialize = function(GUI,pElement)
+				pElement:SetColorRGB(GUI.PROGRESS_BAR_LABEL_BACKGROUND_COLOR)
 			end
 		}
 	},

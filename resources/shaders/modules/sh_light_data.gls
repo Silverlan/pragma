@@ -15,7 +15,7 @@
 #endif
 
 #ifdef GLS_FRAGMENT_SHADER
-vec3 get_light_direction_cs(int i)
+vec3 get_light_direction_cs(uint i)
 {
 	LightSourceData light = get_light_source(i);
 	if((light.flags &FLIGHT_TYPE_DIRECTIONAL) != 0)
@@ -29,7 +29,7 @@ vec3 get_light_direction_cs(int i)
 	return (vm *vec4(light.position.xyz -fs_in.vert_pos_ws.xyz,1.0)).xyz;
 }
 
-vec4 get_light_vertex_position(int i)
+vec4 get_light_vertex_position(uint i)
 {
 	LightSourceData light = get_light_source(i);
 	ShadowData shadow = shadowBuffer.data[light.shadowIndex -1];
@@ -41,7 +41,7 @@ vec4 get_light_vertex_position(int i)
 #endif
 
 #if USE_LIGHT_DIR_TS == 1
-vec3 get_light_direction_ts(int i) {return fs_in.TBN *get_light_direction_cs(i);}
+vec3 get_light_direction_ts(uint i) {return fs_in.TBN *get_light_direction_cs(i);}
 #endif
 
 #endif

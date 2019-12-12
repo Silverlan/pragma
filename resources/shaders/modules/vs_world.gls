@@ -7,7 +7,7 @@
 #include "sh_normalmapping.gls"
 #include "sh_parallaxmapping.gls"
 #include "sh_vertex_data.gls"
-#include "sh_mapping.gls"
+#include "sh_material.gls"
 
 #include "../functions/sh_vector_to_depth.gls"
 #include "../lighting/sh_lighting.gls"
@@ -26,16 +26,20 @@ layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
 
 void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 {
-	uint vertexAnimOffset = (u_material.vertexAnimInfo<<16)>>16;
-	uint vertexAnimCount = u_material.vertexAnimInfo>>16;
+	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
+	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
+	float wrinkleDelta = 0.0;
 	for(uint i=0;i<vertexAnimCount;++i)
 	{
 		uint offset = vertexAnimOffset +i;
 		VertexAnimationFrameData frameData = vaFrameData.data[offset];
-		vec3 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex].xyz;
-		vec3 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex].xyz;
-		vertPos += v0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+		vec4 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex];
+		vec4 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex];
+		wrinkleDelta += v0.w *frameData.blend;
+		vertPos += v0.xyz *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
 	}
+
+	vs_out.wrinkleDelta = wrinkleDelta;
 
 	mat4 MV = u_camera.V *mdlMatrix;
 	mat4 MVP = u_camera.P *MV;
@@ -49,11 +53,11 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 
-	float lenSqrClipPlane = length_sqr(u_material.clipPlane);
+	float lenSqrClipPlane = length_sqr(u_pushConstants.clipPlane);
 	if(lenSqrClipPlane > 0.0)
 	{
 		float lenClipPlane = sqrt(lenSqrClipPlane);
-		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),vec4(u_material.clipPlane /lenClipPlane,lenClipPlane));
+		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),vec4(u_pushConstants.clipPlane /lenClipPlane,lenClipPlane));
 	}
 	else
 		gl_ClipDistance[0] = 1.0;
@@ -67,10 +71,10 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	
 	vs_out.vert_uv = in_vert_uv.xy;
 
-#if ENABLE_TANGENT_SPACE_NORMALS == 1
-	vs_out.vert_tangent = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
-	vs_out.vert_bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
-#endif
+   vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
+   vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+   vec3 N = normal;
+   vs_out.TBN = mat3(T,B,N);
 
 #if ENABLE_LIGHTMAP == 1
 	if(is_light_map_enabled())

@@ -5,28 +5,10 @@
 #include "../lighting/sh_lighting.gls"
 #include "sh_vertex_data_locations.gls"
 
-#ifndef USE_TANGENT_SPACE
-	#define USE_TANGENT_SPACE 1
-#endif
-
-#if USE_TANGENT_SPACE == 1
-#if ENABLE_TANGENT_SPACE_NORMALS == 1
-	struct TangentVertexData
-	{
-		//vec3 cam_dir_to_vert_ts; // Normalized direction from camera to vertex in tangent space
-
-		vec3 vert_tangent;
-		vec3 vert_bitangent;
-	};
-#endif
-#endif
-
 struct VertexData
 {
 	mat3 TBN;
 	vec3 vert_pos_ws; // Vertex Position in world space
-	//vec3 vert_pos_cs; // Vertex Position in camera space
-	//vec4 vert_pos_ls[MAX_LIGHTS]; // Arrays in structs appear to be problematic, moved to 'LightData' (See sh_light_data.gls)
 
 	vec3 vert_normal; // Vertex Normal
 	vec3 vert_normal_cs; // Vertex Normal in camera space
@@ -34,11 +16,7 @@ struct VertexData
 	vec2 vert_uv; // Texture coordinates
 	vec2 vert_uv_lightmap; // Texture coordinates for light map atlas
 
-#if USE_TANGENT_SPACE == 1
-#if ENABLE_TANGENT_SPACE_NORMALS == 1
-	TangentVertexData tangentData;
-#endif
-#endif
+	float wrinkleDelta;
 };
 layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
 #ifdef GLS_FRAGMENT_SHADER

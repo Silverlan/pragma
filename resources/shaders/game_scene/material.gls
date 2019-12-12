@@ -9,9 +9,10 @@ struct MaterialInfo
 	uint metallicTextureArrayIndex;
 	uint roughnessTextureArrayIndex;
 
+	uint specularTextureArrayIndex;
+
 	uint placeholder0;
 	uint placeholder1;
-	uint placeholder2;
 };
 
 #endif

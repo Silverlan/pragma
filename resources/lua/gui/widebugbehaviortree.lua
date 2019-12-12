@@ -31,6 +31,8 @@ function gui.WIDebugBehaviorTree:OnInitialize()
 	pHighlight:SetRoundness(2)
 	pHighlight:Update()
 	self.m_pHighlight = pHighlight
+
+	self:EnableThinking()
 end
 function gui.WIDebugBehaviorTree:OnThink()
   self:FocusStep()

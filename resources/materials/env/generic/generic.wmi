@@ -1,0 +1,6 @@
+"ibl"
+{
+	$texture prefilter "test_ibl/prefilter"
+	$texture brdf "env/brdf"
+	$texture irradiance "test_ibl/irradiance"
+}

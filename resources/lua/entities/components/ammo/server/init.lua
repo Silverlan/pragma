@@ -1,6 +1,5 @@
 include("../shared.lua")
 
-ents.AmmoComponent.EVENT_ON_PICKED_UP = ents.register_component_event("AMMO_ON_PICKED_UP")
 function ents.AmmoComponent:OnUse(ent)
 	if(self.m_bPickedUp == true) then return end
 	local charComponent = ent:GetComponent(ents.COMPONENT_CHARACTER)

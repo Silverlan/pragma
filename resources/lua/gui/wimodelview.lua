@@ -102,6 +102,7 @@ function gui.WIModelView:UpdateSceneLights()
 end
 function gui.WIModelView:OnInitialize()
 	gui.Base.OnInitialize(self)
+	self:EnableThinking()
 	self.m_shaderShaded = shader.get("mde_textured")
 
 	self.m_lightSources = {}

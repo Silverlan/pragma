@@ -11,6 +11,7 @@
 	$string footsteps "fx.fst_rock"
 	$string impact_soft "fx.phys_impact_rock_soft"
 	$string impact_hard "fx.phys_impact_rock_soft"
+	$int navigation_flags "NAV_FLAG_WALK + NAV_FLAG_SWIM"
 
 	audio
 	{
@@ -70,6 +71,7 @@
 	$float friction 0.8
 	$float restitution 0.53
 	$string footsteps "fx.fst_concrete"
+	$string surface_type "tarmac"
 
 	audio
 	{
@@ -278,4 +280,8 @@
 		$float mid_frequency_transmission 0.0
 		$float high_frequency_transmission 0.0
 	}
+}
+
+"flesh"
+{
 }

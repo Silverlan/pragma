@@ -42,11 +42,7 @@ bool is_fragment_in_shadow() // Only for spot-lights for the time being
 		vec4 depthCoord = get_light_vertex_position(int(lightIndex));
 		depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
 		depthCoord = depthCoord /light.position.w;
-		float shadow = (light.shadowMapIndex > 0) ? calculate_shadow(
-			shadowMaps[light.shadowMapIndex -1],
-					depthCoord,
-					0.0 /* bias is 0, since it's already been applied in the shader pipeline */
-		) : 1.0;
+		float shadow = min(get_spot_light_shadow_sample(lightIndex,false),get_spot_light_shadow_sample(lightIndex,true));
 		if(shadow != 1.0)
 			return true;
 	}

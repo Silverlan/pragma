@@ -13,17 +13,25 @@ layout(push_constant) uniform PushConstants {
 	mat4 modelMatrix;
 	vec4 color;
 	int alphaOnly;
+	float lod;
 } u_pushConstants;
 
 layout(location = 0) out vec4 fs_color;
+
+vec4 get_texture_color(vec2 uv)
+{
+	if(u_pushConstants.lod < 0.0)
+		return texture(u_texture,uv);
+	return textureLod(u_texture,uv,u_pushConstants.lod);
+}
 
 void main()
 {
 	if(u_pushConstants.alphaOnly == 1)
 	{
 		fs_color = u_pushConstants.color;
-		fs_color.a *= texture(u_texture,vs_vert_uv).r;
+		fs_color.a *= get_texture_color(vs_vert_uv).r;
 	}
 	else
-		fs_color = texture(u_texture,vs_vert_uv).rgba *u_pushConstants.color;
+		fs_color = get_texture_color(vs_vert_uv).rgba *u_pushConstants.color;
 }

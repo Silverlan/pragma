@@ -2,8 +2,8 @@ include("/gui/wifileexplorer.lua")
 
 util.register_class("gui.WIFileDialog",gui.Base)
 
-FILE_DIALOG_TYPE_OPEN = 0
-FILE_DIALOG_TYPE_SAVE = 1
+gui.WIFileDialog.TYPE_OPEN = 0
+gui.WIFileDialog.TYPE_SAVE = 1
 
 function gui.WIFileDialog:__init()
 	gui.Base.__init(self)
@@ -97,7 +97,7 @@ function gui.WIFileDialog:OnInitialize()
 
 	pFrame:SetPos(sz.x *0.5 -pFrame:GetWidth() *0.5,sz.y *0.5 -pFrame:GetHeight() *0.5)
 
-	self:SetType(FILE_DIALOG_TYPE_OPEN)
+	self:SetType(gui.WIFileDialog.TYPE_OPEN)
 end
 
 function gui.WIFileDialog:IsInRootDirectory() if(util.is_valid(self.m_pFileList) == true) then return self.m_pFileList:IsInRootDirectory() else return false end end
@@ -122,7 +122,7 @@ function gui.WIFileDialog:GetFilePath()
 end
 function gui.WIFileDialog:SetType(type)
 	self.m_type = type
-	if(type == FILE_DIALOG_TYPE_OPEN) then
+	if(type == gui.WIFileDialog.TYPE_OPEN) then
 		if(util.is_valid(self.m_pButtonOpen) == true) then
 			self.m_pButtonOpen:SetText(locale.get_text("open"))
 		end
@@ -176,8 +176,8 @@ gui.create_file_open_dialog = function(fcOnFileSelected)
 	gui.close_dialog()
 
 	pDialog = gui.create("WIFileDialog")
-	pDialog:SetType(FILE_DIALOG_TYPE_OPEN)
-	pDialog:Update()
+	-- pDialog:SetZPos(10000)
+	pDialog:SetType(gui.WIFileDialog.TYPE_OPEN)
 	if(fcOnFileSelected ~= nil) then pDialog:AddCallback("OnFileSelected",fcOnFileSelected) end
 	return pDialog
 end
@@ -185,8 +185,8 @@ gui.create_file_save_dialog = function(fcOnFileSelected)
 	gui.close_dialog()
 
 	pDialog = gui.create("WIFileDialog")
-	pDialog:SetType(FILE_DIALOG_TYPE_SAVE)
-	pDialog:Update()
+	-- pDialog:SetZPos(10000)
+	pDialog:SetType(gui.WIFileDialog.TYPE_SAVE)
 	if(fcOnFileSelected ~= nil) then pDialog:AddCallback("OnFileSelected",fcOnFileSelected) end
 	return pDialog
 end

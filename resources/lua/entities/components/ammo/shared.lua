@@ -28,3 +28,5 @@ function ents.AmmoComponent:GetAmmoType() return self.m_ammoType end
 function ents.AmmoComponent:SetPickupAmount(am) self.m_pickupAmount = am end
 function ents.AmmoComponent:GetPickupAmount() return self.m_pickupAmount end
 ents.COMPONENT_AMMO = ents.register_component("ammo",ents.AmmoComponent)
+
+ents.AmmoComponent.EVENT_ON_PICKED_UP = ents.register_component_event(ents.COMPONENT_AMMO,"on_picked_up")

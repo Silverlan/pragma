@@ -42,8 +42,8 @@ vec3 intersect_ray_triangle(vec3 origin,vec3 dir,vec3 v0,vec3 v1,vec3 v2)
     vec3  n = cross(v1v0,v2v0);
 
     // Back-face culling
-	if (dot(dir,normalize(n)) > 0)
-		return vec3(-1,0,0);
+	//if (dot(dir,normalize(n)) > 0)
+	//	return vec3(-1,0,0);
 
     vec3  q = cross(rov0,dir);
     float d = 1.0/dot(dir,n);

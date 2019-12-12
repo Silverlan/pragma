@@ -45,6 +45,4 @@ void main()
 		0.0, /* unused */
 		vec4(0,0,0,0) /* unused */
 	);
-	// inverse tone mapping
-	fs_color = vec4(-log(vec3(1.0) -fs_color.rgb),1.0);
 }

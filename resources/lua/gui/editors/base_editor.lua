@@ -23,11 +23,14 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_pMain = pMain
 
 	self.m_menuBar = gui.create("WIMenuBar",self)
-	self.m_menuBar:SetHeight(20)
 	self.m_menuBar:AddCallback("OnClose",function(pMenuBar)
 		if(util.is_valid(self)) then return end
 		self:Close()
 	end)
+
+	self:SetSize(1024,768)
+	self.m_menuBar:SetSize(self:GetWidth(),20)
+	self.m_menuBar:SetAnchor(0,0,1,0)
 end
 
 function gui.WIBaseEditor:GetMenuBar() return self.m_menuBar end
@@ -42,14 +45,9 @@ function gui.WIBaseEditor:CreateWindow(class)
 	p:SetFrame(pFrame)
 	return p
 end
-function gui.WIBaseEditor:OnSizeChanged(w,h)
-	if(util.is_valid(self.m_menuBar) == true) then
-		self.m_menuBar:SetWidth(w)
-	end
-end
 
 function gui.WIBaseEditor:Close()
-	self:SetVisible(false)
+	self:Remove()
 end
 function gui.WIBaseEditor:Open()
 

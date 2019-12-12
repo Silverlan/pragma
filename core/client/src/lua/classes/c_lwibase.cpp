@@ -340,6 +340,58 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	}));
 	classDef.def("GetAnchor",&GetAnchor);
 	classDef.def("HasAnchor",&HasAnchor);
+	classDef.def("GetCenter",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::Push<Vector2>(l,hPanel->GetCenter());
+	}));
+	classDef.def("GetCenterX",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushNumber(l,hPanel->GetCenterX());
+	}));
+	classDef.def("GetCenterY",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushNumber(l,hPanel->GetCenterY());
+	}));
+	classDef.def("GetHalfWidth",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushNumber(l,hPanel->GetHalfWidth());
+	}));
+	classDef.def("GetHalfHeight",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushNumber(l,hPanel->GetHalfHeight());
+	}));
+	classDef.def("GetHalfSize",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::Push<Vector2>(l,hPanel->GetHalfSize());
+	}));
+	classDef.def("SetCenterPos",static_cast<void(*)(lua_State*,WIHandle&,const Vector2i&)>([](lua_State *l,WIHandle &hPanel,const Vector2i &pos) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetCenterPos(pos);
+	}));
+	classDef.def("CenterToParent",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->CenterToParent();
+	}));
+	classDef.def("CenterToParent",static_cast<void(*)(lua_State*,WIHandle&,bool)>([](lua_State *l,WIHandle &hPanel,bool applyAnchor) {
+		lua_checkgui(l,hPanel);
+		hPanel->CenterToParent(applyAnchor);
+	}));
+	classDef.def("CenterToParentX",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->CenterToParentX();
+	}));
+	classDef.def("CenterToParentY",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->CenterToParentY();
+	}));
+	classDef.def("RemoveStyleClass",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>([](lua_State *l,WIHandle &hPanel,const std::string &className) {
+		lua_checkgui(l,hPanel);
+		hPanel->RemoveStyleClass(className);
+	}));
+	classDef.def("ClearStyleClasses",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->ClearStyleClasses();
+	}));
 
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&,bool)>(&Draw));
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,bool)>(&Draw));

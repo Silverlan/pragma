@@ -176,7 +176,11 @@ void WITreeListElement::SetTextElement(WIText *pText)
 {
 	(pText != nullptr) ? m_hText = pText->GetHandle() : WIHandle{};
 	if(pText)
+	{
+		pText->SetName("text");
+		pText->AddStyleClass("tree_list_element_text");
 		pText->GetColorProperty()->Link(*GetColorProperty());
+	}
 }
 WIText *WITreeListElement::GetTextElement() const {return m_hText.IsValid() ? static_cast<WIText*>(m_hText.get()) : nullptr;}
 WITreeListElement *WITreeListElement::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)

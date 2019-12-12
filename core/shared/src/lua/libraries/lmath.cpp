@@ -142,9 +142,20 @@ int Lua::math::get_previous_power_of_2(lua_State *l)
 	return 1;
 }
 
+static float round_by_multiple(float f,float multiple)
+{
+	return ::umath::round(f /multiple) *multiple;
+}
+
 int Lua::math::round(lua_State *l)
 {
 	float f = Lua::CheckNumber<float>(l,1);
+	if(Lua::IsSet(l,2))
+	{
+		auto multiple = Lua::CheckNumber(l,2);
+		Lua::PushNumber(l,round_by_multiple(f,multiple));
+		return 1;
+	}
 	int i = umath::round(f);
 	Lua::PushInt(l,i);
 	return 1;

@@ -150,6 +150,7 @@ search_lib_recursive_ext(DEPENDENCY_MATHUTIL_LIBRARY mathutil)
 set(DEPENDENCY_SHAREDUTILS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/sharedutils/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_SHAREDUTILS_LIBRARY sharedutils)
 search_lib_recursive(DEPENDENCY_SHAREDUTILS_LIBRARY_STATIC external_libs/sharedutils-static/${BINARY_PRAGMA_DIR} sharedutils-static STATIC)
+search_lib_recursive(DEPENDENCY_SHAREDUTILS_STATIC_LIBRARY external_libs/sharedutils-static/${BINARY_PRAGMA_DIR} sharedutils-static STATIC)
 
 set(DEPENDENCY_NETWORKMANAGER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/networkmanager/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_NETWORKMANAGER_LIBRARY external_libs/networkmanager/${BINARY_PRAGMA_DIR} networkmanager STATIC)
@@ -229,6 +230,7 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
 
 set(DEPENDENCY_WGUI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/wgui/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_WGUI_LIBRARY wgui)
+set(WGUI_INCLUDE_DEPENDENCIES OFF CACHE BOOL FORCE "Include dependencies required to build the wgui library?")
 
 set(DEPENDENCY_SERVER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/server/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_SERVER_LIBRARY core/server/${BINARY_PRAGMA_DIR} server)

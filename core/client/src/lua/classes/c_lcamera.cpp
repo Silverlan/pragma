@@ -9,6 +9,9 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <prosper_command_buffer.hpp>
@@ -258,3 +261,52 @@ void Lua::RasterizationRenderer::SetShaderOverride(lua_State *l,pragma::renderin
 void Lua::RasterizationRenderer::ClearShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName) {renderer.ClearShaderOverride(srcName);}
 void Lua::RasterizationRenderer::SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode) {renderer.SetPrepassMode(static_cast<pragma::rendering::RasterizationRenderer::PrepassMode>(mode));}
 void Lua::RasterizationRenderer::GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {Lua::PushInt(l,umath::to_integral(renderer.GetPrepassMode()));}
+
+void Lua::RasterizationRenderer::ScheduleMeshForRendering(
+	lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,pragma::ShaderTextured3DBase &shader,Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh
+)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto *meshData = renderer.GetRenderInfo(static_cast<RenderMode>(renderMode));
+	if(meshData == nullptr)
+		return;
+	auto itShader = std::find_if(meshData->containers.begin(),meshData->containers.end(),[&shader](const std::unique_ptr<ShaderMeshContainer> &c) -> bool {
+		return c->shader.get() == &shader;
+		});
+	if(itShader == meshData->containers.end())
+	{
+		meshData->containers.emplace_back(std::make_unique<ShaderMeshContainer>(&shader));
+		itShader = meshData->containers.end() -1;
+		(*itShader)->shader = shader.GetHandle();
+	}
+
+	auto &shaderC = **itShader;
+	auto itMat = std::find_if(shaderC.containers.begin(),shaderC.containers.end(),[&mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &c) {
+		return c->material == &mat;
+		});
+	if(itMat == shaderC.containers.end())
+	{
+		shaderC.containers.emplace_back(std::make_unique<RenderSystem::MaterialMeshContainer>(&mat));
+		itMat = shaderC.containers.end() -1;
+	}
+
+	auto &matC = **itMat;
+	auto *ent = static_cast<CBaseEntity*>(hEnt.get());
+	auto itEnt = matC.containers.find(ent);
+	if(itEnt == matC.containers.end())
+		itEnt = matC.containers.insert(std::make_pair(ent,EntityMeshInfo{ent})).first;
+
+	auto &entC = itEnt->second;
+	entC.meshes.push_back(&static_cast<CModelSubMesh&>(mesh));
+}
+void Lua::RasterizationRenderer::ScheduleMeshForRendering(
+	lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,const std::string &shaderName,Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh
+)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto hShader = c_engine->GetShader(shaderName);
+	auto *shader = hShader.valid() ? dynamic_cast<pragma::ShaderTextured3DBase*>(hShader.get()) : nullptr;
+	if(shader == nullptr)
+		return;
+	ScheduleMeshForRendering(l,renderer,renderMode,*shader,mat,hEnt,mesh);
+}

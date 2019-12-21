@@ -131,7 +131,7 @@ function(def_project PROJ_NAME PROJ_TYPE)
 	endif()
 	def_vs_filters("${SRC_FILES}")
 
-	set(CONFIG_ENABLE_BULLET_PROFILING "0" CACHE BOOL "Enable profiling for bullet physics.")
+	option(CONFIG_ENABLE_BULLET_PROFILING "Enable profiling for bullet physics." OFF)
 	if(CONFIG_ENABLE_BULLET_PROFILING)
 		target_compile_definitions(${PROJ_NAME} PUBLIC BT_ENABLE_PROFILE)
 	endif()

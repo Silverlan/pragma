@@ -12,13 +12,13 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <unordered_set>
 
-namespace pragma {class Shader; class ShaderTextured3D; class OcclusionCullingHandler; struct OcclusionMeshInfo;};
+namespace pragma {class Shader; class ShaderTextured3DBase; class OcclusionCullingHandler; struct OcclusionMeshInfo;};
 namespace prosper {class BlurSet; class RenderPass; class Fence; class DescriptorSet;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT ShaderMeshContainer
 {
-	ShaderMeshContainer(pragma::ShaderTextured3D *shader);
+	ShaderMeshContainer(pragma::ShaderTextured3DBase *shader);
 	ShaderMeshContainer(ShaderMeshContainer&)=delete;
 	ShaderMeshContainer &operator=(const ShaderMeshContainer &other)=delete;
 	::util::WeakHandle<prosper::Shader> shader = {};

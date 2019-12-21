@@ -28,6 +28,10 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
@@ -46,6 +50,11 @@ namespace pragma
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CSM;
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+
+		enum class VertexBinding : uint32_t
+		{
+			LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count)
+		};
 
 		enum class MaterialBinding : uint32_t
 		{
@@ -101,13 +110,14 @@ namespace pragma
 #pragma pack(push,1)
 		enum class RenderFlags : uint32_t
 		{
-			None = 0,
-			LightmapsEnabled = 1,
+			None = 0u,
+			LightmapsEnabled = 1u,
 
 			// PBR only
-			NoIBL = LightmapsEnabled<<1,
+			NoIBL = LightmapsEnabled<<1u,
 
-			TranslucencyEnabled = NoIBL<<1
+			TranslucencyEnabled = NoIBL<<1u,
+			UseExtendedVertexWeights = TranslucencyEnabled<<1u
 		};
 
 		struct PushConstants
@@ -115,6 +125,7 @@ namespace pragma
 			Vector3 clipPlane;
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
+			std::array<float,3> padding; // Padding to vec4
 		};
 
 		struct MaterialData

@@ -43,7 +43,8 @@ public:
 	std::vector<Vertex> &GetVertices();
 	std::vector<Vector2> &GetAlphas();
 	std::vector<uint16_t> &GetTriangles();
-	std::vector<VertexWeight> &GetVertexWeights();
+	std::vector<VertexWeight> &GetVertexWeights(); // Vertex weights 0-3
+	std::vector<VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
 	void GetBounds(Vector3 &min,Vector3 &max) const;
 	uint8_t GetAlphaCount() const;
 	void SetAlphaCount(uint8_t numAlpha);
@@ -77,6 +78,9 @@ public:
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
 protected:
+	std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx);
+	const std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
+
 	uint32_t m_skinTextureIndex;
 	Vector3 m_center;
 	std::shared_ptr<std::vector<Vertex>> m_vertices;
@@ -84,6 +88,7 @@ protected:
 	uint8_t m_numAlphas;
 	std::shared_ptr<std::vector<uint16_t>> m_triangles;
 	std::shared_ptr<std::vector<VertexWeight>> m_vertexWeights;
+	std::shared_ptr<std::vector<VertexWeight>> m_extendedVertexWeights;
 	Vector3 m_min;
 	Vector3 m_max;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();

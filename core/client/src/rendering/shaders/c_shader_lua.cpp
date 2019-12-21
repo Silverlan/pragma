@@ -1,8 +1,11 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
+#include "pragma/model/c_modelmesh.h"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <misc/compute_pipeline_create_info.h>
 #include <shader/prosper_shader_copy_image.hpp>
+#include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <prosper_util.hpp>
 
@@ -230,6 +233,57 @@ void LuaShaderTextured3D::Lua_InitializeGfxPipelinePushConstantRanges(Anvil::Bas
 void LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void LuaShaderTextured3D::Lua_OnBindMaterial(Material &mat) {}
+void LuaShaderTextured3D::Lua_OnDraw(ModelSubMesh &mesh) {}
+void LuaShaderTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
+void LuaShaderTextured3D::Lua_OnBindScene(rendering::RasterizationRenderer &renderer,bool bView) {}
+void LuaShaderTextured3D::Lua_OnBeginDraw(prosper::CommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {}
+void LuaShaderTextured3D::Lua_OnEndDraw() {}
+bool LuaShaderTextured3D::BindMaterial(CMaterial &mat)
+{
+	if(ShaderTextured3DBase::BindMaterial(mat) == false)
+		return false;
+	CallLuaMember<void,Material*>("OnBindMaterial",&mat);
+	return true;
+}
+bool LuaShaderTextured3D::Draw(CModelSubMesh &mesh)
+{
+	CallLuaMember<void,ModelSubMesh*>("OnDraw",&mesh);
+	return ShaderTextured3DBase::Draw(mesh);
+}
+bool LuaShaderTextured3D::BindEntity(CBaseEntity &ent)
+{
+	if(ShaderTextured3DBase::BindEntity(ent) == false)
+		return false;
+	auto &o = *ent.GetLuaObject();
+	CallLuaMember<void,luabind::object>("OnBindEntity",o);
+	return true;
+}
+bool LuaShaderTextured3D::BindVertexAnimationOffset(uint32_t offset)
+{
+	return ShaderTextured3DBase::BindVertexAnimationOffset(offset);
+}
+bool LuaShaderTextured3D::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
+{
+	if(ShaderTextured3DBase::BindScene(renderer,bView) == false)
+		return false;
+	CallLuaMember<void,rendering::RasterizationRenderer*,bool>("OnBindScene",&renderer,bView);
+	return true;
+}
+bool LuaShaderTextured3D::BeginDraw(
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags
+)
+{
+	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags) == false)
+		return false;
+	CallLuaMember<void,prosper::CommandBuffer*,const Vector4&,uint32_t,uint32_t>("OnBeginDraw",const_cast<prosper::PrimaryCommandBuffer*>(cmdBuffer.get()),clipPlane,umath::to_integral(pipelineIdx),umath::to_integral(recordFlags));
+	return true;
+}
+void LuaShaderTextured3D::EndDraw()
+{
+	CallLuaMember<void>("OnEndDraw");
+	ShaderTextured3DBase::EndDraw();
 }
 bool LuaShaderTextured3D::BindMaterialParameters(CMaterial &mat)
 {

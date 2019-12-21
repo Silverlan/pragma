@@ -37,7 +37,7 @@ Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 
 ///////////////////////////
 
-ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3D *shader)
+ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
 	: shader(shader->GetHandle())
 {}
 

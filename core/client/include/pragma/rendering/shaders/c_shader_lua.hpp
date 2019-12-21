@@ -245,6 +245,35 @@ namespace pragma
 
 		void Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);}
+	
+		void Lua_OnBindMaterial(Material &mat);
+		static void Lua_default_OnBindMaterial(lua_State *l,LuaShaderTextured3D &shader,Material &mat) {shader.Lua_OnBindMaterial(mat);}
+
+		void Lua_OnDraw(ModelSubMesh &mesh);
+		static void Lua_default_OnDraw(lua_State *l,LuaShaderTextured3D &shader,ModelSubMesh &mesh) {shader.Lua_OnDraw(mesh);}
+
+		void Lua_OnBindEntity(EntityHandle &hEnt);
+		static void Lua_default_OnBindEntity(lua_State *l,LuaShaderTextured3D &shader,EntityHandle &hEnt) {shader.Lua_OnBindEntity(hEnt);}
+
+		void Lua_OnBindScene(rendering::RasterizationRenderer &renderer,bool bView);
+		static void Lua_default_OnBindScene(lua_State *l,LuaShaderTextured3D &shader,rendering::RasterizationRenderer &renderer,bool bView) {shader.Lua_OnBindScene(renderer,bView);}
+
+		void Lua_OnBeginDraw(prosper::CommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags);
+		static void Lua_default_OnBeginDraw(lua_State *l,LuaShaderTextured3D &shader,prosper::CommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {shader.Lua_OnBeginDraw(drawCmd,clipPlane,pipelineIdx,recordFlags);}
+
+		void Lua_OnEndDraw();
+		static void Lua_default_OnEndDraw(lua_State *l,LuaShaderTextured3D &shader) {shader.Lua_OnEndDraw();}
+
+		virtual bool BindMaterial(CMaterial &mat) override;
+		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool BindEntity(CBaseEntity &ent) override;
+		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
+		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BeginDraw(
+			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx=Pipeline::Regular,
+			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
+		) override;
+		virtual void EndDraw() override;
 	protected:
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

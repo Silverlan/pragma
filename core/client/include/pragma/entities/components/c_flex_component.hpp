@@ -14,7 +14,7 @@ namespace pragma
 		CFlexComponent(BaseEntity &ent) : BaseFlexComponent(ent) {}
 		virtual void Initialize() override;
 		// Vertex animations
-		virtual void SetFlexController(uint32_t flexId,float val,float duration=0.f) override;
+		virtual void SetFlexController(uint32_t flexId,float val,float duration=0.f,bool clampToLimits=true) override;
 		using BaseFlexComponent::SetFlexController;
 		virtual bool GetFlexController(uint32_t flexId,float &val) const override;
 		bool CalcFlexValue(uint32_t flexId,float &val) const;

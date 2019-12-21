@@ -26,7 +26,7 @@ public:
 	virtual void SetSize(int x,int y) override;
 	using WIBase::SetPos;
 	virtual void SetPos(int x,int y) override;
-	virtual void SetParent(WIBase *base) override;
+	virtual void SetParent(WIBase *base,std::optional<uint32_t> childIndex={}) override;
 	virtual void SetZPos(int zpos) override;
 	virtual void SetVisible(bool b) override;
 	WIBase *GetDragArea() const;

@@ -44,7 +44,7 @@ add_include_dir(cengine)
 add_def(DLLNETWORK_EX)
 add_def(ENGINE_NETWORK)
 
-set(CONFIG_ENABLE_MIKU_MIKU_DANCE_ASSET_SUPPORT "1" CACHE BOOL "Enable asset support for MikuMikuDance.")
+option(CONFIG_ENABLE_MIKU_MIKU_DANCE_ASSET_SUPPORT "Enable asset support for MikuMikuDance." ON)
 if(CONFIG_ENABLE_MIKUMIKUDANCE_ASSET_SUPPORT)
 	list(APPEND DEFINITIONS ENABLE_MMD_IMPORT)
 endif()

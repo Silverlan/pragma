@@ -12,6 +12,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
+#include <pragma/lua/luafunction_call.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -103,6 +104,7 @@ void RasterizationRenderer::AdvanceRenderStage(std::shared_ptr<prosper::PrimaryC
 	case Stage::CollectRenderObjects:
 		c_game->CallCallbacks<void>("OnPreRender");
 		CollectRenderObjects(renderFlags);
+		c_game->CallLuaCallbacks<RasterizationRenderer*>("PrepareRendering",this);
 		m_stage = Stage::Prepass;
 		break;
 	case Stage::Prepass:

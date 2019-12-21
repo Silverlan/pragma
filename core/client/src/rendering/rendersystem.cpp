@@ -169,7 +169,7 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 	//auto &lights = scene->GetCulledLights();
 	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
-	pragma::ShaderTextured3D *shaderPrev = nullptr;
+	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	for(auto it=translucentMeshes.rbegin();it!=translucentMeshes.rend();++it) // Render back-to-front
 	{
@@ -177,7 +177,7 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 		auto &whShader = meshInfo->shader;
 		if(whShader.expired())
 			continue;
-		auto *shader = static_cast<pragma::ShaderTextured3D*>(whShader.get());
+		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
 		if(shader != shaderPrev)
 		{
 			if(shaderPrev != nullptr)
@@ -263,12 +263,12 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
-	pragma::ShaderTextured3D *shaderLast = nullptr;
+	pragma::ShaderTextured3DBase *shaderLast = nullptr;
 	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
 	{
 		auto &shaderContainer = *itShader;
 		auto &whShader = shaderContainer->shader;
-		auto *shader = static_cast<pragma::ShaderTextured3D*>(whShader.get());
+		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
 		auto bView = (renderMode == RenderMode::View) ? true : false;
 		if(shader->BeginDraw(
 				drawCmd,c_game->GetRenderClipPlane(),

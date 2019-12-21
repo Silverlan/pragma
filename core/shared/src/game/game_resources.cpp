@@ -118,8 +118,19 @@ bool util::port_nif_model(NetworkState *nw,const std::string &path,std::string m
 	});
 }
 
+bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
+{
+	static auto *ptrLoadParticle = reinterpret_cast<bool(*)(NetworkState&,const std::string&)>(impl::get_module_func(nw,"load_source_particle"));
+	if(ptrLoadParticle == nullptr)
+		return false;
+	return ptrLoadParticle(*nw,path);
+}
+
 bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
 {
+	// Test
+	port_hl2_particle(nw,"C:/Program Files (x86)/Steam/steamapps/common/SourceFilmmaker/game/tf/particles/explosion.pcf");
+
 	std::string ext;
 	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
 		return false;

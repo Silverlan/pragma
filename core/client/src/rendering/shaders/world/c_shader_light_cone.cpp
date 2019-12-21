@@ -63,6 +63,13 @@ bool ShaderLightCone::BindEntity(CBaseEntity &ent)
 	return true;
 }
 
+std::shared_ptr<prosper::DescriptorSetGroup> ShaderLightCone::InitializeMaterialDescriptorSet(CMaterial &mat)
+{
+	auto descSetGroup = prosper::util::create_descriptor_set_group(GetContext().GetDevice(),DESCRIPTOR_SET_MATERIAL);
+	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	return descSetGroup;
+}
+
 bool ShaderLightCone::Draw(CModelSubMesh &mesh)
 {
 	return RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes

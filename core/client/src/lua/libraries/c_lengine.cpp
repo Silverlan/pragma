@@ -6,7 +6,6 @@
 #include "pragma/c_engine.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/particlesystem/c_particlesystemdata.h"
 #include "pragma/file_formats/wmd_load.h"
 #include <wgui/fontmanager.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
@@ -17,8 +16,7 @@
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <image/prosper_render_target.hpp>
-
-#define WPT_VERSION 0x0001
+#include <pragma/entities/environment/effects/particlesystemdata.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -140,6 +138,15 @@ int Lua::engine::load_material(lua_State *l)
 	if(material == NULL)
 		return 0;
 	luabind::object(l,material).push(l);
+	return 1;
+}
+
+int Lua::engine::get_error_material(lua_State *l)
+{
+	auto *errMat = client->GetMaterialManager().GetErrorMaterial();
+	if(errMat == nullptr)
+		return 0;
+	Lua::Push<Material*>(l,errMat);
 	return 1;
 }
 
@@ -316,25 +323,13 @@ int Lua::engine::precache_particle_system(lua_State *l)
 	return 1;
 }
 
-// See c_particlesystem_save.cpp as well
 int Lua::engine::save_particle_system(lua_State *l)
 {
 	std::string name = luaL_checkstring(l,1);
 	Lua::CheckTable(l,2);
+	pragma::asset::get_particle_system_file_path(name);
 
-	name = FileManager::GetCanonicalizedPath(name);
-	ustring::to_lower(name);
-	name = "particles\\" +name;
-	ufile::remove_extension_from_filename(name);
-	name += ".wpt";
 	if(Lua::file::validate_write_operation(l,name) == false)
-	{
-		Lua::PushBool(l,false);
-		return 1;
-	}
-	FileManager::CreatePath(ufile::get_path_from_filename(name).c_str());
-	auto f = FileManager::OpenFile<VFilePtrReal>(name.c_str(),"wb");
-	if(f == NULL)
 	{
 		Lua::PushBool(l,false);
 		return 1;
@@ -342,7 +337,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 
 	{
 		auto t = 2;
-		
+
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,t);
 		auto bParticleSystem = Lua::IsType<::util::WeakHandle<pragma::CParticleSystemComponent>>(l,-1);
@@ -391,12 +386,18 @@ int Lua::engine::save_particle_system(lua_State *l)
 				Lua::PushBool(l,false);
 				return 1;
 			}
-			Lua::PushBool(l,pragma::CParticleSystemComponent::Save(f,particleSystems));
+
+			FileManager::CreatePath(ufile::get_path_from_filename(name).c_str());
+			auto f = FileManager::OpenFile<VFilePtrReal>(name.c_str(),"wb");
+			if(f != NULL)
+				Lua::PushBool(l,pragma::CParticleSystemComponent::Save(f,particleSystems));
+			else
+				Lua::PushBool(l,false);
 			return 1;
 		}
 	}
 
-	std::unordered_map<std::string,CParticleSystemData*> particles;
+	std::unordered_map<std::string,CParticleSystemData> particles;
 	Lua::PushValue(l,2);
 	int tparticles = 2;
 	Lua::PushNil(l);
@@ -405,7 +406,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 		if(Lua::IsTable(l,-1))
 		{
 			Lua::PushValue(l,-2);
-			CParticleSystemData *data = new CParticleSystemData;
+			CParticleSystemData data {};
 			std::string particle = Lua::ToString(l,-3);
 			Lua::RemoveValue(l,-3);
 			Lua::PushValue(l,-2);
@@ -433,8 +434,8 @@ int Lua::engine::save_particle_system(lua_State *l)
 								Lua::RemoveValue(l,-3);
 								int tmodSettings = Lua::GetStackTop(l) -1;
 								Lua::PushNil(l);
-								std::vector<std::unique_ptr<CParticleModifierData>> modData;
-								modData.push_back(std::make_unique<CParticleModifierData>(mod));
+								std::vector<CParticleModifierData> modData;
+								modData.push_back(CParticleModifierData{mod});
 								int dataIdx = 0;
 								char dataType = -1;
 								while(Lua::GetNextPair(l,tmodSettings) != 0)
@@ -451,14 +452,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 											std::string modVal = Lua::ToString(l,-2);
 											Lua::RemoveValue(l,-3);
 											Lua::RemoveValue(l,-2);
-											modData[dataIdx]->settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
+											modData[dataIdx].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
 										}
 									}
 									else if(dataType != 1)
 									{
 										dataType = 0;
 										if(dataIdx > 0)
-											modData.push_back(std::make_unique<CParticleModifierData>(mod));
+											modData.push_back(CParticleModifierData{mod});
 										dataIdx++;
 										int tModSubSettings = Lua::GetStackTop(l);
 										Lua::PushNil(l);
@@ -469,7 +470,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 											std::string modVal = Lua::ToString(l,-2);
 											Lua::RemoveValue(l,-3);
 											Lua::RemoveValue(l,-2);
-											modData[dataIdx -1]->settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
+											modData[dataIdx -1].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
 										}
 										Lua::Pop(l,1);
 									}
@@ -480,16 +481,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 								StringToLower(mod);
 								for(unsigned int i=0;i<modData.size();i++)
 								{
-									if(modData[i]->settings.empty())
-										modData[i] = nullptr;
-									else
+									if(modData[i].settings.empty() == false)
 									{
 										if(key == "initializers")
-											data->initializers.push_back(std::move(modData[i]));
+											data.initializers.push_back(modData[i]);
 										else if(key == "operators")
-											data->operators.push_back(std::move(modData[i]));
+											data.operators.push_back(modData[i]);
 										else if(key == "renderers")
-											data->renderers.push_back(std::move(modData[i]));
+											data.renderers.push_back(modData[i]);
 									}
 								}
 							}
@@ -516,7 +515,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 								std::string child = Lua::ToString(l,-1);
 								StringToLower(child);
 								Lua::RemoveValue(l,-1);
-								data->children.push_back(child);
+								data.children.push_back(child);
 							}
 							else
 								Lua::Pop(l,1);
@@ -533,92 +532,17 @@ int Lua::engine::save_particle_system(lua_State *l)
 				{
 					std::string val = Lua::ToString(l,-2);
 					Lua::RemoveValue(l,-2);
-					data->settings.insert(std::unordered_map<std::string,std::string>::value_type(key,val));
+					data.settings.insert(std::unordered_map<std::string,std::string>::value_type(key,val));
 				}
 			}
 			Lua::Pop(l,1);
-			particles.insert(std::unordered_map<std::string,CParticleSystemData*>::value_type(particle,data));
+			particles.insert(std::make_pair(particle,data));
 		}
 		else
 			Lua::Pop(l,1);
 	}
 	Lua::Pop(l,2);
-	f->Write<char>('W');
-	f->Write<char>('P');
-	f->Write<char>('T');
-	f->Write<unsigned int>(WPT_VERSION);
-	f->Write<unsigned int>(CUInt32(particles.size()));
-	std::unordered_map<std::string,CParticleSystemData*>::iterator it;
-	std::vector<unsigned long long> offsets;
-	for(it=particles.begin();it!=particles.end();it++)
-	{
-		f->WriteString(it->first);
-		offsets.push_back(f->Tell());
-		f->Write<unsigned long long>((unsigned long long)(0));
-	}
-	unsigned int i = 0;
-	for(it=particles.begin();it!=particles.end();it++)
-	{
-		unsigned long long offset = f->Tell();
-		f->Seek(offsets[i]);
-		f->Write<unsigned long long>(offset);
-		f->Seek(offset);
-
-		CParticleSystemData *data = it->second;
-		f->Write<unsigned int>(CUInt32(data->settings.size()));
-		std::unordered_map<std::string,std::string>::iterator j;
-		for(j=data->settings.begin();j!=data->settings.end();j++)
-		{
-			f->WriteString(j->first);
-			f->WriteString(j->second);
-		}
-		f->Write<unsigned int>(CUInt32(data->initializers.size()));
-		for(unsigned int k=0;k<data->initializers.size();k++)
-		{
-			auto &modData = data->initializers[k];
-			f->WriteString(modData->name);
-			f->Write<unsigned int>(CUInt32(modData->settings.size()));
-			std::unordered_map<std::string,std::string>::iterator l;
-			for(l=modData->settings.begin();l!=modData->settings.end();l++)
-			{
-				f->WriteString(l->first);
-				f->WriteString(l->second);
-			}
-		}
-		f->Write<unsigned int>(CUInt32(data->operators.size()));
-		for(unsigned int k=0;k<data->operators.size();k++)
-		{
-			auto &modData = data->operators[k];
-			f->WriteString(modData->name);
-			f->Write<unsigned int>(CUInt32(modData->settings.size()));
-			std::unordered_map<std::string,std::string>::iterator l;
-			for(l=modData->settings.begin();l!=modData->settings.end();l++)
-			{
-				f->WriteString(l->first);
-				f->WriteString(l->second);
-			}
-		}
-		f->Write<unsigned int>(CUInt32(data->renderers.size()));
-		for(unsigned int k=0;k<data->renderers.size();k++)
-		{
-			auto &modData = data->renderers[k];
-			f->WriteString(modData->name);
-			f->Write<unsigned int>(CUInt32(modData->settings.size()));
-			std::unordered_map<std::string,std::string>::iterator l;
-			for(l=modData->settings.begin();l!=modData->settings.end();l++)
-			{
-				f->WriteString(l->first);
-				f->WriteString(l->second);
-			}
-		}
-		std::vector<std::string> &children = it->second->children;
-		f->Write<unsigned char>(CUInt8(children.size()));
-		for(unsigned char j=0;j<children.size();j++)
-			f->WriteString(children[j]);
-		delete it->second;
-		i++;
-	}
-	Lua::PushBool(l,true);
+	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles));
 	return 1;
 }
 int Lua::engine::save_frame_buffer_as_tga(lua_State *l)

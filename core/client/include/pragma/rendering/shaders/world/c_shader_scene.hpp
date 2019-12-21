@@ -131,6 +131,10 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
@@ -142,6 +146,16 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+
+		enum class VertexBinding : uint32_t
+		{
+			BoneWeight = 0u,
+			BoneWeightExt,
+			
+			Vertex,
+
+			Count
+		};
 
 #pragma pack(push,1)
 		struct InstanceData

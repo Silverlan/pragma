@@ -556,6 +556,14 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelineVertexAttributes,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);
 	defShaderTextured3DBase.def("InitializeGfxPipelinePushConstantRanges",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelinePushConstantRanges,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelinePushConstantRanges);
 	defShaderTextured3DBase.def("InitializeGfxPipelineDescriptorSets",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelineDescriptorSets);
+
+	defShaderTextured3DBase.def("OnBindMaterial",&pragma::LuaShaderTextured3D::Lua_OnBindMaterial,&pragma::LuaShaderTextured3D::Lua_default_OnBindMaterial);
+	defShaderTextured3DBase.def("OnDraw",&pragma::LuaShaderTextured3D::Lua_OnDraw,&pragma::LuaShaderTextured3D::Lua_default_OnDraw);
+	defShaderTextured3DBase.def("OnBindEntity",&pragma::LuaShaderTextured3D::Lua_OnBindEntity,&pragma::LuaShaderTextured3D::Lua_default_OnBindEntity);
+	defShaderTextured3DBase.def("OnBindScene",&pragma::LuaShaderTextured3D::Lua_OnBindScene,&pragma::LuaShaderTextured3D::Lua_default_OnBindScene);
+	defShaderTextured3DBase.def("OnBeginDraw",&pragma::LuaShaderTextured3D::Lua_OnBeginDraw,&pragma::LuaShaderTextured3D::Lua_default_OnBeginDraw);
+	defShaderTextured3DBase.def("OnEndDraw",&pragma::LuaShaderTextured3D::Lua_OnEndDraw,&pragma::LuaShaderTextured3D::Lua_default_OnEndDraw);
+	
 	modShader[defShaderTextured3DBase];
 }
 

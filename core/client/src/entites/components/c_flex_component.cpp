@@ -41,7 +41,7 @@ void CFlexComponent::Initialize()
 	GetEntity().AddComponent<LogicComponent>();
 }
 
-void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration)
+void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,bool clampToLimits)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -50,7 +50,8 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration)
 	auto *flex = mdl->GetFlexController(flexId);
 	if(flex == nullptr)
 		return;
-	val = umath::clamp(val,flex->min,flex->max);
+	if(clampToLimits)
+		val = umath::clamp(val,flex->min,flex->max);
 	auto it = m_flexControllers.find(flexId);
 	if(it == m_flexControllers.end())
 		it = m_flexControllers.insert(std::make_pair(flexId,FlexControllerInfo{})).first;
@@ -100,7 +101,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::Fetch:
 			{
 				auto val = 0.f;
-				if(GetFlexController(op.d.index,val) == false)
+				if(GetScaledFlexController(op.d.index,val) == false)
 					return false;
 				opStack.push(val);
 				break;
@@ -193,7 +194,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::TwoWay0:
 			{
 				auto val = 0.f;
-				if(GetFlexController(op.d.index,val) == false)
+				if(GetScaledFlexController(op.d.index,val) == false)
 					return false;
 				opStack.push(1.f -(umath::min(umath::max(val +1.f,0.f),1.f)));
 				break;
@@ -201,7 +202,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::TwoWay1:
 			{
 				auto val = 0.f;
-				if(GetFlexController(op.d.index,val) == false)
+				if(GetScaledFlexController(op.d.index,val) == false)
 					return false;
 				opStack.push(umath::min(umath::max(val,0.f),1.f));
 				break;
@@ -209,13 +210,13 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::NWay:
 			{
 				auto v = 0.f;
-				if(GetFlexController(op.d.index,v) == false)
+				if(GetScaledFlexController(op.d.index,v) == false)
 					return false;
 				auto valueControllerIndex = op.d.index;
 				opStack.pop();
 
 				auto flValue = 0.f;
-				if(GetFlexController(valueControllerIndex,flValue) == false)
+				if(GetScaledFlexController(valueControllerIndex,flValue) == false)
 					return false;
 
 				auto filterRampW = opStack.top();
@@ -270,7 +271,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::DMELowerEyelid:
 			{
 				auto pCloseLidV = 0.f;
-				if(GetFlexController(op.d.index,pCloseLidV) == false)
+				if(GetScaledFlexController(op.d.index,pCloseLidV) == false)
 					return false;
 				auto &pCloseLidVController = *mdl->GetFlexController(op.d.index);
 				auto flCloseLidV = (umath::min(umath::max((pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
@@ -279,7 +280,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				opStack.pop();
 
 				auto pCloseLid = 0.f;
-				if(GetFlexController(closeLidIndex,pCloseLid) == false)
+				if(GetScaledFlexController(closeLidIndex,pCloseLid) == false)
 					return false;
 				auto &pCloseLidController = *mdl->GetFlexController(closeLidIndex);
 				auto flCloseLid = (umath::min(umath::max((pCloseLid -pCloseLidController.min) /(pCloseLidController.max -pCloseLidController.min),0.f),1.f));
@@ -289,7 +290,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				auto eyeUpDownIndex = *reinterpret_cast<int32_t*>(&opStack.top());
 				opStack.pop();
 				auto pEyeUpDown = 0.f;
-				if(GetFlexController(eyeUpDownIndex,pEyeUpDown) == false)
+				if(GetScaledFlexController(eyeUpDownIndex,pEyeUpDown) == false)
 					return false;
 				auto &pEyeUpDownController = *mdl->GetFlexController(eyeUpDownIndex);
 				auto flEyeUpDown = (-1.f +2.f *(umath::min(umath::max((pEyeUpDown -pEyeUpDownController.min) /(pEyeUpDownController.max -pEyeUpDownController.min),0.f),1.f)));
@@ -300,7 +301,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::DMEUpperEyelid:
 			{
 				auto pCloseLidV = 0.f;
-				if(GetFlexController(op.d.index,pCloseLidV) == false)
+				if(GetScaledFlexController(op.d.index,pCloseLidV) == false)
 					return false;
 				auto &pCloseLidVController = *mdl->GetFlexController(op.d.index);
 				auto flCloseLidV = (umath::min(umath::max((pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
@@ -309,7 +310,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				opStack.pop();
 
 				auto pCloseLid = 0.f;
-				if(GetFlexController(closeLidIndex,pCloseLid) == false)
+				if(GetScaledFlexController(closeLidIndex,pCloseLid) == false)
 					return false;
 				auto &pCloseLidController = *mdl->GetFlexController(closeLidIndex);
 				auto flCloseLid = (umath::min(umath::max((pCloseLid -pCloseLidController.min) /(pCloseLidController.max -pCloseLidController.min),0.f),1.f));
@@ -319,7 +320,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				auto eyeUpDownIndex = *reinterpret_cast<int32_t*>(&opStack.top());
 				opStack.pop();
 				auto pEyeUpDown = 0.f;
-				if(GetFlexController(eyeUpDownIndex,pEyeUpDown) == false)
+				if(GetScaledFlexController(eyeUpDownIndex,pEyeUpDown) == false)
 					return false;
 				auto &pEyeUpDownController = *mdl->GetFlexController(eyeUpDownIndex);
 				auto flEyeUpDown = (-1.f +2.f *(umath::min(umath::max((pEyeUpDown -pEyeUpDownController.min) /(pEyeUpDownController.max -pEyeUpDownController.min),0.f),1.f)));

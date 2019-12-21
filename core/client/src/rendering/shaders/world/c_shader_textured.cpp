@@ -32,6 +32,10 @@ decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT) ShaderTextured3DBase:
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
 
+decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID,VERTEX_BINDING_BONE_WEIGHT_EXT};
+decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT,VERTEX_BINDING_BONE_WEIGHT_EXT};
+
 decltype(ShaderTextured3DBase::VERTEX_BINDING_VERTEX) ShaderTextured3DBase::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION) ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_UV) ShaderTextured3DBase::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV,VERTEX_BINDING_VERTEX};
@@ -45,6 +49,10 @@ decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderTextured3DBas
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE) ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL = {
 	{
+		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
+			Anvil::DescriptorType::UNIFORM_BUFFER,
+			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		},
 		prosper::Shader::DescriptorSetInfo::Binding { // Diffuse Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
@@ -64,10 +72,6 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DE
 		prosper::Shader::DescriptorSetInfo::Binding { // Glow Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
 		}
 	}
 };
@@ -112,6 +116,9 @@ void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(Anvil::Graphics
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
+
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
@@ -119,6 +126,7 @@ void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(Anvil::Graphics
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BI_TANGENT);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LIGHTMAP_UV);
+
 	/*if(static_cast<Pipeline>(pipelineIdx) == Pipeline::LightMap)
 	{
 		AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LIGHTMAP_UV);
@@ -319,7 +327,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	}
 	else
 		pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
-	return RecordBindVertexBuffer(pLightMapUvBuffer->GetAnvilBuffer(),2u);
+	return RecordBindVertexBuffer(pLightMapUvBuffer->GetAnvilBuffer(),umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
@@ -331,6 +339,7 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 		return false;
 	auto renderFlags = RenderFlags::None;
 	umath::set_flag(renderFlags,RenderFlags::LightmapsEnabled,shouldUseLightmaps);
+	umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 	UpdateRenderFlags(mesh,renderFlags);
 	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }

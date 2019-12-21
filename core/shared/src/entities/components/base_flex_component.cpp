@@ -11,13 +11,13 @@ void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 }
-void BaseFlexComponent::SetFlexController(const std::string &name,float val,float duration)
+void BaseFlexComponent::SetFlexController(const std::string &name,float val,float duration,bool clampToLimits)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto flexId = 0u;
 	if(mdlComponent.expired() || mdlComponent->LookupFlexController(name,flexId) == false)
 		return;
-	SetFlexController(flexId,val,duration);
+	SetFlexController(flexId,val,duration,clampToLimits);
 }
 float BaseFlexComponent::GetFlexController(uint32_t flexId) const
 {
@@ -25,6 +25,16 @@ float BaseFlexComponent::GetFlexController(uint32_t flexId) const
 	GetFlexController(flexId,r);
 	return r;
 }
+bool BaseFlexComponent::GetScaledFlexController(uint32_t flexId,float &val) const
+{
+	if(GetFlexController(flexId,val) == false)
+		return false;
+	val *= GetFlexControllerScale();
+	return true;
+}
+
+void BaseFlexComponent::SetFlexControllerScale(float scale) {m_flexControllerScale = scale;}
+float BaseFlexComponent::GetFlexControllerScale() const {return m_flexControllerScale;}
 float BaseFlexComponent::GetFlexController(const std::string &flexController) const
 {
 	auto mdlComponent = GetEntity().GetModelComponent();

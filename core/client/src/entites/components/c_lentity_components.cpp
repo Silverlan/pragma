@@ -48,8 +48,6 @@ namespace Lua
 	{
 		static void GetFlexController(lua_State *l,CFlexHandle &hEnt,uint32_t flexId);
 		static void GetFlexController(lua_State *l,CFlexHandle &hEnt,const std::string &flexController);
-		static void SetFlexController(lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float cycle);
-		static void SetFlexController(lua_State *l,CFlexHandle &hEnt,const std::string &flexController,float cycle);
 		static void CalcFlexValue(lua_State *l,CFlexHandle &hEnt,uint32_t flexId);
 	};
 	namespace ParticleSystem
@@ -180,6 +178,18 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::CommandBuffer>&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer",&Lua::Render::GetRenderBuffer);
 	defCRender.def("GetBoneBuffer",&Lua::Render::GetBoneBuffer);
+	defCRender.def("GetLODMeshes",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &lodMeshes = hComponent->GetLODMeshes();
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &lodMesh : lodMeshes)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push(l,lodMesh);
+			Lua::SetTableValue(l,t);
+		}
+	}));
 
 	auto &componentManager = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
@@ -827,10 +837,65 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCFlex = luabind::class_<CFlexHandle,BaseEntityComponentHandle>("FlexComponent");
 	Lua::register_base_flex_component_methods<luabind::class_<CFlexHandle,BaseEntityComponentHandle>,CFlexHandle>(l,defCFlex);
-	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float)>(&Lua::Flex::SetFlexController));
-	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float)>(&Lua::Flex::SetFlexController));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float,float,bool)>(
+		[](lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float value,float duration,bool clampToLimits
+	) {
+		pragma::Lua::check_component(l,hEnt);
+		hEnt->SetFlexController(flexId,value,duration,clampToLimits);
+	}));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float,float)>(
+		[](lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float value,float duration
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexController(flexId,value,duration);
+	}));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float)>(
+		[](lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float value
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexController(flexId,value);
+	}));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float,float,bool)>(
+		[](lua_State *l,CFlexHandle &hEnt,const std::string &flexName,float value,float duration,bool clampToLimits
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexController(flexName,value,duration,clampToLimits);
+	}));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float,float)>(
+		[](lua_State *l,CFlexHandle &hEnt,const std::string &flexName,float value,float duration
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexController(flexName,value,duration);
+	}));
+	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float)>(
+		[](lua_State *l,CFlexHandle &hEnt,const std::string &flexName,float value
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexController(flexName,value);
+	}));
 	defCFlex.def("GetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>(&Lua::Flex::GetFlexController));
 	defCFlex.def("GetFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&)>(&Lua::Flex::GetFlexController));
+	defCFlex.def("GetScaledFlexController",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>(
+		[](lua_State *l,CFlexHandle &hEnt,uint32_t flexControllerId
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				float value;
+				if(hEnt->GetScaledFlexController(flexControllerId,value) == false)
+					return;
+				Lua::PushNumber(l,value);
+	}));
+	defCFlex.def("SetFlexControllerScale",static_cast<void(*)(lua_State*,CFlexHandle&,float)>(
+		[](lua_State *l,CFlexHandle &hEnt,float scale
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				hEnt->SetFlexControllerScale(scale);
+	}));
+	defCFlex.def("GetFlexControllerScale",static_cast<void(*)(lua_State*,CFlexHandle&)>(
+		[](lua_State *l,CFlexHandle &hEnt
+			) {
+				pragma::Lua::check_component(l,hEnt);
+				Lua::PushNumber(l,hEnt->GetFlexControllerScale());
+	}));
 	defCFlex.def("CalcFlexValue",&Lua::Flex::CalcFlexValue);
 	entsMod[defCFlex];
 
@@ -1145,20 +1210,6 @@ void Lua::Render::GetBoneBuffer(lua_State *l,CRenderHandle &hEnt)
 
 //////////////
 
-void Lua::Flex::SetFlexController(lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float cycle)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetFlexController(flexId,cycle);
-}
-void Lua::Flex::SetFlexController(lua_State *l,CFlexHandle &hEnt,const std::string &flexController,float cycle)
-{
-	pragma::Lua::check_component(l,hEnt);
-	auto flexId = 0u;
-	auto mdlComponent = hEnt->GetEntity().GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->LookupFlexController(flexController,flexId) == false)
-		return;
-	hEnt->SetFlexController(flexId,cycle);
-}
 void Lua::Flex::GetFlexController(lua_State *l,CFlexHandle &hEnt,uint32_t flexId)
 {
 	pragma::Lua::check_component(l,hEnt);

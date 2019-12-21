@@ -196,7 +196,8 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_SMDMODEL_LIBRARY util_smdmodel STATIC)
 set(DEPENDENCY_UTIL_PAD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pad/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_PAD_LIBRARY util_pad STATIC)
 
-set(CONFIG_ENABLE_EXECUTABLE_FLAG OFF CACHE BOOL "" FORCE)
+unset(CONFIG_ENABLE_EXECUTABLE_FLAG CACHE)
+SET(CONFIG_ENABLE_EXECUTABLE_FLAG OFF CACHE BOOL "")
 set(DEPENDENCY_UTIL_PRAGMA_DOC_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pragma_doc/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_PRAGMA_DOC_LIBRARY util_pragma_doc STATIC)
 
@@ -230,7 +231,8 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
 
 set(DEPENDENCY_WGUI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/wgui/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_WGUI_LIBRARY wgui)
-set(WGUI_INCLUDE_DEPENDENCIES OFF CACHE BOOL FORCE "Include dependencies required to build the wgui library?")
+unset(WGUI_INCLUDE_DEPENDENCIES CACHE)
+SET(WGUI_INCLUDE_DEPENDENCIES OFF CACHE BOOL "Include dependencies required to build the wgui library?")
 
 set(DEPENDENCY_SERVER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/core/server/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_SERVER_LIBRARY core/server/${BINARY_PRAGMA_DIR} server)

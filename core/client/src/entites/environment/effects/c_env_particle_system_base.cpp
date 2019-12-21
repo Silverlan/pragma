@@ -1,10 +1,10 @@
 #include "stdafx_client.h"
 #include <algorithm>
+#include <sharedutils/util_weak_handle.hpp>
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/particlesystem/c_particlesystemdata.h"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_util.hpp>
@@ -13,6 +13,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/norm.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/environment/effects/particlesystemdata.h>
 
 using namespace pragma;
 
@@ -146,7 +147,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 				if(key == "material")
 					client->LoadMaterial(val.c_str());
 			}
-			std::array<std::vector<std::unique_ptr<CParticleModifierData>>*,3> params = {
+			std::array<std::vector<CParticleModifierData>*,3> params = {
 				&data->initializers,
 				&data->operators,
 				&data->renderers
@@ -157,15 +158,15 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 				for(auto j=decltype(num){0};j<num;++j)
 				{
 					auto identifier = f->ReadString();
-					auto modData = std::make_unique<CParticleModifierData>(identifier);
+					auto modData = CParticleModifierData{identifier};
 					auto numKeyValues = f->Read<uint32_t>();
 					for(auto k=decltype(numKeyValues){0};k<numKeyValues;++k)
 					{
 						auto key = f->ReadString();
 						auto val = f->ReadString();
-						modData->settings.insert(decltype(modData->settings)::value_type(key,val));
+						modData.settings.insert(decltype(modData.settings)::value_type(key,val));
 					}
-					params[i]->push_back(std::move(modData));
+					params[i]->push_back(modData);
 				}
 			}
 			auto &children = data->children;
@@ -218,11 +219,11 @@ bool CParticleSystemComponent::SetupParticleSystem(std::string fname,CParticleSy
 	}
 
 	for(auto &modData : data->initializers)
-		AddInitializer(modData->name,modData->settings);
+		AddInitializer(modData.name,modData.settings);
 	for(auto &modData : data->operators)
-		AddOperator(modData->name,modData->settings);
+		AddOperator(modData.name,modData.settings);
 	for(auto &modData : data->renderers)
-		AddRenderer(modData->name,modData->settings);
+		AddRenderer(modData.name,modData.settings);
 	if(data->renderers.empty())
 	{
 		std::unordered_map<std::string,std::string> values {};
@@ -268,7 +269,7 @@ static std::shared_ptr<prosper::UniformResizableBuffer> s_animBuffer = nullptr;
 static std::shared_ptr<prosper::Buffer> s_vertexBuffer = nullptr;
 const auto PARTICLE_BUFFER_INSTANCE_SIZE = sizeof(CParticleSystemComponent::ParticleData);
 const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
-util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
+::util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
 {
 #pragma message ("TODO: Calculate max particles automatically!")
 	if(ustring::compare(key,"maxparticles",false))
@@ -276,46 +277,46 @@ util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key
 		if(m_state != State::Initial)
 			Con::cwar<<"WARNING: Attempted to change max particle count for particle system which has already been started! Ignoring..."<<Con::endl;
 		else
-			m_maxParticles = util::to_int(value);
+			m_maxParticles = ::util::to_int(value);
 	}
 	else if(ustring::compare(key,"limit_particle_count"))
-		m_particleLimit = util::to_int(value);
+		m_particleLimit = ::util::to_int(value);
 	else if(ustring::compare(key,"emission_rate"))
-		m_emissionRate = util::to_int(value);
+		m_emissionRate = ::util::to_int(value);
 	else if(ustring::compare(key,"cast_shadows"))
-		SetCastShadows(util::to_boolean(value));
+		SetCastShadows(::util::to_boolean(value));
 	else if(ustring::compare(key,"static_scale"))
-		m_worldScale = util::to_float(value);
+		m_worldScale = ::util::to_float(value);
 	else if(ustring::compare(key,"random_start_frame"))
-		umath::set_flag(m_flags,Flags::RandomStartFrame,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::RandomStartFrame,::util::to_boolean(value));
 	else if(ustring::compare(key,"material"))
 		SetMaterial(client->LoadMaterial(value));
 	else if(ustring::compare(key,"radius"))
-		SetRadius(util::to_float(value));
+		SetRadius(::util::to_float(value));
 	else if(ustring::compare(key,"extent"))
-		SetExtent(util::to_float(value));
+		SetExtent(::util::to_float(value));
 	else if(ustring::compare(key,"sort_particles"))
-		umath::set_flag(m_flags,Flags::SortParticles,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::SortParticles,::util::to_boolean(value));
 	else if(ustring::compare(key,"orientation_type"))
-		m_orientationType = static_cast<OrientationType>(util::to_int(value));
+		m_orientationType = static_cast<OrientationType>(::util::to_int(value));
 	else if(ustring::compare(key,"color"))
 		m_initialColor = Color(value);
 	else if(ustring::compare(key,"loop"))
-		SetContinuous(util::to_boolean(value));
+		SetContinuous(::util::to_boolean(value));
 	else if(ustring::compare(key,"origin"))
 		m_origin = uvec::create(value);
 	else if(ustring::compare(key,"bloom_scale"))
-		m_bloomScale = util::to_float(value);
+		m_bloomScale = ::util::to_float(value);
 	else if(ustring::compare(key,"intensity"))
-		m_intensity = util::to_float(value);
+		m_intensity = ::util::to_float(value);
 	else if(ustring::compare(key,"max_node_count"))
-		m_maxNodes = util::to_int(value);
+		m_maxNodes = ::util::to_int(value);
 	else if(ustring::compare(key,"lifetime"))
-		m_lifeTime = util::to_float(value);
+		m_lifeTime = ::util::to_float(value);
 	else if(ustring::compare(key,"soft_particles"))
-		SetSoftParticles(util::to_boolean(value));
+		SetSoftParticles(::util::to_boolean(value));
 	else if(ustring::compare(key,"texture_scrolling_enabled"))
-		SetTextureScrollingEnabled(util::to_boolean(value));
+		SetTextureScrollingEnabled(::util::to_boolean(value));
 	else if(ustring::compare(key,"world_rotation"))
 	{
 		std::array<float,4> values;
@@ -341,23 +342,23 @@ util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key
 			m_alphaMode = pragma::AlphaMode::Additive;
 	}
 	else if(ustring::compare(key,"premultiply_alpha"))
-		SetAlphaPremultiplied(util::to_boolean(value));
+		SetAlphaPremultiplied(::util::to_boolean(value));
 	else if(ustring::compare(key,"angles"))
 	{
 		auto ang = EulerAngles(value);
 		m_particleRot = uquat::create(ang);
 	}
 	else if(ustring::compare(key,"black_to_alpha"))
-		umath::set_flag(m_flags,Flags::BlackToAlpha,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::BlackToAlpha,::util::to_boolean(value));
 	else if(ustring::compare(key,"move_with_emitter"))
-		umath::set_flag(m_flags,Flags::MoveWithEmitter,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::MoveWithEmitter,::util::to_boolean(value));
 	else if(ustring::compare(key,"rotate_with_emitter"))
-		umath::set_flag(m_flags,Flags::RotateWithEmitter,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::RotateWithEmitter,::util::to_boolean(value));
 	else if(ustring::compare(key,"transform_with_emitter"))
-		umath::set_flag(m_flags,Flags::MoveWithEmitter | Flags::RotateWithEmitter,util::to_boolean(value));
+		umath::set_flag(m_flags,Flags::MoveWithEmitter | Flags::RotateWithEmitter,::util::to_boolean(value));
 	else
-		return util::EventReply::Unhandled;
-	return util::EventReply::Handled;
+		return ::util::EventReply::Unhandled;
+	return ::util::EventReply::Handled;
 }
 
 CParticleSystemComponent::~CParticleSystemComponent()
@@ -588,16 +589,16 @@ void CParticleSystemComponent::SetParent(CParticleSystemComponent *particle)
 		auto *parent = m_hParent.get();
 		if(parent == particle)
 			return;
-		m_hParent = util::WeakHandle<CParticleSystemComponent>{};
+		m_hParent = ::util::WeakHandle<CParticleSystemComponent>{};
 		if(parent != nullptr)
 			parent->RemoveChild(this);
 	}
 	if(particle == nullptr)
 	{
-		m_hParent = util::WeakHandle<CParticleSystemComponent>{};
+		m_hParent = ::util::WeakHandle<CParticleSystemComponent>{};
 		return;
 	}
-	m_hParent = util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle->shared_from_this())};
+	m_hParent = ::util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle->shared_from_this())};
 	particle->AddChild(*this);
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
@@ -622,7 +623,7 @@ void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle)
 {
 	if(HasChild(particle))
 		return;
-	m_childSystems.push_back(util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle.shared_from_this())});
+	m_childSystems.push_back(::util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle.shared_from_this())});
 	particle.SetParent(this);
 }
 
@@ -644,7 +645,7 @@ void CParticleSystemComponent::RemoveChild(CParticleSystemComponent *particle)
 
 bool CParticleSystemComponent::HasChild(CParticleSystemComponent &particle)
 {
-	auto it = std::find_if(m_childSystems.begin(),m_childSystems.end(),[&particle](const util::WeakHandle<CParticleSystemComponent> &hchild) {
+	auto it = std::find_if(m_childSystems.begin(),m_childSystems.end(),[&particle](const ::util::WeakHandle<CParticleSystemComponent> &hchild) {
 		return (hchild.get() == &particle) ? true : false;
 	});
 	return (it != m_childSystems.end()) ? true : false;
@@ -1342,8 +1343,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		r->PostSimulate(tDelta);
 }
 
-const std::vector<util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() const {return const_cast<CParticleSystemComponent*>(this)->GetChildren();}
-std::vector<util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() {return m_childSystems;}
+const std::vector<::util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() const {return const_cast<CParticleSystemComponent*>(this)->GetChildren();}
+std::vector<::util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() {return m_childSystems;}
 
 bool CParticleSystemComponent::ShouldUseBlackAsAlpha() const {return umath::is_flag_set(m_flags,Flags::BlackToAlpha);}
 

@@ -9,9 +9,12 @@
 #include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/rendering/c_rendermode.h"
+#include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
 #include "pragma/rendering/shaders/c_shaderlua.h"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include "cmaterialmanager.h"
 #include <wgui/wgui.h>
 #include <wgui/wibase.h>
@@ -81,6 +84,7 @@ void CGame::RegisterLua()
 		{"precache_material",Lua::engine::precache_material},
 		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
 		{"load_material",Lua::engine::load_material},
+		{"get_error_material",Lua::engine::get_error_material},
 		{"clear_unused_materials",Lua::engine::clear_unused_materials},
 		//{"create_texture",&Lua::engine::create_texture},
 		{"create_material",Lua::engine::create_material},
@@ -327,6 +331,13 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,dsg);
 	}));
+	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
+		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
+	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
+	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
+		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
+	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
+	//lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
 	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::NoPrepass));
 	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DEPTH_ONLY",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::DepthOnly));
 	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_EXTENDED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::Extended));

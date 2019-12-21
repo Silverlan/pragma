@@ -600,11 +600,11 @@ void WITransformable::UpdateResizeRect()
 
 	UpdateResizeRectPos();
 }
-void WITransformable::SetParent(WIBase *base)
+void WITransformable::SetParent(WIBase *base,std::optional<uint32_t> childIndex)
 {
 	if(m_hResizeRect.IsValid() == true)
 		m_hResizeRect->SetParent(base); // Resize element parent has to be set before us!
-	WIBase::SetParent(base);
+	WIBase::SetParent(base,childIndex);
 }
 void WITransformable::SetZPos(int zpos)
 {

@@ -152,8 +152,22 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 
 	if(bAnimated == true && (flags &ModelUpdateFlags::UpdateWeightBuffer) != ModelUpdateFlags::None)
 	{
-		auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() *sizeof(VertexWeightType),m_vertexWeights->data());
-		m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
+		if(m_extendedVertexWeights->empty())
+		{
+			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() *sizeof(VertexWeightType),m_vertexWeights->data());
+			m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
+		}
+		else
+		{
+			auto numVertWeights = m_vertexWeights->size() +m_extendedVertexWeights->size();
+			std::vector<VertexWeight> vertWeights {};
+			vertWeights.resize(numVertWeights);
+			memcpy(vertWeights.data(),m_vertexWeights->data(),m_vertexWeights->size() *sizeof(m_vertexWeights->front()));
+			memcpy(vertWeights.data() +m_vertexWeights->size(),m_extendedVertexWeights->data(),m_extendedVertexWeights->size() *sizeof(m_extendedVertexWeights->front()));
+
+			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(vertWeights.size() *sizeof(VertexWeightType),vertWeights.data());
+			m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
+		}
 	}
 	
 	if(bHasAlphas == true && (flags &ModelUpdateFlags::UpdateAlphaBuffer) != ModelUpdateFlags::None)

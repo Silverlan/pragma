@@ -84,11 +84,15 @@ util::EventReply WILuaBase::ScrollCallback(Vector2 offset)
 
 void WILuaBase::SetSize(int x,int y)
 {
+	if(x == GetWidth() && y == GetHeight())
+		return;
 	WIBase::SetSize(x,y);
 	CallLuaMember<void,int,int>("OnSizeChanged",x,y);
 }
 void WILuaBase::OnVisibilityChanged(bool bVisible)
 {
+	if(bVisible == *GetVisibilityProperty())
+		return;
 	WIBase::OnVisibilityChanged(bVisible);
 	CallLuaMember<void,bool>("OnVisibilityChanged",bVisible);
 }
@@ -99,11 +103,14 @@ void WILuaBase::DoUpdate()
 }
 void WILuaBase::SetColor(float r,float g,float b,float a)
 {
+	// TODO: Check against current values?
 	WIBase::SetColor(r,g,b,a);
 	CallLuaMember<void,float,float,float,float>("OnColorChanged",r,g,b,a);
 }
 void WILuaBase::SetAlpha(float alpha)
 {
+	if(alpha == GetAlpha())
+		return;
 	WIBase::SetAlpha(alpha);
 	CallLuaMember<void,float>("OnAlphaChanged",alpha);
 }

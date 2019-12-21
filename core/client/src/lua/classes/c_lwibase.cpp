@@ -185,6 +185,11 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,WIHandle&,WIHandle&)>(&Wrap));
 	classDef.def("GetParent",&GetParent);
 	classDef.def("SetParent",&SetParent);
+	classDef.def("SetParent",static_cast<void(*)(lua_State*,WIHandle&,WIHandle&,uint32_t)>([](lua_State *l,WIHandle &hPanel,WIHandle &hParent,uint32_t index) {
+		lua_checkgui(l,hPanel);
+		lua_checkgui(l,hParent);
+		hPanel->SetParent(hParent.get(),index);
+	}));
 	classDef.def("ClearParent",&ClearParent);
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,WIHandle&)>(&GetChildren));
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,WIHandle&,std::string)>(&GetChildren));
@@ -391,6 +396,14 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("ClearStyleClasses",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
 		lua_checkgui(l,hPanel);
 		hPanel->ClearStyleClasses();
+	}));
+	classDef.def("FindChildIndex",static_cast<void(*)(lua_State*,WIHandle&,WIHandle&)>([](lua_State *l,WIHandle &hPanel,WIHandle &hChild) {
+		lua_checkgui(l,hPanel);
+		lua_checkgui(l,hChild);
+		auto index = hPanel->FindChildIndex(*hChild.get());
+		if(index.has_value() == false)
+			return;
+		Lua::PushInt(l,*index);
 	}));
 
 	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&,bool)>(&Draw));

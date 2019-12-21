@@ -174,6 +174,10 @@ decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,Anvil::Format::R32G32B32A32_SINT};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT = {VERTEX_BINDING_BONE_WEIGHT,Anvil::Format::R32G32B32A32_SFLOAT};
 
+decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {VERTEX_BINDING_BONE_WEIGHT_EXT,Anvil::Format::R32G32B32A32_SINT};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {VERTEX_BINDING_BONE_WEIGHT_EXT,Anvil::Format::R32G32B32A32_SFLOAT};
+
 decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_POSITION) ShaderEntity::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32_SFLOAT,offsetof(VertexBufferData,uv)};
@@ -278,11 +282,23 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 	auto &cam = scene->GetActiveCamera();
 	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
 	std::vector<Anvil::Buffer*> vertexBuffers;
-	vertexBuffers.reserve(2u);
+	std::vector<uint64_t> offsets;
+	vertexBuffers.reserve(3u);
+	offsets.reserve(3u);
 	if(bUseVertexWeightBuffer == true)
+	{
 		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? &vertexWeightBuffer->GetAnvilBuffer() : &c_engine->GetDummyBuffer()->GetAnvilBuffer());
+		offsets.push_back(0ull);
+
+		// Extended vertex weights
+		auto &vertWeights = mesh.GetVertexWeights();
+		auto offset = vertWeights.size() *sizeof(vertWeights.front());
+		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? &vertexWeightBuffer->GetAnvilBuffer() : &c_engine->GetDummyBuffer()->GetAnvilBuffer());
+		offsets.push_back(offset);
+	}
 	vertexBuffers.push_back(&vertexBuffer->GetAnvilBuffer());
-	return RecordBindVertexBuffers(vertexBuffers) &&
+	offsets.push_back(0ull);
+	return RecordBindVertexBuffers(vertexBuffers,0u,offsets) &&
 		RecordBindIndexBuffer(indexBuffer->GetAnvilBuffer(),Anvil::IndexType::UINT16) &&
 		fDraw(mesh);
 }

@@ -128,12 +128,12 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 ModelSubMesh::ModelSubMesh()
 	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
 	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<VertexWeight>>()),
-	m_vertices(std::make_shared<std::vector<Vertex>>())
+	m_extendedVertexWeights(std::make_shared<std::vector<VertexWeight>>()),m_vertices(std::make_shared<std::vector<Vertex>>())
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
-	m_vertexWeights(other.m_vertexWeights),m_min(other.m_min),m_max(other.m_max)
+	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max)
 {}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
@@ -190,6 +190,16 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 		for(auto &vw : *other.m_vertexWeights)
 			m_vertexWeights->push_back(vw);
 	}
+
+	if(other.m_extendedVertexWeights != nullptr)
+	{
+		if(m_extendedVertexWeights == nullptr)
+			m_extendedVertexWeights = std::make_shared<std::vector<VertexWeight>>();
+		m_extendedVertexWeights->reserve(newVertCount);
+		m_extendedVertexWeights->resize(vertCount);
+		for(auto &vw : *other.m_extendedVertexWeights)
+			m_extendedVertexWeights->push_back(vw);
+	}
 }
 void ModelSubMesh::SetShared(const ModelSubMesh &other,ShareMode mode)
 {
@@ -200,7 +210,10 @@ void ModelSubMesh::SetShared(const ModelSubMesh &other,ShareMode mode)
 	if((mode &ShareMode::Triangles) != ShareMode::None)
 		m_triangles = other.m_triangles;
 	if((mode &ShareMode::VertexWeights) != ShareMode::None)
+	{
 		m_vertexWeights = other.m_vertexWeights;
+		m_extendedVertexWeights = other.m_extendedVertexWeights;
+	}
 }
 void ModelSubMesh::ClearTriangles()
 {
@@ -275,6 +288,7 @@ std::vector<Vertex> &ModelSubMesh::GetVertices() {return *m_vertices;}
 std::vector<Vector2> &ModelSubMesh::GetAlphas() {return *m_alphas;}
 std::vector<uint16_t> &ModelSubMesh::GetTriangles() {return *m_triangles;}
 std::vector<VertexWeight> &ModelSubMesh::GetVertexWeights() {return *m_vertexWeights;}
+std::vector<VertexWeight> &ModelSubMesh::GetExtendedVertexWeights() {return *m_extendedVertexWeights;}
 uint8_t ModelSubMesh::GetAlphaCount() const {return m_numAlphas;}
 void ModelSubMesh::SetAlphaCount(uint8_t numAlpha) {m_numAlphas = numAlpha;}
 uint32_t ModelSubMesh::AddVertex(const Vertex &v)
@@ -357,15 +371,24 @@ void ModelSubMesh::SetVertexAlpha(uint32_t idx,const Vector2 &alpha)
 		return;
 	(*m_alphas)[idx] = alpha;
 }
+const std::vector<VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) const
+{
+	return const_cast<ModelSubMesh*>(this)->GetVertexWeightSet(idx);
+}
+std::vector<VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx)
+{
+	return (idx >= 4) ? *m_extendedVertexWeights : *m_vertexWeights;
+}
 void ModelSubMesh::SetVertexWeight(uint32_t idx,const VertexWeight &weight)
 {
-	if(idx >= m_vertexWeights->size())
+	auto &vertexWeights = GetVertexWeightSet(idx);
+	if(idx >= vertexWeights.size())
 	{
-		m_vertexWeights->resize(idx +1);
-		if(m_vertexWeights->size() == m_vertexWeights->capacity())
-			m_vertexWeights->reserve(static_cast<uint32_t>(m_vertexWeights->size() *1.5f));
+		vertexWeights.resize(idx +1);
+		if(vertexWeights.size() == vertexWeights.capacity())
+			vertexWeights.reserve(static_cast<uint32_t>(vertexWeights.size() *1.5f));
 	}
-	(*m_vertexWeights)[idx] = weight;
+	vertexWeights.at(idx) = weight;
 }
 Vertex ModelSubMesh::GetVertex(uint32_t idx) const
 {
@@ -399,9 +422,10 @@ Vector2 ModelSubMesh::GetVertexAlpha(uint32_t idx) const
 }
 VertexWeight ModelSubMesh::GetVertexWeight(uint32_t idx) const
 {
-	if(idx >= m_vertexWeights->size())
+	auto &vertexWeights = GetVertexWeightSet(idx);
+	if(idx >= vertexWeights.size())
 		return {};
-	return (*m_vertexWeights)[idx];
+	return vertexWeights.at(idx);
 }
 void ModelSubMesh::GetBounds(Vector3 &min,Vector3 &max) const
 {
@@ -416,6 +440,7 @@ void ModelSubMesh::Optimize()
 	newTriangles.reserve(m_triangles->size());
 
 	auto bCheckAlphas = (m_alphas->size() == m_vertices->size()) ? true : false;
+	// TODO: Check extended weights as well!
 	auto bCheckWeights = (m_vertexWeights->size() == m_vertices->size()) ? true : false;
 	std::vector<Vector2> newAlphas;
 	if(bCheckAlphas == true)

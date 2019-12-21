@@ -193,3 +193,6 @@ url=https://github.com/Silverlan/Anvil
 [submodule "external_libs/util_video_recorder"]
 	path = external_libs/util_video_recorder
 	url = https://github.com/Silverlan/util_video_recorder.git
+[submodule "modules/pr_curl"]
+	path = modules/pr_curl
+	url = https://github.com/Silverlan/pr_curl.git

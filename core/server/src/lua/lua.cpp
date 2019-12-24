@@ -45,6 +45,7 @@ void SGame::RegisterLua()
 
 	Lua::RegisterLibrary(GetLuaState(),"engine",{
 		{"load_library",&Lua::engine::LoadLibrary},
+		{"get_info",&Lua::engine::get_info},
 		{"get_tick_count",&Lua::engine::GetTickCount},
 		{"set_record_console_output",&Lua::engine::set_record_console_output},
 		{"poll_console_output",&Lua::engine::poll_console_output}

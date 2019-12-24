@@ -28,6 +28,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 
+#pragma optimize("",off)
 WIMainMenu::WIMainMenu()
 	: WIBase(),WIBaseBlur(),m_menuType(0),m_tOpen(0.0)
 {
@@ -117,6 +118,8 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 	else
 	{
 		m_menuSound->SetType(ALSoundType::Music | ALSoundType::GUI);
+		// m_menuSound->SetPitch(0.4f);
+		// m_menuSound->SetGain(0.2f);
 		m_cbMenuTrack = FunctionCallback<void,ALState,ALState>::Create([this](ALState,ALState newstate) {
 			if(newstate != ALState::Playing)
 				this->PlayNextMenuTrack();
@@ -125,9 +128,28 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 	}
 }
 
+//#include "pragma/util/curl_query_handler.hpp"
 void WIMainMenu::Initialize()
 {
 	WIBase::Initialize();
+
+	/*pragma::CurlQueryHandler curlQueryHandler {};
+	curlQueryHandler.AddRequest("https://wiki.pragma-engine.com/",{},[](int32_t,const std::string &response) {
+		std::cout<<"Complete!"<<std::endl;
+		std::cout<<response<<std::endl;
+	},[](int64_t,int64_t,int64_t,int64_t) {
+		std::cout<<"Progress..."<<std::endl;
+	});
+	curlQueryHandler.StartDownload();
+	while(curlQueryHandler.IsComplete() == false);*/
+
+	m_hPragmaLogo = CreateChild<WITexturedRect>();
+	auto *pTex = static_cast<WITexturedRect*>(m_hPragmaLogo.get());
+	pTex->SetMaterial("wgui/pragma_logo");
+	pTex->SizeToTexture();
+	pTex->SetPos(192,80);
+	pTex->SetHeight(64,true);
+	pTex->SetZPos(1'000);
 	
 	SetSize(1024,768);
 	m_hBg = CreateChild<WIRect>();
@@ -180,9 +202,11 @@ void WIMainMenu::Initialize()
 	menu->AddMenuItem(Locale::GetText("menu_options"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hOptions);
 	}));
-	/*menu->AddMenuItem(Locale::GetText("menu_credits"),FunctionCallback<>::Create([this]() {
+#if WIMENU_ENABLE_CREDITS_MENU != 0
+	menu->AddMenuItem(Locale::GetText("menu_credits"),FunctionCallback<>::Create([this]() {
 		SetActiveMenu(m_hCredits);
-	}));*/
+	}));
+#endif
 	menu->AddMenuItem(Locale::GetText("menu_addons"),FunctionCallback<>::Create([this]() {
 		//SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
@@ -219,12 +243,14 @@ void WIMainMenu::Initialize()
 	pMods->SetAnchor(0.f,0.f,1.f,1.f);
 	pMods->SetKeyboardInputEnabled(true);
 
+#if WIMENU_ENABLE_CREDITS_MENU != 0
 	m_hCredits = CreateChild<WIMainMenuCredits>();
 	auto *pCredits = m_hCredits.get<WIMainMenuCredits>();
 	pCredits->SetVisible(false);
 	pCredits->SetSize(GetWidth(),GetHeight());
 	pCredits->SetAnchor(0.f,0.f,1.f,1.f);
 	pCredits->SetKeyboardInputEnabled(true);
+#endif
 
 	m_hLoad = CreateChild<WIMainMenuLoadGame>();
 	WIMainMenuLoadGame *loadGame = m_hLoad.get<WIMainMenuLoadGame>();
@@ -284,19 +310,21 @@ void WIMainMenu::Initialize()
 	pIcon->SetMaterial("wgui/patreon_logo");
 	pIcon->SetSize(64,64);
 	pIcon->SetMouseInputEnabled(true);
-	pIcon->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::Create([]() -> util::EventReply {
-		ShellExecute(0,0,engine_info::get_patreon_url().c_str(),0,0,SW_SHOW);
-		return util::EventReply::Handled;
+	pIcon->SetCursor(GLFW::Cursor::Shape::Hand);
+	pIcon->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([](util::EventReply *reply) -> CallbackReturnType {
+		util::open_url_in_browser(engine_info::get_patreon_url());
+		*reply = util::EventReply::Handled;
+		return CallbackReturnType::HasReturnValue;
 	}));
 #endif
 
-#if ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD
+#if WIMENU_ENABLE_FMOD_LOGO != 0
 	m_hFMODLogo = CreateChild<WITexturedRect>();
-	auto *pIcon = m_hFMODLogo.get<WITexturedRect>();
-	pIcon->SetMaterial("third_party/fmod_logo");
-	pIcon->SetColor(Color::White);
-	pIcon->SetSize(64,32);
-	pIcon->SetMouseInputEnabled(true);
+	auto *pIconFMod = m_hFMODLogo.get<WITexturedRect>();
+	pIconFMod->SetMaterial("third_party/fmod_logo");
+	pIconFMod->SetColor(Color::White);
+	pIconFMod->SetSize(64,32);
+	pIconFMod->SetMouseInputEnabled(true);
 #endif
 
 	/*WIHandle hConsole = CreateChild<WIConsole>();
@@ -340,6 +368,8 @@ void WIMainMenu::SetActiveMenu(WIHandle &hMenu)
 		return;
 	if(m_hActive.IsValid())
 		m_hActive->SetVisible(false);
+	if(m_hPragmaLogo.IsValid())
+		m_hPragmaLogo->SetVisible(hMenu.get() == m_hMain.get());
 	if(!hMenu.IsValid())
 		return;
 	hMenu->SetVisible(true);
@@ -352,7 +382,9 @@ void WIMainMenu::OpenNewGameMenu() {SetActiveMenu(m_hNewGame);}
 void WIMainMenu::OpenLoadGameMenu() {SetActiveMenu(m_hLoad);}
 void WIMainMenu::OpenOptionsMenu() {SetActiveMenu(m_hOptions);}
 void WIMainMenu::OpenModsMenu() {SetActiveMenu(m_hMods);}
+#if WIMENU_ENABLE_CREDITS_MENU != 0
 void WIMainMenu::OpenCreditsMenu() {SetActiveMenu(m_hCredits);}
+#endif
 void WIMainMenu::OpenLoadScreen() {SetActiveMenu(m_hLoadScreen);}
 
 void WIMainMenu::OnFocusGained()
@@ -408,18 +440,21 @@ void WIMainMenu::SetSize(int x,int y)
 			m_hVersionAttributes->SetPos(pVersion->GetRight() +4,pVersion->GetY());
 		}
 	}
+	uint32_t logoYBottom = 50;
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	if(m_hPatreonIcon.IsValid())
 	{
 		auto *pIcon = m_hPatreonIcon.get();
 		pIcon->SetPos(x -pIcon->GetWidth() -20,y -pIcon->GetHeight() -60);
+		logoYBottom = y -pIcon->GetY();
 	}
 #endif
-#if ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD
+#if WIMENU_ENABLE_FMOD_LOGO != 0
 	if(m_hFMODLogo.IsValid())
 	{
 		auto *pIcon = m_hFMODLogo.get();
-		pIcon->SetPos(x -pIcon->GetWidth() -20,y -pIcon->GetHeight() -50);
+		pIcon->SetPos(x -pIcon->GetWidth() -20,y -pIcon->GetHeight() -logoYBottom);
 	}
 #endif
 }
+#pragma optimize("",on)

@@ -407,6 +407,25 @@ int Lua::file::GetFlags(lua_State *l)
 	return 1;
 }
 
+int Lua::file::open_external_asset_file(lua_State *l)
+{
+	std::string path = Lua::CheckString(l,1);
+	auto dllHandle = engine->GetNetworkState(l)->LoadLibraryModule("mount_external/pr_mount_external");
+	if(dllHandle == nullptr)
+		return 0;
+	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&)>("open_archive_file");
+	if(fOpenFile == nullptr)
+		return 0;
+	VFilePtr f = nullptr;
+	fOpenFile(path,f);
+	if(f == nullptr)
+		return 0;
+	auto lf = std::make_shared<LFile>();
+	lf->Construct(f);
+	luabind::object(l,lf).push(l);
+	return 1;
+}
+
 int32_t Lua::file::find_external_game_resource_files(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);

@@ -74,6 +74,23 @@ std::vector<uint8_t> &BSPTree::GetClusterVisibility() {return m_clusterVisibilit
 uint64_t BSPTree::GetClusterCount() const {return m_clusterCount;}
 void BSPTree::SetClusterCount(uint64_t numClusters) {m_clusterCount = numClusters;}
 
+static BSPTree::Node *find_leaf_node(BSPTree::Node &node,const Vector3 &point)
+{
+	if(node.leaf)
+		return &node;
+	const auto &n = node.plane.GetNormal();
+	auto d = node.plane.GetDistance();
+	auto v = point -n *static_cast<float>(d);
+	auto dot = uvec::dot(v,n);
+	if(dot >= 0.f)
+		return find_leaf_node(*node.children.at(0),point);
+	return find_leaf_node(*node.children.at(1),point);
+}
+BSPTree::Node *BSPTree::FindLeafNode(const Vector3 &pos)
+{
+	return find_leaf_node(GetRootNode(),pos);
+}
+
 std::shared_ptr<BSPTree::Node> BSPTree::CreateLeaf(bsp::File &bsp,int32_t nodeIndex)
 {
 	auto &leaf = bsp.GetLeaves().at(nodeIndex);

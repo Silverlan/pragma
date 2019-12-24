@@ -72,7 +72,8 @@ void CGame::RegisterLua()
 		{"get_text_size",&Lua::engine::get_text_size},
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
-		{"get_tick_count",&Lua::engine::GetTickCount}
+		{"get_tick_count",&Lua::engine::GetTickCount},
+		{"get_info",&Lua::engine::get_info}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"game",{

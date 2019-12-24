@@ -19,6 +19,11 @@ namespace pragma
 			Reflection = umath::to_integral(ShaderEntity::Pipeline::Count),
 			Count
 		};
+		enum class Flags : uint32_t
+		{
+			None = 0u,
+			UseExtendedVertexWeights = 1u
+		};
 		static Pipeline GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount);
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
@@ -39,6 +44,7 @@ namespace pragma
 		{
 			Vector4 clipPlane;
 			uint32_t vertexAnimInfo;
+			Flags flags;
 		};
 #pragma pack(pop)
 
@@ -47,6 +53,7 @@ namespace pragma
 
 		bool BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindClipPlane(const Vector4 &clipPlane);
+		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -79,5 +86,6 @@ namespace pragma
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderPrepassBase::Flags)
 
 #endif

@@ -153,6 +153,9 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("Rotate",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Quat&)>([](lua_State *l,::ModelSubMesh &mesh,const Quat &rotation) {
 		mesh.Rotate(rotation);
 	}));
+	classDef.def("GetReferenceId",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		Lua::PushInt(l,mesh.GetReferenceId());
+	}));
 }
 void Lua::ModelSubMesh::GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mesh)
 {

@@ -718,6 +718,7 @@ void Game::Tick()
 	StopProfilingStage(CPUProfilingPhase::PhysicsSimulation);
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
+
 	for(auto i=decltype(idx){0u};i<idx;++i)
 	{
 		auto &physComponent = physComponents.at(i);

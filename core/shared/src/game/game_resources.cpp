@@ -128,9 +128,6 @@ bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
 
 bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
 {
-	// Test
-	port_hl2_particle(nw,"C:/Program Files (x86)/Steam/steamapps/common/SourceFilmmaker/game/tf/particles/explosion.pcf");
-
 	std::string ext;
 	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
 		return false;

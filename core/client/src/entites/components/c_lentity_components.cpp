@@ -795,6 +795,92 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCWorld = luabind::class_<CWorldHandle,BaseEntityComponentHandle>("WorldComponent");
 	Lua::register_base_world_component_methods<luabind::class_<CWorldHandle,BaseEntityComponentHandle>,CWorldHandle>(l,defCWorld);
+	defCWorld.def("GetBSPTree",static_cast<void(*)(lua_State*,CWorldHandle&)>([](lua_State *l,CWorldHandle &hEnt) {
+		pragma::Lua::check_component(l,hEnt);
+		auto bspTree = hEnt->GetBSPTree();
+		if(bspTree == nullptr)
+			return;
+		Lua::Push(l,bspTree);
+	}));
+
+	auto defBspTree = luabind::class_<util::BSPTree>("BSPTree");
+	defBspTree.def("IsValid",static_cast<void(*)(lua_State*,util::BSPTree&)>([](lua_State *l,util::BSPTree &tree) {
+		Lua::PushBool(l,tree.IsValid());
+	}));
+	defBspTree.def("IsClusterVisible",static_cast<void(*)(lua_State*,util::BSPTree&,uint32_t,uint32_t)>([](lua_State *l,util::BSPTree &tree,uint32_t clusterSrc,uint32_t clusterDst) {
+		Lua::PushBool(l,tree.IsClusterVisible(clusterSrc,clusterDst));
+	}));
+	defBspTree.def("GetRootNode",static_cast<void(*)(lua_State*,util::BSPTree&)>([](lua_State *l,util::BSPTree &tree) {
+		auto &node = tree.GetRootNode();
+		Lua::Push(l,node.shared_from_this());
+	}));
+	defBspTree.def("GetNodes",static_cast<void(*)(lua_State*,util::BSPTree&)>([](lua_State *l,util::BSPTree &tree) {
+		auto &nodes = tree.GetNodes();
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &node : nodes)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push(l,node);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	defBspTree.def("GetClusterVisibility",static_cast<void(*)(lua_State*,util::BSPTree&)>([](lua_State *l,util::BSPTree &tree) {
+		auto &clusterVisibility = tree.GetClusterVisibility();
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto vis : clusterVisibility)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::PushInt(l,vis);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	defBspTree.def("GetClusterCount",static_cast<void(*)(lua_State*,util::BSPTree&)>([](lua_State *l,util::BSPTree &tree) {
+		Lua::PushInt(l,tree.GetClusterCount());
+	}));
+	defBspTree.def("FindLeafNode",static_cast<void(*)(lua_State*,util::BSPTree&,const Vector3&)>([](lua_State *l,util::BSPTree &tree,const Vector3 &origin) {
+		auto *node = tree.FindLeafNode(origin);
+		if(node == nullptr)
+			return;
+		Lua::Push(l,node->shared_from_this());
+	}));
+
+	auto defBspNode = luabind::class_<util::BSPTree::Node>("Node");
+	defBspNode.def("IsLeaf",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::PushBool(l,node.leaf);
+	}));
+	defBspNode.def("GetBounds",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::Push<Vector3>(l,node.min);
+		Lua::Push<Vector3>(l,node.max);
+	}));
+	defBspNode.def("GetChildren",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		auto t = Lua::CreateTable(l);
+		auto idx = 1;
+		for(auto &child : node.children)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push(l,child);
+		}
+	}));
+	defBspNode.def("GetCluster",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::PushInt(l,node.cluster);
+	}));
+	defBspNode.def("GetVisibleLeafAreaBounds",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::Push<Vector3>(l,node.minVisible);
+		Lua::Push<Vector3>(l,node.maxVisible);
+	}));
+	defBspNode.def("GetInternalNodePlane",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::Push<Plane>(l,node.plane);
+	}));
+	defBspNode.def("GetInternalNodeFirstFaceIndex",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::PushInt(l,node.firstFace);
+	}));
+	defBspNode.def("GetInternalNodeFaceCount",static_cast<void(*)(lua_State*,util::BSPTree::Node&)>([](lua_State *l,util::BSPTree::Node &node) {
+		Lua::PushInt(l,node.numFaces);
+	}));
+	defBspTree.scope[defBspNode];
+	defCWorld.scope[defBspTree];
 	entsMod[defCWorld];
 
 	auto defCFlashlight = luabind::class_<CFlashlightHandle,BaseEntityComponentHandle>("FlashlightComponent");

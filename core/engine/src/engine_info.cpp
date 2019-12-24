@@ -8,7 +8,10 @@
 #define PRAGMA_FORUMS_URL "https://forums.pragma-engine.com/"
 #define PRAGMA_MODDING_HUB_URL "https://mods.pragma-engine.com/"
 #define PRAGMA_WIKI_URL "https://wiki.pragma-engine.com/"
-#define PRAGMA_PATREON_URL "https://www.patreon.com/pragma"
+#define PRAGMA_PATREON_URL "https://www.patreon.com/silverlan"
+#define PRAGMA_TWITTER_URL "https://twitter.com/SilverlanPFM"
+#define PRAGMA_REDDIT_URL "https://www.reddit.com/r/PRFM/"
+#define PRAGMA_DISCORD_URL "https://discord.gg/Ck5BcCz"
 #define PRAGMA_STEAM_APP_ID 947'100
 
 std::string engine_info::get_identifier()
@@ -38,6 +41,9 @@ std::string engine_info::get_modding_hub_url() {return PRAGMA_MODDING_HUB_URL;}
 std::string engine_info::get_wiki_url() {return PRAGMA_WIKI_URL;}
 std::string engine_info::get_forums_url() {return PRAGMA_FORUMS_URL;}
 std::string engine_info::get_patreon_url() {return PRAGMA_PATREON_URL;}
+std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
+std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
+std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}
 uint32_t engine_info::get_steam_app_id() {return PRAGMA_STEAM_APP_ID;}
 
 const std::vector<std::string> engine_info::get_supported_audio_formats()

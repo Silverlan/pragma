@@ -1202,8 +1202,8 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		std::function<void(const util::BSPTree::Node&)> fWriteNode = nullptr;
 		fWriteNode = [&fOut,&fWriteNode,&clusterVisibility,&bspNodes,&bspTree,numClusters](const util::BSPTree::Node &node) {
 			fOut->Write<bool>(node.leaf);
-			fOut->Write<Vector3>(convert_vertex2(node.min));
-			fOut->Write<Vector3>(convert_vertex2(node.max));
+			fOut->Write<Vector3>(convert_vertex(node.min));
+			fOut->Write<Vector3>(convert_vertex(node.max));
 			fOut->Write<int32_t>(node.firstFace);
 			fOut->Write<int32_t>(node.numFaces);
 			fOut->Write<int32_t>(node.originalNodeIndex);
@@ -1230,11 +1230,14 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 						}
 					}
 				}
-				fOut->Write<Vector3>(convert_vertex2(min));
-				fOut->Write<Vector3>(convert_vertex2(max));
+				min = convert_vertex(min);
+				max = convert_vertex(max);
+				uvec::to_min_max(min,max); // Vertex conversion rotates the vectors, which will change the signs, so we have to re-order the vector components
+				fOut->Write<Vector3>(min);
+				fOut->Write<Vector3>(max);
 				return;
 			}
-			fOut->Write<Vector3>(convert_vertex2(node.plane.GetNormal()));
+			fOut->Write<Vector3>(convert_vertex(node.plane.GetNormal()));
 			fOut->Write<float>(node.plane.GetDistance());
 
 			fWriteNode(*node.children.at(0));

@@ -13,6 +13,7 @@ namespace util
 	{
 	public:
 		struct Node
+			: public std::enable_shared_from_this<Node>
 		{
 			std::array<std::shared_ptr<Node>,2u> children = {};
 			bool leaf = true;
@@ -51,6 +52,7 @@ namespace util
 		std::vector<uint8_t> &GetClusterVisibility();
 		uint64_t GetClusterCount() const;
 		void SetClusterCount(uint64_t numClusters);
+		Node *FindLeafNode(const Vector3 &pos);
 
 		std::shared_ptr<Node> CreateNode();
 	private:

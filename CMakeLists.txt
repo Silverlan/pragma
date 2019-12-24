@@ -282,6 +282,9 @@ set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapid
 set(DEPENDENCY_GLSLANG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/deps/glslang CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY third_party_libs/anvil/deps/glslang/glslang glslang STATIC)
 
+set(DEPENDENCY_CURL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_curl/third_party_libs/curl/include CACHE PATH "Path to include directory." FORCE)
+search_lib_recursive(DEPENDENCY_CURL_LIBRARY modules/pr_curl/third_party_libs/curl/lib/${BINARY_PRAGMA_DIR} libcurl_imp)
+
 if(WIN32)
 	search_lib_recursive(DEPENDENCY_LUABIND_BINARY bin/${BINARY_PRAGMA_DIR} luabind)
 else()
@@ -591,6 +594,8 @@ message("Processing third-party libaries...")
 # include generated headers
 target_include_directories(shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)
 target_include_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)
+
+target_include_directories(libcurl PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 
 set(LIBRARY_OUTPUT_PATH "" CACHE PATH "" FORCE)
 

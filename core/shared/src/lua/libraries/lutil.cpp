@@ -657,6 +657,12 @@ int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }
+int Lua::util::open_url_in_browser(lua_State *l)
+{
+	std::string url = Lua::CheckString(l,1);
+	::util::open_url_in_browser(url);
+	return 0;
+}
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 {
 	auto w = Lua::CheckInt(l,1);

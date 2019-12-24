@@ -24,6 +24,7 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
@@ -462,3 +463,4 @@ bool RasterizationRenderer::ResolveRenderPass(std::shared_ptr<prosper::PrimaryCo
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawCmd);
 }
+#pragma optimize("",on)

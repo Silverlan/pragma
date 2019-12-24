@@ -30,6 +30,16 @@ void WIMainMenuBase::OnGoBack(int button,int action,int)
 void WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
+	SetSize(1'024,768);
+	m_menuElementsContainer = WGUI::GetInstance().Create<WIBase>(this);
+	m_menuElementsContainer->SetAutoSizeToContents(true);
+	m_menuElementsContainer->SetX(168);
+	ScheduleUpdate();
+}
+void WIMainMenuBase::DoUpdate()
+{
+	WIBase::DoUpdate();
+	UpdateElements();
 }
 util::EventReply WIMainMenuBase::MouseCallback(GLFW::MouseButton,GLFW::KeyState state,GLFW::Modifier)
 {
@@ -123,14 +133,14 @@ void WIMainMenuBase::UpdateElement(int i)
 	if(el == NULL)
 		return;
 	if(i == 0)
-		el->SetPos(60,150);
+		el->SetPos(0,0);
 	else
 	{
 		WIMainMenuElement *prev = GetElement(i -1);
 		if(prev != NULL)
 		{
 			int yGap = 5;
-			el->SetPos(60,prev->GetPos().y +prev->GetHeight() +yGap);
+			el->SetPos(0,prev->GetPos().y +prev->GetHeight() +yGap);
 		}
 	}
 }
@@ -138,15 +148,13 @@ void WIMainMenuBase::UpdateElements()
 {
 	for(unsigned int i=0;i<m_elements.size();i++)
 		UpdateElement(i);
+	if(m_menuElementsContainer.IsValid())
+		m_menuElementsContainer->SetY(GetHeight() -m_menuElementsContainer->GetHeight() -120);
 }
 void WIMainMenuBase::AddMenuItem(int pos,std::string name,const CallbackHandle &onActivated)
 {
-	auto hEl = CreateChild<WIMainMenuElement>();
-	if(hEl.IsValid() == false)
-		return;
-	auto *el = dynamic_cast<WIMainMenuElement*>(hEl.get());
+	auto *el = WGUI::GetInstance().Create<WIMainMenuElement>(m_menuElementsContainer.get());
 	el->SetText(name);
-	el->SetSize(500,60);
 	el->onActivated = onActivated;
 	el->onSelected = FunctionCallback<void,WIMainMenuElement*>::Create([](WIMainMenuElement *el) {
 		auto *parent = dynamic_cast<WIMainMenuBase*>(el->GetParent());
@@ -196,8 +204,9 @@ WIOptionsList *WIMainMenuBase::InitializeOptionsList()
 }
 void WIMainMenuBase::InitializeOptionsList(WIOptionsList *pList)
 {
-	pList->SetPos(350,150);
-	pList->SetWidth(600);
+	pList->SetPos(192,150);
+	pList->SetWidth(200);
+	pList->SetAnchor(0.f,0.f,1.f,0.f,1'024,768);
 	pList->SizeToContents();
 }
 
@@ -220,11 +229,8 @@ void WIMainMenuElement::Select()
 		return;
 	m_bSelected = true;
 	
-	/*if(m_hBackground.IsValid())
-	{
-		WITexturedRect *pRect = m_hBackground.get<WITexturedRect>();
-		//pRect->SetVisible(true);
-	}*/
+	if(m_hBackground.IsValid())
+		m_hBackground->SetVisible(true);
 	CallCallbacks<void>("Select");
 	if(onSelected == nullptr)
 		return;
@@ -237,10 +243,7 @@ void WIMainMenuElement::Deselect()
 		return;
 	m_bSelected = false;
 	if(m_hBackground.IsValid())
-	{
-		WITexturedRect *pRect = m_hBackground.get<WITexturedRect>();
-		pRect->SetVisible(false);
-	}
+		m_hBackground->SetVisible(false);
 	CallCallbacks<void>("Deselect");
 	if(onDeselected == nullptr)
 		return;
@@ -250,18 +253,28 @@ void WIMainMenuElement::Deselect()
 void WIMainMenuElement::Initialize()
 {
 	WIBase::Initialize();
-	//WITexturedRect *pBackground = WGUI::Create<WITexturedRect>(this);
-	//UNUSED(pBackground);
-	/*if(pBackground != NULL)
+
+	SetSize(350,46);
+	auto *pBackground = WGUI::GetInstance().Create<WIRect>(this);
+	if(pBackground)
 	{
 		m_hBackground = pBackground->GetHandle();
-		pBackground->SetMaterial("wgui/menu_item_selected");
+		pBackground->SetColor(Color{76,76,76});
 		pBackground->SetVisible(false);
-	}*/
+		pBackground->SetSize(GetSize());
+		pBackground->SetAnchor(0.f,0.f,1.f,1.f);
+
+		auto *pPrefix = WGUI::GetInstance().Create<WIRect>(m_hBackground.get());
+		pPrefix->SetColor(Color{255,210,0});
+		pPrefix->SetHeight(pBackground->GetHeight());
+		pPrefix->SetWidth(3);
+		pPrefix->SetAnchor(0.f,0.f,0.f,1.f);
+	}
 	WIText *pText = WGUI::GetInstance().Create<WIText>(this);
 	if(pText != NULL)
 	{
 		m_hText = pText->GetHandle();
+		m_hText->SetX(21);
 		/*pText->SetFont("MainMenu_Regular");
 		pText->SetColor(MENU_ITEM_COLOR);
 		
@@ -295,24 +308,16 @@ void WIMainMenuElement::SetText(std::string &text)
 {
 	if(m_hText.IsValid())
 	{
+		auto upperText = text;
+		ustring::to_upper(upperText);
 		WIText *pText = m_hText.get<WIText>();
-		pText->SetText(text);
+		pText->SetText(upperText);
 		pText->SizeToContents();
 	}
 }
 void WIMainMenuElement::SetSize(int x,int y)
 {
 	WIBase::SetSize(x,y);
-	if(m_hBackground.IsValid())
-	{
-		WITexturedRect *pRect = m_hBackground.get<WITexturedRect>();
-		pRect->SetSize(x,y);
-	}
-	if(m_hText.IsValid())
-	{
-		WIText *pText = m_hText.get<WIText>();
-		pText->SetPos(44,CInt32(y *0.5f -pText->GetHeight() *0.45f));
-	}
 }
 Vector4 WIMainMenuElement::GetBackgroundColor()
 {

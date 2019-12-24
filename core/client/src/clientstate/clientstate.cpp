@@ -38,6 +38,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
+#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
@@ -768,3 +769,4 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
+#pragma optimize("",on)

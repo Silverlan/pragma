@@ -24,6 +24,48 @@ int Lua::engine::CreateLight(lua_State *l)
 	return 0;
 }
 
+int Lua::engine::get_info(lua_State *l)
+{
+	auto t = Lua::CreateTable(l);
+
+	Lua::PushString(l,"identifier");
+	Lua::PushString(l,engine_info::get_identifier());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"patreonURL");
+	Lua::PushString(l,engine_info::get_patreon_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"twitterURL");
+	Lua::PushString(l,engine_info::get_twitter_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"redditURL");
+	Lua::PushString(l,engine_info::get_reddit_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"discordURL");
+	Lua::PushString(l,engine_info::get_discord_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"steamAppId");
+	Lua::PushInt(l,engine_info::get_steam_app_id());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"websiteURL");
+	Lua::PushInt(l,engine_info::get_website_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"wikiURL");
+	Lua::PushInt(l,engine_info::get_wiki_url());
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"name");
+	Lua::PushInt(l,engine_info::get_name());
+	Lua::SetTableValue(l,t);
+	
+}
+
 int Lua::engine::RemoveLights(lua_State*)
 {
 	//engine->RemoveLights(); // WEAVETODO

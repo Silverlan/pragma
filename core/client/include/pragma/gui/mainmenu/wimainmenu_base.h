@@ -10,13 +10,6 @@ class WIOptionsList;
 class DLLCLIENT WIMainMenuBase
 	: public WIBase
 {
-protected:
-	std::vector<WIHandle> m_elements;
-	int m_selected;
-	WIHandle m_hControlSettings;
-	void OnGoBack(int button,int action,int mods);
-	virtual void InitializeOptionsList(WIOptionsList *pList);
-	WIOptionsList *InitializeOptionsList();
 public:
 	WIMainMenuBase();
 	virtual void Initialize() override;
@@ -33,6 +26,15 @@ public:
 	void OnElementSelected(WIMainMenuElement *el);
 	void UpdateElements();
 	void UpdateElement(int i);
+protected:
+	std::vector<WIHandle> m_elements;
+	WIHandle m_menuElementsContainer = {};
+	int m_selected;
+	WIHandle m_hControlSettings;
+	void OnGoBack(int button,int action,int mods);
+	virtual void InitializeOptionsList(WIOptionsList *pList);
+	WIOptionsList *InitializeOptionsList();
+	virtual void DoUpdate() override;
 };
 
 class DLLCLIENT WIMainMenuElement

@@ -36,8 +36,8 @@ WIConsole *WIConsole::Open()
 	pFrame->SetMinSize(160,100);
 	pFrame->SetZPos(10'000);
 	pFrame->SetTitle(Locale::GetText("console"));
-	pFrame->SetPos(444,44);
-	pFrame->SetSize(817,876);
+	pFrame->SetPos(675,86);
+	pFrame->SetSize(450,876);
 	pFrame->SetAnchor(0,0,1,1,1'280,1'024);
 	pFrame->SetRemoveOnClose(false);
 

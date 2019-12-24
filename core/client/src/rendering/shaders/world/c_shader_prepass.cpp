@@ -2,6 +2,7 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/model/vertex.h>
 #include <prosper_util.hpp>
 
@@ -58,6 +59,14 @@ bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane)
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}},outRenderPass,pipelineIdx);
+}
+
+bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
+{
+	auto flags = Flags::None;
+	if(mesh.GetExtendedVertexWeights().empty() == false)
+		flags |= Flags::UseExtendedVertexWeights;
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 
 void ShaderPrepassBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

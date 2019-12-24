@@ -18,7 +18,6 @@ namespace pragma
 		bool ShouldPass(CBaseEntity &ent) const;
 		bool ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const;
 		bool ShouldPass(CModelSubMesh &subMesh,const Vector3 &entityPos) const;
-		const util::BSPTree::Node *FindLeafNode(const util::BSPTree::Node &node,const Vector3 &point) const;
 		const util::BSPTree::Node *GetCurrentNode() const;
 		virtual void Update(const Vector3 &camPos) override;
 		virtual void PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut) override;

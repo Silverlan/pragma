@@ -19,6 +19,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
@@ -974,3 +975,4 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(physicsType));
 	Lua::PushInt(l,umath::to_integral(flags));
 }
+#pragma optimize("",on)

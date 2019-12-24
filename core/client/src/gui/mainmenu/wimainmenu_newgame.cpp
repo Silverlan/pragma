@@ -16,6 +16,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
+#pragma optimize("",off)
 WIMainMenuNewGame::WIMainMenuNewGame()
 	: WIMainMenuBase()
 {}
@@ -150,6 +151,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 
 	// Map
 	auto *pMap = pList->AddDropDownMenu(Locale::GetText("map"));
+	pMap->SetEditable(true);
 	m_hMapList = pMap->GetHandle();
 	ReloadMapList();
 	auto &resourceWatcher = client->GetResourceWatcher();
@@ -188,3 +190,4 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	//
 	InitializeOptionsList(pList);
 }
+#pragma optimize("",on)

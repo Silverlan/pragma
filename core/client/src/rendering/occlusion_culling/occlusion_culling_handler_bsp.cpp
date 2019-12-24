@@ -73,19 +73,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3
 	max += entityPos;
 	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible);
 }
-const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const util::BSPTree::Node &node,const Vector3 &point) const
-{
-	if(node.leaf)
-		return &node;
-	const auto &n = node.plane.GetNormal();
-	auto d = node.plane.GetDistance();
-	auto v = point -n *static_cast<float>(d);
-	auto dot = uvec::dot(v,n);
-	if(dot >= 0.f)
-		return FindLeafNode(*node.children.at(0),point);
-	return FindLeafNode(*node.children.at(1),point);
-}
-const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return FindLeafNode(m_bspTree->GetRootNode(),point);}
+const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return m_bspTree->FindLeafNode(point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}
 void OcclusionCullingHandlerBSP::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {

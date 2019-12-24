@@ -7,7 +7,9 @@
 #include "pragma/gui/wibaseblur.h"
 #include <sharedutils/functioncallback.h>
 
-#define WIMENU_ENABLE_PATREON_LOGO 0
+#define WIMENU_ENABLE_PATREON_LOGO 1
+#define WIMENU_ENABLE_FMOD_LOGO 0 // (ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD)
+#define WIMENU_ENABLE_CREDITS_MENU 1
 
 class DLLCLIENT WIMainMenu
 	: public WIBase,public WIBaseBlur
@@ -27,7 +29,9 @@ public:
 	void OpenLoadGameMenu();
 	void OpenOptionsMenu();
 	void OpenModsMenu();
+#if WIMENU_ENABLE_CREDITS_MENU != 0
 	void OpenCreditsMenu();
+#endif
 	void OpenLoadScreen();
 	void OpenMainMenu();
 protected:
@@ -40,7 +44,9 @@ protected:
 	WIHandle m_hBgSlideShow;
 	WIHandle m_hServerBrowser;
 	WIHandle m_hVersion;
+	WIHandle m_hPragmaLogo = {};
 	WIHandle m_hBuild = {};
+	WIHandle m_logoContainer = {};
 	WIHandle m_hVersionAttributes;
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	WIHandle m_hPatreonIcon;

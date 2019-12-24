@@ -1055,8 +1055,6 @@ void CGame::Think()
 	auto *cam = GetPrimaryCamera();
 	if(cam)
 		cam->UpdateFrustumPlanes();
-	//m_entsOccluded.clear();
-	//GetOccludedEntities(m_entsOccluded);
 
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
@@ -1069,80 +1067,6 @@ void CGame::Think()
 
 	auto &info = get_render_debug_info();
 	info.Reset();
-	
-	//Render(); // Vulkan TODO // TODO: Interpolation
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
-	//glBlitFramebuffer(0,0,800,600,0,0,800,600,GL_COLOR_BUFFER_BIT,GL_NEAREST);
-	//std::cout<<"Error: "<<err<<std::endl;
-	//CallCallbacks<void>("RenderScreen"); // Vulkan TODO
-
-	//OpenGL::ClearColor(1,0,0,1);
-	//OpenGL::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//OpenGL::ClearColor(0,0,0,1);
-	//OpenGL::SetViewPort(0,0,w,h);
-
-//#if RENDER_TO_TEXTURE
-	//OpenGL::BindFrameBuffer(m_renderFBO,GL_FRAMEBUFFER); // Vulkan TODO
-	{
-		//CallLuaCallbacks("RenderScreen"); // Vulkan TODO
-	};
-
-	//int w,h;
-	//OpenGL::GetViewportSize(&w,&h);
-	// Render from multi-sample to screen frame buffer
-	//OpenGL::BindFrameBuffer(m_renderFBO,GL_READ_FRAMEBUFFER);
-	//OpenGL::BindFrameBuffer(m_renderFBOSingleSample,GL_DRAW_FRAMEBUFFER);
-	//OpenGL::BlitFrameBuffer(w,h); // Multi-Sample texture to regular texture // Vulkan TODO
-
-	//auto outputFbo = m_renderFBOSingleSample;
-	//auto outputTex = m_renderTextureSingleSample;
-
-	//static auto *shader = static_cast<ShaderAdditive*>(GetShader("additive")); // Vulkan TODO
-	// Add Bloom
-	/*OpenGL::BindFrameBuffer(m_tempFBO,GL_DRAW_FRAMEBUFFER);
-	if(shader != nullptr)
-	{
-		shader->Render(outputTex,m_bloomTexture,ShaderTexturedBase::GetQuadVertexBuffer());
-		outputFbo = m_tempFBO;
-		outputTex = m_tempTexture;
-	}*/ // Vulkan TODO
-	//
-
-	// Add Glow
-
-	/*if(shader != nullptr && m_bFirstGlow == false) // No need for this step if there are no glowing objects on screen
-	{
-		const float additiveScale = 4.f;
-		OpenGL::BindFrameBuffer(m_renderFBOPostProcessing,GL_DRAW_FRAMEBUFFER);
-		shader->Render(outputTex,m_glowBlurTexture,ShaderTexturedBase::GetQuadVertexBuffer(),additiveScale);
-		outputFbo = m_renderFBOPostProcessing;
-		outputTex = m_renderTexturePostProcessing;
-	}*/ // Vulkan TODO
-	//
-
-	//OpenGL::BindFrameBuffer(outputFbo,GL_READ_FRAMEBUFFER);
-	//CallCallbacks<void,unsigned int,unsigned int>("RenderPostProcessing",outputFbo,outputTex); // Vulkan TODO
-
-	// Apply post-processing effects
-	/*static auto *pp = static_cast<ShaderPostProcessing*>(GetShader("postprocessing"));
-	if(pp != nullptr)
-		pp->Render(m_renderFBOScreen,outputTex);
-	//
-	*/ // Vulkan TODO
-	// Convert HDR to 0-1 color range
-	/*OpenGL::BindFrameBuffer(m_renderFBOScreen,GL_READ_FRAMEBUFFER);
-	OpenGL::BindFrameBuffer(m_hdrInfo.fbo,GL_DRAW_FRAMEBUFFER);
-	//static auto *shaderHdr = static_cast<ShaderHDR*>(GetShader("hdr"));
-	//if(shaderHdr != nullptr)
-	//	shaderHdr->Render(m_renderTextureScreen,ShaderTexturedBase::GetQuadVertexBuffer()); // Vulkan TODO
-	//
-	
-	// Render the result to the main screen
-	OpenGL::BindFrameBuffer(m_hdrInfo.fbo,GL_READ_FRAMEBUFFER);
-	OpenGL::BindFrameBuffer(0,GL_DRAW_FRAMEBUFFER);
-	OpenGL::BlitFrameBuffer(w,h);
-	OpenGL::BindFrameBuffer(0,GL_READ_FRAMEBUFFER);*/ // Vulkan TODO
-	//
 
 	PostThink();
 }

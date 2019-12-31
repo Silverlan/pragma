@@ -171,7 +171,6 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	}
 	auto *pGameMode = pList->AddDropDownMenu(Locale::GetText("gamemode"),gameModeOptions,"sv_gamemode");
 	m_hGameMode = pGameMode->GetHandle();
-	pGameMode->SizeToContents();
 	//
 	// Server Name
 	auto *pServerName = pList->AddTextEntry(Locale::GetText("server_name"),"sv_servername");

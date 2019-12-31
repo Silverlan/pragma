@@ -355,7 +355,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		sceneInfo.width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
 		sceneInfo.height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
 		sceneInfo.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1024"));
-		sceneInfo.hdrOutput = true;//(format == pragma::image::ImageOutputFormat::HDR);
+		sceneInfo.hdrOutput = false;//;//(format == pragma::image::ImageOutputFormat::HDR);
 		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 		if(pCam)
 		{

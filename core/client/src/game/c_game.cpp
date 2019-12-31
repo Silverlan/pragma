@@ -586,19 +586,24 @@ Mat4 CGame::GetViewModelProjectionMatrix() const
 	return pragma::BaseEnvCameraComponent::CalcProjectionMatrix(*m_viewFov,aspectRatio,nearZ,farZ);
 }
 
-pragma::CCameraComponent *CGame::CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ)
+pragma::CCameraComponent *CGame::CreateCamera(float aspectRatio,float fov,float nearZ,float farZ)
 {
 	auto *cam = CreateEntity<CEnvCamera>();
 	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : util::WeakHandle<pragma::CCameraComponent>{};
 	if(whCamComponent.expired())
 		return nullptr;
 	auto *pCameraComponent = whCamComponent.get();
-	pCameraComponent->SetAspectRatio(width /static_cast<float>(height));
+	pCameraComponent->SetAspectRatio(aspectRatio);
 	pCameraComponent->SetFOV(fov);
 	pCameraComponent->SetNearZ(nearZ);
 	pCameraComponent->SetFarZ(farZ);
 	pCameraComponent->UpdateMatrices();
 	return pCameraComponent;
+}
+
+pragma::CCameraComponent *CGame::CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ)
+{
+	return CreateCamera(width /static_cast<float>(height),fov,nearZ,farZ);
 }
 
 void CGame::InitializeGame() // Called by NET_cl_resourcecomplete

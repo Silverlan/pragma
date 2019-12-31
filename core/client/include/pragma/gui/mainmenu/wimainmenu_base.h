@@ -28,6 +28,7 @@ public:
 	void UpdateElement(int i);
 protected:
 	std::vector<WIHandle> m_elements;
+	std::vector<WIHandle> m_optionLists = {};
 	WIHandle m_menuElementsContainer = {};
 	int m_selected;
 	WIHandle m_hControlSettings;

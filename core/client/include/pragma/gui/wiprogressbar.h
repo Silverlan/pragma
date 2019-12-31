@@ -42,6 +42,7 @@ private:
 	void UpdateText();
 	void UpdateTextPosition();
 	void UpdateOptions();
+	void OnProgressChanged(float oldValue,float value);
 	void SetRange(float min,float max,float stepSize,bool bEraseOptions);
 };
 

@@ -56,26 +56,31 @@ void WIProgressBar::SetSize(int x,int y)
 		auto *pProgress = m_hProgress.get<WIRect>();
 		pProgress->SetHeight(y);
 	}
-	SetProgress(m_progress->GetValue());
+	OnProgressChanged(GetValue(),GetValue());
 	UpdateTextPosition();
 }
 
 float WIProgressBar::GetProgress() const {return m_progress->GetValue();}
 const util::PFloatProperty &WIProgressBar::GetProgressProperty() const {return m_progress;}
+void WIProgressBar::OnProgressChanged(float oldValue,float value)
+{
+	auto w = GetWidth();
+	if(m_hProgress.IsValid())
+	{
+		auto *pProgress = m_hProgress.get<WIRect>();
+		pProgress->SetWidth(CInt32(CFloat(w) *GetProgress()));
+	}
+	UpdateText();
+	CallCallbacks<void,float,float>("OnChange",oldValue,value);
+}
 void WIProgressBar::SetProgress(float progress)
 {
 	progress = UpdateProgress(progress);
 	if(progress == *m_progress)
 		return;
+	auto value = GetValue();
 	*m_progress = progress;
-	auto w = GetWidth();
-	if(m_hProgress.IsValid())
-	{
-		auto *pProgress = m_hProgress.get<WIRect>();
-		pProgress->SetWidth(CInt32(CFloat(w) *progress));
-	}
-	UpdateText();
-	CallCallbacks<void,float,float>("OnChange",progress,GetValue());
+	OnProgressChanged(value,GetValue());
 }
 void WIProgressBar::SetValue(float v)
 {

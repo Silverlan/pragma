@@ -55,7 +55,7 @@ struct ImageWriteInfo
 		ColorMap1BitAlpha = DXT1a,
 		ColorMapSharpAlpha = DXT3,
 		ColorMapSmoothAlpha = DXT5,
-		NormalMap = DXT5n, // TODO: BC5 might be a better choice, but is not supported by cycles!
+		NormalMap = DXT5, // TODO: BC5 might be a better choice, but is not supported by cycles! DXT5n may also be a better choice but has some strange rules associated.
 		HDRColorMap = BC6,
 		GradientMap = BC1 // TODO: Is this a good idea?
 	};

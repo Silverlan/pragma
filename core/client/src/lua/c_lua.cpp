@@ -73,7 +73,8 @@ void CGame::RegisterLua()
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
 		{"get_tick_count",&Lua::engine::GetTickCount},
-		{"get_info",&Lua::engine::get_info}
+		{"get_info",&Lua::engine::get_info},
+		{"shutdown",&Lua::engine::exit}
 	});
 
 	Lua::RegisterLibrary(GetLuaState(),"game",{
@@ -143,12 +144,11 @@ void CGame::RegisterLua()
 		{"register_component",Lua::ents::register_component<pragma::CLuaBaseEntityComponent>},
 		{"register_component_event",Lua::ents::register_component_event},
 		{"create_camera",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto width = Lua::CheckNumber(l,1);
-			auto height = Lua::CheckNumber(l,2);
-			auto fov = Lua::CheckNumber(l,3);
-			auto nearZ = Lua::CheckNumber(l,4);
-			auto farZ = Lua::CheckNumber(l,5);
-			auto *cam = c_game->CreateCamera(width,height,fov,nearZ,farZ);
+			auto aspectRatio = Lua::CheckNumber(l,1);
+			auto fov = Lua::CheckNumber(l,2);
+			auto nearZ = Lua::CheckNumber(l,3);
+			auto farZ = Lua::CheckNumber(l,4);
+			auto *cam = c_game->CreateCamera(aspectRatio,fov,nearZ,farZ);
 			if(cam == nullptr)
 				return 0;
 			cam->PushLuaObject(l);
@@ -349,6 +349,10 @@ void CGame::RegisterLua()
 
 	auto classDefScene = luabind::class_<Scene>("Scene");
 	classDefScene.def("GetActiveCamera",&Lua::Scene::GetCamera);
+	classDefScene.def("SetActiveCamera",static_cast<void(*)(lua_State*,::Scene&,CCameraHandle&)>([](lua_State *l,::Scene &scene,CCameraHandle &hCam) {
+		pragma::Lua::check_component(l,hCam);
+		scene.SetActiveCamera(*hCam);
+	}));
 	classDefScene.def("GetWidth",&Lua::Scene::GetWidth);
 	classDefScene.def("GetHeight",&Lua::Scene::GetHeight);
 	classDefScene.def("GetSize",&Lua::Scene::GetSize);

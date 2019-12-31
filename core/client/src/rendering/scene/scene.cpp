@@ -613,7 +613,12 @@ void Scene::ReloadRenderTarget()
 	m_bValid = true;
 }
 
-void Scene::InitializeRenderTarget() {}
+void Scene::InitializeRenderTarget()
+{
+	if(IsValid())
+		return;
+	ReloadRenderTarget();
+}
 
 const util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() const {return const_cast<Scene*>(this)->GetActiveCamera();}
 util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() {return m_camera;}

@@ -10,7 +10,7 @@ extern DLLENGINE Engine *engine;
 void ClientState::SendPacket(const std::string &name,NetPacket &packet,pragma::networking::Protocol protocol)
 {
 	auto ID = GetServerMessageID(name);
-	if(ID == 0)
+	if(ID == 0 || m_client == nullptr)
 		return;
 	packet.SetMessageID(ID);
 	pragma::networking::Error err;

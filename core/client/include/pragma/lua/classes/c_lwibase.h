@@ -166,6 +166,10 @@ namespace Lua
 		DLLCLIENT void SetClippingEnabled(lua_State *l,WIHandle &hPanel,bool b);
 		DLLCLIENT void IsClippingEnabled(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetBounds(lua_State *l,WIHandle &hPanel,const Vector2 &start,const Vector2 &end);
+		DLLCLIENT void SetBackgroundElement(lua_State *l,WIHandle &hPanel,bool backgroundElement,bool autoAlignToParent);
+		DLLCLIENT void SetBackgroundElement(lua_State *l,WIHandle &hPanel,bool backgroundElement);
+		DLLCLIENT void SetBackgroundElement(lua_State *l,WIHandle &hPanel);
+		DLLCLIENT void IsBackgroundElement(lua_State *l,WIHandle &hPanel);
 
 		DLLCLIENT void SetAlwaysUpdate(lua_State *l,WIHandle &hPanel,bool b);
 

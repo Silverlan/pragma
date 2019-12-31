@@ -150,6 +150,16 @@ void WIMainMenuBase::UpdateElements()
 		UpdateElement(i);
 	if(m_menuElementsContainer.IsValid())
 		m_menuElementsContainer->SetY(GetHeight() -m_menuElementsContainer->GetHeight() -120);
+
+	if(m_menuElementsContainer.IsValid())
+	{
+		for(auto &hEl : m_optionLists)
+		{
+			if(hEl.IsValid() == false)
+				continue;
+			static_cast<WIOptionsList*>(hEl.get())->SetMaxHeight(m_menuElementsContainer->GetY() -hEl->GetY() -38);
+		}
+	}
 }
 void WIMainMenuBase::AddMenuItem(int pos,std::string name,const CallbackHandle &onActivated)
 {
@@ -200,14 +210,15 @@ void WIMainMenuBase::AddMenuItem(std::string name,const CallbackHandle &onActiva
 WIOptionsList *WIMainMenuBase::InitializeOptionsList()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
+	m_hControlSettings->SetName("options");
 	return m_hControlSettings.get<WIOptionsList>();
 }
 void WIMainMenuBase::InitializeOptionsList(WIOptionsList *pList)
 {
-	pList->SetPos(192,150);
-	pList->SetWidth(200);
-	pList->SetAnchor(0.f,0.f,1.f,0.f,1'024,768);
+	pList->SetPos(192,200);
 	pList->SizeToContents();
+	pList->SetWidth(700);
+	m_optionLists.push_back(pList->GetHandle());
 }
 
 ////////////////////////////

@@ -269,6 +269,9 @@ void Lua::Model::register_class(
 	classDef.def("GetVertexAnimation",&Lua::Model::GetVertexAnimation);
 	classDef.def("AddVertexAnimation",&Lua::Model::AddVertexAnimation);
 	classDef.def("RemoveVertexAnimation",&Lua::Model::RemoveVertexAnimation);
+	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&,luabind::object,uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&)>(&Lua::Model::GetBodyGroupMeshes));
 	classDef.def("GetFlexControllers",&Lua::Model::GetFlexControllers);
 	classDef.def("LookupFlexController",&Lua::Model::GetFlexControllerId);
 	classDef.def("GetFlexController",static_cast<void(*)(lua_State*,::Model&,const std::string&)>(&Lua::Model::GetFlexController));
@@ -1800,6 +1803,48 @@ void Lua::Model::AddVertexAnimation(lua_State *l,::Model &mdl,const std::string 
 	Lua::Push<std::shared_ptr<::VertexAnimation>>(l,anim);
 }
 void Lua::Model::RemoveVertexAnimation(lua_State *l,::Model &mdl,const std::string &name) {mdl.RemoveVertexAnimation(name);}
+static void get_body_group_meshes(lua_State *l,::Model &mdl,const std::vector<uint32_t> &bodyGroupIds,uint32_t lod)
+{
+	std::vector<std::shared_ptr<ModelMesh>> meshes {};
+	mdl.GetBodyGroupMeshes(bodyGroupIds,lod,meshes);
+	auto t = Lua::CreateTable(l);
+	auto idx = 1;
+	for(auto &mesh : meshes)
+	{
+		Lua::PushInt(l,idx++);
+		Lua::Push(l,mesh);
+		Lua::SetTableValue(l,t);
+	}
+}
+void Lua::Model::GetBodyGroupMeshes(lua_State *l,::Model &mdl,luabind::object oBodygroups,uint32_t lod)
+{
+	auto tBodygroups = 2;
+	Lua::CheckTable(l,tBodygroups);
+	std::vector<uint32_t> bodyGroupIds;
+
+	auto numBgs = Lua::GetObjectLength(l,tBodygroups);
+	bodyGroupIds.reserve(numBgs);
+	for(auto i=decltype(numBgs){0u};i<numBgs;++i)
+	{
+		Lua::PushInt(l,i +1);
+		Lua::GetTableValue(l,tBodygroups);
+
+		auto groupId = Lua::CheckInt(l,-1);
+		bodyGroupIds.push_back(groupId);
+
+		Lua::Pop(l,1);
+	}
+
+	get_body_group_meshes(l,mdl,bodyGroupIds,lod);
+}
+void Lua::Model::GetBodyGroupMeshes(lua_State *l,::Model &mdl,uint32_t lod)
+{
+	std::vector<uint32_t> bodygroups {};
+	bodygroups.resize(mdl.GetBodyGroupCount(),0u);
+
+	get_body_group_meshes(l,mdl,bodygroups,lod);
+}
+void Lua::Model::GetBodyGroupMeshes(lua_State *l,::Model &mdl) {GetBodyGroupMeshes(l,mdl,0u);}
 static void push_flex_controller(lua_State *l,const FlexController &fc)
 {
 	auto tFc = Lua::CreateTable(l);

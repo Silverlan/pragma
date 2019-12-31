@@ -10,6 +10,7 @@
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_image_buffer.hpp>
+#include <mathutil/color.h>
 #include <fsys/filesystem.h>
 #include <gli/save.hpp>
 #include <gli/texture2d.hpp>
@@ -534,7 +535,7 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 		uint64_t size = 0;
 		auto numLayers = image.GetLayerCount();
 		auto numMipmaps = image.GetMipmapCount();
-		sizePerPixel = prosper::util::get_byte_size(image.GetFormat());
+		sizePerPixel = prosper::util::get_byte_size(dstFormat);
 		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
 		{
 			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
@@ -548,21 +549,81 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 
 		prosper::util::BufferImageCopyInfo copyInfo {};
 		copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
+
+		struct ImageMipmapData
+		{
+			uint32_t mipmapIndex = 0u;
+			uint64_t bufferOffset = 0ull;
+			uint64_t bufferSize = 0ull;
+			vk::Extent2D extents = {};
+		};
+		struct ImageLayerData
+		{
+			std::vector<ImageMipmapData> mipmaps = {};
+			uint32_t layerIndex = 0u;
+		};
+		std::vector<ImageLayerData> layers = {};
+		uint64_t bufferOffset = 0ull;
 		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
 		{
+			layers.push_back({});
+			auto &layerData = layers.back();
+			layerData.layerIndex = iLayer;
 			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
 			{
-				copyInfo.mipLevel = iMipmap;
-				copyInfo.baseArrayLayer = iLayer;
-				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgRead,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+				layerData.mipmaps.push_back({});
+				auto &mipmapData = layerData.mipmaps.back();
+				mipmapData.mipmapIndex = iMipmap;
+				mipmapData.bufferOffset = bufferOffset;
 
 				auto extents = image.GetExtents(iMipmap);
-				copyInfo.bufferOffset += extents.width *extents.height *sizePerPixel;
+				mipmapData.extents = extents;
+				mipmapData.bufferSize = extents.width *extents.height *sizePerPixel;
+				bufferOffset += mipmapData.bufferSize;
+
 				if(iLayer == 0)
 					sizePerLayer += extents.width *extents.height *sizePerPixel;
 			}
 		}
+		for(auto &layerData : layers)
+		{
+			for(auto &mipmapData : layerData.mipmaps)
+			{
+				copyInfo.mipLevel = mipmapData.mipmapIndex;
+				copyInfo.baseArrayLayer = layerData.layerIndex;
+				copyInfo.bufferOffset = mipmapData.bufferOffset;
+				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgRead,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+			}
+		}
 		context.FlushSetupCommandBuffer();
+
+		/*// The dds library expects the image data in RGB form, so we have to do some conversions in some cases.
+		std::optional<util::ImageBuffer::Format> imgBufFormat = {};
+		switch(srcFormat)
+		{
+		case Anvil::Format::B8G8R8_UNORM:
+		case Anvil::Format::B8G8R8A8_UNORM:
+			imgBufFormat = util::ImageBuffer::Format::RGBA32; // TODO: dst format
+			break;
+		}
+		if(imgBufFormat.has_value())
+		{
+			for(auto &layerData : layers)
+			{
+				for(auto &mipmapData : layerData.mipmaps)
+				{
+					std::vector<uint8_t> imgData {};
+					imgData.resize(mipmapData.bufferSize);
+					if(buf->Read(mipmapData.bufferOffset,mipmapData.bufferSize,imgData.data()))
+					{
+						// Swap red and blue channels, then write the new image data back to the buffer
+						auto imgBuf = util::ImageBuffer::Create(imgData.data(),mipmapData.extents.width,mipmapData.extents.height,*imgBufFormat,true);
+						imgBuf->SwapChannels(util::ImageBuffer::Channel::Red,util::ImageBuffer::Channel::Blue);
+						buf->Write(mipmapData.bufferOffset,mipmapData.bufferSize,imgData.data());
+					}
+				}
+			}
+		}*/
 	}
 	auto numLayers = imgRead->GetLayerCount();
 	auto numMipmaps = imgRead->GetMipmapCount();

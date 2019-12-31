@@ -313,6 +313,7 @@ public:
 	uint32_t GetLostPacketCount();
 
 	pragma::CCameraComponent *CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ);
+	pragma::CCameraComponent *CreateCamera(float aspectRatio,float fov,float nearZ,float farZ);
 	pragma::CCameraComponent *GetPrimaryCamera() const;
 	const std::shared_ptr<Scene> &GetScene() const;
 	const WorldEnvironment &GetWorldEnvironment() const;

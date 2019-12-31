@@ -1256,6 +1256,8 @@ void CEngine::UseFullbrightShader(bool b) {umath::set_flag(m_stateFlags,StateFla
 void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 {
 	prosper::Context::OnResolutionChanged(width,height);
+	if(m_renderResolution.has_value() == false)
+		OnRenderResolutionChanged(width,height);
 }
 
 void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)

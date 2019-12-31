@@ -264,6 +264,7 @@ void WIMainMenuOptions::InitializeOptionsList(WIOptionsList *pList)
 void WIMainMenuOptions::InitializeGeneralSettings()
 {
 	m_hGeneralSettings = CreateChild<WIOptionsList>();
+	m_hGeneralSettings->SetName("settings_general");
 	auto *pList = m_hGeneralSettings.get<WIOptionsList>();
 	auto title = Locale::GetText("general_options");
 	ustring::to_upper(title);
@@ -287,7 +288,6 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 		}
 	}
 	WIDropDownMenu *language = pList->AddDropDownMenu(Locale::GetText("language"),lanOptions,"cl_language");
-	language->SizeToContents();
 	//
 
 	auto *pRowGameplay = pList->AddHeaderRow();
@@ -298,7 +298,6 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	for(auto &engine : pragma::physics::IEnvironment::GetAvailablePhysicsEngines())
 		physEngines.insert(std::make_pair(Locale::GetText("physics_engine_" +engine),engine));
 	auto *pPhysEngineList = pList->AddDropDownMenu(Locale::GetText("physics_engine"),physEngines,"phys_engine");
-	pPhysEngineList->SizeToContents();
 	//
 
 	// Networking library
@@ -306,7 +305,6 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	for(auto &lib : pragma::networking::GetAvailableNetworkingModules())
 		netLibs.insert(std::make_pair(Locale::GetText("networking_library_" +lib),lib));
 	auto *pNetLibList = pList->AddDropDownMenu(Locale::GetText("networking_library"),netLibs,"net_library");
-	pNetLibList->SizeToContents();
 	//
 
 	pList->AddToggleChoice(Locale::GetText("enable_steamworks"),"steam_steamworks_enabled");
@@ -343,7 +341,6 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	//
 
 	InitializeOptionsList(pList);
-	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }
 void WIMainMenuOptions::Think()
 {
@@ -387,6 +384,7 @@ void WIMainMenuOptions::UpdateMemoryUsage()
 void WIMainMenuOptions::InitializeVideoSettings()
 {
 	m_hVideoSettings = CreateChild<WIOptionsList>();
+	m_hVideoSettings->SetName("settings_video");
 	auto *pList = m_hVideoSettings.get<WIOptionsList>();
 	auto title = Locale::GetText("video_options");
 	ustring::to_upper(title);
@@ -624,7 +622,6 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		}
 	},"cl_window_resolution");
 	m_hResolutionList = resMenu->GetHandle();
-	resMenu->SizeToContents();
 	//
 	// Supersampling
 	// TODO
@@ -972,7 +969,6 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 
 	InitializeOptionsList(pList);
-	pList->SetAnchor(0.0,0.0,1.f,1.f);
 
 	if(client->GetConVarInt("cl_render_preset") < 0)
 	{
@@ -990,6 +986,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 void WIMainMenuOptions::InitializeAudioSettings()
 {
 	m_hAudioSettings = CreateChild<WIOptionsList>();
+	m_hAudioSettings->SetName("settings_audio");
 	auto *pList = m_hAudioSettings.get<WIOptionsList>();
 	auto title = Locale::GetText("audio_options");
 	ustring::to_upper(title);
@@ -1093,11 +1090,11 @@ void WIMainMenuOptions::InitializeAudioSettings()
 	//
 
 	InitializeOptionsList(pList);
-	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }
 void WIMainMenuOptions::InitializeControlSettings()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
+	m_hControlSettings->SetName("settings_controls");
 	auto *pList = m_hControlSettings.get<WIOptionsList>();
 	auto title = Locale::GetText("control_options");
 	ustring::to_upper(title);
@@ -1287,5 +1284,4 @@ void WIMainMenuOptions::InitializeControlSettings()
 	}
 
 	InitializeOptionsList(pList);
-	pList->SetAnchor(0.0,0.0,1.f,1.f);
 }

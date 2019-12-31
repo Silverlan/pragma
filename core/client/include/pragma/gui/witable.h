@@ -21,6 +21,7 @@ public:
 	virtual ~WITableCell() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
+	virtual void OnChildAdded(WIBase *child) override;
 	WIBase *GetFirstElement();
 	// Not yet implemented
 	void SetRowSpan(int32_t span);
@@ -104,6 +105,7 @@ protected:
 	static void OnScrollOffsetChanged(unsigned int offset,void *userData);
 	virtual void UpdateHeaderRowHeight(WITableRow *pRow,float defHeight);
 	virtual float UpdateRowHeights(float yOffset,float defHeight);
+	virtual void OnChildAdded(WIBase *child) override;
 	void UpdateCell(const WITableCell &cell);
 	template<class TRow>
 	TRow *AddRow();
@@ -143,6 +145,7 @@ public:
 	virtual ~WITableRow() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
+	virtual void OnChildAdded(WIBase *child) override;
 	void SetCellWidth(unsigned int col,int width);
 	WIHandle SetValue(unsigned int col,std::string val);
 	std::string GetValue(uint32_t col) const;

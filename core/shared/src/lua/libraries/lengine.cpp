@@ -24,6 +24,12 @@ int Lua::engine::CreateLight(lua_State *l)
 	return 0;
 }
 
+int Lua::engine::exit(lua_State *l)
+{
+	::engine->ShutDown();
+	return 0;
+}
+
 int Lua::engine::get_info(lua_State *l)
 {
 	auto t = Lua::CreateTable(l);
@@ -53,17 +59,18 @@ int Lua::engine::get_info(lua_State *l)
 	Lua::SetTableValue(l,t);
 
 	Lua::PushString(l,"websiteURL");
-	Lua::PushInt(l,engine_info::get_website_url());
+	Lua::PushString(l,engine_info::get_website_url());
 	Lua::SetTableValue(l,t);
 
 	Lua::PushString(l,"wikiURL");
-	Lua::PushInt(l,engine_info::get_wiki_url());
+	Lua::PushString(l,engine_info::get_wiki_url());
 	Lua::SetTableValue(l,t);
 
 	Lua::PushString(l,"name");
-	Lua::PushInt(l,engine_info::get_name());
+	Lua::PushString(l,engine_info::get_name());
 	Lua::SetTableValue(l,t);
 	
+	return 1;
 }
 
 int Lua::engine::RemoveLights(lua_State*)

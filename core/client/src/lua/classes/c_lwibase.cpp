@@ -270,6 +270,10 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("IsClippingEnabled",&IsClippingEnabled);
 	classDef.def("SetAlwaysUpdate",&SetAlwaysUpdate);
 	classDef.def("SetBounds",&SetBounds);
+	classDef.def("SetBackgroundElement",static_cast<void(*)(lua_State*,WIHandle&,bool,bool)>(&SetBackgroundElement));
+	classDef.def("SetBackgroundElement",static_cast<void(*)(lua_State*,WIHandle&,bool)>(&SetBackgroundElement));
+	classDef.def("SetBackgroundElement",static_cast<void(*)(lua_State*,WIHandle&)>(&SetBackgroundElement));
+	classDef.def("IsBackgroundElement",&IsBackgroundElement);
 	classDef.def("FindDescendantByName",static_cast<void(*)(lua_State*,WIHandle&,const std::string&)>([](lua_State *l,WIHandle &hPanel,const std::string &name) {
 		lua_checkgui(l,hPanel);
 		auto *el = hPanel->FindDescendantByName(name);
@@ -2218,6 +2222,18 @@ void Lua::WIBase::SetBounds(lua_State *l,WIHandle &hPanel,const Vector2 &start,c
 	auto size = end -start;
 	hPanel->SetPos(pos);
 	hPanel->SetSize(size);
+}
+void Lua::WIBase::SetBackgroundElement(lua_State *l,WIHandle &hPanel,bool backgroundElement,bool autoAlignToParent)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetBackgroundElement(backgroundElement,autoAlignToParent);
+}
+void Lua::WIBase::SetBackgroundElement(lua_State *l,WIHandle &hPanel,bool backgroundElement) {SetBackgroundElement(l,hPanel,backgroundElement,true);}
+void Lua::WIBase::SetBackgroundElement(lua_State *l,WIHandle &hPanel) {SetBackgroundElement(l,hPanel,true);}
+void Lua::WIBase::IsBackgroundElement(lua_State *l,WIHandle &hPanel)
+{
+	lua_checkgui(l,hPanel);
+	Lua::PushBool(l,hPanel->IsBackgroundElement());
 }
 void Lua::WIBase::AddAttachment(lua_State *l,WIHandle &hPanel,const std::string &name,const Vector2 &position)
 {

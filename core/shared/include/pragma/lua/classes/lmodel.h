@@ -177,6 +177,9 @@ namespace Lua
 		DLLNETWORK void GetVertexAnimation(lua_State *l,::Model &mdl,const std::string &name);
 		DLLNETWORK void AddVertexAnimation(lua_State *l,::Model &mdl,const std::string &name);
 		DLLNETWORK void RemoveVertexAnimation(lua_State *l,::Model &mdl,const std::string &name);
+		DLLNETWORK void GetBodyGroupMeshes(lua_State *l,::Model &mdl,luabind::object oBodygroups,uint32_t lod);
+		DLLNETWORK void GetBodyGroupMeshes(lua_State *l,::Model &mdl,uint32_t lod);
+		DLLNETWORK void GetBodyGroupMeshes(lua_State *l,::Model &mdl);
 
 		DLLNETWORK void GetFlexController(lua_State *l,::Model &mdl,const std::string &name);
 		DLLNETWORK void GetFlexController(lua_State *l,::Model &mdl,uint32_t id);

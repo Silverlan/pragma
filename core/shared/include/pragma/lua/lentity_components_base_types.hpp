@@ -1517,7 +1517,7 @@ namespace Lua
 			auto &camPos = trComponent->GetPosition();
 			auto dir = lookAtPos -camPos;
 			uvec::normalize(&dir);
-			trComponent->SetOrientation(uquat::create_look_rotation(lookAtPos,trComponent->GetUp()));
+			trComponent->SetOrientation(uquat::create_look_rotation(dir,trComponent->GetUp()));
 		}));
 		def.def("UpdateMatrices",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);

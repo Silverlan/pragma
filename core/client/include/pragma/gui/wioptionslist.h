@@ -16,6 +16,7 @@ class DLLCLIENT WIOptionsList
 private:
 	WIHandle m_hTable;
 	WIHandle m_hHeaderRow;
+	uint32_t m_maxHeight = 512;
 	std::unordered_map<std::string,std::string> m_updateCvars;
 	std::unordered_map<std::string,GLFW::Key> m_keyBindingsAdd[2];
 	std::unordered_map<std::string,GLFW::Key> m_keyBindingsErase[2];
@@ -29,6 +30,7 @@ public:
 	virtual ~WIOptionsList() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
+	void SetMaxHeight(uint32_t h);
 	WITableRow *AddRow();
 	WITableRow *AddHeaderRow();
 	WICheckbox *AddToggleChoice(const std::string &name,const std::string &cvarName,const std::function<std::string(bool)> &translator,const std::function<bool(std::string)> &translator2=nullptr);

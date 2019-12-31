@@ -17,6 +17,7 @@ namespace Lua
 		DLLNETWORK int LoadLibrary(lua_State *l);
 		DLLNETWORK int GetTickCount(lua_State *l);
 		DLLNETWORK int get_info(lua_State *l);
+		DLLNETWORK int exit(lua_State *l);
 
 		DLLNETWORK int32_t set_record_console_output(lua_State *l);
 		DLLNETWORK int32_t poll_console_output(lua_State *l);

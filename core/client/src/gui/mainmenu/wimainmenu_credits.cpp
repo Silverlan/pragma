@@ -118,6 +118,7 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	const std::vector<std::string> patrons {
 		"PalmliX", // 10
 		"Donovan", // 10
+		"Dark Dreams", // 10
 		"Googleygareth8", // 1
 		"Manndarinchik", // 1
 		"Roach" // 1

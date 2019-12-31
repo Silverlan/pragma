@@ -171,6 +171,7 @@ void WIMainMenu::Initialize()
 	pImageSlideShow->SetColor(0.75f,0.75f,0.75f,1.f);
 	std::vector<std::string> imgFiles;
 	FileManager::FindFiles("screenshots/*.tga",&imgFiles,nullptr);
+	FileManager::FindFiles("screenshots/*.png",&imgFiles,nullptr);
 	for(auto it=imgFiles.begin();it!=imgFiles.end();it++)
 		*it = "screenshots/" +*it;
 	pImageSlideShow->SetImages(imgFiles);

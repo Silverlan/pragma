@@ -44,8 +44,19 @@ void WITable::RemoveRow(uint32_t rowIdx)
 void WITable::SizeToContents(bool x,bool y)
 {
 	if(m_bScrollable == true && m_hScrollContainer.IsValid())
+	{
 		m_hScrollContainer->SizeToContents(x,y);
+		//auto sz = m_hScrollContainer.get()->GetSize();
+		//SetSize(sz.x,sz.y);
+		//return;
+	}
 	WIBase::SizeToContents(x,y);
+}
+
+void WITable::OnChildAdded(WIBase *child)
+{
+	WIBase::OnChildAdded(child);
+	ScheduleUpdate();
 }
 
 bool WITable::SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHandle &b)
@@ -479,7 +490,6 @@ void WITable::SetColumnWidth(unsigned int col,int width)
 void WITable::DoUpdate()
 {
 	WIBase::DoUpdate();
-	Resize();
 }
 
 uint32_t WITable::GetRowIndex(WITableRow *pRow) const
@@ -599,6 +609,11 @@ WITableRow::WITableRow()
 WITableRow::~WITableRow()
 {
 
+}
+void WITableRow::OnChildAdded(WIBase *child)
+{
+	WIBase::OnChildAdded(child);
+	ScheduleUpdate();
 }
 void WITableRow::DetachCell(uint32_t colId)
 {
@@ -849,6 +864,11 @@ void WITableCell::Initialize()
 	WIBase::Initialize();
 	AddStyleClass("table_cell");
 }
+void WITableCell::OnChildAdded(WIBase *child)
+{
+	WIBase::OnChildAdded(child);
+	ScheduleUpdate();
+}
 void WITableCell::SetSize(int x,int y)
 {
 	WIBase::SetSize(x,y);
@@ -861,7 +881,7 @@ WIBase *WITableCell::GetFirstElement()
 	for(it=m_children.begin();it!=m_children.end();it++)
 	{
 		WIHandle &hChild = *it;
-		if(hChild.IsValid())
+		if(hChild.IsValid() && hChild->IsBackgroundElement() == false)
 			return hChild.get();
 	}
 	return nullptr;

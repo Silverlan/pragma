@@ -103,25 +103,29 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 }
 void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 {
-	// Initialize cubemap image data from individual cubemap side buffers
+	// Initialize cubemap image data from individual cubemap side buffers.
+	// Since the cubemap image is in optimal layout with device memory,
+	// we'll have to copy the data to a temporary buffer first and then
+	// to the image via the command buffer.
 	auto cubemapImage = probe.CreateCubemapImage();
-	auto *memBlock = cubemapImage->GetAnvilImage().get_memory_block();
-	auto totalSize = memBlock->get_create_info_ptr()->get_size();
+	auto extents = cubemapImage->GetExtents();
+
+	//auto *memBlock = cubemapImage->GetAnvilImage().get_memory_block();
+	//auto totalSize = memBlock->get_create_info_ptr()->get_size();
 	for(auto layerIndex=decltype(m_layerImageBuffers.size()){0u};layerIndex<m_layerImageBuffers.size();++layerIndex)
 	{
 		auto &imgBuffer = m_layerImageBuffers.at(layerIndex);
 		auto imgDataSize = imgBuffer->GetSize();
-		auto expectedTotalSize = imgDataSize *6;
 
-		auto layout = cubemapImage->GetSubresourceLayout(layerIndex,0);
-		assert(layout->size == imgDataSize);
-		if(layout->size < imgDataSize)
-			throw std::logic_error{"Size mismatch between raytraced reflection probe image and target cubemap!"};
+		auto tmpBuf = c_engine->AllocateTemporaryBuffer(imgDataSize,imgBuffer->GetData());
 
-		void *pData;
-		memBlock->map(layout->offset,layout->size,&pData);
-		memcpy(pData,imgBuffer->GetData(),imgDataSize);
-		memBlock->unmap();
+		auto &setupCmd = c_engine->GetSetupCommandBuffer();
+		prosper::util::BufferImageCopyInfo copyInfo {};
+		copyInfo.baseArrayLayer = layerIndex;
+		copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
+		prosper::util::record_copy_buffer_to_image(**setupCmd,copyInfo,*tmpBuf,**cubemapImage);
+
+		c_engine->FlushSetupCommandBuffer();
 
 		// Don't need the image buffer anymore
 		imgBuffer = nullptr;
@@ -406,9 +410,9 @@ std::shared_ptr<prosper::Image> CReflectionProbeComponent::CreateCubemapImage()
 	// to get the best results for the subsequent stages.
 	createInfo.width = CUBEMAP_LAYER_WIDTH;
 	createInfo.height = CUBEMAP_LAYER_HEIGHT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	createInfo.tiling = Anvil::ImageTiling::LINEAR;
+	createInfo.tiling = Anvil::ImageTiling::OPTIMAL;
 	createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
 	auto &dev = c_engine->GetDevice();
 	return prosper::util::create_image(dev,createInfo);

@@ -32,9 +32,11 @@ WIScrollContainer::~WIScrollContainer()
 
 void WIScrollContainer::SizeToContents(bool x,bool y)
 {
-	if(m_hWrapper.IsValid())
-		m_hWrapper->SizeToContents(x,y);
-	WIBase::SizeToContents(x,y);
+	if(m_hWrapper.IsValid() == false)
+		return;
+	m_hWrapper->SizeToContents(x,y);
+	auto sz = m_hWrapper.get()->GetSize();
+	SetSize(sz.x,sz.y);
 }
 
 int WIScrollContainer::GetContentWidth()
@@ -220,15 +222,14 @@ void WIScrollContainer::DoUpdate()
 		for(it=children->begin();it!=children->end();it++)
 		{
 			WIHandle &hChild = *it;
-			if(hChild.IsValid())
-			{
-				const Vector2i &posChild = hChild->GetPos();
-				const Vector2i &sizeChild = hChild->GetSize();
-				if(posChild.x +sizeChild.x > w)
-					w = posChild.x +sizeChild.x;
-				if(posChild.y +sizeChild.y > h)
-					h = posChild.y +sizeChild.y;
-			}
+			if(hChild.IsValid() == false || hChild->IsBackgroundElement())
+				continue;
+			const Vector2i &posChild = hChild->GetPos();
+			const Vector2i &sizeChild = hChild->GetSize();
+			if(posChild.x +sizeChild.x > w)
+				w = posChild.x +sizeChild.x;
+			if(posChild.y +sizeChild.y > h)
+				h = posChild.y +sizeChild.y;
 		}
 		Vector2i size = GetSize();
 		pWrapper->SetSize(w,h);

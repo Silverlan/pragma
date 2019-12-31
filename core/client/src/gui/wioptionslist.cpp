@@ -30,7 +30,7 @@ void WIOptionsList::Initialize()
 	pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	pTable->SetRowHeight(32);
 	pTable->SetScrollable(true);
-	pTable->SetAnchor(0.f,0.f,1.f,1.f);
+	//pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	auto *pRow = pTable->AddHeaderRow();
 	m_hHeaderRow = pRow->GetHandle();
 }
@@ -62,13 +62,21 @@ void WIOptionsList::SetSize(int x,int y)
 	WIBase::SetSize(x,y);
 	if(m_hTable.IsValid())
 		m_hTable->SetWidth(x);
-	ScheduleUpdate();
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsBeingUpdated) == false)
+		ScheduleUpdate();
 }
 
 void WIOptionsList::DoUpdate()
 {
 	WIBase::DoUpdate();
 	SizeToContents();
+}
+
+void WIOptionsList::SetMaxHeight(uint32_t h)
+{
+	m_maxHeight = h;
+	if(GetHeight() > h)
+		SetHeight(h);
 }
 
 void WIOptionsList::SizeToContents(bool x,bool y)
@@ -78,8 +86,8 @@ void WIOptionsList::SizeToContents(bool x,bool y)
 		auto *pTable = m_hTable.get<WITable>();
 		pTable->SizeToContents();
 		auto h = pTable->GetHeight();
-		if(h > 512)
-			h = 512;
+		if(h > m_maxHeight)
+			h = m_maxHeight;
 		pTable->SetSize(GetWidth(),h);
 		SetHeight(h);
 	}
@@ -123,7 +131,9 @@ template<class T>
 		return nullptr;
 	auto hChoiceList = CreateChild<WIChoiceList>();
 	auto *pChoiceList = hChoiceList.get<WIChoiceList>();
-	pChoiceList->SetAutoAlignToParent(true);
+	auto sz = GetSize();
+	pChoiceList->SetSize(sz.x,sz.y);
+	pChoiceList->SetAnchor(0.f,0.f,1.f,1.f);
 	pChoiceList->SetChoices(list);
 	row->SetValue(0,name);
 	if(initializer != nullptr)
@@ -154,7 +164,9 @@ template<class T>
 		return nullptr;
 	auto hDropDownMenu = CreateChild<WIDropDownMenu>();
 	auto *pDropDownMenu = hDropDownMenu.get<WIDropDownMenu>();
-	pDropDownMenu->SetAutoAlignToParent(true);
+	auto sz = GetSize();
+	pDropDownMenu->SetSize(sz.x,sz.y);
+	pDropDownMenu->SetAnchor(0.f,0.f,1.f,1.f);
 	pDropDownMenu->SetOptions(list);
 	row->SetValue(0,name);
 	if(initializer != nullptr)
@@ -211,7 +223,9 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name,const std::stri
 		return nullptr;
 	auto hTextEntry = CreateChild<WITextEntry>();
 	auto *pTextEntry = hTextEntry.get<WITextEntry>();
-	pTextEntry->SetAutoAlignToParent(true);
+	auto sz = GetSize();
+	pTextEntry->SetSize(sz.x,sz.y);
+	pTextEntry->SetAnchor(0.f,0.f,1.f,1.f);
 	row->SetValue(0,name);
 	if(!cvarName.empty())
 	{
@@ -233,7 +247,9 @@ WISlider *WIOptionsList::AddSlider(const std::string &name,const std::function<v
 		return nullptr;
 	auto hSlider = CreateChild<WISlider>();
 	auto *pSlider = hSlider.get<WISlider>();
-	pSlider->SetAutoAlignToParent(true);
+	auto sz = GetSize();
+	pSlider->SetSize(sz.x,sz.y);
+	pSlider->SetAnchor(0.f,0.f,1.f,1.f);
 	row->SetValue(0,name);
 	if(initializer != nullptr)
 		initializer(pSlider);

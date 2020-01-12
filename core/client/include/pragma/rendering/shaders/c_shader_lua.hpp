@@ -249,8 +249,8 @@ namespace pragma
 		void Lua_OnBindMaterial(Material &mat);
 		static void Lua_default_OnBindMaterial(lua_State *l,LuaShaderTextured3D &shader,Material &mat) {shader.Lua_OnBindMaterial(mat);}
 
-		void Lua_OnDraw(ModelSubMesh &mesh);
-		static void Lua_default_OnDraw(lua_State *l,LuaShaderTextured3D &shader,ModelSubMesh &mesh) {shader.Lua_OnDraw(mesh);}
+		int32_t Lua_OnDraw(ModelSubMesh &mesh);
+		static int32_t Lua_default_OnDraw(lua_State *l,LuaShaderTextured3D &shader,ModelSubMesh &mesh) {return shader.Lua_OnDraw(mesh);}
 
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua_State *l,LuaShaderTextured3D &shader,EntityHandle &hEnt) {shader.Lua_OnBindEntity(hEnt);}

@@ -332,6 +332,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 			f->Write<uint32_t>(static_cast<uint32_t>(subMeshes.size()));
 			for(auto &subMesh : subMeshes)
 			{
+				f->Write<pragma::physics::ScaledTransform>(subMesh->GetPose());
 				f->Write<uint16_t>(static_cast<uint16_t>(subMesh->GetSkinTextureIndex()));
 
 				auto &verts = subMesh->GetVertices();

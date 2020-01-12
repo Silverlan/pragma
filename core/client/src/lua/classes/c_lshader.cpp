@@ -206,7 +206,7 @@ void Lua::Shader::SetPipelineCount(lua_State *l,pragma::LuaShaderBase &shader,ui
 void Lua::Shader::GetCurrentCommandBuffer(lua_State *l,pragma::LuaShaderBase &shader)
 {
 	auto wpDrawCmd = shader.GetCurrentCommandBuffer();
-	if(wpDrawCmd)
+	if(wpDrawCmd == nullptr)
 		return;
 	Lua::Push(l,std::static_pointer_cast<prosper::CommandBuffer>(wpDrawCmd));
 }

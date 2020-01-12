@@ -15,6 +15,8 @@ link_external_library(ishared)
 
 add_external_library(lua)
 
+add_def(BOOST_ALL_NO_LIB)
+
 add_include_dir(glm)
 add_include_dir(eigen)
 add_include_dir(pcl_io)

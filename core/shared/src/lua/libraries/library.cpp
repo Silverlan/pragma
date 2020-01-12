@@ -210,6 +210,20 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_angle_of_reach",Lua::math::calc_ballistic_angle_of_reach);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc",Lua::math::solve_ballistic_arc);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc_lateral",Lua::math::solve_ballistic_arc_lateral);
+
+	lua_pushtablecfunction(lua.GetState(),"math","calc_horizontal_fov",Lua::math::calc_horizontal_fov);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_vertical_fov",Lua::math::calc_vertical_fov);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_diagonal_fov",Lua::math::calc_diagonal_fov);
+
+	lua_pushtablecfunction(lua.GetState(),"math","horizontal_fov_to_vertical_fov",Lua::math::horizontal_fov_to_vertical_fov);
+	lua_pushtablecfunction(lua.GetState(),"math","vertical_fov_to_horizontal_fov",Lua::math::vertical_fov_to_horizontal_fov);
+	lua_pushtablecfunction(lua.GetState(),"math","diagonal_fov_to_vertical_fov",Lua::math::diagonal_fov_to_vertical_fov);
+
+	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_center",Lua::math::get_frustum_plane_center);
+	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_size",Lua::math::get_frustum_plane_size);
+	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_boundaries",Lua::math::get_frustum_plane_boundaries);
+	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_point",Lua::math::get_frustum_plane_point);
+
 	lua_pushtablecfunction(lua.GetState(),"math","max_abs",Lua::math::abs_max);
 	lua_pushtablecfunction(lua.GetState(),"math","ease_in",Lua::math::ease_in);
 	lua_pushtablecfunction(lua.GetState(),"math","ease_out",Lua::math::ease_out);
@@ -290,11 +304,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	complexNumberClassDef.def(luabind::constructor<double,double>());
 	complexNumberClassDef.def(luabind::tostring(luabind::self));
 	complexNumberClassDef.def(-luabind::const_self);
-	complexNumberClassDef.def(luabind::const_self /std::complex<double>());
-	complexNumberClassDef.def(luabind::const_self *std::complex<double>());
-	complexNumberClassDef.def(luabind::const_self +std::complex<double>());
-	complexNumberClassDef.def(luabind::const_self -std::complex<double>());
-	complexNumberClassDef.def(luabind::const_self ==std::complex<double>());
+	complexNumberClassDef.def(luabind::const_self /luabind::const_self);
+	complexNumberClassDef.def(luabind::const_self *luabind::const_self);
+	complexNumberClassDef.def(luabind::const_self +luabind::const_self);
+	complexNumberClassDef.def(luabind::const_self -luabind::const_self);
+	complexNumberClassDef.def(luabind::const_self ==luabind::const_self);
 	complexNumberClassDef.def(luabind::const_self /double());
 	complexNumberClassDef.def(luabind::const_self *double());
 	complexNumberClassDef.def(luabind::const_self +double());
@@ -606,9 +620,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def_readwrite("a",&Color::a);
 	defColor.def(luabind::const_self /float());
 	defColor.def(luabind::const_self *float());
-	defColor.def(luabind::const_self +Color());
-	defColor.def(luabind::const_self -Color());
-	defColor.def(luabind::const_self ==Color());
+	defColor.def(luabind::const_self +luabind::const_self);
+	defColor.def(luabind::const_self -luabind::const_self);
+	defColor.def(luabind::const_self ==luabind::const_self);
 	defColor.def(float() *luabind::const_self);
 	defColor.def("Copy",&Lua::Color::Copy);
 	defColor.def("Set",static_cast<void(Color::*)(const Color&)>(&Color::Set));

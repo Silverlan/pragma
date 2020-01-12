@@ -250,7 +250,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 	auto &oVerts = o->GetVertices();
 	oVerts = lines;
 	o->InitializeBuffers();
-	auto &objs = s_debugObjects[DebugRenderer::Type::LinesStrip];
+	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
 }

@@ -69,6 +69,8 @@ void WIOptionsList::SetSize(int x,int y)
 void WIOptionsList::DoUpdate()
 {
 	WIBase::DoUpdate();
+	if(m_hTable.IsValid())
+		m_hTable->Update();
 	SizeToContents();
 }
 

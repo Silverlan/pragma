@@ -487,8 +487,54 @@ void WITable::SetColumnWidth(unsigned int col,int width)
 	}
 }
 
+void WITable::UpdateTableBounds()
+{
+	auto numRows = m_rows.size();
+	if(numRows == 0 && !m_hRowHeader.IsValid())
+		return;
+	auto x = GetWidth();
+	auto y = GetHeight();
+	float rowHeight;
+	if(m_rowHeight != -1)
+		rowHeight = CFloat(m_rowHeight);
+	else
+	{
+		rowHeight = CFloat((y -GetPaddingTop() -GetPaddingBottom()) /(m_hRowHeader.IsValid() ? (numRows +1) : numRows));
+	}
+	auto yRow = static_cast<float>(GetPaddingTop());
+	if(m_hRowHeader.IsValid())
+	{
+		UpdateHeaderRowHeight(static_cast<WITableRow*>(m_hRowHeader.get()),rowHeight);
+		yRow += m_hRowHeader->GetHeight();
+	}
+	if(m_hScrollContainer.IsValid())
+	{
+		auto *sc = m_hScrollContainer.get<WIScrollContainer>();
+		sc->SetY(CInt32(yRow));
+		sc->SetSize(x,CInt32(y -yRow));
+		yRow = 0;
+	}
+	if(numRows > 0)
+	{
+		yRow = UpdateRowHeights(yRow,rowHeight);
+		if(m_hScrollContainer.IsValid())
+		{
+			auto *sc = m_hScrollContainer.get<WIScrollContainer>();
+			sc->Update();
+			auto wRow = sc->GetContentWidth();
+			for(size_t i=0;i<numRows;i++)
+			{
+				WIHandle &hRow = m_rows[i];
+				if(hRow.IsValid())
+					hRow->SetWidth(wRow);
+			}
+		}
+	}
+}
+
 void WITable::DoUpdate()
 {
+	UpdateTableBounds();
 	WIBase::DoUpdate();
 }
 
@@ -556,45 +602,7 @@ float WITable::UpdateRowHeights(float yOffset,float defHeight)
 void WITable::SetSize(int x,int y)
 {
 	WIBase::SetSize(x,y);
-	auto numRows = m_rows.size();
-	if(numRows == 0 && !m_hRowHeader.IsValid())
-		return;
-	float rowHeight;
-	if(m_rowHeight != -1)
-		rowHeight = CFloat(m_rowHeight);
-	else
-	{
-		rowHeight = CFloat((y -GetPaddingTop() -GetPaddingBottom()) /(m_hRowHeader.IsValid() ? (numRows +1) : numRows));
-	}
-	auto yRow = static_cast<float>(GetPaddingTop());
-	if(m_hRowHeader.IsValid())
-	{
-		UpdateHeaderRowHeight(static_cast<WITableRow*>(m_hRowHeader.get()),rowHeight);
-		yRow += m_hRowHeader->GetHeight();
-	}
-	if(m_hScrollContainer.IsValid())
-	{
-		auto *sc = m_hScrollContainer.get<WIScrollContainer>();
-		sc->SetY(CInt32(yRow));
-		sc->SetSize(x,CInt32(y -yRow));
-		yRow = 0;
-	}
-	if(numRows > 0)
-	{
-		yRow = UpdateRowHeights(yRow,rowHeight);
-		if(m_hScrollContainer.IsValid())
-		{
-			auto *sc = m_hScrollContainer.get<WIScrollContainer>();
-			sc->Update();
-			auto wRow = sc->GetContentWidth();
-			for(size_t i=0;i<numRows;i++)
-			{
-				WIHandle &hRow = m_rows[i];
-				if(hRow.IsValid())
-					hRow->SetWidth(wRow);
-			}
-		}
-	}
+	UpdateTableBounds();
 }
 
 ///////////////////////////

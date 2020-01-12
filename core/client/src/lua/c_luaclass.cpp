@@ -348,6 +348,12 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderEntity.def("BindVertexAnimationOffset",static_cast<void(*)(lua_State*,pragma::ShaderEntity&,uint32_t)>([](lua_State *l,pragma::ShaderEntity &shader,uint32_t offset) {
 		Lua::PushBool(l,shader.BindVertexAnimationOffset(offset));
 	}));
+	defShaderEntity.def("GetBoundEntity",static_cast<void(*)(lua_State*,pragma::ShaderEntity&)>([](lua_State *l,pragma::ShaderEntity &shader) {
+		auto *ent = shader.GetBoundEntity();
+		if(ent == nullptr)
+			return;
+		ent->GetLuaObject()->push(l);
+	}));
 	modShader[defShaderEntity];
 
 	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase,luabind::bases<pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("TexturedLit3D");

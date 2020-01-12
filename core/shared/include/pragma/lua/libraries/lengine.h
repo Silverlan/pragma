@@ -14,6 +14,7 @@ namespace Lua
 		DLLNETWORK int CreateSprite(lua_State *l);
 		DLLNETWORK int PrecacheModel_sv(lua_State *l);
 		DLLNETWORK int LoadSoundScripts(lua_State *l);
+		DLLNETWORK int get_model(lua_State *l);
 		DLLNETWORK int LoadLibrary(lua_State *l);
 		DLLNETWORK int GetTickCount(lua_State *l);
 		DLLNETWORK int get_info(lua_State *l);

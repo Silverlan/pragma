@@ -142,6 +142,7 @@ void WIMainMenuNewGame::ReloadMapList()
 	//
 }
 
+#include <wgui/types/witext.h>
 void WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
@@ -152,6 +153,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	// Map
 	auto *pMap = pList->AddDropDownMenu(Locale::GetText("map"));
 	pMap->SetEditable(true);
+	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
 	ReloadMapList();
 	auto &resourceWatcher = client->GetResourceWatcher();

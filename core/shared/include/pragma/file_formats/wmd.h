@@ -8,7 +8,7 @@
 #include "pragma/file_formats/wad.h"
 
 // Note: Changing this version will directly affect model saving as well as loading, both have to be updated accordingly
-#define WMD_VERSION 25
+#define WMD_VERSION 26
 
 
 struct DLLNETWORK FWMDBone

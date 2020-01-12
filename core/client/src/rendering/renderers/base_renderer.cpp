@@ -6,6 +6,8 @@ using namespace pragma::rendering;
 BaseRenderer::BaseRenderer(Scene &scene)
 	: m_scene{scene}
 {}
+bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other == this;}
+bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
 bool BaseRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	BeginRendering(drawCmd);

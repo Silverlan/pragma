@@ -9,7 +9,7 @@ extern DLLENGINE Engine *engine;
 #pragma optimize("",off)
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
-	classDef.def(luabind::const_self == ::ModelMesh());
+	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetVertexCount",&Lua::ModelMesh::GetVertexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelMesh::GetTriangleCount);
@@ -46,6 +46,15 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 			subMeshes.push_back(subMesh);
 			Lua::Pop(l,1);
 		}
+	}));
+	classDef.def("GetSubMeshCount",static_cast<void(*)(lua_State*,::ModelMesh&)>([](lua_State *l,::ModelMesh &mesh) {
+		Lua::PushInt(l,mesh.GetSubMeshes().size());
+	}));
+	classDef.def("GetSubMesh",static_cast<void(*)(lua_State*,::ModelMesh&,uint32_t)>([](lua_State *l,::ModelMesh &mesh,uint32_t index) {
+		auto &subMeshes = mesh.GetSubMeshes();
+		if(index >= subMeshes.size())
+			return;
+		Lua::Push(l,subMeshes.at(index));
 	}));
 }
 void Lua::ModelMesh::GetVertexCount(lua_State *l,::ModelMesh &mesh)
@@ -108,7 +117,7 @@ void Lua::ModelMesh::Scale(lua_State *l,::ModelMesh &mdl,const Vector3 &scale) {
 
 void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef)
 {
-	classDef.def(luabind::const_self == ::ModelSubMesh());
+	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
@@ -156,6 +165,30 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetReferenceId",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
 		Lua::PushInt(l,mesh.GetReferenceId());
 	}));
+	classDef.def("GetGeometryType",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		Lua::PushInt(l,umath::to_integral(mesh.GetGeometryType()));
+	}));
+	classDef.def("SetGeometryType",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t geometryType) {
+		mesh.SetGeometryType(static_cast<::ModelSubMesh::GeometryType>(geometryType));
+	}));
+	classDef.def("AddLine",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t idx0,uint32_t idx1) {
+		mesh.AddLine(idx0,idx1);
+	}));
+	classDef.def("AddPoint",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t idx) {
+		mesh.AddPoint(idx);
+	}));
+	classDef.def("GetPose",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		Lua::Push<pragma::physics::ScaledTransform>(l,mesh.GetPose());
+	}));
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,::ModelSubMesh&,const pragma::physics::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const pragma::physics::ScaledTransform &pose) {
+		mesh.SetPose(pose);
+	}));
+	classDef.def("Transform",static_cast<void(*)(lua_State*,::ModelSubMesh&,const pragma::physics::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const pragma::physics::ScaledTransform &pose) {
+		mesh.Transform(pose);
+	}));
+	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES",umath::to_integral(::ModelSubMesh::GeometryType::Triangles));
+	classDef.add_static_constant("GEOMETRY_TYPE_LINES",umath::to_integral(::ModelSubMesh::GeometryType::Lines));
+	classDef.add_static_constant("GEOMETRY_TYPE_POINTS",umath::to_integral(::ModelSubMesh::GeometryType::Points));
 }
 void Lua::ModelSubMesh::GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mesh)
 {

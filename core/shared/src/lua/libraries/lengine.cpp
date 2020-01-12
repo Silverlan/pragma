@@ -103,6 +103,18 @@ int Lua::engine::PrecacheModel_sv(lua_State *l)
 	return 0;
 }
 
+int Lua::engine::get_model(lua_State *l)
+{
+	auto *state = ::engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto *name = Lua::CheckString(l,1);
+	auto mdl = game->LoadModel(name);
+	if(mdl == nullptr)
+		return 0;
+	Lua::Push<decltype(mdl)>(l,mdl);
+	return 1;
+}
+
 int Lua::engine::LoadSoundScripts(lua_State *l)
 {
 	NetworkState *state = ::engine->GetNetworkState(l);

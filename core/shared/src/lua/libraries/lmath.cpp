@@ -11,6 +11,7 @@
 #include "pragma/math/util_easing.hpp"
 #include "pragma/model/modelmesh.h"
 #include <mathutil/umath_equation_solver.h>
+#include <mathutil/umath_frustum.hpp>
 
 extern DLLENGINE Engine *engine;
 int Lua::math::approach(lua_State *l)
@@ -437,5 +438,107 @@ int Lua::math::ease_in_out(lua_State *l)
 	if(Lua::IsSet(l,argIdx))
 		type = static_cast<umath::EaseType>(Lua::CheckInt(l,argIdx++));
 	Lua::PushNumber(l,umath::ease_in_out(t,type));
+	return 1;
+}
+
+int Lua::math::calc_horizontal_fov(lua_State *l)
+{
+	auto focalLengthInMM = Lua::CheckNumber(l,1);
+	auto width = Lua::CheckNumber(l,2);
+	auto height = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,::umath::calc_horizontal_fov(focalLengthInMM,width,height));
+	return 1;
+}
+int Lua::math::calc_vertical_fov(lua_State *l)
+{
+	auto focalLengthInMM = Lua::CheckNumber(l,1);
+	auto width = Lua::CheckNumber(l,2);
+	auto height = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,::umath::calc_vertical_fov(focalLengthInMM,width,height));
+	return 1;
+}
+int Lua::math::calc_diagonal_fov(lua_State *l)
+{
+	auto focalLengthInMM = Lua::CheckNumber(l,1);
+	auto width = Lua::CheckNumber(l,2);
+	auto height = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,::umath::calc_diagonal_fov(focalLengthInMM,width,height));
+	return 1;
+}
+
+int Lua::math::horizontal_fov_to_vertical_fov(lua_State *l)
+{
+	auto hFov = Lua::CheckNumber(l,1);
+	auto width = Lua::CheckNumber(l,2);
+	auto height = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,::umath::horizontal_fov_to_vertical_fov(hFov,width,height));
+	return 1;
+}
+int Lua::math::vertical_fov_to_horizontal_fov(lua_State *l)
+{
+	auto hFov = Lua::CheckNumber(l,1);
+	auto width = Lua::CheckNumber(l,2);
+	auto height = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,::umath::vertical_fov_to_horizontal_fov(hFov,width,height));
+	return 1;
+}
+int Lua::math::diagonal_fov_to_vertical_fov(lua_State *l)
+{
+	auto diagonalFov = Lua::CheckNumber(l,1);
+	auto aspectRatio = Lua::CheckNumber(l,2);
+	Lua::PushNumber(l,::umath::diagonal_fov_to_vertical_fov(diagonalFov,aspectRatio));
+	return 1;
+}
+int Lua::math::get_frustum_plane_center(lua_State *l)
+{
+	auto &pos = Lua::Check<Vector3>(l,1);
+	auto &forward = Lua::Check<Vector3>(l,2);
+	auto z = Lua::CheckNumber(l,3);
+	Lua::Push<Vector3>(l,::umath::frustum::get_plane_center(pos,forward,z));
+	return 1;
+}
+int Lua::math::get_frustum_plane_size(lua_State *l)
+{
+	auto fovRad = Lua::CheckNumber(l,1);
+	auto aspectRatio = Lua::CheckNumber(l,2);
+	auto z = Lua::CheckNumber(l,3);
+	float w,h;
+	::umath::frustum::get_plane_size(fovRad,z,aspectRatio,w,h);
+	Lua::PushNumber(l,w);
+	Lua::PushNumber(l,h);
+	return 2;
+}
+int Lua::math::get_frustum_plane_boundaries(lua_State *l)
+{
+	auto &pos = Lua::Check<Vector3>(l,1);
+	auto &forward = Lua::Check<Vector3>(l,2);
+	auto &up = Lua::Check<Vector3>(l,3);
+	auto fovRad = Lua::CheckNumber(l,4);
+	auto aspectRatio = Lua::CheckNumber(l,5);
+	auto z = Lua::CheckNumber(l,6);
+	float w,h;
+	auto boundaries = ::umath::frustum::get_plane_boundaries(pos,forward,up,fovRad,z,aspectRatio,&w,&h);
+	auto t = Lua::CreateTable(l);
+	for(auto i=decltype(boundaries.size()){0u};i<boundaries.size();++i)
+	{
+		Lua::PushInt(l,i +1);
+		Lua::Push<Vector3>(l,boundaries.at(i));
+		Lua::SetTableValue(l,t);
+	}
+	Lua::PushNumber(l,w);
+	Lua::PushNumber(l,h);
+	return 3;
+}
+int Lua::math::get_frustum_plane_point(lua_State *l)
+{
+	auto &pos = Lua::Check<Vector3>(l,1);
+	auto &forward = Lua::Check<Vector3>(l,2);
+	auto &right = Lua::Check<Vector3>(l,3);
+	auto &up = Lua::Check<Vector3>(l,4);
+	auto fovRad = Lua::CheckNumber(l,5);
+	auto aspectRatio = Lua::CheckNumber(l,6);
+	auto uv = Lua::Check<Vector2>(l,7);
+	auto z = Lua::CheckNumber(l,8);
+	Lua::Push<Vector3>(l,::umath::frustum::get_plane_point(pos,forward,right,up,fovRad,z,aspectRatio,uv));
 	return 1;
 }

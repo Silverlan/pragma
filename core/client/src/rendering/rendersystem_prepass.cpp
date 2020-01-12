@@ -45,6 +45,8 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 
 				for(auto *cmesh : pair.second.meshes)
 				{
+					if(cmesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
+						continue;
 					auto &mdlComponent = ent->GetRenderComponent()->GetModelComponent();
 					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 					assert(mdl != nullptr);

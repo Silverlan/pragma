@@ -603,7 +603,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.add_static_constant("EVENT_ON_COMPONENT_ADDED",pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
 	classDef.add_static_constant("EVENT_ON_COMPONENT_REMOVED",pragma::BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
 
-	classDef.def(luabind::const_self ==luabind::other<EntityHandle>());
+	classDef.def(luabind::const_self ==luabind::const_self);
 }
 
 void Lua::Entity::IsValid(lua_State *l,EntityHandle &hEnt)

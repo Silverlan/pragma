@@ -16,6 +16,7 @@ LINK_ENTITY_TO_CLASS(env_camera,CEnvCamera);
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 CCameraComponent::~CCameraComponent()
 {
 	if(m_cbCameraUpdate.IsValid())
@@ -93,3 +94,4 @@ void CEnvCamera::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CCameraComponent>();
 }
+#pragma optimize("",on)

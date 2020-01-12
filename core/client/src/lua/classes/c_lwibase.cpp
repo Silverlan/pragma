@@ -90,7 +90,7 @@ static bool operator==(WIHandle &a,WIHandle &b)
 void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
-	classDef.def(luabind::self ==WIHandle());
+	classDef.def(luabind::self ==luabind::self);
 	classDef.def("IsValid",&IsValid);
 	classDef.def("GetIndex",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
 		lua_checkgui(l,hPanel);

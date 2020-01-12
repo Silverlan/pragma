@@ -191,21 +191,21 @@ template<class TProperty,typename T,class TLuaClass>
 
 	classDef.def(luabind::tostring(luabind::const_self));
 	classDef.def(luabind::self +T());
-	classDef.def(luabind::self +TProperty());
-	classDef.def(T() +luabind::const_self);
+	classDef.def(luabind::self +luabind::self);
+	classDef.def(T() +luabind::self);
 
 	classDef.def(luabind::self -T());
-	classDef.def(luabind::self -TProperty());
-	classDef.def(T() -luabind::const_self);
+	classDef.def(luabind::self -luabind::self);
+	classDef.def(T() -luabind::self);
 
 	classDef.def(luabind::self *float());
-	classDef.def(float() *luabind::const_self);
+	classDef.def(float() *luabind::self);
 
 	classDef.def(luabind::self /float());
 
-	classDef.def(luabind::const_self ==TProperty());
-	classDef.def(luabind::const_self ==T());
-	classDef.def(T() ==luabind::const_self);
+	classDef.def(luabind::self ==luabind::self);
+	classDef.def(luabind::self ==T());
+	classDef.def(T() ==luabind::self);
 }
 
 template<class TProperty,typename T,class TLuaClass>
@@ -215,31 +215,31 @@ template<class TProperty,typename T,class TLuaClass>
 	classDef.def(luabind::constructor<T>());
 	classDef.def(luabind::tostring(luabind::const_self));
 	classDef.def(luabind::self +T());
-	classDef.def(luabind::self +TProperty());
-	classDef.def(T() +luabind::const_self);
+	classDef.def(luabind::self +luabind::self);
+	classDef.def(T() +luabind::self);
 
 	classDef.def(luabind::self -T());
-	classDef.def(luabind::self -TProperty());
-	classDef.def(T() -luabind::const_self);
+	classDef.def(luabind::self -luabind::self);
+	classDef.def(T() -luabind::self);
 
 	classDef.def(luabind::self *T());
-	classDef.def(luabind::self *TProperty());
-	classDef.def(T() *luabind::const_self);
+	classDef.def(luabind::self *luabind::self);
+	classDef.def(T() *luabind::self);
 
 	classDef.def(luabind::self /T());
-	classDef.def(luabind::self /TProperty());
-	classDef.def(T() /luabind::const_self);
+	classDef.def(luabind::self /luabind::self);
+	classDef.def(T() /luabind::self);
 
-	classDef.def(luabind::const_self ==TProperty());
-	classDef.def(luabind::const_self ==T());
-	classDef.def(T() ==luabind::const_self);
+	classDef.def(luabind::self ==luabind::self);
+	classDef.def(luabind::self ==T());
+	classDef.def(T() ==luabind::self);
 	
-	classDef.def(luabind::const_self <T());
-	classDef.def(luabind::const_self <TProperty());
-	classDef.def(T() <luabind::const_self);
-	classDef.def(luabind::const_self <=T());
-	classDef.def(luabind::const_self <=TProperty());
-	classDef.def(T() <=luabind::const_self);
+	classDef.def(luabind::self <T());
+	classDef.def(luabind::self <luabind::self);
+	classDef.def(T() <luabind::self);
+	classDef.def(luabind::self <=T());
+	classDef.def(luabind::self <=luabind::self);
+	classDef.def(T() <=luabind::self);
 }
 
 template<class TProperty,typename T>
@@ -350,21 +350,21 @@ void Lua::Property::register_classes(Lua::Interface &l)
 
 	colDef.def(luabind::tostring(luabind::const_self));
 	colDef.def(luabind::self +Color());
-	colDef.def(luabind::self +LColorProperty());
-	colDef.def(Color() +luabind::const_self);
+	colDef.def(luabind::self +luabind::self);
+	colDef.def(Color() +luabind::self);
 
 	colDef.def(luabind::self -Color());
-	colDef.def(luabind::self -LColorProperty());
-	colDef.def(Color() -luabind::const_self);
+	colDef.def(luabind::self -luabind::self);
+	colDef.def(Color() -luabind::self);
 
 	colDef.def(luabind::self *float());
-	colDef.def(float() *luabind::const_self);
+	colDef.def(float() *luabind::self);
 
 	colDef.def(luabind::self /float());
 
-	colDef.def(luabind::const_self ==LColorProperty());
-	colDef.def(luabind::const_self ==Color());
-	colDef.def(Color() ==luabind::const_self);
+	colDef.def(luabind::self ==luabind::self);
+	colDef.def(luabind::self ==Color());
+	colDef.def(Color() ==luabind::self);
 
 	add_generic_methods<LColorProperty,Color,luabind::class_<LColorProperty,LBasePropertyWrapper>>(colDef);
 	colDef.def("Link",static_cast<void(*)(lua_State*,LColorProperty&,LColorProperty&)>(link<LColorProperty,Color>));
@@ -397,21 +397,21 @@ void Lua::Property::register_classes(Lua::Interface &l)
 
 	angDef.def(luabind::tostring(luabind::const_self));
 	angDef.def(luabind::self +EulerAngles());
-	angDef.def(luabind::self +LEulerAnglesProperty());
-	angDef.def(EulerAngles() +luabind::const_self);
+	angDef.def(luabind::self +luabind::self);
+	angDef.def(EulerAngles() +luabind::self);
 
 	angDef.def(luabind::self -EulerAngles());
-	angDef.def(luabind::self -LEulerAnglesProperty());
-	angDef.def(EulerAngles() -luabind::const_self);
+	angDef.def(luabind::self -luabind::self);
+	angDef.def(EulerAngles() -luabind::self);
 
 	angDef.def(luabind::self *float());
-	angDef.def(float() *luabind::const_self);
+	angDef.def(float() *luabind::self);
 
 	angDef.def(luabind::self /float());
 
-	angDef.def(luabind::const_self ==LEulerAnglesProperty());
-	angDef.def(luabind::const_self ==EulerAngles());
-	angDef.def(EulerAngles() ==luabind::const_self);
+	angDef.def(luabind::self ==luabind::self);
+	angDef.def(luabind::self ==EulerAngles());
+	angDef.def(EulerAngles() ==luabind::self);
 
 	add_generic_methods<LEulerAnglesProperty,EulerAngles,luabind::class_<LEulerAnglesProperty,LBasePropertyWrapper>>(angDef);
 	angDef.def("Link",static_cast<void(*)(lua_State*,LEulerAnglesProperty&,LEulerAnglesProperty&)>(link<LEulerAnglesProperty,EulerAngles>));

@@ -19,6 +19,8 @@ namespace pragma::rendering
 	public:
 		template<class TRenderer>
 			static std::shared_ptr<TRenderer> Create(Scene &scene);
+		bool operator==(const BaseRenderer &other) const;
+		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
 		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All);
 		virtual bool ReloadRenderTarget()=0;

@@ -23,11 +23,18 @@ namespace pragma
 
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 
+		enum class Flags : uint32_t
+		{
+			None = 0u,
+			UseExtendedVertexWeights = 1u
+		};
+
 #pragma pack(push,1)
 		struct PushConstants
 		{
 			Mat4 depthMVP;
 			Vector4 lightPos; // 4th component stores the distance
+			Flags flags;
 		};
 #pragma pack(pop)
 
@@ -37,6 +44,7 @@ namespace pragma
 		bool BindLight(CLightComponent &light);
 		bool BindEntity(CBaseEntity &ent,const Mat4 &depthMVP);
 		bool BindMaterial(CMaterial &mat); // TODO: Transparent only
+		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		bool BindDepthMatrix(const Mat4 &depthMVP);
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -86,6 +94,7 @@ namespace pragma
 		//bool BindMaterial(CMaterial &mat);
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderShadow::Flags)
 
 // prosper TODO
 #if 0

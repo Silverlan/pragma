@@ -849,7 +849,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def(luabind::const_self *pragma::physics::Transform());
+	classDefTransform.def(luabind::const_self *luabind::const_self);
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
@@ -873,7 +873,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		Lua::Push<pragma::physics::ScaledTransform>(l,t.GetInverse());
 	}));
 	classDefScaledTransform.def(luabind::const_self *pragma::physics::Transform());
-	classDefScaledTransform.def(luabind::const_self *pragma::physics::ScaledTransform());
+	classDefScaledTransform.def(luabind::const_self *luabind::const_self);
 	classDefScaledTransform.def(luabind::const_self *Vector3());
 	classDefScaledTransform.def(luabind::const_self *Quat());
 	physMod[classDefScaledTransform];

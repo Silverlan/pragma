@@ -196,7 +196,7 @@ namespace Lua
 			DLLCLIENT void BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSet);
 			DLLCLIENT void BindEntity(lua_State *l,pragma::ShaderEntity &shader,EntityHandle &hEnt);
 			DLLCLIENT void BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset);
-			DLLCLIENT void Draw(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<::ModelSubMesh> &mesh);
+			DLLCLIENT void Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh);
 		};
 
 		namespace TexturedLit3D

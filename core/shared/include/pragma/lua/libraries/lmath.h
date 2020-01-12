@@ -45,6 +45,19 @@ namespace Lua
 		DLLNETWORK int ease_in(lua_State *l);
 		DLLNETWORK int ease_out(lua_State *l);
 		DLLNETWORK int ease_in_out(lua_State *l);
+
+		DLLNETWORK int calc_horizontal_fov(lua_State *l);
+		DLLNETWORK int calc_vertical_fov(lua_State *l);
+		DLLNETWORK int calc_diagonal_fov(lua_State *l);
+
+		DLLNETWORK int horizontal_fov_to_vertical_fov(lua_State *l);
+		DLLNETWORK int vertical_fov_to_horizontal_fov(lua_State *l);
+		DLLNETWORK int diagonal_fov_to_vertical_fov(lua_State *l);
+
+		DLLNETWORK int get_frustum_plane_center(lua_State *l);
+		DLLNETWORK int get_frustum_plane_size(lua_State *l);
+		DLLNETWORK int get_frustum_plane_boundaries(lua_State *l);
+		DLLNETWORK int get_frustum_plane_point(lua_State *l);
 	};
 };
 

@@ -80,8 +80,8 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 			},1);
 			if(c == Lua::StatusCode::Ok && Lua::IsNone(lTmp,-1) == false)
 			{
-				auto result = Lua::IsNumber(l,-1) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1)) : util::EventReply::Unhandled;
-				Lua::Pop(l,1); // Pop result
+				auto result = Lua::IsNumber(lTmp,-1) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1)) : util::EventReply::Unhandled;
+				Lua::Pop(lTmp,1); // Pop result
 				return result;
 			}
 			return util::EventReply::Unhandled;

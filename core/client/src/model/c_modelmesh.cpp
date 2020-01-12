@@ -104,7 +104,6 @@ const std::shared_ptr<pragma::VkMesh> &CModelSubMesh::GetVKMesh() const {return 
 
 void CModelSubMesh::UpdateVertexBuffer()
 {
-	m_vkMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	std::vector<VertexType> vertexBufferData {};
 	vertexBufferData.reserve(m_vertices->size());
@@ -113,7 +112,15 @@ void CModelSubMesh::UpdateVertexBuffer()
 #else
 	auto &vertexBufferData = *m_vertices;
 #endif
-	auto vertexBuffer = s_vertexBuffer->AllocateBuffer(vertexBufferData.size() *sizeof(vertexBufferData.front()),vertexBufferData.data());
+	auto vertexBuffer = m_vkMesh->GetVertexBuffer();
+	auto bufferSize = vertexBufferData.size() *sizeof(vertexBufferData.front());
+	if(vertexBuffer == nullptr || bufferSize != vertexBuffer->GetSize())
+	{
+		m_vkMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
+		vertexBuffer = s_vertexBuffer->AllocateBuffer(bufferSize,vertexBufferData.data());
+	}
+	else
+		vertexBuffer->Write(0ull,bufferSize,vertexBufferData.data());
 	m_vkMesh->SetVertexBuffer(std::move(vertexBuffer));
 }
 

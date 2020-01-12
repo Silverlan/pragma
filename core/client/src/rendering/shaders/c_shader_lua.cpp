@@ -235,7 +235,7 @@ void LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePip
 	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
 void LuaShaderTextured3D::Lua_OnBindMaterial(Material &mat) {}
-void LuaShaderTextured3D::Lua_OnDraw(ModelSubMesh &mesh) {}
+int32_t LuaShaderTextured3D::Lua_OnDraw(ModelSubMesh &mesh) {return umath::to_integral(util::EventReply::Unhandled);}
 void LuaShaderTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
 void LuaShaderTextured3D::Lua_OnBindScene(rendering::RasterizationRenderer &renderer,bool bView) {}
 void LuaShaderTextured3D::Lua_OnBeginDraw(prosper::CommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {}
@@ -250,6 +250,10 @@ bool LuaShaderTextured3D::BindMaterial(CMaterial &mat)
 bool LuaShaderTextured3D::Draw(CModelSubMesh &mesh)
 {
 	CallLuaMember<void,ModelSubMesh*>("OnDraw",&mesh);
+
+	int32_t result = -1;
+	if(CallLuaMember<int32_t,ModelSubMesh*>("OnDraw",&result,&mesh) == CallbackReturnType::HasReturnValue && static_cast<util::EventReply>(result) == util::EventReply::Handled)
+		return true; // Skip default drawing
 	return ShaderTextured3DBase::Draw(mesh);
 }
 bool LuaShaderTextured3D::BindEntity(CBaseEntity &ent)

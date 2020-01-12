@@ -234,6 +234,8 @@ void ShaderEntity::EndDraw()
 	m_boundEntity = nullptr;
 }
 
+CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
+
 bool ShaderEntity::BindInstanceDescriptorSet(Anvil::DescriptorSet &descSet)
 {
 	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex(),{0u,0u});

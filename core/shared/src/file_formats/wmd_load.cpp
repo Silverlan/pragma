@@ -271,6 +271,12 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 				{
 					auto subMesh = subMeshFactory();
 
+					if(version >= 26)
+					{
+						auto pose = Read<pragma::physics::ScaledTransform>();
+						subMesh->SetPose(pose);
+					}
+
 					auto texId = Read<uint16_t>();
 					subMesh->SetSkinTextureIndex(texId);
 

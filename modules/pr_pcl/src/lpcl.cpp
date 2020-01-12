@@ -1,10 +1,10 @@
 #include "stdafx_pcl.h"
 #include "lpcl.h"
 #include "wvmodule.h"
+#include <pragma/lua/luaapi.h>
+#include <pragma/lua/ldefinitions.h>
 #include <util_pcl.h>
 #include <mathutil/uvec.h>
-
-LUA_REGISTER_TYPE(Vector,Vector3)
 
 #pragma comment(lib,"util_pcl.lib")
 
@@ -19,7 +19,7 @@ static std::vector<Vector3> get_point_cloud(lua_State *l)
 	Lua::PushNil(l);
 	while(Lua::GetNextPair(l,t) != 0)
 	{
-		auto &v = *Lua::CheckVector(l,-1);
+		auto &v = Lua::Check<Vector3>(l,-1);
 		pc.push_back(v);
 		Lua::Pop(l,1);
 	}

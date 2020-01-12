@@ -21,7 +21,7 @@ extern DLLENGINE Engine *engine;
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create",&Create)];
-	// classDef.def(luabind::const_self == ::ModelMeshGroup());
+	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetName",&GetName);
 	classDef.def("GetMeshes",&GetMeshes);
 	classDef.def("AddMesh",&AddMesh);
@@ -43,6 +43,15 @@ void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &clas
 			meshes.push_back(subMesh);
 			Lua::Pop(l,1);
 		}
+	}));
+	classDef.def("GetMesh",static_cast<void(*)(lua_State*,::ModelMeshGroup&,uint32_t)>([](lua_State *l,::ModelMeshGroup &meshGroup,uint32_t index) {
+		auto &meshes = meshGroup.GetMeshes();
+		if(index >= meshes.size())
+			return;
+		Lua::Push(l,meshes.at(index));
+	}));
+	classDef.def("GetMeshCount",static_cast<void(*)(lua_State*,::ModelMeshGroup&,uint32_t)>([](lua_State *l,::ModelMeshGroup &meshGroup,uint32_t index) {
+		Lua::PushInt(l,meshGroup.GetMeshCount());
 	}));
 }
 void Lua::ModelMeshGroup::Create(lua_State *l,const std::string &name)
@@ -135,7 +144,7 @@ void Lua::Model::register_class(
 	luabind::class_<::ModelSubMesh> &classDefModelSubMesh
 )
 {
-	classDef.def(luabind::const_self == ::Model());
+	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetCollisionMeshes",&GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes",&ClearCollisionMeshes);
 	classDef.def("GetSkeleton",&GetSkeleton);
@@ -207,6 +216,12 @@ void Lua::Model::register_class(
 	classDef.def("AddMaterial",&Lua::Model::AddMaterial);
 	classDef.def("SetMaterial",&Lua::Model::SetMaterial);
 	classDef.def("GetMaterials",&Lua::Model::GetMaterials);
+	classDef.def("GetMaterial",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) {
+		auto *mat = mdl.GetMaterial(idx);
+		if(mat == nullptr)
+			return;
+		Lua::Push<Material*>(l,mat);
+	}));
 	classDef.def("GetMaterialCount",&Lua::Model::GetMaterialCount);
 	classDef.def("GetMeshGroupCount",&Lua::Model::GetMeshGroupCount);
 	classDef.def("GetMeshCount",&Lua::Model::GetMeshCount);
@@ -619,7 +634,7 @@ void Lua::Model::register_class(
 	defVertex.def(luabind::constructor<const Vector3&,const Vector3&>());
 	defVertex.def(luabind::constructor<>());
 	defVertex.def(luabind::tostring(luabind::self));
-	defVertex.def(luabind::const_self ==::Vertex());
+	defVertex.def(luabind::const_self ==luabind::const_self);
 	defVertex.def_readwrite("position",&::Vertex::position);
 	defVertex.def_readwrite("uv",&::Vertex::uv);
 	defVertex.def_readwrite("normal",&::Vertex::normal);
@@ -632,7 +647,7 @@ void Lua::Model::register_class(
 	defVertWeight.def(luabind::constructor<const ::Vector4i&,const ::Vector4&>());
 	defVertWeight.def(luabind::constructor<>());
 	defVertWeight.def(luabind::tostring(luabind::self));
-	defVertWeight.def(luabind::const_self ==::VertexWeight());
+	defVertWeight.def(luabind::const_self ==luabind::const_self);
 	defVertWeight.def_readwrite("boneIds",&::VertexWeight::boneIds);
 	defVertWeight.def_readwrite("weights",&::VertexWeight::weights);
 	defVertWeight.def("Copy",&Lua::VertexWeight::Copy);

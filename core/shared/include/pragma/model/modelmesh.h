@@ -5,6 +5,7 @@
 #include <mathutil/glmutil.h>
 #include "pragma/model/vertex.h"
 #include "pragma/model/modelupdateflags.hpp"
+#include "pragma/physics/transform.hpp"
 
 namespace umath
 {
@@ -15,7 +16,7 @@ class DLLNETWORK ModelSubMesh
 	: public std::enable_shared_from_this<ModelSubMesh>
 {
 public:
-	enum class DLLNETWORK ShareMode : uint32_t
+	enum class ShareMode : uint32_t
 	{
 		None = 0,
 		Vertices = 1,
@@ -23,6 +24,12 @@ public:
 		Triangles = 4,
 		VertexWeights = 8,
 		All = Vertices | Alphas | Triangles | VertexWeights
+	};
+	enum class GeometryType : uint8_t
+	{
+		Triangles = 0u,
+		Lines,
+		Points
 	};
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
@@ -51,7 +58,12 @@ public:
 	uint32_t AddVertex(const Vertex &v);
 	void AddTriangle(const Vertex &v1,const Vertex &v2,const Vertex &v3);
 	void AddTriangle(uint32_t a,uint32_t b,uint32_t c);
+	void AddLine(uint32_t idx0,uint32_t idx1);
+	void AddPoint(uint32_t idx);
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData);
+
+	GeometryType GetGeometryType() const;
+	void SetGeometryType(GeometryType type);
 
 	void SetVertex(uint32_t idx,const Vertex &v);
 	void SetVertexPosition(uint32_t idx,const Vector3 &pos);
@@ -68,12 +80,17 @@ public:
 	void Optimize();
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
+	void Transform(const pragma::physics::ScaledTransform &pose);
 	void Merge(const ModelSubMesh &other);
 	void Scale(const Vector3 &scale);
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMeshA,ModelSubMesh &clippedMeshB,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMeshA=nullptr,ModelSubMesh *clippedCoverMeshB=nullptr);
 	virtual std::shared_ptr<ModelSubMesh> Copy() const;
 
 	void ApplyUVMapping(const Vector3 &nu,const Vector3 &nv,uint32_t w,uint32_t h,float ou,float ov,float su,float sv);
+
+	const pragma::physics::ScaledTransform &GetPose() const;
+	pragma::physics::ScaledTransform &GetPose();
+	void SetPose(const pragma::physics::ScaledTransform &pose);
 
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
@@ -91,7 +108,9 @@ protected:
 	std::shared_ptr<std::vector<VertexWeight>> m_extendedVertexWeights;
 	Vector3 m_min;
 	Vector3 m_max;
+	GeometryType m_geometryType = GeometryType::Triangles;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
+	pragma::physics::ScaledTransform m_pose = pragma::physics::ScaledTransform{};
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMesh,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMesh=nullptr);
 };
 

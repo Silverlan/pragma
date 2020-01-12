@@ -23,7 +23,7 @@ void Lua::CallbackHandler::register_class(luabind::class_<::CallbackHandler> &cl
 {
 	classDef.def(luabind::constructor<>());
 	classDef.def(luabind::tostring(luabind::self));
-	classDef.def(luabind::const_self == luabind::other<::CallbackHandler>());
+	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("AddCallback",&AddCallback);
 	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,::CallbackHandler&,const std::string&)>(&CallCallbacks));
 	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,::CallbackHandler&,const std::string&,luabind::object)>(&CallCallbacks));

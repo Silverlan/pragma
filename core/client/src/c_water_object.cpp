@@ -63,9 +63,8 @@ static void is_camera_submerged(const pragma::CCameraComponent &cam,const Vector
 {
 	bCameraSubmerged = false;
 	bCameraFullySubmerged = true;
-	std::vector<Vector3> nearPlaneBounds;
-	nearPlaneBounds.reserve(4);
-	cam.GetNearPlaneBoundaries(&nearPlaneBounds);
+	std::array<Vector3,4> nearPlaneBounds;
+	cam.GetNearPlaneBoundaries(nearPlaneBounds);
 
 	auto isPointInAabb = false;
 	for(auto &p : nearPlaneBounds)

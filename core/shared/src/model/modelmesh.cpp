@@ -133,20 +133,26 @@ ModelSubMesh::ModelSubMesh()
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
-	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max)
+	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max),
+	m_pose{other.m_pose}
 {}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy() const {return std::make_shared<ModelSubMesh>(*this);}
 uint32_t ModelSubMesh::GetReferenceId() const {return m_referenceId;}
 void ModelSubMesh::SetReferenceId(uint32_t refId) {m_referenceId = refId;}
+const pragma::physics::ScaledTransform &ModelSubMesh::GetPose() const {return const_cast<ModelSubMesh*>(this)->GetPose();}
+pragma::physics::ScaledTransform &ModelSubMesh::GetPose() {return m_pose;}
+void ModelSubMesh::SetPose(const pragma::physics::ScaledTransform &pose) {m_pose = pose;}
 void ModelSubMesh::Scale(const Vector3 &scale)
 {
+	m_pose.SetOrigin(m_pose.GetOrigin() *scale);
 	for(auto &v : *m_vertices)
 		v.position *= scale;
 }
 void ModelSubMesh::Merge(const ModelSubMesh &other)
 {
+	// TODO: Take poses into account!
 	m_center = (m_center +other.m_center) /2.f;
 	uvec::to_min_max(m_min,m_max,other.m_min,other.m_max);
 	std::size_t vertCount = 0;
@@ -278,6 +284,12 @@ void ModelSubMesh::Translate(const Vector3 &t)
 	m_min += t;
 	m_max += t;
 }
+void ModelSubMesh::Transform(const pragma::physics::ScaledTransform &pose)
+{
+	Scale(pose.GetScale());
+	Rotate(pose.GetRotation());
+	Translate(pose.GetOrigin());
+}
 const Vector3 &ModelSubMesh::GetCenter() const {return m_center;}
 uint32_t ModelSubMesh::GetVertexCount() const {return static_cast<uint32_t>(m_vertices->size());}
 uint32_t ModelSubMesh::GetTriangleVertexCount() const {return static_cast<uint32_t>(m_triangles->size());}
@@ -316,6 +328,21 @@ void ModelSubMesh::AddTriangle(uint32_t a,uint32_t b,uint32_t c)
 	m_triangles->push_back(static_cast<uint16_t>(b));
 	m_triangles->push_back(static_cast<uint16_t>(c));
 }
+void ModelSubMesh::AddLine(uint32_t idx0,uint32_t idx1)
+{
+	if(m_triangles->size() == m_triangles->capacity())
+		m_triangles->reserve(static_cast<uint32_t>(m_triangles->size() *1.5f));
+	m_triangles->push_back(idx0);
+	m_triangles->push_back(idx1);
+}
+void ModelSubMesh::AddPoint(uint32_t idx)
+{
+	if(m_triangles->size() == m_triangles->capacity())
+		m_triangles->reserve(static_cast<uint32_t>(m_triangles->size() *1.5f));
+	m_triangles->push_back(idx);
+}
+ModelSubMesh::GeometryType ModelSubMesh::GetGeometryType() const {return m_geometryType;}
+void ModelSubMesh::SetGeometryType(GeometryType type) {m_geometryType = type;}
 void ModelSubMesh::Update(ModelUpdateFlags flags)
 {
 	if((flags &ModelUpdateFlags::UpdateBounds) == ModelUpdateFlags::None)

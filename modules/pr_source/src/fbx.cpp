@@ -12,6 +12,7 @@
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 
+#pragma optimize("",off)
 static bool get_diffuse_file_name(FbxSurfaceMaterial *material,std::string &fileName)
 {
 	auto prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
@@ -130,6 +131,9 @@ bool import::load_fbx(NetworkState *nw,Model &mdl,VFilePtr &f,std::vector<std::s
 	// The file is imported, so get rid of the importer.
 	importer->Destroy();
 
+	FbxGeometryConverter converter {manager};
+	converter.Triangulate(scene,true);
+
 	auto *rootNode = scene->GetRootNode();
 	if(rootNode != nullptr)
 	{
@@ -211,6 +215,15 @@ bool import::load_fbx(NetworkState *nw,Model &mdl,VFilePtr &f,std::vector<std::s
 						break;
 					}
 				}
+
+				// TODO: These should probably take the hierarchy (i.e. parent poses) into account
+				auto translation = child->GetGeometricTranslation(FbxNode::eSourcePivot);
+				auto rotation = child->GetGeometricRotation(FbxNode::eSourcePivot);
+				auto scale = child->GetGeometricScaling(FbxNode::eSourcePivot);
+				std::cout<<"Transform: ("<<translation[0]<<","<<translation[1]<<","<<translation[2]<<") "<<
+					"("<<rotation[0]<<","<<rotation[1]<<","<<rotation[2]<<") "<<
+					"("<<scale[0]<<","<<scale[1]<<","<<scale[2]<<") "<<std::endl;
+
 				subMesh->Update();
 				mdlMesh->AddSubMesh(subMesh);
 			}
@@ -232,3 +245,4 @@ bool import::load_fbx(NetworkState *nw,Model &mdl,VFilePtr &f,std::vector<std::s
 	manager->Destroy();
 	return true;
 }
+#pragma optimize("",on)

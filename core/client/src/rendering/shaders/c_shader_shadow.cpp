@@ -4,6 +4,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <prosper_util.hpp>
 #include <pragma/model/vertex.h>
 
@@ -47,6 +48,14 @@ bool ShaderShadow::BindMaterial(CMaterial &mat)
 	cmdBuffer->BindDescriptorSet(umath::to_integral(DescSet::DiffuseMap),layout,descTexture);
 	return true;*/
 	return false; // prosper TODO
+}
+
+bool ShaderShadow::Draw(CModelSubMesh &mesh)
+{
+	auto flags = Flags::None;
+	if(mesh.GetExtendedVertexWeights().empty() == false)
+		flags |= Flags::UseExtendedVertexWeights;
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 
 bool ShaderShadow::BindEntity(CBaseEntity &ent,const Mat4 &depthMVP)

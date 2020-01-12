@@ -17,6 +17,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <sharedutils/util_shaderinfo.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 
@@ -309,4 +310,15 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	if(shader == nullptr)
 		return;
 	ScheduleMeshForRendering(l,renderer,renderMode,*shader,mat,hEnt,mesh);
+}
+void Lua::RasterizationRenderer::ScheduleMeshForRendering(
+	lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh
+)
+{
+	auto *shaderInfo = mat.GetShaderInfo();
+	auto *shader = shaderInfo ? static_cast<::util::WeakHandle<prosper::Shader>*>(shaderInfo->GetShader().get()) : nullptr;
+	if(shader == nullptr || shader->expired() || (*shader)->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
+		return;
+	auto &shaderTex = static_cast<pragma::ShaderTextured3D&>(**shader);
+	ScheduleMeshForRendering(l,renderer,renderMode,shaderTex,mat,hEnt,mesh);
 }

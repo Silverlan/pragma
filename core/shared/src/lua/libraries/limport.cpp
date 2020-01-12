@@ -619,47 +619,89 @@ int Lua::import::import_model_asset(lua_State *l)
 		return 0;
 	}
 
-	auto t = Lua::CreateTable(l);
 	auto *nw = engine->GetNetworkState(l);
-	for(auto i=decltype(aiScene->mNumMeshes){0};i<aiScene->mNumMeshes;++i)
-	{
-		auto *mesh = aiScene->mMeshes[i];
+	auto fConvertMesh = [nw](aiMesh &mesh) {
 		auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
 		auto &verts = subMesh->GetVertices();
-		verts.reserve(mesh->mNumVertices);
-		for(auto j=decltype(mesh->mNumVertices){0};j<mesh->mNumVertices;++j)
+		verts.reserve(mesh.mNumVertices);
+		for(auto j=decltype(mesh.mNumVertices){0};j<mesh.mNumVertices;++j)
 		{
-			auto &aiVert = mesh->mVertices[j];
-			//mesh->mNumUVComponents
+			auto &aiVert = mesh.mVertices[j];
 
 			verts.push_back({});
 			auto &v = verts.back();
 			v.position = {aiVert.x,aiVert.y,aiVert.z};
-			if(mesh->mTextureCoords && mesh->mTextureCoords[0])
+			if(mesh.mTextureCoords && mesh.mTextureCoords[0])
 			{
-				auto &aiUvw = mesh->mTextureCoords[0][j];
+				auto &aiUvw = mesh.mTextureCoords[0][j];
 				v.uv = {aiUvw.x,-aiUvw.y};
 			}
-			if(mesh->mNormals)
+			if(mesh.mNormals)
 			{
-				auto &aiNormal = mesh->mNormals[j];
+				auto &aiNormal = mesh.mNormals[j];
 				v.normal = {aiNormal.x,aiNormal.y,aiNormal.z};
 			}
 		}
 
 		auto &triangles = subMesh->GetTriangles();
-		triangles.reserve(mesh->mNumFaces *3);
-		for(auto j=decltype(mesh->mNumFaces){0};j<mesh->mNumFaces;++j)
+		triangles.reserve(mesh.mNumFaces *3);
+		for(auto j=decltype(mesh.mNumFaces){0};j<mesh.mNumFaces;++j)
 		{
-			auto &face = mesh->mFaces[j];
+			auto &face = mesh.mFaces[j];
 			//face.mNumIndices // TODO
 			triangles.push_back(face.mIndices[0]);
 			triangles.push_back(face.mIndices[1]);
 			triangles.push_back(face.mIndices[2]);
 		}
-		subMesh->SetSkinTextureIndex(mesh->mMaterialIndex);
+		subMesh->SetSkinTextureIndex(mesh.mMaterialIndex);
+		return subMesh;
+	};
 
-		Lua::PushInt(l,i +1);
+	std::vector<std::shared_ptr<ModelSubMesh>> subMeshes {};
+	std::function<void(aiNode&,const pragma::physics::ScaledTransform&)> fIterateTree = nullptr;
+	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node,const pragma::physics::ScaledTransform &parentPose) {
+		aiVector3D scale;
+		aiQuaternion rot;
+		aiVector3D pos;
+		auto t = node.mTransformation;
+		// t.Inverse();
+		t.Decompose(scale,rot,pos);
+
+		pragma::physics::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
+		auto ang = EulerAngles{pose.GetRotation()};
+		//umath::swap(ang.r,ang.y);
+		//pose.SetRotation(uquat::identity());//uquat::create(ang));
+		pose = parentPose *pose;
+
+		auto meshScale = pose.GetScale();
+		auto invPose = pose;//pose.GetInverse();
+		//invPose.SetRotation(uquat::create(EulerAngles(-90,26.3579,0)));
+		//invPose.RotateLocal(uquat::create(EulerAngles{0.f,180.f,0.f}));
+		invPose.SetScale(Vector3{1.f,1.f,1.f});
+
+		ang = EulerAngles{invPose.GetRotation()};
+		std::cout<<"ANG: ("<<ang.p<<","<<ang.y<<","<<ang.r<<")"<<std::endl;
+
+		for(auto i=decltype(node.mNumMeshes){0u};i<node.mNumMeshes;++i)
+		{
+			auto meshIdx = node.mMeshes[i];
+			auto subMesh = fConvertMesh(*aiScene->mMeshes[meshIdx]);
+			subMesh->Scale(meshScale);
+			subMesh->Transform(invPose);
+			subMeshes.push_back(subMesh);
+		}
+
+		for(auto i=decltype(node.mNumChildren){0u};i<node.mNumChildren;++i)
+			fIterateTree(*node.mChildren[i],pose);
+	};
+	pragma::physics::ScaledTransform pose {};
+	fIterateTree(*aiScene->mRootNode,pose);
+
+	auto t = Lua::CreateTable(l);
+	auto idx = 1;
+	for(auto &subMesh : subMeshes)
+	{
+		Lua::PushInt(l,idx++);
 		Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);
 		Lua::SetTableValue(l,t);
 	}
@@ -747,8 +789,8 @@ int Lua::import::import_model_asset(lua_State *l)
 	// Build skeleton
 	auto skeleton = std::make_shared<Skeleton>();
 	auto referencePose = Frame::Create(1);
-	std::function<std::shared_ptr<Bone>(aiNode&,Bone*)> fIterateTree = nullptr;
-	fIterateTree = [&fIterateTree,&skeleton,&referencePose](aiNode &node,Bone *parent) -> std::shared_ptr<Bone> {
+	std::function<std::shared_ptr<Bone>(aiNode&,Bone*)> fIterateBones = nullptr;
+	fIterateBones = [&fIterateBones,&skeleton,&referencePose](aiNode &node,Bone *parent) -> std::shared_ptr<Bone> {
 		auto *bone = new Bone{};
 		bone->name = node.mName.C_Str();
 		auto boneIdx = skeleton->AddBone(bone);
@@ -772,13 +814,13 @@ int Lua::import::import_model_asset(lua_State *l)
 		for(auto i=decltype(node.mNumChildren){0};i<node.mNumChildren;++i)
 		{
 			auto &child = *node.mChildren[i];
-			fIterateTree(child,bone);
+			fIterateBones(child,bone);
 		}
 		return skeleton->GetBone(boneIdx).lock();
 	};
 	if(aiScene->mRootNode)
 	{
-		auto rootBone = fIterateTree(*aiScene->mRootNode,nullptr);
+		auto rootBone = fIterateBones(*aiScene->mRootNode,nullptr);
 		skeleton->GetRootBones().insert(std::make_pair(rootBone->ID,rootBone));
 	}
 	// http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html

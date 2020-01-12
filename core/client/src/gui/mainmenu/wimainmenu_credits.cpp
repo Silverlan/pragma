@@ -121,7 +121,8 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 		"Dark Dreams", // 10
 		"Googleygareth8", // 1
 		"Manndarinchik", // 1
-		"Roach" // 1
+		"Roach", // 1
+		"Noah The Troll-Hunting Christian Spy" // 1
 	};
 	for(auto &patron : patrons)
 		AddText(patron,"credits_text");

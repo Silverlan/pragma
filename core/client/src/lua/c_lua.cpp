@@ -98,6 +98,7 @@ void CGame::RegisterLua()
 		{"set_gravity",Lua::game::Client::set_gravity},
 		{"get_gravity",Lua::game::Client::get_gravity},
 		{"load_model",Lua::game::Client::load_model},
+		{"get_model",Lua::engine::get_model},
 		{"create_model",Lua::game::Client::create_model},
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
@@ -288,6 +289,7 @@ void CGame::RegisterLua()
 	auto gameMod = luabind::module(GetLuaState(),"game");
 
 	auto classDefBaseRenderer = luabind::class_<pragma::rendering::BaseRenderer>("BaseRenderer");
+	classDefBaseRenderer.def(luabind::const_self == luabind::const_self);
 	gameMod[classDefBaseRenderer];
 
 	auto classDefRasterizationRenderer = luabind::class_<pragma::rendering::RasterizationRenderer,pragma::rendering::BaseRenderer>("RasterizationRenderer");
@@ -337,6 +339,9 @@ void CGame::RegisterLua()
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
 		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
+	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
+	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
+		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	//lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
 	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::NoPrepass));

@@ -59,6 +59,7 @@ void SGame::RegisterLua()
 		//{"create_sprite",Lua::engine::CreateSprite},
 		{"precache_model",Lua::engine::PrecacheModel_sv},
 		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
+		{"get_model",Lua::engine::get_model},
 		{"load_material",Lua_sv_engine_LoadMaterial},
 
 		{"set_gravity",Lua::game::Server::set_gravity},

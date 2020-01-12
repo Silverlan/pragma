@@ -93,6 +93,7 @@ protected:
 	std::vector<CallbackHandle> m_sortCallbacks;
 	WIHandle m_hRowHeader;
 	std::vector<WIHandle> m_rows;
+	void UpdateTableBounds();
 	void OnRowSelected(WITableRow *row);
 	std::vector<WIHandle> m_selectedRows;
 	static bool SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHandle &b);

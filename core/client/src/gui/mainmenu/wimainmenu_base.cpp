@@ -218,6 +218,7 @@ void WIMainMenuBase::InitializeOptionsList(WIOptionsList *pList)
 	pList->SetPos(192,200);
 	pList->SizeToContents();
 	pList->SetWidth(700);
+	pList->ScheduleUpdate();
 	m_optionLists.push_back(pList->GetHandle());
 }
 

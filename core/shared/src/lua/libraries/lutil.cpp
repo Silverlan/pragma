@@ -76,7 +76,15 @@ int Lua::global::include(lua_State *l)
 		if(relPath.back() != '\\' && relPath.back() != '/')
 			relPath += "/";
 
-		auto incPath = "lua/" +GetIncludePath(relPath);
+		auto incPath = relPath;
+		if(incPath.empty() == false)
+		{
+			if(incPath.front() == '/' || incPath.front() == '\\')
+				incPath.erase(incPath.begin());
+			else
+				incPath = Lua::GetIncludePath(incPath);
+		}
+		incPath = "lua/" +incPath;
 		auto incPathLua = incPath +"*.lua";
 		std::vector<std::string> files;
 		FileManager::FindFiles(incPathLua.c_str(),&files,nullptr);

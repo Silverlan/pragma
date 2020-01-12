@@ -33,14 +33,17 @@ namespace pragma
 		void GetFrustumPoints(std::vector<Vector3> &outPoints) const;
 		Vector3 GetFarPlaneCenter() const;
 		Vector3 GetNearPlaneCenter() const;
+		Vector3 GetPlaneCenter(float z) const;
 		void GetNearPlaneBounds(float *wNear,float *hNear) const;
 		void GetFarPlaneBounds(float *wFar,float *hFar) const;
+		void GetPlaneBounds(float z,float &outW,float &outH) const;
 		// Returns the boundary vectors for the far plane in the order Top left,Top right,Bottom left,Bottom right
-		void GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *wFar=nullptr,float *hFar=nullptr) const;
+		void GetFarPlaneBoundaries(std::array<Vector3,4> &outPoints,float *wFar=nullptr,float *hFar=nullptr) const;
 		// Returns the boundary vectors for the near plane in the order Top left,Top right,Bottom left,Bottom right
-		void GetNearPlaneBoundaries(std::vector<Vector3> *vec,float *wNear=nullptr,float *hNear=nullptr) const;
+		void GetNearPlaneBoundaries(std::array<Vector3,4> &outPoints,float *wNear=nullptr,float *hNear=nullptr) const;
 		// Returns both the boundary vectors for the far and near planes in the order Top left,Top right,Bottom left,Bottom right
-		void GetPlaneBoundaries(std::vector<Vector3> *vecNear,std::vector<Vector3> *vecFar,float *wNear=nullptr,float *hNear=nullptr,float *wFar=nullptr,float *hFar=nullptr) const;
+		void GetPlaneBoundaries(std::array<Vector3,8> &outPoints,float *wNear=nullptr,float *hNear=nullptr,float *wFar=nullptr,float *hFar=nullptr) const;
+		void GetPlaneBoundaries(float z,std::array<Vector3,4> &outPoints,float *wNear=nullptr,float *hNear=nullptr,float *wFar=nullptr,float *hFar=nullptr) const;
 
 		void SetOrientation(const Vector3 &forward,const Vector3 &up);
 
@@ -68,6 +71,7 @@ namespace pragma
 		const std::vector<Plane> &GetFrustumPlanes() const;
 		Vector3 GetNearPlanePoint(const Vector2 &uv) const;
 		Vector3 GetFarPlanePoint(const Vector2 &uv) const;
+		Vector3 GetPlanePoint(float z,const Vector2 &uv) const;
 
 		void CreateFrustumMesh(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Vector3> &verts,std::vector<uint16_t> &indices) const;
 		void CreateFrustumKDop(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Plane> &kDop) const;

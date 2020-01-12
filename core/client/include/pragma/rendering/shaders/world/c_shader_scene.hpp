@@ -178,6 +178,7 @@ namespace pragma
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh);
 		virtual void EndDraw() override;
+		CBaseEntity *GetBoundEntity();
 	protected:
 		ShaderEntity(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		bool Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer);

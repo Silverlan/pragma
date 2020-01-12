@@ -184,54 +184,53 @@ void BaseEnvCameraComponent::GetFrustumPoints(std::vector<Vector3> &outPoints) c
 	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
 	GetFrustumPoints(outPoints,GetNearZ(),GetFarZ(),GetFOVRad(),GetAspectRatio(),pos,forward,up);
 }
-Vector3 BaseEnvCameraComponent::GetFarPlaneCenter() const
+Vector3 BaseEnvCameraComponent::GetFarPlaneCenter() const {return GetPlaneCenter(*m_farZ);}
+Vector3 BaseEnvCameraComponent::GetNearPlaneCenter() const {return GetPlaneCenter(*m_nearZ);}
+Vector3 BaseEnvCameraComponent::GetPlaneCenter(float z) const
 {
 	auto &trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
 	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	return umath::frustum::get_far_plane_center(pos,forward,*m_farZ);
-}
-Vector3 BaseEnvCameraComponent::GetNearPlaneCenter() const
-{
-	auto &trComponent = GetEntity().GetTransformComponent();
-	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
-	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	return umath::frustum::get_near_plane_center(pos,forward,*m_nearZ);
+	return umath::frustum::get_plane_center(pos,forward,z);
 }
 void BaseEnvCameraComponent::GetNearPlaneBounds(float *wNear,float *hNear) const
 {
-	umath::frustum::get_near_plane_size(GetFOVRad(),*m_nearZ,m_aspectRatio,*wNear,*hNear);
+	GetPlaneBounds(*m_nearZ,*wNear,*hNear);
 }
 void BaseEnvCameraComponent::GetFarPlaneBounds(float *wFar,float *hFar) const
 {
-	umath::frustum::get_far_plane_size(GetFOVRad(),*m_farZ,m_aspectRatio,*wFar,*hFar);
+	GetPlaneBounds(*m_farZ,*wFar,*hFar);
 }
-void BaseEnvCameraComponent::GetFarPlaneBoundaries(std::vector<Vector3> *vec,float *wFar,float *hFar) const
+void BaseEnvCameraComponent::GetPlaneBounds(float z,float &outW,float &outH) const
+{
+	umath::frustum::get_plane_size(GetFOVRad(),z,m_aspectRatio,outW,outH);
+}
+void BaseEnvCameraComponent::GetFarPlaneBoundaries(std::array<Vector3,4> &outPoints,float *wFar,float *hFar) const
+{
+	GetPlaneBoundaries(*m_farZ,outPoints,wFar,hFar);
+}
+void BaseEnvCameraComponent::GetNearPlaneBoundaries(std::array<Vector3,4> &outPoints,float *wNear,float *hNear) const
+{
+	GetPlaneBoundaries(*m_nearZ,outPoints,wNear,hNear);
+}
+void BaseEnvCameraComponent::GetPlaneBoundaries(std::array<Vector3,8> &outPoints,float *wNear,float *hNear,float *wFar,float *hFar) const
+{
+	std::array<Vector3,4> tmpPoints;
+	GetNearPlaneBoundaries(tmpPoints,wNear,hNear);
+	for(auto i=decltype(tmpPoints.size()){0u};i<tmpPoints.size();++i)
+		outPoints.at(i) = tmpPoints.at(i);
+
+	GetFarPlaneBoundaries(tmpPoints,wFar,hFar);
+	for(auto i=decltype(tmpPoints.size()){0u};i<tmpPoints.size();++i)
+		outPoints.at(i +tmpPoints.size()) = tmpPoints.at(i);
+}
+void BaseEnvCameraComponent::GetPlaneBoundaries(float z,std::array<Vector3,4> &outPoints,float *wNear,float *hNear,float *wFar,float *hFar) const
 {
 	auto &trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
 	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
 	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	auto boundaries = umath::frustum::get_far_plane_boundaries(pos,forward,up,GetFOVRad(),*m_farZ,m_aspectRatio,wFar,hFar);
-	vec->reserve(boundaries.size());
-	for(auto &v : boundaries)
-		vec->push_back(v);
-}
-void BaseEnvCameraComponent::GetNearPlaneBoundaries(std::vector<Vector3> *vec,float *wNear,float *hNear) const
-{
-	auto &trComponent = GetEntity().GetTransformComponent();
-	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
-	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	auto boundaries = umath::frustum::get_near_plane_boundaries(pos,forward,up,GetFOVRad(),*m_nearZ,m_aspectRatio,wNear,hNear);
-	vec->reserve(boundaries.size());
-	for(auto &v : boundaries)
-		vec->push_back(v);
-}
-void BaseEnvCameraComponent::GetPlaneBoundaries(std::vector<Vector3> *vecNear,std::vector<Vector3> *vecFar,float *wNear,float *hNear,float *wFar,float *hFar) const
-{
-	GetNearPlaneBoundaries(vecNear,wNear,hNear);
-	GetFarPlaneBoundaries(vecFar,wFar,hFar);
+	outPoints = umath::frustum::get_plane_boundaries(pos,forward,up,GetFOVRad(),z,m_aspectRatio,wNear,hNear);
 }
 
 void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov;}
@@ -262,21 +261,20 @@ void BaseEnvCameraComponent::UpdateFrustumPlanes()
 const std::vector<Plane> &BaseEnvCameraComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
 Vector3 BaseEnvCameraComponent::GetNearPlanePoint(const Vector2 &uv) const
 {
-	auto &trComponent = GetEntity().GetTransformComponent();
-	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
-	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	auto right = trComponent.valid() ? trComponent->GetRight() : uvec::RIGHT;
-	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	return umath::frustum::get_near_plane_point(pos,forward,right,up,GetFOVRad(),*m_nearZ,m_aspectRatio,uv);
+	return GetPlanePoint(*m_nearZ,uv);
 }
 Vector3 BaseEnvCameraComponent::GetFarPlanePoint(const Vector2 &uv) const
+{
+	return GetPlanePoint(*m_farZ,uv);
+}
+Vector3 BaseEnvCameraComponent::GetPlanePoint(float z,const Vector2 &uv) const
 {
 	auto &trComponent = GetEntity().GetTransformComponent();
 	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
 	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent.valid() ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	return umath::frustum::get_far_plane_point(pos,forward,right,up,GetFOVRad(),*m_farZ,m_aspectRatio,uv);
+	return umath::frustum::get_plane_point(pos,forward,right,up,GetFOVRad(),z,m_aspectRatio,uv);
 }
 
 void BaseEnvCameraComponent::CreateFrustumMesh(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Vector3> &verts,std::vector<uint16_t> &indices) const

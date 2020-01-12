@@ -20,6 +20,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
+#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/model/c_modelmanager.h"
@@ -591,13 +592,18 @@ pragma::CCameraComponent *CGame::CreateCamera(float aspectRatio,float fov,float 
 	auto *cam = CreateEntity<CEnvCamera>();
 	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : util::WeakHandle<pragma::CCameraComponent>{};
 	if(whCamComponent.expired())
+	{
+		if(cam)
+			cam->RemoveSafely();
 		return nullptr;
+	}
 	auto *pCameraComponent = whCamComponent.get();
 	pCameraComponent->SetAspectRatio(aspectRatio);
 	pCameraComponent->SetFOV(fov);
 	pCameraComponent->SetNearZ(nearZ);
 	pCameraComponent->SetFarZ(farZ);
 	pCameraComponent->UpdateMatrices();
+	cam->Spawn();
 	return pCameraComponent;
 }
 
@@ -630,6 +636,9 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	);
 	if(cam)
 	{
+		auto toggleC = cam->GetEntity().GetComponent<pragma::CToggleComponent>();
+		if(toggleC.valid())
+			toggleC->TurnOn();
 		m_scene->SetActiveCamera(*cam);
 		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
 	}

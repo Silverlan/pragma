@@ -18,10 +18,6 @@
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
 
-#ifdef ENABLE_MMD_IMPORT
-#include <util_mmd.hpp>
-#endif
-
 extern DLLENGINE Engine *engine;
 
 #pragma optimize("",off)
@@ -680,7 +676,6 @@ int Lua::import::import_model_asset(lua_State *l)
 		invPose.SetScale(Vector3{1.f,1.f,1.f});
 
 		ang = EulerAngles{invPose.GetRotation()};
-		std::cout<<"ANG: ("<<ang.p<<","<<ang.y<<","<<ang.r<<")"<<std::endl;
 
 		for(auto i=decltype(node.mNumMeshes){0u};i<node.mNumMeshes;++i)
 		{
@@ -714,6 +709,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		auto modelName = ufile::get_file_from_filename(*filePath);
 		ufile::remove_extension_from_filename(modelName);
 
+#if 0
 		auto matPath = "models/" +FileManager::GetCanonicalizedPath(modelName);
 		auto dstMatPath = "addons/imported/materials/" +matPath;
 		if(FileManager::CreatePath(dstMatPath.c_str()) == false)
@@ -765,7 +761,9 @@ int Lua::import::import_model_asset(lua_State *l)
 				}
 			}
 		}
+#endif
 	}
+	std::unordered_map<uint32_t,uint32_t> originalMaterialIndexToModelMaterialIndex {};
 	if(texturesImported == false)
 	{
 		auto srcMatPath = ufile::get_path_from_filename(*filePath);
@@ -774,9 +772,42 @@ int Lua::import::import_model_asset(lua_State *l)
 		{
 			auto *mat = aiScene->mMaterials[i];
 			std::string matName = mat->GetName().C_Str();
-			importedTextures.push_back(matName);
+			auto numDiffuseMaps = mat->GetTextureCount(aiTextureType::aiTextureType_DIFFUSE);
+			/*for(auto j=decltype(mat->mNumProperties){0};j<mat->mNumProperties;++j)
+			{
+				auto *prop = mat->mProperties[j];
+				std::cout<<"Semantic: "<<prop->mSemantic<<std::endl;
+			}*/
+			if(numDiffuseMaps > 0)
+			{
+				aiString path;
+				if(mat->GetTexture(aiTextureType::aiTextureType_DIFFUSE,0u,&path) == aiReturn::aiReturn_SUCCESS && path.length > 3)
+				{
+					std::string npath = path.data;
+					if(npath.empty() == false && npath.front() == '*')
+						npath = path.data +npath.length() +1;
+					auto br = umath::min(npath.rfind('/'),npath.rfind('\\'));
+					if(br != std::string::npos)
+						npath = npath.substr(br +1);
+					ufile::remove_extension_from_filename(npath);
+					importedTextures.push_back(npath);
+					originalMaterialIndexToModelMaterialIndex.insert(std::make_pair(i,importedTextures.size() -1));
+				}
+			}
 		}
 	}
+
+	// Update material indices
+	for(auto &subMesh : subMeshes)
+	{
+		auto matIdx = subMesh->GetSkinTextureIndex();
+		auto it = originalMaterialIndexToModelMaterialIndex.find(matIdx);
+		if(it != originalMaterialIndexToModelMaterialIndex.end())
+			subMesh->SetSkinTextureIndex(it->second);
+		else
+			subMesh->SetSkinTextureIndex(std::numeric_limits<uint32_t>::max());
+	}
+
 	auto tTextures = Lua::CreateTable(l);
 	for(auto i=decltype(importedTextures.size()){0};i<importedTextures.size();++i)
 	{
@@ -839,176 +870,5 @@ int Lua::import::import_model_asset(lua_State *l)
 	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
 
 	return 4;
-}
-
-int Lua::import::import_pmx(lua_State *l)
-{
-#ifdef ENABLE_MMD_IMPORT
-	auto &f = *Lua::CheckFile(l,1);
-	auto &mdl = Lua::Check<Model>(l,2);
-	auto fptr = f.GetHandle();
-	auto mdlData = mmd::pmx::load(fptr);
-	if(mdlData == nullptr)
-	{
-		Lua::PushBool(l,false);
-		return 1;
-	}
-	auto meshGroup = mdl.GetMeshGroup(0u);
-	if(meshGroup == nullptr)
-	{
-		Lua::PushBool(l,false);
-		return 1;
-	}
-	auto *nw = engine->GetNetworkState(l);
-	auto mesh = std::shared_ptr<ModelMesh>(nw->CreateMesh());
-	meshGroup->AddMesh(mesh);
-
-	std::string matPath = mdlData->characterName;
-	ustring::to_lower(matPath);
-	ustring::replace(matPath," ","_");
-	matPath = "models\\mmd\\" +matPath;
-
-	std::vector<uint32_t> texIds;
-	texIds.reserve(mdlData->textures.size());
-	auto *texGroup = mdl.GetTextureGroup(0u);
-	for(auto &tex : mdlData->textures)
-	{
-		auto fTex = FileManager::OpenFile(tex.c_str(),"rb");
-		if(fTex == nullptr)
-			Con::cwar<<"WARNING: Unable to open texture '"<<tex<<"'!"<<Con::endl;
-		else
-		{
-
-		}
-		// Load DDS
-
-
-		mdl.AddTexturePath(ufile::get_path_from_filename(tex));
-		auto texName = ufile::get_file_from_filename(tex);
-		ufile::remove_extension_from_filename(texName);
-		auto localMatPath = matPath +'\\' +texName;
-		auto matPathWmi = localMatPath +".wmi";
-		if(FileManager::Exists(matPathWmi) == false && FileManager::CreatePath(ufile::get_path_from_filename(matPathWmi).c_str()) == true)
-		{
-			auto f = FileManager::OpenFile<VFilePtrReal>(matPathWmi.c_str(),"w");
-			if(f != nullptr)
-			{
-				std::stringstream ss;
-				ss<<"\"textured\"\n";
-				ss<<"{\n";
-				ss<<"\t$texture diffusemap \""<<localMatPath<<"\"\n";
-				ss<<"\tsurfacematerial \"flesh\"\n";
-				ss<<"}";
-				f->WriteString(ss.str());
-			}
-		}
-		auto *mat = nw->LoadMaterial(localMatPath);
-		auto texId = mdl.AddTexture(texName,mat);
-		if(texGroup != nullptr)
-			texGroup->textures.push_back(texId);
-		texIds.push_back(texId);
-	}
-	auto faceOffset = 0ull;
-	std::unordered_map<int32_t,std::shared_ptr<ModelSubMesh>> subMeshes;
-	for(auto &mat : mdlData->materials)
-	{
-		if(mat.textureIndex == -1)
-			continue;
-		auto it = subMeshes.find(mat.textureIndex);
-		if(it == subMeshes.end())
-			it = subMeshes.insert(std::make_pair(mat.textureIndex,std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh()))).first;
-		auto &subMesh = *it->second;
-		subMesh.SetTexture(texIds.at(mat.textureIndex));
-		auto &verts = subMesh.GetVertices();
-		auto &vertWeights = subMesh.GetVertexWeights();
-		auto &tris = subMesh.GetTriangles();
-
-		std::unordered_map<uint16_t,uint16_t> faceTranslationTable;
-		tris.reserve(mat.faceCount);
-		for(auto i=faceOffset;i<faceOffset +mat.faceCount;++i)
-		{
-			auto idx = mdlData->faces.at(i);
-			auto it = faceTranslationTable.find(idx);
-			if(it == faceTranslationTable.end())
-			{
-				if(verts.size() == verts.capacity())
-				{
-					verts.reserve(verts.size() +500);
-					vertWeights.reserve(verts.capacity());
-				}
-				verts.push_back({});
-				vertWeights.push_back({});
-				auto &vMesh = verts.back();
-				auto &vw = vertWeights.back();
-				auto &v = mdlData->vertices.at(idx);
-				vMesh.position = {v.position.at(0),v.position.at(1),v.position.at(2)};
-				vMesh.normal = {v.normal.at(0),v.normal.at(1),v.normal.at(2)};
-				vMesh.uv = {v.uv.at(0),v.uv.at(1)};
-
-				vw.boneIds = {v.boneIds.at(0),v.boneIds.at(1),v.boneIds.at(2),v.boneIds.at(3)};
-				vw.weights = {v.boneWeights.at(0),v.boneWeights.at(1),v.boneWeights.at(2),v.boneWeights.at(3)};
-
-				it = faceTranslationTable.insert(std::make_pair(idx,verts.size() -1)).first;
-			}
-			tris.push_back(it->second);
-		}
-		faceOffset += mat.faceCount;
-
-		mesh->AddSubMesh(it->second);
-	}
-	mdl.AddTexturePath(matPath);
-
-	auto &skeleton = mdl.GetSkeleton();
-	auto &bones = skeleton.GetBones();
-	bones.clear();
-	for(auto &bone : mdlData->bones)
-	{
-		auto *mdlBone = new Bone();
-		mdlBone->name = bone.name;
-		auto boneId = skeleton.AddBone(mdlBone);
-		if(mdlBone->name.empty())
-			mdlBone->name = "bone" +std::to_string(boneId);
-	}
-	auto &rootBones = skeleton.GetRootBones();
-	rootBones.clear();
-	auto &reference = mdl.GetReference();
-	reference.SetBoneCount(mdlData->bones.size());
-	auto boneId = 0u;
-	for(auto &bone : mdlData->bones)
-	{
-		auto parentId = bone.parentBoneIdx;
-		if(parentId != -1)
-		{
-			auto &parent = bones.at(parentId);
-			auto &child = bones.at(boneId);
-			parent->children.insert(std::make_pair(boneId,child));
-			child->parent = parent;
-		}
-		else
-			rootBones.insert(std::make_pair(boneId,bones.at(boneId)));
-		reference.SetBonePosition(boneId,Vector3(bone.position.at(0),bone.position.at(1),bone.position.at(2)));
-		reference.SetBoneOrientation(boneId,uquat::identity());
-		++boneId;
-	}
-	auto frame = std::make_shared<Frame>(reference);
-	auto anim = std::make_shared<Animation>();
-	anim->AddFrame(frame);
-	mdl.AddAnimation("reference",anim);
-
-	auto numBones = mdlData->bones.size();
-	std::vector<uint32_t> boneList(numBones);
-	for(auto i=decltype(numBones){0};i<numBones;++i)
-		boneList.at(i) = i;
-	anim->SetBoneList(boneList);
-	anim->Localize(skeleton);
-
-	mdl.Update(ModelUpdateFlags::All);
-	mdl.GenerateBindPoseMatrices();
-	Lua::PushBool(l,true);
-	return 1;
-#else
-	Lua::PushBool(l,false);
-	return 1;
-#endif
 }
 #pragma optimize("",on)

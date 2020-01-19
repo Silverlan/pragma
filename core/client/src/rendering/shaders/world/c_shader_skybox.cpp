@@ -5,11 +5,13 @@
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/model/vertex.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
@@ -23,7 +25,11 @@ decltype(ShaderSkybox::DESCRIPTOR_SET_MATERIAL) ShaderSkybox::DESCRIPTOR_SET_MAT
 	}
 };
 ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_skybox","world/fs_skybox")
+	: ShaderSkybox(context,identifier,"world/vs_skybox","world/fs_skybox")
+{}
+
+ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+	: ShaderTextured3DBase(context,identifier,vsShader,fsShader)
 {
 	SetBaseShader<ShaderTextured3D>();
 }
@@ -65,15 +71,33 @@ bool ShaderSkybox::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer
 {
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags);
 }
+bool ShaderSkybox::BindEntity(CBaseEntity &ent)
+{
+	if(ShaderTextured3DBase::BindEntity(ent) == false)
+		return false;
+	auto skyC = ent.GetComponent<CSkyboxComponent>();
+	m_skyAngles = skyC.valid() ? skyC->GetSkyAngles() : EulerAngles{};
+	return true;
+}
 bool ShaderSkybox::BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
 	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
-	return ShaderTextured3DBase::BindSceneCamera(renderer,bView) == true &&
-		RecordPushConstants(PushConstants{cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN}) == true;
+	if(ShaderTextured3DBase::BindSceneCamera(renderer,bView) == false)
+		return false;
+	auto origin = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	uvec::rotate(&origin,m_skyAngles);
+	return RecordPushConstants(PushConstants{origin}) == true;
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) {return true;}
 bool ShaderSkybox::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
 bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(mesh,false);}
+
+//////////////
+
+ShaderSkyboxEquirect::ShaderSkyboxEquirect(prosper::Context &context,const std::string &identifier)
+	: ShaderSkybox{context,identifier,"world/vs_skybox_equirect","world/fs_skybox_equirect"}
+{}
+#pragma optimize("",on)

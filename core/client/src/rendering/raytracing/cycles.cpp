@@ -16,11 +16,12 @@ struct CyclesModuleInterface
 	void(*render_image)(
 		uint32_t,uint32_t,uint32_t,bool,bool,
 		const Vector3&,const Quat&,float,float,umath::Degree,
+		std::string,EulerAngles,float,
 		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<util::ImageBuffer>> &outJob
 	) = nullptr;
 
 	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,util::ParallelJob<std::shared_ptr<util::ImageBuffer>> &outJob) = nullptr;
-	void(*bake_lightmaps)(BaseEntity&,uint32_t,uint32_t,uint32_t,bool,bool,util::ParallelJob<std::shared_ptr<util::ImageBuffer>> &outJob) = nullptr;
+	void(*bake_lightmaps)(BaseEntity&,uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,util::ParallelJob<std::shared_ptr<util::ImageBuffer>> &outJob) = nullptr;
 
 	bool IsValid() const {return m_bValid;}
 private:
@@ -60,6 +61,7 @@ util::ParallelJob<std::shared_ptr<util::ImageBuffer>> cycles::render_image(Clien
 	cyclesInterface->render_image(
 		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
 		renderImageInfo.cameraPosition,renderImageInfo.cameraRotation,renderImageInfo.nearZ,renderImageInfo.farZ,renderImageInfo.fov,
+		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,
 		fEntityFilter,job
 	);
 	if(job.IsValid() == false)
@@ -85,7 +87,11 @@ util::ParallelJob<std::shared_ptr<util::ImageBuffer>> cycles::bake_lightmaps(Cli
 	if(cyclesInterface.has_value() == false)
 		return {};
 	util::ParallelJob<std::shared_ptr<util::ImageBuffer>> job = {};
-	cyclesInterface->bake_lightmaps(entTarget,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,job);
+	cyclesInterface->bake_lightmaps(
+		entTarget,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
+		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,
+		job
+	);
 	if(job.IsValid() == false)
 		return {};
 	return job;

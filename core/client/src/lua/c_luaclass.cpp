@@ -170,6 +170,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defTexInfo.def("GetSize",&Lua::TextureInfo::GetSize);
 	defTexInfo.def("GetWidth",&Lua::TextureInfo::GetWidth);
 	defTexInfo.def("GetHeight",&Lua::TextureInfo::GetHeight);
+	defTexInfo.def("GetName",static_cast<void(*)(lua_State*,TextureInfo&)>([](lua_State *l,TextureInfo &textureInfo) {
+		Lua::PushString(l,textureInfo.name);
+	}));
 	modUtil[defTexInfo];
 
 	auto &modGame = lua.RegisterLibrary("game");

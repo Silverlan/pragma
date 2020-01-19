@@ -43,6 +43,18 @@ void CSkyboxComponent::Initialize()
 		});
 	});
 }
+void CSkyboxComponent::ReceiveData(NetPacket &packet)
+{
+	m_skyAngles = packet->Read<EulerAngles>();
+}
+Bool CSkyboxComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
+{
+	if(eventId == m_netEvSetSkyAngles)
+		SetSkyAngles(packet->Read<EulerAngles>());
+	else
+		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
+	return true;
+}
 void CSkyboxComponent::OnRemove()
 {
 	BaseSkyboxComponent::OnRemove();

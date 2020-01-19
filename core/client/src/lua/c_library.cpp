@@ -21,6 +21,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/util/util_image.hpp>
+#include <sharedutils/util_file.h>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
 #include <pr_dds.hpp>
@@ -632,21 +633,37 @@ void CGame::RegisterLuaLibraries()
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
 		{"create_giblet",Lua::util::Client::create_giblet},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			if(Lua::IsType<util::ImageBuffer>(l,1))
+			{
+				auto &imgBuffer = Lua::Check<util::ImageBuffer>(l,1);
+				std::string fileName = Lua::CheckString(l,2);
+				if(Lua::IsType<ImageWriteInfo>(l,3))
+				{
+					auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
+					auto cubemap = false;
+					if(Lua::IsSet(l,4))
+						cubemap = Lua::CheckBool(l,4);
+					Lua::PushBool(l,c_game->SaveImage(imgBuffer,fileName,imgWriteInfo,cubemap));
+					return 1;
+				}
+
+				auto format = static_cast<pragma::image::ImageOutputFormat>(Lua::CheckInt(l,3));
+				auto quality = 1.f;
+				if(Lua::IsSet(l,4))
+					quality = Lua::CheckNumber(l,4);
+				ufile::remove_extension_from_filename(fileName);
+				fileName += '.' +pragma::image::get_file_extension(format);
+				auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");
+				if(f == nullptr)
+					Lua::PushBool(l,false);
+				else
+					Lua::PushBool(l,pragma::image::save_image(f,imgBuffer,format,quality));
+				return 1;
+			}
 			auto &img = Lua::Check<prosper::Image>(l,1);
 			std::string fileName = Lua::CheckString(l,2);
 			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
-
-			//pragma::image::ImageOutputFormat::BMP;
-			//pragma::image::save_image( // TODO: Shared!!
-			//bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false) const;
-/*
-auto imgBuffer = worker.GetResult();
-if(imgBuffer->IsHDRFormat())
-imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
-if(pragma::image::save_image(f,*imgBuffer,format,quality) == false)
-Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
-*/
 			return 1;
 		})},
 		{"capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -658,7 +675,9 @@ Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
 			auto hdrOutput = false;
 			if(Lua::IsSet(l,4))
 				hdrOutput = Lua::CheckBool(l,4);
-			constexpr auto denoise = true;
+			auto denoise = true;
+			if(Lua::IsSet(l,5))
+				denoise = Lua::CheckBool(l,5);
 
 			pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 			auto *pCam = c_game->GetRenderCamera();
@@ -753,6 +772,14 @@ Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
 		writeInfo.SetNormalMap();
 	}));
 	utilMod[imgWriteInfoDef];
+
+	Lua::RegisterLibraryEnums(GetLuaState(),"util",{
+		{"IMAGE_OUTPUT_FORMAT_PNG",umath::to_integral(pragma::image::ImageOutputFormat::PNG)},
+		{"IMAGE_OUTPUT_FORMAT_BMP",umath::to_integral(pragma::image::ImageOutputFormat::BMP)},
+		{"IMAGE_OUTPUT_FORMAT_TGA",umath::to_integral(pragma::image::ImageOutputFormat::TGA)},
+		{"IMAGE_OUTPUT_FORMAT_JPG",umath::to_integral(pragma::image::ImageOutputFormat::JPG)},
+		{"IMAGE_OUTPUT_FORMAT_HDR",umath::to_integral(pragma::image::ImageOutputFormat::HDR)},
+	});
 
 	Lua::ai::client::register_library(GetLuaInterface());
 

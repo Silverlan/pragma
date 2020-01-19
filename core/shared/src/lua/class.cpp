@@ -143,6 +143,18 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushString(l,str);
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"string","compare",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto *str0 = Lua::CheckString(l,1);
+		auto *str1 = Lua::CheckString(l,2);
+		auto caseSensitive = true;
+		if(Lua::IsSet(l,3))
+			caseSensitive = Lua::CheckBool(l,3);
+		auto len = std::string::npos;
+		if(Lua::IsSet(l,4))
+			len = Lua::CheckInt(l,4);
+		Lua::PushBool(l,ustring::compare(str0,str1,caseSensitive,len));
+		return 1;
+	}));
 
 	auto &modLight = lua.RegisterLibrary("light",{
 		{"get_color_temperature",[](lua_State *l) -> int {

@@ -55,6 +55,25 @@ std::optional<util::ImageBuffer::ToneMapping> pragma::image::string_to_tone_mapp
 	return {};
 }
 
+std::string pragma::image::get_file_extension(ImageOutputFormat format)
+{
+	switch(format)
+	{
+	case ImageOutputFormat::PNG:
+		return "png";
+	case ImageOutputFormat::BMP:
+		return "bmp";
+	case ImageOutputFormat::TGA:
+		return "tga";
+	case ImageOutputFormat::JPG:
+		return "jpg";
+	case ImageOutputFormat::HDR:
+		return "hdr";
+	}
+	static_assert(umath::to_integral(ImageOutputFormat::Count) == 5);
+	return "";
+}
+
 bool pragma::image::save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageOutputFormat format,float quality)
 {
 	auto *fptr = f.get();

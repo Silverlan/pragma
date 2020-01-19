@@ -1,5 +1,6 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lmaterial.h"
+#include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
 #include "material.h"
 #include <sharedutils/util_shaderinfo.hpp>
@@ -20,6 +21,16 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	}));
 	classDef.def("UpdateTextures",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		mat.UpdateTextures();
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fileName) {
+		auto matFileName = fileName;
+		std::string rootPath;
+		if(Lua::file::validate_write_operation(l,matFileName,rootPath) == false)
+		{
+			Lua::PushBool(l,false);
+			return;
+		}
+		Lua::PushBool(l,mat.Save(matFileName,rootPath));
 	}));
 }
 

@@ -11,7 +11,12 @@ void BaseSkyboxComponent::Initialize()
 	ent.AddComponent("render");
 	ent.AddComponent("physics");
 	ent.AddComponent("model");
+
+	m_netEvSetSkyAngles = SetupNetEvent("set_sky_angles");
 }
+
+void BaseSkyboxComponent::SetSkyAngles(const EulerAngles &ang) {m_skyAngles = ang;}
+const EulerAngles &BaseSkyboxComponent::GetSkyAngles() const {return m_skyAngles;}
 
 void BaseSkyboxComponent::OnEntitySpawn()
 {

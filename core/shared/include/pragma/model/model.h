@@ -212,6 +212,7 @@ public:
 	bool GetAnimationName(uint32_t animId,std::string &name) const;
 	std::string GetAnimationName(uint32_t animId) const;
 	uint32_t GetAnimationCount() const;
+	bool HasVertexWeights() const;
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;

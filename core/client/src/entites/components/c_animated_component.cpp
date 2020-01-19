@@ -14,6 +14,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
@@ -70,6 +71,14 @@ void CAnimatedComponent::Initialize()
 		pRenderComponent->SetRenderBufferDirty();
 }
 
+void CAnimatedComponent::OnRemove()
+{
+	BaseAnimatedComponent::OnRemove();
+	auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
+	if(pRenderComponent.valid())
+		pRenderComponent->SetRenderBufferDirty();
+}
+
 void CAnimatedComponent::ReceiveData(NetPacket &packet)
 {
 	int anim = packet->Read<int>();
@@ -94,7 +103,7 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 {
 	BaseAnimatedComponent::OnModelChanged(mdl);
 	m_boneMatrices.clear();
-	if(mdl == nullptr)
+	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
 	m_boneMatrices.resize(mdl->GetBoneCount(),umat::identity());
 	UpdateBoneMatrices();
@@ -265,3 +274,4 @@ void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
 }
+#pragma optimize("",on)

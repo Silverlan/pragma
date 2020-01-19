@@ -7,13 +7,18 @@
 namespace pragma
 {
 	class DLLCLIENT CSkyboxComponent final
-		: public BaseSkyboxComponent
+		: public BaseSkyboxComponent,
+		public CBaseNetComponent
 	{
 	public:
 		CSkyboxComponent(BaseEntity &ent) : BaseSkyboxComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+
+		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
+		virtual void ReceiveData(NetPacket &packet) override;
+		virtual bool ShouldTransmitNetData() const override {return true;}
 	private:
 		bool CreateCubemapFromIndividualTextures(Material &mat,const std::string &postfix="") const;
 		void ValidateMaterials();

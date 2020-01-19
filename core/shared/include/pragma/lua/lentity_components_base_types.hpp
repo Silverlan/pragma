@@ -2080,7 +2080,16 @@ namespace Lua
 
 	template<class TLuaClass,class THandle>
 		void register_base_skybox_component_methods(lua_State *l,TLuaClass &def)
-	{}
+	{
+		def.def("SetSkyAngles",static_cast<void(*)(lua_State*,THandle&,const EulerAngles&)>([](lua_State *l,THandle &hNPC,const EulerAngles &skyAngles) {
+			pragma::Lua::check_component(l,hNPC);
+			hNPC.get()->SetSkyAngles(skyAngles);
+		}));
+		def.def("GetSkyAngles",static_cast<void(*)(lua_State*,THandle&,const EulerAngles&)>([](lua_State *l,THandle &hNPC,const EulerAngles &skyAngles) {
+			pragma::Lua::check_component(l,hNPC);
+			Lua::Push<EulerAngles>(l,hNPC.get()->GetSkyAngles());
+		}));
+	}
 
 	template<class TLuaClass,class THandle>
 		void register_base_world_component_methods(lua_State *l,TLuaClass &def)

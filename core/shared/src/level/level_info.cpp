@@ -164,7 +164,18 @@ void pragma::level::transform_class(
 					continue;
 				lightColor[i] = lightColorHdr[i];
 			}
+			lightColor *= 0.2f;
 			//lightColor *= 1.6f;
+		}
+		else
+			lightColor *= 0.2f;
+		auto rgbMax = umath::max(lightColor.x,lightColor.y,lightColor.z);
+		if(rgbMax > 255.f)
+		{
+			// Map to range [0,255]
+			for(uint8_t i=0;i<3;++i)
+				lightColor[i] = lightColor[i] /rgbMax *255.f;
+			lightColor.w *= (rgbMax /255.f);
 		}
 		return lightColor;
 	};

@@ -386,6 +386,18 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				toneMapping = *customToneMapping;
 		}
 
+		auto itSky = commandOptions.find("sky");
+		if(itSky != commandOptions.end() && itSky->second.parameters.empty() == false)
+			sceneInfo.sky = itSky->second.parameters.front();
+
+		auto itSkyStrength = commandOptions.find("sky_strength");
+		if(itSkyStrength != commandOptions.end() && itSkyStrength->second.parameters.empty() == false)
+			sceneInfo.skyStrength = util::to_float(itSkyStrength->second.parameters.front());
+
+		auto itSkyAngles = commandOptions.find("sky_angles");
+		if(itSkyAngles != commandOptions.end() && itSkyAngles->second.parameters.empty() == false)
+			sceneInfo.skyAngles = EulerAngles{itSkyAngles->second.parameters.front()};
+
 		Con::cout<<"Executing raytracer... This may take a few minutes!"<<Con::endl;
 		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 		if(job.IsValid())

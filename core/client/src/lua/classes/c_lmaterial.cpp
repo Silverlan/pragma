@@ -11,22 +11,22 @@ void Lua::Material::Client::SetTexture(lua_State*,::Material *mat,const std::str
 {
 	auto *cmat = static_cast<CMaterial*>(mat);
 	cmat->SetTexture(textureID,tex);
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 	cmat->UpdateTextures();
+	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 }
 void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,::Texture &tex)
 {
 	auto *cmat = static_cast<CMaterial*>(mat);
 	cmat->SetTexture(textureID,&tex);
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 	cmat->UpdateTextures();
+	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 }
 void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex)
 {
 	auto *cmat = static_cast<CMaterial*>(mat);
 	cmat->SetTexture(textureID,hTex);
-	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 	cmat->UpdateTextures();
+	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 }
 
 void Lua::Material::Client::GetTexture(lua_State *l,::Material *mat,const std::string &textureID)

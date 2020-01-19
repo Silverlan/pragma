@@ -188,6 +188,7 @@ static int32_t convert_dds(lua_State *l)
 		return 1;
 	}
 	image->ConvertToRGBA();
+	image->SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
 
 	auto width = image->GetWidth();
 	auto height = image->GetHeight();

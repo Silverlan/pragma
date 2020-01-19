@@ -38,6 +38,7 @@
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
+#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
@@ -100,6 +101,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("wireframe",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
 	shaderManager.RegisterShader("texturedalphatransition",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSkybox(context,identifier);});
+	shaderManager.RegisterShader("skybox_equirect",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSkyboxEquirect(context,identifier);});
 	shaderManager.RegisterShader("loading",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderLoading(context,identifier);});
 	shaderManager.RegisterShader("light_cone",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderLightCone(context,identifier);});
 	shaderManager.RegisterShader("water",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWater(context,identifier);});
@@ -123,6 +125,7 @@ void CGame::InitShaders()
 	//shaderManager.RegisterShader("hdr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderHDR(context,identifier);});
 	
 	shaderManager.RegisterShader("equirectangular_to_cubemap",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderEquirectangularToCubemap(context,identifier);});
+	shaderManager.RegisterShader("cubemap_to_equirectangular",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderCubemapToEquirectangular(context,identifier);});
 	shaderManager.RegisterShader("convolute_cubemap_lighting",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderConvoluteCubemapLighting(context,identifier);});
 	shaderManager.RegisterShader("compute_irradiance_map_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderComputeIrradianceMapRoughness(context,identifier);});
 	shaderManager.RegisterShader("brdf_convolution",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderBRDFConvolution(context,identifier);});

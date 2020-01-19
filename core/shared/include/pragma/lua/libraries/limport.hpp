@@ -17,7 +17,6 @@ namespace Lua
 		DLLNETWORK int import_wrmi(lua_State *l);
 		DLLNETWORK int import_smd(lua_State *l);
 		DLLNETWORK int import_obj(lua_State *l);
-		DLLNETWORK int import_pmx(lua_State *l);
 		DLLNETWORK int import_model_asset(lua_State *l);
 
 		DLLNETWORK std::shared_ptr<aiScene> snapshot_to_assimp_scene(const pragma::SceneSnapshot &snapshot);

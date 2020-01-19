@@ -5,6 +5,7 @@
 #include "pragma/lua/classes/lanimation.h"
 #include "pragma/lua/classes/lskeleton.h"
 #include "pragma/lua/classes/lvector.h"
+#include "pragma/lua/libraries/lfile.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
@@ -1484,7 +1485,14 @@ void Lua::Model::GetTextureGroup(lua_State *l,::Model &mdl,uint32_t id)
 void Lua::Model::Save(lua_State *l,::Model &mdl,const std::string &name)
 {
 	//Lua::CheckModel(l,1);
-	auto r = mdl.Save(engine->GetNetworkState(l)->GetGameState(),name);
+	auto mdlName = name;
+	std::string rootPath;
+	if(Lua::file::validate_write_operation(l,mdlName,rootPath) == false)
+	{
+		Lua::PushBool(l,false);
+		return;
+	}
+	auto r = mdl.Save(engine->GetNetworkState(l)->GetGameState(),mdlName,rootPath);
 	Lua::PushBool(l,r);
 }
 

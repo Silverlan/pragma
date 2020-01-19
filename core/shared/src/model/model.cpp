@@ -1109,6 +1109,21 @@ std::shared_ptr<Animation> Model::GetAnimation(uint32_t ID)
 	return m_animations[ID];
 }
 uint32_t Model::GetAnimationCount() const {return static_cast<uint32_t>(m_animations.size());}
+bool Model::HasVertexWeights() const
+{
+	for(auto &meshGroup : GetMeshGroups())
+	{
+		for(auto &mesh : meshGroup->GetMeshes())
+		{
+			for(auto &subMesh : mesh->GetSubMeshes())
+			{
+				if(subMesh->GetVertexWeights().empty() == false)
+					return true;
+			}
+		}
+	}
+	return false;
+}
 const std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() const {return const_cast<Model*>(this)->GetAnimations();}
 std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() {return m_animations;}
 bool Model::GetAnimationName(uint32_t animId,std::string &name) const

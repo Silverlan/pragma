@@ -288,8 +288,7 @@ void Lua_LFile_GetPath(lua_State *l,LFile &f)
 
 ////////////////////////////////////
 
-// Also used in wv_sqlite module
-bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
+bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath)
 {
 	auto fname = FileManager::GetCanonicalizedPath(Lua::get_current_file(l));
 	if(fname.length() < 8 || ustring::compare(fname.c_str(),"addons\\",false,7) == false)
@@ -299,7 +298,18 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
 	}
 	auto br = fname.find(FileManager::GetDirectorySeparator(),8);
 	auto prefix = ustring::substr(fname,0,br +1);
-	path = prefix +FileManager::GetCanonicalizedPath(path);
+	outRootPath = prefix;
+	path = FileManager::GetCanonicalizedPath(path);
+	return true;
+}
+
+// Also used in wv_sqlite module
+bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
+{
+	std::string prefix;
+	if(validate_write_operation(l,path,prefix) == false)
+		return false;
+	path = prefix +path;
 	return true;
 }
 

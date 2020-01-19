@@ -29,6 +29,7 @@ namespace pragma
 		CAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}

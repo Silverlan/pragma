@@ -541,9 +541,9 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::Image &imgCubemap)
 	prosper::util::record_image_barrier(**drawCmd,*imgCubemap,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 	prosper::util::record_generate_mipmaps(
 		**drawCmd,*imgCubemap,
-		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT
+		Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,
+		Anvil::AccessFlagBits::TRANSFER_READ_BIT,
+		Anvil::PipelineStageFlagBits::TRANSFER_BIT
 	);
 	c_engine->FlushSetupCommandBuffer();
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

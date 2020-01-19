@@ -278,7 +278,7 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 						}
 						//
 						auto *info = mat->GetShaderInfo();
-						if(info != nullptr)
+						if(info != nullptr && info->GetShader() != nullptr)
 						{
 							auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
 							prosper::Shader *shader = nullptr;

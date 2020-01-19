@@ -3,12 +3,27 @@
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <sharedutils/netpacket.hpp>
 
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,Skybox);
 
 luabind::object SSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSkyboxComponentHandleWrapper>(l);}
+
+void SSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
+{
+	BaseSkyboxComponent::SetSkyAngles(ang);
+
+	NetPacket p {};
+	p->Write<EulerAngles>(ang);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetSkyAngles,p,pragma::networking::Protocol::SlowReliable);
+}
+
+void SSkyboxComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+{
+	packet->Write<EulerAngles>(m_skyAngles);
+}
 
 void Skybox::Initialize()
 {

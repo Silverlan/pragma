@@ -17,8 +17,10 @@ namespace pragma::image
 		BMP,
 		TGA,
 		JPG,
-		HDR
+		HDR,
+		Count
 	};
+	DLLNETWORK std::string get_file_extension(ImageOutputFormat format);
 	DLLNETWORK bool save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageOutputFormat format,float quality=1.f);
 	DLLNETWORK std::optional<ImageOutputFormat> string_to_image_output_format(const std::string &str);
 	DLLNETWORK std::string get_image_output_format_extension(ImageOutputFormat format);

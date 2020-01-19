@@ -190,7 +190,10 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 
 	// Roughness map
 	auto *specularMap = matTraditional.GetSpecularMap();
-	if(specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->HasValidVkTexture())
+	if(
+		specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->HasValidVkTexture() &&
+		std::static_pointer_cast<Texture>(specularMap->texture)->IsError() == false
+	)
 	{
 		auto roughnessMap = ConvertSpecularMapToRoughness(*std::static_pointer_cast<Texture>(specularMap->texture)->GetVkTexture());
 		if(roughnessMap)
@@ -207,7 +210,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		}
 	}
 	else
-		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough"); // Generic roughness map with 100% roughness
+		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half"); // Generic roughness map with 50% roughness
 	//
 
 	// Metalness map

@@ -13,6 +13,12 @@ namespace pragma
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
+
+		virtual void SetSkyAngles(const EulerAngles &ang);
+		const EulerAngles &GetSkyAngles() const;
+	protected:
+		EulerAngles m_skyAngles = {};
+		pragma::NetEventId m_netEvSetSkyAngles = pragma::INVALID_NET_EVENT;
 	};
 };
 

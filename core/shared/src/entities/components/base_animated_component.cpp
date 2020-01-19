@@ -118,7 +118,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_bones.clear();
 	m_processedBones.clear();
 	ApplyAnimationEventTemplates();
-	if(mdl == nullptr)
+	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
 	std::vector<BlendController> &blendControllers = mdl->GetBlendControllers();
 	for(unsigned int i=0;i<blendControllers.size();i++)

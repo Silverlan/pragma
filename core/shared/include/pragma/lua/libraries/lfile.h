@@ -117,6 +117,7 @@ namespace Lua
 	namespace file
 	{
 		DLLNETWORK bool validate_write_operation(lua_State *l,std::string &path);
+		DLLNETWORK bool validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath);
 
 		DLLNETWORK int Open(lua_State *l);
 		DLLNETWORK int CreateDir(lua_State *l);

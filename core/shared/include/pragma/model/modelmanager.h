@@ -20,7 +20,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 protected:
 	static std::unordered_map<std::string,std::shared_ptr<Model>> m_models;
 	static std::vector<std::string> m_marked;
-	static std::shared_ptr<Model> CreateModel(Game *game,bool bAddReference=true);
+	static std::shared_ptr<Model> CreateModel(Game *game,bool bAddReference=true,const std::string &name="");
 	static std::shared_ptr<Model> Load(Game *game,const std::string &mdlName,bool bReload=false,bool *newModel=nullptr);
 	static std::shared_ptr<Model> Create(Game *game,const std::string &name);
 	static std::shared_ptr<Model> GetModel(Game *game,const std::string &mdlName);
@@ -84,10 +84,10 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	std::unordered_map<std::string,std::shared_ptr<Model>> &TModelManager<TModel,TModelMesh,TModelSubMesh>::GetModels() {return m_models;}
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	std::shared_ptr<Model> TModelManager<TModel,TModelMesh,TModelSubMesh>::CreateModel(Game *game,bool bAddReference)
+	std::shared_ptr<Model> TModelManager<TModel,TModelMesh,TModelSubMesh>::CreateModel(Game *game,bool bAddReference,const std::string &name)
 {
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
-	auto mdl = std::shared_ptr<TModel>(new TModel(game->GetNetworkState(),boneCount));
+	auto mdl = std::shared_ptr<TModel>(new TModel(game->GetNetworkState(),boneCount,name));
 	auto &skeleton = mdl->GetSkeleton();
 	auto reference = Animation::Create();
 
@@ -124,7 +124,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	std::shared_ptr<Model> TModelManager<TModel,TModelMesh,TModelSubMesh>::Create(Game *game,const std::string &name)
 {
 	auto lname = GetCanonicalizedName(name);
-	auto mdl = m_models[lname] = CreateModel(game);
+	auto mdl = m_models[lname] = CreateModel(game,true,lname);
 	/*auto it = m_models.find(lname);
 	if(it != m_models.end())
 		return it->second;

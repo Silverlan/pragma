@@ -21,6 +21,9 @@ namespace pragma::rendering::cycles
 		uint32_t samples = 1'024;
 		bool denoise = true;
 		bool hdrOutput = false;
+		std::string sky = "";
+		float skyStrength = 1.f;
+		EulerAngles skyAngles = {};
 	};
 	struct DLLCLIENT RenderImageInfo
 	{

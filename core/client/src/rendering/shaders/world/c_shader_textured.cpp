@@ -302,6 +302,10 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 	if(data != nullptr)
 		data->GetFloat("metalness_factor",&matData.metalnessFactor);
 
+	matData.roughnessFactor = mat.GetRoughnessMap() ? 1.f : 0.f;
+	if(data != nullptr)
+		data->GetFloat("roughness_factor",&matData.roughnessFactor);
+
 	if(mat.IsTranslucent() == true)
 		matFlags |= MaterialFlags::Translucent;
 	ApplyMaterialFlags(mat,matFlags);

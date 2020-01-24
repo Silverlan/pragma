@@ -9,9 +9,10 @@
 #include <memory>
 
 class VFilePtrInternalReal;
+class VFilePtrInternal;
 namespace pragma::image
 {
-	enum class ImageOutputFormat : uint8_t
+	enum class ImageFormat : uint8_t
 	{
 		PNG = 0,
 		BMP,
@@ -20,10 +21,17 @@ namespace pragma::image
 		HDR,
 		Count
 	};
-	DLLNETWORK std::string get_file_extension(ImageOutputFormat format);
-	DLLNETWORK bool save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageOutputFormat format,float quality=1.f);
-	DLLNETWORK std::optional<ImageOutputFormat> string_to_image_output_format(const std::string &str);
-	DLLNETWORK std::string get_image_output_format_extension(ImageOutputFormat format);
+	enum class PixelFormat : uint8_t
+	{
+		LDR = 0,
+		HDR,
+		Float
+	};
+	DLLNETWORK std::string get_file_extension(ImageFormat format);
+	DLLNETWORK std::shared_ptr<::util::ImageBuffer> load_image(std::shared_ptr<VFilePtrInternal> f,PixelFormat pixelFormat=PixelFormat::LDR);
+	DLLNETWORK bool save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageFormat format,float quality=1.f);
+	DLLNETWORK std::optional<ImageFormat> string_to_image_output_format(const std::string &str);
+	DLLNETWORK std::string get_image_output_format_extension(ImageFormat format);
 
 	DLLNETWORK std::optional<util::ImageBuffer::ToneMapping> string_to_tone_mapping(const std::string &str);
 };

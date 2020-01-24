@@ -103,6 +103,15 @@ void SurfaceMaterialManager::Load(const std::string &path)
 					if(audio->GetFloat("high_frequency_transmission",&val))
 						physMat.SetAudioHighFrequencyTransmission(val);
 				}
+
+				auto pbr = mat->GetBlock("pbr",0u);
+				if(pbr)
+				{
+					if(pbr->GetFloat("metalness",&val))
+						physMat.GetPBRInfo().metalness = val;
+					if(pbr->GetFloat("roughness",&val))
+						physMat.GetPBRInfo().roughness = val;
+				}
 			}
 		}
 	}
@@ -156,6 +165,7 @@ SurfaceMaterial::SurfaceMaterial(const SurfaceMaterial &other)
 		*m_liquidInfo = *other.m_liquidInfo;
 	}
 	m_audioInfo = other.m_audioInfo;
+	m_pbrInfo = other.m_pbrInfo;
 }
 
 SurfaceMaterial::SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat)
@@ -216,6 +226,9 @@ float SurfaceMaterial::GetWavePropagation() const
 	return m_liquidInfo->propagation;
 }
 
+const SurfaceMaterial::PBRInfo &SurfaceMaterial::GetPBRInfo() const {return const_cast<SurfaceMaterial*>(this)->GetPBRInfo();}
+SurfaceMaterial::PBRInfo &SurfaceMaterial::GetPBRInfo() {return m_pbrInfo;}
+void SurfaceMaterial::SetPBRInfo(const PBRInfo &pbrInfo) {m_pbrInfo = pbrInfo;}
 const SurfaceMaterial::AudioInfo &SurfaceMaterial::GetAudioInfo() const {return m_audioInfo;}
 void SurfaceMaterial::SetAudioInfo(const AudioInfo &info) {m_audioInfo = info;}
 void SurfaceMaterial::SetAudioLowFrequencyAbsorption(float absp) {m_audioInfo.lowFreqAbsorption = absp;}

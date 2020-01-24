@@ -17,6 +17,8 @@ namespace engine_info
 	DLLENGINE std::string get_wiki_url();
 	DLLENGINE std::string get_forums_url();
 	DLLENGINE std::string get_patreon_url();
+	DLLENGINE std::vector<std::string> get_patrons();
+	DLLENGINE uint32_t get_total_patron_count();
 	DLLENGINE std::string get_discord_url();
 	DLLENGINE std::string get_twitter_url();
 	DLLENGINE std::string get_reddit_url();

@@ -704,7 +704,8 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 	classDef.def("GetText",&GetText);
 	classDef.def("SetText",SetText);
 	classDef.def("GetOptionCount",GetOptionCount);
-	classDef.def("AddOption",AddOption);
+	classDef.def("AddOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,std::string,const std::string&)>(&AddOption));
+	classDef.def("AddOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,std::string)>(&AddOption));
 	classDef.def("OpenMenu",OpenMenu);
 	classDef.def("CloseMenu",CloseMenu);
 	classDef.def("ToggleMenu",ToggleMenu);
@@ -3043,6 +3044,12 @@ void Lua::WIDropDownMenu::AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::
 	lua_checkgui(l,hDm);
 	auto *pMenu = hDm.get<::WIDropDownMenu>();
 	pMenu->AddOption(option);
+}
+void Lua::WIDropDownMenu::AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::string option,const std::string &optionValue)
+{
+	lua_checkgui(l,hDm);
+	auto *pMenu = hDm.get<::WIDropDownMenu>();
+	pMenu->AddOption(option,optionValue);
 }
 void Lua::WIDropDownMenu::OpenMenu(lua_State *l,WIDropDownMenuHandle &hDm)
 {

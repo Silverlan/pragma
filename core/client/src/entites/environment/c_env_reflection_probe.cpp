@@ -374,6 +374,11 @@ util::ParallelJob<std::shared_ptr<util::ImageBuffer>> CReflectionProbeComponent:
 	renderImgInfo.farZ = farZ;
 	renderImgInfo.fov = fov;
 
+	// TODO: Replace these with command arguments?
+	sceneInfo.sky = "skies/dusk379.hdr";
+	sceneInfo.skyAngles = {0.f,160.f,0.f};
+	sceneInfo.skyStrength = 72.f;
+
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = true;

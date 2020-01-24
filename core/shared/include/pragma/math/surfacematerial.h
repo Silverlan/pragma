@@ -49,6 +49,11 @@ public:
 		float midFreqTransmission = 0.050f;
 		float highFreqTransmission = 0.030f;
 	};
+	struct PBRInfo
+	{
+		float metalness = 0.f;
+		float roughness = 0.5f;
+	};
 public:
 	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
 	SurfaceMaterial(const SurfaceMaterial &other);
@@ -95,6 +100,9 @@ public:
 
 	const AudioInfo &GetAudioInfo() const;
 	void SetAudioInfo(const AudioInfo &info);
+	const PBRInfo &GetPBRInfo() const;
+	PBRInfo &GetPBRInfo();
+	void SetPBRInfo(const PBRInfo &pbrInfo);
 	void SetAudioLowFrequencyAbsorption(float absp);
 	float GetAudioLowFrequencyAbsorption() const;
 	void SetAudioMidFrequencyAbsorption(float absp);
@@ -123,6 +131,7 @@ protected:
 	std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;
 	mutable util::TWeakSharedHandle<pragma::physics::SurfaceType> m_surfaceType = {};
 	AudioInfo m_audioInfo = {};
+	PBRInfo m_pbrInfo = {};
 	PhysLiquid &InitializeLiquid();
 };
 

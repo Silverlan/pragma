@@ -143,7 +143,8 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 			Lua::PushBool(l,false);
 			return;
 		}
-		Lua::PushInt(l,videoRecorder.WriteFrame(static_cast<VideoRecorder::Color*>(imgData),size,frameTime));
+		auto imgBuf = util::ImageBuffer::Create(imgData,extents.width,extents.height,util::ImageBuffer::Format::RGBA8,true);
+		Lua::PushInt(l,videoRecorder.WriteFrame(*imgBuf,frameTime));
 		memory->unmap(); // memory doesn't actually get unmapped; imgData stays valid as long as the image is valid, as long as proper memory flags have been set!
 		// TODO: Validate image memory flags to make sure this is actually the case
 	}));
@@ -154,15 +155,14 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 			Lua::PushBool(l,false);
 			return;
 		}
-		Lua::PushInt(l,videoRecorder.WriteFrame(reinterpret_cast<VideoRecorder::Color*>(ds->GetData()),ds->GetSize(),frameIndex));
+		auto imgBuf = util::ImageBuffer::Create(ds->GetData(),videoRecorder.GetWidth(),videoRecorder.GetHeight(),util::ImageBuffer::Format::RGBA8,true);
+		Lua::PushInt(l,videoRecorder.WriteFrame(*imgBuf,frameIndex));
 	}));
 	classDefData.def("WriteFrame",static_cast<void(*)(lua_State*,VideoRecorder&,util::ImageBuffer&,double)>([](lua_State *l,VideoRecorder &videoRecorder,util::ImageBuffer &imgBuffer,double frameIndex) {
 		auto tgtImgBuffer = imgBuffer.shared_from_this();
-		if(tgtImgBuffer->GetFormat() != util::ImageBuffer::Format::RGBA8)
-			tgtImgBuffer = tgtImgBuffer->Copy(util::ImageBuffer::Format::RGBA8);
 		if(tgtImgBuffer->GetWidth() != videoRecorder.GetWidth() || tgtImgBuffer->GetHeight() != videoRecorder.GetHeight())
 			tgtImgBuffer->Resize(videoRecorder.GetWidth(),videoRecorder.GetHeight());
-		Lua::PushInt(l,videoRecorder.WriteFrame(reinterpret_cast<VideoRecorder::Color*>(tgtImgBuffer->GetData()),tgtImgBuffer->GetSize(),frameIndex));
+		Lua::PushInt(l,videoRecorder.WriteFrame(*tgtImgBuffer,frameIndex));
 	}));
 
 	auto classDefEncodingSettings = luabind::class_<VideoRecorder::EncodingSettings>("EncodingSettings");

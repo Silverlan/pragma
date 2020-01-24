@@ -145,7 +145,7 @@ int Lua::math::get_previous_power_of_2(lua_State *l)
 
 static float round_by_multiple(float f,float multiple)
 {
-	return ::umath::round(f /multiple) *multiple;
+	return (multiple != 0.f) ? (::umath::round(f /multiple) *multiple) : f;
 }
 
 int Lua::math::round(lua_State *l)

@@ -21,6 +21,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/util/util_image.hpp>
+#include <pragma/lua/libraries/lfile.h>
 #include <sharedutils/util_file.h>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
@@ -137,6 +138,10 @@ static void register_gui(Lua::Interface &lua)
 			Lua::PushInt(l,w);
 			Lua::PushInt(l,h);
 			return 4;
+		})},
+		{"get_delta_time",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			Lua::PushNumber(l,WGUI::GetInstance().GetDeltaTime());
+			return 1;
 		})}
 	});
 	auto guiMod = luabind::module(l,"gui");
@@ -637,6 +642,11 @@ void CGame::RegisterLuaLibraries()
 			{
 				auto &imgBuffer = Lua::Check<util::ImageBuffer>(l,1);
 				std::string fileName = Lua::CheckString(l,2);
+				if(Lua::file::validate_write_operation(l,fileName) == false)
+				{
+					Lua::PushBool(l,false);
+					return 1;
+				}
 				if(Lua::IsType<ImageWriteInfo>(l,3))
 				{
 					auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
@@ -647,7 +657,7 @@ void CGame::RegisterLuaLibraries()
 					return 1;
 				}
 
-				auto format = static_cast<pragma::image::ImageOutputFormat>(Lua::CheckInt(l,3));
+				auto format = static_cast<pragma::image::ImageFormat>(Lua::CheckInt(l,3));
 				auto quality = 1.f;
 				if(Lua::IsSet(l,4))
 					quality = Lua::CheckNumber(l,4);
@@ -664,6 +674,20 @@ void CGame::RegisterLuaLibraries()
 			std::string fileName = Lua::CheckString(l,2);
 			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
+			return 1;
+		})},
+		{"load_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string fileName = Lua::CheckString(l,1);
+			auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
+			if(f == nullptr)
+				return 0;
+			auto pixelFormat = pragma::image::PixelFormat::LDR;
+			if(Lua::IsSet(l,2))
+				pixelFormat = static_cast<pragma::image::PixelFormat>(Lua::CheckInt(l,2));
+			auto imgBuffer = pragma::image::load_image(f,pixelFormat);
+			if(imgBuffer == nullptr)
+				return 0;
+			Lua::Push(l,imgBuffer);
 			return 1;
 		})},
 		{"capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -774,11 +798,15 @@ void CGame::RegisterLuaLibraries()
 	utilMod[imgWriteInfoDef];
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"util",{
-		{"IMAGE_OUTPUT_FORMAT_PNG",umath::to_integral(pragma::image::ImageOutputFormat::PNG)},
-		{"IMAGE_OUTPUT_FORMAT_BMP",umath::to_integral(pragma::image::ImageOutputFormat::BMP)},
-		{"IMAGE_OUTPUT_FORMAT_TGA",umath::to_integral(pragma::image::ImageOutputFormat::TGA)},
-		{"IMAGE_OUTPUT_FORMAT_JPG",umath::to_integral(pragma::image::ImageOutputFormat::JPG)},
-		{"IMAGE_OUTPUT_FORMAT_HDR",umath::to_integral(pragma::image::ImageOutputFormat::HDR)},
+		{"IMAGE_FORMAT_PNG",umath::to_integral(pragma::image::ImageFormat::PNG)},
+		{"IMAGE_FORMAT_BMP",umath::to_integral(pragma::image::ImageFormat::BMP)},
+		{"IMAGE_FORMAT_TGA",umath::to_integral(pragma::image::ImageFormat::TGA)},
+		{"IMAGE_FORMAT_JPG",umath::to_integral(pragma::image::ImageFormat::JPG)},
+		{"IMAGE_FORMAT_HDR",umath::to_integral(pragma::image::ImageFormat::HDR)},
+
+		{"PIXEL_FORMAT_LDR",umath::to_integral(pragma::image::PixelFormat::LDR)},
+		{"PIXEL_FORMAT_HDR",umath::to_integral(pragma::image::PixelFormat::HDR)},
+		{"PIXEL_FORMAT_FLOAT",umath::to_integral(pragma::image::PixelFormat::Float)}
 	});
 
 	Lua::ai::client::register_library(GetLuaInterface());

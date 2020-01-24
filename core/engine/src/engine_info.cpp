@@ -41,6 +41,18 @@ std::string engine_info::get_modding_hub_url() {return PRAGMA_MODDING_HUB_URL;}
 std::string engine_info::get_wiki_url() {return PRAGMA_WIKI_URL;}
 std::string engine_info::get_forums_url() {return PRAGMA_FORUMS_URL;}
 std::string engine_info::get_patreon_url() {return PRAGMA_PATREON_URL;}
+std::vector<std::string> engine_info::get_patrons()
+{
+	return {
+		"PalmliX",
+		"Dark Dreams",
+		"Ruthoranium",
+		"Googleygareth",
+		"Roach",
+		"Noah The Troll-Hunting Christian Spy"
+	};
+}
+uint32_t engine_info::get_total_patron_count() {return 25;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}

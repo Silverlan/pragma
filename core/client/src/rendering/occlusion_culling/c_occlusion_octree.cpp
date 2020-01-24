@@ -52,7 +52,12 @@ void BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)
 	auto oldObjectCount = m_branchObjectCount;
 	m_branchObjectCount = branchObjectCount;
 	if((bForceUpdateParents == true || m_branchObjectCount != oldObjectCount) && m_parent.expired() == false)
+	{
+		//auto wptr = std::weak_ptr<Node>(shared_from_this());
 		m_parent.lock()->UpdateState();
+		//if(wptr.expired())
+		//	return;
+	}
 	if(m_parent.expired() == true)
 		m_tree->ShrinkRoot();
 	UpdateDebugObject();

@@ -294,7 +294,7 @@ void CMD_cl_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vec
 }
 #endif
 
-static std::string get_screenshot_name(Game *game,pragma::image::ImageOutputFormat format)
+static std::string get_screenshot_name(Game *game,pragma::image::ImageFormat format)
 {
 	std::string map;
 	if(game == nullptr)
@@ -337,7 +337,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
-		auto format = pragma::image::ImageOutputFormat::PNG;
+		auto format = pragma::image::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
 		if(itFormat != commandOptions.end())
 		{
@@ -555,7 +555,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 	if(imgScreenshot == nullptr)
 		return;
-	auto path = get_screenshot_name(game,pragma::image::ImageOutputFormat::TGA); // TODO
+	auto path = get_screenshot_name(game,pragma::image::ImageFormat::TGA); // TODO
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 	if(f == nullptr)
 		return;

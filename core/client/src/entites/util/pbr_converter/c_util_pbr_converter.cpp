@@ -163,6 +163,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	m_convertedMaterials.insert(matTraditional.GetName());
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto &dev = c_engine->GetDevice();
+	auto dataBlock = matTraditional.GetDataBlock();
 
 	auto *matPbr = client->CreateMaterial("pbr");
 	auto &dataPbr = matPbr->GetDataBlock();
@@ -188,6 +189,13 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	fAddGenericTextureByIdentifier(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER); // Wrinkle compress map
 	fAddGenericTextureByIdentifier(Material::EXPONENT_MAP_IDENTIFIER); // Exponent map
 
+	auto valSurfMat = dataBlock->GetDataValue("surfacematerial");
+	auto surfMatName = valSurfMat ? valSurfMat->GetString() : "";
+	auto *surfMat = valSurfMat ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
+
+	if(surfMatName.empty() == false)
+		dataPbr->AddValue("string","surfacematerial",surfMatName);
+
 	// Roughness map
 	auto *specularMap = matTraditional.GetSpecularMap();
 	if(
@@ -210,17 +218,43 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		}
 	}
 	else
-		dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half"); // Generic roughness map with 50% roughness
+	{
+		if(surfMat)
+		{
+			auto &pbrInfo = surfMat->GetPBRInfo();
+			if(pbrInfo.roughness == 0.f)
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/smooth");
+			else if(pbrInfo.roughness == 0.5f)
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half");
+			else if(pbrInfo.roughness == 1.f)
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
+			else
+			{
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
+				dataPbr->AddValue("float","roughness_factor",std::to_string(pbrInfo.roughness));
+			}
+		}
+		else
+			dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half"); // Generic roughness map with 50% roughness
+	}
 	//
 
 	// Metalness map
-	auto valSurfMat = dataPbr->GetDataValue("surfacematerial");
-	if(valSurfMat)
+	if(surfMat)
 	{
-		// Attempt to determine whether this is a metal material or not
-		if(IsSurfaceMaterialMetal(valSurfMat->GetString()))
-			dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal"); // 100% metalness
+		auto &pbrInfo = surfMat->GetPBRInfo();
+		if(pbrInfo.metalness > 0.f)
+		{
+			if(pbrInfo.metalness == 1.f)
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/metal");
+			else
+			{
+				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/metal");
+				dataPbr->AddValue("float","metalness_factor",std::to_string(pbrInfo.metalness));
+			}
+		}
 	}
+
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.
 	//

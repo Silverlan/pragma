@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
+#include "pragma/util/util_image.hpp"
 #include <pragma/util/stb_image.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
@@ -44,28 +45,12 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 }
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr f,uint32_t resolution)
 {
-	int width,height,nrComponents;
-	stbi_io_callbacks ioCallbacks {};
-	ioCallbacks.read = [](void *user,char *data,int size) -> int {
-		return static_cast<VFilePtrInternal*>(user)->Read(data,size);
-	};
-	ioCallbacks.skip = [](void *user,int n) -> void {
-		auto *f = static_cast<VFilePtrInternal*>(user);
-		f->Seek(f->Tell() +n);
-	};
-	ioCallbacks.eof = [](void *user) -> int {
-		return static_cast<VFilePtrInternal*>(user)->Eof();
-	};
-	std::unique_ptr<float,void(*)(float*)> data{stbi_loadf_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4),[](float *data) {
-		if(data)
-			stbi_image_free(data);
-	}};
-	if(data == nullptr)
+	auto imgBuffer = pragma::image::load_image(f,pragma::image::PixelFormat::Float);
+	if(imgBuffer == nullptr)
 		return nullptr;
-
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.width = width;
-	createInfo.height = height;
+	createInfo.width = imgBuffer->GetWidth();
+	createInfo.height = imgBuffer->GetHeight();
 	createInfo.format = Anvil::Format::R32G32B32A32_SFLOAT;
 	createInfo.tiling = Anvil::ImageTiling::LINEAR;
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
@@ -73,7 +58,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 
 	auto &context = *c_engine;
 	auto &dev = context.GetDevice();
-	auto img = prosper::util::create_image(dev,createInfo,reinterpret_cast<uint8_t*>(data.get()));
+	auto img = prosper::util::create_image(dev,createInfo,reinterpret_cast<uint8_t*>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

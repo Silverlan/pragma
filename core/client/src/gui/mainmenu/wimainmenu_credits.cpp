@@ -115,16 +115,7 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	AddHeader(Locale::GetText("menu_credits"),"header");
 	AddHeader(Locale::GetText("patrons"));
 
-	const std::vector<std::string> patrons {
-		"PalmliX", // 10
-		"Donovan", // 10
-		"Dark Dreams", // 10
-		"Googleygareth8", // 1
-		"Manndarinchik", // 1
-		"Roach", // 1
-		"Noah The Troll-Hunting Christian Spy" // 1
-	};
-	for(auto &patron : patrons)
+	for(auto &patron : engine_info::get_patrons())
 		AddText(patron,"credits_text");
 
 	AddHeader(Locale::GetText("powered_by"),"header2");

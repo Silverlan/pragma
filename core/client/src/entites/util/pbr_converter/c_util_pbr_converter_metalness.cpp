@@ -11,12 +11,6 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 #pragma optimize("",off)
-bool CPBRConverterComponent::IsSurfaceMaterialMetal(std::string surfMat)
-{
-	ustring::to_lower(surfMat);
-	return surfMat.find("metal") != std::string::npos;
-}
-
 void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
@@ -109,7 +103,8 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	// matColMeshes now contains all collision meshes associated with the material.
 	// Next, we need to determine the average metalness.
 	uint32_t numSurfMats = 0u;
-	uint32_t numMetalSurfMats = 0u;
+	auto accMetalness = 0.f;
+	auto accRoughness = 0.f;
 	for(auto *colMesh : matColMeshes)
 	{
 		auto surfMatIdx = colMesh->GetSurfaceMaterial();
@@ -120,13 +115,26 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		if(surfMat == nullptr)
 			continue;
 		++numSurfMats;
-		if(IsSurfaceMaterialMetal(surfMat->GetIdentifier()))
-			++numMetalSurfMats;
+		accMetalness += surfMat->GetPBRInfo().metalness;
+		accRoughness += surfMat->GetPBRInfo().roughness;
 	}
-	auto metalness = (numSurfMats > 0) ? (numMetalSurfMats /static_cast<float>(numSurfMats)) : 0.f;
-	Con::cout<<"Assigning metalness value of "<<metalness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
-	mat.GetDataBlock()->AddValue("float","metalness_factor",std::to_string(metalness));
-	mat.GetDataBlock()->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
+	auto metalness = (numSurfMats > 0) ? (accMetalness /static_cast<float>(numSurfMats)) : 0.f;
+	auto roughness = (numSurfMats > 0) ? (accRoughness /static_cast<float>(numSurfMats)) : 0.5f;
+
+	if(mat.GetDataBlock()->GetValue("metalness_factor") == nullptr)
+	{
+		Con::cout<<"Assigning metalness value of "<<metalness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+		mat.GetDataBlock()->AddValue("float","metalness_factor",std::to_string(metalness));
+		mat.GetDataBlock()->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
+	}
+
+	if(mat.GetDataBlock()->GetValue("roughness_factor") == nullptr)
+	{
+		Con::cout<<"Assigning roughness value of "<<roughness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+		mat.GetDataBlock()->AddValue("float","roughness_factor",std::to_string(roughness));
+		mat.GetDataBlock()->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
+	}
+
 	mat.UpdateTextures();
 	mat.Save(mat.GetName(),"addons/converted/");
 }

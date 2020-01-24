@@ -45,6 +45,7 @@ namespace Lua
 		DLLNETWORK int is_same_object(lua_State *l);
 		DLLNETWORK int clamp_resolution_to_aspect_ratio(lua_State *l);
 		DLLNETWORK int open_url_in_browser(lua_State *l);
+		DLLNETWORK int open_path_in_explorer(lua_State *l);
 		DLLNETWORK int get_pretty_bytes(lua_State *l);
 		DLLNETWORK int get_pretty_duration(lua_State *l);
 		DLLNETWORK int get_pretty_time(lua_State *l);
@@ -55,6 +56,7 @@ namespace Lua
 		DLLNETWORK int fade_property(lua_State *l);
 		DLLNETWORK int round_string(lua_State *l);
 		DLLNETWORK int get_type_name(lua_State *l);
+		DLLNETWORK int get_addon_path(lua_State *l);
 	};
 
 	template<class T,class TCast>
@@ -114,7 +116,9 @@ namespace Lua
 	{"get_type_name",Lua::util::get_type_name}, \
 	{"is_same_object",Lua::util::is_same_object}, \
 	{"clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio}, \
-	{"open_url_in_browser",Lua::util::open_url_in_browser},
+	{"open_url_in_browser",Lua::util::open_url_in_browser}, \
+	{"open_path_in_explorer",Lua::util::open_path_in_explorer}, \
+	{"get_addon_path",Lua::util::get_addon_path},
 
 #define REGISTER_SHARED_UTIL \
 	REGISTER_SHARED_UTIL_GENERIC \

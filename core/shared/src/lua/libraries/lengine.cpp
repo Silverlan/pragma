@@ -42,6 +42,22 @@ int Lua::engine::get_info(lua_State *l)
 	Lua::PushString(l,engine_info::get_patreon_url());
 	Lua::SetTableValue(l,t);
 
+	Lua::PushString(l,"patrons");
+	auto tPatrons = Lua::CreateTable(l);
+	auto patrons = engine_info::get_patrons();
+	int32_t idx = 1;
+	for(auto &patron : patrons)
+	{
+		Lua::PushInt(l,idx++);
+		Lua::PushString(l,patron);
+		Lua::SetTableValue(l,tPatrons);
+	}
+	Lua::SetTableValue(l,t);
+
+	Lua::PushString(l,"totalPatronCount");
+	Lua::PushInt(l,engine_info::get_total_patron_count());
+	Lua::SetTableValue(l,t);
+
 	Lua::PushString(l,"twitterURL");
 	Lua::PushString(l,engine_info::get_twitter_url());
 	Lua::SetTableValue(l,t);

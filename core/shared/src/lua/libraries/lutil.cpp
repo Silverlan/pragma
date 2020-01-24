@@ -671,6 +671,13 @@ int Lua::util::open_url_in_browser(lua_State *l)
 	::util::open_url_in_browser(url);
 	return 0;
 }
+int Lua::util::open_path_in_explorer(lua_State *l)
+{
+	std::string path = Lua::CheckString(l,1);
+	path = ::util::get_program_path() +'/' +path;
+	::util::open_path_in_explorer(path);
+	return 0;
+}
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 {
 	auto w = Lua::CheckInt(l,1);
@@ -915,6 +922,25 @@ int Lua::util::get_type_name(lua_State *l)
 	auto o = luabind::from_stack(l,1);
 	auto classInfo = luabind::get_class_info(o);
 	Lua::PushString(l,classInfo.name);
+	return 1;
+}
+
+int Lua::util::get_addon_path(lua_State *l)
+{
+	auto path = Lua::get_current_file(l);
+	ustring::replace(path,"\\","/");
+	if(ustring::compare(path.c_str(),"addons/",false,7) == false)
+	{
+		Lua::PushString(l,"");
+		return 1;
+	}
+
+	// Get path up to addon directory
+	auto br = path.find('/',7);
+	if(br != std::string::npos)
+		path = path.substr(0,br);
+	path += '/';
+	Lua::PushString(l,path);
 	return 1;
 }
 #pragma optimize("",on)

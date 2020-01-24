@@ -391,6 +391,7 @@ namespace Lua
 		DLLCLIENT void SetOptionValue(lua_State *l,WIDropDownMenuHandle &hDm,uint32_t idx,const std::string &val);
 		DLLCLIENT void GetOptionCount(lua_State *l,WIDropDownMenuHandle &hDm);
 		DLLCLIENT void AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::string option);
+		DLLCLIENT void AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::string option,const std::string &optionValue);
 		DLLCLIENT void OpenMenu(lua_State *l,WIDropDownMenuHandle &hDm);
 		DLLCLIENT void CloseMenu(lua_State *l,WIDropDownMenuHandle &hDm);
 		DLLCLIENT void ToggleMenu(lua_State *l,WIDropDownMenuHandle &hDm);

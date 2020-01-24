@@ -42,7 +42,6 @@ namespace pragma
 		bool ConvertToPBR(CMaterial &matTraditional);
 		void PollEvents();
 	private:
-		static bool IsSurfaceMaterialMetal(std::string surfMat);
 		void ConvertMaterialsToPBR(Model &mdl);
 		void UpdateMetalness(Model &mdl);
 		void UpdateMetalness(Model &mdl,CMaterial &mat);

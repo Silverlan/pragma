@@ -42,7 +42,7 @@ REGISTER_CONVAR_CL(cl_render_shadow_pssm_split_count,"3",ConVarFlags::Archive,"T
 REGISTER_CONVAR_CL(cl_render_shader_quality,"8",ConVarFlags::Archive,"Shader quality. The actual effect depends on the shader. 1 = Lowest Quality, 10 = Highest Quality");
 REGISTER_CONVAR_CL(cl_render_particle_quality,"3",ConVarFlags::Archive,"Quality of particle systems. 0 = No particles will be rendered, 1 = Particles will be unlit, 2 = Particles will receive lighting, 3 = Particles will cast shadows.");
 REGISTER_CONVAR_CL(cl_render_present_mode,"1",ConVarFlags::Archive,"0 = Immediate, 1 = FIFO, 2 = Mailbox");
-REGISTER_CONVAR_CL(cl_material_streaming_enabled,"1",ConVarFlags::Archive,"0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)")
+REGISTER_CONVAR_CL(cl_material_streaming_enabled,"0",ConVarFlags::Archive,"0 = All materials and textures will be loaded immediately (= Slower load times), 1 = All materials and textures will be loaded over time. (= Black textures until loaded)")
 
 REGISTER_CONVAR_CL(cl_flex_phoneme_drag,"0.02",ConVarFlags::Archive,"Changes the time required for facial phoneme flexes to adapt to new phonemes.");
 

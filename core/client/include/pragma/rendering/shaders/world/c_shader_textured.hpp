@@ -137,6 +137,7 @@ namespace pragma
 			float alphaDiscardThreshold = DefaultAlphaDiscardThreshold;
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;
+			float roughnessFactor = 0.f;
 		};
 #pragma pack(pop)
 

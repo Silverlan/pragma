@@ -1,38 +1,39 @@
 #include "pragma/util/util_image.hpp"
 #include "pragma/util/stb_image_write.h"
+#include "pragma/util/stb_image.h"
 #include <sharedutils/util_image_buffer.hpp>
 #include <sharedutils/util_string.h>
 #include <fsys/filesystem.h>
 
 #pragma optimize("",off)
-std::optional<pragma::image::ImageOutputFormat> pragma::image::string_to_image_output_format(const std::string &str)
+std::optional<pragma::image::ImageFormat> pragma::image::string_to_image_output_format(const std::string &str)
 {
 	if(ustring::compare(str,"PNG",false))
-		return ImageOutputFormat::PNG;
+		return ImageFormat::PNG;
 	else if(ustring::compare(str,"BMP",false))
-		return ImageOutputFormat::BMP;
+		return ImageFormat::BMP;
 	else if(ustring::compare(str,"TGA",false))
-		return ImageOutputFormat::TGA;
+		return ImageFormat::TGA;
 	else if(ustring::compare(str,"JPG",false))
-		return ImageOutputFormat::JPG;
+		return ImageFormat::JPG;
 	else if(ustring::compare(str,"HDR",false))
-		return ImageOutputFormat::HDR;
+		return ImageFormat::HDR;
 	return {};
 }
 
-std::string pragma::image::get_image_output_format_extension(ImageOutputFormat format)
+std::string pragma::image::get_image_output_format_extension(ImageFormat format)
 {
 	switch(format)
 	{
-	case ImageOutputFormat::PNG:
+	case ImageFormat::PNG:
 		return "png";
-	case ImageOutputFormat::BMP:
+	case ImageFormat::BMP:
 		return "bmp";
-	case ImageOutputFormat::TGA:
+	case ImageFormat::TGA:
 		return "tga";
-	case ImageOutputFormat::JPG:
+	case ImageFormat::JPG:
 		return "jpg";
-	case ImageOutputFormat::HDR:
+	case ImageFormat::HDR:
 		return "hdr";
 	}
 	return "";
@@ -55,32 +56,71 @@ std::optional<util::ImageBuffer::ToneMapping> pragma::image::string_to_tone_mapp
 	return {};
 }
 
-std::string pragma::image::get_file_extension(ImageOutputFormat format)
+std::string pragma::image::get_file_extension(ImageFormat format)
 {
 	switch(format)
 	{
-	case ImageOutputFormat::PNG:
+	case ImageFormat::PNG:
 		return "png";
-	case ImageOutputFormat::BMP:
+	case ImageFormat::BMP:
 		return "bmp";
-	case ImageOutputFormat::TGA:
+	case ImageFormat::TGA:
 		return "tga";
-	case ImageOutputFormat::JPG:
+	case ImageFormat::JPG:
 		return "jpg";
-	case ImageOutputFormat::HDR:
+	case ImageFormat::HDR:
 		return "hdr";
 	}
-	static_assert(umath::to_integral(ImageOutputFormat::Count) == 5);
+	static_assert(umath::to_integral(ImageFormat::Count) == 5);
 	return "";
 }
 
-bool pragma::image::save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageOutputFormat format,float quality)
+std::shared_ptr<::util::ImageBuffer> pragma::image::load_image(std::shared_ptr<VFilePtrInternal> f,PixelFormat pixelFormat)
+{
+	int width,height,nrComponents;
+	stbi_io_callbacks ioCallbacks {};
+	ioCallbacks.read = [](void *user,char *data,int size) -> int {
+		return static_cast<VFilePtrInternal*>(user)->Read(data,size);
+	};
+	ioCallbacks.skip = [](void *user,int n) -> void {
+		auto *f = static_cast<VFilePtrInternal*>(user);
+		f->Seek(f->Tell() +n);
+	};
+	ioCallbacks.eof = [](void *user) -> int {
+		return static_cast<VFilePtrInternal*>(user)->Eof();
+	};
+	std::shared_ptr<::util::ImageBuffer> imgBuffer = nullptr;
+	switch(pixelFormat)
+	{
+	case PixelFormat::LDR:
+	{
+		auto *data = stbi_load_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? util::ImageBuffer::CreateWithCustomDeleter(data,width,height,util::ImageBuffer::Format::RGBA8,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	case PixelFormat::HDR:
+	{
+		auto *data = stbi_load_16_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? util::ImageBuffer::CreateWithCustomDeleter(data,width,height,util::ImageBuffer::Format::RGBA16,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	case PixelFormat::Float:
+	{
+		auto *data = stbi_loadf_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? util::ImageBuffer::CreateWithCustomDeleter(data,width,height,util::ImageBuffer::Format::RGBA32,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	}
+	return imgBuffer;
+}
+
+bool pragma::image::save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::ImageBuffer &imgBuffer,ImageFormat format,float quality)
 {
 	auto *fptr = f.get();
 
 	auto imgFormat = imgBuffer.GetFormat();
 	imgFormat = ::util::ImageBuffer::ToRGBFormat(imgFormat);
-	if(format != ImageOutputFormat::HDR)
+	if(format != ImageFormat::HDR)
 		imgFormat = ::util::ImageBuffer::ToLDRFormat(imgFormat);
 	else
 		imgFormat = ::util::ImageBuffer::ToFloatFormat(imgFormat);
@@ -92,7 +132,7 @@ bool pragma::image::save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::I
 	int result = 0;
 	switch(format)
 	{
-	case ImageOutputFormat::PNG:
+	case ImageFormat::PNG:
 		if(quality >= 0.9f)
 			stbi_write_png_compression_level = 0;
 		else if(quality >= 0.75f)
@@ -107,22 +147,22 @@ bool pragma::image::save_image(std::shared_ptr<VFilePtrInternalReal> f,::util::I
 			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
 		},fptr,w,h,numChannels,data,imgBuffer.GetPixelSize() *w);
 		break;
-	case ImageOutputFormat::BMP:
+	case ImageFormat::BMP:
 		result = stbi_write_bmp_to_func([](void *context,void *data,int size) {
 			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
 		},fptr,w,h,numChannels,data);
 		break;
-	case ImageOutputFormat::TGA:
+	case ImageFormat::TGA:
 		result = stbi_write_tga_to_func([](void *context,void *data,int size) {
 			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
 		},fptr,w,h,numChannels,data);
 		break;
-	case ImageOutputFormat::JPG:
+	case ImageFormat::JPG:
 		result = stbi_write_jpg_to_func([](void *context,void *data,int size) {
 			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
 		},fptr,w,h,numChannels,data,static_cast<int32_t>(quality *100.f));
 		break;
-	case ImageOutputFormat::HDR:
+	case ImageFormat::HDR:
 		result = stbi_write_hdr_to_func([](void *context,void *data,int size) {
 			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
 		},fptr,w,h,numChannels,reinterpret_cast<float*>(data));

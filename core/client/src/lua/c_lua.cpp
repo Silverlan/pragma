@@ -26,7 +26,7 @@
 #include <sharedutils/util_string.h>
 #include "pragma/lua/classes/c_lnetpacket.h"
 #include "pragma/lua/classes/c_lcamera.h"
-#include "pragma/entities/components/c_lentity_components.hpp"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"

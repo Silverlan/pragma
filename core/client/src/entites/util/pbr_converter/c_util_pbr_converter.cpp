@@ -72,11 +72,10 @@ void CPBRConverterComponent::OnRemove()
 		m_cbOnModelLoaded.Remove();
 	if(m_cbOnMaterialLoaded.IsValid())
 		m_cbOnMaterialLoaded.Remove();
-	for(auto &pair : m_onModelMaterialsLoadedCallbacks)
+	for(auto &pair : m_scheduledModelUpdates)
 	{
-		auto &cb = pair.second;
-		if(cb.IsValid())
-			cb.Remove();
+		if(pair.second.cbOnMaterialsLoaded.IsValid())
+			pair.second.cbOnMaterialsLoaded.Remove();
 	}
 }
 
@@ -93,26 +92,45 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
 	}
 }
 
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl)
+{
+	ScheduleModelUpdate(mdl,false,true);
+}
+
+void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo)
+{
+	if(updateInfo.updateMetalness)
+		UpdateMetalness(mdl);
+	if(updateInfo.updateAmbientOcclusion)
+		UpdateAmbientOcclusion(mdl);
+	if(updateInfo.cbOnMaterialsLoaded.IsValid())
+		updateInfo.cbOnMaterialsLoaded.Remove();
+	auto it = m_scheduledModelUpdates.find(&mdl);
+	if(it != m_scheduledModelUpdates.end())
+		m_scheduledModelUpdates.erase(it);
+}
+
+void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness,bool updateAmbientOcclusion)
+{
+	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
+	if(itUpdateInfo == m_scheduledModelUpdates.end())
+		itUpdateInfo = m_scheduledModelUpdates.insert(std::make_pair(&mdl,ModelUpdateInfo{})).first;
+	auto &updateInfo = itUpdateInfo->second;
+	updateInfo.updateMetalness = updateInfo.updateMetalness || updateMetalness;
+	updateInfo.updateAmbientOcclusion = updateInfo.updateAmbientOcclusion || updateAmbientOcclusion;
+	auto cb = mdl.CallOnMaterialsLoaded([this,&mdl,&updateInfo]() {
+		UpdateModel(mdl,updateInfo);
+	});
+	if(cb.IsValid())
+		updateInfo.cbOnMaterialsLoaded = cb;
+}
+
 void CPBRConverterComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 
 	m_cbOnModelLoaded = c_game->AddCallback("OnModelLoaded",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) {
-		auto pMdl = mdl.get();
-		auto cb = mdl.get()->CallOnMaterialsLoaded([this,pMdl]() {
-			UpdateMetalness(*pMdl);
-			UpdateAmbientOcclusion(*pMdl);
-			auto it = m_onModelMaterialsLoadedCallbacks.find(pMdl.get());
-			if(it != m_onModelMaterialsLoadedCallbacks.end())
-			{
-				auto &cb = it->second;
-				if(cb.IsValid())
-					cb.Remove();
-				m_onModelMaterialsLoadedCallbacks.erase(it);
-			}
-		});
-		if(cb.IsValid())
-			m_onModelMaterialsLoadedCallbacks.insert(std::make_pair(mdl.get().get(),cb));
+		ScheduleModelUpdate(*mdl.get(),true,false);
 	}));
 	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded",FunctionCallback<void,CMaterial*>::Create([this](CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
@@ -171,20 +189,29 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
 
-	auto fAddGenericTexture = [&matTraditional,&dataPbr](const std::string &identifier,TextureInfo *texInfo) {
+	auto fAddGenericTexture = [&matTraditional,&dataPbr](const std::string &identifier,TextureInfo *texInfo) -> bool {
 		if(texInfo && texInfo->texture && std::static_pointer_cast<Texture>(texInfo->texture)->HasValidVkTexture())
+		{
 			dataPbr->AddValue("texture",identifier,texInfo->name);
+			return true;
+		}
+		return false;
 	};
-	auto fAddGenericTextureByIdentifier = [&matTraditional,&dataPbr](const std::string &name) {
+	auto fAddGenericTextureByIdentifier = [&matTraditional,&dataPbr](const std::string &name) -> bool {
 		auto *map = matTraditional.GetTextureInfo(name);
 		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
+		{
 			dataPbr->AddValue("texture",name,map->name);
+			return true;
+		}
+		return false;
 	};
 
 	// TODO: Extract ambient occlusion from diffuse map, if possible
 	fAddGenericTexture(Material::ALBEDO_MAP_IDENTIFIER,matTraditional.GetDiffuseMap()); // Albedo map
 	fAddGenericTexture(Material::NORMAL_MAP_IDENTIFIER,matTraditional.GetNormalMap()); // Normal map
 	fAddGenericTexture(Material::AO_MAP_IDENTIFIER,matTraditional.GetAmbientOcclusionMap()); // Ambient occlusion map
+	auto hasSpecularMap = fAddGenericTexture(Material::SPECULAR_MAP_IDENTIFIER,matTraditional.GetSpecularMap()); // Specular/Glossiness map
 	fAddGenericTextureByIdentifier(Material::WRINKLE_STRETCH_MAP_IDENTIFIER); // Wrinkle stretch map
 	fAddGenericTextureByIdentifier(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER); // Wrinkle compress map
 	fAddGenericTextureByIdentifier(Material::EXPONENT_MAP_IDENTIFIER); // Exponent map
@@ -196,8 +223,18 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	if(surfMatName.empty() == false)
 		dataPbr->AddValue("string","surfacematerial",surfMatName);
 
+	auto &pbrInfo = surfMat->GetPBRInfo();
+	if(surfMat && pbrInfo.subsurfaceMultiplier != 0.f)
+	{
+		dataPbr->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
+		dataPbr->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
+		dataPbr->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
+		dataPbr->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
+	}
+
 	// Roughness map
-	auto *specularMap = matTraditional.GetSpecularMap();
+	// Obsolete, since Pragma now supports specular maps for PBR directly
+	/*auto *specularMap = matTraditional.GetSpecularMap();
 	if(
 		specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->HasValidVkTexture() &&
 		std::static_pointer_cast<Texture>(specularMap->texture)->IsError() == false
@@ -217,8 +254,10 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 			dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,roughnessName);
 		}
 	}
-	else
+	else*/
+	if(hasSpecularMap == false)
 	{
+		// Attempt to determine roughness by surface material
 		if(surfMat)
 		{
 			auto &pbrInfo = surfMat->GetPBRInfo();
@@ -246,10 +285,10 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		if(pbrInfo.metalness > 0.f)
 		{
 			if(pbrInfo.metalness == 1.f)
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/metal");
+				dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
 			else
 			{
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/metal");
+				dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
 				dataPbr->AddValue("float","metalness_factor",std::to_string(pbrInfo.metalness));
 			}
 		}

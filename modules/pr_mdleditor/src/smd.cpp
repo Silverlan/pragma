@@ -272,7 +272,7 @@ bool import::load_smd(NetworkState *nw,const std::string &name,Model &mdl,SMDMod
 			}
 			textures.push_back(mesh.texture);
 			auto texId = import::util::add_texture(mdl,mesh.texture);
-			subMesh->SetTexture(texId);
+			subMesh->SetSkinTextureIndex(texId);
 			subMesh->Update();
 			mdlMesh->AddSubMesh(subMesh);
 		}

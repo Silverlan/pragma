@@ -13,6 +13,10 @@ pragma::physics::ICollisionObject::ICollisionObject(IEnvironment &env,pragma::ph
 
 void pragma::physics::ICollisionObject::OnRemove()
 {
+	auto *physObj = GetPhysObj();
+	if(physObj)
+		physObj->OnCollisionObjectRemoved(*this);
+
 	RemoveWorldObject();
 	m_physEnv.RemoveCollisionObject(*this);
 	IBase::OnRemove();
@@ -47,6 +51,8 @@ void pragma::physics::ICollisionObject::SetSurfaceMaterial(int id)
 bool pragma::physics::ICollisionObject::IsRigid() const {return false;}
 bool pragma::physics::ICollisionObject::IsGhost() const {return false;}
 bool pragma::physics::ICollisionObject::IsSoftBody() const {return false;}
+bool pragma::physics::ICollisionObject::IsAsleep() const {return !IsAwake();}
+bool pragma::physics::ICollisionObject::IsAwake() const {return umath::is_flag_set(m_stateFlags,StateFlags::Awake);}
 
 void pragma::physics::ICollisionObject::InitializeLuaObject(lua_State *lua)
 {
@@ -152,11 +158,38 @@ void pragma::physics::ICollisionObject::OnEndTouch(ICollisionObject &other)
 }
 void pragma::physics::ICollisionObject::OnWake()
 {
+	if(IsAwake())
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::Awake);
 	m_physEnv.OnWake(*this);
+
+	auto *physObj = GetPhysObj();
+	if(physObj)
+		physObj->OnCollisionObjectWake(*this);
 }
 void pragma::physics::ICollisionObject::OnSleep()
 {
+	if(IsAlwaysAwake() == true || IsAsleep())
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::Awake,false);
 	m_physEnv.OnSleep(*this);
+
+	auto *physObj = GetPhysObj();
+	if(physObj)
+		physObj->OnCollisionObjectSleep(*this);
+}
+void pragma::physics::ICollisionObject::SetAlwaysAwake(bool alwaysAwake)
+{
+	umath::set_flag(m_stateFlags,StateFlags::AlwaysAwake,alwaysAwake);
+	if(alwaysAwake)
+	{
+		if(IsAsleep())
+			OnWake();
+	}
+}
+bool pragma::physics::ICollisionObject::IsAlwaysAwake() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::AlwaysAwake);
 }
 
 pragma::physics::IRigidBody *pragma::physics::ICollisionObject::GetRigidBody() {return nullptr;}

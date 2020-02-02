@@ -262,6 +262,8 @@ namespace pragma
 		float m_colRadius = 0.f;
 		Vector3 m_colMin = {};
 		Vector3 m_colMax = {};
+	private:
+		void ClearAwakeStatus();
 	};
 	struct DLLNETWORK CEInitializePhysics
 		: public ComponentEvent

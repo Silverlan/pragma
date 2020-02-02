@@ -39,28 +39,31 @@ bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min,const Vector3 &ma
 	return (Intersection::AABBAABB(min,max,m_worldBounds.first,m_worldBounds.second) != INTERSECT_OUTSIDE) ? true : false;
 }
 
-void BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)
+bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)
 {
 	uint32_t branchObjectCount = 0;
+	auto childrenValid = true;
 	if(m_children != nullptr)
 	{
 		for(auto &c : *m_children)
 			branchObjectCount += c->GetTotalObjectCount();
 		if(branchObjectCount == 0)
+		{
+			childrenValid = false;
 			m_children = nullptr;
+		}
 	}
 	auto oldObjectCount = m_branchObjectCount;
 	m_branchObjectCount = branchObjectCount;
 	if((bForceUpdateParents == true || m_branchObjectCount != oldObjectCount) && m_parent.expired() == false)
 	{
-		//auto wptr = std::weak_ptr<Node>(shared_from_this());
-		m_parent.lock()->UpdateState();
-		//if(wptr.expired())
-		//	return;
+		if(m_parent.lock()->UpdateState() == false)
+			return false; // This node is no longer valid, we have to bail out!
 	}
 	if(m_parent.expired() == true)
 		m_tree->ShrinkRoot();
 	UpdateDebugObject();
+	return childrenValid;
 }
 
 void BaseOcclusionOctree::Node::InitializeChildren(bool bPopulateChildren)

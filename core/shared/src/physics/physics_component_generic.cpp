@@ -26,6 +26,7 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose,BoneId boneId)
 {
 	if(shape.IsCompoundShape())
@@ -653,8 +654,44 @@ void BasePhysicsComponent::InitializeBrushGeometry() {}
 std::vector<std::shared_ptr<BrushMesh>> &BasePhysicsComponent::GetBrushMeshes() {return m_brushMeshes;}
 const std::vector<std::shared_ptr<BrushMesh>> &BasePhysicsComponent::GetBrushMeshes() const {return const_cast<BasePhysicsComponent*>(this)->GetBrushMeshes();}
 
-void BasePhysicsComponent::OnPhysicsWake(PhysObj*) {GetEntity().MarkForSnapshot(true);}
-void BasePhysicsComponent::OnPhysicsSleep(PhysObj*) {}
+void BasePhysicsComponent::ClearAwakeStatus()
+{
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	auto &awakePhysC = game.GetAwakePhysicsComponents();
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+		return this == hPhysC.get();
+	});
+	if(it == awakePhysC.end())
+		return;
+	awakePhysC.erase(it);
+}
+void BasePhysicsComponent::OnPhysicsWake(PhysObj*)
+{
+	GetEntity().MarkForSnapshot(true);
+
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	auto &awakePhysC = game.GetAwakePhysicsComponents();
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+		return this == hPhysC.get();
+	});
+	if(it != awakePhysC.end())
+	{
+		Con::cwar<<"WARNING: Physics component has woken up, but was already marked as awake previously!"<<Con::endl;
+		return;
+	}
+	awakePhysC.push_back(GetHandle<BasePhysicsComponent>());
+}
+void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
+{
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
+	auto &awakePhysC = game.GetAwakePhysicsComponents();
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+		return this == hPhysC.get();
+	});
+	if(it == awakePhysC.end())
+		Con::cwar<<"WARNING: Physics component has fallen asleep, but was already marked as asleep previously!"<<Con::endl;
+	ClearAwakeStatus();
+}
 
 PhysObj *BasePhysicsComponent::GetPhysicsObject() const {return m_physObject.get();}
 
@@ -804,7 +841,11 @@ void BasePhysicsComponent::OnPhysicsInitialized()
 {
 	BroadcastEvent(EVENT_ON_PHYSICS_INITIALIZED);
 	SetCollisionContactReportEnabled(GetCollisionContactReportEnabled());
-	SetSleepReportEnabled(IsSleepReportEnabled());
+
+	// Note: We always need sleep reports enabled for optimization purposes.
+	// TODO: Remove IsSleepReportEnabled / SetSleepReportEnabled?
+	SetSleepReportEnabled(true);
+	// SetSleepReportEnabled(IsSleepReportEnabled());
 }
 void BasePhysicsComponent::OnPhysicsDestroyed() {BroadcastEvent(EVENT_ON_PHYSICS_DESTROYED);}
 bool BasePhysicsComponent::IsKinematic() const {return umath::is_flag_set(m_stateFlags,StateFlags::Kinematic);}
@@ -931,3 +972,4 @@ float BasePhysicsComponent::GetMass() const
 		return 0.f;
 	return phys->GetMass();
 }
+#pragma optimize("",on)

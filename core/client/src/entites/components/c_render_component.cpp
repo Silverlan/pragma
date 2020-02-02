@@ -331,6 +331,8 @@ void CRenderComponent::ReceiveData(NetPacket &packet)
 {
 	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
 }
+void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt) {umath::set_flag(m_stateFlags,StateFlags::ExemptFromOcclusionCulling,exempt);}
+bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
 void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {

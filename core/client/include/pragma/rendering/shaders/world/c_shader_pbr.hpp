@@ -25,6 +25,7 @@ namespace pragma
 			WrinkleStretchMap,
 			WrinkleCompressMap,
 			ExponentMap,
+			SpecularMap,
 
 			Count
 		};

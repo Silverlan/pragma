@@ -31,7 +31,6 @@ BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 		auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
 		if(pPhys != NULL && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
 			pPhys->SetPosition(pos);
-		ent.MarkForSnapshot();
 	});
 	m_orientation->AddCallback([this,hEnt](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
 		if(hEnt.IsValid() == false)
@@ -43,7 +42,6 @@ BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 		auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
 		if(phys != NULL && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
 			phys->SetOrientation(rot);
-		ent.MarkForSnapshot();
 	});
 }
 void BaseTransformComponent::Initialize()
@@ -142,6 +140,7 @@ void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
 		return;
 	}
 	*m_pos = pos;
+	ent.MarkForSnapshot();
 }
 
 void BaseTransformComponent::SetPosition(const Vector3 &pos) {SetPosition(pos,false);}
@@ -166,6 +165,7 @@ void BaseTransformComponent::SetOrientation(const Quat &q)
 		return;
 	}
 	*m_orientation = q;
+	ent.MarkForSnapshot();
 }
 
 void BaseTransformComponent::Save(DataStream &ds)

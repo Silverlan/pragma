@@ -33,6 +33,19 @@ int Lua::intersect::aabb_with_plane(lua_State *l)
 	return 1;
 }
 
+int Lua::intersect::aabb_with_triangle(lua_State *l)
+{
+	int32_t idx = 1;
+	auto &min = *Lua::CheckVector(l,idx++);
+	auto &max = *Lua::CheckVector(l,idx++);
+	auto &a = *Lua::CheckVector(l,idx++);
+	auto &b = *Lua::CheckVector(l,idx++);
+	auto &c = *Lua::CheckVector(l,idx++);
+	auto r = Intersection::AABBTriangle(min,max,a,b,c);
+	Lua::PushBool(l,r);
+	return 1;
+}
+
 int Lua::intersect::obb_with_plane(lua_State *l)
 {
 	int32_t idx = 1;
@@ -386,4 +399,17 @@ int Lua::intersect::line_triangle(lua_State *l)
 	Lua::PushNumber(l,t);
 	Lua::Push<Vector2>(l,Vector2{u,v});
 	return 3;
+}
+
+int Lua::intersect::line_line(lua_State *l)
+{
+	auto &start0 = Lua::Check<Vector2>(l,1);
+	auto &end0 = Lua::Check<Vector2>(l,2);
+	auto &start1 = Lua::Check<Vector2>(l,3);
+	auto &end1 = Lua::Check<Vector2>(l,4);
+	auto result = Intersection::LineLine(start0,end0,start1,end1);
+	if(result.has_value() == false)
+		return 0;
+	Lua::Push<Vector2>(l,*result);
+	return 1;
 }

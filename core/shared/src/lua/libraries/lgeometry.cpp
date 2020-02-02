@@ -301,6 +301,17 @@ int Lua::geometry::calc_center_of_mass(lua_State *l)
 	Lua::PushNumber(l,volume);
 	return 2;
 }
+int Lua::geometry::calc_triangle_area(lua_State *l)
+{
+	auto &p0 = Lua::Check<Vector3>(l,1);
+	auto &p1 = Lua::Check<Vector3>(l,2);
+	auto &p2 = Lua::Check<Vector3>(l,3);
+	auto keepSign = false;
+	if(Lua::IsSet(l,4))
+		keepSign = Lua::CheckBool(l,4);
+	Lua::PushNumber(l,Geometry::calc_triangle_area(p0,p1,p2,keepSign));
+	return 1;
+}
 int Lua::geometry::calc_barycentric_coordinates(lua_State *l)
 {
 	float b1,b2;

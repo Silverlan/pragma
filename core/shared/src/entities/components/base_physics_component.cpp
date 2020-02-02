@@ -53,6 +53,7 @@ void BasePhysicsComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
 	DestroyPhysicsObject();
+	ClearAwakeStatus();
 }
 const std::vector<BasePhysicsComponent::PhysJoint> &BasePhysicsComponent::GetJoints() const {return const_cast<BasePhysicsComponent*>(this)->GetJoints();}
 std::vector<BasePhysicsComponent::PhysJoint> &BasePhysicsComponent::GetJoints() {return m_joints;}
@@ -181,23 +182,23 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	}
 
 	bool bStatic = phys->IsStatic();
-	bool bSnapshot = !bStatic;
+	bool bSnapshot = false;
 	auto t = o->GetWorldTransform();
 	Vector3 pos = phys->GetPosition();
 	Quat rot = t.GetRotation();
 	if(!m_physObject->IsController() && pTrComponent.valid()) // TODO
 	{
 		auto &rotCur = pTrComponent->GetOrientation();
-		if(bStatic == false && (rotCur.w != rot.w || rotCur.x != rot.x || rotCur.y != rot.y || rotCur.z != rot.z))
-			bSnapshot = true;
-
 		if(
 			fabsf(rot.w -rotCur.w) > ENT_EPSILON ||
 			fabsf(rot.x -rotCur.x) > ENT_EPSILON ||
 			fabsf(rot.y -rotCur.y) > ENT_EPSILON ||
 			fabsf(rot.z -rotCur.z) > ENT_EPSILON
 		)
+		{
 			ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
+			bSnapshot = true;
+		}
 
 		// Sanity check
 		if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z))

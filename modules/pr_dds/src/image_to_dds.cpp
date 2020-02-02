@@ -545,6 +545,11 @@ bool Lua::dds::save_image(prosper::Image &image,const std::string &fileName,cons
 			}
 		}
 		buf = context.AllocateTemporaryBuffer(size);
+		if(buf == nullptr)
+		{
+			context.FlushSetupCommandBuffer();
+			return false; // Buffer allocation failed; Requested size too large?
+		}
 		prosper::util::record_image_barrier(**setupCmd,**imgRead,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
 
 		prosper::util::BufferImageCopyInfo copyInfo {};

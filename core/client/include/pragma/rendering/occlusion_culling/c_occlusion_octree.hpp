@@ -34,7 +34,7 @@ public:
 		const Vector3 &GetDimensions() const;
 		Vector3 GetChildDimensions() const;
 		bool IsContained(const Vector3 &min,const Vector3 &max) const;
-		void UpdateState(bool bForceUpdateParents=false);
+		bool UpdateState(bool bForceUpdateParents=false);
 		void InitializeChildren(bool bPopulateChildren=false);
 		const std::array<std::shared_ptr<Node>,8> *GetChildren() const;
 		bool HasObjects() const;

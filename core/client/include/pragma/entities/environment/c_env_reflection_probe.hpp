@@ -24,6 +24,7 @@ namespace pragma
 	{
 	public:
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
+		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
 		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}

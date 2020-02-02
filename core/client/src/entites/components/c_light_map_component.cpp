@@ -438,7 +438,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,uint32_t sampleCount,bool denoise)
 {
 	Con::cout<<"Baking lightmaps... This may take a few minutes!"<<Con::endl;
-	constexpr auto hdrOutput = true;
+	auto hdrOutput = true;
 	pragma::rendering::cycles::SceneInfo sceneInfo {};
 	//sceneInfo.width = 256;//1024;//lightmapC->GetLightmapInfo()->atlasSize;//1'024; // TODO: Use original lightmap size
 	//sceneInfo.height = 256;//1024;//lightmapC->GetLightmapInfo()->atlasSize;//1'024; // TODO: Use original lightmap size
@@ -447,6 +447,11 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 	sceneInfo.samples = sampleCount;//16;//8192 *4; // TODO
 	sceneInfo.denoise = denoise;
 	sceneInfo.hdrOutput = hdrOutput;
+
+	// TODO: Replace these with command arguments?
+	sceneInfo.sky = "skies/dusk379.hdr";
+	sceneInfo.skyAngles = {0.f,160.f,0.f};
+	sceneInfo.skyStrength = 72.f;
 
 	auto job = pragma::rendering::cycles::bake_lightmaps(*client,sceneInfo,ent);
 	if(job.IsValid() == false)
@@ -468,6 +473,7 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 			// No HDR output, but we'll still use HDR data
 			imgBuffer->Convert(util::ImageBuffer::Format::RGBA16);
 		}
+
 		auto tex = CLightMapComponent::CreateLightmapTexture(imgBuffer->GetWidth(),imgBuffer->GetHeight(),reinterpret_cast<uint16_t*>(imgBuffer->GetData()));
 		/*{
 		TextureManager::LoadInfo loadInfo {};

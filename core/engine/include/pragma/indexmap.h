@@ -2,39 +2,40 @@
 #define __INDEXMAP_H__
 
 #include <vector>
-#include <deque>
+#include <queue>
+
 template<class T>
 	class IndexMap
 {
-private:
-	std::vector<T*> m_values;
-	std::deque<unsigned int> m_indices;
 public:
-	unsigned int Insert(T* val);
-	void Remove(unsigned int idx);
-	unsigned int Size();
-	T *operator[](const unsigned int idx);
+	size_t Insert(const T &val);
+	void Remove(size_t idx);
+	size_t Size() const;
+	T *operator[](const size_t idx);
+private:
+	std::vector<T> m_values;
+	std::queue<size_t> m_freeIndices;
 };
 
 template<class T>
-	unsigned int IndexMap<T>::Insert(T* val)
+	size_t IndexMap<T>::Insert(const T &val)
 {
-	if(m_indices.empty())
+	if(m_freeIndices.empty())
 	{
 		m_values.push_back(val);
-		return CUInt32(m_values.size()) -1;
+		return m_values.size() -1;
 	}
-	unsigned int idx = m_indices[0];
-	m_values[idx] = val;
-	m_indices.pop_front();
+	auto idx = m_freeIndices.front();
+	m_values.at(idx) = val;
+	m_freeIndices.pop();
 	return idx;
 }
 
 template<class T>
-	unsigned int IndexMap<T>::Size() {return CUInt32(m_values.size());}
+	size_t IndexMap<T>::Size() const {return m_values.size();}
 
 template<class T>
-	void IndexMap<T>::Remove(unsigned int idx)
+	void IndexMap<T>::Remove(size_t idx)
 {
 	if(idx >= m_values.size() || idx < 0)
 		return;
@@ -43,16 +44,16 @@ template<class T>
 		m_values.pop_back();
 		return;
 	}
-	m_values[idx] = NULL;
-	m_indices.push_back(idx);
+	m_values.at(idx) = {};
+	m_freeIndices.push(idx);
 }
 
 template<class T>
-	T *IndexMap<T>::operator[](const unsigned int idx)
+	T *IndexMap<T>::operator[](const size_t idx)
 {
 	if(idx >= m_values.size() || idx < 0)
-		return NULL;
-	return m_values[idx];
+		return nullptr;
+	return &m_values.at(idx);
 }
 
 #endif

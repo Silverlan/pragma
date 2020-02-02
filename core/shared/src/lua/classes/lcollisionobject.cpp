@@ -220,6 +220,23 @@ void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("SetWorldTransform",&SetWorldTransform);
 	classDef.def("SetAngles",&SetAngles);
 	classDef.def("GetAngles",&GetAngles);
+
+	classDef.def("PutToSleep",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
+			return;
+		hPhys->PutToSleep();
+	}));
+	classDef.def("WakeUp",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
+			return;
+		hPhys->WakeUp();
+	}));
+	classDef.def("IsAsleep",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) {
+		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
+			return;
+		Lua::PushBool(l,hPhys->IsAsleep());
+	}));
+
 	mod[classDef];
 
 	PhysRigidBody::register_class(l,mod);

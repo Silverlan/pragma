@@ -22,6 +22,7 @@ namespace Lua
 		DLLNETWORK int calc_volume_of_triangle(lua_State *l);
 		DLLNETWORK int calc_volume_of_polyhedron(lua_State *l);
 		DLLNETWORK int calc_center_of_mass(lua_State *l);
+		DLLNETWORK int calc_triangle_area(lua_State *l);
 
 		DLLNETWORK int calc_barycentric_coordinates(lua_State *l);
 		DLLNETWORK int calc_rotation_between_planes(lua_State *l);

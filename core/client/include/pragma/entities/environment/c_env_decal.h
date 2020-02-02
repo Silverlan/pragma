@@ -14,6 +14,8 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
+	protected:
+		void ApplyDecal();
 	};
 };
 

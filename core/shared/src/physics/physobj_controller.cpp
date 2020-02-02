@@ -199,7 +199,7 @@ Vector3 ControllerPhysObj::GetGroundVelocity() const
 
 void ControllerPhysObj::Simulate(double tDelta,bool bIgnoreGravity)
 {
-	if(m_bDisabled == true || IsKinematic())
+	if(IsDisabled() || IsKinematic())
 		return;
 	auto *owner = GetOwner();
 	if(owner == NULL || m_collisionObject == nullptr)
@@ -287,6 +287,8 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents,unsigned int st
 	m_collisionObject = util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
+
+	collisionObject->SetAlwaysAwake(true);
 	return true;
 }
 
@@ -367,6 +369,8 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width,unsigned int height
 	m_collisionObject = util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(collisionObject->ClaimOwnership());
 	collisionObject->SetPhysObj(*this);
 	m_collisionObjects.push_back(m_collisionObject);
+
+	collisionObject->SetAlwaysAwake(true);
 	return true;
 }
 float CapsuleControllerPhysObj::GetWidth() const {return m_width;}

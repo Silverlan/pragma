@@ -21,7 +21,8 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			RenderBufferDirty = 1u
+			RenderBufferDirty = 1u,
+			ExemptFromOcclusionCulling = RenderBufferDirty<<1u
 		};
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
@@ -78,6 +79,9 @@ namespace pragma
 		void UpdateRenderBounds();
 
 		util::WeakHandle<CModelComponent> &GetModelComponent() const;
+
+		void SetExemptFromOcclusionCulling(bool exempt);
+		bool IsExemptFromOcclusionCulling() const;
 
 		void SetRenderBufferDirty();
 	protected:

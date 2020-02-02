@@ -2,7 +2,7 @@
 #include "pragma/entities/components/c_vehicle_component.hpp"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
-#include "pragma/entities/components/c_lentity_components.hpp"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lua_entity_component.hpp>

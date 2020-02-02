@@ -54,6 +54,34 @@ void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::
 	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
 	pragma::console::parse_command_options(argv,commandOptions);
 	auto rebuild = (commandOptions.find("rebuild") != commandOptions.end());
+	auto closest = (commandOptions.find("closest") != commandOptions.end());
+	if(closest)
+	{
+		EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
+		CReflectionProbeComponent *probeClosest = nullptr;
+		auto dClosest = std::numeric_limits<float>::max();
+		Vector3 origin {};
+		auto *cam = c_game->GetRenderCamera();
+		if(cam)
+			origin = cam->GetEntity().GetPosition();
+		for(auto *entProbe : entIt)
+		{
+			auto d = uvec::distance_sqr(origin,entProbe->GetPosition());
+			if(d > dClosest)
+				continue;
+			dClosest = d;
+			probeClosest = entProbe->GetComponent<CReflectionProbeComponent>().get();
+		}
+		if(probeClosest == nullptr)
+		{
+			Con::cwar<<"WARNING: No reflection probe found!"<<Con::endl;
+			return;
+		}
+		std::vector<CReflectionProbeComponent*> probes {probeClosest};
+		CReflectionProbeComponent::BuildReflectionProbes(*c_game,probes,rebuild);
+		return;
+	}
 	CReflectionProbeComponent::BuildAllReflectionProbes(*c_game,rebuild);
 }
 static void print_status(uint32_t i,uint32_t count)
@@ -189,12 +217,12 @@ static void build_next_reflection_probe()
 static constexpr uint32_t CUBEMAP_LAYER_WIDTH = 512;
 static constexpr uint32_t CUBEMAP_LAYER_HEIGHT = 512;
 static constexpr uint32_t RAYTRACING_SAMPLE_COUNT = 64;
-void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild)
+void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild)
 {
 	if(rebuild)
 	{
 		// Clear existing IBL files
-		for(auto *probe : get_probes())
+		for(auto *probe : probes)
 		{
 			auto path = probe->GetCubemapIBLMaterialPath();
 			std::array<std::string,3> filePostfixes = {
@@ -216,13 +244,18 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 		}
 	}
 	uint32_t numProbes = 0u;
-	for(auto *probe : get_probes())
+	for(auto *probe : probes)
 	{
 		if(probe->RequiresRebuild())
 			++numProbes;
 	}
 	Con::cout<<"Updating "<<numProbes<<" reflection probes... This may take a while!"<<Con::endl;
 	build_next_reflection_probe();
+}
+void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild)
+{
+	auto probes = get_probes();
+	BuildReflectionProbes(game,probes,rebuild);
 }
 
 Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const Vector3 &origin)

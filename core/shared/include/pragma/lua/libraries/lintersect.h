@@ -10,6 +10,7 @@ namespace Lua
 	{
 		DLLNETWORK int aabb_with_aabb(lua_State *l);
 		DLLNETWORK int aabb_with_plane(lua_State *l);
+		DLLNETWORK int aabb_with_triangle(lua_State *l);
 		DLLNETWORK int obb_with_plane(lua_State *l);
 		DLLNETWORK int sphere_with_plane(lua_State *l);
 		DLLNETWORK int sphere_with_sphere(lua_State *l);
@@ -24,6 +25,7 @@ namespace Lua
 		DLLNETWORK int aabb_in_plane_mesh(lua_State *l);
 		DLLNETWORK int sphere_with_cone(lua_State *l);
 		DLLNETWORK int line_triangle(lua_State *l);
+		DLLNETWORK int line_line(lua_State *l);
 	};
 };
 

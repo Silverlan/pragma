@@ -8,6 +8,9 @@
 
 using namespace pragma;
 
+constexpr uint32_t VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT = 0.05f;
+
+#pragma optimize("",off)
 VelocityComponent::VelocityComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_velocity(util::Vector3Property::Create()),
@@ -36,8 +39,10 @@ util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId,Compone
 
 void VelocityComponent::SetVelocity(const Vector3 &vel)
 {
+	auto dt = uvec::distance_sqr(vel,*m_velocity);
 	*m_velocity = vel;
-	GetEntity().MarkForSnapshot(true);
+	if(dt > VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT)
+		GetEntity().MarkForSnapshot(true);
 }
 
 void VelocityComponent::AddVelocity(const Vector3 &vel) {SetVelocity(GetVelocity() +vel);}
@@ -61,8 +66,10 @@ void VelocityComponent::Load(DataStream &ds,uint32_t version)
 }
 void VelocityComponent::SetAngularVelocity(const Vector3 &vel)
 {
+	auto dt = uvec::distance_sqr(vel,*m_velocity);
 	*m_angVelocity = vel;
-	GetEntity().MarkForSnapshot(true);
+	if(dt > VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT)
+		GetEntity().MarkForSnapshot(true);
 }
 void VelocityComponent::AddAngularVelocity(const Vector3 &vel) {SetAngularVelocity(GetAngularVelocity() +vel);}
 const Vector3 &VelocityComponent::GetAngularVelocity() const {return *m_angVelocity;}
@@ -121,3 +128,4 @@ Vector3 VelocityComponent::GetLocalVelocity() const
 
 void VelocityComponent::SetRawVelocity(const Vector3 &vel) {*m_velocity = vel;}
 void VelocityComponent::SetRawAngularVelocity(const Vector3 &vel) {*m_angVelocity = vel;}
+#pragma optimize("",on)

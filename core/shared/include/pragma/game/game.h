@@ -65,6 +65,7 @@ namespace pragma
 {
 	class BaseWorldComponent;
 	class BaseEntityComponent;
+	class BasePhysicsComponent;
 	class EntityComponentManager;
 	namespace nav
 	{
@@ -329,6 +330,8 @@ public:
 	uint32_t GetEntityMapIndexStart() const;
 	void SetEntityMapIndexStart(uint32_t start);
 
+	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
+
 	// Debug
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f)=0;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f)=0;
@@ -342,6 +345,7 @@ protected:
 	GameFlags m_flags = GameFlags::InitialTick;
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
+	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
 	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager = nullptr;
 	uint32_t m_mapEntityIdx = 1u;

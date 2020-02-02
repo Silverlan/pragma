@@ -280,6 +280,12 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 					auto texId = Read<uint16_t>();
 					subMesh->SetSkinTextureIndex(texId);
 
+					if(version >= 27)
+					{
+						auto geometryType = Read<ModelSubMesh::GeometryType>();
+						subMesh->SetGeometryType(geometryType);
+					}
+
 					auto &verts = subMesh->GetVertices();
 					auto &tris = subMesh->GetTriangles();
 					auto &vertWeights = subMesh->GetVertexWeights();
@@ -299,6 +305,15 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 					vertWeights.resize(numVertWeights);
 					static_assert(sizeof(decltype(vertWeights.front())) == sizeof(Vector4) *2);
 					Read(vertWeights.data(),vertWeights.size() *sizeof(decltype(vertWeights.front())));
+
+					if(version >= 27)
+					{
+						auto numExtVertWeights = Read<uint64_t>();
+						auto &extVertWeights = subMesh->GetExtendedVertexWeights();
+						extVertWeights.resize(numExtVertWeights);
+						static_assert(sizeof(decltype(extVertWeights.front())) == sizeof(Vector4) *2);
+						Read(extVertWeights.data(),extVertWeights.size() *sizeof(decltype(extVertWeights.front())));
+					}
 
 					auto numTris = Read<uint32_t>();
 					tris.resize(numTris *3);

@@ -46,7 +46,9 @@ namespace pragma::physics
 			CustomSurfaceMaterial = HasOrigin<<1u,
 			CCDEnabled = CustomSurfaceMaterial<<1u,
 			UpdateAABB = CCDEnabled<<1u,
-			ContactReportEnabled = UpdateAABB<<1u
+			ContactReportEnabled = UpdateAABB<<1u,
+			AlwaysAwake = ContactReportEnabled<<1u,
+			Awake = AlwaysAwake<<1u
 		};
 
 		virtual void OnRemove() override;
@@ -91,7 +93,8 @@ namespace pragma::physics
 		virtual void SetWorldTransform(const Transform &t)=0;
 		virtual void WakeUp(bool forceActivation=false)=0;
 		virtual void PutToSleep()=0;
-		virtual bool IsAsleep() const=0;
+		bool IsAsleep() const;
+		bool IsAwake() const;
 
 		virtual void SetSimulationEnabled(bool b)=0;
 		void DisableSimulation();
@@ -117,6 +120,8 @@ namespace pragma::physics
 		void OnEndTouch(ICollisionObject &other);
 		void OnWake();
 		void OnSleep();
+		void SetAlwaysAwake(bool alwaysAwake);
+		bool IsAlwaysAwake() const;
 
 		void UpdateAABB();
 		bool ShouldUpdateAABB() const;
@@ -166,12 +171,12 @@ namespace pragma::physics
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual bool IsRigid() const override;
 		virtual IRigidBody *GetRigidBody() override;
-		virtual void ApplyForce(const Vector3 &force)=0;
-		virtual void ApplyForce(const Vector3 &force,const Vector3 &relPos)=0;
-		virtual void ApplyImpulse(const Vector3 &impulse)=0;
-		virtual void ApplyImpulse(const Vector3 &impulse,const Vector3 &relPos)=0;
-		virtual void ApplyTorque(const Vector3 &torque)=0;
-		virtual void ApplyTorqueImpulse(const Vector3 &torque)=0;
+		virtual void ApplyForce(const Vector3 &force,bool autoWake=true)=0;
+		virtual void ApplyForce(const Vector3 &force,const Vector3 &relPos,bool autoWake=true)=0;
+		virtual void ApplyImpulse(const Vector3 &impulse,bool autoWake=true)=0;
+		virtual void ApplyImpulse(const Vector3 &impulse,const Vector3 &relPos,bool autoWake=true)=0;
+		virtual void ApplyTorque(const Vector3 &torque,bool autoWake=true)=0;
+		virtual void ApplyTorqueImpulse(const Vector3 &torque,bool autoWake=true)=0;
 		virtual void ClearForces()=0;
 		virtual Vector3 GetTotalForce() const=0;
 		virtual Vector3 GetTotalTorque() const=0;
@@ -185,8 +190,8 @@ namespace pragma::physics
 		virtual void SetInertia(const Vector3 &inertia)=0;
 		virtual Vector3 GetLinearVelocity() const=0;
 		virtual Vector3 GetAngularVelocity() const=0;
-		virtual void SetLinearVelocity(const Vector3 &vel)=0;
-		virtual void SetAngularVelocity(const Vector3 &vel)=0;
+		virtual void SetLinearVelocity(const Vector3 &vel,bool autoWake=true)=0;
+		virtual void SetAngularVelocity(const Vector3 &vel,bool autoWake=true)=0;
 		virtual void SetLinearFactor(const Vector3 &factor)=0;
 		virtual void SetAngularFactor(const Vector3 &factor)=0;
 		virtual Vector3 GetLinearFactor() const=0;

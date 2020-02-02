@@ -32,6 +32,35 @@ PhysObj::PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::ph
 		AddCollisionObject(*objects[i]);
 }
 bool PhysObj::Initialize() {return true;}
+void PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
+{
+	if(m_colObjAwakeCount++ == 0)
+		OnWake();
+
+	// Sanity check
+	if(m_colObjAwakeCount > m_collisionObjects.size())
+		Con::cwar<<"WARNING: Collision object wake counter exceeds number of collision objects!"<<Con::endl;
+}
+void PhysObj::OnCollisionObjectSleep(pragma::physics::ICollisionObject &o)
+{
+	if(m_colObjAwakeCount == 0)
+	{
+		Con::cwar<<"WARNING: Collision object of physics object fell asleep, but previous information indicated all collision objects were already asleep!"<<Con::endl;
+		return;
+	}
+	if(--m_colObjAwakeCount == 0)
+		OnSleep();
+}
+void PhysObj::OnCollisionObjectRemoved(pragma::physics::ICollisionObject &o)
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Spawned) && o.IsAwake())
+		OnCollisionObjectSleep(o);
+	auto it = std::find_if(m_collisionObjects.begin(),m_collisionObjects.end(),[&o](const util::TSharedHandle<pragma::physics::ICollisionObject> &colObjOther) {
+		return &o == colObjOther.Get();
+	});
+	if(it != m_collisionObjects.end())
+		m_collisionObjects.erase(it);
+}
 void PhysObj::GetAABB(Vector3 &min,Vector3 &max) const
 {
 	min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
@@ -62,7 +91,7 @@ void PhysObj::UpdateVelocity() {}
 NetworkState *PhysObj::GetNetworkState() {return m_networkState;}
 float PhysObj::GetMass() const {return 0.f;}
 void PhysObj::SetMass(float) {}
-bool PhysObj::IsDisabled() const {return m_bDisabled;}
+bool PhysObj::IsDisabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::Disabled);}
 bool PhysObj::IsStatic() const {return false;}
 void PhysObj::SetStatic(bool) {}
 bool PhysObj::IsRigid() const {return false;}
@@ -82,13 +111,13 @@ void PhysObj::AddCollisionObject(pragma::physics::ICollisionObject &obj)
 {
 	m_collisionObjects.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::ICollisionObject>(obj.ClaimOwnership()));
 	obj.SetPhysObj(*this);
-	if(m_bSpawned == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Spawned))
 		obj.Spawn();
 }
 
 void PhysObj::Spawn()
 {
-	if(m_bSpawned == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Spawned))
 		return;
 	for(auto &hObj : m_collisionObjects)
 	{
@@ -123,7 +152,6 @@ void PhysObj::OnSleep()
 {
 	if(m_owner.expired())
 		return;
-	m_bAsleep = true;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->OnPhysicsSleep(this);
@@ -132,13 +160,12 @@ void PhysObj::OnWake()
 {
 	if(m_owner.expired())
 		return;
-	m_bAsleep = false;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->OnPhysicsWake(this);
 }
-void PhysObj::Enable() {m_bDisabled = false;}
-void PhysObj::Disable() {m_bDisabled = true;}
+void PhysObj::Enable() {umath::set_flag(m_stateFlags,StateFlags::Disabled,false);}
+void PhysObj::Disable() {umath::set_flag(m_stateFlags,StateFlags::Disabled,true);}
 pragma::BaseEntityComponent *PhysObj::GetOwner() {return m_owner.get();}
 bool PhysObj::IsController() const {return false;}
 
@@ -243,6 +270,7 @@ Vector3 PhysObj::GetOrigin() const
 	r += origin *uquat::get_inverse(rot);
 	return r;
 }
+uint32_t PhysObj::GetNumberOfCollisionObjectsAwake() const {return m_colObjAwakeCount;}
 void PhysObj::SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask)
 {
 	m_collisionFilterGroup = filterGroup;
@@ -302,7 +330,7 @@ void PhysObj::SetAngularVelocity(const Vector3&) {}
 void PhysObj::AddAngularVelocity(const Vector3 &vel) {SetAngularVelocity(GetAngularVelocity() +vel);}
 void PhysObj::PutToSleep() {}
 void PhysObj::WakeUp() {}
-bool PhysObj::IsSleeping() const {return m_bAsleep;}
+bool PhysObj::IsSleeping() const {return m_colObjAwakeCount == m_collisionObjects.size();}
 void PhysObj::SetDamping(float,float) {}
 void PhysObj::SetLinearDamping(float) {}
 void PhysObj::SetAngularDamping(float) {}

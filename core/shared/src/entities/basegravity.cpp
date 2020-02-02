@@ -12,6 +12,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseGravity::SetGravityScale(float scale) {m_gravityScale = scale;}
 void BaseGravity::SetGravityOverride(const Vector3 &dir)
 {
@@ -132,9 +133,9 @@ void GravityComponent::ApplyGravity(double dt)
 
 		for(auto hObj : pPhysRigid->GetCollisionObjects())
 		{
-			if(hObj.IsValid() == false)
+			if(hObj.IsValid() == false || hObj->IsAsleep())
 				continue;
-			hObj->GetRigidBody()->ApplyForce(f);
+			hObj->GetRigidBody()->ApplyForce(f,false);
 		}
 	}
 	else if(pPhys->IsController())
@@ -270,3 +271,4 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3
 
 	return true;
 }
+#pragma optimize("",on)

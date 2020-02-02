@@ -37,6 +37,13 @@ enum class CollisionMask : uint32_t;
 class DLLNETWORK PhysObj
 {
 public:
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		Disabled = 1u,
+		Spawned = Disabled<<1u
+	};
+
 	template<class TPhysObj,typename... TARGS>
 		static std::unique_ptr<TPhysObj> Create(pragma::BaseEntityComponent &owner,TARGS ...args);
 	template<class TPhysObj,typename... TARGS>
@@ -87,6 +94,7 @@ public:
 	virtual Quat GetOrientation() const;
 	virtual Vector3 GetPosition() const;
 	Vector3 GetOrigin() const;
+	uint32_t GetNumberOfCollisionObjectsAwake() const;
 	
 	virtual void PutToSleep();
 	virtual void WakeUp();
@@ -124,23 +132,27 @@ public:
 	virtual float GetAngularSleepingThreshold() const;
 	std::pair<float,float> GetSleepingThreshold() const;
 protected:
+	friend pragma::physics::ICollisionObject;
 	PhysObj(pragma::BaseEntityComponent *owner,pragma::physics::ICollisionObject &object);
 	PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::physics::ICollisionObject*> &objects);
 	PhysObj(pragma::BaseEntityComponent *owner);
 	bool Initialize();
+	void OnCollisionObjectWake(pragma::physics::ICollisionObject &o);
+	void OnCollisionObjectSleep(pragma::physics::ICollisionObject &o);
+	void OnCollisionObjectRemoved(pragma::physics::ICollisionObject &o);
 
 	Vector3 m_velocity = {};
 	std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> m_collisionObjects;
 
 	util::WeakHandle<pragma::BaseEntityComponent> m_owner = {};
 	NetworkState *m_networkState;
-	bool m_bAsleep = true;
-	bool m_bDisabled = false;
-	bool m_bSpawned = false;
 	CollisionMask m_collisionFilterGroup = {};
 	CollisionMask m_collisionFilterMask = {};
+	StateFlags m_stateFlags = StateFlags::None;
+	uint32_t m_colObjAwakeCount = 0u;
 	PhysObjHandle m_handle = {};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(PhysObj::StateFlags)
 
 template<class TPhysObj,typename... TARGS>
 	std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner,TARGS ...args)

@@ -77,13 +77,14 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 			if(mdlComponent.valid())
 				static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(posCam);
 		}
+		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 		auto &meshes = pRenderComponent->GetLODMeshes();
 		auto numMeshes = meshes.size();
 		auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 		for(auto &mesh : meshes)
 		{
 			auto *cmesh = static_cast<CModelMesh*>(mesh.get());
-			if(ShouldExamine(*cmesh,pos,bViewModel,numMeshes,*planes) == false)
+			if(exemptFromCulling == false && ShouldExamine(*cmesh,pos,bViewModel,numMeshes,*planes) == false)
 				continue;
 			if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
 				culledMeshesOut.reserve(culledMeshesOut.capacity() +100);

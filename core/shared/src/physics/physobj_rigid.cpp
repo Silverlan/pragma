@@ -6,6 +6,7 @@
 #include <pragma/game/game.h>
 #include "pragma/physics/environment.hpp"
 
+#pragma optimize("",off)
 RigidPhysObj::RigidPhysObj(pragma::BaseEntityComponent *owner)
 	: PhysObj(owner),PhysObjKinematic(),PhysObjDynamic()
 {}
@@ -15,7 +16,6 @@ bool RigidPhysObj::Initialize(pragma::physics::IRigidBody &body)
 		return false;
 	AddCollisionObject(body);
 	m_mass = body.GetMass();
-	m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::IRigidBody>(body.ClaimOwnership()));
 	return true;
 }
 bool RigidPhysObj::Initialize(const std::vector<pragma::physics::IRigidBody*> &bodies)
@@ -28,7 +28,6 @@ bool RigidPhysObj::Initialize(const std::vector<pragma::physics::IRigidBody*> &b
 	for(auto *body : bodies)
 	{
 		AddCollisionObject(*body);
-		m_rigidBodies.push_back(util::shared_handle_cast<pragma::physics::IBase,pragma::physics::IRigidBody>(body->ClaimOwnership()));
 		if(first)
 		{
 			m_mass = body->GetMass();
@@ -348,9 +347,10 @@ bool RigidPhysObj::IsSleeping() const
 }
 void RigidPhysObj::OnSleep()
 {
-	// BULLETTODO
+	PhysObj::OnSleep();
 }
 void RigidPhysObj::OnWake()
 {
-	 // BULLETTODO
+	PhysObj::OnWake();
 }
+#pragma optimize("",on)

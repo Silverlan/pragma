@@ -185,11 +185,11 @@ bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryComma
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true;
 }
-void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
+std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 {
 	auto *buf = mat.GetSettingsBuffer();
 	if(buf == nullptr)
-		return;
+		return {};
 	MaterialData matData {};
 
 	auto &matFlags = matData.flags;
@@ -199,13 +199,14 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 		matFlags |= MaterialFlags::DiffuseSRGB;
 
 	auto &data = mat.GetDataBlock();
+	if(data == nullptr)
+		return {};
 	auto *parallaxMap = mat.GetParallaxMap();
 	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
 	{
 		matFlags |= MaterialFlags::Parallax;
 
-		if(data != nullptr)
-			data->GetFloat("parallax_height_scale",&matData.parallaxHeightScale);
+		data->GetFloat("parallax_height_scale",&matData.parallaxHeightScale);
 	}
 
 	if(cvNormalMappingEnabled->GetBool() == true)
@@ -219,32 +220,29 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 	if(specularMap != nullptr && specularMap->texture != nullptr)
 		matFlags |= MaterialFlags::SpecularMap;
 
-	if(data != nullptr)
+	if(data->GetBool("black_to_alpha") == true)
+		matFlags |= MaterialFlags::BlackToAlpha;
+
+	auto &phongColor = data->GetValue("phong_color");
+	if(phongColor != nullptr)
 	{
-		if(data->GetBool("black_to_alpha") == true)
-			matFlags |= MaterialFlags::BlackToAlpha;
-
-		auto &phongColor = data->GetValue("phong_color");
-		if(phongColor != nullptr)
+		const auto &colorType = typeid(ds::Color);
+		if(typeid(*phongColor) == colorType)
 		{
-			const auto &colorType = typeid(ds::Color);
-			if(typeid(*phongColor) == colorType)
-			{
-				matFlags |= MaterialFlags::Specular;
-				auto &col = static_cast<ds::Color*>(phongColor.get())->GetValue();
-				matData.phong.x = col.r /255.f;
-				matData.phong.y = col.g /255.f;
-				matData.phong.z = col.b /255.f;
-				matData.phong.w = col.a /255.f;
-			}
+			matFlags |= MaterialFlags::Specular;
+			auto &col = static_cast<ds::Color*>(phongColor.get())->GetValue();
+			matData.phong.x = col.r /255.f;
+			matData.phong.y = col.g /255.f;
+			matData.phong.z = col.b /255.f;
+			matData.phong.w = col.a /255.f;
 		}
-		if(data->GetFloat("phong_shininess",&matData.phong.w) == true)
-			matFlags |= MaterialFlags::Specular;
-		if(data->GetFloat("phong_intensity",&matData.phongIntensity) == true)
-			matFlags |= MaterialFlags::Specular;
 	}
+	if(data->GetFloat("phong_shininess",&matData.phong.w) == true)
+		matFlags |= MaterialFlags::Specular;
+	if(data->GetFloat("phong_intensity",&matData.phongIntensity) == true)
+		matFlags |= MaterialFlags::Specular;
 
-	if(data != nullptr && (matFlags &MaterialFlags::Specular) != MaterialFlags::None && (matFlags &MaterialFlags::SpecularMapDefined) == MaterialFlags::None)
+	if((matFlags &MaterialFlags::Specular) != MaterialFlags::None && (matFlags &MaterialFlags::SpecularMapDefined) == MaterialFlags::None)
 	{
 		// Check if diffuse alpha should be used as specular component,
 		// but only if phong is enabled and no other specular map has been specified
@@ -269,13 +267,11 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 		if(bUseGlow == true)
 		{
 			int32_t glowMode = 1;
-			if(data != nullptr)
-				data->GetInt("glow_blend_diffuse_mode",&glowMode);
+			data->GetInt("glow_blend_diffuse_mode",&glowMode);
 			if(glowMode != 0)
 			{
 				matFlags |= MaterialFlags::Glow;
-				if(data != nullptr)
-					data->GetFloat("glow_blend_diffuse_scale",&matData.glowScale);
+				data->GetFloat("glow_blend_diffuse_scale",&matData.glowScale);
 			}
 			switch(glowMode)
 			{
@@ -295,22 +291,29 @@ void ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 		}
 	}
 
-	if(data != nullptr)
-		data->GetFloat("alpha_discard_threshold",&matData.alphaDiscardThreshold);
+	data->GetFloat("alpha_discard_threshold",&matData.alphaDiscardThreshold);
 
 	matData.metalnessFactor = mat.GetMetalnessMap() ? 1.f : 0.f;
-	if(data != nullptr)
-		data->GetFloat("metalness_factor",&matData.metalnessFactor);
+	data->GetFloat("metalness_factor",&matData.metalnessFactor);
 
-	matData.roughnessFactor = mat.GetRoughnessMap() ? 1.f : 0.f;
-	if(data != nullptr)
-		data->GetFloat("roughness_factor",&matData.roughnessFactor);
+	auto hasRoughnessMap = (mat.GetRoughnessMap() || mat.GetSpecularMap());
+	matData.roughnessFactor = hasRoughnessMap ? 1.f : 0.f;
+	auto hasRoughnessFactor = data->GetFloat("roughness_factor",&matData.roughnessFactor);
+
+	float specularFactor;
+	if(data->GetFloat("specular_factor",&specularFactor))
+	{
+		if(hasRoughnessMap == false && hasRoughnessFactor == false)
+			matData.roughnessFactor = 1.f;
+		matData.roughnessFactor *= (1.f -specularFactor);
+	}
 
 	if(mat.IsTranslucent() == true)
 		matFlags |= MaterialFlags::Translucent;
 	ApplyMaterialFlags(mat,matFlags);
 
 	buf->Write(0,matData);
+	return matData;
 }
 bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps)
 {
@@ -415,16 +418,16 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 
 	return descSetGroup;
 }
-void ShaderTextured3DBase::InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat)
+std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
 		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
 	if(settingsBuffer == nullptr)
-		return;
+		return {};
 	prosper::util::set_descriptor_set_binding_uniform_buffer(descSet,*settingsBuffer,umath::to_integral(MaterialBinding::MaterialSettings));
 	mat.SetSettingsBuffer(*settingsBuffer);
-	UpdateMaterialBuffer(mat);
+	return UpdateMaterialBuffer(mat);
 }
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {

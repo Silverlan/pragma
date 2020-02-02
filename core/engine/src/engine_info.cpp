@@ -47,6 +47,7 @@ std::vector<std::string> engine_info::get_patrons()
 		"PalmliX",
 		"Dark Dreams",
 		"Ruthoranium",
+		"CodaAnim",
 		"Googleygareth",
 		"Roach",
 		"Noah The Troll-Hunting Christian Spy"

@@ -92,6 +92,8 @@ EntityIterator::EntityIterator(Game &game,pragma::ComponentId componentId,Filter
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId,count);
 		m_iteratorData = std::make_shared<EntityIteratorData>(game,components,count); // AttachFilter<EntityIteratorFilterComponent>(componentId);
 	}
+	if(m_iteratorData == nullptr)
+		return;
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);
 }
@@ -104,6 +106,8 @@ EntityIterator::EntityIterator(Game &game,const std::string &componentName,Filte
 		auto &components = game.GetEntityComponentManager().GetComponents(componentId,count);
 		m_iteratorData = std::make_shared<EntityIteratorData>(game,components,count);
 	}
+	if(m_iteratorData == nullptr)
+		return;
 	// AttachFilter<EntityIteratorFilterComponent>(componentName);
 	if(filterFlags != FilterFlags::None)
 		AttachFilter<EntityIteratorFilterFlags>(filterFlags);

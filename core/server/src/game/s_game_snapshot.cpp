@@ -16,6 +16,7 @@
 
 extern DLLSERVER ServerState *server;
 
+#pragma optimize("",off)
 void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 {
 	auto *session = pl ? pl->GetClientSession() : nullptr;
@@ -201,4 +202,4 @@ void SGame::SendSnapshot()
 			plComponent->ClearKeyStack();
 	}
 }
-
+#pragma optimize("",on)

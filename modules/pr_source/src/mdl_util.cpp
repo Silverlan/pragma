@@ -32,9 +32,9 @@ EulerAngles import::mdl::util::convert_rotation_matrix_to_degrees(float m0,float
 Mat4 import::mdl::util::euler_angles_to_matrix(const EulerAngles &ang)
 {
 	auto r = Mat4(1.f);
-	r = glm::rotate(r,-ang.r,uvec::RIGHT);
+	r = glm::rotate(r,-ang.r,Vector3(0,0,1));
 	r = glm::rotate(r,-ang.y,uvec::UP);
-	r = glm::rotate(r,ang.p,uvec::FORWARD);
+	r = glm::rotate(r,ang.p,Vector3(1,0,0));
 	return r;
 }
 

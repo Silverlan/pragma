@@ -18,6 +18,7 @@
 #include <fsys/filesystem.h>
 #include <pragma/model/model.h>
 #include <stack>
+#include <unordered_set>
 #include <pragma/physics/collisionmesh.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_string.h>
@@ -1417,7 +1418,22 @@ std::shared_ptr<Model> import::load_mdl(
 				auto &bodyPart = bodyParts[bodyPartIdx];
 				auto &models = bodyPart.GetModels();
 
-				auto &bgName = bodyPart.GetName();
+				auto bgName = bodyPart.GetName();
+				if(mdl.GetBodyGroupId(bgName) != -1)
+				{
+					// Bodygroup with this name already exists!
+					// Source allows multiple bodygroups with the same name,
+					// but Pragma does not, so we'll have to rename the bodygroup
+					// to something else.
+					std::string newBgName;
+					uint32_t bgIndex = 2;
+					do
+					{
+						newBgName = bgName +std::to_string(bgIndex++);
+					}
+					while(mdl.GetBodyGroupId(newBgName) != -1);
+					bgName = std::move(newBgName);
+				}
 				auto &bgroup = mdl.AddBodyGroup(bgName);
 				for(auto mdlIdx=decltype(vtxModels.size()){0};mdlIdx<vtxModels.size();++mdlIdx)
 				{
@@ -3008,10 +3024,8 @@ std::shared_ptr<Model> import::load_mdl(
 	auto *texGroup = mdl.GetTextureGroup(0);
 	if(texGroup)
 	{
-		// If value in vector is not set, that means the skin texture is not in use by any mesh and will be removed in the next step
-		std::vector<std::optional<uint32_t>> newSkinTextureIndices = {};
-		newSkinTextureIndices.resize(texGroup->textures.size());
-		uint32_t skinTexIdx = 0u;
+		// Check which materials are in use by a mesh and which ones aren't
+		std::unordered_set<uint32_t> materialIndicesInUse {};
 		for(auto &meshGroup : mdl.GetMeshGroups())
 		{
 			for(auto &mesh : meshGroup->GetMeshes())
@@ -3019,28 +3033,46 @@ std::shared_ptr<Model> import::load_mdl(
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					auto texIdx = subMesh->GetSkinTextureIndex();
-					assert(texIdx < newSkinTextureIndices.size());
-					if(texIdx >= newSkinTextureIndices.size())
-						continue;
-					if(newSkinTextureIndices.at(texIdx).has_value() == false)
-						newSkinTextureIndices.at(texIdx) = skinTexIdx++;
-					subMesh->SetSkinTextureIndex(*newSkinTextureIndices.at(texIdx));
+					materialIndicesInUse.insert(texIdx);
 				}
 			}
 		}
+
+		// Map old material indices to new ones
+		std::unordered_map<uint32_t,uint32_t> oldMatIdxToNewIdx {};
+		std::vector<uint32_t> matIndicesToRemove {};
+		uint32_t newMatIdx = 0u;
+		for(auto oldMatIdx=decltype(texGroup->textures.size()){0u};oldMatIdx<texGroup->textures.size();++oldMatIdx)
+		{
+			if(materialIndicesInUse.find(oldMatIdx) != materialIndicesInUse.end())
+				oldMatIdxToNewIdx.insert(std::make_pair(oldMatIdx,newMatIdx++));
+			else
+				matIndicesToRemove.insert(matIndicesToRemove.begin(),oldMatIdx);
+		}
+
+		// Remove unused material indices
 		for(auto &texGroup : mdl.GetTextureGroups())
 		{
-			uint32_t oldSkinTexIdx = 0u;
-			for(auto it=texGroup.textures.begin();it!=texGroup.textures.end();)
+			for(auto idx : matIndicesToRemove)
 			{
-				if(oldSkinTexIdx >= newSkinTextureIndices.size() || newSkinTextureIndices.at(oldSkinTexIdx).has_value() == false)
+				// Indices are in reverse order (highest to lowest), so we can just remove the elements
+				// from the containers.
+				texGroup.textures.erase(texGroup.textures.begin() +idx);
+			}
+		}
+
+		// Apply new material indices to meshes
+		for(auto &meshGroup : mdl.GetMeshGroups())
+		{
+			for(auto &mesh : meshGroup->GetMeshes())
+			{
+				for(auto &subMesh : mesh->GetSubMeshes())
 				{
-					it = texGroup.textures.erase(it);
-					++oldSkinTexIdx;
-					continue;
+					auto matIdx = subMesh->GetSkinTextureIndex();
+					auto itNewIndex = oldMatIdxToNewIdx.find(matIdx);
+					if(itNewIndex != oldMatIdxToNewIdx.end())
+						subMesh->SetSkinTextureIndex(itNewIndex->second);
 				}
-				++it;
-				++oldSkinTexIdx;
 			}
 		}
 	}
@@ -3048,7 +3080,7 @@ std::shared_ptr<Model> import::load_mdl(
 	auto isStaticProp = (mdlInfo.header.flags &STUDIOHDR_FLAGS_STATIC_PROP) != 0;
 	umath::set_flag(mdl.GetMetaInfo().flags,Model::Flags::Inanimate,isStaticProp);
 
-	mdl.Update(ModelUpdateFlags::AllData);
+	//mdl.Update(ModelUpdateFlags::AllData);
 	//auto rot = uquat::create(EulerAngles(0.f,90.f,0.f));
 	//mdl.Rotate(rot);
 

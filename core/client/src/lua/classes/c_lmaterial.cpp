@@ -3,8 +3,10 @@
 #include "luasystem.h"
 #include "cmaterialmanager.h"
 #include "textureinfo.h"
+#include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
 #include <cmaterial.h>
 
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 void Lua::Material::Client::SetTexture(lua_State*,::Material *mat,const std::string &textureID,const std::string &tex)
@@ -42,6 +44,19 @@ void Lua::Material::Client::GetData(lua_State *l,::Material *mat)
 	auto &data = mat->GetDataBlock();
 	Lua::Push<std::shared_ptr<ds::Block>>(l,data);
 }
+
+void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat,bool reload)
+{
+	auto shaderHandler = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
+	if(shaderHandler)
+		shaderHandler(mat);
+	auto *shader = static_cast<::pragma::ShaderTexturedBase*>(mat->GetUserData());
+	if(shader == nullptr)
+		return;
+	shader->InitializeMaterialDescriptorSet(static_cast<CMaterial&>(*mat),reload);
+}
+
+void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat) {InitializeShaderData(l,mat,false);}
 
 ///////////////////
 

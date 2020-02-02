@@ -38,14 +38,23 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
+		void GenerateAmbientOcclusionMaps(Model &mdl);
 
 		bool ConvertToPBR(CMaterial &matTraditional);
 		void PollEvents();
 	private:
+		struct ModelUpdateInfo
+		{
+			CallbackHandle cbOnMaterialsLoaded = {};
+			bool updateMetalness = false;
+			bool updateAmbientOcclusion = false;
+		};
 		void ConvertMaterialsToPBR(Model &mdl);
 		void UpdateMetalness(Model &mdl);
 		void UpdateMetalness(Model &mdl,CMaterial &mat);
 		void UpdateAmbientOcclusion(Model &mdl);
+		void UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo);
+		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,bool updateAmbientOcclusion);
 
 		void ProcessQueue();
 		void WriteAOMap(Model &mdl,CMaterial &mat,util::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;
@@ -59,7 +68,7 @@ namespace pragma
 
 		CallbackHandle m_cbOnModelLoaded = {};
 		CallbackHandle m_cbOnMaterialLoaded = {};
-		std::unordered_map<Model*,CallbackHandle> m_onModelMaterialsLoadedCallbacks = {};
+		std::unordered_map<Model*,ModelUpdateInfo> m_scheduledModelUpdates = {};
 		void(*m_fCalcGeometryData)(const std::vector<Vector3>&,const std::vector<uint16_t>&,std::vector<float>*,std::vector<Vector3>*,uint32_t) = nullptr;
 	};
 };

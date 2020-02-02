@@ -152,7 +152,7 @@ namespace pragma
 		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
-		void UpdateMaterialBuffer(CMaterial &mat) const;
+		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);
@@ -162,7 +162,7 @@ namespace pragma
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
 		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
-		void InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat);
+		std::optional<MaterialData> InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat);
 		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);

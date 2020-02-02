@@ -105,6 +105,8 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	uint32_t numSurfMats = 0u;
 	auto accMetalness = 0.f;
 	auto accRoughness = 0.f;
+	auto accFlesh = 0.f;
+	SurfaceMaterial *sufMatSSS = nullptr;
 	for(auto *colMesh : matColMeshes)
 	{
 		auto surfMatIdx = colMesh->GetSurfaceMaterial();
@@ -115,8 +117,11 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		if(surfMat == nullptr)
 			continue;
 		++numSurfMats;
-		accMetalness += surfMat->GetPBRInfo().metalness;
-		accRoughness += surfMat->GetPBRInfo().roughness;
+		auto &pbrInfo = surfMat->GetPBRInfo();
+		accMetalness += pbrInfo.metalness;
+		accRoughness += pbrInfo.roughness;
+		if(pbrInfo.subsurfaceMultiplier != 0.f && sufMatSSS == nullptr)
+			sufMatSSS = surfMat; // We'll just take the first surface material that has SSS values instead of interpolating.
 	}
 	auto metalness = (numSurfMats > 0) ? (accMetalness /static_cast<float>(numSurfMats)) : 0.f;
 	auto roughness = (numSurfMats > 0) ? (accRoughness /static_cast<float>(numSurfMats)) : 0.5f;
@@ -133,6 +138,16 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		Con::cout<<"Assigning roughness value of "<<roughness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
 		mat.GetDataBlock()->AddValue("float","roughness_factor",std::to_string(roughness));
 		mat.GetDataBlock()->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
+	}
+
+	if(sufMatSSS)
+	{
+		auto &data = mat.GetDataBlock();
+		auto &pbrInfo = sufMatSSS->GetPBRInfo();
+		data->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
+		data->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
+		data->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
+		data->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
 	}
 
 	mat.UpdateTextures();

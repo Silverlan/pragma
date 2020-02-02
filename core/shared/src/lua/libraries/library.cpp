@@ -905,6 +905,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("ReadVector2",&Lua_LFile_ReadVector2);
 	classDefFile.def("ReadVector4",&Lua_LFile_ReadVector4);
 	classDefFile.def("ReadAngles",&Lua_LFile_ReadAngles);
+	classDefFile.def("ReadQuaternion",static_cast<void(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) {
+		Lua::Push<Quat>(l,f.Read<Quat>());
+	}));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&,uint32_t)>(&Lua_LFile_ReadString));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&)>(&Lua_LFile_ReadString));
 	classDefFile.def("WriteInt32",&Lua_LFile_WriteInt32);
@@ -924,6 +927,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("WriteVector2",&Lua_LFile_WriteVector2);
 	classDefFile.def("WriteVector4",&Lua_LFile_WriteVector4);
 	classDefFile.def("WriteAngles",&Lua_LFile_WriteAngles);
+	classDefFile.def("WriteQuaternion",static_cast<void(*)(lua_State*,LFile&,const Quat&)>([](lua_State *l,LFile &f,const Quat &rot) {
+		f.Write<Quat>(rot);
+	}));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string,bool)>(&Lua_LFile_WriteString));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_WriteString));
 	classDefFile.def("Seek",&Lua_LFile_Seek);
@@ -986,6 +992,7 @@ void Game::RegisterLuaLibraries()
 		{"sphere_with_cone",Lua::intersect::sphere_with_cone},
 		{"line_with_triangle",Lua::intersect::line_triangle},
 		{"aabb_with_plane",Lua::intersect::aabb_with_plane},
+		{"aabb_with_triangle",Lua::intersect::aabb_with_triangle},
 		{"obb_with_plane",Lua::intersect::obb_with_plane},
 		{"sphere_with_plane",Lua::intersect::sphere_with_plane}
 	});
@@ -1004,6 +1011,7 @@ void Game::RegisterLuaLibraries()
 		{"calc_volume_of_triangle",Lua::geometry::calc_volume_of_triangle},
 		{"calc_volume_of_polyhedron",Lua::geometry::calc_volume_of_polyhedron},
 		{"calc_center_of_mass",Lua::geometry::calc_center_of_mass},
+		{"calc_triangle_area",Lua::geometry::calc_triangle_area},
 		{"calc_barycentric_coordinates",Lua::geometry::calc_barycentric_coordinates},
 		{"calc_rotation_between_planes",Lua::geometry::calc_rotation_between_planes},
 		{"get_side_of_point_to_line",Lua::geometry::get_side_of_point_to_line},

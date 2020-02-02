@@ -61,9 +61,15 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 		prosper::Shader::DescriptorSetInfo::Binding { // Exponent Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Specular Map
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		}
 	}
 };
+static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 12,"Number of bindings in material descriptor set does not match MaterialBinding enum count!");
+
 decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding { // Irradiance Map
@@ -150,30 +156,39 @@ static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *t
 	return true;
 }
 
+static TextureManager::LoadInfo get_texture_load_info()
+{
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly;
+	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
+	return loadInfo;
+}
+
+static bool bind_default_texture(prosper::DescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex)
+{
+	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	auto &texManager = matManager.GetTextureManager();
+	std::shared_ptr<void> ptrTex = nullptr;
+	if(texManager.Load(*c_engine,defaultTexName,get_texture_load_info(),&ptrTex) == false)
+		return false;
+	auto tex = std::static_pointer_cast<Texture>(ptrTex);
+
+	if(tex && tex->HasValidVkTexture())
+		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+	return true;
+}
+
 static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
-
-	TextureManager::LoadInfo loadInfo {};
-	loadInfo.flags = TextureLoadFlags::LoadInstantly;
-	loadInfo.mipmapLoadMode = TextureMipmapMode::Load;
 
 	std::shared_ptr<Texture> tex = nullptr;
 	if(texInfo && texInfo->texture)
 		tex = std::static_pointer_cast<Texture>(texInfo->texture);
 	else if(defaultTexName.empty())
 		return false;
-	else
-	{
-		std::shared_ptr<void> ptrTex = nullptr;
-		if(texManager.Load(*c_engine,defaultTexName,loadInfo,&ptrTex) == false)
-			return false;
-		tex = std::static_pointer_cast<Texture>(ptrTex);
-	}
-	if(tex && tex->HasValidVkTexture())
-		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
-	return true;
+	return bind_default_texture(ds,defaultTexName,bindingIndex);
 }
 
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo)
@@ -190,7 +205,9 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	prosper::util::set_descriptor_set_binding_texture(descSet,*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
-	InitializeMaterialBuffer(descSet,mat);
+	auto matData = InitializeMaterialBuffer(descSet,mat);
+	if(matData.has_value() == false)
+		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
@@ -198,11 +215,43 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	if(bind_texture(mat,descSet,mat.GetAmbientOcclusionMap(),umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false)
 		return false;
 
-	if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
-		return false;
+	if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap)) == false)
+	{
+		// No metalness map, but might have metalness factor
+		float factor;
+		if(mat.GetDataBlock()->GetFloat("metalness_factor",&factor))
+		{
+			// Let metalness factor decide metalness by using white metalness map
+			if(bind_default_texture(descSet,"white",umath::to_integral(MaterialBinding::MetallicMap)) == false)
+				return false;
+		}
+		else
+		{
+			// Assume no metalness
+			if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
+				return false;
+		}
+	}
 
-	if(bind_texture(mat,descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap),"pbr/rough_half") == false)
-		return false;
+	if(bind_texture(mat,descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap)) == false)
+	{
+		// No roughness map; Neutralize it by using a white texture
+		bind_default_texture(descSet,"white",umath::to_integral(MaterialBinding::RoughnessMap));
+		if(bind_texture(mat,descSet,mat.GetTextureInfo("specular_map"),umath::to_integral(MaterialBinding::SpecularMap)) == false)
+		{
+			// No specular map available either, neutralize it as well (specular is inverted, so we have to use black to neutralize)
+			if(bind_default_texture(descSet,"black",umath::to_integral(MaterialBinding::SpecularMap)) == false)
+				return false;
+
+			float factor;
+			if(mat.GetDataBlock()->GetFloat("roughness_factor",&factor) == false && mat.GetDataBlock()->GetFloat("specular_factor",&factor) == false)
+			{
+				// Use half roughness map as default
+				if(bind_default_texture(descSet,"pbr/rough_half",umath::to_integral(MaterialBinding::RoughnessMap)) == false)
+					return false;
+			}
+		}
+	}
 
 	bind_texture(mat,descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
 

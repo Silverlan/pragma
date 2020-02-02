@@ -12,7 +12,7 @@
 #include "pragma/rendering/scene/scene.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
-#include "pragma/entities/components/c_lentity_components.hpp"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <image/prosper_render_target.hpp>

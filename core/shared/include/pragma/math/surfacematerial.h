@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <sharedutils/util_shared_handle.hpp>
+#include <mathutil/color.h>
 
 namespace pragma::physics {class IEnvironment;};
 class SurfaceMaterial;
@@ -51,8 +52,23 @@ public:
 	};
 	struct PBRInfo
 	{
+		enum class SubsurfaceMethod : uint8_t
+		{
+			Cubic = 0,
+			Gaussian,
+			Principled,
+			Burley,
+			RandomWalk,
+			PrincipledRandomWalk,
+			Count
+		};
 		float metalness = 0.f;
 		float roughness = 0.5f;
+
+		float subsurfaceMultiplier = 0.f;
+		Color subsurfaceColor = Color::White;
+		SubsurfaceMethod subsurfaceMethod = SubsurfaceMethod::PrincipledRandomWalk;
+		Vector3 subsurfaceRadius = {};
 	};
 public:
 	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);

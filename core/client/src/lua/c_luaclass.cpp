@@ -183,6 +183,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	materialClassDef.def("SetTexture",static_cast<void(*)(lua_State*,Material*,const std::string&,Lua::Vulkan::Texture&)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("GetTextureInfo",&Lua::Material::Client::GetTexture);
 	materialClassDef.def("GetData",&Lua::Material::Client::GetData);
+	materialClassDef.def("InitializeShaderDescriptorSet",static_cast<void(*)(lua_State*,::Material*,bool)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("InitializeShaderDescriptorSet",static_cast<void(*)(lua_State*,::Material*)>(&Lua::Material::Client::InitializeShaderData));
 	modGame[materialClassDef];
 
 	 // prosper TODO

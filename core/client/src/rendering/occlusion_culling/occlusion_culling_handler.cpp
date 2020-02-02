@@ -35,6 +35,9 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return false;
+	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&renderer.GetClippedFrustumPlanes());
+	if(pRenderComponent->IsExemptFromOcclusionCulling())
+		return true; // Always draw
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 min;
@@ -43,7 +46,6 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 	min += pos;
 	max += pos;
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&renderer.GetClippedFrustumPlanes());
 	outViewModel = (pRenderComponent->GetRenderMode() == RenderMode::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
 	return (outViewModel == true || (Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) != INTERSECT_OUTSIDE && Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE)) ? true : false;
 }
@@ -169,10 +171,11 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 		auto pRenderComponent = (ent != nullptr) ? ent->GetRenderComponent() : util::WeakHandle<pragma::CRenderComponent>{};
 		if(pRenderComponent.valid() && pRenderComponent->ShouldDrawShadow(posCam))
 		{
+			auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 			auto pTrComponent = ent->GetTransformComponent();
 			auto sphere = pRenderComponent->GetRenderSphereBounds();
 			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-			if(uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
+			if(exemptFromCulling || uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
 			{
 				auto &meshes = pRenderComponent->GetLODMeshes();
 				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
@@ -183,7 +186,7 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 					mesh->GetBounds(min,max);
 					min += pos;
 					max += pos;
-					if(Intersection::AABBSphere(min,max,origin,radius) == true)
+					if(exemptFromCulling || Intersection::AABBSphere(min,max,origin,radius) == true)
 					{
 						if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
 							culledMeshesOut.reserve(culledMeshesOut.capacity() +10);

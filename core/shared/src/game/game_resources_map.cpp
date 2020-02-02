@@ -161,23 +161,19 @@ static void write_mesh(VFilePtrReal &fOut,std::shared_ptr<vmf::PolyMesh> &brushM
 		for(unsigned int k=0;k<numPolyVerts;k++)
 		{
 			auto va = convert_vertex((*polyVerts)[k]->pos);
-			auto bFound = false;
-			for(unsigned int l=0;l<numVerts;l++)
+
+			auto dClosest = std::numeric_limits<float>::max();
+			uint32_t closestVertexIdx = std::numeric_limits<uint32_t>::max();
+			for(auto vertIdx=decltype(verts.size()){0u};vertIdx<verts.size();++vertIdx)
 			{
-				const auto EPSILON = 4.9406564584125e-2;
-				auto &vb = verts[l];
-				if(fabsf(va.x -vb.x) <= EPSILON &&
-					fabsf(va.y -vb.y) <= EPSILON &&
-					fabsf(va.z -vb.z) <= EPSILON)
-				{
-					fOut->Write<uint32_t>(l);
-					bFound = true;
-					break;
-				}
+				auto &v = verts.at(vertIdx);
+				auto d = uvec::distance_sqr(v,va);
+				if(d >= dClosest)
+					continue;
+				dClosest = d;
+				closestVertexIdx = vertIdx;
 			}
-			assert(bFound == true);
-			if(bFound == false)
-				Con::cerr<<"ERROR: Missing vertex index."<<Con::endl;
+			fOut->Write<uint32_t>(closestVertexIdx);
 		}
 
 		if(bDisp)

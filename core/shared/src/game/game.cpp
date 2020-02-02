@@ -41,6 +41,7 @@
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 
+#pragma optimize("",off)
 DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
 	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
 	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
@@ -682,29 +683,20 @@ void Game::Tick()
 	}
 
 	StartProfilingStage(CPUProfilingPhase::Physics);
-	static std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> physComponents {};
-	EntityIterator entItPhysics {*this};
-	entItPhysics.AttachFilter<EntityIteratorFilterComponent>("physics");
-	if(entItPhysics.GetCount() > physComponents.size())
-		physComponents.resize(entItPhysics.GetCount(),util::WeakHandle<pragma::BasePhysicsComponent>{});
-	auto idx = 0u;
-	for(auto *ent : entItPhysics)
-	{
-		auto pPhysComponent = ent->GetPhysicsComponent();
-		if(pPhysComponent->GetPhysicsType() == PHYSICSTYPE::NONE)
-			continue;
-		pPhysComponent->PrePhysicsSimulate(); // Has to be called BEFORE PhysicsUpdate (This is where stuff like Character movement is handled)!
-		physComponents.at(idx++) = pPhysComponent;
-	}
-	if(idx < physComponents.size())
-		physComponents.at(idx) = {};
 
-	for(auto i=decltype(idx){0u};i<idx;++i)
+	auto &awakePhysics = GetAwakePhysicsComponents();
+	for(auto &hPhysC : awakePhysics)
 	{
-		auto &physComponent = physComponents.at(i);
-		if(physComponent.expired())
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
 			continue;
-		physComponent->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
+		hPhysC->PrePhysicsSimulate(); // Has to be called BEFORE PhysicsUpdate (This is where stuff like Character movement is handled)!
+	}
+
+	for(auto &hPhysC : awakePhysics)
+	{
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
+			continue;
+		hPhysC->PhysicsUpdate(m_tDeltaTick); // Has to be called AFTER PrePhysicsSimulate (This is where physics objects are updated)!
 	}
 
 	CallCallbacks("PrePhysicsSimulate");
@@ -719,14 +711,14 @@ void Game::Tick()
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
 
-	for(auto i=decltype(idx){0u};i<idx;++i)
+	for(auto &hPhysC : awakePhysics)
 	{
-		auto &physComponent = physComponents.at(i);
-		if(physComponent.expired())
+		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
 			continue;
-		physComponent->PostPhysicsSimulate();
-		physComponent->UpdatePhysicsData(); // Has to be before Think (Requires updated physics).
+		hPhysC->PostPhysicsSimulate();
+		hPhysC->UpdatePhysicsData(); // Has to be before Think (Requires updated physics).
 	}
+
 	StopProfilingStage(CPUProfilingPhase::Physics);
 
 	while(m_entsScheduledForRemoval.empty() == false)
@@ -744,7 +736,8 @@ void Game::Tick()
 	entItLogic.AttachFilter<TEntityIteratorFilterComponent<pragma::LogicComponent>>();
 	if(entItLogic.GetCount() > logicComponents.size())
 		logicComponents.resize(entItLogic.GetCount(),util::WeakHandle<pragma::LogicComponent>{});
-	idx = 0u;
+
+	uint32_t idx = 0u;
 	for(auto *ent : entItLogic)
 	{
 		auto pLogicComponent = ent->GetComponent<pragma::LogicComponent>();
@@ -1036,6 +1029,8 @@ void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (e
 uint32_t Game::GetEntityMapIndexStart() const {return m_mapEntityIdx;}
 void Game::SetEntityMapIndexStart(uint32_t start) {m_mapEntityIdx = start;}
 
+std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() {return m_awakePhysicsEntities;}
+
 const pragma::EntityComponentManager &Game::GetEntityComponentManager() const {return const_cast<Game*>(this)->GetEntityComponentManager();}
 pragma::EntityComponentManager &Game::GetEntityComponentManager() {return *m_componentManager;}
 
@@ -1079,3 +1074,4 @@ std::string Game::GetConVarString(const std::string &scmd) {return m_stateNetwor
 float Game::GetConVarFloat(const std::string &scmd) {return m_stateNetwork->GetConVarFloat(scmd);}
 bool Game::GetConVarBool(const std::string &scmd) {return m_stateNetwork->GetConVarBool(scmd);}
 ConVarFlags Game::GetConVarFlags(const std::string &scmd) {return m_stateNetwork->GetConVarFlags(scmd);}
+#pragma optimize("",on)

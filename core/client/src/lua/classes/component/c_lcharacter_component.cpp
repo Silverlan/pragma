@@ -3,7 +3,7 @@
 #include "luasystem.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
-#include "pragma/entities/components/c_lentity_components.hpp"
+#include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/classes/lproperty.hpp>

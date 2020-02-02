@@ -635,6 +635,35 @@ bool Intersection::LineTriangle(const Vector3 &lineOrigin,const Vector3 &lineDir
 	return true;
 }
 
+static float det(float a,float b,float c,float d)
+{
+	return a *d -b *c;
+}
+
+std::optional<Vector2> Intersection::LineLine(const Vector2 &start0,const Vector2 &end0,const Vector2 &start1,const Vector2 &end1)
+{
+	// http://mathworld.wolfram.com/Line-LineIntersection.html
+	auto detL1 = det(start0.x,start0.y,end0.x,end0.y);
+	auto detL2 = det(start1.x,start1.y,end1.x,end1.y);
+	auto x1mx2 = start0.x -end0.x;
+	auto x3mx4 = start1.x -end1.x;
+	auto y1my2 = start0.y -end0.y;
+	auto y3my4 = start1.y -end1.y;
+
+	auto xnom = det(detL1,x1mx2,detL2,x3mx4);
+	auto ynom = det(detL1,y1my2,detL2,y3my4);
+	auto denom = det(x1mx2,y1my2,x3mx4,y3my4);
+	if(denom == 0.0) // Lines don't seem to cross
+		return {};
+
+	if(umath::abs(denom) < 0.01)
+		return {};
+
+	auto ixOut = xnom /denom;
+	auto iyOut = ynom /denom;
+	return Vector2{ixOut,iyOut};
+}
+
 ////////////////////////////////////
 
 DLLENGINE void Geometry::ClosestPointOnAABBToPoint(const Vector3 &min,const Vector3 &max,const Vector3 &point,Vector3 *res)

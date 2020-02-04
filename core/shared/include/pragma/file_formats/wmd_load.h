@@ -82,6 +82,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *4u);
 		if(ver >= 0x0016)
 			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *1u);
+		if(ver >= 28)
+			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *1u);
 	}
 
 	unsigned char numTexturePaths = Read<unsigned char>();

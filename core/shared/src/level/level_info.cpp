@@ -7,6 +7,7 @@
 #include "pragma/entities/environment/audio/env_sound.h"
 #include <util_fgd.hpp>
 
+#pragma optimize("",off)
 const auto LIGHT_SOURCE_FLAGS = /*umath::to_integral(pragma::BaseEnvLightComponent::SpawnFlag::DontCastShadows) | */
 	umath::to_integral(pragma::BaseToggleComponent::SpawnFlags::StartOn) | umath::to_integral(pragma::BaseEnvLightComponent::SpawnFlag::DontCastShadows);
 
@@ -164,11 +165,11 @@ void pragma::level::transform_class(
 					continue;
 				lightColor[i] = lightColorHdr[i];
 			}
-			lightColor *= 0.2f;
+			lightColor *= 0.02f;
 			//lightColor *= 1.6f;
 		}
 		else
-			lightColor *= 0.2f;
+			lightColor *= 0.02f;
 		auto rgbMax = umath::max(lightColor.x,lightColor.y,lightColor.z);
 		if(rgbMax > 255.f)
 		{
@@ -488,3 +489,4 @@ void pragma::level::transform_keyvalue(
 		}
 	}
 }
+#pragma optimize("",on)

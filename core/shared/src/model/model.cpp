@@ -310,6 +310,13 @@ JointInfo &Model::AddJoint(uint8_t type,uint32_t src,uint32_t tgt)
 	return m_joints.back();
 }
 
+const std::vector<Eyeball> &Model::GetEyeballs() const {return const_cast<Model*>(this)->GetEyeballs();}
+std::vector<Eyeball> &Model::GetEyeballs() {return m_eyeballs;}
+uint32_t Model::GetEyeballCount() const {return m_eyeballs.size();}
+const Eyeball *Model::GetEyeball(uint32_t idx) const {return const_cast<Model*>(this)->GetEyeball(idx);}
+Eyeball *Model::GetEyeball(uint32_t idx) {return (idx < m_eyeballs.size()) ? &m_eyeballs.at(idx) : nullptr;}
+void Model::AddEyeball(const Eyeball &eyeball) {m_eyeballs.push_back(eyeball);}
+
 void Model::Construct()
 {
 	m_bValid = true;

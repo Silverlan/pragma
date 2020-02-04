@@ -15,6 +15,7 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
+#include <luabind/iterator_policy.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -330,6 +331,30 @@ void Lua::Model::register_class(
 		Lua::PushBool(l,umath::is_flag_set(mdl.GetMetaInfo().flags,::Model::Flags::Static));
 	}));
 
+	classDef.def("GetEyeballs",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		auto &eyeballs = mdl.GetEyeballs();
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(eyeballs.size()){0u};i<eyeballs.size();++i)
+		{
+			auto &eyeball = eyeballs.at(i);
+			Lua::PushInt(l,i +1);
+			Lua::Push<Eyeball*>(l,&eyeball);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDef.def("GetEyeballCount",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		Lua::PushInt(l,mdl.GetEyeballCount());
+	}));
+	classDef.def("IsStatic",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t eyeballIndex) {
+		auto *eyeball = mdl.GetEyeball(eyeballIndex);
+		if(eyeball == nullptr)
+			return;
+		Lua::Push<Eyeball*>(l,eyeball);
+	}));
+	classDef.def("AddEyeball",static_cast<void(*)(lua_State*,::Model&,Eyeball&)>([](lua_State *l,::Model &mdl,Eyeball &eyeball) {
+		mdl.AddEyeball(eyeball);
+	}));
+
 	classDef.def("GetIKControllers",&Lua::Model::GetIKControllers);
 	classDef.def("GetIKController",&Lua::Model::GetIKController);
 	classDef.def("LookupIKController",&Lua::Model::LookupIKController);
@@ -384,6 +409,22 @@ void Lua::Model::register_class(
 
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_MODEL",umath::to_integral(ObjectAttachment::Type::Model));
 	classDef.add_static_constant("OBJECT_ATTACHMENT_TYPE_PARTICLE_SYSTEM",umath::to_integral(ObjectAttachment::Type::ParticleSystem));
+
+	// Eyeball
+	auto classDefEyeball = luabind::class_<::Eyeball>("Eyeball");
+	classDefEyeball.def(luabind::constructor<>());
+	classDefEyeball.def_readwrite("name",&::Eyeball::name);
+	classDefEyeball.def_readwrite("boneIndex",&::Eyeball::boneIndex);
+	classDefEyeball.def_readwrite("origin",&::Eyeball::origin);
+	classDefEyeball.def_readwrite("zOffset",&::Eyeball::zOffset);
+	classDefEyeball.def_readwrite("radius",&::Eyeball::radius);
+	classDefEyeball.def_readwrite("up",&::Eyeball::up);
+	classDefEyeball.def_readwrite("forward",&::Eyeball::forward);
+	classDefEyeball.def_readwrite("irisMaterialIndex",&::Eyeball::irisMaterialIndex);
+	classDefEyeball.def_readwrite("irisScale",&::Eyeball::irisScale);
+	classDefEyeball.def_readwrite("upperFlexDesc",&::Eyeball::upperFlexDesc,luabind::return_stl_iterator(),luabind::return_stl_iterator());
+	classDefEyeball.def_readwrite("lowerFlexDesc",&::Eyeball::lowerFlexDesc,luabind::return_stl_iterator(),luabind::return_stl_iterator());
+	classDef.scope[classDefEyeball];
 
 	// Flex
 	auto classDefFlex = luabind::class_<::Flex>("Flex");

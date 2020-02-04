@@ -126,7 +126,7 @@ namespace pragma
 		void NormalizeViewOrientation(Quat &inOutRot);
 		const Quat &NormalizeViewOrientation();
 		virtual void Initialize() override;
-		TraceData GetAimTraceData() const;
+		TraceData GetAimTraceData(std::optional<float> maxDist={}) const;
 		EulerAngles GetViewAngles() const;
 		void SetViewAngles(const EulerAngles &ang);
 		Vector3 GetViewForward() const;

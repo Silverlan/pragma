@@ -9,6 +9,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
@@ -154,6 +155,10 @@ void ShaderTextured3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateIn
 
 	pipelineInfo.toggle_depth_writes(false);
 	pipelineInfo.toggle_depth_test(true,Anvil::CompareOp::LESS_OR_EQUAL);
+
+	pipelineInfo.toggle_depth_bias(true,0.f,0.f,0.f);
+	pipelineInfo.toggle_dynamic_state(true,Anvil::DynamicState::DEPTH_BIAS); // Required for decals
+
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
 	InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
@@ -183,7 +188,8 @@ void ShaderTextured3DBase::OnPipelineUnbound()
 bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags)
 {
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
-		BindClipPlane(clipPlane) == true;
+		BindClipPlane(clipPlane) == true &&
+		prosper::util::record_set_depth_bias(**cmdBuffer) == true;
 }
 std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 {

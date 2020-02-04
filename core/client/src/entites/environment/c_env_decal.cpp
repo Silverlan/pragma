@@ -3,10 +3,12 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/model/c_model.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <pragma/math/intersection.h>
 
 using namespace pragma;
@@ -16,37 +18,7 @@ LINK_ENTITY_TO_CLASS(env_decal,CEnvDecal);
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-class DecalProjector
-{
-public:
-	DecalProjector(const Vector3 &pos,const Quat &rot,float size);
-	const Vector3 &GetPos() const;
-	const Quat &GetRotation() const;
-	const physics::Transform &GetPose() const;
-	float GetSize() const;
-
-	void GenerateDecalMesh(CModelSubMesh &mesh,const physics::Transform &pose,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris);
-	void DebugDraw(float duration) const;
-private:
-	struct VertexInfo
-	{
-		// Position in projector space
-		Vector2 position = {};
-		uint32_t originalMeshVertexIndex = std::numeric_limits<uint32_t>::max();
-		std::optional<Vector2> barycentricCoordinates = {};
-	};
-	void GetOrthogonalBasis(Vector3 &forward,Vector3 &right,Vector3 &up) const;
-	const std::array<Vector3,8> &GetProjectorCubePoints() const;
-	std::pair<Vector3,Vector3> GetProjectorCubeBounds() const;
-	std::vector<VertexInfo> CropTriangleVertsByLine(
-		const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,
-		const std::vector<VertexInfo> &verts,const Vector2 &lineStart,const Vector2 &lineEnd
-	);
-
-	physics::Transform m_pose = {};
-	float m_size = 0.f;
-};
-
+#pragma optimize("",off)
 DecalProjector::DecalProjector(const Vector3 &pos,const Quat &rot,float size)
 	: m_pose{pos,rot},m_size{size}
 {}
@@ -54,6 +26,22 @@ const Vector3 &DecalProjector::GetPos() const {return m_pose.GetOrigin();}
 const Quat &DecalProjector::GetRotation() const {return m_pose.GetRotation();}
 const physics::Transform &DecalProjector::GetPose() const {return m_pose;}
 float DecalProjector::GetSize() const {return m_size;}
+std::pair<Vector3,Vector3> DecalProjector::GetAABB() const
+{
+	auto &rot = GetRotation();
+
+	auto &cubePoints = GetProjectorCubePoints();
+	Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+	Vector3 max {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+	for(auto p : cubePoints)
+	{
+		uvec::rotate(&p,rot);
+		uvec::min(&min,p);
+		uvec::max(&max,p);
+	}
+	auto size = GetSize();
+	return {min *size,max *size};
+}
 void DecalProjector::GetOrthogonalBasis(Vector3 &forward,Vector3 &right,Vector3 &up) const
 {
 	auto projectorSpaceRot = uquat::identity();
@@ -124,136 +112,149 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	}
 	return newVerts;
 }
-void DecalProjector::GenerateDecalMesh(CModelSubMesh &mesh,const physics::Transform &pose,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris)
+bool DecalProjector::GenerateDecalMesh(const std::vector<ModelSubMesh*> &meshes,const physics::Transform &pose,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris)
 {
-	if(mesh.GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
-		return;
 	auto bounds = GetProjectorCubeBounds();
 
-	auto effectivePose = GetPose().GetInverse() *pose.GetInverse();
-	auto &verts = mesh.GetVertices();
-	auto &tris = mesh.GetTriangles();
+	auto effectivePose = GetPose().GetInverse() *pose;
+
+	Vector3 forward,right,up;
+	GetOrthogonalBasis(forward,right,up);
+	auto &n = forward;
+	auto d = 0.f;
 
 	struct TriangleInfo
 	{
 		std::array<uint32_t,3> originalMeshVertexIndex = {};
 		std::array<Vector3,3> vertices = {};
 	};
-	std::vector<TriangleInfo> intersectingTris {};
-	intersectingTris.reserve(tris.size());
-	// Cull triangles that are outside of the projector bounds
-	for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+
+	for(auto *subMesh : meshes)
 	{
-		std::array<uint32_t,3> indices = {tris.at(i),tris.at(i +1),tris.at(i +2)};
-		auto &v0 = verts.at(indices.at(0));
-		auto &v1 = verts.at(indices.at(1));
-		auto &v2 = verts.at(indices.at(2));
-
-		auto p0 = effectivePose *v0.position;
-		auto p1 = effectivePose *v1.position;
-		auto p2 = effectivePose *v2.position;
-
-		if(Intersection::AABBTriangle(bounds.first,bounds.second,p0,p1,p2) == false)
+		if(subMesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
 			continue;
-		intersectingTris.push_back({
-			indices,
-			std::array<Vector3,3>{p0,p1,p2}
-		});
-	}
+		auto &verts = subMesh->GetVertices();
+		auto &tris = subMesh->GetTriangles();
 
-	Vector3 forward,right,up;
-	GetOrthogonalBasis(forward,right,up);
-	auto &n = forward;
-	auto d = 0.f;
-	std::pair<Vector3,Vector3> projectorAABBBounds = {
-		uvec::project_to_plane(bounds.first,n,d),
-		uvec::project_to_plane(bounds.second,n,d)
-	};
-	std::array<Vector2,4> projectorAABBPoints = {
-		Vector2{projectorAABBBounds.first.x,projectorAABBBounds.first.y},
-		Vector2{projectorAABBBounds.second.x,projectorAABBBounds.first.y},
-		Vector2{projectorAABBBounds.second.x,projectorAABBBounds.second.y},
-		Vector2{projectorAABBBounds.first.x,projectorAABBBounds.second.y}
-	};
+		std::vector<TriangleInfo> intersectingTris {};
+		intersectingTris.reserve(tris.size());
+		// Cull triangles that are outside of the projector bounds
+		for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+		{
+			std::array<uint32_t,3> indices = {tris.at(i),tris.at(i +1),tris.at(i +2)};
+			auto &v0 = verts.at(indices.at(0));
+			auto &v1 = verts.at(indices.at(1));
+			auto &v2 = verts.at(indices.at(2));
 
-	// TODO
-	outVerts.reserve(verts.size());
-	outTris.reserve(tris.size());
-	for(auto triInfo : intersectingTris)
-	{
-		// Original vertex positions
-		auto &p0 = triInfo.vertices.at(0);
-		auto &p1 = triInfo.vertices.at(1);
-		auto &p2 = triInfo.vertices.at(2);
+			auto p0 = effectivePose *v0.position;
+			auto p1 = effectivePose *v1.position;
+			auto p2 = effectivePose *v2.position;
 
-		std::array<Vector3,3> vertsPs = {
-			uvec::project_to_plane(triInfo.vertices.at(0),n,d),
-			uvec::project_to_plane(triInfo.vertices.at(1),n,d),
-			uvec::project_to_plane(triInfo.vertices.at(2),n,d)
+			if(Intersection::AABBTriangle(bounds.first,bounds.second,p0,p1,p2) == false)
+				continue;
+			intersectingTris.push_back({
+				indices,
+				std::array<Vector3,3>{p0,p1,p2}
+				});
+		}
+
+		std::pair<Vector3,Vector3> projectorAABBBounds = {
+			uvec::project_to_plane(bounds.first,n,d),
+			uvec::project_to_plane(bounds.second,n,d)
 		};
-		auto area = Geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
-		constexpr auto AREA_EPSILON = 0.004f;
-		if(area < AREA_EPSILON)
-			continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
-		std::vector<VertexInfo> triDecalVerts = {
-			{Vector2{vertsPs.at(0).x,vertsPs.at(0).y},triInfo.originalMeshVertexIndex.at(0)},
+		std::array<Vector2,4> projectorAABBPoints = {
+			Vector2{projectorAABBBounds.first.x,projectorAABBBounds.first.y},
+			Vector2{projectorAABBBounds.second.x,projectorAABBBounds.first.y},
+			Vector2{projectorAABBBounds.second.x,projectorAABBBounds.second.y},
+			Vector2{projectorAABBBounds.first.x,projectorAABBBounds.second.y}
+		};
+
+		// TODO
+		outVerts.reserve(verts.size());
+		outTris.reserve(tris.size());
+		for(auto &triInfo : intersectingTris)
+		{
+			// Vertex positions in origin space
+			auto &p0 = triInfo.vertices.at(0);
+			auto &p1 = triInfo.vertices.at(1);
+			auto &p2 = triInfo.vertices.at(2);
+
+			std::array<Vector3,3> vertsPs = {
+				uvec::project_to_plane(triInfo.vertices.at(0),n,d),
+				uvec::project_to_plane(triInfo.vertices.at(1),n,d),
+				uvec::project_to_plane(triInfo.vertices.at(2),n,d)
+			};
+			auto area = Geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
+			constexpr auto AREA_EPSILON = 0.004f;
+			if(area < AREA_EPSILON)
+				continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
+			std::vector<VertexInfo> triDecalVerts = {
+				{Vector2{vertsPs.at(0).x,vertsPs.at(0).y},triInfo.originalMeshVertexIndex.at(0)},
 			{Vector2{vertsPs.at(1).x,vertsPs.at(1).y},triInfo.originalMeshVertexIndex.at(1)},
 			{Vector2{vertsPs.at(2).x,vertsPs.at(2).y},triInfo.originalMeshVertexIndex.at(2)}
-		};
-		triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(0),projectorAABBPoints.at(1));
-		triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(1),projectorAABBPoints.at(2));
-		triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(2),projectorAABBPoints.at(3));
-		triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(3),projectorAABBPoints.at(0));
-
-		auto triOffset = outVerts.size();
-		for(auto &vInfo : triDecalVerts)
-		{
-			outVerts.push_back({});
-			auto &v = outVerts.back();
-			if(vInfo.barycentricCoordinates.has_value())
-			{
-				// This is a new vertex; Calculate the position
-				auto f0 = (1.f -(vInfo.barycentricCoordinates->x +vInfo.barycentricCoordinates->y));
-				auto f1 = vInfo.barycentricCoordinates->x;
-				auto f2 = vInfo.barycentricCoordinates->y;
-
-				v.position = p0 *f0 +p1 *f1 +p2 *f2;
-			}
-			else
-				v.position = verts.at(vInfo.originalMeshVertexIndex).position; // Keep the original vertex position
-			v.uv = {
-				1.0 -(v.position.x -projectorAABBBounds.first.x) /(projectorAABBBounds.second.x -projectorAABBBounds.first.x),
-				1.0 -(v.position.y -projectorAABBBounds.first.y) /(projectorAABBBounds.second.y -projectorAABBBounds.first.y)
 			};
-		}
+			triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(0),projectorAABBPoints.at(1));
+			triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(1),projectorAABBPoints.at(2));
+			triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(2),projectorAABBPoints.at(3));
+			triDecalVerts = CropTriangleVertsByLine(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2),triDecalVerts,projectorAABBPoints.at(3),projectorAABBPoints.at(0));
 
-		// Note: triDecalVerts contains triangles as strips; We need it as actual triangles
-		for(auto i=decltype(triDecalVerts.size()){2};i<triDecalVerts.size();++i)
-		{
-			std::array<uint32_t,3> triIndices = {0u,i,i +1};
-			for(auto idx : triIndices)
-				outTris.push_back(triOffset +idx);
+			auto triOffset = outVerts.size();
+			for(auto &vInfo : triDecalVerts)
+			{
+				outVerts.push_back({});
+				auto &v = outVerts.back();
+				if(vInfo.barycentricCoordinates.has_value())
+				{
+					// This is a new vertex; Calculate the position
+					auto f0 = (1.f -(vInfo.barycentricCoordinates->x +vInfo.barycentricCoordinates->y));
+					auto f1 = vInfo.barycentricCoordinates->x;
+					auto f2 = vInfo.barycentricCoordinates->y;
+
+					auto &p0Orig = verts.at(triInfo.originalMeshVertexIndex.at(0));
+					auto &p1Orig = verts.at(triInfo.originalMeshVertexIndex.at(1));
+					auto &p2Orig = verts.at(triInfo.originalMeshVertexIndex.at(2));
+
+					v.position = p0Orig.position *f0 +p1Orig.position *f1 +p2Orig.position *f2;
+					v.normal = p0Orig.normal *f0 +p1Orig.normal *f1 +p2Orig.normal *f2;
+					uvec::normalize(&v.normal);
+				}
+				else
+					v = verts.at(vInfo.originalMeshVertexIndex); // Keep the original vertex
+				v.uv = {
+					1.0 -(vInfo.position.x -projectorAABBBounds.first.x) /(projectorAABBBounds.second.x -projectorAABBBounds.first.x),
+					1.0 -(vInfo.position.y -projectorAABBBounds.first.y) /(projectorAABBBounds.second.y -projectorAABBBounds.first.y)
+				};
+			}
+
+			// Note: triDecalVerts contains triangles as strips; We need it as actual triangles
+			for(auto i=decltype(triDecalVerts.size()){2};i<triDecalVerts.size();++i)
+			{
+				std::array<uint32_t,3> triIndices = {0u,i -1,i};
+				for(auto idx : triIndices)
+					outTris.push_back(triOffset +idx);
+			}
 		}
 	}
+	return outTris.empty() == false;
 }
 void DecalProjector::DebugDraw(float duration) const
 {
 	auto &points = GetProjectorCubePoints();
 	std::vector<Vector3> lines = {
-		points.at(1),points.at(2),
-		points.at(2),points.at(4),
-		points.at(4),points.at(3),
-		points.at(3),points.at(1),
+		points.at(0),points.at(1),
+		points.at(1),points.at(3),
+		points.at(3),points.at(2),
+		points.at(2),points.at(0),
 
+		points.at(0),points.at(4),
 		points.at(1),points.at(5),
-		points.at(2),points.at(6),
-		points.at(4),points.at(8),
 		points.at(3),points.at(7),
+		points.at(2),points.at(6),
 
-		points.at(5),points.at(6),
-		points.at(6),points.at(8),
-		points.at(8),points.at(7),
-		points.at(7),points.at(5)
+		points.at(4),points.at(5),
+		points.at(5),points.at(7),
+		points.at(7),points.at(6),
+		points.at(6),points.at(4)
 	};
 	auto prismSize = GetSize();
 	auto &pose = GetPose();
@@ -269,11 +270,11 @@ void DecalProjector::DebugDraw(float duration) const
 	lines.push_back(prismPos -forward *prismSize);
 	lines.push_back(posCenter);
 
-	lines.push_back(points.at(1));
-	lines.push_back(points.at(7));
+	lines.push_back(points.at(0));
+	lines.push_back(points.at(6));
 
-	lines.push_back(points.at(3));
-	lines.push_back(points.at(5));
+	lines.push_back(points.at(2));
+	lines.push_back(points.at(4));
 	for(auto &l : lines)
 		l = pose *(l *prismSize);
 	::DebugRenderer::DrawLines(lines,Color::Black,duration);
@@ -283,17 +284,17 @@ void DecalProjector::DebugDraw(float duration) const
 
 void CDecalComponent::Initialize()
 {
-	BaseEntityComponent::Initialize();
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	BaseEnvDecalComponent::Initialize();
+	/*auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pSpriteComponent = ent.AddComponent<pragma::CSpriteComponent>();
 	if(pSpriteComponent.valid())
-		pSpriteComponent->SetOrientationType(pragma::CParticleSystemComponent::OrientationType::World);
+		pSpriteComponent->SetOrientationType(pragma::CParticleSystemComponent::OrientationType::World);*/
 }
 
 void CDecalComponent::OnEntitySpawn()
 {
-	BaseEntityComponent::OnEntitySpawn();
-	auto &ent = GetEntity();
+	BaseEnvDecalComponent::OnEntitySpawn();
+	/*auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.expired())
 		return;
@@ -314,18 +315,134 @@ void CDecalComponent::OnEntitySpawn()
 		pTrComponent->SetOrientation(uquat::create(r.normal,angle));
 	}
 	if(pSpriteComponent != nullptr)
-		pSpriteComponent->StartParticle();
+		pSpriteComponent->StartParticle();*/
+	if(m_startDisabled == false)
+		ApplyDecal();
 }
 
-void CDecalComponent::ApplyDecal()
+DecalProjector CDecalComponent::GetProjector() const
 {
 	auto &ent = GetEntity();
-	float size = 16.f; // TODO
-	DecalProjector projector {ent.GetPosition(),ent.GetRotation(),size};
-	//projector.GenerateDecalMesh(mesh,
+	auto size = GetSize();
+	return DecalProjector{ent.GetPosition(),ent.GetRotation(),size};
 }
 
-luabind::object CDecalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CDecalComponentHandleWrapper>(l);}
+bool CDecalComponent::ApplyDecal(const std::vector<ModelSubMesh*> &meshes,const pragma::physics::ScaledTransform &pose)
+{
+	auto projector = GetProjector();
+	return ApplyDecal(projector,meshes,pose);
+}
+
+bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<ModelSubMesh*> &meshes,const pragma::physics::ScaledTransform &pose)
+{
+	auto *mat = client->LoadMaterial(GetMaterial());
+	if(mat == nullptr)
+		return false;
+	std::vector<Vertex> verts;
+	std::vector<uint16_t> tris;
+	if(projector.GenerateDecalMesh(meshes,pose,verts,tris) == false)
+		return false;
+
+	auto mdl = c_game->CreateModel();
+	auto meshGroup = mdl->GetMeshGroup(0);
+	auto subMesh = c_game->CreateModelSubMesh();
+	subMesh->GetVertices() = std::move(verts);
+	subMesh->GetTriangles() = std::move(tris);
+	subMesh->SetSkinTextureIndex(0);
+
+	auto mesh = c_game->CreateModelMesh();
+	mesh->AddSubMesh(subMesh);
+	meshGroup->AddMesh(mesh);
+	mdl->AddMaterial(0,mat);
+
+	mdl->Update(ModelUpdateFlags::All);
+
+	auto decalRenderC = GetEntity().AddComponent<pragma::CRenderComponent>();
+	decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
+
+	GetEntity().SetModel(mdl);
+	GetEntity().SetPose(pose);
+
+	// projector.DebugDraw(15.f);
+	return true;
+}
+
+bool CDecalComponent::ApplyDecal()
+{
+	auto *mat = client->LoadMaterial(GetMaterial());
+	if(mat == nullptr)
+		return false;
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+
+	auto it = entIt.begin();
+	if(it == entIt.end())
+		return false;
+	auto *entTgt = *it;
+	auto renderC = entTgt->GetComponent<pragma::CRenderComponent>();
+	if(renderC.expired())
+		return false;
+	pragma::physics::ScaledTransform pose;
+	entTgt->GetPose(pose);
+
+	auto projector = GetProjector();
+	auto projectorAABB = projector.GetAABB();
+	auto &projectorOrigin = projector.GetPos();
+	projectorAABB.first += projectorOrigin;
+	projectorAABB.second += projectorOrigin;
+
+	auto targetMeshes = renderC->GetLODMeshes();
+	if(entTgt->IsWorld())
+	{
+		// If this is a world entity, we can do some optimizations
+		auto worldC = entTgt->GetComponent<CWorldComponent>();
+		auto bspTree = worldC.valid() ? worldC->GetBSPTree() : nullptr;
+		if(bspTree)
+		{
+			// Filter out meshes outside the projector AABB
+			auto leafNodes = bspTree->FindLeafNodesInAABB(projectorAABB.first,projectorAABB.second);
+			for(auto it=targetMeshes.begin();it!=targetMeshes.end();)
+			{
+				auto &mesh = *it;
+				auto clusterIndex = mesh->GetReferenceId();
+				if(clusterIndex == std::numeric_limits<uint32_t>::max())
+				{
+					++it;
+					continue;
+				}
+				auto itVisLeaf = std::find_if(leafNodes.begin(),leafNodes.end(),[&bspTree,clusterIndex](const util::BSPTree::Node *node) {
+					return bspTree->IsClusterVisible(node->cluster,clusterIndex);
+				});
+				if(itVisLeaf == leafNodes.end())
+				{
+					it = targetMeshes.erase(it);
+					continue;
+				}
+				++it;
+			}
+		}
+	}
+	std::vector<ModelSubMesh*> subMeshes {};
+	uint32_t meshCount = 0u;
+	for(auto &mesh : targetMeshes)
+		meshCount += mesh->GetSubMeshCount();
+	subMeshes.reserve(meshCount);
+	for(auto &mesh : targetMeshes)
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
+			subMeshes.push_back(subMesh.get());
+	}
+	return ApplyDecal(projector,subMeshes,pose);
+}
+
+void CDecalComponent::ReceiveData(NetPacket &packet)
+{
+	m_material = packet->ReadString();
+	m_size = packet->Read<float>();
+	m_startDisabled = packet->Read<bool>();
+}
+
+luabind::object CDecalComponent::InitializeLuaObject(lua_State *l) {return BaseEnvDecalComponent::InitializeLuaObject<CDecalComponentHandleWrapper>(l);}
 
 //////////////
 
@@ -334,3 +451,4 @@ void CEnvDecal::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CDecalComponent>();
 }
+#pragma optimize("",on)

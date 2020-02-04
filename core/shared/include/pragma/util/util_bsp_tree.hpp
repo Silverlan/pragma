@@ -53,6 +53,7 @@ namespace util
 		uint64_t GetClusterCount() const;
 		void SetClusterCount(uint64_t numClusters);
 		Node *FindLeafNode(const Vector3 &pos);
+		std::vector<Node*> FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max);
 
 		std::shared_ptr<Node> CreateNode();
 	private:

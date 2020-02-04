@@ -732,7 +732,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 		return;
 	PlayFootStepSound(foot,*mat,moveScale); // TODO: Is Moving -> Blend move scale -> Same as player!
 }
-TraceData BaseCharacterComponent::GetAimTraceData() const
+TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -742,7 +742,7 @@ TraceData BaseCharacterComponent::GetAimTraceData() const
 	auto origin = GetEyePosition();
 	auto dir = GetViewForward();
 	trData.SetSource(origin);
-	trData.SetTarget(origin +dir *static_cast<float>(GameLimits::MaxRayCastRange));
+	trData.SetTarget(origin +dir *(maxDist.has_value() ? *maxDist : static_cast<float>(GameLimits::MaxRayCastRange)));
 	// See also: ControllerPhysObj::PostSimulate
 	return trData;
 }

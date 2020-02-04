@@ -34,6 +34,7 @@ extern DLLCLIENT CGame *c_game;
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
 
+#pragma optimize("",off)
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -171,6 +172,8 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
+	pragma::CRenderComponent *renderC = nullptr;
+	auto depthBiasActive = false;
 	for(auto it=translucentMeshes.rbegin();it!=translucentMeshes.rend();++it) // Render back-to-front
 	{
 		auto &meshInfo = *it;
@@ -209,8 +212,23 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 			if(ent != entPrev)
 			{
 				entPrev = ent;
-				if(shader->BindEntity(*meshInfo->ent) == false)
+				renderC = entPrev->GetRenderComponent().get();
+				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr)
 					continue;
+				if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+				{
+					float constantFactor,biasClamp,slopeFactor;
+					renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
+					prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+
+					depthBiasActive = true;
+				}
+				else if(depthBiasActive)
+				{
+					// Clear depth bias
+					depthBiasActive = false;
+					prosper::util::record_set_depth_bias(**drawCmd);
+				}
 			}
 			auto *mesh = meshInfo->mesh;
 			auto pRenderComponent = ent->GetRenderComponent();
@@ -263,7 +281,9 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
+	pragma::CRenderComponent *renderC = nullptr;
 	pragma::ShaderTextured3DBase *shaderLast = nullptr;
+	auto depthBiasActive = false;
 	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
 	{
 		auto &shaderContainer = *itShader;
@@ -295,16 +315,31 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 									continue;
 								entLast = ent;
 								shaderLast = shader;
+								renderC = entLast->GetRenderComponent().get();
+
+								if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+								{
+									float constantFactor,biasClamp,slopeFactor;
+									renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
+									prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+
+									depthBiasActive = true;
+								}
+								else if(depthBiasActive)
+								{
+									// Clear depth bias
+									depthBiasActive = false;
+									prosper::util::record_set_depth_bias(**drawCmd);
+								}
 							}
 							for(auto *mesh : pair.second.meshes)
 							{
 #if DEBUG_RENDER_DISABLED == 0
-								auto pRenderComponent = ent->GetRenderComponent();
-								if(pRenderComponent.valid() && pRenderComponent->Render(shader,&mat,mesh) == false)
+								if(renderC && renderC->Render(shader,&mat,mesh) == false)
 								{
 									++numShaderInvocations;
 
-									auto &mdlComponent = pRenderComponent->GetModelComponent();
+									auto &mdlComponent = renderC->GetModelComponent();
 									auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 									auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
 									auto bUseVertexAnim = false;
@@ -394,3 +429,4 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 	//vao->Unbind();
 	return numShaderInvocations;
 }
+#pragma optimize("",on)

@@ -22,7 +22,8 @@ namespace pragma
 		{
 			None = 0u,
 			RenderBufferDirty = 1u,
-			ExemptFromOcclusionCulling = RenderBufferDirty<<1u
+			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
+			HasDepthBias = ExemptFromOcclusionCulling<<1u
 		};
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
@@ -83,6 +84,10 @@ namespace pragma
 		void SetExemptFromOcclusionCulling(bool exempt);
 		bool IsExemptFromOcclusionCulling() const;
 
+		void GetDepthBias(float &outConstantFactor,float &outBiasClamp,float &outSlopeFactor) const;
+		void SetDepthBias(float constantFactor,float biasClamp,float slopeFactor);
+		StateFlags GetStateFlags() const;
+
 		void SetRenderBufferDirty();
 	protected:
 		void UpdateRenderBuffer() const;
@@ -117,6 +122,12 @@ namespace pragma
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
 		static std::vector<CRenderComponent*> s_viewEntities;
 	private:
+		struct
+		{
+			float constantFactor = 0.f;
+			float biasClamp = 0.f;
+			float slopeFactor = 0.f;
+		} m_depthBias;
 		std::shared_ptr<prosper::Buffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::DescriptorSetGroup> m_renderDescSetGroup = nullptr;
 	};

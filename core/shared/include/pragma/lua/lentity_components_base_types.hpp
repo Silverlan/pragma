@@ -2332,9 +2332,11 @@ namespace Lua
 		}));
 		def.def("GetAimRayData",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			auto data = hEnt.get()->GetAimTraceData();
-			auto dir = data.GetDirection();
 			Lua::Push<TraceData>(l,hEnt.get()->GetAimTraceData());
+		}));
+		def.def("GetAimRayData",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,float maxDist) {
+			pragma::Lua::check_component(l,hEnt);
+			Lua::Push<TraceData>(l,hEnt.get()->GetAimTraceData(maxDist));
 		}));
 		def.def("FootStep",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t foot) {
 			pragma::Lua::check_component(l,hEnt);

@@ -48,6 +48,18 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetRenderBufferDirty();
 		}));
+	defCRender.def("GetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		float constantFactor,biasClamp,slopeFactor;
+		hComponent->GetDepthBias(constantFactor,biasClamp,slopeFactor);
+		Lua::PushNumber(l,constantFactor);
+		Lua::PushNumber(l,biasClamp);
+		Lua::PushNumber(l,slopeFactor);
+	}));
+	defCRender.def("SetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&,float,float,float)>([](lua_State *l,CRenderHandle &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetDepthBias(constantFactor,biasClamp,slopeFactor);
+	}));
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED",pragma::CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);

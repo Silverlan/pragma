@@ -185,7 +185,14 @@ static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *t
 
 	std::shared_ptr<Texture> tex = nullptr;
 	if(texInfo && texInfo->texture)
+	{
 		tex = std::static_pointer_cast<Texture>(texInfo->texture);
+		if(tex->HasValidVkTexture())
+		{
+			prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+			return true;
+		}
+	}
 	else if(defaultTexName.empty())
 		return false;
 	return bind_default_texture(ds,defaultTexName,bindingIndex);

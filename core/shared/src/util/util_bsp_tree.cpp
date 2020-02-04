@@ -91,6 +91,52 @@ BSPTree::Node *BSPTree::FindLeafNode(const Vector3 &pos)
 	return find_leaf_node(GetRootNode(),pos);
 }
 
+static void find_leaf_nodes_in_aabb(BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,std::vector<BSPTree::Node*> &outNodes)
+{
+	if(node.leaf)
+	{
+		outNodes.push_back(&node);
+		return;
+	}
+	const auto &n = node.plane.GetNormal();
+	auto d = node.plane.GetDistance();
+	auto checkLeft = false;
+	auto checkRight = false;
+	for(auto &p : aabbPoints)
+	{
+		auto v = p -n *static_cast<float>(d);
+		auto dot = uvec::dot(v,n);
+		if(dot == 0.f)
+			continue;
+		if(dot > 0.f)
+			checkLeft = true;
+		else
+			checkRight = true;
+		if(checkLeft && checkRight)
+			break;
+	}
+	if(checkLeft)
+		find_leaf_nodes_in_aabb(*node.children.at(0),aabbPoints,outNodes);
+	if(checkRight)
+		find_leaf_nodes_in_aabb(*node.children.at(1),aabbPoints,outNodes);
+}
+std::vector<BSPTree::Node*> BSPTree::FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max)
+{
+	std::array<Vector3,8> aabbPoints = {
+		min,
+		Vector3{min.x,min.y,max.z},
+		Vector3{min.x,max.y,min.z},
+		Vector3{min.x,max.y,max.z},
+		Vector3{max.x,min.y,min.z},
+		Vector3{max.x,min.y,max.z},
+		Vector3{max.x,max.y,min.z},
+		max
+	};
+	std::vector<BSPTree::Node*> nodes {};
+	find_leaf_nodes_in_aabb(GetRootNode(),aabbPoints,nodes);
+	return nodes;
+}
+
 std::shared_ptr<BSPTree::Node> BSPTree::CreateLeaf(bsp::File &bsp,int32_t nodeIndex)
 {
 	auto &leaf = bsp.GetLeaves().at(nodeIndex);

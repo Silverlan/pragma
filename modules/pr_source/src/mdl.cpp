@@ -1440,7 +1440,26 @@ std::shared_ptr<Model> import::load_mdl(
 					auto &vtxModel = vtxModels[mdlIdx]; // aVtxModel
 					auto &model = models[mdlIdx];
 
-					std::shared_ptr<ModelSubMesh> rootMesh = nullptr;
+					for(auto &bpEyeball : model.eyeballs)
+					{
+						auto &stdEyeball = bpEyeball.stdEyeball;
+						Eyeball eyeball {};
+						eyeball.name = bpEyeball.name;
+						eyeball.boneIndex = stdEyeball.bone; // TODO Check if this matches Pragma bone index
+						eyeball.origin = stdEyeball.org; // TODO Convert
+						eyeball.zOffset = stdEyeball.zoffset;
+						eyeball.radius = stdEyeball.radius;
+						eyeball.up = stdEyeball.up;
+						eyeball.forward = stdEyeball.forward;
+						eyeball.irisMaterialIndex = stdEyeball.texture; // TODO: Match with Pragma
+
+						eyeball.irisScale = stdEyeball.iris_scale;
+						eyeball.upperFlexDesc = stdEyeball.upperflexdesc; // TODO: Match with Pragma
+						eyeball.lowerFlexDesc = stdEyeball.lowerflexdesc; // TODO: Match with Pragma
+
+						mdl.AddEyeball(eyeball);
+					}
+					
 					for(auto lodIdx=decltype(vtxModel.lods.size()){0};lodIdx<vtxModel.lods.size();++lodIdx)
 					{
 						auto bgLodName = bgName +"_" +((lodIdx > 0) ? (std::string("lod") +std::to_string(lodIdx)) : "reference");

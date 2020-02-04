@@ -1,8 +1,26 @@
 #ifndef __ENV_DECAL_H__
 #define __ENV_DECAL_H__
 
-#include "pragma/entities/environment/effects/env_sprite.h"
+#include "pragma/networkdefinitions.h"
+#include <string>
 
-const auto DEFAULT_DECAL_SIZE = 100.f;
+namespace pragma
+{
+	class DLLNETWORK BaseEnvDecalComponent
+		: public BaseEntityComponent
+	{
+	public:
+		using BaseEntityComponent::BaseEntityComponent;
+		virtual void Initialize() override;
+
+		float GetSize() const;
+		const std::string &GetMaterial() const;
+		bool GetStartDisabled() const;
+	protected:
+		float m_size = 1.f;
+		std::string m_material = "";
+		bool m_startDisabled = false;
+	};
+};
 
 #endif

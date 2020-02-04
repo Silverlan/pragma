@@ -92,6 +92,22 @@ struct DLLNETWORK BodyGroup
 	std::vector<unsigned int> meshGroups;
 };
 
+struct DLLNETWORK Eyeball
+{
+	std::string name = "";
+	int32_t boneIndex = -1;
+	Vector3 origin = {};
+	float zOffset = 0.f;
+	float radius = 0.f;
+	Vector3 up = {};
+	Vector3 forward = {};
+	int32_t irisMaterialIndex = -1;
+
+	float irisScale = 0.f;
+	std::array<int32_t,3> upperFlexDesc = {};
+	std::array<int32_t,3> lowerFlexDesc = {};
+};
+
 #define MODEL_NO_MESH (unsigned int)(-1)
 
 class CollisionMesh;
@@ -388,6 +404,13 @@ public:
 	std::vector<JointInfo> &GetJoints();
 	JointInfo &AddJoint(uint8_t type,uint32_t src,uint32_t tgt);
 
+	const std::vector<Eyeball> &GetEyeballs() const;
+	std::vector<Eyeball> &GetEyeballs();
+	uint32_t GetEyeballCount() const;
+	const Eyeball *GetEyeball(uint32_t idx) const;
+	Eyeball *GetEyeball(uint32_t idx);
+	void AddEyeball(const Eyeball &eyeball);
+
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
 protected:
 	virtual void OnMaterialMissing(const std::string &matName);
@@ -424,6 +447,7 @@ private:
 	std::vector<std::shared_ptr<ModelMeshGroup>> m_meshGroups;
 	std::vector<BodyGroup> m_bodyGroups;
 	std::unordered_map<uint32_t,Hitbox> m_hitboxes;
+	std::vector<Eyeball> m_eyeballs;
 	//std::vector<std::vector<VertexWeight>*> m_weights;
 	static std::unordered_map<std::string,std::shared_ptr<Model>> m_models;
 	std::shared_ptr<Frame> m_reference = nullptr;

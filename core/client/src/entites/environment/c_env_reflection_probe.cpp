@@ -164,6 +164,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 ////////////////
 
 //static auto *GUI_EL_NAME = "cubemap_generation_image";
+static std::queue<util::WeakHandle<CReflectionProbeComponent>> g_reflectionProbeQueue = {};
 static std::vector<CReflectionProbeComponent*> get_probes()
 {
 	if(c_game == nullptr)
@@ -184,18 +185,22 @@ static void build_next_reflection_probe()
 {
 	if(c_game == nullptr)
 		return;
-	auto probes = get_probes();
-	for(auto *probe : probes)
+	while(g_reflectionProbeQueue.empty() == false)
 	{
-		if(probe->RequiresRebuild() == false)
+		auto hProbe = g_reflectionProbeQueue.front();
+		g_reflectionProbeQueue.pop();
+		if(hProbe.expired())
+			continue;
+		auto &probe = *hProbe;
+		if(probe.RequiresRebuild() == false)
 		{
-			probe->LoadIBLReflectionsFromFile();
+			probe.LoadIBLReflectionsFromFile();
 			continue;
 		}
-		auto &ent = probe->GetEntity();
+		auto &ent = probe.GetEntity();
 		auto pos = ent.GetPosition();
 		Con::cout<<"Updating reflection probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<")..."<<Con::endl;
-		if(probe->UpdateIBLData(false))
+		if(probe.UpdateIBLData(false))
 			break;
 		Con::cwar<<"WARNING: Unable to update reflection probe data for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<"). Probe will be unavailable!"<<Con::endl;
 	}
@@ -214,11 +219,12 @@ static void build_next_reflection_probe()
 
 // These have been determined through experimentation and produce good results
 // while not taking excessive time to render.
-static constexpr uint32_t CUBEMAP_LAYER_WIDTH = 512;
-static constexpr uint32_t CUBEMAP_LAYER_HEIGHT = 512;
-static constexpr uint32_t RAYTRACING_SAMPLE_COUNT = 64;
+static uint32_t CUBEMAP_LAYER_WIDTH = 512;
+static uint32_t CUBEMAP_LAYER_HEIGHT = 512;
+static uint32_t RAYTRACING_SAMPLE_COUNT = 32;
 void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild)
 {
+	g_reflectionProbeQueue = {};
 	if(rebuild)
 	{
 		// Clear existing IBL files
@@ -247,7 +253,10 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 	for(auto *probe : probes)
 	{
 		if(probe->RequiresRebuild())
+		{
 			++numProbes;
+			g_reflectionProbeQueue.push(probe->GetHandle<CReflectionProbeComponent>());
+		}
 	}
 	Con::cout<<"Updating "<<numProbes<<" reflection probes... This may take a while!"<<Con::endl;
 	build_next_reflection_probe();
@@ -435,6 +444,8 @@ util::ParallelJob<std::shared_ptr<util::ImageBuffer>> CReflectionProbeComponent:
 		auto imgBuffer = worker.GetResult();
 		if(flipVertically)
 			imgBuffer->FlipVertically();
+		else
+			imgBuffer->FlipHorizontally();
 	});
 	return job;
 }
@@ -480,12 +491,12 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	constexpr auto useRaytracing = true;
 
 	static const std::array<std::pair<Vector3,Vector3>,6> forwardUpDirs = {
-		std::pair<Vector3,Vector3>{Vector3{-1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}},
-		std::pair<Vector3,Vector3>{Vector3{1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}},
-		std::pair<Vector3,Vector3>{Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,0.0f,1.0f}},
-		std::pair<Vector3,Vector3>{Vector3{0.0f,-1.0f,0.0f},Vector3{0.0f,0.0f,-1.0f}},
-		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,1.0f},Vector3{0.0f,1.0f,0.0f}},
-		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,-1.0f},Vector3{0.0f,1.0f,0.0f}}
+		std::pair<Vector3,Vector3>{Vector3{1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}}, // Left
+		std::pair<Vector3,Vector3>{Vector3{-1.0f,0.0f,0.0f},Vector3{0.0f,1.0f,0.0f}}, // Right
+		std::pair<Vector3,Vector3>{Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,0.0f,1.0f}}, // Top
+		std::pair<Vector3,Vector3>{Vector3{0.0f,-1.0f,0.0f},Vector3{0.0f,0.0f,-1.0f}}, // Bottom
+		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,1.0f},Vector3{0.0f,1.0f,0.0f}}, // Front
+		std::pair<Vector3,Vector3>{Vector3{0.0f,0.0f,-1.0f},Vector3{0.0f,1.0f,0.0f}} // Back
 	};
 	static const std::array<Mat4,6> cubemapViewMatrices = {
 		glm::lookAtRH(Vector3{0.0f,0.0f,0.0f},forwardUpDirs.at(0).first,forwardUpDirs.at(0).second),
@@ -580,7 +591,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::Image &imgCubemap)
 	prosper::util::record_generate_mipmaps(
 		**drawCmd,*imgCubemap,
 		Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,
-		Anvil::AccessFlagBits::TRANSFER_READ_BIT,
+		Anvil::AccessFlagBits::TRANSFER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,
 		Anvil::PipelineStageFlagBits::TRANSFER_BIT
 	);
 	c_engine->FlushSetupCommandBuffer();
@@ -625,7 +636,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	if(shaderConvolute == nullptr || shaderRoughness == nullptr || shaderBRDF == nullptr)
 		return false;
 	auto irradianceMap = shaderConvolute->ConvoluteCubemapLighting(cubemap,32);
-	auto prefilterMap = shaderRoughness->ComputeRoughness(cubemap,128);
+	auto prefilterMap = shaderRoughness->ComputeRoughness(cubemap,512);
 
 	TextureManager::LoadInfo loadInfo {};
 	loadInfo.mipmapLoadMode = TextureMipmapMode::Ignore;

@@ -11,7 +11,7 @@ const std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() const 
 std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() {return m_vertices;}
 void MeshVertexFrame::SetVertexCount(uint32_t count) {m_vertices.resize(count,std::array<uint16_t,4>{0,0,0,0});}
 uint32_t MeshVertexFrame::GetVertexCount() const {return m_vertices.size();}
-void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const Vector3 &pos) {SetVertexPosition(vertId,std::array<uint16_t,3>{umath::float32_to_float16(pos.x),umath::float32_to_float16(pos.y),umath::float32_to_float16(pos.z)});}
+void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const Vector3 &pos) {SetVertexPosition(vertId,std::array<uint16_t,3>{static_cast<uint16_t>(umath::float32_to_float16_glm(pos.x)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.y)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.z))});}
 void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos)
 {
 	if(vertId >= m_vertices.size())
@@ -19,7 +19,7 @@ void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_
 	for(uint8_t i=0;i<3;++i)
 		m_vertices.at(vertId).at(i) = pos.at(i);
 }
-void MeshVertexFrame::SetDeltaValue(uint32_t vertId,float deltaValue) {SetDeltaValue(vertId,umath::float32_to_float16(deltaValue));}
+void MeshVertexFrame::SetDeltaValue(uint32_t vertId,float deltaValue) {SetDeltaValue(vertId,static_cast<uint16_t>(umath::float32_to_float16_glm(deltaValue)));}
 void MeshVertexFrame::SetDeltaValue(uint32_t vertId,uint16_t deltaValue)
 {
 	if(vertId >= m_vertices.size())
@@ -30,7 +30,7 @@ bool MeshVertexFrame::GetDeltaValue(uint32_t vertId,float &deltaValue) const
 {
 	if(vertId >= m_vertices.size())
 		return false;
-	deltaValue = umath::float16_to_float32(m_vertices.at(vertId).at(3));
+	deltaValue = umath::float16_to_float32_glm(m_vertices.at(vertId).at(3));
 	return true;
 }
 bool MeshVertexFrame::GetVertexPosition(uint32_t vertId,Vector3 &pos) const
@@ -38,7 +38,7 @@ bool MeshVertexFrame::GetVertexPosition(uint32_t vertId,Vector3 &pos) const
 	if(vertId >= m_vertices.size())
 		return false;
 	auto &v = m_vertices.at(vertId);
-	pos = {umath::float16_to_float32(v.at(0)),umath::float16_to_float32(v.at(1)),umath::float16_to_float32(v.at(2))};
+	pos = {umath::float16_to_float32_glm(v.at(0)),umath::float16_to_float32_glm(v.at(1)),umath::float16_to_float32_glm(v.at(2))};
 	return true;
 }
 void MeshVertexFrame::Rotate(const Quat &rot)

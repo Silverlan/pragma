@@ -614,6 +614,20 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 				flexControllerValues.insert(std::make_pair(controllerName,val));
 			}
 		}
+
+		if(version >= 28)
+		{
+			auto &eyeballs = mdl->GetEyeballs();
+			auto numEyeballs = Read<uint32_t>();
+			eyeballs.reserve(numEyeballs);
+			for(auto i=decltype(numEyeballs){0u};i<numEyeballs;++i)
+			{
+				eyeballs.push_back({});
+				auto &eyeball = eyeballs.back();
+				eyeball.name = ReadString();
+				Read(reinterpret_cast<uint8_t*>(&eyeball) +sizeof(std::string),sizeof(Eyeball) -sizeof(std::string));
+			}
+		}
 	}
 }
 

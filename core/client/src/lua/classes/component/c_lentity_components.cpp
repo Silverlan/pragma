@@ -78,6 +78,30 @@ namespace Lua
 			return Lua::CheckString(l,argIdx);
 		}
 	};
+	namespace Decal
+	{
+		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes,const pragma::physics::ScaledTransform &pose)
+		{
+			pragma::Lua::check_component(l,hComponent);
+			int32_t t = 2;
+			Lua::CheckTable(l,t);
+			std::vector<ModelSubMesh*> meshes {};
+			auto numMeshes = Lua::GetObjectLength(l,t);
+			for(auto i=decltype(numMeshes){0u};i<numMeshes;++i)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::GetTableValue(l,t);
+				auto &mesh = Lua::Check<ModelSubMesh>(l,-1);
+				meshes.push_back(&mesh);
+				Lua::Pop(l,1);
+			}
+			Lua::PushBool(l,hComponent->ApplyDecal(meshes,pose));
+		}
+		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes)
+		{
+			create_from_projection(l,hComponent,tMeshes,{});
+		}
+	};
 };
 
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
@@ -192,6 +216,12 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCDecal = luabind::class_<CDecalHandle,BaseEntityComponentHandle>("DecalComponent");
 	Lua::register_base_decal_component_methods<luabind::class_<CDecalHandle,BaseEntityComponentHandle>,CDecalHandle>(l,defCDecal);
+	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object,const pragma::physics::ScaledTransform&)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("DebugDraw",static_cast<void(*)(lua_State*,CDecalHandle&,float)>([](lua_State *l,CDecalHandle &hEnt,float duration) {
+		pragma::Lua::check_component(l,hEnt);
+		hEnt->GetProjector().DebugDraw(duration);
+	}));
 	entsMod[defCDecal];
 
 	auto defCExplosion = luabind::class_<CExplosionHandle,BaseEntityComponentHandle>("ExplosionComponent");

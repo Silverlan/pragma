@@ -39,7 +39,7 @@
 #include "pragma/entities/environment/s_env_camera.h"
 #include "pragma/entities/environment/s_env_decal.h"
 #include "pragma/entities/environment/effects/s_env_explosion.h"
-#include "pragma/entities/environment/s_env_decal.h"
+#include "pragma/entities/environment/effects/s_env_sprite.h"
 #include "pragma/entities/environment/s_env_fog_controller.h"
 #include "pragma/entities/environment/effects/s_env_fire.h"
 #include "pragma/entities/environment/lights/s_env_light.h"

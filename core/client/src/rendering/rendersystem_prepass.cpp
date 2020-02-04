@@ -12,6 +12,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode,bool bReflection)
 {
 	auto &scene = c_game->GetRenderScene();
@@ -28,6 +29,8 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 
 	//shaderDepthStage.BindLights(lights,descSetShadowmps,descSetLightSources);
 	CBaseEntity *entPrev = nullptr;
+	pragma::CRenderComponent *renderC = nullptr;
+	auto depthBiasActive = false;
 	auto &shaderDepthStage = rasterizer->GetPrepass().GetShader();
 	for(auto &meshInfo : containers)
 	{
@@ -39,15 +42,31 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 				if(ent != entPrev)
 				{
 					entPrev = ent;
+					renderC = entPrev->GetRenderComponent().get();
 					auto bWeighted = false;
 					shaderDepthStage.BindEntity(*ent);//,bWeighted); // prosper TODO
+
+					if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+					{
+						float constantFactor,biasClamp,slopeFactor;
+						renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
+						prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+
+						depthBiasActive = true;
+					}
+					else if(depthBiasActive)
+					{
+						// Clear depth bias
+						depthBiasActive = false;
+						prosper::util::record_set_depth_bias(**drawCmd);
+					}
 				}
 
 				for(auto *cmesh : pair.second.meshes)
 				{
 					if(cmesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)
 						continue;
-					auto &mdlComponent = ent->GetRenderComponent()->GetModelComponent();
+					auto &mdlComponent = renderC->GetModelComponent();
 					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 					assert(mdl != nullptr);
 					auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
@@ -78,3 +97,4 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	}
 	//
 }
+#pragma optimize("",on)

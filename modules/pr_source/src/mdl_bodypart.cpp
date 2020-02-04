@@ -19,6 +19,7 @@ import::mdl::BodyPart::BodyPart(const VFilePtr &f)
 		m_models.push_back({});
 		auto &mdl = m_models.back();
 		auto &meshes = mdl.meshes;
+		auto &eyeballs = mdl.eyeballs;
 
 		auto offset = f->Tell();
 		auto &stdMdl = mdl.stdMdl = f->Read<mstudiomodel_t>();
@@ -33,10 +34,27 @@ import::mdl::BodyPart::BodyPart(const VFilePtr &f)
 			auto offsetMesh = f->Tell();
 			mesh.stdMesh = f->Read<mstudiomesh_t>();
 			
-			// TODO Eyeballs
 			if(mesh.stdMesh.numflexes > 0 && mesh.stdMesh.flexindex != 0)
 				ReadFlexes(f,offsetMesh,mesh);
 			f->Seek(offsetMesh +sizeof(mstudiomesh_t));
+		}
+
+		// Read eyeballs
+		f->Seek(offset +stdMdl.eyeballindex);
+		for(auto j=decltype(stdMdl.numeyeballs){0};j<stdMdl.numeyeballs;++j)
+		{
+			eyeballs.push_back(Model::Eyeball{});
+			auto &eyeball = eyeballs.back();
+			auto offsetEyeball = f->Tell();
+			eyeball.stdEyeball = f->Read<mstudioeyeball_t>();
+
+			if(eyeball.stdEyeball.sznameindex != 0)
+			{
+				f->Seek(offsetEyeball +eyeball.stdEyeball.sznameindex);
+				eyeball.name = f->ReadString();
+			}
+
+			f->Seek(offsetEyeball +sizeof(mstudioeyeball_t));
 		}
 
 		f->Seek(offset +sizeof(mstudiomodel_t));

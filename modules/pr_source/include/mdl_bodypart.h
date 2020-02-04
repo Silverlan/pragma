@@ -53,6 +53,34 @@ namespace import
 			std::array<int32_t,8> unused; // remove as appropriate
 		};
 
+		struct mstudioeyeball_t
+		{
+			int32_t sznameindex;
+			int32_t bone;
+			Vector3 org;
+			float zoffset;
+			float radius;
+			Vector3 up;
+			Vector3 forward;
+			int32_t texture;
+
+			int32_t unused1;
+			float iris_scale;
+			int32_t unused2;
+
+			std::array<int32_t,3> upperflexdesc; // index of raiser, neutral, and lowerer flexdesc that is set by flex controllers
+			std::array<int32_t,3> lowerflexdesc;
+			std::array<float,3> uppertarget; // angle (radians) of raised, neutral, and lowered lid positions
+			std::array<float,3> lowertarget;
+
+			int32_t upperlidflexdesc; // index of flex desc that actual lid flexes look to
+			int32_t lowerlidflexdesc;
+			std::array<int32_t,4> unused; // These were used before, so not guaranteed to be 0
+			bool m_bNonFACS; // Never used before version 44
+			std::array<char,3> unused3;
+			std::array<int32_t,7> unused4;
+		};
+
 		struct mstudio_meshvertexdata_t
 		{
 			// indirection to this mesh's model's vertex data
@@ -157,8 +185,14 @@ namespace import
 					};
 					std::vector<Flex> flexes;
 				};
+				struct Eyeball
+				{
+					std::string name;
+					mstudioeyeball_t stdEyeball;
+				};
 				mstudiomodel_t stdMdl;
 				std::vector<Mesh> meshes;
+				std::vector<Eyeball> eyeballs;
 				uint32_t vertexCount = 0;
 			};
 		private:

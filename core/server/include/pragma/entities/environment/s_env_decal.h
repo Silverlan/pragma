@@ -3,16 +3,20 @@
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/s_baseentity.h"
-#include "pragma/entities/environment/effects/s_env_sprite.h"
+#include "pragma/entities/components/s_entity_component.hpp"
+#include <pragma/entities/environment/env_decal.h>
 
 namespace pragma
 {
 	class DLLSERVER SDecalComponent final
-		: public BaseEntityComponent
+		: public BaseEnvDecalComponent,
+		public SBaseNetComponent
 	{
 	public:
-		SDecalComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		SDecalComponent(BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
+		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	};
 };

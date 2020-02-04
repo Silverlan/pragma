@@ -22,6 +22,7 @@
 #define INDEX_OFFSET_FLEXES (INDEX_OFFSET_FLEX_CONTROLLERS +1)
 #define INDEX_OFFSET_PHONEMES (INDEX_OFFSET_FLEXES +1)
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
+#define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
 
 #pragma optimize("",off)
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
@@ -217,6 +218,10 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 
 		// Version 0x0016
 		f->Write<uint64_t>(0ull); // INDEX_OFFSET_IK_CONTROLLERS
+		//
+
+		// Version 28
+		f->Write<uint64_t>(0ull); // INDEX_OFFSET_EYEBALLS
 		//
 	}
 
@@ -884,6 +889,18 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 			f->Seek(offsetNumControllers);
 			f->Write<uint32_t>(numControllers);
 			f->Seek(offset);
+		}
+		//
+
+		// Eyeballs
+		write_offset(f,offIndex +INDEX_OFFSET_EYEBALLS *INDEX_OFFSET_INDEX_SIZE);
+
+		auto &eyeballs = GetEyeballs();
+		f->Write<uint32_t>(eyeballs.size());
+		for(auto &eyeball : eyeballs)
+		{
+			f->WriteString(eyeball.name);
+			f->Write(reinterpret_cast<const uint8_t*>(&eyeball) +sizeof(std::string),sizeof(Eyeball) -sizeof(std::string));
 		}
 		//
 	}

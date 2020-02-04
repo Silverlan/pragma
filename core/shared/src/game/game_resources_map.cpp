@@ -620,6 +620,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	uint32_t numExtracted = 0;
 	uint32_t numSkippedLump = 0;
 	uint32_t numSkippedMapMats = 0;
+	uint32_t numSkippedVhvFiles = 0;
 	for(auto &fName : bsp->GetFilenames())
 	{
 		if(ustring::compare(fName.c_str(),"lumps/",false,6))
@@ -630,6 +631,12 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		if(ustring::compare(fName.c_str(),mapMatPath.c_str(),false,mapMatPath.length()))
 		{
 			++numSkippedMapMats;
+			continue;
+		}
+		std::string ext;
+		if(ufile::get_extension(fName,&ext) && ustring::compare(ext,"vhv",false))
+		{
+			++numSkippedVhvFiles;
 			continue;
 		}
 		std::vector<uint8_t> data;
@@ -657,7 +664,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		}
 	}
 	if(messageLogger)
-		messageLogger(std::to_string(numExtracted) +" files have been extracted! " +std::to_string(numSkippedLump) +" lump files and " +std::to_string(numSkippedMapMats) +" map material files have been skipped!");
+		messageLogger(std::to_string(numExtracted) +" files have been extracted! " +std::to_string(numSkippedLump) +" lump files, " +std::to_string(numSkippedMapMats) +" map material files and " +std::to_string(numSkippedVhvFiles) +" vhv files have been skipped!");
 	//
 
 	std::unordered_map<uint32_t,std::pair<uint32_t,uint32_t>> staticPropLeafRanges {};

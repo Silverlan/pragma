@@ -4,6 +4,7 @@
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/model/vertex.h>
+#include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 
 using namespace pragma;
@@ -48,7 +49,7 @@ ShaderPrepassBase::ShaderPrepassBase(prosper::Context &context,const std::string
 
 bool ShaderPrepassBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
-	return ShaderEntity::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx));
+	return ShaderEntity::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) && prosper::util::record_set_depth_bias(**cmdBuffer);
 }
 
 bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane)
@@ -78,6 +79,9 @@ void ShaderPrepassBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo 
 
 	pipelineInfo.toggle_depth_writes(true);
 	pipelineInfo.toggle_depth_test(true,Anvil::CompareOp::LESS);
+
+	pipelineInfo.toggle_depth_bias(true,0.f,0.f,0.f);
+	pipelineInfo.toggle_dynamic_state(true,Anvil::DynamicState::DEPTH_BIAS); // Required for decals
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);

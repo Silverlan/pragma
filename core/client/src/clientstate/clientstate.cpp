@@ -691,6 +691,18 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		if(onLoaded != nullptr)
 			onLoaded(mat);
 		// Material has been fully loaded!
+
+		std::string ext;
+		if(ustring::compare(mat->GetShaderIdentifier(),"eye",false) && ufile::get_extension(mat->GetName(),&ext) && ustring::compare(ext,"vmt",false))
+		{
+			// Material was loaded from a VMT and uses the eye shader. In this case we have to save the material as WMI, otherwise
+			// we may run into a loop where the eye material would be loaded over and over again because it involves decomposing the eye
+			// textures, which triggers the resource watcher.
+			// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
+			auto matName = mat->GetName();
+			ufile::remove_extension_from_filename(matName);
+			mat->Save(matName,"addons/converted/");
+		}
 	},nullptr,bReload,&bFirstTimeError,bLoadInstantly);
 	if(bFirstTimeError == true)
 	{

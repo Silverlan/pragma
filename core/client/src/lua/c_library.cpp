@@ -20,12 +20,13 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
-#include <pragma/util/util_image.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <sharedutils/util_file.h>
+#include <util_image.hpp>
+#include <util_image_buffer.hpp>
+#include <util_texture_info.hpp>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
-#include <pr_dds.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -638,18 +639,18 @@ void CGame::RegisterLuaLibraries()
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
 		{"create_giblet",Lua::util::Client::create_giblet},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			if(Lua::IsType<util::ImageBuffer>(l,1))
+			if(Lua::IsType<uimg::ImageBuffer>(l,1))
 			{
-				auto &imgBuffer = Lua::Check<util::ImageBuffer>(l,1);
+				auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,1);
 				std::string fileName = Lua::CheckString(l,2);
 				if(Lua::file::validate_write_operation(l,fileName) == false)
 				{
 					Lua::PushBool(l,false);
 					return 1;
 				}
-				if(Lua::IsType<ImageWriteInfo>(l,3))
+				if(Lua::IsType<uimg::TextureInfo>(l,3))
 				{
-					auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
+					auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
 					auto cubemap = false;
 					if(Lua::IsSet(l,4))
 						cubemap = Lua::CheckBool(l,4);
@@ -657,22 +658,22 @@ void CGame::RegisterLuaLibraries()
 					return 1;
 				}
 
-				auto format = static_cast<pragma::image::ImageFormat>(Lua::CheckInt(l,3));
+				auto format = static_cast<uimg::ImageFormat>(Lua::CheckInt(l,3));
 				auto quality = 1.f;
 				if(Lua::IsSet(l,4))
 					quality = Lua::CheckNumber(l,4);
 				ufile::remove_extension_from_filename(fileName);
-				fileName += '.' +pragma::image::get_file_extension(format);
+				fileName += '.' +uimg::get_file_extension(format);
 				auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");
 				if(f == nullptr)
 					Lua::PushBool(l,false);
 				else
-					Lua::PushBool(l,pragma::image::save_image(f,imgBuffer,format,quality));
+					Lua::PushBool(l,uimg::save_image(f,imgBuffer,format,quality));
 				return 1;
 			}
 			auto &img = Lua::Check<prosper::Image>(l,1);
 			std::string fileName = Lua::CheckString(l,2);
-			auto &imgWriteInfo = Lua::Check<ImageWriteInfo>(l,3);
+			auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
 			return 1;
 		})},
@@ -681,10 +682,10 @@ void CGame::RegisterLuaLibraries()
 			auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
 			if(f == nullptr)
 				return 0;
-			auto pixelFormat = pragma::image::PixelFormat::LDR;
+			auto pixelFormat = uimg::PixelFormat::LDR;
 			if(Lua::IsSet(l,2))
-				pixelFormat = static_cast<pragma::image::PixelFormat>(Lua::CheckInt(l,2));
-			auto imgBuffer = pragma::image::load_image(f,pixelFormat);
+				pixelFormat = static_cast<uimg::PixelFormat>(Lua::CheckInt(l,2));
+			auto imgBuffer = uimg::load_image(f,pixelFormat);
 			if(imgBuffer == nullptr)
 				return 0;
 			Lua::Push(l,imgBuffer);
@@ -725,88 +726,88 @@ void CGame::RegisterLuaLibraries()
 		})}
 	});
 
-	auto imgWriteInfoDef = luabind::class_<ImageWriteInfo>("ImageSaveInfo");
+	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
 	imgWriteInfoDef.def(luabind::constructor<>());
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(ImageWriteInfo::InputFormat::KeepInputImageFormat));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R16G16B16A16_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R16G16B16A16_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32G32B32A32_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R32G32B32A32_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32_FLOAT",umath::to_integral(ImageWriteInfo::InputFormat::R32_Float));
-	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R8G8B8A8_UINT",umath::to_integral(ImageWriteInfo::InputFormat::R8G8B8A8_UInt));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(uimg::TextureInfo::InputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R16G16B16A16_FLOAT",umath::to_integral(uimg::TextureInfo::InputFormat::R16G16B16A16_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32G32B32A32_FLOAT",umath::to_integral(uimg::TextureInfo::InputFormat::R32G32B32A32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R32_FLOAT",umath::to_integral(uimg::TextureInfo::InputFormat::R32_Float));
+	imgWriteInfoDef.add_static_constant("INPUT_FORMAT_R8G8B8A8_UINT",umath::to_integral(uimg::TextureInfo::InputFormat::R8G8B8A8_UInt));
 
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(ImageWriteInfo::OutputFormat::KeepInputImageFormat));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGB",umath::to_integral(ImageWriteInfo::OutputFormat::RGB));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGBA",umath::to_integral(ImageWriteInfo::OutputFormat::RGBA));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1A",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1a));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT3",umath::to_integral(ImageWriteInfo::OutputFormat::DXT3));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5",umath::to_integral(ImageWriteInfo::OutputFormat::DXT5));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5N",umath::to_integral(ImageWriteInfo::OutputFormat::DXT5n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1",umath::to_integral(ImageWriteInfo::OutputFormat::BC1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1A",umath::to_integral(ImageWriteInfo::OutputFormat::BC1a));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC2",umath::to_integral(ImageWriteInfo::OutputFormat::BC2));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3",umath::to_integral(ImageWriteInfo::OutputFormat::BC3));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N",umath::to_integral(ImageWriteInfo::OutputFormat::BC3n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4",umath::to_integral(ImageWriteInfo::OutputFormat::BC4));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5",umath::to_integral(ImageWriteInfo::OutputFormat::BC5));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N",umath::to_integral(ImageWriteInfo::OutputFormat::DXT1n));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1",umath::to_integral(ImageWriteInfo::OutputFormat::CTX1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6",umath::to_integral(ImageWriteInfo::OutputFormat::BC6));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7",umath::to_integral(ImageWriteInfo::OutputFormat::BC7));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM",umath::to_integral(ImageWriteInfo::OutputFormat::BC3_RGBM));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1",umath::to_integral(ImageWriteInfo::OutputFormat::ETC1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_R));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RG));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGB));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBA",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGBA));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB_A1",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGB_A1));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBM",umath::to_integral(ImageWriteInfo::OutputFormat::ETC2_RGBM));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_KEEP_INPUT_IMAGE_FORMAT",umath::to_integral(uimg::TextureInfo::OutputFormat::KeepInputImageFormat));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGB",umath::to_integral(uimg::TextureInfo::OutputFormat::RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_RGBA",umath::to_integral(uimg::TextureInfo::OutputFormat::RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1A",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT3",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT5));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT5N",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT5n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1",umath::to_integral(uimg::TextureInfo::OutputFormat::BC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC1A",umath::to_integral(uimg::TextureInfo::OutputFormat::BC1a));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC2",umath::to_integral(uimg::TextureInfo::OutputFormat::BC2));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3",umath::to_integral(uimg::TextureInfo::OutputFormat::BC3));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3N",umath::to_integral(uimg::TextureInfo::OutputFormat::BC3n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC4",umath::to_integral(uimg::TextureInfo::OutputFormat::BC4));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC5",umath::to_integral(uimg::TextureInfo::OutputFormat::BC5));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_DXT1N",umath::to_integral(uimg::TextureInfo::OutputFormat::DXT1n));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_CTX1",umath::to_integral(uimg::TextureInfo::OutputFormat::CTX1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC6",umath::to_integral(uimg::TextureInfo::OutputFormat::BC6));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC7",umath::to_integral(uimg::TextureInfo::OutputFormat::BC7));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_BC3_RGBM",umath::to_integral(uimg::TextureInfo::OutputFormat::BC3_RGBM));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC1",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_R",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_R));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RG",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RG));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBA",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBA));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGB_A1",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGB_A1));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_ETC2_RGBM",umath::to_integral(uimg::TextureInfo::OutputFormat::ETC2_RGBM));
 
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_1BIT_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMap1BitAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SHARP_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMapSharpAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SMOOTH_ALPHA",umath::to_integral(ImageWriteInfo::OutputFormat::ColorMapSmoothAlpha));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_NORMAL_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::NormalMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_HDR_COLOR_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::HDRColorMap));
-	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_GRADIENT_MAP",umath::to_integral(ImageWriteInfo::OutputFormat::GradientMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP",umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_1BIT_ALPHA",umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMap1BitAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SHARP_ALPHA",umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSharpAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_COLOR_MAP_SMOOTH_ALPHA",umath::to_integral(uimg::TextureInfo::OutputFormat::ColorMapSmoothAlpha));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::OutputFormat::NormalMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_HDR_COLOR_MAP",umath::to_integral(uimg::TextureInfo::OutputFormat::HDRColorMap));
+	imgWriteInfoDef.add_static_constant("OUTPUT_FORMAT_GRADIENT_MAP",umath::to_integral(uimg::TextureInfo::OutputFormat::GradientMap));
 
-	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_DDS",umath::to_integral(ImageWriteInfo::ContainerFormat::DDS));
-	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX",umath::to_integral(ImageWriteInfo::ContainerFormat::KTX));
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_DDS",umath::to_integral(uimg::TextureInfo::ContainerFormat::DDS));
+	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX",umath::to_integral(uimg::TextureInfo::ContainerFormat::KTX));
 
-	imgWriteInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(ImageWriteInfo::Flags::None));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_MAP",umath::to_integral(ImageWriteInfo::Flags::NormalMap));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_CONVERT_TO_NORMAL_MAP",umath::to_integral(ImageWriteInfo::Flags::ConvertToNormalMap));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_SRGB",umath::to_integral(ImageWriteInfo::Flags::SRGB));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_GENERATE_MIPMAPS",umath::to_integral(ImageWriteInfo::Flags::GenerateMipmaps));
+	imgWriteInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(uimg::TextureInfo::Flags::None));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::NormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_CONVERT_TO_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_SRGB",umath::to_integral(uimg::TextureInfo::Flags::SRGB));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_GENERATE_MIPMAPS",umath::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
 
-	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX",umath::to_integral(ImageWriteInfo::MipmapFilter::Box));
-	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER",umath::to_integral(ImageWriteInfo::MipmapFilter::Kaiser));
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX",umath::to_integral(uimg::TextureInfo::MipmapFilter::Box));
+	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER",umath::to_integral(uimg::TextureInfo::MipmapFilter::Kaiser));
 
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_CLAMP",umath::to_integral(ImageWriteInfo::WrapMode::Clamp));
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_REPEAT",umath::to_integral(ImageWriteInfo::WrapMode::Repeat));
-	imgWriteInfoDef.add_static_constant("WRAP_MODE_MIRROR",umath::to_integral(ImageWriteInfo::WrapMode::Mirror));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_CLAMP",umath::to_integral(uimg::TextureInfo::WrapMode::Clamp));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_REPEAT",umath::to_integral(uimg::TextureInfo::WrapMode::Repeat));
+	imgWriteInfoDef.add_static_constant("WRAP_MODE_MIRROR",umath::to_integral(uimg::TextureInfo::WrapMode::Mirror));
 
-	imgWriteInfoDef.def_readwrite("inputFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::inputFormat)> ImageWriteInfo::*>(&ImageWriteInfo::inputFormat));
-	imgWriteInfoDef.def_readwrite("outputFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::outputFormat)> ImageWriteInfo::*>(&ImageWriteInfo::outputFormat));
-	imgWriteInfoDef.def_readwrite("containerFormat",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::containerFormat)> ImageWriteInfo::*>(&ImageWriteInfo::containerFormat));
-	imgWriteInfoDef.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::flags)> ImageWriteInfo::*>(&ImageWriteInfo::flags));
-	imgWriteInfoDef.def_readwrite("mipMapFilter",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::mipMapFilter)> ImageWriteInfo::*>(&ImageWriteInfo::mipMapFilter));
-	imgWriteInfoDef.def_readwrite("wrapMode",reinterpret_cast<std::underlying_type_t<decltype(ImageWriteInfo::wrapMode)> ImageWriteInfo::*>(&ImageWriteInfo::wrapMode));
+	imgWriteInfoDef.def_readwrite("inputFormat",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::inputFormat)> uimg::TextureInfo::*>(&uimg::TextureInfo::inputFormat));
+	imgWriteInfoDef.def_readwrite("outputFormat",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::outputFormat)> uimg::TextureInfo::*>(&uimg::TextureInfo::outputFormat));
+	imgWriteInfoDef.def_readwrite("containerFormat",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::containerFormat)> uimg::TextureInfo::*>(&uimg::TextureInfo::containerFormat));
+	imgWriteInfoDef.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::flags)> uimg::TextureInfo::*>(&uimg::TextureInfo::flags));
+	imgWriteInfoDef.def_readwrite("mipMapFilter",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::mipMapFilter)> uimg::TextureInfo::*>(&uimg::TextureInfo::mipMapFilter));
+	imgWriteInfoDef.def_readwrite("wrapMode",reinterpret_cast<std::underlying_type_t<decltype(uimg::TextureInfo::wrapMode)> uimg::TextureInfo::*>(&uimg::TextureInfo::wrapMode));
 
-	imgWriteInfoDef.def("SetNormalMap",static_cast<void(*)(lua_State*,ImageWriteInfo&)>([](lua_State *l,ImageWriteInfo &writeInfo) {
+	imgWriteInfoDef.def("SetNormalMap",static_cast<void(*)(lua_State*,uimg::TextureInfo&)>([](lua_State *l,uimg::TextureInfo &writeInfo) {
 		writeInfo.SetNormalMap();
 	}));
 	utilMod[imgWriteInfoDef];
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"util",{
-		{"IMAGE_FORMAT_PNG",umath::to_integral(pragma::image::ImageFormat::PNG)},
-		{"IMAGE_FORMAT_BMP",umath::to_integral(pragma::image::ImageFormat::BMP)},
-		{"IMAGE_FORMAT_TGA",umath::to_integral(pragma::image::ImageFormat::TGA)},
-		{"IMAGE_FORMAT_JPG",umath::to_integral(pragma::image::ImageFormat::JPG)},
-		{"IMAGE_FORMAT_HDR",umath::to_integral(pragma::image::ImageFormat::HDR)},
+		{"IMAGE_FORMAT_PNG",umath::to_integral(uimg::ImageFormat::PNG)},
+		{"IMAGE_FORMAT_BMP",umath::to_integral(uimg::ImageFormat::BMP)},
+		{"IMAGE_FORMAT_TGA",umath::to_integral(uimg::ImageFormat::TGA)},
+		{"IMAGE_FORMAT_JPG",umath::to_integral(uimg::ImageFormat::JPG)},
+		{"IMAGE_FORMAT_HDR",umath::to_integral(uimg::ImageFormat::HDR)},
 
-		{"PIXEL_FORMAT_LDR",umath::to_integral(pragma::image::PixelFormat::LDR)},
-		{"PIXEL_FORMAT_HDR",umath::to_integral(pragma::image::PixelFormat::HDR)},
-		{"PIXEL_FORMAT_FLOAT",umath::to_integral(pragma::image::PixelFormat::Float)}
+		{"PIXEL_FORMAT_LDR",umath::to_integral(uimg::PixelFormat::LDR)},
+		{"PIXEL_FORMAT_HDR",umath::to_integral(uimg::PixelFormat::HDR)},
+		{"PIXEL_FORMAT_FLOAT",umath::to_integral(uimg::PixelFormat::Float)}
 	});
 
 	Lua::ai::client::register_library(GetLuaInterface());

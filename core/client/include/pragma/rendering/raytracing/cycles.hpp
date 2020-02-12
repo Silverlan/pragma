@@ -11,7 +11,7 @@
 
 class ClientState;
 class BaseEntity;
-namespace util {class ImageBuffer;};
+namespace uimg {class ImageBuffer;};
 namespace pragma::rendering::cycles
 {
 	struct DLLCLIENT SceneInfo
@@ -35,9 +35,9 @@ namespace pragma::rendering::cycles
 
 		std::function<bool(BaseEntity&)> entityFilter = nullptr;
 	};
-	util::ParallelJob<std::shared_ptr<util::ImageBuffer>> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
-	util::ParallelJob<std::shared_ptr<util::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
-	util::ParallelJob<std::shared_ptr<util::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &entTarget);
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &entTarget);
 };
 
 #endif

@@ -40,6 +40,7 @@ namespace pragma
 		};
 
 		ShaderPBR(prosper::Context &context,const std::string &identifier);
+		ShaderPBR(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
 		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView) override;

@@ -325,6 +325,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	f->Write<Vector3>(max);
 
 	auto &meshGroups = mdl.GetMeshGroups();
+	write_offset(f,offIndex +INDEX_OFFSET_MODEL_MESHES *INDEX_OFFSET_INDEX_SIZE); // Meshes
 	f->Write<uint32_t>(static_cast<uint32_t>(meshGroups.size()));
 	for(auto &group : meshGroups)
 	{

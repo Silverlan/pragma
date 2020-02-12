@@ -1456,6 +1456,10 @@ std::shared_ptr<Model> import::load_mdl(
 						eyeball.irisScale = stdEyeball.iris_scale;
 						eyeball.upperFlexDesc = stdEyeball.upperflexdesc; // TODO: Match with Pragma
 						eyeball.lowerFlexDesc = stdEyeball.lowerflexdesc; // TODO: Match with Pragma
+						eyeball.upperLidFlexDesc = stdEyeball.upperlidflexdesc;
+						eyeball.lowerLidFlexDesc = stdEyeball.lowerlidflexdesc;
+						eyeball.lowerTarget = stdEyeball.lowertarget;
+						eyeball.upperTarget = stdEyeball.uppertarget;
 
 						mdl.AddEyeball(eyeball);
 					}

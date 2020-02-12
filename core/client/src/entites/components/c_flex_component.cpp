@@ -13,6 +13,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
 void CFlexComponent::UpdateFlexControllers()
@@ -29,16 +30,102 @@ void CFlexComponent::UpdateFlexControllers()
 	}
 }
 
+void CFlexComponent::SetFlexWeight(uint32_t flexIdx,float weight)
+{
+	if(flexIdx >= m_flexWeights.size())
+		return;
+	m_flexWeights.at(flexIdx) = weight;
+	m_updatedFlexWeights.at(flexIdx) = true;
+}
+
+// rotate by the inverse of the matrix
+// TODO
+static void VectorIRotate( const float *in1, const Mat3x4& in2, float *out )
+{
+	out[0] = in1[0]*in2[0][0] + in1[1]*in2[1][0] + in1[2]*in2[2][0];
+	out[1] = in1[0]*in2[0][1] + in1[1]*in2[1][1] + in1[2]*in2[2][1];
+	out[2] = in1[0]*in2[0][2] + in1[1]*in2[1][2] + in1[2]*in2[2][2];
+}
+void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
+{
+	auto *animC = static_cast<CAnimatedComponent*>(GetEntity().GetAnimatedComponent().get());
+	auto *eyeballData = animC ? animC->GetEyeballData(eyeballIdx) : nullptr;
+	if(animC == nullptr)
+		return;
+	auto &state = eyeballData->state;
+	Vector3 headup {};
+	Vector3 headforward {};
+	Vector3 pos {};
+
+	// get weighted position of eyeball angles based on the "raiser", "neutral", and "lowerer" controls
+
+	auto upperLid = 0.f;
+	auto lowerLid = 0.f;
+	for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
+	{
+		upperLid += GetFlexWeight(eyeball.upperFlexDesc.at(i)) *umath::asin(eyeball.upperTarget.at(i) /eyeball.radius);
+		lowerLid += GetFlexWeight(eyeball.lowerFlexDesc.at(i)) *umath::asin(eyeball.lowerTarget.at(i) /eyeball.radius);
+	}
+
+	// Con_DPrintf("%.1f %.1f\n", RAD2DEG( upperlid ), RAD2DEG( lowerlid ) );		
+
+	float sinupper, cosupper, sinlower, coslower;
+	sinupper = umath::sin(upperLid);
+	cosupper = umath::cos(upperLid);
+
+	sinlower = umath::sin(lowerLid);
+	coslower = umath::cos(lowerLid);
+
+	// convert to head relative space
+	headup = state.up;
+	headforward = state.forward;
+	// TODO
+	//VectorIRotate( &state.up, m_BoneToWorld[peyeball->bone], &headup );
+	//VectorIRotate( &state.forward, m_BoneToWorld[peyeball->bone], &headforward );
+
+	// upper lid
+	pos = headup *(sinupper *eyeball.radius);
+	pos = pos +(cosupper *eyeball.radius) *headforward;
+	SetFlexWeight(eyeball.upperLidFlexDesc,uvec::dot(pos,eyeball.up));
+
+	// lower lid
+	pos = headup *(sinlower *eyeball.radius);
+	pos = pos +(coslower *eyeball.radius) *headforward;
+	SetFlexWeight(eyeball.lowerLidFlexDesc,uvec::dot(pos,eyeball.up));
+}
+
+void CFlexComponent::UpdateEyeFlexes()
+{
+	auto &mdl = GetEntity().GetModel();
+	if(mdl == nullptr)
+		return;
+	auto &eyeballs = mdl->GetEyeballs();
+	for(auto eyeballIdx=decltype(eyeballs.size()){0u};eyeballIdx<eyeballs.size();++eyeballIdx)
+		UpdateEyeFlexes(eyeballs.at(eyeballIdx),eyeballIdx);
+}
+
+void CFlexComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+{
+	m_flexControllers.clear();
+	m_flexWeights.clear();
+	m_updatedFlexWeights.clear();
+	if(mdl == nullptr)
+		return;
+	m_flexWeights.resize(mdl->GetFlexCount(),0.f);
+	m_updatedFlexWeights.resize(m_flexWeights.size(),false);
+}
+
 void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
-	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		m_flexControllers.clear();
-	});
 	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateFlexControllers();
 	});
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
+	});
 	GetEntity().AddComponent<LogicComponent>();
+	OnModelChanged(GetEntity().GetModel());
 }
 
 void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,bool clampToLimits)
@@ -47,11 +134,11 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return;
-	auto *flex = mdl->GetFlexController(flexId);
-	if(flex == nullptr)
+	auto *flexC = mdl->GetFlexController(flexId);
+	if(flexC == nullptr)
 		return;
 	if(clampToLimits)
-		val = umath::clamp(val,flex->min,flex->max);
+		val = umath::clamp(val,flexC->min,flexC->max);
 	auto it = m_flexControllers.find(flexId);
 	if(it == m_flexControllers.end())
 		it = m_flexControllers.insert(std::make_pair(flexId,FlexControllerInfo{})).first;
@@ -78,12 +165,55 @@ bool CFlexComponent::GetFlexController(uint32_t flexId,float &val) const
 	return true;
 }
 
-bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
+void CFlexComponent::UpdateFlexWeights()
+{
+	auto mdl = GetEntity().GetModel();
+	if(mdl == nullptr)
+		return;
+	auto &flexes = mdl->GetFlexes();
+	assert(flexes.size() == m_flexWeights.size());
+	auto numFlexes = umath::min(flexes.size(),m_flexWeights.size());
+	for(auto flexId=decltype(numFlexes){0u};flexId<numFlexes;++flexId)
+	{
+		auto flexVal = 0.f;
+		UpdateFlexWeight(flexId,flexVal);
+		m_flexWeights.at(flexId) = flexVal;
+	}
+	// UpdateEyeFlexes();
+
+	// Clear for next update
+	std::fill(m_updatedFlexWeights.begin(),m_updatedFlexWeights.end(),false);
+}
+
+const std::vector<float> &CFlexComponent::GetFlexWeights() const {return m_flexWeights;}
+
+float CFlexComponent::GetFlexWeight(uint32_t flexId) const
+{
+	auto weight = 0.f;
+	GetFlexWeight(flexId,weight);
+	return weight;
+}
+bool CFlexComponent::GetFlexWeight(uint32_t flexId,float &outWeight) const
+{
+	if(flexId >= m_flexWeights.size())
+		return false;
+	outWeight = m_flexWeights.at(flexId);
+	return true;
+}
+
+bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const {return const_cast<CFlexComponent*>(this)->UpdateFlexWeight(flexId,val,false);}
+
+bool CFlexComponent::UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(mdl == nullptr)
+	if(mdl == nullptr || flexId >= m_updatedFlexWeights.size())
 		return false;
+	if(m_updatedFlexWeights.at(flexId))
+	{
+		val = m_flexWeights.at(flexId);
+		return true;
+	}
 	auto *flex = mdl->GetFlex(flexId);
 	if(flex == nullptr)
 		return false;
@@ -109,7 +239,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 			case Flex::Operation::Type::Fetch2:
 			{
 				auto val = 0.f;
-				if(CalcFlexValue(op.d.index,val) == false)
+				if(UpdateFlexWeight(op.d.index,val,storeInCache) == false)
 					return false;
 				opStack.push(val);
 				break;
@@ -276,7 +406,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				auto &pCloseLidVController = *mdl->GetFlexController(op.d.index);
 				auto flCloseLidV = (umath::min(umath::max((pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
 
-				auto closeLidIndex = *reinterpret_cast<int32_t*>(&opStack.top());
+				auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
 
 				auto pCloseLid = 0.f;
@@ -287,7 +417,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 
 				opStack.pop();
 
-				auto eyeUpDownIndex = *reinterpret_cast<int32_t*>(&opStack.top());
+				auto eyeUpDownIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
 				auto pEyeUpDown = 0.f;
 				if(GetScaledFlexController(eyeUpDownIndex,pEyeUpDown) == false)
@@ -306,7 +436,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 				auto &pCloseLidVController = *mdl->GetFlexController(op.d.index);
 				auto flCloseLidV = (umath::min(umath::max((pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
 
-				auto closeLidIndex = *reinterpret_cast<int32_t*>(&opStack.top());
+				auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
 
 				auto pCloseLid = 0.f;
@@ -317,7 +447,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 
 				opStack.pop();
 
-				auto eyeUpDownIndex = *reinterpret_cast<int32_t*>(&opStack.top());
+				auto eyeUpDownIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
 				opStack.pop();
 				auto pEyeUpDown = 0.f;
 				if(GetScaledFlexController(eyeUpDownIndex,pEyeUpDown) == false)
@@ -333,6 +463,11 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const
 	if(opStack.size() != 1) // If we don't have a single result left on the stack something went wrong
 		return false;
 	val = opStack.top();
+	if(storeInCache)
+	{
+		m_flexWeights.at(flexId) = val;
+		m_updatedFlexWeights.at(flexId) = true;
+	}
 	return true;
 }
 void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
@@ -411,3 +546,4 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 		}
 	}
 }
+#pragma optimize("",on)

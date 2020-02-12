@@ -86,10 +86,14 @@ decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 		}
 	}
 };
-ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier)
-	: ShaderTextured3DBase{context,identifier,"world/vs_textured","world/fs_pbr"}
+ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+	: ShaderTextured3DBase{context,identifier,vsShader,fsShader,gsShader}
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
+}
+ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier)
+	: ShaderPBR{context,identifier,"world/vs_textured","world/fs_pbr"}
+{
 }
 bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 {

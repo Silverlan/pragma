@@ -16,7 +16,7 @@
 #include <unordered_set>
 
 namespace prosper {class Texture; class Image;};
-namespace util {class ImageBuffer;};
+namespace uimg {class ImageBuffer;};
 namespace pragma
 {
 	namespace rendering::cycles {class Scene;};
@@ -25,7 +25,7 @@ namespace pragma
 		PBRAOBakeJob(Model &mdl,Material &mat);
 		ModelHandle hModel = {};
 		MaterialHandle hMaterial = {};
-		util::ParallelJob<std::shared_ptr<util::ImageBuffer>> job = {};
+		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 		bool isRunning = false;
 	};
 
@@ -57,7 +57,7 @@ namespace pragma
 		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,bool updateAmbientOcclusion);
 
 		void ProcessQueue();
-		void WriteAOMap(Model &mdl,CMaterial &mat,util::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;
+		void WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;
 		void ApplyAOMap(CMaterial &mat,const std::string &aoName) const;
 		bool ShouldConvertMaterial(CMaterial &mat) const;
 		bool IsPBR(CMaterial &mat) const;

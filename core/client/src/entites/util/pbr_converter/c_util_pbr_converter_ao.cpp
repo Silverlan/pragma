@@ -5,11 +5,11 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "cmaterial.h"
-#include <pr_dds.hpp>
 #include <pragma/physics/collisionmesh.h>
 #include <pragma/physics/transform.hpp>
 #include <sharedutils/util_file.h>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
+#include <util_texture_info.hpp>
 #include <prosper_util.hpp>
 
 using namespace pragma;
@@ -63,7 +63,7 @@ void CPBRConverterComponent::ProcessQueue()
 		return;
 	auto hMat = item.hMaterial;
 	auto hMdl = item.hModel;
-	item.job.SetCompletionHandler([this,hMat,hMdl](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+	item.job.SetCompletionHandler([this,hMat,hMdl](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -112,16 +112,16 @@ void CPBRConverterComponent::ApplyAOMap(CMaterial &mat,const std::string &aoName
 	ufile::remove_extension_from_filename(nameNoExt);
 	client->LoadMaterial(nameNoExt,true,true); // Reload material immediately
 }
-void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,util::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
+void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
 {
 	Con::cout<<"Ambient occlusion map has been generated for material '"<<mat.GetName()<<"' of model '"<<mdl.GetName()<<"'! Saving texture file..."<<Con::endl;
 
-	ImageWriteInfo imgWriteInfo {};
-	imgWriteInfo.alphaMode = ImageWriteInfo::AlphaMode::None;
-	imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;
-	imgWriteInfo.flags = ImageWriteInfo::Flags::GenerateMipmaps;
-	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
-	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::GradientMap;
+	uimg::TextureInfo imgWriteInfo {};
+	imgWriteInfo.alphaMode = uimg::TextureInfo::AlphaMode::None;
+	imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+	imgWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
+	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
+	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::GradientMap;
 
 	std::string materialsRootDir = "materials/";
 	auto matName = materialsRootDir +mat.GetName();

@@ -1,11 +1,11 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
-#include "pragma/util/util_image.hpp"
-#include <pragma/util/stb_image.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <util_image.hpp>
+#include <util_image_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 
@@ -45,7 +45,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 }
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr f,uint32_t resolution)
 {
-	auto imgBuffer = pragma::image::load_image(f,pragma::image::PixelFormat::Float);
+	auto imgBuffer = uimg::load_image(f,uimg::PixelFormat::Float);
 	if(imgBuffer == nullptr)
 		return nullptr;
 	prosper::util::ImageCreateInfo createInfo {};

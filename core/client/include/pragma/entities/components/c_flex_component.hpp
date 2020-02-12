@@ -18,10 +18,19 @@ namespace pragma
 		using BaseFlexComponent::SetFlexController;
 		virtual bool GetFlexController(uint32_t flexId,float &val) const override;
 		bool CalcFlexValue(uint32_t flexId,float &val) const;
+		const std::vector<float> &GetFlexWeights() const;
+		float GetFlexWeight(uint32_t flexId) const;
+		bool GetFlexWeight(uint32_t flexId,float &outWeight) const;
+		void SetFlexWeight(uint32_t flexId,float weight);
 		void UpdateSoundPhonemes(CALSound &snd);
+		void UpdateFlexWeights();
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
+		bool UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache=true);
+		void UpdateEyeFlexes();
+		void UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx);
 		void UpdateFlexControllers();
+		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 
 		// Flex controllers
 		struct FlexControllerInfo
@@ -31,6 +40,8 @@ namespace pragma
 			float endTime = 0.f;
 		};
 		std::unordered_map<uint32_t,FlexControllerInfo> m_flexControllers = {};
+		std::vector<float> m_flexWeights = {};
+		std::vector<bool> m_updatedFlexWeights = {};
 	};
 };
 

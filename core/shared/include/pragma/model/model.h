@@ -106,6 +106,11 @@ struct DLLNETWORK Eyeball
 	float irisScale = 0.f;
 	std::array<int32_t,3> upperFlexDesc = {};
 	std::array<int32_t,3> lowerFlexDesc = {};
+	std::array<float,3> upperTarget; // Angle in radians of raised, neutral, and lowered lid positions
+	std::array<float,3> lowerTarget;
+
+	int32_t upperLidFlexDesc = -1; // Index of flex desc that actual lid flexes look to
+	int32_t lowerLidFlexDesc = -1;
 };
 
 #define MODEL_NO_MESH (unsigned int)(-1)

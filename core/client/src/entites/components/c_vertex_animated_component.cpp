@@ -17,6 +17,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
+#pragma optimize("",off)
 luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
@@ -48,7 +49,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 		m_maxVertexAnimations += va->GetMeshAnimations().size();
 	if(m_maxVertexAnimations == 0u)
 		return;
-	m_maxVertexAnimations = 500u;
+	// m_maxVertexAnimations = 500u;
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
 	createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
@@ -86,15 +87,21 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 	auto idx = 0u;
 	auto &vertAnims = mdl->GetVertexAnimations();
 
-	/// Test
-	//auto flexIdTest = 0u;
-	//mdl->GetFlexId("OpenLowerLipL",flexIdTest);
 	auto whFlexComponent = ent.GetComponent<CFlexComponent>();
 	if(whFlexComponent.expired())
 		return;
-	for(auto &flex : mdl->GetFlexes())
+	// TODO: This should be in the CFlexComponent component code, not here!
+	auto &flexWeights = whFlexComponent->GetFlexWeights();
+	auto &flexes = mdl->GetFlexes();
+	assert(flexes.size() == flexWeights.size());
+	auto numFlexes = umath::min(flexes.size(),flexWeights.size());
+	for(auto flexId=decltype(numFlexes){0u};flexId<numFlexes;++flexId)
 	{
-		auto flexId = idx++;
+		auto flexWeight = flexWeights.at(flexId);
+		if(flexWeight == 0.f)
+			continue;
+
+		auto &flex = flexes.at(flexId);
 		//if(flexId == 0u)//flexId != 19u) // TODO; Flex id 19 = "AU1R"
 		//	continue;
 		auto *va = flex.GetVertexAnimation();
@@ -114,16 +121,6 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 		auto vaId = it -vertAnims.begin();
 		auto frameId = itFrame -frames.begin();
 
-		auto flexVal = 0.f;
-		// TODO: This doesn't really belong here and should go into flex component implementation instead!
-		if(whFlexComponent->CalcFlexValue(flexId,flexVal) == false)// || flexVal == 0.f)
-			continue;
-		//if(flexId != flexIdTest)
-		//	continue;
-		//flexVal = 1.f;
-		//if(umath::abs(flexVal) > 0.01f)
-		//	Con::cout<<flex.GetName()<<": "<<flexVal<<Con::endl;
-
 		auto &meshAnims = va->GetMeshAnimations();
 		for(auto &meshAnim : meshAnims)
 		{
@@ -133,7 +130,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			auto &frames = meshAnim->GetFrames();
 			if(frames.empty() == true)
 				continue;
-			auto cycle = flexVal *(frames.size() -1);
+			auto cycle = flexWeight *(frames.size() -1);
 			auto fraction = fmodf(cycle,1.f);
 			//auto frameId = umath::min(static_cast<uint32_t>(umath::floor(cycle)),static_cast<uint32_t>(frames.size() -1));
 			auto nextFrameId = umath::min(static_cast<uint32_t>(frameId +1),static_cast<uint32_t>(frames.size() -1));
@@ -156,7 +153,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			vaData.srcFrameOffset = srcFrameOffset;
 			vaData.dstFrameOffset = dstFrameOffset;
 			//static auto defFraction = 1.f; // TODO
-			vaData.blend = flexVal;//defFraction;//fraction;
+			vaData.blend = flexWeight;//defFraction;//fraction;
 
 			//
 			m_vertexAnimationSlots.push_back({});
@@ -164,12 +161,12 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			info.vertexAnimationId = vaId;
 			info.frameId = frameId;
 			info.nextFrameId = nextFrameId;
-			info.blend = flexVal;
+			info.blend = flexWeight;
 			info.mesh = subMesh->shared_from_this();
 			//
 
 			if(m_activeVertexAnimations >= m_maxVertexAnimations)
-				goto endLoop;
+				goto endLoop; // TODO: This should never be reached, but in some cases it does. FIXME
 		}
 	}
 endLoop:
@@ -231,3 +228,4 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 	}
 	return true;
 }
+#pragma optimize("",on)

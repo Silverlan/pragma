@@ -11,7 +11,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pr_dds.hpp>
+#include <sharedutils/util_library.hpp>
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
@@ -210,6 +210,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// TODO: Extract ambient occlusion from diffuse map, if possible
 	fAddGenericTexture(Material::ALBEDO_MAP_IDENTIFIER,matTraditional.GetDiffuseMap()); // Albedo map
 	fAddGenericTexture(Material::NORMAL_MAP_IDENTIFIER,matTraditional.GetNormalMap()); // Normal map
+	fAddGenericTexture(Material::PARALLAX_MAP_IDENTIFIER,matTraditional.GetParallaxMap()); // Parallax map
 	fAddGenericTexture(Material::AO_MAP_IDENTIFIER,matTraditional.GetAmbientOcclusionMap()); // Ambient occlusion map
 	auto hasSpecularMap = fAddGenericTexture(Material::SPECULAR_MAP_IDENTIFIER,matTraditional.GetSpecularMap()); // Specular/Glossiness map
 	fAddGenericTextureByIdentifier(Material::WRINKLE_STRETCH_MAP_IDENTIFIER); // Wrinkle stretch map

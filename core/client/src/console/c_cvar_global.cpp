@@ -39,8 +39,8 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/console/command_options.hpp>
-#include <pragma/util/util_image.hpp>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image.hpp>
+#include <util_image_buffer.hpp>
 #include <wrappers/memory_block.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -294,7 +294,7 @@ void CMD_cl_dump_netmessages(NetworkState*,pragma::BasePlayerComponent*,std::vec
 }
 #endif
 
-static std::string get_screenshot_name(Game *game,pragma::image::ImageFormat format)
+static std::string get_screenshot_name(Game *game,uimg::ImageFormat format)
 {
 	std::string map;
 	if(game == nullptr)
@@ -308,7 +308,7 @@ static std::string get_screenshot_name(Game *game,pragma::image::ImageFormat for
 		path = "screenshots\\";
 		path += map;
 		path += ustring::fill_zeroes(std::to_string(i),4);
-		path += "." +pragma::image::get_image_output_format_extension(format);
+		path += "." +uimg::get_image_output_format_extension(format);
 		i++;
 	}
 	while(FileManager::Exists(path.c_str()/*,fsys::SearchFlags::Local*/));
@@ -337,14 +337,14 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 		// A raytracing screenshot has been requested; We'll have to re-render the scene with raytracing enabled
 
-		auto format = pragma::image::ImageFormat::PNG;
+		auto format = uimg::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");
 		if(itFormat != commandOptions.end())
 		{
 			std::string customFormat {};
 			if(itFormat->second.parameters.empty() == false)
 				customFormat = itFormat->second.parameters.front();
-			auto eCustomFormat = pragma::image::string_to_image_output_format(customFormat);
+			auto eCustomFormat = uimg::string_to_image_output_format(customFormat);
 			if(eCustomFormat.has_value())
 				format = *eCustomFormat;
 			else
@@ -375,11 +375,11 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		if(itQuality != commandOptions.end() && itQuality->second.parameters.empty() == false)
 			quality = util::to_float(itQuality->second.parameters.front());
 
-		auto toneMapping = util::ImageBuffer::ToneMapping::GammaCorrection;
+		auto toneMapping = uimg::ImageBuffer::ToneMapping::GammaCorrection;
 		auto itToneMapping = commandOptions.find("tone_mapping");
 		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false)
 		{
-			auto customToneMapping = pragma::image::string_to_tone_mapping(itToneMapping->second.parameters.front());
+			auto customToneMapping = uimg::string_to_tone_mapping(itToneMapping->second.parameters.front());
 			if(customToneMapping.has_value() == false)
 				Con::cwar<<"WARNING: '"<<itToneMapping->second.parameters.front()<<"' is not a valid tone mapper!"<<Con::endl;
 			else
@@ -402,7 +402,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 		if(job.IsValid())
 		{
-			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+			job.SetCompletionHandler([format,quality,toneMapping](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 				if(worker.IsSuccessful() == false)
 				{
 					Con::cwar<<"WARNING: Raytraced screenshot failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -420,7 +420,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				auto imgBuffer = worker.GetResult();
 				if(imgBuffer->IsHDRFormat())
 					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
-				if(pragma::image::save_image(f,*imgBuffer,format,quality) == false)
+				if(uimg::save_image(f,*imgBuffer,format,quality) == false)
 					Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
 
 				// Obsolete
@@ -555,7 +555,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 	if(imgScreenshot == nullptr)
 		return;
-	auto path = get_screenshot_name(game,pragma::image::ImageFormat::TGA); // TODO
+	auto path = get_screenshot_name(game,uimg::ImageFormat::TGA); // TODO
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 	if(f == nullptr)
 		return;

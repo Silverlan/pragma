@@ -15,7 +15,7 @@
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_sampler.hpp>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
 #include <pragma/console/command_options.hpp>
 #include <pragma/util/util_game.hpp>
 
@@ -459,7 +459,7 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 		Con::cwar<<"WARNING: Unable to initialize cycles scene for lightmap baking!"<<Con::endl;
 		return;
 	}
-	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([hdrOutput](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Unable to bake lightmaps: "<<worker.GetResultMessage()<<Con::endl;
@@ -471,7 +471,7 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 		if(hdrOutput == false)
 		{
 			// No HDR output, but we'll still use HDR data
-			imgBuffer->Convert(util::ImageBuffer::Format::RGBA16);
+			imgBuffer->Convert(uimg::ImageBuffer::Format::RGBA16);
 		}
 
 		auto tex = CLightMapComponent::CreateLightmapTexture(imgBuffer->GetWidth(),imgBuffer->GetHeight(),reinterpret_cast<uint16_t*>(imgBuffer->GetData()));

@@ -710,6 +710,10 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 	classDef.def("CloseMenu",CloseMenu);
 	classDef.def("ToggleMenu",ToggleMenu);
 	classDef.def("IsMenuOpen",IsMenuOpen);
+	classDef.def("GetSelectedOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&)>([](lua_State *l,WIDropDownMenuHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushInt(l,static_cast<::WIDropDownMenu*>(hPanel.get())->GetSelectedOption());
+	}));
 }
 
 void Lua::WIText::register_class(luabind::class_<WITextHandle,WIHandle> &classDef)

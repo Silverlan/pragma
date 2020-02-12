@@ -69,7 +69,7 @@ namespace pragma
 	class CLightDirectionalComponent;
 	class CCameraComponent;
 };
-namespace util {class ImageBuffer;};
+namespace uimg {class ImageBuffer; struct TextureInfo;};
 namespace prosper {class DescriptorSetGroup; class Image;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -371,12 +371,12 @@ public:
 	bool GetActionInput(Action action);
 
 	// Util
-	bool SaveImage(prosper::Image &image,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo) const;
+	bool SaveImage(prosper::Image &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const;
 	bool SaveImage(
-		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
-		const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false
+		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+		const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap=false
 	) const;
-	bool SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap=false) const;
+	bool SaveImage(uimg::ImageBuffer &imgBuffer,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap=false) const;
 
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;

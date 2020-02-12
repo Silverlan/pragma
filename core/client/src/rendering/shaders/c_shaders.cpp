@@ -41,6 +41,7 @@
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
@@ -95,6 +96,7 @@ void CGame::InitShaders()
 
 	shaderManager.RegisterShader("raytracing",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
+	shaderManager.RegisterShader("eye",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	shaderManager.RegisterShader("unlit",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);});

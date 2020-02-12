@@ -9,7 +9,8 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_image_view.hpp>
 #include <sharedutils/util_library.hpp>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
+#include <util_texture_info.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <cmaterialmanager.h>
 #include <texturemanager/texturemanager.h>
@@ -17,7 +18,6 @@
 #include <wgui/types/wirect.h>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
-#include <pragma/util/stb_image_write.h>
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
@@ -32,7 +32,6 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
-#include "pr_dds.hpp"
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -113,7 +112,7 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 	auto jobId = m_nextJobIndex++;
 	auto &job = jobs.at(jobId);
 	auto preprocessCompletionHandler = job.GetCompletionHandler();
-	job.SetCompletionHandler([this,jobId,preprocessCompletionHandler](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([this,jobId,preprocessCompletionHandler](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for reflection probe has failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -365,9 +364,9 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	const std::string pathBrdf = "materials/env/brdf.ktx";
 	if(FileManager::Exists(pathBrdf) == false)
 	{
-		ImageWriteInfo imgWriteInfo {};
-		imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R16G16B16A16_Float;
-		imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::HDRColorMap;
+		uimg::TextureInfo imgWriteInfo {};
+		imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
+		imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
 		if(c_game->SaveImage(*imgBrdf,"materials/env/brdf",imgWriteInfo) == false)
 		{
 			fErrorHandler("Unable to save BRDF map!");
@@ -375,9 +374,9 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 		}
 	}
 
-	ImageWriteInfo imgWriteInfo {};
-	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R16G16B16A16_Float;
-	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::HDRColorMap;
+	uimg::TextureInfo imgWriteInfo {};
+	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
+	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
 	auto prefix = identifier +"_";
 	if(c_game->SaveImage(*imgPrefilter,absPath +prefix +"prefilter",imgWriteInfo) == false)
 	{
@@ -400,7 +399,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	return mat->Save(relPath +identifier +".wmi");
 }
 
-util::ParallelJob<std::shared_ptr<util::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
+util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
 	uint32_t width,uint32_t height,uint32_t layerIndex,
 	const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 )
@@ -428,14 +427,14 @@ util::ParallelJob<std::shared_ptr<util::ImageBuffer>> CReflectionProbeComponent:
 	// Top and bottom layers have to be flipped vertically, all others horizontally.
 	// Most likely to do with the view matrices being set up incorrectly.
 	auto flipVertically = (layerIndex == 2 || layerIndex == 3);
-	std::shared_ptr<util::ImageBuffer> imgBuffer = nullptr;
+	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
 	renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
 		return ent.IsStatic();
 	};
 	auto job = rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
-	job.SetCompletionHandler([flipVertically](util::ParallelWorker<std::shared_ptr<util::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([flipVertically](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for IBL reflections has failed: "<<worker.GetResultMessage()<<Con::endl;

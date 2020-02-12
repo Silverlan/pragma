@@ -422,8 +422,44 @@ void Lua::Model::register_class(
 	classDefEyeball.def_readwrite("forward",&::Eyeball::forward);
 	classDefEyeball.def_readwrite("irisMaterialIndex",&::Eyeball::irisMaterialIndex);
 	classDefEyeball.def_readwrite("irisScale",&::Eyeball::irisScale);
-	classDefEyeball.def_readwrite("upperFlexDesc",&::Eyeball::upperFlexDesc,luabind::return_stl_iterator(),luabind::return_stl_iterator());
-	classDefEyeball.def_readwrite("lowerFlexDesc",&::Eyeball::lowerFlexDesc,luabind::return_stl_iterator(),luabind::return_stl_iterator());
+	classDefEyeball.def("GetUpperFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushInt(l,eyeball.upperFlexDesc.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefEyeball.def("GetLowerFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(eyeball.lowerFlexDesc.size()){0u};i<eyeball.lowerFlexDesc.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushInt(l,eyeball.lowerFlexDesc.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefEyeball.def("GetUpperTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(eyeball.upperTarget.size()){0u};i<eyeball.upperTarget.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushNumber(l,eyeball.upperTarget.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefEyeball.def("GetLowerTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(eyeball.lowerTarget.size()){0u};i<eyeball.lowerTarget.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushNumber(l,eyeball.lowerTarget.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	classDefEyeball.def_readwrite("lowerLidFlexDesc",&::Eyeball::lowerLidFlexDesc);
+	classDefEyeball.def_readwrite("upperLidFlexDesc",&::Eyeball::upperLidFlexDesc);
 	classDef.scope[classDefEyeball];
 
 	// Flex

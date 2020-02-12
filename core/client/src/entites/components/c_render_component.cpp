@@ -354,9 +354,17 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 	auto frameId = c_engine->GetLastFrameId();
 	if(frameId != m_lastRender)
 	{
-		auto pVertexAnimatedComponented = ent.GetComponent<pragma::CVertexAnimatedComponent>();
-		if(pVertexAnimatedComponented.valid())
-			pVertexAnimatedComponented->UpdateVertexAnimationBuffer(drawCmd);
+		auto pAnimC = ent.GetComponent<pragma::CAnimatedComponent>();
+		if(pAnimC.valid())
+			pAnimC->UpdateEyeballs(); // TODO: Move this to CAnimatedComponent code
+
+		auto pFlexComponent = ent.GetComponent<pragma::CFlexComponent>();
+		if(pFlexComponent.valid())
+			pFlexComponent->UpdateFlexWeights(); // TODO: Move this to CFlexComponent code
+
+		auto pVertexAnimatedComponent = ent.GetComponent<pragma::CVertexAnimatedComponent>();
+		if(pVertexAnimatedComponent.valid())
+			pVertexAnimatedComponent->UpdateVertexAnimationBuffer(drawCmd); // TODO: Move this to CVertexAnimatedComponent code
 		auto pAttComponent = ent.GetComponent<CAttachableComponent>();
 		if(pAttComponent.valid())
 		{

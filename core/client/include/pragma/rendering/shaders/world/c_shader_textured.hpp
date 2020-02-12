@@ -122,10 +122,10 @@ namespace pragma
 
 		struct PushConstants
 		{
-			Vector3 clipPlane;
+			Vector4 clipPlane; // w is unused
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
-			std::array<float,3> padding; // Padding to vec4
+			Vector2 padding; // Padding to vec4
 		};
 
 		struct MaterialData

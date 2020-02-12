@@ -66,5 +66,27 @@ void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 				Lua::PushNumber(l,hEnt->GetFlexControllerScale());
 		}));
 	defCFlex.def("CalcFlexValue",&Lua::Flex::CalcFlexValue);
+	defCFlex.def("GetFlexWeights",static_cast<void(*)(lua_State*,CFlexHandle&)>([](lua_State *l,CFlexHandle &hEnt) {
+		pragma::Lua::check_component(l,hEnt);
+		auto &flexWeights = hEnt->GetFlexWeights();
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(flexWeights.size()){0u};i<flexWeights.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::PushNumber(l,flexWeights.at(i));
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	defCFlex.def("GetFlexWeight",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>([](lua_State *l,CFlexHandle &hEnt,uint32_t flexId) {
+		pragma::Lua::check_component(l,hEnt);
+		float weight;
+		if(hEnt->GetFlexWeight(flexId,weight) == false)
+			return;
+		Lua::PushNumber(l,weight);
+	}));
+	defCFlex.def("SetFlexWeight",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float)>([](lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float weight) {
+		pragma::Lua::check_component(l,hEnt);
+		hEnt->SetFlexWeight(flexId,weight);
+	}));
 	entsMod[defCFlex];
 }

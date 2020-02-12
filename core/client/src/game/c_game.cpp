@@ -89,6 +89,7 @@
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/level/level_info.hpp>
 #include <sharedutils/util_library.hpp>
+#include <util_image.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -1766,51 +1767,32 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 }
 std::shared_ptr<al::Effect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
 
-bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const ImageWriteInfo &imageWriteInfo) const
+bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const
 {
-	std::string err;
-	auto libDds = client->InitializeLibrary("pr_dds",&err);
-	if(libDds == nullptr)
-		return false;
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	auto *fSaveImage = libDds->FindSymbolAddress<bool(*)(prosper::Image&,const std::string&,const ImageWriteInfo&,const std::function<void(const std::string&)>&)>("save_prosper_image");
-	return fSaveImage && fSaveImage(image,fileName,imageWriteInfo,[fileName](const std::string &err) {
+	return prosper::util::save_texture(fileName,image,imageWriteInfo,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 
 bool CGame::SaveImage(
-	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,
-	const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap
+	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+	const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap
 ) const
 {
-	std::string err;
-	auto libDds = client->InitializeLibrary("pr_dds",&err);
-	if(libDds == nullptr)
-		return false;
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	auto *fSaveImage = libDds->FindSymbolAddress<
-		bool(*)(const std::vector<std::vector<const void*>>&,uint32_t,uint32_t,const std::string&,const ImageWriteInfo&,bool,const std::function<void(const std::string&)>&)
-	>("save_data_image");
-	return fSaveImage && fSaveImage(imgLayerMipmapData,width,height,fileName,imageWriteInfo,cubemap,[fileName](const std::string &err) {
+	return uimg::save_texture(fileName,imgLayerMipmapData,width,height,szPerPixel,imageWriteInfo,cubemap,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
 
-bool CGame::SaveImage(util::ImageBuffer &imgBuffer,const std::string &fileName,const struct ImageWriteInfo &imageWriteInfo,bool cubemap) const
+bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap) const
 {
-	std::string err;
-	auto libDds = client->InitializeLibrary("pr_dds",&err);
-	if(libDds == nullptr)
-		return false;
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	auto *fSaveImage = libDds->FindSymbolAddress<
-		bool(*)(util::ImageBuffer&,const std::string&,const ImageWriteInfo&,bool,const std::function<void(const std::string&)>&)
-	>("save_buffer_image");
-	return fSaveImage && fSaveImage(imgBuffer,fileName,imageWriteInfo,cubemap,[fileName](const std::string &err) {
+	return uimg::save_texture(fileName,imgBuffer,imageWriteInfo,cubemap,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }

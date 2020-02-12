@@ -1,12 +1,10 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include <prosper_util_square_shape.hpp>
-#include <pragma/util/stb_image.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <pr_dds.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 

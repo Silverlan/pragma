@@ -8,9 +8,9 @@
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_file.h>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
+#include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pr_dds.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -69,7 +69,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	auto matName = mat.GetName();
 	ufile::remove_extension_from_filename(matName);
 
-	auto containerFormat = ImageWriteInfo::ContainerFormat::KTX;
+	auto containerFormat = uimg::TextureInfo::ContainerFormat::KTX;
 	auto ext = "ktx";
 	if(FileManager::Exists("materials/" +matName +"." +ext))
 		return true; // Skybox texture already exists; There's nothing for us to do
@@ -188,7 +188,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	}
 	c_engine->FlushSetupCommandBuffer();
 
-	std::vector<std::vector<std::shared_ptr<util::ImageBuffer>>> cubemapBuffers {};
+	std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> cubemapBuffers {};
 	cubemapBuffers.resize(numLayers);
 	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
 	{
@@ -198,7 +198,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 		{
 			auto &imgBufferInfo = imageBufferInfos.at(iLayer *numMipmaps +iMipmap);
 
-			auto imgBuffer = util::ImageBuffer::Create(imgBufferInfo.width,imgBufferInfo.height,util::ImageBuffer::Format::RGBA8);
+			auto imgBuffer = uimg::ImageBuffer::Create(imgBufferInfo.width,imgBufferInfo.height,uimg::ImageBuffer::Format::RGBA8);
 			buf->Read(imgBufferInfo.bufferOffset,imgBufferInfo.bufferSize,imgBuffer->GetData());
 			mipmapBuffers.push_back(imgBuffer);
 		}
@@ -214,13 +214,14 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 	}
 
 	// Save the cubemap image on disk; It will automatically be reloaded
-	ImageWriteInfo imgWriteInfo {};
-	imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;//KTX;;
-	imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
-	imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::ColorMap;
-	imgWriteInfo.wrapMode = ImageWriteInfo::WrapMode::Clamp;
+	uimg::TextureInfo imgWriteInfo {};
+	imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;//KTX;;
+	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
+	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
+	imgWriteInfo.wrapMode = uimg::TextureInfo::WrapMode::Clamp;
 	auto fullPath = "addons/converted/materials/" +matName;
-	if(c_game->SaveImage(ptrCubemapBuffers,largestWidth,largestHeight,fullPath,imgWriteInfo,true))
+	auto szPerPixel = prosper::util::get_byte_size(Anvil::Format::R8G8B8A8_UNORM);
+	if(c_game->SaveImage(ptrCubemapBuffers,largestWidth,largestHeight,szPerPixel,fullPath,imgWriteInfo,true))
 	{
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;
 		auto *mat = client->CreateMaterial("skybox");

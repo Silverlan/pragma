@@ -135,7 +135,7 @@ void pragma::level::transform_class(
 		}
 		return it->second;
 	};
-	const auto fGetLightColor = [&fGetKeyValue](const std::string &lightKey,const std::string &lightHDRKey,bool &bHdr) -> Vector4 {
+	const auto fGetLightColor = [&fGetKeyValue](const std::string &lightKey,const std::string &lightHDRKey,bool &bHdr,bool isEnvLight) -> Vector4 {
 		auto &light = fGetKeyValue(lightKey);
 		auto &lightHdr = fGetKeyValue(lightHDRKey);
 
@@ -169,7 +169,11 @@ void pragma::level::transform_class(
 			//lightColor *= 1.6f;
 		}
 		else
-			lightColor *= 0.02f;
+		{
+			lightColor *= 0.02f *15;
+			if(isEnvLight)
+				lightColor *= 0.1f;
+		}
 		auto rgbMax = umath::max(lightColor.x,lightColor.y,lightColor.z);
 		if(rgbMax > 255.f)
 		{
@@ -243,7 +247,7 @@ void pragma::level::transform_class(
 		outKeyValues.insert(std::make_pair("spawnflags",std::to_string(LIGHT_SOURCE_FLAGS)));
 
 		auto bHdr = false;
-		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
+		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr,false);
 		auto lightIntensity = lightColor[3];
 		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
 		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
@@ -262,7 +266,7 @@ void pragma::level::transform_class(
 		outKeyValues.insert(std::make_pair("innercutoff",fGetKeyValue("_inner_cone")));
 
 		auto bHdr = false;
-		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
+		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr,false);
 		auto lightIntensity = lightColor[3];
 		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
 		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
@@ -291,14 +295,14 @@ void pragma::level::transform_class(
 		className = "env_light_environment";
 
 		auto bHdr = false;
-		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr);
+		auto lightColor = fGetLightColor("_light","_lightHDR",bHdr,true);
 		auto lightIntensity = lightColor[3];
 		outKeyValues.insert(std::make_pair("lightcolor",std::to_string(lightColor[0]) +" " +std::to_string(lightColor[1]) +" " +std::to_string(lightColor[2])));
 		outKeyValues.insert(std::make_pair("light_intensity",std::to_string(lightIntensity)));
 		outKeyValues.insert(std::make_pair("light_intensity_type",std::to_string(umath::to_integral(pragma::BaseEnvLightComponent::LightIntensityType::Lux))));
 
 		bHdr = false;
-		auto ambientColor = fGetLightColor("_ambient","_ambientHDR",bHdr);
+		auto ambientColor = fGetLightColor("_ambient","_ambientHDR",bHdr,false);
 		if(bHdr == true)
 			ambientColor *= 0.5f;
 		else

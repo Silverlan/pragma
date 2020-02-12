@@ -29,7 +29,7 @@
 #include <misc/framebuffer_create_info.h>
 #include <misc/image_create_info.h>
 #include <misc/image_view_create_info.h>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
 #include "pragma/model/vk_mesh.h"
 
 extern DLLCENGINE CEngine *c_engine;
@@ -575,9 +575,9 @@ int Lua::Vulkan::create_descriptor_set(lua_State *l)
 int Lua::Vulkan::create_image(lua_State *l)
 {
 	auto arg = 1;
-	if(Lua::IsType<::util::ImageBuffer>(l,arg))
+	if(Lua::IsType<uimg::ImageBuffer>(l,arg))
 	{
-		auto &imgBuffer = Lua::Check<::util::ImageBuffer>(l,arg);
+		auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,arg);
 		auto img = prosper::util::create_image(c_engine->GetDevice(),imgBuffer);
 		if(img == nullptr)
 			return 0;

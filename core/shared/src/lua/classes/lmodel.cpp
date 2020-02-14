@@ -421,6 +421,8 @@ void Lua::Model::register_class(
 	classDefEyeball.def_readwrite("up",&::Eyeball::up);
 	classDefEyeball.def_readwrite("forward",&::Eyeball::forward);
 	classDefEyeball.def_readwrite("irisMaterialIndex",&::Eyeball::irisMaterialIndex);
+	classDefEyeball.def_readwrite("maxDilationFactor",&::Eyeball::maxDilationFactor);
+	classDefEyeball.def_readwrite("irisUvRadius",&::Eyeball::irisUvRadius);
 	classDefEyeball.def_readwrite("irisScale",&::Eyeball::irisScale);
 	classDefEyeball.def("GetUpperFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
 		auto t = Lua::CreateTable(l);

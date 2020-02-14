@@ -14,7 +14,11 @@ namespace pragma
 		{
 			Vector4 irisProjectionU = {};
 			Vector4 irisProjectionV = {};
-			Vector3 eyeballOrigin = {};
+			Vector4 eyeOrigin = {};
+
+			float maxDilationFactor = 1.f;
+			float dilationFactor = 0.5f;
+			float irisUvRadius = 0.2f;
 		};
 #pragma pack(pop)
 

@@ -367,6 +367,12 @@ bool import::load_mdl(
 	umath::negate(eyePos.z);
 	mdlInfo.model.SetEyeOffset(eyePos);
 
+	if(header.studiohdr2index != 0)
+	{
+		f->Seek(offset +header.studiohdr2index);
+		mdlInfo.header2 = f->Read<mdl::studiohdr2_t>();
+	}
+
 	// Read includes
 	f->Seek(offset +header.includemodelindex);
 	for(auto i=decltype(header.numincludemodels){0};i<header.numincludemodels;++i)
@@ -1397,6 +1403,11 @@ std::shared_ptr<Model> import::load_mdl(
 	it = files.find("vtx");
 	std::vector<std::shared_ptr<ModelSubMesh>> skipSharedMeshTransforms {}; // Skip vertex transformations for these meshes, because they use shared vertices from other meshes
 
+	auto fMaxEyeDeflection = 30.f;
+	if(mdlInfo.header2.has_value() && mdlInfo.header2->flMaxEyeDeflection != 0.f)
+		fMaxEyeDeflection = umath::rad_to_deg(mdlInfo.header2->flMaxEyeDeflection);
+	mdl.SetMaxEyeDeflection(fMaxEyeDeflection);
+
 	// TODO: Add LOD info
 	std::vector<uint32_t> bgBaseMeshGroups = {};
 	std::vector<uint32_t> fixedLod0IndicesToPragmaModelIndices {};
@@ -1443,23 +1454,32 @@ std::shared_ptr<Model> import::load_mdl(
 					for(auto &bpEyeball : model.eyeballs)
 					{
 						auto &stdEyeball = bpEyeball.stdEyeball;
+
+						const auto fConvertVertex = [](const Vector3 &v) {
+							return Vector3{v.x,-v.z,v.y};
+						};
+
 						Eyeball eyeball {};
 						eyeball.name = bpEyeball.name;
-						eyeball.boneIndex = stdEyeball.bone; // TODO Check if this matches Pragma bone index
-						eyeball.origin = stdEyeball.org; // TODO Convert
+						eyeball.boneIndex = stdEyeball.bone;
+						eyeball.origin = fConvertVertex(stdEyeball.org);
 						eyeball.zOffset = stdEyeball.zoffset;
 						eyeball.radius = stdEyeball.radius;
-						eyeball.up = stdEyeball.up;
-						eyeball.forward = stdEyeball.forward;
-						eyeball.irisMaterialIndex = stdEyeball.texture; // TODO: Match with Pragma
+						eyeball.up = fConvertVertex(stdEyeball.up);
+						eyeball.forward = fConvertVertex(stdEyeball.forward);
+						eyeball.irisMaterialIndex = stdEyeball.texture; // This appears to be always 0, will be reassigned via the meshes below
 
 						eyeball.irisScale = stdEyeball.iris_scale;
-						eyeball.upperFlexDesc = stdEyeball.upperflexdesc; // TODO: Match with Pragma
-						eyeball.lowerFlexDesc = stdEyeball.lowerflexdesc; // TODO: Match with Pragma
+						eyeball.upperFlexDesc = stdEyeball.upperflexdesc;
+						eyeball.lowerFlexDesc = stdEyeball.lowerflexdesc;
 						eyeball.upperLidFlexDesc = stdEyeball.upperlidflexdesc;
 						eyeball.lowerLidFlexDesc = stdEyeball.lowerlidflexdesc;
 						eyeball.lowerTarget = stdEyeball.lowertarget;
 						eyeball.upperTarget = stdEyeball.uppertarget;
+
+						// These are always the same in Source
+						eyeball.maxDilationFactor = 1.f;
+						eyeball.irisUvRadius = 0.2f;
 
 						mdl.AddEyeball(eyeball);
 					}
@@ -1497,6 +1517,11 @@ std::shared_ptr<Model> import::load_mdl(
 
 							auto &vtxMesh = vtxLod.meshes[meshIdx];
 							auto &mesh = model.meshes[meshIdx];
+							if(mesh.stdMesh.materialtype == 1)
+							{
+								auto &eyeball = *mdl.GetEyeball(mesh.stdMesh.materialparam);
+								eyeball.irisMaterialIndex = mesh.stdMesh.material;
+							}
 
 							if(lodIdx == 0u)
 							{
@@ -3096,6 +3121,40 @@ std::shared_ptr<Model> import::load_mdl(
 					if(itNewIndex != oldMatIdxToNewIdx.end())
 						subMesh->SetSkinTextureIndex(itNewIndex->second);
 				}
+			}
+		}
+
+		for(auto &eyeball : mdl.GetEyeballs())
+		{
+			auto itNewIndex = oldMatIdxToNewIdx.find(eyeball.irisMaterialIndex);
+			if(itNewIndex != oldMatIdxToNewIdx.end())
+				eyeball.irisMaterialIndex = itNewIndex->second;
+		}
+	}
+
+	// Make sure eyeball index references match with Pragma
+	for(auto &eyeball : mdl.GetEyeballs())
+	{
+		auto &boneIndex = eyeball.boneIndex;
+		if(boneIndex < bones.size())
+		{
+			auto &bone = bones.at(boneIndex);
+			boneIndex = skeleton.LookupBone(bone->GetName());
+		}
+
+		auto &irisMaterialIndex = eyeball.irisMaterialIndex;
+		if(irisMaterialIndex < textureTranslations.size())
+			irisMaterialIndex = textureTranslations.at(irisMaterialIndex);
+		for(auto *flexDescIdxSet : std::vector<std::array<int32_t,3>*>{&eyeball.lowerFlexDesc,&eyeball.upperFlexDesc})
+		{
+			for(auto &flexDescIdx : *flexDescIdxSet)
+			{
+				if(flexDescIdx >= mdlInfo.flexDescs.size())
+					continue;
+				auto &flexDesc = mdlInfo.flexDescs.at(flexDescIdx);
+				uint32_t pragmaIdx;
+				if(mdl.GetFlexId(flexDesc.GetName(),pragmaIdx))
+					flexDescIdx = pragmaIdx;
 			}
 		}
 	}

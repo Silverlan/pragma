@@ -48,9 +48,10 @@ static void VectorIRotate( const float *in1, const Mat3x4& in2, float *out )
 }
 void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 {
-	auto *animC = static_cast<CAnimatedComponent*>(GetEntity().GetAnimatedComponent().get());
-	auto *eyeballData = animC ? animC->GetEyeballData(eyeballIdx) : nullptr;
-	if(animC == nullptr)
+	// TODO: Move this code to eye component
+	auto eyeC = GetEntity().GetComponent<CEyeComponent>();
+	auto *eyeballData = eyeC.valid() ? eyeC->GetEyeballData(eyeballIdx) : nullptr;
+	if(eyeballData == nullptr)
 		return;
 	auto &state = eyeballData->state;
 	Vector3 headup {};

@@ -617,6 +617,8 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 
 		if(version >= 28)
 		{
+			auto maxEyeDeflection = Read<float>();
+			mdl->SetMaxEyeDeflection(maxEyeDeflection);
 			auto &eyeballs = mdl->GetEyeballs();
 			auto numEyeballs = Read<uint32_t>();
 			eyeballs.reserve(numEyeballs);

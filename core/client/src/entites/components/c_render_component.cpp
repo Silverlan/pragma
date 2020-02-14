@@ -352,12 +352,10 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto frameId = c_engine->GetLastFrameId();
-	if(frameId != m_lastRender)
-	{
-		auto pAnimC = ent.GetComponent<pragma::CAnimatedComponent>();
-		if(pAnimC.valid())
-			pAnimC->UpdateEyeballs(); // TODO: Move this to CAnimatedComponent code
 
+	auto firstFrame = (frameId != m_lastRender);
+	if(firstFrame)
+	{
 		auto pFlexComponent = ent.GetComponent<pragma::CFlexComponent>();
 		if(pFlexComponent.valid())
 			pFlexComponent->UpdateFlexWeights(); // TODO: Move this to CFlexComponent code
@@ -398,11 +396,10 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
 			prosper::util::record_update_generic_shader_read_buffer(**drawCmd,*renderBuffer,0ull,sizeof(instanceData),&instanceData);
 		}
-
-		m_lastRender = frameId;
 	}
+	m_lastRender = frameId;
 
-	CEOnUpdateRenderData evData {drawCmd,updateRenderBuffer};
+	CEOnUpdateRenderData evData {drawCmd,updateRenderBuffer,firstFrame};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
 }
 
@@ -584,12 +581,13 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired)
-	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer}
+CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame)
+	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer},firstUpdateThisFrame{firstUpdateThisFrame}
 {}
 void CEOnUpdateRenderData::PushArguments(lua_State *l)
 {
 	Lua::PushBool(l,bufferUpdateRequired);
+	Lua::PushBool(l,firstUpdateThisFrame);
 }
 
 /////////////////

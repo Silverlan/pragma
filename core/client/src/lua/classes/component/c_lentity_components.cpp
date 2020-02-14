@@ -164,6 +164,114 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		Lua::Push(l,bspTree);
 	}));
 
+	auto defCEye = luabind::class_<CEyeHandle,BaseEntityComponentHandle>("EyeComponent");
+	defCEye.def("GetViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
+		pragma::Lua::check_component(l,hEye);
+		Lua::Push<Vector3>(l,hEye->GetViewTarget());
+		}));
+	defCEye.def("SetViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&,const Vector3&)>([](lua_State *l,CEyeHandle &hEye,const Vector3 &viewTarget) {
+		pragma::Lua::check_component(l,hEye);
+		hEye->SetViewTarget(viewTarget);
+		}));
+	defCEye.def("GetEyeShift",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		Lua::Push<Vector3>(l,config->eyeShift);
+		}));
+	defCEye.def("SetEyeShift",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,const Vector3&)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,const Vector3 &eyeShift) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		config->eyeShift = eyeShift;
+		}));
+	defCEye.def("GetEyeJitter",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		Lua::Push<Vector2>(l,config->jitter);
+		}));
+	defCEye.def("SetEyeJitter",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,const Vector2&)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,const Vector2 &eyeJitter) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		config->jitter = eyeJitter;
+		}));
+	defCEye.def("GetEyeSize",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		Lua::PushNumber(l,config->eyeSize);
+		}));
+	defCEye.def("SetEyeSize",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,float)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,float eyeSize) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		config->eyeSize = eyeSize;
+		}));
+	defCEye.def("SetIrisDilation",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,float)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,float dilation) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		config->dilation = dilation;
+		}));
+	defCEye.def("GetIrisDilation",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto *config = hEye->GetEyeballConfig(eyeIndex);
+		if(config == nullptr)
+			return;
+		Lua::PushNumber(l,config->dilation);
+		}));
+	defCEye.def("CalcEyeballPose",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto pose = hEye->CalcEyeballPose(eyeIndex);
+		Lua::Push(l,pose);
+		}));
+	defCEye.def("GetEyeballState",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
+		pragma::Lua::check_component(l,hEye);
+		auto *eyeballData = hEye->GetEyeballData(eyeIndex);
+		if(eyeballData == nullptr)
+			return;
+		auto &eyeballState = eyeballData->state;
+		Lua::Push<pragma::CEyeComponent::EyeballState*>(l,&eyeballState);
+		}));
+	defCEye.def("SetBlinkDuration",static_cast<void(*)(lua_State*,CEyeHandle&,float)>([](lua_State *l,CEyeHandle &hEye,float blinkDuration) {
+		pragma::Lua::check_component(l,hEye);
+		hEye->SetBlinkDuration(blinkDuration);
+	}));
+	defCEye.def("GetBlinkDuration",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
+		pragma::Lua::check_component(l,hEye);
+		Lua::PushNumber(l,hEye->GetBlinkDuration());
+	}));
+	defCEye.def("SetBlinkingEnabled",static_cast<void(*)(lua_State*,CEyeHandle&,bool)>([](lua_State *l,CEyeHandle &hEye,bool blinkingEnabled) {
+		pragma::Lua::check_component(l,hEye);
+		hEye->SetBlinkingEnabled(blinkingEnabled);
+	}));
+	defCEye.def("IsBlinkingEnabled",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
+		pragma::Lua::check_component(l,hEye);
+		Lua::PushBool(l,hEye->IsBlinkingEnabled());
+	}));
+
+	auto defEyeballState = luabind::class_<pragma::CEyeComponent::EyeballState>("EyeballState");
+	defEyeballState.def_readwrite("origin",&pragma::CEyeComponent::EyeballState::origin);
+	defEyeballState.def_readwrite("forward",&pragma::CEyeComponent::EyeballState::forward);
+	defEyeballState.def_readwrite("right",&pragma::CEyeComponent::EyeballState::right);
+	defEyeballState.def_readwrite("up",&pragma::CEyeComponent::EyeballState::up);
+	defEyeballState.def_readwrite("irisProjectionU",&pragma::CEyeComponent::EyeballState::irisProjectionU);
+	defEyeballState.def_readwrite("irisProjectionV",&pragma::CEyeComponent::EyeballState::irisProjectionV);
+	defCEye.scope[defEyeballState];
+
+	defCEye.add_static_constant("EVENT_ON_EYEBALLS_UPDATED",pragma::CEyeComponent::EVENT_ON_EYEBALLS_UPDATED);
+	defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
+	entsMod[defCEye];
+
 	Lua::Render::register_class(l,entsMod);
 	Lua::ModelDef::register_class(l,entsMod);
 	Lua::Animated::register_class(l,entsMod);

@@ -17,6 +17,7 @@
 #include "mdl_optimize.h"
 #include <pragma/model/animation/animation.h>
 #include <pragma/pragma_module.hpp>
+#include <optional>
 
 class ModelSubMesh;
 class NetworkState;
@@ -213,6 +214,22 @@ namespace import
 			std::array<int32_t,1> unused2;
 		};
 
+		struct studiohdr2_t
+		{
+			// ??
+			int32_t srcbonetransform_count;
+			int32_t srcbonetransform_index;
+
+			int32_t illumpositionattachmentindex;
+
+			float flMaxEyeDeflection;	//  If set to 0, then equivalent to cos(30)
+
+			// mstudiolinearbone_t
+			int32_t linearbone_index;
+
+			std::array<int32_t,64> unknown;
+		};
+
 		struct mstudiotexture_t
 		{
 			int32_t sznameindex;
@@ -235,6 +252,7 @@ namespace import
 		{}
 		Model &model;
 		mdl::studiohdr_t header;
+		std::optional<mdl::studiohdr2_t> header2 = {};
 		std::vector<std::string> textures;
 		std::vector<std::string> texturePaths;
 		std::vector<std::shared_ptr<mdl::Bone>> bones;

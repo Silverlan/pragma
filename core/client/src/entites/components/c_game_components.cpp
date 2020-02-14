@@ -113,6 +113,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CBSPLeafComponent>("bsp_leaf");
 	componentManager.RegisterComponentType<pragma::CPointAtTargetComponent>("point_at_target");
 	componentManager.RegisterComponentType<pragma::CRaytracingComponent>("raytracing");
+	componentManager.RegisterComponentType<pragma::CEyeComponent>("eye");
 
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");

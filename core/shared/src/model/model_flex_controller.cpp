@@ -61,6 +61,9 @@ const std::string *Model::GetFlexControllerName(uint32_t id) const
 
 //////////////
 
+void Model::SetMaxEyeDeflection(umath::Degree eyeDeflection) {m_maxEyeDeflection = eyeDeflection;}
+umath::Degree Model::GetMaxEyeDeflection() const {return m_maxEyeDeflection;}
+
 std::vector<Flex>::const_iterator Model::FindFlex(const std::string &name) const {return const_cast<Model*>(this)->FindFlex(name);}
 std::vector<Flex>::iterator Model::FindFlex(const std::string &name)
 {

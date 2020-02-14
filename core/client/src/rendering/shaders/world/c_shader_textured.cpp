@@ -88,9 +88,14 @@ static void initialize_material_settings_buffer()
 {
 	if(g_materialSettingsBuffer)
 		return;
+	// Note: Using a uniform resizable buffer for this doesn't work, because the buffers are used by
+	// descriptor sets, which would have to be updated whenever the buffer is re-allocated (which currently
+	// does not happen automatically). TODO: Implement this? On the other hand, material data
+	// isn't that big to begin with, so maybe just make sure the buffer is large enough for all use cases?
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
+	//bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
+	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *524'288; // ~22 MiB
 	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT | Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
 	g_materialSettingsBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);

@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>
@@ -18,13 +19,11 @@ extern DLLCLIENT CGame *c_game;
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
-ComponentEventId CAnimatedComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
 void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager);
 	EVENT_ON_SKELETON_UPDATED = componentManager.RegisterEvent("ON_SKELETON_UPDATED",std::type_index(typeid(CAnimatedComponent)));
 	EVENT_ON_BONE_MATRICES_UPDATED = componentManager.RegisterEvent("ON_BONE_MATRICES_UPDATED",std::type_index(typeid(CAnimatedComponent)));
-	EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CAnimatedComponent)));
 	EVENT_ON_BONE_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_BONE_BUFFER_INITIALIZED");
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
@@ -105,11 +104,9 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 {
 	BaseAnimatedComponent::OnModelChanged(mdl);
 	m_boneMatrices.clear();
-	m_eyeballData.clear();
 	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
 	m_boneMatrices.resize(mdl->GetBoneCount(),umat::identity());
-	m_eyeballData.resize(mdl->GetEyeballCount());
 	UpdateBoneMatrices();
 	SetBoneBufferDirty();
 

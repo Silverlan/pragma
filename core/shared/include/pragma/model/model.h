@@ -102,6 +102,8 @@ struct DLLNETWORK Eyeball
 	Vector3 up = {};
 	Vector3 forward = {};
 	int32_t irisMaterialIndex = -1;
+	float maxDilationFactor = 1.f;
+	float irisUvRadius = 0.2f;
 
 	float irisScale = 0.f;
 	std::array<int32_t,3> upperFlexDesc = {};
@@ -416,6 +418,9 @@ public:
 	Eyeball *GetEyeball(uint32_t idx);
 	void AddEyeball(const Eyeball &eyeball);
 
+	void SetMaxEyeDeflection(umath::Degree eyeDeflection);
+	umath::Degree GetMaxEyeDeflection() const;
+
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
 protected:
 	virtual void OnMaterialMissing(const std::string &matName);
@@ -447,6 +452,7 @@ private:
 	uint32_t m_subMeshCount = 0u;
 	uint32_t m_vertexCount = 0u;
 	uint32_t m_triangleCount = 0u;
+	umath::Degree m_maxEyeDeflection = 30.f;
 	PhonemeMap m_phonemeMap = {};
 	std::vector<BlendController> m_blendControllers;
 	std::vector<std::shared_ptr<ModelMeshGroup>> m_meshGroups;

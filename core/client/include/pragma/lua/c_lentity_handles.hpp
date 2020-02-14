@@ -92,6 +92,7 @@
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
 #include "pragma/entities/components/c_ownable_component.hpp"
 #include "pragma/entities/components/c_debug_component.hpp"
@@ -211,5 +212,6 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CPBRConverter);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowManager);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadow);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowCSM);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEye);
 
 #endif

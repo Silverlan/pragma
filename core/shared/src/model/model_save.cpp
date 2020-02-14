@@ -896,6 +896,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		// Eyeballs
 		write_offset(f,offIndex +INDEX_OFFSET_EYEBALLS *INDEX_OFFSET_INDEX_SIZE);
 
+		f->Write(GetMaxEyeDeflection());
 		auto &eyeballs = GetEyeballs();
 		f->Write<uint32_t>(eyeballs.size());
 		for(auto &eyeball : eyeballs)

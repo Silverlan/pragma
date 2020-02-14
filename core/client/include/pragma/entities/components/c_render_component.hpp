@@ -166,9 +166,10 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderData
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired);
+		CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame);
 		virtual void PushArguments(lua_State *l) override;
 		const bool bufferUpdateRequired;
+		const bool firstUpdateThisFrame;
 		std::shared_ptr<prosper::PrimaryCommandBuffer> commandBuffer;
 	};
 

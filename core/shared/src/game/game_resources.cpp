@@ -126,19 +126,13 @@ bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
 	return ptrLoadParticle(*nw,path);
 }
 
-bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
+static void init_custom_mount_directories(NetworkState &nw)
 {
-	std::string ext;
-	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
-		return false;
-	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
-	if(ptrConvertModel == nullptr)
-		return false;
 	static auto g_customMountDirsInitialized = false;
 	if(g_customMountDirsInitialized == false)
 	{
 		g_customMountDirsInitialized = true;
-		static auto *ptrAddGameMountPath = reinterpret_cast<void(*)(const std::string&)>(impl::get_module_func(nw,"add_source_engine_game_mount_path"));
+		static auto *ptrAddGameMountPath = reinterpret_cast<void(*)(const std::string&)>(util::impl::get_module_func(&nw,"add_source_engine_game_mount_path"));
 		if(ptrAddGameMountPath)
 		{
 			auto fMountList = FileManager::OpenFile("cfg/mount_source_game_paths.txt","r");
@@ -155,6 +149,28 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 			}
 		}
 	}
+}
+bool util::port_source2_model(NetworkState *nw,const std::string &path,std::string mdlName)
+{
+	std::string ext;
+	if(ufile::get_extension(mdlName,&ext) == false || ext != "vmdl_c")
+		return false;
+	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_source2_model"));
+	if(ptrConvertModel == nullptr)
+		return false;
+	init_custom_mount_directories(*nw);
+	return port_model(nw,path,mdlName,"source2",ptrConvertModel);
+}
+
+bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName)
+{
+	std::string ext;
+	if(ufile::get_extension(mdlName,&ext) == false || ext != "mdl")
+		return false;
+	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
+	if(ptrConvertModel == nullptr)
+		return false;
+	init_custom_mount_directories(*nw);
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);
 }
 

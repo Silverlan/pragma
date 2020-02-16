@@ -13,9 +13,11 @@ link_external_library(fbxsdk)
 link_external_library(util_smdmodel)
 link_external_library(niftools)
 link_external_library(util_dmx)
+link_external_library(util_source2)
 
 add_external_library(fbxsdk)
 add_external_library(lua)
+add_external_library(lz4) # Required for source2 library
 
 add_include_dir(niftools)
 add_include_dir(glm)

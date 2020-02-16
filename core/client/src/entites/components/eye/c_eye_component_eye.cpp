@@ -32,7 +32,29 @@ pragma::CEyeComponent::EyeballData *pragma::CEyeComponent::GetEyeballData(uint32
 	return (eyeballIndex < m_eyeballData.size()) ? &m_eyeballData.at(eyeballIndex) : nullptr;
 }
 
-const Vector3 &pragma::CEyeComponent::GetViewTarget() const {return m_viewTarget;}
+Vector3 pragma::CEyeComponent::GetViewTarget() const
+{
+	if(m_viewTarget.has_value())
+		return *m_viewTarget;
+	constexpr auto dist = 500.f; // Arbitrary distance; just has to be far enough
+	auto &ent = GetEntity();
+	auto forward = ent.GetForward();
+	auto pos = ent.GetPosition() +forward *dist;
+	if(m_eyeAttachmentIndex != std::numeric_limits<uint32_t>::max())
+	{
+		auto mdlC = ent.GetModelComponent();
+		if(mdlC.valid())
+		{
+			Vector3 attPos {};
+			auto attRot = uquat::identity();
+			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
+				pos = attPos +uquat::forward(attRot) *dist; 
+		}
+	}
+	return ClampViewTarget(pos);
+}
+
+void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}
 
 static void angle_to_vector(const EulerAngles &angles,Vector3 &outForward)
 {
@@ -46,7 +68,7 @@ static void angle_to_vector(const EulerAngles &angles,Vector3 &outForward)
 	outForward.y = cp *sy;
 	outForward.z = -sp;
 }
-Vector3 pragma::CEyeComponent::GetClampedViewTarget() const
+Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 {
 	auto flexC = GetEntity().GetComponent<CFlexComponent>();
 	auto mdlC = GetEntity().GetComponent<CModelComponent>();
@@ -123,8 +145,7 @@ Vector3 pragma::CEyeComponent::GetClampedViewTarget() const
 }
 void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 {
-	m_viewTarget = viewTarget;
-	m_viewTarget = GetClampedViewTarget();
+	m_viewTarget = ClampViewTarget(viewTarget);
 }
 pragma::physics::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,physics::Transform *optOutBonePose) const
 {

@@ -229,6 +229,9 @@ set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/z
 set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
 
+set(DEPENDENCY_UTIL_SOURCE2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_UTIL_SOURCE2_LIBRARY util_source2 STATIC)
+
 set(DEPENDENCY_WGUI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/wgui/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_WGUI_LIBRARY wgui)
 unset(WGUI_INCLUDE_DEPENDENCIES CACHE)
@@ -271,6 +274,9 @@ set(OGG_LIBRARIES ${DEPENDENCY_LIBOGG_LIBRARY} CACHE STRING "" FORCE)
 
 set(DEPENDENCY_BZIP2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bzip2 CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_BZIP2_LIBRARY third_party_libs/bzip2/${BINARY_PRAGMA_DIR} bz2)
+
+set(DEPENDENCY_LZ4_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/third_party_libs/lz4/lib CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_LZ4_LIBRARY external_libs/util_source2/third_party_libs/lz4-cmake/${BINARY_PRAGMA_DIR} lz4)
 
 set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
@@ -1100,7 +1106,7 @@ add_dependencies(util_pad zip)
 add_dependencies(pr_pcl util_pcl)
 add_dependencies(niflib_static qhullstatic)
 add_dependencies(util_archive bsa)
-add_dependencies(pr_source util_archive util_dmx niflib_static)
+add_dependencies(pr_source util_archive util_dmx util_source2 niflib_static)
 add_dependencies(pr_dmx util_dmx)
 add_dependencies(pr_video_recorder util_video_recorder)
 add_dependencies(pr_mdleditor util_archive ishared pr_source)

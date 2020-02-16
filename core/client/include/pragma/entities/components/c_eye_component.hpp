@@ -65,7 +65,8 @@ namespace pragma
 		const EyeballData *GetEyeballData(uint32_t eyeballIndex) const;
 		bool GetEyeballProjectionVectors(uint32_t eyeballIndex,Vector4 &outProjU,Vector4 &outProjV) const;
 
-		const Vector3 &GetViewTarget() const;
+		void ClearViewTarget();
+		Vector3 GetViewTarget() const;
 		void SetViewTarget(const Vector3 &viewTarget);
 
 		void SetBlinkDuration(float dur);
@@ -82,13 +83,13 @@ namespace pragma
 	protected:
 		void UpdateBlink();
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
-		Vector3 GetClampedViewTarget() const;
+		Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
 		void UpdateEyeball(const Eyeball &eyeball,uint32_t eyeballIndex);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	private:
 		EyeballConfig m_eyeballConfig = {};
 		std::vector<EyeballData> m_eyeballData = {};
-		Vector3 m_viewTarget = {};
+		std::optional<Vector3> m_viewTarget = {};
 		StateFlags m_stateFlags;
 		std::unordered_map<uint32_t,uint32_t> m_skinMaterialIndexToEyeballIndex = {};
 		util::WeakHandle<CFlexComponent> m_flexC = {};

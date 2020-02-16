@@ -283,6 +283,11 @@ namespace import
 		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,
 		std::vector<std::string> &textures,std::ostream *optLog=nullptr
 	);
+	std::shared_ptr<Model> load_source2_mdl(
+		NetworkState *nw,VFilePtr f,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,bool bCollision,
+		std::vector<std::string> &textures,std::ostream *optLog=nullptr
+	);
 };
 #pragma pack(pop)
 

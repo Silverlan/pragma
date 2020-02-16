@@ -20,6 +20,7 @@ namespace util
 	DLLNETWORK bool port_nif_model(NetworkState *nw,const std::string &path,std::string mdlName);
 	DLLNETWORK bool port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures);
 	DLLNETWORK bool port_hl2_model(NetworkState *nw,const std::string &path,std::string mdlName);
+	DLLNETWORK bool port_source2_model(NetworkState *nw,const std::string &path,std::string mdlName);
 	DLLNETWORK bool port_hl2_particle(NetworkState *nw,const std::string &path);
 	DLLNETWORK bool port_hl2_map(NetworkState *nw,const std::string &path);
 	DLLNETWORK bool port_file(NetworkState *nw,const std::string &path);

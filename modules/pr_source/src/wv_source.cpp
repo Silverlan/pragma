@@ -35,6 +35,7 @@
 #pragma comment(lib,"util_archive.lib")
 #pragma comment(lib,"niflib_static.lib")
 
+#pragma optimize("",off)
 uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name)
 {
 	auto fname = name;
@@ -413,6 +414,30 @@ extern "C" {
 			return false;
 		return load_smd(&nw,animName,mdl,*smd,isCollisionMesh,outTextures);
 	}
+	PRAGMA_EXPORT bool convert_source2_model(
+		NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,
+		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,
+		const std::string &path,const std::string &mdlName,std::ostream *optLog
+	)
+	{
+		std::optional<std::string> sourcePath = {};
+		auto fullPath = path +mdlName +".vmdl_c";
+		auto f = FileManager::OpenFile(fullPath.c_str(),"rb");
+		if(f == nullptr)
+			f = uarch::load(fullPath,&sourcePath);
+
+		if(f == nullptr)
+			return false;
+
+		if(sourcePath.has_value())
+			Con::cout<<"Found model in '"<<*sourcePath<<"'! Porting..."<<Con::endl;
+
+		std::vector<std::string> textures;
+		auto r = ::import::load_source2_mdl(nw,f,fCreateModel,fCallback,true,textures,optLog);
+		if(r == nullptr)
+			return false;
+		return fCallback(r,path,mdlName);
+	}
 	PRAGMA_EXPORT bool convert_hl2_model(
 		NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,
 		const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)> &fCallback,
@@ -520,3 +545,4 @@ extern "C" {
 		return fCallback(mdl,pathRoot,mdlName);
 	}
 };
+#pragma optimize("",on)

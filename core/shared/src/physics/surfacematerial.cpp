@@ -12,6 +12,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
 	: m_physEnv{env}
 {
@@ -117,14 +118,14 @@ void SurfaceMaterialManager::Load(const std::string &path)
 					if(pbr->GetFloat("subsurface_multiplier",&val))
 						physMat.GetPBRInfo().subsurfaceMultiplier = val;
 
-					auto &subsurfaceColor = data->GetValue("subsurface_color");
+					auto &subsurfaceColor = pbr->GetValue("subsurface_color");
 					if(subsurfaceColor != nullptr && typeid(*subsurfaceColor) == typeid(ds::Color))
 						physMat.GetPBRInfo().subsurfaceColor = static_cast<ds::Color&>(*subsurfaceColor).GetValue();
 
 					if(pbr->GetInt("subsurface_method",&ival))
 						physMat.GetPBRInfo().subsurfaceMethod = static_cast<SurfaceMaterial::PBRInfo::SubsurfaceMethod>(ival);
 
-					auto &subsurfaceRadius = data->GetValue("subsurface_radius");
+					auto &subsurfaceRadius = pbr->GetValue("subsurface_radius");
 					if(subsurfaceRadius != nullptr && typeid(*subsurfaceRadius) == typeid(ds::Vector))
 						physMat.GetPBRInfo().subsurfaceRadius = static_cast<ds::Vector&>(*subsurfaceRadius).GetValue();
 				}
@@ -301,3 +302,4 @@ std::ostream &operator<<(std::ostream &out,const SurfaceMaterial &surfaceMateria
 	out<<"SurfaceMaterial["<<surfaceMaterial.GetIndex()<<"]["<<surfaceMaterial.GetIdentifier()<<"]";
 	return out;
 }
+#pragma optimize("",on)

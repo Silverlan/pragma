@@ -10,6 +10,7 @@
 #include <mathutil/uvec.h>
 
 namespace prosper {class UniformResizableBuffer; class DescriptorSet;};
+namespace Intersection {struct LineMeshResult;};
 namespace pragma
 {
 	class CModelComponent;
@@ -23,7 +24,8 @@ namespace pragma
 			None = 0u,
 			RenderBufferDirty = 1u,
 			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
-			HasDepthBias = ExemptFromOcclusionCulling<<1u
+			HasDepthBias = ExemptFromOcclusionCulling<<1u,
+			EnableDepthPass = HasDepthBias<<1u
 		};
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
@@ -45,10 +47,12 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
+		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 
 		unsigned long long &GetLastRenderFrame();
 		void SetLastRenderFrame(unsigned long long &t);
 
+		void GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const;
 		void GetRenderBounds(Vector3 *min,Vector3 *max) const;
 		virtual void SetRenderBounds(Vector3 min,Vector3 max);
 		Sphere GetRenderSphereBounds() const;
@@ -88,7 +92,11 @@ namespace pragma
 		void SetDepthBias(float constantFactor,float biasClamp,float slopeFactor);
 		StateFlags GetStateFlags() const;
 
+		void SetDepthPassEnabled(bool enabled);
+		bool IsDepthPassEnabled() const;
+
 		void SetRenderBufferDirty();
+		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir) const;
 	protected:
 		void UpdateRenderBuffer() const;
 		virtual void UpdateMatrices();
@@ -116,7 +124,7 @@ namespace pragma
 		Vector3 m_renderMaxRot = {};
 		Sphere m_renderSphere = {};
 
-		StateFlags m_stateFlags = StateFlags::RenderBufferDirty;
+		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass));
 		unsigned long long m_lastRender = 0ull;
 		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;

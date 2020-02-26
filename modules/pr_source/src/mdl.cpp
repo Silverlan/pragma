@@ -22,9 +22,12 @@
 #include <pragma/physics/collisionmesh.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_string.h>
+#include <pragma/engine.h>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/game/game_limits.h>
 #include <pragma/physics/transform.hpp>
+
+extern DLLENGINE Engine *engine;
 
 #pragma optimize("",off)
 static const std::unordered_map<std::string,Activity> translateActivities = {
@@ -363,9 +366,10 @@ bool import::load_mdl(
 	}
 
 	auto eyePos = header.eyeposition;
-	umath::swap(eyePos.y,eyePos.z);
-	umath::negate(eyePos.z);
-	mdlInfo.model.SetEyeOffset(eyePos);
+	// TODO: I'm not sure about this. The scout from TF2 has the eye position (-75.8498688,0,0),
+	// So using it for the y-axis should be correct (unless it's relative to something else), but y and z
+	// may be wrong.
+	mdlInfo.model.SetEyeOffset({eyePos.z,-eyePos.x,eyePos.y});
 
 	if(header.studiohdr2index != 0)
 	{
@@ -380,6 +384,7 @@ bool import::load_mdl(
 		auto offset = f->Tell();
 		auto labelOffset = f->Read<int32_t>();
 		auto fileNameOffset = f->Read<int32_t>();
+		auto dataOffset = f->Tell();
 		if(labelOffset != 0)
 		{
 			f->Seek(offset +labelOffset);
@@ -410,23 +415,40 @@ bool import::load_mdl(
 				}
 			}
 		}
+		f->Seek(dataOffset);
 	}
 
-	// Read textures
-	f->Seek(offset +header.textureindex);
-	mdlInfo.textures.reserve(header.numtextures);
-	mdlInfo.texturePaths.reserve(header.numtextures);
 	auto fAddPath = [&mdlInfo](const std::string &fpath) {
 		auto npath = FileManager::GetCanonicalizedPath(fpath);
 		if(npath.empty())
 			return;
 		auto it = std::find_if(mdlInfo.texturePaths.begin(),mdlInfo.texturePaths.end(),[&npath](const std::string &pathOther) {
 			return ustring::compare(npath,pathOther,false);
-		});
+			});
 		if(it != mdlInfo.texturePaths.end())
 			return;
 		mdlInfo.texturePaths.push_back(npath);
 	};
+
+	// Read texture paths
+	f->Seek(offset +header.cdtextureindex);
+	mdlInfo.texturePaths.reserve(mdlInfo.texturePaths.size() +header.numcdtextures);
+	for(auto i=decltype(header.numcdtextures){0};i<header.numcdtextures;++i)
+	{
+		f->Seek(offset +header.cdtextureindex +i *sizeof(int32_t));
+		auto strOffset = f->Read<int32_t>();
+		f->Seek(offset +strOffset);
+		auto stdCdTex = f->ReadString();
+		if(optLog)
+			(*optLog)<<"Adding texture path '"<<stdCdTex<<"'...\n";
+		fAddPath(stdCdTex);
+	}
+	//
+
+	// Read textures
+	f->Seek(offset +header.textureindex);
+	mdlInfo.textures.reserve(header.numtextures);
+	mdlInfo.texturePaths.reserve(mdlInfo.texturePaths.size() +header.numtextures);
 	for(auto i=decltype(header.numtextures){0};i<header.numtextures;++i)
 	{
 		auto stdTexOffset = f->Tell();
@@ -448,20 +470,28 @@ bool import::load_mdl(
 	}
 	//
 
-	// Read texture paths
-	f->Seek(offset +header.cdtextureindex);
-	mdlInfo.texturePaths.reserve(mdlInfo.texturePaths.size() +header.numcdtextures);
-	for(auto i=decltype(header.numcdtextures){0};i<header.numcdtextures;++i)
+	auto itHwm = std::find(mdlInfo.texturePaths.begin(),mdlInfo.texturePaths.end(),"models\\player\\hvyweapon\\hwm\\");
+	if(itHwm != mdlInfo.texturePaths.end())
 	{
-		f->Seek(offset +header.cdtextureindex +i *sizeof(int32_t));
-		auto strOffset = f->Read<int32_t>();
-		f->Seek(offset +strOffset);
-		auto stdCdTex = f->ReadString();
-		if(optLog)
-			(*optLog)<<"Adding texture path '"<<stdCdTex<<"'...\n";
-		fAddPath(stdCdTex);
+		// Note: This is a really ugly hack.
+		// The problem is that some Source models use a material lookup path (cdTexturePath) with relative material names,
+		// while others use absolute material names. Pragma on the other hand always uses lookup paths, so if it's an absolute
+		// name, the path to the material is stripped and added as a lookup path.
+		// This generally works fine, except in very rare cases where the absolute path of a material would point to material,
+		// where a material of the same name also exists in one of the lookup paths which differ from the absolute path of that material,
+		// and where the order of lookup paths is such that that lookup path comes before the stripped absolute path of the material.
+		// This happens, for example, with the HWM SFM TF2 models like models/player/hwm/heavy.mdl:
+		// 1) It has a lookup path that points to "materials/models/player/hvyweapon", which contains a "hvyweapon_red.vmt" material.
+		// 2) It uses the absolute path for the "hvyweapon_red.vmt", which points to "materials/models/player/hvyweapon/hwm/hvyweapon_red.vmt"
+		// 3) The absolute path of the material is stripped (-> "materials/models/player/hvyweapon/hwm") and added as a lookup path, but ends up in order AFTER the "materials/models/player/hvyweapon" lookup path
+		// 4) As a result, the non-hwm material version from "materials/models/player/hvyweapon" would be used ingame
+		// There is no proper solution for this problem (except maybe by getting rid of lookup paths altogether and using absolute paths for all materials),
+		// so we'll work around it for the specific models that it affects by changing the order of the lookup paths so the hwm path comes first.
+		// There may be other models where this could be a problem, but it's extremely rare and could still easily be fixed by hand.
+		auto hwmPath = *itHwm;
+		mdlInfo.texturePaths.erase(itHwm);
+		mdlInfo.texturePaths.insert(mdlInfo.texturePaths.begin(),hwmPath);
 	}
-	//
 
 	// Read bones
 	f->Seek(offset +header.boneindex);
@@ -1166,6 +1196,8 @@ std::shared_ptr<Model> import::load_mdl(
 	for(auto i=decltype(mdlInfo.sequences.size()){0};i<mdlInfo.sequences.size();++i)
 	{
 		auto &seq = mdlInfo.sequences.at(i);
+		if(seq.GetName() == "run_PRIMARY")
+			std::cout<<"!";
 		auto &pp = seq.GetPoseParameter();
 		if(pp.numBlends < 2)
 			continue;
@@ -1174,39 +1206,156 @@ std::shared_ptr<Model> import::load_mdl(
 			continue;
 		auto animIdx = it->second;
 		auto &mdlAnim = mdlAnims.at(animIdx);
-		auto *bc = mdlAnim->SetBlendController(pp.paramIdx.at(0));
 
-		const auto flags = STUDIO_AUTOPLAY | STUDIO_DELTA;
-		auto bAutoplayGesture = (seq.GetFlags() &flags) == flags;
-		// If this is an autoplay gesture, all animations associated with this one should probably loop
-
-		auto &animIndices = seq.GetAnimationIndices();
-		/*std::cout<<"Name: "<<seq.GetName()<<std::endl;
-		for(auto idx : animIndices)
+		auto animIndices = seq.GetAnimationIndices();
+		for(auto &idx : animIndices)
 		{
-			if(idx == -1)
-				continue;
-			auto &animName = animDescs.at(idx).GetName();
-			auto &seqName = animNames.at(idx);
-			std::cout<<"\tChild anim "<<idx<<": "<<animName<<" ("<<seqName<<")"<<std::endl;
-		}*/
-		for(auto i=decltype(pp.numBlends){0};i<pp.numBlends;++i)
-		{
-			auto animId = animIndices.at(i);
-			if(animId == -1)
-				continue;
-			auto &name = animNames.at(animId);
-			auto animDstId = mdl.LookupAnimation(name);
-			//std::cout<<"Assigning animation "<<mdl.GetAnimationName(animDstId)<<std::endl;
-			if(animDstId == -1)
-				continue;
-			if(bAutoplayGesture == true)
-				mdl.GetAnimation(animDstId)->AddFlags(FAnim::Loop);
-			bc->transitions.push_back({});
-			auto &t = bc->transitions.back();
-			t.animation = animDstId;
-			t.transition = pp.start.at(0) +(pp.end.at(0) -pp.start.at(0)) *(i /static_cast<float>(pp.numBlends -1));
+			auto &name = animNames.at(idx);
+			idx = mdl.LookupAnimation(name);
 		}
+		/*auto animId = animIndices.at(i);
+		if(animId == -1)
+			continue;
+		auto &name = animNames.at(animId);
+		auto animDstId = mdl.LookupAnimation(name);*/
+
+
+		if(animIndices.size() == 9 && pp.paramIdx.at(0) != -1 && pp.paramIdx.at(1) != -1)
+		{
+			auto ppMoveYIdx = pp.paramIdx.at(0);
+			auto ppMoveXIdx = pp.paramIdx.at(1);
+			// Seems to be always the same order?
+			auto sw = animIndices.at(0);
+			auto s = animIndices.at(1);
+			auto se = animIndices.at(2);
+			auto w = animIndices.at(3);
+			auto c = animIndices.at(4);
+			auto e = animIndices.at(5);
+			auto nw = animIndices.at(6);
+			auto n = animIndices.at(7);
+			auto ne = animIndices.at(8);
+
+			auto fPrint = [&mdl](const std::string &identifier,uint32_t i) {
+				Con::cout<<identifier<<": "<<mdl.GetAnimationName(i)<<Con::endl;
+			};
+			fPrint("sw",sw);
+			fPrint("s",s);
+			fPrint("se",se);
+			fPrint("w",w);
+			fPrint("c",c);
+			fPrint("e",e);
+			fPrint("nw",nw);
+			fPrint("n",n);
+			fPrint("ne",ne);
+
+			uint8_t iParam = 0;
+			auto bcIdx = pp.paramIdx.at(iParam);
+			auto start = pp.start.at(iParam);
+			auto end = pp.end.at(iParam);
+
+			auto &bc = mdlAnim->SetBlendController(bcIdx);
+			const auto flags = STUDIO_AUTOPLAY | STUDIO_DELTA;
+			auto bAutoplayGesture = (seq.GetFlags() &flags) == flags;
+			std::array<uint32_t,9> blends = {
+				s,se,e,ne,n,nw,w,sw,s
+				//s,sw,w,nw,n,ne,e,se,s
+				//n,ne,e,se,s,sw,w,nw,n
+			};
+			auto numBlends = blends.size(); // pp.numBlends
+			for(auto i=decltype(numBlends){0};i<numBlends;++i)
+			{
+				auto animId = blends.at(i);//animIndices.at(i);
+				//if(animId == -1)
+				//	continue;
+				//auto &name = animNames.at(animId);
+				//auto animDstId = mdl.LookupAnimation(name);
+				auto animDstId = animId;
+				//std::cout<<"Assigning animation "<<mdl.GetAnimationName(animDstId)<<std::endl;
+				if(animDstId == -1)
+					continue;
+				if(bAutoplayGesture == true)
+					mdl.GetAnimation(animDstId)->AddFlags(FAnim::Loop);
+				bc.transitions.push_back({});
+				auto &t = bc.transitions.back();
+				t.animation = animDstId;
+				auto f = (i /static_cast<float>(numBlends -1));
+				t.transition = umath::lerp(start,end,f);
+				Con::cout<<animDstId<<": "<<t.transition<<Con::endl;
+			}
+			bc.animationPostBlendTarget = c;
+			bc.animationPostBlendController = pp.paramIdx.at(1);
+		}
+
+			// PP1: n, ne, e, se, s, sw, w, nw
+			// PP2: -1 -> c?
+
+#if 0
+		for(auto iParam=decltype(pp.paramIdx.size()){0u};iParam<pp.paramIdx.size();++iParam)
+		{
+			auto bcIdx = pp.paramIdx.at(iParam);
+			auto start = pp.start.at(iParam);
+			auto end = pp.end.at(iParam);
+			auto &bc = mdlAnim->SetBlendController(bcIdx);
+
+			const auto flags = STUDIO_AUTOPLAY | STUDIO_DELTA;
+			auto bAutoplayGesture = (seq.GetFlags() &flags) == flags;
+			// If this is an autoplay gesture, all animations associated with this one should probably loop
+
+			/*std::cout<<"Name: "<<seq.GetName()<<std::endl;
+			for(auto idx : animIndices)
+			{
+				if(idx == -1)
+					continue;
+				auto &animName = animDescs.at(idx).GetName();
+				auto &seqName = animNames.at(idx);
+				std::cout<<"\tChild anim "<<idx<<": "<<animName<<" ("<<seqName<<")"<<std::endl;
+			}*/
+			// Note: The first animation in the blend array seems to be the base animation, which we don't need since we already
+			// have that information. Instead, we'll just skip it altogether.
+			// TODO: I'm not sure if this works for all models, but it works for the Scout model from TF2, which has the following pose parameters:
+			/*
+			move_y:
+			[0]	488	short -> name = "run_PRIMARY"
+			[1]	481	short -> name = "a_runS_PRIMARY"
+			[2]	482	short -> name = "a_runSE_PRIMARY"
+			[3]	487	short -> name = "a_runW_PRIMARY"
+			[4]	480	short -> name = "a_runCenter_PRIMARY"
+			[5]	483	short -> name = "a_runE_PRIMARY"
+			[6]	486	short -> name = "a_runNW_PRIMARY"
+			[7]	485	short -> name = "a_runN_PRIMARY"
+			[8]	484	short -> name = "a_runNE_PRIMARY"
+
+			move_x:
+			[0]	488	short -> name = "run_PRIMARY"
+			[1]	481	short -> name = "a_runS_PRIMARY"
+			[2]	482	short -> name = "a_runSE_PRIMARY"
+			[3]	487	short -> name = "a_runW_PRIMARY"
+			[4]	480	short -> name = "a_runCenter_PRIMARY"
+			[5]	483	short -> name = "a_runE_PRIMARY"
+			[6]	486	short -> name = "a_runNW_PRIMARY"
+			[7]	485	short -> name = "a_runN_PRIMARY"
+			[8]	484	short -> name = "a_runNE_PRIMARY"
+			*/
+			for(auto i=decltype(pp.numBlends){1};i<pp.numBlends;++i)
+			{
+				auto animId = animIndices.at(i);
+				if(animId == -1)
+					continue;
+				auto &name = animNames.at(animId);
+				auto animDstId = mdl.LookupAnimation(name);
+				//std::cout<<"Assigning animation "<<mdl.GetAnimationName(animDstId)<<std::endl;
+				if(animDstId == -1)
+					continue;
+				if(bAutoplayGesture == true)
+					mdl.GetAnimation(animDstId)->AddFlags(FAnim::Loop);
+				bc.transitions.push_back({});
+				auto &t = bc.transitions.back();
+				t.animation = animDstId;
+				auto f = (pp.numBlends > 2) ? ((i -1) /static_cast<float>(pp.numBlends -2)) : 0.f;
+				t.transition = umath::lerp(start,end,f);
+			}
+		}
+#endif
 	}
 	//
 
@@ -3167,6 +3316,22 @@ std::shared_ptr<Model> import::load_mdl(
 	//mdl.Rotate(rot);
 
 	mdl.Update(ModelUpdateFlags::All);
+
+	if(engine->ShouldMountExternalGameResources())
+	{
+		// Immediately attempt to port all of the materials / textures associated with the model
+		for(auto &matName : mdl.GetTextures())
+		{
+			for(auto &lookupPath : mdl.GetTexturePaths())
+			{
+				auto matPath = lookupPath +matName;
+				if(FileManager::Exists("materials/" +matPath +".wmi") || FileManager::Exists("materials/" +matPath +".vmt"))
+					break; // Material exists, no need to do anything
+				if(nw->PortMaterial(matPath +".wmi",nullptr))
+					break;
+			}
+		}
+	}
 
 	if(optLog)
 		(*optLog)<<"Done!\n";

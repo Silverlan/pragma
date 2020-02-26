@@ -2,6 +2,7 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
+#include <pragma/math/intersection.h>
 
 void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 {
@@ -59,6 +60,38 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("SetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&,float,float,float)>([](lua_State *l,CRenderHandle &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetDepthBias(constantFactor,biasClamp,slopeFactor);
+	}));
+	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&)>([](lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir) {
+		pragma::Lua::check_component(l,hComponent);
+		auto result = hComponent->CalcRayIntersection(start,dir);
+		if(result.has_value() == false)
+		{
+			Lua::PushInt(l,umath::to_integral(Intersection::Result::NoIntersection));
+			return;
+		}
+		Lua::Push(l,umath::to_integral(result->result));
+
+		auto t = Lua::CreateTable(l);
+
+		Lua::PushString(l,"position"); /* 1 */
+		Lua::Push<Vector3>(l,result->hitPos); /* 2 */
+		Lua::SetTableValue(l,t); /* 0 */
+
+		Lua::PushString(l,"distance"); /* 1 */
+		Lua::PushNumber(l,result->hitValue); /* 2 */
+		Lua::SetTableValue(l,t); /* 0 */
+
+		Lua::PushString(l,"uv"); /* 1 */
+		Lua::Push<Vector2>(l,Vector2{result->u,result->v}); /* 2 */
+		Lua::SetTableValue(l,t); /* 0 */
+	}));
+	defCRender.def("SetDepthPassEnabled",static_cast<void(*)(lua_State*,CRenderHandle&,bool)>([](lua_State *l,CRenderHandle &hComponent,bool depthPassEnabled) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetDepthPassEnabled(depthPassEnabled);
+	}));
+	defCRender.def("IsDepthPassEnabled",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushBool(l,hComponent->IsDepthPassEnabled());
 	}));
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);

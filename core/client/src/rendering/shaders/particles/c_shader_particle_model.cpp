@@ -104,12 +104,12 @@ bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_
 }
 
 bool ShaderParticleModel::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx,ShaderScene::RecordFlags recordFlags
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
+	const Vector4 &drawOrigin,Pipeline pipelineIdx,ShaderScene::RecordFlags recordFlags
 )
 {
 	return ShaderTextured3DBase::BeginDraw(
-		cmdBuffer,clipPlane,
+		cmdBuffer,clipPlane,drawOrigin,
 		static_cast<Pipeline>(umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys))),
 		recordFlags
 	);

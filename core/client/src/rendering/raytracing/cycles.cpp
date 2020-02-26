@@ -15,9 +15,9 @@ struct CyclesModuleInterface
 	}
 	void(*render_image)(
 		uint32_t,uint32_t,uint32_t,bool,bool,
-		const Vector3&,const Quat&,float,float,umath::Degree,
-		bool,std::string,EulerAngles,float,
-		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob
+		const Vector3&,const Quat&,const Mat4&,float,float,umath::Degree,
+		bool,std::string,EulerAngles,float,uint32_t,
+		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&
 	) = nullptr;
 
 	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
@@ -60,8 +60,8 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::render_image(Clien
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 	cyclesInterface->render_image(
 		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
-		renderImageInfo.cameraPosition,renderImageInfo.cameraRotation,renderImageInfo.nearZ,renderImageInfo.farZ,renderImageInfo.fov,
-		sceneInfo.cullObjectsOutsidePvs,sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,
+		renderImageInfo.cameraPosition,renderImageInfo.cameraRotation,renderImageInfo.viewProjectionMatrix,renderImageInfo.nearZ,renderImageInfo.farZ,renderImageInfo.fov,
+		sceneInfo.cullObjectsOutsidePvs,sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.maxTransparencyBounces,
 		fEntityFilter,job
 	);
 	if(job.IsValid() == false)

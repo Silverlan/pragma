@@ -49,7 +49,9 @@ ShaderPrepassBase::ShaderPrepassBase(prosper::Context &context,const std::string
 
 bool ShaderPrepassBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
-	return ShaderEntity::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) && prosper::util::record_set_depth_bias(**cmdBuffer);
+	Set3DSky(false);
+	return ShaderEntity::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) &&
+		prosper::util::record_set_depth_bias(**cmdBuffer);
 }
 
 bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane)
@@ -57,16 +59,25 @@ bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane)
 	return RecordPushConstants(clipPlane);
 }
 
+bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin)
+{
+	return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));
+}
+
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}},outRenderPass,pipelineIdx);
 }
+
+void ShaderPrepassBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,Flags::RenderAs3DSky,is3dSky);}
 
 bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
 {
 	auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
 		flags |= Flags::UseExtendedVertexWeights;
+	if(umath::is_flag_set(m_stateFlags,Flags::RenderAs3DSky))
+		flags |= Flags::RenderAs3DSky;
 	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 

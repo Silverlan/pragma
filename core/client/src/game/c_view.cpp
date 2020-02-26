@@ -18,6 +18,7 @@ static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");
 static CVar cvYaw = GetClientConVar("cl_mouse_yaw");
 static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
 
+#pragma optimize("",off)
 void CGame::CalcLocalPlayerOrientation()
 {
 	auto *pl = GetLocalPlayer();
@@ -244,3 +245,4 @@ void CGame::CalcView()
 	cam->GetEntity().SetRotation(orientation);
 	cam->UpdateViewMatrix();
 }
+#pragma optimize("",on)

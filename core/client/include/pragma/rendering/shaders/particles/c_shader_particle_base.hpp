@@ -21,6 +21,7 @@ namespace pragma
 		};
 
 		ShaderParticleBase()=default;
+		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle) const;
 	protected:
 		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 		virtual prosper::Shader::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const=0;
@@ -28,7 +29,6 @@ namespace pragma
 		uint32_t GetBasePipelineIndex(uint32_t pipelineIdx) const;
 		pragma::AlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
 		pragma::AlphaMode GetRenderAlphaMode(const CParticleSystemComponent &particle) const;
-		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle) const;
 		uint32_t GetParticlePipelineCount() const;
 		void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 	private:

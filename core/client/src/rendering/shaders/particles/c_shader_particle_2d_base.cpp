@@ -140,23 +140,15 @@ void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::RenderP
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
 
 void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
-	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,pragma::CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
-	float &nearZ,float &farZ,const Material *material,const pragma::CCameraComponent *cam
+	const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
+	float &nearZ,float &farZ,const Material *material,float camNearZ,float camFarZ
 ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
 	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
 
-	if(cam != nullptr)
-	{
-		nearZ = cam->GetNearZ();
-		farZ = cam->GetFarZ();
-	}
-	else
-	{
-		nearZ = 0.f;
-		farZ = 0.f;
-	}
+	nearZ = camNearZ;
+	farZ = camFarZ;
 	if(orientationType != pragma::CParticleSystemComponent::OrientationType::World)
 		right = Vector3(matrix[0][0],matrix[1][0],matrix[2][0]);
 	else
@@ -172,15 +164,38 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 
 	switch(orientationType)
 	{
-		case pragma::CParticleSystemComponent::OrientationType::World:
-			up = uquat::up(rot);
-			break;
-		case pragma::CParticleSystemComponent::OrientationType::Upright:
-			up = uquat::forward(rot);
-			break;
-		default:
-			up = Vector3(matrix[0][1],matrix[1][1],matrix[2][1]);
+	case pragma::CParticleSystemComponent::OrientationType::World:
+		up = uquat::up(rot);
+		break;
+	case pragma::CParticleSystemComponent::OrientationType::Upright:
+		up = uquat::forward(rot);
+		break;
+	default:
+		up = Vector3(matrix[0][1],matrix[1][1],matrix[2][1]);
 	}
+}
+
+void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
+	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,pragma::CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
+	float &nearZ,float &farZ,const Material *material,const pragma::CCameraComponent *cam
+) const
+{
+	auto camNearZ = 0.f;
+	auto camFarZ = 0.f;
+	if(cam != nullptr)
+	{
+		camNearZ = cam->GetNearZ();
+		camFarZ = cam->GetFarZ();
+	}
+	else
+	{
+		camNearZ = 0.f;
+		camFarZ = 0.f;
+	}
+	GetParticleSystemOrientationInfo(
+		matrix,particle,orientationType,up,right,
+		nearZ,farZ,material,camNearZ,camFarZ
+	);
 }
 
 void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
@@ -239,7 +254,8 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		viewportSize,
 		texIntensity,
 		umath::to_integral(renderFlags),
-		umath::to_integral(ps.GetAlphaMode())
+		umath::to_integral(ps.GetAlphaMode()),
+		ps.GetSimulationTime()
 	};
 	Mat4 vp;
 	if(cam.valid())

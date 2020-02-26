@@ -28,6 +28,11 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
 #pragma optimize("",off)
+static auto cvDrawGlow = GetClientConVar("render_draw_glow");
+static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
+static auto cvDrawSky = GetClientConVar("render_draw_sky");
+static auto cvDrawWater = GetClientConVar("render_draw_water");
+static auto cvDrawView = GetClientConVar("render_draw_view");
 void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto prepassMode = GetPrepassMode();
@@ -86,25 +91,47 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::PrimaryComman
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
 			if(hCam.valid())
-				RenderSystem::RenderPrepass(drawCmd,*hCam,GetCulledMeshes(),RenderMode::Skybox,bReflection);
+			{
+				RenderSystem::RenderPrepass(drawCmd,RenderMode::Skybox);
+
+				// 3D Skybox
+				if(m_3dSkyCameras.empty() == false)
+				{
+					shaderDepthStage.Set3DSky(true);
+					for(auto &hSkyCam : m_3dSkyCameras)
+					{
+						auto filteredMeshes = hSkyCam.valid() ? hSkyCam->GetRenderMeshCollectionHandler().GetRenderMeshData(RenderMode::World) : nullptr;
+						if(filteredMeshes == nullptr)
+							continue;
+						auto &ent = hSkyCam->GetEntity();
+						auto &pos = ent.GetPosition();
+						Vector4 drawOrigin {pos.x,pos.y,pos.z,hSkyCam->GetSkyboxScale()};
+						shaderDepthStage.BindDrawOrigin(drawOrigin);
+						RenderSystem::RenderPrepass(drawCmd,*filteredMeshes);
+					}
+					shaderDepthStage.Set3DSky(false);
+				}
+			}
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
 		}
+		shaderDepthStage.BindDrawOrigin(Vector4{0.f,0.f,0.f,1.f});
 		if((renderFlags &FRender::World) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
 			if(hCam.valid())
-				RenderSystem::RenderPrepass(drawCmd,*hCam,GetCulledMeshes(),RenderMode::World,bReflection);
+				RenderSystem::RenderPrepass(drawCmd,RenderMode::World);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
 		}
 		c_game->CallCallbacks<void>("RenderPrepass");
 		c_game->CallLuaCallbacks("RenderPrepass");
 
 		shaderDepthStage.BindSceneCamera(*this,true);
-		if((renderFlags &FRender::View) != FRender::None)
+		auto *pl = c_game->GetLocalPlayer();
+		if((renderFlags &FRender::View) != FRender::None && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassView);
 			if(hCam.valid())
-				RenderSystem::RenderPrepass(drawCmd,*hCam,GetCulledMeshes(),RenderMode::View,bReflection);
+				RenderSystem::RenderPrepass(drawCmd,RenderMode::View);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassView);
 		}
 		shaderDepthStage.EndDraw();
@@ -124,11 +151,6 @@ void RasterizationRenderer::PerformOcclusionCulling()
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
 }
 
-static auto cvDrawGlow = GetClientConVar("render_draw_glow");
-static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-static auto cvDrawSky = GetClientConVar("render_draw_sky");
-static auto cvDrawWater = GetClientConVar("render_draw_water");
-static auto cvDrawView = GetClientConVar("render_draw_view");
 void RasterizationRenderer::CollectRenderObjects(FRender renderFlags)
 {
 	// Prepare rendering
@@ -161,9 +183,10 @@ void RasterizationRenderer::CollectRenderObjects(FRender renderFlags)
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
 void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender renderFlags,bool bUpdateTranslucentMeshes,bool bUpdateGlowMeshes)
 {
-	auto it = m_renderInfo.find(renderMode);
-	if(it == m_renderInfo.end())
-		it = m_renderInfo.insert(decltype(m_renderInfo)::value_type(renderMode,std::make_shared<CulledMeshData>())).first;
+	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
+	auto it = renderMeshData.find(renderMode);
+	if(it == renderMeshData.end())
+		it = renderMeshData.insert(std::remove_reference_t<decltype(renderMeshData)>::value_type(renderMode,std::make_shared<CulledMeshData>())).first;
 
 	auto &renderInfo = it->second;
 	auto &cam = GetScene().GetActiveCamera();

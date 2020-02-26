@@ -59,6 +59,7 @@ namespace pragma
 			float texIntensity;
 			uint32_t renderFlags;
 			uint32_t alphaMode;
+			float time;
 		};
 #pragma pack(pop)
 
@@ -69,6 +70,11 @@ namespace pragma
 			CParticleSystemComponent &pSys,Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
+
+		void GetParticleSystemOrientationInfo(
+			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,
+			float &nearZ,float &farZ,const Material *material=nullptr,float camNearZ=0.f,float camFarZ=0.f
+		) const;
 
 		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:

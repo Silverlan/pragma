@@ -60,7 +60,8 @@ namespace pragma
 			PremultiplyAlpha = RandomStartFrame<<1u,
 			AlwaysSimulate = PremultiplyAlpha<<1u,
 			CastShadows = AlwaysSimulate<<1u,
-			Setup = CastShadows<<1u /* Has this system been set up already? */
+			Setup = CastShadows<<1u, /* Has this system been set up already? */
+			AutoSimulate = Setup<<1u
 		};
 
 #pragma pack(push,1)
@@ -108,6 +109,7 @@ namespace pragma
 		float GetRadius() const;
 		float GetExtent() const;
 		const std::vector<ParticleData> &GetRenderParticleData() const;
+		const std::vector<float> &GetRenderParticleAnimationStartData() const;
 		void SetMaterial(Material *mat);
 		void SetMaterial(const char *mat);
 		Material *GetMaterial() const;
@@ -137,6 +139,9 @@ namespace pragma
 		bool ShouldParticlesRotateWithEmitter() const;
 		bool ShouldParticlesMoveWithEmitter() const;
 
+		void SetAutoSimulate(bool b);
+		bool ShouldAutoSimulate() const;
+
 		bool IsAlphaPremultiplied() const;
 		void SetAlphaPremultiplied(bool b);
 
@@ -159,6 +164,7 @@ namespace pragma
 
 		// Returns the time the particle system has been alive
 		double GetLifeTime() const;
+		float GetSimulationTime() const;
 
 		void SetSoftParticles(bool bSoft);
 		bool GetSoftParticles() const;
@@ -257,7 +263,7 @@ namespace pragma
 		uint32_t m_emissionRate = 0u;
 		uint32_t m_nextParticleEmissionCount = std::numeric_limits<uint32_t>::max();
 		Color m_initialColor = Color::White;
-		Flags m_flags = Flags::SoftParticles;
+		Flags m_flags = static_cast<Flags>(umath::to_integral(Flags::SoftParticles) | umath::to_integral(Flags::AutoSimulate));
 		std::vector<CallbackHandle> m_renderCallbacks;
 		std::pair<Vector3,Vector3> m_renderBounds = {{},{}};
 		uint32_t m_maxParticles = 0u;
@@ -271,6 +277,7 @@ namespace pragma
 		uint32_t m_maxNodes = 0u;
 		Vector3 m_origin = {};
 		float m_lifeTime = std::numeric_limits<float>::max();
+		float m_simulationTime = 0.f;
 		pragma::AlphaMode m_alphaMode = pragma::AlphaMode::Additive;
 		std::vector<std::unique_ptr<CParticleInitializer>> m_initializers;
 		std::vector<std::unique_ptr<CParticleOperator>> m_operators;

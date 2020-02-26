@@ -151,6 +151,8 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 	vmtPath += ".vmt";
 	if(util::port_file(this,"materials\\" +vmtPath) == false)
 		return false;
+	if(fLoadMaterial == nullptr)
+		return true;
 	auto *mat = fLoadMaterial(vmtPath,true);
 	if(mat)
 	{

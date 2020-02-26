@@ -101,6 +101,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CFlexComponent>("flex");
 	componentManager.RegisterComponentType<pragma::CSoftBodyComponent>("softbody");
 	componentManager.RegisterComponentType<pragma::CVertexAnimatedComponent>("vertex_animated");
+	componentManager.RegisterComponentType<pragma::CSkyCameraComponent>("sky_camera");
 	componentManager.RegisterComponentType<pragma::COwnableComponent>("ownable");
 	componentManager.RegisterComponentType<pragma::CDebugTextComponent>("debug_text");
 	componentManager.RegisterComponentType<pragma::CDebugPointComponent>("debug_point");

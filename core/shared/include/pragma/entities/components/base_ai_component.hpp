@@ -193,7 +193,7 @@ namespace pragma
 		void ResolvePathObstruction(Vector3 &dir);
 
 		virtual void OnPathNodeChanged(uint32_t nodeIdx);
-		void BlendAnimationMovement(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales);
+		void BlendAnimationMovement(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales);
 		Vector2 CalcMovementSpeed() const;
 		float CalcAirMovementModifier() const;
 		float CalcMovementAcceleration() const;

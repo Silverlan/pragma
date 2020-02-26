@@ -56,11 +56,11 @@ namespace pragma
 			int32_t animation = -1;
 			float cycle = 0.f;
 			FPlayAnim flags = FPlayAnim::Default;
-			std::vector<Orientation> boneOrientations;
+			std::vector<pragma::physics::Transform> bonePoses;
 			std::vector<Vector3> boneScales;
 
 			// These are only used if the animation has a blend-controller
-			std::vector<Orientation> boneOrientationsBc;
+			std::vector<pragma::physics::Transform> bonePosesBc;
 			std::vector<Vector3> boneScalesBc;
 
 			// Keep a reference to our last animation for blending
@@ -73,7 +73,7 @@ namespace pragma
 				float blendScale = 1.f;
 			} lastAnim;
 		};
-		static bool GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **frameA,Frame **frameB,float &blendScale,int32_t frameOffset=0);
+		static bool GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset=0);
 
 		virtual void Initialize() override;
 
@@ -141,7 +141,7 @@ namespace pragma
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
-		int32_t SelectTranslatedAnimation(Activity activity) const;
+		int32_t SelectTranslatedAnimation(Activity &inOutActivity) const;
 		int SelectWeightedAnimation(Activity activity,int animAvoid=-1) const;
 		// Returns the time left until the current animation has finished playing
 		float GetAnimationDuration() const;
@@ -191,8 +191,15 @@ namespace pragma
 
 		Activity TranslateActivity(Activity act);
 
-		void BlendBoneFrames(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,float blendScale) const;
-		void BlendBoneFrames(std::vector<Orientation> &tgt,std::vector<Vector3> *tgtScales,std::vector<Orientation> &add,std::vector<Vector3> *addScales,float blendScale) const;
+		void BlendBonePoses(
+			const std::vector<pragma::physics::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
+			const std::vector<pragma::physics::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
+			std::vector<pragma::physics::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
+			Animation &anim,float interpFactor
+		) const;
+		void BlendBoneFrames(
+			std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,float blendScale
+		) const;
 
 		virtual bool MaintainAnimations(double dt);
 
@@ -255,8 +262,8 @@ namespace pragma
 		Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale);
 
 		// Animations
-		void TransformBoneFrames(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
-		void TransformBoneFrames(std::vector<Orientation> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<Orientation> &add,std::vector<Vector3> *addScales,bool bAdd=true);
+		void TransformBoneFrames(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
+		void TransformBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
 		//
 
 		std::unordered_map<uint32_t,AnimationSlotInfo> m_animSlots = {};
@@ -406,21 +413,20 @@ namespace pragma
 	struct DLLNETWORK CETranslateActivity
 		: public ComponentEvent
 	{
-		CETranslateActivity(Activity &activity,pragma::FPlayAnim &flags);
+		CETranslateActivity(Activity &activity);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		Activity &activity;
-		pragma::FPlayAnim &flags;
 	};
 	struct DLLNETWORK CEOnBlendAnimation
 		: public ComponentEvent
 	{
-		CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales);
+		CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales);
 		virtual void PushArguments(lua_State *l) override;
 		BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 		Activity activity;
-		std::vector<Orientation> &boneOrientations;
+		std::vector<pragma::physics::Transform> &bonePoses;
 		std::vector<Vector3> *boneScales;
 	};
 	struct DLLNETWORK CEMaintainAnimations

@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#define WLD_VERSION 9
+#define WLD_VERSION 10
 
 namespace util
 {

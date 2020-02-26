@@ -75,9 +75,9 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderWater::InitializeMaterialDesc
 	}
 	return descSetGroup;
 }
-bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags)
 {
-	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags) == false)
+	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)
 		return false;
 	decltype(PushConstants::enableReflection) enableReflection = {m_bReflectionEnabled == true ? 1u : 0u};
 	return RecordPushConstants(enableReflection,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,enableReflection));

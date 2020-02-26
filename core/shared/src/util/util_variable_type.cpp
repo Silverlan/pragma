@@ -7,6 +7,59 @@
 #include <sharedutils/datastream.h>
 #include <mathutil/color.h>
 
+std::string util::variable_type_to_string(VarType type)
+{
+	switch(type)
+	{
+	case VarType::Invalid:
+		return "Invalid";
+	case VarType::Bool:
+		return "Bool";
+	case VarType::Double:
+		return "Double";
+	case VarType::Float:
+		return "Float";
+	case VarType::Int8:
+		return "Int8";
+	case VarType::Int16:
+		return "Int16";
+	case VarType::Int32:
+		return "Int32";
+	case VarType::Int64:
+		return "Int64";
+	case VarType::LongDouble:
+		return "LongDouble";
+	case VarType::String:
+		return "String";
+	case VarType::UInt8:
+		return "UInt8";
+	case VarType::UInt16:
+		return "UInt16";
+	case VarType::UInt32:
+		return "UInt32";
+	case VarType::UInt64:
+		return "UInt64";
+	case VarType::EulerAngles:
+		return "EulerAngles";
+	case VarType::Color:
+		return "Color";
+	case VarType::Vector:
+		return "Vector";
+	case VarType::Vector2:
+		return "Vector2";
+	case VarType::Vector4:
+		return "Vector4";
+	case VarType::Entity:
+		return "Entity";
+	case VarType::Quaternion:
+		return "Quaternion";
+	case VarType::Count:
+		return "Count";
+	}
+	static_assert(umath::to_integral(VarType::Count) == 21);
+	return "Unknown";
+}
+
 struct IAnyHandler
 {
 	virtual std::any GetValue(lua_State *l,int32_t idx) const=0;

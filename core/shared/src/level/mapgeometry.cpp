@@ -116,6 +116,7 @@ void pragma::level::load_map_faces(
 		uint32_t faceIndex = 0u;
 		std::array<Vertex,3u> vertices;
 		std::array<Vector2,3u> lightMapUvs;
+		std::optional<std::array<float,3>> alphas = {};
 	};
 	std::vector<BSPTriangleInfo> bspTriangles {};
 	auto &faces = bspInputData.lightMapInfo.faceInfos;
@@ -183,8 +184,8 @@ void pragma::level::load_map_faces(
 			result.x = result.x *widthLightmap +lmInfo.x +borderSize;
 			result.y = result.y *heightLightmap +lmInfo.y +borderSize;
 
-			result.x /= static_cast<float>(lightmapAtlasExtents);
-			result.y /= static_cast<float>(lightmapAtlasExtents);
+			result.x /= static_cast<float>(lightmapAtlasExtents.x);
+			result.y /= static_cast<float>(lightmapAtlasExtents.y);
 			return result;
 		};
 
@@ -257,7 +258,13 @@ void pragma::level::load_map_faces(
 
 			auto numRows = umath::pow(2,dispInfo.power) +1;
 			auto numVerts = umath::pow2(numRows);
-			std::vector<std::pair<Vector3,Vector3>> points {}; // Pairs of positions +offsets
+			struct Point
+			{
+				Vector3 position = {};
+				Vector3 offset = {};
+				float alpha = 0.f;
+			};
+			std::vector<Point> points {};
 			points.reserve(numVerts);
 			for(auto x=decltype(numRows){0};x<numRows;++x)
 			{
@@ -276,8 +283,7 @@ void pragma::level::load_map_faces(
 					auto offset = dispVert.vec *dispVert.dist;
 					umath::swap(offset.y,offset.z);
 					umath::negate(offset.z);
-
-					points.push_back({posCur,offset}); // Original position (without offset is required for UV calculation below)
+					points.push_back({posCur,offset,dispVert.alpha}); // Original position (without offset is required for UV calculation below)
 				}
 			}
 			
@@ -315,9 +321,10 @@ void pragma::level::load_map_faces(
 					auto &triInfo0 = bspTriangles.back();
 					triInfo0.faceIndex = faceIndex;
 					triInfo0.materialIndex = texId;
-					triInfo0.vertices.at(0) = Vertex{p0.first +p0.second,fCalculateUv(p0.first),normal};
-					triInfo0.vertices.at(1) = Vertex{p1.first +p1.second,fCalculateUv(p1.first),normal};
-					triInfo0.vertices.at(2) = Vertex{p2.first +p2.second,fCalculateUv(p2.first),normal};
+					triInfo0.vertices.at(0) = Vertex{p0.position +p0.offset,fCalculateUv(p0.position),normal};
+					triInfo0.vertices.at(1) = Vertex{p1.position +p1.offset,fCalculateUv(p1.position),normal};
+					triInfo0.vertices.at(2) = Vertex{p2.position +p2.offset,fCalculateUv(p2.position),normal};
+					triInfo0.alphas = {p0.alpha /255.f,p1.alpha /255.f,p2.alpha /255.f};
 
 					auto *outLightMapUvs0 = (outMeshLightMapUvCoordinates != nullptr) ? &triInfo0.lightMapUvs : nullptr;
 					if(outLightMapUvs0 != nullptr && useLightmaps)
@@ -337,9 +344,10 @@ void pragma::level::load_map_faces(
 					auto &triInfo1 = bspTriangles.back();
 					triInfo1.faceIndex = faceIndex;
 					triInfo1.materialIndex = texId;
-					triInfo1.vertices.at(0) = Vertex{p1.first +p1.second,fCalculateUv(p1.first),normal};
-					triInfo1.vertices.at(1) = Vertex{p3.first +p3.second,fCalculateUv(p3.first),normal};
-					triInfo1.vertices.at(2) = Vertex{p2.first +p2.second,fCalculateUv(p2.first),normal};
+					triInfo1.vertices.at(0) = Vertex{p1.position +p1.offset,fCalculateUv(p1.position),normal};
+					triInfo1.vertices.at(1) = Vertex{p3.position +p3.offset,fCalculateUv(p3.position),normal};
+					triInfo1.vertices.at(2) = Vertex{p2.position +p2.offset,fCalculateUv(p2.position),normal};
+					triInfo1.alphas = {p1.alpha /255.f,p3.alpha /255.f,p2.alpha /255.f};
 					auto *outLightMapUvs1 = (outMeshLightMapUvCoordinates != nullptr) ? &triInfo1.lightMapUvs : nullptr;
 					if(outLightMapUvs1 != nullptr && useLightmaps)
 					{
@@ -564,12 +572,22 @@ void pragma::level::load_map_faces(
 		}
 		auto &meshVerts = subMesh->GetVertices();
 		auto &meshTris = subMesh->GetTriangles();
+		auto &meshAlphas = subMesh->GetAlphas();
 		meshVerts.reserve(range.second *3u);
 		meshTris.reserve(range.second *3u);
 
+		auto hasAlphas = false;
 		for(auto i=range.first;i<(range.first +range.second);++i)
 		{
 			auto &triInfo = bspTriangles.at(i);
+
+			if(i == range.first)
+			{
+				hasAlphas = triInfo.alphas.has_value();
+				meshAlphas.reserve(range.second *3u);
+				subMesh->SetAlphaCount(1u);
+			}
+
 			auto numVerts = meshVerts.size();
 			meshTris.push_back(numVerts);
 			meshTris.push_back(numVerts +1u);
@@ -578,6 +596,13 @@ void pragma::level::load_map_faces(
 			meshVerts.push_back(triInfo.vertices.at(0));
 			meshVerts.push_back(triInfo.vertices.at(1));
 			meshVerts.push_back(triInfo.vertices.at(2));
+
+			if(hasAlphas)
+			{
+				meshAlphas.push_back(Vector2{triInfo.alphas->at(0),0.f});
+				meshAlphas.push_back(Vector2{triInfo.alphas->at(1),0.f});
+				meshAlphas.push_back(Vector2{triInfo.alphas->at(2),0.f});
+			}
 
 			if(meshLightMapUvs != nullptr)
 			{

@@ -92,17 +92,17 @@ void CPBRConverterComponent::ConvertMaterialsToPBR(Model &mdl)
 	}
 }
 
-void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl)
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl,uint32_t w,uint32_t h,uint32_t samples,bool rebuild)
 {
-	ScheduleModelUpdate(mdl,false,true);
+	ScheduleModelUpdate(mdl,false,AmbientOcclusionInfo{w,h,samples,rebuild});
 }
 
 void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo)
 {
 	if(updateInfo.updateMetalness)
 		UpdateMetalness(mdl);
-	if(updateInfo.updateAmbientOcclusion)
-		UpdateAmbientOcclusion(mdl);
+	if(updateInfo.updateAmbientOcclusion.has_value())
+		UpdateAmbientOcclusion(mdl,*updateInfo.updateAmbientOcclusion);
 	if(updateInfo.cbOnMaterialsLoaded.IsValid())
 		updateInfo.cbOnMaterialsLoaded.Remove();
 	auto it = m_scheduledModelUpdates.find(&mdl);
@@ -110,14 +110,16 @@ void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo)
 		m_scheduledModelUpdates.erase(it);
 }
 
-void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness,bool updateAmbientOcclusion)
+void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo)
 {
 	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
 	if(itUpdateInfo == m_scheduledModelUpdates.end())
 		itUpdateInfo = m_scheduledModelUpdates.insert(std::make_pair(&mdl,ModelUpdateInfo{})).first;
 	auto &updateInfo = itUpdateInfo->second;
-	updateInfo.updateMetalness = updateInfo.updateMetalness || updateMetalness;
-	updateInfo.updateAmbientOcclusion = updateInfo.updateAmbientOcclusion || updateAmbientOcclusion;
+	if(updateMetalness)
+		updateInfo.updateMetalness = true;
+	if(updateAOInfo.has_value())
+		updateInfo.updateAmbientOcclusion = *updateAOInfo;
 	auto cb = mdl.CallOnMaterialsLoaded([this,&mdl,&updateInfo]() {
 		UpdateModel(mdl,updateInfo);
 	});
@@ -130,7 +132,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 
 	m_cbOnModelLoaded = c_game->AddCallback("OnModelLoaded",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) {
-		ScheduleModelUpdate(*mdl.get(),true,false);
+		ScheduleModelUpdate(*mdl.get(),true);
 	}));
 	m_cbOnMaterialLoaded = client->AddCallback("OnMaterialLoaded",FunctionCallback<void,CMaterial*>::Create([this](CMaterial *mat) {
 		if(ShouldConvertMaterial(*mat) == false)
@@ -160,14 +162,14 @@ bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const
 		return false;
 	auto shader = mat.GetShaderIdentifier();
 	ustring::to_lower(shader);
-	return (shader == "textured" || shader == "texturedalphatransition") && shader != "pbr";
+	return (shader == "textured" || shader == "texturedalphatransition") && shader != "pbr" && shader != "pbr_blend";
 }
 
 bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
 {
 	auto shader = mat.GetShaderIdentifier();
 	ustring::to_lower(shader);
-	return shader == "pbr";
+	return shader == "pbr" || shader == "pbr_blend";
 }
 
 void CPBRConverterComponent::PollEvents()
@@ -183,7 +185,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto &dev = c_engine->GetDevice();
 	auto dataBlock = matTraditional.GetDataBlock();
 
-	auto *matPbr = client->CreateMaterial("pbr");
+	auto *matPbr = client->CreateMaterial(matTraditional.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER) ? "pbr_blend" : "pbr");
 	auto &dataPbr = matPbr->GetDataBlock();
 
 	auto matName = matTraditional.GetName();
@@ -209,6 +211,8 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 
 	// TODO: Extract ambient occlusion from diffuse map, if possible
 	fAddGenericTexture(Material::ALBEDO_MAP_IDENTIFIER,matTraditional.GetDiffuseMap()); // Albedo map
+	fAddGenericTexture(Material::ALBEDO_MAP2_IDENTIFIER,matTraditional.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER)); // Albedo blend map
+	fAddGenericTexture(Material::ALBEDO_MAP3_IDENTIFIER,matTraditional.GetTextureInfo(Material::ALBEDO_MAP3_IDENTIFIER)); // Albedo blend map 2
 	fAddGenericTexture(Material::NORMAL_MAP_IDENTIFIER,matTraditional.GetNormalMap()); // Normal map
 	fAddGenericTexture(Material::PARALLAX_MAP_IDENTIFIER,matTraditional.GetParallaxMap()); // Parallax map
 	fAddGenericTexture(Material::AO_MAP_IDENTIFIER,matTraditional.GetAmbientOcclusionMap()); // Ambient occlusion map

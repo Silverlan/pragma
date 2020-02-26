@@ -11,9 +11,9 @@ int32_t ai::TaskPlayActivity::SelectAnimation(const Schedule *sched,pragma::SAIC
 	auto *param = GetParameter(sched,paramId);
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)
 		return -1;
-	auto activity = param->GetInt();
+	auto activity = static_cast<Activity>(param->GetInt());
 	auto animComponent = ent.GetEntity().GetAnimatedComponent();
-	return animComponent.valid() ? animComponent->SelectTranslatedAnimation(static_cast<Activity>(activity)) : -1;
+	return animComponent.valid() ? animComponent->SelectTranslatedAnimation(activity) : -1;
 }
 
 void ai::TaskPlayActivity::SetActivity(Activity activity)
@@ -85,7 +85,7 @@ int32_t ai::TaskPlayLayeredActivity::SelectAnimation(const Schedule *sched,pragm
 	auto *param = GetParameter(sched,paramId);
 	if(param == nullptr || param->GetType() != ai::Schedule::Parameter::Type::Int)
 		return -1;
-	auto activity = param->GetInt();
+	auto activity = static_cast<Activity>(param->GetInt());
 	auto animComponent = ent.GetEntity().GetAnimatedComponent();
-	return animComponent.valid() ? animComponent->SelectTranslatedAnimation(static_cast<Activity>(activity)) : -1;
+	return animComponent.valid() ? animComponent->SelectTranslatedAnimation(activity) : -1;
 }

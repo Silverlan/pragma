@@ -12,6 +12,11 @@ namespace pragma
 	class DLLCLIENT DecalProjector
 	{
 	public:
+		struct DLLCLIENT MeshData
+		{
+			std::vector<ModelSubMesh*> subMeshes {};
+			physics::ScaledTransform pose = {};
+		};
 		DecalProjector(const Vector3 &pos,const Quat &rot,float size);
 		const Vector3 &GetPos() const;
 		const Quat &GetRotation() const;
@@ -19,7 +24,7 @@ namespace pragma
 		float GetSize() const;
 		std::pair<Vector3,Vector3> GetAABB() const;
 
-		bool GenerateDecalMesh(const std::vector<ModelSubMesh*> &meshes,const physics::Transform &pose,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris);
+		bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris);
 		void DebugDraw(float duration) const;
 	private:
 		struct VertexInfo
@@ -54,10 +59,10 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 
 		DecalProjector GetProjector() const;
-		bool ApplyDecal(const std::vector<ModelSubMesh*> &meshes,const pragma::physics::ScaledTransform &pose={});
+		bool ApplyDecal(const std::vector<DecalProjector::MeshData> &meshes);
 	protected:
 		bool ApplyDecal();
-		bool ApplyDecal(DecalProjector &projector,const std::vector<ModelSubMesh*> &meshes,const pragma::physics::ScaledTransform &pose={});
+		bool ApplyDecal(DecalProjector &projector,const std::vector<DecalProjector::MeshData> &meshes);
 	};
 };
 

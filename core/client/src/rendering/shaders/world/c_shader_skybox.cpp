@@ -67,7 +67,10 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderSkybox::InitializeMaterialDes
 	return descSetGroup;
 }
 uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
-bool ShaderSkybox::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderSkybox::BeginDraw(
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
+	const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags
+)
 {
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags);
 }

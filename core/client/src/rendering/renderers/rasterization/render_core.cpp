@@ -144,7 +144,6 @@ bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandB
 {
 	if(BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
 		return false;
-	m_stage = Stage::Initial;
-	AdvanceRenderStage(drawCmd,renderFlags);
+	RenderGameScene(drawCmd,renderFlags);
 	return true;
 }

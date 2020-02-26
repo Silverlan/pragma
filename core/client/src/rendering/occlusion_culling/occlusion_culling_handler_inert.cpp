@@ -9,7 +9,10 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 #pragma optimize("",off)
-void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandlerInert::PerformCulling(
+	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	std::vector<pragma::CParticleSystemComponent*> &particlesOut
+)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
@@ -18,11 +21,12 @@ void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::Raste
 	for(auto *ent : entIt)
 		particlesOut.push_back(ent->GetComponent<pragma::CParticleSystemComponent>().get());
 }
-void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerInert::PerformCulling(
+	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
+)
 {
 	auto &scene = renderer.GetScene();
-	auto &cam = scene.GetActiveCamera();
-	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
@@ -37,11 +41,10 @@ void OcclusionCullingHandlerInert::PerformCulling(const pragma::rendering::Raste
 		if(pRenderComponent.expired())
 			continue;
 		bool bViewModel = false;
-		std::vector<Plane> *planes = nullptr;
-		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(posCam) != false))
+		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(camPos) != false))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
-			pRenderComponent->GetModelComponent()->UpdateLOD(posCam);
+			pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
 			if(pRenderComponent.valid())
 			{
 				auto pTrComponent = ent->GetTransformComponent();

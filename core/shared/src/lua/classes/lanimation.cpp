@@ -62,6 +62,22 @@ void Lua::Animation::GetEventEnumName(lua_State *l,uint32_t id)
 		return;
 	Lua::PushString(l,*name);
 }
+void Lua::Animation::FindActivityId(lua_State *l,const std::string &name)
+{
+	auto &reg = ::Animation::GetActivityEnumRegister();
+	uint32_t id;
+	if(reg.GetEnumValue(name,id) == false)
+		return;
+	Lua::PushInt(l,id);
+}
+void Lua::Animation::FindEventId(lua_State *l,const std::string &name)
+{
+	auto &reg = ::Animation::GetEventEnumRegister();
+	uint32_t id;
+	if(reg.GetEnumValue(name,id) == false)
+		return;
+	Lua::PushInt(l,id);
+}
 void Lua::Animation::GetBoneList(lua_State *l,::Animation &anim)
 {
 	auto &list = anim.GetBoneList();
@@ -212,19 +228,17 @@ void Lua::Animation::GetEventCount(lua_State *l,::Animation &anim)
 }
 void Lua::Animation::GetFadeInTime(lua_State *l,::Animation &anim) {Lua::PushNumber(l,anim.GetFadeInTime());}
 void Lua::Animation::GetFadeOutTime(lua_State *l,::Animation &anim) {Lua::PushNumber(l,anim.GetFadeOutTime());}
-void Lua::Animation::GetBlendController(lua_State *l,::Animation &anim)
+static void push_blend_controller(lua_State *l,AnimationBlendController &bc)
 {
-	auto *blendController = anim.GetBlendController();
-	if(blendController == nullptr)
-		return;
 	auto t = Lua::CreateTable(l); /* 1 */
+
 	Lua::PushString(l,"controller"); /* 2 */
-	Lua::PushInt(l,blendController->controller); /* 3 */
+	Lua::PushInt(l,bc.controller); /* 3 */
 	Lua::SetTableValue(l,t); /* 1 */
 
 	Lua::PushString(l,"transitions"); /* 2 */
 	auto tTransitions = Lua::CreateTable(l); /* 3 */
-	auto &transitions = blendController->transitions;
+	auto &transitions = bc.transitions;
 	for(auto i=decltype(transitions.size()){0};i<transitions.size();++i)
 	{
 		Lua::PushInt(l,i +1); /* 4 */
@@ -239,10 +253,26 @@ void Lua::Animation::GetBlendController(lua_State *l,::Animation &anim)
 		Lua::PushString(l,"transition"); /* 6 */
 		Lua::PushInt(l,t.transition); /* 7 */
 		Lua::SetTableValue(l,tTransition); /* 5 */
-		
+
 		Lua::SetTableValue(l,tTransitions); /* 3 */
 	}
+
+	Lua::PushString(l,"animationPostBlendController"); /* 2 */
+	Lua::PushInt(l,bc.animationPostBlendController); /* 3 */
 	Lua::SetTableValue(l,t); /* 1 */
+
+	Lua::PushString(l,"animationPostBlendTarget"); /* 2 */
+	Lua::PushInt(l,bc.animationPostBlendTarget); /* 3 */
+	Lua::SetTableValue(l,t); /* 1 */
+
+	Lua::SetTableValue(l,t); /* 1 */
+}
+void Lua::Animation::GetBlendController(lua_State *l,::Animation &anim)
+{
+	auto *bc = anim.GetBlendController();
+	if(bc == nullptr)
+		return;
+	push_blend_controller(l,*bc);
 }
 void Lua::Animation::CalcRenderBounds(lua_State *l,::Animation &anim,const std::shared_ptr<::Model> &mdl)
 {

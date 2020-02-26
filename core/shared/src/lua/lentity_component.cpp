@@ -16,6 +16,7 @@
 
 extern DLLENGINE Engine *engine;
 
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace BaseEntityComponent
@@ -73,15 +74,19 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 			// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
 			// would also cause the std::function-object to be destroyed (and therefore the captured variables).
 			auto lTmp = l;
+			auto nstack = Lua::GetStackTop(l);
 			auto c = Lua::CallFunction(l,[&oCallback,&ev](lua_State *l) -> Lua::StatusCode {
 				oCallback.push(l);
 				ev.get().PushArguments(l);
 				return Lua::StatusCode::Ok;
-			},1);
-			if(c == Lua::StatusCode::Ok && Lua::IsNone(lTmp,-1) == false)
+			},LUA_MULTRET);
+			auto numRet = Lua::GetStackTop(l) -nstack;
+			if(c == Lua::StatusCode::Ok && numRet > 0 && Lua::IsNone(lTmp,-1) == false)
 			{
-				auto result = Lua::IsNumber(lTmp,-1) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp,-1)) : util::EventReply::Unhandled;
-				Lua::Pop(lTmp,1); // Pop result
+				auto result = Lua::IsNumber(lTmp,-numRet) ? static_cast<util::EventReply>(Lua::CheckInt(lTmp,-numRet)) : util::EventReply::Unhandled;
+				if(result == util::EventReply::Handled)
+					ev.get().HandleReturnValues(l);
+				Lua::Pop(lTmp,numRet); // Pop result(s)
 				return result;
 			}
 			return util::EventReply::Unhandled;
@@ -137,3 +142,4 @@ void Lua::BaseEntityComponent::GetName(lua_State *l,BaseEntityComponentHandle &c
 	auto &info = *componentManager.GetComponentInfo(component->GetComponentId());
 	Lua::PushString(l,info.name);
 }
+#pragma optimize("",on)

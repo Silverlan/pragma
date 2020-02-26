@@ -648,19 +648,21 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 					f->Write<float>((i < weights.size()) ? weights.at(i) : 1.f);
 			}
 
-			auto *blend = anim->GetBlendController();
-			auto bBlend = (blend != nullptr) ? true : false;
-			f->Write<bool>(bBlend);
-			if(bBlend == true)
+			auto *blendController = anim->GetBlendController();
+			f->Write<bool>(blendController);
+			if(blendController)
 			{
-				f->Write<int32_t>(blend->controller);
-				auto &transitions = blend->transitions;
+				f->Write<int32_t>(blendController->controller);
+				auto &transitions = blendController->transitions;
 				f->Write<int8_t>(static_cast<int8_t>(transitions.size()));
 				for(auto &t : transitions)
 				{
 					f->Write<uint32_t>(t.animation -1); // Account for reference pose
-					f->Write<int32_t>(t.transition);
+					f->Write<float>(t.transition);
 				}
+
+				f->Write<int32_t>(blendController->animationPostBlendController);
+				f->Write<int32_t>(blendController->animationPostBlendTarget);
 			}
 
 			auto numFrames = anim->GetFrameCount();

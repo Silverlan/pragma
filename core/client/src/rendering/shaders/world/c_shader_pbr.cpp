@@ -3,6 +3,8 @@
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/model/vk_mesh.h"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
@@ -103,12 +105,12 @@ bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 prosper::Shader::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderPBR::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,
-	RecordFlags recordFlags
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+	const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	m_extRenderFlags = RenderFlags::None;
-	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags);
+	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags);
 }
 bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
 {
@@ -287,5 +289,78 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+}
+
+/////////////////
+
+decltype(ShaderPBRBlend::VERTEX_BINDING_ALPHA) ShaderPBRBlend::VERTEX_BINDING_ALPHA = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA) ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL = {
+	&ShaderPBR::DESCRIPTOR_SET_MATERIAL,
+	{
+		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map 2
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map 3
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		}
+	}
+};
+ShaderPBRBlend::ShaderPBRBlend(prosper::Context &context,const std::string &identifier)
+	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/fs_pbr_blend"}
+{}
+void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
+}
+prosper::Shader::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+}
+std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
+{
+	auto descSetGroup = ShaderPBR::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+	if(descSetGroup == nullptr)
+		return nullptr;
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+
+	auto *diffuseMap2 = mat.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER);
+	if(diffuseMap2 != nullptr && diffuseMap2->texture != nullptr)
+	{
+		auto texture = std::static_pointer_cast<Texture>(diffuseMap2->texture);
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap2));
+	}
+
+	auto *diffuseMap3 = mat.GetTextureInfo(Material::ALBEDO_MAP3_IDENTIFIER);
+	if(diffuseMap3 != nullptr && diffuseMap3->texture != nullptr)
+	{
+		auto texture = std::static_pointer_cast<Texture>(diffuseMap3->texture);
+		if(texture->HasValidVkTexture())
+			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap3));
+	}
+	return descSetGroup;
+}
+bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
+{
+	auto numAlpha = 0;
+	auto alphaBuffer = c_engine->GetDummyBuffer();
+	auto &vkMesh = mesh.GetVKMesh();
+	if(vkMesh != nullptr)
+	{
+		auto &meshAlphaBuffer = vkMesh->GetAlphaBuffer();
+		if(meshAlphaBuffer != nullptr)
+		{
+			alphaBuffer = meshAlphaBuffer;
+			numAlpha = mesh.GetAlphaCount();
+		}
+	}
+	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
+		RecordBindVertexBuffer(alphaBuffer->GetAnvilBuffer(),VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
+		ShaderPBR::Draw(mesh) == true;
 }
 #pragma optimize("",on)

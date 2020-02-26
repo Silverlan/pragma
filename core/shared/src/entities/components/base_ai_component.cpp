@@ -222,7 +222,7 @@ void BaseAIComponent::Initialize()
 		auto &evDataBlend = static_cast<CEOnBlendAnimation&>(evData.get());
 		auto &animInfo = evDataBlend.slotInfo;
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
-			BaseAIComponent::BlendAnimationMovement(evDataBlend.boneOrientations,evDataBlend.boneScales);
+			BaseAIComponent::BlendAnimationMovement(evDataBlend.bonePoses,evDataBlend.boneScales);
 	});
 	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);

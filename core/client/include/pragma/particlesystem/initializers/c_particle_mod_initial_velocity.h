@@ -3,6 +3,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
+#include <optional>
 
 class DLLCLIENT CParticleInitializerInitialVelocity
 	: public CParticleInitializer
@@ -16,6 +17,8 @@ private:
 	float m_speed = 0.f;
 	Vector3 m_spreadMin = {};
 	Vector3 m_spreadMax = {};
+	Vector3 m_velocityMin = {};
+	Vector3 m_velocityMax = {};
 };
 
 #endif

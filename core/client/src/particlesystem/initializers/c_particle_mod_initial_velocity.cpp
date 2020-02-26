@@ -32,13 +32,22 @@ CParticleInitializerInitialVelocity::CParticleInitializerInitialVelocity(pragma:
 			m_spreadMin = uvec::create(it->second);
 		else if(key == "spread_max")
 			m_spreadMax = uvec::create(it->second);
+		else if(key == "velocity_min")
+			m_velocityMin = uvec::create(it->second);
+		else if(key == "velocity_max")
+			m_velocityMax = uvec::create(it->second);
 	}
 }
 void CParticleInitializerInitialVelocity::Initialize(CParticle &particle)
 {
-	if(m_speed == 0.f)
-		return;
-	Vector3 dir = glm::normalize(m_direction +uvec::get_random_spread(m_spreadMin,m_spreadMax));
-	particle.SetVelocity(dir *m_speed);
+	auto dir = m_direction;
+	if(uvec::length_sqr(m_spreadMax -m_spreadMin) > 0.001f)
+	{
+		dir += uvec::get_random_spread(m_spreadMin,m_spreadMax);
+		uvec::normalize(&dir);
+	}
+	auto vel = dir *m_speed;
+	vel += uvec::get_random_spread(m_velocityMin,m_velocityMax);
+	particle.SetVelocity(vel);
 }
 float CParticleInitializerInitialVelocity::GetSpeed() const {return m_speed;}

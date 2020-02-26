@@ -330,6 +330,12 @@ void pragma::level::transform_class(
 			spawnFlags |= pragma::BaseEnvSoundComponent::SpawnFlags::PlayEverywhere;
 		outKeyValues.insert(std::make_pair("spawnflags",std::to_string(umath::to_integral(spawnFlags))));
 	}*/
+	else if(ustring::compare(className,"sky_camera",false) == true)
+	{
+		if(ustring::compare(className,"sky_camera"))
+			outKeyValues.insert(std::make_pair("wv_hint_clientsideonly","1"));
+		outKeyValues.insert(std::make_pair("skybox_scale",fGetKeyValue("scale")));
+	}
 	else // Just use it unchanged
 	{
 		if(ustring::compare(className,"env_cubemap") || ustring::compare(className,"util_cubemap"))

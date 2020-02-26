@@ -104,7 +104,8 @@ namespace pragma
 		{
 			None = 0u,
 			ClipPlaneBound = 1u,
-			ShouldUseLightMap = ClipPlaneBound<<1u
+			ShouldUseLightMap = ClipPlaneBound<<1u,
+			RenderAs3DSky = ShouldUseLightMap<<1u
 		};
 
 #pragma pack(push,1)
@@ -117,12 +118,14 @@ namespace pragma
 			NoIBL = LightmapsEnabled<<1u,
 
 			TranslucencyEnabled = NoIBL<<1u,
-			UseExtendedVertexWeights = TranslucencyEnabled<<1u
+			UseExtendedVertexWeights = TranslucencyEnabled<<1u,
+			Is3DSky = UseExtendedVertexWeights<<1u
 		};
 
 		struct PushConstants
 		{
 			Vector4 clipPlane; // w is unused
+			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
 			Vector2 padding; // Padding to vec4
@@ -145,7 +148,7 @@ namespace pragma
 		virtual ~ShaderTextured3DBase() override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane);
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 		virtual size_t GetBaseTypeHashCode() const override;
@@ -153,6 +156,7 @@ namespace pragma
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
+		void Set3DSky(bool is3dSky);
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);

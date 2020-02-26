@@ -27,6 +27,7 @@
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
+#include "pragma/util/util_variable_type.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
 #include <luainterface.hpp>
@@ -922,6 +923,13 @@ int Lua::util::get_type_name(lua_State *l)
 	auto o = luabind::from_stack(l,1);
 	auto classInfo = luabind::get_class_info(o);
 	Lua::PushString(l,classInfo.name);
+	return 1;
+}
+
+int Lua::util::variable_type_to_string(lua_State *l)
+{
+	auto type = static_cast<::util::VarType>(Lua::CheckInt(l,1));
+	Lua::PushString(l,::util::variable_type_to_string(type));
 	return 1;
 }
 

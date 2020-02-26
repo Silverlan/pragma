@@ -270,7 +270,7 @@ namespace pragma
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual void EndDraw() override;

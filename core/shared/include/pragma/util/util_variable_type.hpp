@@ -32,6 +32,7 @@ namespace util
 
 		Count
 	};
+	std::string variable_type_to_string(VarType type);
 };
 
 struct lua_State;

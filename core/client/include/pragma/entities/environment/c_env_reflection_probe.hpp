@@ -23,6 +23,13 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		enum class UpdateStatus : uint8_t
+		{
+			Initial = 0,
+			Pending,
+			Complete,
+			Failed
+		};
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
 		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin);
@@ -39,10 +46,11 @@ namespace pragma
 		const rendering::IBLData *GetIBLData() const;
 		Anvil::DescriptorSet *GetIBLDescriptorSet();
 
-		bool UpdateIBLData(bool rebuild=false);
+		UpdateStatus UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
 	private:
 		static std::shared_ptr<prosper::Image> CreateCubemapImage();
+		Material *LoadMaterial();
 
 		void InitializeDescriptorSet();
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
@@ -70,7 +78,7 @@ namespace pragma
 		std::unique_ptr<RaytracingJobManager> m_raytracingJobManager = nullptr;
 		bool m_bBakingFailed = false;
 
-		std::string m_srcEnvMap = "";
+		std::string m_srcEnvMap = "skies/dusk379.hdr"; // Arbitrary default sky
 	};
 };
 

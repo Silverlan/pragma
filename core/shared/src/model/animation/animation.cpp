@@ -20,17 +20,16 @@ std::shared_ptr<Animation> Animation::Create(const Animation &other,ShareMode sh
 
 Animation::Animation()
 	: m_flags(FAnim::None),m_activity(Activity::Invalid),m_activityWeight(1),m_fps(24),
-	m_fadeIn(nullptr),m_fadeOut(nullptr),m_blendController(nullptr)
+	m_fadeIn(nullptr),m_fadeOut(nullptr)
 {}
 
 Animation::Animation(const Animation &other,ShareMode share)
 	: m_boneIds(other.m_boneIds),m_boneIdMap(other.m_boneIdMap),m_flags(other.m_flags),m_activity(other.m_activity),
 	m_activityWeight(other.m_activityWeight),m_fps(other.m_fps),m_boneWeights(other.m_boneWeights),
-	m_renderBounds(other.m_renderBounds)
+	m_renderBounds(other.m_renderBounds),m_blendController{other.m_blendController}
 {
 	m_fadeIn = (other.m_fadeIn != nullptr) ? std::make_unique<float>(*other.m_fadeIn) : nullptr;
 	m_fadeOut = (other.m_fadeOut != nullptr) ? std::make_unique<float>(*other.m_fadeOut) : nullptr;
-	m_blendController = (other.m_blendController != nullptr) ? std::make_unique<AnimationBlendController>(*other.m_blendController) : nullptr;
 
 	if((share &ShareMode::Frames) != ShareMode::None)
 		m_frames = other.m_frames;
@@ -128,20 +127,15 @@ void Animation::Localize(const Skeleton &skeleton)
 	for(auto it=m_frames.begin();it!=m_frames.end();++it)
 		(*it)->Localize(*this,skeleton);
 }
-AnimationBlendController *Animation::SetBlendController(unsigned int controller)
+AnimationBlendController &Animation::SetBlendController(uint32_t controller)
 {
-	m_blendController = std::make_unique<AnimationBlendController>();
+	m_blendController = AnimationBlendController{};
 	m_blendController->controller = controller;
-	return m_blendController.get();
+	return *m_blendController;
 }
-void Animation::ClearBlendController()
-{
-	m_blendController = nullptr;
-}
-AnimationBlendController *Animation::GetBlendController()
-{
-	return m_blendController.get();
-}
+AnimationBlendController *Animation::GetBlendController() {return m_blendController.has_value() ? &*m_blendController : nullptr;}
+const AnimationBlendController *Animation::GetBlendController() const {return const_cast<Animation*>(this)->GetBlendController();}
+void Animation::ClearBlendController() {m_blendController = {};}
 float Animation::GetFadeInTime()
 {
 	if(m_fadeIn == nullptr)

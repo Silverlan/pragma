@@ -27,7 +27,8 @@ int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
 	auto width = Lua::CheckInt(l,arg++);
 	auto height = Lua::CheckInt(l,arg++);
 	auto *uv = Lua::CheckVector2(l,arg++);
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
+	// TODO: FOV is multiplied by two due to a potential error in calc_world_direction_from_2d_coordinates FIXME
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad() *2.f,hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),static_cast<float>(width),static_cast<float>(height),*uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }

@@ -46,8 +46,8 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	extents.height *= 2;
 #endif
 	// If the lightmap resolution has changed, we will have to make some additional changes to the BSP file (i.e. updating offsets)
-	auto widthLightmapAtlas = lightMapInfo.atlasSize;
-	auto heightLightmapAtlas = lightMapInfo.atlasSize;
+	auto widthLightmapAtlas = lightMapInfo.atlasSize.x;
+	auto heightLightmapAtlas = lightMapInfo.atlasSize.y;
 	auto scaleFactorW = extents.width /static_cast<float>(widthLightmapAtlas);
 	auto scaleFactorH = extents.height /static_cast<float>(heightLightmapAtlas);
 	auto newResolution = (extents.width != widthLightmapAtlas || extents.height != heightLightmapAtlas);

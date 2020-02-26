@@ -6,6 +6,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 static void get_local_bone_position(std::vector<physics::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	std::function<void(std::shared_ptr<Bone>&,Vector3*,Quat*,Vector3*)> apply;
@@ -315,26 +316,19 @@ bool BaseAnimatedComponent::ShouldUpdateBones() const
 	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES,evData) == util::EventReply::Handled && evData.shouldUpdate;
 }
 
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
 {
-	for(unsigned int i=0;i<boneOrientations.size();i++)
+	for(unsigned int i=0;i<bonePoses.size();i++)
 	{
-		Orientation &orientation = boneOrientations[i];
-		Vector3 *posBlend = frameBlend->GetBonePosition(i);
-		Quat *rotBlend = frameBlend->GetBoneOrientation(i);
+		auto &pose = bonePoses[i];
+		auto *poseFrame = frameBlend->GetBoneTransform(i);
 		auto weight = anim.GetBoneWeight(i);
-		if(posBlend != NULL && rotBlend != NULL)
+		if(poseFrame)
 		{
 			if(bAdd == true)
-			{
-				orientation.pos += *posBlend *weight;
-				orientation.rot = orientation.rot *glm::slerp(uquat::identity(),*rotBlend,weight);//orientation.rot *(*rotBlend);
-			}
+				pose *= *poseFrame *weight;
 			else
-			{
-				orientation.pos = orientation.pos +(*posBlend -orientation.pos) *weight;
-				orientation.rot = glm::slerp(orientation.rot,*rotBlend,weight);
-			}
+				pose.Interpolate(*poseFrame,weight);
 		}
 		if(boneScales != nullptr)
 		{
@@ -354,27 +348,19 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<Orientation> &boneOr
 		}
 	}
 }
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<Orientation> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<Orientation> &add,std::vector<Vector3> *addScales,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
 {
 	for(auto i=decltype(tgt.size()){0};i<tgt.size();++i)
 	{
 		auto animBoneIdx = anim->LookupBone(i);
 		if(animBoneIdx == -1 || animBoneIdx >= add.size())
 			continue;
-		auto &orientation = tgt.at(i);
+		auto &pose = tgt.at(i);
 		auto weight = anim->GetBoneWeight(i);
 		if(bAdd == true)
-		{
-			orientation.pos += add.at(animBoneIdx).pos *weight;
-			orientation.rot = orientation.rot *glm::slerp(uquat::identity(),add.at(animBoneIdx).rot,weight);
-		}
+			pose *= add.at(animBoneIdx) *weight;
 		else
-		{
-			orientation.pos = orientation.pos +(add.at(animBoneIdx).pos -orientation.pos) *weight;
-			orientation.rot = glm::slerp(orientation.rot,add.at(animBoneIdx).rot,weight);
-			//orientation.pos = add.at(animBoneIdx).pos *weight;
-			//orientation.rot = glm::slerp(uquat::identity(),add.at(animBoneIdx).rot,weight);
-		}
+			pose.Interpolate(add.at(animBoneIdx),weight);
 		if(boneScales != nullptr && addScales != nullptr)
 		{
 			if(bAdd == true)
@@ -389,37 +375,38 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<Orientation> &tgt,st
 		}
 	}
 }
-void BaseAnimatedComponent::BlendBoneFrames(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,float blendScale) const
+void BaseAnimatedComponent::BlendBonePoses(
+	const std::vector<pragma::physics::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
+	const std::vector<pragma::physics::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
+	std::vector<pragma::physics::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
+	Animation &anim,float interpFactor
+) const
 {
-	for(unsigned int i=0;i<boneOrientations.size();i++)
+	auto numBones = umath::min(srcBonePoses.size(),dstBonePoses.size(),outBonePoses.size());
+	auto numScales = (optSrcBoneScales && optDstBoneScales && optOutBoneScales) ? umath::min(optSrcBoneScales->size(),optDstBoneScales->size(),optOutBoneScales->size(),numBones) : 0;
+	for(auto boneId=decltype(numBones){0u};boneId<numBones;++boneId)
 	{
-		Orientation &orientation = boneOrientations[i];
-		Vector3 *posBlend = frameBlend->GetBonePosition(i);
-		auto *rotBlend = frameBlend->GetBoneOrientation(i);
-		auto boneBlendScale = anim.GetBoneWeight(i);
-		if(posBlend != NULL && rotBlend != NULL)
-		{
-			boneBlendScale *= blendScale;
-			orientation.pos = orientation.pos +(*posBlend -orientation.pos) *boneBlendScale;
-			orientation.rot = glm::slerp(orientation.rot,*rotBlend,boneBlendScale);
-		}
-		if(boneScales != nullptr)
-		{
-			auto *scaleBlend = frameBlend->GetBoneScale(i);
-			if(scaleBlend != nullptr)
-				boneScales->at(i) = uvec::lerp(boneScales->at(i),*scaleBlend *boneBlendScale,blendScale);
-		}
+		auto &srcPose = srcBonePoses.at(boneId);
+		auto dstPose = dstBonePoses.at(boneId);
+		auto boneWeight = anim.GetBoneWeight(boneId);
+		auto boneInterpFactor = boneWeight *interpFactor;
+		auto &outPose = (outBonePoses.at(boneId) = srcPose);
+		outPose.Interpolate(dstPose,boneInterpFactor);
+
+		// Scaling
+		if(boneId >= numScales)
+			continue;
+		optOutBoneScales->at(boneId) = uvec::lerp(optSrcBoneScales->at(boneId),optDstBoneScales->at(boneId) *boneWeight,interpFactor);
 	}
 }
-void BaseAnimatedComponent::BlendBoneFrames(std::vector<Orientation> &tgt,std::vector<Vector3> *tgtScales,std::vector<Orientation> &add,std::vector<Vector3> *addScales,float blendScale) const
+void BaseAnimatedComponent::BlendBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,float blendScale) const
 {
 	if(blendScale == 0.f)
 		return;
 	for(unsigned int i=0;i<umath::min(tgt.size(),add.size());i++)
 	{
-		Orientation &orientation = tgt[i];
-		orientation.pos = orientation.pos +(add[i].pos -orientation.pos) *blendScale;
-		orientation.rot = glm::slerp(orientation.rot,add[i].rot,blendScale);
+		auto &pose = tgt.at(i);
+		pose.Interpolate(add.at(i),blendScale);
 		if(tgtScales != nullptr && addScales != nullptr)
 			tgtScales->at(i) = uvec::lerp(tgtScales->at(i),addScales->at(i),blendScale);
 	}
@@ -446,3 +433,4 @@ void BaseAnimatedComponent::UpdateSkeleton()
 	m_processedBones = m_bones;
 	get_global_bone_transforms(m_processedBones,skeleton.GetRootBones());
 }
+#pragma optimize("",on)

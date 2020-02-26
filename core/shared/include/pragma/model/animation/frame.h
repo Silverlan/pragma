@@ -49,14 +49,16 @@ public:
 
 	bool HasScaleTransforms() const;
 
-	const std::vector<OrientedPoint> &GetBoneTransforms() const;
+	const std::vector<pragma::physics::Transform> &GetBoneTransforms() const;
 	const std::vector<Vector3> &GetBoneScales() const;
-	std::vector<OrientedPoint> &GetBoneTransforms();
+	std::vector<pragma::physics::Transform> &GetBoneTransforms();
 	std::vector<Vector3> &GetBoneScales();
+	pragma::physics::Transform *GetBoneTransform(uint32_t idx);
+	const pragma::physics::Transform *GetBoneTransform(uint32_t idx) const;
 private:
 	Frame(unsigned int numBones);
 	Frame(const Frame &other);
-	std::vector<OrientedPoint> m_bones;
+	std::vector<pragma::physics::Transform> m_bones;
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;
 	std::vector<uint32_t> GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const;

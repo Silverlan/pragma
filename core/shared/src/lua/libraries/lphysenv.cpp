@@ -849,6 +849,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
+	classDefTransform.def("Interpolate",static_cast<void(*)(lua_State*,pragma::physics::Transform&,pragma::physics::Transform&,float)>([](lua_State *l,pragma::physics::Transform &t,pragma::physics::Transform &dst,float factor) {
+		t.Interpolate(dst,factor);
+	}));
+	classDefTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,pragma::physics::Transform&,float)>([](lua_State *l,pragma::physics::Transform &t,float factor) {
+		t.InterpolateToIdentity(factor);
+	}));
 	classDefTransform.def(luabind::const_self *luabind::const_self);
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
@@ -871,6 +877,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classDefScaledTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
 		Lua::Push<pragma::physics::ScaledTransform>(l,t.GetInverse());
+	}));
+	classDefScaledTransform.def("Interpolate",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,pragma::physics::ScaledTransform&,float)>([](lua_State *l,pragma::physics::ScaledTransform &t,pragma::physics::ScaledTransform &dst,float factor) {
+		t.Interpolate(dst,factor);
+	}));
+	classDefScaledTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,float)>([](lua_State *l,pragma::physics::ScaledTransform &t,float factor) {
+		t.InterpolateToIdentity(factor);
 	}));
 	classDefScaledTransform.def(luabind::const_self *pragma::physics::Transform());
 	classDefScaledTransform.def(luabind::const_self *luabind::const_self);

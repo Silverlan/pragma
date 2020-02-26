@@ -13,7 +13,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 #pragma optimize("",off)
-void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode,bool bReflection)
+void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -23,7 +23,16 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	auto *renderInfo = rasterizer->GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return;
-	auto &containers = renderInfo->containers;
+	RenderPrepass(drawCmd,*renderInfo);
+}
+void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes)
+{
+	auto &scene = c_game->GetRenderScene();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &containers = renderMeshes.containers;
 	//auto &descSetLightSources = scene->GetLightSourceDescriptorSet();
 	// Render depth, positions and normals
 
@@ -43,6 +52,8 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 				{
 					entPrev = ent;
 					renderC = entPrev->GetRenderComponent().get();
+					if(renderC->IsDepthPassEnabled() == false)
+						continue;
 					auto bWeighted = false;
 					shaderDepthStage.BindEntity(*ent);//,bWeighted); // prosper TODO
 
@@ -61,7 +72,8 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 						prosper::util::record_set_depth_bias(**drawCmd);
 					}
 				}
-
+				if(renderC->IsDepthPassEnabled() == false)
+					continue;
 				for(auto *cmesh : pair.second.meshes)
 				{
 					if(cmesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)

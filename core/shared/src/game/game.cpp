@@ -898,7 +898,13 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 
 			// Light map data
 			auto bLightMap = f->Read<bool>(); // -> Does this level have a light map?
-			bspInputData.lightMapInfo.atlasSize = f->Read<uint32_t>();
+			if(version >= 10)
+				bspInputData.lightMapInfo.atlasSize = f->Read<Vector2i>();
+			else
+			{
+				auto sz = f->Read<uint32_t>();
+				bspInputData.lightMapInfo.atlasSize = {sz,sz};
+			}
 			auto borderSize = bspInputData.lightMapInfo.borderSize = f->Read<uint8_t>();
 
 			// Light map atlas

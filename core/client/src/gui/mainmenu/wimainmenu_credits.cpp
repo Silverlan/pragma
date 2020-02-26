@@ -118,6 +118,9 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	for(auto &patron : engine_info::get_patrons())
 		AddText(patron,"credits_text");
 
+	AddHeader(Locale::GetText("localization"));
+	AddText("Shmeerz (" +Locale::GetText("lan_portuguese") +")","credits_text");
+
 	AddHeader(Locale::GetText("powered_by"),"header2");
 	AddLogo("third_party/vulkan_logo");
 	AddLogo("third_party/fmod_logo");

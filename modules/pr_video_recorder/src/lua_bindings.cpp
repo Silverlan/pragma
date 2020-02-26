@@ -10,7 +10,7 @@
 #include <pragma/lua/libraries/lfile.h>
 #include <mathutil/umath.h>
 #include <image/prosper_image.hpp>
-#include <sharedutils/util_image_buffer.hpp>
+#include <util_image_buffer.hpp>
 #include <wrappers/memory_block.h>
 
 struct VideoRecorderFileInterface
@@ -143,7 +143,7 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 			Lua::PushBool(l,false);
 			return;
 		}
-		auto imgBuf = util::ImageBuffer::Create(imgData,extents.width,extents.height,util::ImageBuffer::Format::RGBA8,true);
+		auto imgBuf = uimg::ImageBuffer::Create(imgData,extents.width,extents.height,uimg::ImageBuffer::Format::RGBA8,true);
 		Lua::PushInt(l,videoRecorder.WriteFrame(*imgBuf,frameTime));
 		memory->unmap(); // memory doesn't actually get unmapped; imgData stays valid as long as the image is valid, as long as proper memory flags have been set!
 		// TODO: Validate image memory flags to make sure this is actually the case
@@ -155,10 +155,10 @@ void video_recorder::register_lua_library(Lua::Interface &l)
 			Lua::PushBool(l,false);
 			return;
 		}
-		auto imgBuf = util::ImageBuffer::Create(ds->GetData(),videoRecorder.GetWidth(),videoRecorder.GetHeight(),util::ImageBuffer::Format::RGBA8,true);
+		auto imgBuf = uimg::ImageBuffer::Create(ds->GetData(),videoRecorder.GetWidth(),videoRecorder.GetHeight(),uimg::ImageBuffer::Format::RGBA8,true);
 		Lua::PushInt(l,videoRecorder.WriteFrame(*imgBuf,frameIndex));
 	}));
-	classDefData.def("WriteFrame",static_cast<void(*)(lua_State*,VideoRecorder&,util::ImageBuffer&,double)>([](lua_State *l,VideoRecorder &videoRecorder,util::ImageBuffer &imgBuffer,double frameIndex) {
+	classDefData.def("WriteFrame",static_cast<void(*)(lua_State*,VideoRecorder&,uimg::ImageBuffer&,double)>([](lua_State *l,VideoRecorder &videoRecorder,uimg::ImageBuffer &imgBuffer,double frameIndex) {
 		auto tgtImgBuffer = imgBuffer.shared_from_this();
 		if(tgtImgBuffer->GetWidth() != videoRecorder.GetWidth() || tgtImgBuffer->GetHeight() != videoRecorder.GetHeight())
 			tgtImgBuffer->Resize(videoRecorder.GetWidth(),videoRecorder.GetHeight());

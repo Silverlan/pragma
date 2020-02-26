@@ -25,11 +25,13 @@ namespace pragma::rendering::cycles
 		std::string sky = "";
 		float skyStrength = 1.f;
 		EulerAngles skyAngles = {};
+		uint32_t maxTransparencyBounces = 64;
 	};
 	struct DLLCLIENT RenderImageInfo
 	{
 		Vector3 cameraPosition = {};
 		Quat cameraRotation = {};
+		Mat4 viewProjectionMatrix = {};
 		float nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 		float farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
 		umath::Degree fov = BaseEnvCameraComponent::DEFAULT_FOV;

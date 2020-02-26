@@ -14,18 +14,20 @@ OcclusionMeshInfo::OcclusionMeshInfo(CBaseEntity &ent,CModelMesh &mesh)
 	: mesh{&mesh},hEntity{ent.GetHandle()}
 {}
 
-bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> &planes) const
+bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *planes) const
 {
-	if(bViewModel == true || numMeshes == 1)
+	if((planes == nullptr) || bViewModel == true || numMeshes == 1)
 		return true;
 	Vector3 min,max;
 	mesh.GetBounds(min,max);
 	min += pos;
 	max += pos;
-	return (Intersection::AABBInPlaneMesh(min,max,planes) != INTERSECT_OUTSIDE) ? true : false;
+	return (Intersection::AABBInPlaneMesh(min,max,*planes) != INTERSECT_OUTSIDE) ? true : false;
 }
 bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
+	if(outPlanes == nullptr)
+		return true; // Skip the frustum culling
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
@@ -35,21 +37,42 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return false;
+	outViewModel = (pRenderComponent->GetRenderMode() == RenderMode::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
 	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&renderer.GetClippedFrustumPlanes());
-	if(pRenderComponent->IsExemptFromOcclusionCulling())
+	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
-	auto pTrComponent = ent.GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto sphere = pRenderComponent->GetRenderSphereBounds();
+	pragma::physics::Transform pose;
+	ent.GetPose(pose);
+	auto pos = pose.GetOrigin();
+	if(Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) == INTERSECT_OUTSIDE)
+		return false;
 	Vector3 min;
 	Vector3 max;
 	pRenderComponent->GetRenderBounds(&min,&max);
-	min += pos;
-	max += pos;
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	outViewModel = (pRenderComponent->GetRenderMode() == RenderMode::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
-	return (outViewModel == true || (Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) != INTERSECT_OUTSIDE && Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE)) ? true : false;
+	min = pose *min;
+	max = pose *max;
+	uvec::to_min_max(min,max);
+	return Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE;
 }
 void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+{
+	auto &scene = renderer.GetScene();
+	auto &cam = scene.GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	PerformCulling(renderer,posCam,particlesOut);
+}
+void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+{
+	auto &scene = renderer.GetScene();
+	auto &cam = scene.GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	PerformCulling(renderer,posCam,culledMeshesOut);
+}
+void OcclusionCullingHandler::PerformCulling(
+	const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	std::vector<pragma::CParticleSystemComponent*> &particlesOut
+)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();

@@ -19,6 +19,7 @@ extern DLLCLIENT CGame *c_game;
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
+#pragma optimize("",off)
 void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto &scene = GetScene();
@@ -129,16 +130,33 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 	auto bGlow = cvDrawGlow->GetBool();
 	auto bTranslucent = cvDrawTranslucent->GetBool();
-	auto bReflection = (renderFlags &FRender::Reflection) != FRender::None;
+	auto rsFlags = RenderSystem::RenderFlags::None;
+	if(umath::is_flag_set(renderFlags,FRender::Reflection))
+		rsFlags |= RenderSystem::RenderFlags::Reflection;
 	//c_engine->StartGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
 	if((renderFlags &FRender::Skybox) != FRender::None)
 	{
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Skybox);
 		c_game->CallCallbacks("PreRenderSkybox");
-		RenderSystem::Render(drawCmd,RenderMode::Skybox,bReflection);
+
+		RenderSystem::Render(drawCmd,RenderMode::Skybox,rsFlags);
+
+		// 3D Skybox
+		for(auto &hSkyCam : m_3dSkyCameras)
+		{
+			auto filteredMeshes = hSkyCam.valid() ? hSkyCam->GetRenderMeshCollectionHandler().GetRenderMeshData(RenderMode::World) : nullptr;
+			if(filteredMeshes == nullptr)
+				continue;
+			auto &ent = hSkyCam->GetEntity();
+			auto &pos = ent.GetPosition();
+			Vector4 drawOrigin {pos.x,pos.y,pos.z,hSkyCam->GetSkyboxScale()};
+			RenderSystem::Render(drawCmd,*filteredMeshes,RenderMode::Skybox,rsFlags | RenderSystem::RenderFlags::RenderAs3DSky,drawOrigin);
+		}
+
 		c_game->CallCallbacks("PostRenderSkybox");
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Skybox);
 	}
+
 	//c_engine->StopGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
 
 	// Simple rendering test using a flat (unlit) shader
@@ -185,13 +203,13 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 		c_game->CallCallbacks("PreRenderWorld");
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::World); // prosper TODO
-		RenderSystem::Render(drawCmd,RenderMode::World,bReflection);
+		RenderSystem::Render(drawCmd,RenderMode::World,rsFlags);
 		//c_engine->StopGPUTimer(GPUTimerEvent::World); // prosper TODO
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 		auto *renderInfo = GetRenderInfo(RenderMode::World);
 		if(renderInfo != nullptr && cam.valid())
-			RenderSystem::Render(drawCmd,*cam,RenderMode::World,bReflection,renderInfo->translucentMeshes);
+			RenderSystem::Render(drawCmd,*cam,RenderMode::World,rsFlags,renderInfo->translucentMeshes);
 		//c_engine->StopGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 
 		c_game->CallCallbacks("PostRenderWorld");
@@ -288,7 +306,7 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 		c_game->CallCallbacks("PreRenderWater");
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::Water); // prosper TODO
-		auto numShaderInvocations = RenderSystem::Render(drawCmd,RenderMode::Water,bReflection);
+		auto numShaderInvocations = RenderSystem::Render(drawCmd,RenderMode::Water,rsFlags);
 		//c_engine->StopGPUTimer(GPUTimerEvent::Water); // prosper TODO
 
 		c_game->CallCallbacks("PostRenderWater");
@@ -314,7 +332,7 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 			c_game->CallCallbacks("PreRenderView");
 
 			//c_engine->StartGPUTimer(GPUTimerEvent::View); // prosper TODO
-			RenderSystem::Render(drawCmd,RenderMode::View,bReflection);
+			RenderSystem::Render(drawCmd,RenderMode::View,rsFlags);
 			//c_engine->StopGPUTimer(GPUTimerEvent::View); // prosper TODO
 
 			//c_engine->StartGPUTimer(GPUTimerEvent::ViewParticles); // prosper TODO
@@ -403,3 +421,4 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 	//m_shaderScreen->Render(m_renderTexture,m_renderScreenVertexBuffer);
 	*/ // Vulkan TODO
 }
+#pragma optimize("",on)

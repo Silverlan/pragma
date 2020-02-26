@@ -276,10 +276,11 @@ bool LuaShaderTextured3D::BindScene(rendering::RasterizationRenderer &renderer,b
 	return true;
 }
 bool LuaShaderTextured3D::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+	const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
 )
 {
-	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,pipelineIdx,recordFlags) == false)
+	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)
 		return false;
 	CallLuaMember<void,prosper::CommandBuffer*,const Vector4&,uint32_t,uint32_t>("OnBeginDraw",const_cast<prosper::PrimaryCommandBuffer*>(cmdBuffer.get()),clipPlane,umath::to_integral(pipelineIdx),umath::to_integral(recordFlags));
 	return true;

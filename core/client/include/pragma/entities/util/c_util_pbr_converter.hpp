@@ -27,6 +27,9 @@ namespace pragma
 		MaterialHandle hMaterial = {};
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 		bool isRunning = false;
+		uint32_t width = 512;
+		uint32_t height = 512;
+		uint32_t samples = 512;
 	};
 
 	class DLLCLIENT CPBRConverterComponent final
@@ -38,23 +41,31 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
-		void GenerateAmbientOcclusionMaps(Model &mdl);
+		void GenerateAmbientOcclusionMaps(Model &mdl,uint32_t w=512,uint32_t h=512,uint32_t samples=512,bool rebuild=false);
 
 		bool ConvertToPBR(CMaterial &matTraditional);
 		void PollEvents();
 	private:
+		struct AmbientOcclusionInfo
+		{
+			// These values are a good compromise between quality and render time
+			uint32_t width = 512;
+			uint32_t height = 512;
+			uint32_t samples = 512;
+			bool rebuild = false;
+		};
 		struct ModelUpdateInfo
 		{
 			CallbackHandle cbOnMaterialsLoaded = {};
 			bool updateMetalness = false;
-			bool updateAmbientOcclusion = false;
+			std::optional<AmbientOcclusionInfo> updateAmbientOcclusion = {};
 		};
 		void ConvertMaterialsToPBR(Model &mdl);
 		void UpdateMetalness(Model &mdl);
 		void UpdateMetalness(Model &mdl,CMaterial &mat);
-		void UpdateAmbientOcclusion(Model &mdl);
+		void UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo={});
 		void UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo);
-		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,bool updateAmbientOcclusion);
+		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo={});
 
 		void ProcessQueue();
 		void WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;

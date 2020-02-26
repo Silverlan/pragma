@@ -10,6 +10,7 @@ link_external_library(util_video_recorder)
 link_external_library(vulkan)
 link_external_library(anvil)
 link_external_library(prosper)
+link_external_library(util_image)
 
 add_external_library(lua)
 add_external_library(ffmpeg_avcodec)

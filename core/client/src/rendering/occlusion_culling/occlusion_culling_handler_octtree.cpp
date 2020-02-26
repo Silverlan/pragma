@@ -10,12 +10,12 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 template<class T>
-	void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node,std::vector<OcclusionMeshInfo> &culledMeshes,const std::vector<Plane> &planes,const std::function<void(const T&)> &fObjectCallback)
+	void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node,std::vector<OcclusionMeshInfo> &culledMeshes,const std::vector<Plane> *optFrustumPlanes,const std::function<void(const T&)> &fObjectCallback)
 {
 	if(node.IsEmpty() == true)
 		return;
 	auto &nodeBounds = node.GetWorldBounds();
-	if(Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,planes) == INTERSECT_OUTSIDE)
+	if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == INTERSECT_OUTSIDE)
 		return;
 	auto &objs = node.GetObjects();
 	for(auto &o : objs)
@@ -26,17 +26,18 @@ template<class T>
 	if(children == nullptr)
 		return;
 	for(auto &c : *children)
-		iterate_occlusion_tree(static_cast<typename OcclusionOctree<T>::Node&>(*c),culledMeshes,planes,fObjectCallback);
+		iterate_occlusion_tree(static_cast<typename OcclusionOctree<T>::Node&>(*c),culledMeshes,optFrustumPlanes,fObjectCallback);
 }
 
-void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerOctTree::PerformCulling(
+	const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
+)
 {
 	// TODO: Is this function still being used somewhere? If not, get rid of it!
 	auto &scene = renderer.GetScene();
-	auto &cam = scene.GetActiveCamera();
-	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	auto d = uvec::distance(m_lastLodCamPos,posCam);
-	m_lastLodCamPos = posCam;
+	auto d = uvec::distance(m_lastLodCamPos,camPos);
+	m_lastLodCamPos = camPos;
 	auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
@@ -51,7 +52,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 	auto &dynOctree = scene.GetOcclusionOctree();
 	auto &root = dynOctree.GetRootNode();
 	// TODO: Planes
-	iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,renderer.GetFrustumPlanes(),[this,&renderer,&scene,&bUpdateLod,&posCam,&culledMeshesOut](const CBaseEntity *cent) {
+	iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,cullByViewFrustum ? &renderer.GetFrustumPlanes() : nullptr,[this,&renderer,&scene,&bUpdateLod,&camPos,&culledMeshesOut,cullByViewFrustum](const CBaseEntity *cent) {
 		auto *ent = const_cast<CBaseEntity*>(cent);
 		assert(ent != nullptr);
 		if(ent == nullptr)
@@ -65,7 +66,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 			return;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
-		if(ShouldExamine(renderer,*ent,bViewModel,&planes) == false)
+		if(ShouldExamine(renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == false)
 			return;
 		auto pRenderComponent = ent->GetRenderComponent();
 		if(pRenderComponent.expired())
@@ -75,7 +76,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 		{
 			auto &mdlComponent = pRenderComponent->GetModelComponent();
 			if(mdlComponent.valid())
-				static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(posCam);
+				static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(camPos);
 		}
 		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 		auto &meshes = pRenderComponent->GetLODMeshes();
@@ -84,7 +85,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 		for(auto &mesh : meshes)
 		{
 			auto *cmesh = static_cast<CModelMesh*>(mesh.get());
-			if(exemptFromCulling == false && ShouldExamine(*cmesh,pos,bViewModel,numMeshes,*planes) == false)
+			if(cullByViewFrustum == true && exemptFromCulling == false && ShouldExamine(*cmesh,pos,bViewModel,numMeshes,planes) == false)
 				continue;
 			if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
 				culledMeshesOut.reserve(culledMeshesOut.capacity() +100);
@@ -104,15 +105,15 @@ void OcclusionCullingHandlerOctTree::PerformCulling(const rendering::Rasterizati
 			auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
 			auto bViewModel = false;
 			std::vector<Plane> *planes = nullptr;
-			if(ShouldExamine(renderer,entWorld,bViewModel,&planes) == true)
+			if(ShouldExamine(renderer,entWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
 			{
 				auto &root = wrldTree->GetRootNode();
 				auto pTrComponent = entWorld.GetTransformComponent();
 				auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 				std::size_t numMeshes = 2; // Value doesn't matter, but has to be > 1
-				iterate_occlusion_tree<std::shared_ptr<ModelMesh>>(root,culledMeshesOut,*planes,[this,&pos,&bViewModel,&planes,&entWorld,numMeshes,&culledMeshesOut](const std::shared_ptr<ModelMesh> &mesh) {
+				iterate_occlusion_tree<std::shared_ptr<ModelMesh>>(root,culledMeshesOut,planes,[this,&pos,&bViewModel,&planes,&entWorld,numMeshes,&culledMeshesOut](const std::shared_ptr<ModelMesh> &mesh) {
 					auto *cmesh = static_cast<CModelMesh*>(mesh.get());
-					if(ShouldExamine(*cmesh,pos,bViewModel,numMeshes,*planes) == false)
+					if(ShouldExamine(*cmesh,pos,bViewModel,numMeshes,planes) == false)
 						return;
 					if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
 						culledMeshesOut.reserve(culledMeshesOut.capacity() +100);

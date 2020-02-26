@@ -74,20 +74,26 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 		}
 	}
 
-	bool bHasBlendController = Read<bool>();
-	if(bHasBlendController == true)
+	auto hasBlendController = Read<bool>();
+	if(hasBlendController)
 	{
 		int controller = Read<int>();
-		AnimationBlendController *blend = anim->SetBlendController(controller);
+		auto &blend = anim->SetBlendController(controller);
 		char numTransitions = Read<char>();
 		for(char i=0;i<numTransitions;i++)
 		{
 			unsigned int animation = Read<unsigned int>();
-			int transition = Read<int>();
-			blend->transitions.push_back(AnimationBlendControllerTransition());
-			AnimationBlendControllerTransition &t = blend->transitions.back();
+			auto transition = (version >= 29) ? Read<float>() : static_cast<float>(Read<int>());
+			blend.transitions.push_back(AnimationBlendControllerTransition());
+			AnimationBlendControllerTransition &t = blend.transitions.back();
 			t.animation = animation +1; // Account for reference pose
 			t.transition = transition;
+		}
+
+		if(version >= 29)
+		{
+			blend.animationPostBlendController = Read<int32_t>();
+			blend.animationPostBlendTarget = Read<int32_t>();
 		}
 	}
 	

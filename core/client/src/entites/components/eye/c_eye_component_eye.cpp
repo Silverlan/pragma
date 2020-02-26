@@ -58,8 +58,9 @@ void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}
 
 static void angle_to_vector(const EulerAngles &angles,Vector3 &outForward)
 {
-	auto sy = umath::sin(umath::deg_to_rad(angles.y));
-	auto cy = umath::cos(umath::deg_to_rad(angles.y));
+	auto y = -umath::deg_to_rad(angles.y); // Needs to be inverted for some reason
+	auto sy = umath::sin(y);
+	auto cy = umath::cos(y);
 
 	auto sp = umath::sin(umath::deg_to_rad(angles.p));
 	auto cp = umath::cos(umath::deg_to_rad(angles.p));
@@ -84,7 +85,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 	flexC->SetFlexController("eyes_updown",f *(s *90 -45));
 	flexC->SetFlexController("eyes_rightleft",f *(s2 *90 -45));*/
 
-	auto tmp = GetViewTarget();
+	auto tmp = viewTarget;
 	if(m_eyeAttachmentIndex != std::numeric_limits<uint32_t>::max())
 	{
 		Vector3 pos {};

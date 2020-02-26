@@ -22,7 +22,8 @@ namespace pragma
 		enum class Flags : uint32_t
 		{
 			None = 0u,
-			UseExtendedVertexWeights = 1u
+			UseExtendedVertexWeights = 1u,
+			RenderAs3DSky = UseExtendedVertexWeights<<1u
 		};
 		static Pipeline GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount);
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
@@ -43,6 +44,7 @@ namespace pragma
 		struct PushConstants
 		{
 			Vector4 clipPlane;
+			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			Flags flags;
 		};
@@ -53,6 +55,8 @@ namespace pragma
 
 		bool BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindClipPlane(const Vector4 &clipPlane);
+		bool BindDrawOrigin(const Vector4 &drawOrigin);
+		void Set3DSky(bool is3dSky);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
@@ -67,6 +71,7 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) override {return false;}
 		virtual bool BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources) override {return false;}
+		Flags m_stateFlags = Flags::None;
 	};
 	using ShaderPrepassDepth = ShaderPrepassBase;
 

@@ -5,6 +5,7 @@
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
+#include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/math/plane.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <misc/types.h>
@@ -27,6 +28,7 @@ namespace pragma
 	struct OcclusionMeshInfo;
 	class OcclusionCullingHandler;
 	class CLightDirectionalComponent;
+	class CSkyCameraComponent;
 };
 namespace Anvil
 {
@@ -161,12 +163,17 @@ namespace pragma::rendering
 		// rendering has finished.
 		void SetFrameDepthBufferSamplingRequired();
 
+		RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
+		const RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
+
+		prosper::Shader *GetWireframeShader();
 		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);
 
-		void AdvanceRenderStage(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderGameScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+
 		void PerformOcclusionCulling();
 		void CollectRenderObjects(FRender renderFlags);
 		void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
@@ -191,23 +198,21 @@ namespace pragma::rendering
 		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
 
 		LightMapInfo m_lightMapInfo = {};
-		mutable std::unordered_map<RenderMode,std::shared_ptr<CulledMeshData>> m_renderInfo;
 		bool m_bFrameDepthBufferSamplingRequired = false;
 
 		// HDR
 		HDRData m_hdrInfo;
 		GlowData m_glowInfo;
-		Stage m_stage = Stage::Initial;
 
 		// Frustum planes (Required for culling)
 		std::vector<Plane> m_frustumPlanes = {};
 		std::vector<Plane> m_clippedFrustumPlanes = {};
 		void UpdateFrustumPlanes();
 
-		// Culled objects
-		std::vector<pragma::OcclusionMeshInfo> m_culledMeshes;
-		std::vector<pragma::CParticleSystemComponent*> m_culledParticles;
+		// 3D sky cameras used for the current rendering pass
+		std::vector<util::WeakHandle<pragma::CSkyCameraComponent>> m_3dSkyCameras = {};
 
+		RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
 		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupCSM;
 
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;

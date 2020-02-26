@@ -71,7 +71,7 @@ namespace util
 				uint16_t h;
 			};
 			uint32_t borderSize = 1u;
-			uint32_t atlasSize = 0u;
+			Vector2i atlasSize = {0,0};
 			std::vector<FaceLightMapInfo> faceInfos = {};
 			std::vector<uint8_t> luxelData = {}; // Vector of bsp::ColorRGBExp32
 			std::vector<uint8_t> dispLightmapSamplePositions = {};

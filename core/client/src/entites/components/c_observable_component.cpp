@@ -6,6 +6,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
 luabind::object CObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CObservableComponentHandleWrapper>(l);}
 void CObservableComponent::ReceiveData(NetPacket &packet)
 {
@@ -57,3 +58,4 @@ void CObservableComponent::SetLocalCameraOrigin(CameraType type,const Vector3 &o
 		return;
 	pl->UpdateObserverOffset();
 }
+#pragma optimize("",on)

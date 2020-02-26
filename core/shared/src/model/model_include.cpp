@@ -206,7 +206,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		{
 			auto &anim = anims.at(i);
 			auto *animBc = anim->GetBlendController();
-			if(animBc != nullptr)
+			if(animBc)
 			{
 				auto *bc = other.GetBlendController(animBc->controller);
 				if(bc == nullptr)

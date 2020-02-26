@@ -34,7 +34,7 @@ namespace pragma
 
 		virtual void SetLocalCameraOrigin(CameraType type,const Vector3 &origin);
 		void ClearLocalCameraOrigin(CameraType type);
-		const Vector3 &GetLocalCameraOrigin(CameraType type) const;
+		Vector3 GetLocalCameraOrigin(CameraType type) const;
 
 		virtual void SetLocalCameraOffset(CameraType type,const Vector3 &offset);
 		const Vector3 &GetLocalCameraOffset(CameraType type) const;

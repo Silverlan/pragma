@@ -62,12 +62,21 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	mdl.GetBodyGroupMeshes(bodyGroups,0,lodMeshes);
 	Vector3 meshCenter {};
 	uint32_t vertexCount = 0;
+	auto numSkins = mdl.GetTextureGroups().size();
 	for(auto &mesh : lodMeshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto texIdx = mdl.GetMaterialIndex(*subMesh);
-			if(texIdx.has_value() == false || *texIdx != matIdx)
+			auto isMeshUsingTexture = false;
+			for(auto i=decltype(numSkins){0u};i<numSkins;++i)
+			{
+				auto texIdx = mdl.GetMaterialIndex(*subMesh,i);
+				if(texIdx.has_value() == false || *texIdx != matIdx)
+					continue;
+				isMeshUsingTexture = true;
+				break;
+			}
+			if(isMeshUsingTexture == false)
 				continue;
 			// Calculate center pos of the mesh
 			auto &verts = subMesh->GetVertices();

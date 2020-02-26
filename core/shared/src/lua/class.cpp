@@ -425,6 +425,19 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::Push(l,tonemappedImg);
 	}));
+
+	defImageBuffer.def("GetPixelOffset",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
+		Lua::PushInt(l,imgBuffer.GetPixelOffset(x,y));
+	}));
+	defImageBuffer.def("GetPixelIndex",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
+		Lua::PushInt(l,imgBuffer.GetPixelIndex(x,y));
+	}));
+	defImageBuffer.def("GetPixelValue",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel) {
+		Lua::PushNumber(l,imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).GetFloatValue(static_cast<uimg::ImageBuffer::Channel>(channel)));
+	}));
+	defImageBuffer.def("SetPixelValue",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,float value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+	}));
 	modUtil[defImageBuffer];
 
 	auto defImgParallelJob = luabind::class_<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>,util::BaseParallelJob>("ParallelJobImage");

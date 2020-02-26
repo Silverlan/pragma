@@ -159,7 +159,10 @@ DLLCLIENT uint32_t s_shadowIndexCount = 0;
 DLLCLIENT uint32_t s_shadowTriangleCount = 0;
 DLLCLIENT uint32_t s_shadowVertexCount = 0;
 #endif
-void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes)
+void RenderSystem::Render(
+	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,
+	RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin
+)
 {
 	if(translucentMeshes.empty())
 		return;
@@ -167,6 +170,8 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
+	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
+	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
 	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
@@ -190,10 +195,11 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 				entPrev = nullptr;
 			}
 			if(shader->BeginDraw(
-				drawCmd,c_game->GetRenderClipPlane(),
+				drawCmd,c_game->GetRenderClipPlane(),drawOrigin,
 				pipelineType
 			) == false)
 				continue;
+			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
 			if(shader->BindScene(rasterizer,renderMode == RenderMode::View) == false)
 			{
@@ -262,21 +268,23 @@ void RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 }
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
-uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode,bool bReflection)
+uint32_t RenderSystem::Render(
+	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes,
+	RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin
+)
 {
 	auto &debugInfo = get_render_debug_info();
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
+	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
+	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto numShaderInvocations = 0u;
 
-	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
-	if(renderInfo == nullptr)
-		return numShaderInvocations;
-	auto &containers = renderInfo->containers;
-	auto &processed = renderInfo->processed;
+	auto &containers = renderMeshes.containers;
+	auto &processed = renderMeshes.processed;
 
 	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetLastFrameId();
@@ -291,13 +299,15 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
 		auto bView = (renderMode == RenderMode::View) ? true : false;
 		if(shader->BeginDraw(
-				drawCmd,c_game->GetRenderClipPlane(),
-				pipelineType
-			) == true
-		)
+			drawCmd,c_game->GetRenderClipPlane(),drawOrigin,
+			pipelineType
+		) == true
+			)
 		{
 			if(shader->BindScene(rasterizer,bView) == true)
 			{
+				shader->Set3DSky(renderAs3dSky);
+
 				++debugInfo.shaderCount;
 				for(auto itMat=shaderContainer->containers.begin();itMat!=shaderContainer->containers.end();itMat++)
 				{
@@ -380,53 +390,20 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 			}
 		}
 	}
-	// Render normals if enabled
-	/*static auto hShaderDebugNormals = c_engine->GetShader("debugnormals");
-	if(hShaderDebugNormals.IsValid())
-	{
-		auto drawNormals = cvDebugNormals->GetInt();
-		if(drawNormals > 0)
-		{
-			entLast = nullptr;
-			auto normalRenderMode = static_cast<Shader::DebugNormals::RenderMode>(drawNormals -1);
-			auto *shader = static_cast<Shader::DebugNormals*>(hShaderDebugNormals.get());
-			if(shader->BeginDraw(normalRenderMode) == true)
-			{
-				shader->BindScene(*scene);
-				for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
-				{
-					auto &shaderContainer = *itShader;
-					for(auto itMat=shaderContainer->containers.begin();itMat!=shaderContainer->containers.end();itMat++)
-					{
-						auto &matContainer = *itMat;
-						for(auto itEnt=matContainer->containers.begin();itEnt!=matContainer->containers.end();itEnt++)
-						{
-							auto &entContainer = *itEnt;
-							auto *ent = entContainer->entity;
-							if(ent != entLast)
-							{
-								shader->BindEntity(ent);
-								entLast = ent;
-							}
-							for(auto itMesh=entContainer->meshes.begin();itMesh!=entContainer->meshes.end();itMesh++)
-							{
-								auto *mesh = *itMesh;
-								shader->Draw(mesh);
-							}
-						}
-					}
-				}
-				shader->EndDraw();
-			}
-		}
-	}*/ // prosper TODO
-	//
 
 	for(auto it : processed)
 		static_cast<CBaseEntity*>(it.first)->GetRenderComponent()->PostRender(renderMode);
 
-	//OpenGL::BindVertexArray(0); // Vulkan TODO
-	//vao->Unbind();
 	return numShaderInvocations;
+}
+uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
+{
+	auto &scene = c_game->GetRenderScene();
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return 0;
+	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
+	return renderInfo ? Render(drawCmd,*renderInfo,renderMode,flags,drawOrigin) : 0;
 }
 #pragma optimize("",on)

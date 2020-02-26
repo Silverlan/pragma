@@ -39,7 +39,7 @@ namespace pragma
 
 		bool BeginDraw(
 			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-			pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx=Pipeline::Regular,
+			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
 			ShaderScene::RecordFlags recordFlags=ShaderScene::RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 	protected:

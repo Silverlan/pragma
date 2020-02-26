@@ -104,8 +104,8 @@ std::shared_ptr<Frame> Frame::Create(const Frame &other)
 Frame::Frame(unsigned int numBones)
 	: m_move(nullptr)
 {
-	for(unsigned int i=0;i<numBones;i++)
-		m_bones.push_back(OrientedPoint());
+	m_bones.resize(numBones);
+	std::fill(m_bones.begin(),m_bones.end(),pragma::physics::Transform{});
 }
 
 Frame::Frame(const Frame &other)
@@ -136,16 +136,13 @@ std::vector<uint32_t> Frame::GetLocalRootBoneIds(const Animation &anim,const Ske
 
 void Frame::Rotate(const Quat &rot)
 {
-	for(auto &transform : m_bones)
-	{
-		uvec::rotate(&transform.pos,rot);
-		transform.rot = rot *transform.rot;
-	}
+	for(auto &pose : m_bones)
+		pose.RotateGlobal(rot);
 }
 void Frame::Translate(const Vector3 &t)
 {
-	for(auto &transform : m_bones)
-		transform.pos += t;
+	for(auto &pose : m_bones)
+		pose.TranslateGlobal(t);
 }
 
 void Frame::Rotate(const Skeleton &skeleton,const Quat &rot)
@@ -153,9 +150,7 @@ void Frame::Rotate(const Skeleton &skeleton,const Quat &rot)
 	for(auto &pair : skeleton.GetRootBones())
 	{
 		auto id = pair.first;
-		auto &transform = m_bones[id];
-		uvec::rotate(&transform.pos,rot);
-		transform.rot = rot *transform.rot;
+		m_bones.at(id).RotateGlobal(rot);
 	}
 }
 void Frame::Translate(const Skeleton &skeleton,const Vector3 &t)
@@ -163,8 +158,7 @@ void Frame::Translate(const Skeleton &skeleton,const Vector3 &t)
 	for(auto &pair : skeleton.GetRootBones())
 	{
 		auto id = pair.first;
-		auto &transform = m_bones[id];
-		transform.pos += t;
+		m_bones.at(id).TranslateGlobal(t);
 	}
 }
 
@@ -172,46 +166,39 @@ void Frame::Rotate(const Animation &anim,const Skeleton &skeleton,const Quat &ro
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
-	{
-		auto &transform = m_bones[id];
-		uvec::rotate(&transform.pos,rot);
-		transform.rot = rot *transform.rot;
-	}
+		m_bones.at(id).RotateGlobal(rot);
 }
 void Frame::Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
-	{
-		auto &transform = m_bones[id];
-		transform.pos += t;
-	}
+		m_bones.at(id).TranslateGlobal(t);
 }
 void Frame::Scale(const Vector3 &scale)
 {
 	for(auto &t : m_bones)
-		t.pos *= scale;
+		t.SetOrigin(t.GetOrigin() *scale);
 }
 
-const std::vector<OrientedPoint> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
+const std::vector<pragma::physics::Transform> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
 const std::vector<Vector3> &Frame::GetBoneScales() const {return const_cast<Frame*>(this)->GetBoneScales();}
-std::vector<OrientedPoint> &Frame::GetBoneTransforms() {return m_bones;}
+std::vector<pragma::physics::Transform> &Frame::GetBoneTransforms() {return m_bones;}
 std::vector<Vector3> &Frame::GetBoneScales() {return m_scales;}
+pragma::physics::Transform *Frame::GetBoneTransform(uint32_t idx) {return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr;}
+const pragma::physics::Transform *Frame::GetBoneTransform(uint32_t idx) const {return const_cast<Frame*>(this)->GetBoneTransform(idx);}
 bool Frame::GetBonePose(uint32_t boneId,pragma::physics::ScaledTransform &outTransform) const
 {
 	if(boneId >= m_bones.size())
 		return false;
 	auto &t = m_bones.at(boneId);
-	outTransform = pragma::physics::ScaledTransform{t.pos,t.rot,(boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3{1.f,1.f,1.f}};
+	outTransform = pragma::physics::ScaledTransform{t.GetOrigin(),t.GetRotation(),(boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3{1.f,1.f,1.f}};
 	return true;
 }
 void Frame::SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto &t = m_bones.at(boneId);
-	t.pos = pose.GetOrigin();
-	t.rot = pose.GetRotation();
+	m_bones.at(boneId) = pose;
 	if(boneId < m_scales.size())
 		m_scales.at(boneId) = pose.GetScale();
 }
@@ -220,9 +207,7 @@ void Frame::SetBonePose(uint32_t boneId,const pragma::physics::Transform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto &t = m_bones.at(boneId);
-	t.pos = pose.GetOrigin();
-	t.rot = pose.GetRotation();
+	m_bones.at(boneId) = pose;
 }
 
 /*
@@ -268,13 +253,13 @@ void Frame::SetBonePosition(unsigned int boneID,const Vector3 &pos)
 {
 	if(boneID >= m_bones.size())
 		return;
-	m_bones[boneID].pos = pos;
+	m_bones.at(boneID).SetOrigin(pos);
 }
 void Frame::SetBoneOrientation(unsigned int boneID,const Quat &orientation)
 {
 	if(boneID >= m_bones.size())
 		return;
-	m_bones[boneID].rot = orientation;
+	m_bones.at(boneID).SetRotation(orientation);
 }
 void Frame::UpdateScales()
 {
@@ -301,20 +286,19 @@ Vector3 *Frame::GetBonePosition(unsigned int boneID)
 {
 	if(boneID >= m_bones.size())
 		return nullptr;
-	return &m_bones[boneID].pos;
+	return &m_bones.at(boneID).GetOrigin();
 }
 Quat *Frame::GetBoneOrientation(unsigned int boneID)
 {
 	if(boneID >= m_bones.size())
 		return nullptr;
-	return &m_bones[boneID].rot;
+	return &m_bones.at(boneID).GetRotation();
 }
 bool Frame::GetBoneMatrix(unsigned int boneID,Mat4 *mat)
 {
 	if(boneID >= m_bones.size())
 		return false;
-	*mat = glm::toMat4(m_bones[boneID].rot);
-	*mat = glm::translate(*mat,m_bones[boneID].pos);
+	*mat = m_bones.at(boneID).ToMatrix();
 	return true;
 }
 bool Frame::HasScaleTransforms() const {return !m_scales.empty();}

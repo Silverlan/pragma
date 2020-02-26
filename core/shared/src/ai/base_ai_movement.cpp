@@ -275,7 +275,7 @@ void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 }
 Activity BaseAIComponent::GetMoveActivity() const {return m_moveInfo.moveActivity;}
 
-void BaseAIComponent::BlendAnimationMovement(std::vector<Orientation> &boneOrientations,std::vector<Vector3> *boneScales)
+void BaseAIComponent::BlendAnimationMovement(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales)
 {
 	if(m_seqIdle == -1)
 		return;
@@ -319,7 +319,14 @@ void BaseAIComponent::BlendAnimationMovement(std::vector<Orientation> &boneOrien
 			scale = 0.f;
 	}
 	m_lastMovementBlendScale = scale = umath::approach(m_lastMovementBlendScale,scale,0.05f);
-	animComponent->BlendBoneFrames(boneOrientations,boneScales,*anim,frame.get(),scale);
+	auto &dstBonePoses = frame->GetBoneTransforms();
+	auto &dstBoneScales = frame->GetBoneScales();
+	animComponent->BlendBonePoses(
+		bonePoses,boneScales,
+		dstBonePoses,&dstBoneScales,
+		bonePoses,boneScales,
+		*anim,scale
+	);
 }
 
 void BaseAIComponent::OnPathDestinationReached()
@@ -628,7 +635,7 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 			if(anim != nullptr)
 			{
 				auto *bc = anim->GetBlendController();
-				if(bc != nullptr && ent.IsCharacter() && bc->controller == ent.GetCharacterComponent()->GetMoveController())
+				if(ent.IsCharacter() && bc->controller == ent.GetCharacterComponent()->GetMoveController())
 					bMoveForward = false; // Animation has a move blend-controller, which means it probably allows sideways or backwards movement
 			}
 		}

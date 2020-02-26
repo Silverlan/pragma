@@ -18,11 +18,14 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
+
 
 #pragma optimize("",off)
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
@@ -57,8 +60,9 @@ bool RasterizationRenderer::Initialize() {return true;}
 
 CulledMeshData *RasterizationRenderer::GetRenderInfo(RenderMode renderMode) const
 {
-	auto it = m_renderInfo.find(renderMode);
-	if(it == m_renderInfo.end())
+	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
+	auto it = renderMeshData.find(renderMode);
+	if(it == renderMeshData.end())
 		return nullptr;
 	return it->second.get();
 }
@@ -91,89 +95,79 @@ void RasterizationRenderer::InitializeLightDescriptorSets()
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 
-void RasterizationRenderer::AdvanceRenderStage(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
-	switch(m_stage)
+
+	// Occlusion Culling
+	PerformOcclusionCulling();
+
+	// Collect render objects
+	c_game->CallCallbacks<void,RasterizationRenderer*>("OnPreRender",this);
+	CollectRenderObjects(renderFlags);
+	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
+
+	// Collect 3D skybox data
+	m_3dSkyCameras.clear();
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyCameraComponent>>();
+	for(auto *ent : entIt)
 	{
-	case Stage::Initial:
-		m_stage = Stage::OcclusionCulling;
-		break;
-	case Stage::OcclusionCulling:
-		PerformOcclusionCulling();
-		m_stage = Stage::CollectRenderObjects;
-		break;
-	case Stage::CollectRenderObjects:
-		c_game->CallCallbacks<void>("OnPreRender");
-		CollectRenderObjects(renderFlags);
-		c_game->CallLuaCallbacks<RasterizationRenderer*>("PrepareRendering",this);
-		m_stage = Stage::Prepass;
-		break;
-	case Stage::Prepass:
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
-		RenderPrepass(drawCmd,renderFlags);
-		m_stage = Stage::SSAOPass;
-		break;
-	case Stage::SSAOPass:
-		RenderSSAO(drawCmd);
-		m_stage = Stage::LightCullingPass;
-		break;
-	case Stage::LightCullingPass:
-		CullLightSources(drawCmd);
-		m_stage = Stage::LightingPass;
-		break;
-	case Stage::LightingPass:
-		RenderLightingPass(drawCmd,renderFlags);
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
-		m_stage = Stage::PostProcessingPass;
-		break;
-	case Stage::PostProcessingPass:
-		c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
-		m_stage = Stage::PPFog;
-		break;
-	case Stage::PPFog:
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-		RenderSceneFog(drawCmd);
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-		m_stage = Stage::PPGlow;
-		break;
-	case Stage::PPGlow:
-		RenderGlowObjects(drawCmd);
-		c_game->CallCallbacks<void,FRender>("RenderPostProcessing",renderFlags);
-		c_game->CallLuaCallbacks("RenderPostProcessing");
-		m_stage = Stage::PPBloom;
-		break;
-	case Stage::PPBloom:
-		RenderBloom(drawCmd);
-		m_stage = Stage::PPToneMapping;
-		break;
-	case Stage::PPToneMapping:
+		auto skyCamera = ent->GetComponent<pragma::CSkyCameraComponent>();
+		auto &renderMeshes = skyCamera->UpdateRenderMeshes(*this,renderFlags);
+		m_3dSkyCameras.push_back(skyCamera);
+	}
+	//
+
+	// Prepass
+	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
+	RenderPrepass(drawCmd,renderFlags);
+
+	// SSAO
+	RenderSSAO(drawCmd);
+
+	// Cull light sources
+	CullLightSources(drawCmd);
+
+	// Lighting pass
+	RenderLightingPass(drawCmd,renderFlags);
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
+
+	// Post processing
+	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
+
+	// Fog
+	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+	RenderSceneFog(drawCmd);
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+
+	// Glow
+	RenderGlowObjects(drawCmd);
+	c_game->CallCallbacks<void,FRender>("RenderPostProcessing",renderFlags);
+	c_game->CallLuaCallbacks("RenderPostProcessing");
+
+	// Bloom
+	RenderBloom(drawCmd);
+
+	// Tone mapping
+	if(umath::is_flag_set(renderFlags,FRender::HDR))
 	{
-		if(umath::is_flag_set(renderFlags,FRender::HDR))
-		{
-			// Don't bother resolving HDR; Just apply the barrier
-			prosper::util::record_image_barrier(
-				*(*drawCmd),**GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage(),
-				Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
-			);
-			return;
-		}
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
-		auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
-		RenderToneMapping(drawCmd,*dsgBloomTonemapping->GetDescriptorSet());
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
-		m_stage = Stage::PPFXAA;
-		break;
+		// Don't bother resolving HDR; Just apply the barrier
+		prosper::util::record_image_barrier(
+			*(*drawCmd),**GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage(),
+			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+		);
+		return;
 	}
-	case Stage::PPFXAA:
-		m_stage = Stage::Final;
-		RenderFXAA(drawCmd);
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
-		c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-		break;
-	}
-	if(m_stage != Stage::Final)
-		AdvanceRenderStage(drawCmd,renderFlags);
+	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+	auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
+	RenderToneMapping(drawCmd,*dsgBloomTonemapping->GetDescriptorSet());
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+
+	// FXAA
+	RenderFXAA(drawCmd);
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
+	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 }
 
 bool RasterizationRenderer::ReloadRenderTarget()
@@ -284,10 +278,10 @@ void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 	m_shaderOverrides.erase(it);
 }
 
-const std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() const {return m_culledMeshes;}
-std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() {return m_culledMeshes;}
-const std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() const {return m_culledParticles;}
-std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() {return m_culledParticles;}
+const std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
+std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
+const std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
+std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
 
 void RasterizationRenderer::SetPrepassMode(PrepassMode mode)
 {
@@ -463,4 +457,8 @@ bool RasterizationRenderer::ResolveRenderPass(std::shared_ptr<prosper::PrimaryCo
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawCmd);
 }
+RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
+const RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() const {return const_cast<RasterizationRenderer*>(this)->GetRenderMeshCollectionHandler();}
+
+prosper::Shader *RasterizationRenderer::GetWireframeShader() {return m_whShaderWireframe.get();}
 #pragma optimize("",on)

@@ -96,7 +96,11 @@ struct DLLCLIENT EntityMeshContainer
 */
 
 namespace prosper {class Shader; class PrimaryCommandBuffer;};
-namespace pragma {class CLightComponent; class CCameraComponent;};
+namespace pragma
+{
+	class CLightComponent; class CCameraComponent;
+	namespace rendering {struct CulledMeshData;};
+};
 class CModelMesh;
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -120,12 +124,23 @@ public:
 		::util::WeakHandle<prosper::Shader> shader = {};
 		float distance;
 	};
+	enum class RenderFlags : uint8_t
+	{
+		None = 0u,
+		Reflection = 1u,
+		RenderAs3DSky = Reflection<<1u
+	};
 public:
-	static void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,bool bReflection,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes);
-	static uint32_t Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode=RenderMode::World,bool bReflection=false);
-	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,std::vector<pragma::OcclusionMeshInfo> &renderMeshes,RenderMode renderMode=RenderMode::World,bool bReflection=false);
+	static void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
+	
+	static uint32_t Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode=RenderMode::World,RenderFlags flags=RenderFlags::None,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
+	static uint32_t Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes,RenderMode renderMode=RenderMode::World,RenderFlags flags=RenderFlags::None,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
+
+	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode=RenderMode::World);
+	static void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes);
 	static void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(RenderSystem::RenderFlags)
 #pragma warning(pop)
 
 #endif

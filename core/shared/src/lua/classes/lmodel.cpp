@@ -620,6 +620,8 @@ void Lua::Model::register_class(
 		luabind::def("GetEventEnums",&Lua::Animation::GetEventEnums),
 		luabind::def("GetActivityEnumName",&Lua::Animation::GetActivityEnumName),
 		luabind::def("GetEventEnumName",&Lua::Animation::GetEventEnumName),
+		luabind::def("FindActivityId",&Lua::Animation::FindActivityId),
+		luabind::def("FindEventId",&Lua::Animation::FindEventId),
 		classDefFrame
 	];
 	//for(auto &pair : ANIMATION_EVENT_NAMES)

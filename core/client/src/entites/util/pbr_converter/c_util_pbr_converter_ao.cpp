@@ -53,10 +53,9 @@ void CPBRConverterComponent::ProcessQueue()
 	pragma::rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = false;
-	// These values are a good compromise between quality and render time
-	sceneInfo.width = 512;
-	sceneInfo.height = 512;
-	sceneInfo.samples = 512;
+	sceneInfo.width = item.width;
+	sceneInfo.height = item.height;
+	sceneInfo.samples = item.samples;
 
 	item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hModel.get(),itMat -mats.begin() /* materialIndex */);
 	if(item.job.IsValid() == false)
@@ -78,7 +77,7 @@ void CPBRConverterComponent::ProcessQueue()
 	c_engine->AddParallelJob(item.job,"Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl)
+void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo)
 {
 	ConvertMaterialsToPBR(mdl);
 
@@ -93,9 +92,12 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl)
 		if(mat == nullptr)
 			continue;
 		// Make sure it's a PBR material and it doesn't already have an ao map
-		if(IsPBR(*mat) == false || mat->GetAmbientOcclusionMap())
+		if(IsPBR(*mat) == false || (mat->GetAmbientOcclusionMap() && aoInfo.rebuild == false))
 			continue;
 		PBRAOBakeJob job {mdl,*mat};
+		job.width = aoInfo.width;
+		job.height = aoInfo.height;
+		job.samples = aoInfo.samples;
 		m_workQueue.push(job);
 	}
 }

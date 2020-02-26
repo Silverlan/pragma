@@ -13,6 +13,7 @@ static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE *32; // 524'2
 
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 CModelMesh::CModelMesh()
 	: ModelMesh()
 {}
@@ -183,3 +184,4 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 		m_vkMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}
 }
+#pragma optimize("",on)

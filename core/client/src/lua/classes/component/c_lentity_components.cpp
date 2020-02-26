@@ -22,6 +22,25 @@
 
 namespace Lua
 {
+	namespace PBRConverter
+	{
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
+		{
+			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height,samples,rebuild);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples)
+		{
+			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height,samples);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height)
+		{
+			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl)
+		{
+			hComponent->GenerateAmbientOcclusionMaps(mdl);
+		}
+	};
 	namespace ParticleSystem
 	{
 		static std::string get_key_value(lua_State *l,int32_t argIdx)
@@ -85,17 +104,43 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			int32_t t = 2;
 			Lua::CheckTable(l,t);
-			std::vector<ModelSubMesh*> meshes {};
+			std::vector<pragma::DecalProjector::MeshData> meshesDatas {};
 			auto numMeshes = Lua::GetObjectLength(l,t);
+			meshesDatas.reserve(numMeshes);
 			for(auto i=decltype(numMeshes){0u};i<numMeshes;++i)
 			{
-				Lua::PushInt(l,i +1);
-				Lua::GetTableValue(l,t);
-				auto &mesh = Lua::Check<ModelSubMesh>(l,-1);
-				meshes.push_back(&mesh);
-				Lua::Pop(l,1);
+				meshesDatas.push_back({});
+				auto &meshData = meshesDatas.back();
+				Lua::PushInt(l,i +1); /* 1 */
+				Lua::GetTableValue(l,t); /* 1 */
+
+				auto tMeshData = Lua::GetStackTop(l);
+				Lua::CheckTable(l,tMeshData);
+
+				Lua::PushString(l,"pose"); /* 2 */
+				Lua::GetTableValue(l,tMeshData); /* 2 */
+				meshData.pose = Lua::Check<pragma::physics::ScaledTransform>(l,-1);
+				Lua::Pop(l,1); /* 1 */
+				
+				Lua::PushString(l,"subMeshes"); /* 2 */
+				Lua::GetTableValue(l,tMeshData); /* 2 */
+				auto tSubMeshes = Lua::GetStackTop(l);
+				Lua::CheckTable(l,tSubMeshes);
+				auto numSubMeshes = Lua::GetObjectLength(l,tSubMeshes);
+				meshData.subMeshes.reserve(numSubMeshes);
+				for(auto j=decltype(numSubMeshes){0u};j<numSubMeshes;++j)
+				{
+					Lua::PushInt(l,j +1); /* 1 */
+					Lua::GetTableValue(l,tSubMeshes); /* 1 */
+					auto &mesh = Lua::Check<ModelSubMesh>(l,-1);
+					meshData.subMeshes.push_back(&mesh);
+					Lua::Pop(l,1); /* 0 */
+				}
+				Lua::Pop(l,1); /* 1 */
+
+				Lua::Pop(l,1); /* 0 */
 			}
-			Lua::PushBool(l,hComponent->ApplyDecal(meshes,pose));
+			Lua::PushBool(l,hComponent->ApplyDecal(meshesDatas));
 		}
 		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes)
 		{
@@ -553,11 +598,14 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCReflectionProbe = luabind::class_<CReflectionProbeHandle,BaseEntityComponentHandle>("ReflectionProbeComponent");
 	entsMod[defCReflectionProbe];
 
+	auto defCSkyCamera = luabind::class_<CSkyCameraHandle,BaseEntityComponentHandle>("SkyCameraComponent");
+	entsMod[defCSkyCamera];
+
 	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverterComponent");
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&)>([](lua_State *l,CPBRConverterHandle &hEnt,Model &mdl) {
-		pragma::Lua::check_component(l,hEnt);
-		hEnt->GenerateAmbientOcclusionMaps(mdl);
-	}));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
 	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMapComponent");

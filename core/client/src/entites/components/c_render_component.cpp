@@ -6,6 +6,7 @@
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/classes/ldef_mat4.h>
 #include <pragma/model/model.h>
 #include <pragma/entities/parentinfo.h>
@@ -27,6 +28,7 @@ namespace pragma
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
@@ -89,6 +91,8 @@ void CRenderComponent::SetDepthBias(float constantFactor,float biasClamp,float s
 	umath::set_flag(m_stateFlags,StateFlags::HasDepthBias,(constantFactor != 0.f) || (biasClamp != 0.f) || (slopeFactor != 0.f));
 }
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const {return m_stateFlags;}
+void CRenderComponent::SetDepthPassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableDepthPass,enabled);}
+bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableDepthPass);}
 void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
@@ -195,6 +199,15 @@ Sphere CRenderComponent::GetRenderSphereBounds() const
 		r.pos += lorigin;
 	}
 	return r;
+}
+void CRenderComponent::GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const
+{
+	physics::Transform pose;
+	GetEntity().GetPose(pose);
+	GetRenderBounds(&outMin,&outMax);
+	outMin = pose *outMin;
+	outMax = pose *outMax;
+	uvec::to_min_max(outMin,outMax);
 }
 void CRenderComponent::GetRenderBounds(Vector3 *min,Vector3 *max) const
 {
@@ -342,6 +355,57 @@ bool CRenderComponent::Render(pragma::ShaderTextured3DBase*,Material*,CModelSubM
 void CRenderComponent::ReceiveData(NetPacket &packet)
 {
 	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
+}
+std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start,const Vector3 &dir) const
+{
+	auto &lodMeshes = GetLODMeshes();
+	if(lodMeshes.empty())
+		return {};
+	physics::Transform pose;
+	GetEntity().GetPose(pose);
+	auto invPose = pose.GetInverse();
+
+	// Move ray into entity space
+	auto lstart = invPose *start;
+	auto ldir = dir;
+	uvec::rotate(&ldir,invPose.GetRotation());
+
+	// Cheap line-aabb check
+	Vector3 min,max;
+	GetRenderBounds(&min,&max);
+	auto n = ldir;
+	auto d = uvec::length(n);
+	n /= d;
+	float dIntersect;
+	if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+		return {};
+
+	std::optional<Intersection::LineMeshResult> bestResult = {};
+	for(auto &mesh : lodMeshes)
+	{
+		mesh->GetBounds(min,max);
+		if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+			continue;
+		for(auto &subMesh : mesh->GetSubMeshes())
+		{
+			subMesh->GetBounds(min,max);
+			if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+				continue;
+			Intersection::LineMeshResult result;
+			if(Intersection::LineMesh(lstart,ldir,*subMesh,result,true) == false)
+				continue;
+			// Confirm that this is the best result so far
+			if(bestResult.has_value() && result.hitValue > bestResult->hitValue)
+				continue;
+			bestResult = result;
+		}
+	}
+	if(bestResult.has_value())
+	{
+		// Move back to world space
+		bestResult->hitPos = pose *bestResult->hitPos;
+	}
+	return bestResult;
 }
 void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt) {umath::set_flag(m_stateFlags,StateFlags::ExemptFromOcclusionCulling,exempt);}
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
@@ -497,6 +561,7 @@ bool CRenderComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
 	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
 }
 
+const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes() const {return const_cast<CRenderComponent*>(this)->GetLODMeshes();}
 std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
@@ -602,3 +667,4 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
+#pragma optimize("",on)

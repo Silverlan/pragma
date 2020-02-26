@@ -7,18 +7,24 @@
 #include "pragma/model/animation/activities.h"
 #include "pragma/model/animation/animation_event.h"
 #include <sharedutils/util_enum_register.hpp>
+#include <optional>
 #include <vector>
 
 struct DLLNETWORK AnimationBlendControllerTransition
 {
-	unsigned int animation;
-	int transition;
+	uint32_t animation = std::numeric_limits<uint32_t>::max();
+	float transition = 0.f;
 };
 
 struct DLLNETWORK AnimationBlendController
 {
-	unsigned int controller;
+	uint32_t controller;
 	std::vector<AnimationBlendControllerTransition> transitions;
+
+	// An optional post blend target, which will be blended towards depending on the specified controller.
+	// Primary used for directional movement animations with several cardinal animations and one center animation.
+	uint32_t animationPostBlendTarget = std::numeric_limits<uint32_t>::max();
+	uint32_t animationPostBlendController = std::numeric_limits<uint32_t>::max();
 };
 
 class DLLNETWORK Animation
@@ -69,8 +75,9 @@ public:
 	bool HasFadeOutTime();
 	void SetFadeInTime(float t);
 	void SetFadeOutTime(float t);
-	AnimationBlendController *SetBlendController(unsigned int controller);
+	AnimationBlendController &SetBlendController(uint32_t controller);
 	AnimationBlendController *GetBlendController();
+	const AnimationBlendController *GetBlendController() const;
 	void ClearBlendController();
 	void Localize(const Skeleton &skeleton);
 	void Rotate(const Skeleton &skeleton,const Quat &rot);
@@ -104,7 +111,7 @@ private:
 	unsigned char m_activityWeight;
 	unsigned char m_fps;
 	std::pair<Vector3,Vector3> m_renderBounds;
-	std::unique_ptr<AnimationBlendController> m_blendController;
+	std::optional<AnimationBlendController> m_blendController = {};
 	std::unique_ptr<float> m_fadeIn;
 	std::unique_ptr<float> m_fadeOut;
 };

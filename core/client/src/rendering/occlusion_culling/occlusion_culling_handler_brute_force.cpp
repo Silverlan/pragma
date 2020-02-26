@@ -5,11 +5,12 @@
 
 using namespace pragma;
 
-void OcclusionCullingHandlerBruteForce::PerformCulling(const pragma::rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandlerBruteForce::PerformCulling(
+	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
+)
 {
 	auto &scene = renderer.GetScene();
-	auto &cam = scene.GetActiveCamera();
-	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
@@ -25,10 +26,10 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(const pragma::rendering::
 			continue;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
-		if((ShouldExamine(renderer,*ent,bViewModel,&planes) == true))
+		if((ShouldExamine(renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
-			pRenderComponent->GetModelComponent()->UpdateLOD(posCam);
+			pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
 			if(pRenderComponent.valid())
 			{
 				auto pTrComponent = ent->GetTransformComponent();
@@ -38,7 +39,7 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(const pragma::rendering::
 				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
 				{
 					auto *mesh = static_cast<CModelMesh*>(itMesh->get());
-					if(ShouldExamine(*mesh,pos,bViewModel,numMeshes,*planes) == true)
+					if(ShouldExamine(*mesh,pos,bViewModel,numMeshes,planes) == true)
 					{
 						if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
 							culledMeshesOut.reserve(culledMeshesOut.capacity() +100);

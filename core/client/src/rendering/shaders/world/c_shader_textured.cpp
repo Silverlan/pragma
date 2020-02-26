@@ -180,6 +180,7 @@ bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);
 	return RecordPushConstants(Vector3(clipPlane.x,clipPlane.y,clipPlane.z) *clipPlane.w,offsetof(PushConstants,clipPlane));
 }
+void ShaderTextured3DBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,StateFlags::RenderAs3DSky,is3dSky);}
 void ShaderTextured3DBase::OnPipelineBound()
 {
 	ShaderEntity::OnPipelineBound();
@@ -190,10 +191,14 @@ void ShaderTextured3DBase::OnPipelineUnbound()
 	ShaderEntity::OnPipelineUnbound();
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
 }
-bool ShaderTextured3DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderTextured3DBase::BeginDraw(
+	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
+)
 {
+	Set3DSky(false);
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
+		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) && 
 		prosper::util::record_set_depth_bias(**cmdBuffer) == true;
 }
 std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
@@ -358,6 +363,8 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 	auto renderFlags = RenderFlags::None;
 	umath::set_flag(renderFlags,RenderFlags::LightmapsEnabled,shouldUseLightmaps);
 	umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderAs3DSky))
+		umath::set_flag(renderFlags,RenderFlags::Is3DSky);
 	UpdateRenderFlags(mesh,renderFlags);
 	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }

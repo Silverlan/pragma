@@ -148,8 +148,8 @@ const std::shared_ptr<util::bsp::LightMapInfo> &CLightMapComponent::GetLightmapI
 std::shared_ptr<prosper::Texture> CLightMapComponent::LoadLightMap(pragma::level::BSPInputData &bspInputData)
 {
 	auto &lightMapInfo = bspInputData.lightMapInfo;
-	const auto widthLightmapAtlas = lightMapInfo.atlasSize;
-	const auto heightLightmapAtlas = lightMapInfo.atlasSize;
+	const auto widthLightmapAtlas = lightMapInfo.atlasSize.x;
+	const auto heightLightmapAtlas = lightMapInfo.atlasSize.y;
 	auto borderSize = lightMapInfo.borderSize;
 
 	auto &lightMapData = bspInputData.lightMapInfo.luxelData;
@@ -527,10 +527,7 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePl
 	pragma::console::parse_command_options(argv,commandOptions);
 
 	//auto resolution = c_engine->GetRenderResolution();
-	Vector2i resolution {
-		lightmapC->GetLightmapInfo()->atlasSize,
-		lightmapC->GetLightmapInfo()->atlasSize
-	};
+	auto resolution = lightmapC->GetLightmapInfo()->atlasSize;
 	auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
 	auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
 	auto sampleCount = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1225"));
@@ -585,7 +582,7 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	pElContainer->RequestFocus();
 
 	auto *pFrame = wgui.Create<WIFrame>(pElContainer);
-	pFrame->SetTitle("BRDF");
+	pFrame->SetTitle("Lightmap Atlas");
 	auto *pLightmaps = wgui.Create<WITexturedRect>(pFrame);
 	pLightmaps->SetSize(256,256);
 	pLightmaps->SetY(24);

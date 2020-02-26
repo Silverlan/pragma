@@ -27,6 +27,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
+#pragma optimize("",off)
 CParticleSystemComponent::Node::Node(CBaseEntity *ent)
 	: hEntity((ent != nullptr) ? ent->GetHandle() : EntityHandle{}),bEntity(true)
 {}
@@ -356,6 +357,8 @@ const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
 		umath::set_flag(m_flags,Flags::RotateWithEmitter,::util::to_boolean(value));
 	else if(ustring::compare(key,"transform_with_emitter"))
 		umath::set_flag(m_flags,Flags::MoveWithEmitter | Flags::RotateWithEmitter,::util::to_boolean(value));
+	else if(ustring::compare(key,"auto_simulate"))
+		SetAutoSimulate(::util::to_boolean(value));
 	else
 		return ::util::EventReply::Unhandled;
 	return ::util::EventReply::Handled;
@@ -385,6 +388,9 @@ void CParticleSystemComponent::SetContinuous(bool b)
 
 bool CParticleSystemComponent::ShouldParticlesRotateWithEmitter() const {return umath::is_flag_set(m_flags,Flags::RotateWithEmitter);}
 bool CParticleSystemComponent::ShouldParticlesMoveWithEmitter() const {return umath::is_flag_set(m_flags,Flags::MoveWithEmitter);}
+
+void CParticleSystemComponent::SetAutoSimulate(bool b) {umath::set_flag(m_flags,Flags::AutoSimulate,b);}
+bool CParticleSystemComponent::ShouldAutoSimulate() const {return umath::is_flag_set(m_flags,Flags::AutoSimulate);}
 
 Vector3 CParticleSystemComponent::PointToParticleSpace(const Vector3 &p,bool bRotateWithEmitter) const
 {
@@ -795,8 +801,10 @@ void CParticleSystemComponent::Stop()
 }
 
 double CParticleSystemComponent::GetLifeTime() const {return m_tLifeTime;}
+float CParticleSystemComponent::GetSimulationTime() const {return m_simulationTime;}
 
 const std::vector<CParticleSystemComponent::ParticleData> &CParticleSystemComponent::GetRenderParticleData() const {return m_instanceData;}
+const std::vector<float> &CParticleSystemComponent::GetRenderParticleAnimationStartData() const {return m_dataAnimStart;}
 
 bool CParticleSystemComponent::IsActive() const {return m_state == State::Active;}
 bool CParticleSystemComponent::IsEmissionPaused() const {return m_state == State::Paused;}
@@ -1076,6 +1084,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto *cam = c_game->GetPrimaryCamera();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
+	m_simulationTime += tDelta;
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())
 		tDelta *= pTsComponent->GetTimeScale();
@@ -1378,3 +1387,4 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->Destroy(particle);
 }
+#pragma optimize("",on)

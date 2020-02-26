@@ -576,7 +576,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 	fOut->Write(header.data(),header.size());
 
 	fOut->Write<uint32_t>(WLD_VERSION);
-	static_assert(WLD_VERSION == 9);
+	static_assert(WLD_VERSION == 10);
 	auto offsetMaterial = fOut->Tell();
 	fOut->Write<uint64_t>(0ull);
 	auto offsetEntities = fOut->Tell();
@@ -1316,7 +1316,7 @@ bool util::port_hl2_map(NetworkState *nw,const std::string &path)
 		messageLogger("Writing light map data...");
 	fWriteOffset(offsetLightMapData);
 	fOut->Write<bool>(geometryType == GeometryType::FaceGeometry); // Light map data is only valid if we're using the map faces as geometry
-	fOut->Write<uint32_t>(bspGeometryData.lightMapData.atlasSize);
+	fOut->Write<Vector2i>(bspGeometryData.lightMapData.atlasSize);
 	fOut->Write<uint8_t>(bspGeometryData.lightMapData.borderSize);
 	auto &rects = bspGeometryData.lightMapData.lightmapAtlas;
 	fOut->Write<uint32_t>(rects.size());

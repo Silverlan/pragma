@@ -30,6 +30,7 @@ void CSkyboxComponent::Initialize()
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Skybox);
 		pRenderComponent->SetCastShadows(false);
+		pRenderComponent->SetDepthPassEnabled(false);
 	}
 
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {

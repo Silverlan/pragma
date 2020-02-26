@@ -199,9 +199,11 @@ static void build_next_reflection_probe()
 		auto &ent = probe.GetEntity();
 		auto pos = ent.GetPosition();
 		Con::cout<<"Updating reflection probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<")..."<<Con::endl;
-		if(probe.UpdateIBLData(false))
-			break;
-		Con::cwar<<"WARNING: Unable to update reflection probe data for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<"). Probe will be unavailable!"<<Con::endl;
+		auto status = probe.UpdateIBLData(false);
+		if(status == CReflectionProbeComponent::UpdateStatus::Pending)
+			break; // Next reflection probe will automatically be generated once this one has completed rendering!
+		if(status == CReflectionProbeComponent::UpdateStatus::Failed)
+			Con::cwar<<"WARNING: Unable to update reflection probe data for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<"). Probe will be unavailable!"<<Con::endl;
 	}
 
 	/*auto &wgui = WGUI::GetInstance();
@@ -329,18 +331,18 @@ bool CReflectionProbeComponent::RequiresRebuild() const
 	return true;
 }
 
-bool CReflectionProbeComponent::UpdateIBLData(bool rebuild)
+CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData(bool rebuild)
 {
 	if(rebuild == false && RequiresRebuild() == false)
-		return true;
+		return UpdateStatus::Complete;
 	if(m_srcEnvMap.empty() == false)
 	{
 		if(GenerateIBLReflectionsFromEnvMap("materials/" +m_srcEnvMap) == false)
-			return false;
+			return UpdateStatus::Failed;
 	}
 	else if(CaptureIBLReflectionsFromScene() == false)
-		return false;
-	return true;
+		return UpdateStatus::Pending;
+	return UpdateStatus::Complete;
 }
 
 luabind::object CReflectionProbeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CReflectionProbeComponentHandleWrapper>(l);}
@@ -396,7 +398,11 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	dataBlock->AddValue("texture","prefilter",relPath +prefix +"prefilter");
 	dataBlock->AddValue("texture","irradiance",relPath +prefix +"irradiance");
 	dataBlock->AddValue("texture","brdf","env/brdf");
-	return mat->Save(relPath +identifier +".wmi");
+	auto matPath = relPath +identifier +".wmi";
+	auto result = mat->Save(matPath);
+	if(result)
+		client->LoadMaterial(matPath,true);
+	return result;
 }
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
@@ -669,7 +675,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 			break;
 		}
 	}*/
-	return true;
+	return SaveIBLReflectionsToFile();
 }
 
 bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName)
@@ -684,11 +690,16 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 		return false;
 	return GenerateIBLReflectionsFromCubemap(*cubemapTex);
 }
-bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
+Material *CReflectionProbeComponent::LoadMaterial()
 {
 	auto relPath = GetCubemapIBLMaterialPath();
 	auto identifier = GetCubemapIdentifier();
 	auto *mat = client->LoadMaterial(relPath +identifier +".wmi",true,false);
+	return (mat && mat->IsError() == false) ? mat : nullptr;
+}
+bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
+{
+	auto *mat = LoadMaterial();
 	if(mat == nullptr)
 		return false;
 	auto *pPrefilter = mat->GetTextureInfo("prefilter");

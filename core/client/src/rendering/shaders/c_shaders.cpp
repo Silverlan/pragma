@@ -96,6 +96,7 @@ void CGame::InitShaders()
 
 	shaderManager.RegisterShader("raytracing",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
+	shaderManager.RegisterShader("pbr_blend",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);});
 	shaderManager.RegisterShader("eye",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});

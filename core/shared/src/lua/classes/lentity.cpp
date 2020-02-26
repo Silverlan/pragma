@@ -222,7 +222,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		auto &componentManager = game->GetEntityComponentManager();
 		auto componentId = pragma::INVALID_COMPONENT_ID;
 		if(componentManager.GetComponentTypeId(name,componentId) == false)
+		{
+			Lua::PushBool(l,false);
 			return;
+		}
 		Lua::PushBool(l,hEnt->HasComponent(componentId));
 	}));
 	classDef.def("HasComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {

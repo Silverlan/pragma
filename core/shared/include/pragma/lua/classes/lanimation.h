@@ -22,6 +22,8 @@ namespace Lua
 		DLLNETWORK void GetEventEnums(lua_State *l);
 		DLLNETWORK void GetActivityEnumName(lua_State *l,uint32_t id);
 		DLLNETWORK void GetEventEnumName(lua_State *l,uint32_t id);
+		DLLNETWORK void FindActivityId(lua_State *l,const std::string &name);
+		DLLNETWORK void FindEventId(lua_State *l,const std::string &name);
 
 		DLLNETWORK void GetFrame(lua_State *l,::Animation &anim,unsigned int ID);
 		DLLNETWORK void GetBoneList(lua_State *l,::Animation &anim);

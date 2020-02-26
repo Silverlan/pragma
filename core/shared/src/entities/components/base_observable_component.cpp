@@ -5,6 +5,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 pragma::ObserverCameraData::ObserverCameraData()
 	: enabled{util::BoolProperty::Create(false)},
 	offset{util::Vector3Property::Create()}
@@ -24,13 +25,17 @@ void BaseObservableComponent::Initialize()
 
 void BaseObservableComponent::SetLocalCameraOrigin(CameraType type,const Vector3 &origin)
 {
-	*GetCameraData(type).localOrigin = origin;
+	GetCameraData(type).localOrigin = origin;
 }
 void BaseObservableComponent::ClearLocalCameraOrigin(CameraType type)
 {
-	*GetCameraData(type).localOrigin = {};
+	GetCameraData(type).localOrigin = {};
 }
-const Vector3 &BaseObservableComponent::GetLocalCameraOrigin(CameraType type) const {return *GetCameraData(type).localOrigin;}
+Vector3 BaseObservableComponent::GetLocalCameraOrigin(CameraType type) const
+{
+	auto &localOrigin = GetCameraData(type).localOrigin;
+	return localOrigin.has_value() ? *localOrigin : Vector3{};
+}
 void BaseObservableComponent::SetLocalCameraOffset(CameraType type,const Vector3 &offset)
 {
 	*GetCameraData(type).offset = offset;
@@ -87,3 +92,4 @@ void BaseObservableComponent::Load(DataStream &ds,uint32_t version)
 		}
 	}
 }
+#pragma optimize("",on)

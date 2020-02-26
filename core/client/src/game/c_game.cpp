@@ -171,7 +171,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,FRender>("RenderPostProcessing");
-	RegisterCallback<void>("OnPreRender");
+	RegisterCallback<void,pragma::rendering::RasterizationRenderer*>("OnPreRender");
 	RegisterCallback<void>("RenderPrepass");
 	RegisterCallback<void>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");

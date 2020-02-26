@@ -1133,7 +1133,7 @@ vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,cons
 	fOut->Write<char>('L');
 	fOut->Write<char>('D');
 	fOut->Write<unsigned int>(WLD_VERSION);
-	static_assert(WLD_VERSION == 9);
+	static_assert(WLD_VERSION == 10);
 
 	auto offsetLocMaterials = fOut->Tell();
 	fOut->Write<uint64_t>(0);
@@ -1297,7 +1297,7 @@ vmf::ResultCode vmf::load(NetworkState &nwState,const std::string &fileName,cons
 
 	fOut->Write<bool>(false); // No BSP Tree
 	fOut->Write<bool>(false); // No light map
-	fOut->Write<uint32_t>(0u); // Atlas size
+	fOut->Write<Vector2i>(Vector2i{}); // Atlas size
 	fOut->Write<uint8_t>(0u); // Border size
 	fOut->Write<uint32_t>(0u); // Light map atlas rect count
 	fOut->Write<uint64_t>(0ull); // Luxel data

@@ -55,9 +55,19 @@ void CCharacterComponent::Initialize()
 			if(anim != nullptr && anim->HasFlag(FAnim::Loop) && (moveSpeed.x > 0.f || moveSpeed.y > 0.f))//IsMoving())
 			{
 				auto anim = hMdl->GetAnimation(hMdl->SelectFirstAnimation(animComponent->TranslateActivity(Activity::Idle)));
-				auto &frame = *anim->GetFrame(0);
-				auto blendScale = GetMovementBlendScale();
-				animComponent->BlendBoneFrames(blendAnimInfo.slotInfo.boneOrientations,!blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr,*anim,&frame,blendScale);
+				auto frame = anim ? anim->GetFrame(0) : nullptr;
+				if(frame != nullptr)
+				{
+					auto blendScale = GetMovementBlendScale();
+					auto &dstPoses = frame->GetBoneTransforms();
+					auto &dstScales = frame->GetBoneScales();
+					animComponent->BlendBonePoses(
+						blendAnimInfo.slotInfo.bonePoses,!blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr,
+						dstPoses,&dstScales,
+						blendAnimInfo.slotInfo.bonePoses,!blendAnimInfo.slotInfo.boneScales.empty() ? &blendAnimInfo.slotInfo.boneScales : nullptr,
+						*anim,blendScale
+					);
+				}
 			}
 		}
 	});

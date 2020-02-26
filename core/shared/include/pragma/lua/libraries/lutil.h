@@ -56,6 +56,7 @@ namespace Lua
 		DLLNETWORK int fade_property(lua_State *l);
 		DLLNETWORK int round_string(lua_State *l);
 		DLLNETWORK int get_type_name(lua_State *l);
+		DLLNETWORK int variable_type_to_string(lua_State *l);
 		DLLNETWORK int get_addon_path(lua_State *l);
 	};
 
@@ -114,6 +115,7 @@ namespace Lua
 	{"fade_property",Lua::util::fade_property}, \
 	{"round_string",Lua::util::round_string}, \
 	{"get_type_name",Lua::util::get_type_name}, \
+	{"variable_type_to_string",Lua::util::variable_type_to_string}, \
 	{"is_same_object",Lua::util::is_same_object}, \
 	{"clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio}, \
 	{"open_url_in_browser",Lua::util::open_url_in_browser}, \

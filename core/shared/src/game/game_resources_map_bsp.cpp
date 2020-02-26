@@ -6,6 +6,130 @@
 #include <util_bsp.hpp>
 #include <GuillotineBinPack.h>
 
+struct SBPRect
+{
+	uint32_t index = 0u;
+	uint32_t w = 0u;
+	uint32_t h = 0u;
+};
+
+struct SBPSpace
+{
+	uint32_t x = 0u;
+	uint32_t y = 0u;
+	uint32_t w = 0u;
+	uint32_t h = 0u;
+};
+
+struct SBPPacked
+{
+	uint32_t rectIdx = 0u;
+	SBPRect packedRect = {};
+};
+
+#pragma optimize("",off)
+static std::vector<rbp::Rect> simple_binpacking(std::vector<SBPRect> &rects,uint32_t &outAtlasWidth,uint32_t &outAtlasHeight)
+{
+	// Source: https://observablehq.com/@mourner/simple-rectangle-packing
+	uint32_t area = 0u;
+	uint32_t maxWidth = 0u;
+	for(auto &rect : rects)
+	{
+		area += rect.w *rect.h;
+		maxWidth = umath::max(maxWidth,rect.w);
+	}
+
+	std::sort(rects.begin(),rects.end(),[](const SBPRect &a,const SBPRect &b) {
+		return (static_cast<int32_t>(b.h) -static_cast<int32_t>(a.h)) < 0;
+	});
+
+	auto startWidth = umath::max(static_cast<uint32_t>(umath::ceil(umath::sqrt(area /0.95f))),maxWidth);
+	std::vector<SBPSpace> spaces {
+		{0u,0u,static_cast<uint32_t>(startWidth),std::numeric_limits<uint32_t>::max()}
+	};
+	spaces.reserve(100);
+	std::vector<rbp::Rect> packed {};
+	packed.resize(rects.size());
+	for(auto &rect : rects)
+	{
+		for(auto i=static_cast<int32_t>(spaces.size()) -1;i>=0;--i)
+		{
+			auto &space = spaces.at(i);
+			if((rect.w > space.w || rect.h > space.h))
+				continue;
+			packed.at(rect.index) = {
+				static_cast<int32_t>(space.x),static_cast<int32_t>(space.y),
+				static_cast<int32_t>(rect.w),static_cast<int32_t>(rect.h)
+			};
+ 			if(rect.w == space.w && rect.h == space.h)
+			{
+				auto last = spaces.back();
+				spaces.erase(spaces.end() -1);
+				if(i < spaces.size())
+					spaces.at(i) = last;
+			}
+			else if(rect.h == space.h)
+			{
+				space.x += rect.w;
+				space.w -= rect.w;
+			}
+			else if(rect.w == space.w)
+			{
+				space.y += rect.h;
+				space.h -= rect.h;
+			}
+			else
+			{
+				if(spaces.size() == spaces.capacity())
+					spaces.reserve(spaces.size() *1.5f); // Increase by 50%
+				auto &space = spaces.at(i); // We need a new reference, because the reserve call above may have invalidated the old one
+				spaces.push_back({
+					space.x +rect.w,
+					space.y,
+					space.w -rect.w,
+					rect.h
+				});
+				space.y += rect.h;
+				space.h -= rect.h;
+			}
+			break;
+		}
+	}
+
+	outAtlasWidth = 0u;
+	outAtlasHeight = 0u;
+	for(auto &rect : packed)
+	{
+		outAtlasWidth = umath::max(outAtlasWidth,static_cast<uint32_t>(rect.x +rect.width));
+		outAtlasHeight = umath::max(outAtlasHeight,static_cast<uint32_t>(rect.y +rect.height));
+	}
+
+	constexpr auto validateResult = false;
+	if constexpr(validateResult)
+	{
+		// Validate (Make sure no boxes are overlapping or going out of bounds)
+		std::vector<uint32_t> pixels {};
+		pixels.resize(outAtlasWidth *outAtlasHeight,std::numeric_limits<uint32_t>::max());
+		for(auto i=decltype(packed.size()){0u};i<packed.size();++i)
+		{
+			auto &rect = packed.at(i);
+			if((rect.x +rect.width) > outAtlasWidth || (rect.y +rect.height) > outAtlasHeight)
+				throw std::logic_error{"Lightmap resolutions out of bounds!"};
+			for(auto x=rect.x;x<(rect.x +rect.width);++x)
+			{
+				for(auto y=rect.y;y<(rect.y +rect.height);++y)
+				{
+					auto pxOffset = (y *outAtlasWidth) +x;
+					if(pixels.at(pxOffset) != std::numeric_limits<uint32_t>::max())
+						throw std::logic_error{"Rectangle " +std::to_string(i) +" and " +std::to_string(pixels.at(pxOffset)) +" are overlapping!"};
+					pixels.at(pxOffset) = i;
+				}
+			}
+		}
+	}
+	return packed;
+}
+
 bool util::bsp::FaceLightMapInfo::valid() const {return (flags &Flags::Valid) != Flags::None;}
 
 static util::bsp::LightMapInfo load_light_map_data(bsp::File &bsp)
@@ -93,38 +217,80 @@ static util::bsp::LightMapInfo load_light_map_data(bsp::File &bsp)
 		//	lightMapInfo.faceInfos.push_back({0,0,{0,0},{0,0},util::bsp::FaceLightMapInfo::Flags::None,faceIndex,0u,-1,-1,0u,0u,Vector3{}});
 	}
 
-	// Attempt to find smallest texture required to fit all of the
-	// lightmaps. This may take several attempts.
-	const auto maxSizeLightMapAtlas = 16'384;
-	auto szLightMapAtlas = 8u;
-	rbp::GuillotineBinPack binPack {};
-	do
+	enum class BinPackAlgorithm : uint8_t
 	{
-		szLightMapAtlas <<= 1u;
-		binPack.Init(szLightMapAtlas,szLightMapAtlas);
-
-		for(auto &info : lightMapInfo.faceInfos)
+		Guillotine = 0u,
+		Simple
+	};
+	constexpr auto algorithm = BinPackAlgorithm::Simple;
+	std::vector<rbp::Rect> packedRects {};
+	Vector2i atlasResolution {};
+	switch(algorithm)
+	{
+	case BinPackAlgorithm::Guillotine:
+	{
+		// Attempt to find smallest texture required to fit all of the
+		// lightmaps. This may take several attempts.
+		const auto maxSizeLightMapAtlas = 16'384;
+		auto szLightMapAtlas = 8u;
+		rbp::GuillotineBinPack binPack {};
+		do
 		{
+			szLightMapAtlas <<= 1u;
+			binPack.Init(szLightMapAtlas,szLightMapAtlas);
+
+			for(auto &info : lightMapInfo.faceInfos)
+			{
+				if(info.valid() == false)
+					continue;
+				binPack.Insert(info.lightMapSize.at(0) +borderSize *2u,info.lightMapSize.at(1) +borderSize *2u,true,rbp::GuillotineBinPack::FreeRectChoiceHeuristic::RectBestAreaFit,rbp::GuillotineBinPack::GuillotineSplitHeuristic::SplitShorterLeftoverAxis);
+			}
+
+			// Note: Passing the entire container to the Insert-call
+			// like below would be more efficient, but causes
+			// discrepancies between the width and height of the original
+			// rect and the inserted one in some cases.
+			/*
+			// This vector will be cleared by the Insert-call, but we may need it for
+			// another iteration if the size doesn't fit all rects,
+			// so we need to make a copy.
+			auto tmpLightMapRects = lightMapRects;
+			binPack.Insert(tmpLightMapRects,true,rbp::GuillotineBinPack::FreeRectChoiceHeuristic::RectBestAreaFit,rbp::GuillotineBinPack::GuillotineSplitHeuristic::SplitShorterLeftoverAxis);*/
+		}
+		while(binPack.GetUsedRectangles().size() < numFacesWithLightMapInfo && szLightMapAtlas < maxSizeLightMapAtlas);
+		packedRects = std::move(binPack.GetUsedRectangles());
+		atlasResolution = {szLightMapAtlas,szLightMapAtlas};
+		break;
+	}
+	case BinPackAlgorithm::Simple:
+	{
+		// Very simple and inaccurate algorithm, but much faster than the one above and
+		// it's sufficient for our purposes.
+		std::vector<SBPRect> rects {};
+		rects.reserve(lightMapInfo.faceInfos.size());
+		for(auto i=decltype(lightMapInfo.faceInfos.size()){0u};i<lightMapInfo.faceInfos.size();++i)
+		{
+			auto &info = lightMapInfo.faceInfos.at(i);
 			if(info.valid() == false)
 				continue;
-			binPack.Insert(info.lightMapSize.at(0) +borderSize *2u,info.lightMapSize.at(1) +borderSize *2u,true,rbp::GuillotineBinPack::FreeRectChoiceHeuristic::RectBestAreaFit,rbp::GuillotineBinPack::GuillotineSplitHeuristic::SplitShorterLeftoverAxis);
+			rects.push_back({});
+			auto &rect = rects.back();
+			rect.index = i;
+			rect.w = info.lightMapSize.at(0) +borderSize *2u;
+			rect.h = info.lightMapSize.at(1) +borderSize *2u;
 		}
-
-		// Note: Passing the entire container to the Insert-call
-		// like below would be more efficient, but causes
-		// discrepancies between the width and height of the original
-		// rect and the inserted one in some cases.
-		/*
-		// This vector will be cleared by the Insert-call, but we may need it for
-		// another iteration if the size doesn't fit all rects,
-		// so we need to make a copy.
-		auto tmpLightMapRects = lightMapRects;
-		binPack.Insert(tmpLightMapRects,true,rbp::GuillotineBinPack::FreeRectChoiceHeuristic::RectBestAreaFit,rbp::GuillotineBinPack::GuillotineSplitHeuristic::SplitShorterLeftoverAxis);*/
+		uint32_t w,h;
+		packedRects = simple_binpacking(rects,w,h);
+		if((w & (w - 1)) != 0) // Check if not power of 2. TODO: Use std::ispow2 once Visual Studio has C++-20 support
+			w = umath::next_power_of_2(w);
+		if((h & (h - 1)) != 0)
+			h = umath::next_power_of_2(h);
+		atlasResolution = {w,h};
+		break;
 	}
-	while(binPack.GetUsedRectangles().size() < numFacesWithLightMapInfo && szLightMapAtlas < maxSizeLightMapAtlas);
+	};
 
-	lightMapInfo.atlasSize = szLightMapAtlas;
-	auto &packedRects = binPack.GetUsedRectangles();
+	lightMapInfo.atlasSize = atlasResolution;
 	auto &atlasRects = lightMapInfo.lightmapAtlas;
 	atlasRects.reserve(packedRects.size());
 	for(auto &rect : packedRects)
@@ -153,3 +319,4 @@ util::bsp::GeometryData util::bsp::load_bsp_geometry(NetworkState &nw,::bsp::Fil
 	geometryData.lightMapData = load_light_map_data(bsp);
 	return geometryData;
 }
+#pragma optimize("",on)

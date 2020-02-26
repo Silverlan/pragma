@@ -188,4 +188,17 @@ void Engine::RegisterConsoleCommands()
 		for(auto &candidate : similarCandidates)
 			autoCompleteOptions.push_back(std::string{candidate});
 	});
+
+	conVarMap.RegisterConCommand("clear_cache",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto fRemoveDir = [](const std::string &name) {
+			Con::cout<<"Removing '"<<name<<"'..."<<Con::endl;
+			auto result = FileManager::RemoveDirectory(name.c_str());
+			if(result == false)
+				Con::cwar<<"WARNING: Unable to remove directory!"<<Con::endl;
+		};
+		fRemoveDir("cache");
+		fRemoveDir("addons/imported");
+		fRemoveDir("addons/converted");
+		Con::cout<<"Please restart the Engine."<<Con::endl;
+	},ConVarFlags::None,"Clears all of the cached engine files.");
 }

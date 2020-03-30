@@ -57,7 +57,7 @@ int32_t Lua::string::find_similar_elements(lua_State *l)
 	},similarElements,limit,&similarities);
 
 	auto tOutElements = Lua::CreateTable(l);
-	offset = 0u;
+	offset = 1u;
 	for(auto &el : similarElements)
 	{
 		Lua::PushInt(l,offset++);
@@ -66,7 +66,7 @@ int32_t Lua::string::find_similar_elements(lua_State *l)
 	}
 
 	auto tSimilarities = Lua::CreateTable(l);
-	offset = 0u;
+	offset = 1u;
 	for(auto &val : similarities)
 	{
 		Lua::PushInt(l,offset++);

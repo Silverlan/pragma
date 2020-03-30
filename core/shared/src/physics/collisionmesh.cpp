@@ -7,6 +7,7 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/model/modelmesh.h"
 
+#pragma optimize("",off)
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(Game *game) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(game));}
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(const CollisionMesh &other) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(other));}
 CollisionMesh::SoftBodyInfo::SoftBodyInfo()
@@ -123,23 +124,51 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 			return nullptr;
 		auto *ptrShape = shape->GetTriangleShape();
 		auto numMats = m_surfaceMaterials.size();
-		assert((m_vertices.size() %3) == 0);
-		ptrShape->ReserveTriangles(m_vertices.size() /3);
-		for(UInt i=0;i<m_vertices.size();i+=3)
+		auto &tris = GetTriangles();
+		if(tris.empty() == false)
 		{
-			auto triId = i /3;
-			const SurfaceMaterial *mat = nullptr;
-			auto matId = 0;
-			if(triId < numMats)
-				matId = m_surfaceMaterials[triId];
-			mat = &materials[matId];
-			auto &a = m_vertices[i];
-			auto &b = m_vertices[i +1];
-			auto &c = m_vertices[i +2];
-			if(bScale == false)
-				ptrShape->AddTriangle(a,b,c,mat);
-			else
-				ptrShape->AddTriangle(a *scale,b *scale,c *scale,mat);
+			assert((m_vertices.size() %3) == 0);
+			auto numTris = tris.size() /3;
+			ptrShape->ReserveTriangles(numTris);
+			for(auto i=decltype(numTris){0u};i<(numTris *3);i+=3)
+			{
+				auto triId = i /3;
+				const SurfaceMaterial *mat = nullptr;
+				auto matId = 0;
+				if(triId < numMats)
+					matId = m_surfaceMaterials[triId];
+				mat = &materials[matId];
+				auto &a = m_vertices.at(tris.at(i));
+				auto &b = m_vertices.at(tris.at(i +1));
+				auto &c = m_vertices.at(tris.at(i +2));
+				if(bScale == false)
+					ptrShape->AddTriangle(a,b,c,mat);
+				else
+					ptrShape->AddTriangle(a *scale,b *scale,c *scale,mat);
+			}
+		}
+		else
+		{
+			// Assume that the vertices are making up a triangle mesh
+			assert((m_vertices.size() %3) == 0);
+			auto numTris = m_vertices.size() /3;
+			ptrShape->ReserveTriangles(m_vertices.size() /3);
+			for(auto i=decltype(numTris){0u};i<(numTris *3);i+=3)
+			{
+				auto triId = i /3;
+				const SurfaceMaterial *mat = nullptr;
+				auto matId = 0;
+				if(triId < numMats)
+					matId = m_surfaceMaterials[triId];
+				mat = &materials[matId];
+				auto &a = m_vertices[i];
+				auto &b = m_vertices[i +1];
+				auto &c = m_vertices[i +2];
+				if(bScale == false)
+					ptrShape->AddTriangle(a,b,c,mat);
+				else
+					ptrShape->AddTriangle(a *scale,b *scale,c *scale,mat);
+			}
 		}
 		ptrShape->Build(&materials);
 	}
@@ -150,9 +179,10 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 	}
 	return shape;
 }
+void CollisionMesh::ClearShape() {m_shape = nullptr;}
 void CollisionMesh::UpdateShape()
 {
-	m_shape = nullptr;
+	ClearShape();
 	if(m_vertices.empty() == true)
 		return;
 	m_shape = CreateShape();
@@ -290,3 +320,4 @@ std::vector<CollisionMesh::SoftBodyAnchor> *CollisionMesh::GetSoftBodyAnchors()
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
+#pragma optimize("",on)

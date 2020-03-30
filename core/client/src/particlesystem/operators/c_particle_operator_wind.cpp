@@ -8,9 +8,9 @@
 
 REGISTER_PARTICLE_OPERATOR(wind,CParticleOperatorWind);
 
-CParticleOperatorWind::CParticleOperatorWind(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorWind::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;

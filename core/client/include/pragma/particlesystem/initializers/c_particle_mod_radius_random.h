@@ -8,15 +8,17 @@ class DLLCLIENT CParticleInitializerRadiusRandomBase
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerRadiusRandomBase(const std::string &identifier,pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerRadiusRandomBase(const std::string &identifier);
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 	float GetMinRadius() const;
 	float GetMaxRadius() const;
 protected:
 	virtual void ApplyRadius(CParticle &particle,float radius)=0;
 private:
-	float m_radiusMin;
-	float m_radiusMax;
+	float m_radiusMin = 0.f;
+	float m_radiusMax = 0.f;
+	std::string m_identifier;
 };
 
 ////////////////////////////
@@ -25,7 +27,7 @@ class DLLCLIENT CParticleInitializerRadiusRandom
 	: public CParticleInitializerRadiusRandomBase
 {
 public:
-	CParticleInitializerRadiusRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleInitializerRadiusRandom();
 protected:
 	virtual void ApplyRadius(CParticle &particle,float radius) override;
 };
@@ -36,7 +38,7 @@ class DLLCLIENT CParticleInitializerLengthRandom
 	: public CParticleInitializerRadiusRandomBase
 {
 public:
-	CParticleInitializerLengthRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleInitializerLengthRandom();
 protected:
 	virtual void ApplyRadius(CParticle &particle,float radius) override;
 };

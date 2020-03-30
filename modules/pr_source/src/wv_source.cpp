@@ -2,6 +2,10 @@
 #include "wv_source.hpp"
 #include "nif.hpp"
 #include "fbx.h"
+#include "source_engine/source_engine.hpp"
+#include "source_engine/vbsp/bsp_converter.hpp"
+#include "source_engine/vmf/util_vmf.hpp"
+#include "source2/source2.hpp"
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/pragma_module.hpp>
 #include <pragma/ishared.hpp>
@@ -20,6 +24,7 @@
 #include <smdmodel.h>
 #include <pragma/physics/collisionmesh.h>
 #include <pragma/model/modelmesh.h>
+#include <pragma/asset_types/world.hpp>
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 #pragma comment(lib,"lua51.lib")
@@ -36,7 +41,9 @@
 #pragma comment(lib,"niflib_static.lib")
 
 #pragma optimize("",off)
-uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name)
+extern DLLENGINE Engine *engine;
+
+uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string &name,TextureGroup *optTexGroup,bool forceAddToTexGroup)
 {
 	auto fname = name;
 	ufile::remove_extension_from_filename(fname);
@@ -48,18 +55,37 @@ uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string
 	else
 		idx = mdl.AddTexture(fname,nw.LoadMaterial(fname));
 
-	auto *texGroup = mdl.GetTextureGroup(0);
+	auto *texGroup = optTexGroup ? optTexGroup : mdl.GetTextureGroup(0);
 	if(texGroup == nullptr)
 		texGroup = mdl.CreateTextureGroup();
-	texGroup->textures.push_back(idx);
+	if(forceAddToTexGroup || std::find(texGroup->textures.begin(),texGroup->textures.end(),idx) == texGroup->textures.end())
+		texGroup->textures.push_back(idx);
 	return idx;
 }
 
-static bool write_data(const std::string &fpath,const std::vector<uint8_t> &data,const std::string &outRoot="")
+void import::util::port_model_texture_assets(NetworkState &nw,Model &mdl)
 {
-	auto path = ufile::get_path_from_filename(outRoot +fpath);
+	if(engine->ShouldMountExternalGameResources() == false)
+		return;
+	// Immediately attempt to port all of the materials / textures associated with the model
+	for(auto &matName : mdl.GetTextures())
+	{
+		for(auto &lookupPath : mdl.GetTexturePaths())
+		{
+			auto matPath = lookupPath +matName;
+			if(FileManager::Exists("materials/" +matPath +".wmi") || FileManager::Exists("materials/" +matPath +".vmt") || FileManager::Exists("materials/" +matPath +".vmat_c"))
+				break; // Material exists, no need to do anything
+			if(nw.PortMaterial(matPath +".wmi",nullptr))
+				break;
+		}
+	}
+}
+
+static bool write_data(const std::string &fpath,const std::vector<uint8_t> &data)
+{
+	auto path = ufile::get_path_from_filename(fpath);
 	FileManager::CreatePath(path.c_str());
-	auto fOut = FileManager::OpenFile<VFilePtrReal>((outRoot +fpath).c_str(),"wb");
+	auto fOut = FileManager::OpenFile<VFilePtrReal>(fpath.c_str(),"wb");
 	if(fOut == nullptr)
 		return false;
 	fOut->Write(data.data(),data.size());
@@ -379,6 +405,10 @@ extern "C" {
 	{
 		uarch::add_source_engine_game_path(path);
 	}
+	PRAGMA_EXPORT void mount_workshop_addons(uint64_t appId)
+	{
+		uarch::mount_workshop_addons(appId);
+	}
 	PRAGMA_EXPORT void close_archive_manager() {uarch::close();}
 	PRAGMA_EXPORT void find_files(const std::string &path,std::vector<std::string> *outFiles,std::vector<std::string> *outDirectories) {uarch::find_files(path,outFiles,outDirectories);}
 	PRAGMA_EXPORT void open_archive_file(const std::string &path,VFilePtr &f)
@@ -387,7 +417,7 @@ extern "C" {
 		if(f == nullptr)
 			f = uarch::load(path);
 	}
-	PRAGMA_EXPORT bool extract_resource(NetworkState *nw,const std::string &fpath,const std::string &outRoot)
+	PRAGMA_EXPORT bool extract_resource(NetworkState *nw,const std::string &fpath,const std::string &outputPath)
 	{
 		auto f = uarch::load(fpath);
 		auto fv = std::dynamic_pointer_cast<VFilePtrInternalVirtual>(f);
@@ -396,14 +426,14 @@ extern "C" {
 			auto data = fv->GetData();
 			if(data == nullptr)
 				return false;
-			return write_data(fpath,*data,outRoot);
+			return write_data(outputPath,*data);
 		}
 		auto fr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f);
 		if(fr != nullptr)
 		{
 			std::vector<uint8_t> data(fr->GetSize());
 			fr->Read(data.data(),data.size());
-			return write_data(fpath,data,outRoot);
+			return write_data(outputPath,data);
 		}
 		return false;
 	}
@@ -413,6 +443,49 @@ extern "C" {
 		if(smd == nullptr)
 			return false;
 		return load_smd(&nw,animName,mdl,*smd,isCollisionMesh,outTextures);
+	}
+	PRAGMA_EXPORT bool convert_source2_map(Game &game,const std::string &path)
+	{
+		std::optional<std::string> sourcePath = {};
+		auto fullPath = path;
+		ufile::remove_extension_from_filename(fullPath);
+		fullPath += ".vwrld_c"; // TODO: vmap_c?
+		auto f = FileManager::OpenFile(fullPath.c_str(),"rb");
+		if(f == nullptr)
+			f = uarch::load(fullPath,&sourcePath);
+		if(f == nullptr)
+			return false;
+		auto worldData = source2::convert::convert_map(game,f,path);
+		if(worldData == nullptr)
+			return false;
+		std::string errMsg;
+		return worldData->Write(path,&errMsg);
+	}
+	PRAGMA_EXPORT bool convert_hl2_map(Game &game,const std::string &path)
+	{
+		auto bspConverter = pragma::asset::vbsp::BSPConverter::Open(game,path);
+		if(bspConverter == nullptr)
+		{
+			auto vmfPath = path;
+			ufile::remove_extension_from_filename(vmfPath);
+			vmfPath += ".vmf";
+			if(FileManager::Exists(vmfPath) == false)
+				return false;
+			Con::cout<<"Found VMF version of map: '"<<vmfPath<<"'! Compiling..."<<Con::endl;
+			Con::cwar<<"----------- VMF Compile LOG -----------"<<Con::endl;
+			auto r = vmf::load(*game.GetNetworkState(),vmfPath,[](const std::string &msg) {
+				Con::cout<<"> "<<msg<<Con::endl;
+				});
+			Con::cwar<<"---------------------------------------"<<Con::endl;
+			return r == vmf::ResultCode::Success;
+		}
+		Con::cout<<"Found BSP version of map: '"<<path<<"'! Converting..."<<Con::endl;
+		bspConverter->SetMessageLogger([](const std::string &msg) {
+			Con::cout<<"> "<<msg<<Con::endl;
+			});
+		bspConverter->StartConversion();
+
+		return true;
 	}
 	PRAGMA_EXPORT bool convert_source2_model(
 		NetworkState *nw,const std::function<std::shared_ptr<Model>()> &fCreateModel,
@@ -433,7 +506,7 @@ extern "C" {
 			Con::cout<<"Found model in '"<<*sourcePath<<"'! Porting..."<<Con::endl;
 
 		std::vector<std::string> textures;
-		auto r = ::import::load_source2_mdl(nw,f,fCreateModel,fCallback,true,textures,optLog);
+		auto r = ::import::load_source2_mdl(*nw->GetGameState(),f,fCallback,true,textures,optLog);
 		if(r == nullptr)
 			return false;
 		return fCallback(r,path,mdlName);

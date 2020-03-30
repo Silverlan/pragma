@@ -17,11 +17,9 @@ extern DLLCLIENT CGame *c_game;
 CParticleRendererBeam::Node::Node(const Vector3 &o,const Color&)
 	: origin(o),color(1.f,0.f,0.f,1.f)//{c.r /255.f,c.g /255.f,c.b /255.f,c.a /255.f})
 {}
-
-CParticleRendererBeam::CParticleRendererBeam(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleRenderer(pSystem,values),
-	m_indexCount(0),m_nodeCount(0),m_startNode(0),m_endNode(0),m_curvature(1.f)
+void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleRenderer::Initialize(pSystem,values);
 	m_shader = c_engine->GetShader("particlepolyboard");
 	for(auto &it : values)
 	{
@@ -66,7 +64,6 @@ CParticleRendererBeam::CParticleRendererBeam(pragma::CParticleSystemComponent &p
 	createInfo.size = sizeof(uint16_t) *indices.size();
 	m_indexBuffer = prosper::util::create_buffer(dev,createInfo,indices.data());
 }
-
 void CParticleRendererBeam::PostSimulate(double tDelta)
 {
 	CParticleRenderer::PostSimulate(tDelta);
@@ -75,11 +72,11 @@ void CParticleRendererBeam::PostSimulate(double tDelta)
 
 void CParticleRendererBeam::UpdateNodes()
 {
-	auto *p = m_particleSystem.GetParticle(0);
+	auto *p = GetParticleSystem().GetParticle(0);
 	auto *color = (p != nullptr) ? &p->GetColor() : nullptr;
 	for(auto i=(m_startNode -1);i!=m_endNode;++i)
 	{
-		auto pos = m_particleSystem.GetNodePosition(i +1);
+		auto pos = GetParticleSystem().GetNodePosition(i +1);
 		m_nodeOrigins[i].origin = pos;
 		if(color != nullptr)
 			m_nodeOrigins[i].color = {color->r /255.f,color->g /255.f,color->b /255.f,color->a /255.f};
@@ -91,13 +88,13 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 {
 	if((m_startNode -1) == m_endNode)
 		return {{},{}};
-	auto radius = m_particleSystem.GetRadius();
+	auto radius = GetParticleSystem().GetRadius();
 	const auto minSize = Vector3{-radius,-radius,-radius};
 	const auto maxSize = Vector3{radius,radius,radius};
 	std::pair<Vector3,Vector3> bounds {};
 	for(auto i=(m_startNode -1);i!=m_endNode;++i)
 	{
-		auto pos = m_particleSystem.GetNodePosition(i +1);
+		auto pos = GetParticleSystem().GetNodePosition(i +1);
 		uvec::to_min_max(bounds.first,bounds.second,pos +minSize,pos +maxSize);
 	}
 	return bounds;
@@ -113,9 +110,9 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommand
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
 	shader->BindLights(*descSetShadows,descSetLightSources);
-	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->Draw(renderer,m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,m_particleSystem.GetRadius(),m_curvature); // TODO: bloom
+	shader->Draw(renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();
 }
 
@@ -133,8 +130,8 @@ void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::PrimaryC
 	shader.EndDraw();*/ // prosper TODO
 }
 
-void CParticleRendererBeam::Destroy()
+void CParticleRendererBeam::OnParticleSystemStopped()
 {
-	CParticleRenderer::Destroy();
+	CParticleRenderer::OnParticleSystemStopped();
 
 }

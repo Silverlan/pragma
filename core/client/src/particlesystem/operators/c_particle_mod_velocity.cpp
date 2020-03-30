@@ -8,9 +8,9 @@
 
 REGISTER_PARTICLE_OPERATOR(velocity,CParticleOperatorVelocity);
 
-CParticleOperatorVelocity::CParticleOperatorVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorVelocity::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;

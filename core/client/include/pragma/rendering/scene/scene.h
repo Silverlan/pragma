@@ -29,7 +29,7 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma {class CLightComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
+namespace pragma {class CLightComponent; class CLightMapComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
 class CBaseEntity;
 class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
@@ -127,6 +127,7 @@ public:
 	void LinkLightSources(Scene &other);
 	void LinkEntities(Scene &other);
 	void LinkWorldEnvironment(Scene &other);
+	void SetLightMap(pragma::CLightMapComponent &lightMapC);
 
 	void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
 	pragma::rendering::BaseRenderer *GetRenderer();

@@ -199,8 +199,11 @@ Vector3 import::mdl::util::transform_physics_vertex(const std::shared_ptr<mdl::B
 		r.x = scale *v.x;
 		r.y = scale *v.z;
 		r.z = scale *-v.y;
-		auto &pose = bone->GetPoseToBone();
-		r = vectori_transform(r,{pose[0][0],pose[1][0],pose[2][0]},{pose[0][1],pose[1][1],pose[2][1]},{pose[0][2],pose[1][2],pose[2][2]},{pose[0][3],pose[1][3],pose[2][3]});
+		if(bone)
+		{
+			auto &pose = bone->GetPoseToBone();
+			r = vectori_transform(r,{pose[0][0],pose[1][0],pose[2][0]},{pose[0][1],pose[1][1],pose[2][1]},{pose[0][2],pose[1][2],pose[2][2]},{pose[0][3],pose[1][3],pose[2][3]});
+		}
 	}
 	return r;
 }

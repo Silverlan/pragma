@@ -6,10 +6,9 @@ REGISTER_PARTICLE_INITIALIZER(position_random_box,CParticleInitializerPositionRa
 REGISTER_PARTICLE_INITIALIZER(position_random_sphere,CParticleInitializerPositionRandomSphere);
 REGISTER_PARTICLE_INITIALIZER(position_random_circle,CParticleInitializerPositionRandomCircle);
 
-CParticleInitializerPositionRandomBox::CParticleInitializerPositionRandomBox(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values),
-	m_min(0.f,0.f,0.f),m_max(0.f,0.f,0.f)
+void CParticleInitializerPositionRandomBox::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;
@@ -24,7 +23,7 @@ CParticleInitializerPositionRandomBox::CParticleInitializerPositionRandomBox(pra
 			m_bOnSides = util::to_boolean(it->second);
 	}
 }
-void CParticleInitializerPositionRandomBox::Initialize(CParticle &particle)
+void CParticleInitializerPositionRandomBox::OnParticleCreated(CParticle &particle)
 {
 	if(m_bOnSides == true)
 	{
@@ -42,10 +41,9 @@ void CParticleInitializerPositionRandomBox::Initialize(CParticle &particle)
 
 //////////////////////////////
 
-CParticleInitializerPositionRandomSphere::CParticleInitializerPositionRandomSphere(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values),
-	m_distMin(0),m_distMax(0),distBias(1.f,1.f,1.f)
+void CParticleInitializerPositionRandomSphere::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;
@@ -60,7 +58,7 @@ CParticleInitializerPositionRandomSphere::CParticleInitializerPositionRandomSphe
 			m_origin = uvec::create(it->second);
 	}
 }
-void CParticleInitializerPositionRandomSphere::Initialize(CParticle &particle)
+void CParticleInitializerPositionRandomSphere::OnParticleCreated(CParticle &particle)
 {
 	float offset = m_distMax -m_distMin;
 	float r = m_distMin +sqrtf(umath::random(0.f,offset *offset));
@@ -86,9 +84,9 @@ void CParticleInitializerPositionRandomSphere::Initialize(CParticle &particle)
 
 //////////////////////////////
 
-CParticleInitializerPositionRandomCircle::CParticleInitializerPositionRandomCircle(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values)
+void CParticleInitializerPositionRandomCircle::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -103,7 +101,7 @@ CParticleInitializerPositionRandomCircle::CParticleInitializerPositionRandomCirc
 			m_origin = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerPositionRandomCircle::Initialize(CParticle &particle)
+void CParticleInitializerPositionRandomCircle::OnParticleCreated(CParticle &particle)
 {
 	auto offset = m_fMaxDist -m_fMinDist;
 	auto r = m_fMinDist +sqrtf(umath::random(0.f,offset *offset));

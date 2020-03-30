@@ -19,11 +19,9 @@ namespace pragma
 	public:
 		BaseWorldComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		void SetBrushes(std::vector<PolyMesh*> brushes);
-		void GetBrushes(std::vector<PolyMesh*> **brushes);
 		virtual void OnEntitySpawn() override;
 	protected:
-		std::vector<PolyMesh*> m_brushes;
+		void InitializePhysics();
 	};
 };
 #pragma warning(pop)

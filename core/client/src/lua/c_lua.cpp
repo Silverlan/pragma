@@ -86,6 +86,7 @@ void CGame::RegisterLua()
 		{"precache_material",Lua::engine::precache_material},
 		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
 		{"load_material",Lua::engine::load_material},
+		{"load_texture",Lua::engine::load_texture},
 		{"get_error_material",Lua::engine::get_error_material},
 		{"clear_unused_materials",Lua::engine::clear_unused_materials},
 		//{"create_texture",&Lua::engine::create_texture},
@@ -283,7 +284,11 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_BIT_DEBUG",umath::to_integral(FRender::Debug)},
 		{"RENDER_FLAG_ALL",umath::to_integral(FRender::All)},
 		{"RENDER_FLAG_REFLECTION_BIT",umath::to_integral(FRender::Reflection)},
-		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)}
+		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)},
+
+		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
+		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},
+		{"TEXTURE_LOAD_FLAG_BIT_RELOAD",umath::to_integral(TextureLoadFlags::Reload)}
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");

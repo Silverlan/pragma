@@ -67,16 +67,17 @@ namespace pragma
 	class BaseEntityComponent;
 	class BasePhysicsComponent;
 	class EntityComponentManager;
+	class BasePlayerComponent;
 	namespace nav
 	{
 		class Mesh;
 	};
 	namespace lua {class ClassManager;};
 	namespace networking {enum class DropReason : int8_t;};
+	namespace asset {class EntityData; class WorldData;};
 };
 
 struct BaseEntityComponentHandleWrapper;
-namespace pragma {namespace level {class BSPInputData;};};
 namespace pragma::physics {class IEnvironment;};
 class DLLNETWORK Game
 	: public CallbackHandler,public LuaCallbackHandler
@@ -327,9 +328,6 @@ public:
 
 	virtual bool IsPhysicsSimulationEnabled() const=0;
 
-	uint32_t GetEntityMapIndexStart() const;
-	void SetEntityMapIndexStart(uint32_t start);
-
 	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
 
 	// Debug
@@ -348,7 +346,6 @@ protected:
 	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
 	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager = nullptr;
-	uint32_t m_mapEntityIdx = 1u;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 	std::unique_ptr<SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
 	std::unordered_map<std::string,std::vector<std::shared_ptr<CvarCallback>>> m_cvarCallbacks;
@@ -389,6 +386,8 @@ protected:
 	// Lua
 	std::vector<std::string> m_luaIncludeStack = {};
 
+	virtual void InitializeWorldData(pragma::asset::WorldData &worldData);
+	virtual void InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector<EntityHandle> &outEnts);
 	virtual bool LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName);
 	virtual bool InitializeGameMode();
 	template<class TComponent>
@@ -408,9 +407,7 @@ protected:
 		void ClearResources();
 
 	// Map
-	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr)=0;
-	virtual void LoadMapMaterials(uint32_t version,VFilePtr f,std::vector<Material*> &materials);
-	BaseEntity *CreateMapEntity(uint32_t version,const std::string &classname,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,uint64_t offsetToEndOfEntity,std::vector<EntityHandle> &ents,std::vector<EntityHandle> *entities=nullptr);
+	BaseEntity *CreateMapEntity(pragma::asset::EntityData &entData);
 	std::unique_ptr<pragma::physics::IEnvironment,void(*)(pragma::physics::IEnvironment*)> m_physEnvironment = std::unique_ptr<pragma::physics::IEnvironment,void(*)(pragma::physics::IEnvironment*)>{nullptr,[](pragma::physics::IEnvironment*) {}};
 
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager()=0;

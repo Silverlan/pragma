@@ -10,7 +10,8 @@ class DLLCLIENT CParticleOperatorWorldBase
 public:
 	bool ShouldRotateWithEmitter() const;
 protected:
-	CParticleOperatorWorldBase(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorWorldBase()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 private:
 	bool m_bRotateWithEmitter = false;
 };

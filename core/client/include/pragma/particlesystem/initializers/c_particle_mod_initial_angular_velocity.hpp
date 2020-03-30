@@ -20,8 +20,9 @@ private:
 	};
 	std::unique_ptr<RandomVelocity> m_randomVelocity = nullptr;
 public:
-	CParticleInitializerInitialAngularVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	void Initialize(CParticle &particle);
+	CParticleInitializerInitialAngularVelocity()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 };
 
 #endif

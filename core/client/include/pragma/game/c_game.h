@@ -60,6 +60,7 @@ namespace pragma
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
 	class LuaShaderManager;
+	class LuaParticleModifierManager;
 	class CPlayerComponent;
 	class CViewModelComponent;
 	class CViewBodyComponent;
@@ -304,6 +305,7 @@ public:
 	float GetAlphaScale();
 	LuaGUIManager &GetLuaGUIManager();
 	pragma::LuaShaderManager &GetLuaShaderManager();
+	pragma::LuaParticleModifierManager &GetLuaParticleModifierManager();
 	Material *GetLoadMaterial();
 	virtual bool RunLua(const std::string &lua) override;
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx,bool bInject) override;
@@ -390,6 +392,8 @@ public:
 protected:
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 	virtual void OnMapLoaded() override;
+	virtual void InitializeWorldData(pragma::asset::WorldData &worldData) override;
+	virtual void InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector<EntityHandle> &outEnts);
 
 	template<class T>
 		void GetPlayers(std::vector<T*> *ents);
@@ -438,6 +442,7 @@ private:
 
 	LuaGUIManager m_luaGUIElements = {};
 	std::shared_ptr<pragma::LuaShaderManager> m_luaShaderManager = nullptr;
+	std::shared_ptr<pragma::LuaParticleModifierManager> m_luaParticleModifierManager = nullptr;
 	double m_tServer = 0.0;
 	LuaCallbackHandler m_inputCallbackHandler;
 
@@ -491,8 +496,6 @@ private:
 	std::shared_ptr<Scene> m_renderScene = nullptr;
 
 	// Map
-	virtual void LoadMapMaterials(uint32_t version,VFilePtr f,std::vector<Material*> &materials) override;
-	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
 	virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;
 
 	// Entities

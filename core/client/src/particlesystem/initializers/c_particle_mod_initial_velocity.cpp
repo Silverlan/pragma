@@ -10,10 +10,9 @@
 
 REGISTER_PARTICLE_INITIALIZER(initial_velocity,CParticleInitializerInitialVelocity);
 
-CParticleInitializerInitialVelocity::CParticleInitializerInitialVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values),
-	m_speed(0)
+void CParticleInitializerInitialVelocity::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;
@@ -38,7 +37,7 @@ CParticleInitializerInitialVelocity::CParticleInitializerInitialVelocity(pragma:
 			m_velocityMax = uvec::create(it->second);
 	}
 }
-void CParticleInitializerInitialVelocity::Initialize(CParticle &particle)
+void CParticleInitializerInitialVelocity::OnParticleCreated(CParticle &particle)
 {
 	auto dir = m_direction;
 	if(uvec::length_sqr(m_spreadMax -m_spreadMin) > 0.001f)

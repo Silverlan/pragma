@@ -11,7 +11,8 @@ class CParticle;
 class DLLCLIENT CParticleModifierComponentTime
 {
 protected:
-	CParticleModifierComponentTime(const std::string &prefix,const std::unordered_map<std::string,std::string> &values);
+	CParticleModifierComponentTime()=default;
+	void Initialize(const std::string &prefix,const std::unordered_map<std::string,std::string> &values);
 	float GetTime(float t,CParticle &p) const;
 private:
 	bool m_bLifetimeFraction = false;

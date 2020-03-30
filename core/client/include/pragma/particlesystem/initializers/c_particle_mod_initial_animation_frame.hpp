@@ -12,8 +12,9 @@ private:
 	float m_maxFrame = 0.f;
 	bool m_bUseFraction = false;
 public:
-	CParticleInitializerInitialAnimationFrame(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerInitialAnimationFrame()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 };
 
 #endif

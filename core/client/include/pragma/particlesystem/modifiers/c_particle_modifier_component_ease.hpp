@@ -9,7 +9,8 @@ namespace umath {enum class EaseType : uint32_t;};
 class DLLCLIENT CParticleModifierComponentEase
 {
 protected:
-	CParticleModifierComponentEase(const std::unordered_map<std::string,std::string> &values);
+	CParticleModifierComponentEase();
+	void Initialize(const std::unordered_map<std::string,std::string> &values);
 
 	float Ease(float t) const;
 	float EaseIn(float t) const;

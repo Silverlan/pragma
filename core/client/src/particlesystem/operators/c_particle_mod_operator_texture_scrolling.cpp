@@ -11,9 +11,9 @@
 
 REGISTER_PARTICLE_OPERATOR(texture_scrolling,CParticleOperatorTextureScrolling);
 
-CParticleOperatorTextureScrolling::CParticleOperatorTextureScrolling(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorTextureScrolling::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -32,7 +32,7 @@ void CParticleOperatorTextureScrolling::SetFrameOffset(CParticle &particle,Vecto
 	auto frameOffset = glm::packHalf2x16(uv);
 	particle.SetFrameOffset(reinterpret_cast<float&>(frameOffset));
 }
-void CParticleOperatorTextureScrolling::Initialize(CParticle &particle) {SetFrameOffset(particle,{});}
+void CParticleOperatorTextureScrolling::OnParticleCreated(CParticle &particle) {SetFrameOffset(particle,{});}
 void CParticleOperatorTextureScrolling::Simulate(CParticle &particle,double dt)
 {
 	auto offsetH = m_fHorizontalSpeed *dt;

@@ -47,16 +47,22 @@ std::vector<std::string> engine_info::get_patrons()
 		"PalmliX",
 		"Dark Dreams",
 		"Borland",
+		"Archangel470",
+		"The Tveit",
+		"Netfuta",
+		"Meehoyminoy",
 
 		"Ruthoranium",
 		"CodaAnim",
 		"Googleygareth",
+		"Leeroy Plambeck",
 		"Roach",
 		"Noah The Troll-Hunting Christian Spy",
-		"Boris \"SunRade\" Serousov"
+		"Boris \"SunRade\" Serousov",
+		"Prof. Purble"
 	};
 }
-uint32_t engine_info::get_total_patron_count() {return 30;}
+uint32_t engine_info::get_total_patron_count() {return 50;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}

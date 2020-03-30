@@ -4,9 +4,11 @@
 REGISTER_PARTICLE_INITIALIZER(shoot_cone,CParticleInitializerShootCone);
 REGISTER_PARTICLE_INITIALIZER(shoot_outward,CParticleInitializerShootOutward);
 
-CParticleInitializerShootCone::CParticleInitializerShootCone(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values),m_fMinAngle("angle_min",values),m_fMaxAngle("angle_max",values)
+void CParticleInitializerShootCone::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
+	m_fMinAngle.Initialize("angle_min",values);
+	m_fMaxAngle.Initialize("angle_max",values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -15,7 +17,7 @@ CParticleInitializerShootCone::CParticleInitializerShootCone(pragma::CParticleSy
 			m_vDirection = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerShootCone::Initialize(CParticle &particle)
+void CParticleInitializerShootCone::OnParticleCreated(CParticle &particle)
 {
 	auto rot = glm::rotation(Vector3(0.f,1.f,0.f),m_vDirection);
 
@@ -35,9 +37,9 @@ void CParticleInitializerShootCone::Initialize(CParticle &particle)
 
 /////////////////////////
 
-CParticleInitializerShootOutward::CParticleInitializerShootOutward(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values)
+void CParticleInitializerShootOutward::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -46,7 +48,7 @@ CParticleInitializerShootOutward::CParticleInitializerShootOutward(pragma::CPart
 			m_vBias = uvec::create(pair.second);
 	}
 }
-void CParticleInitializerShootOutward::Initialize(CParticle &particle)
+void CParticleInitializerShootOutward::OnParticleCreated(CParticle &particle)
 {
 	auto vel = GetParticleSystem().PointToParticleSpace(Vector3{},true);
 	vel = particle.GetPosition() -vel;

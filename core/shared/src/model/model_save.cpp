@@ -169,6 +169,8 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 bool Model::Save(Game *game,const std::string &name,const std::string &rootPath) const
 {
 	auto fname = FileManager::GetCanonicalizedPath(name);
+	ufile::remove_extension_from_filename(fname);
+	fname += ".wmd";
 	fname = rootPath +"models\\" +fname;
 	FileManager::CreatePath(ufile::get_path_from_filename(fname).c_str());
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");
@@ -331,7 +333,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	{
 		f->WriteString(group->GetName());
 		auto &meshes = group->GetMeshes();
-		f->Write<uint8_t>(static_cast<uint8_t>(meshes.size()));
+		f->Write<uint32_t>(static_cast<uint32_t>(meshes.size()));
 		for(auto &mesh : meshes)
 		{
 			auto &subMeshes = mesh->GetSubMeshes();
@@ -355,8 +357,29 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				{
 					f->Write<Vector3>(v.position);
 					f->Write<Vector3>(v.normal);
-					f->Write<Vector2>(v.uv);
 				}
+
+				auto &uvSets = subMesh->GetUVSets();
+				// Version 30
+				auto numUvSets = umath::min(uvSets.size() +1,static_cast<size_t>(std::numeric_limits<uint8_t>::max()));
+				f->Write<uint8_t>(numUvSets);
+				f->WriteString(std::string{"base"});
+				for(auto &v : verts)
+					f->Write<Vector2>(v.uv);
+				auto uvSetIdx = 1;
+				for(auto &pair : uvSets)
+				{
+					f->WriteString(pair.first);
+					auto &uvSet = pair.second;
+					for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+					{
+						auto uv = (i < uvSet.size()) ? uvSet.at(i) : Vector2{};
+						f->Write<Vector2>(uv);
+					}
+					if(++uvSetIdx == numUvSets)
+						break;
+				}
+				//
 
 				auto &boneWeights = subMesh->GetVertexWeights();
 				f->Write<uint64_t>(boneWeights.size());
@@ -370,16 +393,32 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				f->Write(extBoneWeights.data(),extBoneWeights.size() *sizeof(decltype(extBoneWeights.front())));
 				//
 
-				auto &triangles = subMesh->GetTriangles();
-				assert((triangles.size() %3) == 0);
-				f->Write<uint32_t>(triangles.size() /3);
-				static_assert(std::is_same_v<std::remove_reference_t<decltype(triangles.front())>,uint16_t>);
-				f->Write(triangles.data(),triangles.size() *sizeof(decltype(triangles.front())));
+				// Version 30
+				auto numAlphas = subMesh->GetAlphaCount();
+				f->Write<uint8_t>(numAlphas);
+				if(numAlphas > 0)
+				{
+					auto &alphas = subMesh->GetAlphas();
+					for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+					{
+						auto a = (i < alphas.size()) ? alphas.at(i) : Vector2{};
+						f->Write<float>(a.x);
+						if(numAlphas > 1)
+							f->Write<float>(a.y);
+					}
+				}
+				//
+
+				auto &indices = subMesh->GetTriangles();
+				f->Write<uint32_t>(indices.size());
+				static_assert(std::is_same_v<std::remove_reference_t<decltype(indices.front())>,uint16_t>);
+				f->Write(indices.data(),indices.size() *sizeof(decltype(indices.front())));
 			}
 		}
 	}
 
 	auto &baseMeshes = mdl.GetBaseMeshes();
+
 	// Version 0x0004
 	f->Write<uint16_t>(static_cast<uint16_t>(baseMeshes.size()));
 	for(auto &meshId : baseMeshes)
@@ -442,12 +481,59 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 
 		write_offset(f,offIndex +INDEX_OFFSET_COLLISION_MESHES *INDEX_OFFSET_INDEX_SIZE);
 		f->Write<float>(mdl.GetMass());
-		f->Write<uint8_t>(static_cast<uint8_t>(collisionMeshes.size()));
+		f->Write<uint32_t>(collisionMeshes.size());
 
 		auto &surfaceMaterials = game->GetSurfaceMaterials();
 		for(auto i=decltype(collisionMeshes.size()){0};i<collisionMeshes.size();++i)
 		{
 			auto &mesh = collisionMeshes[i];
+			auto flags = CollisionMeshLoadFlags::None;
+			if(mesh->IsConvex())
+				flags |= CollisionMeshLoadFlags::Convex;
+
+			// Collect soft body information
+			auto bSoftBody = mesh->IsSoftBody();
+			auto *sbInfo = mesh->GetSoftBodyInfo();
+			auto *sbMesh = mesh->GetSoftBodyMesh();
+			auto *sbTriangles = mesh->GetSoftBodyTriangles();
+			auto *sbAnchors = mesh->GetSoftBodyAnchors();
+			bSoftBody = (bSoftBody && sbInfo != nullptr && sbMesh != nullptr && sbTriangles != nullptr && sbAnchors != nullptr) ? true : false;
+
+			auto meshGroupId = std::numeric_limits<uint32_t>::max();
+			auto meshId = std::numeric_limits<uint32_t>::max();
+			auto subMeshId = std::numeric_limits<uint32_t>::max();
+			ModelSubMesh *subMesh = nullptr;
+			if(bSoftBody == true)
+			{
+				auto bFound = false;
+				for(auto i=decltype(meshGroups.size()){0};i<meshGroups.size();++i)
+				{
+					auto &group = meshGroups.at(i);
+					auto &meshes = group->GetMeshes();
+					for(auto j=decltype(meshes.size()){0};j<meshes.size();++j)
+					{
+						auto &mesh = meshes.at(j);
+						auto &subMeshes = mesh->GetSubMeshes();
+						for(auto k=decltype(subMeshes.size()){0};k<subMeshes.size();++k)
+						{
+							subMesh = subMeshes.at(k).get();
+							meshGroupId = i;
+							meshId = j;
+							subMeshId = k;
+							bFound = true;
+							goto endLoop;
+						}
+					}
+				}
+			endLoop:
+				if(bFound == false)
+					bSoftBody = false;
+			}
+			//
+			if(bSoftBody)
+				flags |= CollisionMeshLoadFlags::SoftBody;
+
+			f->Write<CollisionMeshLoadFlags>(flags);
 			f->Write<int32_t>(mesh->GetBoneParent());
 			// Version 0x0002
 			f->Write<Vector3>(mesh->GetOrigin());
@@ -497,43 +583,6 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 			//
 
 			// Version 0x0014
-			auto bSoftBody = mesh->IsSoftBody();
-			auto *sbInfo = mesh->GetSoftBodyInfo();
-			auto *sbMesh = mesh->GetSoftBodyMesh();
-			auto *sbTriangles = mesh->GetSoftBodyTriangles();
-			auto *sbAnchors = mesh->GetSoftBodyAnchors();
-			bSoftBody = (bSoftBody && sbInfo != nullptr && sbMesh != nullptr && sbTriangles != nullptr && sbAnchors != nullptr) ? true : false;
-			auto meshGroupId = std::numeric_limits<uint32_t>::max();
-			auto meshId = std::numeric_limits<uint32_t>::max();
-			auto subMeshId = std::numeric_limits<uint32_t>::max();
-			ModelSubMesh *subMesh = nullptr;
-			if(bSoftBody == true)
-			{
-				auto bFound = false;
-				for(auto i=decltype(meshGroups.size()){0};i<meshGroups.size();++i)
-				{
-					auto &group = meshGroups.at(i);
-					auto &meshes = group->GetMeshes();
-					for(auto j=decltype(meshes.size()){0};j<meshes.size();++j)
-					{
-						auto &mesh = meshes.at(j);
-						auto &subMeshes = mesh->GetSubMeshes();
-						for(auto k=decltype(subMeshes.size()){0};k<subMeshes.size();++k)
-						{
-							subMesh = subMeshes.at(k).get();
-							meshGroupId = i;
-							meshId = j;
-							subMeshId = k;
-							bFound = true;
-							goto endLoop;
-						}
-					}
-				}
-			endLoop:
-				if(bFound == false)
-					bSoftBody = false;
-			}
-			f->Write<bool>(bSoftBody);
 			if(bSoftBody == true)
 			{
 				f->Write<uint32_t>(meshGroupId);

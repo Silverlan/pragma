@@ -566,9 +566,9 @@ void Lua::GraphicsPipelineCreateInfo::SetDepthTestProperties(lua_State *l,Anvil:
 }
 void Lua::GraphicsPipelineCreateInfo::SetDepthTestEnabled(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,bool bEnabled)
 {
-	Anvil::CompareOp compareOp;
-	pipelineInfo.get_depth_test_state(nullptr,&compareOp);
-	pipelineInfo.toggle_depth_test(bEnabled,static_cast<Anvil::CompareOp>(compareOp));
+	// Anvil::CompareOp compareOp;
+	// pipelineInfo.get_depth_test_state(nullptr,&compareOp);
+	pipelineInfo.toggle_depth_test(bEnabled,Anvil::CompareOp::LESS_OR_EQUAL);
 }
 void Lua::GraphicsPipelineCreateInfo::SetDepthWritesEnabled(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,bool bEnabled) {pipelineInfo.toggle_depth_writes(bEnabled);}
 void Lua::GraphicsPipelineCreateInfo::SetDynamicStates(lua_State *l,Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t states)

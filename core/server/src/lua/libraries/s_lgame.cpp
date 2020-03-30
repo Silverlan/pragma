@@ -75,14 +75,14 @@ int Lua::game::Server::load_map(lua_State *l)
 	std::string mapName;
 	BaseEntity *entWorld = nullptr;
 	Vector3 origin {};
-	auto startIdx = s_game->GetEntityMapIndexStart();
+	//auto startIdx = s_game->GetEntityMapIndexStart();
 	auto pair = Lua::game::load_map(l,mapName,&entWorld,origin);
 	if(pair.first == false)
 		return pair.second;
 	NetPacket packet {};
 	packet->WriteString(mapName);
 	packet->Write<Vector3>(origin);
-	packet->Write<uint32_t>(startIdx);
+	//packet->Write<uint32_t>(startIdx);
 
 	std::vector<SBaseEntity*> ptrEnts;
 	ptrEnts.reserve(ents.size());

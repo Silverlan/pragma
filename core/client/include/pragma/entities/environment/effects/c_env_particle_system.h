@@ -279,9 +279,9 @@ namespace pragma
 		float m_lifeTime = std::numeric_limits<float>::max();
 		float m_simulationTime = 0.f;
 		pragma::AlphaMode m_alphaMode = pragma::AlphaMode::Additive;
-		std::vector<std::unique_ptr<CParticleInitializer>> m_initializers;
-		std::vector<std::unique_ptr<CParticleOperator>> m_operators;
-		std::vector<std::unique_ptr<CParticleRenderer>> m_renderers;
+		std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> m_initializers;
+		std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> m_operators;
+		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> m_renderers;
 
 		Material *m_material = nullptr;
 		float m_tNextEmission = 0.f;

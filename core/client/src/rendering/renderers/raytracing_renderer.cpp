@@ -72,7 +72,8 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 	if(umath::is_flag_set(renderFlags,FRender::World))
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWorld);
 
-	auto *dsIBL = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(cam->GetEntity().GetPosition());
+	float intensity;
+	auto *dsIBL = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(cam->GetEntity().GetPosition(),intensity);
 	if(dsIBL == nullptr)
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::NoIBL);
 

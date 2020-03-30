@@ -183,13 +183,14 @@ void Animation::RemoveFlags(FAnim flags) {m_flags &= ~flags;}
 
 const std::vector<unsigned int> &Animation::GetBoneList() const {return m_boneIds;}
 const std::unordered_map<uint32_t,uint32_t> &Animation::GetBoneMap() const {return m_boneIdMap;}
-void Animation::AddBoneId(uint32_t id)
+uint32_t Animation::AddBoneId(uint32_t id)
 {
 	auto it = m_boneIdMap.find(id);
 	if(it != m_boneIdMap.end())
-		return;
+		return it->second;
 	m_boneIds.push_back(id);
 	m_boneIdMap.insert(std::make_pair(id,m_boneIds.size() -1));
+	return m_boneIds.size() -1;
 }
 void Animation::SetBoneId(uint32_t localIdx,uint32_t id)
 {

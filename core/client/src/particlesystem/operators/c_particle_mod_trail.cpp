@@ -8,9 +8,9 @@
 
 REGISTER_PARTICLE_OPERATOR(trail,CParticleOperatorTrail);
 
-CParticleOperatorTrail::CParticleOperatorTrail(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values),m_travelTime(1.f)
+void CParticleOperatorTrail::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto &it : values)
 	{
 		auto key = it.first;
@@ -26,8 +26,8 @@ void CParticleOperatorTrail::Simulate(CParticle &particle,double)
 	auto nodeIdx = particle.GetIndex();
 	auto curNode = m_particleNodes[nodeIdx];
 	auto nextNode = curNode +1;
-	auto posSrc = m_particleSystem.GetNodePosition(curNode);
-	auto posDst = m_particleSystem.GetNodePosition(nextNode);
+	auto posSrc = GetParticleSystem().GetNodePosition(curNode);
+	auto posDst = GetParticleSystem().GetNodePosition(nextNode);
 	auto dir = posDst -posSrc;
 	uvec::normalize(&dir);
 
@@ -36,8 +36,8 @@ void CParticleOperatorTrail::Simulate(CParticle &particle,double)
 	{
 		auto &p0 = posSrc;
 		auto &p1 = posDst;
-		auto p2 = m_particleSystem.GetNodePosition(nextNode +1);
-		auto p3 = m_particleSystem.GetNodePosition(nextNode +2);
+		auto p2 = GetParticleSystem().GetNodePosition(nextNode +1);
+		auto p3 = GetParticleSystem().GetNodePosition(nextNode +2);
 
 		auto curveTightness = 1.f;
 		auto s = particle.GetTimeAlive() /m_travelTime;

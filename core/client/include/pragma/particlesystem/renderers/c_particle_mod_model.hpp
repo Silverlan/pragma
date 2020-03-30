@@ -34,12 +34,13 @@ class DLLCLIENT CParticleRendererModel
 	: public CParticleRenderer
 {
 public:
-	CParticleRendererModel(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleRendererModel()=default;
 	virtual ~CParticleRendererModel() override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual void PostSimulate(double tDelta) override;
-	virtual void Initialize(CParticle &particle) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 
 	bool IsAnimated() const;
 protected:

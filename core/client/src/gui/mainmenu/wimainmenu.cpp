@@ -304,7 +304,7 @@ void WIMainMenu::Initialize()
 		pAttributes->SetText("[D]");
 		pAttributes->SizeToContents();
 	}
-
+	
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	m_hPatreonIcon = CreateChild<WITexturedRect>();
 	auto *pIcon = m_hPatreonIcon.get<WITexturedRect>();

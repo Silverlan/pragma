@@ -20,6 +20,9 @@ namespace pragma
 		int32_t viewportH;
 		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
 		int32_t shaderQuality;
+
+		float lightmapIntensity;
+		float lightmapSqrt; // Experimental; can be 1 or 0
 	};
 	struct CameraData
 	{

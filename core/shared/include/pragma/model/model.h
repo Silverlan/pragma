@@ -123,6 +123,7 @@ class VertexAnimation;
 class NetworkState;
 namespace pragma::physics{class ScaledTransform;};
 class DLLNETWORK Model
+	: public std::enable_shared_from_this<Model>
 {
 	friend Con::c_cout& operator<<(Con::c_cout&,const Model&);
 public:

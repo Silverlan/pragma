@@ -9,8 +9,9 @@ class DLLCLIENT CParticleInitializerShootCone
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerShootCone(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerShootCone()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fMinAngle;
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fMaxAngle;
@@ -23,8 +24,9 @@ class DLLCLIENT CParticleInitializerShootOutward
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerShootOutward(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerShootOutward()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	Vector3 m_vBias = {};
 };

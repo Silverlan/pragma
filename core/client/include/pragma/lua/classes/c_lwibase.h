@@ -2,6 +2,7 @@
 #define __C_LWIBASE_H__
 #include "pragma/definitions.h"
 #include "pragma/clientstate/clientstate.h"
+#include <wgui/wibase.h>
 #include <pragma/lua/ldefinitions.h>
 class WIHandle;
 class WIShapeHandle;
@@ -92,14 +93,9 @@ namespace Lua
 		DLLCLIENT void PosInBounds(lua_State *l,WIHandle &hPanel,Vector2 pos);
 		DLLCLIENT void MouseInBounds(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void GetMousePos(lua_State *l,WIHandle &hPanel);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,const Mat4 &matPostTransform,bool bUseScissor);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,bool bUseScissor);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size,const Mat4 &matPostTransform,bool bUseScissor);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size,bool bUseScissor);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,const Mat4 &matPostTransform);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size,const Mat4 &matPostTransform);
-		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size);
+		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo);
+		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize);
+		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent);
 		DLLCLIENT void GetX(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void GetY(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetX(lua_State *l,WIHandle &hPanel,float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind

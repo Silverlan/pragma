@@ -118,6 +118,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");
+	componentManager.RegisterComponentType<pragma::CLightMapReceiverComponent>("light_map_receiver");
 
 	auto *l = GetLuaState();
 	for(auto &evName : {

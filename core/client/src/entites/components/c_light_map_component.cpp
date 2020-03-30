@@ -33,18 +33,14 @@ void CLightMapComponent::Initialize()
 }
 
 void CLightMapComponent::InitializeLightMapData(
-	const std::shared_ptr<util::bsp::LightMapInfo> &lightmapInfo,
 	const std::shared_ptr<prosper::Texture> &lightMap,
 	const std::shared_ptr<prosper::DynamicResizableBuffer> &lightMapUvBuffer,
-	const std::vector<std::shared_ptr<prosper::Buffer>> &meshUvBuffers,
-	const std::vector<std::vector<Vector2>> &lightmapUvs
+	const std::vector<std::shared_ptr<prosper::Buffer>> &meshUvBuffers
 )
 {
-	m_lightmapInfo = lightmapInfo;
 	m_lightMapAtlas = lightMap;
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
-	m_lightmapUvs = std::move(lightmapUvs);
 }
 
 const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const {return m_lightMapAtlas;}
@@ -60,240 +56,84 @@ std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GetGlobalLi
 const std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() const {return const_cast<CLightMapComponent*>(this)->GetMeshLightMapUvBuffers();}
 std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() {return m_meshLightMapUvBuffers;}
 
-const std::vector<std::vector<Vector2>> &CLightMapComponent::GetLightmapUvs() const {return const_cast<CLightMapComponent*>(this)->GetLightmapUvs();}
-std::vector<std::vector<Vector2>> &CLightMapComponent::GetLightmapUvs() {return m_lightmapUvs;}
-/* Obsolete
-void CLightMapComponent::ReadLightmapUvCoordinates(std::vector<std::vector<Vector2>> &uvs) const
-{
-	// Note: We need the lightmap uv coordinates, however these are not available on the CPU after the map has been loaded.
-	// Therefore we will have to map the lightmap uv buffer instead and copy the values from the GPU.
-	auto uvBuffer = GetGlobalLightMapUvBuffer();
-	auto mdl = GetEntity().GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
-	if(uvBuffer == nullptr || meshGroup == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize()) == false)
-		return;
+void CLightMapComponent::SetLightMapIntensity(float intensity) {m_lightMapIntensity = intensity;}
+void CLightMapComponent::SetLightMapSqrtFactor(float sqrtFactor) {m_lightMapSqrt = sqrtFactor;}
+float CLightMapComponent::GetLightMapIntensity() const {return m_lightMapIntensity;}
+float CLightMapComponent::GetLightMapSqrtFactor() const {return m_lightMapSqrt;}
 
-	// Note: There is one uv buffer per sub-mesh of the model, which contains one uv-set per vertex.
-	auto uvBuffers = GetMeshLightMapUvBuffers();
-	uvs.reserve(uvBuffers.size());
-	for(auto &mesh : meshGroup->GetMeshes())
-	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
-			auto refId = subMesh->GetReferenceId();
-			if(refId >= uvBuffers.size())
-				continue;
-			auto &subBuffer = uvBuffers.at(refId);
-			if(refId >= uvs.size())
-				uvs.resize(refId +1);
-			auto &meshUvs = uvs.at(refId);
-			auto numVerts = subMesh->GetVertexCount();
-			meshUvs.resize(numVerts);
-			uvBuffer->Read(subBuffer->GetStartOffset(),numVerts *sizeof(Vector2),meshUvs.data());
-		}
-	}
-	uvBuffer->Unmap();
-}
-*/
 void CLightMapComponent::UpdateLightmapUvBuffers()
 {
 	auto uvBuffer = GetGlobalLightMapUvBuffer();
 	auto mdl = GetEntity().GetModel();
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
-	if(uvBuffer == nullptr || meshGroup == nullptr || m_lightmapUvs.empty() || uvBuffer->Map(0ull,uvBuffer->GetSize()) == false)
+	if(uvBuffer == nullptr || meshGroup == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize()) == false)
 		return;
 	auto &uvBuffers = GetMeshLightMapUvBuffers();
 	for(auto &mesh : meshGroup->GetMeshes())
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto refId = subMesh->GetReferenceId();
-			if(refId >= m_lightmapUvs.size() || refId >= uvBuffers.size())
+			auto *uvSet = subMesh->GetUVSet("lightmap");
+			auto bufIdx = subMesh->GetReferenceId();
+			if(uvSet == nullptr || bufIdx == std::numeric_limits<uint32_t>::max())
 				continue;
-			auto &uvs = m_lightmapUvs.at(refId);
-			uvBuffers.at(refId)->Write(0,uvs.size() *sizeof(uvs.front()),uvs.data());
+			uvBuffers.at(bufIdx)->Write(0,uvSet->size() *sizeof(uvSet->front()),uvSet->data());
 		}
 	}
 	uvBuffer->Unmap();
 }
 
-std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::LoadLightMapUvBuffers(const std::vector<std::vector<Vector2>> &meshUvData,std::vector<std::shared_ptr<prosper::Buffer>> &outMeshLightMapUvBuffers)
+std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::Buffer>> &outMeshLightMapUvBuffers)
 {
 	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT; // Transfer flags are required for mapping GPUBulk buffers
-	auto requiredBufferSize = 0ull;
 	auto alignment = prosper::util::calculate_buffer_alignment(dev,bufCreateInfo.usageFlags);
-	for(auto &data : meshUvData)
-		requiredBufferSize += prosper::util::get_aligned_size(data.size() *sizeof(data.front()),alignment);
+	auto requiredBufferSize = 0ull;
+
+	// Collect all meshes that have lightmap uv coordinates
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
+
+	// Calculate required buffer size
+	uint32_t numMeshes = 0;
+	for(auto *ent : entIt)
+	{
+		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
+		auto &meshLightMapUvData = lightMapReceiverC->GetMeshLightMapUvData();
+		for(auto &pair : meshLightMapUvData)
+		{
+			auto &uvSet = pair.second;
+			requiredBufferSize += prosper::util::get_aligned_size(uvSet.size() *sizeof(uvSet.front()),alignment);
+			++numMeshes;
+		}
+	}
+
+	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
 	auto lightMapUvBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,bufCreateInfo,bufCreateInfo.size,0.2f);
 	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
 		return nullptr;
-	outMeshLightMapUvBuffers.reserve(meshUvData.size());
-	for(auto &data : meshUvData)
-	{
-		auto subBuf = lightMapUvBuffer->AllocateBuffer(data.size() *sizeof(data.front()));
-		outMeshLightMapUvBuffers.push_back(subBuf);
 
-		lightMapUvBuffer->Write(subBuf->GetStartOffset(),data.size() *sizeof(data.front()),data.data());
+	outMeshLightMapUvBuffers.reserve(numMeshes);
+	uint32_t bufIdx = 0;
+	for(auto *ent : entIt)
+	{
+		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
+		auto &meshLightMapUvData = lightMapReceiverC->GetMeshLightMapUvData();
+		for(auto &pair : meshLightMapUvData)
+		{
+			auto &uvSet = pair.second;
+			auto subBuf = lightMapUvBuffer->AllocateBuffer(uvSet.size() *sizeof(uvSet.front()));
+			outMeshLightMapUvBuffers.push_back(subBuf);
+
+			lightMapUvBuffer->Write(subBuf->GetStartOffset(),uvSet.size() *sizeof(uvSet.front()),uvSet.data());
+			lightMapReceiverC->AssignBufferIndex(pair.first,bufIdx++);
+		}
 	}
 	lightMapUvBuffer->Unmap();
 	return lightMapUvBuffer;
-}
-
-const std::shared_ptr<util::bsp::LightMapInfo> &CLightMapComponent::GetLightmapInfo() const {return m_lightmapInfo;}
-
-std::shared_ptr<prosper::Texture> CLightMapComponent::LoadLightMap(pragma::level::BSPInputData &bspInputData)
-{
-	auto &lightMapInfo = bspInputData.lightMapInfo;
-	const auto widthLightmapAtlas = lightMapInfo.atlasSize.x;
-	const auto heightLightmapAtlas = lightMapInfo.atlasSize.y;
-	auto borderSize = lightMapInfo.borderSize;
-
-	auto &lightMapData = bspInputData.lightMapInfo.luxelData;
-	if(lightMapData.empty())
-		return nullptr;
-	std::vector<std::array<uint16_t,4>> lightMapImageData(widthLightmapAtlas *heightLightmapAtlas);
-	auto &rects = lightMapInfo.lightmapAtlas;
-	if(rects.size() != lightMapInfo.faceInfos.size())
-		; // TODO: Print Warning: LIGHT MAP ATLAS TO SMALL TO ENCOMPASS ALL LIGHTMAPS
-	auto rectIdx = 0u;
-	for(auto lmIdx=decltype(lightMapInfo.faceInfos.size()){0u};lmIdx<lightMapInfo.faceInfos.size();++lmIdx)
-	{
-		auto &info = lightMapInfo.faceInfos.at(lmIdx);
-		if(info.valid() == false)
-			continue;
-		auto &rect = rects.at(rectIdx++);
-		info.x = rect.x;
-		info.y = rect.y;
-		if(info.lightMapSize.at(0) +borderSize *2u != rect.w)
-		{
-			// This shouldn't happen (The bounds should already have been put in the proper rotation before the map-file was created)
-			throw std::runtime_error("Illegal light map bounds!");
-			info.flags |= util::bsp::FaceLightMapInfo::Flags::Rotated;
-		}
-		info.lightMapSize.at(0) = rect.w -borderSize *2u;
-		info.lightMapSize.at(1) = rect.h -borderSize *2u;
-	}
-
-	for(auto faceIndex=decltype(lightMapInfo.faceInfos.size()){0u};faceIndex<lightMapInfo.faceInfos.size();++faceIndex)
-	{
-		auto &lmInfo = lightMapInfo.faceInfos.at(faceIndex);
-		if(lmInfo.valid() == false)
-			continue;
-		auto &face = lightMapInfo.faceInfos.at(faceIndex);
-		if(face.luxelDataOffset == std::numeric_limits<uint32_t>::max())
-			continue; // No light map available for this face (e.g. nodraw or skybox)
-		auto widthLightmap = face.lightMapSize.at(0);
-		auto heightLightmap = face.lightMapSize.at(1);
-		auto bRotated = (lmInfo.flags &util::bsp::FaceLightMapInfo::Flags::Rotated) != util::bsp::FaceLightMapInfo::Flags::None;
-		const auto fCalcPixelIndex = [&lmInfo,widthLightmapAtlas,heightLightmap,bRotated,borderSize](int x,int y,int offsetX,int offsetY) {
-			x += lmInfo.x +borderSize +offsetX;
-			y += lmInfo.y +borderSize +offsetY;
-			return y *widthLightmapAtlas +x;
-		};
-		auto *lightmapData = lightMapData.data() +face.luxelDataOffset;
-		for(auto y=decltype(heightLightmap){0u};y<heightLightmap;++y)
-		{
-			for(auto x=decltype(widthLightmap){0u};x<widthLightmap;++x)
-			{
-				auto xLuxel = x;
-				auto yLuxel = y;
-				if(bRotated)
-				{
-					auto tmp = yLuxel;
-					yLuxel = widthLightmap -xLuxel -1;
-					xLuxel = tmp;
-				}
-				auto &luxel = *reinterpret_cast<const bsp::ColorRGBExp32*>(lightmapData +(yLuxel *(bRotated ? heightLightmap : widthLightmap) +xLuxel) *sizeof(bsp::ColorRGBExp32));
-
-				auto exp = umath::pow(2.0,static_cast<double>(luxel.exponent));
-				auto rgbR = luxel.r *exp /255.f;
-				auto rgbG = luxel.g *exp /255.f;
-				auto rgbB = luxel.b *exp /255.f;
-
-				if(lmInfo.lightMapSize.at(1) != 0)
-				{
-					auto pxIdx = fCalcPixelIndex(x,y,0,0);
-
-					std::array<uint16_t,4> hdrPxCol = {
-						umath::float32_to_float16_glm(rgbR),
-						umath::float32_to_float16_glm(rgbG),
-						umath::float32_to_float16_glm(rgbB),
-						1.f
-					};
-					lightMapImageData.at(pxIdx) = hdrPxCol;
-
-					auto borderCol = hdrPxCol;
-					//borderCol = bRotated ? Vector4{255.f,0.f,255.f,255.f} : Vector4{0.f,255.f,255.f,255.f};
-					// Vertical border
-					if(x == 0u)
-					{
-						for(auto i=decltype(borderSize){1u};i<=borderSize;++i)
-							lightMapImageData.at(fCalcPixelIndex(x,y,-i,0)) = borderCol;
-						if(y == 0u)
-						{
-							// Fill out top left corner
-							for(auto xOff=decltype(borderSize){1u};xOff<=borderSize;++xOff)
-							{
-								for(auto yOff=decltype(borderSize){1u};yOff<=borderSize;++yOff)
-									lightMapImageData.at(fCalcPixelIndex(x,y,-xOff,-yOff)) = borderCol;
-							}
-						}
-					}
-					else if(x == (widthLightmap -1u))
-					{
-						for(auto i=decltype(borderSize){1u};i<=borderSize;++i)
-							lightMapImageData.at(fCalcPixelIndex(x,y,i,0)) = borderCol;
-						if(y == (heightLightmap -1u))
-						{
-							// Fill out bottom right corner
-							for(auto xOff=decltype(borderSize){1u};xOff<=borderSize;++xOff)
-							{
-								for(auto yOff=decltype(borderSize){1u};yOff<=borderSize;++yOff)
-									lightMapImageData.at(fCalcPixelIndex(x,y,xOff,yOff)) = borderCol;
-							}
-						}
-					}
-
-					// Horizontal border
-					if(y == 0u)
-					{
-						for(auto i=decltype(borderSize){1u};i<=borderSize;++i)
-							lightMapImageData.at(fCalcPixelIndex(x,y,0,-i)) = borderCol;
-						if(x == (widthLightmap -1u))
-						{
-							// Fill out top right corner
-							for(auto xOff=decltype(borderSize){1u};xOff<=borderSize;++xOff)
-							{
-								for(auto yOff=decltype(borderSize){1u};yOff<=borderSize;++yOff)
-									lightMapImageData.at(fCalcPixelIndex(x,y,xOff,-yOff)) = borderCol;
-							}
-						}
-					}
-					else if(y == (heightLightmap -1u))
-					{
-						for(auto i=decltype(borderSize){1u};i<=borderSize;++i)
-							lightMapImageData.at(fCalcPixelIndex(x,y,0,i)) = borderCol;
-						if(x == 0u)
-						{
-							// Fill out bottom left corner
-							for(auto xOff=decltype(borderSize){1u};xOff<=borderSize;++xOff)
-							{
-								for(auto yOff=decltype(borderSize){1u};yOff<=borderSize;++yOff)
-									lightMapImageData.at(fCalcPixelIndex(x,y,-xOff,yOff)) = borderCol;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// Build lightmap texture
-	return CreateLightmapTexture(widthLightmapAtlas,heightLightmapAtlas,reinterpret_cast<uint16_t*>(lightMapImageData.data()));
 }
 
 std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData)
@@ -326,7 +166,8 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint
 	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
 	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE; // Doesn't really matter since lightmaps have their own border either way
 	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	prosper::util::ImageViewCreateInfo imgViewCreateInfo {}; // TODO: Is this needed?
+	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	imgViewCreateInfo.swizzleAlpha = Anvil::ComponentSwizzle::ONE; // We don't use the alpha channel
 	return prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
 }
 
@@ -343,7 +184,6 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 		callback(false);
 		return;
 	}
-	auto &dstLightmapUvs = lightmapC->GetLightmapUvs();
 	uint32_t numVerts = 0;
 	uint32_t numTris = 0;
 	// Count the number of primitives so we can pre-allocate the data properly
@@ -351,8 +191,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto refId = subMesh->GetReferenceId();
-			if(refId >= dstLightmapUvs.size())
+			if(subMesh->GetUVSet("lightmap") == nullptr)
 				continue;
 			numVerts += subMesh->GetVertexCount();
 			numTris += subMesh->GetTriangleCount();
@@ -368,8 +207,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
-			auto refId = subMesh->GetReferenceId();
-			if(refId >= dstLightmapUvs.size())
+			if(subMesh->GetUVSet("lightmap") == nullptr)
 				continue;
 			auto vertOffset = verts.size();
 			for(auto &v : subMesh->GetVertices())
@@ -410,21 +248,19 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 
 		// Apply new lightmap uvs
 
-		auto &dstLightmapUvs = lightmapC->GetLightmapUvs();
 		auto &newLightmapUvs = worker.GetResult();
 		uint32_t vertexOffset = 0u;
 		for(auto &mesh : meshGroup->GetMeshes())
 		{
 			for(auto &subMesh : mesh->GetSubMeshes())
 			{
-				auto refId = subMesh->GetReferenceId();
-				if(refId >= dstLightmapUvs.size())
+				auto *uvSet = subMesh->GetUVSet("lightmap");
+				if(uvSet == nullptr)
 					continue;
-				auto &dstMeshLightmapUvs = dstLightmapUvs.at(refId);
 				auto numVerts = subMesh->GetVertexCount();
 				assert(newLightmapUvs.size() >= vertexOffset +numVerts);
 				for(auto i=vertexOffset;i<(vertexOffset +numVerts);++i)
-					dstMeshLightmapUvs.at(i -vertexOffset) = newLightmapUvs.at(i);
+					uvSet->at(i -vertexOffset) = newLightmapUvs.at(i);
 				vertexOffset += numVerts;
 			}
 		}
@@ -527,7 +363,13 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePl
 	pragma::console::parse_command_options(argv,commandOptions);
 
 	//auto resolution = c_engine->GetRenderResolution();
-	auto resolution = lightmapC->GetLightmapInfo()->atlasSize;
+	auto &lightMap = lightmapC->GetLightMap();
+	Vector2i resolution {2'048,2'048};
+	if(lightMap)
+	{
+		auto extents = lightMap->GetImage()->GetExtents();
+		resolution = {extents.width,extents.height};
+	}
 	auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
 	auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
 	auto sampleCount = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1225"));
@@ -564,14 +406,11 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	if(c_game == nullptr)
 		return;
 
-	EntityIterator entIt {*c_game,};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<CLightMapComponent>>();
-	auto it = entIt.begin();
-	if(it == entIt.end())
+	auto &scene = c_game->GetRenderScene();
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto *ent = *it;
-	auto lightmapC = ent->GetComponent<CLightMapComponent>();
-	auto &lightmap = lightmapC->GetLightMap();
+	auto &lightmap = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetLightMap();
 	if(lightmap == nullptr)
 		return;
 

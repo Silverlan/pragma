@@ -60,7 +60,7 @@ public:
 	std::shared_ptr<Frame> GetFrame(unsigned int ID);
 	const std::vector<unsigned int> &GetBoneList() const;
 	const std::unordered_map<uint32_t,uint32_t> &GetBoneMap() const;
-	void AddBoneId(uint32_t id);
+	uint32_t AddBoneId(uint32_t id);
 	void SetBoneId(uint32_t localIdx,uint32_t id);
 	void SetBoneList(const std::vector<uint32_t> &list);
 	void ReserveBoneIds(uint32_t count);

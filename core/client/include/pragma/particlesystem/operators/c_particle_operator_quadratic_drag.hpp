@@ -8,7 +8,8 @@ class DLLCLIENT CParticleOperatorQuadraticDrag
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorQuadraticDrag(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorQuadraticDrag()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
 private:

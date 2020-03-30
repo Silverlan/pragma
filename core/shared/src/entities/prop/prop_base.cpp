@@ -14,7 +14,7 @@ using namespace pragma;
 
 BasePropComponent::BasePropComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
-	m_kvMdl(""),m_kvScale(1.f)
+	m_kvScale(1.f)
 {}
 
 PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
@@ -40,11 +40,7 @@ PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
 
 bool BasePropComponent::SetKeyValue(std::string key,std::string val)
 {
-	if(key == "model")
-		m_kvMdl = val;
-	else if(key == "skin")
-		m_kvSkin = std::make_unique<uint32_t>(ustring::to_int(val));
-	else if(key == "scale")
+	if(key == "scale")
 		m_kvScale = ustring::to_float(val);
 	else if(key == "maxvisibledist")
 		m_kvMaxVisibleDist = ustring::to_float(val);
@@ -104,6 +100,26 @@ void BasePropComponent::Initialize()
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
+
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		InitializePhysics();
+	});
+}
+
+void BasePropComponent::InitializePhysics()
+{
+	auto &ent = GetEntity();
+	if(ent.IsSpawned() == false)
+		return;
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	if(pPhysComponent.expired())
+		return;
+	auto mdlC = ent.GetModelComponent();
+	auto hMdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	if(hMdl != nullptr && m_physicsType != PHYSICSTYPE::NONE && m_physicsType != pPhysComponent->GetPhysicsType())
+		InitializePhysics(m_physicsType);
+	if(m_moveType != MOVETYPE::NONE)
+		pPhysComponent->SetMoveType(m_moveType);
 }
 
 void BasePropComponent::Setup(PHYSICSTYPE physType,MOVETYPE mvType)
@@ -117,30 +133,11 @@ void BasePropComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(!m_kvMdl.empty())
-	{
-		if(mdlComponent.valid())
-			mdlComponent->SetModel(m_kvMdl.c_str());
-	}
-	if(m_kvSkin != nullptr)
-	{
-		auto mdlComponent = ent.GetModelComponent();
-		if(mdlComponent.valid())
-			mdlComponent->SetSkin(*m_kvSkin);
-		m_kvSkin = nullptr;
-	}
 	if(m_kvScale != 1.f)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
 		if(pTrComponent.valid())
 			pTrComponent->SetScale(m_kvScale);
 	}
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
-		return;
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(hMdl != nullptr && m_physicsType != PHYSICSTYPE::NONE && m_physicsType != pPhysComponent->GetPhysicsType())
-		InitializePhysics(m_physicsType);
-	if(m_moveType != MOVETYPE::NONE)
-		pPhysComponent->SetMoveType(m_moveType);
+	InitializePhysics();
 }

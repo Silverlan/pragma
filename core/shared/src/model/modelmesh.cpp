@@ -128,13 +128,14 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 ModelSubMesh::ModelSubMesh()
 	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
 	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<VertexWeight>>()),
-	m_extendedVertexWeights(std::make_shared<std::vector<VertexWeight>>()),m_vertices(std::make_shared<std::vector<Vertex>>())
+	m_extendedVertexWeights(std::make_shared<std::vector<VertexWeight>>()),m_vertices(std::make_shared<std::vector<Vertex>>()),
+	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()}
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
 	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max),
-	m_pose{other.m_pose}
+	m_pose{other.m_pose},m_uvSets{other.m_uvSets}
 {}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
@@ -417,6 +418,19 @@ void ModelSubMesh::SetVertexWeight(uint32_t idx,const VertexWeight &weight)
 	}
 	vertexWeights.at(idx) = weight;
 }
+const std::vector<Vector2> *ModelSubMesh::GetUVSet(const std::string &name) const {return const_cast<ModelSubMesh*>(this)->GetUVSet(name);}
+std::vector<Vector2> *ModelSubMesh::GetUVSet(const std::string &name)
+{
+	auto it = m_uvSets->find(name);
+	return (it != m_uvSets->end()) ? &it->second : nullptr;
+}
+const std::unordered_map<std::string,std::vector<Vector2>> &ModelSubMesh::GetUVSets() const {return const_cast<ModelSubMesh*>(this)->GetUVSets();}
+std::unordered_map<std::string,std::vector<Vector2>> &ModelSubMesh::GetUVSets() {return *m_uvSets;}
+std::vector<Vector2> &ModelSubMesh::AddUVSet(const std::string &name)
+{
+	auto it = m_uvSets->insert(std::make_pair(name,std::vector<Vector2>{})).first;
+	return it->second;
+}
 Vertex ModelSubMesh::GetVertex(uint32_t idx) const
 {
 	if(idx >= m_vertices->size())
@@ -527,4 +541,20 @@ void ModelSubMesh::ApplyUVMapping(const Vector3 &nu,const Vector3 &nv,uint32_t w
 		v.uv.x = (glm::dot(v.position,nu) *sw) /su +ou *sw;
 		v.uv.y = 1.f -((glm::dot(v.position,nv) *sh) /sv +ov *sh);
 	}
+}
+void ModelSubMesh::RemoveVertex(uint64_t idx)
+{
+	if(idx < m_vertices->size())
+		m_vertices->erase(m_vertices->begin() +idx);
+	if(idx < m_alphas->size())
+		m_alphas->erase(m_alphas->begin() +idx);
+	for(auto &uvSet : *m_uvSets)
+	{
+		if(idx < uvSet.second.size())
+			uvSet.second.erase(uvSet.second.begin() +idx);
+	}
+	if(idx < m_vertexWeights->size())
+		m_vertexWeights->erase(m_vertexWeights->begin() +idx);
+	if(idx < m_extendedVertexWeights->size())
+		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() +idx);
 }

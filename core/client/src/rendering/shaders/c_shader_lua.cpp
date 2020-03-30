@@ -388,7 +388,6 @@ void LuaShaderManager::RegisterShader(std::string className,luabind::object &o)
 	
 	auto &pair = m_shaders[className] = {};
 	pair.luaClassObject = o;
-	auto bOverwrite = true;
 
 	enum class ShaderType : uint8_t
 	{

@@ -17,6 +17,7 @@ namespace pragma
 			std::shared_ptr<prosper::Texture> irradianceMap;
 			std::shared_ptr<prosper::Texture> prefilterMap;
 			std::shared_ptr<prosper::Texture> brdfMap;
+			float strength = 1.f;
 		};
 	};
 	class DLLCLIENT CReflectionProbeComponent final
@@ -30,9 +31,15 @@ namespace pragma
 			Complete,
 			Failed
 		};
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			BakingFailed = 1u,
+			RequiresRebuild = BakingFailed<<1u
+		};
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
-		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin);
+		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin,float &outIntensity);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
@@ -46,11 +53,13 @@ namespace pragma
 		const rendering::IBLData *GetIBLData() const;
 		Anvil::DescriptorSet *GetIBLDescriptorSet();
 
+		float GetIBLStrength() const;
+
 		UpdateStatus UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
 	private:
 		static std::shared_ptr<prosper::Image> CreateCubemapImage();
-		Material *LoadMaterial();
+		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
@@ -76,11 +85,13 @@ namespace pragma
 			void Finalize();
 		};
 		std::unique_ptr<RaytracingJobManager> m_raytracingJobManager = nullptr;
-		bool m_bBakingFailed = false;
+		StateFlags m_stateFlags = StateFlags::RequiresRebuild;
 
-		std::string m_srcEnvMap = "skies/dusk379.hdr"; // Arbitrary default sky
+		std::string m_srcEnvMap = "";
+		std::optional<float> m_strength = {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CReflectionProbeComponent::StateFlags)
 
 class EntityHandle;
 class DLLCLIENT CEnvReflectionProbe

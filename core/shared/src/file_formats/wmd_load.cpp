@@ -156,8 +156,8 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 	{
 		std::string name = ReadString();
 		auto group = mdl->AddMeshGroup(name);
-		unsigned char numMeshes = Read<unsigned char>();
-		for(unsigned char j=0;j<numMeshes;j++)
+		uint32_t numMeshes = (version < 30) ? Read<unsigned char>() : Read<uint32_t>();
+		for(uint32_t j=0;j<numMeshes;j++)
 		{
 			auto mesh = meshFactory();
 			if(version <= 0x0017)
@@ -298,7 +298,33 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 						auto &v = verts.back();
 						v.position = Read<Vector3>();
 						v.normal = Read<Vector3>();
-						v.uv = Read<Vector2>();
+						if(version < 30)
+							v.uv = Read<Vector2>();
+					}
+
+					if(version >= 30)
+					{
+						auto &uvSets = subMesh->GetUVSets();
+						auto numUvSets = Read<uint8_t>();
+						assert(numUvSets > 0); // There always has to be at least one uv set!
+						uvSets.reserve(numUvSets -1);
+						for(auto i=decltype(numUvSets){0u};i<numUvSets;++i)
+						{
+							auto name = ReadString();
+							if(name == "base")
+							{
+								for(auto j=decltype(numVerts){0u};j<numVerts;++j)
+									verts.at(j).uv = Read<Vector2>();
+							}
+							else
+							{
+								auto it = uvSets.insert(std::make_pair(name,std::vector<Vector2>{})).first;
+								auto &uvSet = it->second;
+
+								uvSet.resize(numVerts);
+								Read(uvSet.data(),uvSet.size() *sizeof(uvSet.front()));
+							}
+						}
 					}
 
 					auto numVertWeights = Read<uint64_t>();
@@ -315,8 +341,28 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 						Read(extVertWeights.data(),extVertWeights.size() *sizeof(decltype(extVertWeights.front())));
 					}
 
-					auto numTris = Read<uint32_t>();
-					tris.resize(numTris *3);
+
+					if(version >= 30)
+					{
+						auto numAlphas = Read<uint8_t>();
+						if(numAlphas > 0)
+						{
+							subMesh->SetAlphaCount(numAlphas);
+							auto &alphas = subMesh->GetAlphas();
+							alphas.resize(numVerts,Vector2{});
+							for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+							{
+								alphas.at(i).x = Read<float>();
+								if(numAlphas > 1)
+									alphas.at(i).y = Read<float>();
+							}
+						}
+					}
+
+					uint32_t numIndices = Read<uint32_t>();
+					if(version < 30)
+						numIndices *= 3;
+					tris.resize(numIndices);
 					static_assert(std::is_same_v<std::remove_reference_t<decltype(tris.front())>,uint16_t>);
 					Read(tris.data(),tris.size() *sizeof(decltype(tris.front())));
 
@@ -328,6 +374,7 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 			group->AddMesh(mesh);
 		}
 	}
+
 	if(version >= 0x0004)
 	{
 		auto &baseMeshes = mdl->GetBaseMeshes();
@@ -349,10 +396,13 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 	mdl->SetMass(mass);
 	Vector3 collisionMin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
-	unsigned char numMeshes = Read<unsigned char>();
+	uint32_t numMeshes = (version < 30) ? Read<uint8_t>() : Read<uint32_t>();
 	auto massPerMesh = mass /static_cast<float>(numMeshes); // TODO: Allow individual mass per collision mesh
-	for(unsigned char i=0;i<numMeshes;i++)
+	for(auto i=decltype(numMeshes){0u};i<numMeshes;++i)
 	{
+		auto flags = CollisionMeshLoadFlags::None;
+		if(version >= 30)
+			flags = Read<CollisionMeshLoadFlags>();
 		int boneParent = Read<int>();
 		if(boneParent == -1)
 			boneParent = 0;
@@ -381,6 +431,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 		mesh->SetOrigin(origin);
 		std::vector<Vector3> &colVerts = mesh->GetVertices();
 		mesh->SetBoneParent(boneParent);
+		mesh->SetConvex(umath::is_flag_set(flags,CollisionMeshLoadFlags::Convex));
 
 		auto numVerts = Read<unsigned long long>();
 		colVerts.resize(numVerts);
@@ -423,7 +474,11 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 		}
 		// Version 0x0014
 		if(version >= 0x0014)
-			LoadSoftBodyData(mdl,*mesh);
+		{
+			auto bSoftBodyData = (version < 30) ? Read<bool>() : umath::is_flag_set(flags,CollisionMeshLoadFlags::SoftBody);
+			if(bSoftBodyData)
+				LoadSoftBodyData(mdl,*mesh);
+		}
 		//
 		mesh->CalculateBounds();
 		mdl->AddCollisionMesh(mesh);
@@ -726,9 +781,6 @@ void FWMD::LoadLODData(unsigned short version,Model *mdl)
 
 void FWMD::LoadSoftBodyData(Model *mdl,CollisionMesh &colMesh)
 {
-	auto bSoftBodyData = Read<bool>();
-	if(bSoftBodyData == false)
-		return;
 	auto meshGroupId = Read<uint32_t>();
 	auto meshId = Read<uint32_t>();
 	auto subMeshId = Read<uint32_t>();

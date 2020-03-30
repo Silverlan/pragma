@@ -10,9 +10,10 @@ class DLLCLIENT CParticleOperatorPauseEmissionBase
 {
 public:
 	virtual void Simulate(double tDelta) override;
-	virtual void Initialize() override;
+	virtual void OnParticleSystemStarted() override;
 protected:
-	CParticleOperatorPauseEmissionBase(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPauseEmissionBase()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual pragma::CParticleSystemComponent *GetTargetParticleSystem()=0;
 private:
 	enum class State : uint32_t
@@ -32,7 +33,8 @@ class DLLCLIENT CParticleOperatorPauseEmission
 	: public CParticleOperatorPauseEmissionBase
 {
 public:
-	CParticleOperatorPauseEmission(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPauseEmission()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual pragma::CParticleSystemComponent *GetTargetParticleSystem() override;
 };
 
@@ -42,7 +44,8 @@ class DLLCLIENT CParticleOperatorPauseChildEmission
 	: public CParticleOperatorPauseEmissionBase
 {
 public:
-	CParticleOperatorPauseChildEmission(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPauseChildEmission()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual pragma::CParticleSystemComponent *GetTargetParticleSystem() override;
 private:
 	util::WeakHandle<pragma::CParticleSystemComponent> m_hChildSystem = {};

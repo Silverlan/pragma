@@ -10,7 +10,8 @@ class DLLCLIENT CParticleOperatorVelocity
 private:
 	Vector3 m_velocity = {};
 public:
-	CParticleOperatorVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorVelocity()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	float GetSpeed() const;
 };

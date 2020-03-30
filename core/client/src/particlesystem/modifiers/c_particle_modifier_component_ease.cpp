@@ -3,8 +3,10 @@
 #include <mathutil/umath.h>
 #include <pragma/math/util_easing.hpp>
 
-CParticleModifierComponentEase::CParticleModifierComponentEase(const std::unordered_map<std::string,std::string> &values)
-	: m_type(umath::EaseType::Linear)
+CParticleModifierComponentEase::CParticleModifierComponentEase()
+	: m_type{umath::EaseType::Linear}
+{}
+void CParticleModifierComponentEase::Initialize(const std::unordered_map<std::string,std::string> &values)
 {
 	auto bEaseIn = true;
 	auto bEaseOut = true;

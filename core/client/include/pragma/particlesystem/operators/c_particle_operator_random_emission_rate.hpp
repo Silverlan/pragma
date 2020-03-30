@@ -8,9 +8,10 @@ class DLLCLIENT CParticleOperatorRandomEmissionRate
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorRandomEmissionRate(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorRandomEmissionRate()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(double tDelta) override;
-	virtual void Initialize() override;
+	virtual void OnParticleSystemStarted() override;
 private:
 	float GetInterval() const;
 	void Reset();

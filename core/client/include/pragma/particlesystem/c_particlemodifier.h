@@ -7,9 +7,10 @@
 
 namespace pragma {class CParticleSystemComponent;};
 #define REGISTER_PARTICLE_MODIFIER(localname,classname,basetype) \
-	static std::unique_ptr<basetype> CreateParticle##classname##Modifier(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) \
+	static std::unique_ptr<basetype,void(*)(basetype*)> CreateParticle##classname##Modifier(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) \
 	{ \
-		auto r = std::make_unique<classname>(pSystem,values); \
+		auto r = std::unique_ptr<basetype,void(*)(basetype*)>(new classname{},[](basetype *p) {delete p;}); \
+		r->Initialize(pSystem,values); \
 		r->SetName(#localname); \
 		return r; \
 	} \
@@ -31,18 +32,19 @@ public:
 	const std::string &GetName() const;
 	void SetName(const std::string &name);
 	// Called when a new particle has been created
-	virtual void Initialize(CParticle &particle);
+	virtual void OnParticleCreated(CParticle &particle);
 	// Called when the particle system has been started
-	virtual void Initialize();
+	virtual void OnParticleSystemStarted();
 	// Called when a particle has been destroyed
-	virtual void Destroy(CParticle &particle);
+	virtual void OnParticleDestroyed(CParticle &particle);
 	// Called when the particle system has been stopped
-	virtual void Destroy();
-	pragma::CParticleSystemComponent &GetParticleSystem();
+	virtual void OnParticleSystemStopped();
+	pragma::CParticleSystemComponent &GetParticleSystem() const;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 protected:
-	virtual ~CParticleModifier();
-	pragma::CParticleSystemComponent &m_particleSystem;
-	CParticleModifier(pragma::CParticleSystemComponent &pSystem);
+	virtual ~CParticleModifier()=default;
+	mutable pragma::CParticleSystemComponent *m_particleSystem = nullptr;
+	CParticleModifier()=default;
 private:
 	std::string m_name;
 };
@@ -52,10 +54,8 @@ private:
 class DLLCLIENT CParticleInitializer
 	: public CParticleModifier
 {
-protected:
 public:
-	CParticleInitializer(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual ~CParticleInitializer() override;
+	CParticleInitializer()=default;
 };
 
 ///////////////////////
@@ -63,10 +63,8 @@ public:
 class DLLCLIENT CParticleOperator
 	: public CParticleModifier
 {
-protected:
 public:
-	CParticleOperator(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual ~CParticleOperator() override;
+	CParticleOperator()=default;
 	virtual void PreSimulate(CParticle &particle,double tDelta);
 	virtual void Simulate(CParticle &particle,double tDelta);
 	virtual void PostSimulate(CParticle &particle,double tDelta);
@@ -77,7 +75,7 @@ class DLLCLIENT CParticleOperatorLifespanDecay
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorLifespanDecay(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorLifespanDecay()=default;
 	void Simulate(CParticle &particle,double tDelta);
 };
 
@@ -93,8 +91,7 @@ class DLLCLIENT CParticleRenderer
 	: public CParticleModifier
 {
 public:
-	CParticleRenderer(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual ~CParticleRenderer() override;
+	CParticleRenderer()=default;
 	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)=0;
 	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
@@ -104,24 +101,26 @@ public:
 
 ///////////////////////
 
-DLLCLIENT void LinkParticleInitializerToFactory(std::string name,std::unique_ptr<CParticleInitializer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
-DLLCLIENT void LinkParticleOperatorToFactory(std::string name,std::unique_ptr<CParticleOperator>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
-DLLCLIENT void LinkParticleRendererToFactory(std::string name,std::unique_ptr<CParticleRenderer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
+template<class T>
+	using TParticleModifierFactory = std::function<std::unique_ptr<T,void(*)(T*)>(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)>;
+DLLCLIENT void LinkParticleInitializerToFactory(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc);
+DLLCLIENT void LinkParticleOperatorToFactory(std::string name,const TParticleModifierFactory<CParticleOperator> &fc);
+DLLCLIENT void LinkParticleRendererToFactory(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc);
 
 class DLLCLIENT __reg_particle_modifier
 {
 public:
-	__reg_particle_modifier(std::string name,std::unique_ptr<CParticleInitializer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+	__reg_particle_modifier(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc)
 	{
 		LinkParticleInitializerToFactory(name,fc);
 		delete this;
 	}
-	__reg_particle_modifier(std::string name,std::unique_ptr<CParticleOperator>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+	__reg_particle_modifier(std::string name,const TParticleModifierFactory<CParticleOperator> &fc)
 	{
 		LinkParticleOperatorToFactory(name,fc);
 		delete this;
 	}
-	__reg_particle_modifier(std::string name,std::unique_ptr<CParticleRenderer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+	__reg_particle_modifier(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc)
 	{
 		LinkParticleRendererToFactory(name,fc);
 		delete this;
@@ -133,16 +132,16 @@ public:
 class DLLCLIENT ParticleModifierMap
 {
 private:
-	std::unordered_map<std::string,std::unique_ptr<CParticleInitializer>(*)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)> m_initializers;
-	std::unordered_map<std::string,std::unique_ptr<CParticleOperator>(*)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)> m_operators;
-	std::unordered_map<std::string,std::unique_ptr<CParticleRenderer>(*)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)> m_renderers;
+	std::unordered_map<std::string,TParticleModifierFactory<CParticleInitializer>> m_initializers;
+	std::unordered_map<std::string,TParticleModifierFactory<CParticleOperator>> m_operators;
+	std::unordered_map<std::string,TParticleModifierFactory<CParticleRenderer>> m_renderers;
 public:
-	void AddInitializer(std::string name,std::unique_ptr<CParticleInitializer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
-	void AddOperator(std::string name,std::unique_ptr<CParticleOperator>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
-	void AddRenderer(std::string name,std::unique_ptr<CParticleRenderer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&));
-	std::unique_ptr<CParticleInitializer>(*FindInitializer(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&);
-	std::unique_ptr<CParticleOperator>(*FindOperator(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&);
-	std::unique_ptr<CParticleRenderer>(*FindRenderer(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&);
+	void AddInitializer(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc);
+	void AddOperator(std::string name,const TParticleModifierFactory<CParticleOperator> &fc);
+	void AddRenderer(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc);
+	TParticleModifierFactory<CParticleInitializer> FindInitializer(std::string classname);
+	TParticleModifierFactory<CParticleOperator> FindOperator(std::string classname);
+	TParticleModifierFactory<CParticleRenderer> FindRenderer(std::string classname);
 };
 #pragma warning(pop)
 

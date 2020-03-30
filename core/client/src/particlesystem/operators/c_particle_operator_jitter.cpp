@@ -11,9 +11,10 @@ extern DLLCENGINE CEngine *c_engine;
 
 REGISTER_PARTICLE_OPERATOR(jitter,CParticleOperatorJitter);
 
-CParticleOperatorJitter::CParticleOperatorJitter(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorWander(pSystem,values)
-{}
+void CParticleOperatorJitter::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+{
+	CParticleOperatorWander::Initialize(pSystem,values);
+}
 void CParticleOperatorJitter::Simulate(CParticle &particle,double tDelta)
 {
 	CParticleOperatorWorldBase::Simulate(particle,tDelta);

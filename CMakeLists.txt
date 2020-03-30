@@ -428,6 +428,7 @@ set(DEPENDENCY_ASSIMP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/assimp/
 search_lib_recursive(DEPENDENCY_ASSIMP_LIBRARY third_party_libs/assimp/code/${BINARY_PRAGMA_DIR} ${ASSIMP_LIB_NAME})
 
 set(DEPENDENCY_EIGEN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen CACHE PATH "Path to include directory.")
+set(DEPENDENCY_TINYGLTF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_OPENAL_SOFT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/openal-soft/include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_OPENAL_SOFT_LIBRARY third_party_libs/openal-soft/${BINARY_PRAGMA_DIR} OpenAL32)
@@ -522,6 +523,7 @@ if(UNIX)
 	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY)
 	resolve_links(DEPENDENCY_OPENAL_SOFT_LIBRARY)
 	resolve_links(DEPENDENCY_OPENVR_LIBRARY)
+	resolve_links(DEPENDENCY_OVR_LIBRARY)
 	resolve_links(DEPENDENCY_PCL_FEATURES_LIBRARY)
 	resolve_links(DEPENDENCY_PCL_FILTERS_LIBRARY)
 	resolve_links(DEPENDENCY_PCL_KDTREE_LIBRARY)
@@ -1111,6 +1113,7 @@ add_dependencies(pr_dmx util_dmx)
 add_dependencies(pr_video_recorder util_video_recorder)
 add_dependencies(pr_mdleditor util_archive ishared pr_source)
 add_dependencies(pr_openvr iclient)
+add_dependencies(pr_ovr iclient)
 
 if(WIN32)
 	add_dependencies(pr_mdleditor hllib)

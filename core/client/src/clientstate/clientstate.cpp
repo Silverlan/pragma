@@ -684,7 +684,8 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 
 	bool bFirstTimeError;
 	auto *mat = static_cast<CMaterialManager&>(GetMaterialManager()).Load(path,[this,onLoaded,bShaderInitialized](Material *mat) mutable {
-		if(bShaderInitialized.use_count() > 1) // Callback has been called immediately
+		// TODO: bShaderInitialized should never be null, but for some reason is!
+		if(bShaderInitialized == nullptr || bShaderInitialized.use_count() > 1) // Callback has been called immediately
 			init_shader(mat);
 		bShaderInitialized = nullptr;
 		CallCallbacks<void,CMaterial*>("OnMaterialLoaded",static_cast<CMaterial*>(mat));
@@ -726,7 +727,8 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 			if(b == true)
 				return mat;
 		}
-		c_game->RequestResource(path);
+		if(c_game)
+			c_game->RequestResource(path);
 		Con::cwar<<"WARNING: Unable to load material '"<<path<<"': File not found!"<<Con::endl;
 	}
 	else if(bShaderInitialized.use_count() > 1)

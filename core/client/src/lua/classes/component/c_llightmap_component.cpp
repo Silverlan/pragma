@@ -17,4 +17,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		hLightMapC->ConvertLightmapToBSPLuxelData();
 		}));
 	entsMod[defCLightMap];
+
+	auto defCLightMapReceiver = luabind::class_<CLightMapReceiverHandle,BaseEntityComponentHandle>("LightMapReceiverComponent");
+	entsMod[defCLightMapReceiver];
 }

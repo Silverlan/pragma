@@ -48,7 +48,12 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 			Vector3 attPos {};
 			auto attRot = uquat::identity();
 			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
-				pos = attPos +uquat::forward(attRot) *dist; 
+			{
+				physics::Transform attPose;
+				ent.GetPose(attPose);
+				attPose *= physics::Transform{attPos,attRot};
+				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;
+			}
 		}
 	}
 	return ClampViewTarget(pos);
@@ -92,7 +97,9 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		auto rot = uquat::identity();
 		mdlC->GetAttachment(m_eyeAttachmentIndex,&pos,&rot);
 
-		physics::Transform attPose {pos,rot};
+		physics::Transform attPose;
+		GetEntity().GetPose(attPose);
+		attPose *= physics::Transform{pos,rot};
 		auto localPos = attPose.GetInverse() *tmp;
 		// FIXME: clamp distance to something based on eyeball distance
 		if(localPos.z < 6)

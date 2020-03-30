@@ -18,6 +18,7 @@
 #include "pragma/lua/libraries/c_limport.hpp"
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -673,6 +674,11 @@ void CGame::RegisterLuaLibraries()
 			}
 			auto &img = Lua::Check<prosper::Image>(l,1);
 			std::string fileName = Lua::CheckString(l,2);
+			if(Lua::file::validate_write_operation(l,fileName) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
 			auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
 			return 1;
@@ -723,6 +729,17 @@ void CGame::RegisterLuaLibraries()
 			sceneInfo.hdrOutput = hdrOutput;
 			auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 			Lua::Push(l,job);
+			return 1;
+		})},
+		{"cubemap_to_equirectangular_texture",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &cubemap = Lua::Check<prosper::Texture>(l,1);
+			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
+			if(shader == nullptr)
+				return 0;
+			auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
+			if(equiRect == nullptr)
+				return 0;
+			Lua::Push(l,equiRect);
 			return 1;
 		})}
 	});

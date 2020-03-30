@@ -63,15 +63,15 @@ void CSkyboxComponent::OnRemove()
 		m_cbOnModelMaterialsLoaded.Remove();
 }
 luabind::object CSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSkyboxComponentHandleWrapper>(l);}
-bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const std::string &postfix) const
+bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &materialPath,const std::string &postfix) const
 {
 	// Check if this skybox is made of individual textures
 	// (e.g. if it came from the source engine)
-	auto matName = mat.GetName();
+	auto matName = materialPath;
 	ufile::remove_extension_from_filename(matName);
 
-	auto containerFormat = uimg::TextureInfo::ContainerFormat::KTX;
-	auto ext = "ktx";
+	auto containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+	auto ext = "dds";
 	if(FileManager::Exists("materials/" +matName +"." +ext))
 		return true; // Skybox texture already exists; There's nothing for us to do
 
@@ -103,7 +103,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 		largestWidth = umath::max(largestWidth,extents.width);
 		largestHeight = umath::max(largestHeight,extents.height);
 	}
-	Con::cout<<"Found individual skybox textures for skybox '"<<mat.GetName()<<"'! Generating cubemap texture..."<<Con::endl;
+	Con::cout<<"Found individual skybox textures for skybox '"<<materialPath<<"'! Generating cubemap texture..."<<Con::endl;
 
 	// Merge textures into cubemap image
 
@@ -216,7 +216,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 
 	// Save the cubemap image on disk; It will automatically be reloaded
 	uimg::TextureInfo imgWriteInfo {};
-	imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;//KTX;;
+	imgWriteInfo.containerFormat = containerFormat;
 	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
 	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
 	imgWriteInfo.wrapMode = uimg::TextureInfo::WrapMode::Clamp;
@@ -229,6 +229,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 		mat->GetDataBlock()->AddValue("texture","skybox",matName);
 		if(mat->Save(matName,"addons/converted/"))
 		{
+			client->LoadMaterial(matName,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;
 			return true;
 		}
@@ -241,21 +242,26 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(Material &mat,const s
 }
 void CSkyboxComponent::ValidateMaterials()
 {
+	// TODO: Move this to Source Engine porting module?
 	auto mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
-	for(auto &hMat : mdl->GetMaterials())
+	auto &textures = mdl->GetMetaInfo().textures;
+	auto &materials = mdl->GetMaterials();
+	auto &texturePaths = mdl->GetMetaInfo().texturePaths;
+	if(materials.empty() || textures.empty() || texturePaths.empty())
+		return;
+	auto &mat = materials.front();
+	auto &texture = textures.front();
+	auto &texturePath = texturePaths.front();
+	if(mat.IsValid() && mat->GetTextureInfo("skybox"))
+		return; // Skybox is valid; Skip the material
+	// Attempt to use HDR textures, otherwise LDR
+	if(CreateCubemapFromIndividualTextures(texturePath +texture +".wmi","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".wmi"))
 	{
-		if(hMat.IsValid() == false)
-			continue;
-		auto *skyboxTex = hMat->GetTextureInfo("skybox");
-		if(skyboxTex != nullptr)
-			continue; // Skybox is valid; Skip this material
-		// Attempt to use HDR textures
-		if(CreateCubemapFromIndividualTextures(*hMat.get(),"_hdr"))
-			continue;
-		// Try LDR textures instead
-		CreateCubemapFromIndividualTextures(*hMat.get());
+		mdl->LoadMaterials([](const std::string &str,bool b) -> Material* {
+			return client->LoadMaterial(str,b);
+		});
 	}
 }
 

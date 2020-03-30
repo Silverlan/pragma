@@ -8,9 +8,9 @@
 
 REGISTER_PARTICLE_OPERATOR(cylindrical_vortex,CParticleOperatorCylindricalVortex);
 
-CParticleOperatorCylindricalVortex::CParticleOperatorCylindricalVortex(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorWorldBase(pSystem,values)
+void CParticleOperatorCylindricalVortex::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorWorldBase::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;

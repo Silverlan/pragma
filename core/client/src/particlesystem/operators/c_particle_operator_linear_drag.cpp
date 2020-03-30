@@ -8,9 +8,9 @@
 
 REGISTER_PARTICLE_OPERATOR(linear_drag,CParticleOperatorLinearDrag);
 
-CParticleOperatorLinearDrag::CParticleOperatorLinearDrag(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorLinearDrag::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;

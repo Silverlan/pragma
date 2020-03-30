@@ -40,9 +40,6 @@ private:
 	std::unordered_map<std::string,DataStream> m_preTransitionWorldState {};
 	// Delta landmark offset between this level and the previous level (in case there was a level change)
 	Vector3 m_deltaTransitionLandmarkOffset {};
-
-	// Map
-	virtual void LoadMapEntities(uint32_t version,const char *map,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin={},std::vector<EntityHandle> *entities=nullptr) override;
 public:
 	enum class CPUProfilingPhase : uint32_t
 	{

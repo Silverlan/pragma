@@ -19,7 +19,7 @@ void SceneSnapshot::AddMaterial(Material &mat)
 	m_materials.push_back(mat.GetHandle());
 }
 
-void SceneSnapshot::AddModel(Model &mdl,uint32_t skin,std::vector<std::vector<Vector2>> *inLightmapUvs)
+void SceneSnapshot::AddModel(Model &mdl,uint32_t skin)
 {
 	for(auto &meshGroup : mdl.GetMeshGroups())
 	{
@@ -40,16 +40,12 @@ void SceneSnapshot::AddModel(Model &mdl,uint32_t skin,std::vector<std::vector<Ve
 					vSnapshotMesh.uv = v.uv;
 				}
 
-				if(inLightmapUvs)
+				auto *lightmapUvSet = subMesh->GetUVSet("lightmap");
+				if(lightmapUvSet)
 				{
-					auto refId = subMesh->GetReferenceId();
-					if(refId < inLightmapUvs->size())
-					{
-						auto &uvs = (*inLightmapUvs)[refId];
-						snapshotMesh->lightmapUvs.reserve(uvs.size());
-						for(auto &uv : uvs)
-							snapshotMesh->lightmapUvs.push_back(uv);
-					}
+					snapshotMesh->lightmapUvs.reserve(lightmapUvSet->size());
+					for(auto &uv : *lightmapUvSet)
+						snapshotMesh->lightmapUvs.push_back(uv);
 				}
 
 				auto &tris = subMesh->GetTriangles();

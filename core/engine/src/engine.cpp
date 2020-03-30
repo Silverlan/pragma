@@ -71,6 +71,7 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 DLLENGINE Engine *engine = NULL;
 extern DLLSERVER ServerState *server;
 
+#include <sharedutils/util_path.hpp>
 Engine::Engine(int,char*[])
 	: CVarHandler(),m_bRunning(true),m_bInitialized(false),
 	m_console(nullptr),m_consoleThread(nullptr),
@@ -220,7 +221,17 @@ void Engine::Close()
 
 void Engine::ClearCache()
 {
-	FileManager::RemoveDirectory("cache");
+	Con::cout<<"Clearing cached files..."<<Con::endl;
+	auto fRemoveDir = [](const std::string &name) {
+		Con::cout<<"Removing '"<<name<<"'..."<<Con::endl;
+		auto result = FileManager::RemoveDirectory(name.c_str());
+		if(result == false)
+			Con::cwar<<"WARNING: Unable to remove directory! Please remove it manually!"<<Con::endl;
+	};
+	fRemoveDir("cache");
+	fRemoveDir("addons/imported");
+	fRemoveDir("addons/converted");
+	Con::cout<<"Cache cleared successfully! Please restart the Engine."<<Con::endl;
 }
 
 ServerState *Engine::GetServerState() const

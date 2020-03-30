@@ -122,9 +122,10 @@ bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer
 		return false;
 	if(m_bNonIBLMode == false)
 	{
-		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(hCam->GetEntity().GetPosition());
+		float iblStrength;
+		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(hCam->GetEntity().GetPosition(),iblStrength);
 		if(ds)
-			return RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
+			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}
 	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
 	m_extRenderFlags |= RenderFlags::NoIBL;

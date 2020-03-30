@@ -268,60 +268,6 @@ bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 	return true;
 }
 
-void SGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,std::vector<EntityHandle> *entities)
-{
-	Con::cout<<"Loading entities..."<<Con::endl;
-	unsigned int numEnts = f->Read<unsigned int>();
-	std::vector<EntityHandle> ents;
-	ents.reserve(numEnts);
-	if(entities != nullptr)
-		entities->reserve(entities->size() +numEnts);
-	for(unsigned int i=0;i<numEnts;i++)
-	{
-		auto startOffset = f->Tell();
-		auto offsetToEndOfEntity = std::numeric_limits<uint64_t>::max();
-		if(version > 1)
-		{
-			offsetToEndOfEntity = startOffset +f->Read<uint64_t>();
-			if(version < 4)
-				offsetToEndOfEntity += sizeof(uint64_t);
-		}
-		f->Seek(f->Tell() +sizeof(uint64_t)); // Don't need offset to the entity meshes
-		if(version >= 9)
-			f->Seek(f->Tell() +sizeof(uint64_t)); // Don't need offset to the entity leaves
-
-		auto bClientsideEntity = false;
-		if(version >= 4)
-		{
-			enum class EntityFlags : uint64_t
-			{
-				None = 0ull,
-				ClientsideOnly = 1ull
-			};
-			auto flags = f->Read<uint64_t>();
-			bClientsideEntity = (flags &umath::to_integral(EntityFlags::ClientsideOnly)) != 0;
-		}
-		if(bClientsideEntity == true && offsetToEndOfEntity != std::numeric_limits<uint64_t>::max())
-			f->Seek(offsetToEndOfEntity);
-		else
-		{
-			std::string classname = f->ReadString();
-			CreateMapEntity(version,classname,f,bspInputData,materials,origin,offsetToEndOfEntity,ents,entities);
-		}
-		m_mapEntityIdx++;
-	}
-	for(unsigned int i=0;i<ents.size();i++)
-	{
-		if(ents[i].IsValid())
-			ents[i]->Spawn();
-	}
-	for(unsigned int i=0;i<ents.size();i++)
-	{
-		if(ents[i].IsValid() && ents[i]->IsSpawned())
-			ents[i]->OnSpawn();
-	}
-}
-
 static CVar cvSimEnabled = GetServerConVar("sv_physics_simulation_enabled");
 bool SGame::IsPhysicsSimulationEnabled() const {return cvSimEnabled->GetBool();}
 

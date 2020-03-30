@@ -1,9 +1,13 @@
 #include "stdafx_client.h"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_gradual_fade.hpp"
 
-CParticleModifierComponentGradualFade::CParticleModifierComponentGradualFade(const std::unordered_map<std::string,std::string> &values)
-	: CParticleModifierComponentEase(values),CParticleModifierComponentTime("fade",values),m_fStart("fade_start",values),m_fEnd("fade_end",values)
-{}
+void CParticleModifierComponentGradualFade::Initialize(const std::unordered_map<std::string,std::string> &values)
+{
+	CParticleModifierComponentTime::Initialize("fade",values);
+	CParticleModifierComponentEase::Initialize(values);
+	m_fStart.Initialize("fade_start",values);
+	m_fEnd.Initialize("fade_end",values);
+}
 
 float CParticleModifierComponentGradualFade::GetStartTime(CParticle &p) const
 {

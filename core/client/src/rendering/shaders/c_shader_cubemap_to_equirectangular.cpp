@@ -13,11 +13,14 @@ using namespace pragma;
 #pragma optimize("",off)
 ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::Context &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing{context,identifier,"screen/fs_cubemap_to_equirectangular"}
-{}
+{
+	SetPipelineCount(umath::to_integral(Pipeline::Count));
+}
 
 void ShaderCubemapToEquirectangular::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderCubemapToEquirectangular>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
+	auto format = (pipelineIdx == 0) ? Anvil::Format::R16G16B16A16_SFLOAT : Anvil::Format::R8G8B8A8_UNORM;
+	CreateCachedRenderPass<ShaderCubemapToEquirectangular>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{format}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Image> ShaderCubemapToEquirectangular::CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
@@ -57,6 +60,7 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width,uint32_t height)
 {
 	auto rt = CreateEquirectangularRenderTarget(width,height,prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
+	auto format = cubemap.GetImage()->GetFormat();
 
 	// Shader input
 	auto &dev = c_engine->GetDevice();
@@ -76,7 +80,10 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 		success = false;
 	else
 	{
-		if(BeginDraw(setupCmd) == true)
+		auto pipelineIdx = Pipeline::RGBA16;
+		if(format == Anvil::Format::R8G8B8A8_UNORM)
+			pipelineIdx = Pipeline::RGBA8;
+		if(BeginDraw(setupCmd,umath::to_integral(pipelineIdx)) == true)
 		{
 			success = RecordBindDescriptorSet(*(*dsg)->get_descriptor_set(0u)) &&
 				RecordBindVertexBuffers({&vertBuffer->GetAnvilBuffer(),&uvBuffer->GetAnvilBuffer()}) && RecordDraw(numVerts);

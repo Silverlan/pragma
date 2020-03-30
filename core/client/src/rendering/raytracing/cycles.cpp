@@ -20,7 +20,7 @@ struct CyclesModuleInterface
 		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&
 	) = nullptr;
 
-	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
+	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
 	void(*bake_lightmaps)(BaseEntity&,uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
 
 	bool IsValid() const {return m_bValid;}
@@ -74,8 +74,9 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlu
 	if(cyclesInterface.has_value() == false)
 		return {};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
+	auto sDeviceType = (sceneInfo.device == SceneInfo::DeviceType::GPU) ? "gpu" : "cpu";
 	cyclesInterface->bake_ao(
-		mdl,materialIndex,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,job
+		mdl,materialIndex,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,sDeviceType,job
 	);
 	if(job.IsValid() == false)
 		return {};

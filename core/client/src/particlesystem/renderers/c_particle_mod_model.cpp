@@ -24,9 +24,11 @@ decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rend
 static std::shared_ptr<prosper::Buffer> s_instanceBuffer = nullptr;
 static std::shared_ptr<prosper::Buffer> s_instanceBufferAnimated = nullptr;
 static std::shared_ptr<prosper::DescriptorSetGroup> s_instanceDescSetGroup = nullptr;
-CParticleRendererModel::CParticleRendererModel(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleRenderer(pSystem,values),m_rotationalBuffer(pSystem)
+void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleRenderer::Initialize(pSystem,values);
+	m_rotationalBuffer.Initialize(pSystem);
+
 	auto skin = 0u;
 	m_shader = c_engine->GetShader("particlemodel");
 	std::unordered_map<uint32_t,uint32_t> bodyGroups;
@@ -127,9 +129,9 @@ CParticleRendererModel::ParticleModelComponent &CParticleRendererModel::GetParti
 	return m_particleComponents.at(particleIdx);
 }
 
-void CParticleRendererModel::Initialize(CParticle &particle)
+void CParticleRendererModel::OnParticleCreated(CParticle &particle)
 {
-	CParticleRenderer::Initialize(particle);
+	CParticleRenderer::OnParticleCreated(particle);
 	if(m_animation.empty())
 		return;
 	auto &ptComponent = GetParticleComponent(particle.GetIndex());
@@ -149,10 +151,10 @@ void CParticleRendererModel::PostSimulate(double tDelta)
 	if(IsAnimated() == false)
 		return;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto numRenderParticles = m_particleSystem.GetRenderParticleCount();
+	auto numRenderParticles = GetParticleSystem().GetRenderParticleCount();
 	for(auto i=decltype(numRenderParticles){0u};i<numRenderParticles;++i)
 	{
-		auto ptIdx = m_particleSystem.TranslateBufferIndex(i);
+		auto ptIdx = GetParticleSystem().TranslateBufferIndex(i);
 		auto &ptComponent = GetParticleComponent(ptIdx);
 		auto &animComponent = ptComponent.animatedComponent;
 		if(animComponent.expired())
@@ -169,13 +171,13 @@ bool CParticleRendererModel::Update()
 		return false;
 	// Update meshes
 	auto &posCam = cam->GetEntity().GetPosition();
-	auto &renderBounds = m_particleSystem.GetRenderBounds();
+	auto &renderBounds = GetParticleSystem().GetRenderBounds();
 	Vector3 p;
 	Geometry::ClosestPointOnAABBToPoint(renderBounds.first,renderBounds.second,posCam,&p);
 	auto dist = uvec::distance(posCam,p);
 
 	auto bSuccessful = true;
-	auto mdlComponent = m_particleSystem.GetEntity().GetModelComponent();
+	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
 	if(mdlComponent.valid() && mdlComponent->HasModel())
 	{
 		auto &mdl = mdlComponent->GetModel();
@@ -192,22 +194,22 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticleModel*>(m_shader.get());
-	auto animStartBuffer = m_particleSystem.GetAnimationStartBuffer();
+	auto animStartBuffer = GetParticleSystem().GetAnimationStartBuffer();
 	if(animStartBuffer == nullptr)
 		animStartBuffer = c_engine->GetDummyBuffer();
 	if(
-		shader->BeginDraw(drawCmd,{},m_particleSystem) == false || 
-		shader->BindParticleBuffers(*m_particleSystem.GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animStartBuffer) == false || 
-		shader->BindParticleSystem(m_particleSystem) == false
+		shader->BeginDraw(drawCmd,{},GetParticleSystem()) == false || 
+		shader->BindParticleBuffers(*GetParticleSystem().GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animStartBuffer) == false || 
+		shader->BindParticleSystem(GetParticleSystem()) == false
 	)
 		return;
 	auto &descSetShadowmps = *renderer.GetCSMDescriptorSet();
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	shader->BindLights(*descSetShadowmps,descSetLightSources);
-	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
-	auto mdlComponent = m_particleSystem.GetEntity().GetModelComponent();
+	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
 	if(mdlComponent.valid() && mdlComponent->HasModel())
 	{
 		auto &mdl = *mdlComponent->GetModel();
@@ -216,9 +218,9 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 		if(texGroup == nullptr)
 			texGroup = mdl.GetTextureGroup(0);
 
-		auto *matPt = m_particleSystem.GetMaterial();
+		auto *matPt = GetParticleSystem().GetMaterial();
 		auto bAnimated = IsAnimated();
-		auto instanceCount = m_particleSystem.GetRenderParticleCount();
+		auto instanceCount = GetParticleSystem().GetRenderParticleCount();
 		auto numRenderPasses = bAnimated ? instanceCount : 1u;
 		for(auto instanceIdx=decltype(numRenderPasses){0u};instanceIdx<numRenderPasses;++instanceIdx)
 		{

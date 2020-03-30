@@ -30,6 +30,7 @@
 #include <misc/image_create_info.h>
 #include <misc/image_view_create_info.h>
 #include <util_image_buffer.hpp>
+#include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
 
 extern DLLCENGINE CEngine *c_engine;
@@ -577,8 +578,30 @@ int Lua::Vulkan::create_image(lua_State *l)
 	auto arg = 1;
 	if(Lua::IsType<uimg::ImageBuffer>(l,arg))
 	{
-		auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,arg);
-		auto img = prosper::util::create_image(c_engine->GetDevice(),imgBuffer);
+		if(Lua::IsTable(l,arg) == false)
+		{
+			auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,arg++);
+			auto img = prosper::util::create_image(c_engine->GetDevice(),imgBuffer);
+			if(img == nullptr)
+				return 0;
+			img->SetDebugName("lua_img");
+			Lua::Push(l,img);
+			return 1;
+		}
+	}
+	else if(Lua::IsTable(l,arg))
+	{
+		std::array<std::shared_ptr<uimg::ImageBuffer>,6> imgBuffers {};
+		auto t = arg;
+		for(auto i=decltype(imgBuffers.size()){0u};i<imgBuffers.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,t);
+			auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l,-1);
+			imgBuffers.at(i) = imgBuf.shared_from_this();
+			Lua::Pop(l,1);
+		}
+		auto img = prosper::util::create_cubemap(c_engine->GetDevice(),imgBuffers);
 		if(img == nullptr)
 			return 0;
 		img->SetDebugName("lua_img");
@@ -976,6 +999,61 @@ int Lua::Vulkan::create_gradient_texture(lua_State *l)
 	c_engine->AddCallback("DrawFrame",cb);
 	Lua::Push(l,texture);
 	return 1;
+}
+
+static void push_image_buffers(lua_State *l,uint32_t includeLayers,uint32_t includeMipmaps,const std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &imgBuffers)
+{
+	if(imgBuffers.empty())
+		return;
+	if(includeLayers == false)
+	{
+		auto &layer = imgBuffers.front();
+		if(layer.empty())
+			return;
+		if(includeMipmaps == false)
+		{
+			auto &imgBuf = layer.front();
+			Lua::Push(l,imgBuf);
+			return;
+		}
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(layer.size()){0u};i<layer.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::Push(l,layer.at(i));
+			Lua::SetTableValue(l,t);
+		}
+		return;
+	}
+	if(includeMipmaps == false)
+	{
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(imgBuffers.size()){0u};i<imgBuffers.size();++i)
+		{
+			auto &layer = imgBuffers.at(i);
+			if(layer.empty())
+				return;
+			Lua::PushInt(l,i +1);
+			Lua::Push(l,layer.at(i));
+			Lua::SetTableValue(l,t);
+		}
+		return;
+	}
+	auto t = Lua::CreateTable(l);
+	for(auto i=decltype(imgBuffers.size()){0u};i<imgBuffers.size();++i)
+	{
+		auto &layer = imgBuffers.at(i);
+		if(layer.empty())
+			return;
+		Lua::PushInt(l,i +1);
+		auto tMipmaps = Lua::CreateTable(l);
+		for(auto j=decltype(layer.size()){0u};j<layer.size();++j)
+		{
+			Lua::PushInt(l,j +1);
+			Lua::Push(l,layer.at(i));
+		}
+		Lua::SetTableValue(l,t);
+	}
 }
 
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
@@ -1972,6 +2050,20 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	defVkImage.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Image>(l,img,&Lua::Check<Lua::Vulkan::Image>);
+	}));
+	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,uint32_t includeLayers,uint32_t includeMipmaps,uint32_t targetFormat) {
+		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		auto result = util::to_image_buffer(img,static_cast<uimg::ImageBuffer::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
+		if(result == false || imgBuffers.empty())
+			return;
+		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
+	}));
+	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,uint32_t includeLayers,uint32_t includeMipmaps) {
+		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
+		auto result = util::to_image_buffer(img,imgBuffers,includeLayers,includeMipmaps);
+		if(result == false || imgBuffers.empty())
+			return;
+		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
 	}));
 	vulkanMod[defVkImage];
 

@@ -469,7 +469,7 @@ void CParticleSystemComponent::InitializeBuffers()
 	}
 	if(s_animBuffer == nullptr)
 	{
-		auto instanceCount = 64;
+		auto instanceCount = 4'096u;
 		auto maxInstanceCount = instanceCount *5u;
 		auto instanceSize = sizeof(AnimationData);
 		prosper::util::BufferCreateInfo createInfo {};
@@ -538,13 +538,15 @@ void CParticleSystemComponent::AddInitializer(std::string identifier,const std::
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
-	auto *factory = map->FindInitializer(identifier);
+	auto factory = map->FindInitializer(identifier);
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle initializer '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return;
 	}
 	auto initializer = factory(*this,values);
+	if(initializer == nullptr)
+		return;
 	if(IsRecordingKeyValues())
 		initializer->RecordKeyValues(values);
 	m_initializers.push_back(std::move(initializer));
@@ -553,13 +555,15 @@ void CParticleSystemComponent::AddOperator(std::string identifier,const std::uno
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
-	auto *factory = map->FindOperator(identifier);
+	auto factory = map->FindOperator(identifier);
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle operator '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return;
 	}
 	auto op = factory(*this,values);
+	if(op == nullptr)
+		return;
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_operators.push_back(std::move(op));
@@ -568,13 +572,15 @@ void CParticleSystemComponent::AddRenderer(std::string identifier,const std::uno
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
-	auto *factory = map->FindRenderer(identifier);
+	auto factory = map->FindRenderer(identifier);
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle renderer '"<<identifier<<"'! Ignoring..."<<Con::endl;
 		return;
 	}
 	auto op = factory(*this,values);
+	if(op == nullptr)
+		return;
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_renderers.push_back(std::move(op));
@@ -691,11 +697,11 @@ void CParticleSystemComponent::Start()
 
 	//
 	for(auto &init : m_initializers)
-		init->Initialize();
+		init->OnParticleSystemStarted();
 	for(auto &op : m_operators)
-		op->Initialize(); // Operators have to be initialized before buffers are initialized
+		op->OnParticleSystemStarted(); // Operators have to be initialized before buffers are initialized
 	for(auto &r : m_renderers)
-		r->Initialize();
+		r->OnParticleSystemStarted();
 	//
 
 	if(m_maxParticles > 0)
@@ -778,11 +784,11 @@ void CParticleSystemComponent::Stop()
 		return;
 	m_state = State::Complete;
 	for(auto &init : m_initializers)
-		init->Destroy();
+		init->OnParticleSystemStopped();
 	for(auto &op : m_operators)
-		op->Destroy();
+		op->OnParticleSystemStopped();
 	for(auto &r : m_renderers)
-		r->Destroy();
+		r->OnParticleSystemStopped();
 	m_particles.clear();
 	m_sortedParticleIndices.clear();
 	m_instanceData.clear();
@@ -1040,11 +1046,11 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 		}
 	}
 	for(auto &init : m_initializers)
-		init->Initialize(particle);
+		init->OnParticleCreated(particle);
 	for(auto &op : m_operators)
-		op->Initialize(particle);
+		op->OnParticleCreated(particle);
 	for(auto &r : m_renderers)
-		r->Initialize(particle);
+		r->OnParticleCreated(particle);
 }
 
 uint32_t CParticleSystemComponent::CreateParticles(uint32_t count)
@@ -1129,6 +1135,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto bMoving = (umath::is_flag_set(m_flags,Flags::MoveWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::PositionChanged))
 		|| (umath::is_flag_set(m_flags,Flags::RotateWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags,Flags::HasMovingParticles,bMoving);
+	physics::Transform pose;
+	GetEntity().GetPose(pose);
 	auto &posCam = cam->GetEntity().GetPosition();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{
@@ -1160,9 +1168,12 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			auto &vel = p.GetVelocity();
 			if(uvec::length(vel) > 0.f)
 			{
-				pos += vel *static_cast<float>(tDelta);
+				auto velEffective = vel;
+				if(umath::is_flag_set(m_flags,Flags::RotateWithEmitter))
+					uvec::rotate(&velEffective,pose.GetRotation());
+				pos += velEffective *static_cast<float>(tDelta);
 				p.SetPosition(pos);
-				if(umath::is_flag_set(m_flags,Flags::HasMovingParticles) == false && uvec::length_sqr(vel) > 0.f)
+				if(umath::is_flag_set(m_flags,Flags::HasMovingParticles) == false && uvec::length_sqr(velEffective) > 0.f)
 					umath::set_flag(m_flags,Flags::HasMovingParticles,true);
 			}
 			p.SetCameraDistance(glm::length2(pos -posCam));
@@ -1381,10 +1392,10 @@ void CParticleSystemComponent::SortParticles()
 void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 {
 	for(auto &init : m_initializers)
-		init->Destroy(particle);
+		init->OnParticleDestroyed(particle);
 	for(auto &op : m_operators)
-		op->Destroy(particle);
+		op->OnParticleDestroyed(particle);
 	for(auto &r : m_renderers)
-		r->Destroy(particle);
+		r->OnParticleDestroyed(particle);
 }
 #pragma optimize("",on)

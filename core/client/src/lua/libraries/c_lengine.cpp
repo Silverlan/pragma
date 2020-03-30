@@ -125,6 +125,16 @@ int Lua::engine::precache_model(lua_State *l)
 	return 0;
 }
 
+int Lua::engine::load_texture(lua_State *l)
+{
+	std::string tex = Lua::CheckString(l,1);
+	TextureManager::LoadInfo loadInfo {};
+	if(Lua::IsSet(l,2))
+		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
+	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ReloadTexture(tex,loadInfo);
+	return 0;
+}
+
 int Lua::engine::load_material(lua_State *l)
 {
 	std::string mat = Lua::CheckString(l,1);

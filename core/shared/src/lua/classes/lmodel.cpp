@@ -369,6 +369,28 @@ void Lua::Model::register_class(
 	classDef.def("GetPhonemeMap",&Lua::Model::GetPhonemeMap);
 	classDef.def("SetPhonemeMap",&Lua::Model::SetPhonemeMap);
 
+	classDef.def("SelectWeightedAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t activity) {
+		Lua::PushInt(l,mdl.SelectWeightedAnimation(static_cast<Activity>(activity)));
+	}));
+	classDef.def("SelectWeightedAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t,int32_t)>([](lua_State *l,::Model &mdl,uint32_t activity,int32_t animIgnore) {
+		Lua::PushInt(l,mdl.SelectWeightedAnimation(static_cast<Activity>(activity),animIgnore));
+	}));
+	classDef.def("SelectFirstAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t activity) {
+		Lua::PushInt(l,mdl.SelectFirstAnimation(static_cast<Activity>(activity)));
+	}));
+	classDef.def("GetAnimationActivityWeight",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t anim) {
+		Lua::PushInt(l,mdl.GetAnimationActivityWeight(anim));
+	}));
+	classDef.def("GetAnimationActivity",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t anim) {
+		Lua::PushInt(l,umath::to_integral(mdl.GetAnimationActivity(anim)));
+	}));
+	classDef.def("GetAnimationDuration",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t anim) {
+		Lua::PushNumber(l,mdl.GetAnimationDuration(anim));
+	}));
+	classDef.def("HasVertexWeights",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		Lua::PushBool(l,mdl.HasVertexWeights());
+	}));
+
 	classDef.add_static_constant("FLAG_NONE",umath::to_integral(::Model::Flags::None));
 	classDef.add_static_constant("FLAG_BIT_STATIC",umath::to_integral(::Model::Flags::Static));
 	classDef.add_static_constant("FLAG_BIT_INANIMATE",umath::to_integral(::Model::Flags::Inanimate));

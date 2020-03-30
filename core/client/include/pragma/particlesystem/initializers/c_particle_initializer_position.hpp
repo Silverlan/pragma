@@ -9,8 +9,9 @@ class DLLCLIENT CParticleInitializerPositionRandomBox
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerPositionRandomBox(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerPositionRandomBox()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	Vector3 m_min = {};
 	Vector3 m_max = {};
@@ -24,12 +25,13 @@ class DLLCLIENT CParticleInitializerPositionRandomSphere
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerPositionRandomSphere(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerPositionRandomSphere()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	float m_distMin = 0.f;
 	float m_distMax = 0.f;
-	Vector3 distBias = {};
+	Vector3 distBias = {1.f,1.f,1.f};
 	Vector3 m_origin = {};
 };
 
@@ -39,8 +41,9 @@ class DLLCLIENT CParticleInitializerPositionRandomCircle
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerPositionRandomCircle(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerPositionRandomCircle()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	Vector3 m_vAxis = Vector3(0.f,1.f,0.f);
 	float m_fMinDist = 0.f;

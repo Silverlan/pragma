@@ -1,8 +1,64 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/lua/classes/c_lparticle_modifiers.hpp"
+#include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+
+extern DLLCLIENT CGame *c_game;
+
+#pragma optimize("",off)
+static void register_particle_modifier(lua_State *l,pragma::LuaParticleModifierManager::Type type,const std::string &name,luabind::object oClass)
+{
+	Lua::CheckUserData(l,2);
+	auto &particleModMan = c_game->GetLuaParticleModifierManager();
+	if(particleModMan.RegisterModifier(type,name,oClass) == false)
+		return;
+
+	auto *map = GetParticleModifierMap();
+	if(map == nullptr)
+		return;
+	switch(type)
+	{
+	case pragma::LuaParticleModifierManager::Type::Initializer:
+		map->AddInitializer(name,[name](pragma::CParticleSystemComponent &psc,const std::unordered_map<std::string,std::string> &keyValues) -> std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)> {
+			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto *modifier = dynamic_cast<CParticleInitializer*>(particleModMan.CreateModifier(name));
+			if(modifier == nullptr)
+				return std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>(nullptr,[](CParticleInitializer *p) {});
+			modifier->Initialize(psc,keyValues);
+			modifier->SetName(name);
+			return std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>(modifier,[](CParticleInitializer *p) {}); // Externally owned (by Lua state), so no delete
+		});
+		break;
+	case pragma::LuaParticleModifierManager::Type::Operator:
+		map->AddOperator(name,[name](pragma::CParticleSystemComponent &psc,const std::unordered_map<std::string,std::string> &keyValues) -> std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)> {
+			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto *modifier = dynamic_cast<CParticleOperator*>(particleModMan.CreateModifier(name));
+			if(modifier == nullptr)
+				return std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>(nullptr,[](CParticleOperator *p) {});
+			modifier->Initialize(psc,keyValues);
+			modifier->SetName(name);
+			return std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>(modifier,[](CParticleOperator *p) {}); // Externally owned (by Lua state), so no delete
+		});
+		break;
+	case pragma::LuaParticleModifierManager::Type::Renderer:
+		map->AddRenderer(name,[name](pragma::CParticleSystemComponent &psc,const std::unordered_map<std::string,std::string> &keyValues) -> std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)> {
+			auto &particleModMan = c_game->GetLuaParticleModifierManager();
+			auto *modifier = dynamic_cast<CParticleRenderer*>(particleModMan.CreateModifier(name));
+			if(modifier == nullptr)
+				return std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>(nullptr,[](CParticleRenderer *p) {});
+			modifier->Initialize(psc,keyValues);
+			modifier->SetName(name);
+			return std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>(modifier,[](CParticleRenderer *p) {}); // Externally owned (by Lua state), so no delete
+		});
+		break;
+	case pragma::LuaParticleModifierManager::Type::Emitter:
+		// TODO
+		break;
+	}
+}
 
 void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 {
@@ -344,5 +400,20 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT",umath::to_integral(pragma::AlphaMode::Translucent));
 	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED",umath::to_integral(pragma::AlphaMode::Premultiplied));
 	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT",umath::to_integral(pragma::AlphaMode::Count));
+	ParticleSystemModifier::register_particle_class(defCParticleSystem);
+	ParticleSystemModifier::register_modifier_class(defCParticleSystem);
+	defCParticleSystem.scope[luabind::def("register_initializer",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
+		register_particle_modifier(l,pragma::LuaParticleModifierManager::Type::Initializer,name,oClass);
+	}))];
+	defCParticleSystem.scope[luabind::def("register_operator",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
+		register_particle_modifier(l,pragma::LuaParticleModifierManager::Type::Operator,name,oClass);
+	}))];
+	defCParticleSystem.scope[luabind::def("register_renderer",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
+		register_particle_modifier(l,pragma::LuaParticleModifierManager::Type::Renderer,name,oClass);
+	}))];
+	defCParticleSystem.scope[luabind::def("register_emitter",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
+		register_particle_modifier(l,pragma::LuaParticleModifierManager::Type::Emitter,name,oClass);
+	}))];
 	entsMod[defCParticleSystem];
 }
+#pragma optimize("",on)

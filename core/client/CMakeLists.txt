@@ -50,6 +50,7 @@ add_include_dir(freetype)
 add_include_dir(pr_steamworks)
 add_include_dir(steam_audio)
 add_include_dir(anvil_build)
+add_include_dir(tinygltf)
 
 add_def(DLLCLIENT_EX)
 add_def(WMS_STATIC)

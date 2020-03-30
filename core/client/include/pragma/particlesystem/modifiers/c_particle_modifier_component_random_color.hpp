@@ -15,6 +15,7 @@ public:
 		Alpha = Blue<<1,
 		RGBA = Red | Green | Blue | Alpha
 	};
+	CParticleModifierComponentRandomColor()=default;
 	CParticleModifierComponentRandomColor(const std::string &suffix,const std::unordered_map<std::string,std::string> &values);
 	void Initialize(const std::string &suffix,const std::unordered_map<std::string,std::string> &values);
 	Color GetValue(CParticle &p) const;

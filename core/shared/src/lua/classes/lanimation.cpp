@@ -368,7 +368,7 @@ void Lua::Animation::SetBoneList(lua_State *l,::Animation &anim,luabind::object 
 	}
 	anim.SetBoneList(list);
 }
-void Lua::Animation::AddBoneId(lua_State *l,::Animation &anim,uint32_t boneId) {anim.AddBoneId(boneId);}
+void Lua::Animation::AddBoneId(lua_State *l,::Animation &anim,uint32_t boneId) {Lua::PushInt(l,anim.AddBoneId(boneId));}
 void Lua::Animation::SetFadeInTime(lua_State *l,::Animation &anim,float t) {anim.SetFadeInTime(t);}
 void Lua::Animation::SetFadeOutTime(lua_State *l,::Animation &anim,float t) {anim.SetFadeOutTime(t);}
 void Lua::Animation::SetBoneWeight(lua_State *l,::Animation &anim,uint32_t boneId,float t) {anim.SetBoneWeight(boneId,t);}

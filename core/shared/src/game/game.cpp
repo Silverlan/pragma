@@ -37,7 +37,9 @@
 #include "pragma/lua/class_manager.hpp"
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/entities/entity_iterator.hpp"
-#include <util_bsp.hpp>
+#include "pragma/asset_types/world.hpp"
+#include "pragma/model/model.h"
+#include "pragma/physics/collisionmesh.h"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 
@@ -335,6 +337,17 @@ void Game::OnRemove()
 	m_componentManager = nullptr;
 	ClearTimers(); // Timers have to be removed before the lua state is closed
 	m_cvarCallbacks.clear();
+
+	// We have to clear all of the collision mesh shapes, because they may
+	// contain luabind objects, which have to be destroyed before we destroy the
+	// lua state.
+	// TODO: Implement this properly!
+	for(auto &pair : GetModels())
+	{
+		for(auto &colMesh : pair.second->GetCollisionMeshes())
+			colMesh->ClearShape();
+	}
+
 	auto *state = m_lua->GetState();
 	auto identifier = m_lua->GetIdentifier();
 	GetNetworkState()->ClearConsoleCommandOverrides();
@@ -773,7 +786,6 @@ void Game::SetGameFlags(GameFlags flags) {m_flags = flags;}
 Game::GameFlags Game::GetGameFlags() const {return m_flags;}
 
 bool Game::IsMapInitialized() {return (m_flags &GameFlags::MapInitialized) != GameFlags::None;}
-void Game::LoadMapMaterials(uint32_t,VFilePtr f,std::vector<Material*> &materials) {pragma::level::load_map_materials(GetNetworkState(),f,materials);}
 
 const pragma::NetEventManager &Game::GetEntityNetEventManager() const {return const_cast<Game*>(this)->GetEntityNetEventManager();}
 pragma::NetEventManager &Game::GetEntityNetEventManager() {return m_entNetEventManager;}
@@ -794,218 +806,13 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	m_mapInfo.name = map;
 	m_mapInfo.fileName = smap;
 	auto f = FileManager::OpenFile(smap.c_str(),"rb");
-	if(f != nullptr)
-	{
-		char header[3];
-		f->Read(&header[0],sizeof(char) *3);
-		if(header[0] != 'W' || header[1] != 'L' || header[2] != 'D')
-		{
-			Con::cwar<<"WARNING: Invalid file format for map '"<<map<<"'!"<<Con::endl;
-			return false;
-		}
-		unsigned int version = f->Read<unsigned int>();
-		UNUSED(version);
-
-		if(version > WLD_VERSION)
-		{
-			Con::cwar<<"WARNING: Unsupported map version '"<<WLD_VERSION<<"'!"<<Con::endl;
-			return false;
-		}
-
-		if(version > 1)
-		{
-			auto offsetMaterial = f->Read<uint64_t>();
-			UNUSED(offsetMaterial);
-			if(version < 6)
-			{
-				auto offsetWorldGeometry = f->Read<uint64_t>();
-				UNUSED(offsetWorldGeometry);
-			}
-			auto offsetEntities = f->Read<uint64_t>();
-			UNUSED(offsetEntities);
-
-			if(version >= 8)
-			{
-				auto offsetBSPTree = f->Read<uint64_t>();
-				UNUSED(offsetBSPTree);
-				
-				auto offsetLightMapData = f->Read<uint64_t>();
-				UNUSED(offsetLightMapData);
-
-				auto offsetFaceVertexData = f->Read<uint64_t>();
-				UNUSED(offsetFaceVertexData);
-			}
-		}
-
-		std::vector<Material*> materials;
-		LoadMapMaterials(version,f,materials);
-		if(version < 6)
-		{
-			auto *entWorld = CreateEntity("world");
-			pragma::level::load_map_brushes(
-				*this,version,f,entWorld,materials,GetSurfaceMaterials(),
-				origin
-			);
-			if(entWorld != nullptr)
-				entWorld->Spawn();
-		}
-
-		std::string soundScript = "soundscapes_";
-		soundScript += map;
-		soundScript += ".txt";
-		LoadSoundScripts(soundScript.c_str());
-
-		pragma::level::BSPInputData bspInputData {};
-		if(version >= 8)
-		{
-			// Read BSP tree
-			auto bHasBSPTree = f->Read<bool>();
-			if(bHasBSPTree)
-			{
-				std::function<void(util::BSPTree::Node&)> fReadNode = nullptr;
-				fReadNode = [&fReadNode,&f,&bspInputData](util::BSPTree::Node &node) {
-					node.leaf = f->Read<bool>();
-					node.min = f->Read<Vector3>();
-					node.max = f->Read<Vector3>();
-					node.firstFace = f->Read<int32_t>();
-					node.numFaces = f->Read<int32_t>();
-					node.originalNodeIndex = f->Read<int32_t>();
-					if(node.leaf)
-					{
-						node.cluster = f->Read<uint16_t>();
-						node.minVisible = f->Read<Vector3>();
-						node.maxVisible = f->Read<Vector3>();
-						return;
-					}
-					auto normal = f->Read<Vector3>();
-					auto d = f->Read<float>();
-					node.plane = Plane{normal,static_cast<double>(d)};
-					node.children.at(0) = bspInputData.bspTree.CreateNode();
-					node.children.at(1) = bspInputData.bspTree.CreateNode();
-					fReadNode(*node.children.at(0));
-					fReadNode(*node.children.at(1));
-				};
-				fReadNode(bspInputData.bspTree.GetRootNode());
-
-				auto numClusters = f->Read<uint64_t>();
-				auto numCompressedClusters = umath::pow2(numClusters);
-				numCompressedClusters = numCompressedClusters /8u +((numCompressedClusters %8u) > 0u ? 1u : 0u);
-				auto &compressedClusterData = bspInputData.bspTree.GetClusterVisibility();
-				compressedClusterData.resize(numCompressedClusters);
-				f->Read(compressedClusterData.data(),compressedClusterData.size() *sizeof(compressedClusterData.front()));
-				bspInputData.bspTree.SetClusterCount(numClusters);
-			}
-
-			// Light map data
-			auto bLightMap = f->Read<bool>(); // -> Does this level have a light map?
-			if(version >= 10)
-				bspInputData.lightMapInfo.atlasSize = f->Read<Vector2i>();
-			else
-			{
-				auto sz = f->Read<uint32_t>();
-				bspInputData.lightMapInfo.atlasSize = {sz,sz};
-			}
-			auto borderSize = bspInputData.lightMapInfo.borderSize = f->Read<uint8_t>();
-
-			// Light map atlas
-			auto numRects = f->Read<uint32_t>();
-			auto &rects = bspInputData.lightMapInfo.lightmapAtlas;
-			rects.resize(numRects);
-			f->Read(rects.data(),rects.size() *sizeof(rects.front()));
-
-			// Luxel data
-			auto luxelDataSize = f->Read<uint64_t>();
-			auto &luxelData = bspInputData.lightMapInfo.luxelData;
-			luxelData.resize(luxelDataSize);
-			f->Read(luxelData.data(),luxelData.size() *sizeof(luxelData.front()));
-
-			// Face data
-			auto numSurfEdges = f->Read<uint32_t>();
-			auto &surfEdges = bspInputData.surfEdges;
-			surfEdges.resize(numSurfEdges);
-			f->Read(surfEdges.data(),surfEdges.size() *sizeof(surfEdges.front()));
-
-			auto numEdges = f->Read<uint32_t>();
-			auto &edges = bspInputData.edges;
-			edges.resize(numEdges);
-			f->Read(edges.data(),edges.size() *sizeof(edges.front()));
-
-			auto numVerts = f->Read<uint32_t>();
-			auto &verts = bspInputData.verts;
-			verts.resize(numVerts);
-			f->Read(verts.data(),verts.size() *sizeof(verts.front()));
-
-			auto numTexInfo = f->Read<uint32_t>();
-			auto &texInfo = bspInputData.texInfo;
-			texInfo.resize(numTexInfo);
-			f->Read(texInfo.data(),texInfo.size() *sizeof(texInfo.front()));
-
-			auto numFaces = f->Read<uint64_t>();
-			auto &faces = bspInputData.lightMapInfo.faceInfos;
-			faces.resize(numFaces);
-			auto rectIdx = 0u;
-			for(auto i=decltype(numFaces){0ull};i<numFaces;++i)
-			{
-				auto &face = faces.at(i);
-				face.flags = f->Read<util::bsp::FaceLightMapInfo::Flags>();
-				face.faceIndex = i;
-				if((face.flags &util::bsp::FaceLightMapInfo::Flags::Valid) == util::bsp::FaceLightMapInfo::Flags::None)
-					continue;
-				face.lightMapSize.at(0) = f->Read<int32_t>();
-				face.lightMapSize.at(1) = f->Read<int32_t>();
-				face.lightMapMins.at(0) = f->Read<int32_t>();
-				face.lightMapMins.at(1) = f->Read<int32_t>();
-				face.luxelDataOffset = f->Read<uint32_t>();
-				face.texInfoIndex = f->Read<int16_t>();
-				face.dispInfoIndex = f->Read<int16_t>();
-				face.firstEdge = f->Read<uint32_t>();
-				face.numEdges = f->Read<uint16_t>();
-				face.planeNormal = f->Read<Vector3>();
-
-				auto &rect = rects.at(rectIdx++);
-				face.x = rect.x;
-				face.y = rect.y;
-				if(face.lightMapSize.at(0) +borderSize *2u != rect.w)
-					throw std::runtime_error("Illegal light map orientation!"); // This should never happen (The bounds should already be rotated)
-				face.lightMapSize.at(0) = rect.w -borderSize *2u;
-				face.lightMapSize.at(1) = rect.h -borderSize *2u;
-			}
-
-			auto numLeafFaces = f->Read<uint64_t>();
-			auto &leafFaces = bspInputData.leafFaces;
-			leafFaces.resize(numLeafFaces);
-			f->Read(leafFaces.data(),leafFaces.size() *sizeof(leafFaces.front()));
-
-			auto numDispInfo = f->Read<uint32_t>();
-			auto &dispInfo = bspInputData.displacementInfo;
-			dispInfo.resize(numDispInfo);
-			for(auto &disp : dispInfo)
-			{
-				disp.power = f->Read<int32_t>();
-				disp.dispVertStart = f->Read<int32_t>();
-				disp.lightmapSamplePositionStart = f->Read<int32_t>();
-				disp.startPosition = f->Read<Vector3>();
-				auto numVerts = f->Read<uint32_t>();
-				disp.vertices.resize(numVerts);
-				f->Read(disp.vertices.data(),disp.vertices.size() *sizeof(disp.vertices.front()));
-			}
-
-			auto szSamplePositions = f->Read<uint64_t>();
-			auto &dispLightmapSamplePositions = bspInputData.lightMapInfo.dispLightmapSamplePositions;
-			dispLightmapSamplePositions.resize(szSamplePositions);
-			f->Read(dispLightmapSamplePositions.data(),dispLightmapSamplePositions.size() *sizeof(dispLightmapSamplePositions.front()));
-		}
-
-		LoadMapEntities(version,map.c_str(),f,bspInputData,materials,origin,entities);
-		Con::cout<<"Successfully loaded map '"<<map<<"'!"<<Con::endl;
-	}
-	else
+	if(f == nullptr)
 	{
 		static auto bPort = true;
 		if(bPort == true)
 		{
 			Con::cwar<<"WARNING: Map '"<<map<<"' not found."<<Con::endl;
-			if(util::port_hl2_map(GetNetworkState(),smap) == false)
+			if(util::port_source2_map(GetNetworkState(),smap) == false && util::port_hl2_map(GetNetworkState(),smap) == false)
 				Con::cwar<<" Loading empty map..."<<Con::endl;
 			else
 			{
@@ -1017,9 +824,59 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 				return r;
 			}
 		}
+		m_flags |= GameFlags::MapInitialized;
+		return false;
 	}
+	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
+	std::string errMsg;
+	auto success = worldData->Read(f,pragma::asset::EntityData::Flags::None,&errMsg);
+
+	if(success)
+	{
+		// Load sound scripts
+		std::string soundScript = "soundscapes_";
+		soundScript += map;
+		soundScript += ".txt";
+		LoadSoundScripts(soundScript.c_str());
+
+		// Load entities
+		Con::cout<<"Loading entities..."<<Con::endl;
+
+		std::vector<EntityHandle> ents {};
+		InitializeMapEntities(*worldData,ents);
+		for(auto &hEnt : ents)
+		{
+			if(hEnt.IsValid() == false)
+				continue;
+			hEnt->Spawn();
+		}
+		for(auto &hEnt : ents)
+		{
+			if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
+				continue;
+			hEnt->OnSpawn();
+		}
+		InitializeWorldData(*worldData);
+	}
+
 	m_flags |= GameFlags::MapInitialized;
-	return true;
+	if(success == false)
+		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<errMsg<<Con::endl;
+	return success;
+}
+
+void Game::InitializeWorldData(pragma::asset::WorldData &worldData) {}
+void Game::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector<EntityHandle> &outEnt)
+{
+	auto &entityData = worldData.GetEntities();
+	outEnt.reserve(entityData.size());
+	for(auto &entData : entityData)
+	{
+		auto *ent = CreateMapEntity(*entData);
+		if(ent == nullptr)
+			continue;
+		outEnt.push_back(ent->GetHandle());
+	}
 }
 
 void Game::OnGameReady()
@@ -1031,9 +888,6 @@ void Game::OnGameReady()
 }
 
 void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : util::WeakHandle<pragma::BaseWorldComponent>{};}
-
-uint32_t Game::GetEntityMapIndexStart() const {return m_mapEntityIdx;}
-void Game::SetEntityMapIndexStart(uint32_t start) {m_mapEntityIdx = start;}
 
 std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() {return m_awakePhysicsEntities;}
 

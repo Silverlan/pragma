@@ -146,14 +146,19 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 
 bool NetworkState::PortMaterial(const std::string &path,const std::function<Material*(const std::string&,bool)> &fLoadMaterial)
 {
-	auto vmtPath = path;
-	ufile::remove_extension_from_filename(vmtPath);
-	vmtPath += ".vmt";
-	if(util::port_file(this,"materials\\" +vmtPath) == false)
-		return false;
+	auto pathWithoutExt = path;
+	ufile::remove_extension_from_filename(pathWithoutExt);
+
+	auto matPath = pathWithoutExt +".vmat_c";
+	if(util::port_file(this,"materials\\" +matPath) == false)
+	{
+		matPath = pathWithoutExt +".vmt";
+		if(util::port_file(this,"materials\\" +matPath) == false)
+			return false;
+	}
 	if(fLoadMaterial == nullptr)
 		return true;
-	auto *mat = fLoadMaterial(vmtPath,true);
+	auto *mat = fLoadMaterial(matPath,true);
 	if(mat)
 	{
 		// Port textures as well

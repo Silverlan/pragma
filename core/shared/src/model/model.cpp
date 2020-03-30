@@ -413,7 +413,7 @@ uint32_t Model::AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> 
 	AddTexturePath(ufile::get_path_from_filename(texName));
 	texName = ufile::get_file_from_filename(texName);
 	std::string ext;
-	if(ufile::get_extension(texName,&ext) == true && (ustring::compare(ext,"wmi",false) || ustring::compare(ext,"vmt",false)))
+	if(ufile::get_extension(texName,&ext) == true && (ustring::compare(ext,"wmi",false) || ustring::compare(ext,"vmt",false) || ustring::compare(ext,"vmat_c",false)))
 		ufile::remove_extension_from_filename(texName);
 	auto r = AddTexture(texName,mat);
 	if(skin < m_textureGroups.size())
@@ -486,7 +486,7 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(FileManager::Exists("materials\\" +texPath +".wmi") || FileManager::Exists("materials\\" +texPath +".vmt"))
+		if(FileManager::Exists("materials\\" +texPath +".wmi") || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
 		{
 			matPath = texPath;
 			return true;
@@ -630,6 +630,7 @@ void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std
 				AddLoadingMaterial(*mat,i);
 		}
 	}
+	OnMaterialLoaded();
 }
 
 void Model::LoadMaterials(const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)

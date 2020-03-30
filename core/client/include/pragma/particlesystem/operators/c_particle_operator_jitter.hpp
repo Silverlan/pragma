@@ -7,7 +7,8 @@ class DLLCLIENT CParticleOperatorJitter
 	: public CParticleOperatorWander
 {
 public:
-	CParticleOperatorJitter(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorJitter()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 };
 

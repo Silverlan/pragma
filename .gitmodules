@@ -196,3 +196,6 @@ url=https://github.com/Silverlan/Anvil
 [submodule "modules/pr_mmd"]
 	path = modules/pr_mmd
 	url = https://github.com/Silverlan/pr_mmd.git
+[submodule "third_party_libs/tinygltf"]
+	path = third_party_libs/tinygltf
+	url = https://github.com/syoyo/tinygltf.git

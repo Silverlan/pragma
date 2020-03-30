@@ -7,7 +7,8 @@ class DLLCLIENT CParticleOperatorGravity
 	: public CParticleOperatorWorldBase
 {
 public:
-	CParticleOperatorGravity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorGravity()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
 protected:

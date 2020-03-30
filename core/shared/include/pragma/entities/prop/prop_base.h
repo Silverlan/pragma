@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/physics/physicstypes.h"
 #include <pragma/physics/movetypes.h>
 #include <memory>
 
@@ -26,9 +27,8 @@ namespace pragma
 		void Setup(PHYSICSTYPE physType,MOVETYPE mvType);
 		virtual void OnEntitySpawn() override;
 	protected:
+		void InitializePhysics();
 		float m_kvMaxVisibleDist = 0.f;
-		std::string m_kvMdl;
-		std::unique_ptr<uint32_t> m_kvSkin = nullptr;
 		float m_kvScale;
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
 		BasePropComponent(BaseEntity &ent);

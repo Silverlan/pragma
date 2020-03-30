@@ -4,6 +4,7 @@
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
+#include <sharedutils/util_path.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -126,26 +127,33 @@ bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
 	return ptrLoadParticle(*nw,path);
 }
 
-static void init_custom_mount_directories(NetworkState &nw)
+void util::impl::init_custom_mount_directories(NetworkState &nw)
 {
 	static auto g_customMountDirsInitialized = false;
 	if(g_customMountDirsInitialized == false)
 	{
 		g_customMountDirsInitialized = true;
 		static auto *ptrAddGameMountPath = reinterpret_cast<void(*)(const std::string&)>(util::impl::get_module_func(&nw,"add_source_engine_game_mount_path"));
-		if(ptrAddGameMountPath)
+		static auto *ptrMountWorkshopAddons = reinterpret_cast<void(*)(uint64_t)>(util::impl::get_module_func(&nw,"mount_workshop_addons"));
+		auto fMountList = FileManager::OpenFile("cfg/mount_source_game_paths.txt","r");
+		if(fMountList)
 		{
-			auto fMountList = FileManager::OpenFile("cfg/mount_source_game_paths.txt","r");
-			if(fMountList)
+			auto strList = fMountList->ReadString();
+			std::vector<std::string> list {};
+			ustring::explode(strList,"\n",list);
+			for(auto &strPath : list)
 			{
-				auto strList = fMountList->ReadString();
-				std::vector<std::string> list {};
-				ustring::explode(strList,"\n",list);
-				for(auto &path : list)
+				ustring::remove_whitespace(strPath);
+				util::Path path {strPath};
+				if(ustring::compare(path.GetFront(),"workshop",false))
 				{
-					ustring::remove_whitespace(path);
-					ptrAddGameMountPath(path);
+					auto appId = util::to_int(path.GetBack());
+					if(ptrMountWorkshopAddons)
+						ptrMountWorkshopAddons(appId);
+					continue;
 				}
+				if(ptrAddGameMountPath)
+					ptrAddGameMountPath(strPath);
 			}
 		}
 	}
@@ -158,7 +166,7 @@ bool util::port_source2_model(NetworkState *nw,const std::string &path,std::stri
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	init_custom_mount_directories(*nw);
+	impl::init_custom_mount_directories(*nw);
 	return port_model(nw,path,mdlName,"source2",ptrConvertModel);
 }
 
@@ -170,7 +178,7 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	init_custom_mount_directories(*nw);
+	impl::init_custom_mount_directories(*nw);
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);
 }
 
@@ -182,16 +190,19 @@ bool util::port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::strin
 	return ptrConvertSmd(nw,mdl,f,animName,isCollisionMesh,outTextures);
 }
 
-bool util::port_file(NetworkState *nw,const std::string &path)
+bool util::port_file(NetworkState *nw,const std::string &path,const std::optional<std::string> &optOutputPath)
 {
 	if(engine->ShouldMountExternalGameResources() == false)
 		return false;
+	if(FileManager::Exists(path))
+		return true;
 	auto dllHandle = load_module(nw);
 	if(dllHandle == nullptr)
 		return false;
 	static auto *ptrExtractResource = dllHandle->FindSymbolAddress<bool(*)(NetworkState*,const std::string&,const std::string&)>("extract_resource");
 	if(ptrExtractResource == nullptr)
 		return false;
-	return ptrExtractResource(nw,path,util::IMPORT_PATH);
+	auto outputPath = optOutputPath.has_value() ? *optOutputPath : path;
+	return ptrExtractResource(nw,path,util::IMPORT_PATH +outputPath);
 }
 #pragma optimize("",on)

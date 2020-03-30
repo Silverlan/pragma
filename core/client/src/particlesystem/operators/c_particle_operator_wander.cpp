@@ -11,9 +11,9 @@ extern DLLCENGINE CEngine *c_engine;
 
 REGISTER_PARTICLE_OPERATOR(wander,CParticleOperatorWander);
 
-CParticleOperatorWander::CParticleOperatorWander(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorWorldBase(pSystem,values)
+void CParticleOperatorWander::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorWorldBase::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;
@@ -27,7 +27,7 @@ CParticleOperatorWander::CParticleOperatorWander(pragma::CParticleSystemComponen
 	m_hashCodes.resize(pSystem.GetMaxParticleCount());
 
 }
-void CParticleOperatorWander::Initialize(CParticle &particle)
+void CParticleOperatorWander::OnParticleCreated(CParticle &particle)
 {
 	m_hashCodes.at(particle.GetIndex()) = umath::random(1,std::numeric_limits<int32_t>::max());
 }

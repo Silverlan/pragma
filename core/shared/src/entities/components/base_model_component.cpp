@@ -6,6 +6,7 @@
 #include "pragma/model/model.h"
 #include <sharedutils/datastream.h>
 #include <pragma/util/transform.h>
+#include <pragma/entities/baseentity_events.hpp>
 
 using namespace pragma;
 
@@ -33,6 +34,33 @@ void BaseModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
+	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
+		if(ustring::compare(kvData.key,"model",false))
+		{
+			m_kvModel = kvData.value;
+			if(GetEntity().IsSpawned())
+				SetModel(m_kvModel);
+		}
+		else if(ustring::compare(kvData.key,"skin",false))
+		{
+			m_kvSkin = util::to_int(kvData.value);
+			if(GetEntity().IsSpawned())
+				SetSkin(m_kvSkin);
+		}
+		else
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
+	});
+}
+
+void BaseModelComponent::OnEntitySpawn()
+{
+	BaseEntityComponent::OnEntitySpawn();
+	if(m_kvModel.empty() == false)
+		SetModel(m_kvModel);
+	if(m_kvSkin != std::numeric_limits<uint32_t>::max())
+		SetSkin(m_kvSkin);
 }
 
 bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const

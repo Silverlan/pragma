@@ -335,6 +335,11 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	fCopyValue("parallax_height_scale");
 	fCopyValue("translucent");
 
+	fCopyValue("metalness_factor");
+	fCopyValue("roughness_factor");
+	fCopyValue("specular_factor");
+	fCopyValue("emission_factor");
+
 	matPbr->UpdateTextures();
 	// Overwrite old material with new PBR settings
 	if(matPbr->Save(matTraditional.GetName(),"addons/converted/"))

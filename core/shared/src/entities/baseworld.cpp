@@ -2,10 +2,12 @@
 #include "pragma/entities/baseworld.h"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include <pragma/physics/collisiontypes.h>
 
 using namespace pragma;
 
+#pragma optimize("",off)
 void BaseWorldComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -14,26 +16,38 @@ void BaseWorldComponent::Initialize()
 	if(whRenderComponent.valid())
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
 	ent.AddComponent("model");
-	auto whPhysComponent = ent.AddComponent("physics");
-	if(whPhysComponent.valid())
-		static_cast<pragma::BasePhysicsComponent*>(whPhysComponent.get())->SetCollisionType(COLLISIONTYPE::BRUSH);
+	ent.AddComponent("physics");
+
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		InitializePhysics();
+	});
+}
+
+void BaseWorldComponent::InitializePhysics()
+{
+	auto &ent = GetEntity();
+	if(ent.IsSpawned() == false)
+		return;
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	if(pPhysComponent.expired())
+		return;
+	auto mdl = ent.GetModel();
+	if(mdl)
+		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	else
+		pPhysComponent->DestroyPhysicsObject();
 }
 
 void BaseWorldComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	auto &ent = GetEntity();
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
-		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
-	ent.GetNetworkState()->GetGameState()->SetWorld(this);
+	GetEntity().GetNetworkState()->GetGameState()->SetWorld(this);
+	InitializePhysics();
 }
-
-void BaseWorldComponent::GetBrushes(std::vector<PolyMesh*> **brushes) {*brushes = &m_brushes;}
-void BaseWorldComponent::SetBrushes(std::vector<PolyMesh*> brushes) {m_brushes = brushes;}
 
 Con::c_cout &BaseWorldComponent::print(Con::c_cout &os)
 {
 	os<<"World";
 	return os;
 }
+#pragma optimize("",on)

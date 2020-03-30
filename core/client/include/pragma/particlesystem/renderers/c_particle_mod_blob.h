@@ -55,13 +55,14 @@ protected:
 public:
 	static void SetShowNeighborLinks(bool b);
 
-	CParticleRendererBlob(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleRendererBlob()=default;
 	virtual ~CParticleRendererBlob() override;
 	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
-	virtual void Initialize() override;
-	virtual void Destroy(CParticle &particle) override;
-	virtual void Destroy() override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	virtual void OnParticleSystemStarted() override;
+	virtual void OnParticleDestroyed(CParticle &particle) override;
+	virtual void OnParticleSystemStopped() override;
 };
 
 #endif

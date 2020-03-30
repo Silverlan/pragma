@@ -33,6 +33,11 @@ constexpr uint32_t BSP_MAX_DISP_LIGHTMAP_DIM_INCLUDING_BORDER = 131;
 #include <wrappers/memory_block.h>
 void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 {
+	Con::cwar<<"WARNING: BSP lightmap conversion is currently disabled due to changes to the level format. Please contact the Engine developer if you need this feature!"<<Con::endl;
+
+	// TODO: Pragma's map format does not contain all of the lightmap information we need anymore.
+	// Instead, we need to read the information from the original Source Engine BSP-file.
+#if 0
 	auto &lightMapInfo = *m_lightmapInfo;
 	bsp::ColorRGBExp32 *luxelData = nullptr;
 	uint32_t luxelDataSize = 0u;
@@ -282,5 +287,6 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	//fOut->Seek(lumpInfoLDR.fileofs);
 	//fOut->Write(luxelData.data(),luxelData.size() *sizeof(luxelData.front()));
 	f = nullptr;
+#endif
 }
 #pragma optimize("",on)

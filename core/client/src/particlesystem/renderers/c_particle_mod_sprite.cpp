@@ -14,9 +14,9 @@ REGISTER_PARTICLE_RENDERER(sprite,CParticleRendererSprite);
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-CParticleRendererSprite::CParticleRendererSprite(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleRenderer(pSystem,values)
+void CParticleRendererSprite::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleRenderer::Initialize(pSystem,values);
 	auto bAlignVelocity = false;
 	for(auto &pair : values)
 	{
@@ -30,7 +30,8 @@ CParticleRendererSprite::CParticleRendererSprite(pragma::CParticleSystemComponen
 	m_shader = c_engine->GetShader(m_bPlanarRotation ? "particle" : "particle_rotational");
 	if(m_bPlanarRotation == true)
 		return;
-	m_rotationalBuffer = std::make_unique<CParticleRendererRotationalBuffer>(pSystem);
+	m_rotationalBuffer = std::make_unique<CParticleRendererRotationalBuffer>();
+	m_rotationalBuffer->Initialize(pSystem);
 	m_rotationalBuffer->SetRotationAlignVelocity(bAlignVelocity);
 }
 
@@ -51,12 +52,12 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::PrimaryComma
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
 	shader->BindLights(*descSetShadows,descSetLightSources);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->BindSceneCamera(renderer,(m_particleSystem.GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(renderer,(m_particleSystem->GetRenderMode() == RenderMode::View) ? true : false);
 	if(m_bPlanarRotation == false)
 		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(**m_rotationalBuffer->GetBuffer());
 	shader->Draw(
-		renderer,m_particleSystem,
-		(m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem.GetOrientationType(),
+		renderer,*m_particleSystem,
+		(m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem->GetOrientationType(),
 		bloom
 	);
 	shader->EndDraw();

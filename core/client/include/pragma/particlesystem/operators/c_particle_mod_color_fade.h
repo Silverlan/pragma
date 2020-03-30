@@ -11,9 +11,10 @@ class DLLCLIENT CParticleOperatorColorFade
 	public CParticleModifierComponentGradualFade
 {
 public:
-	CParticleOperatorColorFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorColorFade()=default;
 	virtual void Simulate(CParticle &particle,double) override;
-	virtual void Initialize(CParticle &particle) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	CParticleModifierComponentRandomColor m_colorStart;
 	CParticleModifierComponentRandomColor m_colorEnd;

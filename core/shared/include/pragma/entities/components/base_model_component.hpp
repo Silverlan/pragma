@@ -42,6 +42,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
+		virtual void OnEntitySpawn() override;
 		int LookupBlendController(const std::string &controller) const;
 		Int32 LookupBone(const std::string &name) const;
 		int LookupAnimation(const std::string &name) const;
@@ -91,6 +92,9 @@ namespace pragma
 		std::shared_ptr<util::UInt32Property> m_skin = nullptr;
 		pragma::NetEventId m_netEvSetBodyGroup = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_onModelMaterialsLoaded = {};
+
+		std::string m_kvModel = "";
+		uint32_t m_kvSkin = std::numeric_limits<uint32_t>::max();
 
 		bool m_bMaterialsLoaded = true;
 	};

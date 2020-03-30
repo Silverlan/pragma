@@ -7,10 +7,11 @@ class DLLCLIENT CParticleOperatorWander
 	: public CParticleOperatorWorldBase
 {
 public:
-	CParticleOperatorWander(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorWander()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
-	virtual void Initialize(CParticle &particle) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 protected:
 	std::vector<int32_t> m_hashCodes;
 	float m_fFrequency = 2.f;

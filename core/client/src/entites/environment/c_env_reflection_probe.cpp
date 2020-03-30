@@ -268,7 +268,7 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 	BuildReflectionProbes(game,probes,rebuild);
 }
 
-Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const Vector3 &origin)
+Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const Vector3 &origin,float &outIntensity)
 {
 	if(c_game == nullptr)
 		return nullptr;
@@ -289,6 +289,7 @@ Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProb
 	if(entClosest)
 	{
 		auto &reflectionProbeC = *entClosest->GetComponent<pragma::CReflectionProbeComponent>();
+		outIntensity = reflectionProbeC.GetIBLStrength();
 		return reflectionProbeC.GetIBLDescriptorSet();
 	}
 	return nullptr;
@@ -303,6 +304,8 @@ void CReflectionProbeComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare(kvData.key,"env_map",false))
 			m_srcEnvMap = kvData.value;
+		else if(ustring::compare(kvData.key,"ibl_strength",false))
+			m_strength = kvData.value.empty() ? std::optional<float>{} : util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
@@ -323,12 +326,9 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 
 bool CReflectionProbeComponent::RequiresRebuild() const
 {
-	if(m_bBakingFailed)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::BakingFailed))
 		return false; // We've already tried baking the probe and it failed; don't try again!
-	auto matPath = GetCubemapIBLMaterialFilePath();
-	if(FileManager::Exists(matPath))
-		return false; // IBL textures already exist; nothing to be done!
-	return true;
+	return umath::is_flag_set(m_stateFlags,StateFlags::RequiresRebuild);
 }
 
 CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData(bool rebuild)
@@ -410,6 +410,11 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 )
 {
+	static auto jobActive = false;
+	if(jobActive == true)
+		return {};
+	//jobActive = true;
+
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
@@ -474,7 +479,7 @@ std::shared_ptr<prosper::Image> CReflectionProbeComponent::CreateCubemapImage()
 
 bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 {
-	m_bBakingFailed = true; // Mark as failed until complete
+	umath::set_flag(m_stateFlags,StateFlags::BakingFailed,true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
 	Con::cout<<"Capturing reflection probe IBL reflections for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<")..."<<Con::endl;
 
@@ -619,7 +624,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::Image &imgCubemap)
 	}
 
 	auto success = (m_iblData && SaveIBLReflectionsToFile());
-	m_bBakingFailed = !success;
+	umath::set_flag(m_stateFlags,StateFlags::BakingFailed,!success);
 	build_next_reflection_probe();
 	/*auto &wgui = WGUI::GetInstance();
 	auto *p = dynamic_cast<WITexturedCubemap*>(wgui.GetBaseElement()->FindDescendantByName(GUI_EL_NAME));
@@ -690,16 +695,24 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 		return false;
 	return GenerateIBLReflectionsFromCubemap(*cubemapTex);
 }
-Material *CReflectionProbeComponent::LoadMaterial()
+Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 {
+	outIsDefault = false;
 	auto relPath = GetCubemapIBLMaterialPath();
 	auto identifier = GetCubemapIdentifier();
-	auto *mat = client->LoadMaterial(relPath +identifier +".wmi",true,false);
+	auto matPath = relPath +identifier +".wmi";
+	if(FileManager::Exists("materials/" +matPath) == false)
+	{
+		outIsDefault = true;
+		matPath = "maps/default_ibl.wmi";
+	}
+	auto *mat = client->LoadMaterial(matPath,true,false);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
 }
 bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 {
-	auto *mat = LoadMaterial();
+	auto isDefaultMaterial = false;
+	auto *mat = LoadMaterial(isDefaultMaterial);
 	if(mat == nullptr)
 		return false;
 	auto *pPrefilter = mat->GetTextureInfo("prefilter");
@@ -718,6 +731,10 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		return false;
 	m_iblDsg = nullptr;
 	m_iblData = std::make_unique<rendering::IBLData>(texIrradiance->GetVkTexture(),texPrefilter->GetVkTexture(),texBrdf->GetVkTexture());
+	if(m_strength.has_value())
+		m_iblData->strength = *m_strength;
+	else
+		mat->GetDataBlock()->GetFloat("ibl_strength",&m_iblData->strength);
 
 	// TODO: Do this properly (e.g. via material attributes)
 	static auto brdfSamplerInitialized = false;
@@ -739,6 +756,8 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 	}
 
 	InitializeDescriptorSet();
+	if(isDefaultMaterial == false)
+		umath::set_flag(m_stateFlags,StateFlags::RequiresRebuild,false);
 	return true;
 }
 void CReflectionProbeComponent::InitializeDescriptorSet()
@@ -771,6 +790,8 @@ Anvil::DescriptorSet *CReflectionProbeComponent::GetIBLDescriptorSet()
 {
 	return m_iblDsg ? (*m_iblDsg)->get_descriptor_set(0u) : nullptr;
 }
+
+float CReflectionProbeComponent::GetIBLStrength() const {return m_iblData ? m_iblData->strength : 0.f;}
 
 const rendering::IBLData *CReflectionProbeComponent::GetIBLData() const {return m_iblData.get();}
 

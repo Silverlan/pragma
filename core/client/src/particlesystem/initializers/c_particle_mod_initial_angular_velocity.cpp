@@ -10,9 +10,9 @@
 
 REGISTER_PARTICLE_INITIALIZER(initial_angular_velocity,CParticleInitializerInitialAngularVelocity);
 
-CParticleInitializerInitialAngularVelocity::CParticleInitializerInitialAngularVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values)
+void CParticleInitializerInitialAngularVelocity::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -44,7 +44,7 @@ CParticleInitializerInitialAngularVelocity::CParticleInitializerInitialAngularVe
 		}
 	}
 }
-void CParticleInitializerInitialAngularVelocity::Initialize(CParticle &particle)
+void CParticleInitializerInitialAngularVelocity::OnParticleCreated(CParticle &particle)
 {
 	if(m_randomVelocity != nullptr)
 	{

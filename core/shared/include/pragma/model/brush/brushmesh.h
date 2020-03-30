@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "pragma/model/side.h"
+#include "pragma/physics/shape.hpp"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <pragma/console/conout.h>

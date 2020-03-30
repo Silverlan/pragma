@@ -9,9 +9,9 @@
 REGISTER_PARTICLE_OPERATOR(pause_emission,CParticleOperatorPauseEmission);
 REGISTER_PARTICLE_OPERATOR(pause_child_emission,CParticleOperatorPauseChildEmission);
 
-CParticleOperatorPauseEmissionBase::CParticleOperatorPauseEmissionBase(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorPauseEmissionBase::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -23,9 +23,9 @@ CParticleOperatorPauseEmissionBase::CParticleOperatorPauseEmissionBase(pragma::C
 	}
 	pSystem.SetAlwaysSimulate(true); // Required, otherwise Simulate() might not get called
 }
-void CParticleOperatorPauseEmissionBase::Initialize()
+void CParticleOperatorPauseEmissionBase::OnParticleSystemStarted()
 {
-	CParticleOperator::Initialize();
+	CParticleOperator::OnParticleSystemStarted();
 	Simulate(0.0);
 }
 void CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
@@ -59,16 +59,17 @@ void CParticleOperatorPauseEmissionBase::Simulate(double tDelta)
 
 /////////////////////
 
-CParticleOperatorPauseEmission::CParticleOperatorPauseEmission(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPauseEmissionBase(pSystem,values)
-{}
+void CParticleOperatorPauseEmission::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+{
+	CParticleOperatorPauseEmissionBase::Initialize(pSystem,values);
+}
 pragma::CParticleSystemComponent *CParticleOperatorPauseEmission::GetTargetParticleSystem() {return &GetParticleSystem();}
 
 /////////////////////
 
-CParticleOperatorPauseChildEmission::CParticleOperatorPauseChildEmission(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPauseEmissionBase(pSystem,values)
+void CParticleOperatorPauseChildEmission::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorPauseEmissionBase::Initialize(pSystem,values);
 	std::string childName;
 	for(auto &pair : values)
 	{

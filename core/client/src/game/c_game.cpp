@@ -21,6 +21,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/model/c_modelmanager.h"
@@ -60,6 +61,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -82,14 +84,17 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <prosper_util.hpp>
+#include <image/prosper_sampler.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/networking/snapshot_flags.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <pragma/level/level_info.hpp>
+#include <pragma/asset_types/world.hpp>
 #include <sharedutils/util_library.hpp>
 #include <util_image.hpp>
+#include <util_image_buffer.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -150,6 +155,7 @@ CGame::CGame(NetworkState *state)
 	c_game = this;
 
 	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
+	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
@@ -351,6 +357,7 @@ void CGame::OnRemove()
 	m_globalRenderSettingsBufferData = nullptr;
 	m_luaGUIElements = {};
 	m_luaShaderManager = nullptr;
+	m_luaParticleModifierManager = nullptr;
 	m_gpuProfilingStageManager = nullptr;
 	m_profilingStageManager = nullptr;
 
@@ -624,7 +631,6 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	}));
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
-	materialManager.ReloadMaterialShaders();
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 
@@ -930,6 +936,7 @@ WIBase *CGame::CreateGUIElement(std::string name,WIHandle *hParent)
 }
 LuaGUIManager &CGame::GetLuaGUIManager() {return m_luaGUIElements;}
 pragma::LuaShaderManager &CGame::GetLuaShaderManager() {return *m_luaShaderManager;}
+pragma::LuaParticleModifierManager &CGame::GetLuaParticleModifierManager() {return *m_luaParticleModifierManager;}
 
 void CGame::SetUp()
 {
@@ -1156,6 +1163,127 @@ void CGame::OnMapLoaded()
 	// pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);
 }
 
+void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector<EntityHandle> &outEnts)
+{
+	auto &entityData = worldData.GetEntities();
+	outEnts.reserve(entityData.size());
+	for(auto &entData : entityData)
+	{
+		if(entData->IsClientSideOnly())
+		{
+			auto *ent = CreateMapEntity(*entData);
+			if(ent)
+				outEnts.push_back(ent->GetHandle());
+			continue;
+		}
+
+		// Entity should already have been created by the server, look for it
+		auto mapIdx = entData->GetMapIndex();
+		EntityIterator entIt {*this,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
+		entIt.AttachFilter<EntityIteratorFilterUser>([mapIdx](BaseEntity &ent) -> bool {
+			auto pMapComponent = ent.GetComponent<pragma::MapComponent>();
+			return pMapComponent->GetMapIndex() == mapIdx;
+		});
+
+		auto it = entIt.begin();
+		if(it == entIt.end())
+			continue;
+		outEnts.push_back(it->GetHandle());
+	}
+
+	for(auto &hEnt : outEnts)
+	{
+		if(hEnt.IsValid() == false)
+			continue;
+		auto &ent = *hEnt.get();
+		if(ent.IsWorld())
+		{
+			auto pWorldComponent = ent.GetComponent<pragma::CWorldComponent>();
+			if(pWorldComponent.valid())
+			{
+				auto *bspTree = worldData.GetBSPTree();
+				if(bspTree)
+					pWorldComponent->SetBSPTree(bspTree->shared_from_this());
+			}
+		}
+
+		auto mdlComponent = ent.GetModelComponent();
+		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		if(mdl == nullptr)
+		{
+			auto pRenderComponent = static_cast<CBaseEntity&>(ent).GetRenderComponent();
+			if(pRenderComponent.valid())
+			{
+				Vector3 min {};
+				Vector3 max {};
+				auto pPhysComponent = ent.GetPhysicsComponent();
+				if(pPhysComponent.valid())
+					pPhysComponent->GetCollisionBounds(&min,&max);
+				pRenderComponent->SetRenderBounds(min,max);
+			}
+		}
+	}
+}
+
+void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
+{
+	Game::InitializeWorldData(worldData);
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly;
+
+	prosper::util::SamplerCreateInfo samplerCreateInfo {};
+	loadInfo.sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
+
+	std::shared_ptr<void> texture = nullptr;
+	static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().Load(
+		*c_engine,worldData.GetLightmapAtlasTexturePath(GetMapName()),loadInfo,&texture
+	);
+	if(texture)
+	{
+		auto &tex = *static_cast<Texture*>(texture.get());
+		auto lightmapAtlas = tex.GetVkTexture();
+		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
+		auto &scene = GetScene();
+		auto *renderer = scene ? scene->GetRenderer() : nullptr;
+		if(renderer != nullptr && renderer->IsRasterizationRenderer())
+		{
+			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+			rasterizer->ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
+			if(lightmapAtlas != nullptr)
+				rasterizer->SetLightMap(lightmapAtlas);
+		}
+
+		// Find map entities with lightmap uv sets
+		EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
+		for(auto *ent : entIt)
+			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity&>(*ent));
+
+		// Generate lightmap uv buffers for all entities
+		std::vector<std::shared_ptr<prosper::Buffer>> buffers {};
+		auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
+
+		auto *world = c_game->GetWorld();
+		if(world && globalLightmapUvBuffer)
+		{
+			auto lightMapC = world->GetEntity().GetComponent<pragma::CLightMapComponent>();
+			if(lightMapC.valid())
+			{
+				lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
+				lightMapC->SetLightMapSqrtFactor(worldData.GetLightMapSqrtFactor());
+				lightMapC->InitializeLightMapData(lightmapAtlas,globalLightmapUvBuffer,buffers);
+				auto &scene = GetRenderScene();
+				if(scene)
+					scene->SetLightMap(*lightMapC);
+			}
+		}
+	}
+
+	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
+	materialManager.ReloadMaterialShaders();
+}
+
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
@@ -1175,204 +1303,10 @@ bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 	return r;
 }
 
-void CGame::LoadMapEntities(uint32_t version,const char*,VFilePtr f,const pragma::level::BSPInputData &bspInputData,std::vector<Material*> &materials,const Vector3 &origin,std::vector<EntityHandle> *entities)
-{
-	auto lightMap = pragma::CLightMapComponent::LoadLightMap(const_cast<pragma::level::BSPInputData&>(bspInputData));
-	std::vector<std::vector<Vector2>> lightMapUvCoordinates {}; // Light map uv coordinates per mesh per entity (used to build a global lightmap uv buffer for the world)
-
-	struct EntityUvData
-	{
-		EntityHandle hEntity;
-		size_t start;
-		size_t numUvSets;
-	};
-	std::vector<EntityUvData> lightMapUvCoordinateRanges {}; // Range into lightMapUvCoordinates indicating which uv sets belong to which entity
-
-	unsigned int numEnts = f->Read<unsigned int>();
-	std::vector<EntityHandle> ents;
-	ents.reserve(numEnts);
-	if(entities != nullptr)
-		entities->reserve(entities->size() +numEnts);
-	for(unsigned int i=0;i<numEnts;i++)
-	{
-		auto startOffset = f->Tell();
-		auto offsetToEndOfEntity = std::numeric_limits<uint64_t>::max();
-		if(version > 1)
-		{
-			offsetToEndOfEntity = startOffset +f->Read<uint64_t>();
-			if(version < 4)
-				offsetToEndOfEntity += sizeof(uint64_t);
-		}
-
-		auto offsetMeshes = f->Tell();
-		offsetMeshes += f->Read<uint64_t>();
-		if(version < 4)
-			offsetMeshes += sizeof(uint64_t);
-
-		auto offsetLeaves = 0ull;
-		if(version >= 9)
-		{
-			offsetLeaves = f->Tell();
-			offsetLeaves += f->Read<uint64_t>();
-		}
-
-		auto bClientsideEntity = false;
-		if(version >= 4)
-		{
-			auto flags = static_cast<pragma::level::EntityFlags>(f->Read<uint64_t>());
-			if(umath::is_flag_set(flags,pragma::level::EntityFlags::ClientsideOnly))
-			{
-				auto className = f->ReadString();
-				CreateMapEntity(version,className,f,bspInputData,materials,origin,offsetToEndOfEntity,ents,entities);
-			}
-		}
-
-		BaseEntity *ent = nullptr;
-		if(bClientsideEntity == false)
-		{
-			EntityIterator entIt {*this,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
-			entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent) -> bool {
-				auto pMapComponent = ent.GetComponent<pragma::MapComponent>();
-				return pMapComponent->GetMapIndex() == m_mapEntityIdx;
-			});
-
-			auto it = entIt.begin();
-			if(it != entIt.end())
-				ent = *it;
-		}
-		if(ent == nullptr && offsetToEndOfEntity != std::numeric_limits<uint64_t>::max())
-			f->Seek(offsetToEndOfEntity);
-		else
-		{
-			if(offsetLeaves != 0ull)
-			{
-				f->Seek(offsetLeaves);
-				auto numLeaves = f->Read<uint32_t>();
-				if(numLeaves > 0u)
-				{
-					auto pBspLeafComponent = ent->AddComponent<pragma::CBSPLeafComponent>();
-					std::vector<uint16_t> leaves {};
-					leaves.resize(numLeaves);
-					f->Read(leaves.data(),leaves.size() *sizeof(leaves.front()));
-					pBspLeafComponent->SetLeaves(leaves);
-				}
-			}
-			f->Seek(offsetMeshes);
-			pragma::level::load_map_brushes(*this,version,f,ent,materials,GetSurfaceMaterials(),origin);
-			if(version >= 8)
-			{
-				auto uvSetOffset = lightMapUvCoordinates.size();
-				pragma::level::load_map_faces(*this,f,*ent,bspInputData,materials,&lightMapUvCoordinates);
-				auto numUvSets = lightMapUvCoordinates.size() -uvSetOffset;
-				if(numUvSets > 0u)
-					lightMapUvCoordinateRanges.push_back({(ent != nullptr) ? ent->GetHandle() : EntityHandle{},uvSetOffset,numUvSets});
-			}
-			if(ent != NULL)
-			{
-				if(ent->IsWorld())
-				{
-					auto pWorldComponent = ent->GetComponent<pragma::CWorldComponent>();
-					if(pWorldComponent.valid())
-						pWorldComponent->SetBSPTree(std::make_shared<util::BSPTree>(bspInputData.bspTree)); // TODO: Avoid copy
-				}
-				auto mdlComponent = ent->GetModelComponent();
-				auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-				if(mdl == nullptr)
-				{
-					auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-					if(pRenderComponent.valid())
-					{
-						Vector3 min {};
-						Vector3 max {};
-						auto pPhysComponent = ent->GetPhysicsComponent();
-						if(pPhysComponent.valid())
-							pPhysComponent->GetCollisionBounds(&min,&max);
-						pRenderComponent->SetRenderBounds(min,max);
-					}
-				}
-				auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-				if(pMapComponent.valid())
-					pMapComponent->SetMapIndex(m_mapEntityIdx);
-				auto pTrComponent = ent->GetTransformComponent();
-				if(pTrComponent.valid())
-					pTrComponent->SetPosition(pTrComponent->GetPosition() +origin);
-				ents.push_back(ent->GetHandle());
-				if(entities != nullptr)
-					entities->push_back(ent->GetHandle());
-			}
-			f->Seek(offsetToEndOfEntity);
-		}
-		m_mapEntityIdx++;
-	}
-
-	if(bspInputData.lightMapInfo.luxelData.empty() == false)
-	{
-		std::vector<std::shared_ptr<prosper::Buffer>> uvBuffers {};
-		auto lightMapUvBuffer = pragma::CLightMapComponent::LoadLightMapUvBuffers(lightMapUvCoordinates,uvBuffers);
-		if(lightMapUvBuffer != nullptr)
-		{
-			// Technically we don't need the lightmap information anymore, but it's useful to have in case we want to make changes to the lightmaps
-			// at a later date.
-			auto lightmapInfo = std::make_shared<util::bsp::LightMapInfo>(bspInputData.lightMapInfo);
-			for(auto &uvData : lightMapUvCoordinateRanges)
-			{
-				if(uvData.hEntity.IsValid() == false)
-					continue;
-				auto pLightMapComponent = uvData.hEntity->AddComponent<pragma::CLightMapComponent>();
-				if(pLightMapComponent.expired())
-					continue;
-				std::vector<std::shared_ptr<prosper::Buffer>> entityUvBuffers {};
-				entityUvBuffers.reserve(uvData.numUvSets);
-				for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
-					entityUvBuffers.push_back(uvBuffers.at(i));
-
-				std::vector<std::vector<Vector2>> lightmapUvs {};
-				lightmapUvs.resize(uvData.numUvSets);
-				uint32_t meshIndex = 0u;
-				for(auto i=uvData.start;i<(uvData.start +uvData.numUvSets);++i)
-					lightmapUvs.at(meshIndex++) = std::move(lightMapUvCoordinates.at(i));
-				pLightMapComponent->InitializeLightMapData(lightmapInfo,lightMap,lightMapUvBuffer,entityUvBuffers,lightmapUvs);
-			}
-		}
-	}
-	// Note: lightMapUvCoordinates should no longer be used after this point
-
-	for(auto &hEnt : ents)
-	{
-		if(hEnt.IsValid() == false)
-			continue;
-		hEnt->Spawn();
-	}
-
-	EntityIterator itEnt {*this,(EntityIterator::FilterFlags::Default &~EntityIterator::FilterFlags::Spawned) | EntityIterator::FilterFlags::Pending};
-	itEnt.AttachFilter<TEntityIteratorFilterComponent<pragma::MapComponent>>();
-	for(auto *ent : itEnt)
-	{
-		auto pMapComponent = ent->GetComponent<pragma::MapComponent>();
-		if(pMapComponent->GetMapIndex() == 0u)
-			continue;
-		Con::cwar<<"WARNING: Uninitialized map-entity found after map creation! Removing..."<<Con::endl;
-		ent->RemoveSafely();
-	}
-
-	auto &scene = GetScene();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer != nullptr && renderer->IsRasterizationRenderer())
-	{
-		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-		rasterizer->ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
-		if(lightMap != nullptr)
-			rasterizer->SetLightMap(lightMap);
-	}
-}
-
 void CGame::BuildVMF(const char*)
 {
 	//Game::BuildVMF<CWorld,CPolyMesh,CPoly,CBrushMesh>(map);
 }
-
-void CGame::LoadMapMaterials(uint32_t,VFilePtr f,std::vector<Material*> &materials) {pragma::level::load_map_materials(GetNetworkState(),f,materials);}
 
 static CVar cvTimescale = GetClientConVar("host_timescale");
 float CGame::GetTimeScale()

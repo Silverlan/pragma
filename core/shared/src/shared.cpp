@@ -19,12 +19,9 @@
 #pragma comment(lib,"mathutil.lib")
 //#pragma comment(lib,"libnoise.lib")
 #pragma comment(lib,"util_pad.lib")
-#pragma comment(lib,"util_bsp.lib")
-#pragma comment(lib,"util_vmf.lib")
 //#pragma comment(lib,"VTFLib.lib")
 #pragma comment(lib,"util_source_script.lib")
 #pragma comment(lib,"util_mmd.lib")
-#pragma comment(lib,"util_fgd.lib")
 #pragma comment(lib,"ogg.lib")
 //#pragma comment(lib,"RectangleBinPack.lib")
 

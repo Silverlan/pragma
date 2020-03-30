@@ -71,6 +71,13 @@ public:
 	void SetVertexUV(uint32_t idx,const Vector2 &uv);
 	void SetVertexAlpha(uint32_t idx,const Vector2 &alpha);
 	void SetVertexWeight(uint32_t idx,const VertexWeight &weight);
+
+	const std::vector<Vector2> *GetUVSet(const std::string &name) const;
+	std::vector<Vector2> *GetUVSet(const std::string &name);
+	const std::unordered_map<std::string,std::vector<Vector2>> &GetUVSets() const;
+	std::unordered_map<std::string,std::vector<Vector2>> &GetUVSets();
+	std::vector<Vector2> &AddUVSet(const std::string &name);
+
 	Vertex GetVertex(uint32_t idx) const;
 	Vector3 GetVertexPosition(uint32_t idx) const;
 	Vector3 GetVertexNormal(uint32_t idx) const;
@@ -87,6 +94,7 @@ public:
 	virtual std::shared_ptr<ModelSubMesh> Copy() const;
 
 	void ApplyUVMapping(const Vector3 &nu,const Vector3 &nv,uint32_t w,uint32_t h,float ou,float ov,float su,float sv);
+	void RemoveVertex(uint64_t idx);
 
 	const pragma::physics::ScaledTransform &GetPose() const;
 	pragma::physics::ScaledTransform &GetPose();
@@ -102,6 +110,7 @@ protected:
 	Vector3 m_center;
 	std::shared_ptr<std::vector<Vertex>> m_vertices;
 	std::shared_ptr<std::vector<Vector2>> m_alphas;
+	std::shared_ptr<std::unordered_map<std::string,std::vector<Vector2>>> m_uvSets;
 	uint8_t m_numAlphas;
 	std::shared_ptr<std::vector<uint16_t>> m_triangles;
 	std::shared_ptr<std::vector<VertexWeight>> m_vertexWeights;

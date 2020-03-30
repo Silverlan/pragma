@@ -18,11 +18,12 @@ protected:
 	std::vector<util::TSharedHandle<pragma::physics::IRigidBody>> m_physicsObjects;
 	virtual std::shared_ptr<pragma::physics::IShape> CreateShape()=0;
 public:
-	CParticleOperatorPhysics(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
-	virtual void Initialize() override;
-	virtual void Destroy(CParticle &particle) override;
-	virtual void Destroy() override;
+	CParticleOperatorPhysics()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
+	virtual void OnParticleSystemStarted() override;
+	virtual void OnParticleDestroyed(CParticle &particle) override;
+	virtual void OnParticleSystemStopped() override;
 	virtual void PreSimulate(CParticle &particle,double) override;
 	virtual void PostSimulate(CParticle &particle,double) override;
 };
@@ -34,7 +35,8 @@ protected:
 	float m_radius = 0.f;
 	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
-	CParticleOperatorPhysicsSphere(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPhysicsSphere()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 };
 REGISTER_PARTICLE_OPERATOR(physics_sphere,CParticleOperatorPhysicsSphere);
 
@@ -45,7 +47,8 @@ protected:
 	float m_extent = 0.f;
 	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
-	CParticleOperatorPhysicsBox(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPhysicsBox()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 };
 REGISTER_PARTICLE_OPERATOR(physics_box,CParticleOperatorPhysicsBox);
 
@@ -57,7 +60,8 @@ protected:
 	float m_height = 0.f;
 	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;
 public:
-	CParticleOperatorPhysicsCylinder(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorPhysicsCylinder()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 };
 REGISTER_PARTICLE_OPERATOR(physics_cylinder,CParticleOperatorPhysicsCylinder);
 
@@ -65,8 +69,9 @@ class DLLCLIENT CParticleOperatorPhysicsModel
 	: public CParticleOperatorPhysics
 {
 public:
-	CParticleOperatorPhysicsModel(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleOperatorPhysicsModel()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 protected:
 	std::shared_ptr<Model> m_model = nullptr;
 	virtual std::shared_ptr<pragma::physics::IShape> CreateShape() override;

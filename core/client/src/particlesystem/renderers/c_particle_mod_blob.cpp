@@ -19,9 +19,9 @@ decltype(CParticleRendererBlob::s_activeBlobRendererCount) CParticleRendererBlob
 //decltype(CParticleRendererBlob::s_shader) CParticleRendererBlob::s_shader = nullptr; // prosper TODO
 decltype(CParticleRendererBlob::s_shadowShader) CParticleRendererBlob::s_shadowShader = nullptr;
 
-CParticleRendererBlob::CParticleRendererBlob(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleRenderer(pSystem,values)
+void CParticleRendererBlob::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleRenderer::Initialize(pSystem,values);
 	auto bHasShininess = false;
 	auto shininess = 0.f;
 	for(auto it=values.begin();it!=values.end();it++)
@@ -58,7 +58,7 @@ void CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
 		m_dbgNeighborLinks.clear();
 		return;
 	}
-	m_dbgNeighborLinks.resize(m_particleSystem.GetMaxParticleCount());
+	m_dbgNeighborLinks.resize(GetParticleSystem().GetMaxParticleCount());
 	for(auto &info : m_dbgNeighborLinks)
 	{
 		//for(auto &o : info.renderObjects) // prosper TODO
@@ -152,7 +152,7 @@ void CParticleRendererBlob::UpdateDebugNeighborLinks()
 
 void CParticleRendererBlob::SetShowNeighborLinks(bool b) {s_bShowNeighborLinks = b;}
 
-void CParticleRendererBlob::Initialize()
+void CParticleRendererBlob::OnParticleSystemStarted()
 {
 	 // prosper TODO
 #if 0
@@ -266,7 +266,7 @@ REGISTER_CONVAR_CALLBACK_CL(debug_particle_blob_show_neighbor_links,[](NetworkSt
 });
 
 
-void CParticleRendererBlob::Destroy()
+void CParticleRendererBlob::OnParticleSystemStopped()
 {
 	/*if(--s_activeBlobRendererCount == 0) // Release the descriptor set when it's not needed anymore
 	{
@@ -309,7 +309,7 @@ void CParticleRendererBlob::SortParticleLinks()
 	}*/
 }
 
-void CParticleRendererBlob::Destroy(CParticle &particle)
+void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 {
 	/*CParticleRenderer::Destroy(particle);
 	auto particleIdx = particle.GetIndex();

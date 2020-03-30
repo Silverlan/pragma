@@ -27,5 +27,5 @@ void BaseFlashlightComponent::Initialize()
 	if(pColorComponent != nullptr)
 		pColorComponent->SetColor(ulighting::color_temperature_to_color(3'500));
 	if(pLightComponent)
-		pLightComponent->SetLightIntensity(50.f,BaseEnvLightComponent::LightIntensityType::Lumen);
+		pLightComponent->SetLightIntensity(10.f,BaseEnvLightComponent::LightIntensityType::Lumen);
 }

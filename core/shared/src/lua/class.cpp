@@ -46,6 +46,7 @@
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_parallel_job.hpp>
+#include <sharedutils/util_path.hpp>
 #include <util_image_buffer.hpp>
 #include <mathutil/umath_lighting.hpp>
 #include <luainterface.hpp>
@@ -344,6 +345,29 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::Push(l,imgBuffer);
 	}))];
+	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &parent,uint32_t x,uint32_t y,uint32_t w,uint32_t h) {
+		auto imgBuffer = uimg::ImageBuffer::Create(parent,x,y,w,h);
+		if(imgBuffer == nullptr)
+			return;
+		Lua::Push(l,imgBuffer);
+	}))];
+	defImageBuffer.scope[luabind::def("CreateCubemap",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) {
+		int32_t t = 1;
+		Lua::CheckTable(l,t);
+		std::array<std::shared_ptr<uimg::ImageBuffer>,6> cubemapSides {};
+		for(uint8_t i=0;i<6;++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,t);
+			auto &img = Lua::Check<uimg::ImageBuffer>(l,-1);
+			cubemapSides.at(i) = img.shared_from_this();
+			Lua::Pop(l,1);
+		}
+		auto imgBuffer = uimg::ImageBuffer::CreateCubemap(cubemapSides);
+		if(imgBuffer == nullptr)
+			return;
+		Lua::Push(l,imgBuffer);
+	}))];
 	defImageBuffer.def("GetFormat",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		Lua::PushInt(l,umath::to_integral(imgBuffer.GetFormat()));
 	}));
@@ -382,6 +406,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t format) {
 		Lua::Push(l,imgBuffer.Copy(static_cast<uimg::ImageBuffer::Format>(format)));
+	}));
+	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) {
+		imgBuffer.Copy(dst,xSrc,ySrc,xDst,yDst,w,h);
 	}));
 	defImageBuffer.def("Convert",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t format) {
 		imgBuffer.Convert(static_cast<uimg::ImageBuffer::Format>(format));
@@ -460,6 +487,98 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushString(l,val->GetTypeString());
 	}));
 	modUtil[defDataBlock];
+
+	// Path
+	auto defPath = luabind::class_<util::Path>("Path");
+	defPath.scope[luabind::def("CreateFromComponents",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) {
+		int32_t t = 1;
+		Lua::CheckTable(l,t);
+		std::vector<std::string> components {};
+		auto n = Lua::GetObjectLength(l,t);
+		components.reserve(n);
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,t);
+			components.push_back(Lua::CheckString(l,-1));
+
+			Lua::Pop(l,1);
+		}
+		Lua::Push<util::Path>(l,{components});
+	}))];
+	defPath.def(luabind::constructor<>());
+	defPath.def(luabind::constructor<const std::string&>());
+
+	defPath.def(luabind::tostring(luabind::self));
+	defPath.def(luabind::self +luabind::const_self);
+	defPath.def(luabind::self +std::string{});
+
+	defPath.def(luabind::const_self ==luabind::const_self);
+	defPath.def(luabind::const_self ==std::string{});
+
+	defPath.def("ToComponents",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		auto components = p.ToComponents();
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &c : components)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::PushString(l,c);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	defPath.def("GetString",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushString(l,p.GetString());
+	}));
+	defPath.def("GetPath",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushString(l,p.GetPath());
+	}));
+	defPath.def("GetFileName",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushString(l,p.GetFileName());
+	}));
+	defPath.def("GetFront",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushString(l,p.GetFront());
+	}));
+	defPath.def("GetBack",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushString(l,p.GetBack());
+	}));
+	defPath.def("MoveUp",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		p.MoveUp();
+	}));
+	defPath.def("PopFront",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		p.PopFront();
+	}));
+	defPath.def("PopBack",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		p.PopBack();
+	}));
+	defPath.def("Canonicalize",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		p.Canonicalize();
+	}));
+	defPath.def("IsFile",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushBool(l,p.IsFile());
+	}));
+	defPath.def("GetFileExtension",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		auto ext = p.GetFileExtension();
+		if(ext.has_value() == false)
+			return;
+		Lua::PushString(l,*ext);
+	}));
+	defPath.def("RemoveFileExtension",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		p.RemoveFileExtension();
+	}));
+	defPath.def("MakeRelative",static_cast<void(*)(lua_State*,util::Path&,util::Path&)>([](lua_State *l,util::Path &p,util::Path &pOther) {
+		p.MakeRelative(pOther);
+	}));
+	defPath.def("MakeRelative",static_cast<void(*)(lua_State*,util::Path&,const std::string&)>([](lua_State *l,util::Path &p,const std::string &other) {
+		p.MakeRelative(other);
+	}));
+	defPath.def("GetComponentCount",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushInt(l,p.GetComponentCount());
+	}));
+	defPath.def("IsEmpty",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushBool(l,p.IsEmpty());
+	}));
+	modUtil[defPath];
 
 	// Properties
 	Lua::Property::register_classes(lua);
@@ -687,6 +806,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVectori.def(int32_t() /luabind::const_self);
 	defVectori.def(int32_t() *luabind::const_self);
 	defVectori.def("Copy",&Lua::Vectori::Copy);
+	defVectori.def("Get",static_cast<void(*)(lua_State*,const Vector3i&,uint32_t)>([](lua_State *l,const Vector3i &v,uint32_t idx) {
+		Lua::PushInt(l,v[idx]);
+	}));
 	modMath[defVectori];
 	
 	auto defVector2i = luabind::class_<Vector2i>("Vector2i");
@@ -704,6 +826,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2i.def(int32_t() /luabind::const_self);
 	defVector2i.def(int32_t() *luabind::const_self);
 	defVector2i.def("Copy",&Lua::Vector2i::Copy);
+	defVector2i.def("Get",static_cast<void(*)(lua_State*,const Vector2i&,uint32_t)>([](lua_State *l,const Vector2i &v,uint32_t idx) {
+		Lua::PushInt(l,v[idx]);
+	}));
 	modMath[defVector2i];
 
 	auto defVector4i = luabind::class_<Vector4i>("Vector4i");
@@ -724,6 +849,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4i.def(int32_t() /luabind::const_self);
 	defVector4i.def(int32_t() *luabind::const_self);
 	defVector4i.def("Copy",&Lua::Vector4i::Copy);
+	defVector4i.def("Get",static_cast<void(*)(lua_State*,const Vector4i&,uint32_t)>([](lua_State *l,const Vector4i &v,uint32_t idx) {
+		Lua::PushInt(l,v[idx]);
+	}));
 	modMath[defVector4i];
 
 	auto defVector = luabind::class_<Vector3>("Vector");

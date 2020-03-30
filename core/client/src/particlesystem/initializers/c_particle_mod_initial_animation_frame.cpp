@@ -10,9 +10,9 @@
 
 REGISTER_PARTICLE_INITIALIZER(initial_animation_frame,CParticleInitializerInitialAnimationFrame);
 
-CParticleInitializerInitialAnimationFrame::CParticleInitializerInitialAnimationFrame(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values)
+void CParticleInitializerInitialAnimationFrame::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;
@@ -39,9 +39,9 @@ CParticleInitializerInitialAnimationFrame::CParticleInitializerInitialAnimationF
 		}
 	}
 }
-void CParticleInitializerInitialAnimationFrame::Initialize(CParticle &particle)
+void CParticleInitializerInitialAnimationFrame::OnParticleCreated(CParticle &particle)
 {
-	CParticleInitializer::Initialize(particle);
+	CParticleInitializer::OnParticleCreated(particle);
 	auto &pSystem = GetParticleSystem();
 	auto *animData = pSystem.GetAnimationData();
 	if(animData == nullptr)

@@ -9,9 +9,9 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT pragma::physics::IEnvironment *c_physEnv;
 
-CParticleOperatorPhysics::CParticleOperatorPhysics(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
+void CParticleOperatorPhysics::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;
@@ -35,9 +35,9 @@ CParticleOperatorPhysics::CParticleOperatorPhysics(pragma::CParticleSystemCompon
 			m_posOffset = uvec::create(it->second);
 	}
 }
-void CParticleOperatorPhysics::Initialize()
+void CParticleOperatorPhysics::OnParticleSystemStarted()
 {
-	auto maxParticles = m_particleSystem.GetMaxParticleCount();
+	auto maxParticles = GetParticleSystem().GetMaxParticleCount();
 	if(maxParticles == 0)
 		return;
 	auto shape = CreateShape();
@@ -67,11 +67,11 @@ void CParticleOperatorPhysics::Initialize()
 		}
 	}
 }
-void CParticleOperatorPhysics::Destroy()
+void CParticleOperatorPhysics::OnParticleSystemStopped()
 {
 	m_physicsObjects.clear();
 }
-void CParticleOperatorPhysics::Initialize(CParticle &particle)
+void CParticleOperatorPhysics::OnParticleCreated(CParticle &particle)
 {
 	auto idx = particle.GetIndex();
 	if(idx >= m_physicsObjects.size())
@@ -88,7 +88,7 @@ void CParticleOperatorPhysics::Initialize(CParticle &particle)
 	rigidBody->SetAngularVelocity(particle.GetAngularVelocity());
 	rigidBody->WakeUp();
 }
-void CParticleOperatorPhysics::Destroy(CParticle &particle)
+void CParticleOperatorPhysics::OnParticleDestroyed(CParticle &particle)
 {
 	auto idx = particle.GetIndex();
 	if(idx >= m_physicsObjects.size())
@@ -134,9 +134,9 @@ void CParticleOperatorPhysics::PostSimulate(CParticle &particle,double)
 
 //////////////////////////////
 
-CParticleOperatorPhysicsSphere::CParticleOperatorPhysicsSphere(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPhysics(pSystem,values)
+void CParticleOperatorPhysicsSphere::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorPhysics::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;
@@ -153,9 +153,9 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsSphere::CreateS
 
 //////////////////////////////
 
-CParticleOperatorPhysicsBox::CParticleOperatorPhysicsBox(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPhysics(pSystem,values)
+void CParticleOperatorPhysicsBox::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorPhysics::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;
@@ -172,9 +172,9 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsBox::CreateShap
 
 //////////////////////////////
 
-CParticleOperatorPhysicsCylinder::CParticleOperatorPhysicsCylinder(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPhysics(pSystem,values)
+void CParticleOperatorPhysicsCylinder::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorPhysics::Initialize(pSystem,values);
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		auto key = it->first;
@@ -193,9 +193,9 @@ std::shared_ptr<pragma::physics::IShape> CParticleOperatorPhysicsCylinder::Creat
 
 //////////////////////////////
 
-CParticleOperatorPhysicsModel::CParticleOperatorPhysicsModel(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorPhysics(pSystem,values)
+void CParticleOperatorPhysicsModel::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperatorPhysics::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -208,11 +208,11 @@ CParticleOperatorPhysicsModel::CParticleOperatorPhysicsModel(pragma::CParticleSy
 	}
 }
 
-void CParticleOperatorPhysicsModel::Initialize(CParticle &particle)
+void CParticleOperatorPhysicsModel::OnParticleCreated(CParticle &particle)
 {
 	if(m_model == nullptr)
 		return;
-	CParticleOperatorPhysics::Initialize(particle);
+	CParticleOperatorPhysics::OnParticleCreated(particle);
 	particle.SetOrigin(m_model->GetOrigin());
 }
 

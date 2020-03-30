@@ -175,6 +175,10 @@ void ShaderTextured3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateIn
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
 bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat) {return true;}
 void ShaderTextured3DBase::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
+bool ShaderTextured3DBase::BindReflectionProbeIntensity(float intensity)
+{
+	return RecordPushConstants(intensity,offsetof(PushConstants,clipPlane) +sizeof(Vector3));
+}
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);
@@ -272,6 +276,10 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 	if(glowMap != nullptr && glowMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
+
+		matData.emissionFactor = 1.f;
+		data->GetFloat("emission_factor",&matData.emissionFactor);
+
 		if(texture->HasFlag(Texture::Flags::SRGB))
 			matFlags |= MaterialFlags::GlowSRGB;
 		auto bUseGlow = true;
@@ -336,20 +344,28 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	outShouldUseLightmaps = false;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
 		return true;
-	outShouldUseLightmaps = (mesh.GetReferenceId() != std::numeric_limits<uint32_t>::max()) ? 1u : 0u;
-	prosper::Buffer *pLightMapUvBuffer = nullptr;
-	auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
-	if(pLightMapComponent.valid())
+	auto *pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
+	if(m_boundEntity)
 	{
-		auto meshIndex = mesh.GetReferenceId();
-		auto *pUvBuffer = pLightMapComponent->GetMeshLightMapUvBuffer(meshIndex);
-		if(pUvBuffer != nullptr)
-			pLightMapUvBuffer = pUvBuffer;
-		else
-			pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
+		auto lightMapReceiverC = m_boundEntity->GetComponent<CLightMapReceiverComponent>();
+		auto bufIdx = lightMapReceiverC.valid() ? lightMapReceiverC->FindBufferIndex(mesh) : std::optional<uint32_t>{};
+		if(bufIdx.has_value())
+		{
+			outShouldUseLightmaps = true;
+
+			auto *world = c_game->GetWorld();
+			auto pLightMapComponent = world ? world->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+			//auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+			if(pLightMapComponent.valid())
+			{
+				auto *pUvBuffer = pLightMapComponent->GetMeshLightMapUvBuffer(*bufIdx);
+				if(pUvBuffer != nullptr)
+					pLightMapUvBuffer = pUvBuffer;
+				else
+					pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
+			}
+		}
 	}
-	else
-		pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
 	return RecordBindVertexBuffer(pLightMapUvBuffer->GetAnvilBuffer(),umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}

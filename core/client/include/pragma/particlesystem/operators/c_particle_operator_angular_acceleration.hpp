@@ -8,7 +8,8 @@ class DLLCLIENT CParticleOperatorAngularAcceleration
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorAngularAcceleration(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorAngularAcceleration()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 private:
 	Vector3 m_vAcceleration = {};

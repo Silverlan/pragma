@@ -3,7 +3,6 @@
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/util/util_bsp_tree.hpp"
-#include <util_bsp.hpp>
 
 DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
 	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
@@ -17,21 +16,6 @@ namespace pragma
 {
 	namespace level
 	{
-		struct DLLNETWORK BSPInputData
-		{
-			BSPInputData();
-			util::bsp::LightMapInfo lightMapInfo {};
-			std::vector<int32_t> surfEdges {};
-			std::vector<uint16_t> leafFaces {};
-			std::vector<bsp::dedge_t> edges {};
-			std::vector<Vector3> verts {};
-			std::vector<util::bsp::TexInfo> texInfo {};
-			std::vector<util::bsp::DispInfo> displacementInfo = {};
-			util::BSPTree bspTree;
-		};
-
-		DLLNETWORK void load_map_materials(NetworkState *state,VFilePtr f,std::vector<Material*> &materials);
-		DLLNETWORK void load_map_faces(Game &game,VFilePtr f,BaseEntity &ent,const BSPInputData &bspInputData,const std::vector<Material*> &materials,std::vector<std::vector<Vector2>> *outMeshLightMapUvCoordinates=nullptr);
 		DLLNETWORK void load_map_brushes(
 			Game &game,uint32_t version,VFilePtr f,BaseEntity *ent,std::vector<Material*> &materials,std::vector<SurfaceMaterial> &surfaceMaterials,const Vector3 &origin
 		);

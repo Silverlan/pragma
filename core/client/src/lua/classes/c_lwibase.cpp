@@ -199,10 +199,9 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("IsPosInBounds",&PosInBounds);
 	classDef.def("IsCursorInBounds",&MouseInBounds);
 	classDef.def("GetCursorPos",&GetMousePos);
-	classDef.def("Render",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&)>(&Draw));
-	classDef.def("Render",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&)>(&Draw));
-	classDef.def("Render",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Mat4&)>(&Draw));
-	classDef.def("Render",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&,const Vector2i&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&)>(&Draw));
+	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const ::WIBase::DrawInfo&)>(&Draw));
 	classDef.def("GetX",&GetX);
 	classDef.def("GetY",&GetY);
 	classDef.def("SetX",&SetX);
@@ -410,14 +409,19 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		Lua::PushInt(l,*index);
 	}));
 
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&,bool)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,bool)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Mat4&,bool)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,bool)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&,const Mat4&)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Vector2&)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,const Mat4&)>(&Draw));
-	classDef.def("Draw",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&)>(&Draw));
+	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
+	defDrawInfo.def(luabind::constructor<>());
+	defDrawInfo.def_readwrite("offset",&::WIBase::DrawInfo::offset);
+	defDrawInfo.def_readwrite("size",&::WIBase::DrawInfo::size);
+	defDrawInfo.def_readwrite("transform",&::WIBase::DrawInfo::transform);
+	defDrawInfo.def_readwrite("useScissor",&::WIBase::DrawInfo::useScissor);
+	defDrawInfo.def("SetColor",static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,const Color&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,const Color &color) {
+		drawInfo.color = color.ToVector4();
+	}));
+	defDrawInfo.def("SetPostTransform",static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,const Mat4&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,const Mat4 &t) {
+		drawInfo.postTransform = t;
+	}));
+	classDef.scope[defDrawInfo];
 }
 
 void Lua::WIButton::register_class(luabind::class_<WIButtonHandle,WIHandle> &classDef)
@@ -1280,44 +1284,20 @@ void Lua::WIBase::GetMousePos(lua_State *l,WIHandle &hPanel)
 	hPanel->GetMousePos(&x,&y);
 	luabind::object(l,Vector2(x,y)).push(l);
 }
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,const Mat4 &matPostTransform,bool bUseScissor)
+void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->Draw(
-		CInt32(size.x),CInt32(size.y),
-		offset,
-		Vector2i(0,0), // Parent Offset
-		umat::identity(),bUseScissor,
-		&matPostTransform
-	);
+	hPanel->Draw(drawInfo);
 }
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,bool bUseScissor)
+void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize)
 {
-	Lua::WIBase::Draw(l,hPanel,offset,size,umat::identity(),bUseScissor);
+	lua_checkgui(l,hPanel);
+	hPanel->Draw(drawInfo,Vector2i{},scissorOffset,scissorSize);
 }
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size,const Mat4 &matPostTransform,bool bUseScissor)
+void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent)
 {
-	Lua::WIBase::Draw(l,hPanel,Vector2(0.f,0.f),size,matPostTransform,bUseScissor);
-}
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size,bool bUseScissor)
-{
-	Lua::WIBase::Draw(l,hPanel,Vector2(0.f,0.f),size,umat::identity(),bUseScissor);
-}
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size,const Mat4 &matPostTransform)
-{
-	Lua::WIBase::Draw(l,hPanel,offset,size,matPostTransform,false);
-}
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &offset,const Vector2 &size)
-{
-	Lua::WIBase::Draw(l,hPanel,offset,size,true);
-}
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2&,const Mat4 &matPostTransform)
-{
-	Lua::WIBase::Draw(l,hPanel,Vector2(0.f,0.f),matPostTransform,true);
-}
-void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const Vector2 &size)
-{
-	Lua::WIBase::Draw(l,hPanel,size,true);
+	lua_checkgui(l,hPanel);
+	hPanel->Draw(drawInfo,offsetParent,scissorOffset,scissorSize);
 }
 void Lua::WIBase::GetX(lua_State *l,WIHandle &hPanel)
 {

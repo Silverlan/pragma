@@ -3,9 +3,10 @@
 
 REGISTER_PARTICLE_INITIALIZER(speed,CParticleInitializerSpeed);
 
-CParticleInitializerSpeed::CParticleInitializerSpeed(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleInitializer(pSystem,values),m_fSpeed("speed",values)
+void CParticleInitializerSpeed::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleInitializer::Initialize(pSystem,values);
+	m_fSpeed.Initialize("speed",values);
 	for(auto &pair : values)
 	{
 		auto key = pair.first;
@@ -16,7 +17,7 @@ CParticleInitializerSpeed::CParticleInitializerSpeed(pragma::CParticleSystemComp
 			m_fSpeed.SetMax(util::to_float(pair.second));
 	}
 }
-void CParticleInitializerSpeed::Initialize(CParticle &particle)
+void CParticleInitializerSpeed::OnParticleCreated(CParticle &particle)
 {
 	auto vel = particle.GetVelocity();
 	auto l = uvec::length(vel);

@@ -11,9 +11,10 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-CParticleRendererRotationalBuffer::CParticleRendererRotationalBuffer(pragma::CParticleSystemComponent &pSystem)
-	: m_hParticleSystem(pSystem.GetHandle<pragma::CParticleSystemComponent>())
+void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemComponent &pSystem)
 {
+	m_hParticleSystem = pSystem.GetHandle<pragma::CParticleSystemComponent>();
+
 	auto maxParticles = pSystem.GetMaxParticleCount();
 	m_rotations.resize(maxParticles);
 

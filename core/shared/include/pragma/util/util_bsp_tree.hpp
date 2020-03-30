@@ -6,10 +6,10 @@
 #include <array>
 #include <mathutil/uvec.h>
 
-namespace bsp {class File;};
 namespace util
 {
 	class DLLNETWORK BSPTree
+		: public std::enable_shared_from_this<BSPTree>
 	{
 	public:
 		struct Node
@@ -38,11 +38,8 @@ namespace util
 			Plane plane = {};
 
 			friend BSPTree;
-		private:
-			void Initialize(::bsp::File &bsp,const std::array<int16_t,3u> &min,const std::array<int16_t,3u> &max,uint16_t firstFace,uint16_t faceCount);
 		};
-		static BSPTree Create(::bsp::File &bsp);
-		static BSPTree Create();
+		static std::shared_ptr<BSPTree> Create();
 		bool IsValid() const;
 		bool IsClusterVisible(uint16_t clusterSrc,uint16_t clusterDst) const;
 		const Node &GetRootNode() const;
@@ -56,10 +53,8 @@ namespace util
 		std::vector<Node*> FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max);
 
 		std::shared_ptr<Node> CreateNode();
-	private:
+	protected:
 		BSPTree()=default;
-		std::shared_ptr<Node> CreateNode(::bsp::File &bsp,int32_t nodeIndex);
-		std::shared_ptr<Node> CreateLeaf(::bsp::File &bsp,int32_t nodeIndex);
 		std::shared_ptr<Node> m_rootNode = nullptr;
 		std::vector<std::shared_ptr<Node>> m_nodes = {};
 		std::vector<uint8_t> m_clusterVisibility = {};

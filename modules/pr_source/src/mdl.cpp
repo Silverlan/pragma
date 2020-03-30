@@ -2780,7 +2780,10 @@ std::shared_ptr<Model> import::load_mdl(
 				{
 					auto &face = colObj.faceSections.front();
 					boneId = face.boneIdx;
-					bone = bones[boneId]; // TODO Faces with different bones?
+					if(boneId >= 0 && boneId < bones.size())
+						bone = bones[boneId]; // TODO Faces with different bones?
+					else
+						Con::cwar<<"WARNING: Physics has reference to bone "<<boneId<<", which does not exist! Ignoring..."<<Con::endl;
 				}
 				auto &verts = colMesh->GetVertices();
 				verts.reserve(colObj.vertices.size());
@@ -3317,21 +3320,7 @@ std::shared_ptr<Model> import::load_mdl(
 
 	mdl.Update(ModelUpdateFlags::All);
 
-	if(engine->ShouldMountExternalGameResources())
-	{
-		// Immediately attempt to port all of the materials / textures associated with the model
-		for(auto &matName : mdl.GetTextures())
-		{
-			for(auto &lookupPath : mdl.GetTexturePaths())
-			{
-				auto matPath = lookupPath +matName;
-				if(FileManager::Exists("materials/" +matPath +".wmi") || FileManager::Exists("materials/" +matPath +".vmt"))
-					break; // Material exists, no need to do anything
-				if(nw->PortMaterial(matPath +".wmi",nullptr))
-					break;
-			}
-		}
-	}
+	import::util::port_model_texture_assets(*nw,mdl);
 
 	if(optLog)
 		(*optLog)<<"Done!\n";

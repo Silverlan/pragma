@@ -8,7 +8,8 @@ namespace prosper {class Buffer;};
 class DLLCLIENT CParticleRendererRotationalBuffer
 {
 public:
-	CParticleRendererRotationalBuffer(pragma::CParticleSystemComponent &pSystem);
+	CParticleRendererRotationalBuffer()=default;
+	void Initialize(pragma::CParticleSystemComponent &pSystem);
 	virtual bool Update();
 	const std::shared_ptr<prosper::Buffer> &GetBuffer() const;
 	void SetRotationAlignVelocity(bool b);

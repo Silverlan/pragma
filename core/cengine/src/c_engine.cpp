@@ -59,6 +59,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
+#pragma optimize("",off)
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -562,6 +563,21 @@ bool CEngine::Initialize(int argc,char *argv[])
 			for(auto &format : formats)
 			{
 				if(util::port_file(cl,path +'.' +format.extension) == true)
+					break;
+			}
+		}
+		return nullptr;
+	});
+	matManager->SetTextureImporter([this](const std::string &fpath,const std::string &outputPath) -> VFilePtr {
+		if(FileManager::Exists(fpath) == false)
+		{
+			auto &formats = MaterialManager::get_supported_image_formats();
+			auto *cl = GetClientState();
+			auto path = fpath;
+			ufile::remove_extension_from_filename(path);
+			for(auto &format : formats)
+			{
+				if(util::port_file(cl,path +'.' +format.extension,outputPath +'.' +format.extension) == true)
 					break;
 			}
 		}
@@ -1331,3 +1347,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

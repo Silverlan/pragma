@@ -10,15 +10,17 @@ class DLLCLIENT CParticleOperatorRadiusFadeBase
 	public CParticleModifierComponentGradualFade
 {
 public:
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double) override;
-	virtual void Initialize(CParticle &particle) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 protected:
-	CParticleOperatorRadiusFadeBase(const std::string &identifier,pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorRadiusFadeBase(const std::string &identifier);
 	virtual void ApplyRadius(CParticle &particle,float radius) const=0;
 private:
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fRadiusStart;
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fRadiusEnd;
 	std::unique_ptr<std::vector<float>> m_particleStartRadiuses = nullptr;
+	std::string m_identifier;
 };
 
 ////////////////////////////
@@ -27,7 +29,7 @@ class DLLCLIENT CParticleOperatorRadiusFade
 	: public CParticleOperatorRadiusFadeBase
 {
 public:
-	CParticleOperatorRadiusFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorRadiusFade();
 protected:
 	virtual void ApplyRadius(CParticle &particle,float radius) const override;
 };
@@ -38,7 +40,7 @@ class DLLCLIENT CParticleOperatorLengthFade
 	: public CParticleOperatorRadiusFadeBase
 {
 public:
-	CParticleOperatorLengthFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorLengthFade();
 protected:
 	virtual void ApplyRadius(CParticle &particle,float radius) const override;
 };

@@ -10,13 +10,13 @@ class DLLCLIENT CParticleInitializerLifetimeRandom
 	: public CParticleInitializer
 {
 private:
-	float m_lifeMin;
-	float m_lifeMax;
+	float m_lifeMin = 0.f;
+	float m_lifeMax = 0.f;
 public:
-	CParticleInitializerLifetimeRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-		: CParticleInitializer(pSystem,values),
-		m_lifeMin(0),m_lifeMax(0)
+	CParticleInitializerLifetimeRandom()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override
 	{
+		CParticleInitializer::Initialize(pSystem,values);
 		for(auto it=values.begin();it!=values.end();it++)
 		{
 			std::string key = it->first;
@@ -27,7 +27,7 @@ public:
 				m_lifeMax = util::to_float(it->second);
 		}
 	}
-	void Initialize(CParticle &particle)
+	virtual void OnParticleCreated(CParticle &particle) override
 	{
 		particle.SetLife(umath::random(m_lifeMin,m_lifeMax));
 	}
@@ -38,14 +38,14 @@ class DLLCLIENT CParticleInitializerColorRandom
 	: public CParticleInitializer
 {
 private:
-	Color m_colorA;
-	Color m_colorB;
-	std::unique_ptr<Color> m_colorC;
+	Color m_colorA = Color::White;
+	Color m_colorB = Color::White;
+	std::unique_ptr<Color> m_colorC = nullptr;
 public:
-	CParticleInitializerColorRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-		: CParticleInitializer(pSystem,values),
-		m_colorA(255,255,255,255),m_colorB(255,255,255,255)
+	CParticleInitializerColorRandom()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override
 	{
+		CParticleInitializer::Initialize(pSystem,values);
 		for(auto it=values.begin();it!=values.end();it++)
 		{
 			std::string key = it->first;
@@ -58,7 +58,7 @@ public:
 				m_colorC = std::make_unique<Color>(it->second);
 		}
 	}
-	void Initialize(CParticle &particle)
+	virtual void OnParticleCreated(CParticle &particle) override
 	{
 		auto col = m_colorA.Lerp(m_colorB,umath::random(0.f,1.f));
 		if(m_colorC != nullptr)
@@ -72,13 +72,13 @@ class DLLCLIENT CParticleInitializerAlphaRandom
 	: public CParticleInitializer
 {
 private:
-	float m_alphaMin;
-	float m_alphaMax;
+	float m_alphaMin = 0.f;
+	float m_alphaMax = 255.f;
 public:
-	CParticleInitializerAlphaRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-		: CParticleInitializer(pSystem,values),
-		m_alphaMin(0.f),m_alphaMax(255.f)
+	CParticleInitializerAlphaRandom()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override
 	{
+		CParticleInitializer::Initialize(pSystem,values);
 		for(auto it=values.begin();it!=values.end();it++)
 		{
 			std::string key = it->first;
@@ -89,7 +89,7 @@ public:
 				m_alphaMax = util::to_float(it->second);
 		}
 	}
-	void Initialize(CParticle &particle)
+	virtual void OnParticleCreated(CParticle &particle) override
 	{
 		Color &col = particle.GetColor();
 		col.a = CInt16(umath::random(m_alphaMin,m_alphaMax));
@@ -108,9 +108,10 @@ private:
 	float m_planarRotMax = 0.f;
 	bool m_bUseQuaternionRotation = false;
 public:
-	CParticleInitializerRotationRandom(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-		: CParticleInitializer(pSystem,values)
+	CParticleInitializerRotationRandom()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override
 	{
+		CParticleInitializer::Initialize(pSystem,values);
 		for(auto it=values.begin();it!=values.end();it++)
 		{
 			std::string key = it->first;
@@ -132,7 +133,7 @@ public:
 			}
 		}
 	}
-	void Initialize(CParticle &particle)
+	virtual void OnParticleCreated(CParticle &particle) override
 	{
 		if(m_bUseQuaternionRotation == true)
 		{
@@ -147,39 +148,18 @@ REGISTER_PARTICLE_INITIALIZER(rotation_random,CParticleInitializerRotationRandom
 
 ///////////////////////
 
-CParticleModifier::CParticleModifier(pragma::CParticleSystemComponent &pSystem)
-	: m_particleSystem(pSystem)
-{}
+void CParticleModifier::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) {m_particleSystem = &pSystem;}
 
-CParticleModifier::~CParticleModifier()
-{}
+pragma::CParticleSystemComponent &CParticleModifier::GetParticleSystem() const {return *m_particleSystem;}
 
-pragma::CParticleSystemComponent &CParticleModifier::GetParticleSystem() {return m_particleSystem;}
-
-void CParticleModifier::Initialize(CParticle&) {}
-void CParticleModifier::Initialize() {}
-void CParticleModifier::Destroy(CParticle&) {}
-void CParticleModifier::Destroy() {}
+void CParticleModifier::OnParticleCreated(CParticle&) {}
+void CParticleModifier::OnParticleSystemStarted() {}
+void CParticleModifier::OnParticleDestroyed(CParticle&) {}
+void CParticleModifier::OnParticleSystemStopped() {}
 void CParticleModifier::SetName(const std::string &name) {m_name = name;}
 const std::string &CParticleModifier::GetName() const {return m_name;}
 
 ///////////////////////
-
-CParticleInitializer::CParticleInitializer(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string>&)
-	: CParticleModifier(pSystem)
-{}
-
-CParticleInitializer::~CParticleInitializer()
-{}
-
-///////////////////////
-
-CParticleOperator::CParticleOperator(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string>&)
-	: CParticleModifier(pSystem)
-{}
-
-CParticleOperator::~CParticleOperator()
-{}
 
 void CParticleOperator::Simulate(double)
 {}
@@ -193,23 +173,10 @@ void CParticleOperator::Simulate(CParticle&,double)
 void CParticleOperator::PostSimulate(CParticle &particle,double tDelta)
 {}
 
-CParticleOperatorLifespanDecay::CParticleOperatorLifespanDecay(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values)
-{
-#pragma message ("TODO: Actually implement this?")
-}
-
 void CParticleOperatorLifespanDecay::Simulate(CParticle&,double)
 {}
 
 ///////////////////////
-
-CParticleRenderer::CParticleRenderer(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleModifier(pSystem)
-{}
-
-CParticleRenderer::~CParticleRenderer()
-{}
 
 void CParticleRenderer::PostSimulate(double tDelta) {}
 
@@ -218,7 +185,7 @@ std::pair<Vector3,Vector3> CParticleRenderer::GetRenderBounds() const {return {u
 ///////////////////////
 
 DLLCLIENT ParticleModifierMap *g_ParticleModifierFactories = NULL;
-DLLCLIENT void LinkParticleInitializerToFactory(std::string name,std::unique_ptr<CParticleInitializer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+DLLCLIENT void LinkParticleInitializerToFactory(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	if(g_ParticleModifierFactories == NULL)
 	{
@@ -227,7 +194,7 @@ DLLCLIENT void LinkParticleInitializerToFactory(std::string name,std::unique_ptr
 	}
 	g_ParticleModifierFactories->AddInitializer(name,fc);
 }
-DLLCLIENT void LinkParticleOperatorToFactory(std::string name,std::unique_ptr<CParticleOperator>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+DLLCLIENT void LinkParticleOperatorToFactory(std::string name,const TParticleModifierFactory<CParticleOperator> &fc)
 {
 	if(g_ParticleModifierFactories == NULL)
 	{
@@ -236,7 +203,7 @@ DLLCLIENT void LinkParticleOperatorToFactory(std::string name,std::unique_ptr<CP
 	}
 	g_ParticleModifierFactories->AddOperator(name,fc);
 }
-DLLCLIENT void LinkParticleRendererToFactory(std::string name,std::unique_ptr<CParticleRenderer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+DLLCLIENT void LinkParticleRendererToFactory(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc)
 {
 	if(g_ParticleModifierFactories == NULL)
 	{
@@ -247,37 +214,37 @@ DLLCLIENT void LinkParticleRendererToFactory(std::string name,std::unique_ptr<CP
 }
 DLLCLIENT ParticleModifierMap *GetParticleModifierMap() {return g_ParticleModifierFactories;}
 
-void ParticleModifierMap::AddInitializer(std::string name,std::unique_ptr<CParticleInitializer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+void ParticleModifierMap::AddInitializer(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	StringToLower(name);
-	m_initializers.insert(std::unordered_map<std::string,std::unique_ptr<CParticleInitializer>(*)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)>::value_type(name,fc));
+	m_initializers.insert(std::make_pair(name,fc));
 }
-void ParticleModifierMap::AddOperator(std::string name,std::unique_ptr<CParticleOperator>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+void ParticleModifierMap::AddOperator(std::string name,const TParticleModifierFactory<CParticleOperator> &fc)
 {
 	StringToLower(name);
-	m_operators.insert(std::unordered_map<std::string,std::unique_ptr<CParticleOperator>(*)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)>::value_type(name,fc));
+	m_operators.insert(std::make_pair(name,fc));
 }
-void ParticleModifierMap::AddRenderer(std::string name,std::unique_ptr<CParticleRenderer>(*fc)(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&))
+void ParticleModifierMap::AddRenderer(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc)
 {
 	StringToLower(name);
-	m_renderers.insert(decltype(m_renderers)::value_type(name,fc));
+	m_renderers.insert(std::make_pair(name,fc));
 }
 
-std::unique_ptr<CParticleInitializer >(*ParticleModifierMap::FindInitializer(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)
+TParticleModifierFactory<CParticleInitializer> ParticleModifierMap::FindInitializer(std::string classname)
 {
 	auto it = m_initializers.find(classname);
 	if(it == m_initializers.end())
 		return NULL;
 	return it->second;
 }
-std::unique_ptr<CParticleOperator >(*ParticleModifierMap::FindOperator(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)
+TParticleModifierFactory<CParticleOperator> ParticleModifierMap::FindOperator(std::string classname)
 {
 	auto it = m_operators.find(classname);
 	if(it == m_operators.end())
 		return NULL;
 	return it->second;
 }
-std::unique_ptr<CParticleRenderer >(*ParticleModifierMap::FindRenderer(std::string classname))(pragma::CParticleSystemComponent&,const std::unordered_map<std::string,std::string>&)
+TParticleModifierFactory<CParticleRenderer> ParticleModifierMap::FindRenderer(std::string classname)
 {
 	auto it = m_renderers.find(classname);
 	if(it == m_renderers.end())

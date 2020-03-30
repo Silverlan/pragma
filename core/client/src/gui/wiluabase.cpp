@@ -114,10 +114,10 @@ void WILuaBase::SetAlpha(float alpha)
 	WIBase::SetAlpha(alpha);
 	CallLuaMember<void,float>("OnAlphaChanged",alpha);
 }
-void WILuaBase::Render(int w,int h,const Mat4 &mat,const Vector2i &origin,const Mat4 &matParent)
+void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw)
 {
-	WIBase::Render(w,h,mat,origin,matParent);
-	CallLuaMember<void,int,int,Mat4>("OnDraw",w,h,mat);
+	WIBase::Render(drawInfo,matDraw);
+	CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4>("OnDraw",std::ref(drawInfo),matDraw);
 }
 void WILuaBase::OnCursorEntered()
 {
@@ -180,8 +180,8 @@ void WILuaWrapper::default_OnSetColor(lua_State*,WIHandle&,float,float,float,flo
 void WILuaWrapper::OnSetAlpha(float) {}
 void WILuaWrapper::default_OnSetAlpha(lua_State*,WIHandle&,float) {}
 
-void WILuaWrapper::Render(int,int,Mat4) {}
-void WILuaWrapper::default_Render(lua_State*,WIHandle&,int,int,Mat4) {}
+void WILuaWrapper::Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw) {}
+void WILuaWrapper::default_Render(lua_State*,WIHandle&,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw) {}
 
 void WILuaWrapper::OnCursorEntered() {}
 void WILuaWrapper::default_OnCursorEntered(lua_State*,WIHandle&) {}

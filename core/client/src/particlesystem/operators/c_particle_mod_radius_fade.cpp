@@ -6,15 +6,22 @@
 REGISTER_PARTICLE_OPERATOR(radius_fade,CParticleOperatorRadiusFade);
 REGISTER_PARTICLE_OPERATOR(length_fade,CParticleOperatorLengthFade);
 
-CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::string &identifier,pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values),CParticleModifierComponentGradualFade(values),
-	m_fRadiusStart(identifier +"_start",values),m_fRadiusEnd(identifier +"_end",values)
+CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::string &identifier)
+	: CParticleOperator{},m_identifier{identifier}
+	
+{}
+void CParticleOperatorRadiusFadeBase::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
+	CParticleModifierComponentGradualFade::Initialize(values);
+	m_fRadiusStart.Initialize(m_identifier +"_start",values);
+	m_fRadiusEnd.Initialize(m_identifier +"_end",values);
+
 	for(auto it=values.begin();it!=values.end();it++)
 	{
 		std::string key = it->first;
 		StringToLower(key);
-		if(key == identifier) // Alternative to "radius_end"
+		if(key == m_identifier) // Alternative to "radius_end"
 			m_fRadiusEnd.SetRange(util::to_float(it->second));
 	}
 
@@ -23,7 +30,7 @@ CParticleOperatorRadiusFadeBase::CParticleOperatorRadiusFadeBase(const std::stri
 	if(m_fRadiusStart.IsSet() == false)
 		m_particleStartRadiuses = std::make_unique<std::vector<float>>(pSystem.GetMaxParticleCount(),std::numeric_limits<float>::max());
 }
-void CParticleOperatorRadiusFadeBase::Initialize(CParticle &particle)
+void CParticleOperatorRadiusFadeBase::OnParticleCreated(CParticle &particle)
 {
 	if(m_particleStartRadiuses == nullptr)
 		return;
@@ -52,15 +59,15 @@ void CParticleOperatorRadiusFadeBase::Simulate(CParticle &particle,double)
 
 ////////////////////////////
 
-CParticleOperatorRadiusFade::CParticleOperatorRadiusFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorRadiusFadeBase("radius",pSystem,values)
+CParticleOperatorRadiusFade::CParticleOperatorRadiusFade()
+	: CParticleOperatorRadiusFadeBase("radius")
 {}
 void CParticleOperatorRadiusFade::ApplyRadius(CParticle &particle,float radius) const {particle.SetRadius(radius);}
 
 ////////////////////////////
 
-CParticleOperatorLengthFade::CParticleOperatorLengthFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperatorRadiusFadeBase("length",pSystem,values)
+CParticleOperatorLengthFade::CParticleOperatorLengthFade()
+	: CParticleOperatorRadiusFadeBase("length")
 {}
 void CParticleOperatorLengthFade::ApplyRadius(CParticle &particle,float radius) const {particle.SetLength(radius);}
 

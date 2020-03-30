@@ -13,6 +13,7 @@ namespace Lua
 		DLLCLIENT int precache_material(lua_State *l);
 		DLLCLIENT int precache_model(lua_State *l);
 		DLLCLIENT int load_material(lua_State *l);
+		DLLCLIENT int load_texture(lua_State *l);
 		DLLCLIENT int get_error_material(lua_State *l);
 		DLLCLIENT int clear_unused_materials(lua_State *l);
 		DLLCLIENT int create_material(lua_State *l);

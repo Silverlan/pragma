@@ -15,6 +15,7 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
@@ -25,9 +26,9 @@ void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::PrimaryCommandB
 	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomBlurRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 	prosper::util::record_blit_texture(**drawCmd,*hdrInfo.bloomTexture,**hdrInfo.bloomBlurRenderTarget->GetTexture()->GetImage());
 
-	const auto blurSize = 5.f;
-	const auto kernelSize = 9u;
-	const auto blurAmount = 5u;
+	static auto blurSize = 5.f;
+	static int32_t kernelSize = 9u;
+	static uint32_t blurAmount = 5u;
 
 	prosper::util::record_image_barrier(*(*drawCmd),**hdrInfo.bloomBlurRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
@@ -117,3 +118,4 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::PrimaryCom
 		shader->EndDraw();
 	}
 }
+#pragma optimize("",on)

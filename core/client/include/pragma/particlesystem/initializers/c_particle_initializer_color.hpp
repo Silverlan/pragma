@@ -10,8 +10,9 @@ class DLLCLIENT CParticleInitializerColor
 	public CParticleModifierComponentRandomColor
 {
 public:
-	CParticleInitializerColor(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerColor()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 };
 
 #endif

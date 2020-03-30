@@ -75,6 +75,7 @@ public:
 	std::shared_ptr<pragma::physics::IShape> GetShape();
 	bool IntersectAABB(Vector3 *min,Vector3 *max);
 	void UpdateShape();
+	void ClearShape();
 	void SetConvex(bool bConvex);
 	bool IsConvex() const;
 	std::vector<Vector3> &GetVertices();

@@ -136,8 +136,6 @@ void CWorldComponent::OnEntitySpawn()
 void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseWorldComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(pragma::CPhysicsComponent))
-		static_cast<pragma::CPhysicsComponent&>(component).SetCollisionType(COLLISIONTYPE::BRUSH);
 }
 std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const {return m_meshTree;};
 std::shared_ptr<CHC> CWorldComponent::GetCHCController() const {return m_chcController;}

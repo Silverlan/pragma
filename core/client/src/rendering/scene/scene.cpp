@@ -26,7 +26,7 @@
 #include <sharedutils/property/util_property_vector.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-
+#include <pragma/entities/entity_iterator.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
@@ -160,6 +160,8 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.viewportW = w;
 	m_renderSettings.viewportH = h;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
+	m_renderSettings.lightmapIntensity = 1.f;
+	m_renderSettings.lightmapSqrt = 0.f;
 
 	if(m_renderer)
 		m_renderer->UpdateRenderSettings(m_renderSettings);
@@ -401,6 +403,13 @@ bool Scene::HasLightSource(pragma::CLightComponent &lightSource) const
 	auto it = m_lightSources->lightSourceLookupTable.find(&lightSource);
 	return it != m_lightSources->lightSourceLookupTable.end();
 }
+void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
+{
+	auto &renderSettings = GetRenderSettings();
+	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
+	renderSettings.lightmapSqrt = lightMapC.GetLightMapSqrtFactor();
+	UpdateRenderSettings();
+}
 void Scene::UpdateRenderSettings()
 {
 	if(m_worldEnvironment == nullptr)
@@ -408,7 +417,7 @@ void Scene::UpdateRenderSettings()
 	auto &unlitProperty = m_worldEnvironment->GetUnlitProperty();
 	auto flags = FRenderSetting::None;
 	if(unlitProperty->GetValue() == true)
-		flags |= FRenderSetting::Unlit;\
+		flags |= FRenderSetting::Unlit;
 	m_renderSettings.flags = umath::to_integral(flags);
 	if(m_renderer)
 		m_renderer->UpdateRenderSettings(m_renderSettings);

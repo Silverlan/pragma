@@ -8,7 +8,8 @@ class DLLCLIENT CParticleOperatorLinearDrag
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorLinearDrag(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorLinearDrag()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
 private:

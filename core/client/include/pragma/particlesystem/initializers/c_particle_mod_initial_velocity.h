@@ -9,8 +9,9 @@ class DLLCLIENT CParticleInitializerInitialVelocity
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerInitialVelocity(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	void Initialize(CParticle &particle);
+	CParticleInitializerInitialVelocity()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 	float GetSpeed() const;
 private:
 	Vector3 m_direction = {};

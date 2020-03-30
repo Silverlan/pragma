@@ -9,8 +9,9 @@ class DLLCLIENT CParticleInitializerSpeed
 	: public CParticleInitializer
 {
 public:
-	CParticleInitializerSpeed(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Initialize(CParticle &particle) override;
+	CParticleInitializerSpeed()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	CParticleModifierComponentRandomVariable<std::uniform_real_distribution<float>,float> m_fSpeed;
 };

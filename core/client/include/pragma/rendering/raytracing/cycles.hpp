@@ -16,12 +16,18 @@ namespace pragma::rendering::cycles
 {
 	struct DLLCLIENT SceneInfo
 	{
+		enum class DeviceType : uint8_t
+		{
+			CPU = 0,
+			GPU
+		};
 		uint32_t width = 1'024;
 		uint32_t height = 768;
 		uint32_t samples = 1'024;
 		bool denoise = true;
 		bool hdrOutput = false;
 		bool cullObjectsOutsidePvs = true;
+		DeviceType device = DeviceType::CPU;
 		std::string sky = "";
 		float skyStrength = 1.f;
 		EulerAngles skyAngles = {};

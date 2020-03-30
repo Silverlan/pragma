@@ -10,7 +10,8 @@ class DLLCLIENT CParticleModifierComponentGradualFade
 	public CParticleModifierComponentTime
 {
 protected:
-	CParticleModifierComponentGradualFade(const std::unordered_map<std::string,std::string> &values);
+	CParticleModifierComponentGradualFade()=default;
+	void Initialize(const std::unordered_map<std::string,std::string> &values);
 
 	float GetStartTime(CParticle &p) const;
 	float GetEndTime(CParticle &p) const;

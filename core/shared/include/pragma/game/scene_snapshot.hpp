@@ -49,7 +49,7 @@ namespace pragma
 		SceneSnapshot &operator=(const SceneSnapshot&)=delete;
 
 		void MergeMeshesByMaterial();
-		void AddModel(Model &mdl,uint32_t skin=0u,std::vector<std::vector<Vector2>> *inLightmapUvs=nullptr);
+		void AddModel(Model &mdl,uint32_t skin=0u);
 		const std::vector<std::shared_ptr<Mesh>> &GetMeshes() const;
 		std::vector<std::shared_ptr<Mesh>> &GetMeshes();
 		const std::vector<std::shared_ptr<Object>> &GetObjects() const;

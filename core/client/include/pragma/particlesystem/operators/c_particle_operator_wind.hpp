@@ -8,7 +8,8 @@ class DLLCLIENT CParticleOperatorWind
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorWind(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorWind()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void Simulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
 private:

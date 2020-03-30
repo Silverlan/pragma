@@ -14,6 +14,7 @@ template<class TUniformDis,typename T>
 public:
 	CParticleModifierComponentRandomVariable()=default;
 	CParticleModifierComponentRandomVariable(const std::string &identifier,const std::unordered_map<std::string,std::string> &values);
+	void Initialize(const std::string &identifier,const std::unordered_map<std::string,std::string> &values);
 	template<typename U=T>
 		typename std::enable_if<std::is_integral<T>::value,U>::type GetValue(CParticle &p) const;
 	template<typename U=T>
@@ -34,6 +35,11 @@ private:
 
 template<class TUniformDis,typename T>
 	CParticleModifierComponentRandomVariable<TUniformDis,T>::CParticleModifierComponentRandomVariable(const std::string &identifier,const std::unordered_map<std::string,std::string> &values)
+{
+	Initialize(identifier,values);
+}
+template<class TUniformDis,typename T>
+	void CParticleModifierComponentRandomVariable<TUniformDis,T>::Initialize(const std::string &identifier,const std::unordered_map<std::string,std::string> &values)
 {
 	auto it = values.find(identifier);
 	if(it != values.end())

@@ -117,14 +117,9 @@ int Lua::lib_export::export_scene(lua_State *l)
 
 	auto &ent = world->GetEntity();
 
-	std::vector<std::vector<Vector2>> *lightmapUvs = nullptr;
-	auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
-	if(lightmapC.valid())
-		lightmapUvs = &lightmapC->GetLightmapUvs();
-
 	Assimp::Exporter exporter;
 	auto sceneSnapshot = pragma::SceneSnapshot::Create();
-	sceneSnapshot->AddModel(*mdl,ent.GetSkin(),lightmapUvs);
+	sceneSnapshot->AddModel(*mdl,ent.GetSkin());
 	sceneSnapshot->MergeMeshesByMaterial();
 	auto scene = Lua::import::snapshot_to_assimp_scene(*sceneSnapshot);
 

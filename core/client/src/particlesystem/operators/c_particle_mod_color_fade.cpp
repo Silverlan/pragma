@@ -3,17 +3,20 @@
 
 REGISTER_PARTICLE_OPERATOR(color_fade,CParticleOperatorColorFade);
 
-CParticleOperatorColorFade::CParticleOperatorColorFade(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
-	: CParticleOperator(pSystem,values),CParticleModifierComponentGradualFade(values),
-	m_colorStart("start",values),m_colorEnd("end",values)
+void CParticleOperatorColorFade::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
+	CParticleOperator::Initialize(pSystem,values);
+	CParticleModifierComponentGradualFade::Initialize(values);
+	m_colorStart.Initialize("start",values);
+	m_colorEnd.Initialize("end",values);
+
 	m_colorEnd.Initialize("",values); // Allows "color" as alternative to "color_end"
-	// If no start color has been specified, the previous known color of the particle has to be used as start color.
-	// Since that color cannot be known beforehand, we need to store it.
+									  // If no start color has been specified, the previous known color of the particle has to be used as start color.
+									  // Since that color cannot be known beforehand, we need to store it.
 	if(m_colorStart.IsSet() == false)
 		m_particleStartColors = std::make_unique<std::vector<Color>>(pSystem.GetMaxParticleCount(),Color(std::numeric_limits<int16_t>::max(),0,0,0));
 }
-void CParticleOperatorColorFade::Initialize(CParticle &particle)
+void CParticleOperatorColorFade::OnParticleCreated(CParticle &particle)
 {
 	if(m_particleStartColors == nullptr)
 		return;

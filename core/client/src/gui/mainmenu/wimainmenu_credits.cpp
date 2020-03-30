@@ -121,6 +121,9 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	AddHeader(Locale::GetText("localization"));
 	AddText("Shmeerz (" +Locale::GetText("lan_portuguese") +")","credits_text");
 
+	AddHeader(Locale::GetText("tools_and_plugins"));
+	AddText("Ilya Getsman aka \"RED_EYE\" (Blender plugins)","credits_text");
+
 	AddHeader(Locale::GetText("powered_by"),"header2");
 	AddLogo("third_party/vulkan_logo");
 	AddLogo("third_party/fmod_logo");

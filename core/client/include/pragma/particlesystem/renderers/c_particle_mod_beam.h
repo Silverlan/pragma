@@ -9,10 +9,11 @@ class DLLCLIENT CParticleRendererBeam
 	: public CParticleRenderer
 {
 public:
-	CParticleRendererBeam(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleRendererBeam()=default;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
 	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
-	virtual void Destroy() override;
+	virtual void OnParticleSystemStopped() override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const override;
 private:
@@ -32,7 +33,7 @@ private:
 	std::vector<Node> m_nodeOrigins;
 	uint32_t m_indexCount = 0u;
 	util::WeakHandle<prosper::Shader> m_shader = {};
-	float m_curvature = 0.f;
+	float m_curvature = 1.f;
 	void UpdateNodes();
 };
 

@@ -8,9 +8,10 @@ class DLLCLIENT CParticleOperatorTextureScrolling
 	: public CParticleOperator
 {
 public:
-	CParticleOperatorTextureScrolling(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+	CParticleOperatorTextureScrolling()=default;
 	virtual void Simulate(CParticle &particle,double) override;
-	virtual void Initialize(CParticle &particle) override;
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	virtual void OnParticleCreated(CParticle &particle) override;
 private:
 	void SetFrameOffset(CParticle &particle,Vector2 uv);
 	float m_fHorizontalSpeed = 0.f;

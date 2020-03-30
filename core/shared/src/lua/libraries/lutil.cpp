@@ -933,6 +933,32 @@ int Lua::util::variable_type_to_string(lua_State *l)
 	return 1;
 }
 
+int Lua::util::get_string_hash(lua_State *l)
+{
+	auto *str = Lua::CheckString(l,1);
+	Lua::PushString(l,std::to_string(std::hash<std::string>{}(str)));
+	return 1;
+}
+
+int Lua::util::get_class_value(lua_State *l)
+{
+	int32_t t = 1;
+	Lua::CheckUserData(l,t);
+	auto oClass = luabind::object{luabind::from_stack{l,t}};
+
+	std::string key = Lua::CheckString(l,2);
+	Lua::PushString(l,key); /* 1 */
+	auto r = Lua::GetProtectedTableValue(l,t); /* 2 */
+	if(r != Lua::StatusCode::Ok)
+	{
+		Lua::Pop(l,2); /* 0 */
+		return 0;
+	}
+	// Pop key from stack
+	Lua::RemoveValue(l,-2); /* 1 */
+	return 1;
+}
+
 int Lua::util::get_addon_path(lua_State *l)
 {
 	auto path = Lua::get_current_file(l);

@@ -124,7 +124,7 @@ namespace pragma
 
 		struct PushConstants
 		{
-			Vector4 clipPlane; // w is unused
+			Vector4 clipPlane; // w is reflection probe intensity
 			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
@@ -141,6 +141,7 @@ namespace pragma
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;
 			float roughnessFactor = 0.f;
+			float emissionFactor = 1.f;
 		};
 #pragma pack(pop)
 
@@ -155,6 +156,7 @@ namespace pragma
 		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
 		void Set3DSky(bool is3dSky);
 	protected:

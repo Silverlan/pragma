@@ -139,7 +139,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 		}
 		CallChangeCallbacks(EResourceWatcherCallbackType::Model,path,ext);
 	}
-	else if(ext == "wmi" || ext == "vmt")
+	else if(ext == "wmi" || ext == "vmt" || ext == "vmat_c")
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto matPath = "materials\\" +path;

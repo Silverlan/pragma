@@ -20,7 +20,7 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	private:
-		bool CreateCubemapFromIndividualTextures(Material &mat,const std::string &postfix="") const;
+		bool CreateCubemapFromIndividualTextures(const std::string &materialPath,const std::string &postfix="") const;
 		void ValidateMaterials();
 		CallbackHandle m_cbOnModelMaterialsLoaded = {};
 	};

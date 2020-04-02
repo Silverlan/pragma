@@ -237,6 +237,11 @@ public:
 	std::string GetAnimationName(uint32_t animId) const;
 	uint32_t GetAnimationCount() const;
 	bool HasVertexWeights() const;
+	std::optional<float> CalcFlexWeight(
+		uint32_t flexId,
+		const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight,
+		const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight
+	) const;
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;

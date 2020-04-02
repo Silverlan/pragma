@@ -12,7 +12,15 @@ namespace source2
 {
 	namespace impl
 	{
-		void initialize_vertices(const source2::resource::VBIB::VertexBuffer &vbuf,ModelSubMesh &mesh,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex=nullptr);
+		struct MeshData
+		{
+			std::vector<Vertex> verts;
+			std::vector<VertexWeight> vertWeights;
+			std::vector<Vector2> lightmapUvs;
+		};
+		MeshData initialize_vertices(
+			const source2::resource::VBIB::VertexBuffer &vbuf,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex=nullptr
+		);
 		std::shared_ptr<resource::Resource> load_resource(NetworkState &nw,std::shared_ptr<VFilePtrInternal> &f);
 		uint64_t vertex_attr_value_to_index(uint32_t size,const uint8_t *data);
 		Vector3 convert_source2_vector_to_pragma(const Vector3 &v);

@@ -51,24 +51,95 @@ static uint32_t add_material(NetworkState &nw,Model &mdl,const std::string &mat,
 		auto *texGroup = mdl.GetTextureGroup(*skinId);
 		if(texGroup == nullptr)
 			texGroup = mdl.CreateTextureGroup();
-		return import::util::add_texture(nw,mdl,strFile,texGroup);
+		return import::util::add_texture(nw,mdl,strFile,texGroup,true);
 	}
-	else
+	auto *texGroup = mdl.GetTextureGroup(0);
+	if(texGroup)
 	{
-		auto *texGroup = mdl.GetTextureGroup(0);
-		if(texGroup)
+		auto n = texGroup->textures.size();
+		auto idx = import::util::add_texture(nw,mdl,strFile,texGroup);
+		if(texGroup->textures.size() > n) // Texture was added, so we'll have to add it to the other texture groups as well
 		{
-			auto n = texGroup->textures.size();
-			import::util::add_texture(nw,mdl,strFile,texGroup);
-			if(texGroup->textures.size() > n) // Texture was added, so we'll have to add it to the other texture groups as well
-			{
-				auto &texGroups = mdl.GetTextureGroups();
-				for(auto i=decltype(texGroups.size()){1u};i<texGroups.size();++i)
-					import::util::add_texture(nw,mdl,strFile,&texGroups.at(i),true);
-			}
+			auto &texGroups = mdl.GetTextureGroups();
+			for(auto i=decltype(texGroups.size()){1u};i<texGroups.size();++i)
+				import::util::add_texture(nw,mdl,strFile,&texGroups.at(i),true);
+		}
+		return idx;
+	}
+	return 0;
+}
+
+static std::vector<std::shared_ptr<ModelSubMesh>> generate_split_meshes(NetworkState &nw,const source2::impl::MeshData &meshData,const std::vector<uint64_t> &indices)
+{
+	constexpr auto MAX_VERTEX_COUNT_PER_MESH = std::numeric_limits<uint16_t>::max();
+	// Pragma doesn't support a vertex count > MAX_VERTEX_COUNT_PER_MESH,
+	// so we'll have to split the mesh
+	struct SplitMesh
+	{
+		std::vector<Vertex> verts {};
+		std::vector<VertexWeight> vertWeights {};
+		std::vector<Vector2> lightmapUvs {};
+	};
+	std::vector<SplitMesh> splitMeshes {};
+
+	auto hasVertexWeights = (meshData.vertWeights.empty() == false);
+	auto hasLightmapUvs = (meshData.lightmapUvs.empty() == false);
+
+	for(auto i=decltype(indices.size()){0u};i<indices.size();i+=3)
+	{
+		auto idx0 = indices.at(i);
+		auto idx1 = indices.at(i +1);
+		auto idx2 = indices.at(i +2);
+
+	}
+
+	auto numVerts = meshData.verts.size();
+	auto &prVerts = meshData.verts;
+	auto &vertWeights = meshData.vertWeights;
+	auto &lightmapUvs = meshData.lightmapUvs;
+	auto numSplitMeshes = numVerts /std::numeric_limits<uint16_t>::max() +1;
+	splitMeshes.reserve(numSplitMeshes);
+
+	for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+	{
+		auto meshIdx = i /MAX_VERTEX_COUNT_PER_MESH;
+		if(meshIdx >= splitMeshes.size())
+		{
+			splitMeshes.push_back({});
+			auto &splitMesh = splitMeshes.back();
+			splitMesh.verts.reserve(MAX_VERTEX_COUNT_PER_MESH);
+			if(hasVertexWeights)
+				splitMesh.vertWeights.reserve(MAX_VERTEX_COUNT_PER_MESH);
+			if(hasLightmapUvs)
+				splitMesh.lightmapUvs.reserve(MAX_VERTEX_COUNT_PER_MESH);
+		}
+		auto &splitMesh = splitMeshes.back();
+		splitMesh.verts.push_back(prVerts.at(i));
+		if(hasVertexWeights)
+			splitMesh.vertWeights.push_back(vertWeights.at(i));
+
+		if(hasLightmapUvs)
+			splitMesh.lightmapUvs.push_back(lightmapUvs.at(i));
+	}
+
+	std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
+	meshes.reserve(splitMeshes.size());
+	for(auto &splitMesh : splitMeshes)
+	{
+		auto mesh = std::shared_ptr<ModelSubMesh>{nw.CreateSubMesh()};
+		meshes.push_back(mesh);
+
+		mesh->GetVertices() = splitMesh.verts;
+		if(hasVertexWeights)
+			mesh->GetVertexWeights() = splitMesh.vertWeights;
+
+		if(hasLightmapUvs)
+		{
+			auto &uvSet = mesh->AddUVSet("lightmap");
+			uvSet = splitMesh.lightmapUvs;
 		}
 	}
-	return true;
+	return meshes;
 }
 
 static void initialize_scene_objects(
@@ -87,9 +158,9 @@ static void initialize_scene_objects(
 		auto drawCalls = sceneObject->FindArrayValues<source2::resource::IKeyValueCollection*>("m_drawCalls");
 		for(auto *drawCall : drawCalls)
 		{
-			auto prSubMesh = std::shared_ptr<ModelSubMesh>{nw.CreateSubMesh()};
-			prMesh->AddSubMesh(prSubMesh);
-			prSubMesh->SetSkinTextureIndex(0);
+			//auto prSubMesh = std::shared_ptr<ModelSubMesh>{nw.CreateSubMesh()};
+			//prMesh->AddSubMesh(prSubMesh);
+			//prSubMesh->SetSkinTextureIndex(0);
 			auto vertexCount = drawCall->FindValue<int64_t>("m_nVertexCount");
 			auto baseVertex = drawCall->FindValue<int64_t>("m_nBaseVertex");
 			auto primitiveType = drawCall->FindValue<std::string>("m_nPrimitiveType","");
@@ -109,12 +180,11 @@ static void initialize_scene_objects(
 				continue;
 			}
 
+			uint32_t skinTexIdx = 0;
 			if(material.has_value())
-			{
-				auto idx = add_material(nw,mdl,*material);
-				prSubMesh->SetSkinTextureIndex(idx);
-			}
+				skinTexIdx = add_material(nw,mdl,*material);
 
+			source2::impl::MeshData meshData {};
 			auto vertexBuffers = drawCall->FindArrayValues<source2::resource::IKeyValueCollection*>("m_vertexBuffers");
 			for(auto *vbuf : vertexBuffers)
 			{
@@ -124,7 +194,7 @@ static void initialize_scene_objects(
 				{
 					auto &vbuf = vbufs.at(*bufferIndex);
 					// TODO: bindOffsetBytes?
-					source2::impl::initialize_vertices(vbuf,*prSubMesh,&skinIndexToBoneIndex);
+					meshData = std::move(source2::impl::initialize_vertices(vbuf,&skinIndexToBoneIndex));
 				}
 				break; // TODO: How to handle multiple vertex buffers?
 			}
@@ -165,7 +235,7 @@ static void initialize_scene_objects(
 
 					// We don't need all vertices, so we'll just remove the unused ones
 					std::vector<bool> verticesUsed {};
-					auto &verts = prSubMesh->GetVertices();
+					auto &verts = meshData.verts;
 					auto numVerts = verts.size();
 					verticesUsed.resize(numVerts,false);
 					for(auto idx : tris)
@@ -179,7 +249,7 @@ static void initialize_scene_objects(
 						{
 							if(verticesUsed.at(i))
 								continue;
-							prSubMesh->RemoveVertex(i);
+							meshData.verts.erase(meshData.verts.begin() +i);
 						}
 					}
 
@@ -196,6 +266,11 @@ static void initialize_scene_objects(
 					for(auto &idx : tris)
 						idx = indexTranslationTable[idx];
 
+					auto meshes = generate_split_meshes(nw,meshData,tris);
+
+					//prSubMesh->SetSkinTextureIndex(idx);
+
+#if 0
 					auto &meshTris = prSubMesh->GetTriangles();
 					meshTris.reserve(tris.size());
 					auto hasIndicesThatExceedSupportedRange = false;
@@ -210,6 +285,7 @@ static void initialize_scene_objects(
 					}
 					if(hasIndicesThatExceedSupportedRange)
 						Con::cwar<<"WARNING: Mesh vertex count exceeds maximum supported number of vertices per mesh! Mesh may be rendered incorrectly..."<<Con::endl;
+#endif
 				}
 			}
 		}
@@ -264,10 +340,13 @@ std::shared_ptr<Model> source2::convert::convert_model(
 
 	auto s2Skeleton = s2Mdl.GetSkeleton();
 
-	std::unordered_map<int32_t,uint32_t> skinIndexToBoneIndex {};
+	std::vector<std::unordered_map<int32_t,uint32_t>> skinIndexToBoneIndexPerMesh {};
 	auto &skeleton = mdl.GetSkeleton();
 	skeleton.GetBones().clear();
 	skeleton.GetRootBones().clear();
+
+	auto s2Meshes = s2Mdl.GetEmbeddedMeshes();
+	skinIndexToBoneIndexPerMesh.resize(s2Meshes.size());
 	if(s2Skeleton)
 	{
 		auto reference = Animation::Create();
@@ -297,12 +376,20 @@ std::shared_ptr<Model> source2::convert::convert_model(
 			refFrame->SetBoneOrientation(i,s2Bone->GetRotation());
 			s2BoneToPragma[s2Bone.get()] = bone;
 
-			for(auto skinIdx : s2Bone->GetSkinIndices())
+			auto &skinIndicesPerMesh = s2Bone->GetSkinIndicesPerMesh();
+			if(skinIndicesPerMesh.size() > skinIndexToBoneIndexPerMesh.size())
+				skinIndexToBoneIndexPerMesh.resize(skinIndicesPerMesh.size());
+			for(auto i=decltype(skinIndicesPerMesh.size()){0u};i<skinIndicesPerMesh.size();++i)
 			{
-				auto it = skinIndexToBoneIndex.find(skinIdx);
-				if(it != skinIndexToBoneIndex.end() && it->second != boneId)
-					Con::cwar<<"WARNING: Multiple bones point to skin index "<<skinIdx<<": "<<bone->name<<" and "<<skeleton.GetBone(it->second).lock()->name<<"! Only one is permitted, this may cause animation issues!"<<Con::endl;
-				skinIndexToBoneIndex[skinIdx] = boneId;
+				auto &skinIndices = skinIndicesPerMesh.at(i);
+				auto &skinIndexToBoneIndex = skinIndexToBoneIndexPerMesh.at(i);
+				for(auto skinIdx : skinIndices)
+				{
+					auto it = skinIndexToBoneIndex.find(skinIdx);
+					if(it != skinIndexToBoneIndex.end() && it->second != boneId)
+						Con::cwar<<"WARNING: Multiple bones point to skin index "<<skinIdx<<": "<<bone->name<<" and "<<skeleton.GetBone(it->second).lock()->name<<"! Only one is permitted, this may cause animation issues!"<<Con::endl;
+					skinIndexToBoneIndex[skinIdx] = boneId;
+				}
 			}
 		}
 		for(auto &s2RootBone : s2Skeleton->GetRootBones())
@@ -334,7 +421,6 @@ std::shared_ptr<Model> source2::convert::convert_model(
 	auto meshGroups = s2Mdl.GetData()->FindArrayValues<std::string>("m_meshGroups");
 	auto refLodGroupMasks = s2Mdl.GetData()->FindArrayValues<int64_t>("m_refLODGroupMasks");
 
-	auto s2Meshes = s2Mdl.GetEmbeddedMeshes();
 	uint32_t meshIdx = 0;
 	for(auto &s2Mesh : s2Meshes)
 	{
@@ -351,7 +437,7 @@ std::shared_ptr<Model> source2::convert::convert_model(
 
 		auto *data = s2Mesh->GetResourceData()->GetData();
 		if(data)
-			initialize_scene_objects(nw,mdl,meshGroup,*s2Mesh->GetVBIB(),*data,skinIndexToBoneIndex);
+			initialize_scene_objects(nw,mdl,meshGroup,*s2Mesh->GetVBIB(),*data,skinIndexToBoneIndexPerMesh.at(meshIdx));
 		prMesh->AddSubMesh(prSubMesh);
 	}
 
@@ -375,7 +461,7 @@ std::shared_ptr<Model> source2::convert::convert_model(
 		auto *dataBlock = dynamic_cast<source2::resource::BinaryKV3*>(resource->FindBlock(source2::BlockType::DATA));
 		if(vbib == nullptr || dataBlock == nullptr)
 			continue;
-		initialize_scene_objects(nw,mdl,meshGroup,*vbib,*dataBlock->GetData(),skinIndexToBoneIndex);
+		initialize_scene_objects(nw,mdl,meshGroup,*vbib,*dataBlock->GetData(),skinIndexToBoneIndexPerMesh.at(refMeshIdx));
 	}
 
 	if(optResource)

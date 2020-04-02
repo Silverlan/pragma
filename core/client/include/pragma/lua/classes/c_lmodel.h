@@ -28,6 +28,7 @@ namespace Lua
 				};
 				bool exportAnimations = true;
 				bool exportSkinnedMeshData = true;
+				bool exportMorphTargets = true;
 				bool exportImages = true;
 				ImageFormat imageFormat = ImageFormat::DDS;
 				float scale = ::util::units_to_metres(1.f);

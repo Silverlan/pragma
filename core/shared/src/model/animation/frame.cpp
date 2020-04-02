@@ -117,6 +117,10 @@ Frame::Frame(const Frame &other)
 		m_move = std::make_unique<Vector2>(*other.m_move);
 }
 
+
+const FlexFrameData &Frame::GetFlexFrameData() const {return const_cast<Frame*>(this)->GetFlexFrameData();}
+FlexFrameData &Frame::GetFlexFrameData() {return m_flexFrameData;}
+
 std::vector<uint32_t> Frame::GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const
 {
 	auto &boneIds = anim.GetBoneList();

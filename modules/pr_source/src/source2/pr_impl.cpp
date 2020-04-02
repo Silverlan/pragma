@@ -6,6 +6,7 @@
 #include <source2/resource_edit_info.hpp>
 #include <pragma/model/modelmesh.h>
 #include <pragma/game/game_resources.hpp>
+#include <pragma/networkstate/networkstate.h>
 #include <fsys/filesystem.h>
 
 #pragma optimize("",off)
@@ -329,7 +330,9 @@ static Vector4i vertex_attr_value_to_ivec4(source2::resource::DXGI_FORMAT format
 	return result;
 }
 
-void source2::impl::initialize_vertices(const source2::resource::VBIB::VertexBuffer &vbuf,ModelSubMesh &mesh,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex)
+source2::impl::MeshData source2::impl::initialize_vertices(
+	const source2::resource::VBIB::VertexBuffer &vbuf,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex
+)
 {
 	auto numVerts = vbuf.count;
 	auto sizePerVertex = vbuf.size;
@@ -349,20 +352,25 @@ void source2::impl::initialize_vertices(const source2::resource::VBIB::VertexBuf
 	auto *attrBlendWeights = fFindAttribute("BLENDWEIGHT",vbuf);
 	auto *attrTex2 = fFindAttribute("texcoord",vbuf); // Lightmap uvs?
 	auto &vertexData = vbuf.buffer;
-	auto &prVerts = mesh.GetVertices();
+
+	MeshData meshData {};
+	auto &prVerts = meshData.verts;
 	prVerts.resize(numVerts);
-	std::vector<VertexWeight> *vertWeights = nullptr;
+
+	auto &lightmapUvs = meshData.lightmapUvs;
+	if(attrTex2)
+		lightmapUvs.resize(numVerts);
+
+	auto &vertWeights = meshData.vertWeights;
 	if(attrBlendIndices)
-	{
-		vertWeights = &mesh.GetVertexWeights();
-		vertWeights->resize(numVerts);
-	}
+		vertWeights.resize(numVerts);
+
 	for(auto i=decltype(numVerts){0u};i<numVerts;++i)
 	{
 		auto offset = i *sizePerVertex;
 		auto *data = vertexData.data() +offset;
 		auto &v = prVerts.at(i);
-		auto *vw = vertWeights ? &vertWeights->at(i) : nullptr;
+		auto *vw = attrBlendIndices ? &vertWeights.at(i) : nullptr;
 		if(attrPos)
 		{
 			auto pos = vertex_attr_value_to_vec4(vbuf,*attrPos,i);
@@ -393,13 +401,10 @@ void source2::impl::initialize_vertices(const source2::resource::VBIB::VertexBuf
 		}
 		if(attrTex2)
 		{
-			auto &uvSet = mesh.AddUVSet("lightmap");
-			if(uvSet.empty())
-				uvSet.resize(numVerts,Vector2{});
 			auto uv = vertex_attr_value_to_vec4(vbuf,*attrTex2,i);
-			uvSet.at(i) = uv *1.3333333f; // Magic number; Currently unknown why this is needed!
+			lightmapUvs.at(i) = uv *1.3333333f; // Magic number; Currently unknown why this is needed!
 		}
-		if(optSkinIndexToBoneIndex && attrBlendIndices && vertWeights)
+		if(optSkinIndexToBoneIndex && attrBlendIndices)
 		{
 			vw->boneIds = vertex_attr_value_to_ivec4(attrBlendIndices->type,data +attrBlendIndices->offset,{-1,-1,-1,-1});
 			for(uint8_t i=0;i<4;++i)
@@ -410,12 +415,13 @@ void source2::impl::initialize_vertices(const source2::resource::VBIB::VertexBuf
 				vw->boneIds[i] = (itBoneIdx != optSkinIndexToBoneIndex->end()) ? itBoneIdx->second : -1;
 			}
 		}
-		if(vertWeights)
+		if(attrBlendIndices)
 		{
 			auto w = attrBlendWeights ? vertex_attr_value_to_vec4(vbuf,*attrBlendWeights,i) : Vector4{1.f,0.f,0.f,0.f};
 			//auto w = attrBlendWeights ? vertex_attr_value_to_vec4(attrBlendWeights->type,data +attrBlendWeights->offset) : Vector4{1.f,0.f,0.f,0.f};
 			vw->weights = reinterpret_cast<Vector4&>(w);
 		}
 	}
+	return meshData;
 }
 #pragma optimize("",on)

@@ -13,6 +13,7 @@
 #include "pragma/file_formats/wmd.h"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
+#include <stack>
 
 DEFINE_BASE_HANDLE(DLLNETWORK,Model,Model);
 
@@ -1082,6 +1083,265 @@ std::vector<std::shared_ptr<CollisionMesh>> &Model::GetCollisionMeshes() {return
 const std::vector<std::shared_ptr<CollisionMesh>> &Model::GetCollisionMeshes() const {return m_collisionMeshes;}
 
 void Model::AddCollisionMesh(const std::shared_ptr<CollisionMesh> &mesh) {m_collisionMeshes.push_back(mesh);}
+
+std::optional<float> Model::CalcFlexWeight(
+	uint32_t flexId,const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight,
+	const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight
+) const
+{
+	auto val = fFetchFlexWeight(flexId);
+	if(val.has_value())
+		return val;
+	auto *flex = GetFlex(flexId);
+	if(flex == nullptr)
+		return {};
+	auto &ops = flex->GetOperations();
+	std::stack<float> opStack {};
+	for(auto &op : ops)
+	{
+		switch(op.type)
+		{
+		case Flex::Operation::Type::None:
+			break;
+		case Flex::Operation::Type::Const:
+			opStack.push(op.d.value);
+			break;
+		case Flex::Operation::Type::Fetch:
+		{
+			auto val = fFetchFlexControllerWeight(op.d.index);
+			if(val.has_value() == false)
+				return {};
+			opStack.push(*val);
+			break;
+		}
+		case Flex::Operation::Type::Fetch2:
+		{
+			auto val = CalcFlexWeight(op.d.index,fFetchFlexControllerWeight,fFetchFlexWeight);
+			if(val.has_value() == false)
+				return {};
+			opStack.push(*val);
+			break;
+		}
+		case Flex::Operation::Type::Add:
+		{
+			if(opStack.size() < 2)
+				return {};
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			l += r;
+			break;
+		}
+		case Flex::Operation::Type::Sub:
+		{
+			if(opStack.size() < 2)
+				return {};
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			l -= r;
+			break;
+		}
+		case Flex::Operation::Type::Mul:
+		{
+			if(opStack.size() < 2)
+				return {};
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			l *= r;
+			break;
+		}
+		case Flex::Operation::Type::Div:
+		{
+			if(opStack.size() < 2)
+				return {};
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			if(r != 0.f)
+				l /= r;
+			break;
+		}
+		case Flex::Operation::Type::Neg:
+		{
+			if(opStack.size() < 1)
+				return {};
+			auto &r = opStack.top();
+			r = -r;
+			break;
+		}
+		case Flex::Operation::Type::Exp:
+			break;
+		case Flex::Operation::Type::Open:
+			break;
+		case Flex::Operation::Type::Close:
+			break;
+		case Flex::Operation::Type::Comma:
+			break;
+		case Flex::Operation::Type::Max:
+		{
+			if(opStack.size() < 2)
+				return {};
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			l = umath::max(l,r);
+			break;
+		}
+		case Flex::Operation::Type::Min:
+		{
+			if(opStack.size() < 2)
+				return false;
+			auto r = opStack.top();
+			opStack.pop();
+			auto &l = opStack.top();
+			l = umath::min(l,r);
+			break;
+		}
+		case Flex::Operation::Type::TwoWay0:
+		{
+			auto val = fFetchFlexControllerWeight(op.d.index);
+			if(val.has_value() == false)
+				return {};
+			opStack.push(1.f -(umath::min(umath::max(*val +1.f,0.f),1.f)));
+			break;
+		}
+		case Flex::Operation::Type::TwoWay1:
+		{
+			auto val = fFetchFlexControllerWeight(op.d.index);
+			if(val.has_value() == false)
+				return {};
+			opStack.push(umath::min(umath::max(*val,0.f),1.f));
+			break;
+		}
+		case Flex::Operation::Type::NWay:
+		{
+			auto v = fFetchFlexControllerWeight(op.d.index);
+			if(v.has_value() == false)
+				return {};
+			auto valueControllerIndex = op.d.index;
+			opStack.pop();
+
+			auto flValue = fFetchFlexControllerWeight(valueControllerIndex);
+			if(flValue.has_value() == false)
+				return {};
+
+			auto filterRampW = opStack.top();
+			opStack.pop();
+			auto filterRampZ = opStack.top();
+			opStack.pop();
+			auto filterRampY = opStack.top();
+			opStack.pop();
+			auto filterRampX = opStack.top();
+			opStack.pop();
+
+			auto greaterThanX = umath::min(1.f,(-umath::min(0.f,(filterRampX -*flValue))));
+			auto lessThanY = umath::min(1.f,(-umath::min(0.f,(*flValue -filterRampY))));
+			auto remapX = umath::min(umath::max((*flValue -filterRampX) /(filterRampY -filterRampX),0.f),1.f);
+			auto greaterThanEqualY = -(umath::min(1.f,(-umath::min(0.f,(*flValue -filterRampY)))) -1.f);
+			auto lessThanEqualZ = -(umath::min(1.f,(-umath::min(0.f,(filterRampZ -*flValue)))) -1.f);
+			auto greaterThanZ = umath::min(1.f,(-umath::min(0.f,(filterRampZ -*flValue))));
+			auto lessThanW = umath::min(1.f,(-umath::min(0.f,(*flValue -filterRampW))));
+			auto remapZ = (1.f -(umath::min(umath::max((*flValue -filterRampZ) /(filterRampW -filterRampZ),0.f),1.f)));
+
+			auto expValue = ((greaterThanX *lessThanY) *remapX) +(greaterThanEqualY *lessThanEqualZ) +((greaterThanZ *lessThanW) *remapZ);
+
+			opStack.push(expValue **v);
+			break;
+		}
+		case Flex::Operation::Type::Combo:
+		{
+			if(opStack.size() < op.d.index)
+				return {};
+			auto v = (op.d.index > 0) ? 1.f : 0.f;;
+			for(auto i=decltype(op.d.index){0};i<op.d.index;++i)
+			{
+				v *= opStack.top();
+				opStack.pop();
+			}
+			opStack.push(v);
+			break;
+		}
+		case Flex::Operation::Type::Dominate:
+		{
+			if(opStack.size() < op.d.index +1)
+				return {};
+			auto v = (op.d.index > 0) ? 1.f : 0.f;
+			for(auto i=decltype(op.d.index){0};i<op.d.index;++i)
+			{
+				v *= opStack.top();
+				opStack.pop();
+			}
+			opStack.top() *= 1.f -v;
+			break;
+		}
+		case Flex::Operation::Type::DMELowerEyelid:
+		{
+			auto pCloseLidV = fFetchFlexControllerWeight(op.d.index);
+			if(pCloseLidV.has_value() == false)
+				return {};
+			auto &pCloseLidVController = *GetFlexController(op.d.index);
+			auto flCloseLidV = (umath::min(umath::max((*pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
+
+			auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
+			opStack.pop();
+
+			auto pCloseLid = fFetchFlexControllerWeight(closeLidIndex);
+			if(pCloseLid.has_value() == false)
+				return {};
+			auto &pCloseLidController = *GetFlexController(closeLidIndex);
+			auto flCloseLid = (umath::min(umath::max((*pCloseLid -pCloseLidController.min) /(pCloseLidController.max -pCloseLidController.min),0.f),1.f));
+
+			opStack.pop();
+
+			auto eyeUpDownIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
+			opStack.pop();
+			auto pEyeUpDown = fFetchFlexControllerWeight(eyeUpDownIndex);
+			if(pEyeUpDown.has_value() == false)
+				return {};
+			auto &pEyeUpDownController = *GetFlexController(eyeUpDownIndex);
+			auto flEyeUpDown = (-1.f +2.f *(umath::min(umath::max((*pEyeUpDown -pEyeUpDownController.min) /(pEyeUpDownController.max -pEyeUpDownController.min),0.f),1.f)));
+
+			opStack.push(umath::min(1.f,(1.f -flEyeUpDown)) *(1 -flCloseLidV) *flCloseLid);
+			break;
+		}
+		case Flex::Operation::Type::DMEUpperEyelid:
+		{
+			auto pCloseLidV = fFetchFlexControllerWeight(op.d.index);
+			if(pCloseLidV.has_value() == false)
+				return {};
+			auto &pCloseLidVController = *GetFlexController(op.d.index);
+			auto flCloseLidV = (umath::min(umath::max((*pCloseLidV -pCloseLidVController.min) /(pCloseLidVController.max -pCloseLidVController.min),0.f),1.f));
+
+			auto closeLidIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
+			opStack.pop();
+
+			auto pCloseLid = fFetchFlexControllerWeight(closeLidIndex);
+			if(pCloseLid.has_value() == false)
+				return {};
+			auto &pCloseLidController = *GetFlexController(closeLidIndex);
+			auto flCloseLid = (umath::min(umath::max((*pCloseLid -pCloseLidController.min) /(pCloseLidController.max -pCloseLidController.min),0.f),1.f));
+
+			opStack.pop();
+
+			auto eyeUpDownIndex = std::lroundf(opStack.top()); // Index is an integer stored as float, we'll round to make sure we get the right value
+			opStack.pop();
+			auto pEyeUpDown = fFetchFlexControllerWeight(eyeUpDownIndex);
+			if(pEyeUpDown.has_value() == false)
+				return {};
+			auto &pEyeUpDownController = *GetFlexController(eyeUpDownIndex);
+			auto flEyeUpDown = (-1.f +2.f *(umath::min(umath::max((*pEyeUpDown -pEyeUpDownController.min) /(pEyeUpDownController.max -pEyeUpDownController.min),0.f),1.f)));
+
+			opStack.push(umath::min(1.f,(1.f +flEyeUpDown)) *flCloseLidV *flCloseLid);
+			break;
+		}
+		}
+	}
+	if(opStack.size() != 1) // If we don't have a single result left on the stack something went wrong
+		return {};
+	return opStack.top();
+}
 
 uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim)
 {

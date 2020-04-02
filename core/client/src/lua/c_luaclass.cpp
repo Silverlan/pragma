@@ -675,6 +675,7 @@ void CGame::RegisterLuaClasses()
 	defMdlExportInfo.def(luabind::constructor<>());
 	defMdlExportInfo.def_readwrite("exportAnimations",&Lua::Model::Client::ModelExportInfo::exportAnimations);
 	defMdlExportInfo.def_readwrite("exportSkinnedMeshData",&Lua::Model::Client::ModelExportInfo::exportSkinnedMeshData);
+	defMdlExportInfo.def_readwrite("exportMorphTargets",&Lua::Model::Client::ModelExportInfo::exportMorphTargets);
 	defMdlExportInfo.def_readwrite("exportImages",&Lua::Model::Client::ModelExportInfo::exportImages);
 	defMdlExportInfo.def_readwrite("enableExtendedDDS",&Lua::Model::Client::ModelExportInfo::enableExtendedDDS);
 	defMdlExportInfo.def_readwrite("saveAsBinary",&Lua::Model::Client::ModelExportInfo::saveAsBinary);

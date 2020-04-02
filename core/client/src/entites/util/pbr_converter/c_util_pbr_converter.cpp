@@ -19,6 +19,7 @@
 #include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <cmaterialmanager.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -344,6 +345,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// Overwrite old material with new PBR settings
 	if(matPbr->Save(matTraditional.GetName(),"addons/converted/"))
 		client->LoadMaterial(matName,true,true); // Reload material immediately
+	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	Con::cout<<"Conversion complete!"<<Con::endl;
 	return true;
 }

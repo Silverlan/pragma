@@ -76,7 +76,9 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				continue;
 			auto idxThis = boneTranslations.at(idxOther);
 			auto &boneThis = bones.at(idxThis);
-			boneThis->parent = bones.at(boneTranslations.at(boneOther->parent.lock()->ID));
+			auto &parent = bones.at(boneTranslations.at(boneOther->parent.lock()->ID));
+			boneThis->parent = parent;
+			parent->children.insert(std::make_pair(idxThis,boneThis));
 		}
 
 		// Copy reference pose transforms of new bones from other model to this model

@@ -3,6 +3,7 @@
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/lua/classes/lmodel.h>
 #include "pragma/lua/classes/ldef_model.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -39,6 +40,7 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 	auto exportImages = exportInfo.exportImages;
 	auto exportAnimations = exportInfo.exportAnimations;
 	auto exportSkinned = exportInfo.exportSkinnedMeshData;
+	auto exportMorphTargets = exportInfo.exportMorphTargets;
 	auto saveAsBinary = exportInfo.saveAsBinary;
 	auto imageFormat = exportInfo.imageFormat;
 	auto verbose = exportInfo.verbose;
@@ -163,7 +165,7 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 	};
 
 	auto szVertex = sizeof(Vector3) *2 +sizeof(Vector2);
-	gltfMdl.buffers.reserve(umath::to_integral(Buffer::Count) +mdl.GetAnimationCount());
+	gltfMdl.buffers.reserve(umath::to_integral(Buffer::Count) +mdl.GetAnimationCount() +mdl.GetVertexAnimations().size());
 	auto &indexBuffer = fAddBuffer("indices");
 	auto &vertexBuffer = fAddBuffer("vertices");
 	//indexBuffer.uri = "indices.bin";
@@ -382,6 +384,29 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 		fAddBufferView("inversebindpose",Buffer::InverseBindMatrices,0,invBindPoseData.size(),{});
 	}
 
+	struct MorphSet
+	{
+		std::string name;
+		MeshVertexFrame *frame = nullptr;
+		Flex *flex = nullptr;
+	};
+	std::unordered_map<ModelSubMesh*,std::vector<MorphSet>> meshMorphSets;
+	for(auto &flex : mdl.GetFlexes())
+	{
+		auto &name = flex.GetName();
+		auto *anim = flex.GetMeshVertexAnimation();
+		auto *frame = flex.GetMeshVertexFrame();
+		auto *subMesh = anim ? anim->GetSubMesh() : nullptr;
+		if(anim == nullptr || frame == nullptr || subMesh == nullptr)
+			continue;
+		auto &morphSets = meshMorphSets[subMesh];
+		morphSets.push_back({});
+		auto &morphSet = morphSets.back();
+		morphSet.name = name;
+		morphSet.frame = frame;
+		morphSet.flex = &flex;
+	}
+
 	// Initialize accessors
 	indexOffset = 0;
 	vertOffset = 0;
@@ -389,9 +414,11 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 	gltfMdl.meshes.reserve(meshes.size());
 	gltfMdl.nodes.reserve(meshes.size());
 	uint32_t meshIdx = 0;
+	std::unordered_map<ModelSubMesh*,uint32_t> meshesWithMorphTargets {};
 	for(auto &mesh : meshes)
 	{
-		auto &gltfNode = gltfMdl.nodes.at(fAddNode(name +'_' +std::to_string(meshIdx),true));
+		auto nodeIdx = fAddNode(name +'_' +std::to_string(meshIdx),true);
+		auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
 		gltfNode.mesh = gltfMdl.meshes.size();
 		if(skinIdx != -1)
 			gltfNode.skin = skinIdx;
@@ -466,6 +493,58 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 			vertexWeightOffset += verts.size();
 		}
 
+		// Morphs
+		if(exportMorphTargets)
+		{
+			auto itMorphSets = meshMorphSets.find(mesh.get());
+			if(itMorphSets != meshMorphSets.end())
+			{
+				std::vector<tinygltf::Value> morphNames {};
+				auto &morphSets = itMorphSets->second;
+				morphNames.reserve(morphSets.size());
+				for(auto &morphSet : morphSets)
+				{
+					morphNames.push_back(tinygltf::Value{morphSet.name});
+
+					auto numVerts = morphSet.frame->GetVertexCount();
+					std::vector<Vector3> vertices {};
+					vertices.reserve(numVerts);
+					Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+					Vector3 max {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+					for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+					{
+						Vector3 pos {};
+						morphSet.frame->GetVertexPosition(i,pos);
+						pos = fTransformPos(pos);
+						vertices.push_back(pos);
+
+						uvec::min(&min,pos);
+						uvec::max(&max,pos);
+					}
+
+					uint32_t morphBufferIdx;
+					auto &morphBuffer = fAddBuffer("morph_" +morphSet.name,&morphBufferIdx);
+					auto &morphData = morphBuffer.data;
+					morphData.resize(vertices.size() *sizeof(vertices.front()));
+					memcpy(morphData.data(),vertices.data(),vertices.size() *sizeof(vertices.front()));
+					auto morphBufferView = fAddBufferView("morph" +morphSet.name,static_cast<Buffer>(morphBufferIdx),0,vertices.size() *sizeof(vertices.front()),{});
+					auto morphAccessor = fAddAccessor("morph_" +morphSet.name +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,0,vertices.size(),static_cast<BufferView>(morphBufferView));
+					gltfMdl.accessors.at(morphAccessor).minValues = {min.x,min.y,min.z};
+					gltfMdl.accessors.at(morphAccessor).maxValues = {max.x,max.y,max.z};
+
+					primitive.targets.push_back({});
+					auto &map = primitive.targets.back();
+					map["POSITION"] = morphAccessor;
+				}
+
+				std::map<std::string,tinygltf::Value> extras {};
+				extras["targetNames"] = tinygltf::Value{morphNames};
+				gltfMesh.extras = tinygltf::Value{extras};
+
+				meshesWithMorphTargets[mesh.get()] = nodeIdx;
+			}
+		}
+
 		indexOffset += tris.size();
 		vertOffset += verts.size();
 		++meshIdx;
@@ -513,6 +592,25 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 
 			auto fps = anim->GetFPS();
 
+			auto useScales = false;
+			for(auto &frame : anim->GetFrames())
+			{
+				if(frame->GetBoneScales().empty())
+					continue;
+				auto &scales = frame->GetBoneScales();
+				// Check if there are any actual meaningful scales
+				auto it = std::find_if(scales.begin(),scales.end(),[](const Vector3 &scale) {
+					constexpr auto EPSILON = 0.001f;
+					return umath::abs(1.f -scale.x) > EPSILON ||
+						umath::abs(1.f -scale.y) > EPSILON || 
+						umath::abs(1.f -scale.z) > EPSILON;
+				});
+				if(it == scales.end())
+					continue;
+				useScales = true;
+				break;
+			}
+
 			// Setup buffers
 			std::vector<float> times {};
 			times.reserve(numFrames);
@@ -526,8 +624,11 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 			uint32_t animBufferIdx;
 			auto &animBuffer = fAddBuffer("anim_" +gltfAnim.name,&animBufferIdx);
 			auto &animData = animBuffer.data;
+			auto sizePerVertex = sizeof(Vector3) +sizeof(Vector4);
+			if(useScales)
+				sizePerVertex += sizeof(Vector3);
 			auto bufferSize = times.size() *sizeof(times.front()) +
-				numBones *numFrames *(sizeof(Vector3) +sizeof(Vector4) +sizeof(Vector3)); // TODO: Scale optional
+				numBones *numFrames *sizePerVertex;
 			animData.resize(bufferSize);
 			memcpy(animData.data(),times.data(),times.size() *sizeof(times.front()));
 
@@ -550,7 +651,8 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 				std::vector<Vector3> scales {};
 				translations.reserve(numFrames);
 				rotations.reserve(numFrames);
-				scales.reserve(numFrames);
+				if(useScales)
+					scales.reserve(numFrames);
 
 				for(auto &frame : frames)
 				{
@@ -561,8 +663,11 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 					auto &rot = pose.GetRotation();
 					rotations.push_back({rot.x,rot.y,rot.z,rot.w});
 
-					auto scale = frame->GetBoneScale(i) ? *frame->GetBoneScale(i) : Vector3{1.f,1.f,1.f};
-					scales.push_back(scale);
+					if(useScales)
+					{
+						auto scale = frame->GetBoneScale(i) ? *frame->GetBoneScale(i) : Vector3{1.f,1.f,1.f};
+						scales.push_back(scale);
+					}
 				}
 				auto bufBone = fAddBufferView(
 					"anim_" +gltfAnim.name +"_bone_" +bone.name +"_data",static_cast<Buffer>(animBufferIdx),
@@ -576,8 +681,11 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 				memcpy(animData.data() +dataOffset,rotations.data(),rotations.size() *sizeof(rotations.front()));
 				dataOffset += rotations.size() *sizeof(rotations.front());
 
-				memcpy(animData.data() +dataOffset,scales.data(),scales.size() *sizeof(scales.front()));
-				dataOffset += scales.size() *sizeof(scales.front());
+				if(useScales)
+				{
+					memcpy(animData.data() +dataOffset,scales.data(),scales.size() *sizeof(scales.front()));
+					dataOffset += scales.size() *sizeof(scales.front());
+				}
 
 				// Initialize accessors
 				auto translationsAccessor = fAddAccessor(
@@ -590,11 +698,15 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 					TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC4,translations.size() *sizeof(translations.front()),
 					numFrames,static_cast<BufferView>(bufBone)
 				);
-				auto scalesAccessor = fAddAccessor(
-					"anim_" +gltfAnim.name +"_bone_" +bone.name +"_scales",
-					TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,translations.size() *sizeof(translations.front()) +rotations.size() *sizeof(rotations.front()),
-					numFrames,static_cast<BufferView>(bufBone)
-				);
+				auto scalesAccessor = std::numeric_limits<uint32_t>::max();
+				if(useScales)
+				{
+					scalesAccessor = fAddAccessor(
+						"anim_" +gltfAnim.name +"_bone_" +bone.name +"_scales",
+						TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,translations.size() *sizeof(translations.front()) +rotations.size() *sizeof(rotations.front()),
+						numFrames,static_cast<BufferView>(bufBone)
+					);
+				}
 
 				// Initialize samplers
 				gltfAnim.samplers.push_back({});
@@ -611,12 +723,16 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 				samplerRotations.interpolation = "LINEAR";
 				auto rotationSamplerIdx = gltfAnim.samplers.size() -1;
 
-				gltfAnim.samplers.push_back({});
-				auto &samplerScales = gltfAnim.samplers.back();
-				samplerScales.input = timesAccessor;
-				samplerScales.output = scalesAccessor;
-				samplerScales.interpolation = "LINEAR";
-				auto scaleSamplerIdx = gltfAnim.samplers.size() -1;
+				auto scaleSamplerIdx = std::numeric_limits<size_t>::max();
+				if(useScales)
+				{
+					gltfAnim.samplers.push_back({});
+					auto &samplerScales = gltfAnim.samplers.back();
+					samplerScales.input = timesAccessor;
+					samplerScales.output = scalesAccessor;
+					samplerScales.interpolation = "LINEAR";
+					scaleSamplerIdx = gltfAnim.samplers.size() -1;
+				}
 
 				// Initialize channels
 				auto nodeIdx = boneIdxToNodeIdx[boneId];
@@ -636,11 +752,60 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 				channelRot.sampler = rotationSamplerIdx;
 
 				// Scale
-				gltfAnim.channels.push_back({});
-				auto &channelScale = gltfAnim.channels.back();
-				channelScale.target_node = nodeIdx;
-				channelScale.target_path = "scale";
-				channelScale.sampler = scaleSamplerIdx;
+				if(useScales)
+				{
+					gltfAnim.channels.push_back({});
+					auto &channelScale = gltfAnim.channels.back();
+					channelScale.target_node = nodeIdx;
+					channelScale.target_path = "scale";
+					channelScale.sampler = scaleSamplerIdx;
+				}
+			}
+
+			if(exportMorphTargets)
+			{
+				for(auto &pair : meshesWithMorphTargets)
+				{
+					auto &morphSet = meshMorphSets.find(pair.first)->second;
+					auto meshNodeIdx = pair.second;
+					auto numMorphs = morphSet.size();
+
+					uint32_t morphBufferIdx;
+					auto &morphTargetBuffer = fAddBuffer("anim_" +gltfAnim.name +"_morph_target",&morphBufferIdx);
+					auto &morphTargetData = morphTargetBuffer.data;
+
+					std::vector<float> weights {};
+					weights.resize(numMorphs *numFrames,1.f);
+					morphTargetData.resize(weights.size() *sizeof(weights.front()));
+					memcpy(morphTargetData.data(),weights.data(),weights.size() *sizeof(weights.front()));
+
+					auto bufViewMorphTargets = fAddBufferView(
+						"anim_" +gltfAnim.name +"_morph_target_data",static_cast<Buffer>(morphBufferIdx),
+						0,morphTargetData.size() *sizeof(morphTargetData.front()),{}
+					);
+
+					// Initialize accessors
+					auto weightsAccessor = fAddAccessor(
+						"anim_" +gltfAnim.name +"_morph_target_weights",
+						TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_SCALAR,0,
+						numMorphs *numFrames,static_cast<BufferView>(bufViewMorphTargets)
+					);
+
+					// Initialize samplers
+					gltfAnim.samplers.push_back({});
+					auto &samplerWeights = gltfAnim.samplers.back();
+					samplerWeights.input = timesAccessor;
+					samplerWeights.output = weightsAccessor;
+					samplerWeights.interpolation = "LINEAR";
+					auto weightsSamplerIdx = gltfAnim.samplers.size() -1;
+
+					// Weights
+					gltfAnim.channels.push_back({});
+					auto &channelWeight = gltfAnim.channels.back();
+					channelWeight.target_path = "weights";
+					channelWeight.sampler = weightsSamplerIdx;
+					channelWeight.target_node = meshNodeIdx;
+				}
 			}
 		}
 	}
@@ -901,6 +1066,17 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 		auto normalIdx = fSaveTexture(mat->GetNormalMap(),true);
 		if(normalIdx.has_value())
 			gltfMat.normalTexture.index = *normalIdx;
+
+		float metalnessFactor;
+		float roughnessFactor;
+		auto metallicRoughnessIdx = fSaveTexture(mat->GetTextureInfo("metalness_roughness_map"),true);
+		if(metallicRoughnessIdx.has_value())
+		{
+			gltfMat.pbrMetallicRoughness.metallicRoughnessTexture.index = *metallicRoughnessIdx;
+			metalnessFactor = 1.f;
+			roughnessFactor = 1.f;
+		}
+
 		auto emissiveIdx = fSaveTexture(mat->GetGlowMap(),false);
 
 		if(emissiveIdx.has_value())
@@ -912,17 +1088,14 @@ void Lua::Model::Client::Export(lua_State *l,::Model &mdl,const ModelExportInfo 
 		if(aoIdx.has_value())
 			gltfMat.occlusionTexture.index = *aoIdx;
 
-		// TODO: Metalness / roughness
-		// TODO: Factors
 		auto &data = mat->GetDataBlock();
-
-		float metalnessFactor;
-		if(data->GetFloat("metalness_factor",&metalnessFactor))
-			gltfMat.pbrMetallicRoughness.metallicFactor = metalnessFactor;
+		data->GetFloat("metalness_factor",&metalnessFactor);
 		
-		float roughnessFactor;
-		if(data->GetFloat("roughness_factor",&roughnessFactor))
-			gltfMat.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
+		// TODO: Specular factor!
+		data->GetFloat("roughness_factor",&roughnessFactor);
+
+		gltfMat.pbrMetallicRoughness.metallicFactor = metalnessFactor;
+		gltfMat.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
 
 		float emissionFactor;
 		if(data->GetFloat("emission_factor",&emissionFactor))

@@ -10,6 +10,13 @@
 class Animation;
 class Model;
 namespace pragma::physics {class Transform; class ScaledTransform;};
+
+struct DLLNETWORK FlexFrameData
+{
+	std::vector<float> flexControllerWeights;
+	std::vector<uint32_t> flexControllerIds;
+};
+
 class DLLNETWORK Frame
 	: public std::enable_shared_from_this<Frame>
 {
@@ -47,6 +54,9 @@ public:
 	void Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t);
 	void Scale(const Vector3 &scale);
 
+	const FlexFrameData &GetFlexFrameData() const;
+	FlexFrameData &GetFlexFrameData();
+
 	bool HasScaleTransforms() const;
 
 	const std::vector<pragma::physics::Transform> &GetBoneTransforms() const;
@@ -61,6 +71,7 @@ private:
 	std::vector<pragma::physics::Transform> m_bones;
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;
+	FlexFrameData m_flexFrameData {};
 	std::vector<uint32_t> GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const;
 
 	void UpdateScales();

@@ -583,6 +583,47 @@ void Lua::Model::register_class(
 		.def("GetLocalBoneTransform",&Lua::Frame::GetLocalBoneTransform)
 		.def("GetBoneCount",&Lua::Frame::GetBoneCount)
 		.def("SetBoneCount",&Lua::Frame::SetBoneCount)
+		.def("GetFlexControllerWeights",static_cast<void(*)(lua_State*,::Frame&)>([](lua_State *l,::Frame &frame) {
+			auto &flexFrameData = frame.GetFlexFrameData();
+			auto t = Lua::CreateTable(l);
+			auto n = flexFrameData.flexControllerWeights.size();
+			for(auto i=decltype(n){0u};i<n;++i)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::PushNumber(l,flexFrameData.flexControllerWeights.at(i));
+				Lua::SetTableValue(l,t);
+			}
+		}))
+		.def("GetFlexControllerIds",static_cast<void(*)(lua_State*,::Frame&)>([](lua_State *l,::Frame &frame) {
+			auto &flexFrameData = frame.GetFlexFrameData();
+			auto t = Lua::CreateTable(l);
+			auto n = flexFrameData.flexControllerIds.size();
+			for(auto i=decltype(n){0u};i<n;++i)
+			{
+				Lua::PushInt(l,i +1);
+				Lua::PushInt(l,flexFrameData.flexControllerIds.at(i));
+				Lua::SetTableValue(l,t);
+			}
+		}))
+		.def("SetFlexControllerWeights",static_cast<void(*)(lua_State*,::Frame&,luabind::object)>([](lua_State *l,::Frame &frame,luabind::object) {
+			auto &flexFrameData = frame.GetFlexFrameData();
+			flexFrameData.flexControllerIds.clear();
+			flexFrameData.flexControllerWeights.clear();
+
+			auto t = Lua::CreateTable(l);
+			Lua::CheckTable(l,2);
+
+			Lua::PushNil(l);
+			while(Lua::GetNextPair(l,2) != 0)
+			{
+				auto flexCId = Lua::CheckInt(l,-2);
+				auto weight = Lua::CheckNumber(l,-1);
+				flexFrameData.flexControllerIds.push_back(flexCId);
+				flexFrameData.flexControllerWeights.push_back(weight);
+
+				Lua::Pop(l,1);
+			}
+		}))
 	;
 	classDefFrame.scope[luabind::def("Create",&Lua::Frame::Create)];
 

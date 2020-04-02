@@ -36,6 +36,8 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(m_pCurrentNode == nullptr || pRenderComponent.expired())
 		return false;
+	if(pRenderComponent->IsExemptFromOcclusionCulling())
+		return true;
 	auto pBspLeafComponent = ent.GetComponent<CBSPLeafComponent>();
 	//if(pBspLeafComponent.valid())
 		//return false;//pBspLeafComponent->GetLeafVisibility(m_pCurrentNode->cluster); // TODO

@@ -23,7 +23,7 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 void CGame::RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImage,uint32_t layerId)
 {
 	prosper::util::record_image_barrier(*(*drawCmd),*outImage,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
@@ -65,4 +65,4 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 		StopProfilingStage(CGame::GPUProfilingPhase::Present);
 	}
 }
-#pragma optimize("",on)
+

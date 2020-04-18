@@ -11,7 +11,7 @@
 #include <sharedutils/util_file.h>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	TModel *FWMD::Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
 	std::string pathCache(model);
 	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
@@ -98,19 +98,19 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	unsigned int numBones = 0;
 	if(!m_bStatic)
 		numBones = Read<unsigned int>();
-	TModel *mdl = new TModel(game->GetNetworkState(),umath::max(numBones,(unsigned int)(1)),model);
+	auto mdl = Model::Create<TModel>(game->GetNetworkState(),umath::max(numBones,(unsigned int)(1)),model);
 	mdl->SetEyeOffset(eyeOffset);
 	auto &meta = mdl->GetMetaInfo();
 	meta.flags = flags;
 	for(auto &path : texturePaths)
 		mdl->AddTexturePath(path);
-	LoadBones(ver,numBones,mdl);
+	LoadBones(ver,numBones,*mdl);
 	if(!m_bStatic)
 	{
-		LoadAttachments(mdl);
+		LoadAttachments(*mdl);
 		if(ver >= 0x0017)
-			LoadObjectAttachments(mdl);
-		LoadHitboxes(ver,mdl);
+			LoadObjectAttachments(*mdl);
+		LoadHitboxes(ver,*mdl);
 	}
 
 	// Textures
@@ -161,26 +161,26 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	}
 	//
 	// Meshes
-	LoadMeshes(ver,mdl,[]() {return std::make_shared<TModelMesh>();},[]() {return std::make_shared<TModelSubMesh>();});
+	LoadMeshes(ver,*mdl,[]() {return std::make_shared<TModelMesh>();},[]() {return std::make_shared<TModelSubMesh>();});
 
 	// LOD Data
-	LoadLODData(ver,mdl);
+	LoadLODData(ver,*mdl);
 
 	// Bodygroups
 	if(ver >= 0x0004)
-		LoadBodygroups(mdl);
+		LoadBodygroups(*mdl);
 	
 	// Collision Meshes
 	if(offCollisionMesh > 0)
-		LoadCollisionMeshes(game,ver,mdl,smDefault);
+		LoadCollisionMeshes(game,ver,*mdl,smDefault);
 	else
 		mdl->SetCollisionBounds(Vector3(0,0,0),Vector3(0,0,0));
 	
 	if(!m_bStatic)
 	{
-		LoadBlendControllers(mdl);
-		LoadIKControllers(ver,mdl);
-		LoadAnimations(ver,mdl);
+		LoadBlendControllers(*mdl);
+		LoadIKControllers(ver,*mdl);
+		LoadAnimations(ver,*mdl);
 	}
 	unsigned char numIncludes = Read<unsigned char>();
 	for(unsigned char i=0;i<numIncludes;i++)

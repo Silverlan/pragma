@@ -486,6 +486,21 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::PushString(l,val->GetTypeString());
 	}));
+
+	defDataBlock.def("RemoveValue",&Lua::DataBlock::RemoveValue);
+	defDataBlock.def("IsEmpty",&Lua::DataBlock::IsEmpty);
+	defDataBlock.def("HasValue",&Lua::DataBlock::HasValue);
+	defDataBlock.def("AddBlock",&Lua::DataBlock::AddBlock);
+	defDataBlock.def("IsString",&Lua::DataBlock::IsString);
+	defDataBlock.def("IsInt",&Lua::DataBlock::IsInt);
+	defDataBlock.def("IsFloat",&Lua::DataBlock::IsFloat);
+	defDataBlock.def("IsBool",&Lua::DataBlock::IsBool);
+	defDataBlock.def("IsColor",&Lua::DataBlock::IsColor);
+	defDataBlock.def("IsVector",&Lua::DataBlock::IsVector);
+	defDataBlock.def("GetColor",&Lua::DataBlock::GetColor);
+	defDataBlock.def("GetVector",&Lua::DataBlock::GetVector);
+	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::FindBlock));
+	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,uint32_t)>(&Lua::DataBlock::FindBlock));
 	modUtil[defDataBlock];
 
 	// Path

@@ -27,7 +27,6 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 
-#pragma optimize("",off)
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
@@ -89,8 +88,8 @@ Anvil::DescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {retu
 
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
-	if(pragma::ShaderTextured3D::DESCRIPTOR_SET_CSM.IsValid())
-		m_descSetGroupCSM = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3D::DESCRIPTOR_SET_CSM);
+	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM.IsValid())
+		m_descSetGroupCSM = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
@@ -112,6 +111,9 @@ void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::PrimaryComm
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyCameraComponent>>();
 	for(auto *ent : entIt)
 	{
+		if(static_cast<CBaseEntity*>(ent)->IsInScene(GetScene()) == false)
+			continue;
+
 		auto skyCamera = ent->GetComponent<pragma::CSkyCameraComponent>();
 		auto &renderMeshes = skyCamera->UpdateRenderMeshes(*this,renderFlags);
 		m_3dSkyCameras.push_back(skyCamera);
@@ -248,28 +250,28 @@ void RasterizationRenderer::SetShaderOverride(const std::string &srcShaderId,con
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
 	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
 		return;
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3D*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto hDstShader = c_engine->GetShader(shaderOverrideId);
-	auto dstShader = dynamic_cast<pragma::ShaderTextured3D*>(hDstShader.get());
+	auto dstShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hDstShader.get());
 	if(dstShader == nullptr)
 		return;
 	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
 }
-pragma::ShaderTextured3D *RasterizationRenderer::GetShaderOverride(pragma::ShaderTextured3D *srcShader)
+pragma::ShaderTextured3DBase *RasterizationRenderer::GetShaderOverride(pragma::ShaderTextured3DBase *srcShader)
 {
 	if(srcShader == nullptr)
 		return nullptr;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
 	if(it == m_shaderOverrides.end())
 		return srcShader;
-	return static_cast<pragma::ShaderTextured3D*>(it->second.get());
+	return static_cast<pragma::ShaderTextured3DBase*>(it->second.get());
 }
 void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3D*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
@@ -340,15 +342,11 @@ void RasterizationRenderer::ReloadOcclusionCullingHandler()
 		break;
 	case 4: /* BSP */
 	{
-		auto &scene = GetScene();
-		auto &entityList = *scene.GetEntityListInfo();
-		auto itWorld = std::find_if(entityList.entities.begin(),entityList.entities.end(),[](const EntityHandle &hEnt) {
-			return hEnt.IsValid() && hEnt.get()->IsWorld();
-			});
-		if(itWorld != entityList.entities.end())
+		auto *world = c_game->GetWorld();
+		if(world)
 		{
-			auto *entWorld = itWorld->get();
-			auto pWorldComponent = entWorld->GetComponent<pragma::CWorldComponent>();
+			auto &entWorld = world->GetEntity();
+			auto pWorldComponent = entWorld.GetComponent<pragma::CWorldComponent>();
 			auto bspTree = pWorldComponent.valid() ? pWorldComponent->GetBSPTree() : nullptr;
 			if(bspTree != nullptr && bspTree->GetNodes().size() > 1u)
 			{
@@ -431,10 +429,6 @@ const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetSceneTexture(
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetPresentationTexture() const {return m_hdrInfo.toneMappedRenderTarget->GetTexture();}
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetHDRPresentationTexture() const {return m_hdrInfo.sceneRenderTarget->GetTexture();}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
-void RasterizationRenderer::OnEntityAddedToScene(CBaseEntity &ent)
-{
-	BaseRenderer::OnEntityAddedToScene(ent);
-}
 
 Anvil::SampleCountFlagBits RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage()->GetSampleCount();}
 bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != Anvil::SampleCountFlagBits::_1_BIT;}
@@ -461,4 +455,3 @@ RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandl
 const RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() const {return const_cast<RasterizationRenderer*>(this)->GetRenderMeshCollectionHandler();}
 
 prosper::Shader *RasterizationRenderer::GetWireframeShader() {return m_whShaderWireframe.get();}
-#pragma optimize("",on)

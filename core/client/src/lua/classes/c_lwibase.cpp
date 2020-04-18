@@ -54,7 +54,7 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIDebugSSAO,WIDe
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const WIHandle &handle)
 {
 	if(!handle.IsValid())
@@ -860,6 +860,7 @@ void Lua::WITextEntry::register_class(luabind::class_<WITextEntryHandle,WIHandle
 {
 	classDef.def("SetText",&SetText);
 	classDef.def("GetText",&GetText);
+	classDef.def("GetValue",&GetText);
 	classDef.def("IsNumeric",&IsNumeric);
 	classDef.def("IsEditable",&IsEditable);
 	classDef.def("SetEditable",&SetEditable);
@@ -3659,4 +3660,4 @@ void Lua::WIFrame::GetTitle(lua_State *l,WIFrameHandle &hFrame)
 	lua_checkgui(l,hFrame);
 	Lua::PushString(l,hFrame.get<::WIFrame>()->GetTitle());
 }
-#pragma optimize("",on)
+

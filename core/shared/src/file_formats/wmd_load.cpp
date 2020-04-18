@@ -5,10 +5,10 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
-#pragma optimize("",off)
-void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
+
+void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
-	auto &skeleton = mdl->GetSkeleton();
+	auto &skeleton = mdl.GetSkeleton();
 	auto reference = Animation::Create();
 	if(!m_bStatic)
 	{
@@ -27,7 +27,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 		auto *root = new Bone;
 		root->name = "root";
 		unsigned int rootID = skeleton.AddBone(root);
-		mdl->SetBindPoseBoneMatrix(0,glm::inverse(umat::identity()));
+		mdl.SetBindPoseBoneMatrix(0,glm::inverse(umat::identity()));
 		auto &rootBones = skeleton.GetRootBones();
 		rootBones[0] = skeleton.GetBone(rootID).lock();
 		reference->AddBoneId(0);
@@ -64,7 +64,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 					trans[x][y] = Read<float>();
 			}*/
 			//frame->SetBoneMatrix(i,trans);
-			//mdl->SetBindPoseBoneMatrix(i,glm::inverse(Mat4(trans)));
+			//mdl.SetBindPoseBoneMatrix(i,glm::inverse(Mat4(trans)));
 		}
 	}
 	if(!m_bStatic)
@@ -82,12 +82,12 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model *mdl)
 	auto refFrame = Frame::Create(*frame);
 	frame->Localize(*reference,skeleton);
 	reference->AddFrame(frame);
-	mdl->AddAnimation("reference",reference);
-	mdl->SetReference(refFrame);
-	mdl->GenerateBindPoseMatrices();
+	mdl.AddAnimation("reference",reference);
+	mdl.SetReference(refFrame);
+	mdl.GenerateBindPoseMatrices();
 }
 
-void FWMD::LoadHitboxes(uint16_t version,Model *mdl)
+void FWMD::LoadHitboxes(uint16_t version,Model &mdl)
 {
 	if(version <= 0x0004) // Hitboxes aren't supported until version 0x0005
 		return;
@@ -98,14 +98,14 @@ void FWMD::LoadHitboxes(uint16_t version,Model *mdl)
 		auto group = Read<uint32_t>();
 		auto min = Read<Vector3>();
 		auto max = Read<Vector3>();
-		mdl->AddHitbox(boneId,static_cast<HitGroup>(group),min,max);
+		mdl.AddHitbox(boneId,static_cast<HitGroup>(group),min,max);
 	}
 }
 
-void FWMD::LoadObjectAttachments(Model *mdl)
+void FWMD::LoadObjectAttachments(Model &mdl)
 {
 	auto numObjectAttachments = Read<uint32_t>();
-	mdl->GetObjectAttachments().reserve(numObjectAttachments);
+	mdl.GetObjectAttachments().reserve(numObjectAttachments);
 	for(auto i=decltype(numObjectAttachments){0u};i<numObjectAttachments;++i)
 	{
 		auto type = Read<ObjectAttachment::Type>();
@@ -120,11 +120,11 @@ void FWMD::LoadObjectAttachments(Model *mdl)
 			auto val = ReadString();
 			keyValues.insert(std::make_pair(key,val));
 		}
-		mdl->AddObjectAttachment(type,name,attachment,keyValues);
+		mdl.AddObjectAttachment(type,name,attachment,keyValues);
 	}
 }
 
-void FWMD::LoadAttachments(Model *mdl)
+void FWMD::LoadAttachments(Model &mdl)
 {
 	unsigned int numAttachments = Read<unsigned int>();
 	for(unsigned int i=0;i<numAttachments;i++)
@@ -139,23 +139,23 @@ void FWMD::LoadAttachments(Model *mdl)
 		angles.p = Read<float>();
 		angles.y = Read<float>();
 		angles.r = Read<float>();
-		mdl->AddAttachment(name,boneID,offset,angles);
+		mdl.AddAttachment(name,boneID,offset,angles);
 	}
 }
 
-void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory)
+void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory)
 {
 	Vector3 renderMin,renderMax;
 	for(char i=0;i<3;i++)
 		renderMin[i] = Read<float>();
 	for(char i=0;i<3;i++)
 		renderMax[i] = Read<float>();
-	mdl->SetRenderBounds(renderMin,renderMax);
+	mdl.SetRenderBounds(renderMin,renderMax);
 	unsigned int numMeshGroups = Read<unsigned int>();
 	for(unsigned int i=0;i<numMeshGroups;i++)
 	{
 		std::string name = ReadString();
-		auto group = mdl->AddMeshGroup(name);
+		auto group = mdl.AddMeshGroup(name);
 		uint32_t numMeshes = (version < 30) ? Read<unsigned char>() : Read<uint32_t>();
 		for(uint32_t j=0;j<numMeshes;j++)
 		{
@@ -377,7 +377,7 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 
 	if(version >= 0x0004)
 	{
-		auto &baseMeshes = mdl->GetBaseMeshes();
+		auto &baseMeshes = mdl.GetBaseMeshes();
 		auto numBaseMeshes = Read<unsigned short>();
 		baseMeshes.reserve(baseMeshes.size() +numBaseMeshes);
 		for(unsigned short i=0;i<numBaseMeshes;i++)
@@ -388,12 +388,12 @@ void FWMD::LoadMeshes(unsigned short version,Model *mdl,const std::function<std:
 	}
 }
 
-void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,SurfaceMaterial *smDefault)
+void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,SurfaceMaterial *smDefault)
 {
 	if(smDefault == nullptr)
 		smDefault = m_gameState->GetSurfaceMaterial(0);
 	float mass = Read<float>();
-	mdl->SetMass(mass);
+	mdl.SetMass(mass);
 	Vector3 collisionMin(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
 	uint32_t numMeshes = (version < 30) ? Read<uint8_t>() : Read<uint32_t>();
@@ -461,7 +461,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 			{
 				auto type = Read<unsigned char>();
 				auto idTgt = Read<unsigned int>();
-				auto &joint = mdl->AddJoint(type,i,idTgt);
+				auto &joint = mdl.AddJoint(type,i,idTgt);
 				joint.collide = Read<bool>();
 				auto numArgs = Read<unsigned char>();
 				for(unsigned char i=0;i<numArgs;i++)
@@ -481,13 +481,13 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,Surf
 		}
 		//
 		mesh->CalculateBounds();
-		mdl->AddCollisionMesh(mesh);
+		mdl.AddCollisionMesh(mesh);
 	}
-	mdl->SetCollisionBounds(collisionMin,collisionMax);
-	mdl->UpdateShape();
+	mdl.SetCollisionBounds(collisionMin,collisionMax);
+	mdl.UpdateShape();
 }
 
-void FWMD::LoadBlendControllers(Model *mdl)
+void FWMD::LoadBlendControllers(Model &mdl)
 {
 	unsigned short numControllers = Read<unsigned short>();
 	for(unsigned short i=0;i<numControllers;i++)
@@ -496,11 +496,11 @@ void FWMD::LoadBlendControllers(Model *mdl)
 		int min = Read<int>();
 		int max = Read<int>();
 		bool loop = Read<bool>();
-		mdl->AddBlendController(name,min,max,loop);
+		mdl.AddBlendController(name,min,max,loop);
 	}
 }
 
-void FWMD::LoadIKControllers(uint16_t version,Model *mdl)
+void FWMD::LoadIKControllers(uint16_t version,Model &mdl)
 {
 	if(version < 0x0016)
 		return;
@@ -511,7 +511,7 @@ void FWMD::LoadIKControllers(uint16_t version,Model *mdl)
 		auto type = ReadString();
 		auto chainLength = Read<uint32_t>();
 		auto method = Read<uint32_t>();
-		auto *controller = mdl->AddIKController(name,chainLength,type,static_cast<util::ik::Method>(method));
+		auto *controller = mdl.AddIKController(name,chainLength,type,static_cast<util::ik::Method>(method));
 
 		auto *keyValues = (controller != nullptr) ? &controller->GetKeyValues() : nullptr;
 		auto numKeyValues = Read<uint32_t>();
@@ -525,7 +525,7 @@ void FWMD::LoadIKControllers(uint16_t version,Model *mdl)
 	}
 }
 
-void FWMD::LoadAnimations(unsigned short version,Model *mdl)
+void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 {
 	unsigned int numAnimations = Read<unsigned int>();
 	for(unsigned int i=0;i<numAnimations;i++)
@@ -536,20 +536,20 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 		if(version < 0x0007)
 		{
 			Vector3 min,max;
-			mdl->GetRenderBounds(min,max);
+			mdl.GetRenderBounds(min,max);
 			anim->SetRenderBounds(min,max);
 		}
-		mdl->AddAnimation(name,anim);
+		mdl.AddAnimation(name,anim);
 	}
 
 	if(version >= 0x0015)
 	{
 		auto numVertexAnims = Read<uint32_t>();
-		mdl->GetVertexAnimations().reserve(numVertexAnims);
+		mdl.GetVertexAnimations().reserve(numVertexAnims);
 		for(auto i=decltype(numVertexAnims){0};i<numVertexAnims;++i)
 		{
 			auto name = ReadString();
-			auto va = mdl->AddVertexAnimation(name);
+			auto va = mdl.AddVertexAnimation(name);
 			auto numMeshAnims = Read<uint32_t>();
 			va->GetMeshAnimations().reserve(numMeshAnims);
 			for(auto j=decltype(numMeshAnims){0};j<numMeshAnims;++j)
@@ -558,7 +558,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 				auto meshId = Read<uint32_t>();
 				auto subMeshId = Read<uint32_t>();
 
-				auto meshGroup = mdl->GetMeshGroup(meshGroupId);
+				auto meshGroup = mdl.GetMeshGroup(meshGroupId);
 				auto &meshes = meshGroup->GetMeshes();
 				std::shared_ptr<ModelMesh> mesh = (meshId < meshes.size()) ? meshes.at(meshId) : nullptr;
 				std::shared_ptr<ModelSubMesh> subMesh = nullptr;
@@ -601,7 +601,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 		}
 
 		auto numFlexControllers = Read<uint32_t>();
-		auto &flexControllers = mdl->GetFlexControllers();
+		auto &flexControllers = mdl.GetFlexControllers();
 		flexControllers.reserve(numFlexControllers);
 		for(auto i=decltype(numFlexControllers){0};i<numFlexControllers;++i)
 		{
@@ -613,7 +613,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 		}
 
 		auto numFlexes = Read<uint32_t>();
-		auto &flexes = mdl->GetFlexes();
+		auto &flexes = mdl.GetFlexes();
 		for(auto i=decltype(numFlexes){0};i<numFlexes;++i)
 		{
 			auto name = ReadString();
@@ -623,7 +623,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 			auto vaIdx = Read<uint32_t>();
 			auto maIdx = Read<uint32_t>();
 			auto frIdx = Read<uint32_t>();
-			auto &vertAnims = mdl->GetVertexAnimations();
+			auto &vertAnims = mdl.GetVertexAnimations();
 			if(vaIdx < vertAnims.size())
 			{
 				auto &va = vertAnims.at(vaIdx);
@@ -652,7 +652,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 			}
 		}
 
-		auto &phonemeMap = mdl->GetPhonemeMap();
+		auto &phonemeMap = mdl.GetPhonemeMap();
 		auto numPhonemes = Read<uint32_t>();
 		phonemeMap.phonemes.reserve(numPhonemes);
 		for(auto i=decltype(numPhonemes){0};i<numPhonemes;++i)
@@ -673,8 +673,8 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 		if(version >= 28)
 		{
 			auto maxEyeDeflection = Read<float>();
-			mdl->SetMaxEyeDeflection(maxEyeDeflection);
-			auto &eyeballs = mdl->GetEyeballs();
+			mdl.SetMaxEyeDeflection(maxEyeDeflection);
+			auto &eyeballs = mdl.GetEyeballs();
 			auto numEyeballs = Read<uint32_t>();
 			eyeballs.reserve(numEyeballs);
 			for(auto i=decltype(numEyeballs){0u};i<numEyeballs;++i)
@@ -688,7 +688,7 @@ void FWMD::LoadAnimations(unsigned short version,Model *mdl)
 	}
 }
 
-void FWMD::LoadLODData(unsigned short version,Model *mdl)
+void FWMD::LoadLODData(unsigned short version,Model &mdl)
 {
 	if(version >= 0x0004)
 	{
@@ -705,14 +705,14 @@ void FWMD::LoadLODData(unsigned short version,Model *mdl)
 				auto repId = Read<unsigned int>();
 				meshReplacements[origId] = repId;
 			}
-			mdl->AddLODInfo(lod,meshReplacements);
+			mdl.AddLODInfo(lod,meshReplacements);
 		}
 		return;
 	}
 
 	// Version 0x0003 and lower
 	auto numLODs = Read<unsigned char>();
-	auto &baseMeshes = mdl->GetBaseMeshes();
+	auto &baseMeshes = mdl.GetBaseMeshes();
 	for(UChar i=0;i<numLODs;i++)
 	{
 		auto lod = Read<unsigned char>();
@@ -730,7 +730,7 @@ void FWMD::LoadLODData(unsigned short version,Model *mdl)
 
 	// Obsolete, because incompatible with new format (LODs won't work for these models)
 	/*unsigned char numLODs = Read<unsigned char>();
-	auto &baseMeshes = mdl->GetBaseMeshes();
+	auto &baseMeshes = mdl.GetBaseMeshes();
 	LODInfo *lodBase = NULL;
 	for(unsigned char i=0;i<numLODs;i++)
 	{
@@ -751,7 +751,7 @@ void FWMD::LoadLODData(unsigned short version,Model *mdl)
 		}
 		if(lod == 0)
 		{
-			LODInfo *info = mdl->AddLODInfo(lod,meshIDs);
+			LODInfo *info = mdl.AddLODInfo(lod,meshIDs);
 			lodBase = info;
 		}
 		else if(lodBase != NULL)
@@ -771,22 +771,22 @@ void FWMD::LoadLODData(unsigned short version,Model *mdl)
 				if(bHidden == false)
 					meshIDs.push_back(meshID);
 			}
-			mdl->AddLODInfo(lod,meshIDs);
-			lodBase = mdl->GetLODInfo(0);
+			mdl.AddLODInfo(lod,meshIDs);
+			lodBase = mdl.GetLODInfo(0);
 		}
 	}*/
 	//
 	//
 }
 
-void FWMD::LoadSoftBodyData(Model *mdl,CollisionMesh &colMesh)
+void FWMD::LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh)
 {
 	auto meshGroupId = Read<uint32_t>();
 	auto meshId = Read<uint32_t>();
 	auto subMeshId = Read<uint32_t>();
 	colMesh.SetSoftBody(true);
 	auto bValid = false;
-	auto meshGroup = mdl->GetMeshGroup(meshGroupId);
+	auto meshGroup = mdl.GetMeshGroup(meshGroupId);
 	if(meshGroup != nullptr)
 	{
 		auto &meshes = meshGroup->GetMeshes();
@@ -830,13 +830,13 @@ void FWMD::LoadSoftBodyData(Model *mdl,CollisionMesh &colMesh)
 		colMesh.SetSoftBody(false);
 }
 
-void FWMD::LoadBodygroups(Model *mdl)
+void FWMD::LoadBodygroups(Model &mdl)
 {
 	auto numBodygroups = Read<unsigned short>();
 	for(unsigned short i=0;i<numBodygroups;i++)
 	{
 		auto name = ReadString();
-		auto &bg = mdl->AddBodyGroup(name);
+		auto &bg = mdl.AddBodyGroup(name);
 		auto numMeshes = Read<unsigned char>();
 		for(unsigned char j=0;j<numMeshes;j++)
 		{
@@ -845,4 +845,4 @@ void FWMD::LoadBodygroups(Model *mdl)
 		}
 	}
 }
-#pragma optimize("",on)
+

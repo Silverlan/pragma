@@ -11,7 +11,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE) ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_IRRADIANCE = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding {
@@ -174,4 +174,4 @@ endLoop:
 	return success ? tex : nullptr;
 
 }
-#pragma optimize("",on)
+

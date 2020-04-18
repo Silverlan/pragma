@@ -11,7 +11,7 @@ using namespace pragma::rendering;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 bool RaytracingRenderer::Initialize()
 {
 	auto &dev = c_engine->GetDevice();
@@ -41,7 +41,8 @@ bool RaytracingRenderer::Initialize()
 	return m_whShader.valid() && CRaytracingComponent::InitializeBuffers();
 }
 bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
-void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
+// TODO
+// void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
 //#include <wgui/types/wirect.h>
 bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
@@ -73,7 +74,7 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWorld);
 
 	float intensity;
-	auto *dsIBL = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(cam->GetEntity().GetPosition(),intensity);
+	auto *dsIBL = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,cam->GetEntity().GetPosition(),intensity);
 	if(dsIBL == nullptr)
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::NoIBL);
 
@@ -178,4 +179,4 @@ const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetHDRPresentationT
 }
 void RaytracingRenderer::EndRendering() {}
 Anvil::DescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0);}
-#pragma optimize("",on)
+

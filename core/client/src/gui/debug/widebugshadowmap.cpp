@@ -12,7 +12,6 @@ extern DLLCLIENT CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugShadowMap,WIDebugShadowMap);
 
-#pragma optimize("",off)
 WIDebugShadowMap::WIDebugShadowMap()
 	: WIBase()
 {}
@@ -167,4 +166,3 @@ void WIDebugShadowMap::DoUpdate()
 		);
 	}
 }
-#pragma optimize("",on)

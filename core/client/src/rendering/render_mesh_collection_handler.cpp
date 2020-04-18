@@ -22,7 +22,7 @@ using namespace pragma;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
 const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum)
 {
@@ -174,7 +174,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							if(drawWorld == 2)
 								shader = renderer.GetWireframeShader();
 							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderTextured3D*>(base));
+								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
 							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
 							{
 								// Translucent?
@@ -205,7 +205,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 								{
 									if(containers.size() == containers.capacity())
 										containers.reserve(containers.capacity() +10);
-									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3D*>(shader)));
+									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3DBase*>(shader)));
 									shaderContainer = containers.back().get();
 								}
 								RenderSystem::MaterialMeshContainer *matContainer = nullptr;
@@ -247,4 +247,4 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 	}
 	return flags;
 }
-#pragma optimize("",on)
+

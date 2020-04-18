@@ -5,6 +5,8 @@
 
 using namespace pragma;
 
+extern DLLCLIENT CGame *c_game;
+
 void OcclusionCullingHandlerBruteForce::PerformCulling(
 	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
@@ -15,12 +17,12 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
-	auto &ents = scene.GetEntities();
-	for(auto &hEnt : ents)
+	std::vector<CBaseEntity*> *ents;
+	c_game->GetEntities(&ents);
+	for(auto *ent : *ents)
 	{
-		if(hEnt.IsValid() == false)
+		if(ent == nullptr)
 			continue;
-		auto *ent = static_cast<CBaseEntity*>(hEnt.get());
 		auto pRenderComponent = ent->GetRenderComponent();
 		if(pRenderComponent.expired())
 			continue;

@@ -43,6 +43,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
+#include "pragma/asset/c_util_model.hpp"
 #include <wgui/fontmanager.h>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
@@ -661,32 +662,49 @@ void CGame::RegisterLuaClasses()
 
 	auto modelClassDef = luabind::class_<Model>("Model");
 
-	auto defMdlExportInfo = luabind::class_<Lua::Model::Client::ModelExportInfo>("ExportInfo");
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::PNG));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_BMP",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::BMP));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_TGA",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::TGA));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_JPG",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::JPG));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_HDR",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::HDR));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_DDS",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::DDS));
-	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_KTX",umath::to_integral(Lua::Model::Client::ModelExportInfo::ImageFormat::KTX));
+	auto defMdlExportInfo = luabind::class_<pragma::asset::ModelExportInfo>("ExportInfo");
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_PNG",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::PNG));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_BMP",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::BMP));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_TGA",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::TGA));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_JPG",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::JPG));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_HDR",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::HDR));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_DDS",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::DDS));
+	defMdlExportInfo.add_static_constant("IMAGE_FORMAT_KTX",umath::to_integral(pragma::asset::ModelExportInfo::ImageFormat::KTX));
 
 	defMdlExportInfo.add_static_constant("DEVICE_CPU",umath::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::CPU));
 	defMdlExportInfo.add_static_constant("DEVICE_GPU",umath::to_integral(pragma::rendering::cycles::SceneInfo::DeviceType::GPU));
 	defMdlExportInfo.def(luabind::constructor<>());
-	defMdlExportInfo.def_readwrite("exportAnimations",&Lua::Model::Client::ModelExportInfo::exportAnimations);
-	defMdlExportInfo.def_readwrite("exportSkinnedMeshData",&Lua::Model::Client::ModelExportInfo::exportSkinnedMeshData);
-	defMdlExportInfo.def_readwrite("exportMorphTargets",&Lua::Model::Client::ModelExportInfo::exportMorphTargets);
-	defMdlExportInfo.def_readwrite("exportImages",&Lua::Model::Client::ModelExportInfo::exportImages);
-	defMdlExportInfo.def_readwrite("enableExtendedDDS",&Lua::Model::Client::ModelExportInfo::enableExtendedDDS);
-	defMdlExportInfo.def_readwrite("saveAsBinary",&Lua::Model::Client::ModelExportInfo::saveAsBinary);
-	defMdlExportInfo.def_readwrite("verbose",&Lua::Model::Client::ModelExportInfo::verbose);
-	defMdlExportInfo.def_readwrite("generateAo",&Lua::Model::Client::ModelExportInfo::generateAo);
-	defMdlExportInfo.def_readwrite("aoSamples",&Lua::Model::Client::ModelExportInfo::aoSamples);
-	defMdlExportInfo.def_readwrite("aoResolution",&Lua::Model::Client::ModelExportInfo::aoResolution);
-	defMdlExportInfo.def_readwrite("scale",&Lua::Model::Client::ModelExportInfo::scale);
-	defMdlExportInfo.def_readwrite("mergeMeshesByMaterial",&Lua::Model::Client::ModelExportInfo::mergeMeshesByMaterial);
-	defMdlExportInfo.def_readwrite("imageFormat",reinterpret_cast<uint32_t Lua::Model::Client::ModelExportInfo::*>(&Lua::Model::Client::ModelExportInfo::imageFormat));
-	defMdlExportInfo.def_readwrite("aoDevice",reinterpret_cast<uint32_t Lua::Model::Client::ModelExportInfo::*>(&Lua::Model::Client::ModelExportInfo::aoDevice));
+	defMdlExportInfo.def_readwrite("exportAnimations",&pragma::asset::ModelExportInfo::exportAnimations);
+	defMdlExportInfo.def_readwrite("exportSkinnedMeshData",&pragma::asset::ModelExportInfo::exportSkinnedMeshData);
+	defMdlExportInfo.def_readwrite("exportMorphTargets",&pragma::asset::ModelExportInfo::exportMorphTargets);
+	defMdlExportInfo.def_readwrite("exportImages",&pragma::asset::ModelExportInfo::exportImages);
+	defMdlExportInfo.def_readwrite("embedAnimations",&pragma::asset::ModelExportInfo::embedAnimations);
+	defMdlExportInfo.def_readwrite("fullExport",&pragma::asset::ModelExportInfo::fullExport);
+	defMdlExportInfo.def_readwrite("enableExtendedDDS",&pragma::asset::ModelExportInfo::enableExtendedDDS);
+	defMdlExportInfo.def_readwrite("saveAsBinary",&pragma::asset::ModelExportInfo::saveAsBinary);
+	defMdlExportInfo.def_readwrite("verbose",&pragma::asset::ModelExportInfo::verbose);
+	defMdlExportInfo.def_readwrite("generateAo",&pragma::asset::ModelExportInfo::generateAo);
+	defMdlExportInfo.def_readwrite("aoSamples",&pragma::asset::ModelExportInfo::aoSamples);
+	defMdlExportInfo.def_readwrite("aoResolution",&pragma::asset::ModelExportInfo::aoResolution);
+	defMdlExportInfo.def_readwrite("scale",&pragma::asset::ModelExportInfo::scale);
+	defMdlExportInfo.def_readwrite("mergeMeshesByMaterial",&pragma::asset::ModelExportInfo::mergeMeshesByMaterial);
+	defMdlExportInfo.def_readwrite("imageFormat",reinterpret_cast<uint32_t pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::imageFormat));
+	defMdlExportInfo.def_readwrite("aoDevice",reinterpret_cast<uint32_t pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::aoDevice));
+	defMdlExportInfo.def("SetAnimationList",static_cast<void(*)(lua_State*,pragma::asset::ModelExportInfo&,luabind::object)>([](lua_State *l,pragma::asset::ModelExportInfo &exportInfo,luabind::object oTable) {
+		int32_t t = 2;
+		auto n = Lua::GetObjectLength(l,t);
+		std::vector<std::string> anims {};
+		anims.reserve(n);
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,t);
+			anims.push_back(Lua::CheckString(l,-1));
+
+			Lua::Pop(l,1);
+		}
+		exportInfo.SetAnimationList(anims);
+	}));
 	modelClassDef.scope[defMdlExportInfo];
 
 	Lua::Model::register_class(GetLuaState(),modelClassDef,modelMeshClassDef,subModelMeshClassDef);
@@ -694,6 +712,7 @@ void CGame::RegisterLuaClasses()
 	modelClassDef.def("SetMaterial",&Lua::Model::Client::SetMaterial);
 	modelClassDef.def("GetVertexAnimationBuffer",&Lua::Model::Client::GetVertexAnimationBuffer);
 	modelClassDef.def("Export",&Lua::Model::Client::Export);
+	modelClassDef.def("ExportAnimation",&Lua::Model::Client::ExportAnimation);
 	modGame[modelClassDef];
 	auto _G = luabind::globals(GetLuaState());
 	_G["Model"] = _G["game"]["Model"];

@@ -65,7 +65,7 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 						continue;
 					auto shadowIdx = i *numBits +j;
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
-					if(l == nullptr || scene.HasLightSource(*l) == false)
+					if(l == nullptr || static_cast<CBaseEntity&>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
 					culledLightSources.push_back(l);
 

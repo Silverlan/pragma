@@ -27,7 +27,6 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 CParticleSystemComponent::Node::Node(CBaseEntity *ent)
 	: hEntity((ent != nullptr) ? ent->GetHandle() : EntityHandle{}),bEntity(true)
 {}
@@ -1398,4 +1397,3 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
-#pragma optimize("",on)

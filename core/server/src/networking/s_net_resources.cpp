@@ -63,7 +63,7 @@ void ServerState::SendRoughModel(const std::string &f,const std::vector<pragma::
 //#if RESOURCE_TRANSFER_VERBOSE == 1
 	Con::csv<<"[ResourceManager] Got Request For: "<<mdlName<<Con::endl;
 //#endif
-	auto mdl = ModelManager::GetModel(s_game,mdlName);
+	auto mdl = GetModelManager().FindCachedModel(mdlName);
 	if(mdl == nullptr)
 		return;
 	NetPacket pOut;
@@ -353,7 +353,7 @@ void NET_sv_query_model_texture(pragma::networking::IServerClient &session,NetPa
 {
 	auto mdlName = packet->ReadString();
 	auto matName = packet->ReadString();
-	auto mdl = ModelManager::GetModel(s_game,mdlName);
+	auto mdl = server->GetModelManager().FindCachedModel(mdlName);
 	if(mdl == nullptr)
 		return;
 	std::string dstName;

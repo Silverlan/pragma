@@ -7,6 +7,7 @@
 #include <pragma/model/modelmesh.h>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/networkstate/networkstate.h>
+#include <pragma/console/conout.h>
 #include <fsys/filesystem.h>
 
 #pragma optimize("",off)
@@ -331,7 +332,7 @@ static Vector4i vertex_attr_value_to_ivec4(source2::resource::DXGI_FORMAT format
 }
 
 source2::impl::MeshData source2::impl::initialize_vertices(
-	const source2::resource::VBIB::VertexBuffer &vbuf,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex
+	const source2::resource::VBIB::VertexBuffer &vbuf,source2::resource::Skeleton *optSkeleton,std::optional<int64_t> meshIdx
 )
 {
 	auto numVerts = vbuf.count;
@@ -370,6 +371,7 @@ source2::impl::MeshData source2::impl::initialize_vertices(
 		auto offset = i *sizePerVertex;
 		auto *data = vertexData.data() +offset;
 		auto &v = prVerts.at(i);
+
 		auto *vw = attrBlendIndices ? &vertWeights.at(i) : nullptr;
 		if(attrPos)
 		{
@@ -404,15 +406,23 @@ source2::impl::MeshData source2::impl::initialize_vertices(
 			auto uv = vertex_attr_value_to_vec4(vbuf,*attrTex2,i);
 			lightmapUvs.at(i) = uv *1.3333333f; // Magic number; Currently unknown why this is needed!
 		}
-		if(optSkinIndexToBoneIndex && attrBlendIndices)
+		if(optSkeleton && meshIdx.has_value() && attrBlendIndices)
 		{
 			vw->boneIds = vertex_attr_value_to_ivec4(attrBlendIndices->type,data +attrBlendIndices->offset,{-1,-1,-1,-1});
-			for(uint8_t i=0;i<4;++i)
+			for(uint8_t iWeight=0;iWeight<4;++iWeight)
 			{
-				if(vw->boneIds[i] == -1)
+				auto boneIdx = vw->boneIds[iWeight];
+				if(boneIdx == -1)
 					continue;
-				auto itBoneIdx = optSkinIndexToBoneIndex->find(vw->boneIds[i]);
-				vw->boneIds[i] = (itBoneIdx != optSkinIndexToBoneIndex->end()) ? itBoneIdx->second : -1;
+				auto &remappingTable = optSkeleton->GetRemappingTable();
+				auto &remappingTableStarts = optSkeleton->GetRemappingTableStarts();
+
+				if(*meshIdx >= 0 && *meshIdx < remappingTableStarts.size())
+				{
+					auto start = remappingTableStarts.at(*meshIdx);
+					boneIdx = remappingTable.at(start +boneIdx);
+				}
+				vw->boneIds[iWeight] = boneIdx;
 			}
 		}
 		if(attrBlendIndices)

@@ -78,112 +78,6 @@ void Lua::Scene::InitializeRenderTarget(lua_State *l,::Scene &scene)
 {
 	scene.InitializeRenderTarget();
 }
-void Lua::Scene::AddLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight)
-{
-	pragma::Lua::check_component(l,hLight);
-	scene.AddLight(hLight.get());
-}
-void Lua::Scene::RemoveLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight)
-{
-	pragma::Lua::check_component(l,hLight);
-	scene.RemoveLight(hLight.get());
-}
-void Lua::Scene::SetLightSources(lua_State *l,::Scene &scene,luabind::object o)
-{
-	int32_t t = 2;
-	Lua::CheckTable(l,t);
-	auto numLights = Lua::GetObjectLength(l,t);
-	std::vector<pragma::CLightComponent*> lights;
-	lights.reserve(numLights);
-
-	auto bHasDirectional = false;
-	for(auto i=decltype(numLights){0};i<numLights;++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,t);
-		auto &pLight = Lua::Check<CLightHandle>(l,-1);
-		pragma::Lua::check_component(l,pLight);
-		Lua::Pop(l,1);
-		auto pToggleComponent = pLight->GetEntity().GetComponent<pragma::CToggleComponent>();
-		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
-			continue;
-		auto type = LightType::Undefined;
-		auto *pBaseLight = pLight->GetLight(type);
-		if(pBaseLight == nullptr)
-			continue;
-		if(type == LightType::Directional)
-		{
-			if(bHasDirectional == true)
-				continue;
-			lights.insert(lights.begin(),pLight.get()); // Directional light source has to be at front
-			bHasDirectional = true;
-			continue;
-		}
-		lights.push_back(pLight.get());
-	}
-	scene.SetLights(lights);
-}
-void Lua::Scene::GetLightSources(lua_State *l,::Scene &scene)
-{
-	auto &lightSources = scene.GetLightSources();
-	auto t = Lua::CreateTable(l);
-	int32_t idx = 1;
-	for(auto &hLight : lightSources)
-	{
-		if(hLight.expired())
-			continue;
-		Lua::PushInt(l,idx++);
-		hLight->PushLuaObject(l);
-		Lua::SetTableValue(l,t);
-	}
-}
-void Lua::Scene::LinkLightSources(lua_State *l,::Scene &scene,::Scene &sceneOther) {scene.LinkLightSources(sceneOther);}
-void Lua::Scene::AddEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	scene.AddEntity(static_cast<CBaseEntity&>(*hEnt.get()));
-}
-void Lua::Scene::RemoveEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	scene.RemoveEntity(static_cast<CBaseEntity&>(*hEnt.get()));
-}
-void Lua::Scene::SetEntities(lua_State *l,::Scene &scene,luabind::object o)
-{
-	int32_t t = 2;
-	Lua::CheckTable(l,t);
-	auto numEnts = Lua::GetObjectLength(l,t);
-	std::vector<CBaseEntity*> ents;
-	ents.reserve(numEnts);
-
-	auto bHasDirectional = false;
-	for(auto i=decltype(numEnts){0};i<numEnts;++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,t);
-		auto *ent = static_cast<CBaseEntity*>(Lua::CheckEntity(l,-1));
-		Lua::Pop(l,1);
-		if(ent->IsSpawned() == false)
-			continue;
-		ents.push_back(ent);
-	}
-	scene.SetEntities(ents);
-}
-void Lua::Scene::GetEntities(lua_State *l,::Scene &scene)
-{
-	auto &entityList = scene.GetEntities();
-	auto t = Lua::CreateTable(l);
-	int32_t idx = 1;
-	for(auto &hEnt : entityList)
-	{
-		if(hEnt.IsValid() == false)
-			continue;
-		Lua::PushInt(l,idx++);
-		Lua::Push<BaseEntity*>(l,hEnt.get());
-		Lua::SetTableValue(l,t);
-	}
-}
-void Lua::Scene::LinkEntities(lua_State *l,::Scene &scene,::Scene &sceneOther) {scene.LinkEntities(sceneOther);}
 void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint)
 {
 	auto &descSet = scene.GetCameraDescriptorSetGroup(static_cast<vk::PipelineBindPoint>(bindPoint));
@@ -198,6 +92,10 @@ void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,::Scene &scene)
 	if(descSet == nullptr)
 		return;
 	Lua::Push(l,descSet);
+}
+void Lua::Scene::GetIndex(lua_State *l,::Scene &scene)
+{
+	Lua::PushInt(l,scene.GetSceneIndex());
 }
 
 ////////////////////////////////
@@ -319,6 +217,6 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	auto *shader = shaderInfo ? static_cast<::util::WeakHandle<prosper::Shader>*>(shaderInfo->GetShader().get()) : nullptr;
 	if(shader == nullptr || shader->expired() || (*shader)->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
 		return;
-	auto &shaderTex = static_cast<pragma::ShaderTextured3D&>(**shader);
+	auto &shaderTex = static_cast<pragma::ShaderTextured3DBase&>(**shader);
 	ScheduleMeshForRendering(l,renderer,renderMode,shaderTex,mat,hEnt,mesh);
 }

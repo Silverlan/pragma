@@ -37,7 +37,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -676,7 +676,10 @@ int Lua::util::open_path_in_explorer(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);
 	path = ::util::get_program_path() +'/' +path;
-	::util::open_path_in_explorer(path);
+	std::optional<std::string> selectFile {};
+	if(Lua::IsSet(l,2))
+		selectFile = Lua::CheckString(l,2);
+	::util::open_path_in_explorer(path,selectFile);
 	return 0;
 }
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
@@ -977,4 +980,4 @@ int Lua::util::get_addon_path(lua_State *l)
 	Lua::PushString(l,path);
 	return 1;
 }
-#pragma optimize("",on)
+

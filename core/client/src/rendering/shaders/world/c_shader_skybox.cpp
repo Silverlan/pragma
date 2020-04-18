@@ -11,7 +11,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
@@ -31,7 +31,7 @@ ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifi
 ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderTextured3DBase(context,identifier,vsShader,fsShader)
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 void ShaderSkybox::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -103,4 +103,4 @@ bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(
 ShaderSkyboxEquirect::ShaderSkyboxEquirect(prosper::Context &context,const std::string &identifier)
 	: ShaderSkybox{context,identifier,"world/vs_skybox_equirect","world/fs_skybox_equirect"}
 {}
-#pragma optimize("",on)
+

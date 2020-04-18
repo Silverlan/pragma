@@ -17,7 +17,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
@@ -105,22 +104,16 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 		//if(flexId == 0u)//flexId != 19u) // TODO; Flex id 19 = "AU1R"
 		//	continue;
 		auto *va = flex.GetVertexAnimation();
-		auto *ma = flex.GetMeshVertexAnimation();
-		auto *fr = flex.GetMeshVertexFrame();
-		if(va == nullptr || ma == nullptr || fr == nullptr)
+		if(va == nullptr)
 			continue;
+		//auto *ma = flex.GetMeshVertexAnimation();
+		//auto *fr = flex.GetMeshVertexFrame();
 		auto it = std::find_if(vertAnims.begin(),vertAnims.end(),[va](const std::shared_ptr<VertexAnimation> &vaOther) {
 			return vaOther.get() == va;
 		});
-		auto &frames = ma->GetFrames();
-		auto itFrame = std::find_if(frames.begin(),frames.end(),[fr](const std::shared_ptr<MeshVertexFrame> &frameOther) {
-			return frameOther.get() == fr;
-		});
-		if(it == vertAnims.end() || itFrame == frames.end())
+		if(it == vertAnims.end())
 			continue;
 		auto vaId = it -vertAnims.begin();
-		auto frameId = itFrame -frames.begin();
-
 		auto &meshAnims = va->GetMeshAnimations();
 		for(auto &meshAnim : meshAnims)
 		{
@@ -129,6 +122,10 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 				continue;
 			auto &frames = meshAnim->GetFrames();
 			if(frames.empty() == true)
+				continue;
+			uint32_t frameId = 0;
+			auto *fr = meshAnim->GetFrame(frameId);
+			if(fr == nullptr)
 				continue;
 			auto cycle = flexWeight *(frames.size() -1);
 			auto fraction = fmodf(cycle,1.f);
@@ -228,4 +225,3 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 	}
 	return true;
 }
-#pragma optimize("",on)

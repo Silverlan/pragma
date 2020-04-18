@@ -11,14 +11,20 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 void Lua::Entity::Client::register_class(luabind::class_<EntityHandle> &classDef)
 {
 	::Lua::Entity::register_class(classDef);
+	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED",CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);
 	classDef.def("IsClientsideOnly",&IsClientsideOnly);
 	classDef.def("GetClientIndex",&GetClientIndex);
 	classDef.def("SendNetEvent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t protocol,unsigned int,const NetPacket&)>(&SendNetEvent));
 	classDef.def("SendNetEvent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t protocol,unsigned int)>(&SendNetEvent));
+
+	classDef.def("GetSceneFlags",&GetSceneFlags);
+	classDef.def("AddToScene",&AddToScene);
+	classDef.def("RemoveFromScene",&RemoveFromScene);
+	classDef.def("IsInScene",&IsInScene);
 }
 
 void Lua::Entity::Client::IsClientsideOnly(lua_State *l,EntityHandle &hEnt)
@@ -46,4 +52,24 @@ void Lua::Entity::Client::SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t 
 	}
 }
 void Lua::Entity::Client::SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId) {SendNetEvent(l,hEnt,protocol,eventId,{});}
-#pragma optimize("",on)
+void Lua::Entity::Client::GetSceneFlags(lua_State *l,EntityHandle &hEnt)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	Lua::PushInt(l,static_cast<CBaseEntity*>(hEnt.get())->GetSceneFlags());
+}
+void Lua::Entity::Client::AddToScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	static_cast<CBaseEntity*>(hEnt.get())->AddToScene(scene);
+}
+void Lua::Entity::Client::RemoveFromScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	static_cast<CBaseEntity*>(hEnt.get())->RemoveFromScene(scene);
+}
+void Lua::Entity::Client::IsInScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	Lua::PushBool(l,static_cast<CBaseEntity*>(hEnt.get())->IsInScene(scene));
+}
+

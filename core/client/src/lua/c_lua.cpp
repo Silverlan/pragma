@@ -374,19 +374,10 @@ void CGame::RegisterLua()
 	classDefScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
 	classDefScene.def("InitializeRenderTarget",&Lua::Scene::InitializeRenderTarget);
 
-	classDefScene.def("SetLightSources",&Lua::Scene::SetLightSources);
-	classDefScene.def("GetLightSources",&Lua::Scene::GetLightSources);
-	classDefScene.def("LinkLightSources",&Lua::Scene::LinkLightSources);
-	classDefScene.def("SetEntities",&Lua::Scene::SetEntities);
-	classDefScene.def("GetEntities",&Lua::Scene::GetEntities);
-	classDefScene.def("LinkEntities",&Lua::Scene::LinkEntities);
+	classDefScene.def("GetIndex",&Lua::Scene::GetIndex);
 	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
 	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&)>(&Lua::Scene::GetCameraDescriptorSet));
 	classDefScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
-	classDefScene.def("AddLightSource",&Lua::Scene::AddLightSource);
-	classDefScene.def("RemoveLightSource",&Lua::Scene::RemoveLightSource);
-	classDefScene.def("AddEntity",&Lua::Scene::AddEntity);
-	classDefScene.def("RemoveEntity",&Lua::Scene::RemoveEntity);
 	classDefScene.def("GetRenderer",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
 		auto *renderer = scene.GetRenderer();
 		if(renderer == nullptr)

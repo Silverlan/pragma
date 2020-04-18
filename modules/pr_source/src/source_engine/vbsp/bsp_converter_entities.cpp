@@ -289,7 +289,7 @@ void source_engine::translate_class(
 			// Hotfix: FGD information for Source 2 entities is unreliable (I don't know if Source 2 uses FGDs),
 			// so we can't determine accurately if something is a model path. We'll just assume that the "models"
 			// keyvalue is always a model path.
-			util::Path path{itMdl->second,true};
+			util::Path path{itMdl->second};
 			if(path.GetFront() == "models")
 				path.PopFront();
 			itMdl->second = path.GetString();

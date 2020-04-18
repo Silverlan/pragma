@@ -123,7 +123,7 @@ decltype(ShaderPrepass::RENDER_PASS_NORMAL_FORMAT) ShaderPrepass::RENDER_PASS_NO
 ShaderPrepass::ShaderPrepass(prosper::Context &context,const std::string &identifier)
 	: ShaderPrepassBase(context,identifier,"world/prepass/vs_prepass","world/prepass/fs_prepass")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)

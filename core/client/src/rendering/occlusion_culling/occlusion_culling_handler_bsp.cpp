@@ -12,7 +12,6 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 OcclusionCullingHandlerBSP::OcclusionCullingHandlerBSP(const std::shared_ptr<util::BSPTree> &bspTree)
 	: m_bspTree{bspTree}
 {}
@@ -271,4 +270,3 @@ static void debug_bsp_lock_callback(NetworkState*,ConVar*,int32_t,int32_t val)
 	pHandler->SetCurrentNodeLocked(val != 0);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_bsp_lock,debug_bsp_lock_callback);
-#pragma optimize("",on)

@@ -10,7 +10,6 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
@@ -149,12 +148,6 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 	return true;
 }
 
-void CModelComponent::SetModel(const std::string &mdl)
-{
-	BaseModelComponent::SetModel(mdl);
-	BaseModelComponent::SetModel<CModel,CModelMesh,CModelManager>(mdl);
-}
-
 void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	m_lod = 0;
@@ -187,4 +180,3 @@ void CEOnUpdateLODByPos::PushArguments(lua_State *l)
 {
 	Lua::Push<Vector3>(l,posCam);
 }
-#pragma optimize("",on)

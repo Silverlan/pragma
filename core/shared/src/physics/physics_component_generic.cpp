@@ -26,7 +26,7 @@ using namespace pragma;
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose,BoneId boneId)
 {
 	if(shape.IsCompoundShape())
@@ -546,73 +546,6 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	return InitializePhysics(physObjCreateInfo,flags,meshes.front()->GetBoneParent());
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBrushPhysics(PhysFlags flags) // Obsolete?
-{
-	auto &ent = GetEntity();
-	NetworkState *state = ent.GetNetworkState();
-	Game *game = state->GetGameState();
-	auto *physEnv = game->GetPhysicsEnvironment();
-
-	auto &meshes = GetBrushMeshes();
-	auto pTrComponent = ent.GetTransformComponent();
-	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	bool bPhys = false;
-	for(unsigned int i=0;i<meshes.size();i++)
-	{
-		std::vector<Vector3> vertices;
-		auto &mesh = meshes[i];
-		bool bConvex = mesh->IsConvex();
-		if(bConvex == true) // Create a single convex mesh
-		{
-			auto shape = mesh->GetShape();
-
-			physics::Transform startTransform;
-			startTransform.SetIdentity();
-			startTransform.SetOrigin(origin);
-			auto contactProcessingThreshold = 1e30;
-
-			auto body = physEnv->CreateRigidBody(*shape,umath::is_flag_set(flags,PhysFlags::Dynamic));
-			//PhysRigidBody *body = physEnv->CreateRigid
-			//btRigidBody *body = new btRigidBody(mass,NULL,shape,localInertia);
-			body->SetWorldTransform(startTransform);
-			body->SetContactProcessingThreshold(CFloat(contactProcessingThreshold));
-			if(shape->GetMass() == 0.f)
-				body->SetStatic(true);
-
-			if(bPhys == false)
-			{
-				bPhys = true;
-				if(m_physObject != NULL)
-					DestroyPhysicsObject();
-				m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
-			}
-			else
-				m_physObject->AddCollisionObject(*body);
-		}
-		else // It's a displacement, every side will be a seperate actor
-		{
-			
-		}
-	}
-	if(bPhys == false)
-		return {};
-	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
-	{
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::All);
-		SetMoveType(MOVETYPE::PHYSICS);
-	}
-	else
-	{
-		m_physicsType = PHYSICSTYPE::STATIC;
-		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic,CollisionMask::All);
-		SetMoveType(MOVETYPE::NONE);
-	}
-
-	InitializePhysObj();
-	OnPhysicsInitialized();
-	return m_physObject;
-}
 util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
 {
 	Vector3 min,max;
@@ -647,12 +580,6 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysi
 	OnPhysicsInitialized();
 	return m_physObject;
 }
-
-void BasePhysicsComponent::AddBrushMesh(const std::shared_ptr<BrushMesh> &mesh) {m_brushMeshes.push_back(mesh);}
-void BasePhysicsComponent::InitializeBrushGeometry() {}
-
-std::vector<std::shared_ptr<BrushMesh>> &BasePhysicsComponent::GetBrushMeshes() {return m_brushMeshes;}
-const std::vector<std::shared_ptr<BrushMesh>> &BasePhysicsComponent::GetBrushMeshes() const {return const_cast<BasePhysicsComponent*>(this)->GetBrushMeshes();}
 
 void BasePhysicsComponent::ClearAwakeStatus()
 {
@@ -972,4 +899,4 @@ float BasePhysicsComponent::GetMass() const
 		return 0.f;
 	return phys->GetMass();
 }
-#pragma optimize("",on)
+

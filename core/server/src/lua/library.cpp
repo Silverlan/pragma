@@ -7,6 +7,7 @@
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/s_ldebug.h"
+#include <pragma/lua/libraries/lasset.hpp>
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/classes/lalsound.h>
 #include <luainterface.hpp>
@@ -22,6 +23,7 @@ void SGame::RegisterLuaLibraries()
 	});
 
 	Game::RegisterLuaLibraries();
+	Lua::asset::register_library(GetLuaInterface(),true);
 
 	Lua::RegisterLibrary(GetLuaState(),"resource",{
 		{"add_file",Lua::resource::add_file},

@@ -4,7 +4,7 @@
 
 LINK_WGUI_TO_CLASS(WITexturedCubemap,WITexturedCubemap);
 
-#pragma optimize("",off)
+
 WITexturedCubemap::WITexturedCubemap()
 	: WIBase{}
 {}
@@ -74,4 +74,4 @@ void WITexturedCubemap::SetTexture(prosper::Texture &tex)
 	}
 }
 WITexturedRect *WITexturedCubemap::GetSideElement(CubeMapSide side) {return static_cast<WITexturedRect*>(m_hCubemapSides.at(umath::to_integral(side)).get());}
-#pragma optimize("",on)
+

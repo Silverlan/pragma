@@ -20,7 +20,6 @@ void BaseRenderer::BeginRendering(std::shared_ptr<prosper::PrimaryCommandBuffer>
 void BaseRenderer::Resize(uint32_t width, uint32_t height) {}
 void BaseRenderer::UpdateRenderSettings(pragma::RenderSettings &renderSettings) {}
 void BaseRenderer::UpdateCameraData(pragma::CameraData &cameraData) {}
-void BaseRenderer::OnEntityAddedToScene(CBaseEntity &ent) {}
 bool BaseRenderer::IsRasterizationRenderer() const {return false;}
 bool BaseRenderer::IsRayTracingRenderer() const {return false;}
 const std::shared_ptr<prosper::Texture> &BaseRenderer::GetPresentationTexture() const {return GetSceneTexture();}

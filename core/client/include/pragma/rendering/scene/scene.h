@@ -29,7 +29,11 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 #pragma warning(push)
 #pragma warning(disable : 4251)
-namespace pragma {class CLightComponent; class CLightMapComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};};
+namespace pragma
+{
+	class CLightComponent; class CLightMapComponent; class CCameraComponent; class CParticleSystemComponent; namespace rendering {class BaseRenderer; class HDRData;};
+	class COcclusionCullerComponent;
+};
 class CBaseEntity;
 class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
@@ -42,22 +46,7 @@ public:
 		SSAOEnabled = 2
 	};
 public:
-	struct DLLCLIENT LightListInfo
-	{
-		void AddLightSource(pragma::CLightComponent &lightSource);
-		void RemoveLightSource(pragma::CLightComponent &lightSource);
-		std::vector<util::WeakHandle<pragma::CLightComponent>> lightSources;
-		std::unordered_set<pragma::CLightComponent*> lightSourceLookupTable;
-	};
-
-	struct DLLCLIENT EntityListInfo
-	{
-		void AddEntity(CBaseEntity &ent);
-		void RemoveEntity(CBaseEntity &ent);
-		std::vector<EntityHandle> entities;
-		std::unordered_set<CBaseEntity*> entityLookupTable;
-	};
-
+	using SceneIndex = uint8_t;
 	struct DLLCLIENT CreateInfo
 	{
 		CreateInfo(uint32_t width,uint32_t height);
@@ -66,7 +55,8 @@ public:
 		Anvil::SampleCountFlagBits sampleCount;
 	};
 
-	static std::shared_ptr<Scene> Create(const CreateInfo &createInfo);
+	static std::shared_ptr<Scene> Create(const CreateInfo &createInfo,Scene *optParent=nullptr);
+	static Scene *GetByIndex(SceneIndex sceneIndex);
 
 	//static void ClearLightCache();
 	~Scene();
@@ -80,25 +70,7 @@ public:
 	void SetActiveCamera(pragma::CCameraComponent &cam);
 	void SetActiveCamera();
 
-	void SetLights(const std::vector<pragma::CLightComponent*> &lights);
-	void SetLights(const std::shared_ptr<LightListInfo> &lights);
-	void AddLight(pragma::CLightComponent *light);
-	void RemoveLight(pragma::CLightComponent *light);
-	const std::shared_ptr<LightListInfo> &GetLightSourceListInfo() const;
-	const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetLightSources() const;
-	std::vector<util::WeakHandle<pragma::CLightComponent>> &GetLightSources();
-	bool HasLightSource(pragma::CLightComponent &lightSource) const;
-
 	void InitializeRenderTarget();
-
-	void SetEntities(const std::vector<CBaseEntity*> &ents);
-	void SetEntities(const std::shared_ptr<EntityListInfo> &ents);
-	void AddEntity(CBaseEntity &ent);
-	void RemoveEntity(CBaseEntity &ent);
-	const std::shared_ptr<EntityListInfo> &GetEntityListInfo() const;
-	const std::vector<EntityHandle> &GetEntities() const;
-	std::vector<EntityHandle> &GetEntities();
-	bool HasEntity(CBaseEntity &ent) const;
 
 	uint32_t GetWidth() const;
 	uint32_t GetHeight() const;
@@ -124,21 +96,17 @@ public:
 	void SetWorldEnvironment(WorldEnvironment &env);
 	void ClearWorldEnvironment();
 
-	void LinkLightSources(Scene &other);
-	void LinkEntities(Scene &other);
 	void LinkWorldEnvironment(Scene &other);
 	void SetLightMap(pragma::CLightMapComponent &lightMapC);
 
 	void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
 	pragma::rendering::BaseRenderer *GetRenderer();
 
-	OcclusionOctree<CBaseEntity*> &GetOcclusionOctree();
-	const OcclusionOctree<CBaseEntity*> &GetOcclusionOctree() const;
-
+	pragma::COcclusionCullerComponent *FindOcclusionCuller();
+	SceneIndex GetSceneIndex() const;
 	bool IsValid() const;
 private:
-	Scene(const CreateInfo &createInfo);
-	static std::vector<Scene*> s_scenes;
+	Scene(const CreateInfo &createInfo,SceneIndex sceneIndex);
 	// CSM Data
 	struct DLLCLIENT CSMCascadeDescriptor
 	{
@@ -146,6 +114,8 @@ private:
 		//Vulkan::SwapDescriptorBuffer descBuffer; // prosper TODO
 	};
 	std::vector<std::unique_ptr<CSMCascadeDescriptor>> m_csmDescriptors;
+
+	SceneIndex m_sceneIndex = std::numeric_limits<SceneIndex>::max();
 
 	// Render Target
 	uint32_t m_width;
@@ -162,7 +132,6 @@ private:
 	std::shared_ptr<prosper::Buffer> m_renderSettingsBuffer = nullptr;
 	pragma::RenderSettings m_renderSettings = {};
 	pragma::CameraData m_cameraData = {};
-	std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
 
 	// Fog
 	pragma::FogData m_fogData = {};
@@ -175,9 +144,6 @@ private:
 
 	bool m_bValid = false;
 	std::shared_ptr<pragma::rendering::BaseRenderer> m_renderer = nullptr;
-
-	std::shared_ptr<LightListInfo> m_lightSources = nullptr;
-	std::shared_ptr<EntityListInfo> m_entityList = nullptr;
 
 	void UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView=false);
 	void UpdateRenderSettings();

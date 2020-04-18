@@ -19,7 +19,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED = INVALID_COMPONENT_ID;
 ComponentEventId BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED = INVALID_COMPONENT_ID;
@@ -492,49 +492,6 @@ Vector3 BasePhysicsComponent::GetCollisionCenter() const
 	return r;
 }
 
-bool BasePhysicsComponent::IntersectAABB(const Vector3 &extents,const Vector3 &pos,const Vector3 &posNew,float *entryTime,float *exitTime,Vector3 *hitnormal,int *i) const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
-		return false;
-	auto &posThis = pTrComponent->GetPosition();
-	auto numMeshes = CInt32(m_brushMeshes.size());
-	for(auto j=*i;j<numMeshes;j++)
-	{
-		if(m_brushMeshes[j]->IntersectAABB(pos,posNew,extents,posThis,entryTime,exitTime,hitnormal))
-		{
-			*i = j +1;
-			return true;
-		}
-	}
-	*i = numMeshes;
-	*entryTime = 0;
-	*exitTime = 0;
-	if(hitnormal != NULL)
-		*hitnormal = Vector3(0,0,0);
-	return false;
-}
-
-bool BasePhysicsComponent::IntersectAABB(Vector3 &min,Vector3 &max) const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
-		return false;
-	auto &pos = pTrComponent->GetPosition();
-	min -= pos;
-	max -= pos; // TODO: Rotate around angle
-	for(int i=0;i<m_brushMeshes.size();i++)
-	{
-		if(m_brushMeshes[i]->IntersectAABB(&min,&max))
-		{
-			Vector3 minB,maxB;
-			m_brushMeshes[i]->GetBounds(&minB,&maxB);
-			return true;
-		}
-	}
-	return false;
-}
-
 void BasePhysicsComponent::PhysicsUpdate(double tDelta)
 {
 	PhysObj *phys = GetPhysicsObject();
@@ -976,4 +933,4 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(physicsType));
 	Lua::PushInt(l,umath::to_integral(flags));
 }
-#pragma optimize("",on)
+

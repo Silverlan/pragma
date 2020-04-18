@@ -27,7 +27,6 @@ constexpr uint32_t BSP_MAX_DISP_LIGHTMAP_DIM_INCLUDING_BORDER = 131;
 		throw std::logic_error{#msg}; \
 	}
 
-#pragma optimize("",off)
 //#define TEST_SCALE_LIGHTMAP_ATLAS
 #include <util_bsp.hpp>
 #include <wrappers/memory_block.h>
@@ -289,4 +288,3 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	f = nullptr;
 #endif
 }
-#pragma optimize("",on)

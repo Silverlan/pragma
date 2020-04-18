@@ -7,7 +7,7 @@
 LINK_WGUI_TO_CLASS(WITreeList,WITreeList);
 LINK_WGUI_TO_CLASS(WITreeListElement,WITreeListElement);
 
-#pragma optimize("",off)
+
 WITreeListElement::WITreeListElement()
 	: WITableRow(),m_bCollapsed(false),m_pTreeParent{},
 	m_pArrow{},m_pList{},m_xOffset(0),m_depth(0)
@@ -271,4 +271,4 @@ void WITreeList::CollapseAll()
 		return;
 	static_cast<WITreeListElement*>(m_pRoot.get())->Collapse(true);
 }
-#pragma optimize("",on)
+

@@ -163,6 +163,10 @@ public:
 		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshes
 	};
 public:
+	template<class TModel>
+		static std::shared_ptr<Model> Create(NetworkState *nw,uint32_t numBones,const std::string &name="");
+	template<class TModel>
+		static std::shared_ptr<Model> Create(const Model &other);
 	enum class DLLNETWORK MergeFlags : uint32_t
 	{
 		None = 0,
@@ -177,15 +181,12 @@ public:
 		All = (Meshes<<1) -1
 	};
 
-	Model(NetworkState *nw,uint32_t numBones,const std::string &name="");
-	Model(const Model &other);
 	bool operator==(const Model &other) const;
 	bool operator!=(const Model &other) const;
 	virtual ~Model();
 	bool Save(Game *game,const std::string &name,const std::string &rootPath="") const;
 	std::shared_ptr<Model> Copy(Game *game,CopyFlags copyFlags=CopyFlags::ShallowCopy) const;
 	bool FindMaterial(const std::string &texture,std::string &matPath) const;
-	ModelHandle GetHandle();
 	MetaInfo &GetMetaInfo() const;
 	Vector3 GetOrigin() const;
 	const Vector3 &GetEyeOffset() const;
@@ -427,8 +428,13 @@ public:
 	void SetMaxEyeDeflection(umath::Degree eyeDeflection);
 	umath::Degree GetMaxEyeDeflection() const;
 
+	util::WeakHandle<const Model> GetHandle() const;
+	util::WeakHandle<Model> GetHandle();
+
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
 protected:
+	Model(NetworkState *nw,uint32_t numBones,const std::string &name="");
+	Model(const Model &other);
 	virtual void OnMaterialMissing(const std::string &matName);
 	void AddLoadingMaterial(Material &mat,std::optional<uint32_t> index={});
 	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
@@ -450,7 +456,6 @@ protected:
 private:
 	void Construct();
 	NetworkState *m_networkState = nullptr;
-	ModelHandle m_handle = {};
 	mutable MetaInfo m_metaInfo = {};
 	bool m_bValid = false;
 	float m_mass = 0.f;
@@ -503,5 +508,16 @@ REGISTER_BASIC_BITWISE_OPERATORS(Model::CopyFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::MergeFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(Model::Flags);
 #pragma warning(pop)
+
+template<class TModel>
+	std::shared_ptr<Model> Model::Create(NetworkState *nw,uint32_t numBones,const std::string &name)
+{
+	return std::shared_ptr<Model>{new TModel{nw,numBones,name}};
+}
+template<class TModel>
+	std::shared_ptr<Model> Model::Create(const Model &other)
+{
+	return std::shared_ptr<Model>{new TModel{other}};
+}
 
 #endif // __MODEL_H__

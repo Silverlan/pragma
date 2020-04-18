@@ -10,7 +10,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 decltype(ShaderGlow::DESCRIPTOR_SET_INSTANCE) ShaderGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderGlow::DESCRIPTOR_SET_CAMERA) ShaderGlow::DESCRIPTOR_SET_CAMERA = {&ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
@@ -25,7 +25,7 @@ decltype(ShaderGlow::RENDER_PASS_FORMAT) ShaderGlow::RENDER_PASS_FORMAT = Anvil:
 ShaderGlow::ShaderGlow(prosper::Context &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_glow","world/fs_glow")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 prosper::Shader::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderGlow::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -107,4 +107,4 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 	return RecordPushConstants(PushConstants{scale}) &&
 		RecordBindDescriptorSet(*(*descSetGroup)->get_descriptor_set(0u),GetMaterialDescriptorSetIndex());
 }
-#pragma optimize("",on)
+

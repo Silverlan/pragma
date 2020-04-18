@@ -12,6 +12,7 @@ enum class RenderMode : uint32_t;
 class RenderInstance;
 class RenderObject;
 class Material;
+class Scene;
 namespace pragma
 {
 	class BaseEntityComponent;
@@ -24,6 +25,9 @@ class DLLCLIENT CBaseEntity
 	: public BaseEntity
 {
 public:
+	static pragma::ComponentEventId EVENT_ON_SCENE_FLAGS_CHANGED;
+	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
 	CBaseEntity();
 	void Construct(unsigned int idx,unsigned int clientIdx);
 
@@ -63,6 +67,11 @@ public:
 	unsigned int GetClientIndex();
 	virtual uint32_t GetLocalIndex() const override;
 
+	uint32_t GetSceneFlags() const;
+	void AddToScene(Scene &scene);
+	void RemoveFromScene(Scene &scene);
+	bool IsInScene(Scene &scene) const;
+
 	// Quick-access
 	std::pair<Vector3,Vector3> GetRenderBounds() const;
 	//
@@ -81,6 +90,7 @@ protected:
 
 	friend pragma::BaseEntityComponent;
 	uint32_t m_clientIdx = 0u;
+	uint32_t m_sceneFlags = 0;
 	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
 
 	//std::unique_ptr<std::shared_ptr<prosper::Buffer>> m_softBodyBuffers = nullptr; // prosper TODO

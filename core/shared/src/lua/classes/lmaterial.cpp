@@ -5,7 +5,7 @@
 #include "material.h"
 #include <sharedutils/util_shaderinfo.hpp>
 
-#pragma optimize("",off)
+
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
 	classDef.def("IsValid",&Lua::Material::IsValid);
@@ -32,6 +32,15 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		}
 		Lua::PushBool(l,mat.Save(matFileName,rootPath));
 	}));
+	classDef.def("IsError",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		Lua::PushBool(l,mat.IsError());
+	}));
+	classDef.def("IsLoaded",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		Lua::PushBool(l,mat.IsLoaded());
+	}));
+	classDef.def("IsTranslucent",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		Lua::PushBool(l,mat.IsTranslucent());
+	}));
 }
 
 void Lua::Material::IsTranslucent(lua_State *l,::Material &mat)
@@ -56,4 +65,4 @@ void Lua::Material::GetDataBlock(lua_State *l,::Material &mat)
 	auto &dataBlock = mat.GetDataBlock();
 	Lua::Push<std::shared_ptr<ds::Block>>(l,dataBlock);
 }
-#pragma optimize("",on)
+

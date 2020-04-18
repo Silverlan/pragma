@@ -6,7 +6,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderWireframe
-		: public ShaderTextured3D
+		: public ShaderTextured3DBase
 	{
 	public:
 		ShaderWireframe(prosper::Context &context,const std::string &identifier);

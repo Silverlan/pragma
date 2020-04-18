@@ -14,7 +14,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_pos(util::Vector3Property::Create()),
 	m_orientation(util::QuatProperty::Create(uquat::identity())),
@@ -325,4 +325,4 @@ void BaseTransformComponent::SetRawScale(const Vector3 &scale)
 	// TODO: Obsolete function; Remove this and use SetScale instead!
 	*m_scale = scale;
 }
-#pragma optimize("",on)
+

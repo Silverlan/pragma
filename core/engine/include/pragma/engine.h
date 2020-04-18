@@ -187,6 +187,10 @@ public:
 	void ShutDown();
 	void AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName);
 
+	void LockResourceWatchers();
+	void UnlockResourceWatchers();
+	ScopeGuard ScopeLockResourceWatchers();
+
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
 protected:

@@ -28,10 +28,11 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 {
 	if(outPlanes == nullptr)
 		return true; // Skip the frustum culling
+	auto &scene = renderer.GetScene();
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(ent.IsSpawned() == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
+	if(ent.IsSpawned() == false || ent.IsInScene(scene) == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
 		return false;
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -182,15 +183,15 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto &scene = renderer.GetScene();
-	auto &ents = scene.GetEntities();
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();
 	culledMeshesOut.reserve(10);
-	for(auto &hEnt : ents)
+	std::vector<CBaseEntity*> *ents = nullptr;
+	c_game->GetEntities(&ents);
+	for(auto *ent : *ents)
 	{
-		if(hEnt.IsValid() == false)
+		if(ent == nullptr)
 			continue;
-		auto *ent = static_cast<CBaseEntity*>(hEnt.get());
 		auto pRenderComponent = (ent != nullptr) ? ent->GetRenderComponent() : util::WeakHandle<pragma::CRenderComponent>{};
 		if(pRenderComponent.valid() && pRenderComponent->ShouldDrawShadow(posCam))
 		{

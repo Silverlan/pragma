@@ -74,7 +74,6 @@ namespace pragma
 	};
 	namespace lua {class ClassManager;};
 	namespace networking {enum class DropReason : int8_t;};
-	namespace asset {class EntityData; class WorldData;};
 };
 
 struct BaseEntityComponentHandleWrapper;
@@ -102,17 +101,14 @@ public:
 
 	Vector3 &GetGravity();
 	void SetGravity(Vector3 &gravity);
-	virtual std::shared_ptr<Model> CreateModel(const std::string &mdl) const=0;
-	virtual std::shared_ptr<Model> CreateModel(bool bAddReference=true) const=0;
-	virtual std::shared_ptr<Model> LoadModel(const std::string &mdl,bool bReload=false)=0;
-	virtual std::unordered_map<std::string,std::shared_ptr<Model>> &GetModels() const=0;
+	std::shared_ptr<Model> CreateModel(const std::string &mdl) const;
+	std::shared_ptr<Model> CreateModel(bool bAddReference=true) const;
+	std::shared_ptr<Model> LoadModel(const std::string &mdl,bool bReload=false);
 	bool RunLua(const std::string &lua,const std::string &chunkName);
 	LuaDirectoryWatcherManager &GetLuaScriptWatcher();
 	ResourceWatcherManager &GetResourceWatcher();
 	void ReloadGameModeScripts();
 
-	virtual std::shared_ptr<BrushMesh> CreateBrushMesh() const=0;
-	virtual std::shared_ptr<Side> CreateSide() const=0;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const=0;
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const=0;
 
@@ -403,8 +399,6 @@ protected:
 	void SaveConfig();
 	void UpdateTimers();
 	virtual void InitializeLuaScriptWatcher();
-	template<class TModelManager>
-		void ClearResources();
 
 	// Map
 	BaseEntity *CreateMapEntity(pragma::asset::EntityData &entData);

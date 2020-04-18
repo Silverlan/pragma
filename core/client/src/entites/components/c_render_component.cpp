@@ -4,6 +4,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -17,6 +18,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 
 using namespace pragma;
 
@@ -28,7 +30,6 @@ namespace pragma
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
@@ -178,6 +179,14 @@ void CRenderComponent::OnEntitySpawn()
 {
 	BaseRenderComponent::OnEntitySpawn();
 	UpdateRenderMeshes();
+
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto occlusionCullerC = ent->GetComponent<pragma::COcclusionCullerComponent>();
+		occlusionCullerC->AddEntity(static_cast<CBaseEntity&>(GetEntity()));
+	}
 }
 Sphere CRenderComponent::GetRenderSphereBounds() const
 {
@@ -667,4 +676,3 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
-#pragma optimize("",on)

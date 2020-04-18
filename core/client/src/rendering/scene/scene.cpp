@@ -15,6 +15,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
@@ -31,7 +32,6 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -43,104 +43,71 @@ ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
 
 ///////////////////////////
 
-void Scene::LightListInfo::AddLightSource(pragma::CLightComponent &lightSource)
-{
-	RemoveLightSource(lightSource);
-	if(lightSources.size() == lightSources.capacity())
-		lightSources.reserve(lightSources.size() +20u);
-	lightSources.push_back(lightSource.GetHandle<pragma::CLightComponent>());
-	lightSourceLookupTable.insert(&lightSource);
-}
-void Scene::LightListInfo::RemoveLightSource(pragma::CLightComponent &lightSource)
-{
-	auto it = std::find_if(lightSources.begin(),lightSources.end(),[&lightSource](const util::WeakHandle<pragma::CLightComponent> &hLight) {
-		return hLight.get() == &lightSource;
-	});
-	if(it != lightSources.end())
-		lightSources.erase(it);
-
-	auto itLookup = lightSourceLookupTable.find(&lightSource);
-	if(itLookup != lightSourceLookupTable.end())
-		lightSourceLookupTable.erase(itLookup);
-}
-void Scene::EntityListInfo::AddEntity(CBaseEntity &ent)
-{
-	RemoveEntity(ent);
-	if(entities.size() == entities.capacity())
-		entities.reserve(entities.size() +20u);
-	entities.push_back(ent.GetHandle());
-	entityLookupTable.insert(&ent);
-}
-void Scene::EntityListInfo::RemoveEntity(CBaseEntity &ent)
-{
-	auto it = std::find_if(entities.begin(),entities.end(),[&ent](const EntityHandle &hEnt) {
-		return hEnt.get() == &ent;
-	});
-	if(it != entities.end())
-		entities.erase(it);
-
-	auto itLookup = entityLookupTable.find(&ent);
-	if(itLookup != entityLookupTable.end())
-		entityLookupTable.erase(itLookup);
-}
-
-///////////////////////////
-
 Scene::CreateInfo::CreateInfo(uint32_t width,uint32_t height)
 	: width{width},height{height},sampleCount{static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount())}
 {}
 
 ///////////////////////////
 
-decltype(Scene::s_scenes) Scene::s_scenes;
-std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo)
+using SceneCount = uint32_t;
+static std::array<SceneCount,32> g_sceneUseCount {};
+static std::array<Scene*,32> g_scenes {};
+std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo,Scene *optParent)
 {
-	return std::shared_ptr<Scene>(new Scene{createInfo});
+	SceneIndex sceneIndex;
+	if(optParent)
+		sceneIndex = optParent->GetSceneIndex();
+	else
+	{
+		// Find unused slot
+		auto it = std::find(g_sceneUseCount.begin(),g_sceneUseCount.end(),0);
+		if(it == g_sceneUseCount.end())
+			return nullptr;
+		sceneIndex = (it -g_sceneUseCount.begin());
+	}
+	++g_sceneUseCount.at(sceneIndex);
+	auto scene = std::shared_ptr<Scene>{new Scene{createInfo,sceneIndex},[](Scene *ptr) {
+		auto sceneIndex = ptr->GetSceneIndex();
+		assert(g_sceneUseCount > 0);
+		--g_sceneUseCount.at(sceneIndex);
+		g_scenes.at(sceneIndex) = nullptr;
+
+		// Clear all entities from this scene
+		std::vector<CBaseEntity*> *ents;
+		c_game->GetEntities(&ents);
+		for(auto *ent : *ents)
+		{
+			if(ent == nullptr)
+				continue;
+			ent->RemoveFromScene(*ptr);
+		}
+		delete ptr;
+	}};
+	g_scenes.at(sceneIndex) = scene.get();
+	return scene;
 }
 
-Scene::Scene(const CreateInfo &createInfo)
+Scene *Scene::GetByIndex(SceneIndex sceneIndex)
+{
+	return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr;
+}
+
+Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	: std::enable_shared_from_this<Scene>(),
 	m_width(createInfo.width),m_height(createInfo.height),
-	m_lightSources(std::make_shared<LightListInfo>()),
-	m_entityList(std::make_shared<EntityListInfo>())
+	m_sceneIndex{sceneIndex}
 {
 	for(auto i=decltype(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT){0};i<pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;++i)
 		m_csmDescriptors.push_back(std::unique_ptr<CSMCascadeDescriptor>(new CSMCascadeDescriptor()));
 	InitializeCameraBuffer();
 	InitializeFogBuffer();
 	InitializeDescriptorSetLayouts();
-	s_scenes.push_back(this);
-
-	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity*>>(256.f,1'073'741'824.f,4096.f,[](const CBaseEntity *ent,Vector3 &min,Vector3 &max) {
-		auto pRenderComponent = ent->GetRenderComponent();
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pRenderComponent.valid())
-			pRenderComponent->GetRenderBounds(&min,&max);
-		else
-		{
-			min = {};
-			max = {};
-		}
-		if(pTrComponent.expired())
-			return;
-		auto &pos = pTrComponent->GetPosition();
-		min += pos;
-		max += pos;
-	});
-	m_occlusionOctree->Initialize();
-	m_occlusionOctree->SetSingleReferenceMode(true);
-	m_occlusionOctree->SetToStringCallback([](CBaseEntity *ent) -> std::string {
-		return ent->GetClass() +" " +std::to_string(ent->GetIndex());
-	});
 }
 
 Scene::~Scene()
 {
 	ClearWorldEnvironment();
 	//c_engine->FlushCommandBuffers(); // We need to make sure all rendering commands have been completed, in case this scene is still in use somewhere // prosper TODO
-	auto it = std::find(s_scenes.begin(),s_scenes.end(),this);
-	if(it != s_scenes.end())
-		s_scenes.erase(it);
 }
 
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
@@ -203,6 +170,17 @@ void Scene::InitializeFogBuffer()
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
 	m_fogBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
+}
+pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
+{
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
+	entIt.AttachFilter<EntityIteratorFilterUser>([this](BaseEntity &ent) -> bool {
+		return static_cast<CBaseEntity&>(ent).IsInScene(*this);
+	});
+	auto it = entIt.begin();
+	auto *ent = (it != entIt.end()) ? *it : nullptr;
+	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
 const std::shared_ptr<prosper::Buffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
 void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView)
@@ -369,40 +347,6 @@ void Scene::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
-void Scene::SetLights(const std::vector<pragma::CLightComponent*> &lights)
-{
-	auto &info = *m_lightSources;
-	info.lightSourceLookupTable.clear();
-	info.lightSources.clear();
-
-	info.lightSourceLookupTable.reserve(lights.size());
-	info.lightSources.reserve(lights.size());
-	for(auto *l : lights)
-	{
-		info.lightSources.push_back(l->GetHandle<pragma::CLightComponent>());
-		info.lightSourceLookupTable.insert(l);
-	}
-}
-void Scene::SetLights(const std::shared_ptr<LightListInfo> &lights)
-{
-	if(lights == nullptr)
-	{
-		m_lightSources = std::make_shared<LightListInfo>();
-		SetLights(std::vector<pragma::CLightComponent*>{});
-		return;
-	}
-	m_lightSources = lights;
-}
-void Scene::AddLight(pragma::CLightComponent *light) {m_lightSources->AddLightSource(*light);}
-void Scene::RemoveLight(pragma::CLightComponent *light) {m_lightSources->RemoveLightSource(*light);}
-const std::shared_ptr<Scene::LightListInfo> &Scene::GetLightSourceListInfo() const {return m_lightSources;}
-const std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() const {return const_cast<Scene&>(*this).GetLightSources();}
-std::vector<util::WeakHandle<pragma::CLightComponent>> &Scene::GetLightSources() {return m_lightSources->lightSources;}
-bool Scene::HasLightSource(pragma::CLightComponent &lightSource) const
-{
-	auto it = m_lightSources->lightSourceLookupTable.find(&lightSource);
-	return it != m_lightSources->lightSourceLookupTable.end();
-}
 void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
@@ -445,14 +389,6 @@ void Scene::Resize(uint32_t width,uint32_t height)
 	m_height = height;
 	ReloadRenderTarget();
 }
-const OcclusionOctree<CBaseEntity*> &Scene::GetOcclusionOctree() const {return const_cast<Scene*>(this)->GetOcclusionOctree();}
-OcclusionOctree<CBaseEntity*> &Scene::GetOcclusionOctree() {return *m_occlusionOctree;}
-void Scene::LinkEntities(Scene &other)
-{
-	m_entityList = other.m_entityList;
-	m_occlusionOctree = other.m_occlusionOctree;
-}
-void Scene::LinkLightSources(Scene &other) {m_lightSources = other.m_lightSources;}
 void Scene::LinkWorldEnvironment(Scene &other)
 {
 	// T
@@ -482,130 +418,9 @@ void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &
 }
 pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
 
-void Scene::SetEntities(const std::vector<CBaseEntity*> &ents)
-{
-	auto &info = *m_entityList;
-	info.entityLookupTable.clear();
-	info.entities.clear();
-
-	info.entityLookupTable.reserve(ents.size());
-	info.entities.reserve(ents.size());
-	for(auto *ent : ents)
-	{
-		info.entities.push_back(ent->GetHandle());
-		info.entityLookupTable.insert(ent);
-	}
-}
-void Scene::SetEntities(const std::shared_ptr<EntityListInfo> &ents)
-{
-	if(ents == nullptr)
-	{
-		m_entityList = std::make_shared<EntityListInfo>();
-		SetEntities(std::vector<CBaseEntity*>{});
-		return;
-	}
-	m_entityList = ents;
-}
-void Scene::AddEntity(CBaseEntity &ent)
-{
-	m_entityList->AddEntity(ent);
-	std::weak_ptr<Scene> wpScene = shared_from_this();
-	auto cb = FunctionCallback<void>::Create(nullptr);
-	static_cast<Callback<void>*>(cb.get())->SetFunction([wpScene,&ent,cb]() mutable {
-		if(wpScene.expired())
-		{
-			if(cb.IsValid())
-				cb.Remove();
-			return;
-		}
-		wpScene.lock()->RemoveEntity(ent);
-	});
-	ent.CallOnRemove(cb);
-
-	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>::Create(nullptr);
-	auto callbacks = std::make_shared<std::vector<CallbackHandle>>();
-	callbacks->push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
-	auto fInsertOctreeObject = [this,callbacks](CBaseEntity *ent) {
-		m_occlusionOctree->InsertObject(ent);
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pTrComponent.valid())
-		{
-			callbacks->push_back(pTrComponent->GetPosProperty()->AddCallback([this,ent](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-		}
-		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
-		if(pGenericComponent.valid())
-		{
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->UpdateObject(ent);
-			}));
-			callbacks->push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,callbacks,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
-				m_occlusionOctree->RemoveObject(ent);
-				m_occlusionOctree->IterateObjects([](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
-
-					return true;
-					},[&](const CBaseEntity *entOther) {
-						if(entOther == ent)
-							throw std::runtime_error("!!");
-					});
-				for(auto &cb : *callbacks)
-				{
-					if(cb.IsValid() == false)
-						continue;
-					cb.Remove();
-				}
-			}));
-		}
-	};
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
-		return;
-	static_cast<Callback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,callbacks,wpScene,cbRenderMode](std::reference_wrapper<const RenderMode> old,std::reference_wrapper<const RenderMode> newMode) mutable {
-		if(wpScene.expired())
-		{
-			if(cbRenderMode.IsValid())
-				cbRenderMode.Remove();
-			return;
-		}
-		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetRenderMode() : RenderMode::None;
-		auto &occlusionTree = GetOcclusionOctree();
-		if(renderMode == RenderMode::World || renderMode == RenderMode::Skybox || renderMode == RenderMode::Water)
-		{
-			if(occlusionTree.ContainsObject(&ent) == false)
-				fInsertOctreeObject(&ent);
-		}
-		else
-			occlusionTree.RemoveObject(&ent);
-	});
-	pRenderComponent->GetRenderModeProperty()->AddCallback(cbRenderMode);
-	auto renderMode = pRenderComponent->GetRenderMode();
-	if(renderMode != RenderMode::World && renderMode != RenderMode::Skybox && renderMode != RenderMode::Water)
-		return;
-	fInsertOctreeObject(&ent);
-
-	if(m_renderer)
-		m_renderer->OnEntityAddedToScene(ent);
-}
-void Scene::RemoveEntity(CBaseEntity &ent) {m_entityList->RemoveEntity(ent);}
-const std::shared_ptr<Scene::EntityListInfo> &Scene::GetEntityListInfo() const {return m_entityList;}
-const std::vector<EntityHandle> &Scene::GetEntities() const {return const_cast<Scene&>(*this).GetEntities();}
-std::vector<EntityHandle> &Scene::GetEntities(){return m_entityList->entities;}
-bool Scene::HasEntity(CBaseEntity &ent) const
-{
-	auto it = m_entityList->entityLookupTable.find(&ent);
-	return it != m_entityList->entityLookupTable.end();
-}
-
 bool Scene::IsValid() const {return m_bValid;}
+
+Scene::SceneIndex Scene::GetSceneIndex() const {return m_sceneIndex;}
 
 uint32_t Scene::GetWidth() const {return m_width;}
 uint32_t Scene::GetHeight() const {return m_height;}
@@ -638,4 +453,3 @@ void Scene::SetActiveCamera(pragma::CCameraComponent &cam)
 	m_renderSettings.farZ = cam.GetFarZ();
 }
 void Scene::SetActiveCamera() {m_camera = {};}
-#pragma optimize("",on)

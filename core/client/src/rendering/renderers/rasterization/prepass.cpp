@@ -27,7 +27,6 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-#pragma optimize("",off)
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static auto cvDrawSky = GetClientConVar("render_draw_sky");
@@ -308,7 +307,7 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 							if(drawWorld == 2)
 								shader = m_whShaderWireframe.get();
 							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = GetShaderOverride(static_cast<pragma::ShaderTextured3D*>(base));
+								shader = GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
 							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
 							{
 								// Translucent?
@@ -339,7 +338,7 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 								{
 									if(containers.size() == containers.capacity())
 										containers.reserve(containers.capacity() +10);
-									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3D*>(shader)));
+									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3DBase*>(shader)));
 									shaderContainer = containers.back().get();
 								}
 								RenderSystem::MaterialMeshContainer *matContainer = nullptr;
@@ -379,4 +378,3 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 		});
 	}
 }
-#pragma optimize("",on)

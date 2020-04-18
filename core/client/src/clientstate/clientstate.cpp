@@ -38,7 +38,6 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
-#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
@@ -95,6 +94,7 @@ ClientState::ClientState()
 {
 	client = this;
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
+	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	auto &gui = WGUI::GetInstance();
 	gui.SetHandleFactory(wgui_handle_factory);
 	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
@@ -332,7 +332,7 @@ void ClientState::Close()
 		itHandles->second->set(NULL);
 	StopSounds();
 	client = NULL;
-	CModelManager::Clear();
+	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
 	pragma::CParticleSystemComponent::ClearCache();
 }
@@ -783,4 +783,3 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
-#pragma optimize("",on)

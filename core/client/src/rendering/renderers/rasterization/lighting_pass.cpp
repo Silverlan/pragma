@@ -19,7 +19,7 @@ extern DLLCLIENT CGame *c_game;
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
-#pragma optimize("",off)
+
 void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto &scene = GetScene();
@@ -421,4 +421,4 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 	//m_shaderScreen->Render(m_renderTexture,m_renderScreenVertexBuffer);
 	*/ // Vulkan TODO
 }
-#pragma optimize("",on)
+

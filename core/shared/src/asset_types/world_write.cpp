@@ -7,7 +7,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
@@ -119,7 +119,7 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 	f->Write<uint32_t>(m_materialTable.size());
 	for(auto &str : m_materialTable)
 	{
-		util::Path path{str,true};
+		util::Path path{str};
 		if(ustring::compare(path.GetFront(),"materials",false))
 			path.PopFront();
 
@@ -301,4 +301,4 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
 	return result;
 }
-#pragma optimize("",on)
+

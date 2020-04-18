@@ -9,7 +9,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::Context &context,const std::string &identifier)
 	: ShaderBaseImageProcessing{context,identifier,"screen/fs_brdf_convolution.gls"}
 {}
@@ -63,4 +63,4 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	c_engine->FlushSetupCommandBuffer();
 	return success ? tex : nullptr;
 }
-#pragma optimize("",on)
+

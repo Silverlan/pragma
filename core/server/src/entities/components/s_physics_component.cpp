@@ -27,18 +27,6 @@ void SPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFi
 }
 luabind::object SPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPhysicsComponentHandleWrapper>(l);}
 
-void SPhysicsComponent::InitializeBrushGeometry()
-{
-	BasePhysicsComponent::InitializeBrushGeometry();
-	auto hModel = ModelManager::CreateFromBrushMeshes(s_game,m_brushMeshes,s_game->GetSurfaceMaterials());
-	if(GetEntity().IsWorld() == true && hModel != nullptr)
-		hModel->Optimize();
-	hModel->Update(ModelUpdateFlags::All);
-	auto mdlComponent = GetEntity().AddComponent<SModelComponent>();
-	if(mdlComponent.valid())
-		mdlComponent->SetModel(hModel);
-}
-
 void SPhysicsComponent::SetKinematic(bool b)
 {
 	BasePhysicsComponent::SetKinematic(b);

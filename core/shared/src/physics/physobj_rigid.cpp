@@ -6,7 +6,7 @@
 #include <pragma/game/game.h>
 #include "pragma/physics/environment.hpp"
 
-#pragma optimize("",off)
+
 RigidPhysObj::RigidPhysObj(pragma::BaseEntityComponent *owner)
 	: PhysObj(owner),PhysObjKinematic(),PhysObjDynamic()
 {}
@@ -353,4 +353,4 @@ void RigidPhysObj::OnWake()
 {
 	PhysObj::OnWake();
 }
-#pragma optimize("",on)
+

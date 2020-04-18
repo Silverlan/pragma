@@ -53,7 +53,7 @@ namespace pragma
 		float GetAnimationDuration(unsigned int animation) const;
 		void OnModelMaterialsLoaded();
 		bool HasModelMaterialsLoaded() const;
-		virtual void SetModel(const std::string &mdl);
+		void SetModel(const std::string &mdl);
 		virtual void SetModel(const std::shared_ptr<Model> &mdl);
 		const std::shared_ptr<Model> &GetModel() const;
 		std::string GetModelName() const;
@@ -83,8 +83,6 @@ namespace pragma
 		BaseModelComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model);
 		virtual void Load(DataStream &ds,uint32_t version) override;
-		template<class TModel,class TModelMesh,class TModelLoader>
-			void SetModel(const std::string &mdl);
 		std::shared_ptr<Model> m_model = nullptr;
 
 		std::vector<unsigned int> m_bodyGroups;

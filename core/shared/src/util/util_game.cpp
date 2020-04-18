@@ -2,7 +2,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include <sharedutils/util_library.hpp>
 
-#pragma optimize("",off)
+
 util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<Vertex> &verts,const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
@@ -17,4 +17,4 @@ util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkStat
 		return {};
 	return job;
 }
-#pragma optimize("",on)
+

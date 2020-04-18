@@ -8,9 +8,10 @@
 
 using namespace pragma;
 
+extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 {
 	// Material has no surface material. To find out whether it is a metal material,
@@ -132,35 +133,51 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		if(pbrInfo.subsurfaceMultiplier != 0.f && sufMatSSS == nullptr)
 			sufMatSSS = surfMat; // We'll just take the first surface material that has SSS values instead of interpolating.
 	}
-	auto metalness = (numSurfMats > 0) ? (accMetalness /static_cast<float>(numSurfMats)) : 0.f;
-	auto roughness = (numSurfMats > 0) ? (accRoughness /static_cast<float>(numSurfMats)) : 0.5f;
+	std::optional<float> metalness = (numSurfMats > 0) ? (accMetalness /static_cast<float>(numSurfMats)) : std::optional<float>{};
+	std::optional<float> roughness = (numSurfMats > 0) ? (accRoughness /static_cast<float>(numSurfMats)) : std::optional<float>{};
 
-	if(mat.GetDataBlock()->GetValue("metalness_factor") == nullptr)
+	auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
+	if(rmaInfo == nullptr)
+		return;
+	if(rmaInfo->GetBool("requires_roughness_update"))
 	{
-		Con::cout<<"Assigning metalness value of "<<metalness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
-		mat.GetDataBlock()->AddValue("float","metalness_factor",std::to_string(metalness));
-		mat.GetDataBlock()->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
+		if(roughness.has_value())
+		{
+			Con::cout<<"Assigning roughness value of "<<*roughness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+			mat.GetDataBlock()->AddValue("float","roughness_factor",std::to_string(*roughness));
+		}
+		rmaInfo->RemoveValue("requires_roughness_update");
 	}
+	if(rmaInfo->GetBool("requires_metalness_update"))
+	{
+		if(metalness.has_value())
+		{
+			Con::cout<<"Assigning metalness value of "<<*metalness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
+			mat.GetDataBlock()->AddValue("float","metalness_factor",std::to_string(*metalness));
+		}
+		rmaInfo->RemoveValue("requires_metalness_update");
+	}
+	if(rmaInfo->GetBool("requires_sss_update"))
+	{
+		if(sufMatSSS)
+		{
+			auto &data = mat.GetDataBlock();
+			auto &pbrInfo = sufMatSSS->GetPBRInfo();
+			data->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
+			data->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
+			data->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
+			data->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
+		}
+		rmaInfo->RemoveValue("requires_sss_update");
+	}
+	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
 
-	if(mat.GetDataBlock()->GetValue("roughness_factor") == nullptr)
-	{
-		Con::cout<<"Assigning roughness value of "<<roughness<<" to material '"<<mat.GetName()<<"', based on surface material properties of model '"<<mdl.GetName()<<"'!"<<Con::endl;
-		mat.GetDataBlock()->AddValue("float","roughness_factor",std::to_string(roughness));
-		mat.GetDataBlock()->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
-	}
-
-	if(sufMatSSS)
-	{
-		auto &data = mat.GetDataBlock();
-		auto &pbrInfo = sufMatSSS->GetPBRInfo();
-		data->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
-		data->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
-		data->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
-		data->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
-	}
+	if(rmaInfo->IsEmpty())
+		mat.GetDataBlock()->RemoveValue("rma_info");
 
 	mat.UpdateTextures();
-	mat.Save(mat.GetName(),"addons/converted/");
+	if(mat.Save())
+		client->LoadMaterial(mat.GetName(),true,true); // Reload material immediately
 }
 
 void CPBRConverterComponent::UpdateMetalness(Model &mdl)
@@ -174,11 +191,9 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl)
 		// Make sure it's a PBR material
 		if(IsPBR(mat) == false)
 			continue;
-		// Material already has a metalness map, we don't need to do anything
-		float metalness = 0.f;
-		if(hMat->GetMetalnessMap() || hMat->GetDataBlock()->GetFloat("metalness_factor",&metalness))
+		auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
+		if(rmaInfo == nullptr || rmaInfo->GetBool("requires_metalness_update") == false)
 			continue;
 		UpdateMetalness(mdl,mat);
 	}
 }
-#pragma optimize("",on)

@@ -81,15 +81,10 @@ namespace pragma
 			None = 0,
 			Diffuse = 0,
 			Normal = 1,
-			Specular = Normal<<1,
-			SpecularMapDefined = Specular<<1,
-			SpecularMap = SpecularMapDefined | Specular,
-			Parallax = Specular<<2,
+			Parallax = Normal<<2,
 			Glow = Parallax<<1,
 			Translucent = Glow<<1,
-			DiffuseSpecular = Translucent<<1, // Specular from diffuse alpha
-			NormalSpecular = DiffuseSpecular<<1, // Specular from normal alpha
-			BlackToAlpha = NormalSpecular<<1,
+			BlackToAlpha = Translucent<<1,
 
 			FMAT_GLOW_MODE_1 = BlackToAlpha<<1,
 			FMAT_GLOW_MODE_2 = FMAT_GLOW_MODE_1<<1,
@@ -133,7 +128,8 @@ namespace pragma
 
 		struct MaterialData
 		{
-			Vector4 phong = {1.f,1.f,1.f,1.f}; // TODO: Obsolete?
+			Vector4 color = {1.f,1.f,1.f,1.f};
+			Vector4 emissionFactor = {1.f,1.f,1.f,1.f};
 			MaterialFlags flags = MaterialFlags::Diffuse;
 			float glowScale = 1.f;
 			float parallaxHeightScale = DefaultParallaxHeightScale;
@@ -141,7 +137,7 @@ namespace pragma
 			float phongIntensity = 1.f;
 			float metalnessFactor = 0.f;
 			float roughnessFactor = 0.f;
-			float emissionFactor = 1.f;
+			float aoFactor = 1.f;
 		};
 #pragma pack(pop)
 
@@ -181,15 +177,6 @@ namespace pragma
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		StateFlags m_stateFlags = StateFlags::ShouldUseLightMap;
-	};
-
-	////////////////////////////
-
-	class DLLCLIENT ShaderTextured3D
-		: public ShaderTextured3DBase
-	{
-	public:
-		ShaderTextured3D(prosper::Context &context,const std::string &identifier);
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::MaterialFlags)

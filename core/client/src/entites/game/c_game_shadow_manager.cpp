@@ -21,7 +21,6 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(game_shadow_manager,CShadowManager);
 
-#pragma optimize("",off)
 static CShadowManagerComponent *g_shadowManager = nullptr;
 CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() {return g_shadowManager;}
 
@@ -179,4 +178,3 @@ void CShadowManager::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CShadowManagerComponent>();
 }
-#pragma optimize("",on)

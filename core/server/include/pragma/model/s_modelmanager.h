@@ -3,18 +3,17 @@
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/model/modelmanager.h>
-#include <pragma/math/surfacematerial.h>
 
-class Game;
-class DLLSERVER ModelManager
-	: public TModelManager<Model,ModelMesh,ModelSubMesh>
+namespace pragma::asset
 {
-public:
-	static std::shared_ptr<Model> Load(Game *game,const std::string &path,bool bReload=false,bool *newModel=nullptr);
-	static std::shared_ptr<Model> GetModel(Game *game,const std::string &mdlName);
-	static std::shared_ptr<Model> Create(Game *game,const std::string &path);
-	static std::shared_ptr<Model> Create(Game *game,bool bAddReference=true);
-	static std::shared_ptr<Model> CreateFromBrushMeshes(Game *game,std::vector<std::shared_ptr<BrushMesh>> &meshes,const std::vector<SurfaceMaterial> &materials);
+	class DLLSERVER SModelManager
+		: public ModelManager
+	{
+	public:
+		using ModelManager::ModelManager;
+	private:
+		virtual std::shared_ptr<Model> LoadModel(const std::string &mdlName,bool bReload=false,bool *outIsNewModel=nullptr) override;
+	};
 };
 
 #endif

@@ -24,7 +24,7 @@
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
 
-#pragma optimize("",off)
+
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
 	auto cur = f->Tell();
@@ -964,4 +964,4 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->WriteString(inc);
 	return true;
 }
-#pragma optimize("",on)
+

@@ -59,10 +59,13 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(Anvil::ComputePipelin
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 }
 
-bool ShaderForwardPLightCulling::Compute(Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount)
+bool ShaderForwardPLightCulling::Compute(
+	Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+	uint32_t sceneIndex
+)
 {
 	return RecordPushConstants(PushConstants{
-			lightCount
+			lightCount,1u<<sceneIndex
 		}) &&
 		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
 		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_CAMERA.setIndex) &&

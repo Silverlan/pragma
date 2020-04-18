@@ -453,8 +453,10 @@ void ModelLoadManager::Update()
 
 void NET_cl_resource_mdl_rough(NetPacket packet)
 {
+	if(client == nullptr)
+		return;
 	auto fileName = packet->ReadString();
-	auto mdl = CModelManager::Create(c_game,fileName);
+	auto mdl = client->GetModelManager().CreateModel(fileName);
 	if(mdl == nullptr)
 		return;
 	mdl->AddMaterial(0,client->LoadMaterial("loading"));

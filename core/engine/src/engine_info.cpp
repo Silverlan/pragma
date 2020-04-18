@@ -59,10 +59,14 @@ std::vector<std::string> engine_info::get_patrons()
 		"Roach",
 		"Noah The Troll-Hunting Christian Spy",
 		"Boris \"SunRade\" Serousov",
-		"Prof. Purble"
+		"Prof. Purble",
+		"Antoine Guillo",
+		"ff7sfm",
+		"Kybrid96",
+		"PixMedia"
 	};
 }
-uint32_t engine_info::get_total_patron_count() {return 50;}
+uint32_t engine_info::get_total_patron_count() {return 51;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}

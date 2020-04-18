@@ -38,6 +38,7 @@
 #include <sharedutils/util_parallel_job.hpp>
 #include <util_zip.h>
 #include <pragma/game/game_resources.hpp>
+#include <pragma/util/resource_watcher.h>
 #include <util_pad.hpp>
 #include <pragma/networking/iserver.hpp>
 #include <pragma/addonsystem/addonsystem.h>
@@ -188,6 +189,40 @@ void Engine::SetProfilingEnabled(bool bEnabled)
 
 upad::PackageManager *Engine::GetPADPackageManager() const {return m_padPackageManager;}
 
+void Engine::LockResourceWatchers()
+{
+	auto *sv = GetServerNetworkState();
+	auto *cl = GetClientState();
+	if(sv)
+		sv->GetResourceWatcher().Lock();
+	if(cl)
+		cl->GetResourceWatcher().Lock();
+}
+void Engine::UnlockResourceWatchers()
+{
+	auto *sv = GetServerNetworkState();
+	auto *cl = GetClientState();
+	if(sv)
+		sv->GetResourceWatcher().Unlock();
+	if(cl)
+		cl->GetResourceWatcher().Unlock();
+}
+ScopeGuard Engine::ScopeLockResourceWatchers()
+{
+	auto *sv = GetServerNetworkState();
+	auto *cl = GetClientState();
+	if(sv)
+		sv->GetResourceWatcher().Lock();
+	if(cl)
+		cl->GetResourceWatcher().Lock();
+	return ScopeGuard{[this,sv,cl]() {
+		if(sv && GetServerNetworkState() == sv)
+			sv->GetResourceWatcher().Unlock();
+		if(cl && GetClientState() == cl)
+			cl->GetResourceWatcher().Unlock();
+	}};
+}
+
 void Engine::AddParallelJob(const util::ParallelJobWrapper &job,const std::string &jobName)
 {
 	m_parallelJobMutex.lock();
@@ -227,10 +262,34 @@ void Engine::ClearCache()
 		auto result = FileManager::RemoveDirectory(name.c_str());
 		if(result == false)
 			Con::cwar<<"WARNING: Unable to remove directory! Please remove it manually!"<<Con::endl;
+		return result;
 	};
 	fRemoveDir("cache");
 	fRemoveDir("addons/imported");
 	fRemoveDir("addons/converted");
+
+	Con::cout<<"Removing addon cache directories..."<<Con::endl;
+	for(auto &addonInfo : AddonSystem::GetMountedAddons())
+	{
+		auto path = addonInfo.GetAbsolutePath() +"\\cache";
+		if(FileManager::ExistsSystem(path) == false)
+			continue;
+		if(FileManager::RemoveSystemDirectory(path.c_str()) == false)
+			Con::cwar<<"WARNING: Unable to remove '"<<path<<"'! Please remove it manually!"<<Con::endl;
+	}
+
+	// Give it a bit of time to complete
+	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+
+	// Re-create the directories
+	FileManager::CreatePath("cache");
+	FileManager::CreatePath("addons/imported");
+	FileManager::CreatePath("addons/converted");
+
+	// Give it a bit of time to complete
+	std::this_thread::sleep_for(std::chrono::milliseconds{500});
+	// The addon system needs to be informed right away, to make sure the new directories are re-mounted
+	AddonSystem::Poll();
 	Con::cout<<"Cache cleared successfully! Please restart the Engine."<<Con::endl;
 }
 

@@ -18,7 +18,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 const prosper::UniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 const prosper::UniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -120,24 +119,7 @@ bool CLightComponent::ShouldPass(const Model &mdl,const CModelSubMesh &mesh)
 
 void CLightComponent::InitializeLight(BaseEntityComponent &component)
 {
-	auto &scene = c_game->GetScene();
-	if(scene == nullptr)
-		return;
-	if(m_hLight.valid())
-	{
-		auto pLightComponent = m_hLight->GetEntity().GetComponent<CLightComponent>();
-		if(pLightComponent.valid())
-			scene->RemoveLight(pLightComponent.get());
-	}
 	CBaseLightComponent::InitializeLight(component);
-	if(m_hLight.expired())
-		return;
-	if(umath::is_flag_set(m_stateFlags,StateFlags::AddToGameScene))
-	{
-		auto pLightComponent = m_hLight->GetEntity().GetComponent<CLightComponent>();
-		if(pLightComponent.valid())
-			scene->AddLight(pLightComponent.get());
-	}
 }
 
 bool CLightComponent::ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags)
@@ -156,6 +138,20 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,u
 	CEShouldPassEntityMesh evData {ent,mesh,renderFlags};
 	InvokeEventCallbacks(EVENT_SHOULD_PASS_ENTITY_MESH,evData);
 	return evData.shouldPass;
+}
+
+Scene *CLightComponent::FindShadowScene() const
+{
+	auto sceneFlags = static_cast<const CBaseEntity&>(GetEntity()).GetSceneFlags();
+	// A shadowed light source should always only be assigned to one scene slot, so
+	// we'll just pick whichever is the first
+	auto lowestBit = static_cast<int32_t>(sceneFlags) &-static_cast<int32_t>(sceneFlags);
+	return Scene::GetByIndex(lowestBit);
+}
+COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const
+{
+	auto *scene = FindShadowScene();
+	return scene ? scene->FindOcclusionCuller() : nullptr;
 }
 
 bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float angle) const
@@ -350,7 +346,7 @@ void CLightComponent::Initialize()
 {
 	CBaseLightComponent::Initialize();
 
-	auto &ent = GetEntity();
+	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	ent.AddComponent<LogicComponent>();
 	ent.AddComponent<CShadowComponent>();
 
@@ -385,11 +381,17 @@ void CLightComponent::Initialize()
 				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
 		}
 	});
+	BindEventUnhandled(CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		m_bufferData.sceneFlags = static_cast<CBaseEntity&>(GetEntity()).GetSceneFlags();
+		if(m_renderBuffer != nullptr)
+			c_engine->ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,sceneFlags),m_bufferData.sceneFlags);
+	});
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.valid())
 		reinterpret_cast<Vector3&>(m_bufferData.position) = pTrComponent->GetPosition();
 	if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
 		m_bufferData.direction.z = 1.f;
+	m_bufferData.sceneFlags = ent.GetSceneFlags();
 
 	++s_lightCount;
 }
@@ -656,4 +658,3 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
-#pragma optimize("",on)

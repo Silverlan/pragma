@@ -5,7 +5,18 @@
 
 using namespace pragma;
 
-decltype(ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE) ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE = {ShaderPPBase::DESCRIPTOR_SET_TEXTURE};
+decltype(ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE) ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE = {
+	{
+		prosper::Shader::DescriptorSetInfo::Binding {
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		},
+		prosper::Shader::DescriptorSetInfo::Binding { // Pre-tonemapped image (required for correct transparency)
+			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
+			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		}
+	}
+};
 ShaderPPFXAA::ShaderPPFXAA(prosper::Context &context,const std::string &identifier)
 	: ShaderPPBase(context,identifier,"screen/fxaa/fs_pp_fxaa")
 {

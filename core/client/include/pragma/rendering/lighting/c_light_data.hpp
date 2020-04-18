@@ -6,6 +6,7 @@
 #include <mathutil/uvec.h>
 #include <mathutil/umath_lighting.hpp>
 #include <cinttypes>
+#include <array>
 
 namespace pragma
 {
@@ -25,6 +26,8 @@ namespace pragma
 		Vector3 color {};
 		Candela intensity = 0.f;
 		Vector4 direction {}; // direction.w is unused
+
+		uint32_t sceneFlags = 0u;
 		uint32_t shadowIndex = 0u;
 
 		umath::Radian cutoffOuterCos = 0.f;
@@ -35,6 +38,7 @@ namespace pragma
 		uint32_t shadowMapIndexDynamic = 0u;
 
 		float falloffExponent = 1.f;
+		std::array<float,3> padding = {}; // Padding to vec4
 	};
 	struct ShadowBufferData
 	{

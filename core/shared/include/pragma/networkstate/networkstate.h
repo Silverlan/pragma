@@ -40,6 +40,7 @@ class CvarCallback;
 class SoundScriptManager;
 class SoundScript;
 class Material;
+class Model;
 class ModelMesh;
 class ModelSubMesh;
 class MaterialManager;
@@ -48,6 +49,7 @@ class ALSound;
 enum class ALSoundType : int32_t;
 namespace Lua {enum class ErrorColorMode : uint32_t;class Interface;};
 namespace util {class Library;};
+namespace pragma {namespace asset {class EntityData; class WorldData; class ModelManager;};};
 using ALSoundRef = std::reference_wrapper<ALSound>;
 class DLLNETWORK NetworkState
 	: public CallbackHandler,public CVarHandler
@@ -69,6 +71,11 @@ public:
 	void TerminateLuaModules(lua_State *l);
 	void DeregisterLuaModules(void *l,const std::string &identifier);
 	virtual bool ShouldRemoveSound(ALSound &snd);
+
+	// Assets
+	const pragma::asset::ModelManager &GetModelManager() const;
+	pragma::asset::ModelManager &GetModelManager();
+	const std::unordered_map<std::string,std::shared_ptr<Model>> &GetCachedModels() const;
 
 	// Debug
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
@@ -175,6 +182,7 @@ protected:
 	double m_tLast;
 
 	std::unique_ptr<Game,void(*)(Game*)> m_game = std::unique_ptr<Game,void(*)(Game*)>{nullptr,[](Game*) {}};
+	std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
 	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
 	std::vector<CallbackHandle> m_thinkCallbacks;
 	std::vector<CallbackHandle> m_tickCallbacks;

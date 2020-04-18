@@ -4,7 +4,6 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 void pragma::CEyeComponent::UpdateEyeballs()
 {
 	auto mdlC = GetEntity().GetModelComponent();
@@ -254,4 +253,3 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 	state.irisProjectionV.z = v.z;
 	state.irisProjectionV.w = -uvec::dot(org,v);
 }
-#pragma optimize("",on)

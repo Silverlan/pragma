@@ -6,7 +6,6 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void CEyeComponent::Blink()
 {
 	m_tNextBlink = c_game->CurTime() +umath::random(1.5f,4.f);
@@ -46,4 +45,3 @@ void CEyeComponent::UpdateBlink()
 	if(tCur >= m_tNextBlink)
 		Blink();
 }
-#pragma optimize("",on)

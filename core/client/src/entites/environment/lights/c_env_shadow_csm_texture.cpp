@@ -9,7 +9,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 CShadowCSMComponent::TextureSet::TextureSet()
 {}
 
@@ -90,4 +89,3 @@ const std::shared_ptr<prosper::Framebuffer> &CShadowCSMComponent::GetFramebuffer
 }
 
 bool CShadowCSMComponent::IsDynamicValid() const {return (GetDepthTexture(pragma::CLightComponent::ShadowMapType::Dynamic) != nullptr) ? true : false;} // prosper TODO
-#pragma optimize("",on)

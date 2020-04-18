@@ -38,6 +38,7 @@ public:
 	static void UnmountAddons();
 	static const std::vector<AddonInfo> &GetMountedAddons();
 	static void Poll();
+	static DirectoryWatcherCallback *GetAddonWatcher();
 private:
 	static std::vector<AddonInfo> m_addons;
 	static std::shared_ptr<DirectoryWatcherCallback> m_addonWatcher;

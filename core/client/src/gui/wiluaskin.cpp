@@ -7,7 +7,7 @@
 #include <queue>
 
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 WILuaSkin::WILuaSkin(std::string id)
 	: WISkin(id),m_lua(nullptr),m_rootClass(nullptr)
 {}
@@ -230,4 +230,4 @@ WISkinClass *WISkinClass::Copy()
 	}
 	return other;
 }
-#pragma optimize("",on)
+

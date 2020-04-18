@@ -10,7 +10,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 {
 	auto mdl = ent.GetModel();
@@ -112,4 +111,3 @@ std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent:
 		return {};
 	return it->second;
 }
-#pragma optimize("",on)

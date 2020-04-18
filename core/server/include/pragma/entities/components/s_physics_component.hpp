@@ -26,7 +26,6 @@ namespace pragma
 		virtual void SetKinematic(bool b) override;
 
 		virtual void SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask) override;
-		virtual void InitializeBrushGeometry() override;
 
 		virtual void SetMoveType(MOVETYPE movetype) override;
 		void SetCollisionType(COLLISIONTYPE collisiontype) override;

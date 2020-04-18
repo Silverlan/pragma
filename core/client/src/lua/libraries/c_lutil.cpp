@@ -6,13 +6,22 @@
 #include "pragma/entities/point/c_point_target.h"
 #include "luasystem.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
 #include <pragma/lua/classes/ldef_entity.h>
+#include <pragma/lua/libraries/lfile.h>
+#include <pragma/lua/classes/ldef_material.h>
 #include <pragma/util/giblet_create_info.hpp>
+#include <pragma/asset_types/world.hpp>
+#include <pragma/model/model.h>
+#include <util_image_buffer.hpp>
 
 extern DLLCLIENT CGame *c_game;
+extern DLLCLIENT ClientState *client;
+extern DLLCENGINE CEngine *c_engine;
+
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
 {
@@ -123,5 +132,150 @@ int Lua::util::Client::create_giblet(lua_State *l)
 		return 0;
 	particle->PushLuaObject(l);
 	return 1;
+}
+
+int Lua::util::Client::import_model(lua_State *l)
+{
+	VFilePtr f = nullptr;
+	std::string fileName;
+	if(Lua::IsString(l,1))
+		fileName = Lua::CheckString(l,1);
+	else
+	{
+		auto *lf = Lua::CheckFile(l,1);
+		if(lf == nullptr)
+			return 0;
+		f = lf->GetHandle();
+	}
+	::util::Path outputPath {};
+	if(Lua::IsSet(l,2))
+		outputPath = Lua::CheckString(l,2);
+	std::string errMsg;
+	auto mdl = f ? pragma::asset::import_model(f,errMsg,outputPath) : pragma::asset::import_model(fileName,errMsg,outputPath);
+	if(mdl == nullptr)
+	{
+		Lua::PushBool(l,false);
+		Lua::PushString(l,errMsg);
+		return 2;
+	}
+	Lua::Push(l,mdl);
+	return 1;
+}
+
+int Lua::util::Client::export_map(lua_State *l)
+{
+	std::string mapName = Lua::CheckString(l,1);
+	auto &exportInfo = Lua::Check<pragma::asset::ModelExportInfo>(l,2);
+
+	std::string errMsg;
+	auto result = pragma::asset::export_map(mapName,exportInfo,errMsg);
+	Lua::PushBool(l,result);
+	if(result)
+		return 1;
+	Lua::PushString(l,errMsg);
+	return 2;
+}
+
+int Lua::util::Client::export_texture(lua_State *l)
+{
+	if(Lua::IsString(l,1))
+	{
+		std::string texturePath = Lua::CheckString(l,1);
+		auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+		auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
+		if(Lua::IsSet(l,3))
+			alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l,3));
+		auto enabledExtendedDDs = false;
+		if(Lua::IsSet(l,4))
+			enabledExtendedDDs = Lua::CheckBool(l,4);
+
+		std::string errMsg;
+		std::string outputPath;
+		auto result = pragma::asset::export_texture(texturePath,imgFormat,errMsg,alphaMode,enabledExtendedDDs,nullptr,&outputPath);
+		Lua::PushBool(l,result);
+		if(result == false)
+			Lua::PushString(l,errMsg);
+		else
+			Lua::PushString(l,outputPath);
+		return 2;
+	}
+	auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l,1);
+	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+	std::string outputPath = Lua::CheckString(l,3);
+	if(Lua::file::validate_write_operation(l,outputPath) == false)
+	{
+		Lua::PushBool(l,false);
+		return 1;
+	}
+	auto normalMap = false;
+	if(Lua::IsSet(l,4))
+		normalMap = Lua::CheckBool(l,4);
+	auto srgb = false;
+	if(Lua::IsSet(l,5))
+		srgb = Lua::CheckBool(l,5);
+	auto alphaMode = uimg::TextureInfo::AlphaMode::Auto;
+	if(Lua::IsSet(l,6))
+		alphaMode = static_cast<uimg::TextureInfo::AlphaMode>(Lua::CheckInt(l,6));
+	
+	std::string errMsg;
+	std::string finalOutputPath;
+	auto result = pragma::asset::export_texture(imgBuf,imgFormat,outputPath,errMsg,normalMap,srgb,alphaMode,&finalOutputPath);
+	Lua::PushBool(l,result);
+	if(result == false)
+		Lua::PushString(l,errMsg);
+	else
+		Lua::PushString(l,finalOutputPath);
+	return 2;
+}
+
+int Lua::util::Client::export_material(lua_State *l)
+{
+	Material *mat = nullptr;
+	if(Lua::IsString(l,1))
+	{
+		std::string matPath = Lua::CheckString(l,1);
+		mat = client->LoadMaterial(matPath,true,false);
+	}
+	else
+		mat = Lua::CheckMaterial(l,1);
+
+	if(mat == nullptr)
+	{
+		Lua::PushBool(l,false);
+		Lua::PushString(l,"Invalid material");
+		return 2;
+	}
+	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+
+	std::string errMsg;
+	std::string finalOutputPath;
+	auto textures = pragma::asset::export_material(*mat,imgFormat,errMsg);
+	Lua::PushBool(l,textures.has_value());
+	if(textures.has_value() == false)
+		Lua::PushString(l,errMsg);
+	else
+	{
+		auto t = Lua::CreateTable(l);
+		for(auto &pair : *textures)
+		{
+			Lua::PushString(l,pair.first);
+			Lua::PushString(l,pair.second);
+			Lua::SetTableValue(l,t);
+		}
+	}
+	return 2;
+}
+
+
+int Lua::util::Client::get_clipboard_string(lua_State *l)
+{
+	Lua::PushString(l,c_engine->GetWindow().GetClipboardString());
+	return 1;
+}
+int Lua::util::Client::set_clipboard_string(lua_State *l)
+{
+	std::string str = Lua::CheckString(l,1);
+	c_engine->GetWindow().SetClipboardString(str);
+	return 0;
 }
 

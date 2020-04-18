@@ -20,7 +20,6 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
 
-#pragma optimize("",off)
 void CSkyboxComponent::Initialize()
 {
 	BaseSkyboxComponent::Initialize();
@@ -270,4 +269,3 @@ void CSkybox::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSkyboxComponent>();
 }
-#pragma optimize("",on)

@@ -48,7 +48,7 @@ decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = 
 ShaderWater::ShaderWater(prosper::Context &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_water","world/fs_water")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 std::shared_ptr<prosper::DescriptorSetGroup> ShaderWater::InitializeMaterialDescriptorSet(CMaterial &mat)

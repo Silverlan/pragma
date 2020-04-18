@@ -101,14 +101,3 @@ Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;
 }
-
-void CPhysicsComponent::InitializeBrushGeometry()
-{
-	auto mdl = CModelManager::CreateFromBrushMeshes(m_brushMeshes);
-	if(GetEntity().IsWorld() == true && mdl != nullptr)
-		mdl->Optimize();
-	mdl->Update(ModelUpdateFlags::All);
-	auto mdlComponent = GetEntity().AddComponent<CModelComponent>();
-	if(mdlComponent.valid())
-		mdlComponent->SetModel(mdl);
-}

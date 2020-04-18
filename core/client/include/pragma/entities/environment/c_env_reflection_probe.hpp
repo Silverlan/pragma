@@ -39,7 +39,7 @@ namespace pragma
 		};
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
-		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(const Vector3 &origin,float &outIntensity);
+		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
@@ -88,6 +88,7 @@ namespace pragma
 		StateFlags m_stateFlags = StateFlags::RequiresRebuild;
 
 		std::string m_srcEnvMap = "";
+		std::string m_iblMat = "";
 		std::optional<float> m_strength = {};
 	};
 };

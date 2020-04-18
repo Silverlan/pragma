@@ -34,11 +34,15 @@ namespace pragma
 		struct PushConstants
 		{
 			uint32_t numLights;
+			uint32_t sceneFlag;
 		};
 #pragma pack(pop)
 
 		ShaderForwardPLightCulling(prosper::Context &context,const std::string &identifier);
-		bool Compute(Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount);
+		bool Compute(
+			Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+			uint32_t sceneIndex
+		);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

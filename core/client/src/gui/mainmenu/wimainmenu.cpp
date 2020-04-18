@@ -28,7 +28,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 
-#pragma optimize("",off)
 WIMainMenu::WIMainMenu()
 	: WIBase(),WIBaseBlur(),m_menuType(0),m_tOpen(0.0)
 {
@@ -458,4 +457,3 @@ void WIMainMenu::SetSize(int x,int y)
 	}
 #endif
 }
-#pragma optimize("",on)

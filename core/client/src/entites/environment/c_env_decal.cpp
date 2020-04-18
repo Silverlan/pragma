@@ -18,7 +18,6 @@ LINK_ENTITY_TO_CLASS(env_decal,CEnvDecal);
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 DecalProjector::DecalProjector(const Vector3 &pos,const Quat &rot,float size)
 	: m_pose{pos,rot},m_size{size}
 {}
@@ -495,4 +494,3 @@ void CEnvDecal::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CDecalComponent>();
 }
-#pragma optimize("",on)

@@ -6,6 +6,7 @@
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
 
+
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType{umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType{umath::to_integral(E::Material)};
 decltype(EResourceWatcherCallbackType::Texture) EResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType{umath::to_integral(E::Texture)};
@@ -23,6 +24,33 @@ void ResourceWatcherManager::Poll()
 		watcher->Poll();
 }
 
+void ResourceWatcherManager::Lock()
+{
+	if(m_lockedCount++ > 0)
+		return;
+	for(auto &dirWatcher : m_watchers)
+		dirWatcher->SetEnabled(false);
+}
+void ResourceWatcherManager::Unlock()
+{
+	assert(m_lockedCount > 0);
+	if(m_lockedCount == 0)
+		throw std::logic_error{"Attempted to unlock resource watcher more times than it has been locked!"};
+	if(--m_lockedCount > 0)
+		return;
+	for(auto &dirWatcher : m_watchers)
+		dirWatcher->SetEnabled(true);
+}
+ScopeGuard ResourceWatcherManager::ScopeLock()
+{
+	Lock();
+	return ScopeGuard{[this]() {
+		Unlock();
+	}};
+}
+
+bool ResourceWatcherManager::IsLocked() const {return m_lockedCount > 0;}
+
 void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 {
 	auto *nw = m_networkState;
@@ -30,6 +58,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 	auto &matManager = nw->GetMaterialManager();
 	//if(matManager.FindMaterial(path) == nullptr)
 	//	return; // Don't reload the material if it was never requested in the first place
+	std::string internalPath;
 	if(nw->LoadMaterial(path,true) != nullptr)
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
@@ -39,7 +68,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 		{
 			auto fname = ufile::get_file_from_filename(path);
 			ufile::remove_extension_from_filename(fname);
-			auto &models = game->GetModels();
+			auto &models = m_networkState->GetCachedModels();
 			for(auto &pair : models)
 			{
 				auto &mdl = pair.second;
@@ -107,7 +136,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 	{
 		if(game != nullptr)
 		{
-			auto &mdls = game->GetModels();
+			auto &mdls = m_networkState->GetCachedModels();
 			auto it = mdls.find(path);
 			if(it != mdls.end())
 			{
@@ -139,7 +168,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 		}
 		CallChangeCallbacks(EResourceWatcherCallbackType::Model,path,ext);
 	}
-	else if(ext == "wmi" || ext == "vmt" || ext == "vmat_c")
+	else if(ext == "wmi"/* || ext == "vmt" || ext == "vmat_c"*/)
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto matPath = "materials\\" +path;
@@ -277,6 +306,8 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 		auto watchFlags = DirectoryWatcherCallback::WatchFlags::WatchSubDirectories;
 		if(bAbsolutePath)
 			watchFlags |= DirectoryWatcherCallback::WatchFlags::AbsolutePath;
+		if(m_lockedCount > 0)
+			watchFlags |= DirectoryWatcherCallback::WatchFlags::StartDisabled;
 		m_watchers.push_back(std::make_shared<DirectoryWatcherCallback>(path,[this,watchPaths](const std::string &fName) {
 			for(auto &resPath : watchPaths)
 			{
@@ -296,3 +327,4 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 	}
 	return true;
 }
+

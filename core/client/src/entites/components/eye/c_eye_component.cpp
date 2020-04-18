@@ -10,7 +10,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ComponentEventId CEyeComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CEyeComponent::EVENT_ON_BLINK = INVALID_COMPONENT_ID;
 void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -92,4 +91,3 @@ void CEyeComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		m_skinMaterialIndexToEyeballIndex.insert(std::make_pair(eyeball.irisMaterialIndex,eyeballIndex));
 	}
 }
-#pragma optimize("",on)

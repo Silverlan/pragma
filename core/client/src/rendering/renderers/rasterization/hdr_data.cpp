@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/image/c_shader_additive.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
@@ -163,7 +164,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	if(prepass.Initialize(context,width,height,sampleCount,bEnableSSAO) == false)
 		return false;
 
-	auto wpShader = c_engine->GetShader("textured");
+	auto wpShader = c_engine->GetShader("pbr");
 	auto &hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(
 		wpShader.expired() || hShaderTonemapping.expired() || 
@@ -210,7 +211,7 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	bloomTexture = prosper::util::create_texture(dev,texCreateInfo,hdrBloomImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
 	sceneRenderTarget = prosper::util::create_render_target(
 		dev,{hdrTex,bloomTexture,prepass.textureDepth},
-		static_cast<prosper::ShaderGraphics*>(wpShader.get())->GetRenderPass(umath::to_integral(pragma::ShaderTextured3D::GetPipelineIndex(sampleCount)))
+		static_cast<prosper::ShaderGraphics*>(wpShader.get())->GetRenderPass(umath::to_integral(pragma::ShaderTextured3DBase::GetPipelineIndex(sampleCount)))
 	);
 	sceneRenderTarget->SetDebugName("scene_hdr_rt");
 	auto resolvedBloomTex = bloomTexture;
@@ -261,19 +262,21 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	auto postHdrTex = prosper::util::create_texture(dev,texCreateInfo,postHdrImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
 	toneMappedRenderTarget = prosper::util::create_render_target(dev,{postHdrTex},static_cast<prosper::ShaderGraphics*>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
-	dsgTonemappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
+	dsgTonemappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
 	prosper::util::set_descriptor_set_binding_texture(*dsgTonemappedPostProcessing->GetDescriptorSet(),*postHdrTex,0u);
+	prosper::util::set_descriptor_set_binding_texture(*dsgTonemappedPostProcessing->GetDescriptorSet(),*resolvedTex,1u);
 
 	{
 		auto hShaderFXAA = c_engine->GetShader("pp_fxaa");
 		if(hShaderFXAA.valid())
 		{
+			// TODO: Obsolete?
 			imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
 			auto tmPpImg = prosper::util::create_image(dev,imgCreateInfo);
 			auto tmPpTex = prosper::util::create_texture(dev,texCreateInfo,tmPpImg,&hdrImgViewCreateInfo,&hdrSamplerCreateInfo);
 			toneMappedPostProcessingRenderTarget = prosper::util::create_render_target(dev,{tmPpTex},static_cast<prosper::ShaderGraphics*>(hShaderFXAA.get())->GetRenderPass());
 			toneMappedPostProcessingRenderTarget->SetDebugName("scene_post_tonemapping_post_processing_rt");
-			dsgToneMappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
+			dsgToneMappedPostProcessing = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
 			prosper::util::set_descriptor_set_binding_texture(*dsgToneMappedPostProcessing->GetDescriptorSet(),*tmPpTex,0u);
 		}
 	}

@@ -8,7 +8,7 @@ extern DLLCLIENT ClientState *client;
 ShaderLoading::ShaderLoading(prosper::Context &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_textured","world/fs_loading")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 bool ShaderLoading::BindMaterial(CMaterial&)

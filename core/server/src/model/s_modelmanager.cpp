@@ -7,33 +7,10 @@
 
 extern DLLSERVER SGame *s_game;
 
-std::shared_ptr<Model> ModelManager::GetModel(Game *game,const std::string &mdlName)
+std::shared_ptr<Model> pragma::asset::SModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {
-	return TModelManager<Model,ModelMesh,ModelSubMesh>::GetModel(game,mdlName);
-}
-
-std::shared_ptr<Model> ModelManager::Load(Game *game,const std::string &path,bool bReload,bool *newModel)
-{
-	auto r = TModelManager<Model,ModelMesh,ModelSubMesh>::Load(game,path,bReload,newModel);
-	if(s_game != nullptr)
-		s_game->RegisterGameResource("models\\" +GetCanonicalizedName(path));
-	return r;
-}
-
-std::shared_ptr<Model> ModelManager::Create(Game *game,const std::string &path)
-{
-	auto r = TModelManager<Model,ModelMesh,ModelSubMesh>::Create(game,path);
-	if(s_game != nullptr)
-		s_game->RegisterGameResource("models\\" +GetCanonicalizedName(path));
-	return r;
-}
-
-std::shared_ptr<Model> ModelManager::Create(Game *game,bool bAddReference)
-{
-	return TModelManager<Model,ModelMesh,ModelSubMesh>::CreateModel(game,bAddReference);
-}
-
-std::shared_ptr<Model> ModelManager::CreateFromBrushMeshes(Game *game,std::vector<std::shared_ptr<BrushMesh>> &meshes,const std::vector<SurfaceMaterial> &surfaceMaterials)
-{
-	return TModelManager<Model,ModelMesh,ModelSubMesh>::CreateFromBrushMeshes(game,meshes,surfaceMaterials);
+	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
+	if(mdl == nullptr)
+		static_cast<SGame&>(*m_nw.GetGameState()).RegisterGameResource("models/" +GetNormalizedModelName(mdlName));
+	return mdl;
 }

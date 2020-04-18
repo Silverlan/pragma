@@ -16,6 +16,7 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/util/resource_watcher.h"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/model/modelmanager.h"
 #include <pragma/console/s_cvar_global_functions.h>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
@@ -178,7 +179,7 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 					if(dataTex)
 					{
 						auto path = "materials\\" +dataTex->GetValue().name;
-						if(FileManager::Exists(path) == false && util::port_file(this,path) == false)
+						if(FileManager::Exists(path) == false && util::port_file(this,path +".vtf") == false && util::port_file(this,path +".vtex_c") == false)
 							Con::cwar<<"WARNING: Unable to port texture '"<<dataTex->GetValue().name<<"'!"<<Con::endl;
 					}
 				}
@@ -756,6 +757,11 @@ void NetworkState::Think()
 	for(unsigned int i=0;i<m_thinkCallbacks.size();i++)
 		m_thinkCallbacks[i]();
 }
+
+const std::unordered_map<std::string,std::shared_ptr<Model>> &NetworkState::GetCachedModels() const {return m_modelManager->GetCache();}
+
+const pragma::asset::ModelManager &NetworkState::GetModelManager() const {return const_cast<NetworkState*>(this)->GetModelManager();}
+pragma::asset::ModelManager &NetworkState::GetModelManager() {return *m_modelManager;}
 
 void NetworkState::Tick()
 {

@@ -1,6 +1,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/raytracing/cycles.hpp"
@@ -8,9 +9,11 @@
 #include <pragma/physics/collisionmesh.h>
 #include <pragma/physics/transform.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_util.hpp>
+#include <image/prosper_sampler.hpp>
 
 using namespace pragma;
 
@@ -18,7 +21,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 PBRAOBakeJob::PBRAOBakeJob(Model &mdl,Material &mat)
 	: hModel{mdl.GetHandle()},hMaterial{mat.GetHandle()}
 {}
@@ -39,7 +41,7 @@ void CPBRConverterComponent::ProcessQueue()
 		return;
 	}
 	item.isRunning = true;
-	if(item.hModel.IsValid() == false || item.hMaterial.IsValid() == false)
+	if(item.hModel.expired() || item.hMaterial.IsValid() == false)
 		return;
 	auto &mat = *item.hMaterial.get();
 	auto &mdl = *item.hModel.get();
@@ -68,7 +70,7 @@ void CPBRConverterComponent::ProcessQueue()
 			Con::cwar<<"WARNING: Generating ambient occlusion map failed: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
-		if(hMat.IsValid() == false || hMdl.IsValid() == false)
+		if(hMat.IsValid() == false || hMdl.expired())
 			return;
 		auto imgBuffer = worker.GetResult();
 		WriteAOMap(*hMdl.get(),static_cast<CMaterial&>(*hMat.get()),*imgBuffer,imgBuffer->GetWidth(),imgBuffer->GetHeight());
@@ -79,6 +81,7 @@ void CPBRConverterComponent::ProcessQueue()
 
 void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo)
 {
+#if 0
 	ConvertMaterialsToPBR(mdl);
 
 	// We will have to generate ao maps for all materials of the first skin.
@@ -92,7 +95,10 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOccl
 		if(mat == nullptr)
 			continue;
 		// Make sure it's a PBR material and it doesn't already have an ao map
-		if(IsPBR(*mat) == false || (mat->GetAmbientOcclusionMap() && aoInfo.rebuild == false))
+		if(IsPBR(*mat) == false)
+			continue;
+		auto rmaInfo = mat->GetDataBlock()->GetBlock("rma_info");
+		if(aoInfo.rebuild == false && (rmaInfo == nullptr || rmaInfo->GetBool("requires_ao_update") == false))
 			continue;
 		PBRAOBakeJob job {mdl,*mat};
 		job.width = aoInfo.width;
@@ -100,47 +106,44 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOccl
 		job.samples = aoInfo.samples;
 		m_workQueue.push(job);
 	}
-}
-void CPBRConverterComponent::ApplyAOMap(CMaterial &mat,const std::string &aoName) const
-{
-	if(mat.GetAmbientOcclusionMap())
-		return; // Don't overwrite the existing ao map
-	auto &dataBlock = mat.GetDataBlock();
-	dataBlock->AddValue("texture",Material::AO_MAP_IDENTIFIER,aoName);
-	mat.UpdateTextures();
-	if(mat.Save(mat.GetName(),"addons/converted/") == false)
-		return;
-	auto nameNoExt = mat.GetName();
-	ufile::remove_extension_from_filename(nameNoExt);
-	client->LoadMaterial(nameNoExt,true,true); // Reload material immediately
+#endif
 }
 void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
 {
-	Con::cout<<"Ambient occlusion map has been generated for material '"<<mat.GetName()<<"' of model '"<<mdl.GetName()<<"'! Saving texture file..."<<Con::endl;
+	Con::cout<<"Ambient occlusion map has been generated for material '"<<mat.GetName()<<"' of model '"<<mdl.GetName()<<"'! Combining with RMA map..."<<Con::endl;
 
-	uimg::TextureInfo imgWriteInfo {};
-	imgWriteInfo.alphaMode = uimg::TextureInfo::AlphaMode::None;
-	imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
-	imgWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
-	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
-	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::GradientMap;
+	auto *shader = static_cast<pragma::ShaderComposeRMA*>(c_engine->GetShader("compose_rma").get());
+	if(shader == nullptr)
+		return;
+	auto *texInfoRMA = mat.GetRMAMap();
+	if(texInfoRMA == nullptr)
+		return;
+	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
+	auto rmaName = texInfoRMA->name;
+	ufile::remove_extension_from_filename(rmaName);
 
-	std::string materialsRootDir = "materials/";
-	auto matName = materialsRootDir +mat.GetName();
-	ufile::remove_extension_from_filename(matName);
+	auto outPath = util::Path{rmaName};
+	auto requiresSave = false;
+	if(outPath.GetFront() == "pbr")
+	{
+		// We don't want to overwrite the default pbr materials, so we'll use a different rma path
+		outPath = mat.GetName();
+		outPath.RemoveFileExtension();
+		rmaName = outPath.GetString() +"_rma";
+		mat.GetDataBlock()->AddValue("texture",Material::RMA_MAP_IDENTIFIER,rmaName);
+		requiresSave = true;
+	}
 
-	std::string aoName = matName +"_ao";
-	Con::cout<<"Writing ambient occlusion texture file '"<<aoName<<"'..."<<Con::endl;
-	if(c_game->SaveImage(imgBuffer,"addons/converted/" +aoName,imgWriteInfo) == false)
-		aoName = "";
+	shader->InsertAmbientOcclusion(*c_engine,rmaName,imgBuffer);
 
-	if(aoName.empty() == false)
-		aoName = aoName.substr(materialsRootDir.length());
-	else
-		aoName = "white";
+	if(requiresSave)
+	{
+		mat.UpdateTextures();
+		mat.Save();
+	}
 
-	ApplyAOMap(mat,aoName);
-
+#if 0
+	// OBSOLETE
 	// Apply to skins as well
 	auto &mats = mdl.GetMaterials();
 	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const MaterialHandle &hMat) {
@@ -168,5 +171,5 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuf
 			continue;
 		ApplyAOMap(static_cast<CMaterial&>(*mat),aoName);
 	}
+#endif
 }
-#pragma optimize("",on)

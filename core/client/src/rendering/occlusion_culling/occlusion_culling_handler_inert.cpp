@@ -8,7 +8,6 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 void OcclusionCullingHandlerInert::PerformCulling(
 	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<pragma::CParticleSystemComponent*> &particlesOut
@@ -31,12 +30,12 @@ void OcclusionCullingHandlerInert::PerformCulling(
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
-	auto &ents = scene.GetEntities();
-	for(auto &hEnt : ents)
+	std::vector<CBaseEntity*> *ents;
+	c_game->GetEntities(&ents);
+	for(auto *ent : *ents)
 	{
-		if(hEnt.IsValid() == false)
+		if(ent == nullptr)
 			continue;
-		auto *ent = static_cast<CBaseEntity*>(hEnt.get());
 		auto pRenderComponent = ent->GetRenderComponent();
 		if(pRenderComponent.expired())
 			continue;
@@ -64,4 +63,3 @@ void OcclusionCullingHandlerInert::PerformCulling(
 	//if(bUpdateLod == true)
 	//	m_lastLodCamPos = posCam;
 }
-#pragma optimize("",on)

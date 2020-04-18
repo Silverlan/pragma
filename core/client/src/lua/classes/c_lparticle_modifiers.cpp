@@ -4,7 +4,7 @@
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include <luasystem.h>
 
-#pragma optimize("",off)
+
 
 extern DLLCENGINE CEngine *c_engine;
 
@@ -311,4 +311,4 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	defPtRendererBase.def("OnParticleDestroyed",&CParticleRendererLua::Lua_OnParticleDestroyed,&CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtc.scope[defPtRendererBase];
 }
-#pragma optimize("",on)
+

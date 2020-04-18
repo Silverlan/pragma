@@ -61,6 +61,12 @@ util::WeakHandle<pragma::CRenderComponent> CBaseEntity::GetRenderComponent() con
 //////////////////////////////////
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
+pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
+void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED");
+}
+
 CBaseEntity::CBaseEntity()
 	: BaseEntity()
 {}
@@ -93,6 +99,24 @@ void CBaseEntity::UpdateAnimatedState()
 	GetModelComponent().SetAnimated(bAnimated);
 }
 */
+
+static uint64_t get_scene_flag(Scene &scene)
+{
+	auto index = scene.GetSceneIndex();
+	return 1<<index;
+}
+uint32_t CBaseEntity::GetSceneFlags() const {return m_sceneFlags;}
+void CBaseEntity::AddToScene(Scene &scene)
+{
+	m_sceneFlags |= get_scene_flag(scene);
+	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+}
+void CBaseEntity::RemoveFromScene(Scene &scene)
+{
+	m_sceneFlags &= ~get_scene_flag(scene);
+	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+}
+bool CBaseEntity::IsInScene(Scene &scene) const {return (m_sceneFlags &get_scene_flag(scene)) != 0;}
 
 void CBaseEntity::Construct(unsigned int idx,unsigned int clientIdx)
 {

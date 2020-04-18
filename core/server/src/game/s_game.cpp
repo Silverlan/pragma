@@ -175,8 +175,6 @@ void SGame::OnRemove()
 			m_ents[i]->Remove();
 		}
 	}
-	ModelManager::MarkAllForDeletion();
-	server->GetMaterialManager().ClearUnused();
 	if(m_cbProfilingHandle.IsValid())
 		m_cbProfilingHandle.Remove();
 	s_physEnv = nullptr;
@@ -225,7 +223,6 @@ void SGame::Initialize()
 	//p->WriteString((gameMode != nullptr) ? gameMode->id : "");
 	//server->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
-	ClearResources<ModelManager>();
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
@@ -234,24 +231,8 @@ void SGame::Initialize()
 
 void SGame::SetUp() {Game::SetUp();}
 
-std::shared_ptr<Model> SGame::CreateModel(const std::string &mdl) const {return ModelManager::Create(const_cast<SGame*>(this),mdl);}
-std::shared_ptr<Model> SGame::CreateModel(bool bAddReference) const {return ModelManager::Create(const_cast<SGame*>(this),bAddReference);}
-std::shared_ptr<BrushMesh> SGame::CreateBrushMesh() const {return std::make_shared<BrushMesh>();}
-std::shared_ptr<Side> SGame::CreateSide() const {return std::make_shared<Side>();}
 std::shared_ptr<ModelMesh> SGame::CreateModelMesh() const {return std::make_shared<ModelMesh>();}
 std::shared_ptr<ModelSubMesh> SGame::CreateModelSubMesh() const {return std::make_shared<ModelSubMesh>();}
-std::shared_ptr<Model> SGame::LoadModel(const std::string &mdl,bool bReload)
-{
-	auto bNewModel = false;
-	auto r = ModelManager::Load(this,mdl,bReload,&bNewModel);
-	if(bNewModel == true && r != nullptr)
-	{
-		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",r);
-		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",r);
-	}
-	return r;
-}
-std::unordered_map<std::string,std::shared_ptr<Model>> &SGame::GetModels() const {return ModelManager::GetModels();}
 
 bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {

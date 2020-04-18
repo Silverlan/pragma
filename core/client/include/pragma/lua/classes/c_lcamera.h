@@ -28,21 +28,10 @@ namespace Lua
 
 		DLLCLIENT void InitializeRenderTarget(lua_State *l,::Scene &scene);
 
-		DLLCLIENT void AddLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight);
-		DLLCLIENT void RemoveLightSource(lua_State *l,::Scene &scene,CLightHandle &hLight);
-		DLLCLIENT void SetLightSources(lua_State *l,::Scene &scene,luabind::object o);
-		DLLCLIENT void GetLightSources(lua_State *l,::Scene &scene);
-		DLLCLIENT void LinkLightSources(lua_State *l,::Scene &scene,::Scene &sceneOther);
-
-		DLLCLIENT void AddEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt);
-		DLLCLIENT void RemoveEntity(lua_State *l,::Scene &scene,EntityHandle &hEnt);
-		DLLCLIENT void SetEntities(lua_State *l,::Scene &scene,luabind::object o);
-		DLLCLIENT void GetEntities(lua_State *l,::Scene &scene);
-		DLLCLIENT void LinkEntities(lua_State *l,::Scene &scene,::Scene &sceneOther);
-
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene);
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint);
 		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,::Scene &scene);
+		DLLCLIENT void GetIndex(lua_State *l,::Scene &scene);
 	};
 	namespace RasterizationRenderer
 	{

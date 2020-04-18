@@ -21,7 +21,7 @@ namespace prosper
 };
 namespace pragma
 {
-	class ShaderTextured3D;
+	class ShaderTextured3DBase;
 	class ShaderPrepassBase;
 	class CLightComponent;
 	class CParticleSystemComponent;
@@ -90,7 +90,6 @@ namespace pragma::rendering
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings) override;
 		virtual void UpdateCameraData(pragma::CameraData &cameraData) override;
 		virtual bool ReloadRenderTarget() override;
-		virtual void OnEntityAddedToScene(CBaseEntity &ent) override;
 		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const override;
 		virtual const std::shared_ptr<prosper::Texture> &GetPresentationTexture() const override;
 		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const override;
@@ -103,7 +102,7 @@ namespace pragma::rendering
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
-		pragma::ShaderTextured3D *GetShaderOverride(pragma::ShaderTextured3D *srcShader);
+		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader);
 		void ClearShaderOverride(const std::string &srcShader);
 
 		const std::vector<Plane> &GetFrustumPlanes() const;

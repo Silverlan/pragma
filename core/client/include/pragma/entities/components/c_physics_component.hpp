@@ -21,8 +21,6 @@ namespace pragma
 		virtual void PrePhysicsSimulate() override;
 		virtual void PostPhysicsSimulate() override;
 
-		virtual void InitializeBrushGeometry() override;
-		
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;

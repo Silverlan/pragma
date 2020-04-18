@@ -29,7 +29,6 @@ namespace pragma::rendering
 		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const=0;
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings);
 		virtual void UpdateCameraData(pragma::CameraData &cameraData);
-		virtual void OnEntityAddedToScene(CBaseEntity &ent);
 		void Resize(uint32_t width, uint32_t height);
 
 		virtual bool IsRasterizationRenderer() const;

@@ -8,11 +8,13 @@
 
 class CBaseEntity;
 class CModelMesh;
+class Scene;
 namespace pragma
 {
 	class CLightSpotComponent;
 	class CLightPointComponent;
 	class CLightDirectionalComponent;
+	class COcclusionCullerComponent;
 	struct DLLCLIENT CEShouldPassEntity
 		: public ComponentEvent
 	{
@@ -152,6 +154,10 @@ namespace pragma
 		bool IsInRange(const CBaseEntity &ent) const;
 		bool IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) const;
 		bool IsInCone(const CBaseEntity &ent,const Vector3 &dir,float angle) const;
+
+		// A shadowed light source may only be assigned to one scene / one scene slot
+		Scene *FindShadowScene() const;
+		COcclusionCullerComponent *FindShadowOcclusionCuller() const;
 
 		virtual void SetLightIntensityType(LightIntensityType type) override;
 		virtual void SetLightIntensity(float intensity,LightIntensityType type) override;

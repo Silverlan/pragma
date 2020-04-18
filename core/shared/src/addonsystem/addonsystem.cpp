@@ -110,6 +110,8 @@ static bool mount_linked_addon(const std::string &pathLink,std::vector<AddonInfo
 }
 #endif
 
+DirectoryWatcherCallback *AddonSystem::GetAddonWatcher() {return m_addonWatcher.get();}
+
 void AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
@@ -183,7 +185,7 @@ void AddonSystem::MountAddons()
 				// Directory
 				mount_directory_addon(fName,m_addons,false);
 			}
-		},DirectoryWatcherCallback::WatchFlags::WatchSubDirectories);
+		},DirectoryWatcherCallback::WatchFlags::WatchSubDirectories | DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);
 	}
 	catch(const DirectoryWatcher::ConstructException &e)
 	{

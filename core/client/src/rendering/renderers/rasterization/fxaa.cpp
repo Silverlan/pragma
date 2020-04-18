@@ -19,7 +19,7 @@ static auto cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static auto cvFxaaSubPixelAliasingRemoval = GetClientConVar("cl_render_fxaa_sub_pixel_aliasing_removal_amount");
 static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold");
 static auto cvFxaaMinEdgeThreshold = GetClientConVar("cl_render_fxaa_min_edge_threshold");
-#pragma optimize("",off)
+
 void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
 	if(static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) != AntiAliasing::FXAA)
@@ -71,4 +71,4 @@ void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBu
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
 }
-#pragma optimize("",on)
+

@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/lgeometry.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/libraries/lmatrix.h"
+#include "pragma/lua/libraries/lasset.hpp"
 
 #include "pragma/lua/classes/ldef_vector.h"
 #include "luasystem.h"

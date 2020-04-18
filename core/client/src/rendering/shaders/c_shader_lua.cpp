@@ -212,7 +212,7 @@ void LuaShaderCompute::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 LuaShaderTextured3D::LuaShaderTextured3D()
 	: TLuaShaderBase(*c_engine,"","","")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 void LuaShaderTextured3D::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {

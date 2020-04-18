@@ -9,7 +9,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 void RenderSystem::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights)
 {
 	EntityIterator entIt {*c_game};
@@ -39,4 +39,4 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	}
 
 }
-#pragma optimize("",on)
+

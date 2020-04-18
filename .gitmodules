@@ -199,3 +199,6 @@ url=https://github.com/Silverlan/Anvil
 [submodule "third_party_libs/tinygltf"]
 	path = third_party_libs/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
+[submodule "modules/pr_prosper_opengl"]
+	path = modules/pr_prosper_opengl
+	url = https://github.com/Silverlan/pr_prosper_opengl.git

@@ -3,6 +3,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/util_extensible_enum.hpp>
+#include <sharedutils/scope_guard.h>
 #include <fsys/directory_watcher.h>
 
 #define RESOURCE_WATCHER_VERBOSE 0
@@ -42,9 +43,17 @@ public:
 	bool MountDirectory(const std::string &path,bool bAbsolutePath=false);
 	void Poll();
 
+	// All file changes will be ignored as long as the watcher is locked.
+	// It can be locked multiple times and has to be unlocked the same amount of
+	// times to resume watching
+	void Lock();
+	void Unlock();
+	ScopeGuard ScopeLock();
+	bool IsLocked() const;
 	CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type,const std::function<void(std::reference_wrapper<const std::string>,std::reference_wrapper<const std::string>)> &fcallback);
 protected:
 	NetworkState *m_networkState = nullptr;
+	uint32_t m_lockedCount = 0;
 	void OnResourceChanged(const std::string &path);
 	void ReloadMaterial(const std::string &path);
 	virtual void OnResourceChanged(const std::string &path,const std::string &ext);

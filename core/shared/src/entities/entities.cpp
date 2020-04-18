@@ -10,7 +10,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/asset_types/world.hpp"
 
-#pragma optimize("",off)
+
 pragma::BaseWorldComponent *Game::GetWorld() {return m_worldComponent.get();}
 unsigned int Game::GetEntityCount() {return 0;}
 void Game::RemoveEntity(BaseEntity*) {}
@@ -48,4 +48,4 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 
 	return ent;
 }
-#pragma optimize("",on)
+

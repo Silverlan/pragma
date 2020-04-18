@@ -43,7 +43,6 @@ namespace pragma
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 		using BaseModelComponent::SetBodyGroup;
 		using BaseModelComponent::SetModel;
-		virtual void SetModel(const std::string &mdl) override;
 		virtual bool SetBodyGroup(uint32_t groupId,uint32_t id) override;
 
 		// Only use if LOD is handled externally!

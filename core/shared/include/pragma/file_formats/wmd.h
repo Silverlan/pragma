@@ -89,23 +89,23 @@ private:
 	void ReadChildBones(const Skeleton &skeleton,std::shared_ptr<Bone> bone);
 	std::vector<FWMDMesh*> m_meshes;
 
-	void LoadBones(unsigned short version,unsigned int numBones,Model *mdl);
-	void LoadAttachments(Model *mdl);
-	void LoadObjectAttachments(Model *mdl);
-	void LoadHitboxes(uint16_t version,Model *mdl);
-	void LoadMeshes(unsigned short version,Model *mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory);
-	void LoadLODData(unsigned short version,Model *mdl);
-	void LoadBodygroups(Model *mdl);
-	void LoadSoftBodyData(Model *mdl,CollisionMesh &colMesh);
-	void LoadCollisionMeshes(Game *game,unsigned short version,Model *mdl,SurfaceMaterial *smDefault=nullptr);
-	void LoadBlendControllers(Model *mdl);
-	void LoadIKControllers(uint16_t version,Model *mdl);
-	void LoadAnimations(unsigned short version,Model *mdl);
+	void LoadBones(unsigned short version,unsigned int numBones,Model &mdl);
+	void LoadAttachments(Model &mdl);
+	void LoadObjectAttachments(Model &mdl);
+	void LoadHitboxes(uint16_t version,Model &mdl);
+	void LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory);
+	void LoadLODData(unsigned short version,Model &mdl);
+	void LoadBodygroups(Model &mdl);
+	void LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh);
+	void LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,SurfaceMaterial *smDefault=nullptr);
+	void LoadBlendControllers(Model &mdl);
+	void LoadIKControllers(uint16_t version,Model &mdl);
+	void LoadAnimations(unsigned short version,Model &mdl);
 public:
 	FWMD(Game *game);
 	~FWMD();
 	template<class TModel,class TModelMesh,class TModelSubMesh>
-		TModel *Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
+		std::shared_ptr<Model> Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel);
 	void GetMeshes(std::vector<FWMDMesh*> **meshes);
 };
 

@@ -22,7 +22,6 @@ extern DLLCLIENT CGame *c_game;
 
 static const uint8_t LAYER_UPDATE_FREQUENCY = 3; // Frames
 
-#pragma optimize("",off)
 #define CSM_MAX_SHADOW_DISTANCE 10'000
 #define CSM_SHADOW_SPLIT_FACTOR 0.9f
 
@@ -302,8 +301,9 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4
 void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
 {
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
+	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	auto &rt = GetStaticPendingRenderTarget();
-	if(m_whShaderCsm.expired() || pLightComponent.expired() || rt == nullptr)
+	if(m_whShaderCsm.expired() || shadowScene == nullptr || rt == nullptr)
 		return;
 	auto &shaderCsm = static_cast<pragma::ShaderShadowCSM&>(*m_whShaderCsm.get());
 	auto *shaderCsmTransparent = m_whShaderCsmTransparent.expired() == false ? static_cast<pragma::ShaderShadowCSMTransparent*>(m_whShaderCsmTransparent.get()) : nullptr;
@@ -460,7 +460,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 		for(auto *ent : entIt)
 		{
 			auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(ent->IsInert() == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
+			if(ent->IsInert() == false || static_cast<CBaseEntity*>(ent)->IsInScene(*shadowScene) == false || pRenderComponent->ShouldDrawShadow(camPos) == false)
 				continue;
 			if(ent->IsWorld())
 			{
@@ -531,4 +531,3 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,layer);
 	}
 }
-#pragma optimize("",on)

@@ -5,11 +5,13 @@
 #include <functional>
 #include <unordered_map>
 #include <source2/resource_data.hpp>
+#include <pragma/model/vertex.h>
 
 class ModelSubMesh;
 class VFilePtrInternal;
 namespace source2
 {
+	namespace resource {class Skeleton;};
 	namespace impl
 	{
 		struct MeshData
@@ -19,7 +21,7 @@ namespace source2
 			std::vector<Vector2> lightmapUvs;
 		};
 		MeshData initialize_vertices(
-			const source2::resource::VBIB::VertexBuffer &vbuf,std::unordered_map<int32_t,uint32_t> *optSkinIndexToBoneIndex=nullptr
+			const source2::resource::VBIB::VertexBuffer &vbuf,source2::resource::Skeleton *optSkeleton=nullptr,std::optional<int64_t> meshIdx={}
 		);
 		std::shared_ptr<resource::Resource> load_resource(NetworkState &nw,std::shared_ptr<VFilePtrInternal> &f);
 		uint64_t vertex_attr_value_to_index(uint32_t size,const uint8_t *data);

@@ -34,7 +34,6 @@ extern DLLCLIENT CGame *c_game;
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
 
-#pragma optimize("",off)
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -174,7 +173,7 @@ void RenderSystem::Render(
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
 	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
+	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
@@ -286,7 +285,7 @@ uint32_t RenderSystem::Render(
 	auto &containers = renderMeshes.containers;
 	auto &processed = renderMeshes.processed;
 
-	auto pipelineType = pragma::ShaderTextured3D::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
+	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
@@ -406,4 +405,3 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &dr
 	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
 	return renderInfo ? Render(drawCmd,*renderInfo,renderMode,flags,drawOrigin) : 0;
 }
-#pragma optimize("",on)

@@ -14,7 +14,7 @@
 
 LINK_WGUI_TO_CLASS(WIServerBrowser,WIServerBrowser);
 
-#pragma optimize("",off)
+
 pragma::networking::DefaultMasterServerQueryDispatcher::DefaultMasterServerQueryDispatcher()
 	: IMasterServerQueryDispatcher{}
 {
@@ -386,4 +386,4 @@ void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResul
 		row->SetValue(5,std::to_string(0));
 	}
 }
-#pragma optimize("",on)
+

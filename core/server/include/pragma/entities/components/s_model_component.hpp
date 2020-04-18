@@ -19,7 +19,6 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
 		using BaseModelComponent::SetModel;
-		virtual void SetModel(const std::string &mdl) override;
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id) override;
 		virtual void SetSkin(unsigned int skin) override;
 	protected:

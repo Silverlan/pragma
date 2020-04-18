@@ -12,7 +12,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
 {
 	auto &scene = c_game->GetRenderScene();
@@ -109,4 +109,4 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	}
 	//
 }
-#pragma optimize("",on)
+

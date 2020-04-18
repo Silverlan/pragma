@@ -40,7 +40,7 @@ ShaderParticleModel::ShaderParticleModel(prosper::Context &context,const std::st
 	: ShaderTextured3DBase(context,identifier,"particles/model/vs_particle_model","particles/model/fs_particle_model")
 {
 	SetPipelineCount(GetParticlePipelineCount());
-	SetBaseShader<ShaderTextured3D>();
+	SetBaseShader<pragma::ShaderTextured3DBase>();
 }
 prosper::Shader::DescriptorSetInfo &ShaderParticleModel::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
 bool ShaderParticleModel::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderTextured3DBase::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}

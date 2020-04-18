@@ -20,7 +20,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 int Lua::import::import_wad(lua_State *l)
 {
 	auto &f = *Lua::CheckFile(l,1);
@@ -871,4 +871,4 @@ int Lua::import::import_model_asset(lua_State *l)
 
 	return 4;
 }
-#pragma optimize("",on)
+

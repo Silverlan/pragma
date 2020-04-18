@@ -7,7 +7,7 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/model/modelmesh.h"
 
-#pragma optimize("",off)
+
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(Game *game) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(game));}
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(const CollisionMesh &other) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(other));}
 CollisionMesh::SoftBodyInfo::SoftBodyInfo()
@@ -320,4 +320,4 @@ std::vector<CollisionMesh::SoftBodyAnchor> *CollisionMesh::GetSoftBodyAnchors()
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
-#pragma optimize("",on)
+

@@ -49,7 +49,7 @@ DLLCLIENT void NET_cl_serverinfo(NetPacket packet) {client->HandleClientReceiveS
 DLLCLIENT void NET_cl_start_resource_transfer(NetPacket packet) {client->HandleClientStartResourceTransfer(packet);}
 
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
-#pragma optimize("",off)
+
 CBaseEntity *NET_cl_ent_create(NetPacket &packet,bool bSpawn,bool bIgnoreMapInit=false)
 {
 	if(!client->IsGameActive())
@@ -1589,4 +1589,4 @@ REGISTER_CONVAR_CALLBACK_CL(debug_ai_navigation,[](NetworkState *state,ConVar*,b
 	p->Write<bool>(val);
 	client->SendPacket("debug_ai_navigation",p,pragma::networking::Protocol::SlowReliable);
 });
-#pragma optimize("",on)
+

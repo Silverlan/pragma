@@ -1,7 +1,7 @@
 #include "stdafx_client.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 
-#pragma optimize("",off)
+
 void CParticleModifierLua::Initialize(const luabind::object &o)
 {
 	m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o));
@@ -41,4 +41,4 @@ void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::PrimaryCo
 {
 
 }
-#pragma optimize("",on)
+

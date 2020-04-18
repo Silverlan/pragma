@@ -7,7 +7,6 @@
 #include "pragma/model/model_handle.hpp"
 #include <sharedutils/util_shared_handle.hpp>
 
-class BrushMesh;
 class Frame;
 struct Bone;
 enum class MOVETYPE : int;
@@ -37,7 +36,7 @@ namespace pragma
 		private:
 			std::unordered_map<BoneId,std::vector<ShapeInfo>> m_shapes = {};
 			std::unordered_map<MeshIndex,BoneId> m_modelMeshIndexToShapeIndex = {};
-			ModelHandle m_model = {};
+			util::WeakHandle<Model> m_model = {};
 		};
 	};
 	struct DLLNETWORK CEPhysicsUpdateData
@@ -170,8 +169,6 @@ namespace pragma
 		bool IsRayResultCallbackEnabled() const;
 		void SetRayResultCallbackEnabled(bool b);
 
-		bool IntersectAABB(Vector3 &min,Vector3 &max) const;
-		bool IntersectAABB(const Vector3 &extents,const Vector3 &pos,const Vector3 &posNew,float *entryTime,float *exitTime,Vector3 *hitnormal,int *i) const;
 		MOVETYPE GetMoveType() const;
 		virtual void SetMoveType(MOVETYPE movetype);
 		COLLISIONTYPE GetCollisionType() const;
@@ -206,11 +203,6 @@ namespace pragma
 		void WorldToOrigin(Vector3 *origin) const;
 		void WorldToOrigin(Vector3 *origin,Quat *rot) const;
 
-		void AddBrushMesh(const std::shared_ptr<BrushMesh> &mesh);
-		virtual void InitializeBrushGeometry();
-		std::vector<std::shared_ptr<BrushMesh>> &GetBrushMeshes();
-		const std::vector<std::shared_ptr<BrushMesh>> &GetBrushMeshes() const;
-
 		virtual void Save(DataStream &ds) override;
 		virtual void Load(DataStream &ds,uint32_t version) override;
 
@@ -231,7 +223,6 @@ namespace pragma
 		
 		pragma::NetEventId m_netEvSetCollisionsEnabled = pragma::INVALID_NET_EVENT;
 
-		std::vector<std::shared_ptr<BrushMesh>> m_brushMeshes = {};
 		bool m_bRayResultCallbackEnabled = false;
 		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
 		std::shared_ptr<PhysObj> m_physObject = nullptr;
@@ -241,7 +232,6 @@ namespace pragma
 		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const physics::Transform &localPose={});
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
-		util::WeakHandle<PhysObj> InitializeBrushPhysics(PhysFlags flags=PhysFlags::None);
 		util::WeakHandle<PhysObj> InitializeBoxControllerPhysics();
 		util::WeakHandle<PhysObj> InitializeCapsuleControllerPhysics();
 		virtual void OnPhysicsInitialized();

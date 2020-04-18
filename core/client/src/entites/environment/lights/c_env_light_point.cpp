@@ -26,7 +26,6 @@ static const std::array<Vector3,6> directions = {
 	Vector3(0.f,0.f,-1.f)
 };
 
-#pragma optimize("",off)
 void CLightPointComponent::Initialize()
 {
 	BaseEnvLightPointComponent::Initialize();
@@ -216,4 +215,3 @@ void CLightPointComponent::UpdateTransformationMatrix(unsigned int j) // TODO Th
 	std::array<Mat4,3> matrices = {GetBiasTransformationMatrix(),GetViewMatrix(4),GetProjectionMatrix()};
 	c_engine->ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
 }
-#pragma optimize("",on)

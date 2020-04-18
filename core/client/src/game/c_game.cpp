@@ -22,6 +22,7 @@
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/model/c_modelmanager.h"
@@ -103,7 +104,6 @@ extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
 
-#pragma optimize("",off)
 CGame::MessagePacketTracker::MessagePacketTracker()
 	: lastInMessageId(0),outMessageId(0)
 {
@@ -220,11 +220,6 @@ CGame::CGame(NetworkState *state)
 		nullptr,true,nullptr
 	);*/ // prosper TODO
 
-	AddCallback("OnEntitySpawned",FunctionCallback<void,BaseEntity*>::Create([this](BaseEntity *ent) {
-		// Add entity to scene
-		m_scene->AddEntity(*static_cast<CBaseEntity*>(ent));
-	}));
-
 	WGUI::GetInstance().SetFocusCallback([this](WIBase *oldFocus,WIBase *newFocus) {
 		CallCallbacks<void,WIBase*,WIBase*>("OnGUIFocusChanged",oldFocus,newFocus);
 
@@ -340,7 +335,6 @@ void CGame::OnRemove()
 	m_plLocal = {};
 	m_viewModel = {};
 	m_viewBody = {};
-	CModelManager::MarkAllForDeletion();
 
 	c_engine->ClearLuaKeyMappings();
 	/*auto shaders = ShaderSystem::get_shaders();
@@ -955,6 +949,9 @@ void CGame::SetUp()
 
 	auto *entShadowManager = CreateEntity<CShadowManager>();
 	entShadowManager->Spawn();
+
+	auto *entOcclusionCuller = CreateEntity<COcclusionCuller>();
+	entOcclusionCuller->Spawn();
 }
 
 bool WriteTGA(const char *name,int w,int h,unsigned char *pixels,int size);
@@ -1117,24 +1114,8 @@ const util::WeakHandle<prosper::Shader> &CGame::GetGameShader(GameShader shader)
 
 LuaCallbackHandler &CGame::GetInputCallbackHandler() {return m_inputCallbackHandler;}
 
-std::shared_ptr<Model> CGame::CreateModel(const std::string &mdl) const {return CModelManager::Create(const_cast<CGame*>(this),mdl);}
-std::shared_ptr<Model> CGame::CreateModel(bool bAddReference) const {return CModelManager::Create(const_cast<CGame*>(this),bAddReference);}
-std::shared_ptr<BrushMesh> CGame::CreateBrushMesh() const {return std::make_shared<CBrushMesh>();}
-std::shared_ptr<Side> CGame::CreateSide() const {return std::make_shared<CSide>();}
 std::shared_ptr<ModelMesh> CGame::CreateModelMesh() const {return std::make_shared<CModelMesh>();}
 std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const {return std::make_shared<CModelSubMesh>();}
-std::shared_ptr<Model> CGame::LoadModel(const std::string &mdl,bool bReload)
-{
-	auto bNewModel = false;
-	auto r = CModelManager::Load(this,mdl,bReload,&bNewModel);
-	if(bNewModel == true && r != nullptr)
-	{
-		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",r);
-		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",r);
-	}
-	return r;
-}
-std::unordered_map<std::string,std::shared_ptr<Model>> &CGame::GetModels() const {return CModelManager::GetModels();}
 
 Float CGame::GetHDRExposure() const
 {
@@ -1287,7 +1268,6 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
-	ClearResources<CModelManager>();
 	if(r == true)
 	{
 		CallCallbacks<void>("OnMapLoaded");
@@ -1741,4 +1721,3 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
-#pragma optimize("",on)

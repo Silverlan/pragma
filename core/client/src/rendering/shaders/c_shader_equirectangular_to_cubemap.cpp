@@ -11,7 +11,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding {
@@ -120,4 +120,4 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	GetContext().FlushSetupCommandBuffer();
 	return success ? rt->GetTexture() : nullptr;
 }
-#pragma optimize("",on)
+

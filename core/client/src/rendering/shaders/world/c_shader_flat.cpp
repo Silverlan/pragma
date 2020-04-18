@@ -81,7 +81,7 @@ decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIA
 ShaderFlat::ShaderFlat(prosper::Context &context,const std::string &identifier)
 	: ShaderScene(context,identifier,"world/vs_flat","world/fs_flat")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 }
 bool ShaderFlat::BindScene(const Scene &scene,bool bView)
 {

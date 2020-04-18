@@ -16,12 +16,6 @@ void SModelComponent::Initialize()
 }
 luabind::object SModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SModelComponentHandleWrapper>(l);}
 
-void SModelComponent::SetModel(const std::string &mdl)
-{
-	BaseModelComponent::SetModel(mdl);
-	BaseModelComponent::SetModel<Model,ModelMesh,ModelManager>(mdl);
-}
-
 void SModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	BaseModelComponent::OnModelChanged(model);

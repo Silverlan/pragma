@@ -3,6 +3,7 @@
 #include <wgui/types/wiscrollbar.h>
 #include <mathutil/umath.h>
 
+#pragma optimize("",off)
 LINK_WGUI_TO_CLASS(WIScrollContainer,WIScrollContainer);
 WIScrollContainer::WIScrollContainer()
 	: WIBase()
@@ -62,8 +63,13 @@ Vector2i WIScrollContainer::GetContentSize()
 	return Vector2i(GetContentWidth(),GetContentHeight());
 }
 
-void WIScrollContainer::SetAutoStickToBottom(bool autoStick) {m_bAutoStickToBottom = autoStick;}
-bool WIScrollContainer::ShouldAutoStickToBottom() const {return m_bAutoStickToBottom;}
+void WIScrollContainer::SetAutoStickToBottom(bool autoStick) {umath::set_flag(m_scFlags,StateFlags::AutoStickToBottom,autoStick);}
+bool WIScrollContainer::ShouldAutoStickToBottom() const {return umath::is_flag_set(m_scFlags,StateFlags::AutoStickToBottom);}
+
+void WIScrollContainer::SetContentsWidthFixed(bool fixed) {umath::set_flag(m_scFlags,StateFlags::ContentsWidthFixed,fixed);}
+void WIScrollContainer::SetContentsHeightFixed(bool fixed) {umath::set_flag(m_scFlags,StateFlags::ContentsHeightFixed,fixed);}
+bool WIScrollContainer::IsContentsWidthFixed() const {return umath::is_flag_set(m_scFlags,StateFlags::ContentsWidthFixed);}
+bool WIScrollContainer::IsContentsHeightFixed() const {return umath::is_flag_set(m_scFlags,StateFlags::ContentsHeightFixed);}
 
 int WIScrollContainer::GetScrollBarWidthV()
 {
@@ -232,6 +238,10 @@ void WIScrollContainer::DoUpdate()
 				h = posChild.y +sizeChild.y;
 		}
 		Vector2i size = GetSize();
+		if(IsContentsWidthFixed())
+			w = size.x;
+		if(IsContentsHeightFixed())
+			h = size.y;
 		pWrapper->SetSize(w,h);
 		if(m_hScrollBarH.IsValid())
 		{
@@ -259,3 +269,4 @@ void WIScrollContainer::DoUpdate()
 	}
 	WIBase::DoUpdate();
 }
+#pragma optimize("",on)

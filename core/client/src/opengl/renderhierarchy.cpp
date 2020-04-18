@@ -14,6 +14,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -1269,7 +1270,10 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BaseP
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	auto &octree = scene->GetOcclusionOctree();
+	auto *culler = scene->FindOcclusionCuller();
+	if(culler == nullptr)
+		return;
+	auto &octree = culler->GetOcclusionOctree();
 	octree.DebugPrint();
 }
 
@@ -1314,7 +1318,10 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	if(c_game == nullptr)
 		return;
 	auto &scene = c_game->GetScene();
-	auto &octree = scene->GetOcclusionOctree();
+	auto *culler = scene->FindOcclusionCuller();
+	if(culler == nullptr)
+		return;
+	auto &octree = culler->GetOcclusionOctree();
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);

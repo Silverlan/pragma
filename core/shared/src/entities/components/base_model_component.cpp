@@ -4,6 +4,7 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/model/model.h"
+#include "pragma/model/modelmanager.h"
 #include <sharedutils/datastream.h>
 #include <pragma/util/transform.h>
 #include <pragma/entities/baseentity_events.hpp>
@@ -222,9 +223,33 @@ void BaseModelComponent::SetBodyGroup(const std::string &name,UInt32 id)
 
 bool BaseModelComponent::HasModelMaterialsLoaded() const {return m_bMaterialsLoaded;}
 
-void BaseModelComponent::SetModel(const std::string&)
+void BaseModelComponent::SetModel(const std::string &mdl)
 {
 	m_modelName = nullptr;
+
+	if(mdl.empty() == true)
+	{
+		SetModel(std::shared_ptr<Model>(nullptr));
+		return;
+	}
+	auto *nw = GetEntity().GetNetworkState();
+	auto *game = nw->GetGameState();
+	auto &mdlManager = nw->GetModelManager();
+	m_modelName = std::make_unique<std::string>(mdlManager.GetNormalizedModelName(mdl));
+	auto prevMdl = GetModel();
+	auto model = game->LoadModel(*m_modelName);
+	if(model == nullptr)
+	{
+		model = game->LoadModel("error.wmd");
+		if(model == nullptr)
+		{
+			if(GetModel() == prevMdl) // Model might have been changed during TModelLoader::Load-call in single player (on the client)
+				SetModel(std::shared_ptr<Model>(nullptr));
+			return;
+		}
+	}
+
+	SetModel(model);
 }
 
 void BaseModelComponent::OnModelMaterialsLoaded()

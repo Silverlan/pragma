@@ -1535,6 +1535,26 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetFOV(fov);
 		}));
+		def.def("GetProjectionMatrixProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetProjectionMatrixProperty());
+		}));
+		def.def("GetViewMatrixProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetViewMatrixProperty());
+		}));
+		def.def("GetNearZProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetNearZProperty());
+		}));
+		def.def("GetFarZProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetFarZProperty());
+		}));
+		def.def("GetFOVProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetFOVProperty());
+		}));
 		def.def("SetAspectRatio",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float aspectRatio) {
 			pragma::Lua::check_component(l,hComponent);
 			hComponent->SetAspectRatio(aspectRatio);

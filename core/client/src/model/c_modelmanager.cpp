@@ -6,35 +6,23 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 
-extern DLLCLIENT CGame *c_game;
-
-std::shared_ptr<Model> CModelManager::GetModel(Game *game,const std::string &mdlName)
+std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string &mdlName,bool bReload,bool *outIsNewModel)
 {
-	return TModelManager<CModel,CModelMesh,CModelSubMesh>::GetModel(game,mdlName);
+	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
+	if(mdl == nullptr)
+		static_cast<CGame&>(*m_nw.GetGameState()).RequestResource("models/" +GetNormalizedModelName(mdlName));
+	return mdl;
 }
 
-std::shared_ptr<Model> CModelManager::Load(Game *game,const std::string &path,bool bReload,bool *newModel)
+std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(FWMD &wmd,const std::string &mdlName) const
 {
-	auto r = TModelManager<CModel,CModelMesh,CModelSubMesh>::Load(game,path,bReload,newModel);
-	if(c_game != nullptr && r == nullptr)
-		c_game->RequestResource("models\\" +GetCanonicalizedName(path));
-	return r;
+	return std::shared_ptr<Model>{wmd.Load<CModel,CModelMesh,CModelSubMesh>(m_nw.GetGameState(),mdlName,[this](const std::string &mat,bool reload) -> Material* {
+		return m_nw.LoadMaterial(mat,reload);
+	},[this](const std::string &mdlName) -> std::shared_ptr<Model> {
+		return m_nw.GetGameState()->LoadModel(mdlName);
+	})};
 }
-
-std::shared_ptr<Model> CModelManager::Create(Game *game,const std::string &path)
+std::shared_ptr<Model> pragma::asset::CModelManager::CreateModel(uint32_t numBones,const std::string &mdlName)
 {
-	auto r = TModelManager<CModel,CModelMesh,CModelSubMesh>::Create(game,path);
-	if(c_game != nullptr && r == nullptr)
-		c_game->RequestResource("models\\" +GetCanonicalizedName(path));
-	return r;
-}
-
-std::shared_ptr<Model> CModelManager::Create(Game *game,bool bAddReference)
-{
-	return TModelManager<CModel,CModelMesh,CModelSubMesh>::CreateModel(game,bAddReference);
-}
-
-std::shared_ptr<Model> CModelManager::CreateFromBrushMeshes(std::vector<std::shared_ptr<BrushMesh>> &meshes)
-{
-	return TModelManager<CModel,CModelMesh,CModelSubMesh>::CreateFromBrushMeshes(c_game,meshes,c_game->GetSurfaceMaterials());
+	return Model::Create<CModel>(&m_nw,numBones,mdlName);
 }

@@ -1,0 +1,65 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#ifndef __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
+#define __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
+
+#include "pragma/clientdefinitions.h"
+#include <shader/prosper_shader_base_image_processing.hpp>
+
+namespace prosper
+{
+	class Image;
+	class Texture;
+};
+namespace pragma
+{
+	class DLLCLIENT ShaderSpecularGlossinessToMetalnessRoughness
+		: public prosper::ShaderBaseImageProcessing
+	{
+	public:
+		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
+
+		enum class TextureBinding : uint32_t
+		{
+			DiffuseMap = 0,
+			SpecularGlossinessMap,
+			AmbientOcclusionMap,
+
+			Count
+		};
+
+		struct DLLCLIENT MetalnessRoughnessImageSet
+		{
+			std::shared_ptr<prosper::Image> albedoMap = nullptr;
+			std::shared_ptr<prosper::Image> rmaMap = nullptr;
+		};
+
+		enum class Pass : uint32_t
+		{
+			Albedo = 0,
+			RMA
+		};
+
+#pragma pack(push,1)
+		struct PushConstants
+		{
+			Vector4 diffuseFactor = {1.f,1.f,1.f,1.f};
+			Vector4 specularFactor = {1.f,1.f,1.f,1.f}; // Alpha is glossiness factor
+			Pass pass = Pass::Albedo;
+		};
+#pragma pack(pop)
+
+		ShaderSpecularGlossinessToMetalnessRoughness(prosper::Context &context,const std::string &identifier);
+		std::optional<MetalnessRoughnessImageSet> ConvertToMetalnessRoughness(
+			prosper::Context &context,prosper::Texture *optDiffuseMap,prosper::Texture *optSpecularGlossinessMap,const PushConstants &pushConstants={},
+			prosper::Texture *optAoMap=nullptr
+		);
+	protected:
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+};
+
+#endif

@@ -25,7 +25,7 @@ decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_
 ShaderLightCone::ShaderLightCone(prosper::Context &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"effects/vs_light_cone","effects/fs_light_cone")
 {
-	SetBaseShader<ShaderTextured3D>();
+	// SetBaseShader<ShaderTextured3DBase>();
 	umath::set_flag(m_stateFlags,StateFlags::ShouldUseLightMap,false);
 }
 

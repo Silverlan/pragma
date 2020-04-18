@@ -47,21 +47,18 @@ int32_t Lua::string::find_similar_elements(lua_State *l)
 		elements.push_back(Lua::CheckString(l,-1));
 		Lua::Pop(l,1);
 	}
-	std::vector<std::string_view> similarElements {};
+
+	std::vector<size_t> similarElements {};
 	std::vector<float> similarities {};
 	uint32_t offset = 0u;
-	ustring::gather_similar_elements(baseElement,[&elements,&offset]() mutable -> std::optional<std::string_view> {
-		if(offset >= elements.size())
-			return std::optional<std::string_view>{};
-		return elements.at(offset++);
-	},similarElements,limit,&similarities);
+	ustring::gather_similar_elements(baseElement,elements,similarElements,limit,&similarities);
 
 	auto tOutElements = Lua::CreateTable(l);
 	offset = 1u;
-	for(auto &el : similarElements)
+	for(auto idx : similarElements)
 	{
 		Lua::PushInt(l,offset++);
-		Lua::PushString(l,std::string{el});
+		Lua::PushInt(l,idx +1);
 		Lua::SetTableValue(l,tOutElements);
 	}
 

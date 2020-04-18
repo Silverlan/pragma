@@ -18,7 +18,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-#pragma optimize("",off)
+
 ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount,bool bReflection)
 {
 	if(sampleCount == Anvil::SampleCountFlagBits::_1_BIT)
@@ -236,40 +236,14 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 			matFlags |= MaterialFlags::Normal;
 	}
 
-	auto *specularMap = mat.GetSpecularMap();
-	if(specularMap != nullptr && specularMap->texture != nullptr)
-		matFlags |= MaterialFlags::SpecularMap;
-
 	if(data->GetBool("black_to_alpha") == true)
 		matFlags |= MaterialFlags::BlackToAlpha;
 
-	auto &phongColor = data->GetValue("phong_color");
-	if(phongColor != nullptr)
+	auto &color = data->GetValue("color");
+	if(color != nullptr)
 	{
-		const auto &colorType = typeid(ds::Color);
-		if(typeid(*phongColor) == colorType)
-		{
-			matFlags |= MaterialFlags::Specular;
-			auto &col = static_cast<ds::Color*>(phongColor.get())->GetValue();
-			matData.phong.x = col.r /255.f;
-			matData.phong.y = col.g /255.f;
-			matData.phong.z = col.b /255.f;
-			matData.phong.w = col.a /255.f;
-		}
-	}
-	if(data->GetFloat("phong_shininess",&matData.phong.w) == true)
-		matFlags |= MaterialFlags::Specular;
-	if(data->GetFloat("phong_intensity",&matData.phongIntensity) == true)
-		matFlags |= MaterialFlags::Specular;
-
-	if((matFlags &MaterialFlags::Specular) != MaterialFlags::None && (matFlags &MaterialFlags::SpecularMapDefined) == MaterialFlags::None)
-	{
-		// Check if diffuse alpha should be used as specular component,
-		// but only if phong is enabled and no other specular map has been specified
-		if(data->GetBool("phong_diffuse_alpha") == true)
-			matFlags |= MaterialFlags::DiffuseSpecular;
-		else if((matFlags &MaterialFlags::Normal) != MaterialFlags::None && data->GetBool("phong_normal_alpha") == true)
-			matFlags |= MaterialFlags::NormalSpecular;
+		auto &col = static_cast<ds::Color*>(color.get())->GetValue();
+		matData.color = col.ToVector4();
 	}
 
 	auto *glowMap = mat.GetGlowMap();
@@ -277,8 +251,12 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 
-		matData.emissionFactor = 1.f;
-		data->GetFloat("emission_factor",&matData.emissionFactor);
+		auto &emissionFactor = data->GetValue("emission_factor");
+		if(emissionFactor != nullptr)
+		{
+			auto &col = static_cast<ds::Color*>(emissionFactor.get())->GetValue();
+			matData.emissionFactor = col.ToVector4();
+		}
 
 		if(texture->HasFlag(Texture::Flags::SRGB))
 			matFlags |= MaterialFlags::GlowSRGB;
@@ -317,17 +295,24 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 
 	data->GetFloat("alpha_discard_threshold",&matData.alphaDiscardThreshold);
 
-	matData.metalnessFactor = mat.GetMetalnessMap() ? 1.f : 0.f;
+	auto hasRmaMap = (data->GetValue(Material::RMA_MAP_IDENTIFIER) != nullptr);
+	auto defaultMetalness = hasRmaMap ? 1.f : 0.f;
+	auto defaultRoughness = hasRmaMap ? 1.f : 0.5f;
+	auto defaultAo = hasRmaMap ? 1.f : 0.f;
+
+	matData.metalnessFactor = defaultMetalness;
 	data->GetFloat("metalness_factor",&matData.metalnessFactor);
 
-	auto hasRoughnessMap = (mat.GetRoughnessMap() || mat.GetSpecularMap());
-	matData.roughnessFactor = hasRoughnessMap ? 1.f : 0.f;
+	matData.roughnessFactor = defaultRoughness;
 	auto hasRoughnessFactor = data->GetFloat("roughness_factor",&matData.roughnessFactor);
+
+	matData.aoFactor = defaultAo;
+	data->GetFloat("ao_factor",&matData.aoFactor);
 
 	float specularFactor;
 	if(data->GetFloat("specular_factor",&specularFactor))
 	{
-		if(hasRoughnessMap == false && hasRoughnessFactor == false)
+		if(hasRoughnessFactor == false)
 			matData.roughnessFactor = 1.f;
 		matData.roughnessFactor *= (1.f -specularFactor);
 	}
@@ -425,14 +410,6 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
 	}
 
-	auto *specularMap = mat.GetSpecularMap();
-	if(specularMap != nullptr && specularMap->texture != nullptr)
-	{
-		auto texture = std::static_pointer_cast<Texture>(specularMap->texture);
-		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::SpecularMap));
-	}
-
 	auto *parallaxMap = mat.GetParallaxMap();
 	if(parallaxMap != nullptr && parallaxMap->texture != nullptr)
 	{
@@ -468,11 +445,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }
 
-////////////////////////////
-
-ShaderTextured3D::ShaderTextured3D(prosper::Context &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_textured","world/fs_textured")
-{}
+////////
 
 static void set_debug_flag(pragma::ShaderScene::DebugFlags setFlags,pragma::ShaderScene::DebugFlags unsetFlags)
 {
@@ -518,4 +491,4 @@ REGISTER_CONVAR_CALLBACK_CL(debug_light_depth,[](NetworkState*,ConVar*,int,int v
 REGISTER_CONVAR_CALLBACK_CL(debug_forwardplus_heatmap,[](NetworkState*,ConVar*,bool,bool val) {
 	set_debug_flag(pragma::ShaderScene::DebugFlags::ForwardPlusHeatmap,val);
 });
-#pragma optimize("",on)
+

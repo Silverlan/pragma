@@ -12,13 +12,13 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows)
 {
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
+	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	// TODO
 	auto hShadowMap = light.GetEntity().GetComponent<CShadowCSMComponent>();
-	if(hShadowMap.expired() || m_shaderCSM.expired())// || m_shaderCSMTransparent.expired()) // prosper TODO: Transparent shadow shader
+	if(hShadowMap.expired() || m_shaderCSM.expired() || shadowScene == nullptr)// || m_shaderCSMTransparent.expired()) // prosper TODO: Transparent shadow shader
 		return;
 	auto &shaderCsm = static_cast<pragma::ShaderShadowCSM&>(*m_shaderCSM);
 	auto *shaderCsmTransparent = static_cast<pragma::ShaderShadowCSMTransparent*>(m_shaderCSMTransparent.expired() == false ? m_shaderCSMTransparent.get() : nullptr);
@@ -84,7 +84,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 		for(auto *ent : entIt)
 		{
 			auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(ent->IsInert() == true || pRenderComponent->ShouldDrawShadow(posCam) == false)
+			if(ent->IsInert() == true || static_cast<CBaseEntity*>(ent)->IsInScene(*shadowScene) || pRenderComponent->ShouldDrawShadow(posCam) == false)
 				continue;
 			auto &mdlComponent = pRenderComponent->GetModelComponent();
 			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -284,4 +284,3 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 		//	pLightComponent->PostRenderShadow();
 	}
 }
-#pragma optimize("",on)

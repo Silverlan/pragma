@@ -12,7 +12,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
 
-#pragma optimize("",off)
+
 WIImageSlideShow::PreloadImage::PreloadImage()
 	: ready(false),loading(false),image(-1)
 {}
@@ -228,4 +228,4 @@ void WIImageSlideShow::PreloadNextRandomShuffle()
 	}
 	PreloadNextImage(Int32(img));
 }
-#pragma optimize("",on)
+

@@ -3,7 +3,7 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
-#pragma optimize("",off)
+
 #define WPT_VERSION 0x0001
 void pragma::asset::get_particle_system_file_path(std::string &path)
 {
@@ -95,4 +95,4 @@ bool pragma::asset::save_particle_system(const std::string &name,const std::unor
 	}
 	return true;
 }
-#pragma optimize("",on)
+

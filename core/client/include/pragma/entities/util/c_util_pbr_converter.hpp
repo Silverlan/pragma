@@ -23,7 +23,7 @@ namespace pragma
 	struct PBRAOBakeJob
 	{
 		PBRAOBakeJob(Model &mdl,Material &mat);
-		ModelHandle hModel = {};
+		util::WeakHandle<Model> hModel = {};
 		MaterialHandle hMaterial = {};
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 		bool isRunning = false;
@@ -69,7 +69,6 @@ namespace pragma
 
 		void ProcessQueue();
 		void WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;
-		void ApplyAOMap(CMaterial &mat,const std::string &aoName) const;
 		bool ShouldConvertMaterial(CMaterial &mat) const;
 		bool IsPBR(CMaterial &mat) const;
 		std::shared_ptr<prosper::Texture> ConvertSpecularMapToRoughness(prosper::Texture &specularMap);

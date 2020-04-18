@@ -7,7 +7,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 void BaseWorldComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -50,4 +50,4 @@ Con::c_cout &BaseWorldComponent::print(Con::c_cout &os)
 	os<<"World";
 	return os;
 }
-#pragma optimize("",on)
+

@@ -13,7 +13,6 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
 void CFlexComponent::UpdateFlexControllers()
@@ -36,6 +35,32 @@ void CFlexComponent::SetFlexWeight(uint32_t flexIdx,float weight)
 		return;
 	m_flexWeights.at(flexIdx) = weight;
 	m_updatedFlexWeights.at(flexIdx) = true;
+}
+
+void CFlexComponent::SetFlexWeightOverride(uint32_t flexId,float weight)
+{
+	if(flexId < m_flexOverrides.size())
+	{
+		m_flexOverrides.at(flexId) = weight;
+		return;
+	}
+	auto mdl = GetEntity().GetModel();
+	if(mdl == nullptr || flexId >= mdl->GetFlexCount())
+		return;
+	m_flexOverrides.resize(flexId +1);
+	m_flexOverrides.at(flexId) = weight;
+}
+void CFlexComponent::ClearFlexWeightOverride(uint32_t flexId)
+{
+	if(flexId >= m_flexOverrides.size())
+		return;
+	m_flexOverrides.at(flexId) = {};
+}
+bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
+{
+	if(flexId >= m_flexOverrides.size())
+		return false;
+	return m_flexOverrides.at(flexId).has_value();
 }
 
 // rotate by the inverse of the matrix
@@ -110,6 +135,7 @@ void CFlexComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_flexControllers.clear();
 	m_flexWeights.clear();
 	m_updatedFlexWeights.clear();
+	m_flexOverrides.clear();
 	if(mdl == nullptr)
 		return;
 	m_flexWeights.resize(mdl->GetFlexCount(),0.f);
@@ -218,14 +244,20 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCac
 	auto *flex = mdl->GetFlex(flexId);
 	if(flex == nullptr)
 		return false;
-	auto weight = mdl->CalcFlexWeight(flexId,[this](uint32_t fcIdx) -> std::optional<float> {
-		auto val = 0.f;
-		if(GetScaledFlexController(fcIdx,val) == false)
-			return {};
-		return val;
-	},[this](uint32_t flexIdx) -> std::optional<float> {
-		return m_updatedFlexWeights.at(flexIdx) ? m_flexWeights.at(flexIdx) : std::optional<float>{};
-	});
+	std::optional<float> weight {};
+	if(flexId < m_flexOverrides.size() && m_flexOverrides.at(flexId).has_value())
+		weight = m_flexOverrides.at(flexId);
+	else
+	{
+		weight = mdl->CalcFlexWeight(flexId,[this](uint32_t fcIdx) -> std::optional<float> {
+			auto val = 0.f;
+			if(GetScaledFlexController(fcIdx,val) == false)
+				return {};
+			return val;
+		},[this](uint32_t flexIdx) -> std::optional<float> {
+			return m_updatedFlexWeights.at(flexIdx) ? m_flexWeights.at(flexIdx) : std::optional<float>{};
+		});
+	}
 	if(weight.has_value() == false)
 		return false;
 	val = *weight;
@@ -312,4 +344,3 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 		}
 	}
 }
-#pragma optimize("",on)

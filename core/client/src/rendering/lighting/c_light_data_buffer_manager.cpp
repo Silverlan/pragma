@@ -9,6 +9,8 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
+#pragma optimize("",off)
+//#define ENABLE_LIGHT_BUFFER_DEBUGGING
 void BaseLightBufferManager::Initialize()
 {
 	if(m_bInitialized)
@@ -85,7 +87,11 @@ void LightDataBufferManager::DoInitialize()
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+#ifdef ENABLE_LIGHT_BUFFER_DEBUGGING
+	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+#else
 	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+#endif
 	createInfo.size = m_maxCount *lightDataSize;
 	m_masterBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,lightDataSize,createInfo.size,0.05f);
 	m_masterBuffer->SetDebugName("light_data_buf");
@@ -155,3 +161,4 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::Buffer> &render
 		//c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(BufferData,flags),flags);
 	}
 }
+#pragma optimize("",on)

@@ -8,7 +8,7 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 static void register_particle_modifier(lua_State *l,pragma::LuaParticleModifierManager::Type type,const std::string &name,luabind::object oClass)
 {
 	Lua::CheckUserData(l,2);
@@ -416,4 +416,4 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	}))];
 	entsMod[defCParticleSystem];
 }
-#pragma optimize("",on)
+

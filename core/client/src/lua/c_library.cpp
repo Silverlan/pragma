@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/libraries/c_linput.h"
+#include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
@@ -22,18 +23,21 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
+#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <alsoundsystem.hpp>
 #include <luainterface.hpp>
+#include <cmaterialmanager.h>
+#include <impl_texture_formats.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -278,6 +282,22 @@ static void register_gui(Lua::Interface &lua)
 	wiScrollContainerClassDef.def("ShouldAutoStickToBottom",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
 		lua_checkgui(l,hEl);
 		Lua::PushBool(l,static_cast<::WIScrollContainer*>(hEl.get())->ShouldAutoStickToBottom());
+	}));
+	wiScrollContainerClassDef.def("IsContentsWidthFixed",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushBool(l,static_cast<::WIScrollContainer*>(hEl.get())->IsContentsWidthFixed());
+	}));
+	wiScrollContainerClassDef.def("IsContentsHeightFixed",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
+		lua_checkgui(l,hEl);
+		Lua::PushBool(l,static_cast<::WIScrollContainer*>(hEl.get())->IsContentsHeightFixed());
+	}));
+	wiScrollContainerClassDef.def("SetContentsWidthFixed",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,bool)>([](lua_State *l,WIScrollContainerHandle &hEl,bool fixed) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetContentsWidthFixed(fixed);
+	}));
+	wiScrollContainerClassDef.def("SetContentsHeightFixed",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,bool)>([](lua_State *l,WIScrollContainerHandle &hEl,bool fixed) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetContentsHeightFixed(fixed);
 	}));
 	guiMod[wiScrollContainerClassDef];
 
@@ -630,6 +650,30 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 
 	RegisterVulkanLuaInterface(lua);
 }
+static std::optional<std::string> find_asset_file(NetworkState &nw,const std::string &name,pragma::asset::Type type)
+{
+	if(type == pragma::asset::Type::Texture)
+	{
+		TextureType type;
+		auto found = false;
+		auto filePath = translate_image_path(name,type,nullptr,&found);
+		if(found == false)
+			return {};
+		::util::Path path {filePath};
+		path.PopFront();
+		return path.GetString();
+	}
+	return find_file(nw,name,type);
+}
+static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::asset::Type type)
+{
+	if(type == pragma::asset::Type::Texture)
+	{
+		auto tex = static_cast<CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindTexture(name,true);
+		return tex != nullptr;
+	}
+	return is_loaded(nw,name,type);
+}
 void CGame::RegisterLuaLibraries()
 {
 	auto &utilMod = GetLuaInterface().RegisterLibrary("util",{
@@ -741,7 +785,9 @@ void CGame::RegisterLuaLibraries()
 				return 0;
 			Lua::Push(l,equiRect);
 			return 1;
-		})}
+		})},
+		{"get_clipboard_string",Lua::util::Client::get_clipboard_string},
+		{"set_clipboard_string",Lua::util::Client::set_clipboard_string}
 	});
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
@@ -792,7 +838,6 @@ void CGame::RegisterLuaLibraries()
 	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX",umath::to_integral(uimg::TextureInfo::ContainerFormat::KTX));
 
 	imgWriteInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(uimg::TextureInfo::Flags::None));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::NormalMap));
 	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_CONVERT_TO_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
 	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_SRGB",umath::to_integral(uimg::TextureInfo::Flags::SRGB));
 	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_GENERATE_MIPMAPS",umath::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
@@ -833,6 +878,43 @@ void CGame::RegisterLuaLibraries()
 	Game::RegisterLuaLibraries();
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
+	GetLuaInterface().RegisterLibrary("asset",{
+		{"clear_unused_textures",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			Lua::PushInt(l,static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused());
+			return 1;
+		})},
+		{"export_map",Lua::util::Client::export_map},
+		{"import_model",Lua::util::Client::import_model},
+		{"export_texture",Lua::util::Client::export_texture},
+		{"export_material",Lua::util::Client::export_material},
+		{"exists",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string name = Lua::CheckString(l,1);
+			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
+			auto *nw = c_engine->GetNetworkState(l);
+			auto fileName = find_asset_file(*nw,name,type);
+			Lua::PushBool(l,fileName.has_value());
+			return 1;
+		})},
+		{"find_file",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string name = Lua::CheckString(l,1);
+			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
+			auto *nw = c_engine->GetNetworkState(l);
+			auto fileName = find_asset_file(*nw,name,type);
+			if(fileName.has_value() == false)
+				return 0;
+			Lua::PushString(l,*fileName);
+			return 1;
+		})},
+		{"is_loaded",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string name = Lua::CheckString(l,1);
+			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
+			auto *nw = c_engine->GetNetworkState(l);
+			Lua::PushBool(l,is_asset_loaded(*nw,name,type));
+			return 1;
+		})}
+	});
+	Lua::asset::register_library(GetLuaInterface(),false);
+
 	auto &utilImport = GetLuaInterface().RegisterLibrary("import",{
 		{"export_scene",static_cast<int32_t(*)(lua_State*)>(Lua::lib_export::export_scene)}
 	});
@@ -860,4 +942,3 @@ void CGame::RegisterLuaLibraries()
 		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
 	}
 }
-#pragma optimize("",on)

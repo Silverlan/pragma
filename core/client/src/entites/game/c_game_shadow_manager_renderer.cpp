@@ -1,5 +1,6 @@
 #include "stdafx_client.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_model.h"
@@ -17,7 +18,6 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ShadowRenderer::ShadowRenderer()
 {
 	m_shader = c_game->GetGameShader(CGame::GameShader::Shadow);
@@ -82,10 +82,15 @@ ShadowRenderer::ShadowRenderer()
 
 void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
+	auto *scene = light.FindShadowScene();
+	if(scene == nullptr)
+		return;
 	auto *pWorld = c_game->GetWorld();
 	if(pWorld == nullptr)
 		return;
 	auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
+	if(entWorld.IsInScene(*scene) == false)
+		return;
 	auto mdlComponent = entWorld.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	auto meshTree = mdl ? static_cast<pragma::CWorldComponent*>(pWorld)->GetMeshTree() : nullptr;
@@ -102,15 +107,20 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCo
 }
 void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
-	auto &scene = c_game->GetScene();
-	auto &octree = scene->GetOcclusionOctree();
+	auto *scene = light.FindShadowScene();
+	if(scene == nullptr)
+		return;
+	auto *culler = scene->FindOcclusionCuller();
+	if(culler == nullptr)
+		return;
+	auto &octree = culler->GetOcclusionOctree();
 	// Iterate all entities in the scene and populate m_shadowCasters
 	octree.IterateObjects([this](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
 		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
-		},[this,&light,&drawCmd](const CBaseEntity *ent) {
+		},[this,&light,&drawCmd,scene](const CBaseEntity *ent) {
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.expired() || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
+			if(pRenderComponent.expired() || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
 				return;
 			uint32_t renderFlags = 0;
 			if(light.ShouldPass(*ent,renderFlags) == false)
@@ -326,4 +336,3 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Static,type,bDrawParticleShadows);
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Dynamic,type,bDrawParticleShadows);
 }
-#pragma optimize("",on)

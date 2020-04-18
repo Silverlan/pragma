@@ -10,7 +10,7 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btMultimaterialTriangleMeshShape.h>
 
-#pragma optimize("",off)
+
 pragma::physics::IShape::IShape(IEnvironment &env)
 	: IBase{env}
 {}
@@ -257,4 +257,4 @@ void pragma::physics::ITriangleShape::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<ITriangleShape>(lua);
 }
-#pragma optimize("",on)
+

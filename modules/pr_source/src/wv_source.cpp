@@ -25,6 +25,8 @@
 #include <pragma/physics/collisionmesh.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/asset_types/world.hpp>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 
 #pragma comment(lib,"libfbxsdk-md.lib")
 #pragma comment(lib,"lua51.lib")
@@ -53,7 +55,31 @@ uint32_t import::util::add_texture(NetworkState &nw,Model &mdl,const std::string
 	if(it != meta.textures.end())
 		idx = it -meta.textures.begin();
 	else
-		idx = mdl.AddTexture(fname,nw.LoadMaterial(fname));
+	{
+		std::optional<std::string> foundPath {};
+		for(auto &path : mdl.GetMetaInfo().texturePaths)
+		{
+			auto texPath = path +fname;
+			if(pragma::asset::exists(nw,texPath,pragma::asset::Type::Material))
+			{
+				foundPath = texPath;
+				break;
+			}
+		}
+		if(foundPath.has_value() == false)
+		{
+			for(auto &path : mdl.GetMetaInfo().texturePaths)
+			{
+				auto texPath = path +fname;
+				if(::util::port_file(&nw,"materials/" +texPath +".vmt"))
+				{
+					foundPath = texPath;
+					break;
+				}
+			}
+		}
+		idx = mdl.AddTexture(fname,foundPath.has_value() ? nw.LoadMaterial(*foundPath) : nw.GetMaterialManager().GetErrorMaterial());
+	}
 
 	auto *texGroup = optTexGroup ? optTexGroup : mdl.GetTextureGroup(0);
 	if(texGroup == nullptr)

@@ -198,14 +198,8 @@ public:
 	void CreateGiblet(const GibletCreateInfo &info,pragma::CParticleSystemComponent **particle);
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname) override;
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
-	virtual std::shared_ptr<Model> CreateModel(const std::string &mdl) const override;
-	virtual std::shared_ptr<Model> CreateModel(bool bAddReference=true) const override;
-	virtual std::shared_ptr<BrushMesh> CreateBrushMesh() const override;
-	virtual std::shared_ptr<Side> CreateSide() const override;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
-	virtual std::shared_ptr<Model> LoadModel(const std::string &mdl,bool bReload=false) override;
-	virtual std::unordered_map<std::string,std::shared_ptr<Model>> &GetModels() const override;
 
 	bool StartProfilingStage(GPUProfilingPhase stage);
 	bool StopProfilingStage(GPUProfilingPhase stage);

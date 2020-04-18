@@ -9,6 +9,13 @@ class DLLCLIENT WIScrollContainer
 	: public WIBase
 {
 public:
+	enum class StateFlags : uint8_t
+	{
+		None = 0u,
+		AutoStickToBottom = 1u,
+		ContentsWidthFixed = AutoStickToBottom<<1u,
+		ContentsHeightFixed = ContentsWidthFixed<<1u
+	};
 	WIScrollContainer();
 	virtual ~WIScrollContainer() override;
 	virtual void Initialize() override;
@@ -27,9 +34,14 @@ public:
 
 	void SetAutoStickToBottom(bool autoStick);
 	bool ShouldAutoStickToBottom() const;
+
+	void SetContentsWidthFixed(bool fixed);
+	void SetContentsHeightFixed(bool fixed);
+	bool IsContentsWidthFixed() const;
+	bool IsContentsHeightFixed() const;
 protected:
 	virtual void DoUpdate() override;
-	bool m_bAutoStickToBottom = false;
+	StateFlags m_scFlags = StateFlags::None;
 	WIHandle m_hScrollBarH = {};
 	WIHandle m_hScrollBarV = {};
 	WIHandle m_hWrapper = {};
@@ -46,5 +58,6 @@ protected:
 	static void OnChildReleased(WIBase *child);
 	static void OnChildSetSize(WIBase *child);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(WIScrollContainer::StateFlags)
 
 #endif

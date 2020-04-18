@@ -17,15 +17,12 @@ namespace pragma
 			MaterialSettings = umath::to_integral(ShaderTextured3DBase::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 			NormalMap,
-			AmbientOcclusionMap,
-			MetallicMap,
-			RoughnessMap,
+			RMAMap,
 			EmissionMap,
 			ParallaxMap,
 			WrinkleStretchMap,
 			WrinkleCompressMap,
 			ExponentMap,
-			SpecularMap,
 
 			Count
 		};

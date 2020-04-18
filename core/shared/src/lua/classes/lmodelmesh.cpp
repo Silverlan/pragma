@@ -6,7 +6,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
@@ -689,4 +689,4 @@ void Lua::ModelSubMesh::InitializeCircle(lua_State *l,::ModelSubMesh &mesh,float
 {
 	InitializeRing(l,mesh,{},radius,doubleSided,segmentCount);
 }
-#pragma optimize("",on)
+

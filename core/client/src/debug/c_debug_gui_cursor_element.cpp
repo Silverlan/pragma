@@ -6,7 +6,6 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-#pragma optimize("",off)
 class GUIDebugCursorManager
 {
 public:
@@ -303,4 +302,3 @@ void Console::commands::debug_gui_cursor(NetworkState *state,pragma::BasePlayerC
 	if(s_dbgManager->Initialize() == false)
 		s_dbgManager = nullptr;
 }
-#pragma optimize("",on)

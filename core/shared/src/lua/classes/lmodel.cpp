@@ -16,10 +16,11 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include <luabind/iterator_policy.hpp>
+#include <pragma/lua/lua_call.hpp>
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create",&Create)];
@@ -302,6 +303,26 @@ void Lua::Model::register_class(
 	}));
 	classDef.def("GetFlexCount",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
 		Lua::PushInt(l,mdl.GetFlexCount());
+	}));
+	classDef.def("CalcFlexWeight",static_cast<void(*)(lua_State*,::Model&,uint32_t,luabind::object)>([](lua_State *l,::Model &mdl,uint32_t flexId,luabind::object oFc) {
+		Lua::CheckFunction(l,3);
+		auto weight = mdl.CalcFlexWeight(flexId,[&oFc,l](uint32_t fcId) -> std::optional<float> {
+			auto result = Lua::CallFunction(l,[oFc,fcId](lua_State *l) -> Lua::StatusCode {
+				oFc.push(l);
+				Lua::PushInt(l,fcId);
+				return Lua::StatusCode::Ok;
+			},1);
+			if(result != Lua::StatusCode::Ok)
+				return std::optional<float>{};
+			if(Lua::IsSet(l,-1) == false)
+				return std::optional<float>{};
+			return Lua::CheckNumber(l,-1);
+		},[](uint32_t fcId) -> std::optional<float> {
+			return std::optional<float>{};
+		});
+		if(weight.has_value() == false)
+			return;
+		Lua::PushNumber(l,*weight);
 	}));
 	classDef.def("CalcReferenceAttachmentPose",static_cast<void(*)(lua_State*,::Model&,int32_t)>([](lua_State *l,::Model &mdl,int32_t attIdx) {
 		auto t = mdl.CalcReferenceAttachmentPose(attIdx);
@@ -2295,4 +2316,4 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l,::Model &mdl,uint32_t idx)
 	//Lua::CheckModel(l,1);
 	mdl.RemoveObjectAttachment(idx);
 }
-#pragma optimize("",on)
+

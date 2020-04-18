@@ -11,6 +11,7 @@
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {
 	Game::InitializeEntityComponents(componentManager);
+	CBaseEntity::RegisterEvents(componentManager);
 	componentManager.RegisterComponentType<pragma::CAIComponent>("ai");
 	componentManager.RegisterComponentType<pragma::CCharacterComponent>("character");
 	componentManager.RegisterComponentType<pragma::CColorComponent>("color");
@@ -89,6 +90,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CShadowComponent>("shadow_map");
 	componentManager.RegisterComponentType<pragma::CShadowCSMComponent>("csm");
 	componentManager.RegisterComponentType<pragma::CShadowManagerComponent>("shadow_manager");
+	componentManager.RegisterComponentType<pragma::COcclusionCullerComponent>("occlusion_culler");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");

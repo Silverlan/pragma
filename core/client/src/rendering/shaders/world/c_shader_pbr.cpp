@@ -17,7 +17,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
@@ -32,15 +32,7 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Ambient occlusion Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Metallic Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Roughness Map
+		prosper::Shader::DescriptorSetInfo::Binding { // RMA Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		},
@@ -63,14 +55,10 @@ decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL 
 		prosper::Shader::DescriptorSetInfo::Binding { // Exponent Map
 			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
 			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
-		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Specular Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
 		}
 	}
 };
-static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 12,"Number of bindings in material descriptor set does not match MaterialBinding enum count!");
+static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 9,"Number of bindings in material descriptor set does not match MaterialBinding enum count!");
 
 decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 	{
@@ -94,7 +82,7 @@ ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier,con
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier)
-	: ShaderPBR{context,identifier,"world/vs_textured","world/fs_pbr"}
+	: ShaderPBR{context,identifier,"world/vs_textured","world/pbr/fs_pbr"}
 {
 }
 bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
@@ -123,7 +111,7 @@ bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer
 	if(m_bNonIBLMode == false)
 	{
 		float iblStrength;
-		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(hCam->GetEntity().GetPosition(),iblStrength);
+		auto *ds = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),iblStrength);
 		if(ds)
 			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}
@@ -226,46 +214,8 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	if(bind_texture(mat,descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
 		return false;
 
-	if(bind_texture(mat,descSet,mat.GetAmbientOcclusionMap(),umath::to_integral(MaterialBinding::AmbientOcclusionMap),"white") == false)
+	if(bind_texture(mat,descSet,mat.GetRMAMap(),umath::to_integral(MaterialBinding::RMAMap),"pbr/rma_neutral") == false)
 		return false;
-
-	if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap)) == false)
-	{
-		// No metalness map, but might have metalness factor
-		float factor;
-		if(mat.GetDataBlock()->GetFloat("metalness_factor",&factor))
-		{
-			// Let metalness factor decide metalness by using white metalness map
-			if(bind_default_texture(descSet,"white",umath::to_integral(MaterialBinding::MetallicMap)) == false)
-				return false;
-		}
-		else
-		{
-			// Assume no metalness
-			if(bind_texture(mat,descSet,mat.GetMetalnessMap(),umath::to_integral(MaterialBinding::MetallicMap),"black") == false)
-				return false;
-		}
-	}
-
-	if(bind_texture(mat,descSet,mat.GetRoughnessMap(),umath::to_integral(MaterialBinding::RoughnessMap)) == false)
-	{
-		// No roughness map; Neutralize it by using a white texture
-		bind_default_texture(descSet,"white",umath::to_integral(MaterialBinding::RoughnessMap));
-		if(bind_texture(mat,descSet,mat.GetTextureInfo("specular_map"),umath::to_integral(MaterialBinding::SpecularMap)) == false)
-		{
-			// No specular map available either, neutralize it as well (specular is inverted, so we have to use black to neutralize)
-			if(bind_default_texture(descSet,"black",umath::to_integral(MaterialBinding::SpecularMap)) == false)
-				return false;
-
-			float factor;
-			if(mat.GetDataBlock()->GetFloat("roughness_factor",&factor) == false && mat.GetDataBlock()->GetFloat("specular_factor",&factor) == false)
-			{
-				// Use half roughness map as default
-				if(bind_default_texture(descSet,"pbr/rough_half",umath::to_integral(MaterialBinding::RoughnessMap)) == false)
-					return false;
-			}
-		}
-	}
 
 	bind_texture(mat,descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
 
@@ -310,7 +260,7 @@ decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET
 	}
 };
 ShaderPBRBlend::ShaderPBRBlend(prosper::Context &context,const std::string &identifier)
-	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/fs_pbr_blend"}
+	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/pbr/fs_pbr_blend"}
 {}
 void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -364,4 +314,4 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 		RecordBindVertexBuffer(alphaBuffer->GetAnvilBuffer(),VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
 		ShaderPBR::Draw(mesh) == true;
 }
-#pragma optimize("",on)
+

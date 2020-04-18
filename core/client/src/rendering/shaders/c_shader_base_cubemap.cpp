@@ -13,7 +13,7 @@ using namespace pragma;
 decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX};
 decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT};
 
-#pragma optimize("",off)
+
 ShaderCubemap::ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader)
 	: ShaderGraphics{context,identifier,vertexShader,fragmentShader}
 {}
@@ -125,4 +125,4 @@ const Mat4 &ShaderCubemap::GetViewMatrix(uint8_t layerId) const
 {
 	return pragma::math::get_cubemap_view_matrices().at(layerId);
 }
-#pragma optimize("",on)
+

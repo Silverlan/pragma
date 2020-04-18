@@ -15,7 +15,7 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
 {
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
@@ -118,4 +118,4 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::PrimaryCom
 		shader->EndDraw();
 	}
 }
-#pragma optimize("",on)
+

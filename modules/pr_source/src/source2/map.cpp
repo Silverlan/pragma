@@ -69,7 +69,7 @@ std::shared_ptr<pragma::asset::WorldData> source2::convert::convert_map(Game &ga
 		world->AddEntity(*entData);
 	}
 
-	util::Path mapPath {mapName,true};
+	util::Path mapPath {mapName};
 	mapPath.PopBack(); // Pop file name
 	auto lightmapPath = mapPath.GetString() +"/irradiance.vtex_c";
 	auto targetPath = mapPath.GetString() +"/lightmap_atlas.vtex_c";

@@ -4,7 +4,6 @@
 #include <pragma/localization.h>
 #include <wgui/types/witext.h>
 
-#pragma optimize("",off)
 WIMainMenuCredits::WIMainMenuCredits()
 	: WIMainMenuBase()
 {}
@@ -131,4 +130,3 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	AddLogo("third_party/lua_logo").SetWidth(160,true);
 	ScheduleUpdate();
 }
-#pragma optimize("",on)

@@ -4,7 +4,7 @@
 
 using namespace pragma::rendering;
 
-#pragma optimize("",off)
+
 struct CyclesModuleInterface
 {
 	CyclesModuleInterface(util::Library &lib)
@@ -97,4 +97,4 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_lightmaps(Cli
 		return {};
 	return job;
 }
-#pragma optimize("",on)
+

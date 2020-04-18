@@ -10,7 +10,7 @@ using namespace pragma;
 
 constexpr uint32_t VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT = 0.05f;
 
-#pragma optimize("",off)
+
 VelocityComponent::VelocityComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_velocity(util::Vector3Property::Create()),
@@ -128,4 +128,4 @@ Vector3 VelocityComponent::GetLocalVelocity() const
 
 void VelocityComponent::SetRawVelocity(const Vector3 &vel) {*m_velocity = vel;}
 void VelocityComponent::SetRawAngularVelocity(const Vector3 &vel) {*m_angVelocity = vel;}
-#pragma optimize("",on)
+

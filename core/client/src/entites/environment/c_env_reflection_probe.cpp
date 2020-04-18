@@ -9,8 +9,11 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_image_view.hpp>
 #include <sharedutils/util_library.hpp>
+#include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <cmaterialmanager.h>
 #include <texturemanager/texturemanager.h>
@@ -41,7 +44,6 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
 
-#pragma optimize("",off)
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
@@ -144,7 +146,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 		auto &imgBuffer = m_layerImageBuffers.at(layerIndex);
 		auto imgDataSize = imgBuffer->GetSize();
 
-		auto tmpBuf = c_engine->AllocateTemporaryBuffer(imgDataSize,imgBuffer->GetData());
+		auto tmpBuf = c_engine->AllocateTemporaryBuffer(imgDataSize,0u /* alignment */,imgBuffer->GetData());
 
 		auto &setupCmd = c_engine->GetSetupCommandBuffer();
 		prosper::util::BufferImageCopyInfo copyInfo {};
@@ -231,7 +233,10 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 		// Clear existing IBL files
 		for(auto *probe : probes)
 		{
-			auto path = probe->GetCubemapIBLMaterialPath();
+			if(probe->m_iblMat.empty() == false)
+				continue;
+			auto path = util::Path{probe->GetCubemapIBLMaterialFilePath()};
+			path.PopFront();
 			std::array<std::string,3> filePostfixes = {
 				".wmi",
 				"_irradiance.ktx",
@@ -240,11 +245,12 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 			auto identifier = probe->GetCubemapIdentifier();
 			for(auto &postfix : filePostfixes)
 			{
-				auto fpath = "materials/" +path +identifier +postfix;
-				if(FileManager::Exists(fpath) == false)
+				auto fpath = path +postfix;
+				auto fileName = pragma::asset::find_file(*client,path.GetString(),pragma::asset::Type::Material);
+				if(fileName.has_value() == false)
 					continue;
 				Con::cout<<"Removing probe IBL file '"<<fpath<<"'..."<<Con::endl;
-				if(FileManager::RemoveFile(fpath.c_str()))
+				if(FileManager::RemoveFile(fileName->c_str()))
 					continue;
 				Con::cwar<<"WARNING: Unable to remove IBL file '"<<fpath<<"'! This reflection probe may not be rebuilt!"<<Con::endl;
 			}
@@ -268,7 +274,7 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 	BuildReflectionProbes(game,probes,rebuild);
 }
 
-Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const Vector3 &origin,float &outIntensity)
+Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity)
 {
 	if(c_game == nullptr)
 		return nullptr;
@@ -279,6 +285,8 @@ Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProb
 	BaseEntity *entClosest = nullptr;
 	for(auto *ent : entIt)
 	{
+		if(static_cast<CBaseEntity*>(ent)->IsInScene(scene) == false)
+			continue;
 		auto posEnt = ent->GetPosition();
 		auto d = uvec::distance_sqr(origin,posEnt);
 		if(d >= dClosest)
@@ -304,6 +312,8 @@ void CReflectionProbeComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare(kvData.key,"env_map",false))
 			m_srcEnvMap = kvData.value;
+		else if(ustring::compare(kvData.key,"ibl_material",false))
+			m_iblMat = kvData.value;
 		else if(ustring::compare(kvData.key,"ibl_strength",false))
 			m_strength = kvData.value.empty() ? std::optional<float>{} : util::to_float(kvData.value);
 		else
@@ -321,6 +331,8 @@ void CReflectionProbeComponent::OnEntitySpawn()
 
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 {
+	if(m_iblMat.empty() == false)
+		return "materials/" +m_iblMat;
 	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +".wmi";
 }
 
@@ -349,7 +361,7 @@ luabind::object CReflectionProbeComponent::InitializeLuaObject(lua_State *l) {re
 
 bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 {
-	if(m_iblData == nullptr)
+	if(m_iblData == nullptr || m_iblMat.empty() == false)
 		return false;
 	auto relPath = GetCubemapIBLMaterialPath();
 	auto absPath = "materials/" +relPath;
@@ -698,15 +710,14 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromEnvMap(const std::stri
 Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 {
 	outIsDefault = false;
-	auto relPath = GetCubemapIBLMaterialPath();
-	auto identifier = GetCubemapIdentifier();
-	auto matPath = relPath +identifier +".wmi";
-	if(FileManager::Exists("materials/" +matPath) == false)
+	auto matPath = util::Path{GetCubemapIBLMaterialFilePath()};
+	matPath.PopFront();
+	if(pragma::asset::exists(*client,matPath.GetString(),pragma::asset::Type::Material) == false)
 	{
 		outIsDefault = true;
 		matPath = "maps/default_ibl.wmi";
 	}
-	auto *mat = client->LoadMaterial(matPath,true,false);
+	auto *mat = client->LoadMaterial(matPath.GetString(),true,false);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
 }
 bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
@@ -776,6 +787,8 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 }
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialPath() const
 {
+	if(m_iblMat.empty() == false)
+		return ufile::get_path_from_filename(m_iblMat);
 	return "maps/" +c_game->GetMapName() +"/ibl/";
 }
 std::string CReflectionProbeComponent::GetCubemapIdentifier() const
@@ -948,4 +961,3 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
-#pragma optimize("",on)

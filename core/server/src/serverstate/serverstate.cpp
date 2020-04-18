@@ -46,6 +46,7 @@ ServerState::ServerState()
 	m_alsoundID = 1;
 	server = this;
 	m_soundScriptManager = std::make_unique<SoundScriptManager>();
+	m_modelManager = std::make_unique<pragma::asset::SModelManager>(*this);
 
 	FileManager::AddCustomMountDirectory("cache",static_cast<fsys::SearchFlags>(FSYS_SEARCH_CACHE));
 
@@ -65,7 +66,7 @@ ServerState::~ServerState()
 	for(auto itHandles=conVarPtrs.begin();itHandles!=conVarPtrs.end();itHandles++)
 		itHandles->second->set(NULL);
 	ResourceManager::ClearResources();
-	ModelManager::Clear();
+	m_modelManager->Clear();
 	GetMaterialManager().ClearUnused();
 }
 

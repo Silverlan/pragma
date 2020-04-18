@@ -928,7 +928,7 @@ int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
 }
 int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,::DataStream &ds)
 {
-	auto buf = c_engine->AllocateTemporaryBuffer(ds->GetSize(),ds->GetData());
+	auto buf = c_engine->AllocateTemporaryBuffer(ds->GetSize(),0u /* alignment */,ds->GetData());
 	if(buf == nullptr)
 		return 0;
 	Lua::Push(l,buf);

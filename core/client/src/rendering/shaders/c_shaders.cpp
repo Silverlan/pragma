@@ -48,10 +48,14 @@
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
 #include <buffers/prosper_buffer.hpp>
+
+
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -87,7 +91,6 @@ void CGame::InitShaders()
 
 	shaderManager.RegisterShader("clear_color",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
 
-	shaderManager.RegisterShader("textured",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderTextured3D(context,identifier);});
 	shaderManager.RegisterShader("prepass",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPrepass(context,identifier);});
 	shaderManager.RegisterShader("prepass_depth",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderPrepassDepth(context,identifier);});
 
@@ -134,6 +137,8 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("brdf_convolution",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderBRDFConvolution(context,identifier);});
 	shaderManager.RegisterShader("specular_to_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSpecularToRoughness(context,identifier);});
 	shaderManager.RegisterShader("extract_diffuse_ambient_occlusion",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderExtractDiffuseAmbientOcclusion(context,identifier);});
+	shaderManager.RegisterShader("compose_rma",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderComposeRMA(context,identifier);});
+	shaderManager.RegisterShader("specular_glossiness_to_metalness_roughness",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderSpecularGlossinessToMetalnessRoughness(context,identifier);});
 
 	shaderManager.RegisterShader("calcimagecolor",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderCalcImageColor(context,identifier);});
 	shaderManager.RegisterShader("watersplash",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderWaterSplash(context,identifier);});

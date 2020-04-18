@@ -4,7 +4,7 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
+
 bool util::to_image_buffer(
 	prosper::Image &image,uimg::ImageBuffer::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
 	bool includeLayers,bool includeMipmaps
@@ -298,4 +298,4 @@ bool util::to_image_buffer(
 	}
 	return to_image_buffer(image,targetFormat,outImageBuffers,includeLayers,includeMipmaps);
 }
-#pragma optimize("",on)
+

@@ -17,8 +17,11 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_to_roughness.hpp"
 #include "pragma/rendering/shaders/util/c_shader_extract_diffuse_ambient_occlusion.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <util_texture_info.hpp>
+#include <pragma/model/modelmanager.h>
 #include <cmaterialmanager.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -29,7 +32,6 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(util_pbr_converter,CUtilPBRConverter);
 
-#pragma optimize("",off)
 luabind::object CPBRConverterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPBRConverterComponentHandleWrapper>(l);}
 
 void CPBRConverterComponent::Initialize()
@@ -149,7 +151,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 		ConvertToPBR(static_cast<CMaterial&>(*hMat.get()));
 	}
 
-	auto &models = c_game->GetModels();
+	auto &models = client->GetModelManager().GetCache();
 	for(auto &pair : models)
 	{
 		auto &mdl = pair.second;
@@ -159,11 +161,9 @@ void CPBRConverterComponent::OnEntitySpawn()
 }
 bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const
 {
-	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end())
+	if(m_convertedMaterials.find(mat.GetName()) != m_convertedMaterials.end() || IsPBR(mat) == false)
 		return false;
-	auto shader = mat.GetShaderIdentifier();
-	ustring::to_lower(shader);
-	return (shader == "textured" || shader == "texturedalphatransition") && shader != "pbr" && shader != "pbr_blend";
+	return mat.GetRMAMap() == nullptr;
 }
 
 bool CPBRConverterComponent::IsPBR(CMaterial &mat) const
@@ -180,170 +180,129 @@ void CPBRConverterComponent::PollEvents()
 
 bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 {
+	auto dataBlock = matTraditional.GetDataBlock();
+	auto rmaInfo = dataBlock->GetBlock("rma_info");
+	if(rmaInfo == nullptr)
+		return false;
+	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
 	Con::cout<<"Converting material '"<<matTraditional.GetName()<<"' to PBR..."<<Con::endl;
 	m_convertedMaterials.insert(matTraditional.GetName());
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto &dev = c_engine->GetDevice();
-	auto dataBlock = matTraditional.GetDataBlock();
-
-	auto *matPbr = client->CreateMaterial(matTraditional.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER) ? "pbr_blend" : "pbr");
-	auto &dataPbr = matPbr->GetDataBlock();
 
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
-
-	auto fAddGenericTexture = [&matTraditional,&dataPbr](const std::string &identifier,TextureInfo *texInfo) -> bool {
-		if(texInfo && texInfo->texture && std::static_pointer_cast<Texture>(texInfo->texture)->HasValidVkTexture())
-		{
-			dataPbr->AddValue("texture",identifier,texInfo->name);
-			return true;
-		}
-		return false;
-	};
-	auto fAddGenericTextureByIdentifier = [&matTraditional,&dataPbr](const std::string &name) -> bool {
-		auto *map = matTraditional.GetTextureInfo(name);
-		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
-		{
-			dataPbr->AddValue("texture",name,map->name);
-			return true;
-		}
-		return false;
-	};
-
-	// TODO: Extract ambient occlusion from diffuse map, if possible
-	fAddGenericTexture(Material::ALBEDO_MAP_IDENTIFIER,matTraditional.GetDiffuseMap()); // Albedo map
-	fAddGenericTexture(Material::ALBEDO_MAP2_IDENTIFIER,matTraditional.GetTextureInfo(Material::ALBEDO_MAP2_IDENTIFIER)); // Albedo blend map
-	fAddGenericTexture(Material::ALBEDO_MAP3_IDENTIFIER,matTraditional.GetTextureInfo(Material::ALBEDO_MAP3_IDENTIFIER)); // Albedo blend map 2
-	fAddGenericTexture(Material::NORMAL_MAP_IDENTIFIER,matTraditional.GetNormalMap()); // Normal map
-	fAddGenericTexture(Material::PARALLAX_MAP_IDENTIFIER,matTraditional.GetParallaxMap()); // Parallax map
-	fAddGenericTexture(Material::AO_MAP_IDENTIFIER,matTraditional.GetAmbientOcclusionMap()); // Ambient occlusion map
-	auto hasSpecularMap = fAddGenericTexture(Material::SPECULAR_MAP_IDENTIFIER,matTraditional.GetSpecularMap()); // Specular/Glossiness map
-	fAddGenericTextureByIdentifier(Material::WRINKLE_STRETCH_MAP_IDENTIFIER); // Wrinkle stretch map
-	fAddGenericTextureByIdentifier(Material::WRINKLE_COMPRESS_MAP_IDENTIFIER); // Wrinkle compress map
-	fAddGenericTextureByIdentifier(Material::EXPONENT_MAP_IDENTIFIER); // Exponent map
 
 	auto valSurfMat = dataBlock->GetDataValue("surfacematerial");
 	auto surfMatName = valSurfMat ? valSurfMat->GetString() : "";
 	auto *surfMat = valSurfMat ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
 
-	if(surfMatName.empty() == false)
-		dataPbr->AddValue("string","surfacematerial",surfMatName);
+	auto fSetMaterialValue = [&matTraditional,&dataBlock](const std::string &type,const std::string &name,const std::string &value) {
+		if(dataBlock->GetValue(name))
+			return;
+		dataBlock->AddValue(type,name,value);
+	};
 
-	auto &pbrInfo = surfMat->GetPBRInfo();
-	if(surfMat && pbrInfo.subsurfaceMultiplier != 0.f)
+	auto *pbrInfo = surfMat ? &surfMat->GetPBRInfo() : nullptr;
+	if(rmaInfo->GetBool("requires_sss_update") && pbrInfo && pbrInfo->subsurfaceMultiplier != 0.f)
 	{
-		dataPbr->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
-		dataPbr->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
-		dataPbr->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
-		dataPbr->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
+		auto hasSSS = (
+			dataBlock->GetValue("subsurface_multiplier") != nullptr ||
+			dataBlock->GetValue("subsurface_color") != nullptr ||
+			dataBlock->GetValue("subsurface_method") != nullptr ||
+			dataBlock->GetValue("subsurface_radius") != nullptr
+		);
+		if(hasSSS == false)
+		{
+			fSetMaterialValue("float","subsurface_multiplier",std::to_string(pbrInfo->subsurfaceMultiplier));
+			fSetMaterialValue("color","subsurface_color",pbrInfo->subsurfaceColor.ToString());
+			fSetMaterialValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo->subsurfaceMethod)));
+			fSetMaterialValue("vector","subsurface_radius",std::to_string(pbrInfo->subsurfaceRadius.x) +" " +std::to_string(pbrInfo->subsurfaceRadius.y) +" " +std::to_string(pbrInfo->subsurfaceRadius.z));
+			
+			rmaInfo->RemoveValue("requires_sss_update");
+		}
 	}
 
-	// Roughness map
-	// Obsolete, since Pragma now supports specular maps for PBR directly
-	/*auto *specularMap = matTraditional.GetSpecularMap();
-	if(
-		specularMap && specularMap->texture && std::static_pointer_cast<Texture>(specularMap->texture)->HasValidVkTexture() &&
-		std::static_pointer_cast<Texture>(specularMap->texture)->IsError() == false
-	)
+	auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA*>(c_engine->GetShader("compose_rma").get());
+	if(shaderComposeRMA == nullptr)
+		return false;
+
+	auto fGetTexture = [&matTraditional,&dataBlock](const std::string &name) -> prosper::Texture* {
+		auto *map = matTraditional.GetTextureInfo(name);
+		if(map && map->texture && std::static_pointer_cast<Texture>(map->texture)->HasValidVkTexture())
+			return std::static_pointer_cast<Texture>(map->texture)->GetVkTexture().get();
+		return nullptr;
+	};
+
+	prosper::Texture *roughnessMap = fGetTexture("roughness_map");
+	prosper::Texture *metalnessMap = fGetTexture("metalness_map");
+	prosper::Texture *aoMap = fGetTexture("ao_map");
+
+	auto flags = pragma::ShaderComposeRMA::Flags::None;
+	if(roughnessMap == nullptr)
 	{
-		auto roughnessMap = ConvertSpecularMapToRoughness(*std::static_pointer_cast<Texture>(specularMap->texture)->GetVkTexture());
+		roughnessMap = fGetTexture("specular_map");
 		if(roughnessMap)
-		{
-			auto roughnessName = matName +"_roughness";
-			ImageWriteInfo imgWriteInfo {};
-			imgWriteInfo.alphaMode = ImageWriteInfo::AlphaMode::None;
-			imgWriteInfo.containerFormat = ImageWriteInfo::ContainerFormat::DDS;
-			imgWriteInfo.flags = ImageWriteInfo::Flags::GenerateMipmaps;
-			imgWriteInfo.inputFormat = ImageWriteInfo::InputFormat::R8G8B8A8_UInt;
-			imgWriteInfo.outputFormat = ImageWriteInfo::OutputFormat::GradientMap;
-			c_game->SaveImage(*roughnessMap->GetImage(),"addons/converted/materials/" +roughnessName,imgWriteInfo);
-			dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,roughnessName);
-		}
+			flags |= pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow;
 	}
-	else*/
-	if(hasSpecularMap == false)
-	{
-		// Attempt to determine roughness by surface material
-		if(surfMat)
-		{
-			auto &pbrInfo = surfMat->GetPBRInfo();
-			if(pbrInfo.roughness == 0.f)
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/smooth");
-			else if(pbrInfo.roughness == 0.5f)
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half");
-			else if(pbrInfo.roughness == 1.f)
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
-			else
-			{
-				dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough");
-				dataPbr->AddValue("float","roughness_factor",std::to_string(pbrInfo.roughness));
-			}
-		}
-		else
-			dataPbr->AddValue("texture",Material::ROUGHNESS_MAP_IDENTIFIER,"pbr/rough_half"); // Generic roughness map with 50% roughness
-	}
-	//
 
-	// Metalness map
-	if(surfMat)
+	std::string rmaMapName = "";
+	if(roughnessMap || metalnessMap || aoMap)
 	{
-		auto &pbrInfo = surfMat->GetPBRInfo();
-		if(pbrInfo.metalness > 0.f)
-		{
-			if(pbrInfo.metalness == 1.f)
-				dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
-			else
-			{
-				dataPbr->AddValue("texture",Material::METALNESS_MAP_IDENTIFIER,"pbr/metal");
-				dataPbr->AddValue("float","metalness_factor",std::to_string(pbrInfo.metalness));
-			}
-		}
+		auto rmaMap = shaderComposeRMA->ComposeRMA(*c_engine,roughnessMap,metalnessMap,aoMap,flags);
+
+		rmaMapName = matName +"_rma";
+		uimg::TextureInfo imgWriteInfo {};
+		imgWriteInfo.alphaMode = uimg::TextureInfo::AlphaMode::None;
+		imgWriteInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+		imgWriteInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
+		imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R8G8B8A8_UInt;
+		imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
+		c_game->SaveImage(*rmaMap,"addons/converted/materials/" +rmaMapName,imgWriteInfo);
+
+		if(metalnessMap)
+			rmaInfo->RemoveValue("requires_metalness_update");
+		if(aoMap)
+			rmaInfo->RemoveValue("requires_ao_update");
 	}
+	
+	if(rmaMapName.empty())
+		rmaMapName = "pbr/rma_neutral";
+	dataBlock->AddValue("texture",Material::RMA_MAP_IDENTIFIER,rmaMapName);
+
+	float tmp;
+	if(dataBlock->GetFloat("roughness_factor",&tmp))
+		rmaInfo->RemoveValue("requires_roughness_update");
+	else if(roughnessMap == nullptr && pbrInfo)
+	{
+		dataBlock->AddValue("float","roughness_factor",std::to_string(pbrInfo->roughness));
+		rmaInfo->RemoveValue("requires_roughness_update");
+	}
+
+	if(dataBlock->GetFloat("metalness_factor",&tmp))
+		rmaInfo->RemoveValue("requires_metalness_update");
+	else if(metalnessMap == nullptr && pbrInfo)
+	{
+		dataBlock->AddValue("float","metalness_factor",std::to_string(pbrInfo->metalness));
+		rmaInfo->RemoveValue("requires_metalness_update");
+	}
+
+	if(aoMap == nullptr)
+		rmaInfo->AddValue("bool","requires_ao_update","1");
+	else
+		rmaInfo->RemoveValue("requires_ao_update");
+
+	if(rmaInfo->IsEmpty())
+		dataBlock->RemoveValue("rma_info");
 
 	// Note: If no surface material could be found in the material,
 	// the model's surface material will be checked as well in 'GenerateGeometryBasedTextures'.
 	//
 
-	auto fCopyValue = [&dataPbr,&matTraditional](const std::string &name) -> bool {
-		auto dataBlock = matTraditional.GetDataBlock();
-		auto value = dataBlock ? dataBlock->GetDataValue(name) : nullptr;
-		if(value == nullptr)
-			return false;
-		dataPbr->AddValue(value->GetTypeString(),name,value->GetString());
-		return true;
-	};
+	matTraditional.UpdateTextures();
 
-	// Emission map
-	auto *glowMap = matTraditional.GetGlowMap();
-	if(glowMap && glowMap->texture && std::static_pointer_cast<Texture>(glowMap->texture)->GetVkTexture())
-	{
-		dataPbr->AddValue("texture",Material::EMISSION_MAP_IDENTIFIER,glowMap->name);
-		if(fCopyValue("glow_alpha_only") == false)
-			dataPbr->AddValue("bool","glow_alpha_only","1");
-		if(fCopyValue("glow_scale") == false)
-			dataPbr->AddValue("float","glow_scale","1.0");
-		if(fCopyValue("glow_blend_diffuse_mode") == false)
-			dataPbr->AddValue("int","glow_blend_diffuse_mode","1");
-		if(fCopyValue("glow_blend_diffuse_scale") == false)
-			dataPbr->AddValue("float","glow_blend_diffuse_scale","3.0");
-	}
-	//
-
-	fCopyValue("black_to_alpha");
-	fCopyValue("phong_normal_alpha");
-	fCopyValue("phong_intensity");
-	fCopyValue("phong_shininess");
-	fCopyValue("parallax_height_scale");
-	fCopyValue("translucent");
-
-	fCopyValue("metalness_factor");
-	fCopyValue("roughness_factor");
-	fCopyValue("specular_factor");
-	fCopyValue("emission_factor");
-
-	matPbr->UpdateTextures();
 	// Overwrite old material with new PBR settings
-	if(matPbr->Save(matTraditional.GetName(),"addons/converted/"))
+	if(matTraditional.Save())
 		client->LoadMaterial(matName,true,true); // Reload material immediately
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	Con::cout<<"Conversion complete!"<<Con::endl;
@@ -393,4 +352,3 @@ void CUtilPBRConverter::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CPBRConverterComponent>();
 }
-#pragma optimize("",on)

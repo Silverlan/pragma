@@ -3,7 +3,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 
-#pragma optimize("",off)
+
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
 	auto numBones = frameToSubtract.GetBoneCount(); // TODO
@@ -318,10 +318,32 @@ void Model::Merge(const Model &other,MergeFlags flags)
 	if((flags &MergeFlags::Meshes) != MergeFlags::None)
 	{
 		fMergeSkeletons();
+
+		auto &mats = GetMaterials();
+		auto &matsOther = other.GetMaterials();
+		mats.reserve(mats.size() +matsOther.size());
+
+		auto &matPaths = m_metaInfo.texturePaths;
+		auto &matPathsOther = other.m_metaInfo.texturePaths;
+		matPaths.reserve(matPaths.size() +matPathsOther.size());
+		for(auto &path : matPathsOther)
+			AddTexturePath(path);
+
+		auto &textures = m_metaInfo.textures;
+		auto &texturesOther = other.m_metaInfo.textures;
+		textures.reserve(textures.size() +texturesOther.size());
+		std::unordered_map<uint32_t,uint32_t> otherMatIdxToThisMatIdx {};
+		for(auto i=decltype(texturesOther.size()){0u};i<texturesOther.size();++i)
+		{
+			auto *matOther = (i < other.m_materials.size()) ? other.m_materials.at(i).get() : nullptr;
+			auto idx = AddTexture(texturesOther.at(i),matOther);
+			otherMatIdxToThisMatIdx.insert(std::make_pair(i,idx));
+		}
+
 		auto &meshGroupsOther = other.GetMeshGroups();
 		auto &baseMeshesOther = other.GetBaseMeshes();
-		auto &meshGroups = other.GetMeshGroups();
-		auto &baseMeshes = other.GetBaseMeshes();
+		auto &meshGroups = GetMeshGroups();
+		auto &baseMeshes = GetBaseMeshes();
 		for(auto i=decltype(meshGroupsOther.size()){0};i<meshGroupsOther.size();++i)
 		{
 			auto &groupOther = meshGroupsOther.at(i);
@@ -336,10 +358,12 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					subMesh = subMesh->Copy();
+					subMesh->SetSkinTextureIndex(otherMatIdxToThisMatIdx[subMesh->GetSkinTextureIndex()]);
 					// TODO: Update vertex weights
 				}
+				group->AddMesh(mesh);
 			}
 		}
 	}
 }
-#pragma optimize("",on)
+

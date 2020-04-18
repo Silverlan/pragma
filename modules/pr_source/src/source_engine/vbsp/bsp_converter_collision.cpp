@@ -28,7 +28,7 @@ std::vector<std::shared_ptr<CollisionMesh>> pragma::asset::vbsp::BSPConverter::G
 			v = BSPVertexToPragma(v);
 
 		bool bDisplacement = polyMesh->HasDisplacements();
-		auto mesh = game.CreateBrushMesh();
+		auto mesh = std::make_shared<BrushMesh>();
 		if(bDisplacement)
 			mesh->SetConvex(false);
 
@@ -36,7 +36,7 @@ std::vector<std::shared_ptr<CollisionMesh>> pragma::asset::vbsp::BSPConverter::G
 		{
 			auto &polyInfo = poly->GetCompiledData();
 			std::vector<uint16_t> lodTriangles;
-			auto side = game.CreateSide();
+			auto side = std::make_shared<Side>();
 			std::vector<Vector3> sideVerts {};
 			auto &polyVerts = poly->GetVertices();
 			for(auto &pv : polyVerts)

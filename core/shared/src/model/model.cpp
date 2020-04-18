@@ -15,11 +15,9 @@
 #include <sharedutils/util_library.hpp>
 #include <stack>
 
-DEFINE_BASE_HANDLE(DLLNETWORK,Model,Model);
-
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -56,8 +54,7 @@ Model::MetaInfo::MetaInfo()
 {}
 
 Model::Model()
-	: m_handle(new PtrModel(this)),
-	m_reference(Frame::Create(0))
+	: m_reference(Frame::Create(0))
 {
 	Construct();
 }
@@ -72,7 +69,7 @@ Model::Model(NetworkState *nw,uint32_t numBones,const std::string &name)
 }
 
 Model::Model(const Model &other)
-	: m_handle(new PtrModel(this)),m_networkState(other.m_networkState),m_metaInfo(other.m_metaInfo),m_bValid(other.m_bValid),m_mass(other.m_mass),
+	: m_networkState(other.m_networkState),m_metaInfo(other.m_metaInfo),m_bValid(other.m_bValid),m_mass(other.m_mass),
 	m_blendControllers(other.m_blendControllers),m_bodyGroups(other.m_bodyGroups),m_hitboxes(other.m_hitboxes),
 	m_name(other.m_name),m_animationIDs(other.m_animationIDs),m_bindPose(other.m_bindPose),m_collisionMin(other.m_collisionMin),
 	m_collisionMax(other.m_collisionMax),m_renderMin(other.m_renderMin),m_renderMax(other.m_renderMax),m_joints(other.m_joints),
@@ -99,7 +96,6 @@ Model::Model(const Model &other)
 
 Model::~Model()
 {
-	m_handle.Invalidate();
 	for(auto &hCb : m_matLoadCallbacks)
 	{
 		if(hCb.IsValid() == true)
@@ -298,7 +294,14 @@ bool Model::GetLocalBonePosition(uint32_t animId,uint32_t frameId,uint32_t boneI
 	}
 	return true;
 }
-ModelHandle Model::GetHandle() {return m_handle;}
+util::WeakHandle<const Model> Model::GetHandle() const
+{
+	return util::WeakHandle<const Model>(std::static_pointer_cast<const Model>(shared_from_this()));
+}
+util::WeakHandle<Model> Model::GetHandle()
+{
+	return util::WeakHandle<Model>(std::static_pointer_cast<Model>(shared_from_this()));
+}
 
 Frame &Model::GetReference() {return *m_reference;}
 const Frame &Model::GetReference() const {return *m_reference;}
@@ -603,6 +606,11 @@ void Model::Optimize()
 
 void Model::LoadMaterials(const std::vector<uint32_t> &textureGroupIds,const std::function<Material*(const std::string&,bool)> &loadMaterial,bool bReload)
 {
+	// Loading materials may require saving materials / textures, which can trigger the resource watcher,
+	// so we'll disable it temporarily. This is a bit of a messy solution...
+	// TODO: Remove this once the VMT/VMAT conversion code has been removed from the material system!
+	auto resWatcherLock = engine->ScopeLockResourceWatchers();
+
 	auto &meta = GetMetaInfo();
 	auto &textures = meta.textures;
 	//m_materials.clear();
@@ -1647,4 +1655,4 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
-#pragma optimize("",on)
+

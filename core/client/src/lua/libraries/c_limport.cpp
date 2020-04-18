@@ -30,7 +30,7 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 static aiVector3D to_assimp_position(const Vector3 &pos)
 {
 	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(util::units_to_metres(1.f));
@@ -222,4 +222,4 @@ int Lua::lib_export::export_scene(lua_State *l)
 	}
 	return 1;
 }
-#pragma optimize("",on)
+

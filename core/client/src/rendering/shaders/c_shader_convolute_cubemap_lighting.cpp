@@ -9,7 +9,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 decltype(ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE) ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE = {
 	{
 		prosper::Shader::DescriptorSetInfo::Binding {
@@ -94,4 +94,4 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 endLoop:
 	return success ? rt->GetTexture() : nullptr;
 }
-#pragma optimize("",on)
+

@@ -39,11 +39,12 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/asset_types/world.hpp"
 #include "pragma/model/model.h"
+#include "pragma/model/modelmanager.h"
 #include "pragma/physics/collisionmesh.h"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 
-#pragma optimize("",off)
+
 DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
 	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
 	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
@@ -342,7 +343,7 @@ void Game::OnRemove()
 	// contain luabind objects, which have to be destroyed before we destroy the
 	// lua state.
 	// TODO: Implement this properly!
-	for(auto &pair : GetModels())
+	for(auto &pair : GetNetworkState()->GetCachedModels())
 	{
 		for(auto &colMesh : pair.second->GetCollisionMeshes())
 			colMesh->ClearShape();
@@ -879,8 +880,28 @@ void Game::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector
 	}
 }
 
+std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m_stateNetwork->GetModelManager().CreateModel(mdl);}
+std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
+std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
+{
+	auto bNewModel = false;
+	auto r = GetNetworkState()->GetModelManager().LoadModel(mdl,bReload,&bNewModel);
+	if(bNewModel == true && r != nullptr)
+	{
+		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<Model>>>("OnModelLoaded",r);
+		CallLuaCallbacks<void,std::shared_ptr<Model>>("OnModelLoaded",r);
+	}
+	return r;
+}
+
 void Game::OnGameReady()
 {
+	// All assets have been loaded, now clear the unused assets (if there was a previous map)
+	Con::cout<<"Clearing unused assets..."<<Con::endl;
+	auto numModelsCleared = GetNetworkState()->GetModelManager().ClearUnused();
+	auto numMaterialsCleared = GetNetworkState()->GetMaterialManager().ClearUnused();
+	Con::cout<<numModelsCleared<<" models and "<<numMaterialsCleared<<" materials have been cleared from cache!"<<Con::endl;
+
 	m_ctCur.Reset();
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
@@ -934,4 +955,4 @@ std::string Game::GetConVarString(const std::string &scmd) {return m_stateNetwor
 float Game::GetConVarFloat(const std::string &scmd) {return m_stateNetwork->GetConVarFloat(scmd);}
 bool Game::GetConVarBool(const std::string &scmd) {return m_stateNetwork->GetConVarBool(scmd);}
 ConVarFlags Game::GetConVarFlags(const std::string &scmd) {return m_stateNetwork->GetConVarFlags(scmd);}
-#pragma optimize("",on)
+

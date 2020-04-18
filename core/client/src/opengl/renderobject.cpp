@@ -1,6 +1,5 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/rendersystem.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.h"
 
 DEFINE_BASE_HANDLE(DLLCLIENT,RenderObject,RenderObject);
 

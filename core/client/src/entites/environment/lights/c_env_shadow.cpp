@@ -13,7 +13,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 CShadowComponent::CShadowComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent}
 {}
@@ -165,4 +164,3 @@ const std::shared_ptr<prosper::Framebuffer> &CShadowComponent::GetFramebuffer(ui
 bool CShadowComponent::HasRenderTarget() const {return m_hRt.valid();}
 
 bool CShadowComponent::ShouldUpdateLayer(uint32_t) const {return true;}
-#pragma optimize("",on)

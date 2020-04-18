@@ -103,6 +103,7 @@
 #include "pragma/entities/environment/c_sky_camera.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include <pragma/lua/l_entity_handles.hpp>
 #include <pragma/lua/ldefinitions.h>
@@ -215,6 +216,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CPBRConverter);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowManager);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadow);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowCSM);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,COcclusionCuller);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEye);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CSkyCamera);
 

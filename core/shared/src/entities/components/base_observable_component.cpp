@@ -5,7 +5,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 pragma::ObserverCameraData::ObserverCameraData()
 	: enabled{util::BoolProperty::Create(false)},
 	offset{util::Vector3Property::Create()}
@@ -92,4 +92,4 @@ void BaseObservableComponent::Load(DataStream &ds,uint32_t version)
 		}
 	}
 }
-#pragma optimize("",on)
+

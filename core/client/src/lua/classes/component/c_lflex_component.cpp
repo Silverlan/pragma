@@ -88,5 +88,17 @@ void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hEnt);
 		hEnt->SetFlexWeight(flexId,weight);
 	}));
+	defCFlex.def("ClearFlexWeightOverride",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>([](lua_State *l,CFlexHandle &hEnt,uint32_t flexId) {
+		pragma::Lua::check_component(l,hEnt);
+		hEnt->ClearFlexWeightOverride(flexId);
+	}));
+	defCFlex.def("HasFlexWeightOverride",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>([](lua_State *l,CFlexHandle &hEnt,uint32_t flexId) {
+		pragma::Lua::check_component(l,hEnt);
+		Lua::PushBool(l,hEnt->HasFlexWeightOverride(flexId));
+	}));
+	defCFlex.def("SetFlexWeightOverride",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float)>([](lua_State *l,CFlexHandle &hEnt,uint32_t flexId,float weight) {
+		pragma::Lua::check_component(l,hEnt);
+		hEnt->SetFlexWeightOverride(flexId,weight);
+	}));
 	entsMod[defCFlex];
 }

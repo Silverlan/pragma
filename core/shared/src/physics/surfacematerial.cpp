@@ -12,7 +12,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
 	: m_physEnv{env}
 {
@@ -302,4 +302,4 @@ std::ostream &operator<<(std::ostream &out,const SurfaceMaterial &surfaceMateria
 	out<<"SurfaceMaterial["<<surfaceMaterial.GetIndex()<<"]["<<surfaceMaterial.GetIdentifier()<<"]";
 	return out;
 }
-#pragma optimize("",on)
+

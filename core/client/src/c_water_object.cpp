@@ -132,8 +132,6 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		camReflection->GetFarZProperty()->Link(*cam->GetFarZProperty());
 	}
 	sceneReflection->SetWorldEnvironment(*scene->GetWorldEnvironment());
-	sceneReflection->LinkLightSources(*scene);
-	sceneReflection->LinkEntities(*scene);
 
 	// Initialize water settings
 	m_waterScene->waterScale = util::FloatProperty::Create(4.f);

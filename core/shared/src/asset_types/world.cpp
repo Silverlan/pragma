@@ -6,7 +6,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 pragma::asset::WorldData::WorldData(NetworkState &nw)
 	: m_nw{nw}
 {
@@ -103,4 +103,4 @@ void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf,uint32_t &out
 	outFirstLeaf = m_firstLeaf;
 	outNumLeaves = m_numLeaves;
 }
-#pragma optimize("",on)
+

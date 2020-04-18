@@ -10,7 +10,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ShaderEye::ShaderEye(prosper::Context &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/eye/vs_eye","world/eye/fs_eye"}
 {}
@@ -48,4 +48,4 @@ void ShaderEye::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineC
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderPBR::PushConstants) +sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
 }
-#pragma optimize("",on)
+

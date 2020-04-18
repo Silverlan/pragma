@@ -847,11 +847,19 @@ int Lua::game::Client::get_gravity(lua_State *l)
 int Lua::game::Client::load_model(lua_State *l)
 {
 	auto *name = Lua::CheckString(l,1);
+	try
+	{
 	auto mdl = c_game->LoadModel(name);
 	if(mdl == nullptr)
 		return 0;
 	Lua::Push<decltype(mdl)>(l,mdl);
 	return 1;
+	}
+	catch(...)
+	{
+		std::cout<<"!!"<<std::endl;
+		return 0;
+	}
 }
 int Lua::game::Client::create_model(lua_State *l)
 {

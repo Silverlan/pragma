@@ -97,7 +97,11 @@ ShaderSSAO::ShaderSSAO(prosper::Context &context,const std::string &identifier)
 	imgCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
 	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+
+	umath::set_flag(imgCreateInfo.flags,prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
 	auto stagingImage = prosper::util::create_image(dev,imgCreateInfo,reinterpret_cast<uint8_t*>(ssaoNoise.data()));
+	context.AllocateTemporaryBuffer(*stagingImage);
+	umath::set_flag(imgCreateInfo.flags,prosper::util::ImageCreateInfo::Flags::DontAllocateMemory,false);
 
 	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
 	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;

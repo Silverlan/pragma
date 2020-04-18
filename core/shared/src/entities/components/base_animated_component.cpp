@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -1503,4 +1503,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
-#pragma optimize("",on)
+

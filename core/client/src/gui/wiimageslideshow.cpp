@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/gui/wiimageslideshow.h"
 #include <cmaterialmanager.h>
@@ -18,7 +25,7 @@ WIImageSlideShow::PreloadImage::PreloadImage()
 {}
 
 WIImageSlideShow::WIImageSlideShow()
-	: WIBase(),WIBaseBlur(),m_currentImg(-1)
+	: WIBase(),m_currentImg(-1)
 {}
 
 void WIImageSlideShow::Initialize()
@@ -45,7 +52,7 @@ void WIImageSlideShow::SetColor(float r,float g,float b,float a)
 void WIImageSlideShow::DoUpdate()
 {
 	WIBase::DoUpdate();
-	InitializeBlur(GetWidth(),GetHeight());
+	//InitializeBlur(GetWidth(),GetHeight());
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }
 
@@ -83,29 +90,28 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	if(texPreload == nullptr)
 		return;
 	auto &imgPreload = texPreload->GetImage();
-	auto lastTexture = (m_blurSet != nullptr) ? m_blurSet->GetFinalRenderTarget()->GetTexture() : nullptr;
+	auto lastTexture = (m_blurSet != nullptr) ? m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this() : nullptr;
 
 	auto &context = WGUI::GetInstance().GetContext();
-	auto &dev = context.GetDevice();
 
-	auto extents = imgPreload->GetExtents();
+	auto extents = imgPreload.GetExtents();
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 	createInfo.width = extents.width;
 	createInfo.height = extents.height;
-	createInfo.format = imgPreload->GetFormat();
-	createInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+	createInfo.format = imgPreload.GetFormat();
+	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	auto img = prosper::util::create_image(dev,createInfo);
+	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto tex = context.CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {{img->GetFormat()}};
-	auto rp = prosper::util::create_render_pass(dev,rpInfo);
-	auto rt = prosper::util::create_render_target(dev,{tex},rp);
+	auto rp = context.CreateRenderPass(rpInfo);
+	auto rt = context.CreateRenderTarget({tex},rp);
 	rt->SetDebugName("img_slideshow_rt");
 
-	m_blurSet = prosper::BlurSet::Create(dev,rt,texPreload);
+	m_blurSet = prosper::BlurSet::Create(context,rt,texPreload);
 	if(m_blurSet == nullptr)
 		return;
 
@@ -119,7 +125,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	auto &drawCmd = context.GetDrawCommandBuffer();
 	try
 	{
-		prosper::util::record_blur_image(dev,drawCmd,*m_blurSet,{
+		prosper::util::record_blur_image(context,drawCmd,*m_blurSet,{
 			Vector4(1.f,1.f,1.f,1.f),
 			1.75f, /* Blur size */
 			9 /* Kernel size */
@@ -129,7 +135,7 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	{
 		Con::cwar<<"WARNING: Unable to blur menu background image: '"<<e.what()<<"'!"<<Con::endl;
 	}
-	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture();
+	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this();
 
 	auto *pImgPrev = m_hImgPrev.get<WITexturedRect>();
 	auto *pImgNext = m_hImgNext.get<WITexturedRect>();
@@ -152,22 +158,21 @@ void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 	if(m_files.empty() == false || m_hImgNext.IsValid() == false)
 		return;
 	// No images available; Generate a black image and apply it
-	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit;
 	createInfo.width = 1u;
 	createInfo.height = 1u;
-	createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	createInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
+	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	std::array<uint8_t,4> px = {0u,0u,0u,std::numeric_limits<uint8_t>::max()};
-	auto img = prosper::util::create_image(dev,createInfo,px.data());
+	auto img = c_engine->CreateImage(createInfo,px.data());
 	if(img != nullptr)
 	{
 		prosper::util::TextureCreateInfo texCreateInfo {};
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::REPEAT;
-		auto tex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+		samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::Repeat;
+		auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 		if(tex != nullptr)
 		{
 			auto *pImgNext = m_hImgNext.get<WITexturedRect>();

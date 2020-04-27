@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/model/modelmanager.h"
@@ -46,6 +53,8 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		{"TYPE_TEXTURE",umath::to_integral(pragma::asset::Type::Texture)},
 		{"TYPE_AUDIO",umath::to_integral(pragma::asset::Type::Sound)}
 	});
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","MODEL_FILE_EXTENSION","wmd");
+	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","MATERIAL_FILE_EXTENSION","wmi");
 }
 int32_t Lua::asset::exists(lua_State *l)
 {

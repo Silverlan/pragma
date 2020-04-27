@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENGINE_H__
 #define __C_ENGINE_H__
 
@@ -193,7 +200,7 @@ public:
 	// used for offline rendering (i.e. recording).
 	void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 protected:
-	void DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
+	void DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
@@ -201,7 +208,7 @@ protected:
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
-	virtual void DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
+	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
 	virtual void OnClose() override;
 	virtual void RegisterConsoleCommands() override;
 	void InitializeStagingTarget();

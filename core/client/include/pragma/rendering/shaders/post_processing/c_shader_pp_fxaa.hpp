@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_PP_FXAA_HPP__
 #define __C_SHADER_PP_FXAA_HPP__
 
@@ -9,7 +16,7 @@ namespace pragma
 		: public ShaderPPBase
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
 #pragma pack(push,1)
 		struct DLLCLIENT PushConstants
@@ -25,10 +32,10 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPPFXAA(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
+		bool Draw(prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

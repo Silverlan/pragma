@@ -1,10 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/game/c_game.h"
 #include <pragma/console/convars.h>
 #include "pragma/networking/netmessages.h"
 #include "cmaterialmanager.h"
-#include "pragma/rendering/shaders/c_shader.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
@@ -107,11 +113,11 @@ ClientState::ClientState()
 
 	RegisterCallback<void>("Draw");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PreRender");
 	RegisterCallback<
-			void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnReceivePacket");
@@ -414,48 +420,48 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 	return cvar;
 }
 
-void ClientState::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &img)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+void ClientState::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &img)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 	if(m_game != nullptr)
 		GetGameState()->RenderScenes(drawCmd,img);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
 	{
 		auto img = rt->GetTexture().lock()->GetImage().lock();
-		prosper::util::record_image_barrier(
+		.RecordImageBarrier(
 			*drawCmd,*img,
 			vk::PipelineStageFlagBits::eColorAttachmentOutput,vk::PipelineStageFlagBits::eTransfer,
-			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,
+			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal,
 			vk::AccessFlagBits::eColorAttachmentWrite,vk::AccessFlagBits::eTransferRead
 		);
 	}*/
 	CallCallbacks("Draw"); // Don't call this more than once to prevent infinite loops
 }
 
-void ClientState::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
+void ClientState::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	CallCallbacks<
-		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PreRender",std::ref(drawCmd),std::ref(rt));
 	if(m_game != nullptr)
 	{
 		m_game->CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 		>("PreRender",std::ref(drawCmd),std::ref(rt));
 		m_game->CallLuaCallbacks("PreRender");
 	}
-	Draw(drawCmd,*rt->GetTexture()->GetImage());
+	Draw(drawCmd,rt->GetTexture().GetImage());
 	if(m_game != nullptr)
 	{
 		m_game->CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 		>("PostRender",std::ref(drawCmd),std::ref(rt));
 		m_game->CallLuaCallbacks("PostRender");
 	}
 	CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender",std::ref(drawCmd),std::ref(rt));
 }

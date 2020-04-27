@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_vector.h"
@@ -522,26 +529,20 @@ void Lua::Model::register_class(
 			Lua::SetTableValue(l,t);
 		}
 	}));
+	classDefFlex.def("GetFrameIndex",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
+		Lua::PushInt(l,flex.GetFrameIndex());
+	}));
 	classDefFlex.def("GetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
 		auto anim = flex.GetVertexAnimation() ? flex.GetVertexAnimation()->shared_from_this() : nullptr;
 		if(anim == nullptr)
 			return;
 		Lua::Push<std::shared_ptr<::VertexAnimation>>(l,anim);
 	}));
-	classDefFlex.def("GetMeshVertexAnimation",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
-		auto anim = flex.GetMeshVertexAnimation() ? flex.GetMeshVertexAnimation()->shared_from_this() : nullptr;
-		if(anim == nullptr)
-			return;
-		Lua::Push<std::shared_ptr<::MeshVertexAnimation>>(l,anim);
+	classDefFlex.def("SetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&,::VertexAnimation&,uint32_t)>([](lua_State *l,::Flex &flex,::VertexAnimation &anim,uint32_t frameIndex) {
+		flex.SetVertexAnimation(anim,frameIndex);
 	}));
-	classDefFlex.def("GetMeshVertexFrame",static_cast<void(*)(lua_State*,::Flex&)>([](lua_State *l,::Flex &flex) {
-		auto frame = flex.GetMeshVertexFrame() ? flex.GetMeshVertexFrame()->shared_from_this() : nullptr;
-		if(frame == nullptr)
-			return;
-		Lua::Push<std::shared_ptr<::MeshVertexFrame>>(l,frame);
-	}));
-	classDefFlex.def("SetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&,::VertexAnimation&,::MeshVertexAnimation&,::MeshVertexFrame&)>([](lua_State *l,::Flex &flex,::VertexAnimation &anim,::MeshVertexAnimation &meshAnim,::MeshVertexFrame &meshFrame) {
-		flex.SetVertexAnimation(anim,meshAnim,meshFrame);
+	classDefFlex.def("SetVertexAnimation",static_cast<void(*)(lua_State*,::Flex&,::VertexAnimation&)>([](lua_State *l,::Flex &flex,::VertexAnimation &anim) {
+		flex.SetVertexAnimation(anim);
 	}));
 	classDefFlex.add_static_constant("OP_NONE",umath::to_integral(::Flex::Operation::Type::None));
 	classDefFlex.add_static_constant("OP_CONST",umath::to_integral(::Flex::Operation::Type::Const));

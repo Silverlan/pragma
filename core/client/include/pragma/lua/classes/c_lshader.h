@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_LSHADER_H__
 #define __C_LSHADER_H__
 
@@ -182,18 +189,18 @@ namespace Lua
 		{
 			DLLCLIENT void GetRenderPass(lua_State *l,uint32_t pipelineIdx);
 			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView);
-			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSet);
+			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
 		};
 
 		namespace SceneLit3D
 		{
-			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSetShadowMaps,std::shared_ptr<Anvil::DescriptorSetGroup> &descSetLightSources);
+			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetShadowMaps,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetLightSources);
 			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 		};
 
 		namespace ShaderEntity
 		{
-			DLLCLIENT void BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<Anvil::DescriptorSetGroup> &descSet);
+			DLLCLIENT void BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
 			DLLCLIENT void BindEntity(lua_State *l,pragma::ShaderEntity &shader,EntityHandle &hEnt);
 			DLLCLIENT void BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset);
 			DLLCLIENT void Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh);
@@ -220,52 +227,4 @@ namespace Lua
 	};
 };
 
- // prosper TODO
-#if 0
-#include "pragma/clientdefinitions.h"
-#include <pragma/lua/ldefinitions.h>
-
-namespace Shader {class Base; class Debug;};
-namespace Lua
-{
-	namespace Vulkan {class DescriptorSetHandleOwner; class BufferHandleOwner;};
-	namespace shader
-	{
-		DLLCLIENT int register_shader(lua_State *l);
-		DLLCLIENT int get(lua_State *l);
-		DLLCLIENT bool push(lua_State *l,::Shader::Base &shader);
-	};
-	namespace Shader
-	{
-		DLLCLIENT void GenerateDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t layoutId);
-		DLLCLIENT void GenerateSwapDescriptorBuffer(lua_State *l,::Shader::Base &shader,uint32_t layoutId,uint32_t usage,uint32_t size);
-		DLLCLIENT void PushConstants(lua_State *l,::Shader::Base &shader,uint32_t shaderStages,::DataStream &ds);
-		DLLCLIENT void PushConstants(lua_State *l,::Shader::Base &shader,uint32_t shaderStages,uint32_t offset,::DataStream &ds);
-		DLLCLIENT void BindDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t firstSet,Vulkan::DescriptorSetHandleOwner &hDescSet,uint32_t dynamicOffset);
-		DLLCLIENT void BindDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t firstSet,Vulkan::DescriptorSetHandleOwner &hDescSet);
-		DLLCLIENT void BeginDraw(lua_State *l,::Shader::Base &shader);
-		DLLCLIENT void EndDraw(lua_State *l,::Shader::Base &shader);
-		DLLCLIENT void SetBuffer(lua_State *l,::Shader::Base &shader,uint32_t setIdx,::Vulkan::MultiBuffer &hBuffer,uint32_t bindingPoint);
-		DLLCLIENT void SetBuffer(lua_State *l,::Shader::Base &shader,uint32_t setIdx,::Vulkan::MultiBuffer &hBuffer);
-		DLLCLIENT void GetDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t setIdx,uint32_t bindingPoint,uint32_t baseIndex);
-		DLLCLIENT void GetDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t setIdx,uint32_t bindingPoint);
-		DLLCLIENT void GetDescriptorSet(lua_State *l,::Shader::Base &shader,uint32_t setIdx);
-		namespace Debug
-		{
-			DLLCLIENT void BeginDraw(lua_State *l,::Shader::Debug &shader,std::shared_ptr<::Camera> &cam);
-			DLLCLIENT void Draw(lua_State *l,::Shader::Debug &shader,const Mat4 &m,Lua::Vulkan::DescriptorSetHandleOwner &hDescSet,Lua::Vulkan::BufferHandleOwner &hVertBuffer,uint32_t vertCount);
-			DLLCLIENT void Draw(lua_State *l,::Shader::Debug &shader,const Mat4 &m,Lua::Vulkan::DescriptorSetHandleOwner &hDescSet,Lua::Vulkan::BufferHandleOwner &hVertBuffer,Lua::Vulkan::BufferHandleOwner &hColorBuffer,uint32_t vertCount);
-		};
-		namespace TexturedBase3D
-		{
-			DLLCLIENT void BindScene(lua_State *l,::Shader::TexturedBase3D &shader,std::shared_ptr<::Scene> &scene);
-			DLLCLIENT void BindScene(lua_State *l,::Shader::TexturedBase3D &shader,std::shared_ptr<::Scene> &scene,bool bView);
-			DLLCLIENT void BindScene(lua_State *l,::Shader::TexturedBase3D &shader,std::shared_ptr<::Scene> &scene,bool bView,bool bLights);
-			DLLCLIENT void BindEntity(lua_State *l,::Shader::Base3D &shader,EntityHandle &hEnt);
-			DLLCLIENT void BindMaterial(lua_State *l,::Shader::TexturedBase3D &shader,Material *mat);
-			DLLCLIENT void Draw(lua_State *l,::Shader::Base3D &shader,std::shared_ptr<::ModelSubMesh> &mesh);
-		};
-	};
-};
-#endif
 #endif

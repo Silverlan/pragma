@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/model/c_modelmesh.h"
 #include <mathutil/umath.h>
@@ -30,10 +37,10 @@ void CModelMesh::AddSubMesh(const std::shared_ptr<CModelSubMesh> &subMesh) {m_su
 
 // These have to be separate buffers, because the base alignment of the sub-buffers has to match
 // the underlying data structure (otherwise the buffers would not be usable as storage buffers).
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_vertexBuffer = nullptr;
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_alphaBuffer = nullptr;
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_indexBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
 CModelSubMesh::CModelSubMesh()
 	: ModelSubMesh(),NormalMesh(),m_vkMesh(std::make_shared<pragma::VkMesh>())
 {}
@@ -41,10 +48,10 @@ CModelSubMesh::CModelSubMesh()
 CModelSubMesh::CModelSubMesh(const CModelSubMesh &other)
 	: ModelSubMesh(other),m_vkMesh(std::make_shared<pragma::VkMesh>(*other.m_vkMesh))
 {}
-const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() {return s_vertexBuffer;}
-const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
-const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() {return s_alphaBuffer;}
-const std::shared_ptr<prosper::DynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() {return s_indexBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() {return s_vertexBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() {return s_alphaBuffer;}
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() {return s_indexBuffer;}
 std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy() const {return std::make_shared<CModelSubMesh>(*this);}
 
 void CModelSubMesh::InitializeBuffers()
@@ -53,43 +60,43 @@ void CModelSubMesh::InitializeBuffers()
 		return;
 	// Initialize global vertex buffer
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = GLOBAL_MESH_VERTEX_BUFFER_SIZE;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.05f);
+	s_vertexBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
 	s_vertexBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global vertex weight buffer
 	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexWeightBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
+	s_vertexWeightBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
 	s_vertexWeightBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global alpha buffer
 	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_alphaBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
+	s_alphaBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
 	s_alphaBuffer->SetPermanentlyMapped(true);
 
 	// Initialize global index buffer
 	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::INDEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_indexBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,createInfo.size *4u,0.025f);
+	s_indexBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
 	s_indexBuffer->SetPermanentlyMapped(true);
 }

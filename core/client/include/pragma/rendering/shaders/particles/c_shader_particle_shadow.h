@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_PARTICLE_SHADOW_H__
 #define __C_SHADER_PARTICLE_SHADOW_H__
 // prosper TODO
@@ -70,12 +77,12 @@ template<class TBase>
 }
 
 template<class TBase>
-	void Shader::ParticleShadowBase<TBase>::InitializeRenderPasses() {m_renderPasses = {m_context->GenerateRenderPass(Anvil::Format::D32_SFLOAT)};}
+	void Shader::ParticleShadowBase<TBase>::InitializeRenderPasses() {m_renderPasses = {m_context->GenerateRenderPass(prosper::Format::D32_SFloat)};}
 
 template<class TBase>
 	void Shader::ParticleShadowBase<TBase>::InitializePushConstants(std::vector<Vulkan::PushConstantRange> &pushConstants) const
 {
-	pushConstants.push_back({Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT,0,31});
+	pushConstants.push_back({prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0,31});
 }
 
 template<class TBase>
@@ -85,14 +92,14 @@ template<class TBase>
 	InitializePushConstants(pushConstants);
 
 	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // Particle Map
+		{prosper::DescriptorType::CombinedImageSampler,prosper::ShaderStageFlags::FragmentBit} // Particle Map
 	}));
 	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // Animation
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit} // Animation
 	}));
 
 	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT} // Time
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit} // Time
 	}));
 }
 template<class TBase>

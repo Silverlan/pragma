@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SCI_GPU_TIMER_MANAGER_HPP__
 #define __C_SCI_GPU_TIMER_MANAGER_HPP__
 
@@ -62,17 +69,17 @@ namespace pragma
 			: public ProfilingStage
 		{
 		public:
-			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler,const std::string &name,Anvil::PipelineStageFlagBits stage,GPUProfilingStage *parent=nullptr);
+			static std::shared_ptr<GPUProfilingStage> Create(Profiler &profiler,const std::string &name,prosper::PipelineStageFlags stage,GPUProfilingStage *parent=nullptr);
 			const GPUSwapchainTimer &GetTimer() const;
 			GPUSwapchainTimer &GetTimer();
 
-			Anvil::PipelineStageFlagBits GetPipelineStage() const;
+			prosper::PipelineStageFlags GetPipelineStage() const;
 		private:
 			using ProfilingStage::ProfilingStage;
 			virtual void InitializeTimer() override;
 			GPUProfiler &GetProfiler();
 			GPUProfilingStage *GetParent();
-			Anvil::PipelineStageFlagBits m_stage;
+			prosper::PipelineStageFlags m_stage;
 		};
 
 		class DLLCENGINE GPUProfiler
@@ -81,7 +88,7 @@ namespace pragma
 		public:
 			virtual void Initialize() override;
 			void Reset();
-			std::shared_ptr<Timer> CreateTimer(Anvil::PipelineStageFlagBits stage);
+			std::shared_ptr<Timer> CreateTimer(prosper::PipelineStageFlags stage);
 		private:
 			GPUProfiler();
 			std::shared_ptr<prosper::QueryPool> m_timerQueryPool = nullptr;

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/asset_types/world.hpp"
 #include "pragma/level/level_info.hpp"
@@ -96,7 +103,32 @@ const std::vector<pragma::asset::Output> &pragma::asset::EntityData::GetOutputs(
 std::vector<pragma::asset::Output> &pragma::asset::EntityData::GetOutputs() {return m_outputs;}
 const std::vector<uint16_t> &pragma::asset::EntityData::GetLeaves() const {return const_cast<EntityData*>(this)->GetLeaves();}
 std::vector<uint16_t> &pragma::asset::EntityData::GetLeaves() {return m_leaves;}
+std::optional<std::string> pragma::asset::EntityData::GetKeyValue(const std::string &key) const
+{
+	auto it = m_keyValues.find(key);
+	return (it != m_keyValues.end()) ? it->second : std::optional<std::string>{};
+}
+std::string pragma::asset::EntityData::GetKeyValue(const std::string &key,const std::string &default) const
+{
+	auto val = GetKeyValue(key);
+	return val.has_value() ? *val : default;
+}
 const Vector3 &pragma::asset::EntityData::GetOrigin() const {return m_origin;}
+pragma::physics::Transform pragma::asset::EntityData::GetPose() const
+{
+	auto origin = GetOrigin();
+	physics::Transform pose {};
+	pose.SetOrigin(origin);
+	auto &keyValues = GetKeyValues();
+	auto itAngles = keyValues.find("angles");
+	if(itAngles != keyValues.end())
+	{
+		auto &ang = EulerAngles{itAngles->second};
+		auto rot = uquat::create(ang);
+		pose.SetRotation(rot);
+	}
+	return pose;
+}
 
 void pragma::asset::EntityData::GetLeafData(uint32_t &outFirstLeaf,uint32_t &outNumLeaves) const
 {

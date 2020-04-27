@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -12,7 +19,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows)
+void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows)
 {
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
@@ -35,43 +42,25 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 	auto &staticDepthImg = csm.GetDepthTexture(pragma::CLightComponent::ShadowMapType::Static)->GetImage();
 	csm.RenderBatch(drawCmd,light);
 
-	// prosper TODO: Remove this block?:
-	/*auto w = staticDepthImg->GetWidth();
-	auto h = staticDepthImg->GetHeight();
-	if(shaderCsm.BeginDraw(drawCmd,w,h) == true)
-	{
-	shaderCsm.BindLight(*dirLight);
-	// Render static entities
-	csm.RenderBatch(*dirLight);
-	shaderCsm.EndDraw();
-	}*/
-
 	// Render dynamic objects
 	for(auto rp : renderPasses)
 	{
 		if(pLightComponent->ShouldUpdateRenderPass(rp) == false)
 			continue;
-		auto &tex = csm.GetDepthTexture(rp);
+		auto *tex = csm.GetDepthTexture(rp);
 		if(tex == nullptr)
 			continue;
 		auto bDynamic = (rp == pragma::CLightComponent::ShadowMapType::Dynamic) ? true : false;
 		if(bDynamic == true)
-			;//staticDepthImg->SetDrawLayout(Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+			;//staticDepthImg->SetDrawLayout(prosper::ImageLayout::TransferSrcOptimal);
 		else
 			;//pLightComponent->SetStaticResolved(true);
 
 		auto &rt = csm.GetRenderTarget(rp);
-		auto &renderPass = csm.GetRenderPass(rp);
+		auto *renderPass = csm.GetRenderPass(rp);
 		auto &img = tex->GetImage();
 
 		auto numLayers = csm.GetLayerCount();
-		/*if(rp == CLightBase::RenderPass::Dynamic)
-		{
-		// Blit static shadow buffer to dynamic shadow buffer (Static shadows have to be rendered first!)
-		shadow->GetDepthTexture(CLightBase::RenderPass::Static)->GetImage()->SetDrawLayout(Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		img->SetDrawLayout(Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-		drawCmd->BlitImage(shadow->GetDepthTexture(CLightBase::RenderPass::Static)->GetImage(),img,vk::ImageSubresourceLayers{img->GetAspectFlags(),0,0,numLayers},vk::ImageSubresourceLayers{img->GetAspectFlags(),0,0,numLayers});
-		}*/
 
 		auto clearValues = {
 			vk::ClearValue{vk::ClearDepthStencilValue{1.f,0}} // Depth Attachment
@@ -127,46 +116,30 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 		}
 
 		auto bHasTranslucent = false;
-		//auto layout = img->GetLayout(); // prosper TODO
-		//auto layoutStatic = (staticDepthImg != nullptr) ? staticDepthImg->GetLayout() : vk::ImageLayout::eUndefined; // prosper TODO
 		for(auto layer=decltype(numLayers){0};layer<numLayers;++layer)
 		{
-			//drawCmd->SetImageLayout(img,layout,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,0u,1u,layer,1); // prosper TODO
-			//img->SetInternalLayout(Anvil::ImageLayout::TRANSFER_DST_OPTIMAL); // prosper TODO
-			prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,layer);
+			drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal,layer);
 
 			prosper::util::ClearImageInfo clearImageInfo {};
 			clearImageInfo.subresourceRange.baseArrayLayer = layer;
 			clearImageInfo.subresourceRange.layerCount = 1u;
-			prosper::util::record_clear_image(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,1.f,clearImageInfo); // Clear this layer
+			drawCmd->RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,1.f,clearImageInfo); // Clear this layer
 			auto &framebuffer = csm.GetFramebuffer(rp,layer);
 
-			prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,layer);
+			drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,layer);
 
-			//drawCmd->SetImageLayout(img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,0u,1u,layer,1); // prosper TODO
-			//img->SetInternalLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
 			if(bDynamic == true)
 			{
-				// Blit static shadow buffer to dynamic shadow buffer (Static shadows have to be rendered first!)
-				//drawCmd->SetImageLayout(staticDepthImg,layoutStatic,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,0u,1u,layer,1); // prosper TODO
-				//staticDepthImg->SetInternalLayout(Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL); // prosper TODO
-
-				//drawCmd->SetImageLayout(img,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,0u,1u,layer,1); // prosper TODO
-				//img->SetInternalLayout(Anvil::ImageLayout::TRANSFER_DST_OPTIMAL); // prosper TODO
-
-				prosper::util::record_image_barrier(*(*drawCmd),*(*staticDepthImg),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,layer);
-				prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,layer);
+				drawCmd->RecordImageBarrier(staticDepthImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal,layer);
+				drawCmd->RecordImageBarrier(img,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal,layer);
 
 				prosper::util::BlitInfo blitInfo {};
-				blitInfo.srcSubresourceLayer.base_array_layer = blitInfo.dstSubresourceLayer.base_array_layer = layer;
-				blitInfo.srcSubresourceLayer.layer_count = blitInfo.dstSubresourceLayer.layer_count = 1u;
-				prosper::util::record_blit_image(*(*drawCmd),blitInfo,*(*staticDepthImg),*(*img));
+				blitInfo.srcSubresourceLayer.baseArrayLayer = blitInfo.dstSubresourceLayer.baseArrayLayer = layer;
+				blitInfo.srcSubresourceLayer.layerCount = blitInfo.dstSubresourceLayer.layerCount = 1u;
+				drawCmd->RecordBlitImage(blitInfo,staticDepthImg,img);
 
-				prosper::util::record_image_barrier(*(*drawCmd),*(*staticDepthImg),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,layer);
-				prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,layer);
-
-				//drawCmd->SetImageLayout(img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,0u,1u,layer,1); // prosper TODO
-				//img->SetInternalLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // Barriers need to be inserted again // prosper TODO
+				drawCmd->RecordImageBarrier(staticDepthImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,layer);
+				drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,layer);
 			}
 
 			// Update entity render buffers (has to be done before render pass has started)
@@ -186,7 +159,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 			}
 			//
 
-			prosper::util::record_begin_render_pass(*(*drawCmd),*rt,layer);
+			drawCmd->RecordBeginRenderPass(*rt,layer);
 
 			// Draw entities
 			const auto fDraw = [this,layerFlag,layer,&drawCmd,&csm](pragma::ShaderShadowCSM &shader,bool bTranslucent) -> bool {
@@ -255,32 +228,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuf
 				}
 			}
 
-			prosper::util::record_end_render_pass(*(*drawCmd));
-
-			/*if(type == LightType::Directional && entWorld != nullptr)
-			{
-			auto *cmdBuffer = static_cast<CLightDirectional*>(light)->GetShadowCommandBuffer(i);
-			if(cmdBuffer != nullptr)
-			{
-			auto *shadowCsm = static_cast<ShadowMapCasc*>(shadow);
-			drawCmd->BeginRenderPass(shadowCsm->GetRenderPassKeep(),shadowCsm->GetFramebufferKeep(i),w,h,clearValues,vk::SubpassContents::eSecondaryCommandBuffers);
-			if(static_cast<Shader::Base*>(worldShader)->BeginDraw() == true)
-			{
-			drawCmd->SetViewport(w,h);
-			drawCmd->SetScissor(w,h); // Required, but why? We don't have a dynamic scissor state...
-			auto idx = (*cmdBuffer)->Swap();
-			auto entMvp = static_cast<ShadowMapCasc*>(shadow)->GetViewProjectionMatrix(i) *(*entWorld->GetTransformationMatrix());
-			auto &buf = *scene->GetCSMShadowBuffer(i,idx);
-			buf->MapMemory(&entMvp,true);
-
-			drawCmd->ExecuteCommand(*(*cmdBuffer)->GetCommandBuffer(idx));
-			static_cast<Shader::Base*>(worldShader)->EndDraw();
-			}
-			drawCmd->EndRenderPass();
-			}
-			}*/
+			drawCmd->RecordEndRenderPass();
 		}
-		//if(bDynamic == true)
-		//	pLightComponent->PostRenderShadow();
 	}
 }

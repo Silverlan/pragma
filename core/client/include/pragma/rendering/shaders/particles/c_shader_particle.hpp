@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_PARTICLE_HPP__
 #define __C_SHADER_PARTICLE_HPP__
 
@@ -25,7 +32,7 @@ namespace pragma
 			WorldRotation = umath::to_integral(ShaderParticle2DBase::VertexAttribute::Count)
 		};
 
-		bool BindWorldRotationBuffer(Anvil::Buffer &buffer);
+		bool BindWorldRotationBuffer(prosper::IBuffer &buffer);
 		ShaderParticleRotational(prosper::Context &context,const std::string &identifier);
 	protected:
 		virtual void GetParticleSystemOrientationInfo(
@@ -35,27 +42,5 @@ namespace pragma
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
-
-// prosper TODO
-#if 0
-#include "pragma/rendering/shaders/world/c_shader_textured.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_base.h"
-
-namespace Shader
-{
-	class DLLCLIENT Particle
-		: public ParticleBase
-	{
-	public:
-		Particle();
-	};
-	class DLLCLIENT ParticleUnlit
-		: public ParticleBase
-	{
-	public:
-		ParticleUnlit();
-	};
-};
-#endif
 
 #endif

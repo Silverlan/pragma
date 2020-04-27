@@ -1,8 +1,14 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __WIIMAGESLIDESHOW_H__
 #define __WIIMAGESLIDESHOW_H__
 
 #include "pragma/clientdefinitions.h"
-#include "pragma/gui/wibaseblur.h"
 #include <wgui/types/wirect.h>
 #include <sharedutils/chronotime.h>
 #include <deque>
@@ -18,7 +24,7 @@ namespace prosper
 
 class GLFrameBuffer;
 class DLLCLIENT WIImageSlideShow
-	: public WIBase,public WIBaseBlur
+	: public WIBase
 {
 private:
 	struct PreloadImage

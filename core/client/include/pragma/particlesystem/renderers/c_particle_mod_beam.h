@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_PARTICLE_MOD_BEAM_H__
 #define __C_PARTICLE_MOD_BEAM_H__
 
@@ -11,8 +18,8 @@ class DLLCLIENT CParticleRendererBeam
 public:
 	CParticleRendererBeam()=default;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
-	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
+	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual void OnParticleSystemStopped() override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const override;
@@ -25,8 +32,8 @@ private:
 		Vector4 color = {};
 	};
 #pragma pack(pop)
-	std::shared_ptr<prosper::Buffer> m_vertexBuffer = nullptr;
-	std::shared_ptr<prosper::Buffer> m_indexBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 	uint32_t m_startNode = 0u;
 	uint32_t m_endNode = 0u;
 	uint32_t m_nodeCount = 0u;

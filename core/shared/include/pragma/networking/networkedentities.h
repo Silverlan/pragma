@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #define LINK_NETWORKED_PHYSICS_ENTITIES \
 	LINK_NETWORKED_ENTITY(PointConstraintBallSocket,CPointConstraintBallSocket); \
 	LINK_NETWORKED_ENTITY(PointConstraintConeTwist,CPointConstraintConeTwist); \
@@ -152,7 +159,6 @@
 	#include "pragma/entities/func/c_func_brush.h"
 	#include "pragma/entities/environment/c_env_microphone.h"
 	#include "pragma/entities/func/c_func_kinematic.hpp"
-	#include "pragma/entities/c_npc_dragonworm.h"
 	#include "pragma/entities/c_bot.h"
 	#include "pragma/entities/point/c_point_target.h"
 	#include "pragma/entities/c_wheel.hpp"

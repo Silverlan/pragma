@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -12,15 +19,15 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 
 
-decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
+decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_CAMERA) ShaderSkybox::DESCRIPTOR_SET_CAMERA = {&ShaderEntity::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderSkybox::DESCRIPTOR_SET_MATERIAL) ShaderSkybox::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Skybox Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Skybox Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -43,7 +50,7 @@ void ShaderSkybox::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 	pipelineInfo.toggle_depth_test(false,Anvil::CompareOp::ALWAYS);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
@@ -51,24 +58,23 @@ void ShaderSkybox::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 	ToggleDynamicScissorState(pipelineInfo,true);
 }
 
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderSkybox::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto &dev = c_engine->GetDevice();
 	auto *skyboxMap = mat.GetTextureInfo("skybox");
 	if(skyboxMap == nullptr || skyboxMap->texture == nullptr)
 		return nullptr;
 	auto skyboxTexture = std::static_pointer_cast<Texture>(skyboxMap->texture);
 	if(skyboxTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSet,*skyboxTexture->GetVkTexture(),0u);
+	descSet.SetBindingTexture(*skyboxTexture->GetVkTexture(),0u);
 	return descSetGroup;
 }
 uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 bool ShaderSkybox::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
 	const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags
 )
 {
@@ -93,8 +99,8 @@ bool ShaderSkybox::BindSceneCamera(const pragma::rendering::RasterizationRendere
 	return RecordPushConstants(PushConstants{origin}) == true;
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
-bool ShaderSkybox::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) {return true;}
-bool ShaderSkybox::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources) {return true;}
+bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}
+bool ShaderSkybox::BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
 bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(mesh,false);}
 

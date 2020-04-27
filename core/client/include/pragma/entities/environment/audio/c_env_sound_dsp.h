@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_SOUND_DSP_H__
 #define __C_ENV_SOUND_DSP_H__
 
@@ -55,36 +62,4 @@ public:
 	virtual void Initialize() override;
 };
 
-/*
-#include "pragma/clientdefinitions.h"
-#include "pragma/entities/c_baseentity.h"
-#include "pragma/entities/environment/audio/env_sound_dsp.h"
-#include <alsound_source.hpp>
-#include <memory>
-
-class DLLCLIENT CEnvSoundDsp
-	: public CBaseEntity,
-	public BaseEnvSoundDsp
-{
-protected:
-	static std::vector<CEnvSoundDsp*> s_soundDsps;
-	std::shared_ptr<al::Effect> m_dsp = nullptr;
-	bool m_bGloballyActive = false;
-	uint8_t m_bAffectGlobal;
-	std::vector<al::SoundSourceHandle> m_affected;
-	void AttachSound(std::shared_ptr<ALSound> &ptrSnd);
-	void DetachSound(int idx);
-	bool IsActive() const;
-	void ThinkRelativeToPlayer();
-	void ThinkRelativeToSound();
-public:
-	CEnvSoundDsp();
-	virtual ~CEnvSoundDsp() override;
-	virtual void ReceiveData(NetPacket &packet) override;
-	virtual void Spawn() override;
-	virtual void Think(double tDelta) override;
-	void SetDSPGlobal(bool b);
-	void SetGloballyActive(bool b);
-};
-*/
 #endif

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
 #include "pragma/lua/classes/lvector.h"
@@ -27,7 +34,6 @@
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/libraries/lregex.h"
 #include "pragma/lua/classes/ldata.hpp"
-#include "pragma/entities/basenpc.h"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/libraries/lstring.hpp"
 #include "pragma/util/giblet_create_info.hpp"
@@ -1442,6 +1448,24 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	}));
 	surfaceMatDef.def("GetWavePropagation",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
 		Lua::PushNumber(l,surfMat.GetWavePropagation());
+	}));
+	surfaceMatDef.def("GetPBRMetalness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::PushNumber(l,surfMat.GetPBRInfo().metalness);
+	}));
+	surfaceMatDef.def("GetPBRRoughness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::PushNumber(l,surfMat.GetPBRInfo().roughness);
+	}));
+	surfaceMatDef.def("GetSubsurfaceMultiplier",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::PushNumber(l,surfMat.GetPBRInfo().subsurfaceMultiplier);
+	}));
+	surfaceMatDef.def("GetSubsurfaceColor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::Push<Color>(l,surfMat.GetPBRInfo().subsurfaceColor);
+	}));
+	surfaceMatDef.def("GetSubsurfaceMethod",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::PushInt(l,umath::to_integral(surfMat.GetPBRInfo().subsurfaceMethod));
+	}));
+	surfaceMatDef.def("GetSubsurfaceRadius",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurfaceRadius);
 	}));
 	gameMod[surfaceMatDef];
 

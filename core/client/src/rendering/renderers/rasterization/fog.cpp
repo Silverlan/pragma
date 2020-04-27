@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/world_environment.hpp"
@@ -12,7 +19,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto &scene = GetScene();
 	auto &hdrInfo = GetHDRInfo();
@@ -36,46 +43,46 @@ void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::PrimaryComma
 		if(texDepth->IsMSAATexture())
 		{
 			texDepth = static_cast<prosper::MSAATexture&>(*texDepth).Resolve(
-				*(*drawCmd),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+				*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
+				prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
 			);
 		}
 		else
-			prosper::util::record_image_barrier(*(*drawCmd),*(*texDepth->GetImage()),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		//texDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		//texDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 		auto &hdrTex = hdrInfo.sceneRenderTarget->GetTexture();
-		prosper::util::record_image_barrier(*(*drawCmd),*(*hdrTex->GetImage()),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.hdrPostProcessingRenderTarget) == true)
+		drawCmd->RecordImageBarrier(hdrTex.GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 		{
 			if(shaderFog.BeginDraw(drawCmd) == true)
 			{
-				prosper::util::record_buffer_barrier(
-					**drawCmd,*scene.GetCameraBuffer(),
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*scene.GetCameraBuffer(),
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 				);
-				prosper::util::record_buffer_barrier(
-					**drawCmd,*scene.GetRenderSettingsBuffer(),
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*scene.GetRenderSettingsBuffer(),
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 				);
-				prosper::util::record_buffer_barrier(
-					**drawCmd,*scene.GetFogBuffer(),
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*scene.GetFogBuffer(),
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 				);
 				shaderFog.Draw(
-					*(*hdrInfo.dsgHDRPostProcessing)->get_descriptor_set(0u),
-					*(*hdrInfo.dsgDepthPostProcessing)->get_descriptor_set(0u),
-					**scene.GetCameraDescriptorSetGraphics(),
-					*(*scene.GetFogDescriptorSetGroup())->get_descriptor_set(0u)
+					*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
+					*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),
+					*scene.GetCameraDescriptorSetGraphics(),
+					*scene.GetFogDescriptorSetGroup()->GetDescriptorSet()
 				);
 				shaderFog.EndDraw();
 			}
-			prosper::util::record_end_render_pass(*(*drawCmd));
+			drawCmd->RecordEndRenderPass();
 		}
-		prosper::util::record_image_barrier(*(*drawCmd),*(*texDepth->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 		hdrInfo.BlitStagingRenderTargetToMainRenderTarget(*drawCmd);
 	}

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __RAYTRACES_H__
 #define __RAYTRACES_H__
 
@@ -5,8 +12,6 @@
 #include "pragma/physics/transform.hpp"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/physics/physobj.h"
-#include "pragma/physics/raycallback/physraycallback.hpp"
-#include "pragma/physics/raycallback/physraycallback_contact.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 #include <memory>
 

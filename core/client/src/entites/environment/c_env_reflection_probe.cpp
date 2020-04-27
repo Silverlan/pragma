@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -151,8 +158,8 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 		auto &setupCmd = c_engine->GetSetupCommandBuffer();
 		prosper::util::BufferImageCopyInfo copyInfo {};
 		copyInfo.baseArrayLayer = layerIndex;
-		copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		prosper::util::record_copy_buffer_to_image(**setupCmd,copyInfo,*tmpBuf,**cubemapImage);
+		copyInfo.dstImageLayout = prosper::ImageLayout::TransferDstOptimal;
+		setupCmd->RecordCopyBufferToImage(copyInfo,*tmpBuf,*cubemapImage);
 
 		c_engine->FlushSetupCommandBuffer();
 
@@ -274,7 +281,7 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 	BuildReflectionProbes(game,probes,rebuild);
 }
 
-Anvil::DescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity)
+prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity)
 {
 	if(c_game == nullptr)
 		return nullptr;
@@ -381,7 +388,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 		uimg::TextureInfo imgWriteInfo {};
 		imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
 		imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
-		if(c_game->SaveImage(*imgBrdf,"materials/env/brdf",imgWriteInfo) == false)
+		if(c_game->SaveImage(imgBrdf,"materials/env/brdf",imgWriteInfo) == false)
 		{
 			fErrorHandler("Unable to save BRDF map!");
 			return false;
@@ -392,12 +399,12 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	imgWriteInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
 	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::HDRColorMap;
 	auto prefix = identifier +"_";
-	if(c_game->SaveImage(*imgPrefilter,absPath +prefix +"prefilter",imgWriteInfo) == false)
+	if(c_game->SaveImage(imgPrefilter,absPath +prefix +"prefilter",imgWriteInfo) == false)
 	{
 		fErrorHandler("Unable to save prefilter map!");
 		return false;
 	}
-	if(c_game->SaveImage(*imgIrradiance,absPath +prefix +"irradiance",imgWriteInfo) == false)
+	if(c_game->SaveImage(imgIrradiance,absPath +prefix +"irradiance",imgWriteInfo) == false)
 	{
 		fErrorHandler("Unable to save irradiance map!");
 		return false;
@@ -472,21 +479,20 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	return job;
 }
 
-std::shared_ptr<prosper::Image> CReflectionProbeComponent::CreateCubemapImage()
+std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 {
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.format = Anvil::Format::R16G16B16A16_SFLOAT; // We need HDR colors for the cubemap
+	createInfo.format = prosper::Format::R16G16B16A16_SFloat; // We need HDR colors for the cubemap
 	createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
 	// The rendered cubemap itself will be discarded, so we render it at a high resolution
 	// to get the best results for the subsequent stages.
 	createInfo.width = CUBEMAP_LAYER_WIDTH;
 	createInfo.height = CUBEMAP_LAYER_HEIGHT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	createInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	auto &dev = c_engine->GetDevice();
-	return prosper::util::create_image(dev,createInfo);
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	createInfo.tiling = prosper::ImageTiling::Optimal;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
+	return c_engine->CreateImage(createInfo);
 }
 
 bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
@@ -605,26 +611,26 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	return FinalizeCubemap(*img);
 }
 
-bool CReflectionProbeComponent::FinalizeCubemap(prosper::Image &imgCubemap)
+bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 {
 	auto drawCmd = c_engine->GetSetupCommandBuffer();
 	// Generate cubemap mipmaps
-	prosper::util::record_image_barrier(**drawCmd,*imgCubemap,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-	prosper::util::record_generate_mipmaps(
-		**drawCmd,*imgCubemap,
-		Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,
-		Anvil::AccessFlagBits::TRANSFER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT
+	drawCmd->RecordImageBarrier(imgCubemap,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	drawCmd->RecordGenerateMipmaps(
+		imgCubemap,
+		prosper::ImageLayout::TransferSrcOptimal,
+		prosper::AccessFlags::TransferReadBit | prosper::AccessFlags::TransferWriteBit,
+		prosper::PipelineStageFlags::TransferBit
 	);
 	c_engine->FlushSetupCommandBuffer();
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-	auto tex = prosper::util::create_texture(c_engine->GetDevice(),{},imgCubemap.shared_from_this(),&imgViewCreateInfo,&samplerCreateInfo);
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.minFilter = prosper::Filter::Linear;
+	samplerCreateInfo.magFilter = prosper::Filter::Linear;
+	auto tex = c_engine->CreateTexture({},imgCubemap,imgViewCreateInfo,samplerCreateInfo);
 
 	Con::cout<<"Generating IBL reflection textures from reflection probe..."<<Con::endl;
 	auto result = GenerateIBLReflectionsFromCubemap(*tex);
@@ -748,21 +754,22 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		mat->GetDataBlock()->GetFloat("ibl_strength",&m_iblData->strength);
 
 	// TODO: Do this properly (e.g. via material attributes)
-	static auto brdfSamplerInitialized = false;
-	if(brdfSamplerInitialized == false)
+	//static auto brdfSamplerInitialized = false;
+	//if(brdfSamplerInitialized == false)
 	{
-		brdfSamplerInitialized = true;
+		//brdfSamplerInitialized = true;
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-		samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-		auto sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
+		samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.minFilter = prosper::Filter::Linear;
+		samplerCreateInfo.magFilter = prosper::Filter::Linear;
+		auto sampler = c_engine->CreateSampler(samplerCreateInfo);
 		texIrradiance->GetVkTexture()->SetSampler(*sampler);
+		texBrdf->GetVkTexture()->SetSampler(*sampler);
 
-		samplerCreateInfo.mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
-		sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
+		samplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
+		sampler = c_engine->CreateSampler(samplerCreateInfo);
 		texPrefilter->GetVkTexture()->SetSampler(*sampler);
 	}
 
@@ -776,14 +783,13 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 	m_iblDsg = nullptr;
 	if(m_iblData == nullptr)
 		return;
-	auto &dev = c_engine->GetDevice();
-	m_iblDsg = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	m_iblDsg = c_engine->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &ds = *m_iblDsg->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->irradianceMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
-	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->prefilterMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
-	prosper::util::set_descriptor_set_binding_texture(ds,*m_iblData->brdfMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));
+	ds.SetBindingTexture(*m_iblData->irradianceMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*m_iblData->prefilterMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*m_iblData->brdfMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::BRDFMap));
 
-	(*m_iblDsg)->get_descriptor_set(0u)->update();
+	m_iblDsg->GetDescriptorSet()->Update();
 }
 std::string CReflectionProbeComponent::GetCubemapIBLMaterialPath() const
 {
@@ -799,12 +805,19 @@ std::string CReflectionProbeComponent::GetCubemapIdentifier() const
 	auto identifier = std::to_string(pos.x) +std::to_string(pos.y) +std::to_string(pos.z);
 	return std::to_string(std::hash<std::string>{}(identifier));
 }
-Anvil::DescriptorSet *CReflectionProbeComponent::GetIBLDescriptorSet()
+prosper::IDescriptorSet *CReflectionProbeComponent::GetIBLDescriptorSet()
 {
-	return m_iblDsg ? (*m_iblDsg)->get_descriptor_set(0u) : nullptr;
+	return m_iblDsg ? m_iblDsg->GetDescriptorSet() : nullptr;
 }
 
 float CReflectionProbeComponent::GetIBLStrength() const {return m_iblData ? m_iblData->strength : 0.f;}
+
+void CReflectionProbeComponent::SetIBLStrength(float iblStrength)
+{
+	if(m_iblData == nullptr)
+		return;
+	m_iblData->strength = iblStrength;
+}
 
 const rendering::IBLData *CReflectionProbeComponent::GetIBLData() const {return m_iblData.get();}
 
@@ -891,7 +904,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 	pFrameBrdf->SizeToContents();
 	pBrdf->SetAnchor(0.f,0.f,1.f,1.f);
 
-	auto maxLod = brdfMap->GetImage()->GetMipmapCount();
+	auto maxLod = brdfMap->GetImage().GetMipmapCount();
 	if(maxLod > 1)
 	{
 		auto *pSlider = wgui.Create<WISlider>(pBrdf);
@@ -918,7 +931,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 	pFrameIrradiance->SizeToContents();
 	pIrradiance->SetAnchor(0.f,0.f,1.f,1.f);
 
-	maxLod = irradianceMap->GetImage()->GetMipmapCount();
+	maxLod = irradianceMap->GetImage().GetMipmapCount();
 	if(maxLod > 1)
 	{
 		auto *pSlider = wgui.Create<WISlider>(pIrradiance);
@@ -945,7 +958,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 	pFramePrefilter->SizeToContents();
 	pPrefilter->SetAnchor(0.f,0.f,1.f,1.f);
 
-	maxLod = prefilterMap->GetImage()->GetMipmapCount();
+	maxLod = prefilterMap->GetImage().GetMipmapCount();
 	if(maxLod > 1)
 	{
 		auto *pSlider = wgui.Create<WISlider>(pPrefilter);

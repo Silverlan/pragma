@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
@@ -96,10 +103,10 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
 				if(wpRenderBuffer.expired() == false)
 				{
-					prosper::util::record_buffer_barrier(
-						**drawCmd,*wpRenderBuffer.lock(),
-						Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-						Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+					drawCmd->RecordBufferBarrier(
+						*wpRenderBuffer.lock(),
+						prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
+						prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 					);
 					auto pAnimComponent = ent->GetAnimatedComponent();
 					if(pAnimComponent.valid())
@@ -107,10 +114,10 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 						auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent*>(pAnimComponent.get())->GetBoneBuffer();
 						if(wpBoneBuffer.expired() == false)
 						{
-							prosper::util::record_buffer_barrier(
-								**drawCmd,*wpBoneBuffer.lock(),
-								Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-								Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+							drawCmd->RecordBufferBarrier(
+								*wpBoneBuffer.lock(),
+								prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
+								prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 							);
 						}
 					}

@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #include "stdafx_server.h"
 #include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/entities/components/s_player_component.hpp"
@@ -67,78 +73,3 @@ void SLuaEntity::Remove()
 
 void SLuaEntityWrapper::Initialize() {}
 void SLuaEntityWrapper::default_Initialize(SLuaEntityWrapper *ent) {}
-
-#if 0
-#include "pragma/lua/classes/s_lua_entity.h"
-#include "pragma/lua/classes/ldef_entity.h"
-#include "pragma/physics/collision_object.hpp"
-
-DEFINE_DERIVED_CHILD_HANDLE(DLLSERVER,Entity,BaseEntity,Entity,SLuaEntity,SLuaEntity);
-void SLuaEntityHandle::Reset(PtrEntity *e)
-{
-	EntityHandle::reset(e);
-	m_bEmpty = false;
-}
-
-///////////////////////////////////////////
-
-SLuaBaseEntity::SLuaBaseEntity(luabind::object &o,BaseEntity *ent,std::string &className)
-	: LuaBaseEntity(ent,className),LuaObjectBase(o)
-{}
-// COMPONENT TODO
-/*Bool SLuaBaseEntity::ImplReceiveNetEvent(Player *pl,UInt32 eventId,NetPacket &packet)
-{
-	bool ret = false;
-	if(CallLuaMember<bool,luabind::object,UInt32,NetPacket>("ReceiveNetEvent",&ret,*pl->GetLuaObject(),eventId,packet) == CallbackReturnType::HasReturnValue)
-		return ret;
-	return false;
-}*/
-void SLuaBaseEntity::ImplSendData(NetPacket &packet,nwm::RecipientFilter &rp)
-{
-	CallLuaMember<void,NetPacket,nwm::RecipientFilter>("SendData",packet,rp);
-}
-
-///////////////////////////////////////////
-
-// COMPONENT TODO
-//DEFINE_LUA_ENTITY_BASE_FUNCTIONS(SLuaEntity,Entity,);
-// COMPONENT TODO
-//DEFINE_LUA_S_ENTITY_SPECIAL_FUNCTIONS(SLuaEntity,Entity);
-
-// COMPONENT TODO (Remove these)
-void SLuaEntity::DoSpawn()
-{
-}
-void SLuaEntity::OnPostSpawn()
-{
-}
-void SLuaEntity::Remove()
-{
-}
-//
-
-SLuaEntity::SLuaEntity(luabind::object &o,std::string &className)
-	: Entity(),SLuaBaseEntity(o,this,className)
-{
-	m_luaObj = new luabind::object(o);
-}
-
-SLuaEntity::~SLuaEntity()
-{}
-
-void SLuaEntity::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
-{
-	Entity::SendData(packet,rp);
-	SLuaBaseEntity::ImplSendData(packet,rp);
-}
-
-// COMPONENT TODO
-Bool SLuaEntity::ReceiveNetEvent(pragma::BasePlayerComponent *pl,UInt32 eventId,NetPacket &packet)
-{
-	return false;//(SLuaBaseEntity::ImplReceiveNetEvent(pl,eventId,packet) || Entity::ReceiveNetEvent(pl,eventId,packet)) ? true : false;
-}
-
-///////////////////////////////////////////
-
-//DEFINE_LUA_ENTITY_WRAPPER_BASE_FUNCTIONS(SLuaEntity);
-#endif

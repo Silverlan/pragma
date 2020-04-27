@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/input/inputhelper.h"
@@ -127,12 +134,40 @@ int Lua::engine::precache_model(lua_State *l)
 
 int Lua::engine::load_texture(lua_State *l)
 {
-	std::string tex = Lua::CheckString(l,1);
 	TextureManager::LoadInfo loadInfo {};
-	if(Lua::IsSet(l,2))
-		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
-	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ReloadTexture(tex,loadInfo);
-	return 0;
+
+	std::shared_ptr<void> tex = nullptr;
+	auto result = false;
+	if(Lua::IsString(l,1))
+	{
+		std::string fname = Lua::CheckString(l,1);
+		if(Lua::IsSet(l,2))
+			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
+		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,fname,loadInfo,&tex);
+	}
+	else
+	{
+		auto *lf = Lua::CheckFile(l,1);
+		if(lf == nullptr)
+			return 0;
+		std::optional<std::string> cacheName {};
+		int32_t loadFlagsIdx = 2;
+		if(Lua::IsNumber(l,2) == false)
+		{
+			cacheName = Lua::CheckString(l,2);
+			++loadFlagsIdx;
+		}
+		if(Lua::IsSet(l,loadFlagsIdx))
+			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,loadFlagsIdx));
+		if(cacheName.has_value() == false)
+			loadInfo.flags |= TextureLoadFlags::DontCache;
+		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
+	}
+	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+		return 0;
+	auto &vkTex = std::static_pointer_cast<Texture>(tex)->GetVkTexture();
+	Lua::Push(l,vkTex);
+	return 1;
 }
 
 int Lua::engine::load_material(lua_State *l)
@@ -553,41 +588,6 @@ int Lua::engine::save_particle_system(lua_State *l)
 	}
 	Lua::Pop(l,2);
 	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles));
-	return 1;
-}
-int Lua::engine::save_frame_buffer_as_tga(lua_State *l)
-{
-	std::string name = Lua::CheckString(l,1);
-	int x = Lua::CheckInt<int>(l,2);
-	int y = Lua::CheckInt<int>(l,3);
-	int w = Lua::CheckInt<int>(l,4);
-	int h = Lua::CheckInt<int>(l,5);
-	bool r;
-	if(!Lua::IsSet(l,6))
-		r = client->SaveFrameBufferAsTGA(name.c_str(),x,y,w,h);
-	else
-	{
-		unsigned int format = Lua::CheckInt<UInt32>(l,6);
-		r = client->SaveFrameBufferAsTGA(name.c_str(),x,y,w,h,format);
-	}
-	Lua::PushBool(l,r);
-	return 1;
-}
-int Lua::engine::save_texture_as_tga(lua_State *l)
-{
-	std::string name = Lua::CheckString(l,1);
-	bool r;
-	if(!Lua::IsSet(l,2))
-		r = client->SaveTextureAsTGA(name.c_str());
-	else
-	{
-		unsigned int target = Lua::CheckInt<UInt32>(l,2);
-		unsigned int level = 0;
-		if(Lua::IsSet(l,3))
-			level = Lua::CheckInt<UInt32>(l,3);
-		r = client->SaveTextureAsTGA(name.c_str(),target,level);
-	}
-	Lua::PushBool(l,r);
 	return 1;
 }
 int Lua::engine::create_texture(lua_State *l)

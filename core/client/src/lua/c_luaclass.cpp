@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_listener.h"
@@ -13,7 +20,6 @@
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
-#include "pragma/rendering/shaders/c_shaderlua.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
@@ -33,13 +39,9 @@
 #include "pragma/model/brush/c_brushmesh.h"
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/classes/c_lua_entity.h"
-#include "pragma/lua/c_lua_weapon.h"
-#include "pragma/lua/c_lua_vehicle.h"
-#include "pragma/lua/c_lua_npc.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/lua/libraries/c_ldebugoverlay.h"
-#include "pragma/rendering/shaders/debug/c_shader_debug.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
@@ -56,109 +58,12 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-//#define TEST_LUABIND_SMART_POINTE_DERIVED
-#ifdef TEST_LUABIND_SMART_POINTE_DERIVED
-namespace pragma
-{
-	struct LuaTestClass
-	{
-
-	};
-
-	struct LuaTestDerived
-		: public LuaTestClass
-	{
-
-	};
-};
-
-namespace util
-{
-	template<class T>
-		struct TestHandle
-	{
-	public:
-		TestHandle()=default;
-		TestHandle(T *o,float x,float y,float z) : object(o) {};
-		T *object = nullptr;
-	};
-};
-
-static void test_func(lua_State *l,pragma::LuaTestClass &o)
-{
-	std::cout<<"FUNC CALLED!"<<std::endl;
-}
-
-static void test_func_derived(lua_State *l,pragma::LuaTestDerived &o)
-{
-	std::cout<<"DERIVED CALLED!"<<std::endl;
-}
-
-static void test_func_derived_handle(lua_State *l,util::TestHandle<pragma::LuaTestDerived> &o)
-{
-	std::cout<<"DERIVED HANDLE CALLED!"<<std::endl;
-}
-
-//static std::shared_ptr<LuaTestClass> testObj = nullptr;
-static pragma::LuaTestDerived *testObj = nullptr;
-static int32_t test_create(lua_State *l)
-{
-	std::cout<<"CREATE CALLED!"<<std::endl;
-	testObj = new pragma::LuaTestDerived();//std::make_shared<LuaTestClass>();
-	Lua::Push<util::TestHandle<pragma::LuaTestDerived>>(l,util::TestHandle<pragma::LuaTestDerived>(testObj,1.f,1.f,1.f));
-	return 1;
-}
-
-static pragma::LuaTestClass *testObjBase = nullptr;
-static int32_t test_create_base(lua_State *l)
-{
-	std::cout<<"BASE CREATE CALLED!"<<std::endl;
-	testObjBase = new pragma::LuaTestClass();//std::make_shared<LuaTestClass>();
-	Lua::Push<util::TestHandle<pragma::LuaTestClass>>(l,util::TestHandle<pragma::LuaTestClass>(testObjBase,1.f,1.f,1.f));
-	return 1;
-}
-
-namespace pragma
-{
-	/*pragma::LuaTestClass *get_pointer(const util::TestHandle<pragma::LuaTestClass> &hObj)
-	{
-		return hObj.object;
-	}
-
-	pragma::LuaTestDerived *get_pointer(const util::TestHandle<pragma::LuaTestDerived> &hObj)
-	{
-		return hObj.object;
-	}*/
-	template<class T>
-		T *get_pointer(const util::TestHandle<T> &hObj)
-	{
-		return hObj.object;
-	}
-};
-#endif
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
 	auto defFontInfo = luabind::class_<FontInfo>("FontInfo");
 	modEngine[defFontInfo];
 
-#ifdef TEST_LUABIND_SMART_POINTE_DERIVED
-	// TEST
-	auto defTest = luabind::class_<pragma::LuaTestClass,util::TestHandle<pragma::LuaTestClass>>("LuaTestClass");
-	defTest.def("TestFunc",&test_func);
-	modEngine[defTest];
-
-	auto defTestDerived = luabind::class_<pragma::LuaTestDerived,pragma::LuaTestClass,util::TestHandle<pragma::LuaTestDerived>>("LuaTestDerived");
-	defTestDerived.def("TestDerived",&test_func_derived);
-	defTestDerived.def("TestDerivedHandle",&test_func_derived_handle);
-	modEngine[defTestDerived];
-	auto &vmod = lua.RegisterLibrary("test",std::unordered_map<std::string,int(*)(lua_State*)>{
-		{"create",test_create},
-			{"create_base",test_create_base}
-	});
-	//
-#endif
-	
 	auto &modUtil = lua.RegisterLibrary("util");
 	auto defTexture = luabind::class_<Texture>("Texture");
 	defTexture.def("GetWidth",&Lua::Texture::GetWidth);

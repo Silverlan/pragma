@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_LUA_VULKAN_H__
 #define __C_LUA_VULKAN_H__
 
@@ -8,34 +15,20 @@
 #include <image/prosper_sampler.hpp>
 #include <wrappers/memory_block.h>
 
-namespace Anvil
-{
-	class Image;
-	class ImageView;
-	class Framebuffer;
-	class RenderPass;
-	class Event;
-	class Fence;
-	class Semaphore;
-	class MemoryBlock;
-	class CommandBufferBase;
-	class DescriptorSetGroup;
-};
-
 namespace prosper
 {
 	class Texture;
-	class Image;
-	class ImageView;
-	class Buffer;
+	class IImage;
+	class IImageView;
+	class IBuffer;
 	class RenderTarget;
 	class TimestampQuery;
 	class TimerQuery;
-	class Sampler;
-	class Framebuffer;
+	class ISampler;
+	class IFramebuffer;
 	class RenderPass;
-	class CommandBuffer;
-	class DescriptorSetGroup;
+	class ICommandBuffer;
+	class IDescriptorSetGroup;
 };
 
 namespace vk
@@ -65,18 +58,18 @@ namespace Lua
 			vk::ClearValue clearValue {};
 		};
 		using Texture = prosper::Texture;
-		using Image = prosper::Image;
-		using ImageView = prosper::ImageView;
-		using Sampler = prosper::Sampler;
-		using Framebuffer = prosper::Framebuffer;
-		using RenderPass = prosper::RenderPass;
+		using Image = prosper::IImage;
+		using ImageView = prosper::IImageView;
+		using Sampler = prosper::ISampler;
+		using Framebuffer = prosper::IFramebuffer;
+		using RenderPass = prosper::IRenderPass;
 		using Event = Anvil::Event;
 		using Fence = Anvil::Fence;
 		using Semaphore = Anvil::Semaphore;
 		using Memory = Anvil::MemoryBlock;
-		using CommandBuffer = prosper::CommandBuffer;
-		using Buffer = prosper::Buffer;
-		using DescriptorSet = prosper::DescriptorSetGroup;
+		using CommandBuffer = prosper::ICommandBuffer;
+		using Buffer = prosper::IBuffer;
+		using DescriptorSet = prosper::IDescriptorSetGroup;
 		using RenderTarget = prosper::RenderTarget;
 		using TimestampQuery = prosper::TimestampQuery;
 		using TimerQuery = prosper::TimerQuery;

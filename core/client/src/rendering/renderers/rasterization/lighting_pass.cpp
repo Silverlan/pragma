@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -20,7 +27,7 @@ static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 
-void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto &scene = GetScene();
 	auto &cam = scene.GetActiveCamera();
@@ -37,91 +44,91 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 		auto &prepass = GetPrepass();
 		auto &dstDepthTex = *prepass.textureDepthSampled;
 		auto &ptrDstDepthImg = dstDepthTex.GetImage();
-		auto &dstDepthImg = *ptrDstDepthImg;
+		auto &dstDepthImg = ptrDstDepthImg;
 
 		auto &hdrInfo = GetHDRInfo();
-		std::function<void(prosper::CommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
+		std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 		hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
 
 		// If this being commented causes issues, check map test_particles for comparison
 		//sgDepthImg = [fTransitionSampleImgToTransferDst,drawCmd,ptrDstDepthImg]() { // Transfer destination image back to TransferDstOptimal layout after render pass has ended
-		//prosper::util::record_image_barrier(**drawCmd,**ptrDstDepthImg,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+		//.RecordImageBarrier(**drawCmd,**ptrDstDepthImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 		//fTransitionSampleImgToTransferDst(*drawCmd);
 		//};
 	}
 	m_bFrameDepthBufferSamplingRequired = false;
 
 	// Visible light tile index buffer
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
+		prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Entity instance buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*pragma::CRenderComponent::GetInstanceBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Entity bone buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*pragma::get_instance_bone_buffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*pragma::get_instance_bone_buffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,bufLightSources,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		bufLightSources,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Shadow data barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,bufShadowData,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		bufShadowData,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	auto &renderSettingsBufferData = c_game->GetGlobalRenderSettingsBufferData();
 	// Debug buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*renderSettingsBufferData.debugBuffer,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*renderSettingsBufferData.debugBuffer,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Time buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*renderSettingsBufferData.timeBuffer,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*renderSettingsBufferData.timeBuffer,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// CSM buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*renderSettingsBufferData.csmBuffer,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*renderSettingsBufferData.csmBuffer,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Camera buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*scene.GetCameraBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*scene.GetCameraBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Render settings buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*scene.GetRenderSettingsBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*scene.GetRenderSettingsBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	if(BeginRenderPass(drawCmd) == false)
@@ -156,43 +163,6 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 		c_game->CallCallbacks("PostRenderSkybox");
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Skybox);
 	}
-
-	//c_engine->StopGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
-
-	// Simple rendering test using a flat (unlit) shader
-	/*{
-	static auto wpShader = c_engine->GetShaderManager().GetShader("flat");
-	if(wpShader.expired() == false)
-	{
-	auto *shader = static_cast<pragma::ShaderFlat*>(wpShader.get());
-	if(shader->BeginDraw(c_engine->GetDrawCommandBuffer(),c_engine->GetWindowWidth(),c_engine->GetWindowHeight()) == true)
-	{
-	std::vector<BasePlayer*> players;
-	GetPlayers(&players);
-	auto *pl = dplayers.front();
-	shader->BindEntity(*pl);
-	shader->BindScene(*scene,false);
-
-	auto &mdl = pl->GetModel();
-	auto &mats = mdl->GetMaterials();
-	for(auto &meshGroup : mdl->GetMeshGroups())
-	{
-	for(auto &mesh : meshGroup->GetMeshes())
-	{
-	for(auto &subMesh : mesh->GetSubMeshes())
-	{
-	auto *mat = static_cast<CMaterial*>(mdl->GetMaterial(subMesh->GetTexture()));
-	if(mat == nullptr)
-	continue;
-	shader->BindMaterial(*mat);
-	shader->Draw(static_cast<CModelSubMesh&>(*subMesh));
-	}
-	}
-	}
-	shader->EndDraw();
-	}
-	}
-	}*/
 
 	if((renderFlags &FRender::World) != FRender::None)
 	{
@@ -230,10 +200,10 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 		auto &glowInfo = GetGlowInfo();
 
 		// Vertex buffer barrier
-		prosper::util::record_buffer_barrier(
-			**drawCmd,*pragma::CParticleSystemComponent::GetGlobalVertexBuffer(),
-			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
-			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+		drawCmd->RecordBufferBarrier(
+			*pragma::CParticleSystemComponent::GetGlobalVertexBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
 		);
 
 		for(auto *particle : culledParticles)
@@ -242,10 +212,10 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 			if (ptBuffer != nullptr)
 			{
 				// Particle buffer barrier
-				prosper::util::record_buffer_barrier(
-					**drawCmd, *ptBuffer,
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*ptBuffer,
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
 				);
 			}
 
@@ -253,10 +223,10 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 			if (animStartBuffer != nullptr)
 			{
 				// Animation start buffer barrier
-				prosper::util::record_buffer_barrier(
-					**drawCmd, *animStartBuffer,
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::VERTEX_INPUT_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::VERTEX_ATTRIBUTE_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*animStartBuffer,
+					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
+					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
 				);
 			}
 
@@ -264,10 +234,10 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 			if (animBuffer != nullptr)
 			{
 				// Animation buffer barrier
-				prosper::util::record_buffer_barrier(
-					**drawCmd, *animBuffer,
-					Anvil::PipelineStageFlagBits::TRANSFER_BIT, Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-					Anvil::AccessFlagBits::TRANSFER_WRITE_BIT, Anvil::AccessFlagBits::SHADER_READ_BIT
+				drawCmd->RecordBufferBarrier(
+					*animBuffer,
+					prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit,
+					prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit
 				);
 			}
 		}
@@ -355,70 +325,5 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::PrimaryC
 	}
 	EndRenderPass(drawCmd);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
-	/*
-	At this point:
-	* m_renderTextures[0] contains the actual scene rendering
-	* m_renderTextures[1] contains bright color components of actual scene (Used for bloom)
-	* m_glowFBO contains all glowing objects
-	*/
-
-	// Blur our glow / bloom effects
-	/*static auto *pp = static_cast<ShaderGaussianBlur*>(GetShader("pp_gaussianblur"));
-
-	// Bloom
-	int w,h;
-	OpenGL::GetViewportSize(&w,&h);
-	auto tmpBuffer = m_glowBlurFBO; // Using m_glowBlurFBO as a temporary buffer, since it's not in use at this point
-	auto tmpTexture = m_glowBlurTexture;
-	OpenGL::BindFrameBuffer(m_renderFBO,GL_READ_FRAMEBUFFER);
-	OpenGL::BindFrameBuffer(tmpBuffer,GL_DRAW_FRAMEBUFFER);
-	glReadBuffer(GL_COLOR_ATTACHMENT1); // We only need the bloom components
-	OpenGL::BlitFrameBuffer(w,h); // Multi-Sample texture to regular texture
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-	glDepthMask(false);
-
-	static float blurSize = 5.f;
-	static int kernelSize = 9;
-	static int blurAmount = 5; // Needs to be uneven
-
-	for(decltype(blurAmount) i=0;i<blurAmount;i++)
-	pp->Render(((i %2) == 0) ? tmpTexture : m_bloomTexture,((i %2) == 0) ? m_bloomFBO : tmpBuffer,blurSize,kernelSize); // Blur our bloom texture
-
-	// Bloom texture is added to screen framebuffer in c_game.cpp:Think
-	//
-
-	// Glow
-	if(pp != nullptr && m_bFirstGlow == false) // Only do this if we actually have any glowing objects on screen
-	{
-	const float blurSize = 1.75f;
-	const int kernelSize = 3;
-	const int blurAmount = 5; // Needs to be uneven
-
-	for(auto i=0;i<blurAmount;i++)
-	pp->Render(((i %2) == 0) ? m_glowTexture : m_glowBlurTexture,((i %2) == 0) ? m_glowBlurFBO : m_glowFBO,blurSize,kernelSize); // Blur our bloom texture
-	*/ // Vulkan TODO
-	/*#ifndef _DEBUG
-	#error Disable me
-	static unsigned int nextRender = 0;
-	nextRender++;
-	if(nextRender >= 100)
-	{
-	nextRender = 0;
-	int w,h;
-	OpenGL::GetViewportSize(&w,&h);
-	//client->SaveTextureAsTGA("test_glow.tga",GL_TEXTURE_2D);
-	client->SaveFrameBufferAsTGA("test_glow.tga",0,0,w,h,GL_RGB);
-	}
-	#endif*/ // Debug code; Saves the glow framebuffer as image every 100 frames
-	/*	OpenGL::UseProgram(0);
-	}
-	//
-	glDepthMask(true);
-	if(drawWorld == 2)
-	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-
-	//m_shaderScreen->Render(m_renderTexture,m_renderScreenVertexBuffer);
-	*/ // Vulkan TODO
 }
 

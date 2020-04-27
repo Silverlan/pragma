@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
@@ -14,7 +21,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderSSAO(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderSSAO(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto &ssaoInfo = GetSSAOInfo();
 	auto *shaderSSAO = static_cast<pragma::ShaderSSAO*>(ssaoInfo.GetSSAOShader());
@@ -30,65 +37,65 @@ void RasterizationRenderer::RenderSSAO(std::shared_ptr<prosper::PrimaryCommandBu
 	{
 		// SSAO
 		auto &prepass = GetPrepass();
-		auto &ssaoImg = ssaoInfo.renderTarget->GetTexture()->GetImage();
+		auto &ssaoImg = ssaoInfo.renderTarget->GetTexture().GetImage();
 
 		auto texNormals = prepass.textureNormals;
 		auto bNormalsMultiSampled = texNormals->IsMSAATexture();
 		if(bNormalsMultiSampled)
 		{
 			texNormals = static_cast<prosper::MSAATexture&>(*texNormals).Resolve(
-				*(*drawCmd),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-				Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+				*drawCmd,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ColorAttachmentOptimal,
+				prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
 			);
 		}
 		else
-			prosper::util::record_image_barrier(*(*drawCmd),*(*texNormals->GetImage()),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd->RecordImageBarrier(texNormals->GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		auto texDepth = prepass.textureDepth;
 		if(texDepth->IsMSAATexture())
 		{
 			texDepth = static_cast<prosper::MSAATexture&>(*texDepth).Resolve(
-				*(*drawCmd),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+				*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
+				prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
 			);
 		}
 		else
-			prosper::util::record_image_barrier(*(*drawCmd),*(*texDepth->GetImage()),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-		prosper::util::record_begin_render_pass(*(*drawCmd),*ssaoInfo.renderTarget);
-		auto &renderImage = ssaoInfo.renderTarget->GetTexture()->GetImage();
-		auto extents = renderImage.get()->GetExtents();
+		drawCmd->RecordBeginRenderPass(*ssaoInfo.renderTarget);
+		auto &renderImage = ssaoInfo.renderTarget->GetTexture().GetImage();
+		auto extents = renderImage.GetExtents();
 
 		if(shaderSSAO->BeginDraw(drawCmd) == true)
 		{
-			shaderSSAO->Draw(scene,*(*ssaoInfo.descSetGroupPrepass)->get_descriptor_set(0u),{extents.width,extents.height});
+			shaderSSAO->Draw(scene,*ssaoInfo.descSetGroupPrepass->GetDescriptorSet(),{extents.width,extents.height});
 			shaderSSAO->EndDraw();
 		}
 
-		prosper::util::record_end_render_pass(*(*drawCmd));
+		drawCmd->RecordEndRenderPass();
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*texNormals->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*(*texDepth->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(texNormals->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 		// Blur SSAO
-		prosper::util::record_image_barrier(*(*drawCmd),*(*ssaoInfo.renderTargetBlur->GetTexture()->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		prosper::util::record_begin_render_pass(*(*drawCmd),*ssaoInfo.renderTargetBlur);
+		drawCmd->RecordImageBarrier(ssaoInfo.renderTargetBlur->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordBeginRenderPass(*ssaoInfo.renderTargetBlur);
 
 		if(shaderSSAOBlur->BeginDraw(drawCmd) == true)
 		{
-			shaderSSAOBlur->Draw(*(*ssaoInfo.descSetGroupOcclusion)->get_descriptor_set(0u));
+			shaderSSAOBlur->Draw(*ssaoInfo.descSetGroupOcclusion->GetDescriptorSet());
 			shaderSSAOBlur->EndDraw();
 		}
 
-		prosper::util::record_end_render_pass(*(*drawCmd));
+		drawCmd->RecordEndRenderPass();
 		//
 
 		if(bNormalsMultiSampled)
 		{
-			prosper::util::record_image_barrier(*(*drawCmd),*(*texNormals->GetImage()),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-			prosper::util::record_image_barrier(*(*drawCmd),*(*texDepth->GetImage()),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd->RecordImageBarrier(texNormals->GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+			drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		}
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*ssaoInfo.renderTarget->GetTexture()->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(ssaoInfo.renderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::SSAO);

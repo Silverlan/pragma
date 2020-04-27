@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -70,12 +77,12 @@ void CModel::UpdateVertexAnimationBuffer()
 	}
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = vertexAnimData.size() *sizeof(vertexAnimData.front());
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-	m_vertexAnimationBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,vertexAnimData.data());
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	m_vertexAnimationBuffer = c_engine->CreateBuffer(createInfo,vertexAnimData.data());
 }
-const std::shared_ptr<prosper::Buffer> &CModel::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CModel::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
 bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &subMesh,uint32_t frameId,uint64_t &offset) const
 {
 	if(vaIdx >= m_frameIndices.size())

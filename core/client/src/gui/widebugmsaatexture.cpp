@@ -1,6 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/gui/widebugmsaatexture.hpp"
-#include "pragma/rendering/shaders/debug/c_shader_debug_multisample_image.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
@@ -33,7 +39,7 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	m_resolvedTexture = nullptr;
 	if(m_msaaTexture == nullptr)
 		return;
-	if(m_msaaTexture->GetImage()->GetSampleCount() == Anvil::SampleCountFlagBits::_1_BIT)
+	if(m_msaaTexture->GetImage().GetSampleCount() == prosper::SampleCountFlags::e1Bit)
 	{
 		m_resolvedTexture = m_msaaTexture;
 		static_cast<WITexturedRect&>(*m_hTextureRect.get()).SetTexture(*m_resolvedTexture);
@@ -46,19 +52,18 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 		return;
 	}
 	auto &msaaImg = m_msaaTexture->GetImage();
-	auto extents = msaaImg->GetExtents();
+	auto extents = msaaImg.GetExtents();
 	auto &context = *c_engine;
-	auto &dev = context.GetDevice();
 	prosper::util::ImageCreateInfo resolvedImgCreateInfo {};
 	resolvedImgCreateInfo.width = extents.width;
 	resolvedImgCreateInfo.height = extents.height;
-	resolvedImgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	resolvedImgCreateInfo.format = msaaImg->GetFormat();
-	resolvedImgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	resolvedImgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	auto resolvedImg = prosper::util::create_image(dev,resolvedImgCreateInfo);
+	resolvedImgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	resolvedImgCreateInfo.format = msaaImg.GetFormat();
+	resolvedImgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	resolvedImgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+	auto resolvedImg = context.CreateImage(resolvedImgCreateInfo);
 	prosper::util::SamplerCreateInfo resolvedSamplerCreateInfo {};
-	m_resolvedTexture = prosper::util::create_texture(dev,{},resolvedImg,nullptr,&resolvedSamplerCreateInfo);
+	m_resolvedTexture = context.CreateTexture({},*resolvedImg,{},resolvedSamplerCreateInfo);
 }
 
 void WIDebugMSAATexture::SetShouldResolveImage(bool b)
@@ -69,75 +74,11 @@ void WIDebugMSAATexture::SetShouldResolveImage(bool b)
 	UpdateResolvedTexture();
 }
 
-/*
-void WIDebugMSAATexture::SetResolveImage(bool b)
-{
-	if(m_bResolveImage == b)
-		return;
-	m_bResolveImage = b;
-	if(b == true)
-	{
-		m_renderTarget = nullptr;
-		m_descSetImg = nullptr;
-		return;
-	}
-	m_singleSampleTexture = nullptr;
-	auto &context = c_engine->GetRenderContext();
-	m_renderTarget = Vulkan::RenderTarget::Create(context,1024,1024,Anvil::Format::R8G8B8A8_UNORM,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags&) {
-		info.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT;
-	}); // Vulkan TODO: Size?
-	if(m_hTexture.IsValid())
-	{
-		auto &tex = *m_hTexture.get();
-		static auto hShaderMs = c_engine->GetShader("debug_multisample_image");
-		if(hShaderMs.IsValid())
-		{
-			auto &shaderMs = static_cast<Shader::DebugMultisampleImage&>(*hShaderMs.get());
-			if(shaderMs.GenerateDescriptorSet(umath::to_integral(Shader::DebugMultisampleImage::DescSet::Texture),m_descSetImg) == true)
-				m_descSetImg->Update(&tex);
-		}
-	}
-	m_renderTarget->GetTexture()->GetImage()->SetSetupLayout(vk::ImageLayout::eGeneral);
-	if(m_hTextureRect.IsValid())
-		m_hTextureRect.get<WITexturedRect>()->SetTexture(m_renderTarget->GetTexture());
-}*/ // prosper TODO
-
 void WIDebugMSAATexture::DoUpdate()
 {
 	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())
 		return;
 	auto &context = *c_engine;
-
-	
-	/*auto hThis = GetHandle();
-	auto hDepthTexture = m_hTexture;
-	context.ScheduleDrawCommand([this,hThis,hDepthTexture](const Vulkan::Context&,const Vulkan::CommandBuffer &drawCmd) {
-		if(!hThis.IsValid() || !hDepthTexture.IsValid() || m_hTexture.IsValid() == false)
-			return;
-		if(m_renderTarget != nullptr && m_descSetImg != nullptr)
-		{
-			static auto hShaderMs = c_engine->GetShader("debug_multisample_image");
-			if(hShaderMs.IsValid())
-			{
-				m_renderTarget->GetTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-				hDepthTexture.get()->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-				auto &shaderMs = static_cast<Shader::DebugMultisampleImage&>(*hShaderMs.get());
-				drawCmd->BeginRenderPass(m_renderTarget);
-				drawCmd->SetViewport(m_renderTarget->GetWidth(),m_renderTarget->GetHeight());
-					if(shaderMs.BeginDraw(drawCmd) == true)
-					{
-						shaderMs.Draw(drawCmd,m_descSetImg,m_renderTarget->GetWidth(),m_renderTarget->GetHeight(),umath::to_integral(m_hTexture->GetImage()->GetSampleCount()));
-						shaderMs.EndDraw();
-					}
-				drawCmd->EndRenderPass();
-				m_renderTarget->GetTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-			}
-			return;
-		}
-		if(m_singleSampleTexture)
-			drawCmd->ResolveImage(m_hTexture->GetImage(),m_singleSampleTexture->GetImage());
-		auto &targetTexture = GetSamplerTexture()->GetImage();
-		targetTexture->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-	});*/ // prosper TODO
+	// TODO
 }

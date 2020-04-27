@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_GAME_SHADOW_MANAGER_HPP__
 #define __C_GAME_SHADOW_MANAGER_HPP__
 
@@ -33,7 +40,7 @@ namespace pragma
 			TranslucentPending = 1u
 		};
 
-		void RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
+		void RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
 	private:
 		struct OctreeCallbacks
 		{
@@ -44,25 +51,25 @@ namespace pragma
 		};
 		struct LightSourceData
 		{
-			std::shared_ptr<prosper::PrimaryCommandBuffer> drawCmd;
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
 			pragma::CLightComponent *light;
 			LightType type;
 			Vector3 position;
 			float radius;
 		};
 		void RenderShadows(
-			std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
 			LightType type,bool drawParticleShadows
 		);
-		bool UpdateShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType);
-		void UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
-		void UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
+		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType);
+		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
+		void UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);
 		RenderResultFlags RenderShadows(
-			std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,
 			pragma::CLightComponent &light,uint32_t layerId,const Mat4 &depthMVP,
 			pragma::ShaderShadow &shader,bool bTranslucent
 		);
-		void RenderCSMShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows);
+		void RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows);
 
 		std::vector<ShadowRenderInfo> m_shadowCasters = {};
 
@@ -108,7 +115,7 @@ namespace pragma
 		RtHandle RequestRenderTarget(Type type,uint32_t size,Priority priority=0);
 		void FreeRenderTarget(const RenderTarget &rt);
 		void UpdatePriority(const RenderTarget &rt,Priority priority);
-		Anvil::DescriptorSet *GetDescriptorSet();
+		prosper::IDescriptorSet *GetDescriptorSet();
 		void ClearRenderTargets();
 		ShadowRenderer &GetRenderer();
 	private:
@@ -128,7 +135,7 @@ namespace pragma
 		BufferSet m_genericSet = {};
 		BufferSet m_cubeSet = {};
 		ShadowRenderer m_renderer = {};
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroup = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroup = nullptr;
 		util::WeakHandle<prosper::Shader> m_whShadowShader = {};
 	};
 };

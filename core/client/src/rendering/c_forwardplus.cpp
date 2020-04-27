@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/c_forwardplus.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -69,7 +76,7 @@ static constexpr uint32_t get_shadow_integer_count()
 pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRenderer &rasterizer)
 	: m_rasterizer{rasterizer}
 {
-	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::COMPUTE,m_cmdBufferQueueFamilyIndex);
+	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
 
 	m_shaderLightCulling = c_engine->GetShader("forwardp_light_culling");
 	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");
@@ -79,23 +86,22 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &contex
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;
-	auto &dev = context.GetDevice();
 	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
-	m_descSetGroupLightSourcesGraphics = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+	m_descSetGroupLightSourcesGraphics = context.CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
+	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
 	);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
 	);
 
-	m_descSetGroupLightSourcesCompute = prosper::util::create_descriptor_set_group(dev,pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_descSetGroupLightSourcesCompute->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
+	m_descSetGroupLightSourcesCompute = context.CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
+	m_descSetGroupLightSourcesCompute->GetDescriptorSet()->SetBindingStorageBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
 	);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_descSetGroupLightSourcesCompute->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
+	m_descSetGroupLightSourcesCompute->GetDescriptorSet()->SetBindingStorageBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
 	);
 
 	auto workGroupCount = CalcWorkGroupCount(width,height);
@@ -110,68 +116,68 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &contex
 	std::vector<VisibleIndex> defaultIndices(numTiles,-1);
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = defaultIndices.size() *sizeof(defaultIndices.front());
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	m_bufTileVisLightIndex = prosper::util::create_buffer(dev,createInfo,defaultIndices.data());
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	m_bufTileVisLightIndex = context.CreateBuffer(createInfo,defaultIndices.data());
 	m_bufTileVisLightIndex->SetDebugName("tile_vis_light_index_buf");
 
 	m_shadowLightBits.resize(get_shadow_integer_count(),0);
 	createInfo.size = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-	m_bufVisLightIndex = prosper::util::create_buffer(dev,createInfo,m_shadowLightBits.data());
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+	m_bufVisLightIndex = context.CreateBuffer(createInfo,m_shadowLightBits.data());
 	m_bufVisLightIndex->SetPermanentlyMapped(true);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_descSetGroupLightSourcesGraphics->GetDescriptorSet(),*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
+	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
+		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
 	);
 
 	auto &descSetCompute = *m_descSetGroupLightSourcesCompute->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		descSetCompute,*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer)
+	descSetCompute.SetBindingStorageBuffer(
+		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer)
 	);
-	prosper::util::set_descriptor_set_binding_texture(descSetCompute,depthTexture,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::DepthMap));
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		descSetCompute,*m_bufVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer)
+	descSetCompute.SetBindingTexture(depthTexture,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::DepthMap));
+	descSetCompute.SetBindingStorageBuffer(
+		*m_bufVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer)
 	);
 	return true;
 }
 
-void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuffer &cmdBuffer,Anvil::Image &imgDepth,Anvil::DescriptorSet &descSetCam)
+void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
 {
 	if(m_shaderLightCulling.expired() || m_shaderLightIndexing.expired() || m_shadowLightBits.empty() == true)
 		return;
 	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling&>(*m_shaderLightCulling.get());
-	if(shaderLightCulling.BeginCompute(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)
+	if(shaderLightCulling.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)
 		return;
 
 	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
-	prosper::util::record_buffer_barrier(
-		*cmdBuffer,bufLightSources,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	cmdBuffer.RecordBufferBarrier(
+		bufLightSources,
+		prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 	// Shadow data barrier
-	prosper::util::record_buffer_barrier(
-		*cmdBuffer,bufShadowData,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	cmdBuffer.RecordBufferBarrier(
+		bufShadowData,
+		prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 	
 	// Visible light tile index buffer
-	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+	cmdBuffer.RecordBufferBarrier(
+		*m_rasterizer.GetForwardPlusInstance().GetTileVisLightIndexBuffer(),
+		prosper::PipelineStageFlags::FragmentShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::ShaderWriteBit
 	);
 
 	// Visible light index buffer
-	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
-		Anvil::PipelineStageFlagBits::HOST_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::HOST_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+	cmdBuffer.RecordBufferBarrier(
+		*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		prosper::PipelineStageFlags::HostBit,prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::HostReadBit,prosper::AccessFlags::ShaderWriteBit
 	);
 
 	auto workGroupCount = GetWorkGroupCount();
@@ -182,10 +188,10 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 		return;
 
 	// Visible light index buffer
-	prosper::util::record_buffer_barrier(
-		*cmdBuffer,*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::HOST_BIT,
-		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::HOST_READ_BIT
+	cmdBuffer.RecordBufferBarrier(
+		*m_rasterizer.GetForwardPlusInstance().GetVisLightIndexBuffer(),
+		prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::HostBit,
+		prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::HostReadBit
 	);
 
 	shaderLightCulling.EndCompute();
@@ -197,8 +203,8 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::PrimaryCommandBuff
 const std::vector<uint32_t> &pragma::rendering::ForwardPlusInstance::GetShadowLightBits() const {return m_shadowLightBits;}
 std::pair<uint32_t,uint32_t> pragma::rendering::ForwardPlusInstance::GetWorkGroupCount() const {return {m_workGroupCountX,m_workGroupCountY};}
 uint32_t pragma::rendering::ForwardPlusInstance::GetTileCount() const {return m_tileCount;}
-Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetGraphics() const {return (*m_descSetGroupLightSourcesGraphics)->get_descriptor_set(0u);}
-Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCompute() const {return (*m_descSetGroupLightSourcesCompute)->get_descriptor_set(0u);}
-Anvil::DescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return (*m_dsgSceneDepthBuffer)->get_descriptor_set(0u);}
-const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
-const std::shared_ptr<prosper::Buffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
+prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetGraphics() const {return m_descSetGroupLightSourcesGraphics->GetDescriptorSet();}
+prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCompute() const {return m_descSetGroupLightSourcesCompute->GetDescriptorSet();}
+prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return m_dsgSceneDepthBuffer->GetDescriptorSet();}
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
+const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}

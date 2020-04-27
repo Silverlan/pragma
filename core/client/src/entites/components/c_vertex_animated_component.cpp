@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -11,6 +18,7 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -38,7 +46,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	auto whMdlComponent = ent.GetModelComponent();
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto mdl = whMdlComponent.valid() ? whMdlComponent->GetModel() : nullptr;
-	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : std::weak_ptr<prosper::Buffer>{};
+	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : std::weak_ptr<prosper::IBuffer>{};
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
 	if(wpRenderBuffer.expired() == true || m_vertexAnimationBuffer != nullptr || mdl == nullptr || pRenderDescSet == nullptr)
 		return;
@@ -50,14 +58,14 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 		return;
 	// m_maxVertexAnimations = 500u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-	m_vertexAnimationBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo);
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	m_vertexAnimationBuffer = c_engine->CreateBuffer(createInfo);
 
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
-	prosper::util::set_descriptor_set_binding_storage_buffer(*pRenderDescSet,*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimationFrameData));
-	prosper::util::set_descriptor_set_binding_storage_buffer(*pRenderDescSet,*vertAnimBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimations));
+	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimationFrameData));
+	pRenderDescSet->SetBindingStorageBuffer(*vertAnimBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimations));
 }
 
 void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
@@ -68,9 +76,9 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	m_vertexAnimationMeshBufferOffsets.clear();
 }
 
-const std::shared_ptr<prosper::Buffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
 
-void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	m_activeVertexAnimations = 0u;
 	auto &ent = GetEntity();
@@ -101,11 +109,10 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			continue;
 
 		auto &flex = flexes.at(flexId);
-		//if(flexId == 0u)//flexId != 19u) // TODO; Flex id 19 = "AU1R"
-		//	continue;
 		auto *va = flex.GetVertexAnimation();
 		if(va == nullptr)
 			continue;
+		auto frameId = flex.GetFrameIndex();
 		//auto *ma = flex.GetMeshVertexAnimation();
 		//auto *fr = flex.GetMeshVertexFrame();
 		auto it = std::find_if(vertAnims.begin(),vertAnims.end(),[va](const std::shared_ptr<VertexAnimation> &vaOther) {
@@ -123,13 +130,11 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			auto &frames = meshAnim->GetFrames();
 			if(frames.empty() == true)
 				continue;
-			uint32_t frameId = 0;
 			auto *fr = meshAnim->GetFrame(frameId);
 			if(fr == nullptr)
 				continue;
 			auto cycle = flexWeight *(frames.size() -1);
 			auto fraction = fmodf(cycle,1.f);
-			//auto frameId = umath::min(static_cast<uint32_t>(umath::floor(cycle)),static_cast<uint32_t>(frames.size() -1));
 			auto nextFrameId = umath::min(static_cast<uint32_t>(frameId +1),static_cast<uint32_t>(frames.size() -1));
 
 			uint64_t srcFrameOffset = 0ull;
@@ -163,7 +168,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 			//
 
 			if(m_activeVertexAnimations >= m_maxVertexAnimations)
-				goto endLoop; // TODO: This should never be reached, but in some cases it does. FIXME
+				goto endLoop; // TODO: This should never be reached, but in some cases it is. FIXME
 		}
 	}
 endLoop:
@@ -175,7 +180,7 @@ endLoop:
 	for(auto &pair : data)
 	{
 		m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
-		prosper::util::record_update_generic_shader_read_buffer(**drawCmd,buf,bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
+		drawCmd->RecordUpdateGenericShaderReadBuffer(buf,bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
 		bufferOffset += pair.second.size();
 
 		//for(auto &vaData : pair.second)
@@ -183,10 +188,10 @@ endLoop:
 	}
 
 	// Vertex animation buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*m_vertexAnimationBuffer,
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*m_vertexAnimationBuffer,
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 }
 

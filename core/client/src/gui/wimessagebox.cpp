@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/gui/wimessagebox.h"
 #include "pragma/gui/wiframe.h"
@@ -96,18 +103,7 @@ void WIMessageBox::__buttonCallback(WIHandle hMessageBox,WIMessageBox::Button bu
 };
 WIButton *WIMessageBox::AddButton(const std::string &text,Button button)
 {
-	/*if(!m_hMessage.IsValid())
-		return nullptr;
-	auto *pButton = WGUI::Create<WIButton>(m_hMessage.get());
-	if(pButton == nullptr)
-		return nullptr;
-	pButton->SetText(text);
-	pButton->SizeToContents();
-	auto hMessageBox = GetHandle();
-	pButton->AddCallback("OnPressed",FunctionCallback<>::Create(std::bind(__buttonCallback,hMessageBox,button)));
-	m_buttons.push_back(pButton->GetHandle());
-	return pButton;*/ // prosper TODO
-	return nullptr; // prosper TODO
+	return nullptr; // TODO
 }
 
 void WIMessageBox::EnableButtons(Button buttons)
@@ -218,11 +214,6 @@ void WIMessageBox::Initialize()
 			pText->SizeToContents();
 		}
 	}));
-	/*m_hText = WGUI::Create<WIText>(pMessage)->GetHandle();
-	auto *pText = m_hText.get<WIText>();
-	pText->SetAutoBreakMode(WIText::AutoBreak::WHITESPACE);
-	pText->SetColor(1.f,1.f,1.f,1.f);
-	pText->SetPos(MARGIN_X,50);*/ // prosper TODO
 }
 void WIMessageBox::SetSize(int x,int y)
 {

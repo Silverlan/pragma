@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
  // prosper TODO
 #if 0
@@ -30,8 +37,8 @@ void ParticlePolyboardShadow::InitializePipelineLayout(const Vulkan::Context &co
 	ParticleShadowBase<ParticlePolyboard>::InitializePipelineLayout(context,setLayouts,pushConstants);
 
 	pushConstants.clear();
-	pushConstants.push_back({Anvil::ShaderStageFlagBits::GEOMETRY_BIT,0,24});
-	pushConstants.push_back({Anvil::ShaderStageFlagBits::FRAGMENT_BIT,24,1});
+	pushConstants.push_back({prosper::ShaderStageFlags::GeometryBit,0,24});
+	pushConstants.push_back({prosper::ShaderStageFlags::FragmentBit,24,1});
 }
 
 void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &vertexBuffer,const Vulkan::Buffer &indexBuffer,uint32_t indexCount,float radius,float curvature,CLightBase *light,uint32_t layerId)
@@ -60,7 +67,7 @@ void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffe
 	Vulkan::Std140LayoutBlockData fsPushConstants(1);
 	fsPushConstants<<static_cast<int32_t>(renderFlags);
 
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::FRAGMENT_BIT,24,static_cast<uint32_t>(fsPushConstants.GetCount()),fsPushConstants.GetData());
+	drawCmd->PushConstants(layout,prosper::ShaderStageFlags::FragmentBit,24,static_cast<uint32_t>(fsPushConstants.GetCount()),fsPushConstants.GetData());
 
 	auto *ranged = dynamic_cast<CLightRanged*>(light);
 	auto &posLight = light->GetPosition();
@@ -77,7 +84,7 @@ void ParticlePolyboardShadow::Draw(CParticleSystem *particle,const Vulkan::Buffe
 	gsPushConstants<<Vector4{posLight.x,posLight.y,posLight.z,(ranged != nullptr) ? static_cast<float>(ranged->GetDistance()) : 0.f};
 	gsPushConstants<<radius<<curvature;
 
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::GEOMETRY_BIT,static_cast<uint32_t>(gsPushConstants.GetCount()),gsPushConstants.GetData());
+	drawCmd->PushConstants(layout,prosper::ShaderStageFlags::GeometryBit,static_cast<uint32_t>(gsPushConstants.GetCount()),gsPushConstants.GetData());
 
 	auto bAnimated = ((renderFlags &RenderFlags::Animated) != RenderFlags::None) ? true : false;
 	if(bAnimated == true)

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_GRADIENT_HPP__
 #define __C_SHADER_GRADIENT_HPP__
 
@@ -41,7 +48,7 @@ namespace pragma
 
 	namespace util
 	{
-		DLLCLIENT bool record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes);
+		DLLCLIENT bool record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes);
 	};
 };
 

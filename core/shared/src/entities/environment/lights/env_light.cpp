@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/lights/env_light.h"
 #include <sharedutils/util.h>
@@ -110,17 +117,15 @@ void BaseEnvLightComponent::SetLightIntensity(float intensity,LightIntensityType
 }
 void BaseEnvLightComponent::SetLightIntensity(float intensity) {SetLightIntensity(intensity,GetLightIntensityType());}
 float BaseEnvLightComponent::GetLightIntensity() const {return m_lightIntensity;}
-Candela BaseEnvLightComponent::GetLightIntensityCandela() const
+Candela BaseEnvLightComponent::GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle)
 {
-	auto intensity = GetLightIntensity();
-	switch(GetLightIntensityType())
+	switch(type)
 	{
 	case LightIntensityType::Candela:
 		return intensity;
 	case LightIntensityType::Lumen:
 	{
-		auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
-		auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+		auto angle = outerCutoffAngle.has_value() ? *outerCutoffAngle : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
 		return ulighting::lumens_to_candela(intensity,umath::cos(umath::deg_to_rad(angle)));
 	}
 	case LightIntensityType::Lux:
@@ -129,17 +134,15 @@ Candela BaseEnvLightComponent::GetLightIntensityCandela() const
 	}
 	return intensity;
 }
-Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
+Lumen BaseEnvLightComponent::GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle)
 {
-	auto intensity = GetLightIntensity();
-	switch(GetLightIntensityType())
+	switch(type)
 	{
 	case LightIntensityType::Lumen:
 		return intensity;
 	case LightIntensityType::Candela:
 	{
-		auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
-		auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+		auto angle = outerCutoffAngle.has_value() ? *outerCutoffAngle : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
 		return ulighting::candela_to_lumens(intensity,umath::cos(umath::deg_to_rad(angle)));
 	}
 	case LightIntensityType::Lux:
@@ -147,6 +150,18 @@ Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
 		break;
 	}
 	return intensity;
+}
+Candela BaseEnvLightComponent::GetLightIntensityCandela() const
+{
+	auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
+	auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+	return GetLightIntensityCandela(GetLightIntensity(),GetLightIntensityType(),angle);
+}
+Lumen BaseEnvLightComponent::GetLightIntensityLumen() const
+{
+	auto *spotLightC = static_cast<BaseEnvLightSpotComponent*>(GetEntity().FindComponent("light_spot").get());
+	auto angle = spotLightC ? spotLightC->GetOuterCutoffAngle() : 180.f; // Note: This is the HALF-angle, so we use 180 degree for point-lights
+	return GetLightIntensityLumen(GetLightIntensity(),GetLightIntensityType(),angle);
 }
 BaseEnvLightComponent::ShadowType BaseEnvLightComponent::GetShadowType() const {return m_shadowType;}
 void BaseEnvLightComponent::SetShadowType(ShadowType type) {m_shadowType = type;}

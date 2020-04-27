@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "cmaterialmanager.h"
@@ -20,41 +27,41 @@ using namespace pragma;
 
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		prosper::DescriptorSetInfo::Binding { // Material settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Albedo Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Normal Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Normal Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // RMA Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // RMA Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Emission Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Emission Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Parallax Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Parallax Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Wrinkle Compress Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Compress Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Exponent Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Exponent Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -62,17 +69,17 @@ static_assert(umath::to_integral(ShaderPBR::MaterialBinding::Count) == 9,"Number
 
 decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Irradiance Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Irradiance Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Prefilter Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Prefilter Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // BRDF Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // BRDF Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -90,10 +97,10 @@ bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 	umath::set_flag(m_extRenderFlags,RenderFlags::TranslucencyEnabled,mat.IsTranslucent());
 	return ShaderTextured3DBase::BindMaterialParameters(mat);
 }
-prosper::Shader::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderPBR::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
 	const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
 )
 {
@@ -130,7 +137,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreat
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
-static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex=nullptr)
+static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex=nullptr)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -147,7 +154,7 @@ static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *t
 	else
 		tex = optDefaultTex->shared_from_this();
 	if(tex && tex->HasValidVkTexture())
-		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+		ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
 	return true;
 }
 
@@ -159,7 +166,7 @@ static TextureManager::LoadInfo get_texture_load_info()
 	return loadInfo;
 }
 
-static bool bind_default_texture(prosper::DescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex)
+static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -169,11 +176,11 @@ static bool bind_default_texture(prosper::DescriptorSet &ds,const std::string &d
 	auto tex = std::static_pointer_cast<Texture>(ptrTex);
 
 	if(tex && tex->HasValidVkTexture())
-		prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+		ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
 	return true;
 }
 
-static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
+static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -184,7 +191,7 @@ static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *t
 		tex = std::static_pointer_cast<Texture>(texInfo->texture);
 		if(tex->HasValidVkTexture())
 		{
-			prosper::util::set_descriptor_set_binding_texture(ds,*tex->GetVkTexture(),bindingIndex);
+			ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
 			return true;
 		}
 	}
@@ -193,9 +200,8 @@ static bool bind_texture(Material &mat,prosper::DescriptorSet &ds,TextureInfo *t
 	return bind_default_texture(ds,defaultTexName,bindingIndex);
 }
 
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
-	auto &dev = c_engine->GetDevice();
 	auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
@@ -203,10 +209,10 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
 	if(albedoTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,descSetInfo);
+	auto descSetGroup = c_engine->CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSet,*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
+	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
 	auto matData = InitializeMaterialBuffer(descSet,mat);
 	if(matData.has_value() == false)
 		return nullptr;
@@ -233,29 +239,29 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescri
 
 	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
 	// that seems to cause crashes in some cases
-	if(descSet->update() == false)
+	if(descSet.Update() == false)
 		return false;
 	return descSetGroup;
 }
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }
 
 /////////////////
 
-decltype(ShaderPBRBlend::VERTEX_BINDING_ALPHA) ShaderPBRBlend::VERTEX_BINDING_ALPHA = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA) ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderPBRBlend::VERTEX_BINDING_ALPHA) ShaderPBRBlend::VERTEX_BINDING_ALPHA = {prosper::VertexInputRate::Vertex};
+decltype(ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA) ShaderPBRBlend::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,prosper::Format::R32G32_SFloat};
 decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL = {
 	&ShaderPBR::DESCRIPTOR_SET_MATERIAL,
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map 2
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Albedo Map 2
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Albedo Map 3
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Albedo Map 3
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -267,12 +273,12 @@ void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipeli
 	ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
 }
-prosper::Shader::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = ShaderPBR::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 	if(descSetGroup == nullptr)
@@ -284,7 +290,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBRBlend::InitializeMaterialD
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap2->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap2));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap2));
 	}
 
 	auto *diffuseMap3 = mat.GetTextureInfo(Material::ALBEDO_MAP3_IDENTIFIER);
@@ -292,7 +298,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderPBRBlend::InitializeMaterialD
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap3->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap3));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap3));
 	}
 	return descSetGroup;
 }
@@ -311,7 +317,7 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 		}
 	}
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
-		RecordBindVertexBuffer(alphaBuffer->GetAnvilBuffer(),VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
+		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
 		ShaderPBR::Draw(mesh) == true;
 }
 

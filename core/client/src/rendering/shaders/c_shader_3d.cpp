@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_3d.hpp"
 
@@ -15,7 +22,7 @@ void Shader3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 	pipelineInfo.toggle_depth_writes(true);
 }
 
-void Shader3DBase::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void Shader3DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);
 }

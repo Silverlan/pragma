@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -154,16 +161,15 @@ void CWaterSurfaceComponent::InitializeSurface()
 	if(mdlComponent.valid())
 		mdlComponent->SetModel(mdl);
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT;
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	bufCreateInfo.size = verts.size() *sizeof(verts.front());
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	auto vertBuffer = prosper::util::create_buffer(dev,bufCreateInfo,verts.data());
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	auto vertBuffer = c_engine->CreateBuffer(bufCreateInfo,verts.data());
 
 	bufCreateInfo.size = triangles.size() *sizeof(triangles.front());
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::INDEX_BUFFER_BIT;
-	auto indexBuffer = prosper::util::create_buffer(dev,bufCreateInfo,triangles.data());
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
+	auto indexBuffer = c_engine->CreateBuffer(bufCreateInfo,triangles.data());
 
 	auto &vkMesh = subMesh->GetVKMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());

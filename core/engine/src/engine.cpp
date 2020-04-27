@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_engine.h"
 
 // Link Libraries
@@ -381,16 +388,6 @@ void Engine::UpdateParallelJobs()
 		}
 		m_parallelJobs.erase(m_parallelJobs.begin() +i);
 	}
-/*
-struct JobInfo
-{
-util::ParallelJobWrapper job = {};
-std::string name = "";
-float lastProgress = 0.f;
-float lastTimeRemaining = 0.f;
-std::chrono::time_point lastProgressUpdate = {};
-};
-*/
 }
 
 ConVarMap *Engine::GetConVarMap() {return console_system::engine::get_convar_map();}

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_UNLIT_HPP__
 #define __C_SHADER_UNLIT_HPP__
 
@@ -10,7 +17,7 @@ namespace pragma
 		: public ShaderTextured3DBase
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		enum class MaterialBinding : uint32_t
 		{
@@ -22,10 +29,10 @@ namespace pragma
 
 		ShaderUnlit(prosper::Context &context,const std::string &identifier);
 
-		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:
-		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
+		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 	};
 };
 

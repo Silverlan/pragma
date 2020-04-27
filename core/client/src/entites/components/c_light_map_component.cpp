@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -33,8 +40,8 @@ void CLightMapComponent::Initialize()
 
 void CLightMapComponent::InitializeLightMapData(
 	const std::shared_ptr<prosper::Texture> &lightMap,
-	const std::shared_ptr<prosper::DynamicResizableBuffer> &lightMapUvBuffer,
-	const std::vector<std::shared_ptr<prosper::Buffer>> &meshUvBuffers
+	const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
+	const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
 )
 {
 	m_lightMapAtlas = lightMap;
@@ -44,16 +51,16 @@ void CLightMapComponent::InitializeLightMapData(
 
 const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const {return m_lightMapAtlas;}
 
-prosper::Buffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) const
+prosper::IBuffer *CLightMapComponent::GetMeshLightMapUvBuffer(uint32_t meshIdx) const
 {
 	if(meshIdx >= m_meshLightMapUvBuffers.size())
 		return nullptr;
 	return m_meshLightMapUvBuffers.at(meshIdx).get();
 }
-std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GetGlobalLightMapUvBuffer() const {return m_meshLightMapUvBuffer;}
+std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GetGlobalLightMapUvBuffer() const {return m_meshLightMapUvBuffer;}
 
-const std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() const {return const_cast<CLightMapComponent*>(this)->GetMeshLightMapUvBuffers();}
-std::vector<std::shared_ptr<prosper::Buffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() {return m_meshLightMapUvBuffers;}
+const std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() const {return const_cast<CLightMapComponent*>(this)->GetMeshLightMapUvBuffers();}
+std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() {return m_meshLightMapUvBuffers;}
 
 void CLightMapComponent::SetLightMapIntensity(float intensity) {m_lightMapIntensity = intensity;}
 void CLightMapComponent::SetLightMapSqrtFactor(float sqrtFactor) {m_lightMapSqrt = sqrtFactor;}
@@ -82,12 +89,12 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	uvBuffer->Unmap();
 }
 
-std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::Buffer>> &outMeshLightMapUvBuffers)
+std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers)
 {
 	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT; // Transfer flags are required for mapping GPUBulk buffers
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit; // Transfer flags are required for mapping GPUBulk buffers
 	auto alignment = prosper::util::calculate_buffer_alignment(dev,bufCreateInfo.usageFlags);
 	auto requiredBufferSize = 0ull;
 
@@ -111,7 +118,7 @@ std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GenerateLig
 
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
-	auto lightMapUvBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,bufCreateInfo,bufCreateInfo.size,0.2f);
+	auto lightMapUvBuffer = c_engine->CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size,0.2f);
 	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
 		return nullptr;
 
@@ -137,37 +144,36 @@ std::shared_ptr<prosper::DynamicResizableBuffer> CLightMapComponent::GenerateLig
 
 std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData)
 {
-	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo lightMapCreateInfo {};
 	lightMapCreateInfo.width = width;
 	lightMapCreateInfo.height = height;
-	lightMapCreateInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
-	lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
-	lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
-	lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-	lightMapCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
-	auto imgStaging = prosper::util::create_image(dev,lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
+	lightMapCreateInfo.format = prosper::Format::R16G16B16A16_SFloat;
+	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
+	lightMapCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
+	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	lightMapCreateInfo.tiling = prosper::ImageTiling::Linear;
+	auto imgStaging = c_engine->CreateImage(lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
 
-	lightMapCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	lightMapCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	lightMapCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	lightMapCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	auto img = prosper::util::create_image(dev,lightMapCreateInfo);
+	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	lightMapCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	lightMapCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
+	auto img = c_engine->CreateImage(lightMapCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	if(prosper::util::record_blit_image(**setupCmd,{},**imgStaging,**img) == false)
+	if(setupCmd->RecordBlitImage({},*imgStaging,*img) == false)
 		; // TODO: Print warning
-	prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	setupCmd->RecordImageBarrier(*img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	c_engine->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE; // Doesn't really matter since lightmaps have their own border either way
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
+	samplerCreateInfo.minFilter = prosper::Filter::Linear;
+	samplerCreateInfo.magFilter = prosper::Filter::Linear;
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge; // Doesn't really matter since lightmaps have their own border either way
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	imgViewCreateInfo.swizzleAlpha = Anvil::ComponentSwizzle::ONE; // We don't use the alpha channel
-	return prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	imgViewCreateInfo.swizzleAlpha = prosper::ComponentSwizzle::One; // We don't use the alpha channel
+	return c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 }
 
 #include "cmaterialmanager.h"
@@ -275,11 +281,9 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 	Con::cout<<"Baking lightmaps... This may take a few minutes!"<<Con::endl;
 	auto hdrOutput = true;
 	pragma::rendering::cycles::SceneInfo sceneInfo {};
-	//sceneInfo.width = 256;//1024;//lightmapC->GetLightmapInfo()->atlasSize;//1'024; // TODO: Use original lightmap size
-	//sceneInfo.height = 256;//1024;//lightmapC->GetLightmapInfo()->atlasSize;//1'024; // TODO: Use original lightmap size
 	sceneInfo.width = width;
 	sceneInfo.height = height;
-	sceneInfo.samples = sampleCount;//16;//8192 *4; // TODO
+	sceneInfo.samples = sampleCount;
 	sceneInfo.denoise = denoise;
 	sceneInfo.hdrOutput = hdrOutput;
 
@@ -366,7 +370,7 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePl
 	Vector2i resolution {2'048,2'048};
 	if(lightMap)
 	{
-		auto extents = lightMap->GetImage()->GetExtents();
+		auto extents = lightMap->GetImage().GetExtents();
 		resolution = {extents.width,extents.height};
 	}
 	auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));

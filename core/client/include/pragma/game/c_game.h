@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_GAME_H__
 #define __C_GAME_H__
 
@@ -71,7 +78,7 @@ namespace pragma
 	class CCameraComponent;
 };
 namespace uimg {class ImageBuffer; struct TextureInfo;};
-namespace prosper {class DescriptorSetGroup; class Image;};
+namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CGame
@@ -87,10 +94,10 @@ public:
 	struct GlobalRenderSettingsBufferData
 	{
 		GlobalRenderSettingsBufferData();
-		std::shared_ptr<prosper::Buffer> debugBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> timeBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> csmBuffer = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> descSetGroup = nullptr;
+		std::shared_ptr<prosper::IBuffer> debugBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> timeBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> csmBuffer = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroup = nullptr;
 	};
 public:
 	CGame(NetworkState *state);
@@ -183,7 +190,7 @@ public:
 	void DisableRenderMode(RenderMode renderMode);
 	bool IsRenderModeEnabled(RenderMode renderMode) const;
 
-	std::shared_ptr<prosper::PrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
 	void InitializeLua();
 	void SetupLua();
 	void SetUp();
@@ -275,7 +282,7 @@ public:
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f) override;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f) override;
 	virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f) override;
-	void RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	using Game::LoadNavMesh;
 	const std::vector<DroppedFile> &GetDroppedFiles() const;
@@ -288,9 +295,6 @@ public:
 	uint32_t GetLOD(float dist,uint32_t maxLod=std::numeric_limits<uint32_t>::max()) const;
 	LuaCallbackHandler &GetInputCallbackHandler();
 	uint32_t GetMSAASampleCount();
-	//const Vulkan::Buffer *GetUniformBlockBuffer(UniformBinding id) const; // prosper TODO
-	//const Vulkan::SwapBuffer *GetUniformBlockSwapBuffer(UniformBinding id) const; // prosper TODO
-	//const Vulkan::Std140LayoutBlockData *GetUniformBlockLayout(UniformBinding id) const; // prosper TODO
 	void SetMaterialOverride(Material *mat);
 	Material *GetMaterialOverride();
 	void SetColorScale(const Vector4 &col);
@@ -324,8 +328,8 @@ public:
 	pragma::CViewBodyComponent *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
-	void RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags=FRender::All,const Color *clearColor=nullptr,uint32_t outLayerId=0u);
-	void RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags=FRender::All,uint32_t outLayerId=0u);
+	void RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags=FRender::All,const Color *clearColor=nullptr,uint32_t outLayerId=0u);
+	void RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags=FRender::All,uint32_t outLayerId=0u);
 
 	// GUI
 	void PreGUIDraw();
@@ -353,8 +357,6 @@ public:
 	Mat4 GetViewModelProjectionMatrix() const;
 
 	// Shaders
-	//Shader::Base *GetShaderOverride(); // prosper TODO
-	//void SetShaderOverride(Shader::Base *shader=NULL); // prosper TODO
 	const util::WeakHandle<prosper::Shader> &GetGameShader(GameShader shader) const;
 
 	// Lights
@@ -367,7 +369,7 @@ public:
 	bool GetActionInput(Action action);
 
 	// Util
-	bool SaveImage(prosper::Image &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const;
+	bool SaveImage(prosper::IImage &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const;
 	bool SaveImage(
 		const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t szPerPixel,
 		const std::string &fileName,const uimg::TextureInfo &imageWriteInfo,bool cubemap=false
@@ -381,7 +383,7 @@ public:
 	std::shared_ptr<Scene> &GetRenderScene();
 	pragma::CCameraComponent *GetRenderCamera() const;
 
-	Anvil::DescriptorSet &GetGlobalRenderSettingsDescriptorSet();
+	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 protected:
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
@@ -441,7 +443,6 @@ private:
 	LuaCallbackHandler m_inputCallbackHandler;
 
 	// Shaders
-	//Shader::Base *m_shaderOverride; // prosper TODO
 	void InitShaders();
 	void LoadLuaShaders();
 	void LoadLuaShader(std::string file);
@@ -458,9 +459,9 @@ private:
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
-	std::weak_ptr<prosper::PrimaryCommandBuffer> m_currentDrawCmd = {};
+	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
-	void RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImage,uint32_t layerId=0u);
+	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage &outImage,uint32_t layerId=0u);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
 

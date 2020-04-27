@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lwibase.h"
 #include <wgui/wibase.h>
@@ -484,6 +491,18 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,
 		lua_checkgui(l,hPanel);
 		static_cast<::WITexturedShape*>(hPanel.get())->SizeToTexture();
 	}));
+	classDef.def("SetChannelSwizzle",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,uint32_t,uint32_t)>([](lua_State *l,WITexturedShapeHandle &hPanel,uint32_t dst,uint32_t src) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->SetChannelSwizzle(static_cast<::wgui::ShaderTextured::Channel>(dst),static_cast<::wgui::ShaderTextured::Channel>(src));
+	}));
+	classDef.def("GetChannelSwizzle",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,uint32_t)>([](lua_State *l,WITexturedShapeHandle &hPanel,uint32_t channel) {
+		lua_checkgui(l,hPanel);
+		Lua::PushInt(l,umath::to_integral(static_cast<::WITexturedShape*>(hPanel.get())->GetChannelSwizzle(static_cast<::wgui::ShaderTextured::Channel>(channel))));
+	}));
+	classDef.add_static_constant("CHANNEL_RED",umath::to_integral(::wgui::ShaderTextured::Channel::Red));
+	classDef.add_static_constant("CHANNEL_GREEN",umath::to_integral(::wgui::ShaderTextured::Channel::Green));
+	classDef.add_static_constant("CHANNEL_BLUE",umath::to_integral(::wgui::ShaderTextured::Channel::Blue));
+	classDef.add_static_constant("CHANNEL_ALPHA",umath::to_integral(::wgui::ShaderTextured::Channel::Alpha));
 }
 
 void Lua::WIIcon::register_class(luabind::class_<WIIconHandle,luabind::bases<WITexturedShapeHandle,WIShapeHandle,WIHandle>> &classDef)

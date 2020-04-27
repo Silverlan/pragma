@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_PHYS_WATER_SURFACE_SIMULATOR_HPP__
 #define __C_PHYS_WATER_SURFACE_SIMULATOR_HPP__
 
@@ -10,11 +17,11 @@ class DLLCLIENT CPhysWaterSurfaceSimulator
 {
 public:
 	CPhysWaterSurfaceSimulator(Vector2 aabbMin,Vector2 aabbMax,float originY,uint32_t spacing,float stiffness=0.1f,float propagation=100.f);
-	void Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,CModelSubMesh &mesh);
+	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CModelSubMesh &mesh);
 	const std::vector<uint16_t> &GetTriangleIndices() const;
 	virtual void Simulate(double dt) override;
-	const std::shared_ptr<prosper::Buffer> &GetParticleBuffer() const;
-	const std::shared_ptr<prosper::Buffer> &GetPositionBuffer() const;
+	const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
+	const std::shared_ptr<prosper::IBuffer> &GetPositionBuffer() const;
 
 #pragma pack(push,1)
 	struct DLLCLIENT ParticleEdgeInfo
@@ -28,7 +35,7 @@ protected:
 	virtual void InitializeSurface() override;
 	std::vector<uint16_t> m_triangleIndices;
 	
-	std::shared_ptr<prosper::PrimaryCommandBuffer> m_cmdBuffer = nullptr;
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 	uint32_t m_universalQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 	::util::WeakHandle<prosper::Shader> m_whShaderSurface = {};
 	::util::WeakHandle<prosper::Shader> m_whShaderSurfaceIntegrate = {};
@@ -36,21 +43,21 @@ protected:
 	::util::WeakHandle<prosper::Shader> m_whShaderSurfaceSumEdges = {};
 	::util::WeakHandle<prosper::Shader> m_whShaderWaterSplash = {};
 
-	std::shared_ptr<prosper::Buffer> m_particleBuffer = nullptr;
-	std::shared_ptr<prosper::Buffer> m_positionBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_particleBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_positionBuffer = nullptr;
 	
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupParticles = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupSplash = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupIntegrate = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupParticles = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupSplash = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupIntegrate = nullptr;
 	std::vector<Vector3> m_particlePositions;
 	bool m_bUseComputeShaders = false;
 
 	// Edges
-	std::shared_ptr<prosper::Buffer> m_edgeBuffer = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_edgeDescSetGroup = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_edgeBuffer = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_edgeDescSetGroup = nullptr;
 
-	std::shared_ptr<prosper::Buffer> m_surfaceInfoBuffer = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupSurfaceInfo = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_surfaceInfoBuffer = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupSurfaceInfo = nullptr;
 };
 
 #endif

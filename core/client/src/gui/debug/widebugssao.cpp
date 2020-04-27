@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugssao.hpp"
@@ -27,7 +34,7 @@ void WIDebugSSAO::DoUpdate()
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();
 	if(m_bUseBlurVariant == false)
-		SetTexture(*ssaoInfo.renderTarget->GetTexture());
+		SetTexture(ssaoInfo.renderTarget->GetTexture());
 	else
-		SetTexture(*ssaoInfo.renderTargetBlur->GetTexture());
+		SetTexture(ssaoInfo.renderTargetBlur->GetTexture());
 }

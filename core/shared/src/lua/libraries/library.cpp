@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
 #include "pragma/lua/classes/lconvar.h"
@@ -36,6 +43,7 @@
 #include "pragma/lua/libraries/lnav.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/util/util_handled.hpp"
+#include "pragma/util/util_rgbcsv.hpp"
 #include "pragma/model/animation/animation.h"
 #include <pragma/math/vector/util_winding_order.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
@@ -55,6 +63,12 @@ static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallbac
 	else
 		out<<"false";
 	out<<"]";
+	return out;
+}
+
+static std::ostream &operator<<(std::ostream &out,const util::HSV &hsv)
+{
+	out<<hsv.h<<' '<<hsv.s<<' '<<hsv.v;
 	return out;
 }
 
@@ -604,6 +618,22 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	utilMod[classDefCallback];
 	utilMod[callbackHandlerClassDef];
 
+	auto defHSV = luabind::class_<util::HSV>("HSVColor");
+	defHSV.def(luabind::constructor<>());
+	defHSV.def(luabind::constructor<double,double,double>());
+	defHSV.def(luabind::tostring(luabind::self));
+	defHSV.def(luabind::const_self ==luabind::const_self);
+	defHSV.def_readwrite("h",&util::HSV::h);
+	defHSV.def_readwrite("s",&util::HSV::s);
+	defHSV.def_readwrite("v",&util::HSV::v);
+	defHSV.def("ToRGBColor",static_cast<void(*)(lua_State*,const util::HSV&)>([](lua_State *l,const util::HSV &hsv) {
+		Lua::Push<Color>(l,util::hsv_to_rgb(hsv));
+	}));
+	defHSV.def("Lerp",static_cast<void(*)(lua_State*,const util::HSV&,const util::HSV&,float)>([](lua_State *l,const util::HSV &hsv0,const util::HSV &hsv1,float t) {
+		Lua::Push<util::HSV>(l,util::lerp_hsv(hsv0,hsv1,t));
+	}));
+	utilMod[defHSV];
+
 	auto defColor = luabind::class_<Color>("Color");
 	defColor.scope[luabind::def("CreateFromHexColor",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &hexColor) {
 		Lua::Push<Color>(l,Color::CreateFromHexColor(hexColor));
@@ -633,6 +663,9 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("ToVector",&Lua::Color::ToVector);
 	defColor.def("ToHexColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
 		Lua::PushString(l,color.ToHexColor());
+	}));
+	defColor.def("ToHSVColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::Push<util::HSV>(l,util::rgb_to_hsv(color));
 	}));
 	utilMod[defColor];
 

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -84,12 +91,6 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 						if(entOther == ent)
 							throw std::runtime_error("!!"); // TODO: What is this?
 					});
-				for(auto &cb : m_callbacks)
-				{
-					if(cb.IsValid() == false)
-						continue;
-					cb.Remove();
-				}
 			}));
 		}
 	};
@@ -148,4 +149,85 @@ void COcclusionCuller::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<COcclusionCullerComponent>();
 }
+
+
+DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+{
+	if(c_game == nullptr)
+		return;
+	auto *entWorld = c_game->GetWorld();
+	if(entWorld == nullptr)
+	{
+		Con::cwar<<"WARNING: No world entity found!"<<Con::endl;
+		return;
+	}
+	auto meshTree = static_cast<pragma::CWorldComponent*>(entWorld)->GetMeshTree();
+	if(meshTree == nullptr)
+	{
+		Con::cwar<<"WARNING: World-entity has no octree!"<<Con::endl;
+		return;
+	}
+	meshTree->DebugPrint();
+}
+
+DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+{
+	if(c_game == nullptr)
+		return;
+	auto &scene = c_game->GetScene();
+	auto *culler = scene->FindOcclusionCuller();
+	if(culler == nullptr)
+		return;
+	auto &octree = culler->GetOcclusionOctree();
+	octree.DebugPrint();
+}
+
+static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState*,ConVar*,bool,bool val)
+{
+	if(c_game == nullptr)
+		return;
+	auto *entWorld = c_game->GetWorld();
+	if(entWorld == nullptr)
+	{
+		Con::cwar<<"WARNING: No world entity found!"<<Con::endl;
+		return;
+	}
+	auto meshTree = static_cast<pragma::CWorldComponent*>(entWorld)->GetMeshTree();
+	if(meshTree == nullptr)
+	{
+		Con::cwar<<"WARNING: World-entity has no octree!"<<Con::endl;
+		return;
+	}
+	meshTree->SetDebugModeEnabled(val);
+	/*if(c_game == nullptr)
+	return;
+	auto mode = OcclusionCulling::GetMode();
+	if(mode != OcclusionCulling::Mode::CHC)
+	{
+	std::cout<<"This command requires 'cl_render_occlusion_culling' to be set to '2'"<<std::endl;
+	return;
+	}
+	auto *octTree = OcclusionCulling::GetRenderOctTree();
+	if(octTree == nullptr)
+	return;
+	octTree->ShowOctTree(val);
+	auto *chc = OcclusionCulling::GetCHC();
+	if(chc == nullptr)
+	return;
+	chc->SetDrawDebugTexture(val);*/
+}
+REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_static_draw,CVAR_CALLBACK_debug_render_octree_static_draw);
+
+static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*,bool,bool val)
+{
+	if(c_game == nullptr)
+		return;
+	auto &scene = c_game->GetScene();
+	auto *culler = scene->FindOcclusionCuller();
+	if(culler == nullptr)
+		return;
+	auto &octree = culler->GetOcclusionOctree();
+	octree.SetDebugModeEnabled(val);
+}
+REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);
 #pragma optimize("",on)

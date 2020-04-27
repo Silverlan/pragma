@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/game/s_game.h"
@@ -19,9 +25,6 @@
 #include "pragma/lua/classes/s_lai_behavior.h"
 #include <pragma/game/damageinfo.h>
 #include "pragma/lua/classes/s_lua_entity.h"
-#include "pragma/lua/classes/s_lua_weapon.h"
-#include "pragma/lua/classes/s_lua_vehicle.h"
-#include "pragma/lua/classes/s_lua_npc.h"
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/lua/classes/s_lmodelmesh.h"
 #include <pragma/entities/func/basefuncwater.h>

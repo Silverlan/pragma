@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #ifndef __LENTITY_H__
 #define __LENTITY_H__
 #include "pragma/networkdefinitions.h"
@@ -34,25 +40,6 @@ namespace Lua
 		DLLNETWORK void RemoveEntityOnRemoval(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther,Bool bRemove);
 		DLLNETWORK void GetSpawnFlags(lua_State *l,EntityHandle &hEnt);
 
-		// Obsolete
-		/*
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13,luabind::object o14);
-		DLLNETWORK void CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13,luabind::object o14,luabind::object o15);
-		*/
 		DLLNETWORK void Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
 		DLLNETWORK void Load(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
 		DLLNETWORK void Copy(lua_State *l,EntityHandle &hEnt);

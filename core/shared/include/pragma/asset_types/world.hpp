@@ -1,9 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #ifndef __PRAGMA_ASSET_TYPES_WORLD_HPP__
 #define __PRAGMA_ASSET_TYPES_WORLD_HPP__
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/game/game_resources.hpp"
+#include "pragma/physics/transform.hpp"
 #include <sharedutils/util_path.hpp>
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
@@ -57,11 +64,14 @@ namespace pragma::asset
 		std::vector<std::string> &GetComponents();
 		const std::unordered_map<std::string,std::string> &GetKeyValues() const;
 		std::unordered_map<std::string,std::string> &GetKeyValues();
+		std::optional<std::string> GetKeyValue(const std::string &key) const;
+		std::string GetKeyValue(const std::string &key,const std::string &default) const;
 		const std::vector<Output> &GetOutputs() const;
 		std::vector<Output> &GetOutputs();
 		const std::vector<uint16_t> &GetLeaves() const;
 		std::vector<uint16_t> &GetLeaves();
 		const Vector3 &GetOrigin() const;
+		pragma::physics::Transform GetPose() const;
 		void GetLeafData(uint32_t &outFirstLeaf,uint32_t &outNumLeaves) const;
 	private:
 		friend WorldData;

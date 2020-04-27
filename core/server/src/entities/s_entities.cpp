@@ -1,12 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/entities/s_entityfactories.h"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include "pragma/entities/player.h"
 #include "pragma/lua/classes/s_lua_entity.h"
-#include "pragma/lua/classes/s_lua_weapon.h"
-#include "pragma/lua/classes/s_lua_npc.h"
-#include "pragma/lua/classes/s_lua_vehicle.h"
 #include "pragma/game/s_game.h"
 #include "luasystem.h"
 #include "pragma/game/s_game_entities.h"
@@ -56,10 +59,6 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 
 void SGame::RemoveEntity(BaseEntity *ent)
 {
-	//if(ent == m_plLocal)
-	//	m_plLocal = NULL;
-	//else if(ent == m_entListener)
-	//	m_entListener = NULL; // WEAVETODO (std::shared_ptr TO THE POINTER?)
 	auto *s_ent = static_cast<SBaseEntity*>(ent);
 	if(s_ent->IsShared())
 	{

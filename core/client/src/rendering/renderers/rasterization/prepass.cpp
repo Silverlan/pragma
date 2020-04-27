@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -32,7 +39,7 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static auto cvDrawSky = GetClientConVar("render_draw_sky");
 static auto cvDrawWater = GetClientConVar("render_draw_water");
 static auto cvDrawView = GetClientConVar("render_draw_view");
-void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	auto prepassMode = GetPrepassMode();
 	if(prepassMode == PrepassMode::NoPrepass)
@@ -49,37 +56,37 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::PrimaryComman
 		static_cast<prosper::MSAATexture&>(*prepass.textureNormals).Reset();
 
 	// Entity instance buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*pragma::CRenderComponent::GetInstanceBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Entity bone buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*pragma::get_instance_bone_buffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*pragma::get_instance_bone_buffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// Camera buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*scene.GetCameraBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*scene.GetCameraBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	// View camera buffer barrier
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*scene.GetViewCameraBuffer(),
-		Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordBufferBarrier(
+		*scene.GetViewCameraBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
 	prepass.BeginRenderPass(*drawCmd);
 	auto bReflection = ((renderFlags &FRender::Reflection) != FRender::None) ? true : false;
 	auto pipelineType = (bReflection == true) ? pragma::ShaderPrepassBase::Pipeline::Reflection :
-		(GetSampleCount() == Anvil::SampleCountFlagBits::_1_BIT) ? pragma::ShaderPrepassBase::Pipeline::Regular :
+		(GetSampleCount() == prosper::SampleCountFlags::e1Bit) ? pragma::ShaderPrepassBase::Pipeline::Regular :
 		pragma::ShaderPrepassBase::Pipeline::MultiSample;
 	auto &shaderDepthStage = GetPrepass().GetShader();
 	if(shaderDepthStage.BeginDraw(drawCmd,pipelineType) == true)
@@ -229,10 +236,10 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
 				if(wpRenderBuffer.expired() == false)
 				{
-					prosper::util::record_buffer_barrier(
-						**drawCmd,*wpRenderBuffer.lock(),
-						Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-						Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+					drawCmd->RecordBufferBarrier(
+						*wpRenderBuffer.lock(),
+						prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
+						prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 					);
 					auto pAnimComponent = ent->GetAnimatedComponent();
 					if(pAnimComponent.valid())
@@ -240,10 +247,10 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 						auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent*>(pAnimComponent.get())->GetBoneBuffer();
 						if(wpBoneBuffer.expired() == false)
 						{
-							prosper::util::record_buffer_barrier(
-								**drawCmd,*wpBoneBuffer.lock(),
-								Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-								Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+							drawCmd->RecordBufferBarrier(
+								*wpBoneBuffer.lock(),
+								prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
+								prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 							);
 						}
 					}

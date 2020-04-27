@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
@@ -13,32 +20,32 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-decltype(ShaderSSAO::RENDER_PASS_FORMAT) ShaderSSAO::RENDER_PASS_FORMAT = Anvil::Format::R8_UNORM;
+decltype(ShaderSSAO::RENDER_PASS_FORMAT) ShaderSSAO::RENDER_PASS_FORMAT = prosper::Format::R8_UNorm;
 decltype(ShaderSSAO::DESCRIPTOR_SET_PREPASS) ShaderSSAO::DESCRIPTOR_SET_PREPASS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Normal Buffer
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Normal Buffer
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Depth Buffer
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Depth Buffer
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE) ShaderSSAO::DESCRIPTOR_SET_NOISE_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Random Normal
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Random Normal
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Sample Buffer
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Sample Buffer
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -67,12 +74,11 @@ ShaderSSAO::ShaderSSAO(prosper::Context &context,const std::string &identifier)
 		ssaoKernel.push_back(sample);  
 	}
 	auto size = ssaoKernel.size() *sizeof(ssaoKernel.front());
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo bufferCreateInfo {};
-	bufferCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
-	bufferCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	bufferCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+	bufferCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufferCreateInfo.size = size;
-	m_kernelBuffer = prosper::util::create_buffer(dev,bufferCreateInfo,ssaoKernel.data());
+	m_kernelBuffer = c_engine->CreateBuffer(bufferCreateInfo,ssaoKernel.data());
 	m_kernelBuffer->SetDebugName("ssao_kernel_buf");
 
 	// Generate kernel rotations
@@ -90,45 +96,45 @@ ShaderSSAO::ShaderSSAO(prosper::Context &context,const std::string &identifier)
 		});
 	}
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
+	imgCreateInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
-	imgCreateInfo.tiling = Anvil::ImageTiling::LINEAR;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
+	imgCreateInfo.tiling = prosper::ImageTiling::Linear;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 
 	umath::set_flag(imgCreateInfo.flags,prosper::util::ImageCreateInfo::Flags::DontAllocateMemory);
-	auto stagingImage = prosper::util::create_image(dev,imgCreateInfo,reinterpret_cast<uint8_t*>(ssaoNoise.data()));
+	auto stagingImage = context.CreateImage(imgCreateInfo,reinterpret_cast<uint8_t*>(ssaoNoise.data()));
 	context.AllocateTemporaryBuffer(*stagingImage);
 	umath::set_flag(imgCreateInfo.flags,prosper::util::ImageCreateInfo::Flags::DontAllocateMemory,false);
 
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	auto noiseImage = prosper::util::create_image(dev,imgCreateInfo);
+	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
+	auto noiseImage = context.CreateImage(imgCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	prosper::util::record_blit_image(*(*setupCmd),{},*(*stagingImage),*(*noiseImage));
-	prosper::util::record_image_barrier(*(*setupCmd),*(*noiseImage),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	setupCmd->RecordBlitImage({},*stagingImage,*noiseImage);
+	setupCmd->RecordImageBarrier(*noiseImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	c_engine->FlushSetupCommandBuffer();
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU =
 		samplerCreateInfo.addressModeV =
-		samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::REPEAT;
+		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::Repeat;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	m_noiseTexture = prosper::util::create_texture(dev,{},noiseImage,&imgViewCreateInfo,&samplerCreateInfo);
+	m_noiseTexture = context.CreateTexture({},*noiseImage,imgViewCreateInfo,samplerCreateInfo);
 
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void ShaderSSAO::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderSSAO::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderSSAO>({{{
-		RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,
-		Anvil::AttachmentStoreOp::STORE,Anvil::SampleCountFlagBits::_1_BIT,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+		RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
+		prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ShaderReadOnlyOptimal
 	}}},outRenderPass,pipelineIdx);
 }
 
@@ -137,12 +143,11 @@ void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 	prosper::ShaderBaseImageProcessing::OnPipelineInitialized(pipelineIdx);
 	if(pipelineIdx != 0u)
 		return;
-	auto &dev = c_engine->GetDevice();
-	m_descSetGroupKernel = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_SAMPLE_BUFFER);
-	m_descSetGroupTexture = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_NOISE_TEXTURE);
+	m_descSetGroupKernel = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
+	m_descSetGroupTexture = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
 	
-	prosper::util::set_descriptor_set_binding_uniform_buffer(*m_descSetGroupKernel->GetDescriptorSet(),*m_kernelBuffer,0u);
-	prosper::util::set_descriptor_set_binding_texture(*m_descSetGroupTexture->GetDescriptorSet(),*m_noiseTexture,0u);
+	m_descSetGroupKernel->GetDescriptorSet()->SetBindingUniformBuffer(*m_kernelBuffer,0u);
+	m_descSetGroupTexture->GetDescriptorSet()->SetBindingTexture(*m_noiseTexture,0u);
 }
 
 void ShaderSSAO::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -155,15 +160,15 @@ void ShaderSSAO::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipeli
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_NOISE_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SAMPLE_BUFFER);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderSSAO::Draw(const Scene &scene,Anvil::DescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions)
+bool ShaderSSAO::Draw(const Scene &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions)
 {
 	auto *descSetCamera = scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSets({
-		&descSetPrepass,(*m_descSetGroupTexture)->get_descriptor_set(0u),(*m_descSetGroupKernel)->get_descriptor_set(0u),
-		&**descSetCamera
+		&descSetPrepass,m_descSetGroupTexture->GetDescriptorSet(),m_descSetGroupKernel->GetDescriptorSet(),
+		descSetCamera
 	}) && RecordPushConstants(renderTargetDimensions.size() *sizeof(renderTargetDimensions.front()),renderTargetDimensions.data()) &&
 		prosper::ShaderBaseImageProcessing::Draw();
 }

@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
 #include "pragma/game/s_game.h"
@@ -60,7 +66,6 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <sharedutils/util_file.h>
-#include <pragma/game/game_clear_resources.h>
 #include <pragma/engine_version.h>
 #include <pragma/util/giblet_create_info.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
@@ -254,115 +259,6 @@ bool SGame::IsPhysicsSimulationEnabled() const {return cvSimEnabled->GetBool();}
 
 std::shared_ptr<pragma::EntityComponentManager> SGame::InitializeEntityComponentManager() {return std::make_shared<pragma::SEntityComponentManager>();}
 
-/*
-#include <pragma/model/brush/brushmesh.h>
-void SGame::LoadMap(const char *map)
-{
-	BaseWorld *bWrld = GetWorld();
-	if(bWrld == NULL)
-		return;
-	std::string smap = "maps\\";
-	smap += map;
-	smap += ".wld";
-	VFilePtr *f = FileManager::OpenFile(smap.c_str(),"rb");
-	if(f == NULL)
-		return;
-	char header[3];
-	f->Read(&header[0],sizeof(char) *3);
-	if(header[0] != 'W' || header[1] != 'L' || header[2] != 'D')
-	{
-		Con::cwar<<"WARNING: Invalid file format for map '"<<map<<"'!"<<Con::endl;
-		return;
-	}
-	unsigned int version = f->Read<unsigned int>();
-	unsigned int numMaterials = f->Read<unsigned int>();
-	std::vector<Material*> materials;
-	for(unsigned int i=0;i<numMaterials;i++)
-	{
-		std::string mat = f->ReadString();
-		materials.push_back(MaterialSystem::Load(mat.c_str()));
-	}
-	std::vector<BrushMesh*> meshes;
-	unsigned int numMeshes = f->Read<unsigned int>();
-	for(unsigned int i=0;i<numMeshes;i++)
-	{
-		BrushMesh *mesh = new BrushMesh;
-		std::vector<Vector3> verts;
-		unsigned int numVerts = f->Read<unsigned int>();
-		for(unsigned int j=0;j<numVerts;j++)
-		{
-			float x = f->Read<float>();
-			float y = f->Read<float>();
-			float z = f->Read<float>();
-			verts.push_back(Vector3(x,y,z));
-		}
-		unsigned int numSides = f->Read<unsigned int>();
-		for(unsigned int j=0;j<numSides;j++)
-		{
-			std::vector<Vector3> vertsSrc;
-			std::vector<Vector2> uvsSrc;
-			std::vector<Vector3> normalsSrc;
-			unsigned int matID = f->Read<unsigned int>();
-			unsigned int numSideVerts = f->Read<unsigned int>();
-			for(unsigned int k=0;k<numSideVerts;k++)
-			{
-				unsigned int vertID = f->Read<unsigned int>();
-				Vector3 &v = verts[vertID];
-				vertsSrc.push_back(v);
-			}
-			for(unsigned int k=0;k<numSideVerts;k++)
-			{
-				Vector3 n(0,1,0);
-				normalsSrc.push_back(n);
-			}
-			for(unsigned int k=0;k<numSideVerts;k++)
-			{
-				float x = f->Read<float>();
-				float y = f->Read<float>();
-				uvsSrc.push_back(Vector2(x,y));
-			}
-			std::vector<Vector3> *vertsDest = new std::vector<Vector3>;
-			std::vector<Vector3> *normalsDest = new std::vector<Vector3>;
-			std::vector<Vector2> *uvsDest = new std::vector<Vector2>;
-			ToTriangles(
-				&vertsSrc,&normalsSrc,&uvsSrc,
-				vertsDest,normalsDest,uvsDest
-			);
-			Side *side = new Side(&vertsSrc,vertsDest,uvsDest,normalsDest,materials[matID]);
-			mesh->AddSide(side);
-		}
-		mesh->Calculate();
-		meshes.push_back(mesh);
-	}
-	FileManager::CloseFile(f);
-
-	World *wrld = static_cast<World*>(bWrld);
-	BaseEntity *entWorld = dynamic_cast<BaseEntity*>(wrld);
-	Vector3 min(0,0,0);
-	Vector3 max(0,0,0);
-	for(int i=0;i<meshes.size();i++)
-	{
-		entWorld->AddBrushMesh(meshes[i]);
-		Vector3 minMesh,maxMesh;
-		meshes[i]->GetBounds(&minMesh,&maxMesh);
-		if(i == 0)
-		{
-			min = minMesh;
-			max = maxMesh;
-		}
-		else
-		{
-			Vector3::min(&min,minMesh);
-			Vector3::max(&max,maxMesh);
-		}
-	}
-	entWorld->SetCollisionBounds(min,max);
-	//wrld->SetBrushes(meshes);
-	entWorld->InitializePhysics(PHYSICSTYPE::STATIC);
-	Con::cout<<"Successfully loaded map '"<<map<<"'!"<<Con::endl;
-}
-*/
-
 pragma::ai::TaskManager &SGame::GetAITaskManager() const {return *m_taskManager;}
 
 void SGame::Think()
@@ -552,70 +448,6 @@ void SGame::GenerateLuaCache()
 		if(ufile::get_extension(fName,&ext) == true && ext == "clua")
 			UpdateLuaCache(fName);
 	}
-	// Deprecated
-	/*if(m_luaCache != NULL)
-		delete m_luaCache;
-	m_luaCache = NULL;
-	auto numFiles = m_csLuaFiles.size();
-	Con::csv<<"Generating lua cache ("<<numFiles<<" files)..."<<Con::endl;
-	if(numFiles == 0)
-		return;
-	std::stringstream out(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-	std::stringstream crc;
-	int numAdded = 0;
-	char csep = 3;
-	for(size_t i=0;i<numFiles;i++)
-	{
-		std::string lpath = FileManager::GetCanonicalizedPath(m_csLuaFiles[i]);
-		std::string subPath = "lua\\" +lpath;
-		std::string path = FileManager::GetSubPath(subPath);
-		std::ifstream is;
-		is.open(path.c_str(),std::ifstream::in | std::ifstream::binary);
-		if(!is.is_open())
-			Con::cwar<<"WARNING: Unable to add clientside lua-file '"<<subPath<<"'"<<Con::endl;
-		else
-		{
-			numAdded++;
-			std::string str((std::istreambuf_iterator<char>(is)),std::istreambuf_iterator<char>());
-			auto len = str.length();
-			out.write(lpath.c_str(),lpath.length());
-			out.write(&csep,1);
-			out.write(str.c_str(),len);
-			
-			out.write(&csep,1);
-			crc<<subPath<<len;
-		}
-	}
-	if(numAdded == 0)
-		return;
-	out.seekg(0,std::ios::end);
-	unsigned int sourceLength = CUInt32(out.tellg());
-	out.seekg(0,std::ios::beg);
-	int blockSize100k = 8;
-	int verbosity = 0;
-	int workFactor = 30;
-	unsigned int destLength = CUInt32(1.01 *sourceLength +600);
-	char *dest = new char[destLength];
-	char *source = new char[sourceLength +1];
-#ifdef WIN32
-	strcpy_s(source,static_cast<size_t>(destLength),out.str().c_str());
-#else
-	std::strcpy(source,out.str().c_str());
-#endif
-	int err = BZ2_bzBuffToBuffCompress(dest,&destLength,source,sourceLength,blockSize100k,verbosity,workFactor);
-	if(err == BZ_OK)
-	{
-		std::string md5 = MD5(crc.str()).hexdigest();
-		FileManager::CreatePath("cache\\");
-		std::string file = "cache\\" +md5 +".cache";
-		FileManager::AddVirtualFile(file.c_str(),dest,destLength);
-		ResourceManager::AddResource(file);
-		m_luaCache = new CacheInfo(md5,sourceLength);
-	}
-	else
-		Con::cwar<<"WANRING: Unable to compress lua-cache ("<<err<<")!"<<Con::endl;
-	delete source;
-	delete dest;*/
 }
 
 bool SGame::InitializeGameMode()

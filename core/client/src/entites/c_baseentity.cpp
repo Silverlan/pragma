@@ -1,7 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/shaders/c_shader.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "cmaterialmanager.h"
@@ -12,7 +18,6 @@
 #include <pragma/math/intersection.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/parentinfo.h"
-#include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/rendersystem.h"
 #include <materialmanager.h>
 #include "pragma/model/c_modelmesh.h"
@@ -83,22 +88,6 @@ BaseEntity *CBaseEntity::GetServersideEntity() const
 		return nullptr;
 	return game->GetEntity(GetIndex());
 }
-// Obsolete
-/*
-void CBaseEntity::UpdateAnimatedState()
-{
-	auto bAnimated = false;
-	if(GetModelComponent().GetAnimation() != -1 || GetModelComponent().GetAnimationSlotInfos().empty() == false)
-		bAnimated = true;
-	else
-	{
-		auto pPhysComponent = GetPhysicsComponent();
-		if(pPhysComponent != nullptr && pPhysComponent->GetPhysConstraints().empty() == false)
-			bAnimated = true;
-	}
-	GetModelComponent().SetAnimated(bAnimated);
-}
-*/
 
 static uint64_t get_scene_flag(Scene &scene)
 {
@@ -134,11 +123,6 @@ void CBaseEntity::Initialize()
 	lua_State *lua = game->GetLuaState();
 	InitializeLuaObject(lua);
 	g_ClientEntityFactories->GetClassName(typeid(*this),&m_class);
-
-	 // prosper TODO
-	//m_modelComponent->AddCallback(pragma::EComponentModelCallbackEvent::OnModelChanged,FunctionCallback<void,std::reference_wrapper<std::shared_ptr<Model>>>::Create([this](std::reference_wrapper<std::shared_ptr<Model>> mdl) {
-		//m_softBodyBuffers = nullptr; // prosper TODO
-	//}));
 }
 
 void CBaseEntity::DoSpawn()

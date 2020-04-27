@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #ifndef __WMD_H__
 #define __WMD_H__
 #include "pragma/networkdefinitions.h"
@@ -8,7 +14,7 @@
 #include "pragma/file_formats/wad.h"
 
 // Note: Changing this version will directly affect model saving as well as loading, both have to be updated accordingly
-#define WMD_VERSION 30
+#define WMD_VERSION 31
 
 enum class CollisionMeshLoadFlags : uint64_t
 {

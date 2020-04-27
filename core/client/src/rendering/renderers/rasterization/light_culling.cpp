@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
@@ -13,7 +20,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto &scene = GetScene();
 	auto &prepass = GetPrepass();
@@ -25,35 +32,35 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 		if(depthTex->IsMSAATexture())
 		{
 			depthTex = static_cast<prosper::MSAATexture&>(*depthTex).Resolve(
-				*(*drawCmd),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+				*drawCmd,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,
+				prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal
 			);
 		}
 		else
-			prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex->GetImage()),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd->RecordImageBarrier(depthTex->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 		static std::vector<pragma::CLightComponent*> culledLightSources;
 		culledLightSources.clear();
 		auto &fp = GetForwardPlusInstance();
 
 		// Camera buffer
-		prosper::util::record_buffer_barrier(
-			**drawCmd,*scene.GetCameraBuffer(),
-			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		drawCmd->RecordBufferBarrier(
+			*scene.GetCameraBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
 		// Render settings buffer
-		prosper::util::record_buffer_barrier(
-			**drawCmd,*scene.GetRenderSettingsBuffer(),
-			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		drawCmd->RecordBufferBarrier(
+			*scene.GetRenderSettingsBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv->IsUnlit() == false)
 		{
-			fp.Compute(*drawCmd,*(*depthTex->GetImage()),**scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd,depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
 			{
@@ -72,19 +79,19 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 					auto &renderBuffer = l->GetRenderBuffer();
 					if(renderBuffer)
 					{
-						prosper::util::record_buffer_barrier(
-							**drawCmd,*renderBuffer,
-							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+						drawCmd->RecordBufferBarrier(
+							*renderBuffer,
+							prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+							prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 						);
 					}
 					auto &shadowBuffer = l->GetShadowBuffer();
 					if(shadowBuffer)
 					{
-						prosper::util::record_buffer_barrier(
-							**drawCmd,*shadowBuffer,
-							Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-							Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+						drawCmd->RecordBufferBarrier(
+							*shadowBuffer,
+							prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+							prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 						);
 					}
 				}
@@ -93,7 +100,7 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 
 		// Don't write to depth image until compute shader has completed reading from it
 		if(!bMultisampled)
-			prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex->GetImage()),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+			drawCmd->RecordImageBarrier(depthTex->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::CullLightSources);
@@ -104,17 +111,17 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 		//c_engine->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
 
 		// Entity instance buffer barrier
-		prosper::util::record_buffer_barrier(
-			**drawCmd,*pragma::CRenderComponent::GetInstanceBuffer(),
-			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		drawCmd->RecordBufferBarrier(
+			*pragma::CRenderComponent::GetInstanceBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
 		// Entity bone buffer barrier
-		prosper::util::record_buffer_barrier(
-			**drawCmd,*pragma::get_instance_bone_buffer(),
-			Anvil::PipelineStageFlagBits::TRANSFER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-			Anvil::AccessFlagBits::TRANSFER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+		drawCmd->RecordBufferBarrier(
+			*pragma::get_instance_bone_buffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
 		if(worldEnv->IsUnlit() == false)
@@ -138,7 +145,7 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::PrimaryCom
 		//drawCmd->SetViewport(w,h); // Reset the viewport
 
 		//auto &imgDepth = textureDepth->GetImage(); // prosper TODO
-		//imgDepth->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
+		//imgDepth->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Shadows);
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
 	}

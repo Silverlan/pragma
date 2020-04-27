@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/util/util_image.hpp"
 #include <prosper_command_buffer.hpp>
@@ -6,27 +13,27 @@ extern DLLCENGINE CEngine *c_engine;
 
 
 bool util::to_image_buffer(
-	prosper::Image &image,uimg::ImageBuffer::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
+	prosper::IImage &image,uimg::ImageBuffer::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
 	bool includeLayers,bool includeMipmaps
 )
 {
 	auto outputFormat = targetFormat;
-	Anvil::Format dstFormat;
+	prosper::Format dstFormat;
 	switch(targetFormat)
 	{
 	case uimg::ImageBuffer::Format::RGB8:
 	case uimg::ImageBuffer::Format::RGBA8:
-		dstFormat = Anvil::Format::R8G8B8A8_UNORM;
+		dstFormat = prosper::Format::R8G8B8A8_UNorm;
 		targetFormat = uimg::ImageBuffer::Format::RGBA8;
 		break;
 	case uimg::ImageBuffer::Format::RGB16:
 	case uimg::ImageBuffer::Format::RGBA16:
-		dstFormat = Anvil::Format::R16G16B16A16_SFLOAT;
+		dstFormat = prosper::Format::R16G16B16A16_SFloat;
 		targetFormat = uimg::ImageBuffer::Format::RGBA16;
 		break;
 	case uimg::ImageBuffer::Format::RGB32:
 	case uimg::ImageBuffer::Format::RGBA32:
-		dstFormat = Anvil::Format::R32G32B32A32_SFLOAT;
+		dstFormat = prosper::Format::R32G32B32A32_SFloat;
 		targetFormat = uimg::ImageBuffer::Format::RGBA32;
 		break;
 	default:
@@ -37,15 +44,14 @@ bool util::to_image_buffer(
 	auto &context = image.GetContext();
 	auto &setupCmd = context.GetSetupCommandBuffer();
 
-	prosper::util::ImageCreateInfo copyCreateInfo {};
-	image.GetCreateInfo(copyCreateInfo);
+	auto copyCreateInfo = image.GetCreateInfo();
 	copyCreateInfo.format = dstFormat;
-	copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-	copyCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	copyCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
-	prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+	copyCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	copyCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	copyCreateInfo.tiling = prosper::ImageTiling::Optimal; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
+	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal);
 	auto imgRead = image.Copy(*setupCmd,copyCreateInfo);
-	prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	setupCmd->RecordImageBarrier(image,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 	// Copy the image data to a buffer
 	uint64_t size = 0;
@@ -76,17 +82,17 @@ bool util::to_image_buffer(
 		context.FlushSetupCommandBuffer();
 		return false; // Buffer allocation failed; Requested size too large?
 	}
-	prosper::util::record_image_barrier(**setupCmd,**imgRead,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+	setupCmd->RecordImageBarrier(*imgRead,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal);
 
 	prosper::util::BufferImageCopyInfo copyInfo {};
-	copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
+	copyInfo.dstImageLayout = prosper::ImageLayout::TransferSrcOptimal;
 
 	struct ImageMipmapData
 	{
 		uint32_t mipmapIndex = 0u;
 		uint64_t bufferOffset = 0ull;
 		uint64_t bufferSize = 0ull;
-		vk::Extent2D extents = {};
+		prosper::Extent2D extents = {};
 	};
 	struct ImageLayerData
 	{
@@ -118,7 +124,7 @@ bool util::to_image_buffer(
 			copyInfo.mipLevel = mipmapData.mipmapIndex;
 			copyInfo.baseArrayLayer = layerData.layerIndex;
 			copyInfo.bufferOffset = mipmapData.bufferOffset;
-			prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgRead,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
+			setupCmd->RecordCopyImageToBuffer(copyInfo,*imgRead,prosper::ImageLayout::TransferSrcOptimal,*buf);
 		}
 	}
 	context.FlushSetupCommandBuffer();
@@ -143,7 +149,7 @@ bool util::to_image_buffer(
 	return true;
 }
 bool util::to_image_buffer(
-	prosper::Image &image,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
+	prosper::IImage &image,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
 	bool includeLayers,bool includeMipmaps
 )
 {
@@ -151,148 +157,148 @@ bool util::to_image_buffer(
 	auto targetFormat = uimg::ImageBuffer::Format::RGBA8;
 	switch(format)
 	{
-	case Anvil::Format::R8_UNORM:
-	case Anvil::Format::R8_SNORM:
-	case Anvil::Format::R8_USCALED:
-	case Anvil::Format::R8_SSCALED:
-	case Anvil::Format::R8_UINT:
-	case Anvil::Format::R8_SINT:
-	case Anvil::Format::R8_SRGB:
-	case Anvil::Format::R8G8_UNORM:
-	case Anvil::Format::R8G8_SNORM:
-	case Anvil::Format::R8G8_USCALED:
-	case Anvil::Format::R8G8_SSCALED:
-	case Anvil::Format::R8G8_UINT:
-	case Anvil::Format::R8G8_SINT:
-	case Anvil::Format::R8G8_SRGB:
-	case Anvil::Format::R8G8B8_UNORM:
-	case Anvil::Format::R8G8B8_SNORM:
-	case Anvil::Format::R8G8B8_USCALED:
-	case Anvil::Format::R8G8B8_SSCALED:
-	case Anvil::Format::R8G8B8_UINT:
-	case Anvil::Format::R8G8B8_SINT:
-	case Anvil::Format::R8G8B8_SRGB:
-	case Anvil::Format::B8G8R8_UNORM:
-	case Anvil::Format::B8G8R8_SNORM:
-	case Anvil::Format::B8G8R8_USCALED:
-	case Anvil::Format::B8G8R8_SSCALED:
-	case Anvil::Format::B8G8R8_UINT:
-	case Anvil::Format::B8G8R8_SINT:
-	case Anvil::Format::B8G8R8_SRGB:
-	case Anvil::Format::R8G8B8A8_UNORM:
-	case Anvil::Format::R8G8B8A8_SNORM:
-	case Anvil::Format::R8G8B8A8_USCALED:
-	case Anvil::Format::R8G8B8A8_SSCALED:
-	case Anvil::Format::R8G8B8A8_UINT:
-	case Anvil::Format::R8G8B8A8_SINT:
-	case Anvil::Format::R8G8B8A8_SRGB:
-	case Anvil::Format::B8G8R8A8_UNORM:
-	case Anvil::Format::B8G8R8A8_SNORM:
-	case Anvil::Format::B8G8R8A8_USCALED:
-	case Anvil::Format::B8G8R8A8_SSCALED:
-	case Anvil::Format::B8G8R8A8_UINT:
-	case Anvil::Format::B8G8R8A8_SINT:
-	case Anvil::Format::B8G8R8A8_SRGB:
-	case Anvil::Format::A8B8G8R8_UNORM_PACK32:
-	case Anvil::Format::A8B8G8R8_SNORM_PACK32:
-	case Anvil::Format::A8B8G8R8_USCALED_PACK32:
-	case Anvil::Format::A8B8G8R8_SSCALED_PACK32:
-	case Anvil::Format::A8B8G8R8_UINT_PACK32:
-	case Anvil::Format::A8B8G8R8_SINT_PACK32:
-	case Anvil::Format::A8B8G8R8_SRGB_PACK32:
-	case Anvil::Format::A2R10G10B10_UNORM_PACK32:
-	case Anvil::Format::A2R10G10B10_SNORM_PACK32:
-	case Anvil::Format::A2R10G10B10_USCALED_PACK32:
-	case Anvil::Format::A2R10G10B10_SSCALED_PACK32:
-	case Anvil::Format::A2R10G10B10_UINT_PACK32:
-	case Anvil::Format::A2R10G10B10_SINT_PACK32:
-	case Anvil::Format::A2B10G10R10_UNORM_PACK32:
-	case Anvil::Format::A2B10G10R10_SNORM_PACK32:
-	case Anvil::Format::A2B10G10R10_USCALED_PACK32:
-	case Anvil::Format::A2B10G10R10_SSCALED_PACK32:
-	case Anvil::Format::A2B10G10R10_UINT_PACK32:
-	case Anvil::Format::A2B10G10R10_SINT_PACK32:
-	case Anvil::Format::S8_UINT:
-	case Anvil::Format::BC1_RGB_UNORM_BLOCK:
-	case Anvil::Format::BC1_RGB_SRGB_BLOCK:
-	case Anvil::Format::BC1_RGBA_UNORM_BLOCK:
-	case Anvil::Format::BC1_RGBA_SRGB_BLOCK:
-	case Anvil::Format::BC2_UNORM_BLOCK:
-	case Anvil::Format::BC2_SRGB_BLOCK:
-	case Anvil::Format::BC3_UNORM_BLOCK:
-	case Anvil::Format::BC3_SRGB_BLOCK:
-	case Anvil::Format::BC4_UNORM_BLOCK:
-	case Anvil::Format::BC4_SNORM_BLOCK:
+	case prosper::Format::R8_UNorm:
+	case prosper::Format::R8_SNorm:
+	case prosper::Format::R8_UScaled_PoorCoverage:
+	case prosper::Format::R8_SScaled_PoorCoverage:
+	case prosper::Format::R8_UInt:
+	case prosper::Format::R8_SInt:
+	case prosper::Format::R8_SRGB:
+	case prosper::Format::R8G8_UNorm:
+	case prosper::Format::R8G8_SNorm:
+	case prosper::Format::R8G8_UScaled_PoorCoverage:
+	case prosper::Format::R8G8_SScaled_PoorCoverage:
+	case prosper::Format::R8G8_UInt:
+	case prosper::Format::R8G8_SInt:
+	case prosper::Format::R8G8_SRGB_PoorCoverage:
+	case prosper::Format::R8G8B8_UNorm_PoorCoverage:
+	case prosper::Format::R8G8B8_SNorm_PoorCoverage:
+	case prosper::Format::R8G8B8_UScaled_PoorCoverage:
+	case prosper::Format::R8G8B8_SScaled_PoorCoverage:
+	case prosper::Format::R8G8B8_UInt_PoorCoverage:
+	case prosper::Format::R8G8B8_SInt_PoorCoverage:
+	case prosper::Format::R8G8B8_SRGB_PoorCoverage:
+	case prosper::Format::B8G8R8_UNorm_PoorCoverage:
+	case prosper::Format::B8G8R8_SNorm_PoorCoverage:
+	case prosper::Format::B8G8R8_UScaled_PoorCoverage:
+	case prosper::Format::B8G8R8_SScaled_PoorCoverage:
+	case prosper::Format::B8G8R8_UInt_PoorCoverage:
+	case prosper::Format::B8G8R8_SInt_PoorCoverage:
+	case prosper::Format::B8G8R8_SRGB_PoorCoverage:
+	case prosper::Format::R8G8B8A8_UNorm:
+	case prosper::Format::R8G8B8A8_SNorm:
+	case prosper::Format::R8G8B8A8_UScaled_PoorCoverage:
+	case prosper::Format::R8G8B8A8_SScaled_PoorCoverage:
+	case prosper::Format::R8G8B8A8_UInt:
+	case prosper::Format::R8G8B8A8_SInt:
+	case prosper::Format::R8G8B8A8_SRGB:
+	case prosper::Format::B8G8R8A8_UNorm:
+	case prosper::Format::B8G8R8A8_SNorm:
+	case prosper::Format::B8G8R8A8_UScaled_PoorCoverage:
+	case prosper::Format::B8G8R8A8_SScaled_PoorCoverage:
+	case prosper::Format::B8G8R8A8_UInt:
+	case prosper::Format::B8G8R8A8_SInt:
+	case prosper::Format::B8G8R8A8_SRGB:
+	case prosper::Format::A8B8G8R8_UNorm_Pack32:
+	case prosper::Format::A8B8G8R8_SNorm_Pack32:
+	case prosper::Format::A8B8G8R8_UScaled_Pack32_PoorCoverage:
+	case prosper::Format::A8B8G8R8_SScaled_Pack32_PoorCoverage:
+	case prosper::Format::A8B8G8R8_UInt_Pack32:
+	case prosper::Format::A8B8G8R8_SInt_Pack32:
+	case prosper::Format::A8B8G8R8_SRGB_Pack32:
+	case prosper::Format::A2R10G10B10_UNorm_Pack32:
+	case prosper::Format::A2R10G10B10_SNorm_Pack32_PoorCoverage:
+	case prosper::Format::A2R10G10B10_UScaled_Pack32_PoorCoverage:
+	case prosper::Format::A2R10G10B10_SScaled_Pack32_PoorCoverage:
+	case prosper::Format::A2R10G10B10_UInt_Pack32:
+	case prosper::Format::A2R10G10B10_SInt_Pack32_PoorCoverage:
+	case prosper::Format::A2B10G10R10_UNorm_Pack32:
+	case prosper::Format::A2B10G10R10_SNorm_Pack32_PoorCoverage:
+	case prosper::Format::A2B10G10R10_UScaled_Pack32_PoorCoverage:
+	case prosper::Format::A2B10G10R10_SScaled_Pack32_PoorCoverage:
+	case prosper::Format::A2B10G10R10_UInt_Pack32:
+	case prosper::Format::A2B10G10R10_SInt_Pack32_PoorCoverage:
+	case prosper::Format::S8_UInt_PoorCoverage:
+	case prosper::Format::BC1_RGB_UNorm_Block:
+	case prosper::Format::BC1_RGB_SRGB_Block:
+	case prosper::Format::BC1_RGBA_UNorm_Block:
+	case prosper::Format::BC1_RGBA_SRGB_Block:
+	case prosper::Format::BC2_UNorm_Block:
+	case prosper::Format::BC2_SRGB_Block:
+	case prosper::Format::BC3_UNorm_Block:
+	case prosper::Format::BC3_SRGB_Block:
+	case prosper::Format::BC4_UNorm_Block:
+	case prosper::Format::BC4_SNorm_Block:
 		targetFormat = uimg::ImageBuffer::Format::RGBA8;
 		break;
-	case Anvil::Format::R16_UNORM:
-	case Anvil::Format::R16_SNORM:
-	case Anvil::Format::R16_USCALED:
-	case Anvil::Format::R16_SSCALED:
-	case Anvil::Format::R16_UINT:
-	case Anvil::Format::R16_SINT:
-	case Anvil::Format::R16_SFLOAT:
-	case Anvil::Format::R16G16_UNORM:
-	case Anvil::Format::R16G16_SNORM:
-	case Anvil::Format::R16G16_USCALED:
-	case Anvil::Format::R16G16_SSCALED:
-	case Anvil::Format::R16G16_UINT:
-	case Anvil::Format::R16G16_SINT:
-	case Anvil::Format::R16G16_SFLOAT:
-	case Anvil::Format::R16G16B16_UNORM:
-	case Anvil::Format::R16G16B16_SNORM:
-	case Anvil::Format::R16G16B16_USCALED:
-	case Anvil::Format::R16G16B16_SSCALED:
-	case Anvil::Format::R16G16B16_UINT:
-	case Anvil::Format::R16G16B16_SINT:
-	case Anvil::Format::R16G16B16_SFLOAT:
-	case Anvil::Format::R16G16B16A16_UNORM:
-	case Anvil::Format::R16G16B16A16_SNORM:
-	case Anvil::Format::R16G16B16A16_USCALED:
-	case Anvil::Format::R16G16B16A16_SSCALED:
-	case Anvil::Format::R16G16B16A16_UINT:
-	case Anvil::Format::R16G16B16A16_SINT:
-	case Anvil::Format::R16G16B16A16_SFLOAT:
+	case prosper::Format::R16_UNorm:
+	case prosper::Format::R16_SNorm:
+	case prosper::Format::R16_UScaled_PoorCoverage:
+	case prosper::Format::R16_SScaled_PoorCoverage:
+	case prosper::Format::R16_UInt:
+	case prosper::Format::R16_SInt:
+	case prosper::Format::R16_SFloat:
+	case prosper::Format::R16G16_UNorm:
+	case prosper::Format::R16G16_SNorm:
+	case prosper::Format::R16G16_UScaled_PoorCoverage:
+	case prosper::Format::R16G16_SScaled_PoorCoverage:
+	case prosper::Format::R16G16_UInt:
+	case prosper::Format::R16G16_SInt:
+	case prosper::Format::R16G16_SFloat:
+	case prosper::Format::R16G16B16_UNorm_PoorCoverage:
+	case prosper::Format::R16G16B16_SNorm_PoorCoverage:
+	case prosper::Format::R16G16B16_UScaled_PoorCoverage:
+	case prosper::Format::R16G16B16_SScaled_PoorCoverage:
+	case prosper::Format::R16G16B16_UInt_PoorCoverage:
+	case prosper::Format::R16G16B16_SInt_PoorCoverage:
+	case prosper::Format::R16G16B16_SFloat_PoorCoverage:
+	case prosper::Format::R16G16B16A16_UNorm:
+	case prosper::Format::R16G16B16A16_SNorm:
+	case prosper::Format::R16G16B16A16_UScaled_PoorCoverage:
+	case prosper::Format::R16G16B16A16_SScaled_PoorCoverage:
+	case prosper::Format::R16G16B16A16_UInt:
+	case prosper::Format::R16G16B16A16_SInt:
+	case prosper::Format::R16G16B16A16_SFloat:
 		targetFormat = uimg::ImageBuffer::Format::RGBA16;
 		break;
-	case Anvil::Format::R32_UINT:
-	case Anvil::Format::R32_SINT:
-	case Anvil::Format::R32_SFLOAT:
-	case Anvil::Format::R32G32_UINT:
-	case Anvil::Format::R32G32_SINT:
-	case Anvil::Format::R32G32_SFLOAT:
-	case Anvil::Format::R32G32B32_UINT:
-	case Anvil::Format::R32G32B32_SINT:
-	case Anvil::Format::R32G32B32_SFLOAT:
-	case Anvil::Format::R32G32B32A32_UINT:
-	case Anvil::Format::R32G32B32A32_SINT:
-	case Anvil::Format::R32G32B32A32_SFLOAT:
-	case Anvil::Format::R64_UINT:
-	case Anvil::Format::R64_SINT:
-	case Anvil::Format::R64_SFLOAT:
-	case Anvil::Format::R64G64_UINT:
-	case Anvil::Format::R64G64_SINT:
-	case Anvil::Format::R64G64_SFLOAT:
-	case Anvil::Format::R64G64B64_UINT:
-	case Anvil::Format::R64G64B64_SINT:
-	case Anvil::Format::R64G64B64_SFLOAT:
-	case Anvil::Format::R64G64B64A64_UINT:
-	case Anvil::Format::R64G64B64A64_SINT:
-	case Anvil::Format::R64G64B64A64_SFLOAT:
-	case Anvil::Format::B10G11R11_UFLOAT_PACK32:
-	case Anvil::Format::E5B9G9R9_UFLOAT_PACK32:
-	case Anvil::Format::D16_UNORM:
-	case Anvil::Format::X8_D24_UNORM_PACK32:
-	case Anvil::Format::D32_SFLOAT:
-	case Anvil::Format::D16_UNORM_S8_UINT:
-	case Anvil::Format::D24_UNORM_S8_UINT:
-	case Anvil::Format::D32_SFLOAT_S8_UINT:
-	case Anvil::Format::BC5_UNORM_BLOCK:
-	case Anvil::Format::BC5_SNORM_BLOCK:
-	case Anvil::Format::BC6H_UFLOAT_BLOCK:
-	case Anvil::Format::BC6H_SFLOAT_BLOCK:
-	case Anvil::Format::BC7_UNORM_BLOCK:
-	case Anvil::Format::BC7_SRGB_BLOCK:
+	case prosper::Format::R32_UInt:
+	case prosper::Format::R32_SInt:
+	case prosper::Format::R32_SFloat:
+	case prosper::Format::R32G32_UInt:
+	case prosper::Format::R32G32_SInt:
+	case prosper::Format::R32G32_SFloat:
+	case prosper::Format::R32G32B32_UInt:
+	case prosper::Format::R32G32B32_SInt:
+	case prosper::Format::R32G32B32_SFloat:
+	case prosper::Format::R32G32B32A32_UInt:
+	case prosper::Format::R32G32B32A32_SInt:
+	case prosper::Format::R32G32B32A32_SFloat:
+	case prosper::Format::R64_UInt_PoorCoverage:
+	case prosper::Format::R64_SInt_PoorCoverage:
+	case prosper::Format::R64_SFloat_PoorCoverage:
+	case prosper::Format::R64G64_UInt_PoorCoverage:
+	case prosper::Format::R64G64_SInt_PoorCoverage:
+	case prosper::Format::R64G64_SFloat_PoorCoverage:
+	case prosper::Format::R64G64B64_UInt_PoorCoverage:
+	case prosper::Format::R64G64B64_SInt_PoorCoverage:
+	case prosper::Format::R64G64B64_SFloat_PoorCoverage:
+	case prosper::Format::R64G64B64A64_UInt_PoorCoverage:
+	case prosper::Format::R64G64B64A64_SInt_PoorCoverage:
+	case prosper::Format::R64G64B64A64_SFloat_PoorCoverage:
+	case prosper::Format::B10G11R11_UFloat_Pack32:
+	case prosper::Format::E5B9G9R9_UFloat_Pack32:
+	case prosper::Format::D16_UNorm:
+	case prosper::Format::X8_D24_UNorm_Pack32_PoorCoverage:
+	case prosper::Format::D32_SFloat:
+	case prosper::Format::D16_UNorm_S8_UInt_PoorCoverage:
+	case prosper::Format::D24_UNorm_S8_UInt_PoorCoverage:
+	case prosper::Format::D32_SFloat_S8_UInt:
+	case prosper::Format::BC5_UNorm_Block:
+	case prosper::Format::BC5_SNorm_Block:
+	case prosper::Format::BC6H_UFloat_Block:
+	case prosper::Format::BC6H_SFloat_Block:
+	case prosper::Format::BC7_UNorm_Block:
+	case prosper::Format::BC7_SRGB_Block:
 		targetFormat = uimg::ImageBuffer::Format::RGBA32;
 		break;
 	}

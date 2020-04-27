@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/console/c_cvar.h"
@@ -261,34 +268,33 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightCom
 		return;
 	const auto layerCount = m_layerCount;
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = size;
 	imgCreateInfo.height = size;
 	imgCreateInfo.format = pragma::ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::DEPTH_STENCIL_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	if(smType == pragma::CLightComponent::ShadowMapType::Static)
-		imgCreateInfo.usage |= Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
+		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	imgCreateInfo.layers = layerCount;
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
+	auto img = c_engine->CreateImage(imgCreateInfo);
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
 	//samplerCreateInfo.compareOp = Anvil::CompareOp::LESS_OR_EQUAL;
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.borderColor = Anvil::BorderColor::FLOAT_OPAQUE_WHITE;
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.borderColor = prosper::BorderColor::FloatOpaqueWhite;
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto tex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 
-	set.renderTarget = prosper::util::create_render_target(dev,{tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
+	set.renderTarget = c_engine->CreateRenderTarget({tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
 void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)
@@ -298,7 +304,7 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4
 		UpdateFrustum(i,cam,matView,dir);
 }
 
-void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
+void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
 {
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
@@ -308,7 +314,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 	auto &shaderCsm = static_cast<pragma::ShaderShadowCSM&>(*m_whShaderCsm.get());
 	auto *shaderCsmTransparent = m_whShaderCsmTransparent.expired() == false ? static_cast<pragma::ShaderShadowCSMTransparent*>(m_whShaderCsmTransparent.get()) : nullptr;
 	auto &tex = rt->GetTexture();
-	auto &img = tex->GetImage();
+	auto &img = tex.GetImage();
 	auto &info = m_pendingInfo;
 	auto smType = pragma::CLightComponent::ShadowMapType::Static;
 
@@ -316,12 +322,12 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 	auto numLayers = GetLayerCount();
 	for(auto layer=decltype(numLayers){0};layer<numLayers;++layer)
 	{
-		auto &framebuffer = rt->GetFramebuffer(layer);
+		auto &framebuffer = *rt->GetFramebuffer(layer);
 
 		auto bBlit = false;
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal,layer);
 
-		prosper::util::record_begin_render_pass(*(*drawCmd),*rt,layer);
+		drawCmd->RecordBeginRenderPass(*rt,layer);
 		auto &meshesInfo = info.meshes.at(layer);
 		if(meshesInfo.entityMeshes.empty() == false)
 		{
@@ -440,7 +446,7 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 				meshesInfo.translucentMeshes.clear();
 			}
 		}
-		prosper::util::record_end_render_pass(*(*drawCmd));
+		drawCmd->RecordEndRenderPass();
 	}
 	auto *cam = c_game->GetPrimaryCamera();
 	auto camPos = cam ? cam->GetEntity().GetPosition() : Vector3{};
@@ -506,19 +512,19 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 
 		auto &dstImg = GetDepthTexture(smType)->GetImage();
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal,layer);
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*dstImg),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(dstImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal,layer);
 
 		// Blit finished shadow map into our actual scene shadow map
 		prosper::util::BlitInfo blitInfo {};
-		blitInfo.srcSubresourceLayer.base_array_layer = blitInfo.dstSubresourceLayer.base_array_layer = layer;
-		blitInfo.srcSubresourceLayer.layer_count = blitInfo.dstSubresourceLayer.layer_count = 1u;
-		prosper::util::record_blit_image(*(*drawCmd),blitInfo,*(*img),*(*dstImg));
+		blitInfo.srcSubresourceLayer.baseArrayLayer = blitInfo.dstSubresourceLayer.baseArrayLayer = layer;
+		blitInfo.srcSubresourceLayer.layerCount = blitInfo.dstSubresourceLayer.layerCount = 1u;
+		drawCmd->RecordBlitImage(blitInfo,img,dstImg);
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::TransferDstOptimal,layer);
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*dstImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(dstImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,layer);
 
 		// Update matrices and CSM-Buffer
 		light.UpdateFrustum(layer);
@@ -526,8 +532,8 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuf
 		prosper::util::ClearImageInfo clearImageInfo {};
 		clearImageInfo.subresourceRange.baseArrayLayer = layer;
 		clearImageInfo.subresourceRange.layerCount = 1u;
-		prosper::util::record_clear_image(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,1.f,clearImageInfo); // Clear layer
+		drawCmd->RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,1.f,clearImageInfo); // Clear layer
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*img),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,layer);
+		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,layer);
 	}
 }

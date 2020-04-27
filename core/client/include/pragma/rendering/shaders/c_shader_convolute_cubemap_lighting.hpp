@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_CONVOLUTE_CUBEMAP_LIGHTING_HPP
 #define __C_SHADER_CONVOLUTE_CUBEMAP_LIGHTING_HPP
 
@@ -10,13 +17,13 @@ namespace pragma
 		: public ShaderCubemap
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CUBEMAP_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CUBEMAP_TEXTURE;
 
 		ShaderConvoluteCubemapLighting(prosper::Context &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> ConvoluteCubemapLighting(prosper::Texture &cubemap,uint32_t resolution);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

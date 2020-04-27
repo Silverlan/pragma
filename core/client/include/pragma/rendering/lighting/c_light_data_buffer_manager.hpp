@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_LIGHT_DATA_BUFFER_MANAGER_HPP__
 #define __C_LIGHT_DATA_BUFFER_MANAGER_HPP__
 
@@ -24,12 +31,12 @@ namespace pragma
 		virtual void Reset();
 		CLightComponent *GetLightByBufferIndex(uint32_t idx);
 		std::size_t GetMaxCount() const;
-		const prosper::UniformResizableBuffer &GetGlobalRenderBuffer();
+		prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 	protected:
 		BaseLightBufferManager()=default;
 		virtual void DoInitialize()=0;
 
-		std::shared_ptr<prosper::UniformResizableBuffer> m_masterBuffer = nullptr;
+		std::shared_ptr<prosper::IUniformResizableBuffer> m_masterBuffer = nullptr;
 		std::vector<CLightComponent*> m_bufferIndexToLightSource;
 		std::size_t m_maxCount = 0u;
 	private:
@@ -46,8 +53,8 @@ namespace pragma
 		ShadowDataBufferManager &operator=(ShadowDataBufferManager&&)=delete;
 		static ShadowDataBufferManager &GetInstance();
 
-		std::shared_ptr<prosper::Buffer> Request(CLightComponent &lightSource,const ShadowBufferData &bufferData);
-		void Free(const std::shared_ptr<prosper::Buffer> &renderBuffer);
+		std::shared_ptr<prosper::IBuffer> Request(CLightComponent &lightSource,const ShadowBufferData &bufferData);
+		void Free(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 	private:
 		ShadowDataBufferManager()=default;
 		virtual void DoInitialize() override;
@@ -65,13 +72,13 @@ namespace pragma
 		LightDataBufferManager &operator=(LightDataBufferManager&&)=delete;
 		static LightDataBufferManager &GetInstance();
 
-		std::shared_ptr<prosper::Buffer> Request(CLightComponent &lightSource,const LightBufferData &bufferData);
-		void Free(const std::shared_ptr<prosper::Buffer> &renderBuffer);
+		std::shared_ptr<prosper::IBuffer> Request(CLightComponent &lightSource,const LightBufferData &bufferData);
+		void Free(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 		virtual void Reset() override;
 	private:
 		LightDataBufferManager()=default;
 		virtual void DoInitialize() override;
-		std::vector<std::shared_ptr<prosper::Buffer>> m_lightDataBuffers {}; // Sub-buffers allocated from master buffer
+		std::vector<std::shared_ptr<prosper::IBuffer>> m_lightDataBuffers {}; // Sub-buffers allocated from master buffer
 		uint32_t m_highestBufferIndexInUse = std::numeric_limits<uint32_t>::max();
 	};
 };

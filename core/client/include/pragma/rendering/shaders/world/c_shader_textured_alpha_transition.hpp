@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_TEXTURED_ALPHA_TRANSITION_HPP__
 #define __C_SHADER_TEXTURED_ALPHA_TRANSITION_HPP__
 
@@ -12,7 +19,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ALPHA;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		enum class MaterialBinding : uint32_t
 		{
 			DiffuseMap2 = umath::to_integral(ShaderTextured3DBase::MaterialBinding::Count),
@@ -31,8 +38,8 @@ namespace pragma
 	protected:
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	};
 };
 

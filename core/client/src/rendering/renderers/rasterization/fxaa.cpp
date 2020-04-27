@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -20,7 +27,7 @@ static auto cvFxaaSubPixelAliasingRemoval = GetClientConVar("cl_render_fxaa_sub_
 static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold");
 static auto cvFxaaMinEdgeThreshold = GetClientConVar("cl_render_fxaa_min_edge_threshold");
 
-void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	if(static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) != AntiAliasing::FXAA)
 		return;
@@ -33,9 +40,9 @@ void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBu
 		auto &shaderFXAA = static_cast<pragma::ShaderPPFXAA&>(*whShaderPPFXAA.get());
 		auto &prepass = hdrInfo.prepass;
 
-		auto &toneMappedImg = *hdrInfo.toneMappedRenderTarget->GetTexture()->GetImage();
-		prosper::util::record_image_barrier(*(*drawCmd),*toneMappedImg,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.toneMappedPostProcessingRenderTarget) == true)
+		auto &toneMappedImg = hdrInfo.toneMappedRenderTarget->GetTexture().GetImage();
+		drawCmd->RecordImageBarrier(toneMappedImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		if(drawCmd->RecordBeginRenderPass(*hdrInfo.toneMappedPostProcessingRenderTarget) == true)
 		{
 			if(shaderFXAA.BeginDraw(drawCmd) == true)
 			{
@@ -45,29 +52,29 @@ void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBu
 				pushConstants.minEdgeThreshold = cvFxaaMinEdgeThreshold->GetFloat();
 
 				shaderFXAA.Draw(
-					*(*hdrInfo.dsgTonemappedPostProcessing)->get_descriptor_set(0u),
+					*hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet(),
 					pushConstants
 				);
 				shaderFXAA.EndDraw();
 			}
-			prosper::util::record_end_render_pass(*(*drawCmd));
+			drawCmd->RecordEndRenderPass();
 
-			prosper::util::record_post_render_pass_image_barrier(
-				**drawCmd,**hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture()->GetImage(),
-				Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			drawCmd->RecordPostRenderPassImageBarrier(
+				hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture().GetImage(),
+				prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ColorAttachmentOptimal
 			);
 		}
 
 		// Blit FXAA output back to tonemapped image, which will be used for the presentation
 		// TODO: This blit operation isn't actually necessary, it would be more performant to just
 		// use the FXAA output image directly for presentation!
-		auto &fxaaOutputImg = *hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture()->GetImage();
-		prosper::util::record_image_barrier(*(*drawCmd),*fxaaOutputImg,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*toneMappedImg,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-		prosper::util::record_blit_image(**drawCmd,{},**hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture()->GetImage(),**hdrInfo.toneMappedRenderTarget->GetTexture()->GetImage());
-		prosper::util::record_image_barrier(*(*drawCmd),*toneMappedImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+		auto &fxaaOutputImg = hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture().GetImage();
+		drawCmd->RecordImageBarrier(fxaaOutputImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+		drawCmd->RecordImageBarrier(toneMappedImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
+		drawCmd->RecordBlitImage({},hdrInfo.toneMappedPostProcessingRenderTarget->GetTexture().GetImage(),hdrInfo.toneMappedRenderTarget->GetTexture().GetImage());
+		drawCmd->RecordImageBarrier(toneMappedImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal);
 		// TODO: This would be better placed BEFORE the FXAA render pass
-		prosper::util::record_image_barrier(*(*drawCmd),*fxaaOutputImg,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(fxaaOutputImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
 }

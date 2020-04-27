@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer */
+
 #ifndef __ENV_LIGHT_H__
 #define __ENV_LIGHT_H__
 
@@ -49,6 +55,8 @@ namespace pragma
 			Lux // Lumen per square-meter; Directional lights only
 		};
 		static std::string LightIntensityTypeToString(LightIntensityType type);
+		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});
+		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;

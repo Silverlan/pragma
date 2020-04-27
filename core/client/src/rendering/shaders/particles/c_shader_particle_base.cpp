@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 #include "pragma/console/c_cvar.h"
@@ -9,23 +16,20 @@ using namespace pragma;
 
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
-Anvil::DescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::CParticleSystemComponent &ps)
+prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pragma::CParticleSystemComponent &ps)
 {
 	auto *animDescSet = const_cast<pragma::CParticleSystemComponent&>(ps).GetAnimationDescriptorSet();
 	if(animDescSet == nullptr)
 	{
 		if(m_dummyAnimDescSetGroup == nullptr)
-		{
-			auto &dev = c_engine->GetDevice();
-			m_dummyAnimDescSetGroup = prosper::util::create_descriptor_set_group(dev,GetAnimationDescriptorSetInfo());
-		}
-		animDescSet = (*m_dummyAnimDescSetGroup)->get_descriptor_set(0u);
+			m_dummyAnimDescSetGroup = c_engine->CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
+		animDescSet = m_dummyAnimDescSetGroup->GetDescriptorSet();
 	}
 	return *animDescSet;
 }

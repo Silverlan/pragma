@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
@@ -16,7 +23,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool SSAOInfo::Initialize(
-	prosper::Context &context,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits samples,
+	prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
 	const std::shared_ptr<prosper::Texture> &texNorm,const std::shared_ptr<prosper::Texture> &texDepth
 )
 {
@@ -25,34 +32,33 @@ bool SSAOInfo::Initialize(
 	shader = c_engine->GetShader("ssao");
 	shaderBlur = c_engine->GetShader("ssao_blur");
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = pragma::ShaderSSAO::RENDER_PASS_FORMAT;
 	imgCreateInfo.width = 512u; // SSAO is very expensive depending on the resolution.
 	imgCreateInfo.height = 512u; // 512x512 is a good compromise between quality and performance.
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
+	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	auto img = context.CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto tex = context.CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	auto rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderSSAO>(*c_engine);
-	renderTarget = prosper::util::create_render_target(dev,{tex},rp);
+	renderTarget = context.CreateRenderTarget({tex},rp);
 	renderTarget->SetDebugName("ssao_rt");
 
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-	auto imgBlur = prosper::util::create_image(dev,imgCreateInfo);
-	auto texBlur = prosper::util::create_texture(dev,{},imgBlur,&imgViewCreateInfo,&samplerCreateInfo);
-	renderTargetBlur = prosper::util::create_render_target(dev,{texBlur},rp);
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	auto imgBlur = context.CreateImage(imgCreateInfo);
+	auto texBlur = context.CreateTexture({},*imgBlur,imgViewCreateInfo,samplerCreateInfo);
+	renderTargetBlur = context.CreateRenderTarget({texBlur},rp);
 	renderTargetBlur->SetDebugName("ssao_blur_rt");
-	descSetGroupPrepass = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
+	descSetGroupPrepass = c_engine->CreateDescriptorSetGroup(pragma::ShaderSSAO::DESCRIPTOR_SET_PREPASS);
 	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSetPrepass,*texNorm,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
-	prosper::util::set_descriptor_set_binding_texture(descSetPrepass,*texDepth,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
+	descSetPrepass.SetBindingTexture(*texNorm,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::NormalBuffer));
+	descSetPrepass.SetBindingTexture(*texDepth,umath::to_integral(pragma::ShaderSSAO::PrepassBinding::DepthBuffer));
 
-	descSetGroupOcclusion = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*descSetGroupOcclusion->GetDescriptorSet(),*renderTarget->GetTexture(),0u);
+	descSetGroupOcclusion = c_engine->CreateDescriptorSetGroup(pragma::ShaderSSAOBlur::DESCRIPTOR_SET_TEXTURE);
+	descSetGroupOcclusion->GetDescriptorSet()->SetBindingTexture(renderTarget->GetTexture(),0u);
 	return true;
 }
 

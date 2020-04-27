@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_PREPASS_HPP__
 #define __C_SHADER_PREPASS_HPP__
 
@@ -25,7 +32,7 @@ namespace pragma
 			UseExtendedVertexWeights = 1u,
 			RenderAs3DSky = UseExtendedVertexWeights<<1u
 		};
-		static Pipeline GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount);
+		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount);
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -37,8 +44,8 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 
 #pragma pack(push,1)
 		struct PushConstants
@@ -53,13 +60,13 @@ namespace pragma
 		ShaderPrepassBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		ShaderPrepassBase(prosper::Context &context,const std::string &identifier);
 
-		bool BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
+		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindClipPlane(const Vector4 &clipPlane);
 		bool BindDrawOrigin(const Vector4 &drawOrigin);
 		void Set3DSky(bool is3dSky);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
@@ -69,8 +76,8 @@ namespace pragma
 		// These are unused
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
-		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) override {return false;}
-		virtual bool BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources) override {return false;}
+		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
+		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources) override {return false;}
 		Flags m_stateFlags = Flags::None;
 	};
 	using ShaderPrepassDepth = ShaderPrepassBase;
@@ -83,11 +90,11 @@ namespace pragma
 	public:
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 
-		static Anvil::Format RENDER_PASS_NORMAL_FORMAT;
+		static prosper::Format RENDER_PASS_NORMAL_FORMAT;
 
 		ShaderPrepass(prosper::Context &context,const std::string &identifier);
 	protected:
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };

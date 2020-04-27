@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_PARTICLE_2D_BASE_HPP__
 #define __C_SHADER_PARTICLE_2D_BASE_HPP__
 
@@ -25,15 +32,15 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_START;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CSM;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class VertexAttribute : uint32_t
 		{
@@ -66,7 +73,7 @@ namespace pragma
 		ShaderParticle2DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		bool Draw(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,bool bloom);
 		bool BeginDraw(
-			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
 			CParticleSystemComponent &pSys,Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
@@ -76,16 +83,16 @@ namespace pragma
 			float &nearZ,float &farZ,const Material *material=nullptr,float camNearZ=0.f,float camFarZ=0.f
 		) const;
 
-		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:
-		virtual prosper::Shader::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
+		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		bool BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps);
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 
 		void RegisterDefaultGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo);

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/audio/c_alsound.h"
@@ -8,14 +15,6 @@
 #include "luasystem.h"
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
-/*
-ALResource::ALResource()
-	: source(""),format(0),type(0),channels(0),rate(0),buffer(-1)
-{
-	source = "";
-}*/
-
-////////////////////////////
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -575,29 +574,6 @@ void CALSound::UpdateState()
 {
 	if(m_bTerminated == true)
 		return;
-	//auto oldState = m_state;
-	/*ALint val = 0;
-	alGetSourcei(m_source,AL_SOURCE_STATE,&val);
-	oldState = static_cast<ALState>(val);
-	if(m_state == ALState::Playing)
-	{
-		if(oldState != ALState::Playing)
-		{
-			for(unsigned int i=0;i<m_auxEffects.size();i++)
-			{
-				EffectInfo &info = m_auxEffects[i];
-				AuxFxManager::AttachSound(info.effect,this,info.filter);
-			}
-		}
-	}
-	else if(oldState == ALState::Playing)
-	{
-		for(unsigned int i=0;i<m_auxEffects.size();i++)
-		{
-			EffectInfo &info = m_auxEffects[i];
-			AuxFxManager::DetachSound(info.effect,this);
-		}
-	}*/
 }
 
 void CALSound::Play()

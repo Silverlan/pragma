@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_WATER_OBJECT_HPP__
 #define __C_WATER_OBJECT_HPP__
 
@@ -18,13 +25,13 @@ public:
 	{
 		~WaterScene();
 		std::shared_ptr<Scene> sceneReflection = nullptr;
-		std::shared_ptr<prosper::Buffer> settingsBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> settingsBuffer = nullptr;
 
 		// Fog
-		std::shared_ptr<prosper::Buffer> fogBuffer = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> fogDescSetGroup = nullptr;
+		std::shared_ptr<prosper::IBuffer> fogBuffer = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> fogDescSetGroup = nullptr;
 
-		std::shared_ptr<prosper::DescriptorSetGroup> descSetGroupTexEffects = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupTexEffects = nullptr;
 		CallbackHandle hRenderScene = {};
 
 		CallbackHandle hRender = {};
@@ -39,7 +46,7 @@ public:
 		util::PFloatProperty reflectiveIntensity = nullptr;
 	};
 	const WaterScene &GetWaterScene() const;
-	Anvil::DescriptorSet *GetEffectDescriptorSet() const;
+	prosper::IDescriptorSet *GetEffectDescriptorSet() const;
 	virtual const Vector3 &GetPosition() const=0;
 	virtual const Quat &GetOrientation() const=0;
 	virtual CMaterial *GetWaterMaterial() const=0;

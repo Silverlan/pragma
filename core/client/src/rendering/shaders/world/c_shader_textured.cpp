@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/console/c_cvar.h"
@@ -19,9 +26,9 @@ using namespace pragma;
 
 
 
-ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount,bool bReflection)
+ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
-	if(sampleCount == Anvil::SampleCountFlagBits::_1_BIT)
+	if(sampleCount == prosper::SampleCountFlags::e1Bit)
 		return bReflection ? Pipeline::Reflection : Pipeline::Regular;
 	if(bReflection)
 		throw std::logic_error("Multi-sampled reflection pipeline not supported!");
@@ -29,50 +36,50 @@ ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(Anvil::Sam
 }
 
 decltype(ShaderTextured3DBase::HASH_TYPE) ShaderTextured3DBase::HASH_TYPE = typeid(ShaderTextured3DBase).hash_code();
-decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
 
-decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT_EXT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID,VERTEX_BINDING_BONE_WEIGHT_EXT};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT,VERTEX_BINDING_BONE_WEIGHT_EXT};
 
-decltype(ShaderTextured3DBase::VERTEX_BINDING_VERTEX) ShaderTextured3DBase::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
+decltype(ShaderTextured3DBase::VERTEX_BINDING_VERTEX) ShaderTextured3DBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION) ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_UV) ShaderTextured3DBase::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV,VERTEX_BINDING_VERTEX};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_NORMAL) ShaderTextured3DBase::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_TANGENT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_TANGENT,VERTEX_BINDING_VERTEX};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT,VERTEX_BINDING_VERTEX};
 
-decltype(ShaderTextured3DBase::VERTEX_BINDING_LIGHTMAP) ShaderTextured3DBase::VERTEX_BINDING_LIGHTMAP = {Anvil::VertexInputRate::VERTEX};
+decltype(ShaderTextured3DBase::VERTEX_BINDING_LIGHTMAP) ShaderTextured3DBase::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderTextured3DBase::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV,VERTEX_BINDING_LIGHTMAP};
 
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE) ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Material settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		prosper::DescriptorSetInfo::Binding { // Material settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Diffuse Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Diffuse Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Normal Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Normal Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Specular Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Specular Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Parallax Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Parallax Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Glow Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Glow Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -82,7 +89,7 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS) ShaderTextured3DBase::DESC
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CSM) ShaderTextured3DBase::DESCRIPTOR_SET_CSM = {&ShaderEntity::DESCRIPTOR_SET_CSM};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS) ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderEntity::DESCRIPTOR_SET_SHADOWS};
 
-static std::shared_ptr<prosper::UniformResizableBuffer> g_materialSettingsBuffer = nullptr;
+static std::shared_ptr<prosper::IUniformResizableBuffer> g_materialSettingsBuffer = nullptr;
 static uint32_t g_instanceCount = 0;
 static void initialize_material_settings_buffer()
 {
@@ -93,11 +100,11 @@ static void initialize_material_settings_buffer()
 	// does not happen automatically). TODO: Implement this? On the other hand, material data
 	// isn't that big to begin with, so maybe just make sure the buffer is large enough for all use cases?
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	//bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
 	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *524'288; // ~22 MiB
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT | Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
-	g_materialSettingsBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
+	g_materialSettingsBuffer = c_engine->CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);
 }
 ShaderTextured3DBase::ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
@@ -112,10 +119,10 @@ ShaderTextured3DBase::~ShaderTextured3DBase()
 	if(--g_instanceCount == 0)
 		g_materialSettingsBuffer = nullptr;
 }
-prosper::Shader::DescriptorSetInfo &ShaderTextured3DBase::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderTextured3DBase::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -196,14 +203,19 @@ void ShaderTextured3DBase::OnPipelineUnbound()
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
 }
 bool ShaderTextured3DBase::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	Set3DSky(false);
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
-		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) && 
-		prosper::util::record_set_depth_bias(**cmdBuffer) == true;
+		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
+		RecordPushConstants(Scene::DebugMode::None,offsetof(PushConstants,debugMode)) &&
+		cmdBuffer->RecordSetDepthBias() == true;
+}
+bool ShaderTextured3DBase::SetDebugMode(Scene::DebugMode debugMode)
+{
+	return RecordPushConstants(debugMode,offsetof(PushConstants,debugMode));
 }
 std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMaterialBuffer(CMaterial &mat) const
 {
@@ -263,7 +275,7 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 		auto bUseGlow = true;
 		if(data->GetBool("glow_alpha_only") == true)
 		{
-			if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage()->GetFormat()) == false)
+			if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage().GetFormat()) == false)
 				bUseGlow = false;
 		}
 		if(bUseGlow == true)
@@ -351,7 +363,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 			}
 		}
 	}
-	return RecordBindVertexBuffer(pLightMapUvBuffer->GetAnvilBuffer(),umath::to_integral(VertexBinding::LightmapUv));
+	return RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
@@ -386,28 +398,27 @@ bool ShaderTextured3DBase::BindMaterial(CMaterial &mat)
 		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
 	if(descSetGroup == nullptr)
 		return false;
-	return BindMaterialParameters(mat) && RecordBindDescriptorSet(*(*descSetGroup)->get_descriptor_set(0u),GetMaterialDescriptorSetIndex());
+	return BindMaterialParameters(mat) && RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
 }
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
-	auto &dev = c_engine->GetDevice();
 	auto *diffuseMap = mat.GetDiffuseMap();
 	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
 		return nullptr;
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
 	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,descSetInfo);
+	auto descSetGroup = c_engine->CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSet,*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap));
+	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap));
 
 	auto *normalMap = mat.GetNormalMap();
 	if(normalMap != nullptr && normalMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(normalMap->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::NormalMap));
 	}
 
 	auto *parallaxMap = mat.GetParallaxMap();
@@ -415,7 +426,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 	{
 		auto texture = std::static_pointer_cast<Texture>(parallaxMap->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::ParallaxMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::ParallaxMap));
 	}
 
 	auto *glowMap = mat.GetGlowMap();
@@ -423,24 +434,24 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMat
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::GlowMap));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::GlowMap));
 	}
 	InitializeMaterialBuffer(descSet,mat);
 
 	return descSetGroup;
 }
-std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat)
+std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat)
 {
 	auto settingsBuffer = mat.GetSettingsBuffer() ? mat.GetSettingsBuffer()->shared_from_this() : nullptr;
 	if(settingsBuffer == nullptr && g_materialSettingsBuffer)
 		settingsBuffer = g_materialSettingsBuffer->AllocateBuffer();
 	if(settingsBuffer == nullptr)
 		return {};
-	prosper::util::set_descriptor_set_binding_uniform_buffer(descSet,*settingsBuffer,umath::to_integral(MaterialBinding::MaterialSettings));
+	descSet.SetBindingUniformBuffer(*settingsBuffer,umath::to_integral(MaterialBinding::MaterialSettings));
 	mat.SetSettingsBuffer(*settingsBuffer);
 	return UpdateMaterialBuffer(mat);
 }
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTextured3DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }

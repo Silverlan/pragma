@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
@@ -286,66 +293,6 @@ bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,
 void BaseAnimatedComponent::GetAnimationBlendController(Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const
 {
 	// Obsolete; TODO: Remove this!
-#if 0
-	struct BlendTransition
-	{
-		BlendTransition()
-			: transition(NULL),value(0.f)
-		{}
-		AnimationBlendControllerTransition *transition;
-		float value;
-		void Set(AnimationBlendControllerTransition &tr)
-		{
-			transition = &tr;
-			value = CFloat(tr.transition);
-		}
-		void Clear()
-		{
-			transition = NULL;
-			value = 0.f;
-		}
-	};
-	for(auto &controller : anim->GetBlendControllers())
-	{
-		float blendControllerScale = 0.f;
-		if(!controller.transitions.empty())
-		{
-			auto mdlComponent = GetEntity().GetModelComponent();
-			auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-			BlendController *blend = hModel->GetBlendController(controller.controller);
-			if(blend != NULL)
-			{
-				auto val = GetBlendController(controller.controller);
-				BlendTransition tSrc;
-				BlendTransition tTgt;
-				tSrc.Set(controller.transitions.front());
-				tTgt.Set(controller.transitions.back());
-				float scale = 0.f;
-				for(unsigned int i=0;i<controller.transitions.size();i++)
-				{
-					AnimationBlendControllerTransition &tr = controller.transitions[i];
-					if(tr.transition <= val && tr.transition > tSrc.value)
-						tSrc.Set(tr);
-					if(tr.transition >= val && tr.transition < tTgt.value)
-						tTgt.Set(tr);
-				}
-				float offset = (tTgt.value -tSrc.value);
-				if(offset > 0.f)
-					scale = (val -tSrc.value) /offset;
-				auto blendSrc = hModel->GetAnimation(tSrc.transition->animation);
-				auto blendTgt = hModel->GetAnimation(tTgt.transition->animation);
-				auto &srcBlend = bcFrames.at(0);
-				auto &dstBlend = bcFrames.at(1);
-				srcBlend.animation = blendSrc.get();
-				dstBlend.animation = blendTgt.get();
-				GetBlendFramesFromCycle(*blendSrc,cycle,&srcBlend.frameSrc,&srcBlend.frameDst,srcBlend.scale);
-				GetBlendFramesFromCycle(*blendTgt,cycle,&dstBlend.frameSrc,&dstBlend.frameDst,dstBlend.scale);
-				blendControllerScale = scale;
-				*blendScale = blendControllerScale; // TODO: How to handle this if there are multiple blend controllers?
-			}
-		}
-	}
-#endif
 }
 Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale)
 {
@@ -379,18 +326,6 @@ Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &
 void BaseAnimatedComponent::ApplyAnimationBlending(AnimationSlotInfo &animInfo,double tDelta)
 {
 	// TODO: This is obsolete, remove it!
-	/*auto blendScale = 0.f;
-	auto *frameLastAnim = GetPreviousAnimationBlendFrame(animInfo,tDelta,blendScale);
-	if(frameLastAnim == nullptr)
-		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(hModel == nullptr)
-		return;
-	auto anim = hModel->GetAnimation(animInfo.animation);
-	if(anim == nullptr)
-		return;
-	BlendBonePoses(animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,*anim,frameLastAnim,blendScale);*/
 }
 
 bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double dt,int32_t layeredSlot)
@@ -519,25 +454,6 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	}
 	//
 
-	/*{
-		static int32_t animationId = -1;
-		auto anim = hModel->GetAnimation(animationId);
-		if(anim)
-		{
-			auto frame = anim->GetFrame(cycle *anim->GetFrameCount());
-			if(frame)
-			{
-				auto &inBonePoses = frame->GetBoneTransforms();
-				auto &inBoneScales = frame->GetBoneScales();
-				BlendBonePoses(
-					inBonePoses,&inBoneScales,
-					inBonePoses,&inBoneScales,
-					bonePoses,&boneScales,
-					*anim,1.f
-				);
-			}
-		}
-	}*/
 	// Blend Controllers
 	auto *animBcData = anim->GetBlendController();
 	if(animBcData)
@@ -1059,30 +975,6 @@ void BaseAnimatedComponent::StopLayeredAnimation(int slot)
 	InvokeEventCallbacks(EVENT_ON_STOP_LAYERED_ANIMATION,evData);
 	m_animSlots.erase(it);
 }
-/*
-static void SetupMatrices(std::vector<Orientation> &boneOrientations,std::unordered_map<unsigned int,Bone*> *bones,Vector3 pos=Vector3(0,0,0),Quat rot=uquat::identity())
-{
-	// Grab ID from GetBoneList(anim)
-	std::unordered_map<unsigned int,Bone*>::iterator it;
-	for(it=bones->begin();it!=bones->end();it++)
-	{
-		Vector3 posParent = pos;
-		Quat rotParent = rot;
-		if(it->first < boneOrientations.size())
-		{
-			Orientation &orientation = boneOrientations[it->first];
-			Vector3 lpos = orientation.pos;
-			lpos = rotParent *lpos;
-			posParent += lpos;
-			rotParent = orientation.rot *rotParent;
-			orientation.pos = posParent;
-			orientation.rot = rotParent;
-		}
-		Bone *bone = it->second;
-		SetupMatrices(boneOrientations,&bone->children,posParent,rotParent);
-	}
-}
-*/
 
 const std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const {return const_cast<BaseAnimatedComponent*>(this)->GetProcessedBones();}
 std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() {return m_processedBones;}

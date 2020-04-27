@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_MODELMESH_H__
 #define __C_MODELMESH_H__
 #include "pragma/clientdefinitions.h"
@@ -5,7 +12,7 @@
 #include <pragma/model/modelmesh.h>
 #include <memory>
 
-namespace prosper {class DynamicResizableBuffer;};
+namespace prosper {class IDynamicResizableBuffer;};
 namespace pragma {class VkMesh;};
 struct VertexBufferData;
 class DLLCLIENT CModelSubMesh
@@ -21,10 +28,10 @@ public:
 	static void InitializeBuffers();
 	static void ClearBuffers();
 
-	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalVertexBuffer();
-	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalVertexWeightBuffer();
-	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalAlphaBuffer();
-	static const std::shared_ptr<prosper::DynamicResizableBuffer> &GetGlobalIndexBuffer();
+	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalVertexBuffer();
+	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalVertexWeightBuffer();
+	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAlphaBuffer();
+	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalIndexBuffer();
 
 	using VertexType = VertexBufferData;
 	using VertexWeightType = VertexWeight;

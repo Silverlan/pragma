@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_SHADOW_CSM_HPP__
 #define __C_ENV_SHADOW_CSM_HPP__
 
@@ -65,14 +72,14 @@ namespace pragma
 
 		const Mat4 &GetStaticPendingViewProjectionMatrix(uint32_t layer) const;
 		const std::shared_ptr<prosper::RenderTarget> &GetStaticPendingRenderTarget() const;
-		void RenderBatch(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light);
+		void RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light);
 
-		const std::shared_ptr<prosper::Framebuffer> &GetFramebuffer(pragma::CLightComponent::ShadowMapType smType,uint32_t layer=0) const;
-		const std::shared_ptr<prosper::RenderPass> &GetRenderPass(pragma::CLightComponent::ShadowMapType smType) const;
+		std::shared_ptr<prosper::IFramebuffer> GetFramebuffer(pragma::CLightComponent::ShadowMapType smType,uint32_t layer=0) const;
+		prosper::IRenderPass *GetRenderPass(pragma::CLightComponent::ShadowMapType smType) const;
 		const std::shared_ptr<prosper::RenderTarget> &GetRenderTarget(pragma::CLightComponent::ShadowMapType smType) const;
 
-		const std::shared_ptr<prosper::Texture> &GetDepthTexture() const;
-		const std::shared_ptr<prosper::Texture> &GetDepthTexture(pragma::CLightComponent::ShadowMapType smType) const;
+		prosper::Texture *GetDepthTexture() const;
+		prosper::Texture *GetDepthTexture(pragma::CLightComponent::ShadowMapType smType) const;
 
 		void FreeRenderTarget();
 
@@ -96,9 +103,6 @@ namespace pragma
 			EntityHandle hEntity = {};
 			std::queue<std::weak_ptr<ModelMesh>> meshes;
 			bool bAlreadyPassed = false;
-			//uint32_t meshGroupId = 0;
-			//uint32_t meshId = 0;
-			//uint32_t subMeshId = 0;
 		};
 		struct TranslucentEntityInfo
 		{
@@ -131,16 +135,11 @@ namespace pragma
 		unsigned int m_numSplits = 0u;
 		float m_maxDistance = 0.f;
 		uint64_t m_lastFrameUpdate = std::numeric_limits<uint64_t>::max();
-		//Vulkan::DescriptorSet m_descSet; // prosper TODO
-		//Vulkan::RenderPass m_renderPassKeep; // prosper TODO
-		//std::vector<Vulkan::Framebuffer> m_framebuffersKeep; // prosper TODO
 		std::array<TextureSet,2> m_textureSets; // 0 = Used for static geometry (Rarely moving and not animated); 1 = Used for dynamic geometry
 
-												//void GenerateTextures();
 		void UpdateSplitDistances(float nd,float fd);
 		void InitializeTextureSet(TextureSet &set,pragma::CLightComponent::ShadowMapType smType);
 		void InitializeDepthTextures(uint32_t size);
-		//void ApplyTextureParameters();
 	};
 };
 

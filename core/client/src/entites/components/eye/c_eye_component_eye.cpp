@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/model/c_model.h"
@@ -100,15 +107,14 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		GetEntity().GetPose(attPose);
 		attPose *= physics::Transform{pos,rot};
 		auto localPos = attPose.GetInverse() *tmp;
-		// FIXME: clamp distance to something based on eyeball distance
+		
 		if(localPos.z < 6)
 			localPos.z = 6;
 
 		auto flDist = uvec::length(localPos);
 		uvec::normalize(&localPos);
 
-		// calculate animated eye deflection
-
+		// Eye deflection
 		Vector3 eyeDeflect {};
 
 		auto eyeAng = EulerAngles{};
@@ -124,19 +130,18 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		localPos = localPos +Vector3(eyeDeflect.y,-eyeDeflect.z,eyeDeflect.x);
 		uvec::normalize(&localPos);
 
-		// check to see if the eye is aiming outside the max eye deflection
-		auto flMaxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
-		if(localPos.z < flMaxEyeDeflection)
+		// Is eye aiming outside the max eye deflection?
+		auto maxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
+		if(localPos.z < maxEyeDeflection)
 		{
 			// TODO: Unsure if this is correct, further testing required
 			// if so, clamp it to 30 degrees offset
-			// debugoverlay->AddTextOverlay( GetAbsOrigin() + Vector( 0, 0, 64 ), 1, 0, "%5.3f %5.3f %5.3f", lcl.x, lcl.y, lcl.z );
 			localPos.z = 0;
 			auto d = uvec::length_sqr(localPos);
 			if(d > 0.0)
 			{
-				d = umath::sqrt((1.0 -flMaxEyeDeflection *flMaxEyeDeflection) /(localPos.y *localPos.y +localPos.x *localPos.x));
-				localPos.z = flMaxEyeDeflection;
+				d = umath::sqrt((1.0 -maxEyeDeflection *maxEyeDeflection) /(localPos.y *localPos.y +localPos.x *localPos.x));
+				localPos.z = maxEyeDeflection;
 				localPos.y = localPos.y * d;
 				localPos.x = localPos.x * d;
 			}
@@ -198,27 +203,24 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 
 	auto &viewTarget = GetViewTarget();
 
-	// move eyeball into worldspace
+	// To world space
 	physics::Transform bonePose {};
 	state.origin = CalcEyeballPose(eyeballIndex,&bonePose).GetOrigin();
 	state.up = eyeball.up;
 	uvec::rotate(&state.up,bonePose.GetRotation());
 
-	// look directly at target
+	// Look at target
 	state.forward = viewTarget -state.origin;
 	uvec::normalize(&state.forward);
 
 	if(config.eyeMove == false)
 	{
-		// TODO: What's this for?
-		//VectorRotate( eyeball.forward, boneToWorld[eyeball.bone], pstate.forward )
-		//pstate.forward = -1 *pstate.forward -- ???
+		// TODO
 	}
 
 	state.right = uvec::cross(state.forward,state.up);
 	uvec::normalize(&state.right);
 
-	// shift N degrees off of the target
 	auto dz = eyeball.zOffset;
 	state.forward = state.forward +(eyeball.zOffset +dz) *state.right;
 
@@ -228,7 +230,6 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 
 	uvec::normalize(&state.forward);
 
-	// re-aim eyes 
 	state.right = uvec::cross(state.forward,state.up);
 	uvec::normalize(&state.right);
 		

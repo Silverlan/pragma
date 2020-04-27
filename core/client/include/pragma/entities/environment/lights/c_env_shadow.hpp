@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_SHADOW_HPP__
 #define __C_ENV_SHADOW_HPP__
 
@@ -20,7 +27,7 @@ namespace pragma
 			Generic = 1,
 			Cube
 		};
-		static Anvil::DescriptorSet *GetDescriptorSet();
+		static prosper::IDescriptorSet *GetDescriptorSet();
 
 		CShadowComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -33,10 +40,10 @@ namespace pragma
 		bool ShouldUpdateLayer(uint32_t layerId) const;
 		void SetTextureReloadCallback(const std::function<void(void)> &f);
 
-		const std::shared_ptr<prosper::RenderTarget> &GetDepthRenderTarget() const;
-		const std::shared_ptr<prosper::Texture> &GetDepthTexture() const;
-		const std::shared_ptr<prosper::RenderPass> &GetRenderPass() const;
-		const std::shared_ptr<prosper::Framebuffer> &GetFramebuffer(uint32_t layerId=0u);
+		prosper::RenderTarget *GetDepthRenderTarget() const;
+		prosper::Texture *GetDepthTexture() const;
+		prosper::IRenderPass *GetRenderPass() const;
+		prosper::IFramebuffer *GetFramebuffer(uint32_t layerId=0u);
 
 		int64_t GetLastFrameRendered() const;
 		void SetLastFrameRendered(int64_t frameId);

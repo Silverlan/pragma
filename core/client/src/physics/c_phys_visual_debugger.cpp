@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
@@ -12,7 +19,7 @@ CPhysVisualDebugger::CPhysVisualDebugger()
 	InitializeBuffers();
 }
 
-void CPhysVisualDebugger::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CPhysVisualDebugger::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 	auto m = umat::identity();
@@ -20,20 +27,20 @@ void CPhysVisualDebugger::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 	auto &shader = static_cast<pragma::ShaderDebugVertexColor&>(*whDebugShader.get());
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Line) == true)
 	{
-		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_lineBuffer.buffer,**m_lineBuffer.colorBuffer,m_lineBuffer.instanceCount *decltype(m_lineBuffer)::VERTS_PER_INSTANCE,vp *m);
+		drawCmd->RecordSetLineWidth(2.f);
+		shader.Draw(*m_lineBuffer.buffer,*m_lineBuffer.colorBuffer,m_lineBuffer.instanceCount *decltype(m_lineBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Point) == true)
 	{
-		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_pointBuffer.buffer,**m_lineBuffer.colorBuffer,m_pointBuffer.instanceCount *decltype(m_pointBuffer)::VERTS_PER_INSTANCE,vp *m);
+		drawCmd->RecordSetLineWidth(2.f);
+		shader.Draw(*m_pointBuffer.buffer,*m_lineBuffer.colorBuffer,m_pointBuffer.instanceCount *decltype(m_pointBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 	if(shader.BeginDraw(drawCmd,pragma::ShaderDebugVertexColor::Pipeline::Triangle) == true)
 	{
-		(*drawCmd)->record_set_line_width(2.f);
-		shader.Draw(**m_triangleBuffer.buffer,**m_lineBuffer.colorBuffer,m_triangleBuffer.instanceCount *decltype(m_triangleBuffer)::VERTS_PER_INSTANCE,vp *m);
+		drawCmd->RecordSetLineWidth(2.f);
+		shader.Draw(*m_triangleBuffer.buffer,*m_lineBuffer.colorBuffer,m_triangleBuffer.instanceCount *decltype(m_triangleBuffer)::VERTS_PER_INSTANCE,vp *m);
 		shader.EndDraw();
 	}
 }
@@ -59,12 +66,11 @@ void CPhysVisualDebugger::InitializeBuffers()
 	constexpr auto totalBufferSize = decltype(m_lineBuffer)::BUFFER_SIZE +decltype(m_pointBuffer)::BUFFER_SIZE +decltype(m_triangleBuffer)::BUFFER_SIZE;
 	constexpr auto totalBufferSizeMb = totalBufferSize /1024 /1024;
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = totalBufferSize;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-	m_debugBuffer = prosper::util::create_buffer(dev,createInfo);
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	m_debugBuffer = c_engine->CreateBuffer(createInfo);
 	m_debugBuffer->SetPermanentlyMapped(true);
 
 	constexpr auto colorBufferSize = (decltype(m_lineBuffer)::VERTS_PER_INSTANCE *decltype(m_lineBuffer)::MAX_INSTANCES +
@@ -73,24 +79,24 @@ void CPhysVisualDebugger::InitializeBuffers()
 	constexpr auto colorBufferSizeMb = colorBufferSize /1024 /1024;
 	createInfo.size = colorBufferSize;
 
-	m_colorBuffer = prosper::util::create_buffer(dev,createInfo);
+	m_colorBuffer = c_engine->CreateBuffer(createInfo);
 	m_colorBuffer->SetPermanentlyMapped(true);
 
 	vk::DeviceSize offset = 0;
 	vk::DeviceSize colorOffset = 0;
 
-	m_lineBuffer.buffer = prosper::util::create_sub_buffer(*m_debugBuffer,offset,decltype(m_lineBuffer)::BUFFER_SIZE);
-	m_lineBuffer.colorBuffer = prosper::util::create_sub_buffer(*m_colorBuffer,offset,decltype(m_lineBuffer)::COLOR_BUFFER_SIZE);
+	m_lineBuffer.buffer = m_debugBuffer->CreateSubBuffer(offset,decltype(m_lineBuffer)::BUFFER_SIZE);
+	m_lineBuffer.colorBuffer = m_colorBuffer->CreateSubBuffer(offset,decltype(m_lineBuffer)::COLOR_BUFFER_SIZE);
 	offset += decltype(m_lineBuffer)::BUFFER_SIZE;
 	colorOffset += decltype(m_lineBuffer)::COLOR_BUFFER_SIZE;
 
-	m_pointBuffer.buffer = prosper::util::create_sub_buffer(*m_debugBuffer,offset,decltype(m_pointBuffer)::BUFFER_SIZE);
-	m_pointBuffer.colorBuffer = prosper::util::create_sub_buffer(*m_colorBuffer,offset,decltype(m_pointBuffer)::COLOR_BUFFER_SIZE);
+	m_pointBuffer.buffer = m_debugBuffer->CreateSubBuffer(offset,decltype(m_pointBuffer)::BUFFER_SIZE);
+	m_pointBuffer.colorBuffer = m_colorBuffer->CreateSubBuffer(offset,decltype(m_pointBuffer)::COLOR_BUFFER_SIZE);
 	offset += decltype(m_pointBuffer)::BUFFER_SIZE;
 	colorOffset += decltype(m_pointBuffer)::COLOR_BUFFER_SIZE;
 
-	m_triangleBuffer.buffer = prosper::util::create_sub_buffer(*m_debugBuffer,offset,decltype(m_triangleBuffer)::BUFFER_SIZE);
-	m_triangleBuffer.colorBuffer = prosper::util::create_sub_buffer(*m_colorBuffer,offset,decltype(m_triangleBuffer)::COLOR_BUFFER_SIZE);
+	m_triangleBuffer.buffer = m_debugBuffer->CreateSubBuffer(offset,decltype(m_triangleBuffer)::BUFFER_SIZE);
+	m_triangleBuffer.colorBuffer = m_colorBuffer->CreateSubBuffer(offset,decltype(m_triangleBuffer)::COLOR_BUFFER_SIZE);
 	offset += decltype(m_triangleBuffer)::BUFFER_SIZE;
 	colorOffset += decltype(m_triangleBuffer)::COLOR_BUFFER_SIZE;
 }

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_LIGHT_H__
 #define __C_ENV_LIGHT_H__
 #include "pragma/clientdefinitions.h"
@@ -69,9 +76,9 @@ namespace pragma
 	struct DLLCLIENT CEOnShadowBufferInitialized
 		: public ComponentEvent
 	{
-		CEOnShadowBufferInitialized(prosper::Buffer &shadowBuffer);
+		CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer);
 		virtual void PushArguments(lua_State *l) override;
-		prosper::Buffer &shadowBuffer;
+		prosper::IBuffer &shadowBuffer;
 	};
 	class DLLCLIENT CBaseLightComponent
 		: public BaseEnvLightComponent,
@@ -107,8 +114,8 @@ namespace pragma
 		static pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
-		static const prosper::UniformResizableBuffer &GetGlobalRenderBuffer();
-		static const prosper::UniformResizableBuffer &GetGlobalShadowBuffer();
+		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
+		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();
 		static CLightComponent *GetLightByBufferIndex(uint32_t idx);
 		static CLightComponent *GetLightByShadowBufferIndex(uint32_t idx);
 		static uint32_t GetMaxLightCount();
@@ -116,8 +123,8 @@ namespace pragma
 		static uint32_t GetLightCount();
 		static void InitializeBuffers();
 		static void ClearBuffers();
-		const std::shared_ptr<prosper::Buffer> &GetRenderBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetShadowBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetRenderBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetShadowBuffer() const;
 
 		enum class StateFlags : uint32_t
 		{
@@ -179,8 +186,8 @@ namespace pragma
 		virtual void SetFalloffExponent(float falloffExponent) override;
 
 		// For internal use only!
-		void SetRenderBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
-		void SetShadowBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer);
+		void SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
+		void SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 		void UpdateShadowTypes();
 	protected:
 		static std::size_t s_lightCount;
@@ -193,8 +200,8 @@ namespace pragma
 
 		LightBufferData m_bufferData {};
 		std::unique_ptr<ShadowBufferData> m_shadowBufferData = nullptr;
-		std::shared_ptr<prosper::Buffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> m_shadowBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_shadowBuffer = nullptr;
 
 		enum class DataSlot : uint32_t
 		{

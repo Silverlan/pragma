@@ -1,34 +1,8 @@
-#include "stdafx_client.h"
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
 
-// Link Libraries
-#pragma comment(lib,"prosper.lib")
-#pragma comment(lib,"Anvil.lib")
-#pragma comment(lib,"vulkan-1.lib")
-#pragma comment(lib,"datasystem.lib")
-#pragma comment(lib,"cengine.lib")
-#pragma comment(lib,"cmaterialsystem.lib")
-#pragma comment(lib,"materialsystem.lib")
-#pragma comment(lib,"wgui.lib")
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"glfw3dll.lib")
-#pragma comment(lib,"shared.lib")
-#pragma comment(lib,"engine.lib")
-#pragma comment(lib,"iglfw.lib")
-#pragma comment(lib,"rectangle_bin_pack.lib")
-#pragma comment(lib,"luasystem.lib")
-#pragma comment(lib,"noise.lib")
-#pragma comment(lib,"alsoundsystem.lib")
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bz2.lib")
-#pragma comment(lib,"recast.lib")
-#pragma comment(lib,"sharedutils.lib")
-#pragma comment(lib,"util_sound.lib")
-#pragma comment(lib,"mathutil.lib")
-#pragma comment(lib,"wms_shared.lib")
-#pragma comment(lib,"util_pad.lib")
-#pragma comment(lib,"util_timeline_scene.lib")
-#pragma comment(lib,"util_source_script.lib")
-#pragma comment(lib,"clientmanager.lib")
-#pragma comment(lib,"networkmanager.lib")
-//
+#include "stdafx_client.h"

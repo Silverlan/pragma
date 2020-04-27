@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_REFLECTION_PROBE_HPP__
 #define __C_ENV_REFLECTION_PROBE_HPP__
 
@@ -39,7 +46,7 @@ namespace pragma
 		};
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
-		static Anvil::DescriptorSet *FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity);
+		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
@@ -51,14 +58,15 @@ namespace pragma
 		bool LoadIBLReflectionsFromFile();
 		bool SaveIBLReflectionsToFile();
 		const rendering::IBLData *GetIBLData() const;
-		Anvil::DescriptorSet *GetIBLDescriptorSet();
+		prosper::IDescriptorSet *GetIBLDescriptorSet();
 
 		float GetIBLStrength() const;
+		void SetIBLStrength(float iblStrength);
 
 		UpdateStatus UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
 	private:
-		static std::shared_ptr<prosper::Image> CreateCubemapImage();
+		static std::shared_ptr<prosper::IImage> CreateCubemapImage();
 		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
@@ -66,12 +74,12 @@ namespace pragma
 			uint32_t width,uint32_t height,uint32_t layerIndex,
 			const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 		);
-		bool FinalizeCubemap(prosper::Image &imgCubemap);
+		bool FinalizeCubemap(prosper::IImage &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;
 		std::string GetCubemapIBLMaterialFilePath() const;
 		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_iblDsg = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_iblDsg = nullptr;
 
 		struct RaytracingJobManager
 		{

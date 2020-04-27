@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include <pragma/model/vertex.h>
@@ -9,8 +16,8 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderDebug::VERTEX_BINDING_VERTEX) ShaderDebug::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderDebug::VERTEX_ATTRIBUTE_POSITION) ShaderDebug::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT};
+decltype(ShaderDebug::VERTEX_BINDING_VERTEX) ShaderDebug::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
+decltype(ShaderDebug::VERTEX_ATTRIBUTE_POSITION) ShaderDebug::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
 
 ShaderDebug::ShaderDebug(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader)
@@ -56,16 +63,16 @@ void ShaderDebug::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipel
 	}
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
 }
 
-bool ShaderDebug::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderDebug::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
 	return ShaderGraphics::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) == true &&
-		(*cmdBuffer)->record_set_depth_bias(1.f,0.f,0.f);
+		cmdBuffer->RecordSetDepthBias(1.f,0.f,0.f);
 }
 
-bool ShaderDebug::Draw(const std::vector<Anvil::Buffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
+bool ShaderDebug::Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
 {
 	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
 	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices))
@@ -86,20 +93,20 @@ bool ShaderDebug::Draw(const std::vector<Anvil::Buffer*> &buffers,uint32_t verte
 	return r;
 }
 
-bool ShaderDebug::Draw(Anvil::Buffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
+bool ShaderDebug::Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color)
 {
-	return Draw(std::vector<Anvil::Buffer*>{&vertexBuffer},vertexCount,mvp,color);
+	return Draw(std::vector<prosper::IBuffer*>{&vertexBuffer},vertexCount,mvp,color);
 }
 
 /////////////////////
 
-decltype(ShaderDebugTexture::VERTEX_BINDING_VERTEX) ShaderDebugTexture::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION) ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderDebugTexture::VERTEX_BINDING_VERTEX) ShaderDebugTexture::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
+decltype(ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION) ShaderDebugTexture::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32_SFloat};
 decltype(ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE) ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -114,12 +121,12 @@ void ShaderDebugTexture::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderDebug::PushConstants),Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderDebug::PushConstants),prosper::ShaderStageFlags::VertexBit);
 }
-bool ShaderDebugTexture::Draw(Anvil::DescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants)
+bool ShaderDebugTexture::Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants)
 {
-	auto buf = prosper::util::get_square_vertex_buffer(c_engine->GetDevice());
-	return RecordBindVertexBuffer(**buf) &&
+	auto buf = prosper::util::get_square_vertex_buffer(*c_engine);
+	return RecordBindVertexBuffer(*buf) &&
 		RecordBindDescriptorSet(descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
 		RecordPushConstants(pushConstants) &&
 		RecordDraw(prosper::util::get_square_vertex_count());
@@ -127,8 +134,8 @@ bool ShaderDebugTexture::Draw(Anvil::DescriptorSet &descSetTexture,const ShaderD
 
 /////////////////////
 
-decltype(ShaderDebugVertexColor::VERTEX_BINDING_COLOR) ShaderDebugVertexColor::VERTEX_BINDING_COLOR = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR) ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_COLOR,Anvil::Format::R32G32B32A32_SFLOAT};
+decltype(ShaderDebugVertexColor::VERTEX_BINDING_COLOR) ShaderDebugVertexColor::VERTEX_BINDING_COLOR = {prosper::VertexInputRate::Vertex};
+decltype(ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR) ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_COLOR,prosper::Format::R32G32B32A32_SFloat};
 
 ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::Context &context,const std::string &identifier)
 	: ShaderDebug(context,identifier,"debug/vs_debug_vertex_color","debug/fs_debug")
@@ -142,187 +149,7 @@ void ShaderDebugVertexColor::InitializeGfxPipeline(Anvil::GraphicsPipelineCreate
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 }
 
-bool ShaderDebugVertexColor::Draw(Anvil::Buffer &vertexBuffer,Anvil::Buffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix)
+bool ShaderDebugVertexColor::Draw(prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix)
 {
-	return ShaderDebug::Draw(std::vector<Anvil::Buffer*>{&vertexBuffer,&colorBuffer},vertexCount,modelMatrix);
+	return ShaderDebug::Draw(std::vector<prosper::IBuffer*>{&vertexBuffer,&colorBuffer},vertexCount,modelMatrix);
 }
-
- // prosper TODO
-#if 0
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/debug/c_shader_debug.h"
-#include "cmaterialmanager.h"
-#include "pragma/model/c_side.h"
-#include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(Debug,debug);
-LINK_SHADER_TO_CLASS(DebugLine,debugline);
-LINK_SHADER_TO_CLASS(DebugTriangleLine,debugtriangleline);
-LINK_SHADER_TO_CLASS(DebugLineStrip,debuglinestrip);
-LINK_SHADER_TO_CLASS(DebugPoint,debugpoint);
-LINK_SHADER_TO_CLASS(DebugPointVertex,debugpointvertex);
-
-extern DLLCENGINE CEngine *c_engine;
-extern DLLCLIENT CGame *c_game;
-
-decltype(Debug::MAX_INSTANCE_COUNT) Debug::MAX_INSTANCE_COUNT = 32;
-
-Debug::Debug(const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: Base3D(identifier,vsShader,fsShader,gsShader)
-{
-	SetUseAlpha(true);
-	SetUseDepth(true);
-}
-
-Debug::Debug()
-	: Debug("debug","debug/vs_debug","debug/fs_debug")
-{}
-
-void Debug::InitializeDynamicStates(std::vector<vk::DynamicState> &states)
-{
-	Base3D::InitializeDynamicStates(states);
-	states.push_back(vk::DynamicState::eDepthBias);
-}
-
-void Debug::SetupPipeline(std::size_t pipelineIdx,vk::GraphicsPipelineCreateInfo &info)
-{
-	Base3D::SetupPipeline(pipelineIdx,info);
-	auto *rasterizationState = const_cast<vk::PipelineRasterizationStateCreateInfo*>(info.pRasterizationState);
-	rasterizationState->depthBiasEnable = true;
-	rasterizationState->depthBiasConstantFactor = 1.f;
-	rasterizationState->depthBiasClamp = 0.f;
-	rasterizationState->depthBiasSlopeFactor = 0.f;
-}
-
-void Debug::InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants)
-{
-	Base::InitializePipelineLayout(context,setLayouts,pushConstants);
-
-	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::VERTEX_BIT} // Instance
-	}));
-
-	pushConstants.push_back({
-		Anvil::ShaderStageFlagBits::VERTEX_BIT,0,32 // Push Constants
-	});
-}
-uint32_t Debug::GetVertexStride() const {return sizeof(Vector3);}
-void Debug::InitializeVertexDescriptions(std::vector<vk::VertexInputBindingDescription> &vertexBindingDescriptions,std::vector<vk::VertexInputAttributeDescription> &vertexAttributeDescriptions)
-{
-	Base::InitializeVertexDescriptions(vertexBindingDescriptions,vertexAttributeDescriptions);
-	vertexBindingDescriptions.push_back({
-		static_cast<uint32_t>(Binding::Vertex),
-		GetVertexStride(),
-		Anvil::VertexInputRate::VERTEX
-	});
-	vertexBindingDescriptions.push_back({
-		static_cast<uint32_t>(Binding::Color),
-		sizeof(Vector4),
-		Anvil::VertexInputRate::VERTEX
-	});
-
-	vertexAttributeDescriptions.push_back({
-		static_cast<uint32_t>(Location::Vertex),
-		static_cast<uint32_t>(Binding::Vertex),
-		Anvil::Format::R32G32B32_SFLOAT,0
-	});
-	vertexAttributeDescriptions.push_back({
-		static_cast<uint32_t>(Location::Color),
-		static_cast<uint32_t>(Binding::Color),
-		Anvil::Format::R32G32B32A32_SFLOAT,0
-	});
-}
-
-bool Debug::BeginDraw(Camera &cam)
-{
-	if(Base3D::BeginDraw() == false)
-		return false;
-	auto &context = *m_context.get();
-	auto &drawCmd = context.GetDrawCmd();
-	auto &layout = GetPipeline()->GetPipelineLayout();
-	auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::VERTEX_BIT,16,&vp);
-	drawCmd->SetDepthBias(1.f,0.f,0.f);
-	//drawCmd->SetLineWidth(10.f);
-	return true;
-}
-void Debug::Draw(const Mat4 &matModel,Vulkan::DescriptorSetObject *descSet,Vulkan::BufferObject *vertexBuffer,uint32_t vertexCount,Vulkan::BufferObject *colorBuffer)
-{
-	assert(vertexCount <= umath::to_integral(GameLimits::MaxMeshVertices));
-	if(vertexCount > umath::to_integral(GameLimits::MaxMeshVertices))
-	{
-		Con::cerr<<"ERROR: Attempted to draw debug mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
-		return;
-	}
-	auto &context = *m_context.get();
-	auto &drawCmd = context.GetDrawCmd();
-	//auto &pipeline = *GetPipeline();
-	auto &layout = GetPipeline()->GetPipelineLayout();
-
-	drawCmd->BindDescriptorSet(layout,descSet);
-	if(colorBuffer == nullptr)
-		drawCmd->BindVertexBuffer({vertexBuffer,c_game->GetDummyVertexBuffer()});
-	else
-		drawCmd->BindVertexBuffer({vertexBuffer,colorBuffer});
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::VERTEX_BIT,16,16,&matModel);
-	//drawCmd->BindIndexBuffer(indexBuffer,vk::IndexType::eUint16);
-	//drawCmd->DrawIndexed(mesh->GetTriangleVertexCount());
-	c_engine->StartGPUTimer(GPUTimerEvent::DebugMesh);
-	drawCmd->Draw(vertexCount,1);
-	c_engine->StopGPUTimer(GPUTimerEvent::DebugMesh);
-}
-void Debug::Draw(Vulkan::DescriptorSetObject *descSet,Vulkan::BufferObject *vertexBuffer,uint32_t vertexCount,Vulkan::BufferObject *colorBuffer)
-{
-	Draw(umat::identity(),descSet,vertexBuffer,vertexCount,colorBuffer);
-}
-
-/////////////////////////////////
-
-void DebugLine::SetupPipeline(std::size_t pipelineIdx,vk::GraphicsPipelineCreateInfo &info)
-{
-	Debug::SetupPipeline(pipelineIdx,info);
-	auto *assemblyState = const_cast<vk::PipelineInputAssemblyStateCreateInfo*>(info.pInputAssemblyState);
-	assemblyState->topology = vk::PrimitiveTopology::eLineList;
-	auto *rasterizationState = const_cast<vk::PipelineRasterizationStateCreateInfo*>(info.pRasterizationState);
-	rasterizationState->polygonMode = Anvil::PolygonMode::LINE;
-}
-
-/////////////////////////////////
-
-void DebugTriangleLine::SetupPipeline(std::size_t pipelineIdx,vk::GraphicsPipelineCreateInfo &info)
-{
-	DebugLine::SetupPipeline(pipelineIdx,info);
-	auto *assemblyState = const_cast<vk::PipelineInputAssemblyStateCreateInfo*>(info.pInputAssemblyState);
-	assemblyState->topology = vk::PrimitiveTopology::eTriangleList;
-}
-
-/////////////////////////////////
-
-void DebugLineStrip::SetupPipeline(std::size_t pipelineIdx,vk::GraphicsPipelineCreateInfo &info)
-{
-	DebugLine::SetupPipeline(pipelineIdx,info);
-	auto *assemblyState = const_cast<vk::PipelineInputAssemblyStateCreateInfo*>(info.pInputAssemblyState);
-	assemblyState->topology = vk::PrimitiveTopology::eLineStrip;
-	auto *rasterizationState = const_cast<vk::PipelineRasterizationStateCreateInfo*>(info.pRasterizationState);
-	rasterizationState->polygonMode = Anvil::PolygonMode::LINE;
-}
-
-/////////////////////////////////
-
-void DebugPoint::SetupPipeline(std::size_t pipelineIdx,vk::GraphicsPipelineCreateInfo &info)
-{
-	Debug::SetupPipeline(pipelineIdx,info);
-	auto *assemblyState = const_cast<vk::PipelineInputAssemblyStateCreateInfo*>(info.pInputAssemblyState);
-	assemblyState->topology = vk::PrimitiveTopology::ePointList;
-	auto *rasterizationState = const_cast<vk::PipelineRasterizationStateCreateInfo*>(info.pRasterizationState);
-	rasterizationState->polygonMode = Anvil::PolygonMode::POINT;
-}
-
-/////////////////////////////////
-
-uint32_t DebugPointVertex::GetVertexStride() const {return sizeof(Vertex);}
-#endif
-

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -21,9 +28,9 @@ extern DLLCLIENT CGame *c_game;
 
 
 decltype(CParticleRendererModel::s_rendererCount) CParticleRendererModel::s_rendererCount = 0;
-static std::shared_ptr<prosper::Buffer> s_instanceBuffer = nullptr;
-static std::shared_ptr<prosper::Buffer> s_instanceBufferAnimated = nullptr;
-static std::shared_ptr<prosper::DescriptorSetGroup> s_instanceDescSetGroup = nullptr;
+static std::shared_ptr<prosper::IBuffer> s_instanceBuffer = nullptr;
+static std::shared_ptr<prosper::IBuffer> s_instanceBufferAnimated = nullptr;
+static std::shared_ptr<prosper::IDescriptorSetGroup> s_instanceDescSetGroup = nullptr;
 void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
 	CParticleRenderer::Initialize(pSystem,values);
@@ -63,22 +70,20 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 
 	if(s_rendererCount++ == 0 && pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid())
 	{
-		auto &dev = c_engine->GetDevice();
-
 		pragma::ShaderEntity::InstanceData instanceData {umat::identity(),Vector4(1.f,1.f,1.f,1.f),pragma::ShaderEntity::InstanceData::RenderFlags::None};
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.size = sizeof(instanceData);
-		createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
-		s_instanceDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-		s_instanceBuffer = prosper::util::create_buffer(dev,createInfo,&instanceData);
-		prosper::util::set_descriptor_set_binding_uniform_buffer(
-			*s_instanceDescSetGroup->GetDescriptorSet(),*s_instanceBuffer,0u
+		s_instanceDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+		s_instanceBuffer = c_engine->CreateBuffer(createInfo,&instanceData);
+		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
+			*s_instanceBuffer,0u
 		);
 
 		instanceData.renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-		s_instanceBufferAnimated = prosper::util::create_buffer(dev,createInfo,&instanceData);
+		s_instanceBufferAnimated = c_engine->CreateBuffer(createInfo,&instanceData);
 	}
 
 	auto bAnimated = !m_animation.empty();
@@ -100,12 +105,12 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 			{
 				// If we are animated, we have to create a unique descriptor set
 				auto &dev = c_engine->GetDevice();
-				ptComponent.instanceDescSetGroupAnimated = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-				prosper::util::set_descriptor_set_binding_uniform_buffer(
-					*ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet(),*s_instanceBufferAnimated,0u
+				ptComponent.instanceDescSetGroupAnimated = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
+					*s_instanceBufferAnimated,0u
 				);
-				prosper::util::set_descriptor_set_binding_uniform_buffer(
-					*ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet(),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
+					*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 				);
 			}
 		}
@@ -189,7 +194,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	if(m_shader.expired())
 		return;
@@ -205,7 +210,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 		return;
 	auto &descSetShadowmps = *renderer.GetCSMDescriptorSet();
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	shader->BindLights(*descSetShadowmps,descSetLightSources);
+	shader->BindLights(descSetShadowmps,descSetLightSources);
 	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
@@ -227,7 +232,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 			auto &ptComponent = GetParticleComponent(instanceIdx);
 			auto &animComponent = ptComponent.animatedComponent;
 			auto &descSet = animComponent.valid() ? ptComponent.instanceDescSetGroupAnimated : s_instanceDescSetGroup;
-			if(shader->BindInstanceDescriptorSet(*(*descSet)->get_descriptor_set(0u)) == false)
+			if(shader->BindInstanceDescriptorSet(*descSet->GetDescriptorSet()) == false)
 				continue;
 			for(auto &mesh : static_cast<pragma::CModelComponent&>(*mdlComponent).GetLODMeshes())
 			{
@@ -253,7 +258,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::PrimaryComman
 	shader->EndDraw();
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

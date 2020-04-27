@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_DEBUGOVERLAY_H__
 #define __C_DEBUGOVERLAY_H__
 
@@ -97,21 +104,21 @@ namespace DebugRenderer
 		void SetColor(const Vector4 &col);
 		const Vector4 &GetColor() const;
 		const Vector4 &GetOutlineColor() const;
-		const std::shared_ptr<prosper::Buffer> &GetColorBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetVertexBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetColorBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		uint32_t GetVertexCount() const;
 		void AddVertex(const Vector3 &v);
 		std::vector<Vector3> &GetVertices();
 		std::vector<Vector4> &GetColors();
-		void InitializeBuffers(const std::shared_ptr<prosper::Buffer> &vertexBuffer,uint32_t vertexCount);
+		void InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount);
 		void InitializeBuffers();
 		void UpdateVertexBuffer();
 		void UpdateColorBuffer();
 		bool HasOutline() const;
 		virtual ObjectType GetType() const override;
 	protected:
-		std::shared_ptr<prosper::Buffer> m_vertexBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> m_colorBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_colorBuffer = nullptr;
 		Vector4 m_color = {};
 		Vector4 m_outlineColor = {};
 		std::vector<Vector3> m_vertices;
@@ -124,17 +131,17 @@ namespace DebugRenderer
 	{
 	protected:
 		mutable WIHandle m_hText;
-		mutable std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupText = nullptr;
+		mutable std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupText = nullptr;
 		CallbackHandle m_hCbRender;
 	public:
 		TextObject(WIText *elText);
 		virtual ~TextObject() override;
-		Anvil::DescriptorSet *GetTextDescriptorSet() const;
+		prosper::IDescriptorSet *GetTextDescriptorSet() const;
 		virtual ObjectType GetType() const override;
 		void Initialize(CallbackHandle &hCallback);
 		WIText *GetTextElement() const;
 	};
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::shared_ptr<prosper::Buffer> &vertexBuffer,uint32_t vertexCount,const Color &color,float duration=0.f);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount,const Color &color,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points,const Color &color,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawPoint(const Vector3 &pos,const Color &color,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawLines(const std::vector<Vector3> &lines,const Color &color,float duration=0.f);
@@ -168,7 +175,7 @@ namespace DebugRenderer
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const EulerAngles &ang,float duration=0.f);
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,float duration=0.f);
 	void ClearObjects();
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 };
 
 #endif

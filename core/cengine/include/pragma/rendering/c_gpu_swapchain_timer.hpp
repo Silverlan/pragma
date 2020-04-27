@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_GPU_SWAPCHAIN_TIMER_HPP__
 #define __C_GPU_SWAPCHAIN_TIMER_HPP__
 
@@ -16,14 +23,14 @@ namespace pragma
 			: public Timer
 		{
 		public:
-			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage);
+			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
 
 			virtual bool Start() override;
 			virtual bool Stop() override;
 			bool Reset();
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 		private:
-			GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage);
+			GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
 			void UpdateResult();
 			prosper::TimerQuery *GetTimerQuery();
 			prosper::PipelineStatisticsQuery *GetStatisticsQuery();
@@ -35,7 +42,7 @@ namespace pragma
 			};
 
 			std::vector<SwapchainQuery> m_swapchainTimers = {};
-			Anvil::PipelineStageFlagBits m_stage;
+			prosper::PipelineStageFlags m_stage;
 			bool m_bHasStartedAtLeastOnce = false;
 			std::weak_ptr<prosper::QueryPool> m_wpTimerQueryPool = {};
 			std::weak_ptr<prosper::QueryPool> m_wpStatsQueryPool = {};

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -6,18 +13,18 @@
 void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCVertexAnimated = luabind::class_<CVertexAnimatedHandle,BaseEntityComponentHandle>("VertexAnimatedComponent");
-	defCVertexAnimated.def("UpdateVertexAnimationBuffer",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<prosper::CommandBuffer>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<prosper::CommandBuffer> &drawCmd) {
+	defCVertexAnimated.def("UpdateVertexAnimationBuffer",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<prosper::ICommandBuffer>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
 		pragma::Lua::check_component(l,hAnim);
 		if(drawCmd->IsPrimary() == false)
 			return;
-		hAnim->UpdateVertexAnimationBuffer(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd));
+		hAnim->UpdateVertexAnimationBuffer(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd));
 		}));
 	defCVertexAnimated.def("GetVertexAnimationBuffer",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&)>([](lua_State *l,CVertexAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);
 		auto &buffer = hAnim->GetVertexAnimationBuffer();
 		if(buffer == nullptr)
 			return;
-		Lua::Push<std::shared_ptr<prosper::Buffer>>(l,buffer);
+		Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,buffer);
 		}));
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh) {
 		pragma::Lua::check_component(l,hAnim);

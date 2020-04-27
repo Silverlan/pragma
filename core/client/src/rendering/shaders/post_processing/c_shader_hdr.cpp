@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include <shader/prosper_shader_copy_image.hpp>
@@ -14,45 +21,11 @@ void ShaderHDR::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelin
 {
 	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderHDR::Draw(Anvil::DescriptorSet &descSetTexture,float exposure)
+bool ShaderHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure)
 {
 	return RecordPushConstants(PushConstants{exposure}) &&
 		prosper::ShaderBaseImageProcessing::Draw(descSetTexture);
 }
-
- // prosper TODO
-#if 0
-#include "c_shader_hdr.h"
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(HDR,hdr);
-
-HDR::HDR()
-	: Screen("hdr","screen/vs_screen_uv","screen/fs_hdr")
-{}
-
-void HDR::InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants)
-{
-	Screen::InitializePipelineLayout(context,setLayouts,pushConstants);
-
-	pushConstants.push_back({Anvil::ShaderStageFlagBits::FRAGMENT_BIT,1});
-
-	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT}
-	}));
-}
-
-bool HDR::BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,float exposure)
-{
-	auto r = Screen::BeginDraw(cmdBuffer);
-	if(r == false)
-		return false;
-	auto &pipeline = *GetPipeline();
-	cmdBuffer->PushConstants(pipeline.GetPipelineLayout(),Anvil::ShaderStageFlagBits::FRAGMENT_BIT,exposure);
-	return r;
-}
-#endif

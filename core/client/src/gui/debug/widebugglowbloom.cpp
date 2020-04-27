@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugglowbloom.hpp"
@@ -32,14 +39,14 @@ void WIDebugGlowBloom::UpdateBloomImage()
 	if(renderer == nullptr)
 		return;
 	auto &glowTexture = renderer->GetGlowInfo().renderTarget->GetTexture();
-	auto &imgSrc = glowTexture->GetImage();
-	auto &imgDst = m_renderTarget->GetTexture()->GetImage();
+	auto &imgSrc = glowTexture.GetImage();
+	auto &imgDst = m_renderTarget->GetTexture().GetImage();
 		
-	prosper::util::record_image_barrier(**drawCmd,**imgSrc,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-	prosper::util::record_image_barrier(**drawCmd,**imgDst,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-	prosper::util::record_blit_image(**drawCmd,{},**imgSrc,**imgDst);
-	prosper::util::record_image_barrier(**drawCmd,**imgSrc,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-	prosper::util::record_image_barrier(**drawCmd,**imgDst,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
+	drawCmd->RecordBlitImage({},imgSrc,imgDst);
+	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 void WIDebugGlowBloom::DoUpdate()
@@ -47,24 +54,23 @@ void WIDebugGlowBloom::DoUpdate()
 	WITexturedRect::DoUpdate();
 	if(c_game == nullptr)
 		return;
-	auto &dev = c_engine->GetDevice();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.width = GetWidth();
 	imgCreateInfo.height = GetHeight();
-	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
+	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
+	auto img = c_engine->CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto tex = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {};
-	rpInfo.attachments.push_back({img->GetFormat(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,Anvil::AttachmentStoreOp::STORE,img->GetSampleCount(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL});
+	rpInfo.attachments.push_back({img->GetFormat(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,prosper::AttachmentStoreOp::Store,img->GetSampleCount(),prosper::ImageLayout::ColorAttachmentOptimal});
 	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass{{0ull}}});
-	auto rp = prosper::util::create_render_pass(dev,rpInfo);
-	m_renderTarget = prosper::util::create_render_target(dev,{tex},rp,{});
+	auto rp = c_engine->CreateRenderPass(rpInfo);
+	m_renderTarget = c_engine->CreateRenderTarget({tex},rp,{});
 	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes",FunctionCallback<>::Create(
 		std::bind(&WIDebugGlowBloom::UpdateBloomImage,this)
 	));
-	SetTexture(*m_renderTarget->GetTexture());
+	SetTexture(m_renderTarget->GetTexture());
 }

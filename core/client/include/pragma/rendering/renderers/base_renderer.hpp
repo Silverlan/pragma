@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __BASE_RENDERER_HPP__
 #define __BASE_RENDERER_HPP__
 
@@ -22,11 +29,14 @@ namespace pragma::rendering
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
-		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All);
+		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All);
 		virtual bool ReloadRenderTarget()=0;
-		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const=0;
-		virtual const std::shared_ptr<prosper::Texture> &GetPresentationTexture() const;
-		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const=0;
+		virtual prosper::Texture *GetSceneTexture()=0;
+		virtual prosper::Texture *GetPresentationTexture();
+		virtual prosper::Texture *GetHDRPresentationTexture()=0;
+		const prosper::Texture *GetSceneTexture() const;
+		const prosper::Texture *GetPresentationTexture() const;
+		const prosper::Texture *GetHDRPresentationTexture() const;
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings);
 		virtual void UpdateCameraData(pragma::CameraData &cameraData);
 		void Resize(uint32_t width, uint32_t height);
@@ -36,7 +46,7 @@ namespace pragma::rendering
 
 		Scene &GetScene() const;
 	protected:
-		virtual void BeginRendering(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		virtual void EndRendering()=0;
 		BaseRenderer(Scene &scene);
 		virtual bool Initialize() = 0;

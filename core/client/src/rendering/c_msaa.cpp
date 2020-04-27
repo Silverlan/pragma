@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/c_msaa.h"
 #include <mathutil/umath.h>
@@ -10,8 +17,8 @@ int GetMaxMSAASampleCount()
 	Anvil::ImageFormatProperties imgFormatProperties {};
 	if(dev.get_physical_device_image_format_properties(
 		Anvil::ImageFormatPropertiesQuery{
-			Anvil::Format::R16G16B16A16_SFLOAT,Anvil::ImageType::_2D,Anvil::ImageTiling::OPTIMAL,
-			Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT,
+			static_cast<Anvil::Format>(prosper::Format::R16G16B16A16_SFloat),static_cast<Anvil::ImageType>(prosper::ImageType::e2D),static_cast<Anvil::ImageTiling>(prosper::ImageTiling::Optimal),
+			static_cast<Anvil::ImageUsageFlagBits>(prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit),
 			{}
 		},&imgFormatProperties
 		) == false

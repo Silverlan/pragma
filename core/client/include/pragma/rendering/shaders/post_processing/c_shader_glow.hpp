@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_GLOW_HPP__
 #define __C_SHADER_GLOW_HPP__
 
@@ -9,11 +16,11 @@ namespace pragma
 		: public ShaderTextured3DBase
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		static Anvil::Format RENDER_PASS_FORMAT;
+		static prosper::Format RENDER_PASS_FORMAT;
 
 #pragma pack(push,1)
 		struct PushConstants
@@ -23,15 +30,15 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderGlow(prosper::Context &context,const std::string &identifier);
-		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		bool BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindGlowMaterial(CMaterial &mat);
 	protected:
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
-		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
+		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

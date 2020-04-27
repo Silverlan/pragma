@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
@@ -872,41 +879,18 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 			f->WriteString(flex.GetName());
 
 			auto *va = flex.GetVertexAnimation();
-			auto *mva = flex.GetMeshVertexAnimation();
-			auto *vf = flex.GetMeshVertexFrame();
-			if(va != nullptr && mva != nullptr && vf != nullptr)
+			if(va != nullptr)
 			{
 				auto &vertAnims = GetVertexAnimations();
 				auto itVa = std::find(vertAnims.begin(),vertAnims.end(),va->shared_from_this());
 				if(itVa == vertAnims.end())
 					va = nullptr;
 				else
-				{
-					auto &meshAnims = va->GetMeshAnimations();
-					auto itMa = std::find(meshAnims.begin(),meshAnims.end(),mva->shared_from_this());
-					if(itMa == meshAnims.end())
-						mva = nullptr;
-					else
-					{
-						auto &frames = mva->GetFrames();
-						auto itFr = std::find(frames.begin(),frames.end(),vf->shared_from_this());
-						if(itFr == frames.end())
-							vf = nullptr;
-						else
-						{
-							f->Write<uint32_t>(itVa -vertAnims.begin());
-							f->Write<uint32_t>(itMa -meshAnims.begin());
-							f->Write<uint32_t>(itFr -frames.begin());
-						}
-					}
-				}
+					f->Write<uint32_t>(itVa -vertAnims.begin());
 			}
-			if(va == nullptr || mva == nullptr || vf == nullptr)
-			{
+			else
 				f->Write<uint32_t>(std::numeric_limits<uint32_t>::max());
-				f->Write<uint32_t>(std::numeric_limits<uint32_t>::max());
-				f->Write<uint32_t>(std::numeric_limits<uint32_t>::max());
-			}
+			f->Write<uint32_t>(flex.GetFrameIndex());
 
 			auto &ops = flex.GetOperations();
 			f->Write<uint32_t>(ops.size());

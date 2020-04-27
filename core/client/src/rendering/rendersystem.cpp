@@ -1,21 +1,24 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/rendersystem.h"
-#include "pragma/opengl/renderobject.h"
 #include "cmaterialmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/opengl/renderhierarchy.h"
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
-#include "pragma/rendering/shaders/debug/c_shader_debug_normals.h"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
-#include "pragma/rendering/uniformbinding.h"
 #include "textureinfo.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -159,7 +162,7 @@ DLLCLIENT uint32_t s_shadowTriangleCount = 0;
 DLLCLIENT uint32_t s_shadowVertexCount = 0;
 #endif
 void RenderSystem::Render(
-	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,
 	RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin
 )
 {
@@ -178,6 +181,7 @@ void RenderSystem::Render(
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
 	auto depthBiasActive = false;
+	auto debugMode = scene->GetDebugMode();
 	for(auto it=translucentMeshes.rbegin();it!=translucentMeshes.rend();++it) // Render back-to-front
 	{
 		auto &meshInfo = *it;
@@ -198,6 +202,8 @@ void RenderSystem::Render(
 				pipelineType
 			) == false)
 				continue;
+			if(debugMode != ::Scene::DebugMode::None)
+				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
 			if(shader->BindScene(rasterizer,renderMode == RenderMode::View) == false)
@@ -224,7 +230,7 @@ void RenderSystem::Render(
 				{
 					float constantFactor,biasClamp,slopeFactor;
 					renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
-					prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+					drawCmd->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
 
 					depthBiasActive = true;
 				}
@@ -232,7 +238,7 @@ void RenderSystem::Render(
 				{
 					// Clear depth bias
 					depthBiasActive = false;
-					prosper::util::record_set_depth_bias(**drawCmd);
+					drawCmd->RecordSetDepthBias();
 				}
 			}
 			auto *mesh = meshInfo->mesh;
@@ -268,7 +274,7 @@ void RenderSystem::Render(
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
 uint32_t RenderSystem::Render(
-	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes,
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes,
 	RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin
 )
 {
@@ -291,6 +297,7 @@ uint32_t RenderSystem::Render(
 	pragma::CRenderComponent *renderC = nullptr;
 	pragma::ShaderTextured3DBase *shaderLast = nullptr;
 	auto depthBiasActive = false;
+	auto debugMode = scene->GetDebugMode();
 	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
 	{
 		auto &shaderContainer = *itShader;
@@ -305,6 +312,8 @@ uint32_t RenderSystem::Render(
 		{
 			if(shader->BindScene(rasterizer,bView) == true)
 			{
+				if(debugMode != ::Scene::DebugMode::None)
+					shader->SetDebugMode(debugMode);
 				shader->Set3DSky(renderAs3dSky);
 
 				++debugInfo.shaderCount;
@@ -330,7 +339,7 @@ uint32_t RenderSystem::Render(
 								{
 									float constantFactor,biasClamp,slopeFactor;
 									renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
-									prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+									drawCmd->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
 
 									depthBiasActive = true;
 								}
@@ -338,7 +347,7 @@ uint32_t RenderSystem::Render(
 								{
 									// Clear depth bias
 									depthBiasActive = false;
-									prosper::util::record_set_depth_bias(**drawCmd);
+									drawCmd->RecordSetDepthBias();
 								}
 							}
 							for(auto *mesh : pair.second.meshes)
@@ -395,7 +404,7 @@ uint32_t RenderSystem::Render(
 
 	return numShaderInvocations;
 }
-uint32_t RenderSystem::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
+uint32_t RenderSystem::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();

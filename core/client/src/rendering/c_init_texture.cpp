@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "textureinfo.h"
@@ -9,7 +16,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-static void get_filter_mode(UInt32 filter,Anvil::Filter &minFilter,Anvil::Filter &magFilter,Anvil::SamplerMipmapMode &mipmapMode,UInt32 &anisotropy)
+static void get_filter_mode(UInt32 filter,prosper::Filter &minFilter,prosper::Filter &magFilter,prosper::SamplerMipmapMode &mipmapMode,UInt32 &anisotropy)
 {
 	anisotropy = 1; // 1 = off
 	if(filter < 0)
@@ -18,21 +25,21 @@ static void get_filter_mode(UInt32 filter,Anvil::Filter &minFilter,Anvil::Filter
 		filter = 6;
 	if(filter == 0)
 	{
-		minFilter = Anvil::Filter::NEAREST;
-		magFilter = Anvil::Filter::NEAREST;
-		mipmapMode = Anvil::SamplerMipmapMode::NEAREST;
+		minFilter = prosper::Filter::Nearest;
+		magFilter = prosper::Filter::Nearest;
+		mipmapMode = prosper::SamplerMipmapMode::Nearest;
 	}
 	else if(filter == 1)
 	{
-		minFilter = Anvil::Filter::NEAREST;
-		magFilter = Anvil::Filter::LINEAR;
-		mipmapMode = Anvil::SamplerMipmapMode::NEAREST;
+		minFilter = prosper::Filter::Nearest;
+		magFilter = prosper::Filter::Linear;
+		mipmapMode = prosper::SamplerMipmapMode::Nearest;
 	}
 	else
 	{
-		minFilter = Anvil::Filter::LINEAR;
-		magFilter = Anvil::Filter::LINEAR;
-		mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
+		minFilter = prosper::Filter::Linear;
+		magFilter = prosper::Filter::Linear;
+		mipmapMode = prosper::SamplerMipmapMode::Linear;
 		if(filter >= 3)
 		{
 			filter -= 2;
@@ -62,8 +69,8 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,in
 	if(client == nullptr)
 		return;
 	c_engine->WaitIdle();
-	Anvil::Filter minFilter,magFilter;
-	Anvil::SamplerMipmapMode mipmapMode;
+	prosper::Filter minFilter,magFilter;
+	prosper::SamplerMipmapMode mipmapMode;
 	UInt32 anisotropy;
 	get_filter_mode(cvTextureFiltering->GetInt(),minFilter,magFilter,mipmapMode,anisotropy);
 	auto lodOffset = get_quality_lod_offset();
@@ -71,7 +78,7 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,in
 	auto &textureManager = materialManager.GetTextureManager();
 	auto &sampler = textureManager.GetTextureSampler();
 	auto &customSamplers = textureManager.GetCustomSamplers();
-	auto fUpdateSampler = [anisotropy,mipmapMode,minFilter,magFilter,lodOffset](prosper::Sampler &sampler) {
+	auto fUpdateSampler = [anisotropy,mipmapMode,minFilter,magFilter,lodOffset](prosper::ISampler &sampler) {
 		sampler.SetMaxAnisotropy(static_cast<float>(anisotropy));
 		sampler.SetMipmapMode(mipmapMode);
 		sampler.SetMinFilter(minFilter);

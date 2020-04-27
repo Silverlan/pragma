@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_SCENE_HPP__
 #define __C_SHADER_SCENE_HPP__
 
@@ -23,14 +30,14 @@ namespace pragma
 
 			Count
 		};
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 
-		static Anvil::Format RENDER_PASS_FORMAT;
-		static Anvil::Format RENDER_PASS_DEPTH_FORMAT;
+		static prosper::Format RENDER_PASS_FORMAT;
+		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
 
-		static Anvil::SampleCountFlagBits RENDER_PASS_SAMPLES;
-		static void SetRenderPassSampleCount(Anvil::SampleCountFlagBits samples);
+		static prosper::SampleCountFlags RENDER_PASS_SAMPLES;
+		static void SetRenderPassSampleCount(prosper::SampleCountFlags samples);
 
 		enum class CameraBinding : uint32_t
 		{
@@ -72,12 +79,12 @@ namespace pragma
 #pragma pack(pop)
 
 		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView);
-		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings);
+		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings);
 	protected:
 		ShaderScene(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		Anvil::SampleCountFlagBits GetSampleCount(uint32_t pipelineIdx) const;
+		prosper::SampleCountFlags GetSampleCount(uint32_t pipelineIdx) const;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const=0;
 		virtual uint32_t GetCameraDescriptorSetIndex() const=0;
 	};
@@ -88,9 +95,9 @@ namespace pragma
 		: public ShaderScene
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CSM;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class LightBinding : uint32_t
 		{
@@ -114,7 +121,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources);
+		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources);
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
@@ -145,7 +152,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_LIGHTMAP;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 
 		enum class VertexBinding : uint32_t
 		{
@@ -172,7 +179,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		bool BindInstanceDescriptorSet(Anvil::DescriptorSet &descSet);
+		bool BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet);
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;

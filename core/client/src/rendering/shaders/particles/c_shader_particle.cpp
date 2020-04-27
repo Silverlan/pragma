@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 
@@ -7,8 +14,8 @@ ShaderParticle::ShaderParticle(prosper::Context &context,const std::string &iden
 	: ShaderParticle2DBase(context,identifier,"particles/vs_particle","particles/fs_particle")
 {}
 
-decltype(ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION) ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION = {Anvil::VertexInputRate::INSTANCE};
-decltype(ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION) ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION = {VERTEX_BINDING_WORLD_ROTATION,Anvil::Format::R32G32B32A32_SFLOAT};
+decltype(ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION) ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION = {prosper::VertexInputRate::Instance};
+decltype(ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION) ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION = {VERTEX_BINDING_WORLD_ROTATION,prosper::Format::R32G32B32A32_SFloat};
 ShaderParticleRotational::ShaderParticleRotational(prosper::Context &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/vs_particle_rotational","particles/fs_particle")
 {
@@ -22,7 +29,7 @@ void ShaderParticleRotational::InitializeGfxPipeline(Anvil::GraphicsPipelineCrea
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_WORLD_ROTATION);
 }
 
-bool ShaderParticleRotational::BindWorldRotationBuffer(Anvil::Buffer &buffer) {return RecordBindVertexBuffer(buffer,VERTEX_BINDING_WORLD_ROTATION.GetBindingIndex());}
+bool ShaderParticleRotational::BindWorldRotationBuffer(prosper::IBuffer &buffer) {return RecordBindVertexBuffer(buffer,VERTEX_BINDING_WORLD_ROTATION.GetBindingIndex());}
 
 void ShaderParticleRotational::GetParticleSystemOrientationInfo(
 	const Mat4 &matrix,const pragma::CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
@@ -24,22 +31,19 @@
 extern DLLCENGINE CEngine *c_engine;
 
 
-void CGame::RenderScenePresent(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::Image &outImage,uint32_t layerId)
+void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage &outImage,uint32_t layerId)
 {
-	prosper::util::record_image_barrier(*(*drawCmd),*outImage,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+	drawCmd->RecordImageBarrier(outImage,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
 	prosper::util::BlitInfo blitInfo {};
-	blitInfo.dstSubresourceLayer.base_array_layer = layerId;
-	prosper::util::record_blit_image(**drawCmd,blitInfo,**texPostHdr.GetImage(),*outImage);
-	prosper::util::record_image_barrier(*(*drawCmd),*(*texPostHdr.GetImage()),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-	prosper::util::record_image_barrier(*(*drawCmd),*outImage,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+	blitInfo.dstSubresourceLayer.baseArrayLayer = layerId;
+	drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),outImage);
+	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	drawCmd->RecordImageBarrier(outImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 }
 
-std::shared_ptr<prosper::PrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
-
-//Shader::Base *CGame::GetShaderOverride() {return m_shaderOverride;} // prosper TODO
-//void CGame::SetShaderOverride(Shader::Base *shader) {m_shaderOverride = shader;} // prosper TODO
-
-void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags,uint32_t outLayerId)
+std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
+	
+void CGame::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags,uint32_t outLayerId)
 {
 	m_currentDrawCmd = drawCmd;
 	ScopeGuard sgCurrentDrawCmd {[this]() {
@@ -56,9 +60,9 @@ void CGame::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(renderFlags,FRender::HDR))
-			presentationTexture = renderer->GetHDRPresentationTexture().get();
+			presentationTexture = renderer->GetHDRPresentationTexture();
 		else
-			presentationTexture = renderer->GetPresentationTexture().get();
+			presentationTexture = renderer->GetPresentationTexture();
 
 		RenderScenePresent(drawCmd,*presentationTexture,outImage,outLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);

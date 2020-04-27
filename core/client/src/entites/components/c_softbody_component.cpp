@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -35,7 +42,7 @@ bool CSoftBodyComponent::InitializeSoftBodyData()
 			if(vkMesh == nullptr)
 				continue;
 			auto &verts = subMesh->GetVertices();
-			auto swapBuffer = Vulkan::SwapBuffer::Create(context,Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT,verts.size() *sizeof(verts.front()));
+			auto swapBuffer = Vulkan::SwapBuffer::Create(context,prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::VertexBufferBit,verts.size() *sizeof(verts.front()));
 			auto numBuffers = swapBuffer->GetBufferCount();
 			for(auto i=decltype(numBuffers){0};i<numBuffers;++i)
 			{

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_WATER_SURFACE_SOLVE_EDGES_HPP__
 #define __C_SHADER_WATER_SURFACE_SOLVE_EDGES_HPP__
 
@@ -13,37 +20,4 @@ namespace pragma
 	};
 };
 
-// prosper TODO
-#if 0
-#include "pragma/clientdefinitions.h"
-#include "shadersystem.h"
-
-namespace Shader
-{
-	class DLLCLIENT WaterSurfaceSolveEdges
-		: public Base
-	{
-	public:
-		enum class DLLCLIENT DescSet : uint32_t
-		{
-			WaterParticles = 0,
-			WaterEdgeData = WaterParticles,
-
-			WaterSurfaceInfo = WaterParticles +1
-		};
-		enum class DLLCLIENT Binding : uint32_t
-		{
-			WarterParticles = 0,
-			WaterEdgeData = WarterParticles +1,
-
-			WaterSurfaceInfo = 0
-		};
-		WaterSurfaceSolveEdges();
-		void Compute(const Vulkan::DescriptorSetObject *descSetSurfaceInfo,const Vulkan::DescriptorSetObject *descSetEdges,uint32_t width,uint32_t length);
-		static Vulkan::DescriptorSet CreateEdgeDescriptorSet();
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	};
-};
-#endif
 #endif

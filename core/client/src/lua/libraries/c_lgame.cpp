@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/libraries/c_lgame.h"
@@ -73,7 +80,6 @@ static void update_vehicle(Vehicle_Car *vhc)
 #endif
 
 enum Method {IK_JACOB_TRANS=0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS , IK_DLS_SVD};
-#include "pragma/lua/c_ldebug_ik.hpp"
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
 static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
@@ -791,13 +797,6 @@ int Lua::game::Client::test(lua_State *l)
 	return 0;
 }
 
-
-
-
-
-
-
-
 #endif
 
 int Lua::game::Client::open_dropped_file(lua_State *l)
@@ -847,19 +846,11 @@ int Lua::game::Client::get_gravity(lua_State *l)
 int Lua::game::Client::load_model(lua_State *l)
 {
 	auto *name = Lua::CheckString(l,1);
-	try
-	{
 	auto mdl = c_game->LoadModel(name);
 	if(mdl == nullptr)
 		return 0;
 	Lua::Push<decltype(mdl)>(l,mdl);
 	return 1;
-	}
-	catch(...)
-	{
-		std::cout<<"!!"<<std::endl;
-		return 0;
-	}
 }
 int Lua::game::Client::create_model(lua_State *l)
 {
@@ -911,7 +902,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	if(Lua::IsSet(l,3))
 		layerId = Lua::CheckInt(l,3);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
-	if(cmdBuffer == nullptr || cmdBuffer->GetAnvilCommandBuffer().get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(cmdBuffer == nullptr || cmdBuffer->IsPrimary() == false)
 		return 0;
 	auto renderFlags = drawSceneInfo.renderFlags;
 	auto *clearColor = drawSceneInfo.clearColor.has_value() ? &drawSceneInfo.clearColor.value() : nullptr;
@@ -921,13 +912,13 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	{
 		auto clearCol = clearColor->ToVector4();
 		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
-		auto &hdrImg = hdrInfo.sceneRenderTarget->GetTexture()->GetImage();
-		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-		prosper::util::record_clear_image(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-		prosper::util::record_image_barrier(*(*cmdBuffer),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		auto &hdrImg = hdrInfo.sceneRenderTarget->GetTexture().GetImage();
+		cmdBuffer->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+		cmdBuffer->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
+		cmdBuffer->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(cmdBuffer);
+	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
 	c_game->RenderScene(primCmdBuffer,img,renderFlags,layerId);
 	c_game->SetRenderScene(nullptr);
 	return 0;
@@ -982,7 +973,7 @@ int Lua::game::Client::get_scene_camera(lua_State *l)
 int Lua::game::Client::get_draw_command_buffer(lua_State *l)
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	Lua::Push(l,std::static_pointer_cast<prosper::CommandBuffer>(drawCmd));
+	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd));
 	return 1;
 }
 int Lua::game::Client::get_setup_command_buffer(lua_State *l)

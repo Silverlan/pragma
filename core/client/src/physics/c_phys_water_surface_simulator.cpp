@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/debug/c_debugoverlay.h"
@@ -20,7 +27,7 @@ extern DLLCLIENT CGame *c_game;
 CPhysWaterSurfaceSimulator::CPhysWaterSurfaceSimulator(Vector2 aabbMin,Vector2 aabbMax,float originY,uint32_t spacing,float stiffness,float propagation)
 	: PhysWaterSurfaceSimulator(aabbMin,aabbMax,originY,spacing,stiffness,propagation)
 {
-	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::COMPUTE,m_universalQueueFamilyIndex);
+	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_universalQueueFamilyIndex);
 	m_whShaderSurface = c_engine->GetShader("watersurface");
 	m_whShaderSurfaceIntegrate = c_engine->GetShader("watersurfaceintegrate");
 	m_whShaderSurfaceSolveEdges = c_engine->GetShader("watersurfacesolveedges");
@@ -66,73 +73,72 @@ void CPhysWaterSurfaceSimulator::InitializeSurface()
 		pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO.IsValid() == false || pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER.IsValid() == false
 	)
 		return;
-	auto &dev = c_engine->GetDevice();
 	auto &shaderWaterSurface = static_cast<pragma::ShaderWaterSurface&>(*m_whShaderSurface.get());
-	m_descSetGroupParticles = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT);
-	m_descSetGroupSplash = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT);
+	m_descSetGroupParticles = c_engine->CreateDescriptorSetGroup(pragma::ShaderWaterSurface::DESCRIPTOR_SET_WATER_EFFECT);
+	m_descSetGroupSplash = c_engine->CreateDescriptorSetGroup(pragma::ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT);
 
 	auto &shaderWaterSurfaceIntegrate = static_cast<pragma::ShaderWaterSurfaceIntegrate&>(*m_whShaderSurfaceIntegrate.get());
-	m_descSetGroupIntegrate = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES);
+	m_descSetGroupIntegrate = c_engine->CreateDescriptorSetGroup(pragma::ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES);
 
 	auto size = sizeof(Particle) *m_particleField.size();
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = size;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	m_particleBuffer = prosper::util::create_buffer(dev,createInfo,m_particleField.data());
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	m_particleBuffer = c_engine->CreateBuffer(createInfo,m_particleField.data());
 
 	// TODO
 	///size = sizeof(Vector3) *m_particlePositions.size();
-	///m_positionBuffer = Vulkan::Buffer::Create(context,Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT,size,size,m_particlePositions.data(),true,nullptr);
+	///m_positionBuffer = Vulkan::Buffer::Create(context,prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::VertexBufferBit,size,size,m_particlePositions.data(),true,nullptr);
 	//size = sizeof(Vertex) *m_particlePositions.size();
 	//std::vector<Vertex> vertices(m_particlePositions.size());
 	//for(auto i=decltype(vertices.size()){0};i<vertices.size();++i)
 	//	vertices.at(i).position = m_particlePositions.at(i);
-	//m_positionBuffer = Vulkan::Buffer::Create(context,Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT,size,size,vertices.data(),true,nullptr);
+	//m_positionBuffer = Vulkan::Buffer::Create(context,prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::VertexBufferBit,size,size,vertices.data(),true,nullptr);
 
 	size = sizeof(Vector4) *m_particleField.size();
 	std::vector<Vector4> verts;
 	verts.resize(m_particleField.size());
 
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT | Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::VertexBufferBit;
 	createInfo.size = size;
-	m_positionBuffer = prosper::util::create_buffer(dev,createInfo,verts.data());
+	m_positionBuffer = c_engine->CreateBuffer(createInfo,verts.data());
 
 	auto &descSetParticles = *m_descSetGroupParticles->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetParticles,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetParticles,*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
+	descSetParticles.SetBindingStorageBuffer(*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterParticles));
+	descSetParticles.SetBindingStorageBuffer(*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSurface::WaterEffectBinding::WaterPositions));
 
 	auto &descSetSplash = *m_descSetGroupSplash->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetSplash,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetSplash,*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
+	descSetSplash.SetBindingStorageBuffer(*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterParticles));
+	descSetSplash.SetBindingStorageBuffer(*m_positionBuffer,umath::to_integral(pragma::ShaderWaterSplash::WaterEffectBinding::WaterPositions));
 
 	auto &descSetIntegrate = *m_descSetGroupIntegrate->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetIntegrate,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
+	descSetIntegrate.SetBindingStorageBuffer(*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceIntegrate::WaterParticlesBinding::WaterParticles));
 
 	// Initialize surface info buffer
 	size = sizeof(m_surfaceInfo);
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	createInfo.size = size;
-	m_surfaceInfoBuffer = prosper::util::create_buffer(dev,createInfo,&m_surfaceInfo);
-	m_descSetGroupSurfaceInfo = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
+	m_surfaceInfoBuffer = c_engine->CreateBuffer(createInfo,&m_surfaceInfo);
+	m_descSetGroupSurfaceInfo = c_engine->CreateDescriptorSetGroup(pragma::ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO);
 	auto &descSetSurfaceInfo = *m_descSetGroupSurfaceInfo->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetSurfaceInfo,*m_surfaceInfoBuffer,umath::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
+	descSetSurfaceInfo.SetBindingUniformBuffer(*m_surfaceInfoBuffer,umath::to_integral(pragma::ShaderWaterSurface::SurfaceInfoBinding::SurfaceInfo));
 
 	// Initialize edge buffer
 	std::vector<ParticleEdgeInfo> particleEdgeInfo(m_particleField.size());
 	size = sizeof(particleEdgeInfo.front()) *particleEdgeInfo.size();
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = size;
-	m_edgeBuffer = prosper::util::create_buffer(dev,createInfo,particleEdgeInfo.data());
+	m_edgeBuffer = c_engine->CreateBuffer(createInfo,particleEdgeInfo.data());
 	auto &shaderWaterSurfaceSolveEdges = static_cast<pragma::ShaderWaterSurfaceSolveEdges&>(*m_whShaderSurfaceSolveEdges.get());
-	m_edgeDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
+	m_edgeDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderWaterSurfaceSolveEdges::DESCRIPTOR_SET_WATER);
 	auto &descSetEdge = *m_edgeDescSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetEdge,*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
-	prosper::util::set_descriptor_set_binding_storage_buffer(descSetEdge,*m_edgeBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
+	descSetEdge.SetBindingStorageBuffer(*m_particleBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterParticles));
+	descSetEdge.SetBindingStorageBuffer(*m_edgeBuffer,umath::to_integral(pragma::ShaderWaterSurfaceSolveEdges::WaterBinding::WaterEdgeData));
 }
 
-const std::shared_ptr<prosper::Buffer> &CPhysWaterSurfaceSimulator::GetParticleBuffer() const {return m_particleBuffer;}
-const std::shared_ptr<prosper::Buffer> &CPhysWaterSurfaceSimulator::GetPositionBuffer() const {return m_positionBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetParticleBuffer() const {return m_particleBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CPhysWaterSurfaceSimulator::GetPositionBuffer() const {return m_positionBuffer;}
 
 static auto cvEdgeIterationCount = GetClientConVar("cl_water_surface_simulation_edge_iteration_count");
 uint8_t CPhysWaterSurfaceSimulator::GetEdgeIterationCount() const {return cvEdgeIterationCount->GetInt();}
@@ -157,7 +163,7 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 		CreateSplash(c_game->GetLocalPlayer()->GetPosition(),radius,force);
 	}*/
 	auto &computeCmd = m_cmdBuffer;
-	if((*computeCmd)->start_recording(false,false) == false)
+	if(computeCmd->StartRecording(false,false) == false)
 		return;
 	// Apply splashes
 	if(m_splashQueue.empty() == false)
@@ -167,14 +173,14 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 		{
 			while(m_splashQueue.empty() == false)
 			{
-				shaderWaterSplash.Compute(*(*m_descSetGroupSplash)->get_descriptor_set(0u),m_splashQueue.front());
+				shaderWaterSplash.Compute(*m_descSetGroupSplash->GetDescriptorSet(),m_splashQueue.front());
 				m_splashQueue.pop();
 			}
 			shaderWaterSplash.EndCompute();
-			prosper::util::record_buffer_barrier(
-				*(*computeCmd),*m_particleBuffer,
-				Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-				Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT
+			computeCmd->RecordBufferBarrier(
+				*m_particleBuffer,
+				prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+				prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 			);
 		}
 	}
@@ -187,13 +193,13 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	auto &shaderWaterSurfaceIntegrate = static_cast<pragma::ShaderWaterSurfaceIntegrate&>(*m_whShaderSurfaceIntegrate.get());
 	if(shaderWaterSurfaceIntegrate.BeginCompute(computeCmd) == true)
 	{
-		shaderWaterSurfaceIntegrate.Compute(*(*m_descSetGroupSurfaceInfo)->get_descriptor_set(0u),*(*m_descSetGroupIntegrate)->get_descriptor_set(0u),width,length);
+		shaderWaterSurfaceIntegrate.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupIntegrate->GetDescriptorSet(),width,length);
 		shaderWaterSurfaceIntegrate.EndCompute();
 
-		prosper::util::record_buffer_barrier(
-			*(*computeCmd),*m_particleBuffer,
-			Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-			Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT
+		computeCmd->RecordBufferBarrier(
+			*m_particleBuffer,
+			prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 		);
 	}
 	//
@@ -206,29 +212,29 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	{
 		if(shaderWaterSolveEdges.BeginCompute(computeCmd) == true)
 		{
-			shaderWaterSolveEdges.Compute(*(*m_descSetGroupSurfaceInfo)->get_descriptor_set(0u),*(*m_edgeDescSetGroup)->get_descriptor_set(0u),width,length);
+			shaderWaterSolveEdges.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
 			shaderWaterSolveEdges.EndCompute();
 
-			prosper::util::record_buffer_barrier(
-				*(*computeCmd),*m_edgeBuffer,
-				Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-				Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT
+			computeCmd->RecordBufferBarrier(
+				*m_edgeBuffer,
+				prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+				prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 			);
 
 			if(shaderWaterSumEdges.BeginCompute(computeCmd) == true)
 			{
-				shaderWaterSumEdges.Compute(*(*m_descSetGroupSurfaceInfo)->get_descriptor_set(0u),*(*m_edgeDescSetGroup)->get_descriptor_set(0u),width,length);
+				shaderWaterSumEdges.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_edgeDescSetGroup->GetDescriptorSet(),width,length);
 				shaderWaterSumEdges.EndCompute();
 
-				prosper::util::record_buffer_barrier(
-					*(*computeCmd),*m_particleBuffer,
-					Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-					Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT
+				computeCmd->RecordBufferBarrier(
+					*m_particleBuffer,
+					prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+					prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 				);
-				prosper::util::record_buffer_barrier(
-					*(*computeCmd),*m_edgeBuffer,
-					Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-					Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT | Anvil::AccessFlagBits::SHADER_WRITE_BIT
+				computeCmd->RecordBufferBarrier(
+					*m_edgeBuffer,
+					prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+					prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::ShaderWriteBit
 				);
 			}
 		}
@@ -239,17 +245,17 @@ void CPhysWaterSurfaceSimulator::Simulate(double dt)
 	auto &shaderWaterSurface = static_cast<pragma::ShaderWaterSurface&>(*m_whShaderSurface.get());
 	if(shaderWaterSurface.BeginCompute(computeCmd) == true)
 	{
-		shaderWaterSurface.Compute(*(*m_descSetGroupSurfaceInfo)->get_descriptor_set(0u),*(*m_descSetGroupParticles)->get_descriptor_set(0u),width,length);
+		shaderWaterSurface.Compute(*m_descSetGroupSurfaceInfo->GetDescriptorSet(),*m_descSetGroupParticles->GetDescriptorSet(),width,length);
 		shaderWaterSurface.EndCompute();
 	}
 	//c_engine->StopGPUTimer(GPUTimerEvent::WaterSurface); // prosper TODO
-	(*computeCmd)->stop_recording();
+	computeCmd->StopRecording();
 	c_engine->SubmitCommandBuffer(*computeCmd);
 }
 
 const std::vector<uint16_t> &CPhysWaterSurfaceSimulator::GetTriangleIndices() const {return m_triangleIndices;}
 
-void CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,CModelSubMesh &mesh)
+void CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CModelSubMesh &mesh)
 {
 	// TODO
 	auto &verts = mesh.GetVertices();
@@ -278,87 +284,9 @@ void CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::PrimaryCommandBuf
 		verts.at(i).position = pos;
 	}
 	auto &vkMesh = mesh.GetVKMesh();
-	prosper::util::record_update_buffer(
-		*(*drawCmd),*vkMesh->GetVertexBuffer(),
+	drawCmd->RecordUpdateBuffer(
+		*vkMesh->GetVertexBuffer(),
 		0ull,verts.size() *sizeof(verts.front()),verts.data()
 	);
 	//
-
-
-
-
-	//static auto tNextDraw = 0.0;
-	//auto &t = c_game->CurTime();
-	//if(tNextDraw > t)
-	//	return;
-	//auto duration = 0.1f;
-	//tNextDraw = t +duration;
-
-	// Test Normals
-	/*static std::vector<Vector3> faceNormals = {};
-	faceNormals.clear();
-	faceNormals.reserve(m_triangleIndices.size() /3);
-	for(auto i=decltype(m_triangleIndices.size()){0};i<m_triangleIndices.size();i+=3)
-	{
-		auto idx0 = m_triangleIndices.at(i);
-		auto idx1 = m_triangleIndices.at(i +1);
-		auto idx2 = m_triangleIndices.at(i +2);
-		faceNormals.push_back(Geometry::CalcFaceNormal(particlePositions.at(idx0),particlePositions.at(idx1),particlePositions.at(idx2)));
-	}
-	static std::vector<std::array<std::size_t,4>> vertTriangles;
-	if(vertTriangles.empty() == true)
-	{
-		vertTriangles.resize(m_particlePositions.size());
-		for(auto &a : vertTriangles)
-		{
-			for(auto &v : a)
-				v = std::numeric_limits<std::size_t>::max();
-		}
-		const auto fAddIndex = [](std::size_t particleIdx,std::size_t triangleIdx) {
-			auto &a = vertTriangles.at(particleIdx);
-			for(auto &v : a)
-			{
-				if(v != std::numeric_limits<std::size_t>::max())
-					continue;
-				v = triangleIdx;
-			}
-		};
-		for(auto i=decltype(m_triangleIndices.size()){0};i<m_triangleIndices.size();i+=3)
-		{
-			auto idx0 = m_triangleIndices.at(i);
-			auto idx1 = m_triangleIndices.at(i +1);
-			auto idx2 = m_triangleIndices.at(i +2);
-			fAddIndex(idx0,i /3);
-			fAddIndex(idx1,i /3);
-			fAddIndex(idx2,i /3);
-		}
-	}
-	for(auto i=decltype(particlePositions.size()){0};i<particlePositions.size();++i)
-	{
-		auto &triangles = vertTriangles.at(i);
-		Vector3 ptNormal {};
-		std::size_t count = 0;
-		for(auto &triIdx : triangles)
-		{
-			if(triIdx == std::numeric_limits<std::size_t>::max())
-				break;
-			auto &n = faceNormals.at(triIdx);
-			ptNormal += n;
-			++count;
-		}
-		if(count > 0)
-			ptNormal /= static_cast<float>(count);
-		uvec::normalize(&ptNormal);
-		verts.at(i).normal = ptNormal;
-	}*/
-	//
-	//DebugRenderer::DrawLines(lines,Color::Red,0.1f);
-
-	//std::vector<Vector3> verts;
-	//verts.reserve(m_triangleIndices.size());
-	//for(auto idx : m_triangleIndices)
-	//	verts.push_back(GetParticlePosition(idx));
-	//DebugRenderer::DrawMesh(verts,Color::Red,duration);
-
-
 }

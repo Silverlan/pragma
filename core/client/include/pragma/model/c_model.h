@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_MODEL_H__
 #define __C_MODEL_H__
 #include "pragma/clientdefinitions.h"
@@ -16,13 +23,13 @@ public:
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false) override;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData) override;
 
-	const std::shared_ptr<prosper::Buffer> &GetVertexAnimationBuffer() const;
+	const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 	bool GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &subMesh,uint32_t frameId,uint64_t &offset) const;
 protected:
 	virtual void AddMesh(const std::string &meshGroup,const std::shared_ptr<ModelMesh> &mesh) override;
 	virtual void OnMaterialMissing(const std::string &matName) override;
 
-	std::shared_ptr<prosper::Buffer> m_vertexAnimationBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_vertexAnimationBuffer = nullptr;
 	std::vector<std::vector<std::vector<uint32_t>>> m_frameIndices = {};
 	void UpdateVertexAnimationBuffer();
 };

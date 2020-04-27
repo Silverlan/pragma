@@ -1,9 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
-#include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
@@ -272,13 +278,6 @@ void CLightDirectionalComponent::ReloadShadowCommandBuffers()
 {
 	m_bShadowBufferUpdateScheduled = true;
 }
-/*const std::vector<Vulkan::SwapCommandBuffer> &CLightDirectionalComponent::GetShadowCommandBuffers() const {return m_cmdShadowBuffers;}
-const Vulkan::SwapCommandBuffer *CLightDirectionalComponent::GetShadowCommandBuffer(uint32_t layer) const
-{
-	if(layer >= m_cmdShadowBuffers.size())
-		return nullptr;
-	return &m_cmdShadowBuffers[layer];
-}*/ // prosper TODO
 
 bool CLightDirectionalComponent::ShouldPass(uint32_t layer,const Vector3 &min,const Vector3 &max)
 {

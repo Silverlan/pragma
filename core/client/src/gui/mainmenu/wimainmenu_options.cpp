@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
@@ -838,15 +845,15 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		auto maxImageCount = surfCapabilities.max_image_count;
 		if(maxImageCount > 0)
 		{
-			if(c_engine->IsPresentationModeSupported(Anvil::PresentModeKHR::IMMEDIATE_KHR))
+			if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
 				pList->AddChoice(Locale::GetText("immediate"),"0");
 			if(maxImageCount > 1)
 			{
-				if(c_engine->IsPresentationModeSupported(Anvil::PresentModeKHR::FIFO_KHR))
+				if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
 					pList->AddChoice(Locale::GetText("fifo"),"1");
 				if(maxImageCount > 2)
 				{
-					if(c_engine->IsPresentationModeSupported(Anvil::PresentModeKHR::MAILBOX_KHR))
+					if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
 						pList->AddChoice(Locale::GetText("mailbox"),"2");
 				}
 			}

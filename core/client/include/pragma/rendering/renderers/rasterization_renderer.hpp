@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __RASERIZATION_RENDERER_HPP__
 #define __RASERIZATION_RENDERER_HPP__
 
@@ -15,9 +22,9 @@
 namespace prosper
 {
 	class Texture;
-	class DescriptorSetGroup;
-	class PrimaryCommandBuffer;
-	class DescriptorSet;
+	class IDescriptorSetGroup;
+	class IPrimaryCommandBuffer;
+	class IDescriptorSet;
 };
 namespace pragma
 {
@@ -29,10 +36,6 @@ namespace pragma
 	class OcclusionCullingHandler;
 	class CLightDirectionalComponent;
 	class CSkyCameraComponent;
-};
-namespace Anvil
-{
-	class DescriptorSet;
 };
 namespace pragma::rendering
 {
@@ -90,9 +93,12 @@ namespace pragma::rendering
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings) override;
 		virtual void UpdateCameraData(pragma::CameraData &cameraData) override;
 		virtual bool ReloadRenderTarget() override;
-		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const override;
-		virtual const std::shared_ptr<prosper::Texture> &GetPresentationTexture() const override;
-		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const override;
+		using BaseRenderer::GetSceneTexture;
+		using BaseRenderer::GetPresentationTexture;
+		using BaseRenderer::GetHDRPresentationTexture;
+		virtual prosper::Texture *GetSceneTexture() override;
+		virtual prosper::Texture *GetPresentationTexture() override;
+		virtual prosper::Texture *GetHDRPresentationTexture() override;
 		virtual bool IsRasterizationRenderer() const override;
 
 		void SetPrepassMode(PrepassMode mode);
@@ -118,8 +124,8 @@ namespace pragma::rendering
 		const std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles() const;
 		std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles();
 		//const Vulkan::DescriptorSet &GetBloomGlowDescriptorSet() const; // prosper TODO
-		prosper::DescriptorSet *GetCSMDescriptorSet() const;
-		//Anvil::DescriptorSet *GetLightSourceDescriptorSet() const;
+		prosper::IDescriptorSet *GetCSMDescriptorSet() const;
+		//prosper::IDescriptorSet *GetLightSourceDescriptorSet() const;
 
 		Float GetHDRExposure() const;
 		Float GetMaxHDRExposure() const;
@@ -128,20 +134,20 @@ namespace pragma::rendering
 		GlowData &GetGlowInfo();
 		SSAOInfo &GetSSAOInfo();
 
-		Anvil::DescriptorSet *GetDepthDescriptorSet() const;
+		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
 		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
-		void SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup);
+		void SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup);
 
 		pragma::rendering::Prepass &GetPrepass();
 		const pragma::rendering::ForwardPlusInstance &GetForwardPlusInstance() const;
 		pragma::rendering::ForwardPlusInstance &GetForwardPlusInstance();
 		CulledMeshData *GetRenderInfo(RenderMode mode) const;
-		Anvil::SampleCountFlagBits GetSampleCount() const;
+		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
-		bool BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass=nullptr);
-		bool EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		bool ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		bool BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass=nullptr);
+		bool EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		bool ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		void PrepareRendering(RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
 
 		const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
@@ -152,10 +158,10 @@ namespace pragma::rendering
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RenderParticleSystems(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
+		void RenderParticleSystems(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
-		void RenderGlowMeshes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode);
+		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode);
 
 		// If this flag is set, the prepass depth buffer will be blitted into a sampleable buffer
 		// before rendering, which can then be used as shader sampler input. This flag will be reset once
@@ -166,35 +172,35 @@ namespace pragma::rendering
 		const RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 
 		prosper::Shader *GetWireframeShader();
-		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
+		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);
 
-		void RenderGameScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderGameScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
 
 		void PerformOcclusionCulling();
 		void CollectRenderObjects(FRender renderFlags);
-		void RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
-		void RenderSSAO(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void CullLightSources(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderLightingPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags);
-		void RenderGlowObjects(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderBloom(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		void RenderToneMapping(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::DescriptorSet &descSetHdrResolve);
-		void RenderFXAA(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderSSAO(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void CullLightSources(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void RenderLightingPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderGlowObjects(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void RenderBloom(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void RenderToneMapping(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IDescriptorSet &descSetHdrResolve);
+		void RenderFXAA(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 
 		void InitializeLightDescriptorSets();
 		virtual bool Initialize() override;
-		virtual void BeginRendering(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd) override;
+		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 
-		void RenderSceneFog(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		void RenderSceneFog(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 
 		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
 
-		Anvil::SampleCountFlagBits m_sampleCount = Anvil::SampleCountFlagBits::_1_BIT;
+		prosper::SampleCountFlags m_sampleCount = prosper::SampleCountFlags::e1Bit;
 		std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
 
 		LightMapInfo m_lightMapInfo = {};
 		bool m_bFrameDepthBufferSamplingRequired = false;
@@ -212,7 +218,7 @@ namespace pragma::rendering
 		std::vector<util::WeakHandle<pragma::CSkyCameraComponent>> m_3dSkyCameras = {};
 
 		RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupCSM;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupCSM;
 
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_PRAGMA_ASSET_UTIL_MODEL_HPP__
 #define __C_PRAGMA_ASSET_UTIL_MODEL_HPP__
 
@@ -53,8 +60,8 @@ namespace pragma::asset
 	DLLCLIENT std::shared_ptr<Model> import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath={});
 	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName,std::string &outErrMsg,const util::Path &outputPath={});
 
-	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName=nullptr);
-	DLLCLIENT bool export_animation(Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName=nullptr);
+	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
+	DLLCLIENT bool export_animation(Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
 	DLLCLIENT bool export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
 	DLLCLIENT bool export_texture(
 		uimg::ImageBuffer &imgBuf,ModelExportInfo::ImageFormat imageFormat,const std::string &outputPath,std::string &outErrMsg,

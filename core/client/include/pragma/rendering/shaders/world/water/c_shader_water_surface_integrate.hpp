@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_WATER_SURFACE_INTEGRATE_HPP__
 #define __C_SHADER_WATER_SURFACE_INTEGRATE_HPP__
 
@@ -9,8 +16,8 @@ namespace pragma
 		: public ShaderWaterSurface
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_WATER_PARTICLES;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SURFACE_INFO;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_WATER_PARTICLES;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SURFACE_INFO;
 
 		enum class WaterParticlesBinding : uint32_t
 		{
@@ -23,36 +30,4 @@ namespace pragma
 	};
 };
 
-// prosper TODO
-#if 0
-#include "pragma/clientdefinitions.h"
-#include "shadersystem.h"
-
-namespace Shader
-{
-	class DLLCLIENT WaterSurfaceIntegrate
-		: public Base
-	{
-	public:
-		enum class DLLCLIENT DescSet : uint32_t
-		{
-			WaterParticles = 0,
-
-			WaterSurfaceInfo = WaterParticles +1
-		};
-		enum class DLLCLIENT Binding : uint32_t
-		{
-			WarterParticles = 0,
-
-			WaterSurfaceInfo = 0
-		};
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	public:
-		WaterSurfaceIntegrate();
-		void Compute(const Vulkan::DescriptorSetObject *descSetSurfaceInfo,const Vulkan::DescriptorSetObject *descSetIntegrate,uint32_t width,uint32_t length);
-		static Vulkan::DescriptorSet CreateWaterParticleDescSet();
-	};
-};
-#endif
 #endif

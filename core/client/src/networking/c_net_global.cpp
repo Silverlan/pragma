@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
@@ -9,7 +16,6 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/c_flashlight.h"
-#include "pragma/entities/c_baseweapon.h"
 #include <pragma/entities/components/basetoggle.h>
 #include "pragma/entities/environment/c_env_fog_controller.h"
 #include "pragma/entities/environment/effects/c_env_explosion.h"

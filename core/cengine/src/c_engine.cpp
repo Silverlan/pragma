@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
 #include <wgui/wgui.h>
@@ -13,7 +20,6 @@
 #include "pragma/console/engine_cvar.h"
 #include "pragma/networking/iclient.hpp"
 #include "pragma/networking/local_client.hpp"
-#include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <cmaterialmanager.h>
@@ -71,9 +77,9 @@ CEngine::CEngine(int argc,char* argv[])
 	c_engine = this;
 
 	RegisterCallback<void,std::reference_wrapper<const GLFW::Joystick>,bool>("OnJoystickStateChanged");
-	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("DrawFrame");
-	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PreDrawGUI");
-	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PostDrawGUI");
+	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame");
+	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI");
+	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI");
 	RegisterCallback<void>("Draw");
 
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput");
@@ -165,26 +171,25 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 void CEngine::InitializeStagingTarget()
 {
 	c_engine->WaitIdle();
-	auto &dev = GetDevice();
 	auto resolution = GetRenderResolution();
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT;
-	createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfo.width = resolution.x;
 	createInfo.height = resolution.y;
-	createInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-	auto stagingImg = prosper::util::create_image(dev,createInfo);
+	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	auto stagingImg = CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	auto stagingTex = prosper::util::create_texture(dev,{},stagingImg,&imgViewCreateInfo);
+	auto stagingTex = CreateTexture({},*stagingImg,imgViewCreateInfo);
 
-	auto rp = prosper::util::create_render_pass(dev,
-		prosper::util::RenderPassCreateInfo{{{Anvil::Format::R8G8B8A8_UNORM,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,
-			Anvil::AttachmentStoreOp::STORE,Anvil::SampleCountFlagBits::_1_BIT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+	auto rp = CreateRenderPass(
+		prosper::util::RenderPassCreateInfo{{{prosper::Format::R8G8B8A8_UNorm,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
+			prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ColorAttachmentOptimal
 		}}}
 		//prosper::util::RenderPassCreateInfo{vk::Format::eD32Sfloat,vk::ImageLayout::eDepthStencilAttachmentOptimal,vk::AttachmentLoadOp::eClear}
 	);
 	umath::set_flag(m_stateFlags,StateFlags::FirstFrame);
-	m_stagingRenderTarget = prosper::util::create_render_target(dev,{stagingTex},rp);//,finalDepthTex},rp);
+	m_stagingRenderTarget = CreateRenderTarget({stagingTex},rp);//,finalDepthTex},rp);
 	m_stagingRenderTarget->SetDebugName("engine_staging_rt");
 	// Vulkan TODO: Resize when window resolution was changed
 }
@@ -530,17 +535,17 @@ bool CEngine::Initialize(int argc,char *argv[])
 			contextCreateInfo.device = {static_cast<prosper::Vendor>(util::to_uint(subStrings.at(0))),util::to_uint(subStrings.at(1))};
 	}
 
-	auto presentMode = Anvil::PresentModeKHR::MAILBOX_KHR;
+	auto presentMode = prosper::PresentModeKHR::Mailbox;
 	res = cmds.find("cl_render_present_mode");
 	if(res != nullptr && !res->argv.empty())
 	{
 		auto mode = util::to_int(res->argv[0]);
 		if(mode == 0)
-			presentMode = Anvil::PresentModeKHR::IMMEDIATE_KHR;
+			presentMode = prosper::PresentModeKHR::Immediate;
 		else if(mode == 1)
-			presentMode = Anvil::PresentModeKHR::FIFO_KHR;
+			presentMode = prosper::PresentModeKHR::Fifo;
 		else
-			presentMode = Anvil::PresentModeKHR::MAILBOX_KHR;
+			presentMode = prosper::PresentModeKHR::Mailbox;
 	}
 	contextCreateInfo.presentMode = presentMode;
 
@@ -588,6 +593,9 @@ bool CEngine::Initialize(int argc,char *argv[])
 	//
 
 	auto &gui = WGUI::Open(*this,matManager);
+	gui.SetMaterialLoadHandler([this](const std::string &path) -> Material* {
+		return GetClientState()->LoadMaterial(path);
+	});
 	auto r = gui.Initialize(GetRenderResolution());
 	if(r != WGUI::ResultCode::Ok)
 	{
@@ -659,7 +667,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		}
 		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>>();
 		auto &gpuProfiler = *m_gpuProfiler;
-		const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
+		const auto defaultStage = prosper::PipelineStageFlags::BottomOfPipeBit;
 		auto stageFrame = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Frame",defaultStage);
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,{
 			stageFrame,
@@ -1003,13 +1011,13 @@ void CEngine::UpdateFPS(float t)
 }
 
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
-void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
+void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
 {
 	m_gpuProfiler->Reset();
 	StartProfilingStage(GPUProfilingPhase::Frame);
 
-	auto ptrDrawCmd = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd.shared_from_this());
-	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
+	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this());
+	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame",std::ref(ptrDrawCmd));
 
 	static_cast<CMaterialManager&>(*m_clInstance->materialManager).Update(); // Requires active command buffer
 
@@ -1023,18 +1031,18 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 		umath::set_flag(m_stateFlags,StateFlags::FirstFrame,false);
 	else
 	{
-		prosper::util::record_image_barrier(
-			*drawCmd,stagingRt->GetTexture()->GetImage()->GetAnvilImage(),
-			Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+		drawCmd.RecordImageBarrier(
+			stagingRt->GetTexture().GetImage(),
+			prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal
 		);
 	}
 
 	DrawScene(ptrDrawCmd,stagingRt);
 
-	auto &finalImg = *stagingRt->GetTexture()->GetImage();
-	prosper::util::record_image_barrier(
-		*drawCmd,finalImg.GetAnvilImage(),
-		Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+	auto &finalImg = stagingRt->GetTexture().GetImage();
+	drawCmd.RecordImageBarrier(
+		finalImg,
+		prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 	);
 
 	// Change swapchain image layout to TransferDst
@@ -1044,94 +1052,44 @@ void CEngine::DrawFrame(prosper::PrimaryCommandBuffer &drawCmd,uint32_t n_curren
 	{
 
 		prosper::util::ImageBarrierInfo imgBarrierInfo {};
-		imgBarrierInfo.srcAccessMask = Anvil::AccessFlagBits{};
-		imgBarrierInfo.dstAccessMask = Anvil::AccessFlagBits::TRANSFER_WRITE_BIT;
-		imgBarrierInfo.oldLayout = Anvil::ImageLayout::UNDEFINED;
-		imgBarrierInfo.newLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
+		imgBarrierInfo.srcAccessMask = prosper::AccessFlags{};
+		imgBarrierInfo.dstAccessMask = prosper::AccessFlags::TransferWriteBit;
+		imgBarrierInfo.oldLayout = prosper::ImageLayout::Undefined;
+		imgBarrierInfo.newLayout = prosper::ImageLayout::TransferDstOptimal;
 		imgBarrierInfo.subresourceRange = subresourceRange;
 		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = universal_queue_ptr->get_queue_family_index();
 
 		prosper::util::PipelineBarrierInfo barrierInfo {};
-		barrierInfo.srcStageMask = Anvil::PipelineStageFlagBits::TOP_OF_PIPE_BIT;
-		barrierInfo.dstStageMask = Anvil::PipelineStageFlagBits::TRANSFER_BIT;
-		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*m_swapchainPtr->get_image(n_current_swapchain_image),imgBarrierInfo));
-		prosper::util::record_pipeline_barrier(*drawCmd,barrierInfo);
-
-		// Obsolete (Replaced by code above)
-		/*Anvil::ImageBarrier image_barrier(
-			0, // source_access_mask
-			VK_ACCESS_TRANSFER_WRITE_BIT,
-			false,
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			universal_queue_ptr->get_queue_family_index(),
-			universal_queue_ptr->get_queue_family_index(),
-			m_swapchainPtr->get_image(n_current_swapchain_image),
-			subresource_range
-		);
-
-		drawCmd->record_pipeline_barrier(
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-			VK_PIPELINE_STAGE_TRANSFER_BIT,
-			VK_FALSE, // in_by_region
-			0, // in_memory_barrier_count
-			nullptr, // in_memory_barrier_ptrs
-			0, // in_buffer_memory_barrier_count
-			nullptr, // in_buffer_memory_barrier_ptrs
-			1, // in_image_memory_barrier_count
-			&image_barrier
-		);*/
+		barrierInfo.srcStageMask = prosper::PipelineStageFlags::TopOfPipeBit;
+		barrierInfo.dstStageMask = prosper::PipelineStageFlags::TransferBit;
+		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
+		drawCmd.RecordPipelineBarrier(barrierInfo);
 	}
 
-	prosper::util::record_blit_image(*drawCmd,{},finalImg.GetAnvilImage(),*m_swapchainPtr->get_image(n_current_swapchain_image));
+	drawCmd.RecordBlitImage({},finalImg,*GetSwapchainImage(n_current_swapchain_image));
 
 	/* Change the swap-chain image's layout to presentable */
 	{
 		prosper::util::ImageBarrierInfo imgBarrierInfo {};
-		imgBarrierInfo.srcAccessMask = Anvil::AccessFlagBits::TRANSFER_WRITE_BIT;
-		imgBarrierInfo.dstAccessMask = Anvil::AccessFlagBits::MEMORY_READ_BIT;
-		imgBarrierInfo.oldLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		imgBarrierInfo.newLayout = Anvil::ImageLayout::PRESENT_SRC_KHR;
+		imgBarrierInfo.srcAccessMask = prosper::AccessFlags::TransferWriteBit;
+		imgBarrierInfo.dstAccessMask = prosper::AccessFlags::MemoryReadBit;
+		imgBarrierInfo.oldLayout = prosper::ImageLayout::TransferDstOptimal;
+		imgBarrierInfo.newLayout = prosper::ImageLayout::PresentSrcKHR;
 		imgBarrierInfo.subresourceRange = subresourceRange;
 		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = universal_queue_ptr->get_queue_family_index();
 
 		prosper::util::PipelineBarrierInfo barrierInfo {};
-		barrierInfo.srcStageMask = Anvil::PipelineStageFlagBits::TRANSFER_BIT;
-		barrierInfo.dstStageMask = Anvil::PipelineStageFlagBits::ALL_COMMANDS_BIT;
-		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*m_swapchainPtr->get_image(n_current_swapchain_image),imgBarrierInfo));
-		prosper::util::record_pipeline_barrier(*drawCmd,barrierInfo);
-
-		// Obsolete (Replaced by code above)
-		/*Anvil::ImageBarrier image_barrier(
-			VK_ACCESS_TRANSFER_WRITE_BIT, // source_access_mask
-			VK_ACCESS_MEMORY_READ_BIT, // destination_access_mask
-			false,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, // old_image_layout
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // new_image_layout
-			universal_queue_ptr->get_queue_family_index(),
-			universal_queue_ptr->get_queue_family_index(),
-			m_swapchainPtr->get_image(n_current_swapchain_image),
-			subresource_range
-		);
-
-		drawCmd->record_pipeline_barrier(
-			VK_PIPELINE_STAGE_TRANSFER_BIT,
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-			VK_FALSE, // in_by_region
-			0, // in_memory_barrier_count
-			nullptr, // in_memory_barrier_ptrs
-			0, // in_buffer_memory_barrier_count
-			nullptr, // in_buffer_memory_barrier_ptrs
-			1, // in_image_memory_barrier_count
-			&image_barrier
-		);*/
+		barrierInfo.srcStageMask = prosper::PipelineStageFlags::TransferBit;
+		barrierInfo.dstStageMask = prosper::PipelineStageFlags::AllCommandsBit;
+		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
+		drawCmd.RecordPipelineBarrier(barrierInfo);
 	}
 	///
 
 	StopProfilingStage(GPUProfilingPhase::Frame);
 }
 
-void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
+void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
 {
 	auto bProfiling = cvProfiling->GetBool();
 	auto *cl = static_cast<ClientState*>(GetClientState());
@@ -1145,8 +1103,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 		StopProfilingStage(GPUProfilingPhase::DrawScene);
 	}
 
-	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
-	prosper::util::record_begin_render_pass(*(*drawCmd),*rt);
+	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
+	drawCmd->RecordBeginRenderPass(*rt);
 	if(c_game != nullptr)
 		c_game->PreGUIDraw();
 	
@@ -1155,8 +1113,8 @@ void CEngine::DrawScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
 		gui.Draw();
 	StopProfilingStage(GPUProfilingPhase::GUI);
 
-	prosper::util::record_end_render_pass(*(*drawCmd));
-	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
+	drawCmd->RecordEndRenderPass();
+	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
 
 	if(c_game != nullptr)
 		c_game->PostGUIDraw();
@@ -1202,9 +1160,6 @@ void CEngine::Think()
 	auto *cl = GetClientState();
 	if(cl != NULL)
 		cl->Think(); // Draw?
-	//if(m_stateClient == NULL || !m_stateClient->IsGameActive())
-	//	OpenGL::Clear(GL_COLOR_BUFFER_BIT);
-	//WGUI::Draw();
 
 	StartProfilingStage(CPUProfilingPhase::DrawFrame);
 	pragma::RenderContext::DrawFrame();
@@ -1214,9 +1169,6 @@ void CEngine::Think()
 	if(GetWindow().ShouldClose())
 		ShutDown();
 
-	//auto tEnd = std::chrono::high_resolution_clock::now();
-	//auto dur = std::chrono::duration_cast<std::chrono::nanoseconds>(tEnd -tStart);
-	//UpdateFPS(static_cast<float>(dur.count() /1'000'000'000.0));
 	EndFrame();
 }
 

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
 #include <image/prosper_render_target.hpp>
@@ -14,9 +21,9 @@ using namespace pragma;
 
 decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE) ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -31,9 +38,9 @@ void ShaderEquirectangularToCubemap::InitializeGfxPipeline(Anvil::GraphicsPipeli
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 }
 
-void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderEquirectangularToCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderEquirectangularToCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R16G16B16A16_SFloat}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(const std::string &fileName,uint32_t resolution)
@@ -51,23 +58,23 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = imgBuffer->GetWidth();
 	createInfo.height = imgBuffer->GetHeight();
-	createInfo.format = Anvil::Format::R32G32B32A32_SFLOAT;
-	createInfo.tiling = Anvil::ImageTiling::LINEAR;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
-	createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
+	createInfo.tiling = prosper::ImageTiling::Linear;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto &context = *c_engine;
 	auto &dev = context.GetDevice();
-	auto img = prosper::util::create_image(dev,createInfo,reinterpret_cast<uint8_t*>(imgBuffer->GetData()));
+	auto img = context.CreateImage(createInfo,reinterpret_cast<uint8_t*>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	samplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	auto equirectRadianceTex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+	samplerCreateInfo.minFilter = prosper::Filter::Linear;
+	samplerCreateInfo.magFilter = prosper::Filter::Linear;
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+	auto equirectRadianceTex = context.CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 	return EquirectangularTextureToCubemap(*equirectRadianceTex,resolution);
 }
 
@@ -76,9 +83,8 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto rt = CreateCubeMapRenderTarget(resolution,resolution,prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
 
 	// Shader input
-	auto &dev = c_engine->GetDevice();
-	auto dsg = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*dsg->GetDescriptorSet(),equirectangularTexture,0u);
+	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture,0u);
 
 	PushConstants pushConstants {};
 	pushConstants.projection = GetProjectionMatrix(resolution /static_cast<float>(resolution));
@@ -89,11 +95,11 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 
 	// Shader execution
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	prosper::util::record_post_render_pass_image_barrier(**setupCmd,**rt->GetTexture()->GetImage(),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
 	for(uint8_t layerId=0u;layerId<6u;++layerId)
 	{
-		if(prosper::util::record_begin_render_pass(**setupCmd,*rt,layerId) == false)
+		if(setupCmd->RecordBeginRenderPass(*rt,layerId) == false)
 		{
 			success = false;
 			break;
@@ -101,23 +107,23 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 		if(BeginDraw(setupCmd) == true)
 		{
 			pushConstants.view = GetViewMatrix(layerId);
-			success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*(*dsg)->get_descriptor_set(0u)) &&
-				RecordBindVertexBuffer(**vertexBuffer) && RecordDraw(numVerts);
+			success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*dsg->GetDescriptorSet()) &&
+				RecordBindVertexBuffer(*vertexBuffer) && RecordDraw(numVerts);
 			EndDraw();
 		}
-		success = success && prosper::util::record_end_render_pass(**setupCmd);
+		success = success && setupCmd->RecordEndRenderPass();
 		if(success == false)
 			break;
 	}
-	auto &img = **rt->GetTexture()->GetImage();
-	prosper::util::record_post_render_pass_image_barrier(**setupCmd,img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-	prosper::util::record_generate_mipmaps(
-		**setupCmd,img,
-		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT
+	auto &img = rt->GetTexture().GetImage();
+	setupCmd->RecordPostRenderPassImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordGenerateMipmaps(
+		img,
+		prosper::ImageLayout::ShaderReadOnlyOptimal,
+		prosper::AccessFlags::ShaderReadBit,
+		prosper::PipelineStageFlags::FragmentShaderBit
 	);
 	GetContext().FlushSetupCommandBuffer();
-	return success ? rt->GetTexture() : nullptr;
+	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }
 

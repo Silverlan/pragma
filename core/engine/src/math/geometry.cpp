@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_engine.h"
 #include "pragma/math/intersection.h"
 
@@ -64,6 +71,8 @@ Vector3 Geometry::calc_center_of_mass(const std::vector<Vector3> &verts,const st
 
 Vector3 Geometry::CalcFaceNormal(const Vector3 &v0,const Vector3 &v1,const Vector3 &v2)
 {
+	if(uvec::distance_sqr(v1 -v0,v2 -v0) < 0.001)
+		return uvec::FORWARD;
 	auto n = uvec::cross(v1 -v0,v2 -v0);
 	uvec::normalize(&n);
 	return n;

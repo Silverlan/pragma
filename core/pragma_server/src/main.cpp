@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include <string>
 #include <sstream>
 //#include <stdlib.h>
@@ -13,14 +20,6 @@
 	#include <thread>
 #endif
 #endif
-/*
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"lua530.lib")
-#pragma comment(lib,"luabind.lib")
-#pragma comment(lib,"Shlwapi.lib")
-#pragma comment(lib,"bz2-sgd-x86.lib")
-#pragma comment(lib,"engine.lib")
-*/
 
 #ifdef _WIN32
 static std::string get_last_system_error_string(DWORD errorMessageID)

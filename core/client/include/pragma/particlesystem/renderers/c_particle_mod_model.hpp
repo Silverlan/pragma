@@ -1,29 +1,14 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_PARTICLE_MOD_MODEL_HPP__
 #define __C_PARTICLE_MOD_MODEL_HPP__
 
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
-// TODO: Remove this
-#if 0
-
-class BaseEntity;
-class CParticleRendererModel;
-struct DLLCLIENT IParticleModelComponent
-	: public pragma::ComponentModel::ICallback
-{
-	CParticleRendererModel &renderer;
-	IParticleModelComponent(CParticleRendererModel &renderer);
-	virtual Vector3 GetOrigin() override;
-	virtual const Quat &GetOrientation() override;
-	virtual const Vector3 &GetPosition() override;
-	virtual const Vector3 &GetScale() override;
-	virtual NetworkState *GetNetworkState() override;
-	virtual void AnimEventEmitSound(const std::string &snd,ALSoundType type) override;
-	virtual bool MaintainAnimation(pragma::ComponentModel::AnimationSlotInfo &animInfo,double dt) override;
-	virtual bool ShouldUpdateBones() override;
-};
-
-///////////////////////
-#endif
 
 namespace pragma
 {
@@ -37,8 +22,8 @@ public:
 	CParticleRendererModel()=default;
 	virtual ~CParticleRendererModel() override;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
-	virtual void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
+	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 
@@ -49,7 +34,7 @@ protected:
 	struct ParticleModelComponent
 	{
 		util::WeakHandle<pragma::CAnimatedComponent> animatedComponent;
-		std::shared_ptr<prosper::DescriptorSetGroup> instanceDescSetGroupAnimated;
+		std::shared_ptr<prosper::IDescriptorSetGroup> instanceDescSetGroupAnimated;
 	};
 	ParticleModelComponent &GetParticleComponent(uint32_t particleIdx);
 	std::vector<ParticleModelComponent> m_particleComponents;

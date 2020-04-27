@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_WATER_SPLASH_HPP__
 #define __C_SHADER_WATER_SPLASH_HPP__
 
@@ -11,7 +18,7 @@ namespace pragma
 		: public prosper::ShaderCompute
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_WATER_EFFECT;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_WATER_EFFECT;
 		enum class WaterEffectBinding : uint32_t
 		{
 			WaterParticles = 0u,
@@ -19,41 +26,10 @@ namespace pragma
 		};
 
 		ShaderWaterSplash(prosper::Context &context,const std::string &identifier);
-		bool Compute(Anvil::DescriptorSet &descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info);
+		bool Compute(prosper::IDescriptorSet &descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
-
-// prosper TODO
-#if 0
-#include "pragma/clientdefinitions.h"
-#include "shadersystem.h"
-#include <pragma/physics/phys_water_surface_simulator.hpp>
-
-namespace Shader
-{
-	class DLLCLIENT WaterSplash
-		: public Base
-	{
-	public:
-		enum class DLLCLIENT DescSet : uint32_t
-		{
-			WaterParticles = 0,
-			WaterPositions = WaterParticles
-		};
-		enum class DLLCLIENT Binding : uint32_t
-		{
-			WarterParticles = 0,
-			WaterPositions = WarterParticles +1
-		};
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	public:
-		WaterSplash();
-		void Compute(const Vulkan::DescriptorSetObject *descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info);
-	};
-};
-#endif
 
 #endif

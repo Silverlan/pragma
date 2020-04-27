@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -175,7 +182,7 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	auto maxParticleCount = m_particleSystem->GetMaxParticleCount();
 	assert(maxParticleCount < (INVALID_BLOB_INDEX +1));
 	m_adjacentParticleIds.resize(maxParticleCount);
-	m_adjacentBlobBuffer = Vulkan::SwapBuffer::Create(context,Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT,m_adjacentParticleIds.size() *sizeof(decltype(m_adjacentParticleIds.front().front())) *m_adjacentParticleIds.front().size(),m_adjacentParticleIds.data());
+	m_adjacentBlobBuffer = Vulkan::SwapBuffer::Create(context,prosper::BufferUsageFlags::StorageBufferBit,m_adjacentParticleIds.size() *sizeof(decltype(m_adjacentParticleIds.front().front())) *m_adjacentParticleIds.front().size(),m_adjacentParticleIds.data());
 
 	m_particleLinks.resize(maxParticleCount);
 	for(auto it=m_particleLinks.begin();it!=m_particleLinks.end();++it)
@@ -193,12 +200,12 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	auto samples = sceneDepth->GetSampleCount();
 
 	auto depthImage = Vulkan::Image::Create(context,sceneDepth->GetWidth(),sceneDepth->GetHeight(),sceneDepth->GetFormat(),std::function<void(vk::ImageCreateInfo&,vk::MemoryPropertyFlags&)>([samples](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags&) {
-		info.usage = Anvil::ImageUsageFlagBits::DEPTH_STENCIL_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
+		info.usage = prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit;
 		//info.samples = samples;
 	}));
 	auto depthTex = Vulkan::Texture::Create(context,depthImage);//,Vulkan::Sampler(nullptr));
-	auto renderTex = Vulkan::Texture::Create(context,sceneTex->GetWidth(),sceneTex->GetHeight(),Anvil::Format::R8G8B8A8_UNORM/*sceneTex->GetFormat()*/,false,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags &flags) {
-		info.setUsage(Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT);
+	auto renderTex = Vulkan::Texture::Create(context,sceneTex->GetWidth(),sceneTex->GetHeight(),prosper::Format::R8G8B8A8_UNorm/*sceneTex->GetFormat()*/,false,false,[](vk::ImageCreateInfo &info,vk::MemoryPropertyFlags &flags) {
+		info.setUsage(prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit);
 	}); // TODO: Use sceneTex instead; TODO: Sample Count
 	auto rp = context->GenerateRenderPass({
 		{renderTex->GetFormat(),renderTex->GetSampleCount(),true}, // TODO: Bloom
@@ -208,8 +215,8 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 	m_rtTransparent = Vulkan::RenderTarget::Create(renderTex,depthTex,fb);
 	//m_rtTransparent = Vulkan::RenderTarget::Create(sceneTex,depthTex,fb);
 	c_game->AddCallback("DrawScene",FunctionCallback<bool,std::reference_wrapper<const Vulkan::RenderPass>,std::reference_wrapper<const Vulkan::Framebuffer>,std::reference_wrapper<const Vulkan::CommandBuffer>>::Create([this,depthImage,renderTex](std::reference_wrapper<const Vulkan::RenderPass> &rpScene,std::reference_wrapper<const Vulkan::Framebuffer> &fbScene,std::reference_wrapper<const Vulkan::CommandBuffer> &drawCmd) {
-		renderTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		depthImage->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // TODO: Only once?
+		renderTex->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal);
+		depthImage->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // TODO: Only once?
 		//drawCmd.get()->BeginRenderPass(m_rtTransparent,Color::Red,1.f);
 		drawCmd.get()->BeginRenderPass(m_rtTransparent->GetRenderPass(),m_rtTransparent->GetFramebuffer(),renderTex->GetWidth(),renderTex->GetHeight(),{
 			vk::ClearValue{vk::ClearColorValue{std::array<float,4>{1.f,0.f,0.f,0.f}}}, // Color Attachment
@@ -218,9 +225,9 @@ void CParticleRendererBlob::OnParticleSystemStarted()
 			m_particleSystem->Render(false); // TODO Bloom?
 		drawCmd.get()->EndRenderPass();
 		
-		depthImage->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		renderTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		/*tex->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		depthImage->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
+		renderTex->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
+		/*tex->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal);
 		drawCmd->BeginRenderPass(glowInfo.renderPass,glowInfo.framebuffer,tex->GetWidth(),tex->GetHeight(),{
 			vk::ClearValue{vk::ClearColorValue{std::array<float,4>{1.f,0.f,0.f,1.f}}},
 			vk::ClearValue{vk::ClearColorValue{}}
@@ -482,7 +489,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIn
 	UpdateDebugNeighborLinks();
 }
 */ // prosper TODO
-void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererBlob::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	/*if(s_dsParticles == nullptr || m_adjacentBlobBuffer == nullptr)
 		return;
@@ -505,7 +512,7 @@ void CParticleRendererBlob::Render(const std::shared_ptr<prosper::PrimaryCommand
 	s_shader->EndDraw();*/ // prosper TODO
 }
 
-void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
 	auto &context = c_engine->GetRenderContext();

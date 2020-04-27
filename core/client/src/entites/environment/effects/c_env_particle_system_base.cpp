@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include <algorithm>
 #include <sharedutils/util_weak_handle.hpp>
@@ -263,10 +270,10 @@ bool CParticleSystemComponent::SetupParticleSystem(CParticleSystemComponent *par
 
 decltype(CParticleSystemComponent::PARTICLE_DATA_SIZE) CParticleSystemComponent::PARTICLE_DATA_SIZE = sizeof(CParticleSystemComponent::ParticleData);
 decltype(CParticleSystemComponent::VERTEX_COUNT) CParticleSystemComponent::VERTEX_COUNT = 6;
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_particleBuffer = nullptr;
-static std::shared_ptr<prosper::DynamicResizableBuffer> s_animStartBuffer = nullptr;
-static std::shared_ptr<prosper::UniformResizableBuffer> s_animBuffer = nullptr;
-static std::shared_ptr<prosper::Buffer> s_vertexBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_particleBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animStartBuffer = nullptr;
+static std::shared_ptr<prosper::IUniformResizableBuffer> s_animBuffer = nullptr;
+static std::shared_ptr<prosper::IBuffer> s_vertexBuffer = nullptr;
 const auto PARTICLE_BUFFER_INSTANCE_SIZE = sizeof(CParticleSystemComponent::ParticleData);
 const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
 ::util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
@@ -373,7 +380,7 @@ CParticleSystemComponent::~CParticleSystemComponent()
 	}
 }
 
-const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetGlobalVertexBuffer() {return s_vertexBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetGlobalVertexBuffer() {return s_vertexBuffer;}
 
 void CParticleSystemComponent::SetContinuous(bool b)
 {
@@ -434,12 +441,11 @@ void CParticleSystemComponent::InitializeBuffers()
 			Vector2(0.5f,-0.5f),
 			Vector2(-0.5f,0.5f)
 		};
-		auto &dev = c_engine->GetDevice();
 		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = vertices.size() *sizeof(vertices.front());
-		createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT;
-		s_vertexBuffer = prosper::util::create_buffer(dev,createInfo,vertices.data());
+		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
+		s_vertexBuffer = c_engine->CreateBuffer(createInfo,vertices.data());
 		s_vertexBuffer->SetDebugName("particle_vertex_buf");
 	}
 	if(s_particleBuffer == nullptr)
@@ -448,10 +454,10 @@ void CParticleSystemComponent::InitializeBuffers()
 		auto maxInstanceCount = instanceCount *40u;
 		auto instanceSize = PARTICLE_BUFFER_INSTANCE_SIZE;
 		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
-		createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-		s_particleBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,instanceSize *maxInstanceCount,0.05f);
+		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		s_particleBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.05f);
 		s_particleBuffer->SetDebugName("particle_instance_buf");
 	}
 	if(s_animStartBuffer == nullptr)
@@ -460,10 +466,10 @@ void CParticleSystemComponent::InitializeBuffers()
 		auto maxInstanceCount = instanceCount *5u;
 		auto instanceSize = ANIM_START_BUFFER_INSTANCE_SIZE;
 		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
-		createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-		s_animStartBuffer = prosper::util::create_dynamic_resizable_buffer(*c_engine,createInfo,instanceSize *maxInstanceCount,0.01f);
+		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		s_animStartBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.01f);
 		s_animStartBuffer->SetDebugName("particle_anim_start_buf");
 	}
 	if(s_animBuffer == nullptr)
@@ -472,10 +478,10 @@ void CParticleSystemComponent::InitializeBuffers()
 		auto maxInstanceCount = instanceCount *5u;
 		auto instanceSize = sizeof(AnimationData);
 		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.size = instanceSize *maxInstanceCount;
-		createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-		s_animBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,instanceSize,instanceSize *maxInstanceCount,0.01f);
+		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		s_animBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.01f);
 		s_animBuffer->SetDebugName("particle_anim_data_buf");
 	}
 }
@@ -662,12 +668,12 @@ bool CParticleSystemComponent::HasChild(CParticleSystemComponent &particle)
 	return (it != m_childSystems.end()) ? true : false;
 }
 
-const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetVertexBuffer() const {return s_vertexBuffer;}
-const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetParticleBuffer() const {return m_bufParticles;}
-const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetAnimationStartBuffer() const {return m_bufAnimStart;}
-const std::shared_ptr<prosper::Buffer> &CParticleSystemComponent::GetAnimationBuffer() const {return m_bufAnim;}
-Anvil::DescriptorSet *CParticleSystemComponent::GetAnimationDescriptorSet() {return (m_descSetGroupAnimation != nullptr) ? (*m_descSetGroupAnimation)->get_descriptor_set(0u) : nullptr;}
-const std::shared_ptr<prosper::DescriptorSetGroup> &CParticleSystemComponent::GetAnimationDescriptorSetGroup() const {return m_descSetGroupAnimation;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetVertexBuffer() const {return s_vertexBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetParticleBuffer() const {return m_bufParticles;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationStartBuffer() const {return m_bufAnimStart;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationBuffer() const {return m_bufAnim;}
+prosper::IDescriptorSet *CParticleSystemComponent::GetAnimationDescriptorSet() {return (m_descSetGroupAnimation != nullptr) ? m_descSetGroupAnimation->GetDescriptorSet() : nullptr;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &CParticleSystemComponent::GetAnimationDescriptorSetGroup() const {return m_descSetGroupAnimation;}
 
 bool CParticleSystemComponent::IsAnimated() const {return m_animData != nullptr;}
 const CParticleSystemComponent::AnimationData *CParticleSystemComponent::GetAnimationData() const {return m_animData.get();}
@@ -737,10 +743,9 @@ void CParticleSystemComponent::Start()
 						animBlock.GetInt("columns",&m_animData->columns);
 						m_bufAnim = s_animBuffer->AllocateBuffer(m_animData.get());
 
-						auto &dev = c_engine->GetDevice();
-						m_descSetGroupAnimation = prosper::util::create_descriptor_set_group(dev,pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
-						prosper::util::set_descriptor_set_binding_uniform_buffer(
-							*m_descSetGroupAnimation->GetDescriptorSet(),*m_bufAnim,0u
+						m_descSetGroupAnimation = c_engine->CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
+						m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
+							*m_bufAnim,0u
 						);
 					}
 				}
@@ -948,7 +953,7 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	m_tLastEmission = c_game->RealTime();
 	if(IsActiveOrPaused() == false)
@@ -977,7 +982,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::PrimaryComm
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
-void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
+void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
 {
 	if(!IsActiveOrPaused() || m_numRenderParticles == 0)
 		return;

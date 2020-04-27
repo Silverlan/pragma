@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_RENDER_CONTEXT_HPP__
 #define __C_RENDER_CONTEXT_HPP__
 
@@ -25,7 +32,7 @@ namespace pragma
 		void SetNoBorder(bool b);
 		void SetResolution(const Vector2i &sz);
 		void SetMonitor(GLFW::Monitor &monitor);
-		void SetPresentMode(Anvil::PresentModeKHR presentMode);
+		void SetPresentMode(prosper::PresentModeKHR presentMode);
 		float GetAspectRatio() const;
 		using prosper::Context::DrawFrame;
 	protected:
@@ -45,7 +52,7 @@ namespace pragma
 			std::optional<uint32_t> width = {};
 			std::optional<uint32_t> height = {};
 			std::optional<std::unique_ptr<GLFW::Monitor>> monitor = {};
-			std::optional<Anvil::PresentModeKHR> presentMode = {};
+			std::optional<prosper::PresentModeKHR> presentMode = {};
 		};
 		WindowChangeInfo &ScheduleWindowReload();
 		std::unique_ptr<WindowChangeInfo> m_scheduledWindowReloadInfo = nullptr;

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __CBASEENTITY_H__
 #define __CBASEENTITY_H__
 #include "pragma/clientdefinitions.h"
@@ -93,7 +100,7 @@ protected:
 	uint32_t m_sceneFlags = 0;
 	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
 
-	//std::unique_ptr<std::shared_ptr<prosper::Buffer>> m_softBodyBuffers = nullptr; // prosper TODO
+	//std::unique_ptr<std::shared_ptr<prosper::IBuffer>> m_softBodyBuffers = nullptr; // prosper TODO
 };
 #pragma warning(pop)
 

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/console/c_cvar_global.h"
@@ -433,7 +440,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 
 	auto scene = game->GetScene();
-	std::shared_ptr<prosper::Image> imgScreenshot = nullptr;
+	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
 #if 0
 	{
 		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"1"});
@@ -477,17 +484,17 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 
 		prosper::util::ImageCreateInfo createInfo {};
-		createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+		createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 		//createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
 
 		createInfo.width = 2'048;
 		createInfo.height = 2'048;
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-		createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		createInfo.tiling = Anvil::ImageTiling::LINEAR;
-		createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+		createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		createInfo.tiling = prosper::ImageTiling::Linear;
+		createInfo.usage = prosper::ImageUsageFlags::SampledBit | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | prosper::ImageUsageFlags::TransferDstBit;
 		auto &dev = c_engine->GetDevice();
-		imgScreenshot = prosper::util::create_image(dev,createInfo);
+		imgScreenshot = .CreateImage(dev,createInfo);
 
 		// TODO: Render
 		auto drawCmd = c_engine->GetSetupCommandBuffer();
@@ -527,28 +534,28 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		c_engine->WaitIdle(); // Make sure rendering is complete
 
 		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(Anvil::QueueFamilyType::UNIVERSAL,queueFamilyIndex);
+		auto cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
 
-		auto &img = rt->GetTexture()->GetImage();
-		auto extents = img->GetExtents();
+		auto &img = rt->GetTexture().GetImage();
+		auto extents = img.GetExtents();
 		prosper::util::ImageCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 		createInfo.width = extents.width;
 		createInfo.height = extents.height;
-		createInfo.tiling = Anvil::ImageTiling::LINEAR;
-		createInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-		createInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		createInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
-		imgScreenshot = prosper::util::create_image(c_engine->GetDevice(),createInfo);
+		createInfo.tiling = prosper::ImageTiling::Linear;
+		createInfo.format = prosper::Format::R8G8B8A8_UNorm;
+		createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		createInfo.usage = prosper::ImageUsageFlags::TransferDstBit;
+		imgScreenshot = c_engine->CreateImage(createInfo);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
 		cmdBuffer->StartRecording();
-		prosper::util::record_image_barrier(**cmdBuffer,**img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		prosper::util::record_copy_image(**cmdBuffer,{},**img,**imgScreenshot);
-		prosper::util::record_image_barrier(**cmdBuffer,**img,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+		cmdBuffer->RecordCopyImage({},img,*imgScreenshot);
+		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
-		//prosper::util::record_blit_image(**cmdBuffer,{},**img,**imgDst);
+		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
 		c_engine->SubmitCommandBuffer(*cmdBuffer,true);
 	}
@@ -560,14 +567,14 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		return;
 	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
-	if(format == Anvil::Format::B8G8R8A8_UNORM)
+	if(format == prosper::Format::B8G8R8A8_UNorm)
 	{
-		format = Anvil::Format::R8G8B8A8_UNORM;
+		format = prosper::Format::R8G8B8A8_UNorm;
 		bSwapped = true;
 	}
-	else if(format == Anvil::Format::B8G8R8_UNORM)
+	else if(format == prosper::Format::B8G8R8_UNorm_PoorCoverage)
 	{
-		format = Anvil::Format::R8G8B8_UNORM;
+		format = prosper::Format::R8G8B8_UNorm_PoorCoverage;
 		bSwapped = true;
 	}
 
@@ -575,11 +582,10 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	auto byteSize = prosper::util::get_byte_size(format);
 	auto extents = imgScreenshot->GetExtents();
 	auto numBytes = extents.width *extents.height *byteSize;
-	imgScreenshot->GetAnvilImage().get_memory_block()->map(0ull,numBytes,&data);
-	Anvil::SubresourceLayout layout;
-	imgScreenshot->GetAnvilImage().get_aspect_subresource_layout(Anvil::ImageAspectFlagBits::COLOR_BIT,0u,0u,&layout);
-	auto offset = layout.offset;
-	auto rowPitch = layout.row_pitch;
+	imgScreenshot->Map(0ull,numBytes,&data);
+	auto layout = imgScreenshot->GetSubresourceLayout();
+	auto offset = layout->offset;
+	auto rowPitch = layout->row_pitch;
 	std::vector<unsigned char> pixels(numBytes);
 	size_t pos = 0;
 	auto *ptr = static_cast<const char*>(data);
@@ -587,7 +593,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	{
 		ptr = static_cast<const char*>(data) +offset +y *rowPitch;
 		auto *row = ptr;
-		if(format == Anvil::Format::R8G8B8A8_UNORM)
+		if(format == prosper::Format::R8G8B8A8_UNorm)
 		{
 			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
@@ -599,7 +605,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				row += byteSize;
 			}
 		}
-		else if(format == Anvil::Format::R8G8B8_UNORM)
+		else if(format == prosper::Format::R8G8B8_UNorm_PoorCoverage)
 		{
 			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
@@ -611,7 +617,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				row += byteSize;
 			}
 		}
-		else if(format == Anvil::Format::R8_UNORM)
+		else if(format == prosper::Format::R8_UNorm)
 		{
 			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
@@ -623,7 +629,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				row += byteSize;
 			}
 		}
-		else if(format == Anvil::Format::R16_UNORM)
+		else if(format == prosper::Format::R16_UNorm)
 		{
 			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
@@ -635,7 +641,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				row += byteSize;
 			}
 		}
-		else if(format == Anvil::Format::D16_UNORM)
+		else if(format == prosper::Format::D16_UNorm)
 		{
 			for(auto x=decltype(extents.width){0};x<extents.width;++x)
 			{
@@ -938,13 +944,13 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 			auto size = resourceSizes.at(idx);
 			ss<<"\t\t";
 			if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::StandAloneBufferBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
-				ss<<"StandAloneBuffer: "<<static_cast<prosper::Buffer*>(res->resource)->GetDebugName();
+				ss<<"StandAloneBuffer: "<<static_cast<prosper::IBuffer*>(res->resource)->GetDebugName();
 			else if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::UniformBufferBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
-				ss<<"UniformResizableBuffer: "<<static_cast<prosper::UniformResizableBuffer*>(res->resource)->GetDebugName();
+				ss<<"UniformResizableBuffer: "<<static_cast<prosper::IUniformResizableBuffer*>(res->resource)->GetDebugName();
 			else if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::DynamicBufferBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
-				ss<<"DynamicResizableBuffer: "<<static_cast<prosper::DynamicResizableBuffer*>(res->resource)->GetDebugName();
+				ss<<"DynamicResizableBuffer: "<<static_cast<prosper::IDynamicResizableBuffer*>(res->resource)->GetDebugName();
 			else if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::ImageBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
-				ss<<"Image: "<<static_cast<prosper::Image*>(res->resource)->GetDebugName();
+				ss<<"Image: "<<static_cast<prosper::IImage*>(res->resource)->GetDebugName();
 			ss<<" "<<util::get_pretty_bytes(size)<<" ("<<umath::round(size /static_cast<double>(totalMemory) *100.0,2)<<"%)\n";
 		}
 		ss<<"\n";
@@ -960,7 +966,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		sortedResourceIndices.push_back(i);
 	}
 	std::sort(sortedResourceIndices.begin(),sortedResourceIndices.end(),[&resources](size_t idx0,size_t idx1) {
-		return static_cast<prosper::Buffer*>(resources.at(idx0).resource)->GetSize() > static_cast<prosper::Buffer*>(resources.at(idx1).resource)->GetSize();
+		return static_cast<prosper::IBuffer*>(resources.at(idx0).resource)->GetSize() > static_cast<prosper::IBuffer*>(resources.at(idx1).resource)->GetSize();
 	});
 
 	ss<<"Uniform resizable buffers:\n";
@@ -969,10 +975,10 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		auto &res = resources.at(idx);
 		if((res.typeFlags &prosper::MemoryTracker::Resource::TypeFlags::UniformBufferBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
 		{
-			auto &uniBuf = *static_cast<prosper::UniformResizableBuffer*>(res.resource);
+			auto &uniBuf = *static_cast<prosper::IUniformResizableBuffer*>(res.resource);
 			ss<<uniBuf.GetDebugName()<<"\n";
 			auto &allocatedSubBuffers = uniBuf.GetAllocatedSubBuffers();
-			auto instanceCount = std::count_if(allocatedSubBuffers.begin(),allocatedSubBuffers.end(),[](const prosper::Buffer *buffer) {
+			auto instanceCount = std::count_if(allocatedSubBuffers.begin(),allocatedSubBuffers.end(),[](const prosper::IBuffer *buffer) {
 				return buffer != nullptr;
 			});
 			auto assignedMemory = uniBuf.GetAssignedMemory();
@@ -987,10 +993,10 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 	{
 		if((res.typeFlags &prosper::MemoryTracker::Resource::TypeFlags::DynamicBufferBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
 		{
-			auto &dynBuf = *static_cast<prosper::DynamicResizableBuffer*>(res.resource);
+			auto &dynBuf = *static_cast<prosper::IDynamicResizableBuffer*>(res.resource);
 			ss<<dynBuf.GetDebugName()<<"\n";
 			auto &allocatedSubBuffers = dynBuf.GetAllocatedSubBuffers();
-			auto instanceCount = std::count_if(allocatedSubBuffers.begin(),allocatedSubBuffers.end(),[](const prosper::Buffer *buffer) {
+			auto instanceCount = std::count_if(allocatedSubBuffers.begin(),allocatedSubBuffers.end(),[](const prosper::IBuffer *buffer) {
 				return buffer != nullptr;
 			});
 			auto szFree = dynBuf.GetFreeSize();

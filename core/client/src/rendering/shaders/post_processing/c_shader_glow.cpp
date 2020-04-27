@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -15,22 +22,22 @@ decltype(ShaderGlow::DESCRIPTOR_SET_INSTANCE) ShaderGlow::DESCRIPTOR_SET_INSTANC
 decltype(ShaderGlow::DESCRIPTOR_SET_CAMERA) ShaderGlow::DESCRIPTOR_SET_CAMERA = {&ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Glow Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Glow Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
-decltype(ShaderGlow::RENDER_PASS_FORMAT) ShaderGlow::RENDER_PASS_FORMAT = Anvil::Format::R8G8B8A8_UNORM;
+decltype(ShaderGlow::RENDER_PASS_FORMAT) ShaderGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
 ShaderGlow::ShaderGlow(prosper::Context &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_glow","world/fs_glow")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-prosper::Shader::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderGlow::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 void ShaderGlow::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -43,39 +50,38 @@ void ShaderGlow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipeli
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	pipelineInfo.toggle_depth_bias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
 }
-bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
 	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx));
 }
 uint32_t ShaderGlow::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
 uint32_t ShaderGlow::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
-void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(pipelineIdx);
 	CreateCachedRenderPass<ShaderGlow>({{{
 		{
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::CLEAR,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ShaderReadOnlyOptimal
 		},
 		{
-			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE /* depth values have already been written by prepass */,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store /* depth values have already been written by prepass */,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 		}
 	}}},outRenderPass,pipelineIdx);
 }
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderGlow::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto &dev = c_engine->GetDevice();
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap == nullptr || glowMap->texture == nullptr)
 		return nullptr;
 	auto glowTexture = std::static_pointer_cast<Texture>(glowMap->texture);
 	if(glowTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSet,*glowTexture->GetVkTexture(),0u);
+	descSet.SetBindingTexture(*glowTexture->GetVkTexture(),0u);
 	return descSetGroup;
 }
 bool ShaderGlow::BindClipPlane(const Vector4 &clipPlane)
@@ -97,7 +103,7 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 	if(data != nullptr && data->GetBool("glow_alpha_only") == true)
 	{
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
-		if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage()->GetFormat()) == false)
+		if(prosper::util::has_alpha(texture->GetVkTexture()->GetImage().GetFormat()) == false)
 			return false;
 	}
 	auto scale = 1.f;
@@ -105,6 +111,6 @@ bool ShaderGlow::BindGlowMaterial(CMaterial &mat)
 		data->GetFloat("glow_scale",&scale);
 
 	return RecordPushConstants(PushConstants{scale}) &&
-		RecordBindDescriptorSet(*(*descSetGroup)->get_descriptor_set(0u),GetMaterialDescriptorSetIndex());
+		RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
 }
 

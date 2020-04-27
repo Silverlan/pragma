@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_RAYTRACING_HPP__
 #define __C_SHADER_RAYTRACING_HPP__
 
@@ -11,11 +18,11 @@ namespace pragma
 		: public prosper::ShaderCompute
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_GAME_SCENE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_IBL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_GAME_SCENE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IBL;
 
 		enum class GameSceneBinding : uint32_t
 		{
@@ -57,9 +64,9 @@ namespace pragma
 		ShaderRayTracing(prosper::Context &context,const std::string &identifier);
 		bool Compute(
 			const PushConstants &pushConstants,
-			Anvil::DescriptorSet &descSetOutputImage,Anvil::DescriptorSet &descSetGameScene,
-			Anvil::DescriptorSet &descSetCamera,Anvil::DescriptorSet &descSetLightSources,
-			Anvil::DescriptorSet *descSetIBL,
+			prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
+			prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
+			prosper::IDescriptorSet *descSetIBL,
 			uint32_t workGroupsX,uint32_t workGroupsY
 		);
 	protected:

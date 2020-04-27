@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_SSAO_HPP__
 #define __C_SHADER_SSAO_HPP__
 
@@ -10,12 +17,12 @@ namespace pragma
 		: public prosper::ShaderBaseImageProcessing
 	{
 	public:
-		static Anvil::Format RENDER_PASS_FORMAT;
+		static prosper::Format RENDER_PASS_FORMAT;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_PREPASS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_NOISE_TEXTURE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SAMPLE_BUFFER;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PREPASS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_NOISE_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SAMPLE_BUFFER;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 
 		enum class PrepassBinding : uint32_t
 		{
@@ -31,16 +38,16 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderSSAO(prosper::Context &context,const std::string &identifier);
-		bool Draw(const Scene &scene,Anvil::DescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions);
+		bool Draw(const Scene &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void OnPipelineInitialized(uint32_t pipelineIdx) override;
 	private:
-		std::shared_ptr<prosper::Buffer> m_kernelBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_kernelBuffer = nullptr;
 		std::shared_ptr<prosper::Texture> m_noiseTexture = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupKernel = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupTexture = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupKernel = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupTexture = nullptr;
 	};
 };
 

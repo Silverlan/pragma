@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/func/c_func_water.h"
 #include "pragma/entities/c_entityfactories.h"
@@ -306,46 +313,3 @@ void CFuncWater::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CWaterComponent>();
 }
-
-
-/*
-
-
-	DECLARE_ENTITY_HANDLE;
-	CFuncWater();
-	virtual ~CFuncWater() override;
-	virtual void Spawn() override;
-
-	virtual void Initialize() override;
-	virtual void OnInitializeModelComponent() override;
-	virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,PhysCollisionObject *col,const btCollisionWorld::LocalRayResult &result) override;
-	virtual void ReceiveData(NetPacket &packet) override;
-	virtual Bool ReceiveNetEvent(UInt32 eventId,NetPacket &packet) override;
-	virtual void PhysicsUpdate(double tDelta) override;
-	virtual void OnEndTouch(BaseEntity *ent,PhysObj *phys) override;
-
-	virtual bool CanTrigger(BaseEntity *ent,PhysObj *phys) override;
-	virtual void SetStiffness(float stiffness) override;
-	virtual void SetPropagation(float propagation) override;
-	virtual const Vector3 &GetPosition() const override;
-	virtual const Quat &GetOrientation() const override;
-	virtual bool ShouldDraw(const Vector3 &camOrigin) const override;
-	virtual CMaterial *GetWaterMaterial() const override;
-	virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
-	virtual void PrePhysicsSimulate() override;
-	CWaterSurface *GetSurfaceEntity() const;
-	virtual void ReloadSurfaceSimulator() override;
-	virtual void SetKeyValue(std::string key,std::string val) override;
-	virtual bool RayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask,btVector3 &rayFromWorld,btVector3 &rayToWorld,btVector3 &hitNormalWorld,btVector3 &hitPointWorld,btCollisionWorld::LocalRayResult &rayResult) override;
-protected:
-	virtual void OnPhysicsInitialized() override;
-	virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) override;
-	void SetupWater();
-	
-	*/
-
-/*
-	: public CTriggerTouch,
-	public BaseFuncWater,
-	public CWaterObject
-	*/

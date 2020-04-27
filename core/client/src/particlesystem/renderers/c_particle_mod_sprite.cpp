@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -43,18 +50,18 @@ void CParticleRendererSprite::PostSimulate(double tDelta)
 	m_rotationalBuffer->Update();
 }
 
-void CParticleRendererSprite::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem()) == false) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(*descSetShadows,descSetLightSources);
+	shader->BindLights(descSetShadows,descSetLightSources);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->BindSceneCamera(renderer,(m_particleSystem->GetRenderMode() == RenderMode::View) ? true : false);
 	if(m_bPlanarRotation == false)
-		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(**m_rotationalBuffer->GetBuffer());
+		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(*m_rotationalBuffer->GetBuffer());
 	shader->Draw(
 		renderer,*m_particleSystem,
 		(m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem->GetOrientationType(),
@@ -63,7 +70,7 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::PrimaryComma
 	shader->EndDraw();
 }
 
-void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particleshadow");
 	if(!hShader.IsValid())

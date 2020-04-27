@@ -1,7 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
-#include "pragma/rendering/shaders/debug/c_shader_debugdepthbuffer.h"
 #include <wgui/types/wirect.h>
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/game/c_game_createguielement.h"
@@ -23,69 +29,6 @@ static int shadowmapHeight;
 static CallbackHandle cbRenderShadowMap;
 static CallbackHandle cbReleaseShadowMap;
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static void OnRender(EntityHandle hEntity)
-{
-	/*if(!hEntity.IsValid())
-		return;
-	CEnvLight *entLight = hEntity.get<CEnvLight>();
-	pragma::CLightComponent *light = entLight->GetLight();
-	if(light == NULL)
-		return;
-	ShadowMap *shadow = light->GetShadowMap();
-	if(shadow == NULL)
-		return;
-	static ShaderBase *shader = c_game->GetShader("debugdepthbuffer");
-	if(shader == NULL)
-		return;
-	CLightRanged *lightRanged = dynamic_cast<CLightRanged*>(light);
-	int w,h;
-	OpenGL::GetViewportSize(&w,&h);
-	auto bufFramePrev = OpenGL::GetInt(GL_FRAMEBUFFER_BINDING);
-	ShaderDebugDepthBuffer *ddb = static_cast<ShaderDebugDepthBuffer*>(shader);
-	unsigned int size = cvShadowmapSize->GetInt();
-	OpenGL::SetViewPort(0,0,size,size);
-	switch(light->GetType())
-	{
-	case LIGHT_TYPE_POINT:
-		{
-			(*shadowmapFBOs[0])->Bind();
-			ddb->Render(GL_TEXTURE_CUBE_MAP,shadow->GetDepthTexture(),c_game->GetScreenVertexBuffer(),2,CUInt32(lightRanged->GetDistance()),-1,(*shadowmapTextures[0])->GetTextureID());
-			break;
-		}
-	case LIGHT_TYPE_DIRECTIONAL:
-		{
-			CSM *csm = dynamic_cast<CSM*>(shadow);
-			unsigned int numCascades = csm->GetSplitCount();
-			unsigned int texture = csm->GetDepthTexture();
-			for(unsigned int i=0;i<numCascades;i++)
-			{
-				(*shadowmapFBOs[i])->Bind();
-				ddb->Render(GL_TEXTURE_2D_ARRAY,texture,c_game->GetScreenVertexBuffer(),2,CUInt32(lightRanged->GetDistance()),i);
-			}
-			break;
-		}
-	default:
-		{
-			(*shadowmapFBOs[0])->Bind();
-			ddb->Render(GL_TEXTURE_2D,shadow->GetDepthTexture(),c_game->GetScreenVertexBuffer(),2,CUInt32(lightRanged->GetDistance()));
-			break;
-		}
-	}
-	OpenGL::SetViewPort(0,0,w,h);
-	OpenGL::BindFrameBuffer(bufFramePrev);*/ // Vulkan TODO
-}
-
-static void OnGameEnd(EntityHandle hEntity)
-{
-	if(hGUIShadowmap.IsValid())
-		hGUIShadowmap->Remove();
-	if(cbRenderShadowMap.IsValid())
-		cbRenderShadowMap.Remove();
-	if(cbReleaseShadowMap.IsValid())
-		cbReleaseShadowMap.Remove();
-	numShadowmapTargets = 0;
-}
-
 static bool get_shadow_map(NetworkState *nw,std::vector<std::string> &argv,pragma::CLightComponent **light,pragma::CLightComponent::ShadowMapType smType)
 {
 	if(argv.empty())

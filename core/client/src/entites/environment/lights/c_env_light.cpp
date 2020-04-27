@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/model/c_model.h"
@@ -18,9 +25,10 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
-const prosper::UniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
-const prosper::UniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
+prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
+prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 uint32_t CLightComponent::GetMaxLightCount() {return pragma::LightDataBufferManager::GetInstance().GetMaxCount();}
 uint32_t CLightComponent::GetMaxShadowCount() {return pragma::ShadowDataBufferManager::GetInstance().GetMaxCount();}
 uint32_t CLightComponent::GetLightCount() {return s_lightCount;}
@@ -516,10 +524,10 @@ Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 	return m;
 }
 
-const std::shared_ptr<prosper::Buffer> &CLightComponent::GetRenderBuffer() const {return m_renderBuffer;}
-const std::shared_ptr<prosper::Buffer> &CLightComponent::GetShadowBuffer() const {return m_shadowBuffer;}
-void CLightComponent::SetRenderBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer) {m_renderBuffer = renderBuffer;}
-void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::Buffer> &renderBuffer) {m_shadowBuffer = renderBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CLightComponent::GetRenderBuffer() const {return m_renderBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CLightComponent::GetShadowBuffer() const {return m_shadowBuffer;}
+void CLightComponent::SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer) {m_renderBuffer = renderBuffer;}
+void CLightComponent::SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer) {m_shadowBuffer = renderBuffer;}
 
 ///////////////////
 
@@ -651,10 +659,11 @@ void CEHandleShadowMap::PushArguments(lua_State *l) {}
 
 /////////////////
 
-CEOnShadowBufferInitialized::CEOnShadowBufferInitialized(prosper::Buffer &shadowBuffer)
+CEOnShadowBufferInitialized::CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer)
 	: shadowBuffer{shadowBuffer}
 {}
 void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
+#pragma optimize("",on)

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_LOADING_H__
 #define __C_SHADER_LOADING_H__
 
@@ -14,23 +21,4 @@ namespace pragma
 	};
 };
 
-// prosper TODO
-#if 0
-#include "pragma/rendering/shaders/world/c_shader_textured.h"
-
-namespace Shader
-{
-	class DLLCLIENT Loading
-		: public Textured3D
-	{
-	protected:
-		virtual void InitializeMaterialBindings(std::vector<Vulkan::DescriptorSetLayout::Binding> &bindings) override;
-		virtual void BindMaterialParameters(Material *mat) override;
-	public:
-		Loading();
-		virtual void InitializeMaterial(Material *mat,bool bReload=false) override;
-		virtual void BindMaterial(Material *mat) override;
-	};
-};
-#endif
 #endif

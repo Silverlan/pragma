@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -21,8 +28,8 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("GetRenderBounds",&Lua::Render::GetRenderBounds);
 	defCRender.def("SetRenderBounds",&Lua::Render::SetRenderBounds);
 	defCRender.def("GetRenderSphereBounds",&Lua::Render::GetRenderSphereBounds);
-	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::CommandBuffer>&,bool)>(&Lua::Render::UpdateRenderBuffers));
-	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::CommandBuffer>&)>(&Lua::Render::UpdateRenderBuffers));
+	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,bool)>(&Lua::Render::UpdateRenderBuffers));
+	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer",&Lua::Render::GetRenderBuffer);
 	defCRender.def("GetBoneBuffer",&Lua::Render::GetBoneBuffer);
 	defCRender.def("GetLODMeshes",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
@@ -174,14 +181,14 @@ void Lua::Render::SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,
 	hEnt->SetRenderBounds(min,max);
 }
 
-void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::CommandBuffer> &drawCmd,bool bForceBufferUpdate)
+void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
 	pragma::Lua::check_component(l,hEnt);
 	if(drawCmd->IsPrimary() == false)
 		return;
-	hEnt->UpdateRenderData(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd),bForceBufferUpdate);
+	hEnt->UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),bForceBufferUpdate);
 }
-void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::CommandBuffer> &drawCmd) {UpdateRenderBuffers(l,hEnt,drawCmd,false);}
+void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {UpdateRenderBuffers(l,hEnt,drawCmd,false);}
 void Lua::Render::GetRenderBuffer(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);

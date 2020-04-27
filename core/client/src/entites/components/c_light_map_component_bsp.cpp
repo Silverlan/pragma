@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/game/game_resources.hpp"
@@ -101,14 +108,14 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	// We can't read the image data directly, so we'll need a temporary buffer to copy it into
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = szLightmaps;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	auto buf = prosper::util::create_buffer(c_engine->GetDevice(),createInfo);
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	auto buf = .CreateBuffer(c_engine->GetDevice(),createInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-	prosper::util::record_copy_image_to_buffer(**setupCmd,{},**img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,*buf);
-	prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+	.RecordImageBarrier(**setupCmd,**img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
+	.RecordCopyImageToBuffer(**setupCmd,{},**img,prosper::ImageLayout::TransferDstOptimal,*buf);
+	.RecordImageBarrier(**setupCmd,**img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	c_engine->FlushSetupCommandBuffer();
 
 	if(buf->Map(0,szLightmaps) == false)

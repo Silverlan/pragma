@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __WIDEBUGMSAATEXTURE_HPP__
 #define __WIDEBUGMSAATEXTURE_HPP__
 
@@ -21,7 +28,7 @@ protected:
 
 	std::shared_ptr<prosper::Texture> m_msaaTexture = nullptr;
 	std::shared_ptr<prosper::Texture> m_resolvedTexture = nullptr;
-	std::shared_ptr<Anvil::DescriptorSetGroup> m_descSetGroupImg = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupImg = nullptr;
 
 	bool m_bShouldResolveImage = true;
 };

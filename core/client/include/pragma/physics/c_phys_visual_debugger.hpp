@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_PHYS_VISUAL_DEBUGGER_HPP__
 #define __C_PHYS_VISUAL_DEBUGGER_HPP__
 
@@ -31,7 +38,7 @@ public:
 	static constexpr uint32_t TRI_SIZE = sizeof(Vector3) *3;
 
 	CPhysVisualDebugger();
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	virtual void DrawLine(const Vector3 &from,const Vector3 &to,const Color &fromColor,const Color &toColor) override;
 	virtual void DrawPoint(const Vector3 &pos,const Color &color) override;
@@ -53,8 +60,8 @@ private:
 		static constexpr auto COLOR_BUFFER_SIZE = MAX_INSTANCES *sizeof(Vector4) *VERTS_PER_INSTANCE;
 		std::array<std::array<Vector3,VERTS_PER_INSTANCE>,MAX_INSTANCES> vertices = {};
 		std::array<std::array<Vector4,VERTS_PER_INSTANCE>,MAX_INSTANCES> vertexColors = {};
-		std::shared_ptr<prosper::Buffer> buffer = nullptr;
-		std::shared_ptr<prosper::Buffer> colorBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> buffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> colorBuffer = nullptr;
 		uint32_t instanceCount = 0;
 
 		size_t GetDataSize() const {return instanceCount *SIZE_PER_INSTANCE;}
@@ -74,8 +81,8 @@ private:
 	DataBuffer<MAX_LINES,2> m_lineBuffer = {};
 	DataBuffer<MAX_POINTS,1> m_pointBuffer = {};
 	DataBuffer<MAX_TRIANGLES,3> m_triangleBuffer = {};
-	std::shared_ptr<prosper::Buffer> m_debugBuffer = nullptr;
-	std::shared_ptr<prosper::Buffer> m_colorBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_debugBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_colorBuffer = nullptr;
 	std::vector<Vector4> m_colorData = {};
 };
 

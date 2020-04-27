@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_gpu_swapchain_timer.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
@@ -9,11 +16,11 @@ using namespace pragma::debug;
 
 extern DLLCENGINE CEngine *c_engine;
 
-std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage)
+std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
 {
 	return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer{timerQueryPool,statsQueryPool,stage});
 }
-GPUSwapchainTimer::GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,Anvil::PipelineStageFlagBits stage)
+GPUSwapchainTimer::GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
 	: m_stage{stage},m_wpTimerQueryPool{timerQueryPool.shared_from_this()},m_wpStatsQueryPool{statsQueryPool.shared_from_this()}
 {}
 void GPUSwapchainTimer::UpdateResult()
@@ -36,7 +43,7 @@ bool GPUSwapchainTimer::Start()
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	auto r = pTimerQuery->Begin(**drawCmd) && pStatsQuery->RecordBegin(**drawCmd);
+	auto r = pTimerQuery->Begin(*drawCmd) && pStatsQuery->RecordBegin(*drawCmd);
 	if(r == true)
 		m_bHasStartedAtLeastOnce = true;
 	return r;
@@ -48,7 +55,7 @@ bool GPUSwapchainTimer::Stop()
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	return pTimerQuery->End(**drawCmd) && pStatsQuery->RecordEnd(**drawCmd);
+	return pTimerQuery->End(*drawCmd) && pStatsQuery->RecordEnd(*drawCmd);
 }
 bool GPUSwapchainTimer::Reset()
 {
@@ -57,7 +64,7 @@ bool GPUSwapchainTimer::Reset()
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr)
 		return false;
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
-	return pTimerQuery->Reset(**drawCmd) && pStatsQuery->Reset(**drawCmd);
+	return pTimerQuery->Reset(*drawCmd) && pStatsQuery->Reset(*drawCmd);
 }
 std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 {
@@ -95,7 +102,7 @@ void GPUSwapchainTimer::InitializeQueries()
 	m_swapchainTimers.reserve(index +1);
 	for(auto i=decltype(m_swapchainTimers.size()){0u};i<=index;++i)
 	{
-		auto timerQuery = prosper::util::create_timer_query(*timerPool,m_stage);
+		auto timerQuery = prosper::util::create_timer_query(*timerPool,static_cast<prosper::PipelineStageFlags>(m_stage));
 		auto statsQuery = prosper::util::create_pipeline_statistics_query(*statsPool);
 		m_swapchainTimers.push_back({timerQuery,statsQuery});
 	}

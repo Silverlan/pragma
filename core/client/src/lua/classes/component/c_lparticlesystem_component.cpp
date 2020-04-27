@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -300,11 +307,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->Simulate(tDelta);
 		}));
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::CommandBuffer>&,pragma::rendering::RasterizationRenderer&,bool)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::CommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,bool bBloom) {
+	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::rendering::RasterizationRenderer&,bool)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,bool bBloom) {
 		pragma::Lua::check_component(l,hComponent);
 		if(drawCmd->IsPrimary() == false)
 			return;
-		hComponent->Render(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(drawCmd),renderer,bBloom);
+		hComponent->Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),renderer,bBloom);
 		}));
 	defCParticleSystem.def("GetRenderParticleCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);

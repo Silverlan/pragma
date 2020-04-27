@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/c_engine.h"
@@ -121,7 +128,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled,[](NetworkState*,ConVar*,bool,b
 })*/
 
 static auto cvHmdViewEnabled = GetClientConVar("cl_vr_hmd_view_enabled");
-static void draw_vr(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderTarget &rt)
+static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::RenderTarget &rt)
 {
 	if(c_game == nullptr || hHmdViewMessage.IsValid() == false || c_game->IsInMainRenderPass() == false)
 		return;
@@ -145,14 +152,14 @@ static void draw_vr(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pros
 	//img->SetDrawLayout(vk::ImageLayout::ePresentSrcKHR); // prosper TODO
 	WGUI::GetInstance().Think();
 
-	auto extents = rt.GetTexture()->GetImage()->GetExtents();
+	auto extents = rt.GetTexture().GetImage().GetExtents();
 	vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
-	if(prosper::util::record_begin_render_pass(**drawCmd,rt,&clearVal) == false)
+	if(drawCmd->RecordBeginRenderPass(rt,&clearVal) == false)
 		return;
 
 		bg->Draw(extents.width,extents.height);
 
-	prosper::util::record_end_render_pass(**drawCmd);
+	drawCmd->RecordEndRenderPass();
 	//*ret = true;
 	//return true;
 }
@@ -173,9 +180,9 @@ static void cl_vr_hmd_view_enabled(bool val)
 		if(cbPreRender.IsValid() == true)
 			cbPreRender.Remove();
 		cbPreRender = client->AddCallback("PostRender",FunctionCallback<
-			void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-		>::Create([](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>> rt) {
+		>::Create([](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd,std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>> rt) {
 			draw_vr(drawCmd.get(),*rt.get());
 		}));
 	}

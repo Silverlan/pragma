@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_DEBUG_TEXT_HPP__
 #define __C_SHADER_DEBUG_TEXT_HPP__
 
@@ -11,30 +18,12 @@ namespace pragma
 	public:
 		ShaderDebugText(prosper::Context &context,const std::string &identifier);
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
-		bool Draw(Anvil::Buffer &vertexBuffer,uint32_t vertexCount,Anvil::DescriptorSet &descSetTexture,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
+		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,prosper::IDescriptorSet &descSetTexture,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
-
-
-/*#include "pragma/rendering/shaders/debug/c_shader_debug.h"
-
-namespace Shader
-{
-	class DLLCLIENT DebugText
-		: public Debug
-	{
-	private:
-		using Debug::Draw;
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	public:
-		DebugText();
-		void Draw(const Mat4 &matModel,Vulkan::DescriptorSetObject *descSet,Vulkan::BufferObject *vertexBuffer,uint32_t vertexCount,const Vulkan::DescriptorSet &texDescSet);
-	};
-};*/ // prosper TODO
 
 #endif

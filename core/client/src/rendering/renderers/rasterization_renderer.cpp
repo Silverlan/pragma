@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -78,23 +85,23 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 	auto numLayers = pShadowMap->GetLayerCount();
 	for(auto i=decltype(numLayers){0};i<numLayers;++i)
 	{
-		prosper::util::set_descriptor_set_binding_array_texture(
-			*descSetShadowMaps,*texture,0u,i,i
+		descSetShadowMaps->SetBindingArrayTexture(
+			*texture,0u,i,i
 		);
 	}
 }
 
-Anvil::DescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? (*m_hdrInfo.dsgSceneDepth)->get_descriptor_set(0u) : nullptr;}
+prosper::IDescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr;}
 
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM.IsValid())
-		m_descSetGroupCSM = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
+		m_descSetGroupCSM = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
 }
 
-void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::DescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
+void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 
-void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 
 	// Occlusion Culling
@@ -155,9 +162,9 @@ void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::PrimaryComm
 	if(umath::is_flag_set(renderFlags,FRender::HDR))
 	{
 		// Don't bother resolving HDR; Just apply the barrier
-		prosper::util::record_image_barrier(
-			*(*drawCmd),**GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage(),
-			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+		drawCmd->RecordImageBarrier(
+			GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(),
+			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 		);
 		return;
 	}
@@ -186,30 +193,30 @@ bool RasterizationRenderer::ReloadRenderTarget()
 		return false;
 
 	auto &descSetHdrResolve = *m_hdrInfo.dsgBloomTonemapping->GetDescriptorSet();
-	auto resolvedGlowTex = GetGlowInfo().renderTarget->GetTexture();
+	auto *resolvedGlowTex = &GetGlowInfo().renderTarget->GetTexture();
 	if(resolvedGlowTex->IsMSAATexture())
-		resolvedGlowTex = static_cast<prosper::MSAATexture&>(*resolvedGlowTex).GetResolvedTexture();
-	prosper::util::set_descriptor_set_binding_texture(descSetHdrResolve,*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
+		resolvedGlowTex = static_cast<prosper::MSAATexture*>(resolvedGlowTex)->GetResolvedTexture().get();
+	descSetHdrResolve.SetBindingTexture(*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 
 	auto &descSetCam = *scene.GetCameraDescriptorSetGraphics();
 	auto &descSetCamView = *scene.GetViewCameraDescriptorSet();
 	if(bSsao == true)
 	{
 		auto &ssaoInfo = GetSSAOInfo();
-		auto ssaoBlurTexResolved = ssaoInfo.renderTargetBlur->GetTexture();
+		auto *ssaoBlurTexResolved = &ssaoInfo.renderTargetBlur->GetTexture();
 		if(ssaoBlurTexResolved->IsMSAATexture())
-			ssaoBlurTexResolved = static_cast<prosper::MSAATexture&>(*ssaoBlurTexResolved).GetResolvedTexture();
-		prosper::util::set_descriptor_set_binding_texture(descSetCam,*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
-		prosper::util::set_descriptor_set_binding_texture(descSetCamView,*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
+			ssaoBlurTexResolved = static_cast<prosper::MSAATexture*>(ssaoBlurTexResolved)->GetResolvedTexture().get();
+		descSetCam.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
+		descSetCamView.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
 	}
 	auto &dummyTex = c_engine->GetDummyTexture();
-	prosper::util::set_descriptor_set_binding_texture(descSetCam,*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	prosper::util::set_descriptor_set_binding_texture(descSetCamView,*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+	descSetCam.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+	descSetCamView.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 	return true;
 }
 void RasterizationRenderer::SetFrameDepthBufferSamplingRequired() {m_bFrameDepthBufferSamplingRequired = true;}
 void RasterizationRenderer::EndRendering() {}
-void RasterizationRenderer::BeginRendering(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	BaseRenderer::BeginRendering(drawCmd);
 	umath::set_flag(m_stateFlags,StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved,false);
@@ -313,7 +320,7 @@ RasterizationRenderer::PrepassMode RasterizationRenderer::GetPrepassMode() const
 
 pragma::ShaderPrepassBase &RasterizationRenderer::GetPrepassShader() const {return const_cast<RasterizationRenderer*>(this)->GetPrepass().GetShader();}
 
-prosper::DescriptorSet *RasterizationRenderer::GetCSMDescriptorSet() const {return m_descSetGroupCSM->GetDescriptorSet();}
+prosper::IDescriptorSet *RasterizationRenderer::GetCSMDescriptorSet() const {return m_descSetGroupCSM->GetDescriptorSet();}
 
 HDRData &RasterizationRenderer::GetHDRInfo() {return m_hdrInfo;}
 GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}
@@ -421,32 +428,32 @@ void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> 
 	m_lightMapInfo.lightMapTexture = lightMapTexture;
 	auto &descSetCam = *GetScene().GetCameraDescriptorSetGraphics();
 	auto &descSetCamView = *GetScene().GetViewCameraDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(descSetCam,*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	prosper::util::set_descriptor_set_binding_texture(descSetCamView,*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+	descSetCam.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+	descSetCamView.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 }
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetSceneTexture() const {return m_hdrInfo.sceneRenderTarget->GetTexture();}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetPresentationTexture() const {return m_hdrInfo.toneMappedRenderTarget->GetTexture();}
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetHDRPresentationTexture() const {return m_hdrInfo.sceneRenderTarget->GetTexture();}
+prosper::Texture *RasterizationRenderer::GetSceneTexture() {return &m_hdrInfo.sceneRenderTarget->GetTexture();}
+prosper::Texture *RasterizationRenderer::GetPresentationTexture() {return &m_hdrInfo.toneMappedRenderTarget->GetTexture();}
+prosper::Texture *RasterizationRenderer::GetHDRPresentationTexture() {return &m_hdrInfo.sceneRenderTarget->GetTexture();}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 
-Anvil::SampleCountFlagBits RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage()->GetSampleCount();}
-bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != Anvil::SampleCountFlagBits::_1_BIT;}
+prosper::SampleCountFlags RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount();}
+bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != prosper::SampleCountFlags::e1Bit;}
 
-bool RasterizationRenderer::BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass)
+bool RasterizationRenderer::BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass)
 {
 	auto &hdrInfo = GetHDRInfo();
 	auto &tex = hdrInfo.sceneRenderTarget->GetTexture();
-	if(tex->IsMSAATexture())
-		static_cast<prosper::MSAATexture&>(*tex).Reset();
+	if(tex.IsMSAATexture())
+		static_cast<prosper::MSAATexture&>(tex).Reset();
 	return hdrInfo.BeginRenderPass(drawCmd,customRenderPass);
 }
-bool RasterizationRenderer::EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+bool RasterizationRenderer::EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.EndRenderPass(drawCmd);
 }
-bool RasterizationRenderer::ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+bool RasterizationRenderer::ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawCmd);

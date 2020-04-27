@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
@@ -10,29 +17,29 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {Anvil::VertexInputRate::INSTANCE,sizeof(pragma::CParticleSystemComponent::ParticleData)};
+decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_PARTICLE) ShaderParticleModel::VERTEX_ATTRIBUTE_PARTICLE = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE,VERTEX_BINDING_PARTICLE};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_COLOR) ShaderParticleModel::VERTEX_ATTRIBUTE_COLOR = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR,VERTEX_BINDING_PARTICLE};
 
-decltype(ShaderParticleModel::VERTEX_BINDING_ROTATION) ShaderParticleModel::VERTEX_BINDING_ROTATION = {Anvil::VertexInputRate::INSTANCE,sizeof(Quat)};
-decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ROTATION) ShaderParticleModel::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_ROTATION,Anvil::Format::R32G32B32A32_SFLOAT};
+decltype(ShaderParticleModel::VERTEX_BINDING_ROTATION) ShaderParticleModel::VERTEX_BINDING_ROTATION = {prosper::VertexInputRate::Instance,sizeof(Quat)};
+decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ROTATION) ShaderParticleModel::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_ROTATION,prosper::Format::R32G32B32A32_SFloat};
 
-decltype(ShaderParticleModel::VERTEX_BINDING_ANIMATION_START) ShaderParticleModel::VERTEX_BINDING_ANIMATION_START = {Anvil::VertexInputRate::INSTANCE};
-decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START,Anvil::Format::R32_SFLOAT};
+decltype(ShaderParticleModel::VERTEX_BINDING_ANIMATION_START) ShaderParticleModel::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance};
+decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticleModel::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START,prosper::Format::R32_SFloat};
 
 decltype(ShaderParticleModel::DESCRIPTOR_SET_ANIMATION) ShaderParticleModel::DESCRIPTOR_SET_ANIMATION = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES) ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Bone Matrices
-			Anvil::DescriptorType::UNIFORM_BUFFER_DYNAMIC,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Bone Matrices
+			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::ShaderStageFlags::VertexBit
 		}
 	}
 };
@@ -42,19 +49,19 @@ ShaderParticleModel::ShaderParticleModel(prosper::Context &context,const std::st
 	SetPipelineCount(GetParticlePipelineCount());
 	SetBaseShader<pragma::ShaderTextured3DBase>();
 }
-prosper::Shader::DescriptorSetInfo &ShaderParticleModel::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
+prosper::DescriptorSetInfo &ShaderParticleModel::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
 bool ShaderParticleModel::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderTextured3DBase::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
-void ShaderParticleModel::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderParticleModel::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
 	CreateCachedRenderPass<ShaderParticleModel>({{{
 		{
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
 		},
 		{
-			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 		}
 	}}},outRenderPass,pipelineIdx);
 }
@@ -76,7 +83,7 @@ void ShaderParticleModel::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInf
 }
 void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &pSys)
 {
@@ -91,9 +98,9 @@ bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &p
 	return RecordPushConstants(sizeof(pushConstants),&pushConstants,sizeof(ShaderTextured3DBase::PushConstants));
 }
 
-bool ShaderParticleModel::BindParticleBuffers(prosper::Buffer &particleBuffer,prosper::Buffer &rotBuffer,prosper::Buffer &animStartBuffer)
+bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer)
 {
-	return RecordBindVertexBuffers({&particleBuffer.GetAnvilBuffer(),&rotBuffer.GetAnvilBuffer(),&animStartBuffer.GetAnvilBuffer()},VERTEX_BINDING_PARTICLE.GetBindingIndex());
+	return RecordBindVertexBuffers({&particleBuffer,&rotBuffer,&animStartBuffer},VERTEX_BINDING_PARTICLE.GetBindingIndex());
 }
 
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
@@ -104,7 +111,7 @@ bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_
 }
 
 bool ShaderParticleModel::BeginDraw(
-	const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
 	const Vector4 &drawOrigin,Pipeline pipelineIdx,ShaderScene::RecordFlags recordFlags
 )
 {
@@ -114,71 +121,3 @@ bool ShaderParticleModel::BeginDraw(
 		recordFlags
 	);
 }
-
- // prosper TODO
-#if 0
-#include "pragma/c_engine.h"
-#include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
-#include "pragma/model/c_modelmesh.h"
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(ParticleModel,particlemodel);
-
-extern DLLCLIENT CGame *c_game;
-
-ParticleModel::ParticleModel()
-	: Textured3D("particlemodel","particles/model/vs_particle_model","particles/model/fs_particle_model")
-{
-	//m_bEnableLighting = true;
-	SetUseBloomAttachment(false);
-}
-
-void ParticleModel::InitializeVertexDescriptions(std::vector<vk::VertexInputBindingDescription> &vertexBindingDescriptions,std::vector<vk::VertexInputAttributeDescription> &vertexAttributeDescriptions)
-{
-	Textured3D::InitializeVertexDescriptions(vertexBindingDescriptions,vertexAttributeDescriptions);
-	vertexBindingDescriptions.push_back({
-		umath::to_integral(Binding::Xyzs),
-		CParticleSystem::PARTICLE_DATA_SIZE,
-		Anvil::VertexInputRate::INSTANCE
-	});
-	vertexBindingDescriptions.push_back({
-		umath::to_integral(Binding::Rotation),
-		sizeof(Quat),
-		Anvil::VertexInputRate::INSTANCE
-	});
-
-	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::Xyzs),
-		umath::to_integral(Binding::Xyzs),
-		Anvil::Format::R32G32B32A32_SFLOAT,0
-	});
-	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::Color),
-		umath::to_integral(Binding::Color),
-		Anvil::Format::R16G16B16A16_UNORM,sizeof(Vector4)
-	});
-	vertexAttributeDescriptions.push_back({
-		umath::to_integral(Location::Rotation),
-		umath::to_integral(Binding::Rotation),
-		Anvil::Format::R32G32B32A32_SFLOAT,0
-	});
-}
-
-bool ParticleModel::BeginDraw(Vulkan::BufferObject *particleBuffer,Vulkan::BufferObject *rotBuffer,Vulkan::CommandBufferObject *cmdBuffer)
-{
-	auto r = Textured3D::BeginDraw(cmdBuffer);
-	if(r == false)
-		return r;
-	cmdBuffer->BindVertexBuffer(umath::to_integral(Binding::Xyzs),{particleBuffer,rotBuffer});
-	return r;
-}
-
-void ParticleModel::Draw(CModelSubMesh *mesh,uint32_t instanceCount)
-{
-	Textured3D::Draw(mesh,[instanceCount](const Vulkan::CommandBufferObject *drawCmd,std::size_t numTriangleVertices) {
-		drawCmd->DrawIndexed(0,numTriangleVertices,0,instanceCount);
-	});
-}
-#endif

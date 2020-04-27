@@ -1,10 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_GAMEENTITIES_H__
 #define __C_GAMEENTITIES_H__
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
-#include "pragma/entities/c_baseweapon.h"
 
 template<class T>
 	void CGame::GetPlayers(std::vector<T*> *ents)
@@ -27,10 +33,10 @@ template<class T>
 template<class T>
 	void CGame::GetWeapons(std::vector<T*> *ents)
 {
-	/*std::vector<CBaseWeapon*> *weps;
-	CBaseWeapon::GetAll(&weps);
-	for(unsigned int i=0;i<weps->size();i++)
-		ents->push_back((*weps)[i]);*/
+	auto &weapons = pragma::CWeaponComponent::GetAll();
+	ents->reserve(ents->size() +weapons.size());
+	for(auto *wp : weapons)
+		ents->push_back(&wp->GetEntity());
 }
 
 template<class T>

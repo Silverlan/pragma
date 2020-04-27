@@ -1,6 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
 
 #ifndef __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
 #define __C_SHADER_SPECULAR_GLOSSINESS_TO_METALNESS_ROUGHNESS_HPP__
@@ -19,7 +22,7 @@ namespace pragma
 		: public prosper::ShaderBaseImageProcessing
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
 		enum class TextureBinding : uint32_t
 		{
@@ -32,8 +35,8 @@ namespace pragma
 
 		struct DLLCLIENT MetalnessRoughnessImageSet
 		{
-			std::shared_ptr<prosper::Image> albedoMap = nullptr;
-			std::shared_ptr<prosper::Image> rmaMap = nullptr;
+			std::shared_ptr<prosper::IImage> albedoMap = nullptr;
+			std::shared_ptr<prosper::IImage> rmaMap = nullptr;
 		};
 
 		enum class Pass : uint32_t
@@ -58,7 +61,7 @@ namespace pragma
 		);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

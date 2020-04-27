@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_GLTF_WRITER_HPP__
 #define __C_GLTF_WRITER_HPP__
 
@@ -17,10 +24,52 @@ namespace pragma::asset
 	class GLTFWriter
 	{
 	public:
-		static bool Export(::Model &mdl,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName);
-		static bool Export(::Model &mdl,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName);
+		struct ModelDesc
+		{
+			ModelDesc(::Model &mdl,const physics::Transform &pose={})
+				: model{mdl},pose{pose}
+			{}
+			::Model &model;
+			physics::Transform pose;
+		};
+		struct LightSource
+		{
+			enum class Type : uint8_t
+			{
+				Point = 0,
+				Spot,
+				Directional
+			};
+			std::string name;
+			Color color;
+			union
+			{
+				Candela luminousIntensity = 1.f;
+				Lux illuminance;
+			};
+			Type type = Type::Point;
+			std::optional<float> range = {};
+			physics::Transform pose {};
+
+			// Spot lights
+			umath::Degree innerConeAngle = 0.f;
+			umath::Degree outerConeAngle = 45.f;
+		};
+		using ModelCollection = std::vector<ModelDesc>;
+		using LightSourceList = std::vector<LightSource>;
+		struct SceneDesc
+		{
+			ModelCollection modelCollection {};
+			LightSourceList lightSources {};
+		};
+
+		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
+		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
+
+		static bool Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={});
+		static bool Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName={});
 	private:
-		GLTFWriter(::Model &mdl,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName);
+		GLTFWriter(const SceneDesc &sceneDesc,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName);
 		using BufferIndex = uint32_t;
 		using BufferViewIndex = uint32_t;
 		struct BufferIndices
@@ -42,6 +91,22 @@ namespace pragma::asset
 			BufferViewIndex weights = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex inverseBindMatrices = std::numeric_limits<uint32_t>::max();
 		};
+		using ExportMeshList = std::vector<std::shared_ptr<ModelSubMesh>>;
+		struct ModelExportData
+		{
+			ModelExportData(Model &model)
+				: model{model}
+			{}
+
+			Model &model;
+			std::vector<physics::Transform> instances {};
+
+			ExportMeshList exportMeshes;
+			uint64_t indexCount = 0;
+			uint64_t vertCount = 0;
+			int32_t skinIndex = -1;
+		};
+		using UniqueModelExportList = std::vector<ModelExportData>;
 
 		struct MorphSet
 		{
@@ -57,23 +122,25 @@ namespace pragma::asset
 		};
 		Vector3 TransformPos(const Vector3 &v) const;
 
-		bool Export(std::string &outErrMsg,const std::string *optModelName=nullptr);
-		void WriteSkeleton();
-		void WriteAnimations();
-		void WriteMorphTargets(ModelSubMesh &mesh,tinygltf::Mesh &gltfMesh,tinygltf::Primitive &primitive,uint32_t nodeIdx);
+		bool Export(std::string &outErrMsg,const std::string &outputFileName);
+		void GenerateUniqueModelExportList();
+		void WriteSkeleton(ModelExportData &mdlData);
+		void WriteAnimations(::Model &mdl);
+		void WriteMorphTargets(ModelSubMesh &mesh,tinygltf::Mesh &gltfMesh,tinygltf::Primitive &primitive,const std::vector<uint32_t> &nodeIndices);
 		void WriteMaterials();
-		void GenerateAO();
+		void WriteLightSources();
+		void GenerateAO(::Model &mdl);
 		uint32_t AddBufferView(const std::string &name,BufferIndex bufferIdx,uint64_t byteOffset,uint64_t byteLength,std::optional<uint64_t> byteStride);
 		tinygltf::Buffer &AddBuffer(const std::string &name,uint32_t *optOutBufIdx=nullptr);
 		uint32_t AddAccessor(const std::string &name,int componentType,int type,uint64_t byteOffset,uint64_t count,BufferViewIndex bufferViewIdx);
 
 		uint32_t AddNode(const std::string &name,bool isRootNode);
-		void InitializeMorphSets();
-		void MergeSplitMeshes();
+		void InitializeMorphSets(::Model &mdl);
+		void MergeSplitMeshes(ExportMeshList &meshList);
 		tinygltf::Scene &GetScene();
 
-		bool IsSkinned() const;
-		bool IsAnimated() const;
+		bool IsSkinned(::Model &mdl) const;
+		bool IsAnimated(::Model &mdl) const;
 		bool ShouldExportMeshes() const;
 
 		pragma::asset::ModelExportInfo m_exportInfo {};
@@ -82,13 +149,13 @@ namespace pragma::asset
 		BufferIndices m_bufferIndices {};
 		BufferViewIndices m_bufferViewIndices {};
 
-		Model &m_model;
-		std::vector<std::shared_ptr<ModelSubMesh>> m_meshes {};
+		SceneDesc m_sceneDesc {};
+		std::unordered_map<Material*,uint32_t> m_materialToGltfIndex {};
+		UniqueModelExportList m_uniqueModelExportList {};
 		std::unordered_map<ModelSubMesh*,std::vector<MorphSet>> m_meshMorphSets {};
-		std::unordered_map<ModelSubMesh*,uint32_t> m_meshesWithMorphTargets {};
+		std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> m_meshesWithMorphTargets {};
 		std::unordered_map<uint32_t,uint32_t> m_boneIdxToNodeIdx {};
 		tinygltf::Model m_gltfMdl = {};
-		int32_t m_skinIdx = -1;
 	};
 };
 

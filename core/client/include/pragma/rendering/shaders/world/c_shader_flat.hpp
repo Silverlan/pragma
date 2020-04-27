@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_FLAT_HPP__
 #define __C_SHADER_FLAT_HPP__
 
@@ -14,9 +21,9 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		ShaderFlat(prosper::Context &context,const std::string &identifier);
 
@@ -29,7 +36,7 @@ namespace pragma
 	private:
 		// These are unused
 		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
-		virtual bool BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings) override {return false;}
+		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 	};

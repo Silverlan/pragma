@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lentity.h"
 #include <pragma/math/angle/wvquaternion.h>
@@ -59,24 +66,6 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>(&RemoveEntityOnRemoval));
 	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&,Bool)>(&RemoveEntityOnRemoval));
 	classDef.def("GetSpawnFlags",&GetSpawnFlags);
-	// Obsolete
-	/*classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	classDef.def("CallCallbacks",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object,luabind::object)>(&CallCallbacks));
-	*/
 	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		pragma::physics::ScaledTransform t;
@@ -764,60 +753,3 @@ void Lua::Entity::GetAirDensity(lua_State *l,EntityHandle &hEnt)
 	LUA_CHECK_ENTITY(l,hEnt);
 	Lua::PushNumber(l,1.225f); // Placeholder
 }
-
-// Obsolete
-// Callbacks
-/*static void call_callbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,uint32_t numArgs)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto *callbacks = hEnt->GetLuaCallbacks(name);
-	if(callbacks == nullptr)
-		return;
-	const uint32_t argOffset = 3;
-	for(auto &hCb : *callbacks)
-	{
-		if(hCb.IsValid() == false)
-			continue;
-		auto *luaCallback = static_cast<LuaCallback*>(hCb.get());
-		auto &o = luaCallback->GetLuaObject();
-		auto bReturn = false;
-		Lua::Execute(l,[l,&o,numArgs,argOffset,&bReturn,&name](int(*traceback)(lua_State *l)) {
-			auto n = Lua::GetStackTop(l);
-			auto r = Lua::ProtectedCall(l,[&o,numArgs,argOffset](lua_State *l) {
-				o.push(l);
-				for(auto i=decltype(numArgs){0};i<numArgs;++i)
-				{
-					auto arg = argOffset +i;
-					Lua::PushValue(l,arg);
-				}
-				return Lua::StatusCode::Ok;
-			},LUA_MULTRET,traceback);
-			if(r == Lua::StatusCode::Ok)
-			{
-				auto numResults = Lua::GetStackTop(l) -n;
-				if(numResults > 0)
-					bReturn = true;
-			}
-			return r;
-		},Lua::GetErrorColorMode(l));
-		if(bReturn == true)
-			break;
-	}
-}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name) {call_callbacks(l,hEnt,name,0);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1) {call_callbacks(l,hEnt,name,1);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2) {call_callbacks(l,hEnt,name,2);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3) {call_callbacks(l,hEnt,name,3);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4) {call_callbacks(l,hEnt,name,4);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5) {call_callbacks(l,hEnt,name,5);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6) {call_callbacks(l,hEnt,name,6);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7) {call_callbacks(l,hEnt,name,7);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8) {call_callbacks(l,hEnt,name,8);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9) {call_callbacks(l,hEnt,name,9);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10) {call_callbacks(l,hEnt,name,10);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11) {call_callbacks(l,hEnt,name,11);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12) {call_callbacks(l,hEnt,name,12);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13) {call_callbacks(l,hEnt,name,13);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13,luabind::object o14) {call_callbacks(l,hEnt,name,14);}
-void Lua::Entity::CallCallbacks(lua_State *l,EntityHandle &hEnt,const std::string &name,luabind::object o1,luabind::object o2,luabind::object o3,luabind::object o4,luabind::object o5,luabind::object o6,luabind::object o7,luabind::object o8,luabind::object o9,luabind::object o10,luabind::object o11,luabind::object o12,luabind::object o13,luabind::object o14,luabind::object o15) {call_callbacks(l,hEnt,name,15);}
-*/

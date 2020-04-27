@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include <misc/compute_pipeline_create_info.h>
@@ -9,37 +16,37 @@ extern DLLCENGINE CEngine *c_engine;
 uint32_t ShaderForwardPLightCulling::TILE_SIZE = 16u;
 decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Light Buffers
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Light Buffers
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Visible light tile index buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Visible light tile index buffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Shadow Buffers
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Shadow Buffers
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Visible light index buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Depth Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Depth Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
 decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA) ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Camera
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Camera
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Render Settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Render Settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
@@ -51,7 +58,7 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(Anvil::ComputePipelin
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::COMPUTE_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
@@ -60,7 +67,7 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(Anvil::ComputePipelin
 }
 
 bool ShaderForwardPLightCulling::Compute(
-	Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+	prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 	uint32_t sceneIndex
 )
 {

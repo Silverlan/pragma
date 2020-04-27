@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __HDR_DATA_HPP__
 #define __HDR_DATA_HPP__
 
@@ -35,18 +42,18 @@ namespace pragma::rendering
 		HDRData(RasterizationRenderer &rasterizer);
 		~HDRData();
 		void UpdateExposure();
-		bool Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits sampleCount,bool bEnableSSAO);
+		bool Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 
 		void SwapIOTextures();
 
-		bool BeginRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::RenderPass *customRenderPass=nullptr);
-		bool EndRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		bool ResolveRenderPass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
+		bool BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass=nullptr);
+		bool EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		bool ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 
 		void ResetIOTextureIndex();
-		bool BlitStagingRenderTargetToMainRenderTarget(prosper::CommandBuffer &cmdBuffer);
-		bool BlitMainDepthBufferToSamplableDepthBuffer(prosper::CommandBuffer &cmdBuffer,std::function<void(prosper::CommandBuffer&)> &fTransitionSampleImgToTransferDst);
+		bool BlitStagingRenderTargetToMainRenderTarget(prosper::ICommandBuffer &cmdBuffer);
+		bool BlitMainDepthBufferToSamplableDepthBuffer(prosper::ICommandBuffer &cmdBuffer,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst);
 
 		SSAOInfo ssaoInfo;
 		pragma::rendering::Prepass prepass;
@@ -58,7 +65,7 @@ namespace pragma::rendering
 		// 3) depth image
 		std::shared_ptr<prosper::RenderTarget> sceneRenderTarget = nullptr;
 		// Bound to HDR color image; Used for HDR post-processing
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgHDRPostProcessing = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgHDRPostProcessing = nullptr;
 
 		// Contains the bright colors of the scene, as output by the lighting pass
 		std::shared_ptr<prosper::Texture> bloomTexture = nullptr;
@@ -69,7 +76,7 @@ namespace pragma::rendering
 
 		// Bound to HDR color image and HDR blurred bloom color image, used for tonemapping and
 		// applying bloom effect
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgBloomTonemapping = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgBloomTonemapping = nullptr;
 
 		// Render target for post-processing after the lighting pass with HDR colors
 		std::shared_ptr<prosper::RenderTarget> hdrPostProcessingRenderTarget = nullptr;
@@ -77,20 +84,20 @@ namespace pragma::rendering
 		// Render target containing image after tonemapping
 		std::shared_ptr<prosper::RenderTarget> toneMappedRenderTarget = nullptr;
 		// Bound to tonemapped (LDR) color image
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgTonemappedPostProcessing = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgTonemappedPostProcessing = nullptr;
 
 		// Render target for post-processing after tonemapping
 		std::shared_ptr<prosper::RenderTarget> toneMappedPostProcessingRenderTarget = nullptr;
 		// Bound to tonemapped post-processing image
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgToneMappedPostProcessing = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgToneMappedPostProcessing = nullptr;
 
 		// Bound to depth image of lighting stage; Used for particle effects
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgSceneDepth = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgSceneDepth = nullptr;
 		// Bound to post-scene depth image; Used for post-processing (e.g. fog)
-		std::shared_ptr<prosper::DescriptorSetGroup> dsgDepthPostProcessing = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> dsgDepthPostProcessing = nullptr;
 
 		// Render pass used to restart scene pass after particle pass
-		std::shared_ptr<prosper::RenderPass> rpPostParticle = nullptr;
+		std::shared_ptr<prosper::IRenderPass> rpPostParticle = nullptr;
 
 		float exposure = 1.f;
 		float max_exposure = 1,f;
@@ -101,17 +108,17 @@ namespace pragma::rendering
 		struct Exposure
 		{
 			Exposure();
-			std::shared_ptr<prosper::DescriptorSetGroup> descSetGroupAverageColorTexture = nullptr;
-			std::shared_ptr<prosper::DescriptorSetGroup> descSetGroupAverageColorBuffer = nullptr;
+			std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupAverageColorTexture = nullptr;
+			std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupAverageColorBuffer = nullptr;
 			Vector3 averageColor;
-			std::shared_ptr<prosper::Buffer> avgColorBuffer = nullptr;
+			std::shared_ptr<prosper::IBuffer> avgColorBuffer = nullptr;
 			double lastExposureUpdate;
 			bool Initialize(prosper::Texture &texture);
 			const Vector3 &UpdateColor();
 		private:
 			util::WeakHandle<prosper::Shader> m_shaderCalcColor = {};
 			std::weak_ptr<prosper::Texture> m_exposureColorSource = {};
-			std::shared_ptr<prosper::PrimaryCommandBuffer> m_calcImgColorCmdBuffer = nullptr;
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_calcImgColorCmdBuffer = nullptr;
 			std::shared_ptr<prosper::Fence> m_calcImgColorFence = nullptr;
 			bool m_bWaitingForResult = false;
 			uint32_t m_cmdBufferQueueFamilyIndex = 0u;

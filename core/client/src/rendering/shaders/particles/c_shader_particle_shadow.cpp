@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
  // prosper TODO
 #if 0
@@ -56,7 +63,7 @@ void ParticleShadow::Draw(CParticleSystem *particle,CLightBase *light,uint32_t l
 		<<Vector4{posLight.x,posLight.y,posLight.z,(ranged != nullptr ) ? static_cast<float>(ranged->GetDistance()) : 0.f}
 		<<static_cast<int32_t>(renderFlags)
 		<<nearZ<<farZ;
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT,static_cast<uint32_t>(instance.GetCount()),instance.GetData());
+	drawCmd->PushConstants(layout,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,static_cast<uint32_t>(instance.GetCount()),instance.GetData());
 
 	auto bAnimated = ((renderFlags &RenderFlags::Animated) != RenderFlags::None) ? true : false;
 	if(bAnimated == true)

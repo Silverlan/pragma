@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_LENTITY_COMPONENTS_HPP__
 #define __C_LENTITY_COMPONENTS_HPP__
 
@@ -61,8 +68,8 @@ namespace Lua
 		DLLCLIENT void GetRenderBounds(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetRenderSphereBounds(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::CommandBuffer> &drawCmd,bool bForceBufferUpdate);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::CommandBuffer> &drawCmd);
+		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,bool bForceBufferUpdate);
+		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd);
 		DLLCLIENT void GetRenderBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetBoneBuffer(lua_State *l,CRenderHandle &hEnt);
 	};

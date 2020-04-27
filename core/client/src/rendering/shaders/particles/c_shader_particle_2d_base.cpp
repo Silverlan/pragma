@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -12,31 +19,31 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_VERTEX) ShaderParticle2DBase::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX) ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_VERTEX) ShaderParticle2DBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX) ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32_SFloat};
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {Anvil::VertexInputRate::INSTANCE,sizeof(pragma::CParticleSystemComponent::ParticleData)};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE = {VERTEX_BINDING_PARTICLE,Anvil::Format::R32G32B32A32_SFLOAT};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_PARTICLE,Anvil::Format::R16G16B16A16_UNORM};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_PARTICLE,Anvil::Format::R32_SFLOAT};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH = {VERTEX_BINDING_PARTICLE,Anvil::Format::R32_SFLOAT};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_PARTICLE,prosper::Format::R16G16B16A16_UNorm};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {Anvil::VertexInputRate::INSTANCE};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START,Anvil::Format::R32_SFLOAT};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START,prosper::Format::R32_SFloat};
 
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE) ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -62,7 +69,7 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(Anvil::Gra
 }
 void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
 {
@@ -89,7 +96,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateIn
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx,RecordFlags recordFlags)
 {
 	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys)),recordFlags);
 }
@@ -98,41 +105,39 @@ uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {retu
 uint32_t ShaderParticle2DBase::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
 uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
 
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto &dev = c_engine->GetDevice();
-
 	auto *diffuseMap = mat.GetDiffuseMap();
 	if(diffuseMap != nullptr && diffuseMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap->texture);
 		if(texture->HasValidVkTexture())
 		{
-			auto descSetGroup = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_TEXTURE);
+			auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this,descSetGroup);
 			auto &descSet = *descSetGroup->GetDescriptorSet();
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),0u);
+			descSet.SetBindingTexture(*texture->GetVkTexture(),0u);
 			return descSetGroup;
 		}
 	}
 	return nullptr;
 }
 
-void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
 	CreateCachedRenderPass<ShaderParticle2DBase>({{
 		{
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
 		},
 		{ // Bloom Attachment
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
 		},
 		{
-			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 		}
 	}},outRenderPass,pipelineIdx);
 }
@@ -209,7 +214,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 	);
 }
 
-prosper::Shader::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
+prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
 bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps)
 {
 	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
@@ -220,7 +225,7 @@ bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRe
 		descSetGroupMat = InitializeMaterialDescriptorSet(*mat); // Attempt to initialize on the fly
 	if(descSetGroupMat == nullptr)
 		return false;
-	auto &descSetTexture = *(*descSetGroupMat)->get_descriptor_set(0u); // prosper TODO: Use dummy descriptor set when not animated
+	auto &descSetTexture = *descSetGroupMat->GetDescriptorSet(); // prosper TODO: Use dummy descriptor set when not animated
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
@@ -272,7 +277,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 	auto animStartBuffer = ps.GetAnimationStartBuffer();
 	if(animStartBuffer == nullptr)
 		animStartBuffer = c_engine->GetDummyBuffer();
-	return RecordBindVertexBuffers({&ps.GetVertexBuffer()->GetAnvilBuffer(),&ps.GetParticleBuffer()->GetAnvilBuffer(),&animStartBuffer->GetAnvilBuffer()}) == true &&
+	return RecordBindVertexBuffers({ps.GetVertexBuffer().get(),ps.GetParticleBuffer().get(),animStartBuffer.get()}) == true &&
 		RecordDraw(pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 }
 

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_BASE_CUBEMAP_HPP__
 #define __C_SHADER_BASE_CUBEMAP_HPP__
 
@@ -34,15 +41,15 @@ namespace pragma
 	protected:
 		ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader);
 		ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &fragmentShader);
-		std::shared_ptr<prosper::Buffer> CreateCubeMesh(uint32_t &outNumVerts) const;
-		std::shared_ptr<prosper::Image> CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags=prosper::util::ImageCreateInfo::Flags::None) const;
+		std::shared_ptr<prosper::IBuffer> CreateCubeMesh(uint32_t &outNumVerts) const;
+		std::shared_ptr<prosper::IImage> CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags=prosper::util::ImageCreateInfo::Flags::None) const;
 		std::shared_ptr<prosper::RenderTarget> CreateCubeMapRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags=prosper::util::ImageCreateInfo::Flags::None) const;
 		static void InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags,prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo);
 		static void InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo);
 		const Mat4 &GetProjectionMatrix(float aspectRatio) const;
 		const Mat4 &GetViewMatrix(uint8_t layerId) const;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

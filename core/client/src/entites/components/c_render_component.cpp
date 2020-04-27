@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
@@ -30,7 +37,7 @@ namespace pragma
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBuffer = nullptr;
+static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
@@ -57,19 +64,19 @@ void CRenderComponent::InitializeBuffers()
 	auto instanceCount = 32'768u;
 	auto maxInstanceCount = instanceCount *100u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize *instanceCount;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
+	s_instanceBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 
 	pragma::initialize_articulated_buffers();
 }
-std::weak_ptr<prosper::Buffer> CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
-prosper::DescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
+std::weak_ptr<prosper::IBuffer> CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
+prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
 void CRenderComponent::ClearRenderObjects()
 {
 	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
@@ -131,36 +138,6 @@ void CRenderComponent::Initialize()
 
 		UpdateRenderMeshes();
 		m_renderMode->InvokeCallbacks();
-
-		// TODO Build LOD cache!
-		/*RenderMode renderMode = GetRenderMode();
-		for(unsigned int i=0;i<model->GetLODCount();i++)
-		{
-			RenderInstance *instance = RenderSystem::CreateRenderInstance(renderMode);
-			instance->userData = this;
-			instance->SetRenderCallback(&CBaseEntity::RenderCallback);
-			std::vector<ModelMesh*> meshes;
-			model->GetMeshes(i,&meshes);
-			for(unsigned int i=0;i<meshes.size();i++)
-			{
-				CModelMesh *mesh = static_cast<CModelMesh*>(meshes[i]);
-				GLMesh &glMesh = mesh->GetGLMesh();
-				unsigned int texture = mesh->GetTexture();
-				Material *mat = model->GetMaterial(GetSkin(),texture);
-				if(mat != NULL)
-				{
-					void *data = mat->GetUserData();
-					Shader3DTexturedBase *shader = NULL;
-					if(data != NULL)
-						shader = dynamic_cast<Shader3DTexturedBase*>(static_cast<ShaderBase*>(data));
-					if(shader != NULL)
-						instance->CreateRenderObject(shader,mat,&glMesh);
-				}
-			}
-			if(i > 0)
-				instance->SetEnabled(false);
-			m_renderInstances.insert(std::unordered_map<unsigned int,RenderInstance*>::value_type(model->GetLOD(i),instance));
-		}*/ // Vulkan TODO
 	});
 }
 CRenderComponent::~CRenderComponent()
@@ -419,7 +396,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt) {umath::set_flag(m_stateFlags,StateFlags::ExemptFromOcclusionCulling,exempt);}
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
-void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
+void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
 	InitializeRenderBuffers();
 
@@ -467,7 +444,7 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::PrimaryCo
 				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 			auto &m = GetTransformationMatrix();
 			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			prosper::util::record_update_generic_shader_read_buffer(**drawCmd,*renderBuffer,0ull,sizeof(instanceData),&instanceData);
+			drawCmd->RecordUpdateGenericShaderReadBuffer(*renderBuffer,0ull,sizeof(instanceData),&instanceData);
 		}
 	}
 	m_lastRender = frameId;
@@ -494,26 +471,19 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 
 	if(mode == RenderMode::None)
 		ClearRenderBuffers();
-	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
-	for(it=m_renderInstances.begin();it!=m_renderInstances.end();it++)
-	{
-		RenderInstance *instance = it->second;
-		instance->SetRenderMode(mode);
-	}*/ // Vulkan TODO
 }
 void CRenderComponent::InitializeRenderBuffers()
 {
 	// Initialize render buffer if it doesn't exist
 	if(m_renderBuffer != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
-	auto &dev = c_engine->GetDevice();
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
-	m_renderDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		*m_renderDescSetGroup->GetDescriptorSet(),*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
+	m_renderDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
+		*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
 	);
 	UpdateBoneBuffer();
-	(*m_renderDescSetGroup)->get_descriptor_set(0u)->update();
+	m_renderDescSetGroup->GetDescriptorSet()->Update();
 
 	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
 }
@@ -529,8 +499,8 @@ void CRenderComponent::UpdateBoneBuffer()
 	if(wpBoneBuffer.expired())
 		return;
 	auto &dev = c_engine->GetDevice();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		*m_renderDescSetGroup->GetDescriptorSet(),*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
+		*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 	);
 }
 void CRenderComponent::ClearRenderBuffers()
@@ -601,13 +571,10 @@ bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *ca
 }
 void CRenderComponent::PreRender()
 {
-	/*if(m_parent == NULL || (m_parent->flags &FPARENT_UPDATE_EACH_FRAME) != FPARENT_UPDATE_EACH_FRAME || !m_parent->parent->IsValid())
-		return;
-	UpdateParentOffset();
-	UpdateMatrices();*/ // Obsolete // Vulkan TODO
+	// TODO: Remove me
 }
 const std::vector<CRenderComponent*> &CRenderComponent::GetViewEntities() {return s_viewEntities;}
-const std::shared_ptr<prosper::UniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}
+const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}
 void CRenderComponent::ClearBuffers()
 {
 	s_instanceBuffer = nullptr;
@@ -655,7 +622,7 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame)
+CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame)
 	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer},firstUpdateThisFrame{firstUpdateThisFrame}
 {}
 void CEOnUpdateRenderData::PushArguments(lua_State *l)

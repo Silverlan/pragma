@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_SSAO_BLUR_HPP__
 #define __C_SHADER_SSAO_BLUR_HPP__
 
@@ -12,26 +19,8 @@ namespace pragma
 	public:
 		ShaderSSAOBlur(prosper::Context &context,const std::string &identifier);
 	protected:
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 
-// prosper TODO
-#if 0
-#include "shadersystem.h"
-#include "shader_screen.h"
-
-namespace Shader
-{
-	class DLLCLIENT SSAOBlur
-		: public Screen
-	{
-	public:
-		SSAOBlur();
-	protected:
-		virtual void InitializeAttachments(std::vector<vk::PipelineColorBlendAttachmentState> &attachments) override;
-		virtual void InitializeRenderPasses() override;
-	};
-};
-#endif
 #endif

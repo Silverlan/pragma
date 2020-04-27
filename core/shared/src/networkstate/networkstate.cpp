@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/console/convars.h>
@@ -740,14 +747,6 @@ void NetworkState::Think()
 	StartProfilingStage(CPUProfilingPhase::UpdateSounds);
 	UpdateSounds();
 	StopProfilingStage(CPUProfilingPhase::UpdateSounds);
-	/*if(m_ioservice != NULL)
-	{
-		m_ioservice->poll();
-		if(m_bTerminateSocket)
-			TerminateSocket();
-	}
-	if(m_ioserviceUdp != NULL)
-		m_ioserviceUdp->poll();*/ // WVTODO
 	CallCallbacks<void>("Think");
 	Game *game = GetGameState();
 	if(game != NULL)

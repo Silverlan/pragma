@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
 #include <image/prosper_sampler.hpp>
@@ -12,9 +19,9 @@ using namespace pragma;
 
 decltype(ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE) ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding {
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding {
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -29,9 +36,9 @@ void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(Anvil::GraphicsPipeli
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 }
 
-void ShaderConvoluteCubemapLighting::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderConvoluteCubemapLighting::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderConvoluteCubemapLighting>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R16G16B16A16_SFLOAT}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderConvoluteCubemapLighting>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R16G16B16A16_SFloat}}},outRenderPass,pipelineIdx);
 }
 
 std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubemapLighting(prosper::Texture &cubemap,uint32_t resolution)
@@ -42,9 +49,8 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	auto rt = CreateCubeMapRenderTarget(w,h);
 
 	// Shader input
-	auto &dev = c_engine->GetDevice();
-	auto dsg = prosper::util::create_descriptor_set_group(dev,DESCRIPTOR_SET_CUBEMAP_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*dsg->GetDescriptorSet(),cubemap,0u);
+	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	dsg->GetDescriptorSet()->SetBindingTexture(cubemap,0u);
 
 	PushConstants pushConstants {};
 	pushConstants.projection = GetProjectionMatrix(w /static_cast<float>(h));
@@ -68,10 +74,10 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 			prosper::util::ImageSubresourceRange range {};
 			range.baseArrayLayer = layerId;
 			range.layerCount = 1u;
-			auto &img = rt->GetTexture()->GetImage();
+			auto &img = rt->GetTexture().GetImage();
 			if(
-				prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,range) == false ||
-				prosper::util::record_begin_render_pass(**setupCmd,*rt,layerId) == false
+				setupCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal,range) == false ||
+				setupCmd->RecordBeginRenderPass(*rt,layerId) == false
 			)
 			{
 				success = false;
@@ -80,18 +86,18 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 			if(BeginDraw(setupCmd) == true)
 			{
 				pushConstants.view = GetViewMatrix(layerId);
-				success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*(*dsg)->get_descriptor_set(0u)) &&
-					RecordBindVertexBuffer(**vertexBuffer) && RecordDraw(3u,1u,i);
+				success = RecordPushConstants(pushConstants) && RecordBindDescriptorSet(*dsg->GetDescriptorSet()) &&
+					RecordBindVertexBuffer(*vertexBuffer) && RecordDraw(3u,1u,i);
 				EndDraw();
 			}
-			success = success && prosper::util::record_end_render_pass(**setupCmd);
-			success = success && prosper::util::record_post_render_pass_image_barrier(**setupCmd,**img,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,range);
+			success = success && setupCmd->RecordEndRenderPass();
+			success = success && setupCmd->RecordPostRenderPassImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,range);
 
 			if(success == false)
 				goto endLoop;
 		}
 	}
 endLoop:
-	return success ? rt->GetTexture() : nullptr;
+	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }
 

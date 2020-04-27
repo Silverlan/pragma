@@ -1,9 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_TEXTURED_HPP__
 #define __C_SHADER_TEXTURED_HPP__
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 
-namespace prosper {class DescriptorSet;};
+namespace prosper {class IDescriptorSet;};
 namespace pragma
 {
 	const float DefaultParallaxHeightScale = 0.025f;
@@ -21,7 +28,7 @@ namespace pragma
 			Reflection = umath::to_integral(ShaderScene::Pipeline::Count),
 			Count
 		};
-		static Pipeline GetPipelineIndex(Anvil::SampleCountFlagBits sampleCount,bool bReflection=false);
+		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection=false);
 		static uint32_t HASH_TYPE;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
@@ -42,14 +49,14 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_LIGHTMAP;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CSM;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class VertexBinding : uint32_t
 		{
@@ -123,7 +130,9 @@ namespace pragma
 			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
-			Vector2 padding; // Padding to vec4
+			static_assert(sizeof(Scene::DebugMode) == sizeof(uint32_t));
+			Scene::DebugMode debugMode;
+			float padding; // Padding to vec4
 		};
 
 		struct MaterialData
@@ -145,15 +154,16 @@ namespace pragma
 		virtual ~ShaderTextured3DBase() override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane);
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 		virtual size_t GetBaseTypeHashCode() const override;
-		virtual std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
+		bool SetDebugMode(Scene::DebugMode debugMode);
 		void Set3DSky(bool is3dSky);
 	protected:
 		using ShaderEntity::Draw;
@@ -163,12 +173,12 @@ namespace pragma
 		virtual void OnPipelineBound() override;
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
-		std::shared_ptr<prosper::DescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::Shader::DescriptorSetInfo &descSetInfo);
-		std::optional<MaterialData> InitializeMaterialBuffer(prosper::DescriptorSet &descSet,CMaterial &mat);
+		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
+		std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat);
 		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		virtual prosper::Shader::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
+		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;

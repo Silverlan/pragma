@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
@@ -14,50 +21,50 @@ extern DLLCENGINE CEngine *c_engine;
 
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT) ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Image
-			Anvil::DescriptorType::STORAGE_IMAGE,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Image
+			prosper::DescriptorType::StorageImage,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
 decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Textures
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT,
+		prosper::DescriptorSetInfo::Binding { // Textures
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::ComputeBit,
 			umath::to_integral(GameLimits::MaxImageArrayLayers)
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Materials
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Materials
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // SubMeshInfos
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // SubMeshInfos
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // EntityInstanceData
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // EntityInstanceData
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // BoneMatrices
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // BoneMatrices
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // VertexBuffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // VertexBuffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // IndexBuffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // IndexBuffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // VertexWeightBuffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // VertexWeightBuffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // AlphaBuffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // AlphaBuffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
 	}
 };
@@ -65,25 +72,25 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPT
 decltype(ShaderRayTracing::DESCRIPTOR_SET_CAMERA) ShaderRayTracing::DESCRIPTOR_SET_CAMERA = {&ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_SET_LIGHTS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Light Buffers
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Light Buffers
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
 decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_IBL = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Irradiance Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Irradiance Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Prefilter Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Prefilter Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // BRDF Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // BRDF Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
@@ -98,7 +105,7 @@ void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 	// Currently not supported on some GPUs?
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::COMPUTE_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IMAGE_OUTPUT);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_GAME_SCENE);
@@ -109,9 +116,9 @@ void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInf
 
 bool ShaderRayTracing::Compute(
 	const PushConstants &pushConstants,
-	Anvil::DescriptorSet &descSetOutputImage,Anvil::DescriptorSet &descSetGameScene,
-	Anvil::DescriptorSet &descSetCamera,Anvil::DescriptorSet &descSetLightSources,
-	Anvil::DescriptorSet *descSetIBL,
+	prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,
+	prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetLightSources,
+	prosper::IDescriptorSet *descSetIBL,
 	uint32_t workGroupsX,uint32_t workGroupsY
 )
 {

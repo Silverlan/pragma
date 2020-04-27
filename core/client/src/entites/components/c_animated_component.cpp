@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_eye_component.hpp"
@@ -27,21 +34,21 @@ void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componen
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
 luabind::object CAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAnimatedComponentHandleWrapper>(l);}
-static std::shared_ptr<prosper::UniformResizableBuffer> s_instanceBoneBuffer = nullptr;
-const std::shared_ptr<prosper::UniformResizableBuffer> &pragma::get_instance_bone_buffer() {return s_instanceBoneBuffer;}
+static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = nullptr;
+const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() {return s_instanceBoneBuffer;}
 void pragma::initialize_articulated_buffers()
 {
 	auto instanceSize = umath::to_integral(GameLimits::MaxBones) *sizeof(Mat4);
 	auto instanceCount = 512u;
 	auto maxInstanceCount = instanceCount *4u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize *maxInstanceCount;
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_SRC_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= Anvil::BufferUsageFlagBits::STORAGE_BUFFER_BIT;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBoneBuffer = prosper::util::create_uniform_resizable_buffer(*c_engine,createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
+	s_instanceBoneBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 }
 void pragma::clear_articulated_buffers() {s_instanceBoneBuffer = nullptr;}
@@ -164,7 +171,7 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	}
 }
 
-std::weak_ptr<prosper::Buffer> CAnimatedComponent::GetBoneBuffer() const {return m_boneBuffer;}
+std::weak_ptr<prosper::IBuffer> CAnimatedComponent::GetBoneBuffer() const {return m_boneBuffer;}
 void CAnimatedComponent::InitializeBoneBuffer()
 {
 	if(m_boneBuffer != nullptr)
@@ -174,7 +181,7 @@ void CAnimatedComponent::InitializeBoneBuffer()
 	CEOnBoneBufferInitialized evData{m_boneBuffer};
 	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED,evData);
 }
-void CAnimatedComponent::UpdateBoneBuffer(prosper::PrimaryCommandBuffer &commandBuffer)
+void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer)
 {
 	// Update Bone Buffer
 	auto wpBoneBuffer = GetBoneBuffer();
@@ -183,7 +190,7 @@ void CAnimatedComponent::UpdateBoneBuffer(prosper::PrimaryCommandBuffer &command
 	{
 		// Update bone buffer
 		auto buffer = wpBoneBuffer.lock();
-		prosper::util::record_update_generic_shader_read_buffer(*commandBuffer,*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
+		commandBuffer.RecordUpdateGenericShaderReadBuffer(*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
 	}
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const {return const_cast<CAnimatedComponent*>(this)->GetBoneMatrices();}
@@ -267,7 +274,7 @@ void CEOnSkeletonUpdated::HandleReturnValues(lua_State *l)
 
 //////////////
 
-CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::Buffer> &buffer)
+CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer)
 	: buffer{buffer}
 {}
 void CEOnBoneBufferInitialized::PushArguments(lua_State *l)

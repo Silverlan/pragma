@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -12,7 +19,6 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
-#include "pragma/rendering/shaders/c_shaderlua.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "cmaterialmanager.h"
@@ -301,8 +307,8 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
 	classDefRasterizationRenderer.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
 	classDefRasterizationRenderer.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::CommandBuffer&,prosper::RenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::CommandBuffer&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::ICommandBuffer&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::ICommandBuffer&)>(&Lua::RasterizationRenderer::BeginRenderPass));
 	classDefRasterizationRenderer.def("EndRenderPass",&Lua::RasterizationRenderer::EndRenderPass);
 	classDefRasterizationRenderer.def("GetPrepassShader",&Lua::RasterizationRenderer::GetPrepassShader);
 	classDefRasterizationRenderer.def("SetShaderOverride",&Lua::RasterizationRenderer::SetShaderOverride);
@@ -322,16 +328,16 @@ void CGame::RegisterLua()
 		Lua::Push(l,rt);
 	}));
 	classDefRasterizationRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &tex = renderer.GetPresentationTexture();
+		auto *tex = renderer.GetPresentationTexture();
 		if(tex == nullptr)
 			return;
-		Lua::Push(l,tex);
+		Lua::Push(l,tex->shared_from_this());
 	}));
 	classDefRasterizationRenderer.def("GetHDRPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &tex = renderer.GetHDRPresentationTexture();
+		auto *tex = renderer.GetHDRPresentationTexture();
 		if(tex == nullptr)
 			return;
-		Lua::Push(l,tex);
+		Lua::Push(l,tex->shared_from_this());
 	}));
 	classDefRasterizationRenderer.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
@@ -358,6 +364,18 @@ void CGame::RegisterLua()
 	gameMod[classDefRaytracingRenderer];
 
 	auto classDefScene = luabind::class_<Scene>("Scene");
+	classDefScene.add_static_constant("DEBUG_MODE_NONE",umath::to_integral(Scene::DebugMode::None));
+	classDefScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION",umath::to_integral(Scene::DebugMode::AmbientOcclusion));
+	classDefScene.add_static_constant("DEBUG_MODE_ALBEDO",umath::to_integral(Scene::DebugMode::Albedo));
+	classDefScene.add_static_constant("DEBUG_MODE_METALNESS",umath::to_integral(Scene::DebugMode::Metalness));
+	classDefScene.add_static_constant("DEBUG_MODE_ROUGHNESS",umath::to_integral(Scene::DebugMode::Roughness));
+	classDefScene.add_static_constant("DEBUG_MODE_DIFFUSE_LIGHTING",umath::to_integral(Scene::DebugMode::DiffuseLighting));
+	classDefScene.add_static_constant("DEBUG_MODE_NORMAL",umath::to_integral(Scene::DebugMode::Normal));
+	classDefScene.add_static_constant("DEBUG_MODE_NORMAL_MAP",umath::to_integral(Scene::DebugMode::NormalMap));
+	classDefScene.add_static_constant("DEBUG_MODE_REFLECTANCE",umath::to_integral(Scene::DebugMode::Reflectance));
+	classDefScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER",umath::to_integral(Scene::DebugMode::IBLPrefilter));
+	classDefScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE",umath::to_integral(Scene::DebugMode::IBLIrradiance));
+	classDefScene.add_static_constant("DEBUG_MODE_EMISSION",umath::to_integral(Scene::DebugMode::Emission));
 	classDefScene.def("GetActiveCamera",&Lua::Scene::GetCamera);
 	classDefScene.def("SetActiveCamera",static_cast<void(*)(lua_State*,::Scene&,CCameraHandle&)>([](lua_State *l,::Scene &scene,CCameraHandle &hCam) {
 		pragma::Lua::check_component(l,hCam);
@@ -378,6 +396,8 @@ void CGame::RegisterLua()
 	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
 	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&)>(&Lua::Scene::GetCameraDescriptorSet));
 	classDefScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
+	classDefScene.def("GetDebugMode",&Lua::Scene::GetDebugMode);
+	classDefScene.def("SetDebugMode",&Lua::Scene::SetDebugMode);
 	classDefScene.def("GetRenderer",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
 		auto *renderer = scene.GetRenderer();
 		if(renderer == nullptr)

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
 #include "pragma/model/c_modelmesh.h"
@@ -10,18 +17,18 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-decltype(ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA) ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA) ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA) ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA = {prosper::VertexInputRate::Vertex};
+decltype(ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA) ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,prosper::Format::R32G32_SFloat};
 decltype(ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL) ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL = {
 	&ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL,
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Diffuse Map 2
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Diffuse Map 2
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Diffuse Map 3
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Diffuse Map 3
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -31,7 +38,7 @@ ShaderTexturedAlphaTransition::ShaderTexturedAlphaTransition(prosper::Context &c
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
-std::shared_ptr<prosper::DescriptorSetGroup> ShaderTexturedAlphaTransition::InitializeMaterialDescriptorSet(CMaterial &mat)
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedAlphaTransition::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto descSetGroup = ShaderTextured3DBase::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 	if(descSetGroup == nullptr)
@@ -43,7 +50,7 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTexturedAlphaTransition::Init
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap2->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap2));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap2));
 	}
 
 	auto *diffuseMap3 = mat.GetTextureInfo("diffusemap3");
@@ -51,14 +58,14 @@ std::shared_ptr<prosper::DescriptorSetGroup> ShaderTexturedAlphaTransition::Init
 	{
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap3->texture);
 		if(texture->HasValidVkTexture())
-			prosper::util::set_descriptor_set_binding_texture(descSet,*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap3));
+			descSet.SetBindingTexture(*texture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap3));
 	}
 	return descSetGroup;
 }
-prosper::Shader::DescriptorSetInfo &ShaderTexturedAlphaTransition::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderTexturedAlphaTransition::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTexturedAlphaTransition::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderTexturedAlphaTransition::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -82,6 +89,6 @@ bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
 		}
 	}
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderTextured3DBase::PushConstants)) == true &&
-		RecordBindVertexBuffer(alphaBuffer->GetAnvilBuffer(),VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
+		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
 		ShaderTextured3DBase::Draw(mesh) == true;
 }

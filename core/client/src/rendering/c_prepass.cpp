@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/c_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -17,7 +24,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-bool pragma::rendering::Prepass::Initialize(prosper::Context &context,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits samples,bool bExtended)
+bool pragma::rendering::Prepass::Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
 {
 	auto &dev = context.GetDevice();
 
@@ -29,30 +36,30 @@ bool pragma::rendering::Prepass::Initialize(prosper::Context &context,uint32_t w
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	imgCreateInfo.samples = samples;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::DEPTH_STENCIL_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	auto imgDepth = prosper::util::create_image(dev,imgCreateInfo);
+	imgCreateInfo.usage = prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::DepthStencilAttachmentOptimal;
+	auto imgDepth = context.CreateImage(imgCreateInfo);
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = {};
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	textureDepth = prosper::util::create_texture(dev,texCreateInfo,imgDepth,&imgViewCreateInfo,&samplerCreateInfo);
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
+	textureDepth = context.CreateTexture(texCreateInfo,*imgDepth,imgViewCreateInfo,samplerCreateInfo);
 
 	if(textureDepth->IsMSAATexture())
 		textureDepthSampled = static_cast<prosper::MSAATexture&>(*textureDepth).GetResolvedTexture();
 	else
 	{
-		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-		imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		imgCreateInfo.samples = Anvil::SampleCountFlagBits::_1_BIT;
-		auto imgDepthSampled = prosper::util::create_image(dev,imgCreateInfo);
+		imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+		imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
+		auto imgDepthSampled = context.CreateImage(imgCreateInfo);
 
 		texCreateInfo.flags = {};
-		textureDepthSampled = prosper::util::create_texture(dev,texCreateInfo,imgDepthSampled,&imgViewCreateInfo,&samplerCreateInfo);
+		textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
 	}
 
 	SetUseExtendedPrepass(bExtended,true);
@@ -75,7 +82,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	context.WaitIdle();
 
 	auto &imgDepth = textureDepth->GetImage();
-	auto extents = imgDepth->GetExtents();
+	auto extents = imgDepth.GetExtents();
 	auto width = extents.width;
 	auto height = extents.height;
 
@@ -86,30 +93,30 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 
 	auto *shaderPrepassDepth = static_cast<pragma::ShaderPrepassDepth*>(whShaderPrepassDepth.get());
 	auto *shaderPrepass = static_cast<pragma::ShaderPrepass*>(whShaderPrepass.get());
-	auto sampleCount = imgDepth->GetSampleCount();
+	auto sampleCount = imgDepth.GetSampleCount();
 	auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
 	if(b == true)
 	{
 		auto &dev = context.GetDevice();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
-		imgCreateInfo.samples = imgDepth->GetSampleCount();
+		imgCreateInfo.samples = imgDepth.GetSampleCount();
 		imgCreateInfo.format = ShaderPrepass::RENDER_PASS_NORMAL_FORMAT;
 		imgCreateInfo.width = width;
 		imgCreateInfo.height = height;
-		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
-		auto imgNormals = prosper::util::create_image(dev,imgCreateInfo);
+		imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+		auto imgNormals = context.CreateImage(imgCreateInfo);
 
 		prosper::util::TextureCreateInfo texCreateInfo {};
 		texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-		textureNormals = prosper::util::create_texture(dev,texCreateInfo,imgNormals,&imgViewCreateInfo,&samplerCreateInfo);
+		samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
+		textureNormals = context.CreateTexture(texCreateInfo,*imgNormals,imgViewCreateInfo,samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = prosper::util::create_render_target(dev,{textureNormals,textureDepth},shaderPrepass->GetRenderPass(umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass(umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
 			vk::ClearValue{vk::ClearColorValue{}}, // Unused, but required
@@ -121,7 +128,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		textureNormals = nullptr;
 
 		auto &dev = context.GetDevice();
-		renderTarget = prosper::util::create_render_target(dev,{textureDepth},shaderPrepassDepth->GetRenderPass(umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_rt");
 		m_clearValues = {
 			vk::ClearValue{vk::ClearDepthStencilValue{1.f,0}} // Clear depth
@@ -129,14 +136,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	}
 }
 
-void pragma::rendering::Prepass::BeginRenderPass(prosper::PrimaryCommandBuffer &cmdBuffer)
+void pragma::rendering::Prepass::BeginRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	prosper::util::record_begin_render_pass(static_cast<Anvil::PrimaryCommandBuffer&>(cmdBuffer.GetAnvilCommandBuffer()),*renderTarget,m_clearValues);
+	cmdBuffer.RecordBeginRenderPass(*renderTarget,m_clearValues);
 }
-void pragma::rendering::Prepass::EndRenderPass(prosper::PrimaryCommandBuffer &cmdBuffer)
+void pragma::rendering::Prepass::EndRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer)
 {
-	prosper::util::record_end_render_pass(static_cast<Anvil::PrimaryCommandBuffer&>(cmdBuffer.GetAnvilCommandBuffer()));
+	cmdBuffer.RecordEndRenderPass();
 }
 
 void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_FORWARDPLUS_HPP__
 #define __C_FORWARDPLUS_HPP__
 
@@ -5,20 +12,14 @@
 #include <cinttypes>
 #include <memory>
 
-namespace Anvil
-{
-	class DescriptorSetGroup;
-	class DescriptorSet;
-	class Image;
-};
-
 namespace prosper
 {
 	class Context;
-	class Buffer;
+	class IBuffer;
 	class Texture;
-	class CommandBuffer;
-	class DescriptorSetGroup;
+	class ICommandBuffer;
+	class IDescriptorSetGroup;
+	class IDescriptorSet;
 };
 
 #pragma warning(push)
@@ -38,13 +39,13 @@ namespace pragma
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
 			uint32_t GetTileCount() const;
 			const std::vector<uint32_t> &GetShadowLightBits() const;
-			Anvil::DescriptorSet *GetDescriptorSetGraphics() const;
-			Anvil::DescriptorSet *GetDescriptorSetCompute() const;
-			Anvil::DescriptorSet *GetDepthDescriptorSetGraphics() const;
-			const std::shared_ptr<prosper::Buffer> &GetTileVisLightIndexBuffer() const;
-			const std::shared_ptr<prosper::Buffer> &GetVisLightIndexBuffer() const;
+			prosper::IDescriptorSet *GetDescriptorSetGraphics() const;
+			prosper::IDescriptorSet *GetDescriptorSetCompute() const;
+			prosper::IDescriptorSet *GetDepthDescriptorSetGraphics() const;
+			const std::shared_ptr<prosper::IBuffer> &GetTileVisLightIndexBuffer() const;
+			const std::shared_ptr<prosper::IBuffer> &GetVisLightIndexBuffer() const;
 
-			void Compute(prosper::PrimaryCommandBuffer &cmdBuffer,Anvil::Image &imgDepth,Anvil::DescriptorSet &descSetCam);
+			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam);
 
 			static std::pair<uint32_t,uint32_t> CalcWorkGroupCount(uint32_t w,uint32_t h);
 			static uint32_t CalcTileCount(uint32_t w,uint32_t h);
@@ -54,16 +55,16 @@ namespace pragma
 			uint32_t m_workGroupCountY = 0u;
 			uint32_t m_tileCount = 0u;
 			std::vector<uint32_t> m_shadowLightBits;
-			std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupLightSourcesGraphics = nullptr;
-			std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupLightSourcesCompute = nullptr;
-			std::shared_ptr<prosper::Buffer> m_bufTileVisLightIndex = nullptr;
-			std::shared_ptr<prosper::Buffer> m_bufVisLightIndex = nullptr;
+			std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupLightSourcesGraphics = nullptr;
+			std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupLightSourcesCompute = nullptr;
+			std::shared_ptr<prosper::IBuffer> m_bufTileVisLightIndex = nullptr;
+			std::shared_ptr<prosper::IBuffer> m_bufVisLightIndex = nullptr;
 			util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};
 			util::WeakHandle<prosper::Shader> m_shaderLightIndexing = {};
-			std::shared_ptr<prosper::PrimaryCommandBuffer> m_cmdBuffer = nullptr;
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 			uint32_t m_cmdBufferQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 
-			std::shared_ptr<prosper::DescriptorSetGroup> m_dsgSceneDepthBuffer = nullptr;
+			std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgSceneDepthBuffer = nullptr;
 		};
 	};
 };

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SSAO_HPP__
 #define __C_SSAO_HPP__
 
@@ -12,29 +19,19 @@ namespace prosper {class Shader; class Context; class RenderTarget; class Descri
 struct DLLCLIENT SSAOInfo
 {
 	bool Initialize(
-		prosper::Context &context,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits samples,
+		prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
 		const std::shared_ptr<prosper::Texture> &texNorm,const std::shared_ptr<prosper::Texture> &texDepth
 	);
 	void Clear();
 	std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 	std::shared_ptr<prosper::RenderTarget> renderTargetBlur = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> descSetGroupPrepass = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> descSetGroupOcclusion = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupPrepass = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupOcclusion = nullptr;
 
 	::util::WeakHandle<prosper::Shader> shader = {};
 	::util::WeakHandle<prosper::Shader> shaderBlur = {};
 	prosper::Shader *GetSSAOShader() const;
 	prosper::Shader *GetSSAOBlurShader() const;
-	/*void Initialize(const Vulkan::Context &context,uint32_t width,uint32_t height,Anvil::SampleCountFlagBits sampleCount,const Vulkan::Texture &texNorm,const Vulkan::Texture &texDepth);
-	void Clear();
-	Vulkan::RenderPass renderPass = nullptr;
-	Vulkan::Framebuffer framebuffer = nullptr;
-	Vulkan::DescriptorSet descSetNormalDepthBuffer = nullptr;
-
-	Vulkan::RenderTarget rtOcclusion = nullptr;
-	Vulkan::DescriptorSet descSetOcclusion = nullptr;
-
-	Vulkan::RenderTarget rtOcclusionBlur = nullptr;*/ // prosper TODO
 };
 #pragma warning(pop)
 

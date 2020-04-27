@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_VERTEX_ANIMATION_HPP__
 #define __C_VERTEX_ANIMATION_HPP__
 
@@ -19,7 +26,6 @@ protected:
 	CVertexAnimation();
 	CVertexAnimation(const CVertexAnimation &other);
 	CVertexAnimation(const std::string &name);
-	//Vulkan::Buffer m_buffer = nullptr; // prosper TODO
 };
 
 #endif

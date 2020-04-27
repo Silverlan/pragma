@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ALSOUND_H__
 #define __C_ALSOUND_H__
 
@@ -12,22 +19,7 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <alsound_source.hpp>
-/*
-struct DLLCLIENT ALResource
-{
-	ALResource();
-	std::string source;
-	ALenum format,type,channels;
-	ALuint rate;
-	ALint buffer;
-};
 
-struct DLLCLIENT ALAudio
-{
-	std::shared_ptr<ALResource> mono;
-	std::shared_ptr<ALResource> stereo;
-};
-*/
 class ClientState;
 #pragma warning(push)
 #pragma warning(disable : 4251)

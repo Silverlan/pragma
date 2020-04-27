@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_engine.h"
 #ifdef _WIN32
 #include "pragma/debug/mdump.h"
@@ -25,7 +32,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 	::SetUnhandledExceptionFilter( TopLevelFilter );
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
-	/*set_terminate([]() {
+	set_terminate([]() {
 		auto eptr = std::current_exception();
 		if(!eptr)
 		{
@@ -46,7 +53,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 		}
 		// Relay exception to SetUnhandledExceptionFilter
 		std::rethrow_exception(eptr);
-	});*/
+	});
 }
 
 LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )

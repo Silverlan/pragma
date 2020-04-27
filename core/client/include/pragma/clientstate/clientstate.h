@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __CLIENTSTATE_H__
 #define __CLIENTSTATE_H__
 
@@ -48,29 +55,7 @@ struct DLLCLIENT ResourceDownload
 	std::string name;
 	unsigned int size;
 };
-/*
-struct DLLCLIENT ALBuffer
-{
-	ALBuffer()
-		: mono(-1),stereo(-1)
-	{}
-	~ALBuffer()
-	{
-		if(mono > 0)
-		{
-			unsigned int umono = mono;
-			alDeleteBuffers(1,&umono);
-		}
-		if(stereo > 0)
-		{
-			unsigned int ustereo = stereo;
-			alDeleteBuffers(1,&ustereo);
-		}
-	}
-	int mono;
-	int stereo;
-};
-*/
+
 class CLNetMessage;
 class ClientMessageMap;
 enum class ClientEvent : int;
@@ -136,8 +121,8 @@ public:
 	pragma::networking::IClient *GetClient();
 	void Think();
 	void Tick();
-	void Draw(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &img);//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
-	void Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &img);
+	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
 	virtual void Close() override;
 	ConVarMap *GetConVarMap();
 	bool IsConnected() const;
@@ -175,15 +160,6 @@ public:
 	void SendUserInfo();
 
 	void InitializeGUIModule();
-
-	// Saves the currently bound frame buffer as a .tga-file. The texture has to be bound to GL_TEXTURE_2D
-	bool SaveFrameBufferAsTGA(const char *name,int x,int y,int w,int h);
-	// Saves the currently bound frame buffer as a .tga-file
-	bool SaveFrameBufferAsTGA(const char *name,int x,int y,int w,int h,unsigned int format);
-
-	bool SaveTextureAsTGA(const char *name);
-	bool SaveTextureAsTGA(const char *name,unsigned int target,int level=0);
-	bool SavePixelsAsTGA(const char *name,unsigned char *pixels,unsigned int w,unsigned int h);
 
 	// Sound
 	virtual void StopSounds() override;

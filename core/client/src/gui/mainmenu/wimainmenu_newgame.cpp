@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include "pragma/c_engine.h"
@@ -12,11 +19,14 @@
 #include "pragma/localization.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
+#include <sharedutils/util_library.hpp>
+#include <sharedutils/util_file.h>
+#include <wgui/types/witext.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
-
+#pragma optimize("",off)
 WIMainMenuNewGame::WIMainMenuNewGame()
 	: WIMainMenuBase()
 {}
@@ -109,10 +119,47 @@ void WIMainMenuNewGame::ReloadMapList()
 	pMap->ClearOptions();
 	std::vector<std::string> files;
 	FileManager::FindFiles("maps/*.wld",&files,nullptr);
+
+	if(c_engine->GetConVarBool("sh_mount_external_game_resources"))
+	{
+		auto dllHandle = c_engine->GetClientState()->LoadLibraryModule("mount_external/pr_mount_external");
+		if(dllHandle)
+		{
+			auto *fFindFiles = dllHandle->FindSymbolAddress<void(*)(const std::string&,std::vector<std::string>*,std::vector<std::string>*)>("find_files");
+			if(fFindFiles)
+			{
+				std::vector<std::string> extFiles {};
+				std::vector<std::string> extDirs {};
+				fFindFiles("maps/*.bsp",&extFiles,&extDirs);
+
+				files.reserve(files.size() +extFiles.size());
+				for(auto &extFile : extFiles)
+					files.push_back(extFile);
+			}
+		}
+	}
+	for(auto &f : files)
+		ufile::remove_extension_from_filename(f);
 	std::sort(files.begin(),files.end());
+
+	// Remove duplicates
+	if(files.size() > 1)
+	{
+		for(auto it=files.begin();it!=files.end() -1;)
+		{
+			auto itNext = it +1;
+			if(ustring::compare(*it,*itNext,false) == false)
+			{
+				++it;
+				continue;
+			}
+			it = files.erase(it);
+		}
+	}
+
 	for(unsigned int i=0;i<files.size();i++)
 	{
-		auto fName = files[i].substr(0,files[i].length() -4);
+		auto &fName = files[i];
 		auto displayName = fName;
 		auto f = FileManager::OpenFile((std::string("maps/") +fName +".txt").c_str(),"r");
 		if(f != nullptr)
@@ -142,7 +189,6 @@ void WIMainMenuNewGame::ReloadMapList()
 	//
 }
 
-#include <wgui/types/witext.h>
 void WIMainMenuNewGame::InitializeGameSettings()
 {
 	auto *pList = InitializeOptionsList();
@@ -152,7 +198,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 
 	// Map
 	auto *pMap = pList->AddDropDownMenu(Locale::GetText("map"));
-	pMap->SetEditable(true);
+	// pMap->SetEditable(true);
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
 	ReloadMapList();
@@ -191,4 +237,4 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	//
 	InitializeOptionsList(pList);
 }
-
+#pragma optimize("",on)

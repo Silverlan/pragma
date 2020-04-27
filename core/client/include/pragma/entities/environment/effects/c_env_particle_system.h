@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ENV_PARTICLE_SYSTEM_H__
 #define __C_ENV_PARTICLE_SYSTEM_H__
 #include "pragma/clientdefinitions.h"
@@ -28,7 +35,7 @@ namespace pragma
 		static void ClearBuffers();
 		static bool Precache(std::string fname,bool bReload=false);
 		static void ClearCache();
-		static const std::shared_ptr<prosper::Buffer> &GetGlobalVertexBuffer();
+		static const std::shared_ptr<prosper::IBuffer> &GetGlobalVertexBuffer();
 
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
@@ -176,8 +183,8 @@ namespace pragma
 		void SetIntensity(float intensity);
 		
 		void Simulate(double tDelta);
-		void Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom);
-		void RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
+		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom);
+		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
 		uint32_t GetParticleCount() const;
 		// Same as m_numParticles, minus particles with a radius of 0, alpha of 0 or similar (Invisible particles)
 		uint32_t GetRenderParticleCount() const;
@@ -207,12 +214,12 @@ namespace pragma
 		bool SetupParticleSystem(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false);
 		bool SetupParticleSystem(CParticleSystemComponent *parent=nullptr);
 
-		const std::shared_ptr<prosper::Buffer> &GetVertexBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetParticleBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetAnimationStartBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetAnimationBuffer() const;
-		Anvil::DescriptorSet *GetAnimationDescriptorSet();
-		const std::shared_ptr<prosper::DescriptorSetGroup> &GetAnimationDescriptorSetGroup() const;
+		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetAnimationStartBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetAnimationBuffer() const;
+		prosper::IDescriptorSet *GetAnimationDescriptorSet();
+		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetAnimationDescriptorSetGroup() const;
 		bool IsAnimated() const;
 		const AnimationData *GetAnimationData() const;
 		const std::pair<Vector3,Vector3> &GetRenderBounds() const;
@@ -292,10 +299,10 @@ namespace pragma
 		std::unique_ptr<AnimationData> m_animData = nullptr;
 		OrientationType m_orientationType = OrientationType::Aligned;
 
-		std::shared_ptr<prosper::Buffer> m_bufParticles = nullptr;
-		std::shared_ptr<prosper::Buffer> m_bufAnimStart = nullptr;
-		std::shared_ptr<prosper::Buffer> m_bufAnim = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_descSetGroupAnimation = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_bufParticles = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_bufAnimStart = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_bufAnim = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupAnimation = nullptr;
 
 		std::vector<ParticleData> m_instanceData;
 		std::vector<float> m_dataAnimStart;

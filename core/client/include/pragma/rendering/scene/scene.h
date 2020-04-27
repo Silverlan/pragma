@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __SCENE_H__
 #define __SCENE_H__
 
@@ -13,7 +20,7 @@
 #include <unordered_set>
 
 namespace pragma {class Shader; class ShaderTextured3DBase; class OcclusionCullingHandler; struct OcclusionMeshInfo;};
-namespace prosper {class BlurSet; class RenderPass; class Fence; class DescriptorSet;};
+namespace prosper {class BlurSet; class IDescriptorSet;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT ShaderMeshContainer
@@ -39,11 +46,27 @@ class DLLCLIENT Scene
 	: public std::enable_shared_from_this<Scene>
 {
 public:
-	enum class DLLCLIENT FRenderSetting : uint32_t
+	enum class FRenderSetting : uint32_t
 	{
 		None = 0,
 		Unlit = 1,
 		SSAOEnabled = 2
+	};
+
+	enum class DebugMode : uint32_t
+	{
+		None = 0,
+		AmbientOcclusion,
+		Albedo,
+		Metalness,
+		Roughness,
+		DiffuseLighting,
+		Normal,
+		NormalMap,
+		Reflectance,
+		IBLPrefilter,
+		IBLIrradiance,
+		Emission
 	};
 public:
 	using SceneIndex = uint8_t;
@@ -78,19 +101,19 @@ public:
 
 	void ReloadRenderTarget();
 
-	void UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-	const std::shared_ptr<prosper::Buffer> &GetRenderSettingsBuffer() const;
+	void UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+	const std::shared_ptr<prosper::IBuffer> &GetRenderSettingsBuffer() const;
 	pragma::RenderSettings &GetRenderSettings();
 	const pragma::RenderSettings &GetRenderSettings() const;
-	const std::shared_ptr<prosper::Buffer> &GetCameraBuffer() const;
-	const std::shared_ptr<prosper::Buffer> &GetViewCameraBuffer() const;
-	const std::shared_ptr<prosper::Buffer> &GetFogBuffer() const;
-	const std::shared_ptr<prosper::DescriptorSetGroup> &GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint=vk::PipelineBindPoint::eGraphics) const;
-	const std::shared_ptr<prosper::DescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
-	prosper::DescriptorSet *GetCameraDescriptorSetGraphics() const;
-	prosper::DescriptorSet *GetCameraDescriptorSetCompute() const;
-	prosper::DescriptorSet *GetViewCameraDescriptorSet() const;
-	const std::shared_ptr<prosper::DescriptorSetGroup> &GetFogDescriptorSetGroup() const;
+	const std::shared_ptr<prosper::IBuffer> &GetCameraBuffer() const;
+	const std::shared_ptr<prosper::IBuffer> &GetViewCameraBuffer() const;
+	const std::shared_ptr<prosper::IBuffer> &GetFogBuffer() const;
+	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint=vk::PipelineBindPoint::eGraphics) const;
+	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
+	prosper::IDescriptorSet *GetCameraDescriptorSetGraphics() const;
+	prosper::IDescriptorSet *GetCameraDescriptorSetCompute() const;
+	prosper::IDescriptorSet *GetViewCameraDescriptorSet() const;
+	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetFogDescriptorSetGroup() const;
 
 	WorldEnvironment *GetWorldEnvironment() const;
 	void SetWorldEnvironment(WorldEnvironment &env);
@@ -101,6 +124,9 @@ public:
 
 	void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
 	pragma::rendering::BaseRenderer *GetRenderer();
+
+	DebugMode GetDebugMode() const;
+	void SetDebugMode(DebugMode debugMode);
 
 	pragma::COcclusionCullerComponent *FindOcclusionCuller();
 	SceneIndex GetSceneIndex() const;
@@ -121,22 +147,23 @@ private:
 	uint32_t m_width;
 	uint32_t m_height;
 
-	std::shared_ptr<prosper::DescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_camViewDescSetGroup = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 
 	util::WeakHandle<pragma::CCameraComponent> m_camera = {};
-	std::shared_ptr<prosper::Buffer> m_cameraBuffer = nullptr;
-	std::shared_ptr<prosper::Buffer> m_cameraViewBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;
 
-	std::shared_ptr<prosper::Buffer> m_renderSettingsBuffer = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_renderSettingsBuffer = nullptr;
 	pragma::RenderSettings m_renderSettings = {};
 	pragma::CameraData m_cameraData = {};
+	DebugMode m_debugMode = DebugMode::None;
 
 	// Fog
 	pragma::FogData m_fogData = {};
-	std::shared_ptr<prosper::Buffer> m_fogBuffer = nullptr;
-	std::shared_ptr<prosper::DescriptorSetGroup> m_fogDescSetGroup = nullptr;
+	std::shared_ptr<prosper::IBuffer> m_fogBuffer = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_fogDescSetGroup = nullptr;
 
 	mutable std::vector<CallbackHandle> m_envCallbacks;
 	mutable std::shared_ptr<WorldEnvironment> m_worldEnvironment;
@@ -145,7 +172,7 @@ private:
 	bool m_bValid = false;
 	std::shared_ptr<pragma::rendering::BaseRenderer> m_renderer = nullptr;
 
-	void UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView=false);
+	void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView=false);
 	void UpdateRenderSettings();
 
 	// Light Sources

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
@@ -13,7 +20,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 
-void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
+void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -25,7 +32,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 		return;
 	RenderPrepass(drawCmd,*renderInfo);
 }
-void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes)
+void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -61,7 +68,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 					{
 						float constantFactor,biasClamp,slopeFactor;
 						renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
-						prosper::util::record_set_depth_bias(**drawCmd,constantFactor,biasClamp,slopeFactor);
+						drawCmd->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
 
 						depthBiasActive = true;
 					}
@@ -69,7 +76,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::PrimaryCommandBuffer> 
 					{
 						// Clear depth bias
 						depthBiasActive = false;
-						prosper::util::record_set_depth_bias(**drawCmd);
+						drawCmd->RecordSetDepthBias();
 					}
 				}
 				if(renderC->IsDepthPassEnabled() == false)

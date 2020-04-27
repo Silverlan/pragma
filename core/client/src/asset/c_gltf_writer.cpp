@@ -1,9 +1,17 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "c_gltf_writer.hpp"
+#include "pragma/math/c_util_math.hpp"
 #include <pragma/clientstate/clientstate.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -11,26 +19,47 @@
 #include <pragma/model/animation/animation.h>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
+#include <mathutil/umath_lighting.hpp>
 #include <pragma/engine_info.hpp>
 #include <pragma/engine_version.h>
 #include <pragma/util/resource_watcher.h>
 #include <datasystem_color.h>
 
+//#define ENABLE_GLTF_VALIDATION
+#define GLTF_ASSERT(c,msg) \
+	if(!(c)) \
+	{ \
+		Con::cwar<<"WARNING: glTF assertion failure: "<<msg<<Con::endl; \
+		throw std::logic_error{"glTF assertion failed!"}; \
+	}
+
 extern DLLCLIENT ClientState *client;
 
-bool pragma::asset::GLTFWriter::Export(::Model &mdl,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName)
+#pragma optimize("",off)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
 {
-	GLTFWriter writer {mdl,exportInfo,std::optional<std::string>{}};
-	return writer.Export(outErrMsg,optModelName);
+	GLTFWriter writer {sceneDesc,exportInfo,std::optional<std::string>{}};
+	return writer.Export(outErrMsg,outputFileName);
 }
-bool pragma::asset::GLTFWriter::Export(::Model &mdl,const std::string &animName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName)
+bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const std::string &animName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
 {
-	GLTFWriter writer {mdl,exportInfo,animName};
-	return writer.Export(outErrMsg,optModelName);
+	GLTFWriter writer {sceneDesc,exportInfo,animName};
+	return writer.Export(outErrMsg,outputFileName);
 }
 
-pragma::asset::GLTFWriter::GLTFWriter(::Model &mdl,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName)
-	: m_model{mdl},m_exportInfo{exportInfo},m_animName{animName}
+bool pragma::asset::GLTFWriter::Export(::Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName)
+{
+	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
+	return Export({{model}},fileName,exportInfo,outErrMsg);
+}
+bool pragma::asset::GLTFWriter::Export(::Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &outputFileName)
+{
+	auto fileName = outputFileName.has_value() ? *outputFileName : model.GetName();
+	return Export({{model}},fileName,animName,exportInfo,outErrMsg);
+}
+
+pragma::asset::GLTFWriter::GLTFWriter(const SceneDesc &sceneDesc,const ModelExportInfo &exportInfo,const std::optional<std::string> &animName)
+	: m_sceneDesc{sceneDesc},m_exportInfo{exportInfo},m_animName{animName}
 {}
 
 uint32_t pragma::asset::GLTFWriter::AddAccessor(const std::string &name,int componentType,int type,uint64_t byteOffset,uint64_t count,BufferViewIndex bufferViewIdx)
@@ -46,9 +75,9 @@ uint32_t pragma::asset::GLTFWriter::AddAccessor(const std::string &name,int comp
 	return m_gltfMdl.accessors.size() -1;
 };
 
-void pragma::asset::GLTFWriter::InitializeMorphSets()
+void pragma::asset::GLTFWriter::InitializeMorphSets(::Model &mdl)
 {
-	auto &flexes = m_model.GetFlexes();
+	auto &flexes = mdl.GetFlexes();
 	for(auto flexId=decltype(flexes.size()){0u};flexId<flexes.size();++flexId)
 	{
 		auto &flex = flexes.at(flexId);
@@ -60,44 +89,45 @@ void pragma::asset::GLTFWriter::InitializeMorphSets()
 		//	continue;
 		if(va == nullptr)
 			continue;
+		auto frameId = flex.GetFrameIndex();
 		auto &meshAnims = va->GetMeshAnimations();
-		uint32_t morphSetIndex = 0u;
+		//uint32_t morphSetIndex = 0u;
 		for(auto &meshAnim : meshAnims)
 		{
 			auto *subMesh = meshAnim->GetSubMesh();
 			if(subMesh == nullptr)
 				continue;
-			auto *frame = va->GetMeshFrame(*subMesh,0);
+			auto *frame = va->GetMeshFrame(*subMesh,frameId);
 			if(frame == nullptr)
 				continue;
 			auto &morphSets = m_meshMorphSets[subMesh];
 			morphSets.push_back({});
 			auto &morphSet = morphSets.back();
 			morphSet.name = name;
-			if(morphSetIndex > 0)
-				morphSet.name += '_' +std::to_string(morphSetIndex);
+			//if(morphSetIndex > 0)
+			//	morphSet.name += '_' +std::to_string(morphSetIndex);
 			morphSet.frame = frame;
 			morphSet.flexId = flexId;
-			++morphSetIndex;
+			//++morphSetIndex;
 		}
 	}
 }
 
-bool pragma::asset::GLTFWriter::IsSkinned() const
+bool pragma::asset::GLTFWriter::IsSkinned(::Model &mdl) const
 {
 	if(ShouldExportMeshes() == false)
 		return false;
-	auto &skeleton = m_model.GetSkeleton();
+	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && m_exportInfo.exportSkinnedMeshData);
 }
-bool pragma::asset::GLTFWriter::IsAnimated() const
+bool pragma::asset::GLTFWriter::IsAnimated(::Model &mdl) const
 {
-	auto &anims = m_model.GetAnimations();
-	auto &skeleton = m_model.GetSkeleton();
+	auto &anims = mdl.GetAnimations();
+	auto &skeleton = mdl.GetSkeleton();
 	return (skeleton.GetBoneCount() > 1 && anims.empty() == false && (m_exportInfo.exportAnimations || m_animName.has_value()));
 }
 bool pragma::asset::GLTFWriter::ShouldExportMeshes() const {return m_animName.has_value() == false;}
-void pragma::asset::GLTFWriter::WriteMorphTargets(ModelSubMesh &mesh,tinygltf::Mesh &gltfMesh,tinygltf::Primitive &primitive,uint32_t nodeIdx)
+void pragma::asset::GLTFWriter::WriteMorphTargets(ModelSubMesh &mesh,tinygltf::Mesh &gltfMesh,tinygltf::Primitive &primitive,const std::vector<uint32_t> &nodeIndices)
 {
 	auto itMorphSets = m_meshMorphSets.find(&mesh);
 	if(itMorphSets != m_meshMorphSets.end())
@@ -144,16 +174,16 @@ void pragma::asset::GLTFWriter::WriteMorphTargets(ModelSubMesh &mesh,tinygltf::M
 		extras["targetNames"] = tinygltf::Value{morphNames};
 		gltfMesh.extras = tinygltf::Value{extras};
 
-		m_meshesWithMorphTargets[&mesh] = nodeIdx;
+		m_meshesWithMorphTargets[&mesh] = nodeIndices;
 	}
 }
 
-void pragma::asset::GLTFWriter::MergeSplitMeshes()
+void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 {
 	if(m_exportInfo.verbose)
 		Con::cout<<"Merging meshes by materials..."<<Con::endl;
 	std::unordered_map<uint32_t,std::vector<std::shared_ptr<ModelSubMesh>>> groupedMeshes {};
-	for(auto &mesh : m_meshes)
+	for(auto &mesh : meshList)
 	{
 		auto texIdx = mesh->GetSkinTextureIndex();
 		auto it = groupedMeshes.find(texIdx);
@@ -182,19 +212,78 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes()
 		}
 		mergedMeshes.push_back(mesh);
 	}
-	m_meshes = mergedMeshes;
+	meshList = mergedMeshes;
 	if(m_exportInfo.verbose)
 		Con::cout<<numMerged<<" meshes have been merged!"<<Con::endl;
 }
 
-bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string *optModelName)
+void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
+{
+	if(ShouldExportMeshes() == false)
+		return;
+	m_uniqueModelExportList.reserve(m_sceneDesc.modelCollection.size());
+	for(auto &mdlDesc : m_sceneDesc.modelCollection)
+	{
+		auto it = std::find_if(m_uniqueModelExportList.begin(),m_uniqueModelExportList.end(),[&mdlDesc](const ModelExportData &exportData) {
+			return &exportData.model == &mdlDesc.model;
+		});
+		if(it == m_uniqueModelExportList.end())
+		{
+			m_uniqueModelExportList.push_back({mdlDesc.model});
+			it = m_uniqueModelExportList.end() -1;
+			auto &exportData = m_uniqueModelExportList.back();
+
+			std::vector<std::shared_ptr<ModelMesh>> meshList {};
+			meshList.reserve(mdlDesc.model.GetMeshCount());
+
+			std::vector<uint32_t> bodyGroups {};
+			bodyGroups.resize(mdlDesc.model.GetBodyGroupCount(),0);
+			if(m_exportInfo.fullExport == false)
+				mdlDesc.model.GetBodyGroupMeshes(bodyGroups,meshList);
+			else
+			{
+				for(auto &meshGroup : mdlDesc.model.GetMeshGroups())
+				{
+					for(auto &mesh : meshGroup->GetMeshes())
+						meshList.push_back(mesh);
+				}
+			}
+
+			for(auto &mesh : meshList)
+			{
+				for(auto &subMesh : mesh->GetSubMeshes())
+				{
+					if(subMesh->GetTriangles().empty())
+						continue;
+					if(exportData.exportMeshes.size() == exportData.exportMeshes.capacity())
+						exportData.exportMeshes.reserve(exportData.exportMeshes.size() +100);
+					exportData.exportMeshes.push_back(subMesh);
+					exportData.indexCount += subMesh->GetTriangles().size();
+					exportData.vertCount += subMesh->GetVertices().size();
+				}
+			}
+		}
+		it->instances.push_back(mdlDesc.pose);
+	}
+
+	if(m_exportInfo.mergeMeshesByMaterial)
+	{
+		for(auto &exportData : m_uniqueModelExportList)
+			MergeSplitMeshes(exportData.exportMeshes);
+	}
+
+	uint64_t indexCount = 0;
+	uint64_t vertCount = 0;
+}
+
+bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string &outputFileName)
 {
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
 	// resource watcher (in case they have been changed)
 	// TODO: This doesn't belong here!
 	client->GetResourceWatcher().Poll();
 
-	auto name = optModelName ? *optModelName : m_model.GetName();
+	auto name = outputFileName;
 	::util::Path exportPath {name};
 	exportPath.Canonicalize();
 	auto exportPathStr = exportPath.GetString();
@@ -204,8 +293,36 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 	m_exportPath = outputPath;
 	outputPath = EXPORT_PATH +m_exportPath;
 
+	// Note: These values are for reserving space. They don't
+	// have to be accurate, but they *have* to be larger than (or equal to) the
+	// actual counts.
+	uint32_t numSubMeshes = 0;
+	uint32_t numMeshes = 0;
+	uint32_t numAnims = 0;
+	uint32_t numVertexAnims = 0;
+	uint32_t numFramesTotal = 0;
+	uint32_t numNodes = 0;
+	auto numLights = m_sceneDesc.lightSources.size();
+	for(auto &mdlDesc : m_sceneDesc.modelCollection)
+	{
+		numSubMeshes += mdlDesc.model.GetSubMeshCount();
+		numMeshes += mdlDesc.model.GetMeshCount();
+		numAnims += mdlDesc.model.GetAnimationCount();
+		numVertexAnims += mdlDesc.model.GetVertexAnimations().size();
+		for(auto &anim : mdlDesc.model.GetAnimations())
+			numFramesTotal += anim->GetFrameCount();
+
+		numNodes += mdlDesc.model.GetSkeleton().GetBoneCount();
+	}
+	numNodes += numSubMeshes;
+	numNodes += numLights;
+
 	auto &gltfMdl = m_gltfMdl;
-	gltfMdl.meshes.reserve(m_model.GetSubMeshCount());
+	gltfMdl.meshes.reserve(numSubMeshes);
+	gltfMdl.nodes.reserve(numNodes);
+	gltfMdl.lights.reserve(numLights);
+	//m_gltfMdl.nodes.reserve(m_gltfMdl.nodes.size() +skeleton.GetBoneCount());
+
 	gltfMdl.asset.generator = "Pragma Engine " +get_pretty_engine_version();
 	gltfMdl.asset.version = "2.0"; // GLTF version
 
@@ -221,56 +338,32 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 	//	mdl->GetBodyGroupMeshes(GetBodyGroups(),m_lodMeshes);
 	//const_cast<Model*>(this)->GetMeshes(meshIds,outMeshes);
 
-	std::vector<std::shared_ptr<ModelMesh>> meshList {};
-	if(ShouldExportMeshes())
-	{
-		meshList.reserve(m_model.GetMeshCount());
-
-		std::vector<uint32_t> bodyGroups {};
-		bodyGroups.resize(m_model.GetBodyGroupCount(),0);
-		if(m_exportInfo.fullExport == false)
-			m_model.GetBodyGroupMeshes(bodyGroups,meshList);
-		else
-		{
-			for(auto &meshGroup : m_model.GetMeshGroups())
-			{
-				for(auto &mesh : meshGroup->GetMeshes())
-					meshList.push_back(mesh);
-			}
-		}
-	}
-
-	auto &meshes = m_meshes;
-	meshes.reserve(m_model.GetSubMeshCount());
-
-	if(m_exportInfo.mergeMeshesByMaterial)
-		MergeSplitMeshes();
-
+	GenerateUniqueModelExportList();
 	uint64_t indexCount = 0;
 	uint64_t vertCount = 0;
-	for(auto &mesh : meshList)
+	for(auto &list : m_uniqueModelExportList)
 	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
-			if(subMesh->GetTriangles().empty())
-				continue;
-			meshes.push_back(subMesh);
-			indexCount += subMesh->GetTriangles().size();
-			vertCount += subMesh->GetVertices().size();
-		}
+		indexCount += list.indexCount;
+		vertCount += list.vertCount;
 	}
+
+	// Materials
+	if(m_exportInfo.generateAo && ShouldExportMeshes())
+	{
+		for(auto &exportData : m_uniqueModelExportList)
+			GenerateAO(exportData.model);
+	}
+
+	WriteMaterials();
 
 	// Initialize buffers
 	if(m_exportInfo.verbose)
 		Con::cout<<"Initializing GLTF buffers..."<<Con::endl;
 
-	gltfMdl.buffers.reserve(BufferIndices::Count +m_model.GetAnimationCount() +m_model.GetVertexAnimations().size());
+	gltfMdl.buffers.reserve(BufferIndices::Count +numAnims +numVertexAnims);
 
 	constexpr auto szVertex = sizeof(Vector3) *2 +sizeof(Vector2);
-	uint32_t numFramesTotal = 0;
-	for(auto &anim : m_model.GetAnimations())
-		numFramesTotal += anim->GetFrameCount();
-	gltfMdl.bufferViews.reserve(BufferViewIndices::Count +m_model.GetAnimationCount() +numFramesTotal);
+	gltfMdl.bufferViews.reserve(BufferViewIndices::Count +numAnims +numFramesTotal);
 	if(ShouldExportMeshes())
 	{
 		auto &indexBuffer = AddBuffer("indices",&m_bufferIndices.indices);
@@ -286,28 +379,57 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		//std::vector<uint8_t> vertexData {};
 		auto &vertexData = vertexBuffer.data;
 		vertexData.resize(vertCount *szVertex);
-		for(auto &mesh : meshes)
+		for(auto &exportData : m_uniqueModelExportList)
 		{
-			auto &indices = mesh->GetTriangles();
-			auto *gltfIndexData = indexData.data() +indexOffset *sizeof(uint32_t);
-			for(auto i=decltype(indices.size()){0u};i<indices.size();++i)
+			uint32_t meshIdx = 0;
+			for(auto &mesh : exportData.exportMeshes)
 			{
-				auto idx = static_cast<uint32_t>(indices.at(i));
-				memcpy(gltfIndexData +i *sizeof(uint32_t),&idx,sizeof(idx));
-			}
-			indexOffset += indices.size();
+				ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
+				auto &indices = mesh->GetTriangles();
+				auto *gltfIndexData = indexData.data() +indexOffset *sizeof(uint32_t);
+				for(auto i=decltype(indices.size()){0u};i<indices.size();++i)
+				{
+					auto idx = static_cast<uint32_t>(indices.at(i));
+					memcpy(gltfIndexData +i *sizeof(uint32_t),&idx,sizeof(idx));
+				}
+				indexOffset += indices.size();
 
-			auto &verts = mesh->GetVertices();
-			auto *gltfVertexData = vertexData.data() +vertOffset *szVertex;
-			for(auto i=decltype(verts.size()){0u};i<verts.size();++i)
-			{
-				auto &v = verts.at(i);
-				auto pos = TransformPos(v.position);
-				memcpy(gltfVertexData +i *szVertex,&pos,sizeof(pos));
-				memcpy(gltfVertexData +i *szVertex +sizeof(Vector3),&v.normal,sizeof(v.normal));
-				memcpy(gltfVertexData +i *szVertex +sizeof(Vector3) *2,&v.uv,sizeof(v.uv));
+				auto &verts = mesh->GetVertices();
+				auto *gltfVertexData = vertexData.data() +vertOffset *szVertex;
+				for(auto i=decltype(verts.size()){0u};i<verts.size();++i)
+				{
+					auto &v = verts.at(i);
+					auto pos = TransformPos(v.position);
+					memcpy(gltfVertexData +i *szVertex,&pos,sizeof(pos));
+					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3),&v.normal,sizeof(v.normal));
+					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3) *2,&v.uv,sizeof(v.uv));
+
+#ifdef ENABLE_GLTF_VALIDATION
+					auto fGetErrMsg = [i,meshIdx,&exportData,&pos,&v]() {
+						std::string msg = "Found invalid vertex (index " +std::to_string(i) +") for mesh " +std::to_string(meshIdx) +" of model "
+							+exportData.model.GetName() +": " +
+							"pos(" +std::to_string(pos.x) +',' +std::to_string(pos.y) +',' +std::to_string(pos.z) +") " +
+							"normal(" +std::to_string(v.normal.x) +',' +std::to_string(v.normal.y) +',' +std::to_string(v.normal.z) +") " +
+							"uv(" +std::to_string(v.uv.x) +',' +std::to_string(v.uv.y) +")";
+						return msg;
+					};
+					GLTF_ASSERT(std::isnan(pos.x) == false && std::isnan(pos.y) == false && std::isnan(pos.z) == false,fGetErrMsg());
+					GLTF_ASSERT(std::isinf(pos.x) == false && std::isinf(pos.y) == false && std::isinf(pos.z) == false,fGetErrMsg());
+
+					GLTF_ASSERT(std::isnan(v.normal.x) == false && std::isnan(v.normal.y) == false && std::isnan(v.normal.z) == false,fGetErrMsg());
+					GLTF_ASSERT(std::isinf(v.normal.x) == false && std::isinf(v.normal.y) == false && std::isinf(v.normal.z) == false,fGetErrMsg());
+
+					GLTF_ASSERT(std::isnan(v.uv.x) == false && std::isnan(v.uv.y) == false,fGetErrMsg());
+					GLTF_ASSERT(std::isinf(v.uv.x) == false && std::isinf(v.uv.y) == false,fGetErrMsg());
+
+					auto l = uvec::length(v.normal);
+					GLTF_ASSERT(l >= 0.99f && l <= 1.01f,fGetErrMsg());
+#endif
+
+
+				}
+				vertOffset += verts.size();
 			}
-			vertOffset += verts.size();
 		}
 
 		m_bufferViewIndices.indices = AddBufferView("indices",m_bufferIndices.indices,0,indexBuffer.data.size(),{});
@@ -316,123 +438,245 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		m_bufferViewIndices.texCoords = AddBufferView("texcoords",m_bufferIndices.vertices,sizeof(Vector3) *2,vertexBuffer.data.size() -sizeof(Vector3) *2,szVertex);
 	}
 
-	gltfMdl.accessors.reserve(meshes.size() *BufferViewIndices::Count);
+	gltfMdl.accessors.reserve(numSubMeshes *BufferViewIndices::Count);
 
 	// Skeleton
-	WriteSkeleton();
+	for(auto &exportData : m_uniqueModelExportList)
+		WriteSkeleton(exportData);
 
 	if(m_exportInfo.exportMorphTargets)
-		InitializeMorphSets();
+	{
+		for(auto &exportData : m_uniqueModelExportList)
+		InitializeMorphSets(exportData.model);
+	}
 
 	// Initialize accessors
 	uint64_t indexOffset = 0;
 	uint64_t vertOffset = 0;
 	uint64_t vertexWeightOffset = 0;
-	gltfMdl.meshes.reserve(meshes.size());
-	gltfMdl.nodes.reserve(meshes.size());
 	uint32_t meshIdx = 0;
-	for(auto &mesh : meshes)
+	for(auto &exportData : m_uniqueModelExportList)
 	{
-		auto nodeIdx = AddNode(name +'_' +std::to_string(meshIdx),true);
-		auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
-		gltfNode.mesh = gltfMdl.meshes.size();
-		if(m_skinIdx != -1)
-			gltfNode.skin = m_skinIdx;
-
-		auto &verts = mesh->GetVertices();
-		auto &tris = mesh->GetTriangles();
-		gltfMdl.accessors.reserve(gltfMdl.accessors.size() +4);
-		auto indicesAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_indices",TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR,indexOffset *sizeof(uint32_t),tris.size(),m_bufferViewIndices.indices);
-		auto posAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.positions);
-		auto normalAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_normals",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.normals);
-		auto uvAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_uvs",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC2,vertOffset *szVertex,verts.size(),m_bufferViewIndices.texCoords);
-
-		// Calculate bounds
-		Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
-		Vector3 max {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
-		for(auto &v : verts)
+		for(auto &mesh : exportData.exportMeshes)
 		{
-			uvec::min(&min,v.position);
-			uvec::max(&max,v.position);
+			auto meshName = name +'_' +std::to_string(meshIdx);
+			std::vector<uint32_t> nodeIndices {};
+			nodeIndices.reserve(exportData.instances.size());
+			for(auto &pose : exportData.instances)
+			{
+				auto pos = pose.GetOrigin() *m_exportInfo.scale;
+				if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
+					pos = {};
+
+				auto rot = pose.GetRotation();
+				if(std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z) || std::isnan(rot.w))
+					rot = uquat::identity();
+				auto nodeIdx = AddNode(meshName,true);
+				auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
+				gltfNode.mesh = gltfMdl.meshes.size();
+				gltfNode.translation = {pos.x,pos.y,pos.z};
+				gltfNode.rotation = {rot.x,rot.y,rot.z,rot.w};
+				if(exportData.skinIndex != -1)
+					gltfNode.skin = exportData.skinIndex;
+				nodeIndices.push_back(nodeIdx);
+			}
+
+			auto &verts = mesh->GetVertices();
+			auto &tris = mesh->GetTriangles();
+			gltfMdl.accessors.reserve(gltfMdl.accessors.size() +4);
+			auto indicesAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_indices",TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR,indexOffset *sizeof(uint32_t),tris.size(),m_bufferViewIndices.indices);
+			auto posAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.positions);
+			auto normalAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_normals",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.normals);
+			auto uvAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_uvs",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC2,vertOffset *szVertex,verts.size(),m_bufferViewIndices.texCoords);
+
+			// Calculate bounds
+			Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+			Vector3 max {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+			for(auto &v : verts)
+			{
+				uvec::min(&min,v.position);
+				uvec::max(&max,v.position);
+			}
+			min = TransformPos(min);
+			max = TransformPos(max);
+			gltfMdl.accessors.at(posAccessor).minValues = {min.x,min.y,min.z};
+			gltfMdl.accessors.at(posAccessor).maxValues = {max.x,max.y,max.z};
+			//
+
+			// Calculate index bounds
+			auto minIndex = std::numeric_limits<int64_t>::max();
+			auto maxIndex = std::numeric_limits<int64_t>::lowest();
+			for(auto idx : tris)
+			{
+				minIndex = umath::min(minIndex,static_cast<int64_t>(idx));
+				maxIndex = umath::max(maxIndex,static_cast<int64_t>(idx));
+			}
+			gltfMdl.accessors.at(indicesAccessor).minValues = {static_cast<double>(minIndex)};
+			gltfMdl.accessors.at(indicesAccessor).maxValues = {static_cast<double>(maxIndex)};
+			//
+
+			gltfMdl.meshes.push_back({});
+			auto &gltfMesh = gltfMdl.meshes.back();
+
+
+			gltfMesh.primitives.push_back({});
+			auto &primitive = gltfMesh.primitives.back();
+			auto *mat = exportData.model.GetMaterial(0,mesh->GetSkinTextureIndex());
+			if(mat)
+			{
+				auto it = m_materialToGltfIndex.find(mat);
+				if(it != m_materialToGltfIndex.end())
+					primitive.material = it->second;
+			}
+
+			auto geometryType = mesh->GetGeometryType();
+			switch(geometryType)
+			{
+			case ModelSubMesh::GeometryType::Triangles:
+				primitive.mode = TINYGLTF_MODE_TRIANGLES;
+				break;
+			case ModelSubMesh::GeometryType::Lines:
+				primitive.mode = TINYGLTF_MODE_LINE;
+				break;
+			case ModelSubMesh::GeometryType::Points:
+				primitive.mode = TINYGLTF_MODE_POINTS;
+				break;
+			}
+
+			primitive.indices = indicesAccessor;
+			primitive.attributes["POSITION"] = posAccessor;
+			primitive.attributes["NORMAL"] = normalAccessor;
+			primitive.attributes["TEXCOORD_0"] = uvAccessor;
+
+			if(IsSkinned(exportData.model) && mesh->GetVertexWeights().empty() == false)
+			{
+				auto jointsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_joints",TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),m_bufferViewIndices.joints);
+				auto weightsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_weights",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),m_bufferViewIndices.weights);
+				primitive.attributes["JOINTS_0"] = jointsAccessor;
+				primitive.attributes["WEIGHTS_0"] = weightsAccessor;
+
+				vertexWeightOffset += verts.size();
+			}
+
+			// Morphs
+			if(m_exportInfo.exportMorphTargets)
+				WriteMorphTargets(*mesh,gltfMesh,primitive,nodeIndices);
+
+			indexOffset += tris.size();
+			vertOffset += verts.size();
+			++meshIdx;
 		}
-		min = TransformPos(min);
-		max = TransformPos(max);
-		gltfMdl.accessors.at(posAccessor).minValues = {min.x,min.y,min.z};
-		gltfMdl.accessors.at(posAccessor).maxValues = {max.x,max.y,max.z};
-		//
-
-		// Calculate index bounds
-		auto minIndex = std::numeric_limits<int64_t>::max();
-		auto maxIndex = std::numeric_limits<int64_t>::lowest();
-		for(auto idx : tris)
-		{
-			minIndex = umath::min(minIndex,static_cast<int64_t>(idx));
-			maxIndex = umath::max(maxIndex,static_cast<int64_t>(idx));
-		}
-		gltfMdl.accessors.at(indicesAccessor).minValues = {static_cast<double>(minIndex)};
-		gltfMdl.accessors.at(indicesAccessor).maxValues = {static_cast<double>(maxIndex)};
-		//
-
-		gltfMdl.meshes.push_back({});
-		auto &gltfMesh = gltfMdl.meshes.back();
-
-		gltfMesh.primitives.push_back({});
-		auto &primitive = gltfMesh.primitives.back();
-		primitive.material = mesh->GetSkinTextureIndex();
-
-		auto geometryType = mesh->GetGeometryType();
-		switch(geometryType)
-		{
-		case ModelSubMesh::GeometryType::Triangles:
-			primitive.mode = TINYGLTF_MODE_TRIANGLES;
-			break;
-		case ModelSubMesh::GeometryType::Lines:
-			primitive.mode = TINYGLTF_MODE_LINE;
-			break;
-		case ModelSubMesh::GeometryType::Points:
-			primitive.mode = TINYGLTF_MODE_POINTS;
-			break;
-		}
-
-		primitive.indices = indicesAccessor;
-		primitive.attributes["POSITION"] = posAccessor;
-		primitive.attributes["NORMAL"] = normalAccessor;
-		primitive.attributes["TEXCOORD_0"] = uvAccessor;
-
-		if(IsSkinned() && mesh->GetVertexWeights().empty() == false)
-		{
-			auto jointsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_joints",TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),m_bufferViewIndices.joints);
-			auto weightsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_weights",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),m_bufferViewIndices.weights);
-			primitive.attributes["JOINTS_0"] = jointsAccessor;
-			primitive.attributes["WEIGHTS_0"] = weightsAccessor;
-
-			vertexWeightOffset += verts.size();
-		}
-
-		// Morphs
-		if(m_exportInfo.exportMorphTargets)
-			WriteMorphTargets(*mesh,gltfMesh,primitive,nodeIdx);
-
-		indexOffset += tris.size();
-		vertOffset += verts.size();
-		++meshIdx;
 	}
 
-	if(m_skinIdx != -1)
+	for(auto &exportData : m_uniqueModelExportList)
 	{
+		if(exportData.skinIndex == -1)
+			continue;
 		// Inverse bind matrix accessor has to be added last
-		auto &skeleton = m_model.GetSkeleton();
+		auto &skeleton = exportData.model.GetSkeleton();
 		auto bindPoseAccessor = AddAccessor("inversebindposematrices",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_MAT4,0,skeleton.GetBoneCount(),m_bufferViewIndices.inverseBindMatrices);
-		gltfMdl.skins.at(m_skinIdx).inverseBindMatrices = bindPoseAccessor;
+		gltfMdl.skins.at(exportData.skinIndex).inverseBindMatrices = bindPoseAccessor;
 	}
 
-	if(IsAnimated() && (m_exportInfo.embedAnimations || m_animName.has_value()))
-		WriteAnimations();
+	if(m_sceneDesc.lightSources.empty() == false)
+	{
+		if(m_exportInfo.verbose)
+			Con::cout<<"Initializing "<<m_sceneDesc.lightSources.size()<<" light sources..."<<Con::endl;
+		tinygltf::Value::Array lights {};
+		for(auto &lightSource : m_sceneDesc.lightSources)
+		{
+			auto outerConeAngle = lightSource.outerConeAngle;
+			if(lightSource.type == LightSource::Type::Spot)
+			{
+				if(outerConeAngle <= lightSource.innerConeAngle)
+				{
+					if(lightSource.innerConeAngle <= 0.f)
+					{
+						Con::cwar<<"WARNING Spot light has cone angle of 0! Skipping..."<<Con::endl;
+						continue;
+					}
+					Con::cwar<<"WARNING Spot light has outer cone angle of "<<
+						outerConeAngle<<", which is smaller or equal to inner cone angle of "<<lightSource.innerConeAngle<<
+						"! This is not allowed! Clamping..."<<Con::endl;
+					outerConeAngle = lightSource.innerConeAngle;
+					lightSource.innerConeAngle = umath::max(lightSource.innerConeAngle -10.f,0.1f);
+					if(outerConeAngle <= lightSource.innerConeAngle)
+					{
+						Con::cwar<<"WARNING Spot light has cone angle of near 0! Skipping..."<<Con::endl;
+						continue;
+					}
+				}
+			}
+			auto nodeIdx = AddNode(lightSource.name,true);
+			auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
 
-	if(m_exportInfo.generateAo && ShouldExportMeshes())
-		GenerateAO();
+			auto pos = lightSource.pose.GetOrigin() *m_exportInfo.scale;
+			int32_t lightSourceIndex = gltfMdl.lights.size();
+			auto &rot = lightSource.pose.GetRotation();
+			gltfNode.name = lightSource.name;
+			gltfNode.translation = {pos.x,pos.y,pos.z};
+			gltfNode.rotation = {rot.x,rot.y,rot.z,rot.w};
+			gltfNode.extensions["KHR_lights_punctual"] = tinygltf::Value{tinygltf::Value::Object{
+				{"light",tinygltf::Value{lightSourceIndex}}
+			}};
 
-	WriteMaterials();
+			std::string type = "point";
+			switch(lightSource.type)
+			{
+			case LightSource::Type::Point:
+				type = "point";
+				break;
+			case LightSource::Type::Spot:
+				type = "spot";
+				break;
+			case LightSource::Type::Directional:
+				type = "directional";
+				break;
+			}
+
+			// Note: The glTF specification states that the light source intensity should be specified in candela.
+			// However, the Blender Cycles renderer does not convert it to radiometric units, and since we're
+			// primarily targeting Blender, we'll just do the conversion ourselves.
+			// TODO: Add an option to change this via a parameter?
+			auto intensity = lightSource.luminousIntensity;
+			auto lightType = (lightSource.type == LightSource::Type::Spot) ? LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? LightType::Directional : LightType::Point;
+			auto watt = pragma::math::light_intensity_to_watts(intensity,lightType);
+			intensity = watt;
+			
+			auto color = lightSource.color.ToVector3();
+			tinygltf::Value::Object light {
+				{"name",tinygltf::Value{std::string{lightSource.name}}},
+				{"type",tinygltf::Value{type}},
+				{"color",tinygltf::Value{tinygltf::Value::Array{{tinygltf::Value{color.r},tinygltf::Value{color.g},tinygltf::Value{color.b}}}}},
+				{"intensity",tinygltf::Value{intensity}} // Doesn't matter which intensity we pick
+			};
+			if(lightSource.range.has_value() && (lightSource.type == LightSource::Type::Point || lightSource.type == LightSource::Type::Spot))
+				light["range"] = tinygltf::Value{*lightSource.range};
+			if(lightSource.type == LightSource::Type::Spot)
+			{
+				light["spot"] = tinygltf::Value{tinygltf::Value::Object{
+					{"innerConeAngle",tinygltf::Value{umath::deg_to_rad(lightSource.innerConeAngle)}},
+					{"outerConeAngle",tinygltf::Value{umath::deg_to_rad(outerConeAngle)}}
+				}};
+			}
+			lights.push_back(tinygltf::Value{light});
+		}
+
+		gltfMdl.extensions["KHR_lights_punctual"] = tinygltf::Value{tinygltf::Value::Object{
+			{"lights",tinygltf::Value{lights}}
+		}};
+		gltfMdl.extensionsUsed.push_back("KHR_lights_punctual");
+	}
+
+	if(m_exportInfo.embedAnimations || m_animName.has_value())
+	{
+		for(auto &exportData : m_uniqueModelExportList)
+		{
+			if(IsAnimated(exportData.model) == false)
+				continue;
+			WriteAnimations(exportData.model);
+		}
+	}
 
 #if 0
 	auto fVertexData = FileManager::OpenFile<VFilePtrReal>("vertices.bin","wb");
@@ -483,19 +727,24 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			outErrMsg = warn;
 		return false;
 	}
-	if(IsAnimated() && m_exportInfo.embedAnimations == false && m_animName.has_value() == false)
+	if(m_exportInfo.embedAnimations == false && m_animName.has_value() == false)
 	{
-		if(m_exportInfo.verbose)
-			Con::cout<<"Exporting animations..."<<Con::endl;
-		std::unordered_map<std::string,uint32_t> *anims = nullptr;
-		m_model.GetAnimations(&anims);
-		for(auto &pair : *anims)
+		for(auto &exportData : m_uniqueModelExportList)
 		{
-			std::string errMsg;
-			if(pragma::asset::export_animation(m_model,pair.first,m_exportInfo,errMsg))
+			if(IsAnimated(exportData.model) == false)
 				continue;
 			if(m_exportInfo.verbose)
-				Con::cwar<<"WARNING: Unable to export animation '"<<pair.first<<"': "<<errMsg<<Con::endl;
+				Con::cout<<"Exporting animations..."<<Con::endl;
+			std::unordered_map<std::string,uint32_t> *anims = nullptr;
+			exportData.model.GetAnimations(&anims);
+			for(auto &pair : *anims)
+			{
+				std::string errMsg;
+				if(pragma::asset::export_animation(exportData.model,pair.first,m_exportInfo,errMsg))
+					continue;
+				if(m_exportInfo.verbose)
+					Con::cwar<<"WARNING: Unable to export animation '"<<pair.first<<"': "<<errMsg<<Con::endl;
+			}
 		}
 	}
 	return true;
@@ -538,19 +787,20 @@ uint32_t pragma::asset::GLTFWriter::AddBufferView(const std::string &name,Buffer
 	return m_gltfMdl.bufferViews.size() -1;
 };
 
-void pragma::asset::GLTFWriter::WriteSkeleton()
+void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 {
-	auto &skeleton = m_model.GetSkeleton();
-	auto &anims = m_model.GetAnimations();
+	auto &mdl = mdlData.model;
+	auto &skeleton = mdl.GetSkeleton();
+	auto &anims = mdl.GetAnimations();
 	std::vector<Mat4> inverseBindPoseMatrices {};
-	if(IsAnimated() || IsSkinned())
+	if(IsAnimated(mdl) || IsSkinned(mdl))
 	{
 		if(m_exportInfo.verbose)
 			Con::cout<<"Initializing GLTF Skeleton..."<<Con::endl;
 		auto gltfRootNodeIdx = AddNode("skeleton_root",true);
 
 		// Transform pose to relative
-		auto referenceRelative = Frame::Create(m_model.GetReference());
+		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
 		std::function<void(::Bone&,const pragma::physics::Transform&)> fToRelativeTransforms = nullptr;
 		fToRelativeTransforms = [this,&fToRelativeTransforms,&referenceRelative,&inverseBindPoseMatrices](::Bone &bone,const pragma::physics::Transform &parentPose) {
@@ -568,11 +818,9 @@ void pragma::asset::GLTFWriter::WriteSkeleton()
 		for(auto &pair : skeleton.GetRootBones())
 			fToRelativeTransforms(*pair.second,pragma::physics::Transform{});
 
-
-		m_gltfMdl.nodes.reserve(m_gltfMdl.nodes.size() +skeleton.GetBoneCount());
 		auto &bones = skeleton.GetBones();
 
-		m_skinIdx = m_gltfMdl.skins.size();
+		mdlData.skinIndex = m_gltfMdl.skins.size();
 		m_gltfMdl.skins.push_back({});
 		auto &skin = m_gltfMdl.skins.back();
 		skin.skeleton = gltfRootNodeIdx;
@@ -658,13 +906,13 @@ void pragma::asset::GLTFWriter::WriteSkeleton()
 #endif
 	}
 
-	if(IsSkinned())
+	if(IsSkinned(mdl))
 	{
 		// Initialize skin buffer
 		auto &skinBuffer = AddBuffer("skin",&m_bufferIndices.skin);
 		auto &skinData = skinBuffer.data;
 		uint64_t numVertWeights = 0;
-		for(auto &mesh : m_meshes)
+		for(auto &mesh : mdlData.exportMeshes)
 		{
 			if(mesh->GetVertexWeights().empty())
 				continue;
@@ -672,7 +920,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton()
 		}
 		skinData.resize(numVertWeights *sizeof(GLTFVertexWeight));
 		uint64_t vertWeightOffset = 0;
-		for(auto &mesh : m_meshes)
+		for(auto &mesh : mdlData.exportMeshes)
 		{
 			if(mesh->GetVertexWeights().empty())
 				continue;
@@ -711,7 +959,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton()
 		m_bufferViewIndices.joints = AddBufferView("joints",m_bufferIndices.skin,0,skinData.size(),sizeof(GLTFVertexWeight));
 		m_bufferViewIndices.weights = AddBufferView("weights",m_bufferIndices.skin,sizeof(GLTFVertexWeight::joints),skinData.size() -sizeof(GLTFVertexWeight::joints),sizeof(GLTFVertexWeight));
 	}
-	if(IsAnimated() || IsSkinned())
+	if(IsAnimated(mdl) || IsSkinned(mdl))
 	{
 		// Inverse bind pose
 		auto &invBindPoseBuffer = AddBuffer("inversebindpose",&m_bufferIndices.inverseBindMatrices);
@@ -722,21 +970,21 @@ void pragma::asset::GLTFWriter::WriteSkeleton()
 	}
 }
 
-void pragma::asset::GLTFWriter::WriteAnimations()
+void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout<<"Initializing GLTF animations..."<<Con::endl;
 
 	// Animations
-	auto &skeleton = m_model.GetSkeleton();
-	auto &anims = m_model.GetAnimations();
+	auto &skeleton = mdl.GetSkeleton();
+	auto &anims = mdl.GetAnimations();
 	auto &bones = skeleton.GetBones();
 	m_gltfMdl.animations.reserve(anims.size());
 	auto *animList = m_exportInfo.GetAnimationList();
 	for(auto i=decltype(anims.size()){0u};i<anims.size();++i)
 	{
 		auto &anim = anims.at(i);
-		auto animName = m_model.GetAnimationName(i);
+		auto animName = mdl.GetAnimationName(i);
 
 		if(m_animName.has_value() && ustring::compare(animName,*m_animName,false) == false)
 			continue;
@@ -940,7 +1188,7 @@ void pragma::asset::GLTFWriter::WriteAnimations()
 		{
 			// Calculate flex weights
 			std::vector<std::vector<float>> flexWeights {};
-			auto numFlexes = m_model.GetFlexCount();
+			auto numFlexes = mdl.GetFlexCount();
 			flexWeights.resize(numFrames);
 			for(auto &w : flexWeights)
 				w.resize(numFlexes,0.f);
@@ -948,7 +1196,7 @@ void pragma::asset::GLTFWriter::WriteAnimations()
 			{
 				// Collect flex controller weights
 				std::vector<float> flexControllerWeights {};
-				auto numFlexControllers = m_model.GetFlexControllerCount();
+				auto numFlexControllers = mdl.GetFlexControllerCount();
 				flexControllerWeights.resize(numFlexControllers,0.f);
 
 				auto &flexFrameData = anim->GetFrames().at(iFrame)->GetFlexFrameData();
@@ -960,7 +1208,7 @@ void pragma::asset::GLTFWriter::WriteAnimations()
 				}
 				for(auto flexId=decltype(numFlexes){0u};flexId<numFlexes;++flexId)
 				{
-					auto weight = m_model.CalcFlexWeight(flexId,[&flexControllerWeights](uint32_t flexConId) -> std::optional<float> {
+					auto weight = mdl.CalcFlexWeight(flexId,[&flexControllerWeights](uint32_t flexConId) -> std::optional<float> {
 						return flexControllerWeights.at(flexConId);
 					},[&flexControllerWeights](uint32_t flexId) -> std::optional<float> {
 						return std::optional<float>{};
@@ -974,7 +1222,7 @@ void pragma::asset::GLTFWriter::WriteAnimations()
 			for(auto &pair : m_meshesWithMorphTargets)
 			{
 				auto &morphSet = m_meshMorphSets.find(pair.first)->second;
-				auto meshNodeIdx = pair.second;
+				auto &meshNodeIndices = pair.second;
 				auto numMorphs = morphSet.size();
 
 				uint32_t morphBufferIdx;
@@ -1018,22 +1266,26 @@ void pragma::asset::GLTFWriter::WriteAnimations()
 				auto weightsSamplerIdx = gltfAnim.samplers.size() -1;
 
 				// Weights
-				gltfAnim.channels.push_back({});
-				auto &channelWeight = gltfAnim.channels.back();
-				channelWeight.target_path = "weights";
-				channelWeight.sampler = weightsSamplerIdx;
-				channelWeight.target_node = meshNodeIdx;
+				gltfAnim.channels.reserve(meshNodeIndices.size());
+				for(auto meshNodeIdx : meshNodeIndices)
+				{
+					gltfAnim.channels.push_back({});
+					auto &channelWeight = gltfAnim.channels.back();
+					channelWeight.target_path = "weights";
+					channelWeight.sampler = weightsSamplerIdx;
+					channelWeight.target_node = meshNodeIdx;
+				}
 			}
 		}
 	}
 }
 
-void pragma::asset::GLTFWriter::GenerateAO()
+void pragma::asset::GLTFWriter::GenerateAO(::Model &mdl)
 {
 	if(m_exportInfo.verbose)
 		Con::cout<<"Generating ambient occlusion maps..."<<Con::endl;
 	std::string errMsg;
-	auto job = pragma::asset::generate_ambient_occlusion(m_model,errMsg,false,m_exportInfo.aoResolution,m_exportInfo.aoSamples,m_exportInfo.aoDevice);
+	auto job = pragma::asset::generate_ambient_occlusion(mdl,errMsg,false,m_exportInfo.aoResolution,m_exportInfo.aoSamples,m_exportInfo.aoDevice);
 	if(job.has_value() == false)
 	{
 		if(m_exportInfo.verbose)
@@ -1073,7 +1325,27 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 {
 	if(ShouldExportMeshes() == false)
 		return; // No point in exporting materials if we're not exporting meshes either
-	auto &materials = m_model.GetMaterials();
+
+	if(m_exportInfo.verbose)
+		Con::cout<<"Collecting materials..."<<Con::endl;
+	std::vector<Material*> materials {};
+	for(auto &mdlDesc : m_sceneDesc.modelCollection)
+	{
+		for(auto &hMat : mdlDesc.model.GetMaterials())
+		{
+			if(hMat.IsValid() == false)
+				continue;
+			auto *mat = hMat.get();
+			auto it = std::find(materials.begin(),materials.end(),mat);
+			if(it == materials.end())
+			{
+				if(materials.size() == materials.capacity())
+					materials.reserve(materials.size() *1.5 +100);
+				materials.push_back(mat);
+			}
+		}
+	}
+
 	if(m_exportInfo.verbose)
 		Con::cout<<"Initializing "<<materials.size()<<" GLTF materials..."<<Con::endl;
 	auto fAddTexture = [this](const std::string &texPath) -> uint32_t {
@@ -1090,29 +1362,19 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 	m_gltfMdl.materials.reserve(materials.size());
 
-	uint32_t matIdx = 0;
-	std::unordered_map<uint32_t,uint32_t> matTranslationTable {};
-	for(auto &mat : materials)
+	std::unordered_map<Material*,uint32_t> matTranslationTable {};
+	for(auto *mat : materials)
 	{
-		if(mat.IsValid() == false)
-		{
-			++matIdx;
-			continue;
-		}
-
 		std::string errMsg;
-		auto texturePaths = pragma::asset::export_material(*mat.get(),m_exportInfo.imageFormat,errMsg,&m_exportPath);
+		auto texturePaths = pragma::asset::export_material(*mat,m_exportInfo.imageFormat,errMsg,&m_exportPath);
 		if(texturePaths.has_value() == false)
-		{
-			++matIdx;
 			continue;
-		}
 
 		m_gltfMdl.materials.push_back({});
 		auto &gltfMat = m_gltfMdl.materials.back();
 		if(m_exportInfo.verbose)
-			Con::cout<<"Initializing GLTF material '"<<mat.get()->GetName()<<"'..."<<Con::endl;
-		gltfMat.name = ufile::get_file_from_filename(mat.get()->GetName());
+			Con::cout<<"Initializing GLTF material '"<<mat->GetName()<<"'..."<<Con::endl;
+		gltfMat.name = ufile::get_file_from_filename(mat->GetName());
 		ufile::remove_extension_from_filename(gltfMat.name);
 
 		auto &data = mat->GetDataBlock();
@@ -1166,17 +1428,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		}
 		else if(gltfMat.emissiveTexture.index != -1)
 			gltfMat.emissiveFactor = {1.0,1.0,1.0};
-		matTranslationTable[matIdx] = m_gltfMdl.materials.size() -1;
-		++matIdx;
-	}
-
-	// Translate material indices
-	for(auto &mesh : m_gltfMdl.meshes)
-	{
-		for(auto &prim : mesh.primitives)
-		{
-			auto it = matTranslationTable.find(prim.material);
-			prim.material = (it != matTranslationTable.end()) ? it->second : -1;
-		}
+		m_materialToGltfIndex[mat] = m_gltfMdl.materials.size() -1;
 	}
 }
+#pragma optimize("",on)

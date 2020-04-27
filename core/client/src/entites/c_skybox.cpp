@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/c_skybox.h"
 #include "pragma/entities/c_entityfactories.h"
@@ -79,7 +86,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		"ft","bk","up","dn","rt","lf"
 	};
 	constexpr uint32_t numLayers = 6u;
-	std::array<std::shared_ptr<prosper::Image>,numLayers> cubemapImages {};
+	std::array<std::shared_ptr<prosper::IImage>,numLayers> cubemapImages {};
 	auto bAllValid = true;
 	uint32_t largestWidth = 0u;
 	uint32_t largestHeight = 0u;
@@ -96,9 +103,9 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		if(texture->HasValidVkTexture() == false || texture->IsError())
 			return false;
 		auto &img = texture->GetVkTexture()->GetImage();
-		cubemapImages.at(i) = img;
+		cubemapImages.at(i) = img.shared_from_this();
 
-		auto extents = img->GetExtents();
+		auto extents = img.GetExtents();
 		largestWidth = umath::max(largestWidth,extents.width);
 		largestHeight = umath::max(largestHeight,extents.height);
 	}
@@ -112,14 +119,14 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	// optimal tiling, and then copy that data into a host-readable buffer.
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap | prosper::util::ImageCreateInfo::Flags::FullMipmapChain;
-	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.width = largestWidth;
 	imgCreateInfo.height = largestHeight;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
-	auto imgCubemap = prosper::util::create_image(c_engine->GetDevice(),imgCreateInfo);
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
+	auto imgCubemap = c_engine->CreateImage(imgCreateInfo);
 	auto numMipmaps = imgCubemap->GetMipmapCount();
 
 	struct ImageBufferInfo
@@ -156,10 +163,10 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	}
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	bufCreateInfo.size = offset;
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	auto buf = prosper::util::create_buffer(c_engine->GetDevice(),bufCreateInfo);
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	auto buf = c_engine->CreateBuffer(bufCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	for(auto &imgBufferInfo : imageBufferInfos)
@@ -169,22 +176,22 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		// Blit image into cubemap image
 		prosper::util::ImageSubresourceRange range {};
 		range.baseMipLevel = imgBufferInfo.mipmapIndex;
-		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,range);
+		setupCmd->RecordImageBarrier(*img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal,range);
 		prosper::util::BlitInfo blitInfo {};
-		blitInfo.dstSubresourceLayer.mip_level = imgBufferInfo.mipmapIndex;
-		prosper::util::record_blit_image(**setupCmd,blitInfo,**img,**imgCubemap);
-		prosper::util::record_image_barrier(**setupCmd,**img,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,range);
+		blitInfo.dstSubresourceLayer.mipLevel = imgBufferInfo.mipmapIndex;
+		setupCmd->RecordBlitImage(blitInfo,*img,*imgCubemap);
+		setupCmd->RecordImageBarrier(*img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,range);
 
 		// Copy image data to host-readable buffer
-		prosper::util::record_image_barrier(**setupCmd,**imgCubemap,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,range);
+		setupCmd->RecordImageBarrier(*imgCubemap,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal,range);
 		// Note: No buffer barrier required, since we're writing to non-intersecting sections of the buffer
 		prosper::util::BufferImageCopyInfo copyInfo {};
 		copyInfo.width = imgBufferInfo.width;
 		copyInfo.height = imgBufferInfo.height;
 		copyInfo.mipLevel = imgBufferInfo.mipmapIndex;
 		copyInfo.bufferOffset = imgBufferInfo.bufferOffset;
-		prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgCubemap,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
-		prosper::util::record_image_barrier(**setupCmd,**imgCubemap,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,range);
+		setupCmd->RecordCopyImageToBuffer(copyInfo,*imgCubemap,prosper::ImageLayout::TransferSrcOptimal,*buf);
+		setupCmd->RecordImageBarrier(*imgCubemap,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::TransferDstOptimal,range);
 	}
 	c_engine->FlushSetupCommandBuffer();
 
@@ -220,7 +227,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	imgWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::ColorMap;
 	imgWriteInfo.wrapMode = uimg::TextureInfo::WrapMode::Clamp;
 	auto fullPath = "addons/converted/materials/" +matName;
-	auto szPerPixel = prosper::util::get_byte_size(Anvil::Format::R8G8B8A8_UNORM);
+	auto szPerPixel = prosper::util::get_byte_size(prosper::Format::R8G8B8A8_UNorm);
 	if(c_game->SaveImage(ptrCubemapBuffers,largestWidth,largestHeight,szPerPixel,fullPath,imgWriteInfo,true))
 	{
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;

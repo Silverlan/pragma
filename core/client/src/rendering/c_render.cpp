@@ -1,25 +1,28 @@
-﻿#include "stdafx_client.h"
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
+#include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/c_engine.h"
 #include "pragma/model/c_side.h"
 #include <mathutil/uquat.h>
 #include "pragma/debug/c_debugoverlay.h"
-#include "pragma/rendering/shaders/c_shader.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <wgui/wgui.h>
-#include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/shaders/image/c_shader_additive.h"
-#include "pragma/rendering/shaders/debug/c_shader_debug.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
@@ -27,9 +30,7 @@
 #include "pragma/rendering/rendersystem.h"
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/scene/scene.h"
-#include "pragma/opengl/renderhierarchy.h"
 #include "luasystem.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_postprocessing.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include <pragma/lua/luafunction_call.h>
@@ -169,9 +170,9 @@ static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,b
 			
 			auto r = wgui.Create<WIDebugDepthTexture>();
 			r->SetTexture(*rasterizer->GetPrepass().textureDepth,{
-				Anvil::PipelineStageFlagBits::LATE_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+				prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 			},{
-				Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+				prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 			});
 			r->SetShouldResolveImage(true);
 			r->SetSize(1024,1024);
@@ -198,7 +199,7 @@ static CVar cvDrawWorld = GetClientConVar("render_draw_world");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::Image &outImage,FRender renderFlags,const Color *clearColor,uint32_t outLayerId)
+void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags,const Color *clearColor,uint32_t outLayerId)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
@@ -238,9 +239,9 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 	{
 		auto clearCol = (clearColor != nullptr) ? clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
 		auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
-		prosper::util::record_image_barrier(*(*drawCmd),*(*hdrImg),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
-		prosper::util::record_clear_image(*(*drawCmd),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-		prosper::util::record_image_barrier(*(*drawCmd),*(*hdrImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+		drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
+		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 
 	// Update Exposure
@@ -270,14 +271,14 @@ void CGame::RenderScenes(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd
 
 
 		auto bSkipScene = CallCallbacksWithOptionalReturn<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+			bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
 		>("DrawScene",ret,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue;
 		m_bMainRenderPass = true;
 		if(bSkipScene == true && ret == true)
 			return;
 		m_bMainRenderPass = false;
 		if(CallLuaCallbacks<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+			bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
 		>("DrawScene",&bSkipScene,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 		{
 			CallCallbacks("PostRenderScenes");

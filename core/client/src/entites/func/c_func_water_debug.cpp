@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/func/c_func_water.h"
 #include "pragma/console/c_cvar_global_functions.h"
@@ -60,16 +67,16 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				auto &hdrInfo = renderer->GetHDRInfo();
 				auto *pReflection = wgui.Create<WITexturedRect>(r);
 				pReflection->SetSize(size,size);
-				pReflection->SetTexture(*hdrInfo.sceneRenderTarget->GetTexture());
+				pReflection->SetTexture(hdrInfo.sceneRenderTarget->GetTexture());
 				pReflection->SetName("dbg_water_reflection");
 
 				auto *pRefractionDepth = wgui.Create<WIDebugDepthTexture>(r);
 				pRefractionDepth->SetSize(size,size);
 				pRefractionDepth->SetX(size);
 				pRefractionDepth->SetTexture(*hdrInfo.prepass.textureDepth,{//*waterScene.texSceneDepth
-					Anvil::PipelineStageFlagBits::LATE_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+					prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 				},{
-					Anvil::PipelineStageFlagBits::EARLY_FRAGMENT_TESTS_BIT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AccessFlagBits::DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+					prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 				});
 				pRefractionDepth->SetShouldResolveImage(true);
 				pRefractionDepth->SetName("dbg_water_refraction_depth");

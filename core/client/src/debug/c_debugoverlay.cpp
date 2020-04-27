@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
@@ -134,13 +141,13 @@ void DebugRenderer::WorldObject::SetOutlineColor(const Vector4 &outlineColor)
 	m_outlineColor = outlineColor;
 }
 bool DebugRenderer::WorldObject::HasOutline() const {return m_bOutline;}
-const std::shared_ptr<prosper::Buffer> &DebugRenderer::WorldObject::GetColorBuffer() const {return m_colorBuffer;}
-const std::shared_ptr<prosper::Buffer> &DebugRenderer::WorldObject::GetVertexBuffer() const {return m_vertexBuffer;}
+const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetColorBuffer() const {return m_colorBuffer;}
+const std::shared_ptr<prosper::IBuffer> &DebugRenderer::WorldObject::GetVertexBuffer() const {return m_vertexBuffer;}
 uint32_t DebugRenderer::WorldObject::GetVertexCount() const {return (m_vertexCount != std::numeric_limits<uint32_t>::max()) ? m_vertexCount : m_vertices.size();}
 void DebugRenderer::WorldObject::AddVertex(const Vector3 &v) {m_vertices.push_back(v);}
 std::vector<Vector3> &DebugRenderer::WorldObject::GetVertices() {return m_vertices;}
 std::vector<Vector4> &DebugRenderer::WorldObject::GetColors() {return m_colors;}
-void DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::Buffer> &vertexBuffer,uint32_t vertexCount)
+void DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount)
 {
 	m_colorBuffer = nullptr;
 	m_vertexBuffer = vertexBuffer;
@@ -153,18 +160,17 @@ void DebugRenderer::WorldObject::InitializeBuffers()
 	m_vertexCount = 0;
 	if(m_vertices.empty())
 		return;
-	auto &dev = c_engine->GetDevice();
 	auto createInfo = prosper::util::BufferCreateInfo {};
 	createInfo.size = m_vertices.size() *sizeof(m_vertices.front());
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-	m_vertexBuffer = prosper::util::create_buffer(dev,createInfo,m_vertices.data());
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	m_vertexBuffer = c_engine->CreateBuffer(createInfo,m_vertices.data());
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
 		return;
 	createInfo.size = m_colors.size() *sizeof(m_colors.front());
-	m_colorBuffer = prosper::util::create_buffer(dev,createInfo,m_colors.data());
+	m_colorBuffer = c_engine->CreateBuffer(createInfo,m_colors.data());
 }
 
 void DebugRenderer::WorldObject::UpdateVertexBuffer()
@@ -191,9 +197,9 @@ DebugRenderer::TextObject::TextObject(WIText *elText)
 			return;
 		if(m_descSetGroupText != nullptr)
 			c_engine->KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
-		auto tex = rt.get()->GetTexture();
-		m_descSetGroupText = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
-		prosper::util::set_descriptor_set_binding_texture(*m_descSetGroupText->GetDescriptorSet(),*tex,0u);
+		auto &tex = rt.get()->GetTexture();
+		m_descSetGroupText = c_engine->CreateDescriptorSetGroup(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
+		m_descSetGroupText->GetDescriptorSet()->SetBindingTexture(tex,0u);
 	}));
 }
 DebugRenderer::TextObject::~TextObject()
@@ -207,15 +213,15 @@ DebugRenderer::TextObject::~TextObject()
 }
 WIText *DebugRenderer::TextObject::GetTextElement() const {return static_cast<WIText*>(m_hText.get());}
 void DebugRenderer::TextObject::Initialize(CallbackHandle &hCallback) {m_hCbRender = hCallback;}
-Anvil::DescriptorSet *DebugRenderer::TextObject::GetTextDescriptorSet() const
+prosper::IDescriptorSet *DebugRenderer::TextObject::GetTextDescriptorSet() const
 {
-	return (m_descSetGroupText != nullptr) ? m_descSetGroupText->GetAnvilDescriptorSetGroup().get_descriptor_set(0u) : nullptr;
+	return (m_descSetGroupText != nullptr) ? m_descSetGroupText->GetDescriptorSet() : nullptr;
 }
 DebugRenderer::ObjectType DebugRenderer::TextObject::GetType() const {return ObjectType::Text;}
 
 ///////////////////////////
 
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::shared_ptr<prosper::Buffer> &vertexBuffer,uint32_t vertexCount,const Color &color,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount,const Color &color,float duration)
 {
 	if(vertexCount == 0)
 		return nullptr;
@@ -741,7 +747,7 @@ void DebugRenderer::ClearObjects()
 	for(auto &it : s_debugObjects)
 		it.second.clear();
 }
-void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void DebugRenderer::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(s_debugObjects.empty())
 		return;
@@ -785,7 +791,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 			continue;
 		auto pipelineId = itPipeline->second;
 		if(pipelineId == pragma::ShaderDebug::Pipeline::Line || pipelineId == pragma::ShaderDebug::Pipeline::Wireframe || pipelineId == pragma::ShaderDebug::Pipeline::LineStrip)
-			(*drawCmd)->record_set_line_width(2.f);
+			drawCmd->RecordSetLineWidth(2.f);
 		for(auto it=meshes.begin();it!=meshes.end();)
 		{
 			auto &mesh = *it;
@@ -800,7 +806,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 					auto &colBuffer = ptrO->GetColorBuffer();
 					auto mvp = vp *ptrO->GetModelMatrix();
 					if(colBuffer == nullptr)
-						shader->Draw(ptrO->GetVertexBuffer()->GetAnvilBuffer(),ptrO->GetVertexCount(),mvp,ptrO->GetColor());
+						shader->Draw(*ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp,ptrO->GetColor());
 					else
 					{
 						//shader->Draw(ptrO->GetVertexBuffer(),ptrO->GetVertexCount(),mvp);
@@ -819,7 +825,7 @@ void DebugRenderer::Render(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawC
 	while(!outlines.empty())
 	{
 		auto &o = static_cast<DebugRenderer::WorldObject&>(*outlines.front());
-		shader->Draw(o.GetVertexBuffer()->GetAnvilBuffer(),o.GetVertexCount(),vp *o.GetModelMatrix());
+		shader->Draw(*o.GetVertexBuffer(),o.GetVertexCount(),vp *o.GetModelMatrix());
 		outlines.pop();
 	}
 	shader->EndDraw();

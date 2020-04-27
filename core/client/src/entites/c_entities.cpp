@@ -1,16 +1,19 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/entityfactories.h"
 #include "pragma/lua/classes/c_lua_entity.h"
-#include "pragma/lua/c_lua_weapon.h"
-#include "pragma/lua/c_lua_npc.h"
-#include "pragma/lua/c_lua_vehicle.h"
 #include "luasystem.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/game/c_game_entities.h"
-#include "pragma/opengl/renderhierarchy.h"
 #include <sharedutils/util_string.h>
 #include <pragma/game/game_lua_entity.hpp>
 

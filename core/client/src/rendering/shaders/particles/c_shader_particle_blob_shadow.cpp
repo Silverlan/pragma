@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
  // prosper TODO
 #if 0
@@ -21,7 +28,7 @@ void ParticleBlobShadow::InitializeVertexDescriptions(std::vector<vk::VertexInpu
 	vertexBindingDescriptions.push_back({
 		umath::to_integral(Binding::AdjacentBlobs),
 		sizeof(uint16_t) *MAX_BLOB_NEIGHBORS,
-		Anvil::VertexInputRate::INSTANCE
+		prosper::VertexInputRate::Instance
 	});
 
 	vertexAttributeDescriptions.push_back({
@@ -33,14 +40,14 @@ void ParticleBlobShadow::InitializeVertexDescriptions(std::vector<vk::VertexInpu
 
 void ParticleBlobShadow::InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants)
 {
-	pushConstants.push_back({Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT,0,28});
+	pushConstants.push_back({prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0,28});
 
 	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::STORAGE_BUFFER_DYNAMIC,Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // Particle data
+		{prosper::DescriptorType::StorageBufferDynamic,prosper::ShaderStageFlags::FragmentBit} // Particle data
 	}));
 
 	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // Light data
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit} // Light data
 	}));
 }
 
@@ -94,7 +101,7 @@ void ParticleBlobShadow::Draw(CParticleSystem *particle,const Vulkan::Buffer &ad
 		<<right // Cam Right
 		<<up // Cam Up
 		<<Vector4{posLight.x,posLight.y,posLight.z,(ranged != nullptr) ? static_cast<float>(ranged->GetDistance()) : 0.f};
-	drawCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT,static_cast<uint32_t>(instance.GetCount()),instance.GetData());
+	drawCmd->PushConstants(layout,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,static_cast<uint32_t>(instance.GetCount()),instance.GetData());
 
 	//drawCmd->BindDescriptorSet(umath::to_integral(DescSet::LightData),layout,light->GetDescriptorSet());
 

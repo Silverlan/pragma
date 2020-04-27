@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
  // prosper TODO
 #if 0
@@ -46,23 +53,23 @@ void ParticleModelShadow::InitializeVertexDescriptions(std::vector<vk::VertexInp
 	vertexBindingDescriptions.push_back({
 		umath::to_integral(Binding::Xyzs),
 		CParticleSystem::PARTICLE_DATA_SIZE,
-		Anvil::VertexInputRate::INSTANCE
+		prosper::VertexInputRate::Instance
 	});
 	vertexBindingDescriptions.push_back({
 		umath::to_integral(Binding::Rotation),
 		sizeof(Quat),
-		Anvil::VertexInputRate::INSTANCE
+		prosper::VertexInputRate::Instance
 	});
 
 	vertexAttributeDescriptions.push_back({
 		umath::to_integral(Location::Xyzs),
 		umath::to_integral(Binding::Xyzs),
-		Anvil::Format::R32G32B32A32_SFLOAT,0
+		prosper::Format::R32G32B32A32_SFloat,0
 	});
 	vertexAttributeDescriptions.push_back({
 		umath::to_integral(Location::Rotation),
 		umath::to_integral(Binding::Rotation),
-		Anvil::Format::R32G32B32A32_SFLOAT,0
+		prosper::Format::R32G32B32A32_SFloat,0
 	});
 }
 #endif

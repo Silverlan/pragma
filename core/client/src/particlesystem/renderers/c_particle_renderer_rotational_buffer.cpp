@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -18,17 +25,16 @@ void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemCompon
 	auto maxParticles = pSystem.GetMaxParticleCount();
 	m_rotations.resize(maxParticles);
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.size = m_rotations.size() *sizeof(m_rotations.front());
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	m_rotBuffer = prosper::util::create_buffer(dev,createInfo,m_rotations.data());
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	m_rotBuffer = c_engine->CreateBuffer(createInfo,m_rotations.data());
 }
 
 void CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) {m_bAlignVelocity = b;}
 bool CParticleRendererRotationalBuffer::ShouldRotationAlignVelocity() const {return m_bAlignVelocity;}
-const std::shared_ptr<prosper::Buffer> &CParticleRendererRotationalBuffer::GetBuffer() const {return m_rotBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CParticleRendererRotationalBuffer::GetBuffer() const {return m_rotBuffer;}
 
 bool CParticleRendererRotationalBuffer::Update()
 {

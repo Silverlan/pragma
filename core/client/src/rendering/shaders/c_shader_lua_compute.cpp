@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
@@ -16,9 +23,9 @@ void Lua::Shader::Compute::RecordDispatch(lua_State *l,prosper::ShaderCompute &s
 }
 void Lua::Shader::Compute::RecordBeginCompute(lua_State *l,prosper::ShaderCompute &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
 {
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer.IsPrimary() == false)
 		return;
-	Lua::PushBool(l,shader.BeginCompute(std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
+	Lua::PushBool(l,shader.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this()),pipelineIdx));
 }
 void Lua::Shader::Compute::RecordCompute(lua_State *l,prosper::ShaderCompute &shader)
 {

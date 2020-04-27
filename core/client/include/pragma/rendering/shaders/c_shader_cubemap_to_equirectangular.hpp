@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_CUBEMAP_TO_EQUIRECTANGULAR_HPP__
 #define __C_SHADER_CUBEMAP_TO_EQUIRECTANGULAR_HPP__
 
@@ -22,9 +29,9 @@ namespace pragma
 		ShaderCubemapToEquirectangular(prosper::Context &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width=1'600,uint32_t height=800);
 	protected:
-		std::shared_ptr<prosper::Image> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;
+		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;
 		std::shared_ptr<prosper::RenderTarget> CreateEquirectangularRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;
-		virtual void InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };
 

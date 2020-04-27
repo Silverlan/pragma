@@ -1,7 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <prosper_render_pass.hpp>
+#include <prosper_framebuffer.hpp>
 #include <pragma/console/c_cvar.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -44,7 +53,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_dynamic,[](NetworkState*,ConVar*,bo
 	reload_all_shadow_maps();
 });
 
-Anvil::DescriptorSet *CShadowComponent::GetDescriptorSet()
+prosper::IDescriptorSet *CShadowComponent::GetDescriptorSet()
 {
 	auto *shadowManager = CShadowManagerComponent::GetShadowManager();
 	return shadowManager ? shadowManager->GetDescriptorSet() : nullptr;
@@ -136,30 +145,28 @@ void CShadowComponent::SetLastFrameRendered(int64_t frameId) {m_lastFrameRendere
 bool CShadowComponent::IsDirty() const {return m_bDirty;}
 void CShadowComponent::SetDirty(bool dirty) {m_bDirty = dirty;}
 
-const std::shared_ptr<prosper::RenderTarget> &CShadowComponent::GetDepthRenderTarget() const
+prosper::RenderTarget *CShadowComponent::GetDepthRenderTarget() const
 {
 	static std::shared_ptr<prosper::RenderTarget> nptr = nullptr;
 	if(m_hRt.expired())
-		return nptr;
-	return m_hRt->lock()->renderTarget;
+		return nullptr;
+	return m_hRt->lock()->renderTarget.get();
 }
-const std::shared_ptr<prosper::Texture> &CShadowComponent::GetDepthTexture() const
+prosper::Texture *CShadowComponent::GetDepthTexture() const
 {
-	static std::shared_ptr<prosper::Texture> nptr = nullptr;
 	auto rt = GetDepthRenderTarget();
-	return rt ? rt->GetTexture() : nptr;
+	return rt ? &rt->GetTexture() : nullptr;
 }
-const std::shared_ptr<prosper::RenderPass> &CShadowComponent::GetRenderPass() const
+prosper::IRenderPass *CShadowComponent::GetRenderPass() const
 {
-	static std::shared_ptr<prosper::RenderPass> nptr = nullptr;
 	auto rt = GetDepthRenderTarget();
-	return rt ? rt->GetRenderPass() : nptr;
+	return rt ? &rt->GetRenderPass() : nullptr;
 }
-const std::shared_ptr<prosper::Framebuffer> &CShadowComponent::GetFramebuffer(uint32_t layerId)
+prosper::IFramebuffer *CShadowComponent::GetFramebuffer(uint32_t layerId)
 {
-	static std::shared_ptr<prosper::Framebuffer> nptr = nullptr;
 	auto rt = GetDepthRenderTarget();
-	return rt ? rt->GetFramebuffer(layerId) : nptr;
+	auto *fb = rt ? rt->GetFramebuffer(layerId) : nullptr;
+	return fb ? fb : nullptr;
 }
 bool CShadowComponent::HasRenderTarget() const {return m_hRt.valid();}
 

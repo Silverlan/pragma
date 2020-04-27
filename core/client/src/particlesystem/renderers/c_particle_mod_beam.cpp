@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -52,17 +59,16 @@ void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem
 	m_indexCount = static_cast<uint32_t>(indices.size());
 	m_nodeOrigins.resize(m_nodeCount,{{},{0,0,0,255}});
 
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_nodeOrigins.size() *sizeof(Node);
-	m_vertexBuffer = prosper::util::create_buffer(dev,createInfo,m_nodeOrigins.data());
+	m_vertexBuffer = c_engine->CreateBuffer(createInfo,m_nodeOrigins.data());
 
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::INDEX_BUFFER_BIT;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(uint16_t) *indices.size();
-	m_indexBuffer = prosper::util::create_buffer(dev,createInfo,indices.data());
+	m_indexBuffer = c_engine->CreateBuffer(createInfo,indices.data());
 }
 void CParticleRendererBeam::PostSimulate(double tDelta)
 {
@@ -100,7 +106,7 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	if(m_shader.expired())
 		return;
@@ -109,7 +115,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommand
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(*descSetShadows,descSetLightSources);
+	shader->BindLights(descSetShadows,descSetLightSources);
 	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
@@ -117,7 +123,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::PrimaryCommand
 }
 
 
-void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())

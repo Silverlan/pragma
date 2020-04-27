@@ -1,6 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
@@ -23,17 +26,17 @@ extern DLLCLIENT ClientState *client;
 
 decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE) pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TEXTURE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Diffuse Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Diffuse Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Specular glossiness map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Specular glossiness map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Ambient occlusion Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Ambient occlusion Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
@@ -46,11 +49,11 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 )
 {
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT;
+	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture* {
 		TextureManager::LoadInfo loadInfo {};
@@ -76,61 +79,61 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 
 	auto &dev = context.GetDevice();
 
-	auto extents = imgDiffuse->GetExtents();
+	auto extents = imgDiffuse.GetExtents();
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
-	auto imgAlbedo = prosper::util::create_image(context.GetDevice(),imgCreateInfo);
+	auto imgAlbedo = context.CreateImage(imgCreateInfo);
 
-	extents = imgSpecularGlossiness->GetExtents();
+	extents = imgSpecularGlossiness.GetExtents();
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
-	auto imgRMA = prosper::util::create_image(context.GetDevice(),imgCreateInfo);
+	auto imgRMA = context.CreateImage(imgCreateInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	auto texAlbedo = prosper::util::create_texture(dev,{},imgAlbedo,&imgViewCreateInfo);
-	auto texRMA = prosper::util::create_texture(dev,{},imgRMA,&imgViewCreateInfo);
+	auto texAlbedo = context.CreateTexture({},*imgAlbedo,imgViewCreateInfo);
+	auto texRMA = context.CreateTexture({},*imgRMA,imgViewCreateInfo);
 
-	auto rtAlbedo = prosper::util::create_render_target(dev,{texAlbedo},GetRenderPass());
-	auto rtRMA = prosper::util::create_render_target(dev,{texRMA},GetRenderPass());
+	auto rtAlbedo = context.CreateRenderTarget({texAlbedo},GetRenderPass());
+	auto rtRMA = context.CreateRenderTarget({texRMA},GetRenderPass());
 
 	auto dsg = CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE.setIndex);
 	auto &ds = *dsg->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_texture(ds,*diffuseMap,umath::to_integral(TextureBinding::DiffuseMap));
-	prosper::util::set_descriptor_set_binding_texture(ds,*specularGlossinessMap,umath::to_integral(TextureBinding::SpecularGlossinessMap));
-	prosper::util::set_descriptor_set_binding_texture(ds,*aoMap,umath::to_integral(TextureBinding::AmbientOcclusionMap));
+	ds.SetBindingTexture(*diffuseMap,umath::to_integral(TextureBinding::DiffuseMap));
+	ds.SetBindingTexture(*specularGlossinessMap,umath::to_integral(TextureBinding::SpecularGlossinessMap));
+	ds.SetBindingTexture(*aoMap,umath::to_integral(TextureBinding::AmbientOcclusionMap));
 
 	auto setupCmd = context.GetSetupCommandBuffer();
 	auto pushConstants = pushConstantData;
 	pushConstants.pass = Pass::Albedo;
-	if(prosper::util::record_begin_render_pass(**setupCmd,*rtAlbedo))
+	if(setupCmd->RecordBeginRenderPass(*rtAlbedo))
 	{
 		if(BeginDraw(setupCmd))
 		{
 			if(RecordPushConstants(pushConstants))
-				Draw(*ds);
+				Draw(ds);
 			EndDraw();
 		}
-		prosper::util::record_end_render_pass(**setupCmd);
+		setupCmd->RecordEndRenderPass();
 	}
 
 	context.FlushSetupCommandBuffer();
 	setupCmd = context.GetSetupCommandBuffer();
 	pushConstants.pass = Pass::RMA;
-	if(prosper::util::record_begin_render_pass(**setupCmd,*rtRMA))
+	if(setupCmd->RecordBeginRenderPass(*rtRMA))
 	{
 		if(BeginDraw(setupCmd))
 		{
 			if(RecordPushConstants(pushConstants))
-				Draw(*ds);
+				Draw(ds);
 			EndDraw();
 		}
-		prosper::util::record_end_render_pass(**setupCmd);
+		setupCmd->RecordEndRenderPass();
 	}
 	context.FlushSetupCommandBuffer();
 
 	return MetalnessRoughnessImageSet{
-		texAlbedo->GetImage(),
-		texRMA->GetImage()
+		texAlbedo->GetImage().shared_from_this(),
+		texRMA->GetImage().shared_from_this()
 	};
 }
 
@@ -140,15 +143,15 @@ void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeGfxPipeline
 
 	AddDefaultVertexAttributes(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 }
 
-void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void pragma::ShaderSpecularGlossinessToMetalnessRoughness::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<pragma::ShaderSpecularGlossinessToMetalnessRoughness>(
 		std::vector<prosper::util::RenderPassCreateInfo::AttachmentInfo>{
-			{Anvil::Format::R8G8B8A8_UNORM} // Albedo / RMA
+			{prosper::Format::R8G8B8A8_UNorm} // Albedo / RMA
 	},outRenderPass,pipelineIdx);
 }
 

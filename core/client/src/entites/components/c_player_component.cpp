@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -9,7 +16,6 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/entities/c_baseweapon.h"
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
@@ -534,8 +540,6 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 
 bool CPlayerComponent::ShouldDraw(const Vector3 &camOrigin) const
 {
-	//if(true)
-	//	return true;
 	if(!IsLocalPlayer())
 		return true;
 #pragma message ("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
@@ -590,12 +594,6 @@ void CPlayerComponent::Think(double tDelta)
 			Vector3 mv = dtrans.offset *scale;
 			dtrans.offset -= mv;
 			SetViewOffset(GetViewOffset() +mv);
-
-			/*Quat mvOrientation = dtrans->orientation *scale;
-			//dtrans->orientation *= (1.0f -scale);
-			Quat newOrientation = GetViewOrientation();
-			newOrientation = newOrientation +Quat(0.1,0,0,0);//Quat(mvOrientation);
-			SetViewOrientation(Quat(newOrientation));*/
 
 			dtrans.time -= tDelta;
 			if(dtrans.time <= 0)
@@ -727,6 +725,6 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		}
 
 		//refRot.get() = uquat::get_inverse(rotRel) *uquat::slerp(newRotCur,rotDst,c_engine->GetDeltaFrameTime() *4.f);
-		// TODO: Remove callback on complete!!
+		// TODO: Remove callback on complete!
 	}));*/
 }

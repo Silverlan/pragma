@@ -1,9 +1,17 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/util/util_rgbcsv.hpp"
 
 // Source: https://stackoverflow.com/a/6930407/2482983
-util::HSV util::rgb_to_hsv(const Color &in)
+util::HSV util::rgb_to_hsv(const Color &inC)
 {
+	auto in = inC.ToVector3();
     HSV         out;
     double      min, max, delta;
 
@@ -49,7 +57,7 @@ Color util::hsv_to_rgb(const HSV &in)
 {
     double      hh, p, q, t, ff;
     long        i;
-	Color         out {};
+	Vector3         out {};
 
     if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
         out.r = in.v;

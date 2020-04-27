@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include "pragma/rendering/c_gpu_swapchain_timer.hpp"
@@ -15,7 +22,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 static CVar cvTimerQueries = GetClientConVar("cl_gpu_timer_queries_enabled");
 
-std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler,const std::string &name,Anvil::PipelineStageFlagBits stage,GPUProfilingStage *parent)
+std::shared_ptr<GPUProfilingStage> GPUProfilingStage::Create(Profiler &profiler,const std::string &name,prosper::PipelineStageFlags stage,GPUProfilingStage *parent)
 {
 	auto result = ProfilingStage::Create<GPUProfilingStage>(profiler,name,parent);
 	if(result == nullptr)
@@ -28,7 +35,7 @@ GPUProfiler &GPUProfilingStage::GetProfiler() {return static_cast<GPUProfiler&>(
 GPUProfilingStage *GPUProfilingStage::GetParent() {return static_cast<GPUProfilingStage*>(ProfilingStage::GetParent());}
 const GPUSwapchainTimer &GPUProfilingStage::GetTimer() const {return const_cast<GPUProfilingStage*>(this)->GetTimer();}
 GPUSwapchainTimer &GPUProfilingStage::GetTimer() {return static_cast<GPUSwapchainTimer&>(ProfilingStage::GetTimer());}
-Anvil::PipelineStageFlagBits GPUProfilingStage::GetPipelineStage() const {return m_stage;}
+prosper::PipelineStageFlags GPUProfilingStage::GetPipelineStage() const {return m_stage;}
 
 void GPUProfilingStage::InitializeTimer()
 {
@@ -42,9 +49,9 @@ GPUProfiler::GPUProfiler()
 }
 void GPUProfiler::Initialize()
 {
-	m_rootStage = GPUProfilingStage::Create(*this,"root",Anvil::PipelineStageFlagBits::NONE);
+	m_rootStage = GPUProfilingStage::Create(*this,"root",prosper::PipelineStageFlags::None);
 }
-std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(Anvil::PipelineStageFlagBits stage)
+std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(prosper::PipelineStageFlags stage)
 {
 	return pragma::debug::GPUSwapchainTimer::Create(*m_timerQueryPool,*m_statsQueryPool,stage);
 }

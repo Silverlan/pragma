@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_RENDER_COMPONENT_HPP__
 #define __C_RENDER_COMPONENT_HPP__
 
@@ -9,7 +16,7 @@
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
 
-namespace prosper {class UniformResizableBuffer; class DescriptorSet;};
+namespace prosper {class IUniformResizableBuffer; class IDescriptorSet;};
 namespace Intersection {struct LineMeshResult;};
 namespace pragma
 {
@@ -36,11 +43,11 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CRenderComponent(BaseEntity &ent);
-		std::weak_ptr<prosper::Buffer> GetRenderBuffer() const;
-		prosper::DescriptorSet *GetRenderDescriptorSet() const;
+		std::weak_ptr<prosper::IBuffer> GetRenderBuffer() const;
+		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent*> &GetViewEntities();
-		static const std::shared_ptr<prosper::UniformResizableBuffer> &GetInstanceBuffer();
+		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
 		static void InitializeBuffers();
 		static void ClearBuffers();
 
@@ -69,7 +76,7 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
-		virtual void UpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
+		virtual void UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
 
 		virtual void Render(RenderMode renderMode);
 		virtual void PostRender(RenderMode renderMode);
@@ -136,8 +143,8 @@ namespace pragma
 			float biasClamp = 0.f;
 			float slopeFactor = 0.f;
 		} m_depthBias;
-		std::shared_ptr<prosper::Buffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_renderDescSetGroup = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
 	};
 
 	// Events
@@ -174,11 +181,11 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderData
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderData(const std::shared_ptr<prosper::PrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame);
+		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame);
 		virtual void PushArguments(lua_State *l) override;
 		const bool bufferUpdateRequired;
 		const bool firstUpdateThisFrame;
-		std::shared_ptr<prosper::PrimaryCommandBuffer> commandBuffer;
+		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 
 	struct DLLCLIENT CEOnRenderBoundsChanged

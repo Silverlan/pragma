@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -305,7 +312,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	if(matTraditional.Save())
 		client->LoadMaterial(matName,true,true); // Reload material immediately
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
-	Con::cout<<"Conversion complete!"<<Con::endl;
+	// Con::cout<<"Conversion complete!"<<Con::endl;
 	return true;
 }
 std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRoughness(prosper::Texture &specularMap)
@@ -314,32 +321,30 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	if(shaderSpecularToRoughness == nullptr)
 		return nullptr;
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	auto &dev = c_engine->GetDevice();
 	// Specular descriptor set
-	auto dsgSpecular = prosper::util::create_descriptor_set_group(dev,pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
-	prosper::util::set_descriptor_set_binding_texture(*dsgSpecular->GetDescriptorSet(),specularMap,0u);
+	auto dsgSpecular = c_engine->CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
+	dsgSpecular->GetDescriptorSet()->SetBindingTexture(specularMap,0u);
 
 	// Initialize roughness image
-	prosper::util::ImageCreateInfo createInfoRoughness {};
-	specularMap.GetImage()->GetCreateInfo(createInfoRoughness);
-	createInfoRoughness.format = Anvil::Format::R8G8B8A8_UNORM;
-	createInfoRoughness.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-	createInfoRoughness.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT;
-	auto roughnessMap = prosper::util::create_image(dev,createInfoRoughness);
+	auto createInfoRoughness = specularMap.GetImage().GetCreateInfo();
+	createInfoRoughness.format = prosper::Format::R8G8B8A8_UNorm;
+	createInfoRoughness.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	createInfoRoughness.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+	auto roughnessMap = c_engine->CreateImage(createInfoRoughness);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto roughnessTex = prosper::util::create_texture(dev,{},roughnessMap,&imgViewCreateInfo,&samplerCreateInfo);
-	auto roughnessRt = prosper::util::create_render_target(dev,{roughnessTex},shaderSpecularToRoughness->GetRenderPass());
+	auto roughnessTex = c_engine->CreateTexture({},*roughnessMap,imgViewCreateInfo,samplerCreateInfo);
+	auto roughnessRt = c_engine->CreateRenderTarget({roughnessTex},shaderSpecularToRoughness->GetRenderPass());
 
 	// Specular to roughness
-	if(prosper::util::record_begin_render_pass(**setupCmd,*roughnessRt) == true)
+	if(setupCmd->RecordBeginRenderPass(*roughnessRt) == true)
 	{
 		if(shaderSpecularToRoughness->BeginDraw(setupCmd) == true)
 		{
-			shaderSpecularToRoughness->Draw(*(*dsgSpecular)->get_descriptor_set(0u));
+			shaderSpecularToRoughness->Draw(*dsgSpecular->GetDescriptorSet());
 			shaderSpecularToRoughness->EndDraw();
 		}
-		prosper::util::record_end_render_pass(**setupCmd);
+		setupCmd->RecordEndRenderPass();
 	}
 	c_engine->FlushSetupCommandBuffer();
 	return roughnessTex;

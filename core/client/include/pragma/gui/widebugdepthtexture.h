@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __WIDEBUGDEPTHTEXTURE_H__
 #define __WIDEBUGDEPTHTEXTURE_H__
 
@@ -30,20 +37,15 @@ protected:
 	util::WeakHandle<prosper::Shader> m_whCubeDepthToRgbShader = {};
 	util::WeakHandle<prosper::Shader> m_whCsmDepthToRgbShader = {};
 	CallbackHandle m_depthToRgbCallback = {};
-	std::shared_ptr<prosper::RenderTarget> m_srcDepthRenderTarget = nullptr;
+	std::shared_ptr<prosper::Texture> m_srcDepthTex = nullptr;
 	std::shared_ptr<prosper::RenderTarget> m_renderTarget = nullptr;
 	prosper::util::BarrierImageLayout m_srcBarrierImageLayout = {};
 	prosper::util::BarrierImageLayout m_dstBarrierImageLayout = {};
-	std::shared_ptr<prosper::DescriptorSetGroup> m_dsgSceneDepthTex = nullptr;
-	//Vulkan::TextureHandle m_hTexture; // prosper TODO
-	//Vulkan::RenderTarget m_renderTarget; // prosper TODO
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgSceneDepthTex = nullptr;
 	uint32_t m_imageLayer = 0u;
 	float m_contrastFactor = 1.f;
-	//Vulkan::DescriptorSet m_descTexture; // prosper TODO
 	
 	bool m_bResolveImage = true;
-	//Vulkan::Texture m_singleSampleTexture = nullptr; // prosper TODO
-	//Vulkan::Texture GetSamplerTexture(); // prosper TODO
 };
 
 #endif

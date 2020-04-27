@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/gui/widebugmipmaps.h"
 #include <prosper_util.hpp>
@@ -37,7 +44,7 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 	auto wContext = context.GetWindowWidth();
 
 	auto &img = texture->GetImage();
-	auto mipmapLevels = img->GetMipmapCount();
+	auto mipmapLevels = img.GetMipmapCount();
 	m_hTextures.reserve(mipmapLevels);
 	m_textures.reserve(mipmapLevels);
 	uint32_t xOffset = 0;
@@ -55,17 +62,17 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		auto &r = *hRect.get<WITexturedRect>();
 
 		auto &dev = context.GetDevice();
-		auto extents = img->GetExtents(mipmap);
+		auto extents = img.GetExtents(mipmap);
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
 		imgCreateInfo.height = extents.height;
-		imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
-		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-		imgCreateInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-		auto dstImg = prosper::util::create_image(dev,imgCreateInfo);
+		imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
+		imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+		imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+		auto dstImg = context.CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		auto tex = prosper::util::create_texture(dev,{},dstImg,&imgViewCreateInfo,&samplerCreateInfo);
+		auto tex = context.CreateTexture({},*dstImg,imgViewCreateInfo,samplerCreateInfo);
 		mipTextures.push_back(tex);
 
 		r.SetSize(width,height);
@@ -75,26 +82,26 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		m_textures.push_back(tex);
 		xOffset += r.GetWidth();
 	}
-	auto cb = FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create(nullptr);
-	static_cast<Callback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>*>(cb.get())->SetFunction([cb,img,mipTextures](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> refDrawCmd) mutable {
+	auto cb = FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create(nullptr);
+	static_cast<Callback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>*>(cb.get())->SetFunction([cb,&img,mipTextures](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> refDrawCmd) mutable {
 		auto &drawCmd = *refDrawCmd.get();
-		prosper::util::record_image_barrier(*drawCmd,*(*img),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+		drawCmd.RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal);
 
 		for(auto mipLevel=decltype(mipTextures.size()){0};mipLevel<mipTextures.size();++mipLevel)
 		{
 			auto &mipTex = mipTextures.at(mipLevel);
 			auto &dstImg = mipTex->GetImage();
-			prosper::util::record_image_barrier(*drawCmd,*(*dstImg),Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+			drawCmd.RecordImageBarrier(dstImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 			
 			prosper::util::BlitInfo blitInfo {};
-			blitInfo.srcSubresourceLayer.mip_level = mipLevel;
-			blitInfo.dstSubresourceLayer.mip_level = 0u;
-			prosper::util::record_blit_image(*drawCmd,blitInfo,*(*img),*(*dstImg));
+			blitInfo.srcSubresourceLayer.mipLevel = mipLevel;
+			blitInfo.dstSubresourceLayer.mipLevel = 0u;
+			drawCmd.RecordBlitImage(blitInfo,img,dstImg);
 
-			prosper::util::record_image_barrier(*drawCmd,*(*dstImg),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+			drawCmd.RecordImageBarrier(dstImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		}
 
-		prosper::util::record_image_barrier(*drawCmd,*(*img),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		drawCmd.RecordImageBarrier(img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		if(cb.IsValid())
 			cb.Remove();
 	});

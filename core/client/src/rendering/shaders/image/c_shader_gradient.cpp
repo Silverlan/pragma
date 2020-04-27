@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
 #include <shader/prosper_shader_copy_image.hpp>
@@ -42,7 +49,7 @@ void ShaderGradient::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pi
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddDefaultVertexAttributes(pipelineInfo);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
 bool ShaderGradient::Draw(const PushConstants &pushConstants)
@@ -53,7 +60,7 @@ bool ShaderGradient::Draw(const PushConstants &pushConstants)
 
 /////////////////////////
 
-bool pragma::util::record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::PrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes)
+bool pragma::util::record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes)
 {
 	if(s_shaderGradient == nullptr)
 		return false;
@@ -61,8 +68,8 @@ bool pragma::util::record_draw_gradient(prosper::Context &context,const std::sha
 	Vector2 pFar = ndir *(glm::length(Vector2(1.f,1.f)) +0.001f);
 	Vector2 pointBox = {};
 	auto &tex = rt.GetTexture();
-	auto &img = *tex->GetImage();
-	if(prosper::util::record_begin_render_pass(*(*cmdBuffer),rt) == false)
+	auto &img = tex.GetImage();
+	if(cmdBuffer->RecordBeginRenderPass(rt) == false)
 		return false;
 	if(
 		get_line_line_intersection(Vector2(-1,-1),Vector2(1,-1),pFar,pointBox) == false &&
@@ -70,7 +77,7 @@ bool pragma::util::record_draw_gradient(prosper::Context &context,const std::sha
 		get_line_line_intersection(Vector2(-1,-1),Vector2(-1,1),pFar,pointBox) == false &&
 		get_line_line_intersection(Vector2(1,1),Vector2(1,-1),pFar,pointBox) == false
 	)
-		return prosper::util::record_clear_attachment(*(*cmdBuffer),(*img),{0.f,0.f,0.f,1.f});
+		return cmdBuffer->RecordClearAttachment(img,{0.f,0.f,0.f,1.f});
 	auto extents = img.GetExtents();
 	auto &shader = static_cast<ShaderGradient&>(*s_shaderGradient);
 	if(shader.BeginDraw(cmdBuffer) == true)
@@ -89,5 +96,5 @@ bool pragma::util::record_draw_gradient(prosper::Context &context,const std::sha
 
 		shader.EndDraw();
 	}
-	return prosper::util::record_end_render_pass(*(*cmdBuffer));
+	return cmdBuffer->RecordEndRenderPass();
 }

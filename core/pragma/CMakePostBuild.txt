@@ -196,7 +196,6 @@ copy_output_file(modules/interfaces/iclient/${BINARY_PRAGMA_DIR} ${BINARY_OUTPUT
 copy_output_file(external_libs/util_pcl/${BINARY_PRAGMA_DIR} "modules/pcl" util_pcl)
 copy_output_file(external_libs/util_archive/${BINARY_PRAGMA_DIR} "modules/mount_external" util_archive)
 
-copy_output_file(modules/pr_source/${BINARY_PRAGMA_DIR} "modules/mount_external" pr_mount_external)
 copy_output_file(modules/pr_dmx/${BINARY_PRAGMA_DIR} "modules" pr_dmx)
 copy_output_file(modules/pr_openvr/${BINARY_PRAGMA_DIR} "modules/openvr" pr_openvr)
 copy_output_file(modules/pr_ovr/${BINARY_PRAGMA_DIR} "modules/ovr" pr_ovr)

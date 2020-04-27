@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include <pragma/lua/classes/ldef_vector.h>
@@ -52,11 +59,11 @@ void Lua::Scene::BeginDraw(lua_State *l,::Scene &scene)
 		return;
 	renderer->BeginRendering();*/
 }
-void Lua::Scene::UpdateBuffers(lua_State *l,::Scene &scene,prosper::CommandBuffer &hCommandBuffer)
+void Lua::Scene::UpdateBuffers(lua_State *l,::Scene &scene,prosper::ICommandBuffer &hCommandBuffer)
 {
 	if(hCommandBuffer.IsPrimary() == false)
 		return;
-	auto pCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	scene.UpdateBuffers(pCmdBuffer);
 }
 void Lua::Scene::GetWorldEnvironment(lua_State *l,::Scene &scene)
@@ -97,6 +104,8 @@ void Lua::Scene::GetIndex(lua_State *l,::Scene &scene)
 {
 	Lua::PushInt(l,scene.GetSceneIndex());
 }
+void Lua::Scene::GetDebugMode(lua_State *l,::Scene &scene) {return Lua::PushInt(l,scene.GetDebugMode());}
+void Lua::Scene::SetDebugMode(lua_State *l,::Scene &scene,uint32_t debugMode) {scene.SetDebugMode(static_cast<::Scene::DebugMode>(debugMode));}
 
 ////////////////////////////////
 
@@ -121,34 +130,34 @@ void Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::rendering:
 		return;
 	Lua::Push(l,rt);
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer)
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer)
 {
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer.IsPrimary() == false)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer));
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer,prosper::RenderPass &rp)
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer,prosper::IRenderPass &rp)
 {
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer.IsPrimary() == false)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer,&rp));
 }
-void Lua::RasterizationRenderer::EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::CommandBuffer &hCommandBuffer)
+void Lua::RasterizationRenderer::EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer)
 {
-	if(hCommandBuffer->get_command_buffer_type() != Anvil::CommandBufferType::COMMAND_BUFFER_TYPE_PRIMARY)
+	if(hCommandBuffer.IsPrimary() == false)
 	{
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto primCmdBuffer = std::static_pointer_cast<prosper::PrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
+	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	Lua::PushBool(l,renderer.EndRenderPass(primCmdBuffer));
 }
 void Lua::RasterizationRenderer::GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)

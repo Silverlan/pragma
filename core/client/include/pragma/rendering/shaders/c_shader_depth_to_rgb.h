@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_DEPTH_TO_RGB_H__
 #define __C_SHADER_DEPTH_TO_RGB_H__
 
@@ -14,7 +21,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
 
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET;
 
 #pragma pack(push,1)
 		struct PushConstants
@@ -27,10 +34,10 @@ namespace pragma
 
 		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier,const std::string &fsShader);
 		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor=1.f);
+		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor=1.f);
 	protected:
 		template<class TPushConstants>
-			bool Draw(Anvil::DescriptorSet &descSetDepthTex,const TPushConstants &pushConstants);
+			bool Draw(prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants);
 		virtual uint32_t GetPushConstantSize() const;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
@@ -50,7 +57,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderCubeDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor=1.f);
+		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;
 	};
@@ -70,44 +77,9 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderCSMDepthToRGB(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor=1.f);
+		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;
 	};
 };
-/*
-namespace Shader
-{
-	class DLLCLIENT DepthToRGB
-		: public Screen
-	{
-	protected:
-		DepthToRGB(const std::string &fs);
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-		virtual bool BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,Vulkan::ShaderPipeline *shaderPipeline) override;
-	public:
-		DepthToRGB();
-		bool BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,Vulkan::ShaderPipeline *shaderPipeline,float nearZ,float farZ);
-	};
-	class DLLCLIENT CubeDepthToRGB
-		: public DepthToRGB
-	{
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-		using DepthToRGB::BeginDraw;
-	public:
-		CubeDepthToRGB();
-		bool BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,Vulkan::ShaderPipeline *shaderPipeline,float nearZ,float farZ,int32_t cubeSide);
-	};
-	class DLLCLIENT CSMDepthToRGB
-		: public DepthToRGB
-	{
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	public:
-		CSMDepthToRGB();
-		bool BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,Vulkan::ShaderPipeline *shaderPipeline,float nearZ,float farZ,int32_t layer);
-	};
-};
-*/
 #endif

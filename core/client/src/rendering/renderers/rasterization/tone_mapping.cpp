@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -10,7 +17,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,prosper::DescriptorSet &descSetHdrResolve)
+void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IDescriptorSet &descSetHdrResolve)
 {
 	auto hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired())
@@ -21,13 +28,13 @@ void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::PrimaryCo
 	auto *srcImgGlow = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 	if(IsMultiSampled() == false) // The resolved images already have the correct layout
 	{
-		prosper::util::record_image_barrier(*(*drawCmd),**srcImg,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		//prosper::util::record_image_barrier(*(*drawCmd),**srcImgBloom,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),**srcImgGlow,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		//.RecordImageBarrier(*(*drawCmd),**srcImgBloom,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	}
-	auto &dstTexPostHdr = *hdrInfo.toneMappedRenderTarget->GetTexture();
-	auto &dstImgPostHdr = *dstTexPostHdr.GetImage();
-	if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.toneMappedRenderTarget) == true)
+	auto &dstTexPostHdr = hdrInfo.toneMappedRenderTarget->GetTexture();
+	auto &dstImgPostHdr = dstTexPostHdr.GetImage();
+	if(drawCmd->RecordBeginRenderPass(*hdrInfo.toneMappedRenderTarget) == true)
 	{
 		auto &shaderPPHdr = static_cast<pragma::ShaderPPHDR&>(*hShaderTonemapping);
 
@@ -35,20 +42,20 @@ void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::PrimaryCo
 		{
 			const float bloomAdditiveScale = 0.5f;
 			auto glowScale = (GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
-			shaderPPHdr.Draw(*descSetHdrResolve,GetHDRExposure(),bloomAdditiveScale,glowScale);
+			shaderPPHdr.Draw(descSetHdrResolve,GetHDRExposure(),bloomAdditiveScale,glowScale);
 			shaderPPHdr.EndDraw();
 		}
-		prosper::util::record_end_render_pass(*(*drawCmd));
+		drawCmd->RecordEndRenderPass();
 
-		prosper::util::record_post_render_pass_image_barrier(
-			**drawCmd,*dstImgPostHdr,
-			Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL
+		drawCmd->RecordPostRenderPassImageBarrier(
+			dstImgPostHdr,
+			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 		);
 	}
 	if(IsMultiSampled() == false)
 	{
-		prosper::util::record_image_barrier(*(*drawCmd),**srcImg,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		//prosper::util::record_image_barrier(*(*drawCmd),srcImgBloom,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),**srcImgGlow,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		//.RecordImageBarrier(*(*drawCmd),srcImgBloom,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 }

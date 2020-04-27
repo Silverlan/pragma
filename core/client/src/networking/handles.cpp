@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientutil.h"
 #include <fsys/filesystem.h>
@@ -330,106 +337,4 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 
 	SendPacket("game_ready",pragma::networking::Protocol::SlowReliable);
 	game->OnGameReady();
-
-	// WEAVETODO
-/*
-	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*ent));
-	if(ID == 0)
-		return;
-	SBaseEntity *sent = static_cast<SBaseEntity*>(ent);
-	NetPacket p;
-	p.Write<unsigned int>(ID);
-	p.Write<unsigned int>(ent->GetIndex());
-	sent->SendData(&p);
-	server->SendTCPMessage("ent_create",&p);
-*/
-	// TODO: Send all existing entities to client
-	/*unsigned char numPlayers = packet->Read<unsigned char>();
-	for(unsigned char i=0;i<numPlayers;i++)
-	{
-		unsigned int idx = packet->Read<unsigned int>();
-		std::string name = packet->ReadString();
-		double tm = packet->Read<double>();
-		CPlayer *
-	}*/
-
-	/*RestartGame(); // CURRENT TODO
-	ClientState *state = GetClientState();
-	if(state == NULL)
-		return;
-	std::string map = packet->ReadString();
-	m_tServer = packet->Read<double>();
-	m_tServer -= UnPredictedCurTime();
-	unsigned char lpIdx = packet->Read<unsigned char>();
-	unsigned char numPlayers = packet->Read<unsigned char>();
-	for(int i=0;i<numPlayers;i++)
-	{
-		unsigned int idx = packet->Read<unsigned int>();
-		std::string name = packet->ReadString();
-		double tm = packet->Read<double>();
-		Player *pl = CreateEntity<Player>(idx);
-		pl->Spawn();
-		if(idx == lpIdx)
-		{
-			pl->m_bLocalPlayer = true;
-			m_plLocal = pl;
-		}
-		else
-			pl->CreateTestSprite();
-		pl->m_userName = name;
-		pl->m_timeConnected = tm;
-	}
-	m_luaClientNetMessageIndex.clear();
-	m_luaClientNetMessageIndex.push_back("invalid");
-	unsigned int numMessages = packet->Read<unsigned int>();
-	for(int i=0;i<numMessages;i++)
-		m_luaClientNetMessageIndex.push_back(packet->ReadString());
-
-	unsigned int luaCmds = packet->Read<unsigned int>();
-	for(unsigned int i=0;i<luaCmds;i++)
-	{
-		std::string name = packet->ReadString();
-		unsigned int ID = packet->Read<unsigned int>();
-		state->RegisterServerConCommand(name,ID);
-	}
-
-	unsigned int numReplicated = packet->Read<unsigned int>();
-	for(int i=0;i<numReplicated;i++)
-	{
-		unsigned int ID = packet->Read<unsigned int>();
-		std::string cvar;
-		bool bIdentifier = false;
-		if(ID == 0)
-		{
-			cvar = packet->ReadString();
-			bIdentifier = true;
-		}
-		else
-			bIdentifier = state->GetServerConVarIdentifier(ID,&cvar);
-		std::string value = packet->ReadString();
-		if(bIdentifier)
-		{
-			ConConf *cv = state->GetConVar(cvar);
-			if(cv != NULL)
-			{
-				if(cv->GetType() == 0)
-				{
-					ConVar *conv = static_cast<ConVar*>(cv);
-					if((conv->GetFlags() &ConVarFlags::Replicated) == ConVarFlags::Replicated)
-						state->SetConVar(cvar,value);
-				}
-			}
-			else
-				Con::cwar<<"WARNING: Replicated ConVar "<<cvar<<" doesn't exist"<<Con::endl;
-		}
-	}
-	unsigned int cacheSize = packet->Read<unsigned int>();
-	if(cacheSize > 0)
-	{
-		std::string cache = packet->ReadString();
-		state->LoadLuaCache(cache,cacheSize);
-	}
-	state->InitializeLua();
-	BuildVMF(map.c_str());*/
 }
-

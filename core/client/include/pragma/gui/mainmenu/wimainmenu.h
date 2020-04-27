@@ -1,10 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __WIMAINMENU_H__
 #define __WIMAINMENU_H__
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/gui/mainmenu/wimainmenu_base.h"
 #include <wgui/types/wirect.h>
-#include "pragma/gui/wibaseblur.h"
 #include <sharedutils/functioncallback.h>
 
 #define WIMENU_ENABLE_PATREON_LOGO 1
@@ -12,7 +18,7 @@
 #define WIMENU_ENABLE_CREDITS_MENU 1
 
 class DLLCLIENT WIMainMenu
-	: public WIBase,public WIBaseBlur
+	: public WIBase
 {
 public:
 	WIMainMenu();

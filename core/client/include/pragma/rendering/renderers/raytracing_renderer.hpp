@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __RAYTRACING_RENDERER_HPP__
 #define __RAYTRACING_RENDERER_HPP__
 
@@ -12,21 +19,21 @@ namespace pragma::rendering
 		: public BaseRenderer
 	{
 	public:
-		Anvil::DescriptorSet& GetOutputImageDescriptorSet();
+		prosper::IDescriptorSet& GetOutputImageDescriptorSet();
 
 		virtual void EndRendering() override;
-		virtual bool RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
+		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
 		virtual bool ReloadRenderTarget() override;
 		virtual bool IsRayTracingRenderer() const override;
-		virtual const std::shared_ptr<prosper::Texture> &GetSceneTexture() const override;
-		virtual const std::shared_ptr<prosper::Texture> &GetHDRPresentationTexture() const override;
+		virtual prosper::Texture *GetSceneTexture() override;
+		virtual prosper::Texture *GetHDRPresentationTexture() override;
 	private:
 		friend BaseRenderer;
 		using BaseRenderer::BaseRenderer;
 		virtual bool Initialize() override;
 		std::shared_ptr<prosper::Texture> m_outputTexture = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_dsgOutputImage = nullptr;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_dsgLights = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgOutputImage = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights = nullptr;
 		util::WeakHandle<prosper::Shader> m_whShader = {};
 	};
 };

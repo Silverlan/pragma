@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/console/c_cvar.h"
@@ -63,14 +70,6 @@ bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
 	return m_flexOverrides.at(flexId).has_value();
 }
 
-// rotate by the inverse of the matrix
-// TODO
-static void VectorIRotate( const float *in1, const Mat3x4& in2, float *out )
-{
-	out[0] = in1[0]*in2[0][0] + in1[1]*in2[1][0] + in1[2]*in2[2][0];
-	out[1] = in1[0]*in2[0][1] + in1[1]*in2[1][1] + in1[2]*in2[2][1];
-	out[2] = in1[0]*in2[0][2] + in1[1]*in2[1][2] + in1[2]*in2[2][2];
-}
 void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 {
 	// TODO: Move this code to eye component
@@ -83,7 +82,7 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	Vector3 headforward {};
 	Vector3 pos {};
 
-	// get weighted position of eyeball angles based on the "raiser", "neutral", and "lowerer" controls
+	// Get weighted position of eyeball angles based on the "raiser", "neutral", and "lowerer" controls
 
 	auto upperLid = 0.f;
 	auto lowerLid = 0.f;
@@ -91,9 +90,7 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	{
 		upperLid += GetFlexWeight(eyeball.upperFlexDesc.at(i)) *umath::asin(eyeball.upperTarget.at(i) /eyeball.radius);
 		lowerLid += GetFlexWeight(eyeball.lowerFlexDesc.at(i)) *umath::asin(eyeball.lowerTarget.at(i) /eyeball.radius);
-	}
-
-	// Con_DPrintf("%.1f %.1f\n", RAD2DEG( upperlid ), RAD2DEG( lowerlid ) );		
+	}	
 
 	float sinupper, cosupper, sinlower, coslower;
 	sinupper = umath::sin(upperLid);
@@ -102,19 +99,16 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	sinlower = umath::sin(lowerLid);
 	coslower = umath::cos(lowerLid);
 
-	// convert to head relative space
+	// To head space
 	headup = state.up;
 	headforward = state.forward;
-	// TODO
-	//VectorIRotate( &state.up, m_BoneToWorld[peyeball->bone], &headup );
-	//VectorIRotate( &state.forward, m_BoneToWorld[peyeball->bone], &headforward );
 
-	// upper lid
+	// Upper lid
 	pos = headup *(sinupper *eyeball.radius);
 	pos = pos +(cosupper *eyeball.radius) *headforward;
 	SetFlexWeight(eyeball.upperLidFlexDesc,uvec::dot(pos,eyeball.up));
 
-	// lower lid
+	// Lower lid
 	pos = headup *(sinlower *eyeball.radius);
 	pos = pos +(coslower *eyeball.radius) *headforward;
 	SetFlexWeight(eyeball.lowerLidFlexDesc,uvec::dot(pos,eyeball.up));

@@ -1,7 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/c_water_object.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
-#include "pragma/rendering/shaders/c_shader_refraction.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
@@ -33,11 +39,11 @@ CWaterObject::WaterScene::~WaterScene()
 const CWaterObject::WaterScene &CWaterObject::GetWaterScene() const {return *m_waterScene;}
 bool CWaterObject::IsWaterSceneValid() const {return m_waterScene != nullptr;}
 
-Anvil::DescriptorSet *CWaterObject::GetEffectDescriptorSet() const
+prosper::IDescriptorSet *CWaterObject::GetEffectDescriptorSet() const
 {
 	if(m_waterScene == nullptr)
 		return nullptr;
-	return (*m_waterScene->descSetGroupTexEffects)->get_descriptor_set(0u);
+	return m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
 }
 
 void CWaterObject::InitializeWaterScene(const WaterScene &scene)
@@ -120,9 +126,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	auto *camReflection = c_game->CreateCamera(width,height,fov,nearZ,farZ);
 	if(camReflection == nullptr)
 		return;
-	auto &dev = c_engine->GetDevice();
 	m_waterScene = std::make_unique<WaterScene>();
-	m_waterScene->descSetGroupTexEffects = prosper::util::create_descriptor_set_group(dev,pragma::ShaderWater::DESCRIPTOR_SET_WATER);
+	m_waterScene->descSetGroupTexEffects = c_engine->CreateDescriptorSetGroup(pragma::ShaderWater::DESCRIPTOR_SET_WATER);
 	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{width,height});
 	sceneReflection->InitializeRenderTarget();
 	if(cam)
@@ -141,51 +146,51 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 	std::array<float,4> waterSettings = {*m_waterScene->waterScale,*m_waterScene->waveStrength,*m_waterScene->waveSpeed,*m_waterScene->reflectiveIntensity};
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.size = waterSettings.size() *sizeof(waterSettings.front());
-	m_waterScene->settingsBuffer = prosper::util::create_buffer(dev,bufCreateInfo,waterSettings.data());
+	m_waterScene->settingsBuffer = c_engine->CreateBuffer(bufCreateInfo,waterSettings.data());
 	//
 
 	if(m_waterScene->texScene == nullptr)
 	{
-		auto &sceneImg = renderer->GetHDRInfo().sceneRenderTarget->GetTexture()->GetImage();
-		auto extents = sceneImg->GetExtents();
+		auto &sceneImg = renderer->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage();
+		auto extents = sceneImg.GetExtents();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
 		imgCreateInfo.height = extents.height;
-		imgCreateInfo.format = sceneImg->GetFormat();
-		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-		imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-		imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		auto img = prosper::util::create_image(dev,imgCreateInfo);
+		imgCreateInfo.format = sceneImg.GetFormat();
+		imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+		imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+		imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		auto img = c_engine->CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		m_waterScene->texScene = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+		m_waterScene->texScene = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	}
 	if(m_waterScene->texSceneDepth == nullptr)
 	{
 		auto &sceneDepthImg = renderer->GetPrepass().textureDepth->GetImage();
-		auto extents = sceneDepthImg->GetExtents();
+		auto extents = sceneDepthImg.GetExtents();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;
 		imgCreateInfo.height = extents.height;
-		imgCreateInfo.format = sceneDepthImg->GetFormat();
-		imgCreateInfo.usage = Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-		imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-		imgCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		auto img = prosper::util::create_image(dev,imgCreateInfo);
+		imgCreateInfo.format = sceneDepthImg.GetFormat();
+		imgCreateInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
+		imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+		imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
+		auto img = c_engine->CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
-		m_waterScene->texSceneDepth = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+		m_waterScene->texSceneDepth = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	}
 
 	auto &descSetEffects = *m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
 	auto &reflectionTex = renderer->GetHDRInfo().sceneRenderTarget->GetTexture();
-	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*reflectionTex,umath::to_integral(pragma::ShaderWater::WaterBinding::ReflectionMap));
-	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texScene,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
-	prosper::util::set_descriptor_set_binding_texture(descSetEffects,*m_waterScene->texSceneDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
-	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetEffects,*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
+	descSetEffects.SetBindingTexture(reflectionTex,umath::to_integral(pragma::ShaderWater::WaterBinding::ReflectionMap));
+	descSetEffects.SetBindingTexture(*m_waterScene->texScene,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
+	descSetEffects.SetBindingTexture(*m_waterScene->texSceneDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
+	descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
 
 	pragma::ShaderPPFog::Fog fog {};
 	fog.flags = pragma::ShaderPPFog::Fog::Flag::Enabled;
@@ -196,13 +201,13 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	fog.density = 0.008f;
 	prosper::util::BufferCreateInfo fogBufCreateInfo {};
 	fogBufCreateInfo.size = sizeof(fog);
-	fogBufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	fogBufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT;
-	m_waterScene->fogBuffer = prosper::util::create_buffer(dev,fogBufCreateInfo,&fog);
-	m_waterScene->fogDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
+	fogBufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	fogBufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+	m_waterScene->fogBuffer = c_engine->CreateBuffer(fogBufCreateInfo,&fog);
+	m_waterScene->fogDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
 	auto &descSetFog = *m_waterScene->fogDescSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetFog,*m_waterScene->fogBuffer,0u);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(descSetEffects,*m_waterScene->fogBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterFog));
+	descSetFog.SetBindingUniformBuffer(*m_waterScene->fogBuffer,0u);
+	descSetEffects.SetBindingUniformBuffer(*m_waterScene->fogBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterFog));
 
 	auto pos = refPos;
 	auto surfaceNormal = planeNormal;
@@ -230,20 +235,20 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		//auto &tex = hdrInfo.texture->GetTexture();
 
 		auto &waterScene = *m_waterScene;
-		//tex->GetImage()->SetDrawLayout(Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		//waterScene.texScene->GetImage()->SetDrawLayout(Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+		//tex->GetImage()->SetDrawLayout(prosper::ImageLayout::TransferSrcOptimal);
+		//waterScene.texScene->GetImage()->SetDrawLayout(prosper::ImageLayout::TransferDstOptimal);
 		//auto &context = tex->GetContext(); // prosper TODO
 		//auto &drawCmd = context.GetDrawCmd(); // prosper TODO
 
-		auto &imgWaterScene = *waterScene.texScene->GetImage();
-		prosper::util::record_image_barrier(*(*drawCmd),*(*tex->GetImage()),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*imgWaterScene,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+		auto &imgWaterScene = waterScene.texScene->GetImage();
+		drawCmd->RecordImageBarrier(tex.GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+		drawCmd->RecordImageBarrier(imgWaterScene,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 
-		prosper::util::record_blit_texture(*(*drawCmd),*tex,*imgWaterScene);
+		drawCmd->RecordBlitTexture(tex,imgWaterScene);
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*tex->GetImage()),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*imgWaterScene,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		//tex->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL); // prosper TODO
+		drawCmd->RecordImageBarrier(tex.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordImageBarrier(imgWaterScene,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		//tex->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal); // prosper TODO
 
 		// Depth
 		auto &prepass = renderer->GetPrepass();
@@ -252,23 +257,23 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		// We need the depth buffer in the water shader, but the water shader has depth write enabled, so we need to copy
 		// the depth buffer before the water is being rendered.
 		// 'CopyImage' automatically resolves the image if it's multi-sampled.
-		//depthTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL); // prosper TODO
-		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::TRANSFER_DST_OPTIMAL); // prosper TODO
+		//depthTex->GetImage()->SetDrawLayout(prosper::ImageLayout::TransferSrcOptimal); // prosper TODO
+		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::TransferDstOptimal); // prosper TODO
 
-		auto &imgWaterSceneDepth = *waterScene.texSceneDepth->GetImage();
-		prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex.GetImage()),Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*imgWaterSceneDepth,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
+		auto &imgWaterSceneDepth = waterScene.texSceneDepth->GetImage();
+		drawCmd->RecordImageBarrier(depthTex.GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+		drawCmd->RecordImageBarrier(imgWaterSceneDepth,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 
-		prosper::util::record_blit_texture(*(*drawCmd),depthTex,*imgWaterSceneDepth);
+		drawCmd->RecordBlitTexture(depthTex,imgWaterSceneDepth);
 
-		prosper::util::record_image_barrier(*(*drawCmd),*(*depthTex.GetImage()),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-		prosper::util::record_image_barrier(*(*drawCmd),*imgWaterSceneDepth,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		drawCmd->RecordImageBarrier(depthTex.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
+		drawCmd->RecordImageBarrier(imgWaterSceneDepth,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 		// TODO: The destination depth image contains red-color components after the copy, why? (Compare debug_prepass and debug_water)
 
-		//waterScene.texScene->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
-		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
-		//depthTex->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
+		//waterScene.texScene->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
+		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
+		//depthTex->GetImage()->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // prosper TODO
 		renderer->BeginRenderPass(drawCmd,prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(*c_engine).get()); // Restart the render pass
 	}));
 	m_waterScene->hPostProcessing = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,FRender>::Create([this,waterNormal,waterPlaneDist,whShaderPPWater](FRender renderFlags) {
@@ -283,7 +288,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			return;
 		auto &waterScene = *m_waterScene;
 
-		//scene->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
+		//scene->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 		auto &n = *waterNormal;
 		auto &planeDist = *waterPlaneDist;
 
@@ -298,40 +303,40 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			auto *imgTex = descSetHdr.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 			auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
 			if(imgTex != nullptr)
-				prosper::util::record_image_barrier(*(*drawCmd),**imgTex,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+				drawCmd->RecordImageBarrier(*imgTex,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-			std::function<void(prosper::CommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
+			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
-			if(prosper::util::record_begin_render_pass(*(*drawCmd),*hdrInfo.hdrPostProcessingRenderTarget) == true)
+			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				auto &prepass = renderer->GetPrepass();
 				//auto &texDepth = prepass.textureDepth->Resolve(); // prosper TODO
-				//texDepth->GetImage()->SetDrawLayout(Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL); // prosper TODO
+				//texDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 
 				auto *mat = GetWaterMaterial();
 				auto &shaderPPWater = static_cast<pragma::ShaderPPWater&>(*whShaderPPWater.get());
 				if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.BeginDraw(drawCmd) == true && shaderPPWater.BindRefractionMaterial(*mat))
 				{
 					shaderPPWater.Draw(
-						*descSetHdr,
-						*(*hdrInfo.dsgSceneDepth)->get_descriptor_set(0u),
-						**scene->GetCameraDescriptorSetGraphics(),
+						descSetHdr,
+						*hdrInfo.dsgSceneDepth->GetDescriptorSet(),
+						*scene->GetCameraDescriptorSetGraphics(),
 						c_game->GetGlobalRenderSettingsDescriptorSet(),
-						*(*waterScene.fogDescSetGroup)->get_descriptor_set(0u),
+						*waterScene.fogDescSetGroup->GetDescriptorSet(),
 						Vector4{n.x,n.y,n.z,planeDist}
 					);
 					shaderPPWater.EndDraw();
 				}
-				prosper::util::record_end_render_pass(*(*drawCmd));
+				drawCmd->RecordEndRenderPass();
 			}
 			//fTransitionSampleImgToTransferDst(*drawCmd);
 			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(*drawCmd);
 		}
 	}));
 	m_waterScene->hRenderScene = c_game->AddCallback("DrawScene",FunctionCallback<
-		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
+		bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
 	>::CreateWithOptionalReturn([this,shader,pos,surfaceNormal,waterNormal,lastPos,lastRot,waterPlaneDist,matReflect](
-		bool *bSkipMainScene,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,prosper::Image *img
+		bool *bSkipMainScene,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd,prosper::IImage *img
 	) mutable -> CallbackReturnType {
 		if(cvDrawWater->GetBool() == false)
 			return CallbackReturnType::NoReturnValue;
@@ -411,11 +416,11 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 						renderFlags |= FRender::Glow;
 					if(reflectionQuality > 1)
 						renderFlags |= FRender::Particles;
-					//rtReflection->GetTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL); // prosper TODO
-					//sceneReflection->GetDepthTexture()->GetImage()->SetDrawLayout(Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL); // prosper TODO
+					//rtReflection->GetTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ColorAttachmentOptimal); // prosper TODO
+					//sceneReflection->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // prosper TODO
 
-					auto &imgReflection = *rtReflection->GetTexture()->GetImage();
-					prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+					auto &imgReflection = rtReflection->GetTexture().GetImage();
+					drawCmd.get()->RecordImageBarrier(imgReflection,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 
 					c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
 						c_game->SetRenderScene(sceneReflection);
@@ -423,7 +428,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 						c_game->SetRenderScene(nullptr);
 					c_game->SetRenderClipPlane({});
 
-					prosper::util::record_image_barrier(*(*drawCmd.get()),*imgReflection,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+					drawCmd.get()->RecordImageBarrier(imgReflection,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 					m_reflectionRendered = (bRenderDynamic == true) ? 1 : 2;
 				}

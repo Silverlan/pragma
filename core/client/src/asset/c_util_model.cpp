@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -280,11 +287,11 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			else
 				imgBuf = uimg::ImageBuffer::Create(data,gltfImg.width,gltfImg.height,format);
 
-			auto img = prosper::util::create_image(c_engine->GetDevice(),*imgBuf);
+			auto img = c_engine->CreateImage(*imgBuf);
 			prosper::util::TextureCreateInfo texCreateInfo {};
 			prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 			prosper::util::SamplerCreateInfo samplerCreateInfo {};
-			tex = prosper::util::create_texture(c_engine->GetDevice(),texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+			tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 		}
 	}
 	uint32_t matIdx = 0;
@@ -340,11 +347,11 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			return inputData.textures.at(gltfMdl.textures.at(index).source);
 		};
 
-		auto fGetImage = [&fGetTexture,&inputData](int32_t index) -> std::shared_ptr<prosper::Image> {
+		auto fGetImage = [&fGetTexture,&inputData](int32_t index) -> std::shared_ptr<prosper::IImage> {
 			auto tex = fGetTexture(index);
 			if(tex == nullptr)
 				return nullptr;
-			return tex->GetImage();
+			return tex->GetImage().shared_from_this();
 		};
 
 		auto matName = matPath +name;
@@ -357,7 +364,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		std::string textureRootPath = "addons/converted/";
 
 		auto fWriteImage = [mat,&fGetTextureInfo,&textureRootPath](
-			const std::string &matIdentifier,const std::string &texName,prosper::Image &img,bool greyScale,bool normalMap,AlphaMode alphaMode=AlphaMode::Opaque
+			const std::string &matIdentifier,const std::string &texName,prosper::IImage &img,bool greyScale,bool normalMap,AlphaMode alphaMode=AlphaMode::Opaque
 			) {
 				auto texInfo = fGetTextureInfo(greyScale,normalMap,alphaMode);
 				c_game->SaveImage(img,textureRootPath +texName,texInfo);
@@ -493,14 +500,14 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		{
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.normalTexture.index).source);
 			if(tex)
-				fWriteImage(Material::NORMAL_MAP_IDENTIFIER,matName +"_normal",*tex->GetImage(),false /* greyScale */,true /* normalMap */);
+				fWriteImage(Material::NORMAL_MAP_IDENTIFIER,matName +"_normal",tex->GetImage(),false /* greyScale */,true /* normalMap */);
 		}
 
 		if(gltfMat.emissiveTexture.index != -1)
 		{
 			auto &tex = inputData.textures.at(gltfMdl.textures.at(gltfMat.emissiveTexture.index).source);
 			if(tex)
-				fWriteImage(Material::EMISSION_MAP_IDENTIFIER,matName +"_emission",*tex->GetImage(),false /* greyScale */,false /* normalMap */);
+				fWriteImage(Material::EMISSION_MAP_IDENTIFIER,matName +"_emission",tex->GetImage(),false /* greyScale */,false /* normalMap */);
 		}
 		auto &emissiveFactor = gltfMat.emissiveFactor;
 		if(emissiveFactor != std::vector<double>{1.0,1.0,1.0,1.0})
@@ -678,30 +685,95 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 
 	if(exportInfo.verbose)
 		Con::cout<<"Collecting world node models..."<<Con::endl;
-	std::vector<std::shared_ptr<Model>> models {};
+
+	pragma::asset::GLTFWriter::SceneDesc sceneDesc {};
 	for(auto &ent : worldData->GetEntities())
 	{
-		if(ent->IsWorld() == false && ent->GetClassName() != "prop_static" && ent->GetClassName() != "prop_physics" && ent->GetClassName() != "prop_dynamic")
-			continue;
-		auto &keyValues = ent->GetKeyValues();
-		auto itMdl = keyValues.find("model");
-		if(itMdl == keyValues.end())
-			continue;
-		auto &strMdl = itMdl->second;
-		if(exportInfo.verbose)
-			Con::cout<<"Loading world node model '"<<strMdl<<"'..."<<Con::endl;
-		auto mdl = c_game->LoadModel(strMdl);
-		if(mdl == nullptr)
+		if(ent->IsWorld() || ent->GetClassName() == "prop_static" || ent->GetClassName() == "prop_physics" || ent->GetClassName() == "prop_dynamic")
 		{
-			Con::cwar<<"WARNING: Unable to load model '"<<strMdl<<"'! Model will not be included in level export!"<<Con::endl;
-			continue;
+			auto strMdl = ent->GetKeyValue("model");
+			if(strMdl.has_value() == false)
+				continue;
+			if(exportInfo.verbose)
+				Con::cout<<"Loading world node model '"<<*strMdl<<"'..."<<Con::endl;
+			auto mdl = c_game->LoadModel(*strMdl);
+			if(mdl == nullptr)
+			{
+				Con::cwar<<"WARNING: Unable to load model '"<<*strMdl<<"'! Model will not be included in level export!"<<Con::endl;
+				continue;
+			}
+			if(sceneDesc.modelCollection.size() == sceneDesc.modelCollection.capacity())
+				sceneDesc.modelCollection.reserve(sceneDesc.modelCollection.size() *1.5 +100);
+			sceneDesc.modelCollection.push_back({*mdl});
+			auto &mdlDesc = sceneDesc.modelCollection.back();
+			mdlDesc.pose = ent->GetPose();
 		}
-		if(models.size() == models.capacity())
-			models.reserve(models.size() *1.5 +100);
-		models.push_back(mdl);
+		else if(ent->GetClassName() == "env_light_spot" || ent->GetClassName() == "env_light_point" || ent->GetClassName() == "env_light_environment")
+		{
+			sceneDesc.lightSources.push_back({});
+			auto &ls = sceneDesc.lightSources.back();
+
+			ls.name = ent->GetKeyValue("name",ent->GetClassName() +'_' +std::to_string(ent->GetMapIndex()));
+			ls.pose = ent->GetPose();
+
+			auto color = ent->GetKeyValue("color");
+			if(color.has_value() == false)
+				color = ent->GetKeyValue("lightcolor");
+			if(color.has_value())
+				ls.color = Color{*color};
+			
+			auto radius = ent->GetKeyValue("radius");
+			if(radius.has_value() == false)
+				radius = ent->GetKeyValue("distance");
+			if(radius.has_value())
+				ls.range = util::to_float(*radius);
+
+			std::optional<float> outerCutoffAngle {};
+			if(ent->GetClassName() == "env_light_spot")
+			{
+				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
+
+				auto innerCutoff = ent->GetKeyValue("innercutoff");
+				if(innerCutoff.has_value())
+					ls.innerConeAngle = util::to_float(*innerCutoff);
+
+				auto outerCutoff = ent->GetKeyValue("outercutoff");
+				if(outerCutoff.has_value())
+				{
+					ls.outerConeAngle = util::to_float(*outerCutoff);
+					outerCutoffAngle = ls.outerConeAngle;
+				}
+			}
+			else if(ent->GetClassName() == "env_light_point")
+				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Point;
+			else if(ent->GetClassName() == "env_light_environment")
+				ls.type = pragma::asset::GLTFWriter::LightSource::Type::Directional;			
+
+			auto intensity = ent->GetKeyValue("light_intensity");
+			if(intensity.has_value())
+			{
+				auto intensityType = pragma::BaseEnvLightComponent::LightIntensityType::Candela;
+				auto vIntensityType = ent->GetKeyValue("light_intensity_type");
+				if(vIntensityType.has_value())
+					intensityType = static_cast<pragma::BaseEnvLightComponent::LightIntensityType>(util::to_int(*vIntensityType));
+
+				auto flIntensity = util::to_float(*intensity);
+				switch(ls.type)
+				{
+				case pragma::asset::GLTFWriter::LightSource::Type::Spot:
+				case pragma::asset::GLTFWriter::LightSource::Type::Point:
+					// TODO: This should be Candela, not Lumen, but Lumen produces closer results for Blender
+					ls.luminousIntensity = BaseEnvLightComponent::GetLightIntensityLumen(flIntensity,intensityType,outerCutoffAngle);
+					break;
+				case pragma::asset::GLTFWriter::LightSource::Type::Directional:
+					ls.illuminance = flIntensity;
+					break;
+				}
+			}
+		}
 	}
 
-	if(models.empty())
+	if(sceneDesc.modelCollection.empty())
 	{
 		outErrMsg = "No models to export found!";
 		return false;
@@ -713,20 +785,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	client->GetResourceWatcher().Poll();
 
 	if(exportInfo.verbose)
-		Con::cout<<models.size()<<" models found! Merging into one..."<<Con::endl;
-	auto mergedModel = models.front();
-	if(models.size() > 1)
-	{
-		mergedModel = mergedModel->Copy(c_game);
-		for(auto it=models.begin() +1;it!=models.end();++it)
-		{
-			auto &mdl = *it;
-			mergedModel->Merge(*mdl);
-		}
-		mergedModel->Update();
-	}
-	if(exportInfo.verbose)
-		Con::cout<<models.size()<<"Exporting merged model..."<<Con::endl;
+		Con::cout<<"Exporting scene with "<<sceneDesc.modelCollection.size()<<" models and "<<sceneDesc.lightSources.size()<<" light sources..."<<Con::endl;
 
 	auto exportPath = "maps/" +mapName +'/';
 	auto mdlName = exportPath +mapName;
@@ -734,7 +793,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	auto mapExportInfo = exportInfo;
 	mapExportInfo.exportSkinnedMeshData = false;
 	mapExportInfo.generateAo = false;
-	auto success = export_model(*mergedModel,mapExportInfo,outErrMsg,&mdlName);
+	auto success = GLTFWriter::Export(sceneDesc,mdlName,mapExportInfo,outErrMsg);
 	if(success == false)
 		return false;
 	if(exportInfo.verbose)
@@ -748,13 +807,13 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	return true;
 }
 
-bool pragma::asset::export_model(::Model &mdl,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName)
+bool pragma::asset::export_model(::Model &mdl,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName)
 {
-	return GLTFWriter::Export(mdl,exportInfo,outErrMsg,optModelName);
+	return GLTFWriter::Export(mdl,exportInfo,outErrMsg,modelName);
 }
-bool pragma::asset::export_animation(Model &mdl,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::string *optModelName)
+bool pragma::asset::export_animation(Model &mdl,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName)
 {
-	return GLTFWriter::Export(mdl,animName,exportInfo,outErrMsg,optModelName);
+	return GLTFWriter::Export(mdl,animName,exportInfo,outErrMsg,modelName);
 }
 bool pragma::asset::export_texture(
 	uimg::ImageBuffer &imgBuf,ModelExportInfo::ImageFormat imageFormat,const std::string &outputPath,std::string &outErrMsg,
@@ -798,25 +857,25 @@ bool pragma::asset::export_texture(
 		imgOutputPath += '.' +ext;
 		if(texWriteInfo.containerFormat == uimg::TextureInfo::ContainerFormat::DDS && enableExtendedDDS == false)
 		{
-			auto anvFormat = vkImg->GetFormat();
+			auto anvFormat = vkImg.GetFormat();
 			switch(anvFormat)
 			{
 				// These formats require DDS10, which is not well supported, so we'll fall back to
 				// a different compression format
-			case Anvil::Format::BC6H_SFLOAT_BLOCK:
-			case Anvil::Format::BC6H_UFLOAT_BLOCK:
-			case Anvil::Format::BC7_SRGB_BLOCK:
-			case Anvil::Format::BC7_UNORM_BLOCK:
+			case prosper::Format::BC6H_SFloat_Block:
+			case prosper::Format::BC6H_UFloat_Block:
+			case prosper::Format::BC7_SRGB_Block:
+			case prosper::Format::BC7_UNorm_Block:
 				texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
 				break;
 			}
 		}
-		exportSuccess = c_game->SaveImage(*vkImg,imgOutputPath,texWriteInfo);
+		exportSuccess = c_game->SaveImage(vkImg,imgOutputPath,texWriteInfo);
 	}
 	else
 	{
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		if(::util::to_image_buffer(*vkImg,imgBuffers) == false)
+		if(::util::to_image_buffer(vkImg,imgBuffers) == false)
 		{
 			outErrMsg = "Unable to convert texture '" +texturePath +"' to image buffer!";
 			return false;
@@ -1052,9 +1111,9 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	if(texInfoAo && texInfoAo->texture && std::static_pointer_cast<Texture>(texInfoAo->texture)->HasValidVkTexture())
 	{
 		// Material already has a separate ambient occlusion map, just use that one
-		auto img = std::static_pointer_cast<Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
+		auto &img = std::static_pointer_cast<Texture>(texInfoAo->texture)->GetVkTexture()->GetImage();
 		std::string errMsg;
-		auto result = save_ambient_occlusion<prosper::Image>(mat,rmaPath,*img,errMsg);
+		auto result = save_ambient_occlusion<prosper::IImage>(mat,rmaPath,img,errMsg);
 		if(result)
 			return AOResult::NoAOGenerationRequired;
 		// Failed; Just try to generate?

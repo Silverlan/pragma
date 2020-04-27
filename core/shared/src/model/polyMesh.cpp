@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/model/polymesh.h"
 #include <pragma/console/conout.h>
@@ -93,54 +100,6 @@ int PolyMesh::BuildPolyMesh()
 		}
 	}
 	return 0;
-
-	// Deprecated?
-	/*int numPolys = static_cast<int>(m_polys.size());
-	for(int i=0;i<numPolys -2;i++)
-	{
-		for(int j=i +1;j<numPolys -1;j++)
-		{
-			for(int k=j +1;k<numPolys;k++)
-			{
-				bool legal = true;
-				auto &a = m_polys[i];
-				auto &b = m_polys[j];
-				auto &c = m_polys[k];
-				
-				Vector3 intersect = {};
-				bool bIntersect = Plane::GetPlaneIntersection(&intersect,a->GetNormal(),b->GetNormal(),c->GetNormal(),a->GetDistance(),b->GetDistance(),c->GetDistance());
-				if(bIntersect)
-				{
-					for(int m=0;m<numPolys;m++)
-					{
-						auto &poly = m_polys[m];
-						float dotProd = -glm::dot(poly->GetNormal(),intersect);
-						double d = poly->GetDistance();
-						if(dotProd -d > EPSILON) {
-							legal = false;
-							break;
-						}
-					}
-					if(legal)
-					{
-						Vector3 na = a->GetNormal();
-						uvec::mul(&na,-1);
-						a->AddUniqueVertex(intersect,na);
-
-						Vector3 nb = b->GetNormal();
-						uvec::mul(&nb,-1);
-						b->AddUniqueVertex(intersect,nb);
-
-						Vector3 nc = c->GetNormal();
-						uvec::mul(&nc,-1);
-						c->AddUniqueVertex(intersect,nc);
-					}
-				}
-			}
-		}
-	}
-	for(int i=0;i<numPolys;i++)
-		m_polys[i]->SortVertices();*/
 }
 
 static unsigned short POLYMESH_ERROR_LEVEL = 0;

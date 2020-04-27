@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebugshadowmap.hpp"
@@ -53,7 +60,7 @@ void WIDebugShadowMap::DoUpdate()
 	auto *pLight = lightSource.GetLight(type);
 	if(pLight == nullptr)
 		return;
-	std::shared_ptr<prosper::Texture> depthTexture = nullptr;
+	prosper::Texture *depthTexture = nullptr;
 	auto hShadow = lightSource.GetShadowMap(m_shadowMapType);
 	auto hShadowCsm = lightSource.GetEntity().GetComponent<pragma::CShadowCSMComponent>();
 	if(hShadow.valid())
@@ -64,11 +71,11 @@ void WIDebugShadowMap::DoUpdate()
 	if(depthTexture == nullptr)
 		return;
 	auto &depthImage = depthTexture->GetImage();
-	auto numLayers = depthImage->GetLayerCount();
+	auto numLayers = depthImage.GetLayerCount();
 	auto wLayer = m_shadowMapSize.x;
 	auto hLayer = m_shadowMapSize.y;
 	prosper::util::BarrierImageLayout barrierImageLayout {
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::AccessFlagBits::SHADER_READ_BIT
+		prosper::PipelineStageFlags::FragmentShaderBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::ShaderReadBit
 	};
 	auto pRadiusComponent = lightSource.GetEntity().GetComponent<pragma::CRadiusComponent>();
 	auto &wgui = WGUI::GetInstance();
@@ -129,20 +136,17 @@ void WIDebugShadowMap::DoUpdate()
 			if(hShadowCsm.valid())
 			{
 				auto &staticDepthTex = hShadowCsm->GetStaticPendingRenderTarget()->GetTexture();
-				if(staticDepthTex != nullptr)
+				auto &staticDepthImg = staticDepthTex.GetImage();
+				for(auto i=decltype(numLayers){0};i<numLayers;++i)
 				{
-					auto &staticDepthImg = staticDepthTex->GetImage();
-					for(auto i=decltype(numLayers){0};i<numLayers;++i)
-					{
-						auto *dt = wgui.Create<WIDebugDepthTexture>(this);
-						dt->SetTexture(*staticDepthTex,barrierImageLayout,barrierImageLayout,i);
-						dt->SetSize(wLayer,hLayer);
-						dt->SetPos(i *wLayer,hLayer);
-						dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-						dt->SetName("dbg_shadowmap_static" +std::to_string(i));
-						dt->SetContrastFactor(GetContrastFactor());
-						m_shadowMapImages.push_back(dt->GetHandle());
-					}
+					auto *dt = wgui.Create<WIDebugDepthTexture>(this);
+					dt->SetTexture(staticDepthTex,barrierImageLayout,barrierImageLayout,i);
+					dt->SetSize(wLayer,hLayer);
+					dt->SetPos(i *wLayer,hLayer);
+					dt->Setup(1.f,pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
+					dt->SetName("dbg_shadowmap_static" +std::to_string(i));
+					dt->SetContrastFactor(GetContrastFactor());
+					m_shadowMapImages.push_back(dt->GetHandle());
 				}
 			}
 			hLayer *= 2.0;

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lents.h"
 #include "pragma/entities/c_world.h"
@@ -8,7 +15,6 @@
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/lua/classes/ldef_material.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/opengl/gldatablock.h"
 #include "luasystem.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
@@ -54,7 +60,7 @@ int Lua::ents::Client::get_view_body(lua_State *l)
 int Lua::ents::Client::get_instance_buffer(lua_State *l)
 {
 	auto &instanceBuffer = pragma::CRenderComponent::GetInstanceBuffer();
-	Lua::Push<std::shared_ptr<prosper::Buffer>>(l,instanceBuffer);
+	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,instanceBuffer);
 	Lua::PushInt(l,instanceBuffer->GetInstanceSize());
 	return 2;
 }
@@ -62,7 +68,7 @@ int Lua::ents::Client::get_instance_buffer(lua_State *l)
 int Lua::ents::Client::get_instance_bone_buffer(lua_State *l)
 {
 	auto &instanceBuffer = pragma::get_instance_bone_buffer();
-	Lua::Push<std::shared_ptr<prosper::Buffer>>(l,instanceBuffer);
+	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,instanceBuffer);
 	Lua::PushInt(l,instanceBuffer->GetInstanceSize());
 	return 2;
 }

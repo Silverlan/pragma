@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __VK_MESH_H__
 #define __VK_MESH_H__
 
@@ -14,20 +21,20 @@ namespace pragma
 	class DLLCLIENT VkMesh
 	{
 	private:
-		std::shared_ptr<prosper::Buffer> m_vertexBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> m_vertexWeightBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> m_alphaBuffer = nullptr;
-		std::shared_ptr<prosper::Buffer> m_indexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 	public:
 		VkMesh();
-		const std::shared_ptr<prosper::Buffer> &GetVertexBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetVertexWeightBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetAlphaBuffer() const;
-		const std::shared_ptr<prosper::Buffer> &GetIndexBuffer() const;
-		void SetVertexBuffer(const std::shared_ptr<prosper::Buffer> &buffer);
-		void SetVertexWeightBuffer(const std::shared_ptr<prosper::Buffer> &buffer);
-		void SetAlphaBuffer(const std::shared_ptr<prosper::Buffer> &buffer);
-		void SetIndexBuffer(const std::shared_ptr<prosper::Buffer> &buffer);
+		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetVertexWeightBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetAlphaBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetIndexBuffer() const;
+		void SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
+		void SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
+		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
+		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 	};
 };
 #endif

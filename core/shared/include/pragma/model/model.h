@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __MODEL_H__
 #define __MODEL_H__
 #include "pragma/networkdefinitions.h"
@@ -13,7 +20,6 @@
 #include "pragma/math/surfacematerial.h"
 #include "pragma/model/modelupdateflags.hpp"
 #include "pragma/model/model_flexes.hpp"
-#include "pragma/model/model_handle.hpp"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
 #include <sharedutils/def_handle.h>

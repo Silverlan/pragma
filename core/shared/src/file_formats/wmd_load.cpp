@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/file_formats/wmd.h"
 #include "pragma/model/modelmesh.h"
@@ -621,23 +628,16 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 			auto &flex = flexes.back();
 
 			auto vaIdx = Read<uint32_t>();
-			auto maIdx = Read<uint32_t>();
-			auto frIdx = Read<uint32_t>();
+			uint32_t frameIndex = 0;
+			if(version < 31)
+				m_file->Seek(m_file->Tell() +sizeof(uint32_t) *2);
+			else
+				frameIndex = Read<uint32_t>();
 			auto &vertAnims = mdl.GetVertexAnimations();
 			if(vaIdx < vertAnims.size())
 			{
 				auto &va = vertAnims.at(vaIdx);
-				auto &meshAnims = va->GetMeshAnimations();
-				if(maIdx < meshAnims.size())
-				{
-					auto &ma = meshAnims.at(maIdx);
-					auto &frames = ma->GetFrames();
-					if(frIdx < frames.size())
-					{
-						auto &frame = frames.at(frIdx);
-						flex.SetVertexAnimation(*va,*ma,*frame);
-					}
-				}
+				flex.SetVertexAnimation(*va,frameIndex);
 			}
 
 			auto &ops = flex.GetOperations();

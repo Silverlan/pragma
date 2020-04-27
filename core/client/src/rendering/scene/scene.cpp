@@ -1,10 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/scene/scene.h"
-#include "pragma/opengl/renderhierarchy.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
-#include "pragma/rendering/shaders/image/c_shader_additive.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
@@ -134,10 +139,10 @@ void Scene::InitializeRenderSettingsBuffer()
 		m_renderer->UpdateRenderSettings(m_renderSettings);
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_renderSettings);
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	m_renderSettingsBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_renderSettings);
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	m_renderSettingsBuffer = c_engine->CreateBuffer(createInfo,&m_renderSettings);
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
@@ -150,25 +155,25 @@ void Scene::InitializeCameraBuffer()
 	m_cameraData.VP = umat::identity();
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_cameraData);
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	m_cameraBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_cameraData);
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	m_cameraBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
 	m_cameraBuffer->SetDebugName("camera_buf");
 	//
 
 	// View Camera
-	m_cameraViewBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_cameraData);
+	m_cameraViewBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
 	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
 void Scene::InitializeFogBuffer()
 {
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_fogData);
-	createInfo.usageFlags = Anvil::BufferUsageFlagBits::UNIFORM_BUFFER_BIT | Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-	m_fogBuffer = prosper::util::create_buffer(c_engine->GetDevice(),createInfo,&m_cameraData);
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	m_fogBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
 pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
@@ -182,8 +187,8 @@ pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
-const std::shared_ptr<prosper::Buffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
-void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,bool bView)
+const std::shared_ptr<prosper::IBuffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
+void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView)
 {
 	auto &cam = GetActiveCamera();
 	if(cam.expired())
@@ -198,14 +203,14 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::PrimaryCommandBuffer> &d
 	if(bView == false && m_renderer)
 		m_renderer->UpdateCameraData(m_cameraData);
 
-	prosper::util::record_buffer_barrier(
-		**drawCmd,*bufCam,
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT | Anvil::PipelineStageFlagBits::VERTEX_SHADER_BIT | Anvil::PipelineStageFlagBits::GEOMETRY_SHADER_BIT,Anvil::PipelineStageFlagBits::TRANSFER_BIT,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::TRANSFER_WRITE_BIT
+	drawCmd->RecordBufferBarrier(
+		*bufCam,
+		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::TransferWriteBit
 	);
-	prosper::util::record_update_buffer(**drawCmd,*bufCam,0ull,m_cameraData);
+	drawCmd->RecordUpdateBuffer(*bufCam,0ull,m_cameraData);
 }
-void Scene::UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd)
+void Scene::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	UpdateCameraBuffer(drawCmd,false);
 	UpdateCameraBuffer(drawCmd,true);
@@ -215,20 +220,20 @@ void Scene::UpdateBuffers(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCm
 	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
 	m_renderSettings.posCam = camPos;
 
-	prosper::util::record_update_buffer(**drawCmd,*m_renderSettingsBuffer,0ull,m_renderSettings);
+	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 }
 void Scene::InitializeDescriptorSetLayouts()
 {
 	/*auto &context = c_engine->GetRenderContext();
 	m_descSetLayoutCamGraphics = Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT}, // Camera
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT}, // Render Settings
-		{Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,Anvil::ShaderStageFlagBits::FRAGMENT_BIT} // SSAO Map
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit}, // Camera
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit}, // Render Settings
+		{prosper::DescriptorType::CombinedImageSampler,prosper::ShaderStageFlags::FragmentBit} // SSAO Map
 	});
 	m_descSetLayoutCamCompute = Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::COMPUTE_BIT}, // Camera
-		{Anvil::DescriptorType::UNIFORM_BUFFER,Anvil::ShaderStageFlagBits::COMPUTE_BIT} // Render Settings
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::ComputeBit}, // Camera
+		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::ComputeBit} // Render Settings
 	});*/ // prosper TODO
 }
 void Scene::InitializeSwapDescriptorBuffers()
@@ -236,42 +241,42 @@ void Scene::InitializeSwapDescriptorBuffers()
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
 	auto &dev = c_engine->GetDevice();
-	m_camDescSetGroupGraphics = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupGraphics = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetGraphics,*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+	descSetGraphics.SetBindingUniformBuffer(
+		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
 	);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetGraphics,*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+	descSetGraphics.SetBindingUniformBuffer(
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
 	);
 
-	m_camDescSetGroupCompute = prosper::util::create_descriptor_set_group(dev,pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupCompute = c_engine->CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetCompute,*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
+	descSetCompute.SetBindingUniformBuffer(
+		*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
 	);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetCompute,*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
+	descSetCompute.SetBindingUniformBuffer(
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
 	);
 
-	m_camViewDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camViewDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetViewGraphics,*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+	descSetViewGraphics.SetBindingUniformBuffer(
+		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
 	);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(
-		descSetViewGraphics,*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+	descSetViewGraphics.SetBindingUniformBuffer(
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
 	);
 
-	m_fogDescSetGroup = prosper::util::create_descriptor_set_group(dev,pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
-	prosper::util::set_descriptor_set_binding_uniform_buffer(*m_fogDescSetGroup->GetDescriptorSet(),*m_fogBuffer,0u);
+	m_fogDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
+	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer,0u);
 }
-const std::shared_ptr<prosper::Buffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
+const std::shared_ptr<prosper::IBuffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
 pragma::RenderSettings &Scene::GetRenderSettings() {return m_renderSettings;}
 const pragma::RenderSettings &Scene::GetRenderSettings() const {return const_cast<Scene*>(this)->GetRenderSettings();}
-const std::shared_ptr<prosper::Buffer> &Scene::GetCameraBuffer() const {return m_cameraBuffer;}
-const std::shared_ptr<prosper::Buffer> &Scene::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
-const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint) const
+const std::shared_ptr<prosper::IBuffer> &Scene::GetCameraBuffer() const {return m_cameraBuffer;}
+const std::shared_ptr<prosper::IBuffer> &Scene::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint) const
 {
 	switch(bindPoint)
 	{
@@ -280,14 +285,14 @@ const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetCameraDescriptorSe
 		case vk::PipelineBindPoint::eCompute:
 			return m_camDescSetGroupCompute;
 	}
-	static std::shared_ptr<prosper::DescriptorSetGroup> nptr = nullptr;
+	static std::shared_ptr<prosper::IDescriptorSetGroup> nptr = nullptr;
 	return nptr;
 }
-const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetViewCameraDescriptorSetGroup() const {return m_camViewDescSetGroup;}
-prosper::DescriptorSet *Scene::GetCameraDescriptorSetGraphics() const {return m_camDescSetGroupGraphics->GetDescriptorSet();}
-prosper::DescriptorSet *Scene::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
-prosper::DescriptorSet *Scene::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
-const std::shared_ptr<prosper::DescriptorSetGroup> &Scene::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetViewCameraDescriptorSetGroup() const {return m_camViewDescSetGroup;}
+prosper::IDescriptorSet *Scene::GetCameraDescriptorSetGraphics() const {return m_camDescSetGroupGraphics->GetDescriptorSet();}
+prosper::IDescriptorSet *Scene::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
+prosper::IDescriptorSet *Scene::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
 
 WorldEnvironment *Scene::GetWorldEnvironment() const {return m_worldEnvironment.get();}
 void Scene::SetWorldEnvironment(WorldEnvironment &env)
@@ -417,6 +422,9 @@ void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &
 	Resize(m_width,m_height);
 }
 pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
+
+Scene::DebugMode Scene::GetDebugMode() const {return m_debugMode;}
+void Scene::SetDebugMode(Scene::DebugMode debugMode) {m_debugMode = debugMode;}
 
 bool Scene::IsValid() const {return m_bValid;}
 

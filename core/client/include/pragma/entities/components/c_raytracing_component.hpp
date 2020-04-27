@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_RAYTRACING_COMPONENT_HPP__
 #define __C_RAYTRACING_COMPONENT_HPP__
 
@@ -17,9 +24,9 @@ namespace pragma
 		static void ClearBuffers();
 		static bool IsRaytracingEnabled();
 
-		static const std::shared_ptr<prosper::UniformResizableBuffer> &GetEntityMeshInfoBuffer();
+		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetEntityMeshInfoBuffer();
 		static const std::shared_ptr<MaterialDescriptorArrayManager> &GetMaterialDescriptorArrayManager();
-		static const std::shared_ptr<prosper::DescriptorSetGroup> &GetGameSceneDescriptorSetGroup();
+		static const std::shared_ptr<prosper::IDescriptorSetGroup> &GetGameSceneDescriptorSetGroup();
 		static uint32_t GetBufferMeshCount();
 
 		enum class StateFlags : uint32_t
@@ -52,12 +59,12 @@ namespace pragma
 			Flags flags = Flags::None;
 			prosper::DescriptorArrayManager::ArrayIndex materialArrayIndex = prosper::DescriptorArrayManager::INVALID_ARRAY_INDEX; // Index into global material array
 
-			prosper::Buffer::SmallOffset vertexBufferStartIndex = prosper::Buffer::INVALID_SMALL_OFFSET; // Index into global vertex buffer
-			prosper::Buffer::SmallOffset indexBufferStartIndex = prosper::Buffer::INVALID_SMALL_OFFSET; // Index into global index buffer
+			prosper::IBuffer::SmallOffset vertexBufferStartIndex = prosper::IBuffer::INVALID_SMALL_OFFSET; // Index into global vertex buffer
+			prosper::IBuffer::SmallOffset indexBufferStartIndex = prosper::IBuffer::INVALID_SMALL_OFFSET; // Index into global index buffer
 
-			prosper::Buffer::SmallOffset vertexWeightBufferIndex = prosper::Buffer::INVALID_SMALL_OFFSET; // Index into global vertex weight buffer
-			prosper::Buffer::SmallOffset entityBufferIndex = prosper::Buffer::INVALID_SMALL_OFFSET; // Index into global entity render buffer
-			prosper::Buffer::SmallOffset boneBufferStartIndex = prosper::Buffer::INVALID_SMALL_OFFSET; // Index into global entity animation/bone buffer
+			prosper::IBuffer::SmallOffset vertexWeightBufferIndex = prosper::IBuffer::INVALID_SMALL_OFFSET; // Index into global vertex weight buffer
+			prosper::IBuffer::SmallOffset entityBufferIndex = prosper::IBuffer::INVALID_SMALL_OFFSET; // Index into global entity render buffer
+			prosper::IBuffer::SmallOffset boneBufferStartIndex = prosper::IBuffer::INVALID_SMALL_OFFSET; // Index into global entity animation/bone buffer
 			uint32_t numTriangles = 0;
 		};
 		#pragma pack(pop)
@@ -72,9 +79,9 @@ namespace pragma
 		void InitializeBufferUpdateCallback();
 		void SetRenderBufferDirty();
 		void SetBoneBufferDirty();
-		void UpdateBuffers(prosper::PrimaryCommandBuffer &cmd);
+		void UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd);
 
-		std::vector<std::shared_ptr<prosper::Buffer>> m_subMeshBuffers = {};
+		std::vector<std::shared_ptr<prosper::IBuffer>> m_subMeshBuffers = {};
 		CallbackHandle m_cbUpdateBuffers = {};
 		StateFlags m_stateFlags = StateFlags::None;
 	};

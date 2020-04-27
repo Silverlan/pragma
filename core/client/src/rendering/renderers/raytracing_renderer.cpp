@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
@@ -14,27 +21,26 @@ extern DLLCLIENT CGame *c_game;
 
 bool RaytracingRenderer::Initialize()
 {
-	auto &dev = c_engine->GetDevice();
 	auto &scene = GetScene();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = Anvil::Format::R8G8B8A8_UNORM;
+	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.width = scene.GetWidth();
 	imgCreateInfo.height = scene.GetHeight();
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::STORAGE_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::StorageBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
+	auto img = c_engine->CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	m_outputTexture = prosper::util::create_texture(dev,prosper::util::TextureCreateInfo{},img,&imgViewCreateInfo,&samplerCreateInfo);
-	auto descSetImage = prosper::util::create_descriptor_set_group(dev,ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
-	prosper::util::set_descriptor_set_binding_storage_image(*descSetImage->GetDescriptorSet(),*m_outputTexture,0u);
+	m_outputTexture = c_engine->CreateTexture(prosper::util::TextureCreateInfo{},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto descSetImage = c_engine->CreateDescriptorSetGroup(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
+	descSetImage->GetDescriptorSet()->SetBindingStorageImage(*m_outputTexture,0u);
 	m_dsgOutputImage = descSetImage;
 
-	m_dsgLights = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
-	prosper::util::set_descriptor_set_binding_storage_buffer(
-		*m_dsgLights->GetDescriptorSet(),const_cast<prosper::UniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
+	m_dsgLights = c_engine->CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
+	m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
 	);
 
 	m_whShader = c_engine->GetShader("raytracing");
@@ -44,21 +50,21 @@ bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
 // TODO
 // void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
 //#include <wgui/types/wirect.h>
-bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
 {
 	if(m_whShader.expired() || BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
 		return false;
 	auto &imgOutput = GetSceneTexture()->GetImage();
-	prosper::util::record_image_barrier(
-		**drawCmd,**imgOutput,
-		Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,
-		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::GENERAL,
-		Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+	drawCmd->RecordImageBarrier(
+		imgOutput,
+		prosper::PipelineStageFlags::FragmentShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
+		prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::General,
+		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::ShaderWriteBit
 	);
 
 	auto &scene = GetScene();
 	auto &cam = scene.GetActiveCamera();
-	auto extents = imgOutput->GetExtents();
+	auto extents = imgOutput.GetExtents();
 	ShaderRayTracing::PushConstants pushConstants {
 		pragma::CRaytracingComponent::GetBufferMeshCount(),pragma::CLightComponent::GetLightCount(),
 		extents.width,extents.height,cam.valid() ? cam->GetFOVRad() : umath::deg_to_rad(pragma::CCameraComponent::DEFAULT_FOV)
@@ -112,12 +118,7 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 	//
 	const auto fFlushCommandBuffer = [&drawCmd]() {
 		drawCmd->StopRecording();
-
-		auto &dev = c_engine->GetDevice();
-		dev.get_universal_queue(0)->submit(Anvil::SubmitInfo::create(
-			&drawCmd->GetAnvilCommandBuffer(),0u,nullptr,
-			0u,nullptr,nullptr,true
-		));
+		c_engine->Submit(*drawCmd,true);
 		drawCmd->StartRecording();
 	};
 	//
@@ -142,8 +143,8 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 			pixelOffset |= static_cast<uint16_t>(x *localWorkGroupSize);
 			shader.Compute(
 				pushConstants,GetOutputImageDescriptorSet(),
-				*(*dsgGameScene)->get_descriptor_set(0),*(*dsgCam)->get_descriptor_set(0),
-				*(*m_dsgLights)->get_descriptor_set(0),
+				*dsgGameScene->GetDescriptorSet(),*dsgCam->GetDescriptorSet(),
+				*m_dsgLights->GetDescriptorSet(),
 				dsIBL,numWorkGroupsPerIterationSqr,numWorkGroupsPerIterationSqr
 			);
 			shader.EndCompute();
@@ -158,11 +159,11 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::PrimaryCommandBuff
 			Con::cout<<"Raytracing progress: "<<(progress *100.f)<<"%"<<Con::endl;
 		}
 	}
-	prosper::util::record_image_barrier(
-		**drawCmd,**imgOutput,
-		Anvil::PipelineStageFlagBits::COMPUTE_SHADER_BIT,Anvil::PipelineStageFlagBits::FRAGMENT_SHADER_BIT,
-		Anvil::ImageLayout::GENERAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-		Anvil::AccessFlagBits::SHADER_WRITE_BIT,Anvil::AccessFlagBits::SHADER_READ_BIT
+	drawCmd->RecordImageBarrier(
+		imgOutput,
+		prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::ImageLayout::General,prosper::ImageLayout::ShaderReadOnlyOptimal,
+		prosper::AccessFlags::ShaderWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 	return true;
 }
@@ -171,12 +172,12 @@ bool RaytracingRenderer::ReloadRenderTarget()
 	// TODO
 	return true;
 }
-const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetSceneTexture() const {return m_outputTexture;}
-const std::shared_ptr<prosper::Texture> &RaytracingRenderer::GetHDRPresentationTexture() const
+prosper::Texture *RaytracingRenderer::GetSceneTexture() {return m_outputTexture.get();}
+prosper::Texture *RaytracingRenderer::GetHDRPresentationTexture()
 {
 	// TODO: Add actual HDR texture
-	return m_outputTexture;
+	return m_outputTexture.get();
 }
 void RaytracingRenderer::EndRendering() {}
-Anvil::DescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetAnvilDescriptorSetGroup().get_descriptor_set(0);}
+prosper::IDescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetDescriptorSet();}
 

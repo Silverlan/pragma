@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include "pragma/math/c_util_math.hpp"
@@ -10,8 +17,8 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT};
+decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
+decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
 
 
 ShaderCubemap::ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader)
@@ -26,16 +33,16 @@ void ShaderCubemap::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pip
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 
-void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderCubemap::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
-	CreateCachedRenderPass<ShaderCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{Anvil::Format::R8G8B8A8_UNORM}}},outRenderPass,pipelineIdx);
+	CreateCachedRenderPass<ShaderCubemap>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R8G8B8A8_UNorm}}},outRenderPass,pipelineIdx);
 	//R32G32B32A32_SFLOAT
 }
 
-std::shared_ptr<prosper::Buffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNumVerts) const
+std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNumVerts) const
 {
 	// Generate cube
 	constexpr Vector3 min {-1.f,-1.f,-1.f};
@@ -65,36 +72,35 @@ std::shared_ptr<prosper::Buffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNumV
 		uniqueVertices[4],uniqueVertices[5],uniqueVertices[7] // 6
 	};
 	prosper::util::BufferCreateInfo bufCreateInfo {};
-	bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.size = verts.size() *sizeof(verts.front());
-	bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT;
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	outNumVerts = verts.size();
-	return prosper::util::create_buffer(c_engine->GetDevice(),bufCreateInfo,verts.data());
+	return c_engine->CreateBuffer(bufCreateInfo,verts.data());
 }
-std::shared_ptr<prosper::Image> ShaderCubemap::CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
+std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
 {
 	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.format = Anvil::Format::R16G16B16A16_SFLOAT;
+	createInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	createInfo.width = width;
 	createInfo.height = height;
-	createInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
-	createInfo.tiling = Anvil::ImageTiling::OPTIMAL;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.flags |= flags | prosper::util::ImageCreateInfo::Flags::Cubemap;
-	createInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	createInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
+	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	auto &dev = c_engine->GetDevice();
-	return prosper::util::create_image(dev,createInfo);
+	return c_engine->CreateImage(createInfo);
 }
 void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags,prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
 {
-	inOutSamplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	inOutSamplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	inOutSamplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_EDGE;
-	inOutSamplerCreateInfo.minFilter = Anvil::Filter::LINEAR;
-	inOutSamplerCreateInfo.magFilter = Anvil::Filter::LINEAR;
+	inOutSamplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+	inOutSamplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+	inOutSamplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
+	inOutSamplerCreateInfo.minFilter = prosper::Filter::Linear;
+	inOutSamplerCreateInfo.magFilter = prosper::Filter::Linear;
 	if(umath::is_flag_set(flags,prosper::util::ImageCreateInfo::Flags::FullMipmapChain))
-		inOutSamplerCreateInfo.mipmapMode = Anvil::SamplerMipmapMode::LINEAR;
+		inOutSamplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
 }
 void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo &inOutTextureCreateInfo)
 {
@@ -102,7 +108,6 @@ void ShaderCubemap::InitializeTextureCreateInfo(prosper::util::TextureCreateInfo
 }
 std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
 {
-	auto &dev = c_engine->GetDevice();
 	auto img = CreateCubeMap(width,height,flags);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -110,11 +115,11 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	return prosper::util::create_render_target(dev,{tex},GetRenderPass(),rtCreateInfo);
+	return c_engine->CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
 }
 
 const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const

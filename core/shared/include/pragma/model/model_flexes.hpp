@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __MODEL_FLEXES_HPP__
 #define __MODEL_FLEXES_HPP__
 
@@ -64,15 +71,13 @@ public:
 	std::vector<Operation> &GetOperations();
 
 	VertexAnimation *GetVertexAnimation() const;
-	MeshVertexAnimation *GetMeshVertexAnimation() const;
-	MeshVertexFrame *GetMeshVertexFrame() const;
-	void SetVertexAnimation(VertexAnimation &anim,MeshVertexAnimation &meshAnim,MeshVertexFrame &meshFrame);
+	uint32_t GetFrameIndex() const;
+	void SetVertexAnimation(VertexAnimation &anim,uint32_t frameIndex=0);
 private:
 	std::vector<Operation> m_operations;
 	std::string m_name;
 	mutable std::weak_ptr<VertexAnimation> m_vertexAnim = {};
-	mutable std::weak_ptr<MeshVertexAnimation> m_meshVertexAnim = {};
-	mutable std::weak_ptr<MeshVertexFrame> m_meshFrame = {};
+	uint32_t m_frameIndex = 0;
 };
 
 #endif

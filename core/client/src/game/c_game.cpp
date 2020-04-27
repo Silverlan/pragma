@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_entityfactories.h"
@@ -13,7 +20,6 @@
 #include <wgui/wihandle.h>
 #include "pragma/lua/classes/c_lwibase.h"
 #include "cmaterialmanager.h"
-#include "pragma/rendering/shaders/c_shader.h"
 //#include "shader_screen.h" // prosper TODO
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/entities/c_listener.h"
@@ -33,7 +39,6 @@
 #include <pragma/physics/physobj.h>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
-#include "pragma/rendering/shaders/post_processing/c_shader_postprocessing.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
@@ -44,7 +49,6 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
-#include "pragma/opengl/renderhierarchy.h"
 #include "pragma/rendering/occlusion_culling/chc.hpp"
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/c_msaa.h"
@@ -54,8 +58,6 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "pragma/game/c_game_callback.h"
-#include "pragma/rendering/shaders/image/c_shader_additive.h"
-#include "pragma/opengl/opengl_helper.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/audio/c_sound_efx.hpp"
@@ -75,7 +77,6 @@
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
 #include <pragma/entities/baseplayer.hpp>
-#include <pragma/game/game_clear_resources.h>
 #include <pragma/util/giblet_create_info.hpp>
 #include <alsound_effect.hpp>
 #include <alsoundsystem.hpp>
@@ -173,7 +174,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
 	RegisterCallback<void>("PreRenderScenes");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*>("DrawScene");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,FRender>("RenderPostProcessing");
@@ -184,11 +185,11 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PreRender");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,
+		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender");
 	RegisterCallback<void,CBaseEntity*>("UpdateEntityModel");
@@ -215,11 +216,6 @@ CGame::CGame(NetworkState *state)
 		csnd->SetPitchModifier(c_game->GetTimeScale());
 	}));
 
-	/*m_dummyVertexBuffer = Vulkan::Buffer::Create(c_engine->GetRenderContext(),Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT,
-		umath::to_integral(GameLimits::MaxMeshVertices) *sizeof(Vector4), // Allocate about 50MB of junk data (For ~1'872'457 vertices)
-		nullptr,true,nullptr
-	);*/ // prosper TODO
-
 	WGUI::GetInstance().SetFocusCallback([this](WIBase *oldFocus,WIBase *newFocus) {
 		CallCallbacks<void,WIBase*,WIBase*>("OnGUIFocusChanged",oldFocus,newFocus);
 
@@ -239,7 +235,7 @@ CGame::CGame(NetworkState *state)
 		}
 		m_gpuProfilingStageManager = std::make_unique<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>>();
 		auto &gpuProfiler = c_engine->GetGPUProfiler();
-		const auto defaultStage = Anvil::PipelineStageFlagBits::BOTTOM_OF_PIPE_BIT;
+		const auto defaultStage = prosper::PipelineStageFlags::BottomOfPipeBit;
 		auto &stageDrawScene = c_engine->GetGPUProfilingStageManager()->GetProfilerStage(CEngine::GPUProfilingPhase::DrawScene);
 		auto stageScene = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Scene",defaultStage,&stageDrawScene);
 		auto stagePrepass = pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Prepass",defaultStage,stageScene.get());
@@ -337,13 +333,6 @@ void CGame::OnRemove()
 	m_viewBody = {};
 
 	c_engine->ClearLuaKeyMappings();
-	/*auto shaders = ShaderSystem::get_shaders();
-	for(auto *shader : shaders)
-	{
-		auto *base = dynamic_cast<Shader::Lua::Base*>(shader);
-		if(base != nullptr)
-			base->ClearLuaObject();
-	}*/ // prosper TODO
 
 	c_physEnv = nullptr;
 	m_renderScene = nullptr;
@@ -487,8 +476,6 @@ void CGame::EnableRenderMode(RenderMode renderMode) {SetRenderModeEnabled(render
 void CGame::DisableRenderMode(RenderMode renderMode) {SetRenderModeEnabled(renderMode,false);}
 bool CGame::IsRenderModeEnabled(RenderMode renderMode) const {return m_renderModesEnabled[umath::to_integral(renderMode)];}
 
-//const Vulkan::Buffer &CGame::GetDummyVertexBuffer() const {return m_dummyVertexBuffer;} // prosper TODO
-
 Material *CGame::GetLoadMaterial() {return m_matLoad.get();}
 void CGame::OnEntityCreated(BaseEntity *ent)
 {
@@ -561,6 +548,7 @@ void CGame::Initialize()
 
 	auto resolution = c_engine->GetRenderResolution();
 	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y)});
+	m_scene->SetDebugMode(static_cast<Scene::DebugMode>(GetConVarInt("render_debug_mode")));
 	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
 	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(*m_scene);
 	//auto renderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*m_scene);
@@ -575,6 +563,17 @@ void CGame::Initialize()
 
 	m_matLoad = client->LoadMaterial("loading",CallbackHandle{},false,true);
 }
+
+static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
+{
+	if(c_game == nullptr)
+		return;
+	auto &scene = c_game->GetScene();
+	if(scene == nullptr)
+		return;
+	scene->SetDebugMode(static_cast<Scene::DebugMode>(debugMode));
+}
+REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
 
 void CGame::SetViewModelFOV(float fov) {*m_viewFov = fov;}
 const util::PFloatProperty &CGame::GetViewModelFOVProperty() const {return m_viewFov;}
@@ -619,9 +618,9 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	Game::InitializeGame();
 	SetupLua();
 
-	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd) {
-		auto baseDrawCmd = std::static_pointer_cast<prosper::CommandBuffer>(drawCmd.get());
-		CallLuaCallbacks<void,std::shared_ptr<prosper::CommandBuffer>>("DrawFrame",baseDrawCmd);
+	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
+		auto baseDrawCmd = std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd.get());
+		CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("DrawFrame",baseDrawCmd);
 	}));
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
@@ -766,53 +765,8 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 		}
 		return nullptr;
 	}
-	/*if(bLuaEntity == true)
-	{
-		luabind::object *o = WGUILuaInterface::GetLuaObject(m_lua,p);
-		o->push(m_lua);
-		int idxObj = Lua::GetStackTop(m_lua);
-		Lua::PushNil(m_lua);
-		while(Lua::GetNextPair(m_lua,data) != 0)
-		{
-			Lua::PushValue(m_lua,-2); // We need the key for the next iteration
-			Lua::Insert(m_lua,-2);
-			Lua::SetTableValue(m_lua,idxObj);
-		}
-		static_cast<WILuaBase*>(p)->SetUp(name);
-	}*/
 	m_luaGUIObjects.push(el->GetHandle());
 	return el;
-	/*StringToLower(name);
-	int ref = Lua::PushTable(m_lua,m_luaRefGUITable);
-	Lua::PushString(m_lua,name);
-	Lua::GetTableValue(m_lua,ref);
-	bool setup = Lua::IsTable(m_lua,-1);
-	int data = Lua::GetStackTop(m_lua);
-	WIBase *p;
-	if(setup)
-		p = static_cast<WIBase*>(WGUI::Create<WILuaBase>(parent));
-	else
-	{
-		p = WGUI::Create(name,parent);
-		if(p == NULL)
-			return NULL;
-	}
-	if(setup) // It's a lua-scripted gui element
-	{
-		luabind::object *o = WGUILuaInterface::GetLuaObject(m_lua,p);
-		o->push(m_lua);
-		int idxObj = Lua::GetStackTop(m_lua);
-		Lua::PushNil(m_lua);
-		while(Lua::GetNextPair(m_lua,data) != 0)
-		{
-			Lua::PushValue(m_lua,-2); // We need the key for the next iteration
-			Lua::Insert(m_lua,-2);
-			Lua::SetTableValue(m_lua,idxObj);
-		}
-		static_cast<WILuaBase*>(p)->SetUp(name);
-	}
-	m_luaGUIObjects.push(p->CreateHandle());
-	return p;*/
 }
 
 static CVar cvLODBias = GetClientConVar("cl_render_lod_bias");
@@ -983,75 +937,6 @@ void WriteCubeMapSide(int w,int,int blockSize,int block,float *inPixels,unsigned
 	}
 }
 
-bool SaveCubeMapAsTGA(const char *name,unsigned int texture,int,int,int w,int h,unsigned int)
-{
-	Con::crit<<"Saving cubemap texture as '"<<name<<"'..."<<Con::endl;
-	int sz = w *h;
-	float *inPixels = new float[sz];
-	unsigned char *outPixels = new unsigned char[sz *12 *3];
-	for(int i=0;i<(sz *12 *3);i++)
-		outPixels[i] = 128;
-	for(int i=0;i<6;i++)
-	{
-		 // prosper TODO
-#if 0
-		int err = glGetError();
-		/*glFramebufferTexture2D(
-			GL_READ_FRAMEBUFFER,
-			GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X +i,
-			texture,
-			0
-		);
-		err = glGetError();
-
-		glReadPixels(
-			0,0,
-			w,h,
-			GL_DEPTH_COMPONENT,
-			GL_FLOAT,
-			&inPixels[0]
-		);*/
-		/*for(int i=0;i<sz;i++)
-		{
-			if(inPixels[i] < 1.f)
-				inPixels[i] = 0;
-		}*/
-		err = glGetError();
-		std::cout<<err<<std::endl;
-#endif
-		//glReadPixels(0,0,w,h,GL_DEPTH_COMPONENT,GL_FLOAT,&inPixels[0]);
-		//for(int i=0;i<sz;i++)
-		//	inPixels[i] = 255;
-		//unsigned int offset;
-		switch(i)
-		{
-		case 0:
-			WriteCubeMapSide(w *4,h *3,w,6,&inPixels[0],&outPixels[0]);
-			break;
-		case 1:
-			WriteCubeMapSide(w *4,h *3,w,4,&inPixels[0],&outPixels[0]);
-			break;
-		case 2:
-			WriteCubeMapSide(w *4,h *3,w,1,&inPixels[0],&outPixels[0]);
-			break;
-		case 3:
-			WriteCubeMapSide(w *4,h *3,w,9,&inPixels[0],&outPixels[0]);
-			break;
-		case 4:
-			WriteCubeMapSide(w *4,h *3,w,5,&inPixels[0],&outPixels[0]);
-			break;
-		case 5:
-			WriteCubeMapSide(w *4,h *3,w,7,&inPixels[0],&outPixels[0]);
-			break;
-		}
-	}
-	delete[] inPixels;
-	bool b = WriteTGA(name,w *4,h *3,outPixels,sz *12 *3);
-	delete[] outPixels;
-	return b;
-}
-
 static CVar cvAntiAliasing = GetClientConVar("cl_render_anti_aliasing");
 static CVar cvMsaaSamples = GetClientConVar("cl_render_msaa_samples");
 uint32_t CGame::GetMSAASampleCount()
@@ -1214,7 +1099,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 	loadInfo.flags = TextureLoadFlags::LoadInstantly;
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	loadInfo.sampler = prosper::util::create_sampler(c_engine->GetDevice(),samplerCreateInfo);
+	loadInfo.sampler = c_engine->CreateSampler(samplerCreateInfo);
 
 	std::shared_ptr<void> texture = nullptr;
 	static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().Load(
@@ -1242,7 +1127,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			pragma::CLightMapReceiverComponent::SetupLightMapUvData(static_cast<CBaseEntity&>(*ent));
 
 		// Generate lightmap uv buffers for all entities
-		std::vector<std::shared_ptr<prosper::Buffer>> buffers {};
+		std::vector<std::shared_ptr<prosper::IBuffer>> buffers {};
 		auto globalLightmapUvBuffer = pragma::CLightMapComponent::GenerateLightmapUVBuffers(buffers);
 
 		auto *world = c_game->GetWorld();
@@ -1560,8 +1445,6 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			char pressed = packet->Read<char>();
 			int action = (pressed == 1) ? GLFW_PRESS : GLFW_RELEASE;
 			UNUSED(action);
-			//if(ent != NULL && pl != plLocal)
-			//	KeyCallback(pl,key,action); // WEAVETODO
 		}
 		/*if(ent != nullptr)
 		{
@@ -1594,8 +1477,6 @@ static void set_action_input(Action action,bool b,bool bKeepMagnitude,const floa
 		pl->SetActionInputAxisMagnitude(action,magnitude);
 	if(b == false)
 	{
-		//if(!GetRawActionInputs(action))
-		//	return;
 		pl->SetActionInput(action,b,true);
 		return;
 	}
@@ -1628,7 +1509,7 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(cvRenderPhysics->GetBool())
 	{
@@ -1681,7 +1562,7 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 }
 std::shared_ptr<al::Effect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
 
-bool CGame::SaveImage(prosper::Image &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const
+bool CGame::SaveImage(prosper::IImage &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());

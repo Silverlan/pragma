@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
@@ -80,7 +87,7 @@ ShadowRenderer::ShadowRenderer()
 	};
 }
 
-void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
+void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
@@ -105,7 +112,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::PrimaryCo
 	m_octreeCallbacks.entityCallback(entWorld,renderFlags);
 	meshTree->IterateObjects(m_octreeCallbacks.nodeCallback,m_octreeCallbacks.meshCallback);
 }
-void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
+void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
 	auto *scene = light.FindShadowScene();
 	if(scene == nullptr)
@@ -150,7 +157,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::PrimaryC
 		});
 }
 
-bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType)
+bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType)
 {
 	m_shadowCasters.clear();
 	auto hShadowMap = light.GetShadowMap(smType);
@@ -203,7 +210,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::PrimaryCommand
 }
 
 ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
-	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,
 	pragma::CLightComponent &light,uint32_t layerId,const Mat4 &depthMVP,
 	pragma::ShaderShadow &shader,bool bTranslucent
 )
@@ -252,7 +259,7 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
 
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void ShadowRenderer::RenderShadows(
-	std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
+	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
 	LightType type,bool drawParticleShadows
 )
 {
@@ -272,26 +279,24 @@ void ShadowRenderer::RenderShadows(
 	s_shadowVertexCount = 0;
 #endif
 
-	auto &smRt = hShadowMap->GetDepthRenderTarget();
+	auto *smRt = hShadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	if(tex == nullptr)
-		return;
 	auto &scene = c_game->GetScene();
 	auto *renderer = scene->GetRenderer();
 	if(renderer->IsRasterizationRenderer() == false)
 		renderer = nullptr;
 
-	auto &img = tex->GetImage();
+	auto &img = tex.GetImage();
 	auto numLayers = hShadowMap->GetLayerCount();
-	prosper::util::record_image_barrier(**drawCmd,**img,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
 	{
 		auto &depthMVP = light.GetTransformationMatrix(layerId);
-		auto &framebuffer = hShadowMap->GetFramebuffer(layerId);
+		auto *framebuffer = hShadowMap->GetFramebuffer(layerId);
 
 		const vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
-		if(prosper::util::record_begin_render_pass(*(*drawCmd),*smRt,layerId,&clearVal) == false)
+		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
 			continue;
 		auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
 		if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
@@ -309,19 +314,19 @@ void ShadowRenderer::RenderShadows(
 					p->RenderShadow(drawCmd,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&light,layerId);
 			}
 		}
-		prosper::util::record_end_render_pass(*(*drawCmd));
+		drawCmd->RecordEndRenderPass();
 
 		prosper::util::ImageSubresourceRange range {layerId};
-		prosper::util::record_post_render_pass_image_barrier(
-			**drawCmd,**img,
-			Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+		drawCmd->RecordPostRenderPassImageBarrier(
+			img,
+			prosper::ImageLayout::DepthStencilAttachmentOptimal,
+			prosper::ImageLayout::ShaderReadOnlyOptimal,
 			range
 		);
 	}
 }
 
-void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
+void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light)
 {
 	auto type = LightType::Undefined;
 	auto *pLight = light.GetLight(type);

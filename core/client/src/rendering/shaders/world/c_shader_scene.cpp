@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -17,44 +24,44 @@ using namespace pragma;
 
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Debug
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Debug
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Time
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Time
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // CSM Data
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // CSM Data
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderScene::DESCRIPTOR_SET_CAMERA) ShaderScene::DESCRIPTOR_SET_CAMERA = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Camera
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		prosper::DescriptorSetInfo::Binding { // Camera
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Render Settings
-			Anvil::DescriptorType::UNIFORM_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT | Anvil::ShaderStageFlagBits::GEOMETRY_BIT
+		prosper::DescriptorSetInfo::Binding { // Render Settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // SSAO Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // SSAO Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Light Map
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Light Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
-decltype(ShaderScene::RENDER_PASS_FORMAT) ShaderScene::RENDER_PASS_FORMAT = Anvil::Format::R16G16B16A16_SFLOAT;
-decltype(ShaderScene::RENDER_PASS_DEPTH_FORMAT) ShaderScene::RENDER_PASS_DEPTH_FORMAT = Anvil::Format::D32_SFLOAT;
-decltype(ShaderScene::RENDER_PASS_SAMPLES) ShaderScene::RENDER_PASS_SAMPLES = Anvil::SampleCountFlagBits::_1_BIT;
-void ShaderScene::SetRenderPassSampleCount(Anvil::SampleCountFlagBits samples) {RENDER_PASS_SAMPLES = samples;}
+decltype(ShaderScene::RENDER_PASS_FORMAT) ShaderScene::RENDER_PASS_FORMAT = prosper::Format::R16G16B16A16_SFloat;
+decltype(ShaderScene::RENDER_PASS_DEPTH_FORMAT) ShaderScene::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
+decltype(ShaderScene::RENDER_PASS_SAMPLES) ShaderScene::RENDER_PASS_SAMPLES = prosper::SampleCountFlags::e1Bit;
+void ShaderScene::SetRenderPassSampleCount(prosper::SampleCountFlags samples) {RENDER_PASS_SAMPLES = samples;}
 ShaderScene::ShaderScene(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: Shader3DBase(context,identifier,vsShader,fsShader,gsShader)
 {
@@ -64,27 +71,27 @@ bool ShaderScene::ShouldInitializePipeline(uint32_t pipelineIdx)
 {
 	if(static_cast<Pipeline>(pipelineIdx) != Pipeline::MultiSample)
 		return true;
-	return RENDER_PASS_SAMPLES != Anvil::SampleCountFlagBits::_1_BIT;
+	return RENDER_PASS_SAMPLES != prosper::SampleCountFlags::e1Bit;
 }
-Anvil::SampleCountFlagBits ShaderScene::GetSampleCount(uint32_t pipelineIdx) const
+prosper::SampleCountFlags ShaderScene::GetSampleCount(uint32_t pipelineIdx) const
 {
-	return (static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : Anvil::SampleCountFlagBits::_1_BIT;
+	return (static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : prosper::SampleCountFlags::e1Bit;
 }
-void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(pipelineIdx);
 	prosper::util::RenderPassCreateInfo rpCreateInfo {{
 		{
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
 		},
 		{ // Bloom Attachment
-			RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::CLEAR,
-			Anvil::AttachmentStoreOp::STORE,sampleCount,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
+			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
 		},
 		{
-			RENDER_PASS_DEPTH_FORMAT,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::LOAD,
-			Anvil::AttachmentStoreOp::STORE /* depth values have already been written by prepass */,sampleCount,Anvil::ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+			prosper::AttachmentStoreOp::Store /* depth values have already been written by prepass */,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 		}
 	}};
 	rpCreateInfo.subPasses.push_back(prosper::util::RenderPassCreateInfo::SubPass{std::vector<std::size_t>{0ull,1ull},true});
@@ -97,11 +104,11 @@ void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &out
 	subPass.dependencies.push_back({
 		particleSubPassId,mainSubPassId,
 		vk::PipelineStageFlagBits::eFragmentShader,vk::PipelineStageFlagBits::eFragmentShader,
-		Anvil::AccessFlagBits::SHADER_WRITE_BIT | Anvil::AccessFlagBits::SHADER_READ_BIT,Anvil::AccessFlagBits::SHADER_WRITE_BIT
+		prosper::AccessFlags::ShaderWriteBit | prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::ShaderWriteBit
 	});*/
 	CreateCachedRenderPass<ShaderScene>(rpCreateInfo,outRenderPass,pipelineIdx);
 }
-bool ShaderScene::BindRenderSettings(Anvil::DescriptorSet &descSetRenderSettings)
+bool ShaderScene::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings)
 {
 	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
 }
@@ -109,51 +116,51 @@ bool ShaderScene::BindSceneCamera(const rendering::RasterizationRenderer &render
 {
 	auto &scene = renderer.GetScene();
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(**descSet,GetCameraDescriptorSetIndex());
+	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
 }
 
 /////////////////////
 
 decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_LIGHTS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Light sources
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Light sources
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Visible light index buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Shadow buffers
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT
+		prosper::DescriptorSetInfo::Binding { // Shadow buffers
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		}
 	}
 };
 decltype(ShaderSceneLit::DESCRIPTOR_SET_CSM) ShaderSceneLit::DESCRIPTOR_SET_CSM = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Cascade Maps
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT,umath::to_integral(GameLimits::MaxCSMCascades)
+		prosper::DescriptorSetInfo::Binding { // Cascade Maps
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit,umath::to_integral(GameLimits::MaxCSMCascades)
 		}
 	}
 };
 decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_SHADOWS = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Shadow Maps
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT,umath::to_integral(GameLimits::MaxActiveShadowMaps)
+		prosper::DescriptorSetInfo::Binding { // Shadow Maps
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit,umath::to_integral(GameLimits::MaxActiveShadowMaps)
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Shadow Cube-Maps
-			Anvil::DescriptorType::COMBINED_IMAGE_SAMPLER,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT,umath::to_integral(GameLimits::MaxActiveShadowCubeMaps)
+		prosper::DescriptorSetInfo::Binding { // Shadow Cube-Maps
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit,umath::to_integral(GameLimits::MaxActiveShadowCubeMaps)
 		}
 	}
 };
 ShaderSceneLit::ShaderSceneLit(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader,gsShader)
 {}
-bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::DescriptorSet &descSetLightSources)
+bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources)
 {
 	auto *descSetShadow = pragma::CShadowComponent::GetDescriptorSet();
 	if(descSetShadow == nullptr)
@@ -165,45 +172,45 @@ bool ShaderSceneLit::BindLights(Anvil::DescriptorSet &descSetShadowMaps,Anvil::D
 bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
 {
 	return BindSceneCamera(renderer,bView) &&
-		BindLights(**renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
+		BindLights(*renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
 }
 
 /////////////////////
 
-decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,Anvil::Format::R32G32B32A32_SINT};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT = {VERTEX_BINDING_BONE_WEIGHT,Anvil::Format::R32G32B32A32_SFLOAT};
+decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SInt};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SFloat};
 
-decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {VERTEX_BINDING_BONE_WEIGHT_EXT,Anvil::Format::R32G32B32A32_SINT};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {VERTEX_BINDING_BONE_WEIGHT_EXT,Anvil::Format::R32G32B32A32_SFLOAT};
+decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT_EXT = {prosper::VertexInputRate::Vertex};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID = {VERTEX_BINDING_BONE_WEIGHT_EXT,prosper::Format::R32G32B32A32_SInt};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT = {VERTEX_BINDING_BONE_WEIGHT_EXT,prosper::Format::R32G32B32A32_SFloat};
 
-decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {Anvil::VertexInputRate::VERTEX,sizeof(VertexBufferData)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_POSITION) ShaderEntity::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32_SFLOAT,offsetof(VertexBufferData,uv)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_NORMAL) ShaderEntity::VERTEX_ATTRIBUTE_NORMAL = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT,offsetof(VertexBufferData,normal)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_TANGENT = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT,offsetof(VertexBufferData,tangent)};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT = {VERTEX_BINDING_VERTEX,Anvil::Format::R32G32B32_SFLOAT,offsetof(VertexBufferData,biTangent)};
+decltype(ShaderEntity::VERTEX_BINDING_VERTEX) ShaderEntity::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_POSITION) ShaderEntity::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_UV) ShaderEntity::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32_SFloat,offsetof(VertexBufferData,uv)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_NORMAL) ShaderEntity::VERTEX_ATTRIBUTE_NORMAL = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat,offsetof(VertexBufferData,normal)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_TANGENT = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat,offsetof(VertexBufferData,tangent)};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat,offsetof(VertexBufferData,biTangent)};
 
-decltype(ShaderEntity::VERTEX_BINDING_LIGHTMAP) ShaderEntity::VERTEX_BINDING_LIGHTMAP = {Anvil::VertexInputRate::VERTEX};
-decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {VERTEX_BINDING_LIGHTMAP,Anvil::Format::R32G32_SFLOAT};
+decltype(ShaderEntity::VERTEX_BINDING_LIGHTMAP) ShaderEntity::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32G32_SFloat};
 decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INSTANCE = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Instance
-			Anvil::DescriptorType::UNIFORM_BUFFER_DYNAMIC,
-			Anvil::ShaderStageFlagBits::FRAGMENT_BIT | Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Instance
+			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Bone Matrices
-			Anvil::DescriptorType::UNIFORM_BUFFER_DYNAMIC,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Bone Matrices
+			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::ShaderStageFlags::VertexBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Vertex Animations
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Vertex Animations
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::VertexBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Vertex Animation Frame Data
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::VERTEX_BIT
+		prosper::DescriptorSetInfo::Binding { // Vertex Animation Frame Data
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::VertexBit
 		}
 	}
 };
@@ -225,7 +232,7 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 	}
 	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())
 	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
-	return BindInstanceDescriptorSet(**descSet);
+	return BindInstanceDescriptorSet(*descSet);
 }
 
 void ShaderEntity::EndDraw()
@@ -236,7 +243,7 @@ void ShaderEntity::EndDraw()
 
 CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
 
-bool ShaderEntity::BindInstanceDescriptorSet(Anvil::DescriptorSet &descSet)
+bool ShaderEntity::BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet)
 {
 	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex(),{0u,0u});
 }
@@ -283,25 +290,25 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 	auto &scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
 	auto &cam = scene->GetActiveCamera();
 	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
-	std::vector<Anvil::Buffer*> vertexBuffers;
+	std::vector<prosper::IBuffer*> vertexBuffers;
 	std::vector<uint64_t> offsets;
 	vertexBuffers.reserve(3u);
 	offsets.reserve(3u);
 	if(bUseVertexWeightBuffer == true)
 	{
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? &vertexWeightBuffer->GetAnvilBuffer() : &c_engine->GetDummyBuffer()->GetAnvilBuffer());
+		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetDummyBuffer().get());
 		offsets.push_back(0ull);
 
 		// Extended vertex weights
 		auto &vertWeights = mesh.GetVertexWeights();
 		auto offset = vertWeights.size() *sizeof(vertWeights.front());
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? &vertexWeightBuffer->GetAnvilBuffer() : &c_engine->GetDummyBuffer()->GetAnvilBuffer());
+		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetDummyBuffer().get());
 		offsets.push_back(offset);
 	}
-	vertexBuffers.push_back(&vertexBuffer->GetAnvilBuffer());
+	vertexBuffers.push_back(vertexBuffer.get());
 	offsets.push_back(0ull);
 	return RecordBindVertexBuffers(vertexBuffers,0u,offsets) &&
-		RecordBindIndexBuffer(indexBuffer->GetAnvilBuffer(),Anvil::IndexType::UINT16) &&
+		RecordBindIndexBuffer(*indexBuffer,prosper::IndexType::UInt16) &&
 		fDraw(mesh);
 }
 

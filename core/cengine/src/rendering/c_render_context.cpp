@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_render_context.hpp"
 #include <prosper_util.hpp>
@@ -11,7 +18,7 @@ RenderContext::RenderContext()
 	,m_bWindowedMode(true),m_monitor(nullptr),m_aspectRatio(1.f)
 {
 	GetWindowCreationInfo().resizable = false;
-	prosper::Shader::SetLogCallback([](prosper::Shader &shader,Anvil::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
+	prosper::Shader::SetLogCallback([](prosper::Shader &shader,prosper::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
 		Con::cwar<<"Unable to load shader '"<<shader.GetIdentifier()<<"':"<<Con::endl;
 		Con::cwar<<"Shader Stage: "<<prosper::util::to_string(stage)<<Con::endl;
 		Con::cwar<<infoLog<<Con::endl<<Con::endl;
@@ -101,7 +108,7 @@ void RenderContext::SetMonitor(GLFW::Monitor &monitor)
 	auto &changeInfo = ScheduleWindowReload();
 	changeInfo.monitor = std::make_unique<GLFW::Monitor>(monitor);
 }
-void RenderContext::SetPresentMode(Anvil::PresentModeKHR presentMode)
+void RenderContext::SetPresentMode(prosper::PresentModeKHR presentMode)
 {
 	if(presentMode == GetPresentMode())
 		return;

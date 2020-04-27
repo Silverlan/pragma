@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_HDR_HPP__
 #define __C_SHADER_HDR_HPP__
 
@@ -18,30 +25,12 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderHDR(prosper::Context &context,const std::string &identifier);
-		bool Draw(Anvil::DescriptorSet &descSetTexture,float exposure);
+		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
-		bool Draw(Anvil::DescriptorSet &descSetTexture)=delete;
+		bool Draw(prosper::IDescriptorSet &descSetTexture)=delete;
 	};
 };
 
-// prosper TODO
-#if 0
-#include "shadersystem.h"
-#include "shader_screen.h"
-
-namespace Shader
-{
-	class DLLCLIENT HDR
-		: public Screen
-	{
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	public:
-		HDR();
-		bool BeginDraw(Vulkan::CommandBufferObject *cmdBuffer,float exposure);
-	};
-};
-#endif
 #endif

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_VERTEX_ANIMATED_COMPONENT_HPP__
 #define __C_VERTEX_ANIMATED_COMPONENT_HPP__
 
@@ -12,8 +19,8 @@ namespace pragma
 	public:
 		CVertexAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::PrimaryCommandBuffer> &drawCmd);
-		const std::shared_ptr<prosper::Buffer> &GetVertexAnimationBuffer() const;
+		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const;
 		bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
@@ -47,7 +54,7 @@ namespace pragma
 		std::unordered_map<CModelSubMesh*,std::pair<uint32_t,uint32_t>> m_vertexAnimationMeshBufferOffsets {};
 		uint32_t m_maxVertexAnimations = 0u;
 		uint32_t m_activeVertexAnimations = 0u;
-		std::shared_ptr<prosper::Buffer> m_vertexAnimationBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexAnimationBuffer = nullptr;
 		void InitializeVertexAnimationBuffer();
 		void DestroyVertexAnimationBuffer();
 	};

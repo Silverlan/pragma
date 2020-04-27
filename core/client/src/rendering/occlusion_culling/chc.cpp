@@ -1,21 +1,22 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
 #include "pragma/rendering/occlusion_culling/chc.hpp"
 #include <pragma/math/intersection.h>
-#include "pragma/rendering/shaders/c_shader.h"
-#include "pragma/opengl/renderhierarchy.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_baseentity.h"
-#include "pragma/rendering/shaders/c_shader_occlusion.h"
-#include "pragma/rendering/shaders/debug/c_shader_debugdepthbuffer.h"
-#include "pragma/rendering/shaders/debug/c_shader_debug.h"
 #include <wgui/types/wirect.h>
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/scene/scene.h"
 #include "pragma/game/c_game_createguielement.h"
-#include "pragma/rendering/shaders/c_shader_occlusion.h"
 
 DEFINE_BASE_HANDLE(DLLCLIENT,CHCNode,CHCNode);
 
@@ -461,7 +462,7 @@ void CHC::IssueMultiQueries()
 			{max.x,min.y,max.z}
 		};
 		vertCount = meshVerts.size();
-		//vertBuf = Vulkan::Buffer::Create(context,Anvil::BufferUsageFlagBits::VERTEX_BUFFER_BIT,meshVerts.size() *sizeof(Vector3),meshVerts.data()); // prosper TODO
+		//vertBuf = Vulkan::Buffer::Create(context,prosper::BufferUsageFlags::VertexBufferBit,meshVerts.size() *sizeof(Vector3),meshVerts.data()); // prosper TODO
 	}
 	else
 	{

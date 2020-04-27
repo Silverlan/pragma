@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
@@ -16,35 +23,10 @@ ShaderSSAOBlur::ShaderSSAOBlur(prosper::Context &context,const std::string &iden
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void ShaderSSAOBlur::InitializeRenderPass(std::shared_ptr<prosper::RenderPass> &outRenderPass,uint32_t pipelineIdx)
+void ShaderSSAOBlur::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	CreateCachedRenderPass<ShaderSSAO>({{{
-		ShaderSSAO::RENDER_PASS_FORMAT,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,
-		Anvil::AttachmentStoreOp::STORE,Anvil::SampleCountFlagBits::_1_BIT,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL
+		ShaderSSAO::RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
+		prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ShaderReadOnlyOptimal
 	}}},outRenderPass,pipelineIdx);
 }
-
- // prosper TODO
-#if 0
-#include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
-#include <random>
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(SSAOBlur,ssao_blur);
-
-SSAOBlur::SSAOBlur()
-	: Screen("ssao_blur","screen/vs_screen_uv","screen/fs_ssao_blur")
-{}
-
-void SSAOBlur::InitializeRenderPasses()
-{
-	m_renderPasses.push_back({m_context->GenerateRenderPass(vk::Format::eR8Unorm)});
-}
-
-void SSAOBlur::InitializeAttachments(std::vector<vk::PipelineColorBlendAttachmentState> &attachments)
-{
-	Screen::InitializeAttachments(attachments);
-	attachments.front().setColorWriteMask(Anvil::ColorComponentFlagBits::R_BIT);
-}
-#endif

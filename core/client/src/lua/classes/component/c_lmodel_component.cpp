@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
@@ -31,7 +38,7 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto *mat = hModel->GetRenderMaterial(matIdx);
 		if(mat == nullptr)
 			return;
-		Lua::Push<MaterialHandle>(l,mat->GetHandle());
+		Lua::Push<Material*>(l,mat);
 		}));
 	entsMod[defCModel];
 }

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
@@ -81,6 +88,7 @@ void CPBRConverterComponent::ProcessQueue()
 
 void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo)
 {
+	// TODO: Re-enable this (but don't run it automatically?)
 #if 0
 	ConvertMaterialsToPBR(mdl);
 
@@ -141,35 +149,4 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuf
 		mat.UpdateTextures();
 		mat.Save();
 	}
-
-#if 0
-	// OBSOLETE
-	// Apply to skins as well
-	auto &mats = mdl.GetMaterials();
-	auto itMat = std::find_if(mats.begin(),mats.end(),[&mat](const MaterialHandle &hMat) {
-		return hMat.get() == &mat;
-	});
-	if(itMat == mats.end())
-		return;
-	auto matIdx = itMat -mats.begin();
-	auto &texGroups = mdl.GetTextureGroups();
-	if(texGroups.size() < 2)
-		return;
-	auto &mainTexGroup = texGroups.front();
-	auto itTex = std::find(mainTexGroup.textures.begin(),mainTexGroup.textures.end(),matIdx);
-	if(itTex == mainTexGroup.textures.end())
-		return;
-	auto texIdx = itTex -mainTexGroup.textures.begin();
-	for(auto i=decltype(texGroups.size()){1};i<texGroups.size();++i)
-	{
-		auto &texGroup = texGroups.at(i);
-		if(texIdx >= texGroup.textures.size())
-			continue;
-		auto matIdx = texGroup.textures.at(texIdx);
-		auto *mat = mdl.GetMaterial(matIdx);
-		if(mat == nullptr)
-			continue;
-		ApplyAOMap(static_cast<CMaterial&>(*mat),aoName);
-	}
-#endif
 }

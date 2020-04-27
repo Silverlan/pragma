@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/clientstate/clientstate.h"
@@ -77,7 +84,7 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 	if(dbg == nullptr)
 	{
 		auto &vkTexture = texture->GetVkTexture();
-		auto numMipmaps = vkTexture->GetImage()->GetMipmapCount();
+		auto numMipmaps = vkTexture->GetImage().GetMipmapCount();
 		Con::cout<<"Mipmap count for '"<<texPath<<"': "<<numMipmaps<<Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = WGUI::GetInstance();

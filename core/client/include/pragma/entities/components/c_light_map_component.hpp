@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_LIGHT_MAP_COMPONENT_HPP__
 #define __C_LIGHT_MAP_COMPONENT_HPP__
 
@@ -5,7 +12,7 @@
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace bsp {class File;};
-namespace prosper {class DynamicResizableBuffer;};
+namespace prosper {class IDynamicResizableBuffer;};
 namespace util::bsp {struct LightMapInfo;};
 namespace pragma
 {
@@ -13,7 +20,7 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		static std::shared_ptr<prosper::DynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::Buffer>> &outMeshLightMapUvBuffers);
+		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData);
 
 		CLightMapComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
@@ -23,13 +30,13 @@ namespace pragma
 
 		void InitializeLightMapData(
 			const std::shared_ptr<prosper::Texture> &lightMap,
-			const std::shared_ptr<prosper::DynamicResizableBuffer> &lightMapUvBuffer,
-			const std::vector<std::shared_ptr<prosper::Buffer>> &meshUvBuffers
+			const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
+			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
 		);
 
-		prosper::Buffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
-		const std::vector<std::shared_ptr<prosper::Buffer>> &GetMeshLightMapUvBuffers() const;
-		std::vector<std::shared_ptr<prosper::Buffer>> &GetMeshLightMapUvBuffers();
+		prosper::IBuffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
+		const std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers() const;
+		std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers();
 
 		void SetLightMapIntensity(float intensity);
 		void SetLightMapSqrtFactor(float sqrtFactor);
@@ -39,7 +46,7 @@ namespace pragma
 		void ConvertLightmapToBSPLuxelData() const;
 
 		void UpdateLightmapUvBuffers();
-		std::shared_ptr<prosper::DynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
+		std::shared_ptr<prosper::IDynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
 	protected:
 		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
 		float m_lightMapIntensity = 1.f;
@@ -47,8 +54,8 @@ namespace pragma
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order
 		// they are in the model's mesh group
-		std::vector<std::shared_ptr<prosper::Buffer>> m_meshLightMapUvBuffers;
-		std::shared_ptr<prosper::DynamicResizableBuffer> m_meshLightMapUvBuffer = nullptr;
+		std::vector<std::shared_ptr<prosper::IBuffer>> m_meshLightMapUvBuffers;
+		std::shared_ptr<prosper::IDynamicResizableBuffer> m_meshLightMapUvBuffer = nullptr;
 	};
 };
 

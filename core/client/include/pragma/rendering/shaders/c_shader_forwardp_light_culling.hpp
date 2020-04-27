@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_SHADER_FORWARDP_LIGHT_CULLING_HPP__
 #define __C_SHADER_FORWARDP_LIGHT_CULLING_HPP__
 
@@ -10,8 +17,8 @@ namespace pragma
 		: public prosper::ShaderCompute
 	{
 	public:
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::Shader::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 
 		static uint32_t TILE_SIZE;
 
@@ -40,7 +47,7 @@ namespace pragma
 
 		ShaderForwardPLightCulling(prosper::Context &context,const std::string &identifier);
 		bool Compute(
-			Anvil::DescriptorSet &descSetLights,Anvil::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+			prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 			uint32_t sceneIndex
 		);
 	protected:
@@ -48,45 +55,4 @@ namespace pragma
 	};
 };
 
-// prosper TODO
-#if 0
-#include "shadersystem.h"
-
-namespace Shader
-{
-	class DLLCLIENT ForwardPLightCulling
-		: public Base
-	{
-	public:
-		ForwardPLightCulling();
-		void Compute(const Vulkan::CommandBuffer &computeCmd,const Vulkan::DescriptorSet &descSetLights,const Vulkan::DescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount); // Currently no barriers in place; Returned color might be from a previous call
-		static Vulkan::DescriptorSet CreateLightDescriptorSet();
-
-		enum class DescSet : uint32_t
-		{
-			LightBuffers = 0,
-			TileVisLightIndexBuffer = LightBuffers,
-			ShadowData = LightBuffers,
-			VisLightIndexBuffer = ShadowData,
-			DepthMap = VisLightIndexBuffer,
-
-			Camera = DepthMap +1,
-			RenderSettings = Camera,
-		};
-		enum class Binding : uint32_t
-		{
-			LightBuffers = 0,
-			TileVisLightIndexBuffer = LightBuffers +1,
-			ShadowData = TileVisLightIndexBuffer +1,
-			VisLightIndexBuffer = ShadowData +1,
-			DepthMap = VisLightIndexBuffer +1,
-
-			Camera = 0,
-			RenderSettings = Camera +1,
-		};
-	protected:
-		virtual void InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants) override;
-	};
-};
-#endif
 #endif

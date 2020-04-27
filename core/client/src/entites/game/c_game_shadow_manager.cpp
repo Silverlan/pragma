@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -40,10 +47,10 @@ void CShadowManagerComponent::Initialize()
 		return;
 	g_shadowManager = this;
 	m_whShadowShader = c_engine->GetShader("shadow");
-	m_descSetGroup = prosper::util::create_descriptor_set_group(c_engine->GetDevice(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+	m_descSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
 
-	auto *descSet = (*m_descSetGroup)->get_descriptor_set(0u);
-	auto *descSetLayout = (*m_descSetGroup)->get_descriptor_set_layout(0u);
+	auto *descSet = static_cast<prosper::DescriptorSet*>(m_descSetGroup->GetDescriptorSet());
+	auto *descSetLayout = (*descSet)->get_descriptor_set_layout();
 	auto &info = *descSetLayout->get_create_info();
 
 	// Shadow map descriptor bindings need to be bound to dummy images.
@@ -51,11 +58,8 @@ void CShadowManagerComponent::Initialize()
 	// that needs to be dealt with
 	auto arraySize = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 	auto &dummyTex = c_engine->GetDummyCubemapTexture();
-	std::vector<Anvil::DescriptorSet::CombinedImageSamplerBindingElement> bindingElements(arraySize,Anvil::DescriptorSet::CombinedImageSamplerBindingElement{
-		Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-		&dummyTex->GetImageView()->GetAnvilImageView(),&dummyTex->GetSampler()->GetAnvilSampler()
-	});
-	descSet->set_binding_array_items(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps),{0u,bindingElements.size()},bindingElements.data());
+	for(auto i=decltype(arraySize){0u};i<arraySize;++i)
+		descSet->SetBindingArrayTexture(*dummyTex,0,i);
 }
 
 void CShadowManagerComponent::OnRemove()
@@ -82,7 +86,7 @@ void CShadowManagerComponent::ClearRenderTargets()
 
 ShadowRenderer &CShadowManagerComponent::GetRenderer() {return m_renderer;}
 
-Anvil::DescriptorSet *CShadowManagerComponent::GetDescriptorSet() {return (*m_descSetGroup)->get_descriptor_set(0u);}
+prosper::IDescriptorSet *CShadowManagerComponent::GetDescriptorSet() {return m_descSetGroup->GetDescriptorSet();}
 
 CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(Type type,uint32_t size,Priority priority)
 {
@@ -107,35 +111,34 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 		return {};
 
 	Con::cerr<<"Initializing new shadow map..."<<Con::endl;
-	auto &dev = c_engine->GetDevice();
 	auto layerCount = (type == Type::Cube) ? 6u : 1u;
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = size;
 	createInfo.height = size;
 	createInfo.format = pragma::ShaderShadow::RENDER_PASS_DEPTH_FORMAT;
-	createInfo.usage = Anvil::ImageUsageFlagBits::SAMPLED_BIT | Anvil::ImageUsageFlagBits::DEPTH_STENCIL_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT;
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::DepthStencilAttachmentBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.layers = layerCount;
-	createInfo.postCreateLayout = Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	if(type == Type::Cube)
 		createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap;
-	auto img = prosper::util::create_image(dev,createInfo);
+	auto img = c_engine->CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
 	//samplerCreateInfo.compareOp = Anvil::CompareOp::LESS_OR_EQUAL;
-	samplerCreateInfo.addressModeU = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.addressModeV = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.addressModeW = Anvil::SamplerAddressMode::CLAMP_TO_BORDER;
-	samplerCreateInfo.borderColor = Anvil::BorderColor::FLOAT_OPAQUE_WHITE;
+	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToBorder;
+	samplerCreateInfo.borderColor = prosper::BorderColor::FloatOpaqueWhite;
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto depthTexture = prosper::util::create_texture(dev,texCreateInfo,img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto depthTexture = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 
 	auto rt = std::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	rt->renderTarget = prosper::util::create_render_target(dev,{depthTexture},static_cast<prosper::ShaderGraphics*>(m_whShadowShader.get())->GetRenderPass(),rtCreateInfo);
+	rt->renderTarget = c_engine->CreateRenderTarget({depthTexture},static_cast<prosper::ShaderGraphics*>(m_whShadowShader.get())->GetRenderPass(),rtCreateInfo);
 	rt->renderTarget->SetDebugName("shadowmap_rt");
 	set.buffers.push_back({});
 	auto &data = set.buffers.back();
@@ -144,8 +147,8 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	data.renderTargetHandle = std::make_shared<std::weak_ptr<RenderTarget>>(data.renderTarget);
 
 	rt->index = set.buffers.size() -1;
-	prosper::util::set_descriptor_set_binding_array_texture(
-		*m_descSetGroup->GetDescriptorSet(),*depthTexture,
+	m_descSetGroup->GetDescriptorSet()->SetBindingArrayTexture(
+		*depthTexture,
 		umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),
 		rt->index
 	);
@@ -155,7 +158,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 void CShadowManagerComponent::FreeRenderTarget(const RenderTarget &rt)
 {
 	auto &depthTex = rt.renderTarget->GetTexture();
-	auto bCube = (depthTex->GetImage()->GetCreateFlags() &Anvil::ImageCreateFlagBits::CUBE_COMPATIBLE_BIT) != 0;
+	auto bCube = depthTex.GetImage().IsCubemap();
 	auto &set = (bCube == true) ? m_cubeSet : m_genericSet;
 	auto &data = set.buffers.at(rt.index);
 	data.lastPriority = -1;
@@ -165,7 +168,7 @@ void CShadowManagerComponent::FreeRenderTarget(const RenderTarget &rt)
 void CShadowManagerComponent::UpdatePriority(const RenderTarget &rt,Priority priority)
 {
 	auto &depthTex = rt.renderTarget->GetTexture();
-	auto bCube = (depthTex->GetImage()->GetCreateFlags() &Anvil::ImageCreateFlagBits::CUBE_COMPATIBLE_BIT) != 0;
+	auto bCube = depthTex.GetImage().IsCubemap();
 	auto &set = (bCube == true) ? m_cubeSet : m_genericSet;
 	auto &data = set.buffers.at(rt.index);
 	data.lastPriority = priority;

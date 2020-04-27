@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "luasystem.h"
@@ -54,19 +61,6 @@ void CGame::CalcLocalPlayerOrientation()
 	float speed = -cvSpeed->GetFloat();
 	float speedYaw = cvYaw->GetFloat();
 	float speedPitch = cvPitch->GetFloat();
-	/*EulerAngles a = orientation->ToEulerAngles();
-	a = a +Angle(
-		speed *speedPitch *tDelta *hDelta,
-		speed *speedYaw *tDelta *wDelta,
-		0
-	);
-	*orientation = a.ToQuaternion();*/
-
-	//Quat rot(1,0,0,0);
-	//rot.RotateX(speed *speedPitch *tDelta *hDelta);
-	//rot.RotateY(speed *speedYaw *tDelta *wDelta);
-	//orientation->RotateX(speed *speedPitch *tDelta *hDelta);
-	//orientation->RotateY(speed *speedYaw *tDelta *wDelta);
 
 	//Vector3 up = pl->GetUpDirection();
 	auto rot = uquat::identity();
@@ -82,36 +76,9 @@ void CGame::CalcLocalPlayerOrientation()
 	if(pObserverTarget == nullptr && charComponent.valid())
 		rot = charComponent->GetOrientationAxesRotation();
 
-	//rot = uquat::create(EulerAngles(rot));
-	//uquat::normalize(rot);
 	const Vector3 forward(0,0,1);
 	const Vector3 right(-1,0,0);
 	const Vector3 up(0,1,0);
-
-	//Vector3 up = Vector3(0,1,0);//pl->GetUpDirection();
-	//Vector3 forward = up;
-	//EulerAngles angUp = Vector3::toAngle(&up);
-	//Vector3::rotate(&forward,&Angle(0,0,-90));
-
-	/*CALL_ENGINE_LUA_HOOK("CalcTest",11,1,{
-		luabind::object(m_lua,orientation).push(m_lua);
-		luabind::object(m_lua,Quat(rot)).push(m_lua);
-		luabind::object(m_lua,forward).push(m_lua);
-		luabind::object(m_lua,right).push(m_lua);
-		luabind::object(m_lua,up).push(m_lua);
-		Lua::PushNumber(m_lua,speed);
-		Lua::PushNumber(m_lua,speedPitch);
-		Lua::PushNumber(m_lua,speedYaw);
-		Lua::PushNumber(m_lua,tDelta);
-		Lua::PushNumber(m_lua,hDzelta);
-		Lua::PushNumber(m_lua,wDelta);
-	},{
-		if(Lua::IsSet(m_lua,-1) && _lua_isQuaternion(m_lua,-1))
-		{
-			Quat *r = _lua_Quaternion_check(m_lua,-1);
-			orientation = *r;
-		}
-	});*/
 	
 	auto acc = cvAcceleration->GetFloat() +1.f;
 	if(hDelta != 0.f)
@@ -160,34 +127,6 @@ void CGame::CalcLocalPlayerOrientation()
 			pTrComponent->SetOrientation(orientation);
 		return;
 	//}
-	//*orientation = *orientation *rot;
-	
-	//Vector3 forward = up;
-	//EulerAngles angUp = Vector3::toAngle(&up);
-	//Vector3::rotate(&forward,&Angle(0,0,-90));
-	//orientation->Rotate(forward,speed *speedPitch *tDelta *hDelta);
-	//orientation->Rotate(up,speed *speedYaw *tDelta *wDelta);
-	
-	//EulerAngles ang(orientation);
-	/*
-	CALL_ENGINE_LUA_HOOK("CalcOrientation",3,1,{
-		luabind::object(m_lua,up).push(m_lua);
-		luabind::object(m_lua,forward).push(m_lua);
-		luabind::object(m_lua,ang).push(m_lua);
-	},{
-		if(Lua::IsSet(m_lua,-1) && _lua_isAngle(m_lua,-1))
-		{
-			EulerAngles *r = _lua_Angle_check(m_lua,-1);
-			ang = *r;
-		}
-	});
-	*/
-	/*EulerAngles angForward(forward);
-	if(ang.p > (angForward.p +90.f))
-		ang.p = angForward.p +90.f;
-	else if(ang.p < (angForward.p -90.f))
-		ang.p = angForward.p -90.f;
-	pl->SetViewOrientation(Quat(ang));*/
 }
 
 void CGame::CalcView()

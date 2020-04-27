@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #ifndef __C_ANIMATED_COMPONENT_HPP__
 #define __C_ANIMATED_COMPONENT_HPP__
 
@@ -10,7 +17,7 @@ namespace pragma
 {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();
-	const std::shared_ptr<prosper::UniformResizableBuffer> &get_instance_bone_buffer();
+	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
 
 	class DLLCLIENT CAnimatedComponent final
 		: public BaseAnimatedComponent,
@@ -36,11 +43,11 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 
-		std::weak_ptr<prosper::Buffer> GetBoneBuffer() const;
+		std::weak_ptr<prosper::IBuffer> GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
 		void UpdateBoneMatrices();
-		void UpdateBoneBuffer(prosper::PrimaryCommandBuffer &commandBuffer);
+		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer);
 		void InitializeBoneBuffer();
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const override;
 
@@ -52,9 +59,9 @@ namespace pragma
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	private:
-		std::shared_ptr<prosper::Buffer> m_boneBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;
 		std::vector<Mat4> m_boneMatrices;
-		std::shared_ptr<prosper::DescriptorSetGroup> m_boneDescSetGroup = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_boneDescSetGroup = nullptr;
 		StateFlags m_stateFlags = StateFlags::BoneBufferDirty;
 	};
 
@@ -73,9 +80,9 @@ namespace pragma
 	struct DLLCLIENT CEOnBoneBufferInitialized
 		: public ComponentEvent
 	{
-		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::Buffer> &buffer);
+		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer);
 		virtual void PushArguments(lua_State *l) override;
-		std::shared_ptr<prosper::Buffer> buffer;
+		std::shared_ptr<prosper::IBuffer> buffer;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)

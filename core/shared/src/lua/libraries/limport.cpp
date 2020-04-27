@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/limport.hpp"
 #include "pragma/model/modelmesh.h"
@@ -332,96 +339,6 @@ int Lua::import::import_smd(lua_State *l)
 		return 2;
 	}
 	return 1;
-	//bool util::port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures)
-	/*auto &f = *Lua::CheckFile(l,1);
-	auto &skeleton = *Lua::CheckSkeleton(l,2);
-	auto smd = SMDModel::Load(f.GetHandle());
-	if(smd == nullptr)
-		return 0;
-	auto group = std::make_unique<MeshGroup>(model,meshName);
-	auto &nodes = smd->GetNodes();
-	auto &frames = smd->GetFrames();
-	std::unordered_map<int,Bone*> bones; // SMD Bone ID -> Actual Bone
-	if(!frames.empty())
-	{
-		auto &frame = frames.front();
-		for(auto it=nodes.begin();it!=nodes.end();++it)
-		{
-			auto &node = *it;
-			Bone *parent = nullptr;
-			if(node.parent != -1)
-			{
-				auto it = bones.find(node.parent);
-				if(it == bones.end())
-					continue;
-				parent = it->second;
-			}
-			info.model.bones.push_back(std::make_unique<Bone>());
-			auto &bone = info.model.bones.back();
-			bone->name = node.name;
-			assert(frame.transforms.size() >= (node.id +1));
-			auto &t = frame.transforms[node.id];
-			bone->position = t.position;
-			bone->orientation = t.rotation;
-			bones[node.id] = bone.get();
-
-			if(parent != nullptr)
-				parent->children.push_back(bone->GetHandle());
-			else
-				info.model.rootbones.push_back(bone->GetHandle());
-		}
-	}
-	auto &meshes = smd->GetMeshes();
-	for(auto it=meshes.begin();it!=meshes.end();++it)
-	{
-		auto &meshData = *it;
-		auto mesh = std::make_unique<Mesh>();
-		mesh->maps.push_back(Map());
-		auto &map = mesh->maps.back();
-		map.map = meshData.texture;
-		for(auto it=meshData.triangles.begin();it!=meshData.triangles.end();++it)
-		{
-			auto &tri = *it;
-			map.faces.push_back(Face());
-			auto &face = map.faces.back();
-			for(auto i=0;i<3;i++)
-			{
-				auto &v = tri.vertices[i];
-				auto &fv = face.vertices[i];
-				fv.vertexid = add_unique_vertex(*mesh.get(),v.position,v.normal);
-				fv.u = v.uv.x;
-				fv.v = 1.f -v.uv.y;
-				for(auto it=v.weights.begin();it!=v.weights.end();++it)
-				{
-					auto nodeId = it->first;
-					auto weight = it->second;
-					//auto &node = nodes[nodeId];
-					auto itBone = bones.find(nodeId);
-					if(itBone != bones.end())
-					{
-						auto *meshBone = add_unique_mesh_bone(info,*mesh,itBone->second);
-						VertexWeight w;
-						w.vertexid = fv.vertexid;
-						w.weight = weight;
-						meshBone->weights.push_back(w);
-					}
-				}
-			}
-		}
-		group->meshes.push_back(mesh.release());
-	}
-	info.model.meshGroups.push_back(group.release());
-	if(lod != LOD_NONE)
-	{
-		auto meshId = static_cast<unsigned int>(info.model.meshGroups.size()) -1;
-		AddLODMesh(info.model,lod,meshId,srcMesh);
-	}
-	if(meshGroupId != nullptr)
-		*meshGroupId = info.model.meshGroups.size() -1;
-	return true;
-	
-	//return smd;*/
-	//return 0;
 }
 
 int Lua::import::import_obj(lua_State *l)
@@ -708,60 +625,6 @@ int Lua::import::import_model_asset(lua_State *l)
 	{
 		auto modelName = ufile::get_file_from_filename(*filePath);
 		ufile::remove_extension_from_filename(modelName);
-
-#if 0
-		auto matPath = "models/" +FileManager::GetCanonicalizedPath(modelName);
-		auto dstMatPath = "addons/imported/materials/" +matPath;
-		if(FileManager::CreatePath(dstMatPath.c_str()) == false)
-			Con::cwar<<"WARNING: Unable to create material output path '"<<dstMatPath<<"'! Textures will not be imported."<<Con::endl;
-		else
-		{
-			texturesImported = true;
-			auto srcMatPath = ufile::get_path_from_filename(*filePath);
-			importedTextures.reserve(aiScene->mNumMaterials);
-			for(auto i=decltype(aiScene->mNumMaterials){0u};i<aiScene->mNumMaterials;++i)
-			{
-				auto *mat = aiScene->mMaterials[i];
-				std::string matName = mat->GetName().C_Str();
-
-				auto dstPath = dstMatPath +'/' +matName;
-				importedTextures.push_back(dstPath);
-
-				auto matPath = srcMatPath +matName;
-				std::vector<std::string> files {};
-				FileManager::FindSystemFiles((matPath +".*").c_str(),&files,nullptr);
-				auto &suportedFormats = MaterialManager::get_supported_image_formats();
-				auto foundSupportedImageFile = false;
-				for(auto &fName : files)
-				{
-					std::string ext = "";
-					ufile::get_extension(fName,&ext);
-					auto it = std::find_if(suportedFormats.begin(),suportedFormats.end(),[&ext](const MaterialManager::ImageFormat &format) {
-						return ustring::compare(format.extension,ext,false);
-					});
-					if(it != suportedFormats.end())
-					{
-						if(FileManager::Exists(dstPath))
-							Con::cout<<"Texture '"<<dstPath<<"' already exists and will not be imported!"<<Con::endl;
-						else
-						{
-							if(FileManager::CopySystemFile((srcMatPath +fName).c_str(),(FileManager::GetProgramPath() +'/' +dstMatPath +'/' +fName).c_str()) == false)
-								Con::cwar<<"WARNING: Unable to copy texture file '"<<fName<<"'! Texture will not be imported."<<Con::endl;
-							else
-								Con::cout<<"Imported texture '"<<dstPath<<"'!"<<Con::endl;
-						}
-						foundSupportedImageFile = true;
-						break;
-					}
-				}
-				if(foundSupportedImageFile == false)
-				{
-					Con::cwar<<"WARNING: Could not find texture file '"<<matName<<"' with supported format! Texture will not be imported."<<Con::endl;
-					continue;
-				}
-			}
-		}
-#endif
 	}
 	std::unordered_map<uint32_t,uint32_t> originalMaterialIndexToModelMaterialIndex {};
 	if(texturesImported == false)

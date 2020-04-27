@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lgeometry.h"
 #include <mathutil/glmutil.h>
@@ -613,60 +620,4 @@ int Lua::geometry::triangulate(lua_State *l)
 		Lua::SetTableValue(l,tResult);
 	}
 	return 1;
-	/*MyListener* myListener = new MyListener();
-	// get the SmartBody scene
-	SmartBody::SBScene* scene = SmartBody::SBScene::getScene();
-	// add the listener to the scene
-	scene->addSceneListener(myListener);
-	//scene->update(currentTime);
-
-	// creates a character with a skeleton that has a single joint
-	SmartBody::SBCharacter* character = scene->createCharacter("thename", "thetype");
-	// creates a skeleton from an existing asset
-	SmartBody::SBSkeleton* skeleton = scene->createSkeleton("mycharacter.dae");
-	// attaches the skeleton to the character
-	character->setSkeleton(skeleton);
-	// creates a standard set of controllers such as animation, gazing, head movements,
-	etc.
-	character->createStandardControllers();
-
-	SmartBody::SBSkeleton* dynamicSkeleton = scene->addSkeletonDefinition("myskeleton");
-	SmartBody::SBJoint* baseJoint = skeleton->createJoint("base", NULL);
-	SmartBody::SBJoint* joint1 = skeleton->createJoint("child", baseJoint);
-	SmartBody::SBJoint* joint2 = skeleton->createJoint("grandchild", joint1);
-	...
-	// then later, create the character and a new instance of this skeleton
-	SmartBody::SBSkeleton* skeleton = scene->createSkeleton("myskeleton");
-	character->setSkeleton(skeleton);
-	*/
-	/*auto mesh = pinocchio::Mesh("C:\\Users\\Florian\\Documents\\Projects\\pinocchio\\meshes\\Model1.obj");
-	auto skeleton = pinocchio::HumanSkeleton();
-	auto po = pinocchio::autorig(skeleton,mesh);
-
-	auto *nw = engine->GetNetworkState(l);
-	auto *game = nw->GetGameState();
-	auto subMesh = std::shared_ptr<ModelSubMesh>(nw->CreateSubMesh());
-	auto &meshVerts = subMesh->GetVertices();
-	auto &meshWeights = subMesh->GetVertexWeights();
-	meshVerts.reserve(mesh.vertices.size());
-	meshWeights.reserve(mesh.vertices.size());
-	for(auto &v : mesh.vertices)
-	{
-		meshVerts.push_back({});
-		auto &mv = meshVerts.back();
-		mv.position = {v.pos[0],v.pos[1],v.pos[2]};
-		mv.normal = {v.normal[0],v.normal[1],v.normal[2]};
-	}
-	auto &meshTris = subMesh->GetTriangles();
-	meshTris.reserve(mesh.vertices.size());
-	for(auto i=decltype(mesh.vertices.size()){0};i<mesh.vertices.size();++i)
-	{
-		meshTris.push_back(i);
-		auto weights = po.attachment->getWeights(0);
-		meshWeights.push_back({});
-		auto &vw = meshWeights.back();
-		vw.weights = {weights[0],weights[1],weights[2],weights[3]};
-	}
-	Lua::Push<std::shared_ptr<ModelSubMesh>>(l,subMesh);*/
-	//return 0;
 }

@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
@@ -716,7 +723,7 @@ void CGame::RegisterLuaLibraries()
 					Lua::PushBool(l,uimg::save_image(f,imgBuffer,format,quality));
 				return 1;
 			}
-			auto &img = Lua::Check<prosper::Image>(l,1);
+			auto &img = Lua::Check<prosper::IImage>(l,1);
 			std::string fileName = Lua::CheckString(l,2);
 			if(Lua::file::validate_write_operation(l,fileName) == false)
 			{
@@ -914,6 +921,12 @@ void CGame::RegisterLuaLibraries()
 		})}
 	});
 	Lua::asset::register_library(GetLuaInterface(),false);
+	Lua::RegisterLibraryEnums(GetLuaState(),"asset",{
+		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
+		{"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT",umath::to_integral(TextureLoadFlags::LoadInstantly)},
+		{"TEXTURE_LOAD_FLAG_RELOAD_BIT",umath::to_integral(TextureLoadFlags::Reload)},
+		{"TEXTURE_LOAD_FLAG_DONT_CACHE_BIT",umath::to_integral(TextureLoadFlags::DontCache)}
+	});
 
 	auto &utilImport = GetLuaInterface().RegisterLibrary("import",{
 		{"export_scene",static_cast<int32_t(*)(lua_State*)>(Lua::lib_export::export_scene)}

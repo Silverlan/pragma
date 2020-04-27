@@ -1,3 +1,10 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2020 Florian Weischer
+ */
+
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include <misc/compute_pipeline_create_info.h>
@@ -8,13 +15,13 @@ extern DLLCENGINE CEngine *c_engine;
 
 decltype(ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT) ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT = {
 	{
-		prosper::Shader::DescriptorSetInfo::Binding { // Visible light tile index buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Visible light tile index buffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		},
-		prosper::Shader::DescriptorSetInfo::Binding { // Visible light index buffer
-			Anvil::DescriptorType::STORAGE_BUFFER,
-			Anvil::ShaderStageFlagBits::COMPUTE_BIT
+		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::ComputeBit
 		}
 	}
 };
@@ -27,12 +34,12 @@ void ShaderForwardPLightIndexing::InitializeComputePipeline(Anvil::ComputePipeli
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),Anvil::ShaderStageFlagBits::COMPUTE_BIT);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::ComputeBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_VISIBLE_LIGHT);
 }
 
-bool ShaderForwardPLightIndexing::Compute(Anvil::DescriptorSet &descSetLights,uint32_t tileCount)
+bool ShaderForwardPLightIndexing::Compute(prosper::IDescriptorSet &descSetLights,uint32_t tileCount)
 {
 	return RecordPushConstants(PushConstants{
 			tileCount
@@ -40,58 +47,3 @@ bool ShaderForwardPLightIndexing::Compute(Anvil::DescriptorSet &descSetLights,ui
 		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_VISIBLE_LIGHT.setIndex) &&
 		RecordDispatch();
 }
-
- // prosper TODO
-#if 0
-#include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
-
-using namespace Shader;
-
-LINK_SHADER_TO_CLASS(ForwardPLightIndexing,forwardp_light_indexing);
-
-ForwardPLightIndexing::ForwardPLightIndexing()
-	: Base("forwardp_light_indexing","compute/cs_forwardp_light_indexing")
-{}
-
-void ForwardPLightIndexing::InitializePipelineLayout(const Vulkan::Context &context,std::vector<Vulkan::DescriptorSetLayout> &setLayouts,std::vector<Vulkan::PushConstantRange> &pushConstants)
-{
-	Base::InitializePipelineLayout(context,setLayouts,pushConstants);
-
-	pushConstants.push_back({
-		Anvil::ShaderStageFlagBits::COMPUTE_BIT,0,1
-	});
-
-	setLayouts.push_back(Vulkan::DescriptorSetLayout::Create(context,{
-		{Anvil::DescriptorType::STORAGE_BUFFER,Anvil::ShaderStageFlagBits::COMPUTE_BIT}, // Visible light tile index buffer
-		{Anvil::DescriptorType::STORAGE_BUFFER,Anvil::ShaderStageFlagBits::COMPUTE_BIT} // Visible light index buffer
-	}));
-}
-
-Vulkan::DescriptorSet ForwardPLightIndexing::CreateLightDescriptorSet()
-{
-	static auto shader = ShaderSystem::get_shader("forwardp_light_indexing");
-	if(!shader.IsValid())
-		return nullptr;
-	auto *textured = static_cast<TexturedBase3D*>(shader.get());
-	auto *pipeline = textured->GetPipeline();
-	if(pipeline != nullptr)
-	{
-		auto &layout = const_cast<Vulkan::ShaderPipeline*>(pipeline)->GetDescriptorSetLayout(umath::to_integral(DescSet::TileVisLightIndexBuffer));
-		auto &pool = pipeline->GetPipeline()->GetContext().GetDescriptorPool(layout->GetDescriptorType());
-		auto descSet = pool->CreateDescriptorSet(layout);
-		return descSet;
-	}
-	return nullptr;
-}
-
-void ForwardPLightIndexing::Compute(const Vulkan::CommandBuffer &computeCmd,const Vulkan::DescriptorSet &descSetLights,uint32_t tileCount)
-{
-	auto &context = *m_context.get();
-	auto &pipeline = *GetPipeline();
-	auto &layout = pipeline.GetPipelineLayout();
-	
-	computeCmd->PushConstants(layout,Anvil::ShaderStageFlagBits::COMPUTE_BIT,1,&tileCount);
-	computeCmd->BindDescriptorSet(umath::to_integral(DescSet::TileVisLightIndexBuffer),layout,descSetLights);
-	computeCmd->Dispatch();
-}
-#endif

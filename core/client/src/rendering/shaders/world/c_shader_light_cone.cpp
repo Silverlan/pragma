@@ -29,7 +29,7 @@ decltype(ShaderLightCone::DESCRIPTOR_SET_DEPTH_MAP) ShaderLightCone::DESCRIPTOR_
 		}
 	}
 };
-ShaderLightCone::ShaderLightCone(prosper::Context &context,const std::string &identifier)
+ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"effects/vs_light_cone","effects/fs_light_cone")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

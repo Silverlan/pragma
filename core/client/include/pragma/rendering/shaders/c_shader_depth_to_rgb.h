@@ -32,8 +32,8 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier,const std::string &fsShader);
-		ShaderDepthToRGB(prosper::Context &context,const std::string &identifier);
+		ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier,const std::string &fsShader);
+		ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor=1.f);
 	protected:
 		template<class TPushConstants>
@@ -56,7 +56,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderCubeDepthToRGB(prosper::Context &context,const std::string &identifier);
+		ShaderCubeDepthToRGB(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t cubeSide,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;
@@ -76,7 +76,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderCSMDepthToRGB(prosper::Context &context,const std::string &identifier);
+		ShaderCSMDepthToRGB(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,uint32_t layer,float contrastFactor=1.f);
 	protected:
 		virtual uint32_t GetPushConstantSize() const override;

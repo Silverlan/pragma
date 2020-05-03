@@ -82,7 +82,7 @@ pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRendere
 	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");
 }
 
-bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
+bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;

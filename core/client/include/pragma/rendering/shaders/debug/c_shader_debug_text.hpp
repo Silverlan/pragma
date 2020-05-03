@@ -16,7 +16,7 @@ namespace pragma
 		: public ShaderDebug
 	{
 	public:
-		ShaderDebugText(prosper::Context &context,const std::string &identifier);
+		ShaderDebugText(prosper::IPrContext &context,const std::string &identifier);
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 

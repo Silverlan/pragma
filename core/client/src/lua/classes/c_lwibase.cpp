@@ -487,11 +487,15 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,
 	classDef.def("SetVertexUVCoord",&SetVertexUVCoord);
 	classDef.def("InvertVertexUVCoordinates",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,bool,bool)>(&InvertVertexUVCoordinates));
 	classDef.def("InvertVertexUVCoordinates",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>(&InvertVertexUVCoordinates));
+	classDef.def("ClearTexture",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>([](lua_State *l,WITexturedShapeHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->ClearTexture();
+	}));
 	classDef.def("SizeToTexture",static_cast<void(*)(lua_State*,WITexturedShapeHandle&)>([](lua_State *l,WITexturedShapeHandle &hPanel) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WITexturedShape*>(hPanel.get())->SizeToTexture();
 	}));
-	classDef.def("SetChannelSwizzle",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,uint32_t,uint32_t)>([](lua_State *l,WITexturedShapeHandle &hPanel,uint32_t dst,uint32_t src) {
+	classDef.def("SetChannelSwizzle",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,uint32_t,uint32_t)>([](lua_State *l,WITexturedShapeHandle &hPanel,uint32_t src,uint32_t dst) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WITexturedShape*>(hPanel.get())->SetChannelSwizzle(static_cast<::wgui::ShaderTextured::Channel>(dst),static_cast<::wgui::ShaderTextured::Channel>(src));
 	}));

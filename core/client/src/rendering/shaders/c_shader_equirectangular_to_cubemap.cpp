@@ -27,7 +27,7 @@ decltype(ShaderEquirectangularToCubemap::DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE)
 		}
 	}
 };
-ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::Context &context,const std::string &identifier)
+ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderCubemap{context,identifier,"screen/fs_equirectangular_to_cubemap"}
 {}
 

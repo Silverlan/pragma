@@ -19,6 +19,8 @@ namespace Lua
 		DLLNETWORK int32_t exists(lua_State *l);
 		DLLNETWORK int32_t find_file(lua_State *l);
 		DLLNETWORK int32_t is_loaded(lua_State *l);
+		DLLNETWORK int32_t lock_asset_watchers(lua_State *l);
+		DLLNETWORK int32_t unlock_asset_watchers(lua_State *l);
 	};
 };
 

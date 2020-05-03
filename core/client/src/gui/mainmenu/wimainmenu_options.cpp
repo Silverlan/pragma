@@ -34,6 +34,9 @@
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
+#include <wrappers/device.h>
+#include <wrappers/physical_device.h>
+#include <wrappers/instance.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;

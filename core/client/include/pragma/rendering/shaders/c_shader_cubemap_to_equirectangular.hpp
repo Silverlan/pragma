@@ -26,7 +26,7 @@ namespace pragma
 			Count
 		};
 
-		ShaderCubemapToEquirectangular(prosper::Context &context,const std::string &identifier);
+		ShaderCubemapToEquirectangular(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width=1'600,uint32_t height=800);
 	protected:
 		std::shared_ptr<prosper::IImage> CreateEquirectangularMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const;

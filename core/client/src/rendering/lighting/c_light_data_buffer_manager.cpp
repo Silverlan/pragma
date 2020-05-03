@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include <wrappers/device.h>
 
 extern DLLCENGINE CEngine *c_engine;
 

@@ -46,6 +46,7 @@
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <wgui/fontmanager.h>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
@@ -292,6 +293,19 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderCompute.def("RecordCompute",&Lua::Shader::Compute::RecordCompute);
 	defShaderCompute.def("RecordEndCompute",&Lua::Shader::Compute::RecordEndCompute);
 	modShader[defShaderCompute];
+
+	// Utility shaders
+	auto defShaderComposeRMA = luabind::class_<pragma::ShaderComposeRMA,luabind::bases<prosper::ShaderGraphics,prosper::Shader>>("ComposeRMA");
+	defShaderComposeRMA.add_static_constant("FLAG_NONE",umath::to_integral(pragma::ShaderComposeRMA::Flags::None));
+	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT",umath::to_integral(pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow));
+	defShaderComposeRMA.def("ComposeRMA",static_cast<void(*)(lua_State*,pragma::ShaderComposeRMA&,prosper::Texture*,prosper::Texture*,prosper::Texture*,uint32_t)>(
+		[](lua_State *l,pragma::ShaderComposeRMA &shader,prosper::Texture *roughnessMap,prosper::Texture *metalnessMap,prosper::Texture *aoMap,uint32_t flags) {
+		auto rma = shader.ComposeRMA(*c_engine,roughnessMap,metalnessMap,aoMap,static_cast<pragma::ShaderComposeRMA::Flags>(flags));
+		if(rma == nullptr)
+			return;
+		Lua::Push(l,rma);
+	}));
+	modShader[defShaderComposeRMA];
 
 	// Custom Shaders
 	auto defVertexBinding = luabind::class_<pragma::LuaVertexBinding>("VertexBinding");
@@ -585,6 +599,7 @@ void CGame::RegisterLuaClasses()
 	defMdlExportInfo.def_readwrite("exportImages",&pragma::asset::ModelExportInfo::exportImages);
 	defMdlExportInfo.def_readwrite("embedAnimations",&pragma::asset::ModelExportInfo::embedAnimations);
 	defMdlExportInfo.def_readwrite("fullExport",&pragma::asset::ModelExportInfo::fullExport);
+	defMdlExportInfo.def_readwrite("normalizeTextureNames",&pragma::asset::ModelExportInfo::normalizeTextureNames);
 	defMdlExportInfo.def_readwrite("enableExtendedDDS",&pragma::asset::ModelExportInfo::enableExtendedDDS);
 	defMdlExportInfo.def_readwrite("saveAsBinary",&pragma::asset::ModelExportInfo::saveAsBinary);
 	defMdlExportInfo.def_readwrite("verbose",&pragma::asset::ModelExportInfo::verbose);
@@ -593,8 +608,8 @@ void CGame::RegisterLuaClasses()
 	defMdlExportInfo.def_readwrite("aoResolution",&pragma::asset::ModelExportInfo::aoResolution);
 	defMdlExportInfo.def_readwrite("scale",&pragma::asset::ModelExportInfo::scale);
 	defMdlExportInfo.def_readwrite("mergeMeshesByMaterial",&pragma::asset::ModelExportInfo::mergeMeshesByMaterial);
-	defMdlExportInfo.def_readwrite("imageFormat",reinterpret_cast<uint32_t pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::imageFormat));
-	defMdlExportInfo.def_readwrite("aoDevice",reinterpret_cast<uint32_t pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::aoDevice));
+	defMdlExportInfo.def_readwrite("imageFormat",reinterpret_cast<std::underlying_type_t<decltype(pragma::asset::ModelExportInfo::imageFormat)> pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::imageFormat));
+	defMdlExportInfo.def_readwrite("aoDevice",reinterpret_cast<std::underlying_type_t<decltype(pragma::asset::ModelExportInfo::aoDevice)> pragma::asset::ModelExportInfo::*>(&pragma::asset::ModelExportInfo::aoDevice));
 	defMdlExportInfo.def("SetAnimationList",static_cast<void(*)(lua_State*,pragma::asset::ModelExportInfo&,luabind::object)>([](lua_State *l,pragma::asset::ModelExportInfo &exportInfo,luabind::object oTable) {
 		int32_t t = 2;
 		auto n = Lua::GetObjectLength(l,t);

@@ -31,7 +31,7 @@ decltype(ShaderPPFog::DESCRIPTOR_SET_FOG) ShaderPPFog::DESCRIPTOR_SET_FOG = {
 		}
 	}
 };
-ShaderPPFog::ShaderPPFog(prosper::Context &context,const std::string &identifier)
+ShaderPPFog::ShaderPPFog(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPPBase(context,identifier,"screen/fs_pp_fog")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

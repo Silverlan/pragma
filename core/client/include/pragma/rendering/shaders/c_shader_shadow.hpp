@@ -45,8 +45,8 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderShadow(prosper::Context &context,const std::string &identifier);
-		ShaderShadow(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
+		ShaderShadow(prosper::IPrContext &context,const std::string &identifier);
+		ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 
 		bool BindLight(CLightComponent &light);
 		bool BindEntity(CBaseEntity &ent,const Mat4 &depthMVP);
@@ -78,7 +78,7 @@ namespace pragma
 		: public ShaderShadow
 	{
 	public:
-		ShaderShadowSpot(prosper::Context &context,const std::string &identifier);
+		ShaderShadowSpot(prosper::IPrContext &context,const std::string &identifier);
 	};
 
 	//////////////////
@@ -87,7 +87,7 @@ namespace pragma
 		: public ShaderShadow
 	{
 	public:
-		ShaderShadowCSM(prosper::Context &context,const std::string &identifier);
+		ShaderShadowCSM(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};

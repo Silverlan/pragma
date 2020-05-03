@@ -40,12 +40,12 @@ decltype(pragma::ShaderSpecularGlossinessToMetalnessRoughness::DESCRIPTOR_SET_TE
 		}
 	}
 };
-pragma::ShaderSpecularGlossinessToMetalnessRoughness::ShaderSpecularGlossinessToMetalnessRoughness(prosper::Context &context,const std::string &identifier)
+pragma::ShaderSpecularGlossinessToMetalnessRoughness::ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderBaseImageProcessing{context,identifier,"util/fs_specular_glossiness_to_metalness_roughness.gls"}
 {}
 
 std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRoughnessImageSet> pragma::ShaderSpecularGlossinessToMetalnessRoughness::ConvertToMetalnessRoughness(
-	prosper::Context &context,prosper::Texture *diffuseMap,prosper::Texture *specularGlossinessMap,const PushConstants &pushConstantData,prosper::Texture *aoMap
+	prosper::IPrContext &context,prosper::Texture *diffuseMap,prosper::Texture *specularGlossinessMap,const PushConstants &pushConstantData,prosper::Texture *aoMap
 )
 {
 	prosper::util::ImageCreateInfo imgCreateInfo {};
@@ -76,8 +76,6 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	auto &imgDiffuse = diffuseMap->GetImage();
 	auto &imgSpecularGlossiness = specularGlossinessMap->GetImage();
 	auto &imgAo = aoMap->GetImage();
-
-	auto &dev = context.GetDevice();
 
 	auto extents = imgDiffuse.GetExtents();
 	imgCreateInfo.width = extents.width;

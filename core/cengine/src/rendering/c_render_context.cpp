@@ -14,7 +14,7 @@
 using namespace pragma;
 
 RenderContext::RenderContext()
-	: prosper::Context(engine_info::get_name(),false)
+	: prosper::VlkContext(engine_info::get_name(),false)
 	,m_bWindowedMode(true),m_monitor(nullptr),m_aspectRatio(1.f)
 {
 	GetWindowCreationInfo().resizable = false;
@@ -48,19 +48,19 @@ VkBool32 RenderContext::ValidationCallback(
 			Con::cerr<<"[VK] "<<strMsg<<Con::endl;
 		}
 	}
-    return prosper::Context::ValidationCallback(severityFlags,message);
+    return prosper::VlkContext::ValidationCallback(severityFlags,message);
 }
 
 void RenderContext::OnWindowInitialized()
 {
-	prosper::Context::OnWindowInitialized();
+	prosper::IPrContext::OnWindowInitialized();
 	m_scheduledWindowReloadInfo = nullptr;
 }
 
 void RenderContext::DrawFrame()
 {
 	UpdateWindow();
-	prosper::Context::DrawFrame();
+	prosper::IPrContext::DrawFrame();
 }
 
 void RenderContext::UpdateWindow()
@@ -83,7 +83,7 @@ void RenderContext::UpdateWindow()
 	if(m_scheduledWindowReloadInfo->monitor.has_value())
 		creationInfo.monitor = std::move(*m_scheduledWindowReloadInfo->monitor);
 	if(m_scheduledWindowReloadInfo->presentMode.has_value())
-		prosper::Context::SetPresentMode(*m_scheduledWindowReloadInfo->presentMode);
+		prosper::IPrContext::SetPresentMode(*m_scheduledWindowReloadInfo->presentMode);
 	m_scheduledWindowReloadInfo = nullptr;
 	if(m_bWindowedMode == false)
 	{

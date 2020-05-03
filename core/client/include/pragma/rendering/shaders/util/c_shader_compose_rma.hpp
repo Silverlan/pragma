@@ -46,13 +46,13 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderComposeRMA(prosper::Context &context,const std::string &identifier);
+		ShaderComposeRMA(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::IImage> ComposeRMA(
-			prosper::Context &context,prosper::Texture *optRoughnessMap,prosper::Texture *optMetalnessMap,prosper::Texture *optAoMap,
+			prosper::IPrContext &context,prosper::Texture *optRoughnessMap,prosper::Texture *optMetalnessMap,prosper::Texture *optAoMap,
 			Flags flags=Flags::None
 		);
-		bool InsertAmbientOcclusion(prosper::Context &context,const std::string &rmaInputPath,uimg::ImageBuffer &aoImgBuffer,const std::string *optRmaOutputPath=nullptr);
-		bool InsertAmbientOcclusion(prosper::Context &context,const std::string &rmaInputPath,prosper::IImage &aoImg,const std::string *optRmaOutputPath=nullptr);
+		bool InsertAmbientOcclusion(prosper::IPrContext &context,const std::string &rmaInputPath,uimg::ImageBuffer &aoImgBuffer,const std::string *optRmaOutputPath=nullptr);
+		bool InsertAmbientOcclusion(prosper::IPrContext &context,const std::string &rmaInputPath,prosper::IImage &aoImg,const std::string *optRmaOutputPath=nullptr);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;

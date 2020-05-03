@@ -12,6 +12,7 @@
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/game/game_limits.h>
 #include <datasystem_color.h>
+#include <datasystem_vector.h>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
@@ -107,7 +108,7 @@ static void initialize_material_settings_buffer()
 	g_materialSettingsBuffer = c_engine->CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);
 }
-ShaderTextured3DBase::ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+ShaderTextured3DBase::ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderEntity(context,identifier,vsShader,fsShader,gsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
@@ -264,10 +265,10 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 		auto texture = std::static_pointer_cast<Texture>(glowMap->texture);
 
 		auto &emissionFactor = data->GetValue("emission_factor");
-		if(emissionFactor != nullptr)
+		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector))
 		{
-			auto &col = static_cast<ds::Color*>(emissionFactor.get())->GetValue();
-			matData.emissionFactor = col.ToVector4();
+			auto &f = static_cast<ds::Vector*>(emissionFactor.get())->GetValue();
+			matData.emissionFactor = {f.r,f.g,f.b,1.f};
 		}
 
 		if(texture->HasFlag(Texture::Flags::SRGB))

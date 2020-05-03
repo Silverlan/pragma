@@ -11,7 +11,7 @@
 
 using namespace pragma;
 
-ShaderHDR::ShaderHDR(prosper::Context &context,const std::string &identifier)
+ShaderHDR::ShaderHDR(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_hdr")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

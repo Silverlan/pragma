@@ -32,7 +32,7 @@ decltype(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE) ShaderPPHDR::DESCRIPTOR_SET_TEXTUR
 	}
 };
 decltype(ShaderPPHDR::RENDER_PASS_FORMAT) ShaderPPHDR::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
-ShaderPPHDR::ShaderPPHDR(prosper::Context &context,const std::string &identifier)
+ShaderPPHDR::ShaderPPHDR(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPPBase(context,identifier,"screen/fs_pp_hdr")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

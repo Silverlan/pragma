@@ -46,7 +46,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderWater(prosper::Context &context,const std::string &identifier);
+		ShaderWater(prosper::IPrContext &context,const std::string &identifier);
 		void SetReflectionEnabled(bool b);
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,

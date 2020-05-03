@@ -21,10 +21,10 @@ decltype(ShaderCubemap::VERTEX_BINDING_VERTEX) ShaderCubemap::VERTEX_BINDING_VER
 decltype(ShaderCubemap::VERTEX_ATTRIBUTE_POSITION) ShaderCubemap::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
 
 
-ShaderCubemap::ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader)
+ShaderCubemap::ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader)
 	: ShaderGraphics{context,identifier,vertexShader,fragmentShader}
 {}
-ShaderCubemap::ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &fragmentShader)
+ShaderCubemap::ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &fragmentShader)
 	: ShaderCubemap{context,identifier,"screen/vs_cubemap",fragmentShader}
 {}
 

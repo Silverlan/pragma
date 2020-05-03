@@ -20,7 +20,7 @@ decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_WATER_PARTICLES) ShaderWate
 	}
 };
 decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_SURFACE_INFO) ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_SURFACE_INFO = {&ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO};
-ShaderWaterSurfaceIntegrate::ShaderWaterSurfaceIntegrate(prosper::Context &context,const std::string &identifier)
+ShaderWaterSurfaceIntegrate::ShaderWaterSurfaceIntegrate(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurface(context,identifier,"compute/water/cs_water_surface_integrate")
 {}
 void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

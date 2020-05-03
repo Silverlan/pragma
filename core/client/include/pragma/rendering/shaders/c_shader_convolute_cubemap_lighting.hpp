@@ -19,7 +19,7 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CUBEMAP_TEXTURE;
 
-		ShaderConvoluteCubemapLighting(prosper::Context &context,const std::string &identifier);
+		ShaderConvoluteCubemapLighting(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> ConvoluteCubemapLighting(prosper::Texture &cubemap,uint32_t resolution);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

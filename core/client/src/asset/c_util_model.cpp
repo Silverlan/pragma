@@ -512,10 +512,10 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		auto &emissiveFactor = gltfMat.emissiveFactor;
 		if(emissiveFactor != std::vector<double>{1.0,1.0,1.0,1.0})
 		{
-			dataBlock->AddValue("color","emission_factor",
-				std::to_string(emissiveFactor.at(0) *255.f) +' ' +
-				std::to_string(emissiveFactor.at(1) *255.f) +' ' +
-				std::to_string(emissiveFactor.at(2) *255.f)
+			dataBlock->AddValue("vector","emission_factor",
+				std::to_string(emissiveFactor.at(0)) +' ' +
+				std::to_string(emissiveFactor.at(1)) +' ' +
+				std::to_string(emissiveFactor.at(2))
 			);
 		}
 
@@ -650,6 +650,69 @@ std::shared_ptr<Model> pragma::asset::import_model(VFilePtr f,std::string &outEr
 std::shared_ptr<Model> pragma::asset::import_model(const std::string &fileName,std::string &outErrMsg,const util::Path &outputPath)
 {
 	return ::import_model(nullptr,fileName,outErrMsg,outputPath);
+}
+
+bool pragma::asset::import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
+{
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
+	std::shared_ptr<void> tex;
+	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,fileName,loadInfo,&tex) == false)
+	{
+		outErrMsg = "Unable to load texture!";
+		return false;
+	}
+	if(std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	{
+		outErrMsg = "Invalid texture!";
+		return false;
+	}
+	return import_texture(std::static_pointer_cast<Texture>(tex)->GetVkTexture()->GetImage(),texInfo,outputPath,outErrMsg);
+}
+bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
+{
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
+	std::shared_ptr<void> tex;
+	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"",f,loadInfo,&tex) == false)
+	{
+		outErrMsg = "Unable to load texture!";
+		return false;
+	}
+	if(std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+	{
+		outErrMsg = "Invalid texture!";
+		return false;
+	}
+	return import_texture(std::static_pointer_cast<Texture>(tex)->GetVkTexture()->GetImage(),texInfo,outputPath,outErrMsg);
+}
+bool pragma::asset::import_texture(prosper::IImage &img,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg)
+{
+	std::string ext;
+	auto texWriteInfo = get_texture_write_info(pragma::asset::ModelExportInfo::ImageFormat::DDS,texInfo.normalMap,texInfo.srgb,uimg::TextureInfo::AlphaMode::Auto,ext);
+	if(texInfo.greyScaleMap)
+		texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::GradientMap;
+	else // TODO: Use BC1 if no alpha!
+		texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+
+	if(texWriteInfo.containerFormat == uimg::TextureInfo::ContainerFormat::DDS)
+	{
+		auto anvFormat = img.GetFormat();
+		switch(anvFormat)
+		{
+			// These formats require DDS10, which is not well supported, so we'll fall back to
+			// a different compression format
+		case prosper::Format::BC6H_SFloat_Block:
+		case prosper::Format::BC6H_UFloat_Block:
+		case prosper::Format::BC7_SRGB_Block:
+		case prosper::Format::BC7_UNorm_Block:
+			texWriteInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC3;
+			break;
+		}
+	}
+	auto imgOutputPath = "materials/" +util::Path{outputPath};
+	imgOutputPath.RemoveFileExtension();
+	return c_game->SaveImage(img,imgOutputPath.GetString(),texWriteInfo);
 }
 
 bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg)
@@ -828,7 +891,8 @@ bool pragma::asset::export_texture(
 }
 bool pragma::asset::export_texture(
 	const std::string &texturePath,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,
-	uimg::TextureInfo::AlphaMode alphaMode,bool enableExtendedDDS,std::string *optExportPath,std::string *optOutOutputPath
+	uimg::TextureInfo::AlphaMode alphaMode,bool enableExtendedDDS,std::string *optExportPath,std::string *optOutOutputPath,
+	const std::optional<std::string> &optFileNameOverride
 )
 {
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
@@ -843,7 +907,7 @@ bool pragma::asset::export_texture(
 	auto texture = std::static_pointer_cast<Texture>(pTexture);
 	auto &vkImg = texture->GetVkTexture()->GetImage();
 
-	auto imgPath = ufile::get_file_from_filename(texturePath);
+	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
 		imgPath = util::Path{*optExportPath}.GetString() +imgPath;
@@ -893,7 +957,8 @@ bool pragma::asset::export_texture(
 	return true;
 }
 std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_material(
-	Material &mat,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,std::string *optExportPath
+	Material &mat,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,std::string *optExportPath,
+	bool normalizeTextureNames
 )
 {
 	auto name = ufile::get_file_from_filename(mat.GetName());
@@ -901,14 +966,14 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 
 	auto exportPath = optExportPath ? *optExportPath : name;
 
-	auto fSaveTexture = [imageFormat,&exportPath]
-	(TextureInfo *texInfo,bool normalMap,bool alpha,std::string &imgOutputPath) -> bool {
+	auto fSaveTexture = [imageFormat,&exportPath,normalizeTextureNames]
+	(TextureInfo *texInfo,bool normalMap,bool alpha,std::string &imgOutputPath,const std::string &normalizedName) -> bool {
 		if(texInfo == nullptr)
 			return false;
 		std::string errMsg;
 		return export_texture(
 			texInfo->name,imageFormat,errMsg,alpha ? uimg::TextureInfo::AlphaMode::Transparency : uimg::TextureInfo::AlphaMode::None,false,
-			&exportPath,&imgOutputPath
+			&exportPath,&imgOutputPath,normalizeTextureNames ? normalizedName : std::optional<std::string>{}
 		);
 	};
 
@@ -918,14 +983,14 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 	pragma::asset::MaterialTexturePaths texturePaths {};
 
 	std::string imgOutputPath;
-	if(fSaveTexture(mat.GetAlbedoMap(),false,translucent,imgOutputPath))
+	if(fSaveTexture(mat.GetAlbedoMap(),false,translucent,imgOutputPath,name))
 		texturePaths.insert(std::make_pair(Material::ALBEDO_MAP_IDENTIFIER,imgOutputPath));
-	if(fSaveTexture(mat.GetNormalMap(),true,false,imgOutputPath))
+	if(fSaveTexture(mat.GetNormalMap(),true,false,imgOutputPath,name +"_normal"))
 		texturePaths.insert(std::make_pair(Material::NORMAL_MAP_IDENTIFIER,imgOutputPath));
-	if(fSaveTexture(mat.GetRMAMap(),true,false,imgOutputPath))
+	if(fSaveTexture(mat.GetRMAMap(),true,false,imgOutputPath,name +"_rma"))
 		texturePaths.insert(std::make_pair(Material::RMA_MAP_IDENTIFIER,imgOutputPath));
 
-	if(fSaveTexture(mat.GetGlowMap(),false,false,imgOutputPath))
+	if(fSaveTexture(mat.GetGlowMap(),false,false,imgOutputPath,name +"_emission"))
 		texturePaths.insert(std::make_pair(Material::EMISSION_MAP_IDENTIFIER,imgOutputPath));
 	return texturePaths;
 }

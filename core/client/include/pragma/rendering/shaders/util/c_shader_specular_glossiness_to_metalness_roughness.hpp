@@ -54,9 +54,9 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderSpecularGlossinessToMetalnessRoughness(prosper::Context &context,const std::string &identifier);
+		ShaderSpecularGlossinessToMetalnessRoughness(prosper::IPrContext &context,const std::string &identifier);
 		std::optional<MetalnessRoughnessImageSet> ConvertToMetalnessRoughness(
-			prosper::Context &context,prosper::Texture *optDiffuseMap,prosper::Texture *optSpecularGlossinessMap,const PushConstants &pushConstants={},
+			prosper::IPrContext &context,prosper::Texture *optDiffuseMap,prosper::Texture *optSpecularGlossinessMap,const PushConstants &pushConstants={},
 			prosper::Texture *optAoMap=nullptr
 		);
 	protected:

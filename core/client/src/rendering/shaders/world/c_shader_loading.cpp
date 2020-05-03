@@ -12,7 +12,7 @@ using namespace pragma;
 
 extern DLLCLIENT ClientState *client;
 
-ShaderLoading::ShaderLoading(prosper::Context &context,const std::string &identifier)
+ShaderLoading::ShaderLoading(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_textured","world/fs_loading")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

@@ -253,10 +253,13 @@ int Lua::util::Client::export_material(lua_State *l)
 		return 2;
 	}
 	auto imgFormat = static_cast<pragma::asset::ModelExportInfo::ImageFormat>(Lua::CheckInt(l,2));
+	auto normalizeTextureNames = false;
+	if(Lua::IsSet(l,3))
+		normalizeTextureNames = Lua::CheckBool(l,3);
 
 	std::string errMsg;
 	std::string finalOutputPath;
-	auto textures = pragma::asset::export_material(*mat,imgFormat,errMsg);
+	auto textures = pragma::asset::export_material(*mat,imgFormat,errMsg,nullptr,normalizeTextureNames);
 	Lua::PushBool(l,textures.has_value());
 	if(textures.has_value() == false)
 		Lua::PushString(l,errMsg);

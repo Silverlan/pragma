@@ -24,7 +24,7 @@ namespace pragma
 			WaterParticles = 0u
 		};
 
-		ShaderWaterSurfaceIntegrate(prosper::Context &context,const std::string &identifier);
+		ShaderWaterSurfaceIntegrate(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

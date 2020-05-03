@@ -35,10 +35,10 @@ decltype(ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO) ShaderWaterSurface::DE
 		}
 	}
 };
-ShaderWaterSurface::ShaderWaterSurface(prosper::Context &context,const std::string &identifier,const std::string &csShader)
+ShaderWaterSurface::ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier,const std::string &csShader)
 	: prosper::ShaderCompute(context,identifier,csShader)
 {}
-ShaderWaterSurface::ShaderWaterSurface(prosper::Context &context,const std::string &identifier)
+ShaderWaterSurface::ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurface(context,identifier,"compute/water/cs_water_surface")
 {}
 void ShaderWaterSurface::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

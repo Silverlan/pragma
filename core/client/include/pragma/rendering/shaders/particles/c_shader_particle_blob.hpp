@@ -34,7 +34,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderParticleBlob(prosper::Context &context,const std::string &identifier);
+		ShaderParticleBlob(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

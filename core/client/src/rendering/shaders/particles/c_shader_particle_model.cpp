@@ -43,7 +43,7 @@ decltype(ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES) ShaderParticleModel:
 		}
 	}
 };
-ShaderParticleModel::ShaderParticleModel(prosper::Context &context,const std::string &identifier)
+ShaderParticleModel::ShaderParticleModel(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"particles/model/vs_particle_model","particles/model/fs_particle_model")
 {
 	SetPipelineCount(GetParticlePipelineCount());

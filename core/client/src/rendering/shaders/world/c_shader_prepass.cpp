@@ -43,12 +43,12 @@ static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass
 	};
 }
 
-ShaderPrepassBase::ShaderPrepassBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderEntity(context,identifier,vsShader,fsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-ShaderPrepassBase::ShaderPrepassBase(prosper::Context &context,const std::string &identifier)
+ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderEntity(context,identifier,"world/prepass/vs_prepass_depth","")
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
@@ -127,7 +127,7 @@ void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) con
 decltype(ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL) ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderPrepass::RENDER_PASS_NORMAL_FORMAT) ShaderPrepass::RENDER_PASS_NORMAL_FORMAT = prosper::Format::R16G16B16A16_SFloat;
-ShaderPrepass::ShaderPrepass(prosper::Context &context,const std::string &identifier)
+ShaderPrepass::ShaderPrepass(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPrepassBase(context,identifier,"world/prepass/vs_prepass","world/prepass/fs_prepass")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

@@ -13,7 +13,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 
 namespace Anvil {class PrimaryCommandBuffer;};
-namespace prosper {class Context; class RenderTarget; class Texture; class Shader; class PrimaryCommandBuffer;};
+namespace prosper {class IPrContext; class RenderTarget; class Texture; class Shader; class PrimaryCommandBuffer;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 namespace pragma
@@ -24,7 +24,7 @@ namespace pragma
 		class DLLCLIENT Prepass
 		{
 		public:
-			bool Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bExtended);
+			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bExtended);
 			pragma::ShaderPrepassBase &GetShader() const;
 			void BeginRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer);
 			void EndRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer);

@@ -12,14 +12,14 @@
 #include <memory>
 #include <image/prosper_texture.hpp>
 
-namespace prosper {class Shader; class Context; class RenderTarget; class DescriptorSetGroup;};
+namespace prosper {class Shader; class IPrContext; class RenderTarget; class DescriptorSetGroup;};
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
 struct DLLCLIENT SSAOInfo
 {
 	bool Initialize(
-		prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
+		prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
 		const std::shared_ptr<prosper::Texture> &texNorm,const std::shared_ptr<prosper::Texture> &texDepth
 	);
 	void Clear();

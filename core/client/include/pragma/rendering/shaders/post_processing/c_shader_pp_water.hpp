@@ -30,7 +30,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderPPWater(prosper::Context &context,const std::string &identifier);
+		ShaderPPWater(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat);
 		bool BindRefractionMaterial(CMaterial &mat);
 		bool Draw(

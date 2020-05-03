@@ -31,10 +31,10 @@ namespace pragma
 			SurfaceInfo = 0u
 		};
 
-		ShaderWaterSurface(prosper::Context &context,const std::string &identifier);
+		ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetParticles,uint32_t width,uint32_t length);
 	protected:
-		ShaderWaterSurface(prosper::Context &context,const std::string &identifier,const std::string &csShader);
+		ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier,const std::string &csShader);
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };

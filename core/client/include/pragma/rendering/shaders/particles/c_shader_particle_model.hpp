@@ -39,7 +39,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderParticleModel(prosper::Context &context,const std::string &identifier);
+		ShaderParticleModel(prosper::IPrContext &context,const std::string &identifier);
 		bool BindParticleBuffers(prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer);
 		bool Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance=0u);
 		bool BindParticleSystem(pragma::CParticleSystemComponent &pSys);

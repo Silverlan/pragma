@@ -11,6 +11,7 @@
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <prosper_command_buffer.hpp>
+#include <wrappers/swapchain.h>
 
 using namespace pragma::debug;
 

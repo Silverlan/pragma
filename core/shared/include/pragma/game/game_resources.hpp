@@ -18,13 +18,13 @@ class Model;
 namespace bsp {class File;};
 namespace util
 {
+	class Library;
 	static const std::string IMPORT_PATH = "addons\\imported\\";
 	namespace impl
 	{
 		void *get_module_func(NetworkState *nw,const std::string &name);
-		void init_custom_mount_directories(NetworkState &nw);
 	};
-	DLLNETWORK void initialize_external_archive_manager(NetworkState *nw);
+	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(NetworkState *nw);
 	DLLNETWORK void close_external_archive_manager();
 
 	DLLNETWORK bool port_nif_model(NetworkState *nw,const std::string &path,std::string mdlName);

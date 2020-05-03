@@ -27,7 +27,7 @@ namespace pragma
 			Count
 		};
 
-		ShaderUnlit(prosper::Context &context,const std::string &identifier);
+		ShaderUnlit(prosper::IPrContext &context,const std::string &identifier);
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:

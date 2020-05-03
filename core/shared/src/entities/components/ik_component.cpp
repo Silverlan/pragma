@@ -20,9 +20,11 @@
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/baseentity_trace.hpp"
+#include <pragma/physics/environment.hpp>
 
 using namespace pragma;
 
+#pragma optimize("",off)
 namespace pragma
 {
 	using ::operator<<;
@@ -527,22 +529,22 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		jacobian.UpdateThetas();
 		jacobian.UpdatedSClampValue(ikEffectorPositions.data());
 
-#define IK_DEBUG_PRINT 0
-#if IK_DEBUG_PRINT != 0
+		static auto debugPrint = false;
+		if(debugPrint)
 		{
-			auto *game = GetNetworkState()->GetGameState();
-			auto fGetLocalTransform = [](const Node* node, btTransform& act) {
-				btVector3 axis = btVector3(node->v.x, node->v.y, node->v.z);
-				btQuaternion rot(0, 0, 0, 1);
+			auto *game = GetEntity().GetNetworkState()->GetGameState();
+			auto fGetLocalTransform = [](const Node* node, physics::Transform& act) {
+				auto axis = Vector3(node->v.x, node->v.y, node->v.z);
+				auto rot = uquat::identity();
 				if (axis.length())
-					rot = btQuaternion (axis, node->GetTheta());
-				act.setIdentity();
-				act.setRotation(rot);
-				act.setOrigin(btVector3(node->r.x, node->r.y, node->r.z));
+					rot = Quat (node->GetTheta(),axis);
+				act.SetIdentity();
+				act.SetRotation(rot);
+				act.SetOrigin(Vector3(node->r.x, node->r.y, node->r.z));
 			};
-			std::function<void(Node*, const btTransform&)> fDrawTree = nullptr;
-			fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node, const btTransform& tr) {
-				btVector3 lineColor = btVector3(0, 0, 0);
+			std::function<void(Node*, const physics::Transform&)> fDrawTree = nullptr;
+			fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node, const physics::Transform& tr) {
+				Vector3 lineColor = Vector3(0, 0, 0);
 				int lineWidth = 2;
 				auto fUpdateLine = [game](int32_t tIdx,const Vector3 &start,const Vector3 &end,const Color &col) {
 					/*auto it = m_dbgObjects.find(tIdx);
@@ -557,8 +559,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				};
 				if (node != 0) {
 				//	glPushMatrix();
-					btVector3 pos = btVector3(tr.getOrigin().x(), tr.getOrigin().y(), tr.getOrigin().z());
-					btVector3 color = btVector3(0, 1, 0);
+					Vector3 pos = Vector3(tr.GetOrigin().x, tr.GetOrigin().y, tr.GetOrigin().z);
+					Vector3 color = Vector3(0, 1, 0);
 					int pointSize = 10;
 					auto enPos = uvec::create(pos);
 					//auto it = m_dbgObjects.find(0u);
@@ -566,36 +568,37 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 					//	it = m_dbgObjects.insert(std::make_pair(0u,DebugRenderer::DrawPoint(enPos,Color::Lime))).first;
 					//it->second->SetPos(enPos);
 
-					auto enForward = uvec::create((tr.getBasis().getColumn(0)));
-					auto enRight = uvec::create((tr.getBasis().getColumn(1)));
-					auto enUp = uvec::create((tr.getBasis().getColumn(2)));
-					fUpdateLine(1,enPos,enPos +enForward *static_cast<float>(0.05f /PhysEnv::WORLD_SCALE),Color::Red);
-					fUpdateLine(2,enPos,enPos +enRight *static_cast<float>(0.05f /PhysEnv::WORLD_SCALE),Color::Lime);
-					fUpdateLine(3,enPos,enPos +enUp *static_cast<float>(0.05f /PhysEnv::WORLD_SCALE),Color::Aqua);
+					auto enForward = uquat::forward(tr.GetRotation());
+					auto enRight = uquat::right(tr.GetRotation());
+					auto enUp = uquat::up(tr.GetRotation());
+					auto worldScale = game->GetPhysicsEnvironment()->GetWorldScale();
+					fUpdateLine(1,enPos,enPos +enForward *static_cast<float>(0.05f /worldScale),Color::Red);
+					fUpdateLine(2,enPos,enPos +enRight *static_cast<float>(0.05f /worldScale),Color::Lime);
+					fUpdateLine(3,enPos,enPos +enUp *static_cast<float>(0.05f /worldScale),Color::Aqua);
 			
-					btVector3 axisLocal = btVector3(node->v.x, node->v.y, node->v.z);
-					btVector3 axisWorld = tr.getBasis()*axisLocal;
+					Vector3 axisLocal = Vector3(node->v.x, node->v.y, node->v.z);
+					Vector3 axisWorld = tr*axisLocal;
 
 					fUpdateLine(4,enPos,enPos +0.1f *uvec::create(axisWorld),Color::Yellow);
 
 					//node->DrawNode(node == root);	// Recursively draw node and update ModelView matrix
 					if (node->left) {
-						btTransform act;
+						physics::Transform act;
 						fGetLocalTransform(node->left, act);
 				
-						btTransform trl = tr*act;
-						auto trOrigin = uvec::create(tr.getOrigin());
-						auto trlOrigin = uvec::create(trl.getOrigin());
+						physics::Transform trl = tr*act;
+						auto trOrigin = tr.GetOrigin();
+						auto trlOrigin = trl.GetOrigin();
 						fUpdateLine(5,trOrigin,trlOrigin,Color::Maroon);
 						fDrawTree(node->left, trl);		// Draw tree of children recursively
 					}
 				//	glPopMatrix();
 					if (node->right) {
-						btTransform act;
+						physics::Transform act;
 						fGetLocalTransform(node->right, act);
-						btTransform trr = tr*act;
-						auto trOrigin = uvec::create(tr.getOrigin());
-						auto trrOrigin = uvec::create(trr.getOrigin());
+						physics::Transform trr = tr*act;
+						auto trOrigin = tr.GetOrigin();
+						auto trrOrigin = trr.GetOrigin();
 						fUpdateLine(6,trOrigin,trrOrigin,Color::Silver);
 						fDrawTree(node->right,trr);		// Draw right siblings recursively
 					}
@@ -603,15 +606,14 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			};
 			auto fRenderScene = [&fGetLocalTransform,&fDrawTree,&rootDeltaTransforms](Tree &tree) {
 				auto &tRoot = rootDeltaTransforms.front();
-				btTransform act {};
+				physics::Transform act {};
 				fGetLocalTransform(tree.GetRoot(),act);
-				act = tRoot.GetTransform() *act;
+				act = tRoot *act;
 
 				fDrawTree(tree.GetRoot(),act);
 			};
-			fRenderScene(*pair.second.tree);
+			fRenderScene(*pair.second->tree);
 		}
-#endif
 
 		// Apply IK transforms to entity skeleton
 		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>>&,physics::Transform&,physics::Transform*,bool)> fIterateIkTree = nullptr;
@@ -686,3 +688,4 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		animComponent->SetLocalBonePosition(footData.boneId,posBone,rotBone);
 	}
 }
+#pragma optimize("",on)

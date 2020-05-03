@@ -62,7 +62,7 @@ decltype(ShaderScene::RENDER_PASS_FORMAT) ShaderScene::RENDER_PASS_FORMAT = pros
 decltype(ShaderScene::RENDER_PASS_DEPTH_FORMAT) ShaderScene::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
 decltype(ShaderScene::RENDER_PASS_SAMPLES) ShaderScene::RENDER_PASS_SAMPLES = prosper::SampleCountFlags::e1Bit;
 void ShaderScene::SetRenderPassSampleCount(prosper::SampleCountFlags samples) {RENDER_PASS_SAMPLES = samples;}
-ShaderScene::ShaderScene(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+ShaderScene::ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: Shader3DBase(context,identifier,vsShader,fsShader,gsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
@@ -157,7 +157,7 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_
 		}
 	}
 };
-ShaderSceneLit::ShaderSceneLit(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader,gsShader)
 {}
 bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources)
@@ -214,7 +214,7 @@ decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INS
 		}
 	}
 };
-ShaderEntity::ShaderEntity(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+ShaderEntity::ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderSceneLit(context,identifier,vsShader,fsShader,gsShader)
 {}
 

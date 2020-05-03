@@ -150,7 +150,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderTextured3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual ~ShaderTextured3DBase() override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane);
 		virtual bool BeginDraw(

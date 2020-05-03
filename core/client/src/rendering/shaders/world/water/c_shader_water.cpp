@@ -52,7 +52,7 @@ decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = 
 		}
 	}
 };
-ShaderWater::ShaderWater(prosper::Context &context,const std::string &identifier)
+ShaderWater::ShaderWater(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_water","world/fs_water")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

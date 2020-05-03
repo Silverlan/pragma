@@ -38,6 +38,7 @@ namespace pragma::asset
 		bool exportImages = true;
 		bool embedAnimations = true;
 		bool fullExport = false;
+		bool normalizeTextureNames = false;
 		ImageFormat imageFormat = ImageFormat::DDS;
 		float scale = ::util::units_to_metres(1.f);
 
@@ -56,9 +57,19 @@ namespace pragma::asset
 	private:
 		std::optional<std::vector<std::string>> m_animations {};
 	};
+	struct DLLCLIENT TextureImportInfo
+	{
+		bool srgb = false;
+		bool normalMap = false;
+		bool greyScaleMap = false;
+	};
 
 	DLLCLIENT std::shared_ptr<Model> import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath={});
 	DLLCLIENT std::shared_ptr<Model> import_model(const std::string &fileName,std::string &outErrMsg,const util::Path &outputPath={});
+
+	DLLCLIENT bool import_texture(const std::string &fileName,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
+	DLLCLIENT bool import_texture(VFilePtr f,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
+	DLLCLIENT bool import_texture(prosper::IImage &img,const TextureImportInfo &texInfo,const std::string &outputPath,std::string &outErrMsg);
 
 	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
 	DLLCLIENT bool export_animation(Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
@@ -71,10 +82,14 @@ namespace pragma::asset
 	DLLCLIENT bool export_texture(
 		const std::string &texturePath,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,
 		uimg::TextureInfo::AlphaMode alphaMode=uimg::TextureInfo::AlphaMode::Auto,bool enableExtendedDDS=false,
-		std::string *optExportPath=nullptr,std::string *optOutOutputPath=nullptr
+		std::string *optExportPath=nullptr,std::string *optOutOutputPath=nullptr,
+		const std::optional<std::string> &optFileNameOverride={}
 	);
 	using MaterialTexturePaths = std::unordered_map<std::string,std::string>;
-	DLLCLIENT std::optional<MaterialTexturePaths> export_material(Material &mat,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,std::string *optExportPath=nullptr);
+	DLLCLIENT std::optional<MaterialTexturePaths> export_material(
+		Material &mat,ModelExportInfo::ImageFormat imageFormat,std::string &outErrMsg,std::string *optExportPath=nullptr,
+		bool normalizeTextureNames=false
+	);
 
 	struct DLLCLIENT ModelAOWorkerResult
 	{

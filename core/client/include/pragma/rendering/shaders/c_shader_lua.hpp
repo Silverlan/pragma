@@ -172,7 +172,7 @@ namespace pragma
 		virtual std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentCommandBuffer() override;
 	protected:
 		template<typename... TARGS>
-			TLuaShaderBase(prosper::Context &context,TARGS ...args)
+			TLuaShaderBase(prosper::IPrContext &context,TARGS ...args)
 				: TBaseShader(context,std::forward<TARGS>(args)...),TLuaBaseShader(static_cast<TBaseShader&>(*this))
 		{}
 		virtual void SetIdentifier(const std::string &identifier) override;

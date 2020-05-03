@@ -17,7 +17,7 @@ namespace pragma
 		: public prosper::ShaderBaseImageProcessing
 	{
 	public:
-		ShaderSSAOBlur(prosper::Context &context,const std::string &identifier);
+		ShaderSSAOBlur(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};

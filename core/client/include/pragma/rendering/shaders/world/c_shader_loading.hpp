@@ -16,7 +16,7 @@ namespace pragma
 		: public ShaderTextured3DBase
 	{
 	public:
-		ShaderLoading(prosper::Context &context,const std::string &identifier);
+		ShaderLoading(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool BindMaterial(CMaterial &mat) override;
 	};
 };

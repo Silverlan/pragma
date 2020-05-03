@@ -16,7 +16,7 @@ namespace pragma
 		: public ShaderTextured3DBase
 	{
 	public:
-		ShaderWireframe(prosper::Context &context,const std::string &identifier);
+		ShaderWireframe(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};

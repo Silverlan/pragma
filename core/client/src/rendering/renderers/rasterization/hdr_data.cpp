@@ -63,7 +63,7 @@ bool HDRData::Exposure::Initialize(prosper::Texture &texture)
 	if(pragma::ShaderCalcImageColor::DESCRIPTOR_SET_COLOR.IsValid() == false || pragma::ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 		return false;
 	m_calcImgColorCmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
-	m_calcImgColorFence = prosper::Fence::Create(*c_engine);
+	m_calcImgColorFence = c_engine->CreateFence();
 
 	descSetGroupAverageColorBuffer = nullptr; // Has to be cleared first! (To release any previous descriptor sets)
 	

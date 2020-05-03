@@ -19,6 +19,7 @@
 #include <image/prosper_image_view.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
+#include <vk_descriptor_set_group.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -49,7 +50,7 @@ void CShadowManagerComponent::Initialize()
 	m_whShadowShader = c_engine->GetShader("shadow");
 	m_descSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
 
-	auto *descSet = static_cast<prosper::DescriptorSet*>(m_descSetGroup->GetDescriptorSet());
+	auto *descSet = static_cast<prosper::VlkDescriptorSet*>(m_descSetGroup->GetDescriptorSet());
 	auto *descSetLayout = (*descSet)->get_descriptor_set_layout();
 	auto &info = *descSetLayout->get_create_info();
 

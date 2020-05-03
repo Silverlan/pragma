@@ -24,7 +24,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -83,12 +83,12 @@ decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 		}
 	}
 };
-ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderTextured3DBase{context,identifier,vsShader,fsShader,gsShader}
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-ShaderPBR::ShaderPBR(prosper::Context &context,const std::string &identifier)
+ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/vs_textured","world/pbr/fs_pbr"}
 {
 }
@@ -265,7 +265,7 @@ decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET
 		}
 	}
 };
-ShaderPBRBlend::ShaderPBRBlend(prosper::Context &context,const std::string &identifier)
+ShaderPBRBlend::ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/pbr/fs_pbr_blend"}
 {}
 void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -320,4 +320,4 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
 		ShaderPBR::Draw(mesh) == true;
 }
-
+#pragma optimize("",on)

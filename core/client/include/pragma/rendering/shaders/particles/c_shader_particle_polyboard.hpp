@@ -21,7 +21,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
-		ShaderParticlePolyboard(prosper::Context &context,const std::string &identifier);
+		ShaderParticlePolyboard(prosper::IPrContext &context,const std::string &identifier);
 
 #pragma pack(push,1)
 		struct GeometryPushConstants

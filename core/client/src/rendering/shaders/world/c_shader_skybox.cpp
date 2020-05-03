@@ -31,11 +31,11 @@ decltype(ShaderSkybox::DESCRIPTOR_SET_MATERIAL) ShaderSkybox::DESCRIPTOR_SET_MAT
 		}
 	}
 };
-ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifier)
+ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderSkybox(context,identifier,"world/vs_skybox","world/fs_skybox")
 {}
 
-ShaderSkybox::ShaderSkybox(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderTextured3DBase(context,identifier,vsShader,fsShader)
 {
 	// SetBaseShader<ShaderTextured3DBase>();
@@ -106,7 +106,7 @@ bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(
 
 //////////////
 
-ShaderSkyboxEquirect::ShaderSkyboxEquirect(prosper::Context &context,const std::string &identifier)
+ShaderSkyboxEquirect::ShaderSkyboxEquirect(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderSkybox{context,identifier,"world/vs_skybox_equirect","world/fs_skybox_equirect"}
 {}
 

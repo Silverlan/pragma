@@ -933,7 +933,7 @@ int Lua::game::Client::create_scene(lua_State *l)
 		static_cast<uint32_t>(width),static_cast<uint32_t>(height)
 	};
 	if(Lua::IsSet(l,argIdx))
-		createInfo.sampleCount = static_cast<Anvil::SampleCountFlagBits>(Lua::CheckInt(l,argIdx++));
+		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
 	auto scene = ::Scene::Create(createInfo);
 	if(scene == nullptr)
 		return 0;

@@ -10,13 +10,13 @@
 
 using namespace pragma;
 
-ShaderParticle::ShaderParticle(prosper::Context &context,const std::string &identifier)
+ShaderParticle::ShaderParticle(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/vs_particle","particles/fs_particle")
 {}
 
 decltype(ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION) ShaderParticleRotational::VERTEX_BINDING_WORLD_ROTATION = {prosper::VertexInputRate::Instance};
 decltype(ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION) ShaderParticleRotational::VERTEX_ATTRIBUTE_WORLD_ROTATION = {VERTEX_BINDING_WORLD_ROTATION,prosper::Format::R32G32B32A32_SFloat};
-ShaderParticleRotational::ShaderParticleRotational(prosper::Context &context,const std::string &identifier)
+ShaderParticleRotational::ShaderParticleRotational(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/vs_particle_rotational","particles/fs_particle")
 {
 	SetBaseShader<ShaderParticle>();

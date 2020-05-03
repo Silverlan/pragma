@@ -19,7 +19,7 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE;
 
-		ShaderEquirectangularToCubemap(prosper::Context &context,const std::string &identifier);
+		ShaderEquirectangularToCubemap(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> EquirectangularTextureToCubemap(prosper::Texture &equirectangularTexture,uint32_t resolution);
 		std::shared_ptr<prosper::Texture> LoadEquirectangularImage(const std::string &fileName,uint32_t resolution);
 		std::shared_ptr<prosper::Texture> LoadEquirectangularImage(VFilePtr f,uint32_t resolution);

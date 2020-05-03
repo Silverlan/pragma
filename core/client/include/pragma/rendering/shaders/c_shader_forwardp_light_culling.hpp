@@ -45,7 +45,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderForwardPLightCulling(prosper::Context &context,const std::string &identifier);
+		ShaderForwardPLightCulling(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(
 			prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 			uint32_t sceneIndex

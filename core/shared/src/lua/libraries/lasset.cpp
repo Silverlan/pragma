@@ -37,7 +37,9 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			auto *nw = engine->GetNetworkState(l);
 			Lua::PushInt(l,nw->GetMaterialManager().ClearUnused());
 			return 1;
-		})}
+		})},
+		{"lock_asset_watchers",&Lua::asset::lock_asset_watchers},
+		{"unlock_asset_watchers",&Lua::asset::unlock_asset_watchers}
 	};
 	if(extended)
 	{
@@ -83,4 +85,13 @@ int32_t Lua::asset::is_loaded(lua_State *l)
 	Lua::PushBool(l,pragma::asset::is_loaded(*nw,name,type));
 	return 1;
 }
-
+int32_t Lua::asset::lock_asset_watchers(lua_State *l)
+{
+	engine->LockResourceWatchers();
+	return 0;
+}
+int32_t Lua::asset::unlock_asset_watchers(lua_State *l)
+{
+	engine->UnlockResourceWatchers();
+	return 0;
+}

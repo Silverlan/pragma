@@ -23,7 +23,7 @@ decltype(ShaderWaterSplash::DESCRIPTOR_SET_WATER_EFFECT) ShaderWaterSplash::DESC
 		}
 	}
 };
-ShaderWaterSplash::ShaderWaterSplash(prosper::Context &context,const std::string &identifier)
+ShaderWaterSplash::ShaderWaterSplash(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"compute/water/cs_water_splash")
 {}
 

@@ -18,7 +18,7 @@ namespace pragma
 		: public prosper::ShaderBaseImageProcessing
 	{
 	public:
-		ShaderSpecularToRoughness(prosper::Context &context,const std::string &identifier);
+		ShaderSpecularToRoughness(prosper::IPrContext &context,const std::string &identifier);
 	};
 };
 

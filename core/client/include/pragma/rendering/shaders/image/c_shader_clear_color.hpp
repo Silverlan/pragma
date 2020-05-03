@@ -27,8 +27,8 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderClearColor(prosper::Context &context,const std::string &identifier);
-		ShaderClearColor(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderClearColor(prosper::IPrContext &context,const std::string &identifier);
+		ShaderClearColor(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
 		bool Draw(const PushConstants &pushConstants={{0.f,0.f,0.f,0.f}});
 	protected:

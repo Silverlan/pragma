@@ -18,7 +18,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::Context &context,const std::string &identifier)
+ShaderCubemapToEquirectangular::ShaderCubemapToEquirectangular(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing{context,identifier,"screen/fs_cubemap_to_equirectangular"}
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));

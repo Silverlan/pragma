@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/c_msaa.h"
 #include <mathutil/umath.h>
+#include <wrappers/device.h>
 
 extern DLLCENGINE CEngine *c_engine;
 

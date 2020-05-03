@@ -49,7 +49,7 @@ ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
 ///////////////////////////
 
 Scene::CreateInfo::CreateInfo(uint32_t width,uint32_t height)
-	: width{width},height{height},sampleCount{static_cast<Anvil::SampleCountFlagBits>(c_game->GetMSAASampleCount())}
+	: width{width},height{height},sampleCount{static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())}
 {}
 
 ///////////////////////////

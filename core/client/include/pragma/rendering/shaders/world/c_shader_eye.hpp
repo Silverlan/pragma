@@ -29,7 +29,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderEye(prosper::Context &context,const std::string &identifier);
+		ShaderEye(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		bool BindEyeball(uint32_t skinMatIdx);

@@ -29,6 +29,7 @@ public:
 	WIMainMenuNewGame();
 	virtual ~WIMainMenuNewGame() override;
 	virtual void Initialize() override;
+	virtual void Think() override;
 	void ReloadMapList();
 };
 

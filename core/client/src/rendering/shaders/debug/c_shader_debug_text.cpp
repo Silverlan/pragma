@@ -18,7 +18,7 @@ decltype(ShaderDebugText::DESCRIPTOR_SET_TEXTURE) ShaderDebugText::DESCRIPTOR_SE
 		}
 	}
 };
-ShaderDebugText::ShaderDebugText(prosper::Context &context,const std::string &identifier)
+ShaderDebugText::ShaderDebugText(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDebug(context,identifier,"debug/vs_debug_text","debug/fs_debug_text")
 {
 	SetBaseShader<ShaderDebug>();

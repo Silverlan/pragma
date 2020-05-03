@@ -94,7 +94,7 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_IBL) ShaderRayTracing::DESCRIPTOR_SET_
 		}
 	}
 };
-ShaderRayTracing::ShaderRayTracing(prosper::Context &context,const std::string &identifier)
+ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"world/raytracing/raytracing.gls")
 {}
 

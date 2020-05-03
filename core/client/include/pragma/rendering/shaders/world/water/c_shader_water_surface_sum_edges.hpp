@@ -26,10 +26,10 @@ namespace pragma
 			WaterEdgeData
 		};
 
-		ShaderWaterSurfaceSumEdges(prosper::Context &context,const std::string &identifier);
+		ShaderWaterSurfaceSumEdges(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descSetSurfaceInfo,prosper::IDescriptorSet &descSetEdges,uint32_t width,uint32_t length);
 	protected:
-		ShaderWaterSurfaceSumEdges(prosper::Context &context,const std::string &identifier,const std::string &csShader);
+		ShaderWaterSurfaceSumEdges(prosper::IPrContext &context,const std::string &identifier,const std::string &csShader);
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };

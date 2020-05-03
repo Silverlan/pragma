@@ -23,7 +23,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool SSAOInfo::Initialize(
-	prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
+	prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,
 	const std::shared_ptr<prosper::Texture> &texNorm,const std::shared_ptr<prosper::Texture> &texDepth
 )
 {

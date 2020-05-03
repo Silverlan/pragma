@@ -26,7 +26,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderForwardPLightIndexing(prosper::Context &context,const std::string &identifier);
+		ShaderForwardPLightIndexing(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descSetLights,uint32_t tileCount);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

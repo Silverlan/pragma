@@ -35,7 +35,7 @@ decltype(ShaderComputeIrradianceMapRoughness::DESCRIPTOR_SET_ROUGHNESS) ShaderCo
 		}
 	}
 };
-ShaderComputeIrradianceMapRoughness::ShaderComputeIrradianceMapRoughness(prosper::Context &context,const std::string &identifier)
+ShaderComputeIrradianceMapRoughness::ShaderComputeIrradianceMapRoughness(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderCubemap{context,identifier,"screen/fs_compute_irradiance_map_roughness"}
 {}
 

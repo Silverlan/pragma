@@ -33,7 +33,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderTexturedAlphaTransition(prosper::Context &context,const std::string &identifier);
+		ShaderTexturedAlphaTransition(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

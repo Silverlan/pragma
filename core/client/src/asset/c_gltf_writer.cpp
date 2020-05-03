@@ -24,8 +24,9 @@
 #include <pragma/engine_version.h>
 #include <pragma/util/resource_watcher.h>
 #include <datasystem_color.h>
+#include <datasystem_vector.h>
 
-//#define ENABLE_GLTF_VALIDATION
+// #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c,msg) \
 	if(!(c)) \
 	{ \
@@ -400,9 +401,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 				{
 					auto &v = verts.at(i);
 					auto pos = TransformPos(v.position);
-					memcpy(gltfVertexData +i *szVertex,&pos,sizeof(pos));
-					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3),&v.normal,sizeof(v.normal));
-					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3) *2,&v.uv,sizeof(v.uv));
+					auto n = v.normal;
+					auto uv = v.uv;
 
 #ifdef ENABLE_GLTF_VALIDATION
 					auto fGetErrMsg = [i,meshIdx,&exportData,&pos,&v]() {
@@ -424,9 +424,25 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 
 					auto l = uvec::length(v.normal);
 					GLTF_ASSERT(l >= 0.99f && l <= 1.01f,fGetErrMsg());
+#else
+					auto l = uvec::length(v.normal);
+					auto isNormalValid = (l >= 0.99f && l <= 1.01f);
+					for(uint8_t i=0;i<3;++i)
+					{
+						if(std::isnan(pos[i]) || std::isinf(pos[i]))
+							pos[i] = 0.f;
+						if(std::isnan(n[i]) || std::isinf(n[i]))
+							isNormalValid = false;
+						if(i < 2 && (std::isnan(uv[i]) || std::isinf(uv[i])))
+							uv[i] = 0.f;
+					}
+					if(isNormalValid == false)
+						n = uvec::UP;
 #endif
 
-
+					memcpy(gltfVertexData +i *szVertex,&pos,sizeof(pos));
+					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3),&n,sizeof(n));
+					memcpy(gltfVertexData +i *szVertex +sizeof(Vector3) *2,&uv,sizeof(uv));
 				}
 				vertOffset += verts.size();
 			}
@@ -1366,7 +1382,7 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 	for(auto *mat : materials)
 	{
 		std::string errMsg;
-		auto texturePaths = pragma::asset::export_material(*mat,m_exportInfo.imageFormat,errMsg,&m_exportPath);
+		auto texturePaths = pragma::asset::export_material(*mat,m_exportInfo.imageFormat,errMsg,&m_exportPath,m_exportInfo.normalizeTextureNames);
 		if(texturePaths.has_value() == false)
 			continue;
 
@@ -1420,11 +1436,10 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		gltfMat.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
 
 		auto &emissionFactor = data->GetValue("emission_factor");
-		if(emissionFactor != nullptr)
+		if(emissionFactor != nullptr && typeid(*emissionFactor) == typeid(ds::Vector))
 		{
-			auto &col = static_cast<ds::Color*>(emissionFactor.get())->GetValue();
-			auto vCol = col.ToVector4();
-			gltfMat.emissiveFactor = {vCol[0],vCol[1],vCol[2]};
+			auto &f = static_cast<ds::Vector*>(emissionFactor.get())->GetValue();
+			gltfMat.emissiveFactor = {f.r,f.g,f.b};
 		}
 		else if(gltfMat.emissiveTexture.index != -1)
 			gltfMat.emissiveFactor = {1.0,1.0,1.0};

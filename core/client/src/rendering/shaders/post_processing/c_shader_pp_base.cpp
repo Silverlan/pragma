@@ -12,10 +12,10 @@
 
 using namespace pragma;
 
-ShaderPPBase::ShaderPPBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+ShaderPPBase::ShaderPPBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: prosper::ShaderBaseImageProcessing(context,identifier,vsShader,fsShader)
 {}
-ShaderPPBase::ShaderPPBase(prosper::Context &context,const std::string &identifier,const std::string &fsShader)
+ShaderPPBase::ShaderPPBase(prosper::IPrContext &context,const std::string &identifier,const std::string &fsShader)
 	: prosper::ShaderBaseImageProcessing(context,identifier,fsShader)
 {}
 

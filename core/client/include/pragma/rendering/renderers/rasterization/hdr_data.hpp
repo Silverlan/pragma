@@ -23,15 +23,15 @@ class Scene;
 namespace prosper
 {
 	class Texture;
-	class CommandBuffer;
-	class PrimaryCommandBuffer;
-	class RenderPass;
+	class ICommandBuffer;
+	class IPrimaryCommandBuffer;
+	class IRenderPass;
 	class RenderTarget;
 	class BlurSet;
-	class DescriptorSetGroup;
+	class IDescriptorSetGroup;
 	class Shader;
-	class Buffer;
-	class Fence;
+	class IBuffer;
+	class IFence;
 };
 namespace pragma::rendering
 {
@@ -119,7 +119,7 @@ namespace pragma::rendering
 			util::WeakHandle<prosper::Shader> m_shaderCalcColor = {};
 			std::weak_ptr<prosper::Texture> m_exposureColorSource = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_calcImgColorCmdBuffer = nullptr;
-			std::shared_ptr<prosper::Fence> m_calcImgColorFence = nullptr;
+			std::shared_ptr<prosper::IFence> m_calcImgColorFence = nullptr;
 			bool m_bWaitingForResult = false;
 			uint32_t m_cmdBufferQueueFamilyIndex = 0u;
 		} m_exposure;

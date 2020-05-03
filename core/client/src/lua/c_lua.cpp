@@ -294,7 +294,8 @@ void CGame::RegisterLua()
 
 		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
 		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},
-		{"TEXTURE_LOAD_FLAG_BIT_RELOAD",umath::to_integral(TextureLoadFlags::Reload)}
+		{"TEXTURE_LOAD_FLAG_BIT_RELOAD",umath::to_integral(TextureLoadFlags::Reload)},
+		{"TEXTURE_LOAD_FLAG_BIT_DONT_CACHE",umath::to_integral(TextureLoadFlags::DontCache)}
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");

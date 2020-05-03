@@ -61,7 +61,6 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		auto hRect = CreateChild<WITexturedRect>();
 		auto &r = *hRect.get<WITexturedRect>();
 
-		auto &dev = context.GetDevice();
 		auto extents = img.GetExtents(mipmap);
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.width = extents.width;

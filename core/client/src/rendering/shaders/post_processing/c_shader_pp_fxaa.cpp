@@ -24,7 +24,7 @@ decltype(ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE) ShaderPPFXAA::DESCRIPTOR_SET_TEXT
 		}
 	}
 };
-ShaderPPFXAA::ShaderPPFXAA(prosper::Context &context,const std::string &identifier)
+ShaderPPFXAA::ShaderPPFXAA(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPPBase(context,identifier,"screen/fxaa/fs_pp_fxaa")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

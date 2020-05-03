@@ -18,7 +18,7 @@ using namespace pragma;
 decltype(ShaderParticlePolyboard::VERTEX_BINDING_VERTEX) ShaderParticlePolyboard::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
 decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
 decltype(ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR) ShaderParticlePolyboard::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32A32_SFloat};
-ShaderParticlePolyboard::ShaderParticlePolyboard(prosper::Context &context,const std::string &identifier)
+ShaderParticlePolyboard::ShaderParticlePolyboard(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/beam/vs_particle_polyboard","particles/beam/fs_particle_polyboard","particles/beam/gs_particle_polyboard")
 {
 	SetBaseShader<ShaderParticle>();

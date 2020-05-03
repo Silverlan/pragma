@@ -39,8 +39,8 @@ namespace pragma
 		};
 #pragma pack(pop)
 	protected:
-		ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader);
-		ShaderCubemap(prosper::Context &context,const std::string &identifier,const std::string &fragmentShader);
+		ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &vertexShader,const std::string &fragmentShader);
+		ShaderCubemap(prosper::IPrContext &context,const std::string &identifier,const std::string &fragmentShader);
 		std::shared_ptr<prosper::IBuffer> CreateCubeMesh(uint32_t &outNumVerts) const;
 		std::shared_ptr<prosper::IImage> CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags=prosper::util::ImageCreateInfo::Flags::None) const;
 		std::shared_ptr<prosper::RenderTarget> CreateCubeMapRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags=prosper::util::ImageCreateInfo::Flags::None) const;

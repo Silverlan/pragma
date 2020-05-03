@@ -17,7 +17,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::Context &context,const std::string &identifier)
+ShaderBRDFConvolution::ShaderBRDFConvolution(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderBaseImageProcessing{context,identifier,"screen/fs_brdf_convolution.gls"}
 {}
 void ShaderBRDFConvolution::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)

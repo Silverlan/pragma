@@ -19,6 +19,7 @@
 #include "pragma/localization.h"
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
+#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
@@ -90,6 +91,18 @@ void WIMainMenuNewGame::Initialize()
 	}));
 
 	InitializeGameSettings();
+	EnableThinking();
+}
+
+void WIMainMenuNewGame::Think()
+{
+	WIMainMenuBase::Think();
+	DisableThinking();
+
+	// We'll delay loading the map list until actually needed,
+	// since it requires the archive library to be fully initialized,
+	// which can take some time.
+	ReloadMapList();
 }
 
 void WIMainMenuNewGame::InitializeOptionsList(WIOptionsList *pList)
@@ -122,7 +135,7 @@ void WIMainMenuNewGame::ReloadMapList()
 
 	if(c_engine->GetConVarBool("sh_mount_external_game_resources"))
 	{
-		auto dllHandle = c_engine->GetClientState()->LoadLibraryModule("mount_external/pr_mount_external");
+		auto dllHandle = util::initialize_external_archive_manager(client);
 		if(dllHandle)
 		{
 			auto *fFindFiles = dllHandle->FindSymbolAddress<void(*)(const std::string&,std::vector<std::string>*,std::vector<std::string>*)>("find_files");
@@ -185,7 +198,7 @@ void WIMainMenuNewGame::ReloadMapList()
 		}
 		pMap->AddOption(displayName,fName);
 	}
-	pMap->SizeToContents();
+	//pMap->SizeToContents();
 	//
 }
 
@@ -201,7 +214,7 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	// pMap->SetEditable(true);
 	pMap->SetName("map");
 	m_hMapList = pMap->GetHandle();
-	ReloadMapList();
+	
 	auto &resourceWatcher = client->GetResourceWatcher();
 	if(m_cbMapListReload.IsValid())
 		m_cbMapListReload.Remove();

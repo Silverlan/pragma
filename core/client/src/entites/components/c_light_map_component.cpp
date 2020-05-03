@@ -91,11 +91,10 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 
 std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers)
 {
-	auto &dev = c_engine->GetDevice();
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit; // Transfer flags are required for mapping GPUBulk buffers
-	auto alignment = prosper::util::calculate_buffer_alignment(dev,bufCreateInfo.usageFlags);
+	auto alignment = c_engine->GetBufferAlignment(bufCreateInfo.usageFlags);
 	auto requiredBufferSize = 0ull;
 
 	// Collect all meshes that have lightmap uv coordinates

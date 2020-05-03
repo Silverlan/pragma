@@ -57,8 +57,8 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderPrepassBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
-		ShaderPrepassBase(prosper::Context &context,const std::string &identifier);
+		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
+		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier);
 
 		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
 		bool BindClipPlane(const Vector4 &clipPlane);
@@ -92,7 +92,7 @@ namespace pragma
 
 		static prosper::Format RENDER_PASS_NORMAL_FORMAT;
 
-		ShaderPrepass(prosper::Context &context,const std::string &identifier);
+		ShaderPrepass(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

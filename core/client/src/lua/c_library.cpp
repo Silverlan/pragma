@@ -27,6 +27,7 @@
 #include "pragma/ai/c_lai.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -918,9 +919,46 @@ void CGame::RegisterLuaLibraries()
 			auto *nw = c_engine->GetNetworkState(l);
 			Lua::PushBool(l,is_asset_loaded(*nw,name,type));
 			return 1;
+		})},
+		{"import_texture",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &texImportInfo = Lua::Check<::pragma::asset::TextureImportInfo>(l,2);
+			std::string outputPath = Lua::CheckString(l,3);
+			auto result = false;
+			std::string errMsg;
+			if(Lua::IsString(l,1))
+			{
+				std::string name = Lua::CheckString(l,1);
+				result = pragma::asset::import_texture(name,texImportInfo,outputPath,errMsg);
+			}
+			else if(Lua::IsFile(l,1))
+			{
+				auto f = Lua::CheckFile(l,1);
+				result = pragma::asset::import_texture(f->GetHandle(),texImportInfo,outputPath,errMsg);
+			}
+			else
+			{
+				auto &img = Lua::Check<prosper::IImage>(l,1);
+				result = pragma::asset::import_texture(img,texImportInfo,outputPath,errMsg);
+			}
+			Lua::PushBool(l,result);
+			if(result == false)
+			{
+				Lua::PushString(l,errMsg);
+				return 2;
+			}
+			return 1;
 		})}
 	});
+
 	Lua::asset::register_library(GetLuaInterface(),false);
+
+	auto defTexImportInfo = luabind::class_<pragma::asset::TextureImportInfo>("TextureImportInfo");
+	defTexImportInfo.def(luabind::constructor<>());
+	defTexImportInfo.def_readwrite("srgb",&pragma::asset::TextureImportInfo::srgb);
+	defTexImportInfo.def_readwrite("normalMap",&pragma::asset::TextureImportInfo::normalMap);
+	auto &modAsset = GetLuaInterface().RegisterLibrary("asset");
+	modAsset[defTexImportInfo];
+
 	Lua::RegisterLibraryEnums(GetLuaState(),"asset",{
 		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
 		{"TEXTURE_LOAD_FLAG_LOAD_INSTANTLY_BIT",umath::to_integral(TextureLoadFlags::LoadInstantly)},

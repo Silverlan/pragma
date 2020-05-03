@@ -28,10 +28,10 @@ decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {
 		}
 	}
 };
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::Context &context,const std::string &identifier,const std::string &fsShader)
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier,const std::string &fsShader)
 	: ShaderGraphics(context,identifier,"screen/vs_screen_uv",fsShader)
 {}
-ShaderDepthToRGB::ShaderDepthToRGB(prosper::Context &context,const std::string &identifier)
+ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDepthToRGB(context,identifier,"debug/fs_depth_to_rgb")
 {}
 
@@ -68,7 +68,7 @@ uint32_t ShaderDepthToRGB::GetPushConstantSize() const {return sizeof(PushConsta
 
 //////////////////////
 
-ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::Context &context,const std::string &identifier)
+ShaderCubeDepthToRGB::ShaderCubeDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDepthToRGB(context,identifier,"debug/fs_cube_depth_to_rgb")
 {}
 
@@ -83,7 +83,7 @@ uint32_t ShaderCubeDepthToRGB::GetPushConstantSize() const {return sizeof(PushCo
 
 //////////////////////
 
-ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::Context &context,const std::string &identifier)
+ShaderCSMDepthToRGB::ShaderCSMDepthToRGB(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDepthToRGB(context,identifier,"debug/fs_csm_depth_to_rgb")
 {}
 

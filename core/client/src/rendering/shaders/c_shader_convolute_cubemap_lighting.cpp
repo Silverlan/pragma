@@ -25,7 +25,7 @@ decltype(ShaderConvoluteCubemapLighting::DESCRIPTOR_SET_CUBEMAP_TEXTURE) ShaderC
 		}
 	}
 };
-ShaderConvoluteCubemapLighting::ShaderConvoluteCubemapLighting(prosper::Context &context,const std::string &identifier)
+ShaderConvoluteCubemapLighting::ShaderConvoluteCubemapLighting(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderCubemap{context,identifier,"screen/fs_convolute_cubemap_lighting"}
 {}
 

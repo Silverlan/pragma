@@ -16,7 +16,7 @@ namespace pragma
 		: public ShaderWaterSurfaceSumEdges
 	{
 	public:
-		ShaderWaterSurfaceSolveEdges(prosper::Context &context,const std::string &identifier);
+		ShaderWaterSurfaceSolveEdges(prosper::IPrContext &context,const std::string &identifier);
 	};
 };
 

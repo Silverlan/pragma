@@ -31,11 +31,11 @@ decltype(ShaderShadow::VERTEX_BINDING_VERTEX) ShaderShadow::VERTEX_BINDING_VERTE
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
-ShaderShadow::ShaderShadow(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderEntity(context,identifier,vsShader,fsShader)
 {}
 
-ShaderShadow::ShaderShadow(prosper::Context &context,const std::string &identifier)
+ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow")
 {}
 bool ShaderShadow::BindDepthMatrix(const Mat4 &depthMVP)
@@ -120,7 +120,7 @@ void ShaderShadow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 
 //////////////////
 
-ShaderShadowSpot::ShaderShadowSpot(prosper::Context &context,const std::string &identifier)
+ShaderShadowSpot::ShaderShadowSpot(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow_spot")
 {
 	SetBaseShader<ShaderShadow>();
@@ -128,7 +128,7 @@ ShaderShadowSpot::ShaderShadowSpot(prosper::Context &context,const std::string &
 
 //////////////////
 
-ShaderShadowCSM::ShaderShadowCSM(prosper::Context &context,const std::string &identifier)
+ShaderShadowCSM::ShaderShadowCSM(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderShadow(context,identifier,"shadow/vs_shadow_csm","")
 {
 	SetBaseShader<ShaderShadow>();

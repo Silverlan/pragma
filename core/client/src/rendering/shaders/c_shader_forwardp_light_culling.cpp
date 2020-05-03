@@ -50,7 +50,7 @@ decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA) ShaderForwardPLightC
 		}
 	}
 };
-ShaderForwardPLightCulling::ShaderForwardPLightCulling(prosper::Context &context,const std::string &identifier)
+ShaderForwardPLightCulling::ShaderForwardPLightCulling(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"compute/cs_forwardp_light_culling")
 {}
 

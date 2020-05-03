@@ -39,12 +39,12 @@ namespace pragma
 			Count
 		};
 
-		ShaderDebug(prosper::Context &context,const std::string &identifier);
+		ShaderDebug(prosper::IPrContext &context,const std::string &identifier);
 
 		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
 		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 	protected:
-		ShaderDebug(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
+		ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		bool Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
@@ -67,7 +67,7 @@ namespace pragma
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
-		ShaderDebugTexture(prosper::Context &context,const std::string &identifier);
+		ShaderDebugTexture(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -82,7 +82,7 @@ namespace pragma
 		: public ShaderDebug
 	{
 	public:
-		ShaderDebugVertexColor(prosper::Context &context,const std::string &identifier);
+		ShaderDebugVertexColor(prosper::IPrContext &context,const std::string &identifier);
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_COLOR;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;

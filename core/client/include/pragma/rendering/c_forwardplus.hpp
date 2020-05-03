@@ -14,7 +14,7 @@
 
 namespace prosper
 {
-	class Context;
+	class IPrContext;
 	class IBuffer;
 	class Texture;
 	class ICommandBuffer;
@@ -34,7 +34,7 @@ namespace pragma
 		{
 		public:
 			ForwardPlusInstance(RasterizationRenderer &rasterizer);
-			bool Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture);
+			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture);
 
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
 			uint32_t GetTileCount() const;

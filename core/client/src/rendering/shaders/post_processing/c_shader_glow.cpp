@@ -29,7 +29,7 @@ decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIA
 	}
 };
 decltype(ShaderGlow::RENDER_PASS_FORMAT) ShaderGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
-ShaderGlow::ShaderGlow(prosper::Context &context,const std::string &identifier)
+ShaderGlow::ShaderGlow(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_glow","world/fs_glow")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

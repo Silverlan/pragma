@@ -75,7 +75,7 @@ public:
 		CreateInfo(uint32_t width,uint32_t height);
 		uint32_t width;
 		uint32_t height;
-		Anvil::SampleCountFlagBits sampleCount;
+		prosper::SampleCountFlags sampleCount;
 	};
 
 	static std::shared_ptr<Scene> Create(const CreateInfo &createInfo,Scene *optParent=nullptr);

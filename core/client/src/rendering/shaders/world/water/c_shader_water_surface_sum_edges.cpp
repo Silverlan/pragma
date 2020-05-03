@@ -25,10 +25,10 @@ decltype(ShaderWaterSurfaceSumEdges::DESCRIPTOR_SET_WATER) ShaderWaterSurfaceSum
 	}
 };
 decltype(ShaderWaterSurfaceSumEdges::DESCRIPTOR_SET_SURFACE_INFO) ShaderWaterSurfaceSumEdges::DESCRIPTOR_SET_SURFACE_INFO = {&ShaderWaterSurface::DESCRIPTOR_SET_SURFACE_INFO};
-ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::Context &context,const std::string &identifier,const std::string &csShader)
+ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::IPrContext &context,const std::string &identifier,const std::string &csShader)
 	: prosper::ShaderCompute(context,identifier,csShader)
 {}
-ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::Context &context,const std::string &identifier)
+ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurfaceSumEdges(context,identifier,"compute/water/cs_water_surface_sum_edges")
 {}
 void ShaderWaterSurfaceSumEdges::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

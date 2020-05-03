@@ -26,7 +26,7 @@ decltype(ShaderForwardPLightIndexing::DESCRIPTOR_SET_VISIBLE_LIGHT) ShaderForwar
 	}
 };
 
-ShaderForwardPLightIndexing::ShaderForwardPLightIndexing(prosper::Context &context,const std::string &identifier)
+ShaderForwardPLightIndexing::ShaderForwardPLightIndexing(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"compute/cs_forwardp_light_indexing")
 {}
 

@@ -37,7 +37,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderSSAO(prosper::Context &context,const std::string &identifier);
+		ShaderSSAO(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(const Scene &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

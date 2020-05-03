@@ -61,7 +61,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderRayTracing(prosper::Context &context,const std::string &identifier);
+		ShaderRayTracing(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(
 			const PushConstants &pushConstants,
 			prosper::IDescriptorSet &descSetOutputImage,prosper::IDescriptorSet &descSetGameScene,

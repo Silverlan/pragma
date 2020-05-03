@@ -32,7 +32,7 @@ decltype(ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL) ShaderTexturedA
 		}
 	}
 };
-ShaderTexturedAlphaTransition::ShaderTexturedAlphaTransition(prosper::Context &context,const std::string &identifier)
+ShaderTexturedAlphaTransition::ShaderTexturedAlphaTransition(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase(context,identifier,"world/vs_textured_alpha_transition","world/fs_textured_alpha_transition")
 {
 	// SetBaseShader<ShaderTextured3DBase>();

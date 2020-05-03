@@ -28,7 +28,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderComputeIrradianceMapRoughness(prosper::Context &context,const std::string &identifier);
+		ShaderComputeIrradianceMapRoughness(prosper::IPrContext &context,const std::string &identifier);
 		std::shared_ptr<prosper::Texture> ComputeRoughness(prosper::Texture &cubemap,uint32_t resolution);
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

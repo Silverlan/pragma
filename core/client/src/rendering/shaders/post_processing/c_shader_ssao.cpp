@@ -50,7 +50,7 @@ decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SA
 	}
 };
 decltype(ShaderSSAO::DESCRIPTOR_SET_CAMERA) ShaderSSAO::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
-ShaderSSAO::ShaderSSAO(prosper::Context &context,const std::string &identifier)
+ShaderSSAO::ShaderSSAO(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_ssao")
 {
 	// Generate random sample kernel

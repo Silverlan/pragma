@@ -24,10 +24,8 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-bool pragma::rendering::Prepass::Initialize(prosper::Context &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
+bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
 {
-	auto &dev = context.GetDevice();
-
 	m_shaderPrepass = context.GetShader("prepass");
 	m_shaderPrepassDepth = context.GetShader("prepass_depth");
 

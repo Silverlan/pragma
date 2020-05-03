@@ -19,12 +19,12 @@ using namespace pragma;
 decltype(ShaderDebug::VERTEX_BINDING_VERTEX) ShaderDebug::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
 decltype(ShaderDebug::VERTEX_ATTRIBUTE_POSITION) ShaderDebug::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32_SFloat};
 
-ShaderDebug::ShaderDebug(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
+ShaderDebug::ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-ShaderDebug::ShaderDebug(prosper::Context &context,const std::string &identifier)
+ShaderDebug::ShaderDebug(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDebug(context,identifier,"debug/vs_debug","debug/fs_debug")
 {}
 
@@ -110,7 +110,7 @@ decltype(ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE) ShaderDebugTexture::DESCRIP
 		}
 	}
 };
-ShaderDebugTexture::ShaderDebugTexture(prosper::Context &context,const std::string &identifier)
+ShaderDebugTexture::ShaderDebugTexture(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderScene(context,identifier,"debug/vs_debug_uv","debug/fs_debug_texture")
 {}
 
@@ -137,7 +137,7 @@ bool ShaderDebugTexture::Draw(prosper::IDescriptorSet &descSetTexture,const Shad
 decltype(ShaderDebugVertexColor::VERTEX_BINDING_COLOR) ShaderDebugVertexColor::VERTEX_BINDING_COLOR = {prosper::VertexInputRate::Vertex};
 decltype(ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR) ShaderDebugVertexColor::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_COLOR,prosper::Format::R32G32B32A32_SFloat};
 
-ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::Context &context,const std::string &identifier)
+ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderDebug(context,identifier,"debug/vs_debug_vertex_color","debug/fs_debug")
 {
 	SetBaseShader<ShaderDebug>();

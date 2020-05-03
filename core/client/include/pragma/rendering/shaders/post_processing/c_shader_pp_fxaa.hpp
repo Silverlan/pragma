@@ -31,7 +31,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderPPFXAA(prosper::Context &context,const std::string &identifier);
+		ShaderPPFXAA(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,const PushConstants &pushConstants=PushConstants{});
 	protected:
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

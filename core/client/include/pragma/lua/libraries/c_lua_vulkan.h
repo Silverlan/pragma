@@ -63,8 +63,8 @@ namespace Lua
 		using Sampler = prosper::ISampler;
 		using Framebuffer = prosper::IFramebuffer;
 		using RenderPass = prosper::IRenderPass;
-		using Event = Anvil::Event;
-		using Fence = Anvil::Fence;
+		using Event = prosper::IEvent;
+		using Fence = prosper::IFence;
 		using Semaphore = Anvil::Semaphore;
 		using Memory = Anvil::MemoryBlock;
 		using CommandBuffer = prosper::ICommandBuffer;

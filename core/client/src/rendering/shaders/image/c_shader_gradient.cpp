@@ -35,7 +35,7 @@ static bool get_line_line_intersection(const Vector2 &p0,const Vector2 &p1,const
 }
 
 static ShaderGradient *s_shaderGradient = nullptr;
-ShaderGradient::ShaderGradient(prosper::Context &context,const std::string &identifier)
+ShaderGradient::ShaderGradient(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_gradient")
 {
 	s_shaderGradient = this;
@@ -60,7 +60,7 @@ bool ShaderGradient::Draw(const PushConstants &pushConstants)
 
 /////////////////////////
 
-bool pragma::util::record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes)
+bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes)
 {
 	if(s_shaderGradient == nullptr)
 		return false;

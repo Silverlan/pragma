@@ -12,7 +12,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-Shader3DBase::Shader3DBase(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
+Shader3DBase::Shader3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderGraphics(context,identifier,vsShader,fsShader,gsShader)
 {}
 void Shader3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

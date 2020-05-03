@@ -17,7 +17,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-ShaderSSAOBlur::ShaderSSAOBlur(prosper::Context &context,const std::string &identifier)
+ShaderSSAOBlur::ShaderSSAOBlur(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_ssao_blur")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

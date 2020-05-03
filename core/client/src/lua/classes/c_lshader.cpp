@@ -8,10 +8,12 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <misc/compute_pipeline_create_info.h>
+#include <wrappers/shader_module.h>
 
 void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,Anvil::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
@@ -65,6 +67,8 @@ void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 				else
 					Lua::Push<pragma::ShaderScene*>(l,static_cast<pragma::ShaderScene*>(&shader));
 			}
+			else if(dynamic_cast<pragma::ShaderComposeRMA*>(&shader))
+				Lua::Push<pragma::ShaderComposeRMA*>(l,static_cast<pragma::ShaderComposeRMA*>(&shader));
 			else
 				Lua::Push<prosper::ShaderGraphics*>(l,static_cast<prosper::ShaderGraphics*>(&shader));
 		}

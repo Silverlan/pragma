@@ -43,9 +43,9 @@ static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 	}
 	return dllHandle;
 }
-void util::initialize_external_archive_manager(NetworkState *nw)
+std::shared_ptr<util::Library> util::initialize_external_archive_manager(NetworkState *nw)
 {
-	load_module(nw);
+	return load_module(nw);
 }
 void util::close_external_archive_manager()
 {
@@ -137,37 +137,6 @@ bool util::port_hl2_particle(NetworkState *nw,const std::string &path)
 	return ptrLoadParticle(*nw,path);
 }
 
-void util::impl::init_custom_mount_directories(NetworkState &nw)
-{
-	static auto g_customMountDirsInitialized = false;
-	if(g_customMountDirsInitialized == false)
-	{
-		g_customMountDirsInitialized = true;
-		static auto *ptrAddGameMountPath = reinterpret_cast<void(*)(const std::string&)>(util::impl::get_module_func(&nw,"add_source_engine_game_mount_path"));
-		static auto *ptrMountWorkshopAddons = reinterpret_cast<void(*)(uint64_t)>(util::impl::get_module_func(&nw,"mount_workshop_addons"));
-		auto fMountList = FileManager::OpenFile("cfg/mount_source_game_paths.txt","r");
-		if(fMountList)
-		{
-			auto strList = fMountList->ReadString();
-			std::vector<std::string> list {};
-			ustring::explode(strList,"\n",list);
-			for(auto &strPath : list)
-			{
-				ustring::remove_whitespace(strPath);
-				util::Path path {strPath};
-				if(ustring::compare(path.GetFront(),"workshop",false))
-				{
-					auto appId = util::to_int(path.GetBack());
-					if(ptrMountWorkshopAddons)
-						ptrMountWorkshopAddons(appId);
-					continue;
-				}
-				if(ptrAddGameMountPath)
-					ptrAddGameMountPath(strPath);
-			}
-		}
-	}
-}
 bool util::port_source2_model(NetworkState *nw,const std::string &path,std::string mdlName)
 {
 	std::string ext;
@@ -176,7 +145,6 @@ bool util::port_source2_model(NetworkState *nw,const std::string &path,std::stri
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_source2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	impl::init_custom_mount_directories(*nw);
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
 	return port_model(nw,path,mdlName,"source2",ptrConvertModel);
 }
@@ -189,7 +157,6 @@ bool util::port_hl2_model(NetworkState *nw,const std::string &path,std::string m
 	static auto *ptrConvertModel = reinterpret_cast<bool(*)(NetworkState*nw,const std::function<std::shared_ptr<Model>()>&,const std::function<bool(const std::shared_ptr<Model>&,const std::string&,const std::string&)>&,const std::string&,const std::string&,std::ostream*)>(impl::get_module_func(nw,"convert_hl2_model"));
 	if(ptrConvertModel == nullptr)
 		return false;
-	impl::init_custom_mount_directories(*nw);
 	auto lockWatcher = engine->ScopeLockResourceWatchers();
 	return port_model(nw,path,mdlName,"HL2",ptrConvertModel);
 }

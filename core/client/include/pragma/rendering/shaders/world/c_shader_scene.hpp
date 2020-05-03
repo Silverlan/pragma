@@ -81,7 +81,7 @@ namespace pragma
 		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView);
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings);
 	protected:
-		ShaderScene(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		prosper::SampleCountFlags GetSampleCount(uint32_t pipelineIdx) const;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
@@ -124,7 +124,7 @@ namespace pragma
 		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources);
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView);
 	protected:
-		ShaderSceneLit(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual uint32_t GetLightDescriptorSetIndex() const=0;
 	};
 
@@ -187,7 +187,7 @@ namespace pragma
 		virtual void EndDraw() override;
 		CBaseEntity *GetBoundEntity();
 	protected:
-		ShaderEntity(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		bool Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer);
 		bool Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
 

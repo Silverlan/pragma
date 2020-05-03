@@ -39,7 +39,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderGradient(prosper::Context &context,const std::string &identifier);
+		ShaderGradient(prosper::IPrContext &context,const std::string &identifier);
 		virtual ~ShaderGradient() override;
 		bool Draw(const PushConstants &pushConstants);
 	protected:
@@ -48,7 +48,7 @@ namespace pragma
 
 	namespace util
 	{
-		DLLCLIENT bool record_draw_gradient(prosper::Context &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes);
+		DLLCLIENT bool record_draw_gradient(prosper::IPrContext &context,const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,prosper::RenderTarget &rt,const Vector2 &dir,const std::vector<ShaderGradient::Node> &nodes);
 	};
 };
 

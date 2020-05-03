@@ -43,8 +43,8 @@ namespace pragma
 			Count
 		};
 
-		ShaderPBR(prosper::Context &context,const std::string &identifier);
-		ShaderPBR(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		ShaderPBR(prosper::IPrContext &context,const std::string &identifier);
+		ShaderPBR(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView) override;
@@ -86,7 +86,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderPBRBlend(prosper::Context &context,const std::string &identifier);
+		ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

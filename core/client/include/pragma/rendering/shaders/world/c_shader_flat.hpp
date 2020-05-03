@@ -25,7 +25,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		ShaderFlat(prosper::Context &context,const std::string &identifier);
+		ShaderFlat(prosper::IPrContext &context,const std::string &identifier);
 
 		bool BindScene(const Scene &scene,bool bView);
 		bool BindEntity(CBaseEntity &ent);

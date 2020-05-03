@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
+#include "pragma/game/game_resources.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 
@@ -427,7 +428,7 @@ int Lua::file::GetFlags(lua_State *l)
 int Lua::file::open_external_asset_file(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);
-	auto dllHandle = engine->GetNetworkState(l)->LoadLibraryModule("mount_external/pr_mount_external");
+	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return 0;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&)>("open_archive_file");
@@ -446,7 +447,7 @@ int Lua::file::open_external_asset_file(lua_State *l)
 int32_t Lua::file::find_external_game_resource_files(lua_State *l)
 {
 	std::string path = Lua::CheckString(l,1);
-	auto dllHandle = engine->GetNetworkState(l)->LoadLibraryModule("mount_external/pr_mount_external");
+	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
 	{
 		Lua::CreateTable(l);

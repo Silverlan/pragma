@@ -13,7 +13,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-ShaderExtractDiffuseAmbientOcclusion::ShaderExtractDiffuseAmbientOcclusion(prosper::Context &context,const std::string &identifier)
+ShaderExtractDiffuseAmbientOcclusion::ShaderExtractDiffuseAmbientOcclusion(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderBaseImageProcessing{context,identifier,"util/fs_extract_diffuse_ambient_occlusion.gls"}
 {}
 

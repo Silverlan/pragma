@@ -30,7 +30,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderSkybox(prosper::Context &context,const std::string &identifier);
+		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
@@ -43,7 +43,7 @@ namespace pragma
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
-		ShaderSkybox(prosper::Context &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
+		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -56,7 +56,7 @@ namespace pragma
 		: public ShaderSkybox
 	{
 	public:
-		ShaderSkyboxEquirect(prosper::Context &context,const std::string &identifier);
+		ShaderSkyboxEquirect(prosper::IPrContext &context,const std::string &identifier);
 	};
 };
 

@@ -39,12 +39,12 @@ decltype(pragma::ShaderComposeRMA::DESCRIPTOR_SET_TEXTURE) pragma::ShaderCompose
 		}
 	}
 };
-pragma::ShaderComposeRMA::ShaderComposeRMA(prosper::Context &context,const std::string &identifier)
+pragma::ShaderComposeRMA::ShaderComposeRMA(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderBaseImageProcessing{context,identifier,"util/fs_compose_rma.gls"}
 {}
 
 std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
-	prosper::Context &context,prosper::Texture *roughnessMap,prosper::Texture *metalnessMap,prosper::Texture *aoMap,
+	prosper::IPrContext &context,prosper::Texture *roughnessMap,prosper::Texture *metalnessMap,prosper::Texture *aoMap,
 	Flags flags
 )
 {
@@ -53,7 +53,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
-	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
 	auto fGetWhiteTex = [&context]() -> prosper::Texture* {
 		TextureManager::LoadInfo loadInfo {};
@@ -113,7 +113,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(
 
 	return texRMA->GetImage().shared_from_this();
 }
-bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::Context &context,const std::string &rmaInputPath,prosper::IImage &aoImg,const std::string *optRmaOutputPath)
+bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context,const std::string &rmaInputPath,prosper::IImage &aoImg,const std::string *optRmaOutputPath)
 {
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
 	std::shared_ptr<void> rmaTexInfo;
@@ -147,7 +147,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::Context &context,
 	// TODO: RMA should overwrite the existing one
 	return c_game->SaveImage(*newRMA,"addons/converted/" +matName,imgWriteInfo);
 }
-bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::Context &context,const std::string &rmaInputPath,uimg::ImageBuffer &imgBuffer,const std::string *optRmaOutputPath)
+bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &context,const std::string &rmaInputPath,uimg::ImageBuffer &imgBuffer,const std::string *optRmaOutputPath)
 {
 	auto aoImg = context.CreateImage(imgBuffer);
 	return InsertAmbientOcclusion(context,rmaInputPath,*aoImg,optRmaOutputPath);

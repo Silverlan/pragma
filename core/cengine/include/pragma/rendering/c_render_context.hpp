@@ -9,7 +9,7 @@
 #define __C_RENDER_CONTEXT_HPP__
 
 #include "pragma/c_enginedefinitions.h"
-#include <prosper_context.hpp>
+#include <vk_context.hpp>
 #include <iglfw/glfw_window.h>
 #include <memory>
 #include <optional>
@@ -21,7 +21,7 @@
 namespace pragma
 {
 	class DLLCENGINE RenderContext
-		: public prosper::Context
+		: public prosper::VlkContext
 	{
 	public:
 		RenderContext();
@@ -34,7 +34,7 @@ namespace pragma
 		void SetMonitor(GLFW::Monitor &monitor);
 		void SetPresentMode(prosper::PresentModeKHR presentMode);
 		float GetAspectRatio() const;
-		using prosper::Context::DrawFrame;
+		using prosper::IPrContext::DrawFrame;
 	protected:
 		void UpdateWindow();
 		virtual void DrawFrame() override;

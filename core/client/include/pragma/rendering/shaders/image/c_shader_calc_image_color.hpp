@@ -27,7 +27,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_COLOR;
 
-		ShaderCalcImageColor(prosper::Context &context,const std::string &identifier);
+		ShaderCalcImageColor(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

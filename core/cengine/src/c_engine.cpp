@@ -124,6 +124,8 @@ bool CEngine::IsGPUProfilingEnabled() const
 	return cvGPUProfiling->GetBool();
 }
 
+#include <wrappers/device.h>
+#include <wrappers/queue.h>
 void CEngine::DumpDebugInformation(ZIPFile &zip) const
 {
 	Engine::DumpDebugInformation(zip);
@@ -553,8 +555,8 @@ bool CEngine::Initialize(int argc,char *argv[])
 	pragma::RenderContext::Initialize(contextCreateInfo);
 
 	auto &shaderManager = GetShaderManager();
-	shaderManager.RegisterShader("clear_color",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
-	shaderManager.RegisterShader("gradient",[](prosper::Context &context,const std::string &identifier) {return new pragma::ShaderGradient(context,identifier);});
+	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
+	shaderManager.RegisterShader("gradient",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGradient(context,identifier);});
 
 	// Initialize Client Instance
 	auto matManager = std::make_shared<CMaterialManager>(*this);
@@ -1223,7 +1225,7 @@ void CEngine::UseFullbrightShader(bool b) {umath::set_flag(m_stateFlags,StateFla
 
 void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 {
-	prosper::Context::OnResolutionChanged(width,height);
+	prosper::IPrContext::OnResolutionChanged(width,height);
 	if(m_renderResolution.has_value() == false)
 		OnRenderResolutionChanged(width,height);
 }

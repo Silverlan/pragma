@@ -25,7 +25,7 @@ namespace pragma
 			WaterPositions
 		};
 
-		ShaderWaterSplash(prosper::Context &context,const std::string &identifier);
+		ShaderWaterSplash(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descParticles,const PhysWaterSurfaceSimulator::SplashInfo &info);
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

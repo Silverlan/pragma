@@ -27,7 +27,7 @@ decltype(ShaderCalcImageColor::DESCRIPTOR_SET_COLOR) ShaderCalcImageColor::DESCR
 		}
 	}
 };
-ShaderCalcImageColor::ShaderCalcImageColor(prosper::Context &context,const std::string &identifier)
+ShaderCalcImageColor::ShaderCalcImageColor(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderCompute(context,identifier,"compute/cs_calc_image_color")
 {}
 

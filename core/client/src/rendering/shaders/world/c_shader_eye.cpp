@@ -18,7 +18,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-ShaderEye::ShaderEye(prosper::Context &context,const std::string &identifier)
+ShaderEye::ShaderEye(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/eye/vs_eye","world/eye/fs_eye"}
 {}
 bool ShaderEye::Draw(CModelSubMesh &mesh)

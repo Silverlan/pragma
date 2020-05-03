@@ -28,7 +28,7 @@ decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATER
 		}
 	}
 };
-ShaderUnlit::ShaderUnlit(prosper::Context &context,const std::string &identifier)
+ShaderUnlit::ShaderUnlit(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTextured3DBase{context,identifier,"world/vs_textured","world/fs_unlit"}
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));

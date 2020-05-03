@@ -17,7 +17,7 @@ namespace pragma
 		: public ShaderParticle2DBase
 	{
 	public:
-		ShaderParticle(prosper::Context &context,const std::string &identifier);
+		ShaderParticle(prosper::IPrContext &context,const std::string &identifier);
 	};
 
 	class DLLCLIENT ShaderParticleRotational
@@ -33,7 +33,7 @@ namespace pragma
 		};
 
 		bool BindWorldRotationBuffer(prosper::IBuffer &buffer);
-		ShaderParticleRotational(prosper::Context &context,const std::string &identifier);
+		ShaderParticleRotational(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,Vector3 &up,Vector3 &right,

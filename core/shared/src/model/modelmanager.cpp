@@ -93,7 +93,7 @@ const Model *pragma::asset::ModelManager::FindCachedModel(const std::string &mdl
 }
 Model *pragma::asset::ModelManager::FindCachedModel(const std::string &mdlName)
 {
-	auto normalizedName = GetNormalizedModelName(mdlName);
+	auto normalizedName = GetCacheName(mdlName);
 	auto it = m_cache.find(normalizedName);
 	return (it != m_cache.end()) ? it->second.get() : nullptr;
 }

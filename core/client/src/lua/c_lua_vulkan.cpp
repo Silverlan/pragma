@@ -26,6 +26,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_render_pass.hpp>
+#include <prosper_fence.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util_square_shape.hpp>
 #include <prosper_util_line_shape.hpp>
@@ -39,6 +40,10 @@
 #include <util_image_buffer.hpp>
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
+#include <wrappers/fence.h>
+#include <wrappers/semaphore.h>
+#include <misc/fence_create_info.h>
+#include <vk_event.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 namespace Lua
@@ -432,7 +437,7 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Event &h
 {
 	out<<"VKEvent[";
 	auto r = vk::Result::eEventReset;
-	if(hEvent.is_set())
+	if(hEvent.IsSet())
 		r = vk::Result::eEventSet;
 	out<<prosper::util::to_string(r);
 	out<<"]";
@@ -736,7 +741,7 @@ int Lua::Vulkan::create_render_target(lua_State *l)
 
 int Lua::Vulkan::create_event(lua_State *l)
 {
-	auto ev = prosper::util::unique_ptr_to_shared_ptr(Anvil::Event::create(Anvil::EventCreateInfo::create(&c_engine->GetDevice())));
+	auto ev = c_engine->CreateEvent();
 	if(ev == nullptr)
 		return 0;
 	Lua::Push(l,ev);
@@ -748,7 +753,7 @@ int Lua::Vulkan::create_fence(lua_State *l)
 	auto bCreateSignalled = false;
 	if(Lua::IsSet(l,1))
 		bCreateSignalled = Lua::CheckBool(l,1);
-	auto fence = prosper::util::unique_ptr_to_shared_ptr(Anvil::Fence::create(Anvil::FenceCreateInfo::create(&c_engine->GetDevice(),bCreateSignalled)));
+	auto fence = c_engine->CreateFence(bCreateSignalled);
 	if(fence == nullptr)
 		return 0;
 	Lua::Push(l,fence);
@@ -2927,13 +2932,13 @@ void Lua::Vulkan::VKEvent::IsValid(lua_State *l,Event &hEvent)
 }
 void Lua::Vulkan::VKEvent::GetStatus(lua_State *l,Event &hEvent)
 {
-	auto b = hEvent.is_set();
+	auto b = hEvent.IsSet();
 	auto r = b ? vk::Result::eEventSet : vk::Result::eEventReset;
 	Lua::PushInt(l,umath::to_integral(r));
 }
 void Lua::Vulkan::VKEvent::IsSet(lua_State *l,Event &hEvent)
 {
-	Lua::PushBool(l,hEvent.is_set());
+	Lua::PushBool(l,hEvent.IsSet());
 }
 
 /////////////////////////////////

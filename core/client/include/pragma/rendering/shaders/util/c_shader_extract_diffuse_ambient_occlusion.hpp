@@ -18,7 +18,7 @@ namespace pragma
 		: public prosper::ShaderBaseImageProcessing
 	{
 	public:
-		ShaderExtractDiffuseAmbientOcclusion(prosper::Context &context,const std::string &identifier);
+		ShaderExtractDiffuseAmbientOcclusion(prosper::IPrContext &context,const std::string &identifier);
 	};
 };
 

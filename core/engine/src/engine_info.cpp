@@ -64,6 +64,12 @@ std::vector<std::string> engine_info::get_patrons()
 		"Googleygareth",
 		"Leeroy Plambeck",
 		"Roach",
+		"Artur 'atrblizzard' Tacacs",
+		"branpurn",
+		"Elektrospy",
+		"Syrr",
+		"Tanooki Jon",
+		"Xrdexst",
 		"Noah The Troll-Hunting Christian Spy",
 		"Boris \"SunRade\" Serousov",
 		"Prof. Purble",
@@ -73,7 +79,7 @@ std::vector<std::string> engine_info::get_patrons()
 		"PixMedia"
 	};
 }
-uint32_t engine_info::get_total_patron_count() {return 51;}
+uint32_t engine_info::get_total_patron_count() {return 56;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}

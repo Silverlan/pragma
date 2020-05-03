@@ -30,7 +30,7 @@ decltype(ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP) ShaderPPWater::DESCRIPTOR
 decltype(ShaderPPWater::DESCRIPTOR_SET_CAMERA) ShaderPPWater::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderPPWater::DESCRIPTOR_SET_FOG) ShaderPPWater::DESCRIPTOR_SET_FOG = {&ShaderPPFog::DESCRIPTOR_SET_FOG};
-ShaderPPWater::ShaderPPWater(prosper::Context &context,const std::string &identifier)
+ShaderPPWater::ShaderPPWater(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPPBase(context,identifier,"screen/fs_pp_water")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();

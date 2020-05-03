@@ -865,6 +865,8 @@ void Console::commands::vk_dump_memory_stats(NetworkState *state,pragma::BasePla
 	}
 	f->WriteString(ss.str());*/ // prosper TODO
 }
+#include <wrappers/device.h>
+#include <wrappers/physical_device.h>
 void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	auto &dev = c_engine->GetDevice();

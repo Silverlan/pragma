@@ -30,7 +30,7 @@ decltype(ShaderParticleBlob::DESCRIPTOR_SET_CUBEMAP) ShaderParticleBlob::DESCRIP
 		}
 	}
 };
-ShaderParticleBlob::ShaderParticleBlob(prosper::Context &context,const std::string &identifier)
+ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderParticle2DBase(context,identifier,"particles/blob/vs_particle_blob","particles/blob/fs_particle_blob")
 {
 	SetBaseShader<ShaderParticle>();

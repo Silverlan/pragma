@@ -14,6 +14,10 @@
 namespace util
 {
 	DLLNETWORK Vector3 angular_velocity_to_linear(const Vector3 &refPos,const Vector3 &angVel,const Vector3 &tgtPos);
+	DLLNETWORK float calc_fov_from_lens(umath::Millimeter sensorSize,umath::Millimeter focalLength,float aspectRatio);
+	DLLNETWORK float calc_aperture_size_from_fstop(float fstop,umath::Millimeter focalLength,bool orthographicCamera=false);
+	DLLNETWORK float calc_focal_length_from_fov(umath::Degree hfov,umath::Millimeter sensorSize);
+	DLLNETWORK float calc_fov_from_focal_length(umath::Millimeter focalLength,umath::Millimeter sensorSize);
 };
 
 #endif

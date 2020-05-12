@@ -56,6 +56,7 @@ static void register_gui(Lua::Interface &lua)
 		{"create_checkbox",Lua::gui::create_checkbox},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
+		{"get_element_under_cursor",Lua::gui::get_element_under_cursor},
 		{"get_element_at_position",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			return Lua::gui::get_element_at_position(l);
 		})},
@@ -675,10 +676,17 @@ static std::optional<std::string> find_asset_file(NetworkState &nw,const std::st
 }
 static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::asset::Type type)
 {
-	if(type == pragma::asset::Type::Texture)
+	switch(type)
+	{
+	case pragma::asset::Type::Texture:
 	{
 		auto tex = static_cast<CMaterialManager&>(nw.GetMaterialManager()).GetTextureManager().FindTexture(name,true);
 		return tex != nullptr;
+	}
+	case pragma::asset::Type::ParticleSystem:
+	{
+		return pragma::CParticleSystemComponent::IsParticleFilePrecached(name);
+	}
 	}
 	return is_loaded(nw,name,type);
 }

@@ -48,6 +48,7 @@
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include <wgui/fontmanager.h>
+#include <wgui/shaders/wishader_textured.hpp>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
@@ -234,6 +235,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		Lua::Push(l,rp);
 	}))];
 	modShader[defShaderGraphics];
+
+	auto defShaderGUITextured = luabind::class_<wgui::ShaderTextured,luabind::bases<prosper::ShaderGraphics,prosper::Shader>>("GUITextured");
+	modShader[defShaderGUITextured];
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene,luabind::bases<prosper::ShaderGraphics,prosper::Shader>>("Scene3D");
 	defShaderScene.scope[luabind::def("GetRenderPass",&Lua::Shader::Scene3D::GetRenderPass)];
@@ -472,6 +476,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	auto defShaderComputeBase = luabind::class_<pragma::LuaShaderCompute,luabind::bases<pragma::LuaShaderComputeBase,prosper::ShaderCompute,prosper::Shader,pragma::LuaShaderBase>>("BaseCompute");
 	defShaderComputeBase.def(luabind::constructor<>());
 	modShader[defShaderComputeBase];
+
+	auto defShaderGUITexturedBase = luabind::class_<pragma::LuaShaderGUITextured,luabind::bases<pragma::LuaShaderGraphicsBase,wgui::ShaderTextured,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseGUITextured");
+	defShaderGUITexturedBase.def(luabind::constructor<>());
+	modShader[defShaderGUITexturedBase];
 
 	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderPostProcessing,luabind::bases<pragma::LuaShaderGraphicsBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BasePostProcessing");
 	defShaderPostProcessingBase.def(luabind::constructor<>());

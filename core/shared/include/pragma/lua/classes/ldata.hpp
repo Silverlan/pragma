@@ -19,11 +19,27 @@ namespace Lua
 {
 	namespace DataBlock
 	{
+		DLLNETWORK void load(lua_State *l,const std::string &fileName);
+		DLLNETWORK void load(lua_State *l,VFilePtr f);
+
 		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetFloat(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetBool(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetString(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetColor(lua_State *l,ds::Block &data,const std::string &key);
+		DLLNETWORK void GetVector(lua_State *l,ds::Block &data,const std::string &key);
+		DLLNETWORK void GetVector4(lua_State *l,ds::Block &data,const std::string &key);
+
+		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val,int32_t default);
+		DLLNETWORK void GetFloat(lua_State *l,ds::Block &data,const std::string &val,float default);
+		DLLNETWORK void GetBool(lua_State *l,ds::Block &data,const std::string &val,bool default);
+		DLLNETWORK void GetString(lua_State *l,ds::Block &data,const std::string &val,const std::string &default);
+		DLLNETWORK void GetColor(lua_State *l,ds::Block &data,const std::string &key,const Color &default);
+		DLLNETWORK void GetVector(lua_State *l,ds::Block &data,const std::string &key,const Vector3 &default);
+		DLLNETWORK void GetVector4(lua_State *l,ds::Block &data,const std::string &key,const ::Vector4 &default);
+
 		DLLNETWORK void GetData(lua_State *l,ds::Block &data,const std::string &val);
+		DLLNETWORK void GetChildBlocks(lua_State *l,ds::Block &data);
 		DLLNETWORK void SetValue(lua_State *l,ds::Block &data,const std::string &type,const std::string &key,const std::string &val);
 
 		DLLNETWORK void RemoveValue(lua_State*,ds::Block &data,const std::string &key);
@@ -38,8 +54,7 @@ namespace Lua
 		DLLNETWORK void IsBool(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void IsColor(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void IsVector(lua_State *l,ds::Block &data,const std::string &key);
-		DLLNETWORK void GetColor(lua_State *l,ds::Block &data,const std::string &key);
-		DLLNETWORK void GetVector(lua_State *l,ds::Block &data,const std::string &key);
+		DLLNETWORK void IsVector4(lua_State *l,ds::Block &data,const std::string &key);
 	};
 };
 

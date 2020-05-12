@@ -90,6 +90,8 @@ void OcclusionCullingHandler::PerformCulling(
 	auto &frustumPlanes = renderer.GetFrustumPlanes();
 	for(auto *ent : entIt)
 	{
+		if(static_cast<CBaseEntity*>(ent)->IsInScene(scene) == false)
+			continue;
 		auto hPt = ent->GetComponent<pragma::CParticleSystemComponent>();
 		auto &bounds = hPt->GetRenderBounds();
 		static auto bAlwaysPass = false;

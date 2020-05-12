@@ -205,6 +205,20 @@ void LuaShaderImageProcessing::InitializeDefaultRenderPass(std::shared_ptr<prosp
 
 /////////////////
 
+LuaShaderGUITextured::LuaShaderGUITextured()
+	: TLuaShaderBase(*c_engine,"","","")
+{}
+
+void LuaShaderGUITextured::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	wgui::ShaderTextured::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void LuaShaderGUITextured::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderGUITextured::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
+void LuaShaderGUITextured::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {wgui::ShaderTextured::InitializeRenderPass(outRenderPass,pipelineIdx);}
+
+/////////////////
+
 LuaShaderCompute::LuaShaderCompute()
 	: TLuaShaderBase(*c_engine,"","")
 {}

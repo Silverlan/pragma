@@ -15,6 +15,9 @@
 
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
+	classDef.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(::Material::AlphaMode::Opaque));
+	classDef.add_static_constant("ALPHA_MODE_MASK",umath::to_integral(::Material::AlphaMode::Mask));
+	classDef.add_static_constant("ALPHA_MODE_BLEND",umath::to_integral(::Material::AlphaMode::Blend));
 	classDef.def("IsValid",&Lua::Material::IsValid);
 	classDef.def("GetShaderName",&Lua::Material::GetShaderName);
 	classDef.def("GetName",&Lua::Material::GetName);

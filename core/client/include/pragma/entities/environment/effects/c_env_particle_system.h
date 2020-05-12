@@ -108,9 +108,15 @@ namespace pragma
 		std::size_t TranslateParticleIndex(std::size_t particleIdx) const;
 		// Translates a buffer index to a particle index
 		std::size_t TranslateBufferIndex(std::size_t bufferIdx) const;
-		void AddInitializer(std::string identifier,const std::unordered_map<std::string,std::string> &values);
-		void AddOperator(std::string identifier,const std::unordered_map<std::string,std::string> &values);
-		void AddRenderer(std::string identifier,const std::unordered_map<std::string,std::string> &values);
+		CParticleInitializer *AddInitializer(std::string identifier,const std::unordered_map<std::string,std::string> &values);
+		CParticleOperator *AddOperator(std::string identifier,const std::unordered_map<std::string,std::string> &values);
+		CParticleRenderer *AddRenderer(std::string identifier,const std::unordered_map<std::string,std::string> &values);
+		void RemoveInitializer(const std::string &name);
+		void RemoveOperator(const std::string &name);
+		void RemoveRenderer(const std::string &name);
+		void RemoveInitializersByType(const std::string &type);
+		void RemoveOperatorsByType(const std::string &type);
+		void RemoveRenderersByType(const std::string &type);
 		void SetRadius(float r);
 		void SetExtent(float ext);
 		float GetRadius() const;
@@ -176,6 +182,12 @@ namespace pragma
 		void SetSoftParticles(bool bSoft);
 		bool GetSoftParticles() const;
 
+		void SetSortParticles(bool sort);
+		bool GetSortParticles() const;
+
+		const Color &GetInitialColor() const;
+		void SetInitialColor(const Color &col);
+
 		float GetBloomScale() const;
 		void SetBloomScale(float scale);
 
@@ -231,6 +243,13 @@ namespace pragma
 			void GetOperators(std::vector<TOperator*> &operators);
 		template<class TRenderer>
 			void GetRenderers(std::vector<TRenderer*> &renderers);
+
+		const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers() const;
+		const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators() const;
+		const std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &GetRenderers() const;
+		std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers();
+		std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators();
+		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &GetRenderers();
 	protected:
 		util::EventReply HandleKeyValue(const std::string &key,const std::string &value);
 

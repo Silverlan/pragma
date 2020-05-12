@@ -16,7 +16,8 @@ namespace pragma::asset
 		Model = 0,
 		Material,
 		Texture,
-		Sound
+		Sound,
+		ParticleSystem
 	};
 	DLLNETWORK bool exists(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type);

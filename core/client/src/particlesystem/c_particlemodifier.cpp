@@ -164,6 +164,8 @@ void CParticleModifier::OnParticleSystemStarted() {}
 void CParticleModifier::OnParticleDestroyed(CParticle&) {}
 void CParticleModifier::OnParticleSystemStopped() {}
 void CParticleModifier::SetName(const std::string &name) {m_name = name;}
+const std::string &CParticleModifier::GetType() const {return m_type;}
+void CParticleModifier::SetType(const std::string &type) {m_type = type;}
 const std::string &CParticleModifier::GetName() const {return m_name;}
 
 ///////////////////////
@@ -224,17 +226,38 @@ DLLCLIENT ParticleModifierMap *GetParticleModifierMap() {return g_ParticleModifi
 void ParticleModifierMap::AddInitializer(std::string name,const TParticleModifierFactory<CParticleInitializer> &fc)
 {
 	StringToLower(name);
-	m_initializers.insert(std::make_pair(name,fc));
+	m_initializers.insert(std::make_pair(name,TParticleModifierFactory<CParticleInitializer>{
+		[fc,name](pragma::CParticleSystemComponent &c,const std::unordered_map<std::string,std::string> &keyvalues) -> std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)> {
+			auto initializer = fc(c,keyvalues);
+			if(initializer)
+				initializer->SetType(name);
+			return initializer;
+		}
+	}));
 }
 void ParticleModifierMap::AddOperator(std::string name,const TParticleModifierFactory<CParticleOperator> &fc)
 {
 	StringToLower(name);
-	m_operators.insert(std::make_pair(name,fc));
+	m_operators.insert(std::make_pair(name,TParticleModifierFactory<CParticleOperator>{
+		[fc,name](pragma::CParticleSystemComponent &c,const std::unordered_map<std::string,std::string> &keyvalues) -> std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)> {
+			auto op = fc(c,keyvalues);
+			if(op)
+				op->SetType(name);
+			return op;
+		}
+	}));
 }
 void ParticleModifierMap::AddRenderer(std::string name,const TParticleModifierFactory<CParticleRenderer> &fc)
 {
 	StringToLower(name);
-	m_renderers.insert(std::make_pair(name,fc));
+	m_renderers.insert(std::make_pair(name,TParticleModifierFactory<CParticleRenderer>{
+		[fc,name](pragma::CParticleSystemComponent &c,const std::unordered_map<std::string,std::string> &keyvalues) -> std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)> {
+			auto renderer = fc(c,keyvalues);
+			if(renderer)
+				renderer->SetType(name);
+			return renderer;
+		}
+	}));
 }
 
 TParticleModifierFactory<CParticleInitializer> ParticleModifierMap::FindInitializer(std::string classname)
@@ -258,3 +281,6 @@ TParticleModifierFactory<CParticleRenderer> ParticleModifierMap::FindRenderer(st
 		return NULL;
 	return it->second;
 }
+const std::unordered_map<std::string,TParticleModifierFactory<CParticleInitializer>> &ParticleModifierMap::GetInitializers() const {return m_initializers;}
+const std::unordered_map<std::string,TParticleModifierFactory<CParticleOperator>> &ParticleModifierMap::GetOperators() const {return m_operators;}
+const std::unordered_map<std::string,TParticleModifierFactory<CParticleRenderer>> &ParticleModifierMap::GetRenderers() const {return m_renderers;}

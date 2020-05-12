@@ -26,7 +26,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
-
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace PBRConverter
@@ -782,46 +782,74 @@ void Lua::ParticleSystem::AddInitializer(lua_State *l,pragma::CParticleSystemCom
 	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
 	Lua::CheckTable(l,t);
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l,t) != 0)
+	
+	auto ot = luabind::object{luabind::from_stack{l,t}};
+	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
-		Lua::PushValue(l,-2);
-		std::string key = Lua::CheckString(l,-3);
-		std::string val = Lua::ParticleSystem::get_key_value(l,-2);
-		StringToLower(key);
+		auto key = luabind::object_cast<std::string>(i.key());
+		auto &valRef = *i;
+		valRef.push(l);
+		auto idx = Lua::GetStackTop(l);
+		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
+		Lua::Pop(l,1);
+
+		ustring::to_lower(key);
 		values[key] = val;
 	}
-	hComponent.AddInitializer(name,values);
+
+	auto *initializer = hComponent.AddInitializer(name,values);
+	if(initializer == nullptr)
+		return;
+	Lua::Push(l,initializer);
 }
 void Lua::ParticleSystem::AddOperator(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
 {
 	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
 	Lua::CheckTable(l,t);
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l,t) != 0)
+
+	auto ot = luabind::object{luabind::from_stack{l,t}};
+	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
-		Lua::PushValue(l,-2);
-		std::string key = Lua::CheckString(l,-3);
-		std::string val = Lua::ParticleSystem::get_key_value(l,-2);
-		StringToLower(key);
+		auto key = luabind::object_cast<std::string>(i.key());
+		auto &valRef = *i;
+		valRef.push(l);
+		auto idx = Lua::GetStackTop(l);
+		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
+		Lua::Pop(l,1);
+
+		ustring::to_lower(key);
 		values[key] = val;
 	}
-	hComponent.AddOperator(name,values);
+
+	auto *op = hComponent.AddOperator(name,values);
+	if(op == nullptr)
+		return;
+	Lua::Push(l,op);
 }
 void Lua::ParticleSystem::AddRenderer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
 {
 	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
 	Lua::CheckTable(l,t);
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l,t) != 0)
+
+	auto ot = luabind::object{luabind::from_stack{l,t}};
+	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
-		Lua::PushValue(l,-2);
-		std::string key = Lua::CheckString(l,-3);
-		std::string val = Lua::ParticleSystem::get_key_value(l,-2);
-		StringToLower(key);
+		auto key = luabind::object_cast<std::string>(i.key());
+		auto &valRef = *i;
+		valRef.push(l);
+		auto idx = Lua::GetStackTop(l);
+		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
+		Lua::Pop(l,1);
+
+		ustring::to_lower(key);
 		values[key] = val;
 	}
-	hComponent.AddRenderer(name,values);
+
+	auto *renderer = hComponent.AddRenderer(name,values);
+	if(renderer == nullptr)
+		return;
+	Lua::Push(l,renderer);
 }
+#pragma optimize("",on)

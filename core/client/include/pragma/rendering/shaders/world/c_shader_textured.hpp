@@ -147,6 +147,8 @@ namespace pragma
 			float metalnessFactor = 0.f;
 			float roughnessFactor = 0.f;
 			float aoFactor = 1.f;
+			AlphaMode alphaMode = AlphaMode::Opaque;
+			float alphaCutoff = 0.5f;
 		};
 #pragma pack(pop)
 

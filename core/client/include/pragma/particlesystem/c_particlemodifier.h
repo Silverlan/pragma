@@ -38,6 +38,8 @@ class DLLCLIENT CParticleModifier
 public:
 	const std::string &GetName() const;
 	void SetName(const std::string &name);
+	const std::string &GetType() const;
+	void SetType(const std::string &type);
 	// Called when a new particle has been created
 	virtual void OnParticleCreated(CParticle &particle);
 	// Called when the particle system has been started
@@ -54,6 +56,7 @@ protected:
 	CParticleModifier()=default;
 private:
 	std::string m_name;
+	std::string m_type;
 };
 
 ///////////////////////
@@ -149,6 +152,10 @@ public:
 	TParticleModifierFactory<CParticleInitializer> FindInitializer(std::string classname);
 	TParticleModifierFactory<CParticleOperator> FindOperator(std::string classname);
 	TParticleModifierFactory<CParticleRenderer> FindRenderer(std::string classname);
+
+	const std::unordered_map<std::string,TParticleModifierFactory<CParticleInitializer>> &GetInitializers() const;
+	const std::unordered_map<std::string,TParticleModifierFactory<CParticleOperator>> &GetOperators() const;
+	const std::unordered_map<std::string,TParticleModifierFactory<CParticleRenderer>> &GetRenderers() const;
 };
 #pragma warning(pop)
 

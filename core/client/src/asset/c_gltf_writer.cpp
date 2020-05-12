@@ -12,6 +12,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "c_gltf_writer.hpp"
 #include "pragma/math/c_util_math.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <pragma/clientstate/clientstate.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -220,8 +221,8 @@ void pragma::asset::GLTFWriter::MergeSplitMeshes(ExportMeshList &meshList)
 
 void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 {
-	if(ShouldExportMeshes() == false)
-		return;
+	//if(ShouldExportMeshes() == false)
+	//	return;
 	m_uniqueModelExportList.reserve(m_sceneDesc.modelCollection.size());
 	for(auto &mdlDesc : m_sceneDesc.modelCollection)
 	{
@@ -1394,18 +1395,16 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		ufile::remove_extension_from_filename(gltfMat.name);
 
 		auto &data = mat->GetDataBlock();
-		auto translucent = data->GetBool("translucent");
 
 		auto itAlbedo = texturePaths->find(Material::ALBEDO_MAP_IDENTIFIER);
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
-		auto &color = data->GetValue("color");
-		if(color != nullptr)
+		auto &color = data->GetValue("color_factor");
+		if(color != nullptr && typeid(*color) == typeid(ds::Vector4))
 		{
-			auto &col = static_cast<ds::Color*>(color.get())->GetValue();
-			auto vCol = col.ToVector4();
-			gltfMat.pbrMetallicRoughness.baseColorFactor = {vCol[0],vCol[1],vCol[2],vCol[3]};
+			auto &col = static_cast<ds::Vector4*>(color.get())->GetValue();
+			gltfMat.pbrMetallicRoughness.baseColorFactor = {col[0],col[1],col[2],col[3]};
 		}
 
 		auto itNormal = texturePaths->find(Material::NORMAL_MAP_IDENTIFIER);
@@ -1422,8 +1421,25 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 			roughnessFactor = 1.f;
 		}
 
-		if(translucent)
+		auto alphaMode = static_cast<int32_t>(AlphaMode::Opaque);
+		data->GetInt("alpha_mode",&alphaMode);
+
+		auto alphaCutoff = 0.5f;
+		data->GetFloat("alpha_cutoff",&alphaCutoff);
+		switch(static_cast<Material::AlphaMode>(alphaMode))
+		{
+		case Material::AlphaMode::Mask:
+			gltfMat.alphaMode = "MASK";
+			break;
+		case Material::AlphaMode::Blend:
 			gltfMat.alphaMode = "BLEND";
+			break;
+		case Material::AlphaMode::Opaque:
+		default:
+			gltfMat.alphaMode = "OPAQUE";
+			break;
+		}
+		gltfMat.alphaCutoff = alphaCutoff;
 
 		auto itEmissive = texturePaths->find(Material::EMISSION_MAP_IDENTIFIER);
 		if(itEmissive != texturePaths->end())

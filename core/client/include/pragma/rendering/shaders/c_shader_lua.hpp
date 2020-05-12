@@ -13,6 +13,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <pragma/lua/luaobjectbase.h>
+#include <wgui/shaders/wishader_textured.hpp>
 
 namespace pragma
 {
@@ -204,6 +205,19 @@ namespace pragma
 		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
 		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderGUITextured
+		: public TLuaShaderBase<wgui::ShaderTextured,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderGUITextured();
+
+		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 
 	class DLLCLIENT LuaShaderImageProcessing

@@ -202,3 +202,6 @@ url=https://github.com/Silverlan/Anvil
 [submodule "modules/pr_prosper_opengl"]
 	path = modules/pr_prosper_opengl
 	url = https://github.com/Silverlan/pr_prosper_opengl.git
+[submodule "third_party_libs/muparserx"]
+	path = third_party_libs/muparserx
+	url = https://github.com/Silverlan/muparserx.git

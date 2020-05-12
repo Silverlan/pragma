@@ -29,6 +29,7 @@ template<class TModifier>
 		: public TModifier,public CParticleModifierLua
 {
 public:
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStarted() override;
@@ -49,6 +50,14 @@ public:
 	void Lua_OnParticleDestroyed(CParticle &pt) {}
 	static void Lua_default_OnParticleDestroyed(lua_State *l,TParticleModifierLua<TModifier> &mod,CParticle &pt) {mod.Lua_OnParticleDestroyed(pt);}
 };
+
+template<class TModifier>
+	void TParticleModifierLua<TModifier>::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+{
+	TModifier::Initialize(pSystem,values);
+	RecordKeyValues(values);
+	CallLuaMember("Initialize");
+}
 
 template<class TModifier>
 	void TParticleModifierLua<TModifier>::OnParticleCreated(CParticle &particle)

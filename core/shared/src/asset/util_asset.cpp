@@ -33,6 +33,14 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 		return {}; // TODO
 	case Type::Texture:
 		return {}; // Only client knows about textures
+	case Type::ParticleSystem:
+	{
+		auto normName = name;
+		std::string ext;
+		if(ufile::get_extension(normName,&ext) == false)
+			normName += ".wpt";
+		return "particles/" +normName;
+	}
 	}
 	return {};
 }

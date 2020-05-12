@@ -252,12 +252,9 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 	if(data->GetBool("black_to_alpha") == true)
 		matFlags |= MaterialFlags::BlackToAlpha;
 
-	auto &color = data->GetValue("color");
-	if(color != nullptr)
-	{
-		auto &col = static_cast<ds::Color*>(color.get())->GetValue();
-		matData.color = col.ToVector4();
-	}
+	auto &colorFactor = data->GetValue("color_factor");
+	if(colorFactor != nullptr && typeid(*colorFactor) == typeid(ds::Vector4))
+		matData.color = static_cast<ds::Vector4*>(colorFactor.get())->GetValue();
 
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap != nullptr && glowMap->texture != nullptr)
@@ -330,8 +327,17 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 		matData.roughnessFactor *= (1.f -specularFactor);
 	}
 
-	if(mat.IsTranslucent() == true)
-		matFlags |= MaterialFlags::Translucent;
+	auto alphaMode = static_cast<int32_t>(AlphaMode::Opaque);
+	data->GetInt("alpha_mode",&alphaMode);
+	matData.alphaMode = static_cast<AlphaMode>(alphaMode);
+
+	auto alphaCutoff = 0.5f;
+	data->GetFloat("alpha_cutoff",&alphaCutoff);
+	matData.alphaCutoff = alphaCutoff;
+	// Obsolete
+	//if(mat.IsTranslucent() == true)
+	//	matFlags |= MaterialFlags::Translucent;
+
 	ApplyMaterialFlags(mat,matFlags);
 
 	buf->Write(0,matData);

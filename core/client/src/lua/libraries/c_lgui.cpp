@@ -192,6 +192,37 @@ int Lua::gui::get_base_element(lua_State *l)
 	return 1;
 }
 
+int Lua::gui::get_element_under_cursor(lua_State *l)
+{
+	std::optional<luabind::object> fCondition {};
+	if(Lua::IsSet(l,1))
+	{
+		Lua::CheckFunction(l,1);
+		fCondition = luabind::object{luabind::from_stack{l,1}};
+	}
+	auto *el = ::WGUI::GetInstance().GetCursorGUIElement(WGUI::GetInstance().GetBaseElement(),[l,fCondition](::WIBase *el) -> bool {
+		if(fCondition.has_value() == false)
+			return true;
+		auto &oFunc = *fCondition;
+		auto result = Lua::CallFunction(l,[&oFunc,el](lua_State *l) -> Lua::StatusCode {
+			oFunc.push(l);
+			auto o = WGUILuaInterface::GetLuaObject(l,*el);
+			o.push(l);
+			return Lua::StatusCode::Ok;
+		},1);
+		if(result != Lua::StatusCode::Ok)
+			return true;
+		if(Lua::IsSet(l,-1) == false)
+			return false;
+		return Lua::CheckBool(l,-1);
+	});
+	if(el == nullptr)
+		return 0;
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
+	o.push(l);
+	return 1;
+}
+
 int Lua::gui::get_element_at_position(lua_State *l,int32_t *optX,int32_t *optY)
 {
 	int32_t argIdx = 1;

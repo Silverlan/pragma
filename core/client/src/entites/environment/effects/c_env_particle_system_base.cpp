@@ -202,6 +202,7 @@ void CParticleSystemComponent::ClearCache()
 
 bool CParticleSystemComponent::SetupParticleSystem(std::string fname,CParticleSystemComponent *parent,bool bRecordKeyValues)
 {
+	bRecordKeyValues = true; // TODO
 	if(umath::is_flag_set(m_flags,Flags::Setup))
 		return true;
 	auto it = s_particleData.find(fname);
@@ -382,6 +383,13 @@ CParticleSystemComponent::~CParticleSystemComponent()
 
 const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetGlobalVertexBuffer() {return s_vertexBuffer;}
 
+const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &CParticleSystemComponent::GetInitializers() const {return const_cast<CParticleSystemComponent*>(this)->GetInitializers();}
+const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &CParticleSystemComponent::GetOperators() const {return const_cast<CParticleSystemComponent*>(this)->GetOperators();}
+const std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &CParticleSystemComponent::GetRenderers() const {return const_cast<CParticleSystemComponent*>(this)->GetRenderers();}
+std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &CParticleSystemComponent::GetInitializers() {return m_initializers;}
+std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &CParticleSystemComponent::GetOperators() {return m_operators;}
+std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &CParticleSystemComponent::GetRenderers() {return m_renderers;}
+
 void CParticleSystemComponent::SetContinuous(bool b)
 {
 	BaseEnvParticleSystemComponent::SetContinuous(b);
@@ -496,6 +504,10 @@ float CParticleSystemComponent::GetStaticWorldScale() const {return m_worldScale
 void CParticleSystemComponent::SetStaticWorldScale(float scale) {m_worldScale = scale;}
 void CParticleSystemComponent::SetSoftParticles(bool bSmooth) {umath::set_flag(m_flags,Flags::SoftParticles,bSmooth);}
 bool CParticleSystemComponent::GetSoftParticles() const {return umath::is_flag_set(m_flags,Flags::SoftParticles);}
+void CParticleSystemComponent::SetSortParticles(bool sort) {umath::set_flag(m_flags,Flags::SortParticles,sort);}
+bool CParticleSystemComponent::GetSortParticles() const {return umath::is_flag_set(m_flags,Flags::SortParticles);}
+const Color &CParticleSystemComponent::GetInitialColor() const {return m_initialColor;}
+void CParticleSystemComponent::SetInitialColor(const Color &col) {m_initialColor = col;}
 
 void CParticleSystemComponent::SetCastShadows(bool b) {umath::set_flag(m_flags,Flags::CastShadows,b);}
 bool CParticleSystemComponent::GetCastShadows() const {return umath::is_flag_set(m_flags,Flags::CastShadows);}
@@ -539,7 +551,7 @@ void CParticleSystemComponent::SetMaterial(Material *mat)
 void CParticleSystemComponent::SetMaterial(const char *mat) {SetMaterial(client->LoadMaterial(mat));}
 Material *CParticleSystemComponent::GetMaterial() const {return m_material;}
 
-void CParticleSystemComponent::AddInitializer(std::string identifier,const std::unordered_map<std::string,std::string> &values)
+CParticleInitializer *CParticleSystemComponent::AddInitializer(std::string identifier,const std::unordered_map<std::string,std::string> &values)
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
@@ -547,16 +559,17 @@ void CParticleSystemComponent::AddInitializer(std::string identifier,const std::
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle initializer '"<<identifier<<"'! Ignoring..."<<Con::endl;
-		return;
+		return nullptr;
 	}
 	auto initializer = factory(*this,values);
 	if(initializer == nullptr)
-		return;
+		return nullptr;
 	if(IsRecordingKeyValues())
 		initializer->RecordKeyValues(values);
 	m_initializers.push_back(std::move(initializer));
+	return m_initializers.back().get();
 }
-void CParticleSystemComponent::AddOperator(std::string identifier,const std::unordered_map<std::string,std::string> &values)
+CParticleOperator *CParticleSystemComponent::AddOperator(std::string identifier,const std::unordered_map<std::string,std::string> &values)
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
@@ -564,16 +577,17 @@ void CParticleSystemComponent::AddOperator(std::string identifier,const std::uno
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle operator '"<<identifier<<"'! Ignoring..."<<Con::endl;
-		return;
+		return nullptr;
 	}
 	auto op = factory(*this,values);
 	if(op == nullptr)
-		return;
+		return nullptr;
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_operators.push_back(std::move(op));
+	return m_operators.back().get();
 }
-void CParticleSystemComponent::AddRenderer(std::string identifier,const std::unordered_map<std::string,std::string> &values)
+CParticleRenderer *CParticleSystemComponent::AddRenderer(std::string identifier,const std::unordered_map<std::string,std::string> &values)
 {
 	ustring::to_lower(identifier);
 	auto *map = GetParticleModifierMap();
@@ -581,14 +595,82 @@ void CParticleSystemComponent::AddRenderer(std::string identifier,const std::uno
 	if(factory == nullptr)
 	{
 		Con::cwar<<"WARNING: Attempted to create unknown particle renderer '"<<identifier<<"'! Ignoring..."<<Con::endl;
-		return;
+		return nullptr;
 	}
 	auto op = factory(*this,values);
 	if(op == nullptr)
-		return;
+		return nullptr;
 	if(IsRecordingKeyValues())
 		op->RecordKeyValues(values);
 	m_renderers.push_back(std::move(op));
+	return m_renderers.back().get();
+}
+
+void CParticleSystemComponent::RemoveInitializer(const std::string &name)
+{
+	auto it = std::find_if(m_initializers.begin(),m_initializers.end(),[&name](const std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)> &initializer) {
+		return ustring::compare(initializer->GetName(),name,false);
+	});
+	if(it == m_initializers.end())
+		return;
+	m_initializers.erase(it);
+}
+void CParticleSystemComponent::RemoveOperator(const std::string &name)
+{
+	auto it = std::find_if(m_operators.begin(),m_operators.end(),[&name](const std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)> &initializer) {
+		return ustring::compare(initializer->GetName(),name,false);
+	});
+	if(it == m_operators.end())
+		return;
+	m_operators.erase(it);
+}
+void CParticleSystemComponent::RemoveRenderer(const std::string &name)
+{
+	auto it = std::find_if(m_renderers.begin(),m_renderers.end(),[&name](const std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)> &initializer) {
+		return ustring::compare(initializer->GetName(),name,false);
+	});
+	if(it == m_renderers.end())
+		return;
+	m_renderers.erase(it);
+}
+void CParticleSystemComponent::RemoveInitializersByType(const std::string &type)
+{
+	for(auto it=m_initializers.begin();it!=m_initializers.end();)
+	{
+		auto &initializer = *it;
+		if(ustring::compare(initializer->GetType(),type,false) == false)
+		{
+			++it;
+			continue;
+		}
+		it = m_initializers.erase(it);
+	}
+}
+void CParticleSystemComponent::RemoveOperatorsByType(const std::string &type)
+{
+	for(auto it=m_operators.begin();it!=m_operators.end();)
+	{
+		auto &op = *it;
+		if(ustring::compare(op->GetType(),type,false) == false)
+		{
+			++it;
+			continue;
+		}
+		it = m_operators.erase(it);
+	}
+}
+void CParticleSystemComponent::RemoveRenderersByType(const std::string &type)
+{
+	for(auto it=m_renderers.begin();it!=m_renderers.end();)
+	{
+		auto &renderer = *it;
+		if(ustring::compare(renderer->GetType(),type,false) == false)
+		{
+			++it;
+			continue;
+		}
+		it = m_renderers.erase(it);
+	}
 }
 
 const CParticleSystemComponent *CParticleSystemComponent::GetParent() const {return const_cast<CParticleSystemComponent*>(this)->GetParent();}

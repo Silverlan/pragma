@@ -22,6 +22,7 @@ namespace Lua
 		DLLCLIENT int register_element(lua_State *l);
 		DLLCLIENT int get_base_element(lua_State *l);
 		DLLCLIENT int get_element_at_position(lua_State *l,int32_t *optX=nullptr,int32_t *optY=nullptr);
+		DLLCLIENT int get_element_under_cursor(lua_State *l);
 		DLLCLIENT int get_focused_element(lua_State *l);
 		DLLCLIENT int register_skin(lua_State *l);
 		DLLCLIENT int load_skin(lua_State *l);

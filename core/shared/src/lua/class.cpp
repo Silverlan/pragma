@@ -162,6 +162,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushBool(l,ustring::compare(str0,str1,caseSensitive,len));
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"string","is_number",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		std::string str = Lua::CheckString(l,1);
+		char* p;
+		strtol(str.c_str(),&p,10);
+		Lua::PushBool(l,*p == 0);
+		return 1;
+	}));
 
 	auto &modLight = lua.RegisterLibrary("light",{
 		{"get_color_temperature",[](lua_State *l) -> int {
@@ -480,11 +487,27 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defImgParallelJob];
 
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
-	defDataBlock.def("GetInt",&Lua::DataBlock::GetInt);
-	defDataBlock.def("GetFloat",&Lua::DataBlock::GetFloat);
-	defDataBlock.def("GetBool",&Lua::DataBlock::GetBool);
-	defDataBlock.def("GetString",&Lua::DataBlock::GetString);
+	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,const std::string&)>(Lua::DataBlock::load))];
+	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,VFilePtr)>(Lua::DataBlock::load))];
+
+	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetInt));
+	defDataBlock.def("GetFloat",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetFloat));
+	defDataBlock.def("GetBool",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetBool));
+	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetString));
+	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetColor));
+	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector4));
+
+	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,int32_t)>(&Lua::DataBlock::GetInt));
+	defDataBlock.def("GetFloat",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,float)>(&Lua::DataBlock::GetFloat));
+	defDataBlock.def("GetBool",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,bool)>(&Lua::DataBlock::GetBool));
+	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const std::string&)>(&Lua::DataBlock::GetString));
+	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Color&)>(&Lua::DataBlock::GetColor));
+	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector3&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector4&)>(&Lua::DataBlock::GetVector4));
+
 	defDataBlock.def("GetData",&Lua::DataBlock::GetData);
+	defDataBlock.def("GetChildBlocks",&Lua::DataBlock::GetChildBlocks);
 	defDataBlock.def("SetValue",&Lua::DataBlock::SetValue);
 	defDataBlock.def("GetValueType",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>([](lua_State *l,ds::Block &dataBlock,const std::string &key) {
 		auto val = dataBlock.GetDataValue(key);
@@ -503,8 +526,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("IsBool",&Lua::DataBlock::IsBool);
 	defDataBlock.def("IsColor",&Lua::DataBlock::IsColor);
 	defDataBlock.def("IsVector",&Lua::DataBlock::IsVector);
-	defDataBlock.def("GetColor",&Lua::DataBlock::GetColor);
-	defDataBlock.def("GetVector",&Lua::DataBlock::GetVector);
+	defDataBlock.def("IsVector4",&Lua::DataBlock::IsVector4);
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::FindBlock));
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,uint32_t)>(&Lua::DataBlock::FindBlock));
 	modUtil[defDataBlock];
@@ -885,6 +907,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def_readwrite("z",&Vector3::z);
 	defVector.def(luabind::const_self /float());
 	defVector.def(luabind::const_self *float());
+	defVector.def(luabind::const_self *Vector3());
 	defVector.def(luabind::const_self +luabind::const_self);
 	defVector.def(luabind::const_self -luabind::const_self);
 	defVector.def(luabind::const_self ==luabind::const_self);
@@ -955,6 +978,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2.def_readwrite("y",&Vector2::y);
 	defVector2.def(luabind::const_self /float());
 	defVector2.def(luabind::const_self *float());
+	defVector2.def(luabind::const_self *Vector2());
 	defVector2.def(luabind::const_self +luabind::const_self);
 	defVector2.def(luabind::const_self -luabind::const_self);
 	defVector2.def(luabind::const_self ==luabind::const_self);
@@ -991,6 +1015,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4.def_readwrite("z",&Vector4::z);
 	defVector4.def(luabind::const_self /float());
 	defVector4.def(luabind::const_self *float());
+	defVector4.def(luabind::const_self *Vector4());
 	defVector4.def(luabind::const_self +luabind::const_self);
 	defVector4.def(luabind::const_self -luabind::const_self);
 	defVector4.def(luabind::const_self ==luabind::const_self);

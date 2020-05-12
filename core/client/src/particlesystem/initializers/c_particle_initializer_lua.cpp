@@ -12,7 +12,6 @@
 void CParticleModifierLua::Initialize(const luabind::object &o)
 {
 	m_baseLuaObj = std::shared_ptr<luabind::object>(new luabind::object(o));
-	CallLuaMember("Initialize");
 }
 
 void CParticleModifierLua::SetIdentifier(const std::string &identifier) {m_identifier = identifier;}

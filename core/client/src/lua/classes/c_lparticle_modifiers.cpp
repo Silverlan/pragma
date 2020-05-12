@@ -14,7 +14,7 @@
 
 
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
 {
 	ustring::to_lower(className);
@@ -93,6 +93,7 @@ bool pragma::LuaParticleModifierManager::RegisterModifier(Type type,std::string 
 	{
 		Con::cwar<<"WARNING: Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Ignoring..."<<Con::endl;
 		return false;
+		//Con::cwar<<"WARNING: Attempted to register particle modifier '"<<className<<"', which has already been registered previously! Overwriting previous definition..."<<Con::endl;
 	}
 	auto &pair = m_modifiers[className] = {};
 	pair.luaClassObject = o;
@@ -250,34 +251,40 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 }
 void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc)
 {
-	auto defPtMod = luabind::class_<::CParticleModifier>("ParticleModifier");
-	defPtMod.def("GetName",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
+	auto defPtModifier = luabind::class_<::CParticleModifier>("ParticleModifier");
+	defPtModifier.def("GetName",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
 		Lua::PushString(l,ptm.GetName());
 	}));
-	defPtMod.def("GetParticleSystem",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
+	defPtModifier.def("GetType",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
+		Lua::PushString(l,ptm.GetType());
+	}));
+	defPtModifier.def("GetParticleSystem",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
 		ptm.GetParticleSystem().PushLuaObject(l);
 	}));
-	defPtMod.def("SetKeyValue",static_cast<void(*)(lua_State*,::CParticleModifier&,const std::string&,const std::string&)>([](lua_State *l,::CParticleModifier &ptm,const std::string &key,const std::string &value) {
+	defPtModifier.def("SetKeyValue",static_cast<void(*)(lua_State*,::CParticleModifier&,const std::string&,const std::string&)>([](lua_State *l,::CParticleModifier &ptm,const std::string &key,const std::string &value) {
 		auto *keyValues = const_cast<std::unordered_map<std::string,std::string>*>(ptm.GetKeyValues());
 		if(keyValues == nullptr)
 			return;
 		(*keyValues)[key] = value;
 	}));
-	defPtMod.def("GetKeyValue",static_cast<void(*)(lua_State*,::CParticleModifier&,const std::string&)>([](lua_State *l,::CParticleModifier &ptm,const std::string &key) {
+	defPtModifier.def("GetKeyValue",static_cast<void(*)(lua_State*,::CParticleModifier&,const std::string&)>([](lua_State *l,::CParticleModifier &ptm,const std::string &key) {
 		auto *keyValues = ptm.GetKeyValues();
 		if(keyValues == nullptr)
 			return;
 		auto it = keyValues->find(key);
 		Lua::PushString(l,(it != keyValues->end()) ? it->second : "");
 	}));
-	defPtc.scope[defPtMod];
-
-	auto defPtModifier = luabind::class_<::CParticleModifier>("ParticleModifier");
-	defPtModifier.def("GetName",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
-		Lua::PushString(l,ptm.GetName());
-	}));
-	defPtModifier.def("GetParticleSystem",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
-		ptm.GetParticleSystem().PushLuaObject(l);
+	defPtModifier.def("GetKeyValues",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
+		auto t = Lua::CreateTable(l);
+		auto *keyValues = ptm.GetKeyValues();
+		if(keyValues == nullptr)
+			return;
+		for(auto &pair : *keyValues)
+		{
+			Lua::PushString(l,pair.first);
+			Lua::PushString(l,pair.second);
+			Lua::SetTableValue(l,t);
+		}
 	}));
 	defPtc.scope[defPtModifier];
 
@@ -318,4 +325,4 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	defPtRendererBase.def("OnParticleDestroyed",&CParticleRendererLua::Lua_OnParticleDestroyed,&CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtc.scope[defPtRendererBase];
 }
-
+#pragma optimize("",on)

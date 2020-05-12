@@ -353,6 +353,9 @@ search_lib_recursive(DEPENDENCY_CLIP2TRI_LIBRARY third_party_libs/clip2tri/${BIN
 search_lib_recursive(DEPENDENCY_CLIPPER_LIBRARY third_party_libs/clip2tri/clipper/${BINARY_PRAGMA_DIR} clipper-static STATIC)
 search_lib_recursive(DEPENDENCY_POLY2TRI_LIBRARY third_party_libs/clip2tri/poly2tri/${BINARY_PRAGMA_DIR} poly2tri-static STATIC)
 
+set(DEPENDENCY_MUPARSERX_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/muparserx/parser CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_MUPARSERX_LIBRARY third_party_libs/muparserx/${BINARY_PRAGMA_DIR} muparserx STATIC)
+
 set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
 
 set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
@@ -786,7 +789,16 @@ set_target_properties(luabind PROPERTIES FOLDER third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 #
 
+# muparserx
+set(BUILD_EXAMPLES OFF CACHE BOOL OFF FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
+register_third_party_library(muparserx)
+set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+set_target_properties(muparserx PROPERTIES FOLDER third_party_libs/muparserx)
+#
+
 # clip2tri
+set(M_LIBRARY "" FORCE)
 register_third_party_library(clip2tri)
 set_target_properties(clip2tri PROPERTIES FOLDER third_party_libs/clip2tri)
 set_target_properties(clip2tri-static PROPERTIES FOLDER third_party_libs/clip2tri)
@@ -857,7 +869,7 @@ set_target_properties(fopen_unchanged PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(fread PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(fseek PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(hole PROPERTIES FOLDER third_party_libs/libzip)
-set_target_properties(in-memory PROPERTIES FOLDER third_party_libs/libzip)
+# set_target_properties(in-memory PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(man PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(nonrandomopen PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(nonrandomopentest PROPERTIES FOLDER third_party_libs/libzip)

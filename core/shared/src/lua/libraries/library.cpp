@@ -46,11 +46,13 @@
 #include "pragma/util/util_rgbcsv.hpp"
 #include "pragma/model/animation/animation.h"
 #include <pragma/math/vector/util_winding_order.hpp>
+#include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
 #include <pragma/math/intersection.h>
 #include <regex>
 #include <complex>
+#include <mpParser.h>
 #include <luainterface.hpp>
 
 extern DLLENGINE Engine *engine;
@@ -81,6 +83,113 @@ static void call_callback(CallbackHandle &cb,std::initializer_list<luabind::obje
 			arg.push(l);
 		return Lua::StatusCode::Ok;
 	});
+}
+
+static int32_t parse_math_expression(lua_State *l)
+{
+	class FunGeneric : public mup::ICallback
+	{
+	public:
+
+		FunGeneric(const std::string &name,uint32_t numArgs)
+			: ICallback(mup::cmFUNC, name.c_str(), numArgs),m_name{name},m_numArgs{numArgs}
+		{}
+
+		FunGeneric(const FunGeneric &other)
+			: mup::ICallback{other},m_name{other.m_name},
+			m_numArgs{other.m_numArgs}
+		{}
+
+		virtual void Eval(mup::ptr_val_type &ret, const mup::ptr_val_type * /*a_pArg*/, int /*a_iArgc*/) override {}
+
+		virtual const mup::char_type* GetDesc() const override
+		{
+			return _T("");
+		}
+
+		virtual IToken* Clone() const override {return new FunGeneric(*this);}
+	private:
+		std::string m_name;
+		uint32_t m_numArgs = 0;
+	};
+
+	mup::ParserX p;
+	p.ClearFun();
+
+	std::string expression = Lua::CheckString(l,1);
+
+	int32_t t = 2;
+	Lua::CheckTable(l,t);
+	auto n = Lua::GetObjectLength(l,t);
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		Lua::PushInt(l,i +1); /* 1 */
+		Lua::GetTableValue(l,t); /* 1 */
+		Lua::CheckTable(l,-1);
+
+		auto tF = Lua::GetStackTop(l);
+
+		Lua::PushInt(l,1); /* 2 */
+		Lua::GetTableValue(l,tF); /* 2 */
+		auto *fnName = Lua::CheckString(l,-1);
+		Lua::Pop(l,1); /* 1 */
+
+		Lua::PushInt(l,2); /* 2 */
+		Lua::GetTableValue(l,tF); /* 2 */
+		auto numArgs = Lua::CheckInt(l,-1);
+		Lua::Pop(l,1); /* 1 */
+		p.DefineFun(new FunGeneric{fnName,static_cast<uint32_t>(numArgs)});
+
+		Lua::Pop(l,1); /* 0 */
+	}
+
+	t = 3;
+	Lua::CheckTable(l,t);
+	n = Lua::GetObjectLength(l,t);
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		Lua::PushInt(l,i +1); /* 1 */
+		Lua::GetTableValue(l,t); /* 1 */
+		auto *varName = Lua::CheckString(l,-1);
+
+		p.DefineVar(varName,0);
+
+		Lua::Pop(l,1); /* 0 */
+	}
+
+	p.SetExpr(expression);
+	try
+	{
+		p.GetExprVar();
+	}
+	catch(const mup::ParserError &err)
+	{
+		Lua::PushBool(l,false);
+		Lua::PushString(l,err.GetMsg());
+		return 2;
+	}
+	auto &rpn = p.GetRPN();
+	auto &data = rpn.GetData();
+	t = Lua::CreateTable(l);
+	auto numTokens = data.size();
+	for(auto i=decltype(numTokens){0u};i<numTokens;++i)
+	{
+		Lua::PushInt(l,i +1); /* 1 */
+
+		auto &pTok = *data[i].Get();
+		auto tToken = Lua::CreateTable(l); /* 2 */
+
+		Lua::PushString(l,"identifier"); /* 3 */
+		Lua::PushString(l,pTok.GetIdent()); /* 4 */
+		Lua::SetTableValue(l,tToken); /* 2 */
+
+		Lua::PushString(l,"code"); /* 3 */
+		Lua::PushInt(l,umath::to_integral(pTok.GetCode())); /* 4 */
+		Lua::SetTableValue(l,tToken); /* 2 */
+
+		Lua::SetTableValue(l,t); /* 0 */
+	}
+	return 1;
 }
 
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
@@ -258,6 +367,57 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		Lua::PushBool(l,std::isfinite(f));
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"math","calc_fov_from_lens",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto sensorSize = Lua::CheckNumber(l,1);
+		auto focalLength = Lua::CheckNumber(l,1);
+		auto aspectRatio = Lua::CheckNumber(l,1);
+		Lua::PushNumber(l,::util::calc_fov_from_lens(sensorSize,focalLength,aspectRatio));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","calc_aperture_size_from_fstop",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto fstop = Lua::CheckNumber(l,1);
+		auto focalLength = Lua::CheckNumber(l,2);
+		auto orthographicCamera = false;
+		if(Lua::IsSet(l,3))
+			orthographicCamera = Lua::CheckBool(l,3);
+		Lua::PushNumber(l,::util::calc_aperture_size_from_fstop(fstop,focalLength,orthographicCamera));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","calc_focal_length_from_fov",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto fov = Lua::CheckNumber(l,1);
+		auto sensorSize = Lua::CheckNumber(l,2);
+		Lua::PushNumber(l,::util::calc_focal_length_from_fov(fov,sensorSize));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","calc_fov_from_focal_length",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto focalLength = Lua::CheckNumber(l,1);
+		auto sensorSize = Lua::CheckNumber(l,2);
+		Lua::PushNumber(l,::util::calc_fov_from_focal_length(focalLength,sensorSize));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","cot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		Lua::PushNumber(l,umath::cot(Lua::CheckNumber(l,1)));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
+
+	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
+		{"EXPRESSION_CODE_BRACKET_OPENING",mup::ECmdCode::cmBO},
+		{"EXPRESSION_CODE_BRACKET_CLOSING",mup::ECmdCode::cmBC},
+		{"EXPRESSION_CODE_INDEX_OPERATOR_OPENING",mup::ECmdCode::cmIO},
+		{"EXPRESSION_CODE_INDEX_OPERATOR_CLOSING",mup::ECmdCode::cmIC},
+		{"EXPRESSION_CODE_CURLY_BRACKET_OPENING",mup::ECmdCode::cmCBO},
+		{"EXPRESSION_CODE_CURLY_BRACKET_CLOSING",mup::ECmdCode::cmCBC},
+		{"EXPRESSION_CODE_COMMA",mup::ECmdCode::cmARG_SEP},
+		{"EXPRESSION_CODE_TERNARY_IF",mup::ECmdCode::cmIF},
+		{"EXPRESSION_CODE_TERNARY_ELSE",mup::ECmdCode::cmELSE},
+		{"EXPRESSION_CODE_TERNARY_ENDIF",mup::ECmdCode::cmENDIF},
+		{"EXPRESSION_CODE_VALUE",mup::ECmdCode::cmVAL},
+		{"EXPRESSION_CODE_FUNCTION",mup::ECmdCode::cmFUNC},
+		{"EXPRESSION_CODE_BINARY_OPERATOR",mup::ECmdCode::cmOPRT_BIN},
+		{"EXPRESSION_CODE_INFIX_OPERATOR",mup::ECmdCode::cmOPRT_INFIX},
+		{"EXPRESSION_CODE_POSTFIX_OPERATOR",mup::ECmdCode::cmOPRT_POSTFIX}
+	});
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
 		{"EASE_TYPE_BACK",umath::to_integral(umath::EaseType::Back)},
@@ -339,6 +499,33 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	complexNumberClassDef.def("GetReal",static_cast<double(std::complex<double>::*)() const>(&std::complex<double>::real));
 	complexNumberClassDef.def("GetImaginary",static_cast<double(std::complex<double>::*)() const>(&std::complex<double>::imag));
 	//mathMod[complexNumberClassDef];
+
+#if 0
+	auto expressionClassDef = luabind::class_<exprtk::expression<float>>("Expression");
+	expressionClassDef.def(luabind::constructor<>());
+	expressionClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua_State*,exprtk::expression<float>&,exprtk::symbol_table<float>&)>([](lua_State *l,exprtk::expression<float> &expr,exprtk::symbol_table<float> &symbolTable) {
+		expr.register_symbol_table(symbolTable);
+	}));
+	expressionClassDef.def("GetValue",static_cast<void(*)(lua_State*,exprtk::expression<float>&)>([](lua_State *l,exprtk::expression<float> &expr) {
+		Lua::PushNumber(l,expr.value());
+	}));
+
+	auto parserClassDef = luabind::class_<exprtk::parser<float>>("Parser");
+	parserClassDef.def(luabind::constructor<>());
+	parserClassDef.def("RegisterSymbolTable",static_cast<void(*)(lua_State*,exprtk::parser<float>&,const std::string&,exprtk::symbol_table<float>&)>([](lua_State *l,exprtk::parser<float> &parser,const std::string &expressionString,exprtk::symbol_table<float> &symbolTable) {
+		Lua::Push(l,parser.compile(expressionString,symbolTable));
+	}));
+	expressionClassDef.scope[parserClassDef];
+
+	auto symbolTableClassDef = luabind::class_<exprtk::symbol_table<float>>("SymbolTable");
+	symbolTableClassDef.def(luabind::constructor<>());
+	symbolTableClassDef.def("AddConstant",static_cast<void(*)(lua_State*,exprtk::symbol_table<float>&,const std::string&,float)>([](lua_State *l,exprtk::symbol_table<float> &symbolTable,const std::string &name,float val) {
+		symbolTable.add_constant(name,val);
+	}));
+	expressionClassDef.scope[symbolTableClassDef];
+
+	mathMod[expressionClassDef];
+#endif
 
 	lua_pushtablecfunction(lua.GetState(),"debug","move_state_to_string",Lua::debug::move_state_to_string);
 	if(Lua::get_extended_lua_modules_enabled())
@@ -664,8 +851,20 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	defColor.def("ToHexColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
 		Lua::PushString(l,color.ToHexColor());
 	}));
+	defColor.def("ToHexColorRGB",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::PushString(l,color.ToHexColorRGB());
+	}));
 	defColor.def("ToHSVColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
 		Lua::Push<util::HSV>(l,util::rgb_to_hsv(color));
+	}));
+	defColor.def("GetComplementaryColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::Push(l,color.GetComplementaryColor());
+	}));
+	defColor.def("GetContrastColor",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::Push(l,color.GetContrastColor());
+	}));
+	defColor.def("CalcPerceivedLuminance",static_cast<void(*)(lua_State*,const Color&)>([](lua_State *l,const Color &color) {
+		Lua::PushNumber(l,color.CalcPerceivedLuminance());
 	}));
 	utilMod[defColor];
 

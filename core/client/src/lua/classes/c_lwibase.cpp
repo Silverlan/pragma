@@ -503,6 +503,10 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,
 		lua_checkgui(l,hPanel);
 		Lua::PushInt(l,umath::to_integral(static_cast<::WITexturedShape*>(hPanel.get())->GetChannelSwizzle(static_cast<::wgui::ShaderTextured::Channel>(channel))));
 	}));
+	classDef.def("SetShader",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,wgui::ShaderTextured&)>([](lua_State *l,WITexturedShapeHandle &hPanel,wgui::ShaderTextured &shader) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->SetShader(shader);
+	}));
 	classDef.add_static_constant("CHANNEL_RED",umath::to_integral(::wgui::ShaderTextured::Channel::Red));
 	classDef.add_static_constant("CHANNEL_GREEN",umath::to_integral(::wgui::ShaderTextured::Channel::Green));
 	classDef.add_static_constant("CHANNEL_BLUE",umath::to_integral(::wgui::ShaderTextured::Channel::Blue));
@@ -3051,13 +3055,21 @@ void Lua::WIDropDownMenu::AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::
 {
 	lua_checkgui(l,hDm);
 	auto *pMenu = hDm.get<::WIDropDownMenu>();
-	pMenu->AddOption(option);
+	auto *el = pMenu->AddOption(option);
+	if(el == nullptr)
+		return;
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
+	o.push(l);
 }
 void Lua::WIDropDownMenu::AddOption(lua_State *l,WIDropDownMenuHandle &hDm,std::string option,const std::string &optionValue)
 {
 	lua_checkgui(l,hDm);
 	auto *pMenu = hDm.get<::WIDropDownMenu>();
-	pMenu->AddOption(option,optionValue);
+	auto *el = pMenu->AddOption(option,optionValue);
+	if(el == nullptr)
+		return;
+	auto o = WGUILuaInterface::GetLuaObject(l,*el);
+	o.push(l);
 }
 void Lua::WIDropDownMenu::OpenMenu(lua_State *l,WIDropDownMenuHandle &hDm)
 {

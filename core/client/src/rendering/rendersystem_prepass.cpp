@@ -59,7 +59,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 				{
 					entPrev = ent;
 					renderC = entPrev->GetRenderComponent().get();
-					if(renderC->IsDepthPassEnabled() == false)
+					if(renderC == nullptr || renderC->IsDepthPassEnabled() == false)
 						continue;
 					auto bWeighted = false;
 					shaderDepthStage.BindEntity(*ent);//,bWeighted); // prosper TODO
@@ -79,7 +79,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 						drawCmd->RecordSetDepthBias();
 					}
 				}
-				if(renderC->IsDepthPassEnabled() == false)
+				if(renderC == nullptr || renderC->IsDepthPassEnabled() == false)
 					continue;
 				for(auto *cmesh : pair.second.meshes)
 				{

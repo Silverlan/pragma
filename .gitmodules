@@ -61,9 +61,6 @@
 [submodule "external_libs/wgui"]
 	path = external_libs/wgui
 	url = https://github.com/Silverlan/wgui.git
-[submodule "modules/pr_steamworks"]
-	path = modules/pr_steamworks
-	url = https://github.com/Silverlan/pr_steamworks.git
 [submodule "modules/interfaces"]
 	path = modules/interfaces
 	url = https://github.com/Silverlan/pragma_interfaces.git
@@ -190,9 +187,6 @@ url=https://github.com/Silverlan/Anvil
 [submodule "modules/pr_curl"]
 	path = modules/pr_curl
 	url = https://github.com/Silverlan/pr_curl.git
-[submodule "modules/pr_mmd"]
-	path = modules/pr_mmd
-	url = https://github.com/Silverlan/pr_mmd.git
 [submodule "third_party_libs/tinygltf"]
 	path = third_party_libs/tinygltf
 	url = https://github.com/syoyo/tinygltf.git

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 
@@ -30,7 +31,7 @@ ShaderPPFXAA::ShaderPPFXAA(prosper::IPrContext &context,const std::string &ident
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void ShaderPPFXAA::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPPFXAA::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);

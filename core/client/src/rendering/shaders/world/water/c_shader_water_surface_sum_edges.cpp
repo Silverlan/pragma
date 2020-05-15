@@ -8,7 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_sum_edges.hpp"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -31,7 +31,7 @@ ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::IPrContext &cont
 ShaderWaterSurfaceSumEdges::ShaderWaterSurfaceSumEdges(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurfaceSumEdges(context,identifier,"compute/water/cs_water_surface_sum_edges")
 {}
-void ShaderWaterSurfaceSumEdges::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWaterSurfaceSumEdges::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

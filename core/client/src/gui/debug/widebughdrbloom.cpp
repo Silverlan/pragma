@@ -60,15 +60,15 @@ void WIDebugHDRBloom::DoUpdate()
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
-	auto img = c_engine->CreateImage(imgCreateInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {};
 	rpInfo.attachments.push_back({img->GetFormat(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,prosper::AttachmentStoreOp::Store,img->GetSampleCount(),prosper::ImageLayout::ColorAttachmentOptimal});
 	rpInfo.subPasses.push_back({prosper::util::RenderPassCreateInfo::SubPass{{0ull}}});
-	auto rp = c_engine->CreateRenderPass(rpInfo);
-	m_renderTarget = c_engine->CreateRenderTarget({tex},rp,{});
+	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
+	m_renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex},rp,{});
 	m_cbRenderHDRMap = c_game->AddCallback("PostRenderScenes",FunctionCallback<>::Create(
 		std::bind(&WIDebugHDRBloom::UpdateBloomImage,this)
 	));

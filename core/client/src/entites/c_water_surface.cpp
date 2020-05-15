@@ -165,11 +165,11 @@ void CWaterSurfaceComponent::InitializeSurface()
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	bufCreateInfo.size = verts.size() *sizeof(verts.front());
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	auto vertBuffer = c_engine->CreateBuffer(bufCreateInfo,verts.data());
+	auto vertBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,verts.data());
 
 	bufCreateInfo.size = triangles.size() *sizeof(triangles.front());
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
-	auto indexBuffer = c_engine->CreateBuffer(bufCreateInfo,triangles.data());
+	auto indexBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,triangles.data());
 
 	auto &vkMesh = subMesh->GetVKMesh();
 	vkMesh->SetVertexBuffer(vertBuffer); //sim.GetPositionBuffer());

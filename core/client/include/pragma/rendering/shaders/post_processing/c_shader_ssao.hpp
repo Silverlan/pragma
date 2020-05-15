@@ -40,7 +40,7 @@ namespace pragma
 		ShaderSSAO(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(const Scene &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void OnPipelineInitialized(uint32_t pipelineIdx) override;
 	private:

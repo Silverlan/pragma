@@ -15,7 +15,6 @@
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/math/plane.h>
 #include <sharedutils/util_weak_handle.hpp>
-#include <misc/types.h>
 #include <string>
 #include <vector>
 

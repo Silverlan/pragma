@@ -96,7 +96,7 @@ prosper::IDescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {r
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM.IsValid())
-		m_descSetGroupCSM = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
+		m_descSetGroupCSM = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
@@ -209,7 +209,7 @@ bool RasterizationRenderer::ReloadRenderTarget()
 		descSetCam.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
 		descSetCamView.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
 	}
-	auto &dummyTex = c_engine->GetDummyTexture();
+	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
 	descSetCam.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 	descSetCamView.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 	return true;

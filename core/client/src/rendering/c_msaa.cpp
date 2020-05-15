@@ -8,28 +8,21 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/c_msaa.h"
 #include <mathutil/umath.h>
-#include <wrappers/device.h>
 
 extern DLLCENGINE CEngine *c_engine;
 
 int GetMaxMSAASampleCount()
 {
-	auto &dev = c_engine->GetDevice();
-	Anvil::ImageFormatProperties imgFormatProperties {};
-	if(dev.get_physical_device_image_format_properties(
-		Anvil::ImageFormatPropertiesQuery{
-			static_cast<Anvil::Format>(prosper::Format::R16G16B16A16_SFloat),static_cast<Anvil::ImageType>(prosper::ImageType::e2D),static_cast<Anvil::ImageTiling>(prosper::ImageTiling::Optimal),
-			static_cast<Anvil::ImageUsageFlagBits>(prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit),
-			{}
-		},&imgFormatProperties
-		) == false
-	)
+	auto props = prosper::util::get_physical_device_image_format_properties(c_engine->GetRenderContext(),{
+		prosper::ImageCreateFlags{},prosper::Format::R16G16B16A16_SFloat,prosper::ImageType::e2D,prosper::ImageTiling::Optimal,
+		prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit
+	});
+	if(props.has_value() == false)
 	{
 		Con::cwar<<"WARNING: Unable to retrieve max MSAA sample count! Setting sample count to 1..."<<Con::endl;
 		return 1;
 	}
-	auto sampleMask = static_cast<uint32_t>(imgFormatProperties.sample_counts.get_vk());
-	return umath::get_highest_bit(sampleMask);
+	return umath::get_highest_bit(umath::to_integral(props->sampleCount));
 }
 unsigned char ClampMSAASampleCount(unsigned int *samples)
 {

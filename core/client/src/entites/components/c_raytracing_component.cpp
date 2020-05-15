@@ -43,10 +43,10 @@ bool CRaytracingComponent::InitializeBuffers()
 	createInfo.size = instanceSize *instanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 	m_entityMeshCount = 0;
-	s_entityMeshInfoBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
+	s_entityMeshInfoBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
 	s_entityMeshInfoBuffer->SetDebugName("entity_mesh_info_buf");
 	
-	s_gameSceneDsg = c_engine->CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
+	s_gameSceneDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
 	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<MaterialDescriptorArrayManager>(s_gameSceneDsg,umath::to_integral(pragma::ShaderRayTracing::GameSceneBinding::TextureArray));
 
 	auto &ds = *s_gameSceneDsg->GetDescriptorSet();

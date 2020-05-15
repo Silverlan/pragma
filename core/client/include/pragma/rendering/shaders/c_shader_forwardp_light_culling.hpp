@@ -51,7 +51,7 @@ namespace pragma
 			uint32_t sceneIndex
 		);
 	protected:
-		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

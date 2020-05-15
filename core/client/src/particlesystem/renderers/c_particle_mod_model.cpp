@@ -76,14 +76,14 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
-		s_instanceDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-		s_instanceBuffer = c_engine->CreateBuffer(createInfo,&instanceData);
+		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
 		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
 			*s_instanceBuffer,0u
 		);
 
 		instanceData.renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-		s_instanceBufferAnimated = c_engine->CreateBuffer(createInfo,&instanceData);
+		s_instanceBufferAnimated = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
 	}
 
 	auto bAnimated = !m_animation.empty();
@@ -104,8 +104,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 			if(wpBoneBuffer.expired() == false)
 			{
 				// If we are animated, we have to create a unique descriptor set
-				auto &dev = c_engine->GetDevice();
-				ptComponent.instanceDescSetGroupAnimated = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
 					*s_instanceBufferAnimated,0u
 				);
@@ -201,7 +200,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	auto *shader = static_cast<pragma::ShaderParticleModel*>(m_shader.get());
 	auto animStartBuffer = GetParticleSystem().GetAnimationStartBuffer();
 	if(animStartBuffer == nullptr)
-		animStartBuffer = c_engine->GetDummyBuffer();
+		animStartBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	if(
 		shader->BeginDraw(drawCmd,{},GetParticleSystem()) == false || 
 		shader->BindParticleBuffers(*GetParticleSystem().GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animStartBuffer) == false || 

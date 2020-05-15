@@ -10,6 +10,7 @@
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -51,7 +52,7 @@ bool ShaderEye::BindEyeball(uint32_t skinMatIdx)
 	pushConstants.eyeOrigin.z = eyeOrigin.z;
 	return RecordPushConstants(pushConstants,sizeof(ShaderPBR::PushConstants));
 }
-void ShaderEye::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderEye::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderPBR::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }

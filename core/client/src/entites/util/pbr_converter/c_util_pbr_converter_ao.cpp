@@ -142,7 +142,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuf
 		requiresSave = true;
 	}
 
-	shader->InsertAmbientOcclusion(*c_engine,rmaName,imgBuffer);
+	shader->InsertAmbientOcclusion(c_engine->GetRenderContext(),rmaName,imgBuffer);
 
 	if(requiresSave)
 	{

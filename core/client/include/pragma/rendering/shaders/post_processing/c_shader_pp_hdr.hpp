@@ -42,7 +42,7 @@ namespace pragma
 		ShaderPPHDR(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
 };

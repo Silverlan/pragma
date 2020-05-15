@@ -46,7 +46,7 @@ namespace pragma
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		EulerAngles m_skyAngles = {};
 	};
 

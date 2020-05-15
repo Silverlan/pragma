@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/model/vertex.h>
 #include <prosper_util_square_shape.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -30,13 +31,13 @@ ShaderDebug::ShaderDebug(prosper::IPrContext &context,const std::string &identif
 
 bool ShaderDebug::ShouldInitializePipeline(uint32_t pipelineIdx) {return true;}
 
-void ShaderDebug::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
-	pipelineInfo.toggle_depth_bias(true,1.f,0.f,0.f);
-	pipelineInfo.toggle_dynamic_states(true,{Anvil::DynamicState::DEPTH_BIAS});
+	pipelineInfo.ToggleDepthBias(true,1.f,0.f,0.f);
+	pipelineInfo.ToggleDynamicStates(true,{prosper::DynamicState::DepthBias});
 
 	VERTEX_BINDING_VERTEX.stride = std::numeric_limits<decltype(VERTEX_BINDING_VERTEX.stride)>::max();
 	switch(static_cast<Pipeline>(pipelineIdx))
@@ -44,21 +45,21 @@ void ShaderDebug::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipel
 		case Pipeline::Triangle:
 			break;
 		case Pipeline::Line:
-			pipelineInfo.toggle_dynamic_states(true,{Anvil::DynamicState::LINE_WIDTH});
-			pipelineInfo.set_primitive_topology(Anvil::PrimitiveTopology::LINE_LIST);
+			pipelineInfo.ToggleDynamicStates(true,{prosper::DynamicState::LineWidth});
+			pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineList);
 		case Pipeline::Wireframe:
-			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,Anvil::PolygonMode::LINE);
+			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Line);
 			break;
 		case Pipeline::LineStrip:
-			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,Anvil::PolygonMode::LINE);
-			pipelineInfo.set_primitive_topology(Anvil::PrimitiveTopology::LINE_STRIP);
-			pipelineInfo.toggle_dynamic_states(true,{Anvil::DynamicState::LINE_WIDTH});
+			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Line);
+			pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineStrip);
+			pipelineInfo.ToggleDynamicStates(true,{prosper::DynamicState::LineWidth});
 			break;
 		case Pipeline::Vertex:
 			VERTEX_BINDING_VERTEX.stride = sizeof(Vertex);
 		case Pipeline::Point:
-			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,Anvil::PolygonMode::POINT);
-			pipelineInfo.set_primitive_topology(Anvil::PrimitiveTopology::POINT_LIST);
+			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Point);
+			pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::PointList);
 			break;
 	}
 
@@ -114,10 +115,10 @@ ShaderDebugTexture::ShaderDebugTexture(prosper::IPrContext &context,const std::s
 	: ShaderScene(context,identifier,"debug/vs_debug_uv","debug/fs_debug_texture")
 {}
 
-void ShaderDebugTexture::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDebugTexture::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::NONE);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
@@ -125,7 +126,7 @@ void ShaderDebugTexture::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo
 }
 bool ShaderDebugTexture::Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants)
 {
-	auto buf = prosper::util::get_square_vertex_buffer(*c_engine);
+	auto buf = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
 	return RecordBindVertexBuffer(*buf) &&
 		RecordBindDescriptorSet(descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
 		RecordPushConstants(pushConstants) &&
@@ -143,7 +144,7 @@ ShaderDebugVertexColor::ShaderDebugVertexColor(prosper::IPrContext &context,cons
 	SetBaseShader<ShaderDebug>();
 }
 
-void ShaderDebugVertexColor::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDebugVertexColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderDebug::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);

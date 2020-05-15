@@ -37,7 +37,7 @@ namespace pragma
 		pragma::AlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
 		pragma::AlphaMode GetRenderAlphaMode(const CParticleSystemComponent &particle) const;
 		uint32_t GetParticlePipelineCount() const;
-		void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 	private:
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyAnimDescSetGroup = nullptr;
 	};

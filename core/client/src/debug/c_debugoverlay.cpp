@@ -17,7 +17,6 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <wrappers/memory_block.h>
 #include <pragma/math/intersection.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -127,9 +126,9 @@ DebugRenderer::WorldObject::WorldObject(const Vector4 &color)
 DebugRenderer::WorldObject::~WorldObject()
 {
 	if(m_vertexBuffer != nullptr)
-		c_engine->KeepResourceAliveUntilPresentationComplete(m_vertexBuffer);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexBuffer);
 	if(m_colorBuffer != nullptr)
-		c_engine->KeepResourceAliveUntilPresentationComplete(m_colorBuffer);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_colorBuffer);
 }
 DebugRenderer::ObjectType DebugRenderer::WorldObject::GetType() const {return ObjectType::World;}
 const Vector4 &DebugRenderer::WorldObject::GetColor() const {return m_color;}
@@ -164,27 +163,27 @@ void DebugRenderer::WorldObject::InitializeBuffers()
 	createInfo.size = m_vertices.size() *sizeof(m_vertices.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	m_vertexBuffer = c_engine->CreateBuffer(createInfo,m_vertices.data());
+	m_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,m_vertices.data());
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
 		return;
 	createInfo.size = m_colors.size() *sizeof(m_colors.front());
-	m_colorBuffer = c_engine->CreateBuffer(createInfo,m_colors.data());
+	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,m_colors.data());
 }
 
 void DebugRenderer::WorldObject::UpdateVertexBuffer()
 {
 	if(m_vertexBuffer == nullptr)
 		return;
-	c_engine->ScheduleRecordUpdateBuffer(m_vertexBuffer,0ull,m_vertices.size() *sizeof(m_vertices.front()),m_vertices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer,0ull,m_vertices.size() *sizeof(m_vertices.front()),m_vertices.data());
 }
 
 void DebugRenderer::WorldObject::UpdateColorBuffer()
 {
 	if(m_colorBuffer == nullptr)
 		return;
-	c_engine->ScheduleRecordUpdateBuffer(m_colorBuffer,0ull,m_colors.size() *sizeof(m_colors.front()),m_colors.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_colorBuffer,0ull,m_colors.size() *sizeof(m_colors.front()),m_colors.data());
 }
 
 ///////////////////////////
@@ -196,16 +195,16 @@ DebugRenderer::TextObject::TextObject(WIText *elText)
 		if(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE.IsValid() == false)
 			return;
 		if(m_descSetGroupText != nullptr)
-			c_engine->KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
+			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
 		auto &tex = rt.get()->GetTexture();
-		m_descSetGroupText = c_engine->CreateDescriptorSetGroup(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
+		m_descSetGroupText = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderDebugTexture::DESCRIPTOR_SET_TEXTURE);
 		m_descSetGroupText->GetDescriptorSet()->SetBindingTexture(tex,0u);
 	}));
 }
 DebugRenderer::TextObject::~TextObject()
 {
 	if(m_descSetGroupText != nullptr)
-		c_engine->KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_descSetGroupText);
 	if(m_hText.IsValid())
 		m_hText->Remove();
 	if(m_hCbRender.IsValid())

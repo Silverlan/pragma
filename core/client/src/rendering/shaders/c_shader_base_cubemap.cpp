@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_base_cubemap.hpp"
 #include "pragma/math/c_util_math.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -28,7 +29,7 @@ ShaderCubemap::ShaderCubemap(prosper::IPrContext &context,const std::string &ide
 	: ShaderCubemap{context,identifier,"screen/vs_cubemap",fragmentShader}
 {}
 
-void ShaderCubemap::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -76,7 +77,7 @@ std::shared_ptr<prosper::IBuffer> ShaderCubemap::CreateCubeMesh(uint32_t &outNum
 	bufCreateInfo.size = verts.size() *sizeof(verts.front());
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 	outNumVerts = verts.size();
-	return c_engine->CreateBuffer(bufCreateInfo,verts.data());
+	return c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,verts.data());
 }
 std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
 {
@@ -90,7 +91,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width,uin
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	return c_engine->CreateImage(createInfo);
+	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
 void ShaderCubemap::InitializeSamplerCreateInfo(prosper::util::ImageCreateInfo::Flags flags,prosper::util::SamplerCreateInfo &inOutSamplerCreateInfo)
 {
@@ -115,11 +116,11 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemap::CreateCubeMapRenderTarget(
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
-	return c_engine->CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
+	return c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
 }
 
 const Mat4 &ShaderCubemap::GetProjectionMatrix(float aspectRatio) const

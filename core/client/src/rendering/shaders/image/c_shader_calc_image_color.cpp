@@ -7,7 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -31,7 +31,7 @@ ShaderCalcImageColor::ShaderCalcImageColor(prosper::IPrContext &context,const st
 	: prosper::ShaderCompute(context,identifier,"compute/cs_calc_image_color")
 {}
 
-void ShaderCalcImageColor::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderCalcImageColor::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

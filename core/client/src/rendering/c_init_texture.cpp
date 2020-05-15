@@ -68,7 +68,7 @@ static void CVAR_CALLBACK_cl_render_texture_quality(NetworkState*,ConVar*,int,in
 {
 	if(client == nullptr)
 		return;
-	c_engine->WaitIdle();
+	c_engine->GetRenderContext().WaitIdle();
 	prosper::Filter minFilter,magFilter;
 	prosper::SamplerMipmapMode mipmapMode;
 	UInt32 anisotropy;

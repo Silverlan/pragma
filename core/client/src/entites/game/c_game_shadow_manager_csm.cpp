@@ -33,7 +33,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto &csm = *hShadowMap;
 
-	auto frameId = c_engine->GetLastFrameId();
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	if(csm.GetLastUpdateFrameId() == frameId)
 		return;
 	csm.SetLastUpdateFrameId(frameId);
@@ -63,7 +63,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 		auto numLayers = csm.GetLayerCount();
 
 		auto clearValues = {
-			vk::ClearValue{vk::ClearDepthStencilValue{1.f,0}} // Depth Attachment
+			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Depth Attachment
 		};
 
 		m_shadowCasters.clear();

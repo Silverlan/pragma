@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_unlit.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CGame *c_game;
@@ -42,7 +43,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDes
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
 	if(albedoTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(descSetInfo);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util_square_shape.hpp>
@@ -24,7 +25,7 @@ void ShaderBRDFConvolution::InitializeRenderPass(std::shared_ptr<prosper::IRende
 {
 	CreateCachedRenderPass<ShaderBRDFConvolution>({{prosper::util::RenderPassCreateInfo::AttachmentInfo{prosper::Format::R16G16_SFloat}}},outRenderPass,pipelineIdx);
 }
-void ShaderBRDFConvolution::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderBRDFConvolution::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -39,7 +40,7 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
-	auto img = c_engine->CreateImage(createInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(createInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -47,11 +48,11 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	auto rt = c_engine->CreateRenderTarget({tex},GetRenderPass());
+	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass());
 
-	auto vertBuffer = prosper::util::get_square_vertex_buffer(*c_engine);
-	auto uvBuffer = prosper::util::get_square_uv_buffer(*c_engine);
+	auto vertBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
+	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto success = false;
 	if(setupCmd->RecordBeginRenderPass(*rt))

@@ -13,7 +13,6 @@
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
-#include <wrappers/memory_block.h>
 
 namespace prosper
 {
@@ -44,18 +43,18 @@ namespace Lua
 		{
 		public:
 			ClearValue(const Color &color)
-				: clearValue{vk::ClearColorValue{std::array<float,4>{color.r /255.f,color.g /255.f,color.b /255.f,color.a /255.f}}}
+				: clearValue{prosper::ClearColorValue{std::array<float,4>{color.r /255.f,color.g /255.f,color.b /255.f,color.a /255.f}}}
 			{}
 			ClearValue(float depth,uint32_t stencil)
-				: clearValue{vk::ClearDepthStencilValue{depth,stencil}}
+				: clearValue{prosper::ClearDepthStencilValue{depth,stencil}}
 			{}
 			ClearValue(float depth)
-				: clearValue{vk::ClearDepthStencilValue{depth}}
+				: clearValue{prosper::ClearDepthStencilValue{depth}}
 			{}
 			ClearValue()
 				: ClearValue(0.f)
 			{}
-			vk::ClearValue clearValue {};
+			prosper::ClearValue clearValue {};
 		};
 		using Texture = prosper::Texture;
 		using Image = prosper::IImage;
@@ -65,8 +64,8 @@ namespace Lua
 		using RenderPass = prosper::IRenderPass;
 		using Event = prosper::IEvent;
 		using Fence = prosper::IFence;
-		using Semaphore = Anvil::Semaphore;
-		using Memory = Anvil::MemoryBlock;
+		//using Semaphore = prosper::Semaphore;
+		//using Memory = prosper::MemoryBlock;
 		using CommandBuffer = prosper::ICommandBuffer;
 		using Buffer = prosper::IBuffer;
 		using DescriptorSet = prosper::IDescriptorSetGroup;

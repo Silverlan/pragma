@@ -292,7 +292,7 @@ uint32_t RenderSystem::Render(
 	auto &processed = renderMeshes.processed;
 
 	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
-	//auto frameId = c_engine->GetLastFrameId();
+	//auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
 	pragma::ShaderTextured3DBase *shaderLast = nullptr;

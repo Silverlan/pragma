@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_context.hpp>
 #include <prosper_util.hpp>
 #include <prosper_util_square_shape.hpp>
@@ -35,7 +36,7 @@ ShaderDepthToRGB::ShaderDepthToRGB(prosper::IPrContext &context,const std::strin
 	: ShaderDepthToRGB(context,identifier,"debug/fs_depth_to_rgb")
 {}
 
-void ShaderDepthToRGB::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -51,7 +52,7 @@ void ShaderDepthToRGB::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &
 template<class TPushConstants>
 	bool ShaderDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants)
 {
-	return RecordBindVertexBuffers({prosper::util::get_square_vertex_uv_buffer(*c_engine).get()}) == true &&
+	return RecordBindVertexBuffers({prosper::util::get_square_vertex_uv_buffer(c_engine->GetRenderContext()).get()}) == true &&
 		RecordBindDescriptorSet(descSetDepthTex) == true &&
 		RecordPushConstants(pushConstants) == true &&
 		RecordDraw(prosper::util::get_square_vertex_count()) == true;

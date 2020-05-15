@@ -53,13 +53,13 @@ void CPhysVisualDebugger::Reset()
 }
 void CPhysVisualDebugger::Flush()
 {
-	c_engine->ScheduleRecordUpdateBuffer(m_lineBuffer.buffer,0,m_lineBuffer.GetDataSize(),m_lineBuffer.vertices.data());
-	c_engine->ScheduleRecordUpdateBuffer(m_pointBuffer.buffer,0,m_pointBuffer.GetDataSize(),m_pointBuffer.vertices.data());
-	c_engine->ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer,0,m_triangleBuffer.GetDataSize(),m_triangleBuffer.vertices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer,0,m_lineBuffer.GetDataSize(),m_lineBuffer.vertices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer,0,m_pointBuffer.GetDataSize(),m_pointBuffer.vertices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer,0,m_triangleBuffer.GetDataSize(),m_triangleBuffer.vertices.data());
 
-	c_engine->ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer,0,m_lineBuffer.GetColorDataSize(),m_lineBuffer.vertexColors.data());
-	c_engine->ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer,0,m_pointBuffer.GetColorDataSize(),m_pointBuffer.vertexColors.data());
-	c_engine->ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer,0,m_triangleBuffer.GetColorDataSize(),m_triangleBuffer.vertexColors.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer,0,m_lineBuffer.GetColorDataSize(),m_lineBuffer.vertexColors.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer,0,m_pointBuffer.GetColorDataSize(),m_pointBuffer.vertexColors.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer,0,m_triangleBuffer.GetColorDataSize(),m_triangleBuffer.vertexColors.data());
 }
 void CPhysVisualDebugger::InitializeBuffers()
 {
@@ -70,7 +70,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.size = totalBufferSize;
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
-	m_debugBuffer = c_engine->CreateBuffer(createInfo);
+	m_debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
 	m_debugBuffer->SetPermanentlyMapped(true);
 
 	constexpr auto colorBufferSize = (decltype(m_lineBuffer)::VERTS_PER_INSTANCE *decltype(m_lineBuffer)::MAX_INSTANCES +
@@ -79,11 +79,11 @@ void CPhysVisualDebugger::InitializeBuffers()
 	constexpr auto colorBufferSizeMb = colorBufferSize /1024 /1024;
 	createInfo.size = colorBufferSize;
 
-	m_colorBuffer = c_engine->CreateBuffer(createInfo);
+	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
 	m_colorBuffer->SetPermanentlyMapped(true);
 
-	vk::DeviceSize offset = 0;
-	vk::DeviceSize colorOffset = 0;
+	prosper::DeviceSize offset = 0;
+	prosper::DeviceSize colorOffset = 0;
 
 	m_lineBuffer.buffer = m_debugBuffer->CreateSubBuffer(offset,decltype(m_lineBuffer)::BUFFER_SIZE);
 	m_lineBuffer.colorBuffer = m_colorBuffer->CreateSubBuffer(offset,decltype(m_lineBuffer)::COLOR_BUFFER_SIZE);

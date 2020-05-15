@@ -94,7 +94,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit; // Transfer flags are required for mapping GPUBulk buffers
-	auto alignment = c_engine->GetBufferAlignment(bufCreateInfo.usageFlags);
+	auto alignment = c_engine->GetRenderContext().GetBufferAlignment(bufCreateInfo.usageFlags);
 	auto requiredBufferSize = 0ull;
 
 	// Collect all meshes that have lightmap uv coordinates
@@ -117,7 +117,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
-	auto lightMapUvBuffer = c_engine->CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size,0.2f);
+	auto lightMapUvBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size,0.2f);
 	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
 		return nullptr;
 
@@ -151,13 +151,13 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Linear;
-	auto imgStaging = c_engine->CreateImage(lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
+	auto imgStaging = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
 
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
-	auto img = c_engine->CreateImage(lightMapCreateInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	if(setupCmd->RecordBlitImage({},*imgStaging,*img) == false)
@@ -172,7 +172,7 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	imgViewCreateInfo.swizzleAlpha = prosper::ComponentSwizzle::One; // We don't use the alpha channel
-	return c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	return c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 }
 
 #include "cmaterialmanager.h"
@@ -303,7 +303,6 @@ static void generate_lightmaps(BaseEntity &ent,uint32_t width,uint32_t height,ui
 			Con::cwar<<"WARNING: Unable to bake lightmaps: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
-		auto &dev = c_engine->GetDevice();
 
 		auto imgBuffer = worker.GetResult();
 		if(hdrOutput == false)

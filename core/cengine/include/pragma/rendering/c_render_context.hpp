@@ -9,7 +9,7 @@
 #define __C_RENDER_CONTEXT_HPP__
 
 #include "pragma/c_enginedefinitions.h"
-#include <vk_context.hpp>
+#include <prosper_context.hpp>
 #include <iglfw/glfw_window.h>
 #include <memory>
 #include <optional>
@@ -21,11 +21,24 @@
 namespace pragma
 {
 	class DLLCENGINE RenderContext
-		: public prosper::VlkContext
 	{
 	public:
 		RenderContext();
-		virtual ~RenderContext() override;
+		virtual ~RenderContext();
+
+		void Release();
+
+		const prosper::IPrContext &GetRenderContext() const;
+		prosper::IPrContext &GetRenderContext();
+		prosper::ShaderManager &GetShaderManager() const;
+		::util::WeakHandle<prosper::Shader> RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory);
+		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
+
+		GLFW::Window &GetWindow();
+		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetSetupCommandBuffer();
+		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer() const;
+		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer(uint32_t swapchainIdx) const;
+		void FlushSetupCommandBuffer();
 		
 		void SetWindowedMode(bool b);
 		void SetRefreshRate(uint32_t rate);
@@ -34,15 +47,17 @@ namespace pragma
 		void SetMonitor(GLFW::Monitor &monitor);
 		void SetPresentMode(prosper::PresentModeKHR presentMode);
 		float GetAspectRatio() const;
-		using prosper::IPrContext::DrawFrame;
 	protected:
 		void UpdateWindow();
-		virtual void DrawFrame() override;
-		virtual void OnWindowInitialized() override;
-		virtual VkBool32 ValidationCallback(
-			Anvil::DebugMessageSeverityFlags severityFlags,
+		virtual void OnClose();
+		virtual void DrawFrame();
+		virtual void OnWindowInitialized();
+		virtual void OnResolutionChanged(uint32_t w,uint32_t h);
+		virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx);
+		virtual void ValidationCallback(
+			prosper::DebugMessageSeverityFlags severityFlags,
 			const char *message
-		) override;
+		);
 	private:
 		struct WindowChangeInfo
 		{
@@ -55,6 +70,7 @@ namespace pragma
 			std::optional<prosper::PresentModeKHR> presentMode = {};
 		};
 		WindowChangeInfo &ScheduleWindowReload();
+		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unique_ptr<WindowChangeInfo> m_scheduledWindowReloadInfo = nullptr;
 		bool m_bWindowedMode = false;
 		float m_aspectRatio = 1.f;

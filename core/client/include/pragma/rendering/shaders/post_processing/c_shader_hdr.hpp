@@ -27,7 +27,7 @@ namespace pragma
 		ShaderHDR(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
 		bool Draw(prosper::IDescriptorSet &descSetTexture)=delete;
 	};

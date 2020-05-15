@@ -15,6 +15,7 @@
 #include "pragma/model/c_side.h"
 #include "pragma/rendering/uniformbinding.h"
 #include "pragma/rendering/lighting/c_light_ranged.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <textureinfo.h>
 #include <cmaterial.h>
 

@@ -91,13 +91,13 @@ namespace pragma
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 
-		void RegisterDefaultGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo);
-		void RegisterDefaultGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo);
-		void RegisterDefaultGfxPipelineDescriptorSetGroups(Anvil::GraphicsPipelineCreateInfo &pipelineInfo);
+		void RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
+		void RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
+		void RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo);
 
 		void GetParticleSystemOrientationInfo(
 			const Mat4 &matrix,const CParticleSystemComponent &particle,CParticleSystemComponent::OrientationType orientationType,Vector3 &up,Vector3 &right,

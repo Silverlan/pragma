@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/model/vertex.h>
@@ -41,13 +42,13 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &ident
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
-void ShaderSkybox::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
-		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::FRONT_BIT);
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-	pipelineInfo.toggle_depth_writes(false);
-	pipelineInfo.toggle_depth_test(false,Anvil::CompareOp::ALWAYS);
+	pipelineInfo.ToggleDepthWrites(false);
+	pipelineInfo.ToggleDepthTest(false,prosper::CompareOp::Always);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
@@ -66,7 +67,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDe
 	auto skyboxTexture = std::static_pointer_cast<Texture>(skyboxMap->texture);
 	if(skyboxTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*skyboxTexture->GetVkTexture(),0u);

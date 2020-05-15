@@ -7,12 +7,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/image/c_shader_clear_color.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_context.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util_square_shape.hpp>
-#include <vulkan/vulkan.hpp>
-#include <wrappers/descriptor_set_group.h>
 
 using namespace pragma;
 
@@ -26,7 +25,7 @@ ShaderClearColor::ShaderClearColor(prosper::IPrContext &context,const std::strin
 	: ShaderGraphics(context,identifier,vsShader,fsShader,gsShader)
 {}
 
-void ShaderClearColor::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderClearColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

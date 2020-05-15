@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -65,12 +66,12 @@ void ShaderParticleModel::InitializeRenderPass(std::shared_ptr<prosper::IRenderP
 		}
 	}}},outRenderPass,pipelineIdx);
 }
-void ShaderParticleModel::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
 
-	//pipelineInfo.toggle_depth_writes(true);
+	//pipelineInfo.ToggleDepthWrites(true);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PARTICLE);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ROTATION);
@@ -81,7 +82,7 @@ void ShaderParticleModel::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInf
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ANIMATION);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_BONE_MATRICES);
 }
-void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }

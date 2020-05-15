@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 
@@ -36,7 +37,7 @@ ShaderParticleBlob::ShaderParticleBlob(prosper::IPrContext &context,const std::s
 	SetBaseShader<ShaderParticle>();
 }
 
-void ShaderParticleBlob::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

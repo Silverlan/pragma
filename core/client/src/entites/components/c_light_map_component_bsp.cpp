@@ -36,7 +36,6 @@ constexpr uint32_t BSP_MAX_DISP_LIGHTMAP_DIM_INCLUDING_BORDER = 131;
 
 //#define TEST_SCALE_LIGHTMAP_ATLAS
 #include <util_bsp.hpp>
-#include <wrappers/memory_block.h>
 void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 {
 	Con::cwar<<"WARNING: BSP lightmap conversion is currently disabled due to changes to the level format. Please contact the Engine developer if you need this feature!"<<Con::endl;

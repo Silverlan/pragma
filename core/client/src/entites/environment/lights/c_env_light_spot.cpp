@@ -50,7 +50,7 @@ void CLightSpotComponent::Initialize()
 		bufferData.cutoffInnerCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInnerCos),bufferData.cutoffInnerCos);
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInnerCos),bufferData.cutoffInnerCos);
 	});
 	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		SetShadowDirty();
@@ -62,7 +62,7 @@ void CLightSpotComponent::Initialize()
 		bufferData.cutoffOuterCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuterCos),bufferData.cutoffOuterCos);
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuterCos),bufferData.cutoffOuterCos);
 
 		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen)
 		{
@@ -140,7 +140,7 @@ void CLightSpotComponent::SetConeStartOffset(float offset)
 	bufferData.direction.w = offset;
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
-		c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,direction) +offsetof(Vector4,w),offset);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,direction) +offsetof(Vector4,w),offset);
 }
 luabind::object CLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightSpotComponentHandleWrapper>(l);}
 void CLightSpotComponent::UpdateTransformMatrix()
@@ -152,7 +152,7 @@ void CLightSpotComponent::UpdateTransformMatrix()
 	if(shadowBuffer == nullptr)
 		return;
 	std::array<Mat4,3> matrices = {GetBiasTransformationMatrix(),GetViewMatrix(),GetProjectionMatrix()};
-	c_engine->ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
 }
 void CLightSpotComponent::UpdateProjectionMatrix()
 {

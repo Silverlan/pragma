@@ -220,5 +220,5 @@ void CLightPointComponent::UpdateTransformationMatrix(unsigned int j) // TODO Th
 	if(shadowBuffer == nullptr)
 		return;
 	std::array<Mat4,3> matrices = {GetBiasTransformationMatrix(),GetViewMatrix(4),GetProjectionMatrix()};
-	c_engine->ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer,0ull,matrices);
 }

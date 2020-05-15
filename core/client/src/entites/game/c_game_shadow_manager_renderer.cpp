@@ -163,7 +163,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 	auto hShadowMap = light.GetShadowMap(smType);
 	if(hShadowMap.expired())
 		return false;
-	auto frameId = c_engine->GetLastFrameId();
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	if(hShadowMap->GetLastFrameRendered() == frameId)
 		return false;
 	auto wpRt = hShadowMap->RequestRenderTarget();
@@ -295,7 +295,7 @@ void ShadowRenderer::RenderShadows(
 		auto &depthMVP = light.GetTransformationMatrix(layerId);
 		auto *framebuffer = hShadowMap->GetFramebuffer(layerId);
 
-		const vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
+		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
 		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
 			continue;
 		auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);

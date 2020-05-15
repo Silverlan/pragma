@@ -150,7 +150,7 @@ static bool load_image(
 	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
 	std::shared_ptr<void> texture = nullptr;
 	auto &texManager = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager();
-	if(texManager.Load(*c_engine,image->uri,f,loadInfo,&texture) == false)
+	if(texManager.Load(c_engine->GetRenderContext(),image->uri,f,loadInfo,&texture) == false)
 		return false;
 	if(std::static_pointer_cast<Texture>(texture)->HasValidVkTexture() == false)
 		return false;
@@ -287,11 +287,11 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			else
 				imgBuf = uimg::ImageBuffer::Create(data,gltfImg.width,gltfImg.height,format);
 
-			auto img = c_engine->CreateImage(*imgBuf);
+			auto img = c_engine->GetRenderContext().CreateImage(*imgBuf);
 			prosper::util::TextureCreateInfo texCreateInfo {};
 			prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 			prosper::util::SamplerCreateInfo samplerCreateInfo {};
-			tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+			tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 		}
 	}
 	uint32_t matIdx = 0;
@@ -437,7 +437,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 					if(shader)
 					{
 						auto metallicRoughnessSet = shader->ConvertToMetalnessRoughness(
-							*c_engine,diffuseTex,specularGlossinessTex,pushConstants,occlusionTex.get()
+							c_engine->GetRenderContext(),diffuseTex,specularGlossinessTex,pushConstants,occlusionTex.get()
 						);
 						if(metallicRoughnessSet.has_value())
 						{
@@ -482,7 +482,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 					// Separate ao texture; Merge it with rma texture
 					auto *shaderComposeRMA = static_cast<pragma::ShaderComposeRMA*>(c_engine->GetShader("compose_rma").get());
 					if(shaderComposeRMA)
-						shaderComposeRMA->InsertAmbientOcclusion(*c_engine,rmaName,*occlusionImg);
+						shaderComposeRMA->InsertAmbientOcclusion(c_engine->GetRenderContext(),rmaName,*occlusionImg);
 				}
 				else
 				{
@@ -657,7 +657,7 @@ bool pragma::asset::import_texture(const std::string &fileName,const TextureImpo
 	TextureManager::LoadInfo loadInfo {};
 	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
 	std::shared_ptr<void> tex;
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,fileName,loadInfo,&tex) == false)
+	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fileName,loadInfo,&tex) == false)
 	{
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -674,7 +674,7 @@ bool pragma::asset::import_texture(VFilePtr f,const TextureImportInfo &texInfo,c
 	TextureManager::LoadInfo loadInfo {};
 	loadInfo.flags = TextureLoadFlags::LoadInstantly | TextureLoadFlags::DontCache;
 	std::shared_ptr<void> tex;
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"",f,loadInfo,&tex) == false)
+	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"",f,loadInfo,&tex) == false)
 	{
 		outErrMsg = "Unable to load texture!";
 		return false;
@@ -899,7 +899,7 @@ bool pragma::asset::export_texture(
 	TextureManager::LoadInfo loadInfo {};
 	loadInfo.flags = TextureLoadFlags::LoadInstantly;
 	std::shared_ptr<void> pTexture = nullptr;
-	if(texManager.Load(*c_engine,texturePath,loadInfo,&pTexture) == false || std::static_pointer_cast<Texture>(pTexture)->HasValidVkTexture() == false)
+	if(texManager.Load(c_engine->GetRenderContext(),texturePath,loadInfo,&pTexture) == false || std::static_pointer_cast<Texture>(pTexture)->HasValidVkTexture() == false)
 	{
 		outErrMsg = "Unable to load texture '" +texturePath +"'!";
 		return false;
@@ -1095,7 +1095,7 @@ template<class T>
 		requiresSave = true;
 	}
 
-	if(shaderComposeRMA->InsertAmbientOcclusion(*c_engine,originalRmaPath,img,&rmaPath) == false)
+	if(shaderComposeRMA->InsertAmbientOcclusion(c_engine->GetRenderContext(),originalRmaPath,img,&rmaPath) == false)
 	{
 		errMsg = "Unable to insert ambient occlusion data into RMA map!";
 		return false;

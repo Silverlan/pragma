@@ -33,7 +33,7 @@ static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	auto sz = c_engine->GetWindowSize();
+	auto sz = c_engine->GetRenderContext().GetWindowSize();
 	c_engine->SetResolution(Vector2i(atoi(argv[0].c_str()),sz.at(1)));
 }
 
@@ -41,7 +41,7 @@ static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	auto sz = c_engine->GetWindowSize();
+	auto sz = c_engine->GetRenderContext().GetWindowSize();
 	c_engine->SetResolution(Vector2i(sz.at(0),atoi(argv[0].c_str())));
 }
 
@@ -49,7 +49,7 @@ static void LPARAM_fullbright(const std::vector<std::string> &argv) {c_engine->U
 
 static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv)
 {
-	c_engine->SetValidationEnabled(true);
+	c_engine->GetRenderContext().SetValidationEnabled(true);
 }
 
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed,LPARAM_windowed,"-window -startwindowed -sw","start in windowed mode");

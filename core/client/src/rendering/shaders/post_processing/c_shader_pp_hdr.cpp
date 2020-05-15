@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/console/c_cvar.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
@@ -48,7 +49,7 @@ void ShaderPPHDR::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &ou
 	}},outRenderPass,pipelineIdx);
 }
 
-void ShaderPPHDR::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDefaultVertexAttributes(pipelineInfo);

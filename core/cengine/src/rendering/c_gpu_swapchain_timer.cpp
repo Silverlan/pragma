@@ -11,7 +11,6 @@
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <prosper_command_buffer.hpp>
-#include <wrappers/swapchain.h>
 
 using namespace pragma::debug;
 
@@ -78,7 +77,7 @@ std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetSwapchain()->get_last_acquired_image_index();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).timerQuery.get();
@@ -87,7 +86,7 @@ prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 {
 	InitializeQueries();
-	auto index = c_engine->GetSwapchain()->get_last_acquired_image_index();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
 	if(index >= m_swapchainTimers.size())
 		return nullptr;
 	return m_swapchainTimers.at(index).statsQuery.get();
@@ -95,7 +94,7 @@ prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 
 void GPUSwapchainTimer::InitializeQueries()
 {
-	auto index = c_engine->GetSwapchain()->get_last_acquired_image_index();
+	auto index = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
 	if(index < m_swapchainTimers.size())
 		return;
 	auto timerPool = m_wpTimerQueryPool.lock();

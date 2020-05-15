@@ -29,7 +29,7 @@ void CParticleRendererRotationalBuffer::Initialize(pragma::CParticleSystemCompon
 	createInfo.size = m_rotations.size() *sizeof(m_rotations.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	m_rotBuffer = c_engine->CreateBuffer(createInfo,m_rotations.data());
+	m_rotBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,m_rotations.data());
 }
 
 void CParticleRendererRotationalBuffer::SetRotationAlignVelocity(bool b) {m_bAlignVelocity = b;}
@@ -38,7 +38,7 @@ const std::shared_ptr<prosper::IBuffer> &CParticleRendererRotationalBuffer::GetB
 
 bool CParticleRendererRotationalBuffer::Update()
 {
-	//auto frameId = c_engine->GetLastFrameId();
+	//auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	if(/*frameId == m_lastFrameUpdate || */m_hParticleSystem.expired())
 		return false;
 	//m_lastFrameUpdate = frameId;
@@ -74,7 +74,7 @@ bool CParticleRendererRotationalBuffer::Update()
 				m_rotations.at(i) = Quat{0.f,vel.x,vel.y,vel.z};
 			}
 		}
-		c_engine->ScheduleRecordUpdateBuffer(m_rotBuffer,0ull,numParticles *sizeof(m_rotations.front()),m_rotations.data());
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer,0ull,numParticles *sizeof(m_rotations.front()),m_rotations.data());
 	}
 	return true;
 }

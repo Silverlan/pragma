@@ -7,7 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface_integrate.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -23,7 +23,7 @@ decltype(ShaderWaterSurfaceIntegrate::DESCRIPTOR_SET_SURFACE_INFO) ShaderWaterSu
 ShaderWaterSurfaceIntegrate::ShaderWaterSurfaceIntegrate(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurface(context,identifier,"compute/water/cs_water_surface_integrate")
 {}
-void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWaterSurfaceIntegrate::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

@@ -340,7 +340,7 @@ void CParticleRendererBlob::OnParticleDestroyed(CParticle &particle)
 /*
 void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIndexBuffer)
 {
-	auto frameId = c_engine->GetLastFrameId();
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	if(m_lastFrame == frameId)
 		return;
 	m_lastFrame = frameId;

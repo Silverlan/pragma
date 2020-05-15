@@ -53,7 +53,7 @@ void WIDebugMSAATexture::UpdateResolvedTexture()
 	}
 	auto &msaaImg = m_msaaTexture->GetImage();
 	auto extents = msaaImg.GetExtents();
-	auto &context = *c_engine;
+	auto &context = c_engine->GetRenderContext();
 	prosper::util::ImageCreateInfo resolvedImgCreateInfo {};
 	resolvedImgCreateInfo.width = extents.width;
 	resolvedImgCreateInfo.height = extents.height;
@@ -79,6 +79,6 @@ void WIDebugMSAATexture::DoUpdate()
 	WIBase::DoUpdate();
 	if(!m_hTextureRect.IsValid())
 		return;
-	auto &context = *c_engine;
+	auto &context = c_engine->GetRenderContext();
 	// TODO
 }

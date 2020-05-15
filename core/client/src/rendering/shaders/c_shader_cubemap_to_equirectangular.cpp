@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util_square_shape.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
@@ -43,7 +44,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirecta
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 
-	return c_engine->CreateImage(createInfo);
+	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
 
 std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEquirectangularRenderTarget(uint32_t width,uint32_t height,prosper::util::ImageCreateInfo::Flags flags) const
@@ -55,11 +56,11 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	//InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	//rtCreateInfo.useLayerFramebuffers = true;
-	return c_engine->CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
+	return c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass(),rtCreateInfo);
 }
 
 std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap,uint32_t width,uint32_t height)
@@ -68,7 +69,7 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	auto format = cubemap.GetImage().GetFormat();
 
 	// Shader input
-	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap,0u);
 
 	// Shader execution
@@ -76,8 +77,8 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
 
-	auto vertBuffer = prosper::util::get_square_vertex_buffer(*c_engine);
-	auto uvBuffer = prosper::util::get_square_uv_buffer(*c_engine);
+	auto vertBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
+	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
 	auto numVerts = prosper::util::get_square_vertex_count();
 
 	if(setupCmd->RecordBeginRenderPass(*rt) == false)

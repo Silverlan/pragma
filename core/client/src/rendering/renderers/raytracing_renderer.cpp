@@ -30,15 +30,15 @@ bool RaytracingRenderer::Initialize()
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::StorageBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
 
-	auto img = c_engine->CreateImage(imgCreateInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	m_outputTexture = c_engine->CreateTexture(prosper::util::TextureCreateInfo{},*img,imgViewCreateInfo,samplerCreateInfo);
-	auto descSetImage = c_engine->CreateDescriptorSetGroup(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
+	m_outputTexture = c_engine->GetRenderContext().CreateTexture(prosper::util::TextureCreateInfo{},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto descSetImage = c_engine->GetRenderContext().CreateDescriptorSetGroup(ShaderRayTracing::DESCRIPTOR_SET_IMAGE_OUTPUT);
 	descSetImage->GetDescriptorSet()->SetBindingStorageImage(*m_outputTexture,0u);
 	m_dsgOutputImage = descSetImage;
 
-	m_dsgLights = c_engine->CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
+	m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
 	m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
 		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
 	);
@@ -84,7 +84,7 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuf
 	if(dsIBL == nullptr)
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::NoIBL);
 
-	auto &dsgCam = scene.GetCameraDescriptorSetGroup(vk::PipelineBindPoint::eCompute);
+	auto &dsgCam = scene.GetCameraDescriptorSetGroup(prosper::PipelineBindPoint::Compute);
 	auto dsgGameScene = CRaytracingComponent::GetGameSceneDescriptorSetGroup();
 	if(dsgGameScene == nullptr)
 		return false;
@@ -118,7 +118,7 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuf
 	//
 	const auto fFlushCommandBuffer = [&drawCmd]() {
 		drawCmd->StopRecording();
-		c_engine->Submit(*drawCmd,true);
+		c_engine->GetRenderContext().Submit(*drawCmd,true);
 		drawCmd->StartRecording();
 	};
 	//

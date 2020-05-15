@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_compute_irradiance_map_roughness.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -39,7 +40,7 @@ ShaderComputeIrradianceMapRoughness::ShaderComputeIrradianceMapRoughness(prosper
 	: ShaderCubemap{context,identifier,"screen/fs_compute_irradiance_map_roughness"}
 {}
 
-void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderComputeIrradianceMapRoughness::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -81,16 +82,16 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 			imgViewCreateInfo.levelCount = 1u;
 			imgViewCreateInfo.mipmapLevels = 1u;
 
-			mipLevelFramebuffer.imageView = c_engine->CreateImageView(imgViewCreateInfo,*img);
+			mipLevelFramebuffer.imageView = c_engine->GetRenderContext().CreateImageView(imgViewCreateInfo,*img);
 			uint32_t wMipmap,hMipmap;
 			prosper::util::calculate_mipmap_size(w,h,&wMipmap,&hMipmap,mipLevel);
 			std::vector<prosper::IImageView*> imgViewAttachments {mipLevelFramebuffer.imageView.get()};
-			mipLevelFramebuffer.framebuffer = c_engine->CreateFramebuffer(wMipmap,hMipmap,1u,imgViewAttachments);
+			mipLevelFramebuffer.framebuffer = c_engine->GetRenderContext().CreateFramebuffer(wMipmap,hMipmap,1u,imgViewAttachments);
 		}
 	}
 
 	// Shader input
-	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_IRRADIANCE);
+	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_IRRADIANCE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap,0u);
 
 	PushConstants pushConstants {};
@@ -105,10 +106,10 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	bufCreateInfo.size = sizeof(RoughnessData);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
-	auto buf = c_engine->CreateBuffer(bufCreateInfo);
+	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
 	buf->SetPermanentlyMapped(true);
 
-	auto dsgRoughness = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
+	auto dsgRoughness = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
 	dsgRoughness->GetDescriptorSet()->SetBindingUniformBuffer(*buf,0);
 
 	// Shader execution
@@ -176,7 +177,7 @@ endLoop:
 	InitializeSamplerCreateInfo(flags,samplerCreateInfo);
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	InitializeTextureCreateInfo(texCreateInfo);
-	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 	return success ? tex : nullptr;
 
 }

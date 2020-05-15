@@ -177,9 +177,9 @@ namespace pragma
 		virtual bool BindMaterialParameters(CMaterial &mat);
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 		std::optional<MaterialData> InitializeMaterialBuffer(prosper::IDescriptorSet &descSet,CMaterial &mat);
-		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
@@ -187,7 +187,7 @@ namespace pragma
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		StateFlags m_stateFlags = StateFlags::ShouldUseLightMap;
 	};
 };

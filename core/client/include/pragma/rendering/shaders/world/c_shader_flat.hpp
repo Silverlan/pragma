@@ -32,7 +32,7 @@ namespace pragma
 		bool BindMaterial(CMaterial &mat);
 		bool Draw(CModelSubMesh &mesh);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
 		// These are unused
 		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override {return false;}

@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_msaa_texture.hpp>
@@ -58,7 +59,7 @@ ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context,const st
 {
 	SetPipelineCount(GetParticlePipelineCount());
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_VERTEX);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PARTICLE);
@@ -67,11 +68,11 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(Anvil::Gra
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LENGTH);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_START);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(Anvil::GraphicsPipelineCreateInfo &pipelineInfo)
+void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
@@ -83,12 +84,12 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(Anvil::
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 }
 
-void ShaderParticle2DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
 	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
 
-	pipelineInfo.toggle_depth_writes(false);
+	pipelineInfo.ToggleDepthWrites(false);
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
@@ -113,7 +114,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMa
 		auto texture = std::static_pointer_cast<Texture>(diffuseMap->texture);
 		if(texture->HasValidVkTexture())
 		{
-			auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
+			auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_TEXTURE);
 			mat.SetDescriptorSetGroup(*this,descSetGroup);
 			auto &descSet = *descSetGroup->GetDescriptorSet();
 			descSet.SetBindingTexture(*texture->GetVkTexture(),0u);
@@ -242,8 +243,8 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 	auto texIntensity = (bloom == true) ? ps.GetBloomScale() : ps.GetIntensity();
 	auto renderFlags = GetRenderFlags(ps);
 
-	auto width = c_engine->GetWindowWidth();
-	auto height = c_engine->GetWindowHeight();
+	auto width = c_engine->GetRenderContext().GetWindowWidth();
+	auto height = c_engine->GetRenderContext().GetWindowHeight();
 	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());
 
 	auto viewportSize = static_cast<uint32_t>(width);
@@ -276,7 +277,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 
 	auto animStartBuffer = ps.GetAnimationStartBuffer();
 	if(animStartBuffer == nullptr)
-		animStartBuffer = c_engine->GetDummyBuffer();
+		animStartBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	return RecordBindVertexBuffers({ps.GetVertexBuffer().get(),ps.GetParticleBuffer().get(),animStartBuffer.get()}) == true &&
 		RecordDraw(pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 }

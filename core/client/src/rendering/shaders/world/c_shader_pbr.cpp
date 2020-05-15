@@ -12,6 +12,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
@@ -131,7 +132,7 @@ void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags)
 	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
 	inOutFlags |= m_extRenderFlags;
 }
-void ShaderPBR::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
@@ -171,7 +172,7 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
 	std::shared_ptr<void> ptrTex = nullptr;
-	if(texManager.Load(*c_engine,defaultTexName,get_texture_load_info(),&ptrTex) == false)
+	if(texManager.Load(c_engine->GetRenderContext(),defaultTexName,get_texture_load_info(),&ptrTex) == false)
 		return false;
 	auto tex = std::static_pointer_cast<Texture>(ptrTex);
 
@@ -209,7 +210,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
 	if(albedoTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(descSetInfo);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
@@ -268,13 +269,13 @@ decltype(ShaderPBRBlend::DESCRIPTOR_SET_MATERIAL) ShaderPBRBlend::DESCRIPTOR_SET
 ShaderPBRBlend::ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/vs_textured_blend","world/pbr/fs_pbr_blend"}
 {}
-void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderPBR::InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
 }
 prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
@@ -305,7 +306,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterial
 bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 {
 	auto numAlpha = 0;
-	auto alphaBuffer = c_engine->GetDummyBuffer();
+	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	auto &vkMesh = mesh.GetVKMesh();
 	if(vkMesh != nullptr)
 	{

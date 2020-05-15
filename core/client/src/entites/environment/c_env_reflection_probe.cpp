@@ -9,7 +9,6 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <wrappers/memory_block.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
@@ -153,7 +152,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 		auto &imgBuffer = m_layerImageBuffers.at(layerIndex);
 		auto imgDataSize = imgBuffer->GetSize();
 
-		auto tmpBuf = c_engine->AllocateTemporaryBuffer(imgDataSize,0u /* alignment */,imgBuffer->GetData());
+		auto tmpBuf = c_engine->GetRenderContext().AllocateTemporaryBuffer(imgDataSize,0u /* alignment */,imgBuffer->GetData());
 
 		auto &setupCmd = c_engine->GetSetupCommandBuffer();
 		prosper::util::BufferImageCopyInfo copyInfo {};
@@ -492,7 +491,7 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 	createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
-	return c_engine->CreateImage(createInfo);
+	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
 
 bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
@@ -630,7 +629,7 @@ bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.minFilter = prosper::Filter::Linear;
 	samplerCreateInfo.magFilter = prosper::Filter::Linear;
-	auto tex = c_engine->CreateTexture({},imgCubemap,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture({},imgCubemap,imgViewCreateInfo,samplerCreateInfo);
 
 	Con::cout<<"Generating IBL reflection textures from reflection probe..."<<Con::endl;
 	auto result = GenerateIBLReflectionsFromCubemap(*tex);
@@ -673,7 +672,7 @@ bool CReflectionProbeComponent::GenerateIBLReflectionsFromCubemap(prosper::Textu
 	std::shared_ptr<void> texPtr = nullptr;
 
 	// Load BRDF texture from disk, if it already exists
-	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"env/brdf.ktx",loadInfo,&texPtr) == true)
+	if(static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"env/brdf.ktx",loadInfo,&texPtr) == true)
 		brdfTex = std::static_pointer_cast<Texture>(texPtr)->GetVkTexture();
 
 	// Otherwise generate it
@@ -764,12 +763,12 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 		samplerCreateInfo.minFilter = prosper::Filter::Linear;
 		samplerCreateInfo.magFilter = prosper::Filter::Linear;
-		auto sampler = c_engine->CreateSampler(samplerCreateInfo);
+		auto sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texIrradiance->GetVkTexture()->SetSampler(*sampler);
 		texBrdf->GetVkTexture()->SetSampler(*sampler);
 
 		samplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
-		sampler = c_engine->CreateSampler(samplerCreateInfo);
+		sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
 		texPrefilter->GetVkTexture()->SetSampler(*sampler);
 	}
 
@@ -783,7 +782,7 @@ void CReflectionProbeComponent::InitializeDescriptorSet()
 	m_iblDsg = nullptr;
 	if(m_iblData == nullptr)
 		return;
-	m_iblDsg = c_engine->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	m_iblDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	auto &ds = *m_iblDsg->GetDescriptorSet();
 	ds.SetBindingTexture(*m_iblData->irradianceMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::IrradianceMap));
 	ds.SetBindingTexture(*m_iblData->prefilterMap,umath::to_integral(pragma::ShaderPBR::PBRBinding::PrefilterMap));

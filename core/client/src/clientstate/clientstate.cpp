@@ -285,8 +285,8 @@ void ClientState::CloseMainMenu()
 	if(menu == NULL || !menu->IsVisible())
 		return;
 	menu->SetVisible(false);
-	auto w = c_engine->GetWindowWidth();
-	auto h = c_engine->GetWindowHeight();
+	auto w = c_engine->GetRenderContext().GetWindowWidth();
+	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	auto &window = c_engine->GetWindow();
 	window.SetCursorPos(Vector2i(w /2,h /2));
 	window.SetCursorInputMode(GLFW::CursorMode::Disabled);

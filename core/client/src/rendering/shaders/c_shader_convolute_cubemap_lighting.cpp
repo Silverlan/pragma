@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_convolute_cubemap_lighting.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -29,7 +30,7 @@ ShaderConvoluteCubemapLighting::ShaderConvoluteCubemapLighting(prosper::IPrConte
 	: ShaderCubemap{context,identifier,"screen/fs_convolute_cubemap_lighting"}
 {}
 
-void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderConvoluteCubemapLighting::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -49,7 +50,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 	auto rt = CreateCubeMapRenderTarget(w,h);
 
 	// Shader input
-	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
+	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_CUBEMAP_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(cubemap,0u);
 
 	PushConstants pushConstants {};

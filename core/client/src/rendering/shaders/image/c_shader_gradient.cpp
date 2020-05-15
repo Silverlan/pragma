@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
@@ -17,7 +18,7 @@
 using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 static bool get_line_line_intersection(const Vector2 &p0,const Vector2 &p1,const Vector2 &p3,Vector2 &intersection)
 {
 	Vector2 p2(0.f,0.f);
@@ -44,7 +45,7 @@ ShaderGradient::ShaderGradient(prosper::IPrContext &context,const std::string &i
 
 ShaderGradient::~ShaderGradient() {s_shaderGradient = nullptr;}
 
-void ShaderGradient::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGradient::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -77,7 +78,10 @@ bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::
 		get_line_line_intersection(Vector2(-1,-1),Vector2(-1,1),pFar,pointBox) == false &&
 		get_line_line_intersection(Vector2(1,1),Vector2(1,-1),pFar,pointBox) == false
 	)
-		return cmdBuffer->RecordClearAttachment(img,{0.f,0.f,0.f,1.f});
+	{
+		auto result = cmdBuffer->RecordClearAttachment(img,{0.f,0.f,0.f,1.f});
+		return cmdBuffer->RecordEndRenderPass();
+	}
 	auto extents = img.GetExtents();
 	auto &shader = static_cast<ShaderGradient&>(*s_shaderGradient);
 	if(shader.BeginDraw(cmdBuffer) == true)
@@ -98,3 +102,4 @@ bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::
 	}
 	return cmdBuffer->RecordEndRenderPass();
 }
+#pragma optimize("",on)

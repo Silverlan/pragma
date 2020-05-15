@@ -9,13 +9,12 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <misc/compute_pipeline_create_info.h>
-#include <wrappers/shader_module.h>
 
-void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,Anvil::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
+void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,pragma::LuaDescriptorSetInfo &descSetInfo)
 {
 	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
 	if(shader == nullptr)
@@ -37,9 +36,9 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,Anvil::Ba
 	shaderDescSetInfo.setIndex = descSetInfo.setIndex;
 	shader->GetShader().AddDescriptorSetGroup(pipelineInfo,shaderDescSetInfo);
 }
-void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
+void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
 {
-	Lua::PushBool(l,pipelineInfo.attach_push_constant_range(offset,size,static_cast<Anvil::ShaderStageFlagBits>(shaderStages)));
+	Lua::PushBool(l,pipelineInfo.AttachPushConstantRange(offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages)));
 }
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {
@@ -100,22 +99,22 @@ void Lua::Shader::GetEntrypointName(lua_State *l,prosper::Shader &shader,uint32_
 	switch(shaderStage)
 	{
 		case umath::to_integral(prosper::ShaderStageFlags::FragmentBit):
-			Lua::PushString(l,ep->shader_module_ptr->get_fs_entrypoint_name());
+			Lua::PushString(l,ep->shader_module_ptr->GetFSEntrypointName());
 			break;
 		case umath::to_integral(prosper::ShaderStageFlags::VertexBit):
-			Lua::PushString(l,ep->shader_module_ptr->get_vs_entrypoint_name());
+			Lua::PushString(l,ep->shader_module_ptr->GetVSEntrypointName());
 			break;
 		case umath::to_integral(prosper::ShaderStageFlags::GeometryBit):
-			Lua::PushString(l,ep->shader_module_ptr->get_gs_entrypoint_name());
+			Lua::PushString(l,ep->shader_module_ptr->GetGSEntrypointName());
 			break;
-		case umath::to_integral(vk::ShaderStageFlagBits::eTessellationControl):
-			Lua::PushString(l,ep->shader_module_ptr->get_tc_entrypoint_name());
+		case umath::to_integral(prosper::ShaderStageFlags::TessellationControlBit):
+			Lua::PushString(l,ep->shader_module_ptr->GetTCEntrypointName());
 			break;
-		case umath::to_integral(vk::ShaderStageFlagBits::eTessellationEvaluation):
-			Lua::PushString(l,ep->shader_module_ptr->get_te_entrypoint_name());
+		case umath::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit):
+			Lua::PushString(l,ep->shader_module_ptr->GetTEEntrypointName());
 			break;
 		case umath::to_integral(prosper::ShaderStageFlags::ComputeBit):
-			Lua::PushString(l,ep->shader_module_ptr->get_cs_entrypoint_name());
+			Lua::PushString(l,ep->shader_module_ptr->GetCSEntrypointName());
 			break;
 	}
 }
@@ -124,25 +123,20 @@ void Lua::Shader::GetGlslSourceCode(lua_State *l,prosper::Shader &shader,uint32_
 	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx);
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
-	Lua::PushString(l,ep->shader_module_ptr->get_glsl_source_code());
+	Lua::PushString(l,ep->shader_module_ptr->GetGLSLSourceCode());
 }
 void Lua::Shader::GetSpirvBlob(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
 {
 	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx);
 	if(ep == nullptr || ep->shader_module_ptr == nullptr)
 		return;
-	auto &spirvBlob = ep->shader_module_ptr->get_spirv_blob();
-	auto sz = spirvBlob.size() *sizeof(spirvBlob.front());
-	auto ds = DataStream(sz);
-	ds->Write(reinterpret_cast<const uint8_t*>(spirvBlob.data()),sz);
-	Lua::Push(l,ds);
-}
-void Lua::Shader::GetStatistics(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
-{
-	vk::ShaderStatisticsInfoAMD stats;
-	if(shader.GetShaderStatistics(stats,static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx) == false)
+	auto &spirvBlob = ep->shader_module_ptr->GetSPIRVData();
+	if(spirvBlob.has_value() == false)
 		return;
-	Lua::Push(l,stats);
+	auto sz = spirvBlob->size() *sizeof(spirvBlob->front());
+	auto ds = DataStream(sz);
+	ds->Write(reinterpret_cast<const uint8_t*>(spirvBlob->data()),sz);
+	Lua::Push(l,ds);
 }
 void Lua::Shader::IsGraphicsShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsGraphicsShader());}
 void Lua::Shader::IsComputeShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsComputeShader());}

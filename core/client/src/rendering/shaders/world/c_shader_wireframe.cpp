@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -16,9 +17,9 @@ ShaderWireframe::ShaderWireframe(prosper::IPrContext &context,const std::string 
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
-void ShaderWireframe::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWireframe::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,Anvil::PolygonMode::LINE);
+	prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Line);
 	prosper::util::set_graphics_pipeline_line_width(pipelineInfo,1.f);
 }

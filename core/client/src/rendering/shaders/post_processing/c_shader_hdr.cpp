@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 
 using namespace pragma;
@@ -17,7 +18,7 @@ ShaderHDR::ShaderHDR(prosper::IPrContext &context,const std::string &identifier)
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void ShaderHDR::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

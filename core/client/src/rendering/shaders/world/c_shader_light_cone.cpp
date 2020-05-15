@@ -12,6 +12,7 @@
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <datasystem_color.h>
@@ -99,15 +100,15 @@ bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)
 	);
 }
 
-void ShaderLightCone::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderLightCone::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderLightCone::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderLightCone::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::NONE);
-	pipelineInfo.toggle_depth_writes(false);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
+	pipelineInfo.ToggleDepthWrites(false);
 }

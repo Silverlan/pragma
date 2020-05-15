@@ -68,22 +68,22 @@ void GPUProfiler::InitializeQueries()
 {
 	if(m_timerQueryPool != nullptr || m_statsQueryPool != nullptr)
 		return;
-	auto swapchainImageCount = c_engine->GetSwapchainImageCount();
+	auto swapchainImageCount = c_engine->GetRenderContext().GetSwapchainImageCount();
 	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
 	const auto maxStatisticsQueryCount = 100u;
-	m_timerQueryPool = prosper::util::create_query_pool(*c_engine,vk::QueryType::eTimestamp,maxTimestampQueryCount);
-	m_statsQueryPool = prosper::util::create_query_pool(*c_engine,
-		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_VERTICES_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::INPUT_ASSEMBLY_PRIMITIVES_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::VERTEX_SHADER_INVOCATIONS_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::GEOMETRY_SHADER_INVOCATIONS_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::GEOMETRY_SHADER_PRIMITIVES_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::CLIPPING_INVOCATIONS_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::CLIPPING_PRIMITIVES_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::FRAGMENT_SHADER_INVOCATIONS_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_CONTROL_SHADER_PATCHES_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT |
-		Anvil::QueryPipelineStatisticFlagBits::COMPUTE_SHADER_INVOCATIONS_BIT,
+	m_timerQueryPool = prosper::util::create_query_pool(c_engine->GetRenderContext(),prosper::QueryType::Timestamp,maxTimestampQueryCount);
+	m_statsQueryPool = prosper::util::create_query_pool(c_engine->GetRenderContext(),
+		prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit |
+		prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit |
+		prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit |
+		prosper::QueryPipelineStatisticFlags::GeometryShaderInvocationsBit |
+		prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit |
+		prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit |
+		prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit |
+		prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit |
+		prosper::QueryPipelineStatisticFlags::TessellationControlShaderPatchesBit |
+		prosper::QueryPipelineStatisticFlags::TessellationEvaluationShaderInvocationsBit |
+		prosper::QueryPipelineStatisticFlags::ComputeShaderInvocationsBit,
 		maxStatisticsQueryCount
 	);
 }

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -24,7 +25,7 @@ ShaderDebugText::ShaderDebugText(prosper::IPrContext &context,const std::string 
 	SetBaseShader<ShaderDebug>();
 }
 
-void ShaderDebugText::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderDebugText::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderDebug::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);

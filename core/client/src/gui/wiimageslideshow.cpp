@@ -165,14 +165,14 @@ void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	std::array<uint8_t,4> px = {0u,0u,0u,std::numeric_limits<uint8_t>::max()};
-	auto img = c_engine->CreateImage(createInfo,px.data());
+	auto img = c_engine->GetRenderContext().CreateImage(createInfo,px.data());
 	if(img != nullptr)
 	{
 		prosper::util::TextureCreateInfo texCreateInfo {};
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
 		samplerCreateInfo.addressModeU = samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::Repeat;
-		auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+		auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 		if(tex != nullptr)
 		{
 			auto *pImgNext = m_hImgNext.get<WITexturedRect>();

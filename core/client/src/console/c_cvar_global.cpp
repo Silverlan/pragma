@@ -48,7 +48,6 @@
 #include <pragma/console/command_options.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
-#include <wrappers/memory_block.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -531,10 +530,10 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		auto rt = renderer->GetHDRInfo().toneMappedRenderTarget;
 		if(rt == nullptr)
 			return;
-		c_engine->WaitIdle(); // Make sure rendering is complete
+		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
 		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
+		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
 
 		auto &img = rt->GetTexture().GetImage();
 		auto extents = img.GetExtents();
@@ -546,7 +545,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 		createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 		createInfo.usage = prosper::ImageUsageFlags::TransferDstBit;
-		imgScreenshot = c_engine->CreateImage(createInfo);
+		imgScreenshot = c_engine->GetRenderContext().CreateImage(createInfo);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
@@ -557,7 +556,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
-		c_engine->SubmitCommandBuffer(*cmdBuffer,true);
+		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer,true);
 	}
 	if(imgScreenshot == nullptr)
 		return;
@@ -800,27 +799,27 @@ void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>
 
 void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_limits(*c_engine,"vk_limits.txt");
+	prosper::debug::dump_limits(c_engine->GetRenderContext(),"vk_limits.txt");
 }
 void Console::commands::vk_dump_features(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_features(*c_engine,"vk_features.txt");
+	prosper::debug::dump_features(c_engine->GetRenderContext(),"vk_features.txt");
 }
 void Console::commands::vk_dump_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_format_properties(*c_engine,"vk_format_properties.txt");
+	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),"vk_format_properties.txt");
 }
 void Console::commands::vk_dump_image_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_image_format_properties(*c_engine,"vk_image_format_properties.txt");
+	prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),"vk_image_format_properties.txt");
 }
 void Console::commands::vk_dump_layers(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_layers(*c_engine,"vk_layers.txt");
+	prosper::debug::dump_layers(c_engine->GetRenderContext(),"vk_layers.txt");
 }
 void Console::commands::vk_dump_extensions(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_extensions(*c_engine,"vk_extensions.txt");
+	prosper::debug::dump_extensions(c_engine->GetRenderContext(),"vk_extensions.txt");
 }
 /*static void print_memory_stats(std::stringstream &ss,Vulkan::MemoryManager::StatInfo &info)
 {
@@ -865,38 +864,21 @@ void Console::commands::vk_dump_memory_stats(NetworkState *state,pragma::BasePla
 	}
 	f->WriteString(ss.str());*/ // prosper TODO
 }
-#include <wrappers/device.h>
-#include <wrappers/physical_device.h>
+
 void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
-	auto &dev = c_engine->GetDevice();
-	auto &memProps = dev.get_physical_device_memory_properties();
-	auto allocatedDeviceLocalSize = 0ull;
-	auto &memTracker = prosper::MemoryTracker::GetInstance();
-	std::vector<uint32_t> deviceLocalTypes = {};
-	deviceLocalTypes.reserve(memProps.types.size());
-	for(auto i=decltype(memProps.types.size()){0u};i<memProps.types.size();++i)
-	{
-		auto &type = memProps.types.at(i);
-		if(type.heap_ptr == nullptr || (type.flags &Anvil::MemoryPropertyFlagBits::DEVICE_LOCAL_BIT) == Anvil::MemoryPropertyFlagBits::NONE)
-			continue;
-		if(deviceLocalTypes.empty() == false)
-			assert(type.heap_trp->size() == memProps.types.at(deviceLocalTypes.front()).heap_ptr->size());
-		deviceLocalTypes.push_back(i);
-		uint64_t allocatedSize = 0ull;
-		uint64_t totalSize = 0ull;
-		memTracker.GetMemoryStats(*c_engine,i,allocatedSize,totalSize);
-		allocatedDeviceLocalSize += allocatedSize;
-	}
-	if(deviceLocalTypes.empty())
+	//bool prosper::util::get_memory_stats(IPrContext &context,MemoryPropertyFlags memPropFlags,DeviceSize &outAvailableSize,DeviceSize &outAllocatedSize)
+	prosper::DeviceSize availableSize,allocatedSize;
+	std::vector<uint32_t> memIndices;
+	auto r = prosper::util::get_memory_stats(c_engine->GetRenderContext(),prosper::MemoryPropertyFlags::DeviceLocalBit,availableSize,allocatedSize,&memIndices);
+	if(r == false)
 	{
 		Con::cwar<<"WARNING: No device local memory types found!"<<Con::endl;
 		return;
 	}
 	std::stringstream ss;
-	auto totalMemory = memProps.types.at(deviceLocalTypes.front()).heap_ptr->size;
-	ss<<"Total Available GPU Memory: "<<util::get_pretty_bytes(totalMemory)<<"\n";
-	ss<<"Memory in use: "<<util::get_pretty_bytes(allocatedDeviceLocalSize)<<" ("<<umath::round(allocatedDeviceLocalSize /static_cast<double>(totalMemory) *100.0,2)<<"%)\n";
+	ss<<"Total Available GPU Memory: "<<util::get_pretty_bytes(availableSize)<<"\n";
+	ss<<"Memory in use: "<<util::get_pretty_bytes(allocatedSize)<<" ("<<umath::round(allocatedSize /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
 	ss<<"Memory usage by resource type:\n";
 	const std::unordered_map<prosper::MemoryTracker::Resource::TypeFlags,std::string> types = {
 		{prosper::MemoryTracker::Resource::TypeFlags::StandAloneBufferBit,"Dedicated buffers"},
@@ -904,15 +886,16 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 		{prosper::MemoryTracker::Resource::TypeFlags::DynamicBufferBit,"Dynamic resizable buffers"},
 		{prosper::MemoryTracker::Resource::TypeFlags::ImageBit,"Images"}
 	};
+	auto &memTracker = prosper::MemoryTracker::GetInstance();
 	for(auto &pair : types)
 	{
 		auto allocatedSizeOfType = 0ull;
 		std::vector<const prosper::MemoryTracker::Resource*> resources {};
-		for(auto idx : deviceLocalTypes)
+		for(auto idx : memIndices)
 		{
 			uint64_t allocatedSize = 0ull;
 			uint64_t totalSize = 0ull;
-			memTracker.GetMemoryStats(*c_engine,idx,allocatedSize,totalSize,pair.first);
+			memTracker.GetMemoryStats(c_engine->GetRenderContext(),idx,allocatedSize,totalSize,pair.first);
 			allocatedSizeOfType += allocatedSize;
 
 			memTracker.GetResources(idx,resources,pair.first);
@@ -931,11 +914,12 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 				auto *memBlock = res->GetMemoryBlock(i);
 				if(memBlock == nullptr)
 					continue;
-				size += memBlock->get_create_info_ptr()->get_size();
+				// TODO
+				//size += memBlock->get_create_info_ptr()->get_size();
 			}
 			resourceSizes.push_back(size);
 		}
-		ss<<"\t"<<pair.second<<": "<<util::get_pretty_bytes(allocatedSizeOfType)<<" ("<<umath::round(allocatedSizeOfType /static_cast<double>(allocatedDeviceLocalSize) *100.0,2)<<"%)\n";
+		ss<<"\t"<<pair.second<<": "<<util::get_pretty_bytes(allocatedSizeOfType)<<" ("<<umath::round(allocatedSizeOfType /static_cast<double>(allocatedSize) *100.0,2)<<"%)\n";
 		ss<<"\tNumber of Resources: "<<resources.size()<<"\n";
 		std::sort(sortedIndices.begin(),sortedIndices.end(),[&resourceSizes](const size_t idx0,const size_t idx1) {
 			return resourceSizes.at(idx0) > resourceSizes.at(idx1);
@@ -953,7 +937,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 				ss<<"DynamicResizableBuffer: "<<static_cast<prosper::IDynamicResizableBuffer*>(res->resource)->GetDebugName();
 			else if((res->typeFlags &prosper::MemoryTracker::Resource::TypeFlags::ImageBit) != prosper::MemoryTracker::Resource::TypeFlags::None)
 				ss<<"Image: "<<static_cast<prosper::IImage*>(res->resource)->GetDebugName();
-			ss<<" "<<util::get_pretty_bytes(size)<<" ("<<umath::round(size /static_cast<double>(totalMemory) *100.0,2)<<"%)\n";
+			ss<<" "<<util::get_pretty_bytes(size)<<" ("<<umath::round(size /static_cast<double>(availableSize) *100.0,2)<<"%)\n";
 		}
 		ss<<"\n";
 	}

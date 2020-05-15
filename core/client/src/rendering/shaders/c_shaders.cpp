@@ -162,7 +162,7 @@ void CGame::InitShaders()
 
 void CGame::UpdateShaderTimeData()
 {
-	c_engine->ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderTextured3DBase::TimeData{
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderTextured3DBase::TimeData{
 		static_cast<float>(CurTime()),static_cast<float>(DeltaTime()),
 		static_cast<float>(RealTime()),static_cast<float>(DeltaRealTime())
 	});

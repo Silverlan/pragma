@@ -37,8 +37,8 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto &fp = rasterizer->GetForwardPlusInstance();
 	auto &prepass = rasterizer->GetPrepass();
-	c_engine->WaitIdle();
-	fp.Initialize(*c_engine,scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
+	c_engine->GetRenderContext().WaitIdle();
+	fp.Initialize(c_engine->GetRenderContext(),scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
 
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
 	rasterizer->UpdateRenderSettings(scene->GetRenderSettings());
@@ -76,7 +76,7 @@ static constexpr uint32_t get_shadow_integer_count()
 pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRenderer &rasterizer)
 	: m_rasterizer{rasterizer}
 {
-	m_cmdBuffer = c_engine->AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
+	m_cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
 
 	m_shaderLightCulling = c_engine->GetShader("forwardp_light_culling");
 	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");

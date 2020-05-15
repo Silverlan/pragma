@@ -30,20 +30,10 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util_square_shape.hpp>
 #include <prosper_util_line_shape.hpp>
-#include <wrappers/event.h>
-#include <wrappers/memory_block.h>
-#include <misc/fence_create_info.h>
-#include <misc/event_create_info.h>
-#include <misc/framebuffer_create_info.h>
-#include <misc/image_create_info.h>
-#include <misc/image_view_create_info.h>
 #include <util_image_buffer.hpp>
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
-#include <wrappers/fence.h>
-#include <wrappers/semaphore.h>
-#include <misc/fence_create_info.h>
-#include <vk_event.hpp>
+#include <prosper_event.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 namespace Lua
@@ -220,6 +210,7 @@ namespace Lua
 			DLLCLIENT void IsValid(lua_State *l,Fence &hFence);
 
 		};
+#if 0
 		namespace VKSemaphore
 		{
 			DLLCLIENT void IsValid(lua_State *l,Semaphore &hFence);
@@ -236,6 +227,7 @@ namespace Lua
 			DLLCLIENT void Map(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
 			DLLCLIENT void Unmap(lua_State *l,Memory &hMemory);
 		};
+#endif
 		namespace VKCommandBuffer
 		{
 			DLLCLIENT void IsValid(lua_State *l,CommandBuffer &hCommandBuffer);
@@ -436,9 +428,9 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderPa
 DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Event &hEvent)
 {
 	out<<"VKEvent[";
-	auto r = vk::Result::eEventReset;
+	auto r = prosper::Result::EventReset;
 	if(hEvent.IsSet())
-		r = vk::Result::eEventSet;
+		r = prosper::Result::EventSet;
 	out<<prosper::util::to_string(r);
 	out<<"]";
 	return out;
@@ -450,7 +442,7 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Fence &h
 	out<<"]";
 	return out;
 }
-
+#if 0
 DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Semaphore &hSemaphore)
 {
 	out<<"VKSemaphore[";
@@ -464,7 +456,7 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Memory &
 	out<<"]";
 	return out;
 }
-
+#endif
 DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBuffer &hCommandBuffer)
 {
 	out<<"VKCommandBuffer[";
@@ -529,11 +521,11 @@ int Lua::Vulkan::create_buffer(lua_State *l)
 	auto &bufCreateInfo = Lua::Check<prosper::util::BufferCreateInfo>(l,arg++);
 	std::shared_ptr<Buffer> buf = nullptr;
 	if(Lua::IsSet(l,arg) == false)
-		buf = c_engine->CreateBuffer(bufCreateInfo);
+		buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
 	else
 	{
 		auto &ds = *Lua::CheckDataStream(l,arg++);
-		buf = c_engine->CreateBuffer(bufCreateInfo,ds->GetData());
+		buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,ds->GetData());
 	}
 	if(buf == nullptr)
 		return 0;
@@ -558,7 +550,7 @@ void Lua::Vulkan::get_descriptor_set_layout_bindings(lua_State *l,std::vector<::
 		auto type = prosper::DescriptorType::UniformBuffer;
 		get_table_value<ptrdiff_t,decltype(type)>(l,"type",tBinding,type,Lua::CheckInt);
 
-		auto shaderStages = vk::ShaderStageFlagBits::eAllGraphics;
+		auto shaderStages = prosper::ShaderStageFlagBits::eAllGraphics;
 		get_table_value<ptrdiff_t,decltype(shaderStages)>(l,"stage",tBinding,shaderStages,Lua::CheckInt);
 
 		uint32_t arrayCount = 1;
@@ -576,7 +568,7 @@ int Lua::Vulkan::create_descriptor_set(lua_State *l)
 {
 	auto &ldescSetInfo = *Lua::CheckDescriptorSetInfo(l,1);
 	auto shaderDescSetInfo = to_prosper_descriptor_set_info(ldescSetInfo);
-	auto dsg = c_engine->CreateDescriptorSetGroup(shaderDescSetInfo);
+	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(shaderDescSetInfo);
 	if(dsg == nullptr)
 		return 0;
 	dsg->SetDebugName("lua_dsg");
@@ -588,7 +580,7 @@ int Lua::Vulkan::create_image_view(lua_State *l)
 {
 	auto &imgViewCreateInfo = Lua::Check<prosper::util::ImageViewCreateInfo>(l,1);
 	auto &img = Lua::Check<prosper::IImage>(l,2);
-	auto imgView = c_engine->CreateImageView(imgViewCreateInfo,img);
+	auto imgView = c_engine->GetRenderContext().CreateImageView(imgViewCreateInfo,img);
 	Lua::Push(l,imgView);
 	return 1;
 }
@@ -601,7 +593,7 @@ int Lua::Vulkan::create_image(lua_State *l)
 		if(Lua::IsTable(l,arg) == false)
 		{
 			auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,arg++);
-			auto img = c_engine->CreateImage(imgBuffer);
+			auto img = c_engine->GetRenderContext().CreateImage(imgBuffer);
 			if(img == nullptr)
 				return 0;
 			img->SetDebugName("lua_img");
@@ -621,7 +613,7 @@ int Lua::Vulkan::create_image(lua_State *l)
 			imgBuffers.at(i) = imgBuf.shared_from_this();
 			Lua::Pop(l,1);
 		}
-		auto img = c_engine->CreateCubemap(imgBuffers);
+		auto img = c_engine->GetRenderContext().CreateCubemap(imgBuffers);
 		if(img == nullptr)
 			return 0;
 		img->SetDebugName("lua_img");
@@ -631,11 +623,11 @@ int Lua::Vulkan::create_image(lua_State *l)
 	auto &imgCreateInfo = Lua::Check<prosper::util::ImageCreateInfo>(l,arg++);
 	std::shared_ptr<Image> img = nullptr;
 	if(Lua::IsSet(l,arg) == false)
-		img = c_engine->CreateImage(imgCreateInfo);
+		img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	else
 	{
 		auto &ds = *Lua::CheckDataStream(l,arg++);
-		img = c_engine->CreateImage(imgCreateInfo,ds->GetData());
+		img = c_engine->GetRenderContext().CreateImage(imgCreateInfo,ds->GetData());
 	}
 	if(img == nullptr)
 		return 0;
@@ -657,7 +649,7 @@ int Lua::Vulkan::create_texture(lua_State *l)
 		if(Lua::IsSet(l,arg))
 			samplerCreateInfo = Lua::Check<prosper::util::SamplerCreateInfo>(l,arg++);
 	}
-	auto tex = c_engine->CreateTexture(texCreateInfo,img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,img,imgViewCreateInfo,samplerCreateInfo);
 	if(tex == nullptr)
 		return 0;
 	tex->SetDebugName("lua_tex");
@@ -687,7 +679,7 @@ int Lua::Vulkan::create_framebuffer(lua_State *l)
 	auto layers = 1u;
 	if(Lua::IsSet(l,arg))
 		layers = Lua::CheckInt(l,arg++);
-	auto fb = c_engine->CreateFramebuffer(width,height,layers,attachments);
+	auto fb = c_engine->GetRenderContext().CreateFramebuffer(width,height,layers,attachments);
 	if(fb == nullptr)
 		return 0;
 	fb->SetDebugName("lua_fb");
@@ -697,7 +689,7 @@ int Lua::Vulkan::create_framebuffer(lua_State *l)
 int Lua::Vulkan::create_render_pass(lua_State *l)
 {
 	auto &rpCreateInfo = Lua::Check<prosper::util::RenderPassCreateInfo>(l,1);
-	auto rp = c_engine->CreateRenderPass(rpCreateInfo);
+	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpCreateInfo);
 	if(rp == nullptr)
 		return 0;
 	rp->SetDebugName("lua_rp");
@@ -731,7 +723,7 @@ int Lua::Vulkan::create_render_target(lua_State *l)
 	std::shared_ptr<Lua::Vulkan::RenderPass> rp = nullptr;
 	if(Lua::IsSet(l,arg))
 		rp = Lua::Check<RenderPass>(l,arg++).shared_from_this();
-	auto rt = c_engine->CreateRenderTarget(textures,rp,rtCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget(textures,rp,rtCreateInfo);
 	if(rt == nullptr)
 		return 0;
 	rt->SetDebugName("lua_rt");
@@ -741,7 +733,7 @@ int Lua::Vulkan::create_render_target(lua_State *l)
 
 int Lua::Vulkan::create_event(lua_State *l)
 {
-	auto ev = c_engine->CreateEvent();
+	auto ev = c_engine->GetRenderContext().CreateEvent();
 	if(ev == nullptr)
 		return 0;
 	Lua::Push(l,ev);
@@ -753,7 +745,7 @@ int Lua::Vulkan::create_fence(lua_State *l)
 	auto bCreateSignalled = false;
 	if(Lua::IsSet(l,1))
 		bCreateSignalled = Lua::CheckBool(l,1);
-	auto fence = c_engine->CreateFence(bCreateSignalled);
+	auto fence = c_engine->GetRenderContext().CreateFence(bCreateSignalled);
 	if(fence == nullptr)
 		return 0;
 	Lua::Push(l,fence);
@@ -790,7 +782,7 @@ int Lua::Vulkan::calculate_mipmap_size(lua_State *l)
 int Lua::Vulkan::result_to_string(lua_State *l)
 {
 	auto result = Lua::CheckInt(l,1);
-	Lua::PushString(l,::prosper::util::to_string(static_cast<vk::Result>(result)));
+	Lua::PushString(l,::prosper::util::to_string(static_cast<prosper::Result>(result)));
 	return 1;
 }
 int Lua::Vulkan::format_to_string(lua_State *l)
@@ -837,17 +829,17 @@ int Lua::Vulkan::get_byte_size(lua_State *l)
 }
 int Lua::Vulkan::get_swapchain_image_count(lua_State *l)
 {
-	Lua::PushInt(l,c_engine->GetSwapchainImageCount());
+	Lua::PushInt(l,c_engine->GetRenderContext().GetSwapchainImageCount());
 	return 1;
 }
 int Lua::Vulkan::wait_idle(lua_State *l)
 {
-	c_engine->WaitIdle();
+	c_engine->GetRenderContext().WaitIdle();
 	return 0;
 }
 int Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
 {
-	auto buf = prosper::util::get_line_vertex_buffer(*c_engine);
+	auto buf = prosper::util::get_line_vertex_buffer(c_engine->GetRenderContext());
 	Lua::Push(l,buf);
 	return 1;
 }
@@ -878,19 +870,19 @@ int Lua::Vulkan::get_line_vertex_format(lua_State *l)
 }
 int Lua::Vulkan::get_square_vertex_uv_buffer(lua_State *l)
 {
-	auto uvBuffer = prosper::util::get_square_vertex_uv_buffer(*c_engine);
+	auto uvBuffer = prosper::util::get_square_vertex_uv_buffer(c_engine->GetRenderContext());
 	Lua::Push(l,uvBuffer);
 	return 1;
 }
 int Lua::Vulkan::get_square_vertex_buffer(lua_State *l)
 {
-	auto vertexBuffer = prosper::util::get_square_vertex_buffer(*c_engine);
+	auto vertexBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
 	Lua::Push(l,vertexBuffer);
 	return 1;
 }
 int Lua::Vulkan::get_square_uv_buffer(lua_State *l)
 {
-	auto uvBuffer = prosper::util::get_square_uv_buffer(*c_engine);
+	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
 	Lua::Push(l,uvBuffer);
 	return 1;
 }
@@ -940,7 +932,7 @@ int Lua::Vulkan::get_square_uv_format(lua_State *l)
 }
 int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
 {
-	auto buf = c_engine->AllocateTemporaryBuffer(size);
+	auto buf = c_engine->GetRenderContext().AllocateTemporaryBuffer(size);
 	if(buf == nullptr)
 		return 0;
 	Lua::Push(l,buf);
@@ -948,7 +940,7 @@ int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
 }
 int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,::DataStream &ds)
 {
-	auto buf = c_engine->AllocateTemporaryBuffer(ds->GetSize(),0u /* alignment */,ds->GetData());
+	auto buf = c_engine->GetRenderContext().AllocateTemporaryBuffer(ds->GetSize(),0u /* alignment */,ds->GetData());
 	if(buf == nullptr)
 		return 0;
 	Lua::Push(l,buf);
@@ -1000,17 +992,17 @@ int Lua::Vulkan::create_gradient_texture(lua_State *l)
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	auto img = c_engine->CreateImage(createInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto texture = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	auto rt = c_engine->CreateRenderTarget({texture},static_cast<prosper::ShaderGraphics&>(*whShader.get()).GetRenderPass());
+	auto texture = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({texture},static_cast<prosper::ShaderGraphics&>(*whShader.get()).GetRenderPass());
 	rt->SetDebugName("lua_gradient");
 	auto cb = FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create(nullptr);
 	static_cast<Callback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>*>(cb.get())->SetFunction([cb,rt,dir,nodes](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) mutable {
-		c_engine->KeepResourceAliveUntilPresentationComplete(rt);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(rt);
 		pragma::util::record_draw_gradient(
-			*c_engine,drawCmd.get(),*rt,dir,nodes
+			c_engine->GetRenderContext(),drawCmd.get(),*rt,dir,nodes
 		);
 		if(cb.IsValid())
 			cb.Remove();
@@ -1124,410 +1116,394 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"vulkan",{
-		{"FORMAT_UNDEFINED",umath::to_integral(vk::Format::eUndefined)},
-		{"FORMAT_R4G4_UNORM_PACK8",umath::to_integral(vk::Format::eR4G4UnormPack8)},
-		{"FORMAT_R4G4B4A4_UNORM_PACK16",umath::to_integral(vk::Format::eR4G4B4A4UnormPack16)},
-		{"FORMAT_B4G4R4A4_UNORM_PACK16",umath::to_integral(vk::Format::eB4G4R4A4UnormPack16)},
-		{"FORMAT_R5G6B5_UNORM_PACK16",umath::to_integral(vk::Format::eR5G6B5UnormPack16)},
-		{"FORMAT_B5G6R5_UNORM_PACK16",umath::to_integral(vk::Format::eB5G6R5UnormPack16)},
-		{"FORMAT_R5G5B5A1_UNORM_PACK16",umath::to_integral(vk::Format::eR5G5B5A1UnormPack16)},
-		{"FORMAT_B5G5R5A1_UNORM_PACK16",umath::to_integral(vk::Format::eB5G5R5A1UnormPack16)},
-		{"FORMAT_A1R5G5B5_UNORM_PACK16",umath::to_integral(vk::Format::eA1R5G5B5UnormPack16)},
-		{"FORMAT_R8_UNORM",umath::to_integral(vk::Format::eR8Unorm)},
-		{"FORMAT_R8_SNORM",umath::to_integral(vk::Format::eR8Snorm)},
-		{"FORMAT_R8_USCALED",umath::to_integral(vk::Format::eR8Uscaled)},
-		{"FORMAT_R8_SSCALED",umath::to_integral(vk::Format::eR8Sscaled)},
-		{"FORMAT_R8_UINT",umath::to_integral(vk::Format::eR8Uint)},
-		{"FORMAT_R8_SINT",umath::to_integral(vk::Format::eR8Sint)},
-		{"FORMAT_R8_SRGB",umath::to_integral(vk::Format::eR8Srgb)},
-		{"FORMAT_R8G8_UNORM",umath::to_integral(vk::Format::eR8G8Unorm)},
-		{"FORMAT_R8G8_SNORM",umath::to_integral(vk::Format::eR8G8Snorm)},
-		{"FORMAT_R8G8_USCALED",umath::to_integral(vk::Format::eR8G8Uscaled)},
-		{"FORMAT_R8G8_SSCALED",umath::to_integral(vk::Format::eR8G8Sscaled)},
-		{"FORMAT_R8G8_UINT",umath::to_integral(vk::Format::eR8G8Uint)},
-		{"FORMAT_R8G8_SINT",umath::to_integral(vk::Format::eR8G8Sint)},
-		{"FORMAT_R8G8_SRGB",umath::to_integral(vk::Format::eR8G8Srgb)},
-		{"FORMAT_R8G8B8_UNORM",umath::to_integral(vk::Format::eR8G8B8Unorm)},
-		{"FORMAT_R8G8B8_SNORM",umath::to_integral(vk::Format::eR8G8B8Snorm)},
-		{"FORMAT_R8G8B8_USCALED",umath::to_integral(vk::Format::eR8G8B8Uscaled)},
-		{"FORMAT_R8G8B8_SSCALED",umath::to_integral(vk::Format::eR8G8B8Sscaled)},
-		{"FORMAT_R8G8B8_UINT",umath::to_integral(vk::Format::eR8G8B8Uint)},
-		{"FORMAT_R8G8B8_SINT",umath::to_integral(vk::Format::eR8G8B8Sint)},
-		{"FORMAT_R8G8B8_SRGB",umath::to_integral(vk::Format::eR8G8B8Srgb)},
-		{"FORMAT_B8G8R8_UNORM",umath::to_integral(vk::Format::eB8G8R8Unorm)},
-		{"FORMAT_B8G8R8_SNORM",umath::to_integral(vk::Format::eB8G8R8Snorm)},
-		{"FORMAT_B8G8R8_USCALED",umath::to_integral(vk::Format::eB8G8R8Uscaled)},
-		{"FORMAT_B8G8R8_SSCALED",umath::to_integral(vk::Format::eB8G8R8Sscaled)},
-		{"FORMAT_B8G8R8_UINT",umath::to_integral(vk::Format::eB8G8R8Uint)},
-		{"FORMAT_B8G8R8_SINT",umath::to_integral(vk::Format::eB8G8R8Sint)},
-		{"FORMAT_B8G8R8_SRGB",umath::to_integral(vk::Format::eB8G8R8Srgb)},
-		{"FORMAT_R8G8B8A8_UNORM",umath::to_integral(vk::Format::eR8G8B8A8Unorm)},
-		{"FORMAT_R8G8B8A8_SNORM",umath::to_integral(vk::Format::eR8G8B8A8Snorm)},
-		{"FORMAT_R8G8B8A8_USCALED",umath::to_integral(vk::Format::eR8G8B8A8Uscaled)},
-		{"FORMAT_R8G8B8A8_SSCALED",umath::to_integral(vk::Format::eR8G8B8A8Sscaled)},
-		{"FORMAT_R8G8B8A8_UINT",umath::to_integral(vk::Format::eR8G8B8A8Uint)},
-		{"FORMAT_R8G8B8A8_SINT",umath::to_integral(vk::Format::eR8G8B8A8Sint)},
-		{"FORMAT_R8G8B8A8_SRGB",umath::to_integral(vk::Format::eR8G8B8A8Srgb)},
-		{"FORMAT_B8G8R8A8_UNORM",umath::to_integral(vk::Format::eB8G8R8A8Unorm)},
-		{"FORMAT_B8G8R8A8_SNORM",umath::to_integral(vk::Format::eB8G8R8A8Snorm)},
-		{"FORMAT_B8G8R8A8_USCALED",umath::to_integral(vk::Format::eB8G8R8A8Uscaled)},
-		{"FORMAT_B8G8R8A8_SSCALED",umath::to_integral(vk::Format::eB8G8R8A8Sscaled)},
-		{"FORMAT_B8G8R8A8_UINT",umath::to_integral(vk::Format::eB8G8R8A8Uint)},
-		{"FORMAT_B8G8R8A8_SINT",umath::to_integral(vk::Format::eB8G8R8A8Sint)},
-		{"FORMAT_B8G8R8A8_SRGB",umath::to_integral(vk::Format::eB8G8R8A8Srgb)},
-		{"FORMAT_A8B8G8R8_UNORM_PACK32",umath::to_integral(vk::Format::eA8B8G8R8UnormPack32)},
-		{"FORMAT_A8B8G8R8_SNORM_PACK32",umath::to_integral(vk::Format::eA8B8G8R8SnormPack32)},
-		{"FORMAT_A8B8G8R8_USCALED_PACK32",umath::to_integral(vk::Format::eA8B8G8R8UscaledPack32)},
-		{"FORMAT_A8B8G8R8_SSCALED_PACK32",umath::to_integral(vk::Format::eA8B8G8R8SscaledPack32)},
-		{"FORMAT_A8B8G8R8_UINT_PACK32",umath::to_integral(vk::Format::eA8B8G8R8UintPack32)},
-		{"FORMAT_A8B8G8R8_SINT_PACK32",umath::to_integral(vk::Format::eA8B8G8R8SintPack32)},
-		{"FORMAT_A8B8G8R8_SRGB_PACK32",umath::to_integral(vk::Format::eA8B8G8R8SrgbPack32)},
-		{"FORMAT_A2R10G10B10_UNORM_PACK32",umath::to_integral(vk::Format::eA2R10G10B10UnormPack32)},
-		{"FORMAT_A2R10G10B10_SNORM_PACK32",umath::to_integral(vk::Format::eA2R10G10B10SnormPack32)},
-		{"FORMAT_A2R10G10B10_USCALED_PACK32",umath::to_integral(vk::Format::eA2R10G10B10UscaledPack32)},
-		{"FORMAT_A2R10G10B10_SSCALED_PACK32",umath::to_integral(vk::Format::eA2R10G10B10SscaledPack32)},
-		{"FORMAT_A2R10G10B10_UINT_PACK32",umath::to_integral(vk::Format::eA2R10G10B10UintPack32)},
-		{"FORMAT_A2R10G10B10_SINT_PACK32",umath::to_integral(vk::Format::eA2R10G10B10SintPack32)},
-		{"FORMAT_A2B10G10R10_UNORM_PACK32",umath::to_integral(vk::Format::eA2B10G10R10UnormPack32)},
-		{"FORMAT_A2B10G10R10_SNORM_PACK32",umath::to_integral(vk::Format::eA2B10G10R10SnormPack32)},
-		{"FORMAT_A2B10G10R10_USCALED_PACK32",umath::to_integral(vk::Format::eA2B10G10R10UscaledPack32)},
-		{"FORMAT_A2B10G10R10_SSCALED_PACK32",umath::to_integral(vk::Format::eA2B10G10R10SscaledPack32)},
-		{"FORMAT_A2B10G10R10_UINT_PACK32",umath::to_integral(vk::Format::eA2B10G10R10UintPack32)},
-		{"FORMAT_A2B10G10R10_SINT_PACK32",umath::to_integral(vk::Format::eA2B10G10R10SintPack32)},
-		{"FORMAT_R16_UNORM",umath::to_integral(vk::Format::eR16Unorm)},
-		{"FORMAT_R16_SNORM",umath::to_integral(vk::Format::eR16Snorm)},
-		{"FORMAT_R16_USCALED",umath::to_integral(vk::Format::eR16Uscaled)},
-		{"FORMAT_R16_SSCALED",umath::to_integral(vk::Format::eR16Sscaled)},
-		{"FORMAT_R16_UINT",umath::to_integral(vk::Format::eR16Uint)},
-		{"FORMAT_R16_SINT",umath::to_integral(vk::Format::eR16Sint)},
-		{"FORMAT_R16_SFLOAT",umath::to_integral(vk::Format::eR16Sfloat)},
-		{"FORMAT_R16G16_UNORM",umath::to_integral(vk::Format::eR16G16Unorm)},
-		{"FORMAT_R16G16_SNORM",umath::to_integral(vk::Format::eR16G16Snorm)},
-		{"FORMAT_R16G16_USCALED",umath::to_integral(vk::Format::eR16G16Uscaled)},
-		{"FORMAT_R16G16_SSCALED",umath::to_integral(vk::Format::eR16G16Sscaled)},
-		{"FORMAT_R16G16_UINT",umath::to_integral(vk::Format::eR16G16Uint)},
-		{"FORMAT_R16G16_SINT",umath::to_integral(vk::Format::eR16G16Sint)},
-		{"FORMAT_R16G16_SFLOAT",umath::to_integral(vk::Format::eR16G16Sfloat)},
-		{"FORMAT_R16G16B16_UNORM",umath::to_integral(vk::Format::eR16G16B16Unorm)},
-		{"FORMAT_R16G16B16_SNORM",umath::to_integral(vk::Format::eR16G16B16Snorm)},
-		{"FORMAT_R16G16B16_USCALED",umath::to_integral(vk::Format::eR16G16B16Uscaled)},
-		{"FORMAT_R16G16B16_SSCALED",umath::to_integral(vk::Format::eR16G16B16Sscaled)},
-		{"FORMAT_R16G16B16_UINT",umath::to_integral(vk::Format::eR16G16B16Uint)},
-		{"FORMAT_R16G16B16_SINT",umath::to_integral(vk::Format::eR16G16B16Sint)},
-		{"FORMAT_R16G16B16_SFLOAT",umath::to_integral(vk::Format::eR16G16B16Sfloat)},
-		{"FORMAT_R16G16B16A16_UNORM",umath::to_integral(vk::Format::eR16G16B16A16Unorm)},
-		{"FORMAT_R16G16B16A16_SNORM",umath::to_integral(vk::Format::eR16G16B16A16Snorm)},
-		{"FORMAT_R16G16B16A16_USCALED",umath::to_integral(vk::Format::eR16G16B16A16Uscaled)},
-		{"FORMAT_R16G16B16A16_SSCALED",umath::to_integral(vk::Format::eR16G16B16A16Sscaled)},
-		{"FORMAT_R16G16B16A16_UINT",umath::to_integral(vk::Format::eR16G16B16A16Uint)},
-		{"FORMAT_R16G16B16A16_SINT",umath::to_integral(vk::Format::eR16G16B16A16Sint)},
-		{"FORMAT_R16G16B16A16_SFLOAT",umath::to_integral(vk::Format::eR16G16B16A16Sfloat)},
-		{"FORMAT_R32_UINT",umath::to_integral(vk::Format::eR32Uint)},
-		{"FORMAT_R32_SINT",umath::to_integral(vk::Format::eR32Sint)},
-		{"FORMAT_R32_SFLOAT",umath::to_integral(vk::Format::eR32Sfloat)},
-		{"FORMAT_R32G32_UINT",umath::to_integral(vk::Format::eR32G32Uint)},
-		{"FORMAT_R32G32_SINT",umath::to_integral(vk::Format::eR32G32Sint)},
-		{"FORMAT_R32G32_SFLOAT",umath::to_integral(vk::Format::eR32G32Sfloat)},
-		{"FORMAT_R32G32B32_UINT",umath::to_integral(vk::Format::eR32G32B32Uint)},
-		{"FORMAT_R32G32B32_SINT",umath::to_integral(vk::Format::eR32G32B32Sint)},
-		{"FORMAT_R32G32B32_SFLOAT",umath::to_integral(vk::Format::eR32G32B32Sfloat)},
-		{"FORMAT_R32G32B32A32_UINT",umath::to_integral(vk::Format::eR32G32B32A32Uint)},
-		{"FORMAT_R32G32B32A32_SINT",umath::to_integral(vk::Format::eR32G32B32A32Sint)},
-		{"FORMAT_R32G32B32A32_SFLOAT",umath::to_integral(vk::Format::eR32G32B32A32Sfloat)},
-		{"FORMAT_R64_UINT",umath::to_integral(vk::Format::eR64Uint)},
-		{"FORMAT_R64_SINT",umath::to_integral(vk::Format::eR64Sint)},
-		{"FORMAT_R64_SFLOAT",umath::to_integral(vk::Format::eR64Sfloat)},
-		{"FORMAT_R64G64_UINT",umath::to_integral(vk::Format::eR64G64Uint)},
-		{"FORMAT_R64G64_SINT",umath::to_integral(vk::Format::eR64G64Sint)},
-		{"FORMAT_R64G64_SFLOAT",umath::to_integral(vk::Format::eR64G64Sfloat)},
-		{"FORMAT_R64G64B64_UINT",umath::to_integral(vk::Format::eR64G64B64Uint)},
-		{"FORMAT_R64G64B64_SINT",umath::to_integral(vk::Format::eR64G64B64Sint)},
-		{"FORMAT_R64G64B64_SFLOAT",umath::to_integral(vk::Format::eR64G64B64Sfloat)},
-		{"FORMAT_R64G64B64A64_UINT",umath::to_integral(vk::Format::eR64G64B64A64Uint)},
-		{"FORMAT_R64G64B64A64_SINT",umath::to_integral(vk::Format::eR64G64B64A64Sint)},
-		{"FORMAT_R64G64B64A64_SFLOAT",umath::to_integral(vk::Format::eR64G64B64A64Sfloat)},
-		{"FORMAT_B10G11R11_UFLOAT_PACK32",umath::to_integral(vk::Format::eB10G11R11UfloatPack32)},
-		{"FORMAT_E5B9G9R9_UFLOAT_PACK32",umath::to_integral(vk::Format::eE5B9G9R9UfloatPack32)},
-		{"FORMAT_D16_UNORM",umath::to_integral(vk::Format::eD16Unorm)},
-		{"FORMAT_X8_D24_UNORM_PACK32",umath::to_integral(vk::Format::eX8D24UnormPack32)},
-		{"FORMAT_D32_SFLOAT",umath::to_integral(vk::Format::eD32Sfloat)},
-		{"FORMAT_S8_UINT",umath::to_integral(vk::Format::eS8Uint)},
-		{"FORMAT_D16_UNORM_S8_UINT",umath::to_integral(vk::Format::eD16UnormS8Uint)},
-		{"FORMAT_D24_UNORM_S8_UINT",umath::to_integral(vk::Format::eD24UnormS8Uint)},
-		{"FORMAT_D32_SFLOAT_S8_UINT",umath::to_integral(vk::Format::eD32SfloatS8Uint)},
-		{"FORMAT_BC1_RGB_UNORM_BLOCK",umath::to_integral(vk::Format::eBc1RgbUnormBlock)},
-		{"FORMAT_BC1_RGB_SRGB_BLOCK",umath::to_integral(vk::Format::eBc1RgbSrgbBlock)},
-		{"FORMAT_BC1_RGBA_UNORM_BLOCK",umath::to_integral(vk::Format::eBc1RgbaUnormBlock)},
-		{"FORMAT_BC1_RGBA_SRGB_BLOCK",umath::to_integral(vk::Format::eBc1RgbaSrgbBlock)},
-		{"FORMAT_BC2_UNORM_BLOCK",umath::to_integral(vk::Format::eBc2UnormBlock)},
-		{"FORMAT_BC2_SRGB_BLOCK",umath::to_integral(vk::Format::eBc2SrgbBlock)},
-		{"FORMAT_BC3_UNORM_BLOCK",umath::to_integral(vk::Format::eBc3UnormBlock)},
-		{"FORMAT_BC3_SRGB_BLOCK",umath::to_integral(vk::Format::eBc3SrgbBlock)},
-		{"FORMAT_BC4_UNORM_BLOCK",umath::to_integral(vk::Format::eBc4UnormBlock)},
-		{"FORMAT_BC4_SNORM_BLOCK",umath::to_integral(vk::Format::eBc4SnormBlock)},
-		{"FORMAT_BC5_UNORM_BLOCK",umath::to_integral(vk::Format::eBc5UnormBlock)},
-		{"FORMAT_BC5_SNORM_BLOCK",umath::to_integral(vk::Format::eBc5SnormBlock)},
-		{"FORMAT_BC6H_UFLOAT_BLOCK",umath::to_integral(vk::Format::eBc6HUfloatBlock)},
-		{"FORMAT_BC6H_SFLOAT_BLOCK",umath::to_integral(vk::Format::eBc6HSfloatBlock)},
-		{"FORMAT_BC7_UNORM_BLOCK",umath::to_integral(vk::Format::eBc7UnormBlock)},
-		{"FORMAT_BC7_SRGB_BLOCK",umath::to_integral(vk::Format::eBc7SrgbBlock)},
-		{"FORMAT_ETC2_R8G8B8_UNORM_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8UnormBlock)},
-		{"FORMAT_ETC2_R8G8B8_SRGB_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8SrgbBlock)},
-		{"FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8A1UnormBlock)},
-		{"FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8A1SrgbBlock)},
-		{"FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8A8UnormBlock)},
-		{"FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK",umath::to_integral(vk::Format::eEtc2R8G8B8A8SrgbBlock)},
-		{"FORMAT_EAC_R11_UNORM_BLOCK",umath::to_integral(vk::Format::eEacR11UnormBlock)},
-		{"FORMAT_EAC_R11_SNORM_BLOCK",umath::to_integral(vk::Format::eEacR11SnormBlock)},
-		{"FORMAT_EAC_R11G11_UNORM_BLOCK",umath::to_integral(vk::Format::eEacR11G11UnormBlock)},
-		{"FORMAT_EAC_R11G11_SNORM_BLOCK",umath::to_integral(vk::Format::eEacR11G11SnormBlock)},
-		{"FORMAT_ASTC_4x4_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc4x4UnormBlock)},
-		{"FORMAT_ASTC_4x4_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc4x4SrgbBlock)},
-		{"FORMAT_ASTC_5x4_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc5x4UnormBlock)},
-		{"FORMAT_ASTC_5x4_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc5x4SrgbBlock)},
-		{"FORMAT_ASTC_5x5_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc5x5UnormBlock)},
-		{"FORMAT_ASTC_5x5_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc5x5SrgbBlock)},
-		{"FORMAT_ASTC_6x5_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc6x5UnormBlock)},
-		{"FORMAT_ASTC_6x5_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc6x5SrgbBlock)},
-		{"FORMAT_ASTC_6x6_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc6x6UnormBlock)},
-		{"FORMAT_ASTC_6x6_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc6x6SrgbBlock)},
-		{"FORMAT_ASTC_8x5_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc8x5UnormBlock)},
-		{"FORMAT_ASTC_8x5_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc8x5SrgbBlock)},
-		{"FORMAT_ASTC_8x6_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc8x6UnormBlock)},
-		{"FORMAT_ASTC_8x6_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc8x6SrgbBlock)},
-		{"FORMAT_ASTC_8x8_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc8x8UnormBlock)},
-		{"FORMAT_ASTC_8x8_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc8x8SrgbBlock)},
-		{"FORMAT_ASTC_10x5_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc10x5UnormBlock)},
-		{"FORMAT_ASTC_10x5_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc10x5SrgbBlock)},
-		{"FORMAT_ASTC_10x6_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc10x6UnormBlock)},
-		{"FORMAT_ASTC_10x6_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc10x6SrgbBlock)},
-		{"FORMAT_ASTC_10x8_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc10x8UnormBlock)},
-		{"FORMAT_ASTC_10x8_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc10x8SrgbBlock)},
-		{"FORMAT_ASTC_10x10_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc10x10UnormBlock)},
-		{"FORMAT_ASTC_10x10_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc10x10SrgbBlock)},
-		{"FORMAT_ASTC_12x10_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc12x10UnormBlock)},
-		{"FORMAT_ASTC_12x10_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc12x10SrgbBlock)},
-		{"FORMAT_ASTC_12x12_UNORM_BLOCK",umath::to_integral(vk::Format::eAstc12x12UnormBlock)},
-		{"FORMAT_ASTC_12x12_SRGB_BLOCK",umath::to_integral(vk::Format::eAstc12x12SrgbBlock)},
+		{"FORMAT_UNKNOWN",umath::to_integral(prosper::Format::Unknown)},
+		{"FORMAT_R4G4_UNORM_PACK8",umath::to_integral(prosper::Format::R4G4_UNorm_Pack8)},
+		{"FORMAT_R4G4B4A4_UNORM_PACK16",umath::to_integral(prosper::Format::R4G4B4A4_UNorm_Pack16)},
+		{"FORMAT_B4G4R4A4_UNORM_PACK16",umath::to_integral(prosper::Format::B4G4R4A4_UNorm_Pack16)},
+		{"FORMAT_R5G6B5_UNORM_PACK16",umath::to_integral(prosper::Format::R5G6B5_UNorm_Pack16)},
+		{"FORMAT_B5G6R5_UNORM_PACK16",umath::to_integral(prosper::Format::B5G6R5_UNorm_Pack16)},
+		{"FORMAT_R5G5B5A1_UNORM_PACK16",umath::to_integral(prosper::Format::R5G5B5A1_UNorm_Pack16)},
+		{"FORMAT_B5G5R5A1_UNORM_PACK16",umath::to_integral(prosper::Format::B5G5R5A1_UNorm_Pack16)},
+		{"FORMAT_A1R5G5B5_UNORM_PACK16",umath::to_integral(prosper::Format::A1R5G5B5_UNorm_Pack16)},
+		{"FORMAT_R8_UNORM",umath::to_integral(prosper::Format::R8_UNorm)},
+		{"FORMAT_R8_SNORM",umath::to_integral(prosper::Format::R8_SNorm)},
+		{"FORMAT_R8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8_UScaled_PoorCoverage)},
+		{"FORMAT_R8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8_SScaled_PoorCoverage)},
+		{"FORMAT_R8_UINT",umath::to_integral(prosper::Format::R8_UInt)},
+		{"FORMAT_R8_SINT",umath::to_integral(prosper::Format::R8_SInt)},
+		{"FORMAT_R8_SRGB",umath::to_integral(prosper::Format::R8_SRGB)},
+		{"FORMAT_R8G8_UNORM",umath::to_integral(prosper::Format::R8G8_UNorm)},
+		{"FORMAT_R8G8_SNORM",umath::to_integral(prosper::Format::R8G8_SNorm)},
+		{"FORMAT_R8G8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8_UScaled_PoorCoverage)},
+		{"FORMAT_R8G8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8_SScaled_PoorCoverage)},
+		{"FORMAT_R8G8_UINT",umath::to_integral(prosper::Format::R8G8_UInt)},
+		{"FORMAT_R8G8_SINT",umath::to_integral(prosper::Format::R8G8_SInt)},
+		{"FORMAT_R8G8_SRGB_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8_SRGB_PoorCoverage)},
+		{"FORMAT_R8G8B8_UNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_UNorm_PoorCoverage)},
+		{"FORMAT_R8G8B8_SNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_SNorm_PoorCoverage)},
+		{"FORMAT_R8G8B8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_UScaled_PoorCoverage)},
+		{"FORMAT_R8G8B8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_SScaled_PoorCoverage)},
+		{"FORMAT_R8G8B8_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_UInt_PoorCoverage)},
+		{"FORMAT_R8G8B8_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_SInt_PoorCoverage)},
+		{"FORMAT_R8G8B8_SRGB_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8_SRGB_PoorCoverage)},
+		{"FORMAT_B8G8R8_UNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_UNorm_PoorCoverage)},
+		{"FORMAT_B8G8R8_SNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_SNorm_PoorCoverage)},
+		{"FORMAT_B8G8R8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_UScaled_PoorCoverage)},
+		{"FORMAT_B8G8R8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_SScaled_PoorCoverage)},
+		{"FORMAT_B8G8R8_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_UInt_PoorCoverage)},
+		{"FORMAT_B8G8R8_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_SInt_PoorCoverage)},
+		{"FORMAT_B8G8R8_SRGB_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8_SRGB_PoorCoverage)},
+		{"FORMAT_R8G8B8A8_UNORM",umath::to_integral(prosper::Format::R8G8B8A8_UNorm)},
+		{"FORMAT_R8G8B8A8_SNORM",umath::to_integral(prosper::Format::R8G8B8A8_SNorm)},
+		{"FORMAT_R8G8B8A8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8A8_UScaled_PoorCoverage)},
+		{"FORMAT_R8G8B8A8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R8G8B8A8_SScaled_PoorCoverage)},
+		{"FORMAT_R8G8B8A8_UINT",umath::to_integral(prosper::Format::R8G8B8A8_UInt)},
+		{"FORMAT_R8G8B8A8_SINT",umath::to_integral(prosper::Format::R8G8B8A8_SInt)},
+		{"FORMAT_R8G8B8A8_SRGB",umath::to_integral(prosper::Format::R8G8B8A8_SRGB)},
+		{"FORMAT_B8G8R8A8_UNORM",umath::to_integral(prosper::Format::B8G8R8A8_UNorm)},
+		{"FORMAT_B8G8R8A8_SNORM",umath::to_integral(prosper::Format::B8G8R8A8_SNorm)},
+		{"FORMAT_B8G8R8A8_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8A8_UScaled_PoorCoverage)},
+		{"FORMAT_B8G8R8A8_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::B8G8R8A8_SScaled_PoorCoverage)},
+		{"FORMAT_B8G8R8A8_UINT",umath::to_integral(prosper::Format::B8G8R8A8_UInt)},
+		{"FORMAT_B8G8R8A8_SINT",umath::to_integral(prosper::Format::B8G8R8A8_SInt)},
+		{"FORMAT_B8G8R8A8_SRGB",umath::to_integral(prosper::Format::B8G8R8A8_SRGB)},
+		{"FORMAT_A8B8G8R8_UNORM_PACK32",umath::to_integral(prosper::Format::A8B8G8R8_UNorm_Pack32)},
+		{"FORMAT_A8B8G8R8_SNORM_PACK32",umath::to_integral(prosper::Format::A8B8G8R8_SNorm_Pack32)},
+		{"FORMAT_A8B8G8R8_USCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A8B8G8R8_UScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A8B8G8R8_SSCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A8B8G8R8_SScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A8B8G8R8_UINT_PACK32",umath::to_integral(prosper::Format::A8B8G8R8_UInt_Pack32)},
+		{"FORMAT_A8B8G8R8_SINT_PACK32",umath::to_integral(prosper::Format::A8B8G8R8_SInt_Pack32)},
+		{"FORMAT_A8B8G8R8_SRGB_PACK32",umath::to_integral(prosper::Format::A8B8G8R8_SRGB_Pack32)},
+		{"FORMAT_A2R10G10B10_UNORM_PACK32",umath::to_integral(prosper::Format::A2R10G10B10_UNorm_Pack32)},
+		{"FORMAT_A2R10G10B10_SNORM_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2R10G10B10_SNorm_Pack32_PoorCoverage)},
+		{"FORMAT_A2R10G10B10_USCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2R10G10B10_UScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A2R10G10B10_SSCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2R10G10B10_SScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A2R10G10B10_UINT_PACK32",umath::to_integral(prosper::Format::A2R10G10B10_UInt_Pack32)},
+		{"FORMAT_A2R10G10B10_SINT_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2R10G10B10_SInt_Pack32_PoorCoverage)},
+		{"FORMAT_A2B10G10R10_UNORM_PACK32",umath::to_integral(prosper::Format::A2B10G10R10_UNorm_Pack32)},
+		{"FORMAT_A2B10G10R10_SNORM_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2B10G10R10_SNorm_Pack32_PoorCoverage)},
+		{"FORMAT_A2B10G10R10_USCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2B10G10R10_UScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A2B10G10R10_SSCALED_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2B10G10R10_SScaled_Pack32_PoorCoverage)},
+		{"FORMAT_A2B10G10R10_UINT_PACK32",umath::to_integral(prosper::Format::A2B10G10R10_UInt_Pack32)},
+		{"FORMAT_A2B10G10R10_SINT_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::A2B10G10R10_SInt_Pack32_PoorCoverage)},
+		{"FORMAT_R16_UNORM",umath::to_integral(prosper::Format::R16_UNorm)},
+		{"FORMAT_R16_SNORM",umath::to_integral(prosper::Format::R16_SNorm)},
+		{"FORMAT_R16_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16_UScaled_PoorCoverage)},
+		{"FORMAT_R16_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16_SScaled_PoorCoverage)},
+		{"FORMAT_R16_UINT",umath::to_integral(prosper::Format::R16_UInt)},
+		{"FORMAT_R16_SINT",umath::to_integral(prosper::Format::R16_SInt)},
+		{"FORMAT_R16_SFLOAT",umath::to_integral(prosper::Format::R16_SFloat)},
+		{"FORMAT_R16G16_UNORM",umath::to_integral(prosper::Format::R16G16_UNorm)},
+		{"FORMAT_R16G16_SNORM",umath::to_integral(prosper::Format::R16G16_SNorm)},
+		{"FORMAT_R16G16_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16_UScaled_PoorCoverage)},
+		{"FORMAT_R16G16_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16_SScaled_PoorCoverage)},
+		{"FORMAT_R16G16_UINT",umath::to_integral(prosper::Format::R16G16_UInt)},
+		{"FORMAT_R16G16_SINT",umath::to_integral(prosper::Format::R16G16_SInt)},
+		{"FORMAT_R16G16_SFLOAT",umath::to_integral(prosper::Format::R16G16_SFloat)},
+		{"FORMAT_R16G16B16_UNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_UNorm_PoorCoverage)},
+		{"FORMAT_R16G16B16_SNORM_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_SNorm_PoorCoverage)},
+		{"FORMAT_R16G16B16_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_UScaled_PoorCoverage)},
+		{"FORMAT_R16G16B16_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_SScaled_PoorCoverage)},
+		{"FORMAT_R16G16B16_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_UInt_PoorCoverage)},
+		{"FORMAT_R16G16B16_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_SInt_PoorCoverage)},
+		{"FORMAT_R16G16B16_SFLOAT_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16_SFloat_PoorCoverage)},
+		{"FORMAT_R16G16B16A16_UNORM",umath::to_integral(prosper::Format::R16G16B16A16_UNorm)},
+		{"FORMAT_R16G16B16A16_SNORM",umath::to_integral(prosper::Format::R16G16B16A16_SNorm)},
+		{"FORMAT_R16G16B16A16_USCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16A16_UScaled_PoorCoverage)},
+		{"FORMAT_R16G16B16A16_SSCALED_POOR_COVERAGE",umath::to_integral(prosper::Format::R16G16B16A16_SScaled_PoorCoverage)},
+		{"FORMAT_R16G16B16A16_UINT",umath::to_integral(prosper::Format::R16G16B16A16_UInt)},
+		{"FORMAT_R16G16B16A16_SINT",umath::to_integral(prosper::Format::R16G16B16A16_SInt)},
+		{"FORMAT_R16G16B16A16_SFLOAT",umath::to_integral(prosper::Format::R16G16B16A16_SFloat)},
+		{"FORMAT_R32_UINT",umath::to_integral(prosper::Format::R32_UInt)},
+		{"FORMAT_R32_SINT",umath::to_integral(prosper::Format::R32_SInt)},
+		{"FORMAT_R32_SFLOAT",umath::to_integral(prosper::Format::R32_SFloat)},
+		{"FORMAT_R32G32_UINT",umath::to_integral(prosper::Format::R32G32_UInt)},
+		{"FORMAT_R32G32_SINT",umath::to_integral(prosper::Format::R32G32_SInt)},
+		{"FORMAT_R32G32_SFLOAT",umath::to_integral(prosper::Format::R32G32_SFloat)},
+		{"FORMAT_R32G32B32_UINT",umath::to_integral(prosper::Format::R32G32B32_UInt)},
+		{"FORMAT_R32G32B32_SINT",umath::to_integral(prosper::Format::R32G32B32_SInt)},
+		{"FORMAT_R32G32B32_SFLOAT",umath::to_integral(prosper::Format::R32G32B32_SFloat)},
+		{"FORMAT_R32G32B32A32_UINT",umath::to_integral(prosper::Format::R32G32B32A32_UInt)},
+		{"FORMAT_R32G32B32A32_SINT",umath::to_integral(prosper::Format::R32G32B32A32_SInt)},
+		{"FORMAT_R32G32B32A32_SFLOAT",umath::to_integral(prosper::Format::R32G32B32A32_SFloat)},
+		{"FORMAT_R64_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64_UInt_PoorCoverage)},
+		{"FORMAT_R64_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64_SInt_PoorCoverage)},
+		{"FORMAT_R64_SFLOAT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64_SFloat_PoorCoverage)},
+		{"FORMAT_R64G64_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64_UInt_PoorCoverage)},
+		{"FORMAT_R64G64_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64_SInt_PoorCoverage)},
+		{"FORMAT_R64G64_SFLOAT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64_SFloat_PoorCoverage)},
+		{"FORMAT_R64G64B64_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64_UInt_PoorCoverage)},
+		{"FORMAT_R64G64B64_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64_SInt_PoorCoverage)},
+		{"FORMAT_R64G64B64_SFLOAT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64_SFloat_PoorCoverage)},
+		{"FORMAT_R64G64B64A64_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64A64_UInt_PoorCoverage)},
+		{"FORMAT_R64G64B64A64_SINT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64A64_SInt_PoorCoverage)},
+		{"FORMAT_R64G64B64A64_SFLOAT_POOR_COVERAGE",umath::to_integral(prosper::Format::R64G64B64A64_SFloat_PoorCoverage)},
+		{"FORMAT_B10G11R11_UFLOAT_PACK32",umath::to_integral(prosper::Format::B10G11R11_UFloat_Pack32)},
+		{"FORMAT_E5B9G9R9_UFLOAT_PACK32",umath::to_integral(prosper::Format::E5B9G9R9_UFloat_Pack32)},
+		{"FORMAT_D16_UNORM",umath::to_integral(prosper::Format::D16_UNorm)},
+		{"FORMAT_X8_D24_UNORM_PACK32_POOR_COVERAGE",umath::to_integral(prosper::Format::X8_D24_UNorm_Pack32_PoorCoverage)},
+		{"FORMAT_D32_SFLOAT",umath::to_integral(prosper::Format::D32_SFloat)},
+		{"FORMAT_S8_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::S8_UInt_PoorCoverage)},
+		{"FORMAT_D16_UNORM_S8_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::D16_UNorm_S8_UInt_PoorCoverage)},
+		{"FORMAT_D24_UNORM_S8_UINT_POOR_COVERAGE",umath::to_integral(prosper::Format::D24_UNorm_S8_UInt_PoorCoverage)},
+		{"FORMAT_D32_SFLOAT_S8_UINT",umath::to_integral(prosper::Format::D32_SFloat_S8_UInt)},
+		{"FORMAT_BC1_RGB_UNORM_BLOCK",umath::to_integral(prosper::Format::BC1_RGB_UNorm_Block)},
+		{"FORMAT_BC1_RGB_SRGB_BLOCK",umath::to_integral(prosper::Format::BC1_RGB_SRGB_Block)},
+		{"FORMAT_BC1_RGBA_UNORM_BLOCK",umath::to_integral(prosper::Format::BC1_RGBA_UNorm_Block)},
+		{"FORMAT_BC1_RGBA_SRGB_BLOCK",umath::to_integral(prosper::Format::BC1_RGBA_SRGB_Block)},
+		{"FORMAT_BC2_UNORM_BLOCK",umath::to_integral(prosper::Format::BC2_UNorm_Block)},
+		{"FORMAT_BC2_SRGB_BLOCK",umath::to_integral(prosper::Format::BC2_SRGB_Block)},
+		{"FORMAT_BC3_UNORM_BLOCK",umath::to_integral(prosper::Format::BC3_UNorm_Block)},
+		{"FORMAT_BC3_SRGB_BLOCK",umath::to_integral(prosper::Format::BC3_SRGB_Block)},
+		{"FORMAT_BC4_UNORM_BLOCK",umath::to_integral(prosper::Format::BC4_UNorm_Block)},
+		{"FORMAT_BC4_SNORM_BLOCK",umath::to_integral(prosper::Format::BC4_SNorm_Block)},
+		{"FORMAT_BC5_UNORM_BLOCK",umath::to_integral(prosper::Format::BC5_UNorm_Block)},
+		{"FORMAT_BC5_SNORM_BLOCK",umath::to_integral(prosper::Format::BC5_SNorm_Block)},
+		{"FORMAT_BC6H_UFLOAT_BLOCK",umath::to_integral(prosper::Format::BC6H_UFloat_Block)},
+		{"FORMAT_BC6H_SFLOAT_BLOCK",umath::to_integral(prosper::Format::BC6H_SFloat_Block)},
+		{"FORMAT_BC7_UNORM_BLOCK",umath::to_integral(prosper::Format::BC7_UNorm_Block)},
+		{"FORMAT_BC7_SRGB_BLOCK",umath::to_integral(prosper::Format::BC7_SRGB_Block)},
+		{"FORMAT_ETC2_R8G8B8_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ETC2_R8G8B8_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8A1_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8A1_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8A8_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ETC2_R8G8B8A8_SRGB_Block_PoorCoverage)},
+		{"FORMAT_EAC_R11_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::EAC_R11_UNorm_Block_PoorCoverage)},
+		{"FORMAT_EAC_R11_SNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::EAC_R11_SNorm_Block_PoorCoverage)},
+		{"FORMAT_EAC_R11G11_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::EAC_R11G11_UNorm_Block_PoorCoverage)},
+		{"FORMAT_EAC_R11G11_SNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::EAC_R11G11_SNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_4x4_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_4x4_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_4x4_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_4x4_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_5x4_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_5x4_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_5x4_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_5x4_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_5x5_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_5x5_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_5x5_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_5x5_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_6x5_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_6x5_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_6x5_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_6x5_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_6x6_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_6x6_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_6x6_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_6x6_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x5_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x5_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x5_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x5_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x6_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x6_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x6_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x6_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x8_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x8_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_8x8_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_8x8_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x5_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x5_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x5_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x5_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x6_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x6_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x6_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x6_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x8_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x8_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x8_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x8_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x10_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x10_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_10x10_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_10x10_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_12x10_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_12x10_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_12x10_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_12x10_SRGB_Block_PoorCoverage)},
+		{"FORMAT_ASTC_12x12_UNORM_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_12x12_UNorm_Block_PoorCoverage)},
+		{"FORMAT_ASTC_12x12_SRGB_BLOCK_POOR_COVERAGE",umath::to_integral(prosper::Format::ASTC_12x12_SRGB_Block_PoorCoverage)},
 
-		{"RESULT_SUCCESS",umath::to_integral(vk::Result::eSuccess)},
-		{"RESULT_NOT_READY",umath::to_integral(vk::Result::eNotReady)},
-		{"RESULT_TIMEOUT",umath::to_integral(vk::Result::eTimeout)},
-		{"RESULT_EVENT_SET",umath::to_integral(vk::Result::eEventSet)},
-		{"RESULT_EVENT_RESET",umath::to_integral(vk::Result::eEventReset)},
-		{"RESULT_INCOMPLETE",umath::to_integral(vk::Result::eIncomplete)},
-		{"RESULT_ERROR_OUT_OF_HOST_MEMORY",umath::to_integral(vk::Result::eErrorOutOfHostMemory)},
-		{"RESULT_ERROR_OUT_OF_DEVICE_MEMORY",umath::to_integral(vk::Result::eErrorOutOfDeviceMemory)},
-		{"RESULT_ERROR_INITIALIZATION_FAILED",umath::to_integral(vk::Result::eErrorInitializationFailed)},
-		{"RESULT_ERROR_DEVICE_LOST",umath::to_integral(vk::Result::eErrorDeviceLost)},
-		{"RESULT_ERROR_MEMORY_MAP_FAILED",umath::to_integral(vk::Result::eErrorMemoryMapFailed)},
-		{"RESULT_ERROR_LAYER_NOT_PRESENT",umath::to_integral(vk::Result::eErrorLayerNotPresent)},
-		{"RESULT_ERROR_EXTENSION_NOT_PRESENT",umath::to_integral(vk::Result::eErrorExtensionNotPresent)},
-		{"RESULT_ERROR_FEATURE_NOT_PRESENT",umath::to_integral(vk::Result::eErrorFeatureNotPresent)},
-		{"RESULT_ERROR_INCOMPATIBLE_DRIVER",umath::to_integral(vk::Result::eErrorIncompatibleDriver)},
-		{"RESULT_ERROR_TOO_MANY_OBJECTS",umath::to_integral(vk::Result::eErrorTooManyObjects)},
-		{"RESULT_ERROR_FORMAT_NOT_SUPPORTED",umath::to_integral(vk::Result::eErrorFormatNotSupported)},
-		{"RESULT_ERROR_SURFACE_LOST_KHR",umath::to_integral(vk::Result::eErrorSurfaceLostKHR)},
-		{"RESULT_ERROR_NATIVE_WINDOW_IN_USE_KHR",umath::to_integral(vk::Result::eErrorNativeWindowInUseKHR)},
-		{"RESULT_SUBOPTIMAL_KHR",umath::to_integral(vk::Result::eSuboptimalKHR)},
-		{"RESULT_ERROR_OUT_OF_DATE_KHR",umath::to_integral(vk::Result::eErrorOutOfDateKHR)},
-		{"RESULT_ERROR_INCOMPATIBLE_DISPLAY_KHR",umath::to_integral(vk::Result::eErrorIncompatibleDisplayKHR)},
-		{"RESULT_ERROR_VALIDATION_FAILED_EXT",umath::to_integral(vk::Result::eErrorValidationFailedEXT)},
+		{"RESULT_SUCCESS",umath::to_integral(prosper::Result::Success)},
+		{"RESULT_NOT_READY",umath::to_integral(prosper::Result::NotReady)},
+		{"RESULT_TIMEOUT",umath::to_integral(prosper::Result::Timeout)},
+		{"RESULT_EVENT_SET",umath::to_integral(prosper::Result::EventSet)},
+		{"RESULT_EVENT_RESET",umath::to_integral(prosper::Result::EventReset)},
+		{"RESULT_INCOMPLETE",umath::to_integral(prosper::Result::Incomplete)},
+		{"RESULT_ERROR_OUT_OF_HOST_MEMORY",umath::to_integral(prosper::Result::ErrorOutOfHostMemory)},
+		{"RESULT_ERROR_OUT_OF_DEVICE_MEMORY",umath::to_integral(prosper::Result::ErrorOutOfDeviceMemory)},
+		{"RESULT_ERROR_INITIALIZATION_FAILED",umath::to_integral(prosper::Result::ErrorInitializationFailed)},
+		{"RESULT_ERROR_DEVICE_LOST",umath::to_integral(prosper::Result::ErrorDeviceLost)},
+		{"RESULT_ERROR_MEMORY_MAP_FAILED",umath::to_integral(prosper::Result::ErrorMemoryMapFailed)},
+		{"RESULT_ERROR_LAYER_NOT_PRESENT",umath::to_integral(prosper::Result::ErrorLayerNotPresent)},
+		{"RESULT_ERROR_EXTENSION_NOT_PRESENT",umath::to_integral(prosper::Result::ErrorExtensionNotPresent)},
+		{"RESULT_ERROR_FEATURE_NOT_PRESENT",umath::to_integral(prosper::Result::ErrorFeatureNotPresent)},
+		{"RESULT_ERROR_INCOMPATIBLE_DRIVER",umath::to_integral(prosper::Result::ErrorIncompatibleDriver)},
+		{"RESULT_ERROR_TOO_MANY_OBJECTS",umath::to_integral(prosper::Result::ErrorTooManyObjects)},
+		{"RESULT_ERROR_FORMAT_NOT_SUPPORTED",umath::to_integral(prosper::Result::ErrorFormatNotSupported)},
+		{"RESULT_ERROR_SURFACE_LOST_KHR",umath::to_integral(prosper::Result::ErrorSurfaceLostKHR)},
+		{"RESULT_ERROR_NATIVE_WINDOW_IN_USE_KHR",umath::to_integral(prosper::Result::ErrorNativeWindowInUseKHR)},
+		{"RESULT_SUBOPTIMAL_KHR",umath::to_integral(prosper::Result::SuboptimalKHR)},
+		{"RESULT_ERROR_OUT_OF_DATE_KHR",umath::to_integral(prosper::Result::ErrorOutOfDateKHR)},
+		{"RESULT_ERROR_INCOMPATIBLE_DISPLAY_KHR",umath::to_integral(prosper::Result::ErrorIncompatibleDisplayKHR)},
+		{"RESULT_ERROR_VALIDATION_FAILED_EXT",umath::to_integral(prosper::Result::ErrorValidationFailedEXT)},
 
-		{"SAMPLER_MIPMAP_MODE_LINEAR",umath::to_integral(vk::SamplerMipmapMode::eLinear)},
-		{"SAMPLER_MIPMAP_MODE_NEAREST",umath::to_integral(vk::SamplerMipmapMode::eNearest)},
+		{"SAMPLER_MIPMAP_MODE_LINEAR",umath::to_integral(prosper::SamplerMipmapMode::Linear)},
+		{"SAMPLER_MIPMAP_MODE_NEAREST",umath::to_integral(prosper::SamplerMipmapMode::Nearest)},
 
-		{"SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER",umath::to_integral(vk::SamplerAddressMode::eClampToBorder)},
-		{"SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE",umath::to_integral(vk::SamplerAddressMode::eClampToEdge)},
-		{"SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE",umath::to_integral(vk::SamplerAddressMode::eMirrorClampToEdge)},
-		{"SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT",umath::to_integral(vk::SamplerAddressMode::eMirroredRepeat)},
-		{"SAMPLER_ADDRESS_MODE_REPEAT",umath::to_integral(vk::SamplerAddressMode::eRepeat)},
+		{"SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER",umath::to_integral(prosper::SamplerAddressMode::ClampToBorder)},
+		{"SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE",umath::to_integral(prosper::SamplerAddressMode::ClampToEdge)},
+		{"SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE",umath::to_integral(prosper::SamplerAddressMode::MirrorClampToEdge)},
+		{"SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT",umath::to_integral(prosper::SamplerAddressMode::MirroredRepeat)},
+		{"SAMPLER_ADDRESS_MODE_REPEAT",umath::to_integral(prosper::SamplerAddressMode::Repeat)},
 
-		{"COMPARE_OP_ALWAYS",umath::to_integral(vk::CompareOp::eAlways)},
-		{"COMPARE_OP_EQUAL",umath::to_integral(vk::CompareOp::eEqual)},
-		{"COMPARE_OP_GREATER",umath::to_integral(vk::CompareOp::eGreater)},
-		{"COMPARE_OP_GREATER_OR_EQUAL",umath::to_integral(vk::CompareOp::eGreaterOrEqual)},
-		{"COMPARE_OP_LESS",umath::to_integral(vk::CompareOp::eLess)},
-		{"COMPARE_OP_LESS_OR_EQUAL",umath::to_integral(vk::CompareOp::eLessOrEqual)},
-		{"COMPARE_OP_NEVER",umath::to_integral(vk::CompareOp::eNever)},
-		{"COMPARE_OP_NOT_EQUAL",umath::to_integral(vk::CompareOp::eNotEqual)},
+		{"COMPARE_OP_ALWAYS",umath::to_integral(prosper::CompareOp::Always)},
+		{"COMPARE_OP_EQUAL",umath::to_integral(prosper::CompareOp::Equal)},
+		{"COMPARE_OP_GREATER",umath::to_integral(prosper::CompareOp::Greater)},
+		{"COMPARE_OP_GREATER_OR_EQUAL",umath::to_integral(prosper::CompareOp::GreaterOrEqual)},
+		{"COMPARE_OP_LESS",umath::to_integral(prosper::CompareOp::Less)},
+		{"COMPARE_OP_LESS_OR_EQUAL",umath::to_integral(prosper::CompareOp::LessOrEqual)},
+		{"COMPARE_OP_NEVER",umath::to_integral(prosper::CompareOp::Never)},
+		{"COMPARE_OP_NOT_EQUAL",umath::to_integral(prosper::CompareOp::NotEqual)},
 
-		{"BORDER_COLOR_FLOAT_OPAQUE_BLACK",umath::to_integral(vk::BorderColor::eFloatOpaqueBlack)},
-		{"BORDER_COLOR_FLOAT_OPAQUE_WHITE",umath::to_integral(vk::BorderColor::eFloatOpaqueWhite)},
-		{"BORDER_COLOR_floatRANSPARENT_BLACK",umath::to_integral(vk::BorderColor::eFloatTransparentBlack)},
-		{"BORDER_COLOR_INT_OPAQUE_BLACK",umath::to_integral(vk::BorderColor::eIntOpaqueBlack)},
-		{"BORDER_COLOR_INT_OPAQUE_WHITE",umath::to_integral(vk::BorderColor::eIntOpaqueWhite)},
-		{"BORDER_COLOR_INT_TRANSPARENT_BLACK",umath::to_integral(vk::BorderColor::eIntTransparentBlack)},
+		{"BORDER_COLOR_FLOAT_OPAQUE_BLACK",umath::to_integral(prosper::BorderColor::FloatOpaqueBlack)},
+		{"BORDER_COLOR_FLOAT_OPAQUE_WHITE",umath::to_integral(prosper::BorderColor::FloatOpaqueWhite)},
+		{"BORDER_COLOR_floatRANSPARENT_BLACK",umath::to_integral(prosper::BorderColor::FloatTransparentBlack)},
+		{"BORDER_COLOR_INT_OPAQUE_BLACK",umath::to_integral(prosper::BorderColor::IntOpaqueBlack)},
+		{"BORDER_COLOR_INT_OPAQUE_WHITE",umath::to_integral(prosper::BorderColor::IntOpaqueWhite)},
+		{"BORDER_COLOR_INT_TRANSPARENT_BLACK",umath::to_integral(prosper::BorderColor::IntTransparentBlack)},
 
-		{"IMAGE_LAYOUT_UNDEFINED",umath::to_integral(vk::ImageLayout::eUndefined)},
-		{"IMAGE_LAYOUT_GENERAL",umath::to_integral(vk::ImageLayout::eGeneral)},
-		{"IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL",umath::to_integral(vk::ImageLayout::eColorAttachmentOptimal)},
-		{"IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL",umath::to_integral(vk::ImageLayout::eDepthStencilAttachmentOptimal)},
-		{"IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL",umath::to_integral(vk::ImageLayout::eDepthStencilReadOnlyOptimal)},
-		{"IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL",umath::to_integral(vk::ImageLayout::eShaderReadOnlyOptimal)},
-		{"IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL",umath::to_integral(vk::ImageLayout::eTransferSrcOptimal)},
-		{"IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL",umath::to_integral(vk::ImageLayout::eTransferDstOptimal)},
-		{"IMAGE_LAYOUT_PREINITIALIZED",umath::to_integral(vk::ImageLayout::ePreinitialized)},
-		{"IMAGE_LAYOUT_PRESENT_SRC_KHR",umath::to_integral(vk::ImageLayout::ePresentSrcKHR)},
+		{"IMAGE_LAYOUT_UNDEFINED",umath::to_integral(prosper::ImageLayout::Undefined)},
+		{"IMAGE_LAYOUT_GENERAL",umath::to_integral(prosper::ImageLayout::General)},
+		{"IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL",umath::to_integral(prosper::ImageLayout::ColorAttachmentOptimal)},
+		{"IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL",umath::to_integral(prosper::ImageLayout::DepthStencilAttachmentOptimal)},
+		{"IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL",umath::to_integral(prosper::ImageLayout::DepthStencilReadOnlyOptimal)},
+		{"IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL",umath::to_integral(prosper::ImageLayout::ShaderReadOnlyOptimal)},
+		{"IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL",umath::to_integral(prosper::ImageLayout::TransferSrcOptimal)},
+		{"IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL",umath::to_integral(prosper::ImageLayout::TransferDstOptimal)},
+		{"IMAGE_LAYOUT_PREINITIALIZED",umath::to_integral(prosper::ImageLayout::Preinitialized)},
+		{"IMAGE_LAYOUT_PRESENT_SRC_KHR",umath::to_integral(prosper::ImageLayout::PresentSrcKHR)},
 
-		{"ATTACHMENT_LOAD_OP_LOAD",umath::to_integral(vk::AttachmentLoadOp::eLoad)},
-		{"ATTACHMENT_LOAD_OP_CLEAR",umath::to_integral(vk::AttachmentLoadOp::eClear)},
-		{"ATTACHMENT_LOAD_OP_DONT_CARE",umath::to_integral(vk::AttachmentLoadOp::eDontCare)},
+		{"ATTACHMENT_LOAD_OP_LOAD",umath::to_integral(prosper::AttachmentLoadOp::Load)},
+		{"ATTACHMENT_LOAD_OP_CLEAR",umath::to_integral(prosper::AttachmentLoadOp::Clear)},
+		{"ATTACHMENT_LOAD_OP_DONT_CARE",umath::to_integral(prosper::AttachmentLoadOp::DontCare)},
 
-		{"ATTACHMENT_STORE_OP_STORE",umath::to_integral(vk::AttachmentStoreOp::eStore)},
-		{"ATTACHMENT_STORE_OP_DONT_CARE",umath::to_integral(vk::AttachmentStoreOp::eDontCare)},
+		{"ATTACHMENT_STORE_OP_STORE",umath::to_integral(prosper::AttachmentStoreOp::Store)},
+		{"ATTACHMENT_STORE_OP_DONT_CARE",umath::to_integral(prosper::AttachmentStoreOp::DontCare)},
 
-		{"IMAGE_TYPE_1D",umath::to_integral(vk::ImageType::e1D)},
-		{"IMAGE_TYPE_2D",umath::to_integral(vk::ImageType::e2D)},
-		{"IMAGE_TYPE_3D",umath::to_integral(vk::ImageType::e3D)},
+		{"IMAGE_TYPE_1D",umath::to_integral(prosper::ImageType::e1D)},
+		{"IMAGE_TYPE_2D",umath::to_integral(prosper::ImageType::e2D)},
+		{"IMAGE_TYPE_3D",umath::to_integral(prosper::ImageType::e3D)},
 
-		{"IMAGE_TILING_OPTIMAL",umath::to_integral(vk::ImageTiling::eOptimal)},
-		{"IMAGE_TILING_LINEAR",umath::to_integral(vk::ImageTiling::eLinear)},
+		{"IMAGE_TILING_OPTIMAL",umath::to_integral(prosper::ImageTiling::Optimal)},
+		{"IMAGE_TILING_LINEAR",umath::to_integral(prosper::ImageTiling::Linear)},
 
-		{"IMAGE_VIEW_TYPE_1D",umath::to_integral(vk::ImageViewType::e1D)},
-		{"IMAGE_VIEW_TYPE_2D",umath::to_integral(vk::ImageViewType::e2D)},
-		{"IMAGE_VIEW_TYPE_3D",umath::to_integral(vk::ImageViewType::e3D)},
-		{"IMAGE_VIEW_TYPE_CUBE",umath::to_integral(vk::ImageViewType::eCube)},
-		{"IMAGE_VIEW_TYPE_1D_ARRAY",umath::to_integral(vk::ImageViewType::e1DArray)},
-		{"IMAGE_VIEW_TYPE_2D_ARRAY",umath::to_integral(vk::ImageViewType::e2DArray)},
-		{"IMAGE_VIEW_TYPE_CUBE_ARRAY",umath::to_integral(vk::ImageViewType::eCubeArray)},
+		{"IMAGE_VIEW_TYPE_1D",umath::to_integral(prosper::ImageViewType::e1D)},
+		{"IMAGE_VIEW_TYPE_2D",umath::to_integral(prosper::ImageViewType::e2D)},
+		{"IMAGE_VIEW_TYPE_3D",umath::to_integral(prosper::ImageViewType::e3D)},
+		{"IMAGE_VIEW_TYPE_CUBE",umath::to_integral(prosper::ImageViewType::Cube)},
+		{"IMAGE_VIEW_TYPE_1D_ARRAY",umath::to_integral(prosper::ImageViewType::e1DArray)},
+		{"IMAGE_VIEW_TYPE_2D_ARRAY",umath::to_integral(prosper::ImageViewType::e2DArray)},
+		{"IMAGE_VIEW_TYPE_CUBE_ARRAY",umath::to_integral(prosper::ImageViewType::CubeArray)},
 
-		{"COMMAND_BUFFER_LEVEL_PRIMARY",umath::to_integral(vk::CommandBufferLevel::ePrimary)},
-		{"COMMAND_BUFFER_LEVEL_SECONDARY",umath::to_integral(vk::CommandBufferLevel::eSecondary)},
+		{"COMPONENT_SWIZZLE_IDENTITY",umath::to_integral(prosper::ComponentSwizzle::Identity)},
+		{"COMPONENT_SWIZZLE_ZERO",umath::to_integral(prosper::ComponentSwizzle::Zero)},
+		{"COMPONENT_SWIZZLE_ONE",umath::to_integral(prosper::ComponentSwizzle::One)},
+		{"COMPONENT_SWIZZLE_R",umath::to_integral(prosper::ComponentSwizzle::R)},
+		{"COMPONENT_SWIZZLE_G",umath::to_integral(prosper::ComponentSwizzle::G)},
+		{"COMPONENT_SWIZZLE_B",umath::to_integral(prosper::ComponentSwizzle::B)},
+		{"COMPONENT_SWIZZLE_A",umath::to_integral(prosper::ComponentSwizzle::A)},
 
-		{"COMPONENT_SWIZZLE_IDENTITY",umath::to_integral(vk::ComponentSwizzle::eIdentity)},
-		{"COMPONENT_SWIZZLE_ZERO",umath::to_integral(vk::ComponentSwizzle::eZero)},
-		{"COMPONENT_SWIZZLE_ONE",umath::to_integral(vk::ComponentSwizzle::eOne)},
-		{"COMPONENT_SWIZZLE_R",umath::to_integral(vk::ComponentSwizzle::eR)},
-		{"COMPONENT_SWIZZLE_G",umath::to_integral(vk::ComponentSwizzle::eG)},
-		{"COMPONENT_SWIZZLE_B",umath::to_integral(vk::ComponentSwizzle::eB)},
-		{"COMPONENT_SWIZZLE_A",umath::to_integral(vk::ComponentSwizzle::eA)},
+		{"DESCRIPTOR_TYPE_SAMPLER",umath::to_integral(prosper::DescriptorType::Sampler)},
+		{"DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER",umath::to_integral(prosper::DescriptorType::CombinedImageSampler)},
+		{"DESCRIPTOR_TYPE_SAMPLED_IMAGE",umath::to_integral(prosper::DescriptorType::SampledImage)},
+		{"DESCRIPTOR_TYPE_STORAGE_IMAGE",umath::to_integral(prosper::DescriptorType::StorageImage)},
+		{"DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER",umath::to_integral(prosper::DescriptorType::UniformTexelBuffer)},
+		{"DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER",umath::to_integral(prosper::DescriptorType::StorageTexelBuffer)},
+		{"DESCRIPTOR_TYPE_UNIFORM_BUFFER",umath::to_integral(prosper::DescriptorType::UniformBuffer)},
+		{"DESCRIPTOR_TYPE_STORAGE_BUFFER",umath::to_integral(prosper::DescriptorType::StorageBuffer)},
+		{"DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC",umath::to_integral(prosper::DescriptorType::UniformBufferDynamic)},
+		{"DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC",umath::to_integral(prosper::DescriptorType::StorageBufferDynamic)},
+		{"DESCRIPTOR_TYPE_INPUT_ATTACHMENT",umath::to_integral(prosper::DescriptorType::InputAttachment)},
 
-		{"DESCRIPTOR_TYPE_SAMPLER",umath::to_integral(vk::DescriptorType::eSampler)},
-		{"DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER",umath::to_integral(vk::DescriptorType::eCombinedImageSampler)},
-		{"DESCRIPTOR_TYPE_SAMPLED_IMAGE",umath::to_integral(vk::DescriptorType::eSampledImage)},
-		{"DESCRIPTOR_TYPE_STORAGE_IMAGE",umath::to_integral(vk::DescriptorType::eStorageImage)},
-		{"DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER",umath::to_integral(vk::DescriptorType::eUniformTexelBuffer)},
-		{"DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER",umath::to_integral(vk::DescriptorType::eStorageTexelBuffer)},
-		{"DESCRIPTOR_TYPE_UNIFORM_BUFFER",umath::to_integral(vk::DescriptorType::eUniformBuffer)},
-		{"DESCRIPTOR_TYPE_STORAGE_BUFFER",umath::to_integral(vk::DescriptorType::eStorageBuffer)},
-		{"DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC",umath::to_integral(vk::DescriptorType::eUniformBufferDynamic)},
-		{"DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC",umath::to_integral(vk::DescriptorType::eStorageBufferDynamic)},
-		{"DESCRIPTOR_TYPE_INPUT_ATTACHMENT",umath::to_integral(vk::DescriptorType::eInputAttachment)},
+		{"QUERY_TYPE_OCCLUSION",umath::to_integral(prosper::QueryType::Occlusion)},
+		{"QUERY_TYPE_PIPELINE_STATISTICS",umath::to_integral(prosper::QueryType::PipelineStatistics)},
+		{"QUERY_TYPE_TIMESTAMP",umath::to_integral(prosper::QueryType::Timestamp)},
 
-		{"QUERY_TYPE_OCCLUSION",umath::to_integral(vk::QueryType::eOcclusion)},
-		{"QUERY_TYPE_PIPELINE_STATISTICS",umath::to_integral(vk::QueryType::ePipelineStatistics)},
-		{"QUERY_TYPE_TIMESTAMP",umath::to_integral(vk::QueryType::eTimestamp)},
+		{"PIPELINE_BIND_POINT_GRAPHICS",umath::to_integral(prosper::PipelineBindPoint::Graphics)},
+		{"PIPELINE_BIND_POINT_COMPUTE",umath::to_integral(prosper::PipelineBindPoint::Compute)},
 
-		{"PIPELINE_BIND_POINT_GRAPHICS",umath::to_integral(vk::PipelineBindPoint::eGraphics)},
-		{"PIPELINE_BIND_POINT_COMPUTE",umath::to_integral(vk::PipelineBindPoint::eCompute)},
+		{"PRIMITIVE_TOPOLOGY_POINT_LIST",umath::to_integral(prosper::PrimitiveTopology::PointList)},
+		{"PRIMITIVE_TOPOLOGY_LINE_LIST",umath::to_integral(prosper::PrimitiveTopology::LineList)},
+		{"PRIMITIVE_TOPOLOGY_LINE_STRIP",umath::to_integral(prosper::PrimitiveTopology::LineStrip)},
+		{"PRIMITIVE_TOPOLOGY_TRIANGLE_LIST",umath::to_integral(prosper::PrimitiveTopology::TriangleList)},
+		{"PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP",umath::to_integral(prosper::PrimitiveTopology::TriangleStrip)},
+		{"PRIMITIVE_TOPOLOGY_TRIANGLE_FAN",umath::to_integral(prosper::PrimitiveTopology::TriangleFan)},
+		{"PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY",umath::to_integral(prosper::PrimitiveTopology::LineListWithAdjacency)},
+		{"PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY",umath::to_integral(prosper::PrimitiveTopology::LineStripWithAdjacency)},
+		{"PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY",umath::to_integral(prosper::PrimitiveTopology::TriangleListWithAdjacency)},
+		{"PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY",umath::to_integral(prosper::PrimitiveTopology::TriangleStripWithAdjacency)},
+		{"PRIMITIVE_TOPOLOGY_PATCH_LIST",umath::to_integral(prosper::PrimitiveTopology::PatchList)},
 
-		{"PIPELINE_CACHE_HEADER_VERSION_ONE",umath::to_integral(vk::PipelineCacheHeaderVersion::eOne)},
+		{"SHARING_MODE_EXCLUSIVE",umath::to_integral(prosper::SharingMode::Exclusive)},
+		{"SHARING_MODE_CONCURRENT",umath::to_integral(prosper::SharingMode::Concurrent)},
 
-		{"PRIMITIVE_TOPOLOGY_POINT_LIST",umath::to_integral(vk::PrimitiveTopology::ePointList)},
-		{"PRIMITIVE_TOPOLOGY_LINE_LIST",umath::to_integral(vk::PrimitiveTopology::eLineList)},
-		{"PRIMITIVE_TOPOLOGY_LINE_STRIP",umath::to_integral(vk::PrimitiveTopology::eLineStrip)},
-		{"PRIMITIVE_TOPOLOGY_TRIANGLE_LIST",umath::to_integral(vk::PrimitiveTopology::eTriangleList)},
-		{"PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP",umath::to_integral(vk::PrimitiveTopology::eTriangleStrip)},
-		{"PRIMITIVE_TOPOLOGY_TRIANGLE_FAN",umath::to_integral(vk::PrimitiveTopology::eTriangleFan)},
-		{"PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY",umath::to_integral(vk::PrimitiveTopology::eLineListWithAdjacency)},
-		{"PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY",umath::to_integral(vk::PrimitiveTopology::eLineStripWithAdjacency)},
-		{"PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY",umath::to_integral(vk::PrimitiveTopology::eTriangleListWithAdjacency)},
-		{"PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY",umath::to_integral(vk::PrimitiveTopology::eTriangleStripWithAdjacency)},
-		{"PRIMITIVE_TOPOLOGY_PATCH_LIST",umath::to_integral(vk::PrimitiveTopology::ePatchList)},
+		{"INDEX_TYPE_UINT16",umath::to_integral(prosper::IndexType::UInt16)},
+		{"INDEX_TYPE_UINT32",umath::to_integral(prosper::IndexType::UInt32)},
 
-		{"SHARING_MODE_EXCLUSIVE",umath::to_integral(vk::SharingMode::eExclusive)},
-		{"SHARING_MODE_CONCURRENT",umath::to_integral(vk::SharingMode::eConcurrent)},
+		{"FILTER_NEAREST",umath::to_integral(prosper::Filter::Nearest)},
+		{"FILTER_LINEAR",umath::to_integral(prosper::Filter::Linear)},
 
-		{"INDEX_TYPE_UINT16",umath::to_integral(vk::IndexType::eUint16)},
-		{"INDEX_TYPE_UINT32",umath::to_integral(vk::IndexType::eUint32)},
+		{"POLYGON_MODE_FILL",umath::to_integral(prosper::PolygonMode::Fill)},
+		{"POLYGON_MODE_LINE",umath::to_integral(prosper::PolygonMode::Line)},
+		{"POLYGON_MODE_POINT",umath::to_integral(prosper::PolygonMode::Point)},
 
-		{"FILTER_NEAREST",umath::to_integral(vk::Filter::eNearest)},
-		{"FILTER_LINEAR",umath::to_integral(vk::Filter::eLinear)},
+		{"CULL_MODE_NONE",umath::to_integral(prosper::CullModeFlags::None)},
+		{"CULL_MODE_FRONT_BIT",umath::to_integral(prosper::CullModeFlags::FrontBit)},
+		{"CULL_MODE_BACK_BIT",umath::to_integral(prosper::CullModeFlags::BackBit)},
+		{"CULL_MODE_FRONT_AND_BACK",umath::to_integral(prosper::CullModeFlags::FrontAndBack)},
 
-		{"POLYGON_MODE_FILL",umath::to_integral(vk::PolygonMode::eFill)},
-		{"POLYGON_MODE_LINE",umath::to_integral(vk::PolygonMode::eLine)},
-		{"POLYGON_MODE_POINT",umath::to_integral(vk::PolygonMode::ePoint)},
+		{"FRONT_FACE_COUNTER_CLOCKWISE",umath::to_integral(prosper::FrontFace::CounterClockwise)},
+		{"FRONT_FACE_CLOCKWISE",umath::to_integral(prosper::FrontFace::Clockwise)},
 
-		{"CULL_MODE_NONE",umath::to_integral(vk::CullModeFlagBits::eNone)},
-		{"CULL_MODE_FRONT_BIT",umath::to_integral(vk::CullModeFlagBits::eFront)},
-		{"CULL_MODE_BACK_BIT",umath::to_integral(vk::CullModeFlagBits::eBack)},
-		{"CULL_MODE_FRONT_AND_BACK",umath::to_integral(vk::CullModeFlagBits::eFrontAndBack)},
+		{"BLEND_FACTOR_ZERO",umath::to_integral(prosper::BlendFactor::Zero)},
+		{"BLEND_FACTOR_ONE",umath::to_integral(prosper::BlendFactor::One)},
+		{"BLEND_FACTOR_SRC_COLOR",umath::to_integral(prosper::BlendFactor::SrcColor)},
+		{"BLEND_FACTOR_ONE_MINUS_SRC_COLOR",umath::to_integral(prosper::BlendFactor::OneMinusSrcColor)},
+		{"BLEND_FACTOR_DST_COLOR",umath::to_integral(prosper::BlendFactor::DstColor)},
+		{"BLEND_FACTOR_ONE_MINUS_DST_COLOR",umath::to_integral(prosper::BlendFactor::OneMinusDstColor)},
+		{"BLEND_FACTOR_SRC_ALPHA",umath::to_integral(prosper::BlendFactor::SrcAlpha)},
+		{"BLEND_FACTOR_ONE_MINUS_SRC_ALPHA",umath::to_integral(prosper::BlendFactor::OneMinusSrcAlpha)},
+		{"BLEND_FACTOR_DST_ALPHA",umath::to_integral(prosper::BlendFactor::DstAlpha)},
+		{"BLEND_FACTOR_ONE_MINUS_DST_ALPHA",umath::to_integral(prosper::BlendFactor::OneMinusDstAlpha)},
+		{"BLEND_FACTOR_CONSTANT_COLOR",umath::to_integral(prosper::BlendFactor::ConstantColor)},
+		{"BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR",umath::to_integral(prosper::BlendFactor::OneMinusConstantColor)},
+		{"BLEND_FACTOR_CONSTANT_ALPHA",umath::to_integral(prosper::BlendFactor::ConstantAlpha)},
+		{"BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA",umath::to_integral(prosper::BlendFactor::OneMinusConstantAlpha)},
+		{"BLEND_FACTOR_SRC_ALPHA_SATURATE",umath::to_integral(prosper::BlendFactor::SrcAlphaSaturate)},
+		{"BLEND_FACTOR_SRC1_COLOR",umath::to_integral(prosper::BlendFactor::Src1Color)},
+		{"BLEND_FACTOR_ONE_MINUS_SRC1_COLOR",umath::to_integral(prosper::BlendFactor::OneMinusSrc1Color)},
+		{"BLEND_FACTOR_SRC1_ALPHA",umath::to_integral(prosper::BlendFactor::Src1Alpha)},
+		{"BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA",umath::to_integral(prosper::BlendFactor::OneMinusSrc1Alpha)},
 
-		{"FRONT_FACE_COUNTER_CLOCKWISE",umath::to_integral(vk::FrontFace::eCounterClockwise)},
-		{"FRONT_FACE_CLOCKWISE",umath::to_integral(vk::FrontFace::eClockwise)},
+		{"BLEND_OP_ADD",umath::to_integral(prosper::BlendOp::Add)},
+		{"BLEND_OP_SUBTRACT",umath::to_integral(prosper::BlendOp::Subtract)},
+		{"BLEND_OP_REVERSE_SUBTRACT",umath::to_integral(prosper::BlendOp::ReverseSubtract)},
+		{"BLEND_OP_MIN",umath::to_integral(prosper::BlendOp::Min)},
+		{"BLEND_OP_MAX",umath::to_integral(prosper::BlendOp::Max)},
 
-		{"BLEND_FACTOR_ZERO",umath::to_integral(vk::BlendFactor::eZero)},
-		{"BLEND_FACTOR_ONE",umath::to_integral(vk::BlendFactor::eOne)},
-		{"BLEND_FACTOR_SRC_COLOR",umath::to_integral(vk::BlendFactor::eSrcColor)},
-		{"BLEND_FACTOR_ONE_MINUS_SRC_COLOR",umath::to_integral(vk::BlendFactor::eOneMinusSrcColor)},
-		{"BLEND_FACTOR_DST_COLOR",umath::to_integral(vk::BlendFactor::eDstColor)},
-		{"BLEND_FACTOR_ONE_MINUS_DST_COLOR",umath::to_integral(vk::BlendFactor::eOneMinusDstColor)},
-		{"BLEND_FACTOR_SRC_ALPHA",umath::to_integral(vk::BlendFactor::eSrcAlpha)},
-		{"BLEND_FACTOR_ONE_MINUS_SRC_ALPHA",umath::to_integral(vk::BlendFactor::eOneMinusSrcAlpha)},
-		{"BLEND_FACTOR_DST_ALPHA",umath::to_integral(vk::BlendFactor::eDstAlpha)},
-		{"BLEND_FACTOR_ONE_MINUS_DST_ALPHA",umath::to_integral(vk::BlendFactor::eOneMinusDstAlpha)},
-		{"BLEND_FACTOR_CONSTANT_COLOR",umath::to_integral(vk::BlendFactor::eConstantColor)},
-		{"BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR",umath::to_integral(vk::BlendFactor::eOneMinusConstantColor)},
-		{"BLEND_FACTOR_CONSTANT_ALPHA",umath::to_integral(vk::BlendFactor::eConstantAlpha)},
-		{"BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA",umath::to_integral(vk::BlendFactor::eOneMinusConstantAlpha)},
-		{"BLEND_FACTOR_SRC_ALPHA_SATURATE",umath::to_integral(vk::BlendFactor::eSrcAlphaSaturate)},
-		{"BLEND_FACTOR_SRC1_COLOR",umath::to_integral(vk::BlendFactor::eSrc1Color)},
-		{"BLEND_FACTOR_ONE_MINUS_SRC1_COLOR",umath::to_integral(vk::BlendFactor::eOneMinusSrc1Color)},
-		{"BLEND_FACTOR_SRC1_ALPHA",umath::to_integral(vk::BlendFactor::eSrc1Alpha)},
-		{"BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA",umath::to_integral(vk::BlendFactor::eOneMinusSrc1Alpha)},
+		{"STENCIL_OP_KEEP",umath::to_integral(prosper::StencilOp::Keep)},
+		{"STENCIL_OP_ZERO",umath::to_integral(prosper::StencilOp::Zero)},
+		{"STENCIL_OP_REPLACE",umath::to_integral(prosper::StencilOp::Replace)},
+		{"STENCIL_OP_INCREMENT_AND_CLAMP",umath::to_integral(prosper::StencilOp::IncrementAndClamp)},
+		{"STENCIL_OP_DECREMENT_AND_CLAMP",umath::to_integral(prosper::StencilOp::DecrementAndClamp)},
+		{"STENCIL_OP_INVERT",umath::to_integral(prosper::StencilOp::Invert)},
+		{"STENCIL_OP_INCREMENT_AND_WRAP",umath::to_integral(prosper::StencilOp::IncrementAndWrap)},
+		{"STENCIL_OP_DECREMENT_AND_WRAP",umath::to_integral(prosper::StencilOp::DecrementAndWrap)},
 
-		{"BLEND_OP_ADD",umath::to_integral(vk::BlendOp::eAdd)},
-		{"BLEND_OP_SUBTRACT",umath::to_integral(vk::BlendOp::eSubtract)},
-		{"BLEND_OP_REVERSE_SUBTRACT",umath::to_integral(vk::BlendOp::eReverseSubtract)},
-		{"BLEND_OP_MIN",umath::to_integral(vk::BlendOp::eMin)},
-		{"BLEND_OP_MAX",umath::to_integral(vk::BlendOp::eMax)},
+		{"LOGIC_OP_CLEAR",umath::to_integral(prosper::LogicOp::Clear)},
+		{"LOGIC_OP_AND",umath::to_integral(prosper::LogicOp::And)},
+		{"LOGIC_OP_AND_REVERSE",umath::to_integral(prosper::LogicOp::AndReverse)},
+		{"LOGIC_OP_COPY",umath::to_integral(prosper::LogicOp::Copy)},
+		{"LOGIC_OP_AND_INVERTED",umath::to_integral(prosper::LogicOp::AndInverted)},
+		{"LOGIC_OP_NO_OP",umath::to_integral(prosper::LogicOp::NoOp)},
+		{"LOGIC_OP_XOR",umath::to_integral(prosper::LogicOp::Xor)},
+		{"LOGIC_OP_OR",umath::to_integral(prosper::LogicOp::Or)},
+		{"LOGIC_OP_NOR",umath::to_integral(prosper::LogicOp::Nor)},
+		{"LOGIC_OP_EQUIVALENT",umath::to_integral(prosper::LogicOp::Equivalent)},
+		{"LOGIC_OP_INVERT",umath::to_integral(prosper::LogicOp::Invert)},
+		{"LOGIC_OP_OR_REVERSE",umath::to_integral(prosper::LogicOp::OrReverse)},
+		{"LOGIC_OP_COPY_INVERTED",umath::to_integral(prosper::LogicOp::CopyInverted)},
+		{"LOGIC_OP_OR_INVERTED",umath::to_integral(prosper::LogicOp::OrInverted)},
+		{"LOGIC_OP_NAND",umath::to_integral(prosper::LogicOp::Nand)},
+		{"LOGIC_OP_SET",umath::to_integral(prosper::LogicOp::Set)},
 
-		{"STENCIL_OP_KEEP",umath::to_integral(vk::StencilOp::eKeep)},
-		{"STENCIL_OP_ZERO",umath::to_integral(vk::StencilOp::eZero)},
-		{"STENCIL_OP_REPLACE",umath::to_integral(vk::StencilOp::eReplace)},
-		{"STENCIL_OP_INCREMENT_AND_CLAMP",umath::to_integral(vk::StencilOp::eIncrementAndClamp)},
-		{"STENCIL_OP_DECREMENT_AND_CLAMP",umath::to_integral(vk::StencilOp::eDecrementAndClamp)},
-		{"STENCIL_OP_INVERT",umath::to_integral(vk::StencilOp::eInvert)},
-		{"STENCIL_OP_INCREMENT_AND_WRAP",umath::to_integral(vk::StencilOp::eIncrementAndWrap)},
-		{"STENCIL_OP_DECREMENT_AND_WRAP",umath::to_integral(vk::StencilOp::eDecrementAndWrap)},
+		{"PHYSICAL_DEVICE_TYPE_OTHER",umath::to_integral(prosper::PhysicalDeviceType::Other)},
+		{"PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU",umath::to_integral(prosper::PhysicalDeviceType::IntegratedGPU)},
+		{"PHYSICAL_DEVICE_TYPE_DISCRETE_GPU",umath::to_integral(prosper::PhysicalDeviceType::DiscreteGPU)},
+		{"PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU",umath::to_integral(prosper::PhysicalDeviceType::VirtualGPU)},
+		{"PHYSICAL_DEVICE_TYPE_CPU",umath::to_integral(prosper::PhysicalDeviceType::CPU)},
 
-		{"LOGIC_OP_CLEAR",umath::to_integral(vk::LogicOp::eClear)},
-		{"LOGIC_OP_AND",umath::to_integral(vk::LogicOp::eAnd)},
-		{"LOGIC_OP_AND_REVERSE",umath::to_integral(vk::LogicOp::eAndReverse)},
-		{"LOGIC_OP_COPY",umath::to_integral(vk::LogicOp::eCopy)},
-		{"LOGIC_OP_AND_INVERTED",umath::to_integral(vk::LogicOp::eAndInverted)},
-		{"LOGIC_OP_NO_OP",umath::to_integral(vk::LogicOp::eNoOp)},
-		{"LOGIC_OP_XOR",umath::to_integral(vk::LogicOp::eXor)},
-		{"LOGIC_OP_OR",umath::to_integral(vk::LogicOp::eOr)},
-		{"LOGIC_OP_NOR",umath::to_integral(vk::LogicOp::eNor)},
-		{"LOGIC_OP_EQUIVALENT",umath::to_integral(vk::LogicOp::eEquivalent)},
-		{"LOGIC_OP_INVERT",umath::to_integral(vk::LogicOp::eInvert)},
-		{"LOGIC_OP_OR_REVERSE",umath::to_integral(vk::LogicOp::eOrReverse)},
-		{"LOGIC_OP_COPY_INVERTED",umath::to_integral(vk::LogicOp::eCopyInverted)},
-		{"LOGIC_OP_OR_INVERTED",umath::to_integral(vk::LogicOp::eOrInverted)},
-		{"LOGIC_OP_NAND",umath::to_integral(vk::LogicOp::eNand)},
-		{"LOGIC_OP_SET",umath::to_integral(vk::LogicOp::eSet)},
-
-		{"INTERNAL_ALLOCATION_TYPE_EXECUTABLE",umath::to_integral(vk::InternalAllocationType::eExecutable)},
-
-		{"SYSTEM_ALLOCATION_SCOPE_COMMAND",umath::to_integral(vk::SystemAllocationScope::eCommand)},
-		{"SYSTEM_ALLOCATION_SCOPE_OBJECT",umath::to_integral(vk::SystemAllocationScope::eObject)},
-		{"SYSTEM_ALLOCATION_SCOPE_CACHE",umath::to_integral(vk::SystemAllocationScope::eCache)},
-		{"SYSTEM_ALLOCATION_SCOPE_DEVICE",umath::to_integral(vk::SystemAllocationScope::eDevice)},
-		{"SYSTEM_ALLOCATION_SCOPE_INSTANCE",umath::to_integral(vk::SystemAllocationScope::eInstance)},
-
-		{"PHYSICAL_DEVICE_TYPE_OTHER",umath::to_integral(vk::PhysicalDeviceType::eOther)},
-		{"PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU",umath::to_integral(vk::PhysicalDeviceType::eIntegratedGpu)},
-		{"PHYSICAL_DEVICE_TYPE_DISCRETE_GPU",umath::to_integral(vk::PhysicalDeviceType::eDiscreteGpu)},
-		{"PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU",umath::to_integral(vk::PhysicalDeviceType::eVirtualGpu)},
-		{"PHYSICAL_DEVICE_TYPE_CPU",umath::to_integral(vk::PhysicalDeviceType::eCpu)},
-
-		{"VERTEX_INPUT_RATE_VERTEX",umath::to_integral(vk::VertexInputRate::eVertex)},
-		{"VERTEX_INPUT_RATE_INSTANCE",umath::to_integral(vk::VertexInputRate::eInstance)},
-
-		{"SUBPASS_CONTENTS_INLINE",umath::to_integral(vk::SubpassContents::eInline)},
-		{"SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS",umath::to_integral(vk::SubpassContents::eSecondaryCommandBuffers)},
+		{"VERTEX_INPUT_RATE_VERTEX",umath::to_integral(prosper::VertexInputRate::Vertex)},
+		{"VERTEX_INPUT_RATE_INSTANCE",umath::to_integral(prosper::VertexInputRate::Instance)},
 
 		{"DYNAMIC_STATE_NONE",umath::to_integral(prosper::util::DynamicStateFlags::None)},
 		{"DYNAMIC_STATE_VIEWPORT_BIT",umath::to_integral(prosper::util::DynamicStateFlags::Viewport)},
@@ -1548,238 +1524,257 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"DYNAMIC_STATE_EXCLUSIVE_SCISSOR_NV_BIT",umath::to_integral(prosper::util::DynamicStateFlags::ExclusiveScissorNV)},
 #endif
 
-		{"QUEUE_GRAPHICS_BIT",umath::to_integral(vk::QueueFlagBits::eGraphics)},
-		{"QUEUE_COMPUTE_BIT",umath::to_integral(vk::QueueFlagBits::eCompute)},
-		{"QUEUE_TRANSFER_BIT",umath::to_integral(vk::QueueFlagBits::eTransfer)},
-		{"QUEUE_SPARSE_BINDING_BIT",umath::to_integral(vk::QueueFlagBits::eSparseBinding)},
+		{"MEMORY_PROPERTY_DEVICE_LOCAL_BIT",umath::to_integral(prosper::MemoryPropertyFlags::DeviceLocalBit)},
+		{"MEMORY_PROPERTY_HOST_VISIBLE_BIT",umath::to_integral(prosper::MemoryPropertyFlags::HostVisibleBit)},
+		{"MEMORY_PROPERTY_HOST_COHERENT_BIT",umath::to_integral(prosper::MemoryPropertyFlags::HostCoherentBit)},
+		{"MEMORY_PROPERTY_HOST_CACHED_BIT",umath::to_integral(prosper::MemoryPropertyFlags::HostCachedBit)},
+		{"MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT",umath::to_integral(prosper::MemoryPropertyFlags::LazilyAllocatedBit)},
 
-		{"MEMORY_PROPERTY_DEVICE_LOCAL_BIT",umath::to_integral(vk::MemoryPropertyFlagBits::eDeviceLocal)},
-		{"MEMORY_PROPERTY_HOST_VISIBLE_BIT",umath::to_integral(vk::MemoryPropertyFlagBits::eHostVisible)},
-		{"MEMORY_PROPERTY_HOST_COHERENT_BIT",umath::to_integral(vk::MemoryPropertyFlagBits::eHostCoherent)},
-		{"MEMORY_PROPERTY_HOST_CACHED_BIT",umath::to_integral(vk::MemoryPropertyFlagBits::eHostCached)},
-		{"MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT",umath::to_integral(vk::MemoryPropertyFlagBits::eLazilyAllocated)},
-
-		{"MEMORY_HEAP_DEVICE_LOCAL_BIT",umath::to_integral(vk::MemoryHeapFlagBits::eDeviceLocal)},
 	
-		{"ACCESS_INDIRECT_COMMAND_READ_BIT",umath::to_integral(vk::AccessFlagBits::eIndirectCommandRead)},
-		{"ACCESS_INDEX_READ_BIT",umath::to_integral(vk::AccessFlagBits::eIndexRead)},
-		{"ACCESS_VERTEX_ATTRIBUTE_READ_BIT",umath::to_integral(vk::AccessFlagBits::eVertexAttributeRead)},
-		{"ACCESS_UNIFORM_READ_BIT",umath::to_integral(vk::AccessFlagBits::eUniformRead)},
-		{"ACCESS_INPUT_ATTACHMENT_READ_BIT",umath::to_integral(vk::AccessFlagBits::eInputAttachmentRead)},
-		{"ACCESS_SHADER_READ_BIT",umath::to_integral(vk::AccessFlagBits::eShaderRead)},
-		{"ACCESS_SHADER_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eShaderWrite)},
-		{"ACCESS_COLOR_ATTACHMENT_READ_BIT",umath::to_integral(vk::AccessFlagBits::eColorAttachmentRead)},
-		{"ACCESS_COLOR_ATTACHMENT_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eColorAttachmentWrite)},
-		{"ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT",umath::to_integral(vk::AccessFlagBits::eDepthStencilAttachmentRead)},
-		{"ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eDepthStencilAttachmentWrite)},
-		{"ACCESS_TRANSFER_READ_BIT",umath::to_integral(vk::AccessFlagBits::eTransferRead)},
-		{"ACCESS_TRANSFER_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eTransferWrite)},
-		{"ACCESS_HOST_READ_BIT",umath::to_integral(vk::AccessFlagBits::eHostRead)},
-		{"ACCESS_HOST_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eHostWrite)},
-		{"ACCESS_MEMORY_READ_BIT",umath::to_integral(vk::AccessFlagBits::eMemoryRead)},
-		{"ACCESS_MEMORY_WRITE_BIT",umath::to_integral(vk::AccessFlagBits::eMemoryWrite)},
+		{"ACCESS_INDIRECT_COMMAND_READ_BIT",umath::to_integral(prosper::AccessFlags::IndirectCommandReadBit)},
+		{"ACCESS_INDEX_READ_BIT",umath::to_integral(prosper::AccessFlags::IndexReadBit)},
+		{"ACCESS_VERTEX_ATTRIBUTE_READ_BIT",umath::to_integral(prosper::AccessFlags::VertexAttributeReadBit)},
+		{"ACCESS_UNIFORM_READ_BIT",umath::to_integral(prosper::AccessFlags::UniformReadBit)},
+		{"ACCESS_INPUT_ATTACHMENT_READ_BIT",umath::to_integral(prosper::AccessFlags::InputAttachmentReadBit)},
+		{"ACCESS_SHADER_READ_BIT",umath::to_integral(prosper::AccessFlags::ShaderReadBit)},
+		{"ACCESS_SHADER_WRITE_BIT",umath::to_integral(prosper::AccessFlags::ShaderWriteBit)},
+		{"ACCESS_COLOR_ATTACHMENT_READ_BIT",umath::to_integral(prosper::AccessFlags::ColorAttachmentReadBit)},
+		{"ACCESS_COLOR_ATTACHMENT_WRITE_BIT",umath::to_integral(prosper::AccessFlags::ColorAttachmentWriteBit)},
+		{"ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT",umath::to_integral(prosper::AccessFlags::DepthStencilAttachmentReadBit)},
+		{"ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT",umath::to_integral(prosper::AccessFlags::DepthStencilAttachmentWriteBit)},
+		{"ACCESS_TRANSFER_READ_BIT",umath::to_integral(prosper::AccessFlags::TransferReadBit)},
+		{"ACCESS_TRANSFER_WRITE_BIT",umath::to_integral(prosper::AccessFlags::TransferWriteBit)},
+		{"ACCESS_HOST_READ_BIT",umath::to_integral(prosper::AccessFlags::HostReadBit)},
+		{"ACCESS_HOST_WRITE_BIT",umath::to_integral(prosper::AccessFlags::HostWriteBit)},
+		{"ACCESS_MEMORY_READ_BIT",umath::to_integral(prosper::AccessFlags::MemoryReadBit)},
+		{"ACCESS_MEMORY_WRITE_BIT",umath::to_integral(prosper::AccessFlags::MemoryWriteBit)},
 
-		{"BUFFER_USAGE_TRANSFER_SRC_BIT",umath::to_integral(vk::BufferUsageFlagBits::eTransferSrc)},
-		{"BUFFER_USAGE_TRANSFER_DST_BIT",umath::to_integral(vk::BufferUsageFlagBits::eTransferDst)},
-		{"BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eUniformTexelBuffer)},
-		{"BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eStorageTexelBuffer)},
-		{"BUFFER_USAGE_UNIFORM_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eUniformBuffer)},
-		{"BUFFER_USAGE_STORAGE_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eStorageBuffer)},
-		{"BUFFER_USAGE_INDEX_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eIndexBuffer)},
-		{"BUFFER_USAGE_VERTEX_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eVertexBuffer)},
-		{"BUFFER_USAGE_INDIRECT_BUFFER_BIT",umath::to_integral(vk::BufferUsageFlagBits::eIndirectBuffer)},
+		{"BUFFER_USAGE_TRANSFER_SRC_BIT",umath::to_integral(prosper::BufferUsageFlags::TransferSrcBit)},
+		{"BUFFER_USAGE_TRANSFER_DST_BIT",umath::to_integral(prosper::BufferUsageFlags::TransferDstBit)},
+		{"BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::UniformTexelBufferBit)},
+		{"BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::StorageTexelBufferBit)},
+		{"BUFFER_USAGE_UNIFORM_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::UniformBufferBit)},
+		{"BUFFER_USAGE_STORAGE_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::StorageBufferBit)},
+		{"BUFFER_USAGE_INDEX_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::IndexBufferBit)},
+		{"BUFFER_USAGE_VERTEX_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::VertexBufferBit)},
+		{"BUFFER_USAGE_INDIRECT_BUFFER_BIT",umath::to_integral(prosper::BufferUsageFlags::IndirectBufferBit)},
 
-		{"BUFFER_CREATE_SPARSE_BINDING_BIT",umath::to_integral(vk::BufferCreateFlagBits::eSparseBinding)},
-		{"BUFFER_CREATE_SPARSE_RESIDENCY_BIT",umath::to_integral(vk::BufferCreateFlagBits::eSparseResidency)},
-		{"BUFFER_CREATE_SPARSE_ALIASED_BIT",umath::to_integral(vk::BufferCreateFlagBits::eSparseAliased)},
+		{"SHADER_STAGE_VERTEX_BIT",umath::to_integral(prosper::ShaderStageFlags::VertexBit)},
+		{"SHADER_STAGE_TESSELLATION_CONTROL_BIT",umath::to_integral(prosper::ShaderStageFlags::TessellationControlBit)},
+		{"SHADER_STAGE_TESSELLATION_EVALUATION_BIT",umath::to_integral(prosper::ShaderStageFlags::TessellationEvaluationBit)},
+		{"SHADER_STAGE_GEOMETRY_BIT",umath::to_integral(prosper::ShaderStageFlags::GeometryBit)},
+		{"SHADER_STAGE_FRAGMENT_BIT",umath::to_integral(prosper::ShaderStageFlags::FragmentBit)},
+		{"SHADER_STAGE_COMPUTE_BIT",umath::to_integral(prosper::ShaderStageFlags::ComputeBit)},
+		{"SHADER_STAGE_ALL_GRAPHICS",umath::to_integral(prosper::ShaderStageFlags::AllGraphics)},
+		{"SHADER_STAGE_ALL",umath::to_integral(prosper::ShaderStageFlags::All)},
 
-		{"SHADER_STAGE_VERTEX_BIT",umath::to_integral(vk::ShaderStageFlagBits::eVertex)},
-		{"SHADER_STAGE_TESSELLATION_CONTROL_BIT",umath::to_integral(vk::ShaderStageFlagBits::eTessellationControl)},
-		{"SHADER_STAGE_TESSELLATION_EVALUATION_BIT",umath::to_integral(vk::ShaderStageFlagBits::eTessellationEvaluation)},
-		{"SHADER_STAGE_GEOMETRY_BIT",umath::to_integral(vk::ShaderStageFlagBits::eGeometry)},
-		{"SHADER_STAGE_FRAGMENT_BIT",umath::to_integral(vk::ShaderStageFlagBits::eFragment)},
-		{"SHADER_STAGE_COMPUTE_BIT",umath::to_integral(vk::ShaderStageFlagBits::eCompute)},
-		{"SHADER_STAGE_ALL_GRAPHICS",umath::to_integral(vk::ShaderStageFlagBits::eAllGraphics)},
-		{"SHADER_STAGE_ALL",umath::to_integral(vk::ShaderStageFlagBits::eAll)},
+		{"IMAGE_USAGE_TRANSFER_SRC_BIT",umath::to_integral(prosper::ImageUsageFlags::TransferSrcBit)},
+		{"IMAGE_USAGE_TRANSFER_DST_BIT",umath::to_integral(prosper::ImageUsageFlags::TransferDstBit)},
+		{"IMAGE_USAGE_SAMPLED_BIT",umath::to_integral(prosper::ImageUsageFlags::SampledBit)},
+		{"IMAGE_USAGE_STORAGE_BIT",umath::to_integral(prosper::ImageUsageFlags::StorageBit)},
+		{"IMAGE_USAGE_COLOR_ATTACHMENT_BIT",umath::to_integral(prosper::ImageUsageFlags::ColorAttachmentBit)},
+		{"IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT",umath::to_integral(prosper::ImageUsageFlags::DepthStencilAttachmentBit)},
+		{"IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT",umath::to_integral(prosper::ImageUsageFlags::TransientAttachmentBit)},
+		{"IMAGE_USAGE_INPUT_ATTACHMENT_BIT",umath::to_integral(prosper::ImageUsageFlags::InputAttachmentBit)},
 
-		{"IMAGE_USAGE_TRANSFER_SRC_BIT",umath::to_integral(vk::ImageUsageFlagBits::eTransferSrc)},
-		{"IMAGE_USAGE_TRANSFER_DST_BIT",umath::to_integral(vk::ImageUsageFlagBits::eTransferDst)},
-		{"IMAGE_USAGE_SAMPLED_BIT",umath::to_integral(vk::ImageUsageFlagBits::eSampled)},
-		{"IMAGE_USAGE_STORAGE_BIT",umath::to_integral(vk::ImageUsageFlagBits::eStorage)},
-		{"IMAGE_USAGE_COLOR_ATTACHMENT_BIT",umath::to_integral(vk::ImageUsageFlagBits::eColorAttachment)},
-		{"IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT",umath::to_integral(vk::ImageUsageFlagBits::eDepthStencilAttachment)},
-		{"IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT",umath::to_integral(vk::ImageUsageFlagBits::eTransientAttachment)},
-		{"IMAGE_USAGE_INPUT_ATTACHMENT_BIT",umath::to_integral(vk::ImageUsageFlagBits::eInputAttachment)},
+		{"IMAGE_CREATE_SPARSE_BINDING_BIT",umath::to_integral(prosper::ImageCreateFlags::SparseBindingBit)},
+		{"IMAGE_CREATE_SPARSE_RESIDENCY_BIT",umath::to_integral(prosper::ImageCreateFlags::SparseResidencyBit)},
+		{"IMAGE_CREATE_SPARSE_ALIASED_BIT",umath::to_integral(prosper::ImageCreateFlags::SparseAliasedBit)},
+		{"IMAGE_CREATE_MUTABLE_FORMAT_BIT",umath::to_integral(prosper::ImageCreateFlags::MutableFormatBit)},
+		{"IMAGE_CREATE_CUBE_COMPATIBLE_BIT",umath::to_integral(prosper::ImageCreateFlags::CubeCompatibleBit)},
 
-		{"IMAGE_CREATE_SPARSE_BINDING_BIT",umath::to_integral(vk::ImageCreateFlagBits::eSparseBinding)},
-		{"IMAGE_CREATE_SPARSE_RESIDENCY_BIT",umath::to_integral(vk::ImageCreateFlagBits::eSparseResidency)},
-		{"IMAGE_CREATE_SPARSE_ALIASED_BIT",umath::to_integral(vk::ImageCreateFlagBits::eSparseAliased)},
-		{"IMAGE_CREATE_MUTABLE_FORMAT_BIT",umath::to_integral(vk::ImageCreateFlagBits::eMutableFormat)},
-		{"IMAGE_CREATE_CUBE_COMPATIBLE_BIT",umath::to_integral(vk::ImageCreateFlagBits::eCubeCompatible)},
+		{"PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT",umath::to_integral(prosper::PipelineCreateFlags::DisableOptimizationBit)},
+		{"PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT",umath::to_integral(prosper::PipelineCreateFlags::AllowDerivativesBit)},
+		{"PIPELINE_CREATE_DERIVATIVE_BIT",umath::to_integral(prosper::PipelineCreateFlags::DerivativeBit)},
 
-		{"PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT",umath::to_integral(vk::PipelineCreateFlagBits::eDisableOptimization)},
-		{"PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT",umath::to_integral(vk::PipelineCreateFlagBits::eAllowDerivatives)},
-		{"PIPELINE_CREATE_DERIVATIVE_BIT",umath::to_integral(vk::PipelineCreateFlagBits::eDerivative)},
+		{"COLOR_COMPONENT_R_BIT",umath::to_integral(prosper::ColorComponentFlags::RBit)},
+		{"COLOR_COMPONENT_G_BIT",umath::to_integral(prosper::ColorComponentFlags::GBit)},
+		{"COLOR_COMPONENT_B_BIT",umath::to_integral(prosper::ColorComponentFlags::BBit)},
+		{"COLOR_COMPONENT_A_BIT",umath::to_integral(prosper::ColorComponentFlags::ABit)},
 
-		{"COLOR_COMPONENT_R_BIT",umath::to_integral(vk::ColorComponentFlagBits::eR)},
-		{"COLOR_COMPONENT_G_BIT",umath::to_integral(vk::ColorComponentFlagBits::eG)},
-		{"COLOR_COMPONENT_B_BIT",umath::to_integral(vk::ColorComponentFlagBits::eB)},
-		{"COLOR_COMPONENT_A_BIT",umath::to_integral(vk::ColorComponentFlagBits::eA)},
+		{"QUERY_RESULT_64_BIT",umath::to_integral(prosper::QueryResultFlags::e64Bit)},
+		{"QUERY_RESULT_WAIT_BIT",umath::to_integral(prosper::QueryResultFlags::WaitBit)},
+		{"QUERY_RESULT_WITH_AVAILABILITY_BIT",umath::to_integral(prosper::QueryResultFlags::WithAvailabilityBit)},
+		{"QUERY_RESULT_PARTIAL_BIT",umath::to_integral(prosper::QueryResultFlags::PartialBit)},
 
-		{"FENCE_CREATE_SIGNALED_BIT",umath::to_integral(vk::FenceCreateFlagBits::eSignaled)},
+		{"QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit)},
+		{"QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit)},
+		{"QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit)},
+		{"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::GeometryShaderInvocationsBit)},
+		{"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::GeometryShaderPrimitivesBit)},
+		{"QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::ClippingInvocationsBit)},
+		{"QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::ClippingPrimitivesBit)},
+		{"QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::FragmentShaderInvocationsBit)},
+		{"QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::TessellationControlShaderPatchesBit)},
+		{"QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::TessellationEvaluationShaderInvocationsBit)},
+		{"QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT",umath::to_integral(prosper::QueryPipelineStatisticFlags::ComputeShaderInvocationsBit)},
 
-		{"FORMAT_FEATURE_SAMPLED_IMAGE_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eSampledImage)},
-		{"FORMAT_FEATURE_STORAGE_IMAGE_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eStorageImage)},
-		{"FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eStorageImageAtomic)},
-		{"FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eUniformTexelBuffer)},
-		{"FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eStorageTexelBuffer)},
-		{"FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eStorageTexelBufferAtomic)},
-		{"FORMAT_FEATURE_VERTEX_BUFFER_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eVertexBuffer)},
-		{"FORMAT_FEATURE_COLOR_ATTACHMENT_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eColorAttachment)},
-		{"FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eColorAttachmentBlend)},
-		{"FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eDepthStencilAttachment)},
-		{"FORMAT_FEATURE_BLIT_SRC_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eBlitSrc)},
-		{"FORMAT_FEATURE_BLIT_DST_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eBlitDst)},
-		{"FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT",umath::to_integral(vk::FormatFeatureFlagBits::eSampledImageFilterLinear)},
+		{"IMAGE_ASPECT_COLOR_BIT",umath::to_integral(prosper::ImageAspectFlags::ColorBit)},
+		{"IMAGE_ASPECT_DEPTH_BIT",umath::to_integral(prosper::ImageAspectFlags::DepthBit)},
+		{"IMAGE_ASPECT_STENCIL_BIT",umath::to_integral(prosper::ImageAspectFlags::StencilBit)},
+		{"IMAGE_ASPECT_METADATA_BIT",umath::to_integral(prosper::ImageAspectFlags::MetadataBit)},
 
-		{"QUERY_CONTROL_PRECISE_BIT",umath::to_integral(vk::QueryControlFlagBits::ePrecise)},
+		{"PIPELINE_STAGE_TOP_OF_PIPE_BIT",umath::to_integral(prosper::PipelineStageFlags::TopOfPipeBit)},
+		{"PIPELINE_STAGE_DRAW_INDIRECT_BIT",umath::to_integral(prosper::PipelineStageFlags::DrawIndirectBit)},
+		{"PIPELINE_STAGE_VERTEX_INPUT_BIT",umath::to_integral(prosper::PipelineStageFlags::VertexInputBit)},
+		{"PIPELINE_STAGE_VERTEX_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::VertexShaderBit)},
+		{"PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::TessellationControlShaderBit)},
+		{"PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::TessellationEvaluationShaderBit)},
+		{"PIPELINE_STAGE_GEOMETRY_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::GeometryShaderBit)},
+		{"PIPELINE_STAGE_FRAGMENT_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::FragmentShaderBit)},
+		{"PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT",umath::to_integral(prosper::PipelineStageFlags::EarlyFragmentTestsBit)},
+		{"PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT",umath::to_integral(prosper::PipelineStageFlags::LateFragmentTestsBit)},
+		{"PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT",umath::to_integral(prosper::PipelineStageFlags::ColorAttachmentOutputBit)},
+		{"PIPELINE_STAGE_COMPUTE_SHADER_BIT",umath::to_integral(prosper::PipelineStageFlags::ComputeShaderBit)},
+		{"PIPELINE_STAGE_TRANSFER_BIT",umath::to_integral(prosper::PipelineStageFlags::TransferBit)},
+		{"PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT",umath::to_integral(prosper::PipelineStageFlags::BottomOfPipeBit)},
+		{"PIPELINE_STAGE_HOST_BIT",umath::to_integral(prosper::PipelineStageFlags::HostBit)},
+		{"PIPELINE_STAGE_ALL_GRAPHICS_BIT",umath::to_integral(prosper::PipelineStageFlags::AllGraphicsBit)},
+		{"PIPELINE_STAGE_ALL_COMMANDS_BIT",umath::to_integral(prosper::PipelineStageFlags::AllCommandsBit)},
 
-		{"QUERY_RESULT_64_BIT",umath::to_integral(vk::QueryResultFlagBits::e64)},
-		{"QUERY_RESULT_WAIT_BIT",umath::to_integral(vk::QueryResultFlagBits::eWait)},
-		{"QUERY_RESULT_WITH_AVAILABILITY_BIT",umath::to_integral(vk::QueryResultFlagBits::eWithAvailability)},
-		{"QUERY_RESULT_PARTIAL_BIT",umath::to_integral(vk::QueryResultFlagBits::ePartial)},
+		{"SAMPLE_COUNT_1_BIT",umath::to_integral(prosper::SampleCountFlags::e1Bit)},
+		{"SAMPLE_COUNT_2_BIT",umath::to_integral(prosper::SampleCountFlags::e2Bit)},
+		{"SAMPLE_COUNT_4_BIT",umath::to_integral(prosper::SampleCountFlags::e4Bit)},
+		{"SAMPLE_COUNT_8_BIT",umath::to_integral(prosper::SampleCountFlags::e8Bit)},
+		{"SAMPLE_COUNT_16_BIT",umath::to_integral(prosper::SampleCountFlags::e16Bit)},
+		{"SAMPLE_COUNT_32_BIT",umath::to_integral(prosper::SampleCountFlags::e32Bit)},
+		{"SAMPLE_COUNT_64_BIT",umath::to_integral(prosper::SampleCountFlags::e64Bit)},
 
-		{"COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT",umath::to_integral(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)},
-		{"COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT",umath::to_integral(vk::CommandBufferUsageFlagBits::eRenderPassContinue)},
-		{"COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT",umath::to_integral(vk::CommandBufferUsageFlagBits::eSimultaneousUse)},
+		{"STENCIL_FACE_FRONT_BIT",umath::to_integral(prosper::StencilFaceFlags::FrontBit)},
+		{"STENCIL_FACE_BACK_BIT",umath::to_integral(prosper::StencilFaceFlags::BackBit)},
+		{"STENCIL_FRONT_AND_BACK",umath::to_integral(prosper::StencilFaceFlags::FrontAndBack)},
 
-		{"QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eInputAssemblyVertices)},
-		{"QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eInputAssemblyPrimitives)},
-		{"QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eVertexShaderInvocations)},
-		{"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eGeometryShaderInvocations)},
-		{"QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eGeometryShaderPrimitives)},
-		{"QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eClippingInvocations)},
-		{"QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eClippingPrimitives)},
-		{"QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eFragmentShaderInvocations)},
-		{"QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches)},
-		{"QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations)},
-		{"QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT",umath::to_integral(vk::QueryPipelineStatisticFlagBits::eComputeShaderInvocations)},
+		{"PRESENT_MODE_IMMEDIATE_KHR",umath::to_integral(prosper::PresentModeKHR::Immediate)},
+		{"PRESENT_MODE_MAILBOX_KHR",umath::to_integral(prosper::PresentModeKHR::Mailbox)},
+		{"PRESENT_MODE_FIFO_KHR",umath::to_integral(prosper::PresentModeKHR::Fifo)},
+		{"PRESENT_MODE_FIFO_RELAXED_KHR",umath::to_integral(prosper::PresentModeKHR::FifoRelaxed)},
 
-		{"IMAGE_ASPECT_COLOR_BIT",umath::to_integral(vk::ImageAspectFlagBits::eColor)},
-		{"IMAGE_ASPECT_DEPTH_BIT",umath::to_integral(vk::ImageAspectFlagBits::eDepth)},
-		{"IMAGE_ASPECT_STENCIL_BIT",umath::to_integral(vk::ImageAspectFlagBits::eStencil)},
-		{"IMAGE_ASPECT_METADATA_BIT",umath::to_integral(vk::ImageAspectFlagBits::eMetadata)},
+#if 0
+		{"COMMAND_BUFFER_LEVEL_PRIMARY",umath::to_integral(prosper::CommandBufferLevel::Primary)},
+		{"COMMAND_BUFFER_LEVEL_SECONDARY",umath::to_integral(prosper::CommandBufferLevel::Secondary)},
 
-		{"SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT",umath::to_integral(vk::SparseImageFormatFlagBits::eSingleMiptail)},
-		{"SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT",umath::to_integral(vk::SparseImageFormatFlagBits::eAlignedMipSize)},
-		{"SPARSE_IMAGE_FORMAT_NONSTANDARD_BLOCK_SIZE_BIT",umath::to_integral(vk::SparseImageFormatFlagBits::eNonstandardBlockSize)},
+		{"PIPELINE_CACHE_HEADER_VERSION_ONE",umath::to_integral(prosper::PipelineCacheHeaderVersion::One)},
 
-		{"SPARSE_MEMORY_BIND_METADATA_BIT",umath::to_integral(vk::SparseMemoryBindFlagBits::eMetadata)},
+		{"INTERNAL_ALLOCATION_TYPE_EXECUTABLE",umath::to_integral(prosper::InternalAllocationType::Executable)},
 
-		{"PIPELINE_STAGE_TOP_OF_PIPE_BIT",umath::to_integral(vk::PipelineStageFlagBits::eTopOfPipe)},
-		{"PIPELINE_STAGE_DRAW_INDIRECT_BIT",umath::to_integral(vk::PipelineStageFlagBits::eDrawIndirect)},
-		{"PIPELINE_STAGE_VERTEX_INPUT_BIT",umath::to_integral(vk::PipelineStageFlagBits::eVertexInput)},
-		{"PIPELINE_STAGE_VERTEX_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eVertexShader)},
-		{"PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eTessellationControlShader)},
-		{"PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eTessellationEvaluationShader)},
-		{"PIPELINE_STAGE_GEOMETRY_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eGeometryShader)},
-		{"PIPELINE_STAGE_FRAGMENT_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eFragmentShader)},
-		{"PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT",umath::to_integral(vk::PipelineStageFlagBits::eEarlyFragmentTests)},
-		{"PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT",umath::to_integral(vk::PipelineStageFlagBits::eLateFragmentTests)},
-		{"PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT",umath::to_integral(vk::PipelineStageFlagBits::eColorAttachmentOutput)},
-		{"PIPELINE_STAGE_COMPUTE_SHADER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eComputeShader)},
-		{"PIPELINE_STAGE_TRANSFER_BIT",umath::to_integral(vk::PipelineStageFlagBits::eTransfer)},
-		{"PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT",umath::to_integral(vk::PipelineStageFlagBits::eBottomOfPipe)},
-		{"PIPELINE_STAGE_HOST_BIT",umath::to_integral(vk::PipelineStageFlagBits::eHost)},
-		{"PIPELINE_STAGE_ALL_GRAPHICS_BIT",umath::to_integral(vk::PipelineStageFlagBits::eAllGraphics)},
-		{"PIPELINE_STAGE_ALL_COMMANDS_BIT",umath::to_integral(vk::PipelineStageFlagBits::eAllCommands)},
+		{"SYSTEM_ALLOCATION_SCOPE_COMMAND",umath::to_integral(prosper::SystemAllocationScope::Command)},
+		{"SYSTEM_ALLOCATION_SCOPE_OBJECT",umath::to_integral(prosper::SystemAllocationScope::Object)},
+		{"SYSTEM_ALLOCATION_SCOPE_CACHE",umath::to_integral(prosper::SystemAllocationScope::Cache)},
+		{"SYSTEM_ALLOCATION_SCOPE_DEVICE",umath::to_integral(prosper::SystemAllocationScope::Device)},
+		{"SYSTEM_ALLOCATION_SCOPE_INSTANCE",umath::to_integral(prosper::SystemAllocationScope::Instance)},
 
-		{"COMMAND_POOL_CREATE_TRANSIENT_BIT",umath::to_integral(vk::CommandPoolCreateFlagBits::eTransient)},
-		{"COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT",umath::to_integral(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)},
+		{"SUBPASS_CONTENTS_INLINE",umath::to_integral(prosper::SubpassContents::Inline)},
+		{"SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS",umath::to_integral(prosper::SubpassContents::SecondaryCommandBuffers)},
 
-		{"COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT",umath::to_integral(vk::CommandPoolResetFlagBits::eReleaseResources)},
+		{"QUEUE_GRAPHICS_BIT",umath::to_integral(prosper::QueueFlags::Graphics)},
+		{"QUEUE_COMPUTE_BIT",umath::to_integral(prosper::QueueFlags::Compute)},
+		{"QUEUE_TRANSFER_BIT",umath::to_integral(prosper::QueueFlags::Transfer)},
+		{"QUEUE_SPARSE_BINDING_BIT",umath::to_integral(prosper::QueueFlags::SparseBinding)},
 
-		{"COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT",umath::to_integral(vk::CommandBufferResetFlagBits::eReleaseResources)},
+		{"MEMORY_HEAP_DEVICE_LOCAL_BIT",umath::to_integral(prosper::MemoryHeapFlags::DeviceLocal)},
 
-		{"SAMPLE_COUNT_1_BIT",umath::to_integral(vk::SampleCountFlagBits::e1)},
-		{"SAMPLE_COUNT_2_BIT",umath::to_integral(vk::SampleCountFlagBits::e2)},
-		{"SAMPLE_COUNT_4_BIT",umath::to_integral(vk::SampleCountFlagBits::e4)},
-		{"SAMPLE_COUNT_8_BIT",umath::to_integral(vk::SampleCountFlagBits::e8)},
-		{"SAMPLE_COUNT_16_BIT",umath::to_integral(vk::SampleCountFlagBits::e16)},
-		{"SAMPLE_COUNT_32_BIT",umath::to_integral(vk::SampleCountFlagBits::e32)},
-		{"SAMPLE_COUNT_64_BIT",umath::to_integral(vk::SampleCountFlagBits::e64)},
+		{"BUFFER_CREATE_SPARSE_BINDING_BIT",umath::to_integral(prosper::BufferCreateFlags::SparseBinding)},
+		{"BUFFER_CREATE_SPARSE_RESIDENCY_BIT",umath::to_integral(prosper::BufferCreateFlags::SparseResidency)},
+		{"BUFFER_CREATE_SPARSE_ALIASED_BIT",umath::to_integral(prosper::BufferCreateFlags::SparseAliased)},
 
-		{"ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT",umath::to_integral(vk::AttachmentDescriptionFlagBits::eMayAlias)},
+		{"FENCE_CREATE_SIGNALED_BIT",umath::to_integral(prosper::FenceCreateFlags::Signaled)},
 
-		{"STENCIL_FACE_FRONT_BIT",umath::to_integral(vk::StencilFaceFlagBits::eFront)},
-		{"STENCIL_FACE_BACK_BIT",umath::to_integral(vk::StencilFaceFlagBits::eBack)},
-		{"STENCIL_FRONT_AND_BACK",umath::to_integral(vk::StencilFaceFlagBits::eVkStencilFrontAndBack)},
+		{"FORMAT_FEATURE_SAMPLED_IMAGE_BIT",umath::to_integral(prosper::FormatFeatureFlags::SampledImage)},
+		{"FORMAT_FEATURE_STORAGE_IMAGE_BIT",umath::to_integral(prosper::FormatFeatureFlags::StorageImage)},
+		{"FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT",umath::to_integral(prosper::FormatFeatureFlags::StorageImageAtomic)},
+		{"FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT",umath::to_integral(prosper::FormatFeatureFlags::UniformTexelBuffer)},
+		{"FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT",umath::to_integral(prosper::FormatFeatureFlags::StorageTexelBuffer)},
+		{"FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT",umath::to_integral(prosper::FormatFeatureFlags::StorageTexelBufferAtomic)},
+		{"FORMAT_FEATURE_VERTEX_BUFFER_BIT",umath::to_integral(prosper::FormatFeatureFlags::VertexBuffer)},
+		{"FORMAT_FEATURE_COLOR_ATTACHMENT_BIT",umath::to_integral(prosper::FormatFeatureFlags::ColorAttachment)},
+		{"FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT",umath::to_integral(prosper::FormatFeatureFlags::ColorAttachmentBlend)},
+		{"FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT",umath::to_integral(prosper::FormatFeatureFlags::DepthStencilAttachment)},
+		{"FORMAT_FEATURE_BLIT_SRC_BIT",umath::to_integral(prosper::FormatFeatureFlags::BlitSrc)},
+		{"FORMAT_FEATURE_BLIT_DST_BIT",umath::to_integral(prosper::FormatFeatureFlags::BlitDst)},
+		{"FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT",umath::to_integral(prosper::FormatFeatureFlags::SampledImageFilterLinear)},
 
-		{"DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT",umath::to_integral(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)},
+		{"QUERY_CONTROL_PRECISE_BIT",umath::to_integral(prosper::QueryControlFlags::Precise)},
 
-		{"DEPENDENCY_BY_REGION_BIT",umath::to_integral(vk::DependencyFlagBits::eByRegion)},
+		{"COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT",umath::to_integral(prosper::CommandBufferUsageFlags::OneTimeSubmit)},
+		{"COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT",umath::to_integral(prosper::CommandBufferUsageFlags::RenderPassContinue)},
+		{"COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT",umath::to_integral(prosper::CommandBufferUsageFlags::SimultaneousUse)},
 
-		{"PRESENT_MODE_IMMEDIATE_KHR",umath::to_integral(vk::PresentModeKHR::eImmediate)},
-		{"PRESENT_MODE_MAILBOX_KHR",umath::to_integral(vk::PresentModeKHR::eMailbox)},
-		{"PRESENT_MODE_FIFO_KHR",umath::to_integral(vk::PresentModeKHR::eFifo)},
-		{"PRESENT_MODE_FIFO_RELAXED_KHR",umath::to_integral(vk::PresentModeKHR::eFifoRelaxed)},
+		{"SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT",umath::to_integral(prosper::SparseImageFormatFlags::SingleMiptail)},
+		{"SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT",umath::to_integral(prosper::SparseImageFormatFlags::AlignedMipSize)},
+		{"SPARSE_IMAGE_FORMAT_NONSTANDARD_BLOCK_SIZE_BIT",umath::to_integral(prosper::SparseImageFormatFlags::NonstandardBlockSize)},
 
-		{"COLORSPACE_SRGB_NONLINEAR_KHR",umath::to_integral(vk::ColorSpaceKHR::eSrgbNonlinear)},
+		{"SPARSE_MEMORY_BIND_METADATA_BIT",umath::to_integral(prosper::SparseMemoryBindFlags::Metadata)},
 
-		{"DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR",umath::to_integral(vk::DisplayPlaneAlphaFlagBitsKHR::eOpaque)},
-		{"DISPLAY_PLANE_ALPHA_GLOBAL_BIT_KHR",umath::to_integral(vk::DisplayPlaneAlphaFlagBitsKHR::eGlobal)},
-		{"DISPLAY_PLANE_ALPHA_PER_PIXEL_BIT_KHR",umath::to_integral(vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixel)},
-		{"DISPLAY_PLANE_ALPHA_PER_PIXEL_PREMULTIPLIED_BIT_KHR",umath::to_integral(vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied)},
+		{"COMMAND_POOL_CREATE_TRANSIENT_BIT",umath::to_integral(prosper::CommandPoolCreateFlags::Transient)},
+		{"COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT",umath::to_integral(prosper::CommandPoolCreateFlags::ResetCommandBuffer)},
 
-		{"COMPOSITE_ALPHA_OPAQUE_BIT_KHR",umath::to_integral(vk::CompositeAlphaFlagBitsKHR::eOpaque)},
-		{"COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR",umath::to_integral(vk::CompositeAlphaFlagBitsKHR::ePreMultiplied)},
-		{"COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR",umath::to_integral(vk::CompositeAlphaFlagBitsKHR::ePostMultiplied)},
-		{"COMPOSITE_ALPHA_INHERIT_BIT_KHR",umath::to_integral(vk::CompositeAlphaFlagBitsKHR::eInherit)},
+		{"COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT",umath::to_integral(prosper::CommandPoolResetFlags::ReleaseResources)},
 
-		{"SURFACE_TRANSFORM_IDENTITY_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eIdentity)},
-		{"SURFACE_TRANSFORM_ROTATE_90_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eRotate90)},
-		{"SURFACE_TRANSFORM_ROTATE_180_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eRotate180)},
-		{"SURFACE_TRANSFORM_ROTATE_270_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eRotate270)},
-		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eHorizontalMirror)},
-		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90)},
-		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180)},
-		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270)},
-		{"SURFACE_TRANSFORM_INHERIT_BIT_KHR",umath::to_integral(vk::SurfaceTransformFlagBitsKHR::eInherit)},
+		{"COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT",umath::to_integral(prosper::CommandBufferResetFlags::ReleaseResources)},
 
-		{"DEBUG_REPORT_INFORMATION_BIT_EXT",umath::to_integral(vk::DebugReportFlagBitsEXT::eInformation)},
-		{"DEBUG_REPORT_WARNING_BIT_EXT",umath::to_integral(vk::DebugReportFlagBitsEXT::eWarning)},
-		{"DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT",umath::to_integral(vk::DebugReportFlagBitsEXT::ePerformanceWarning)},
-		{"DEBUG_REPORT_ERROR_BIT_EXT",umath::to_integral(vk::DebugReportFlagBitsEXT::eError)},
-		{"DEBUG_REPORT_DEBUG_BIT_EXT",umath::to_integral(vk::DebugReportFlagBitsEXT::eDebug)},
+		{"ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT",umath::to_integral(prosper::AttachmentDescriptionFlags::MayAlias)},
 
-		{"DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eUnknown)},
-		{"DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eInstance)},
-		{"DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::ePhysicalDevice)},
-		{"DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDevice)},
-		{"DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eQueue)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSemaphore)},
-		{"DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eCommandBuffer)},
-		{"DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eFence)},
-		{"DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDeviceMemory)},
-		{"DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eBuffer)},
-		{"DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eImage)},
-		{"DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eEvent)},
-		{"DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eQueryPool)},
-		{"DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eBufferView)},
-		{"DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eImageView)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eShaderModule)},
-		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::ePipelineCache)},
-		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::ePipelineLayout)},
-		{"DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eRenderPass)},
-		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::ePipeline)},
-		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDescriptorSetLayout)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSampler)},
-		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDescriptorPool)},
-		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eDescriptorSet)},
-		{"DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eFramebuffer)},
-		{"DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eCommandPool)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSurfaceKHR)},
-		{"DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT",umath::to_integral(vk::DebugReportObjectTypeEXT::eSwapchainKHR)},
+		{"DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT",umath::to_integral(prosper::DescriptorPoolCreateFlags::FreeDescriptorSet)},
+
+		{"DEPENDENCY_BY_REGION_BIT",umath::to_integral(prosper::DependencyFlags::ByRegion)},
+
+		{"COLORSPACE_SRGB_NONLINEAR_KHR",umath::to_integral(prosper::ColorSpaceKHR::SrgbNonlinear)},
+
+		{"DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR",umath::to_integral(prosper::DisplayPlaneAlphaFlagsKHR::Opaque)},
+		{"DISPLAY_PLANE_ALPHA_GLOBAL_BIT_KHR",umath::to_integral(prosper::DisplayPlaneAlphaFlagsKHR::Global)},
+		{"DISPLAY_PLANE_ALPHA_PER_PIXEL_BIT_KHR",umath::to_integral(prosper::DisplayPlaneAlphaFlagsKHR::PerPixel)},
+		{"DISPLAY_PLANE_ALPHA_PER_PIXEL_PREMULTIPLIED_BIT_KHR",umath::to_integral(prosper::DisplayPlaneAlphaFlagsKHR::PerPixelPremultiplied)},
+
+		{"COMPOSITE_ALPHA_OPAQUE_BIT_KHR",umath::to_integral(prosper::CompositeAlphaFlagsKHR::Opaque)},
+		{"COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR",umath::to_integral(prosper::CompositeAlphaFlagsKHR::PreMultiplied)},
+		{"COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR",umath::to_integral(prosper::CompositeAlphaFlagsKHR::PostMultiplied)},
+		{"COMPOSITE_ALPHA_INHERIT_BIT_KHR",umath::to_integral(prosper::CompositeAlphaFlagsKHR::Inherit)},
+
+		{"SURFACE_TRANSFORM_IDENTITY_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::Identity)},
+		{"SURFACE_TRANSFORM_ROTATE_90_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::Rotate90)},
+		{"SURFACE_TRANSFORM_ROTATE_180_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::Rotate180)},
+		{"SURFACE_TRANSFORM_ROTATE_270_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::Rotate270)},
+		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::HorizontalMirror)},
+		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::HorizontalMirrorRotate90)},
+		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::HorizontalMirrorRotate180)},
+		{"SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::HorizontalMirrorRotate270)},
+		{"SURFACE_TRANSFORM_INHERIT_BIT_KHR",umath::to_integral(prosper::SurfaceTransformFlagsKHR::Inherit)},
+#endif
+
+		{"DEBUG_REPORT_INFORMATION_BIT_EXT",umath::to_integral(prosper::DebugReportFlags::InformationBit)},
+		{"DEBUG_REPORT_WARNING_BIT_EXT",umath::to_integral(prosper::DebugReportFlags::WarningBit)},
+		{"DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT",umath::to_integral(prosper::DebugReportFlags::PerformanceWarningBit)},
+		{"DEBUG_REPORT_ERROR_BIT_EXT",umath::to_integral(prosper::DebugReportFlags::ErrorBit)},
+		{"DEBUG_REPORT_DEBUG_BIT_EXT",umath::to_integral(prosper::DebugReportFlags::DebugBit)},
+
+		{"DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Unknown)},
+		{"DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Instance)},
+		{"DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::PhysicalDevice)},
+		{"DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Device)},
+		{"DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Queue)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Semaphore)},
+		{"DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::CommandBuffer)},
+		{"DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Fence)},
+		{"DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::DeviceMemory)},
+		{"DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Buffer)},
+		{"DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Image)},
+		{"DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Event)},
+		{"DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::QueryPool)},
+		{"DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::BufferView)},
+		{"DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::ImageView)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::ShaderModule)},
+		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::PipelineCache)},
+		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::PipelineLayout)},
+		{"DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::RenderPass)},
+		{"DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Pipeline)},
+		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::DescriptorSetLayout)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Sampler)},
+		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::DescriptorPool)},
+		{"DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::DescriptorSet)},
+		{"DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::Framebuffer)},
+		{"DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::CommandPool)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::SurfaceKHR)},
+		{"DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT",umath::to_integral(prosper::DebugReportObjectTypeEXT::SwapchainKHR)},
 
 		{"MEMORY_FEATURE_DEVICE_LOCAL_BIT",umath::to_integral(prosper::MemoryFeatureFlags::DeviceLocal)},
 		{"MEMORY_FEATURE_HOST_CACHED_BIT",umath::to_integral(prosper::MemoryFeatureFlags::HostCached)},
@@ -1795,41 +1790,43 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"QUEUE_FAMILY_DMA_BIT",umath::to_integral(prosper::QueueFamilyFlags::DMABit)}
 	});
 
-	auto defShaderStatisticsInfoAMD = luabind::class_<vk::ShaderStatisticsInfoAMD>("ShaderStatisticsInfoAMD");
-	defShaderStatisticsInfoAMD.def_readwrite("shaderStageMask",reinterpret_cast<uint32_t vk::ShaderStatisticsInfoAMD::*>(&vk::ShaderStatisticsInfoAMD::shaderStageMask));
-	defShaderStatisticsInfoAMD.def_readwrite("resourceUsage",reinterpret_cast<uint32_t vk::ShaderStatisticsInfoAMD::*>(&vk::ShaderStatisticsInfoAMD::resourceUsage));
-	defShaderStatisticsInfoAMD.def_readwrite("numPhysicalVgprs",&vk::ShaderStatisticsInfoAMD::numPhysicalVgprs);
-	defShaderStatisticsInfoAMD.def_readwrite("numPhysicalSgprs",&vk::ShaderStatisticsInfoAMD::numPhysicalSgprs);
-	defShaderStatisticsInfoAMD.def_readwrite("numAvailableVgprs",&vk::ShaderStatisticsInfoAMD::numAvailableVgprs);
-	defShaderStatisticsInfoAMD.def_readwrite("numAvailableSgprs",&vk::ShaderStatisticsInfoAMD::numAvailableSgprs);
-	defShaderStatisticsInfoAMD.property("computeWorkGroupSize",static_cast<Vector3i(*)(vk::ShaderStatisticsInfoAMD&)>([](vk::ShaderStatisticsInfoAMD &stats) -> Vector3i {
+#if 0
+	auto defShaderStatisticsInfoAMD = luabind::class_<prosper::ShaderStatisticsInfoAMD>("ShaderStatisticsInfoAMD");
+	defShaderStatisticsInfoAMD.def_readwrite("shaderStageMask",reinterpret_cast<uint32_t prosper::ShaderStatisticsInfoAMD::*>(&prosper::ShaderStatisticsInfoAMD::shaderStageMask));
+	defShaderStatisticsInfoAMD.def_readwrite("resourceUsage",reinterpret_cast<uint32_t prosper::ShaderStatisticsInfoAMD::*>(&prosper::ShaderStatisticsInfoAMD::resourceUsage));
+	defShaderStatisticsInfoAMD.def_readwrite("numPhysicalVgprs",&prosper::ShaderStatisticsInfoAMD::numPhysicalVgprs);
+	defShaderStatisticsInfoAMD.def_readwrite("numPhysicalSgprs",&prosper::ShaderStatisticsInfoAMD::numPhysicalSgprs);
+	defShaderStatisticsInfoAMD.def_readwrite("numAvailableVgprs",&prosper::ShaderStatisticsInfoAMD::numAvailableVgprs);
+	defShaderStatisticsInfoAMD.def_readwrite("numAvailableSgprs",&prosper::ShaderStatisticsInfoAMD::numAvailableSgprs);
+	defShaderStatisticsInfoAMD.property("computeWorkGroupSize",static_cast<Vector3i(*)(prosper::ShaderStatisticsInfoAMD&)>([](prosper::ShaderStatisticsInfoAMD &stats) -> Vector3i {
 		return {stats.computeWorkGroupSize[0],stats.computeWorkGroupSize[1],stats.computeWorkGroupSize[2]};
-	}),static_cast<void(*)(vk::ShaderStatisticsInfoAMD&,const Vector3i&)>([](vk::ShaderStatisticsInfoAMD &stats,const Vector3i &v) {
+	}),static_cast<void(*)(prosper::ShaderStatisticsInfoAMD&,const Vector3i&)>([](prosper::ShaderStatisticsInfoAMD &stats,const Vector3i &v) {
 		stats.computeWorkGroupSize[0] = v.x;
 		stats.computeWorkGroupSize[1] = v.y;
 		stats.computeWorkGroupSize[2] = v.z;
 	}));
 	vulkanMod[defShaderStatisticsInfoAMD];
 
-	auto defShaderResourceUsageAMD = luabind::class_<vk::ShaderResourceUsageAMD>("ShaderResourceUsageAMD");
-	defShaderResourceUsageAMD.def_readwrite("numUsedVgprs",&vk::ShaderResourceUsageAMD::numUsedVgprs);
-	defShaderResourceUsageAMD.def_readwrite("numUsedSgprs",&vk::ShaderResourceUsageAMD::numUsedSgprs);
-	defShaderResourceUsageAMD.def_readwrite("ldsSizePerLocalWorkGroup",&vk::ShaderResourceUsageAMD::ldsSizePerLocalWorkGroup);
-	defShaderResourceUsageAMD.def_readwrite("ldsUsageSizeInBytes",&vk::ShaderResourceUsageAMD::ldsUsageSizeInBytes);
-	defShaderResourceUsageAMD.def_readwrite("scratchMemUsageInBytes",&vk::ShaderResourceUsageAMD::scratchMemUsageInBytes);
+	auto defShaderResourceUsageAMD = luabind::class_<prosper::ShaderResourceUsageAMD>("ShaderResourceUsageAMD");
+	defShaderResourceUsageAMD.def_readwrite("numUsedVgprs",&prosper::ShaderResourceUsageAMD::numUsedVgprs);
+	defShaderResourceUsageAMD.def_readwrite("numUsedSgprs",&prosper::ShaderResourceUsageAMD::numUsedSgprs);
+	defShaderResourceUsageAMD.def_readwrite("ldsSizePerLocalWorkGroup",&prosper::ShaderResourceUsageAMD::ldsSizePerLocalWorkGroup);
+	defShaderResourceUsageAMD.def_readwrite("ldsUsageSizeInBytes",&prosper::ShaderResourceUsageAMD::ldsUsageSizeInBytes);
+	defShaderResourceUsageAMD.def_readwrite("scratchMemUsageInBytes",&prosper::ShaderResourceUsageAMD::scratchMemUsageInBytes);
 	vulkanMod[defShaderResourceUsageAMD];
 
-	auto defPipelineColorBlendAttachmentState = luabind::class_<vk::PipelineColorBlendAttachmentState>("PipelineColorBlendAttachmentState");
+	auto defPipelineColorBlendAttachmentState = luabind::class_<prosper::PipelineColorBlendAttachmentState>("PipelineColorBlendAttachmentState");
 	defPipelineColorBlendAttachmentState.def(luabind::constructor<>());
-	defPipelineColorBlendAttachmentState.def_readwrite("blendEnable",reinterpret_cast<bool vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::blendEnable));
-	defPipelineColorBlendAttachmentState.def_readwrite("srcColorBlendFactor",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::srcColorBlendFactor));
-	defPipelineColorBlendAttachmentState.def_readwrite("dstColorBlendFactor",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::dstColorBlendFactor));
-	defPipelineColorBlendAttachmentState.def_readwrite("colorBlendOp",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::colorBlendOp));
-	defPipelineColorBlendAttachmentState.def_readwrite("srcAlphaBlendFactor",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::srcAlphaBlendFactor));
-	defPipelineColorBlendAttachmentState.def_readwrite("dstAlphaBlendFactor",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::dstAlphaBlendFactor));
-	defPipelineColorBlendAttachmentState.def_readwrite("alphaBlendOp",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::alphaBlendOp));
-	defPipelineColorBlendAttachmentState.def_readwrite("colorWriteMask",reinterpret_cast<uint32_t vk::PipelineColorBlendAttachmentState::*>(&vk::PipelineColorBlendAttachmentState::colorWriteMask));
+	defPipelineColorBlendAttachmentState.def_readwrite("blendEnable",reinterpret_cast<bool prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::blendEnable));
+	defPipelineColorBlendAttachmentState.def_readwrite("srcColorBlendFactor",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::srcColorBlendFactor));
+	defPipelineColorBlendAttachmentState.def_readwrite("dstColorBlendFactor",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::dstColorBlendFactor));
+	defPipelineColorBlendAttachmentState.def_readwrite("colorBlendOp",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::colorBlendOp));
+	defPipelineColorBlendAttachmentState.def_readwrite("srcAlphaBlendFactor",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::srcAlphaBlendFactor));
+	defPipelineColorBlendAttachmentState.def_readwrite("dstAlphaBlendFactor",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::dstAlphaBlendFactor));
+	defPipelineColorBlendAttachmentState.def_readwrite("alphaBlendOp",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::alphaBlendOp));
+	defPipelineColorBlendAttachmentState.def_readwrite("colorWriteMask",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::colorWriteMask));
 	vulkanMod[defPipelineColorBlendAttachmentState];
+#endif
 
 	auto defBufferCreateInfo = luabind::class_<prosper::util::BufferCreateInfo>("BufferCreateInfo");
 	defBufferCreateInfo.def(luabind::constructor<>());
@@ -1948,12 +1945,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	vulkanMod[defRenderPassCreateInfo];
 
-	auto defImageSubresourceLayers = luabind::class_<vk::ImageSubresourceLayers>("ImageSubresourceLayers");
+	auto defImageSubresourceLayers = luabind::class_<prosper::util::ImageSubresourceLayers>("ImageSubresourceLayers");
 	defImageSubresourceLayers.def(luabind::constructor<>());
-	defImageSubresourceLayers.def_readwrite("aspectMask",&vk::ImageSubresourceLayers::aspectMask);
-    defImageSubresourceLayers.def_readwrite("mipLevel",&vk::ImageSubresourceLayers::mipLevel);
-	defImageSubresourceLayers.def_readwrite("baseArrayLayer",&vk::ImageSubresourceLayers::baseArrayLayer);
-	defImageSubresourceLayers.def_readwrite("layerCount",&vk::ImageSubresourceLayers::layerCount);
+	defImageSubresourceLayers.def_readwrite("aspectMask",reinterpret_cast<std::underlying_type_t<decltype(prosper::util::ImageSubresourceLayers::aspectMask)> prosper::util::ImageSubresourceLayers::*>(&prosper::util::ImageSubresourceLayers::aspectMask));
+    defImageSubresourceLayers.def_readwrite("mipLevel",&prosper::util::ImageSubresourceLayers::mipLevel);
+	defImageSubresourceLayers.def_readwrite("baseArrayLayer",&prosper::util::ImageSubresourceLayers::baseArrayLayer);
+	defImageSubresourceLayers.def_readwrite("layerCount",&prosper::util::ImageSubresourceLayers::layerCount);
 	vulkanMod[defImageSubresourceLayers];
 
 	auto defBlitInfo = luabind::class_<prosper::util::BlitInfo>("BlitInfo");
@@ -1962,7 +1959,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBlitInfo.def_readwrite("dstSubresourceLayer",&prosper::util::BlitInfo::dstSubresourceLayer);
 	vulkanMod[defBlitInfo];
 
-	static_assert(sizeof(vk::Offset3D) == sizeof(Vector3i));
+	static_assert(sizeof(prosper::Offset3D) == sizeof(Vector3i));
 	auto defCopyInfo = luabind::class_<prosper::util::CopyInfo>("ImageCopyInfo");
 	defCopyInfo.def(luabind::constructor<>());
 	defCopyInfo.def_readwrite("width",&prosper::util::CopyInfo::width);
@@ -2094,13 +2091,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	vulkanMod[defVkImage];
 
-	auto debSubresourceLayout = luabind::class_<vk::SubresourceLayout>("SubresourceLayout");
+	auto debSubresourceLayout = luabind::class_<prosper::util::SubresourceLayout>("SubresourceLayout");
 	debSubresourceLayout.def(luabind::constructor<>());
-	debSubresourceLayout.def_readwrite("offset",&vk::SubresourceLayout::offset);
-	debSubresourceLayout.def_readwrite("size",&vk::SubresourceLayout::size);
-	debSubresourceLayout.def_readwrite("rowPitch",&vk::SubresourceLayout::rowPitch);
-	debSubresourceLayout.def_readwrite("arrayPitch",&vk::SubresourceLayout::arrayPitch);
-	debSubresourceLayout.def_readwrite("depthPitch",&vk::SubresourceLayout::depthPitch);
+	debSubresourceLayout.def_readwrite("offset",&prosper::util::SubresourceLayout::offset);
+	debSubresourceLayout.def_readwrite("size",&prosper::util::SubresourceLayout::size);
+	debSubresourceLayout.def_readwrite("rowPitch",&prosper::util::SubresourceLayout::row_pitch);
+	debSubresourceLayout.def_readwrite("arrayPitch",&prosper::util::SubresourceLayout::array_pitch);
+	debSubresourceLayout.def_readwrite("depthPitch",&prosper::util::SubresourceLayout::depth_pitch);
 	vulkanMod[debSubresourceLayout];
 
 	auto defVkImageView = luabind::class_<Lua::Vulkan::ImageView>("ImageView");
@@ -2189,6 +2186,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkFence.def("IsValid",&Lua::Vulkan::VKFence::IsValid);
 	vulkanMod[defVkFence];
 	
+#if 0
 	auto defVkSemaphore = luabind::class_<Lua::Vulkan::Semaphore>("Semaphore");
 	defVkSemaphore.def(luabind::tostring(luabind::self));
 	defVkSemaphore.def("IsValid",&Lua::Vulkan::VKSemaphore::IsValid);
@@ -2218,7 +2216,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	defVkMemory.def("Unmap",&Lua::Vulkan::VKMemory::Unmap);
 	vulkanMod[defVkMemory];
-	
+#endif
 	auto defVkCommandBuffer = luabind::class_<Lua::Vulkan::CommandBuffer>("CommandBuffer");
 	defVkCommandBuffer.def(luabind::tostring(luabind::self));
 	defVkCommandBuffer.def("RecordClearImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
@@ -2475,13 +2473,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defClearValue.def(luabind::constructor<float,uint32_t>());
 	defClearValue.def(luabind::constructor<float>());
 	defClearValue.def("SetColor",static_cast<void(*)(lua_State*,Lua::Vulkan::ClearValue&,const Color&)>([](lua_State *l,Lua::Vulkan::ClearValue &clearValue,const Color &clearColor) {
-		clearValue.clearValue.setColor(vk::ClearColorValue{std::array<float,4>{clearColor.r /255.f,clearColor.g /255.f,clearColor.b /255.f,clearColor.a /255.f}});
+		clearValue.clearValue.setColor(prosper::ClearColorValue{std::array<float,4>{clearColor.r /255.f,clearColor.g /255.f,clearColor.b /255.f,clearColor.a /255.f}});
 	}));
 	defClearValue.def("SetDepthStencil",static_cast<void(*)(lua_State*,Lua::Vulkan::ClearValue&,float)>([](lua_State *l,Lua::Vulkan::ClearValue &clearValue,float depth) {
-		clearValue.clearValue.setDepthStencil(vk::ClearDepthStencilValue{depth});
+		clearValue.clearValue.setDepthStencil(prosper::ClearDepthStencilValue{depth});
 	}));
 	defClearValue.def("SetDepthStencil",static_cast<void(*)(lua_State*,Lua::Vulkan::ClearValue&,float,uint32_t)>([](lua_State *l,Lua::Vulkan::ClearValue &clearValue,float depth,uint32_t stencil) {
-		clearValue.clearValue.setDepthStencil(vk::ClearDepthStencilValue{depth,stencil});
+		clearValue.clearValue.setDepthStencil(prosper::ClearDepthStencilValue{depth,stencil});
 	}));
 	vulkanMod[defClearValue];
 
@@ -2621,7 +2619,7 @@ void Lua::Vulkan::VKImage::GetMemoryBlock(lua_State *l,Image &hImg)
 void Lua::Vulkan::VKImage::GetSubresourceRange(lua_State *l,Image &hImg)
 {
 	auto subresourceRange = hImg->get_subresource_range();
-	Lua::Push(l,reinterpret_cast<vk::ImageSubresourceRange&>(subresourceRange));
+	Lua::Push(l,reinterpret_cast<prosper::ImageSubresourceRange&>(subresourceRange));
 }
 #endif
 void Lua::Vulkan::VKImage::GetFormat(lua_State *l,Image &hImg)
@@ -2713,7 +2711,7 @@ void Lua::Vulkan::VKImageView::GetParentImage(lua_State *l,ImageView &hImgView)
 void Lua::Vulkan::VKImageView::GetSubresourceRange(lua_State *l,ImageView &hImgView)
 {
 	auto subresourceRange = hImgView->get_subresource_range();
-	Lua::Push(l,reinterpret_cast<vk::ImageSubresourceRange&>(subresourceRange));
+	Lua::Push(l,reinterpret_cast<prosper::ImageSubresourceRange&>(subresourceRange));
 }
 #endif
 void Lua::Vulkan::VKImageView::GetImageFormat(lua_State *l,ImageView &hImgView)
@@ -2933,7 +2931,7 @@ void Lua::Vulkan::VKEvent::IsValid(lua_State *l,Event &hEvent)
 void Lua::Vulkan::VKEvent::GetStatus(lua_State *l,Event &hEvent)
 {
 	auto b = hEvent.IsSet();
-	auto r = b ? vk::Result::eEventSet : vk::Result::eEventReset;
+	auto r = b ? prosper::Result::EventSet : prosper::Result::EventReset;
 	Lua::PushInt(l,umath::to_integral(r));
 }
 void Lua::Vulkan::VKEvent::IsSet(lua_State *l,Event &hEvent)
@@ -2950,6 +2948,7 @@ void Lua::Vulkan::VKFence::IsValid(lua_State *l,Fence &hFence)
 
 /////////////////////////////////
 
+#if 0
 void Lua::Vulkan::VKSemaphore::IsValid(lua_State *l,Semaphore &hSemaphore)
 {
 	Lua::PushBool(l,true);
@@ -3002,6 +3001,7 @@ void Lua::Vulkan::VKMemory::Unmap(lua_State *l,Memory &hMemory)
 {
 	Lua::PushBool(l,hMemory.unmap());
 }
+#endif
 
 /////////////////////////////////
 
@@ -3120,14 +3120,14 @@ void Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l,CommandBuf
 		Lua::PushBool(l,false);
 		return;
 	}
-	static_assert(sizeof(Lua::Vulkan::ClearValue) == sizeof(vk::ClearValue));
+	static_assert(sizeof(Lua::Vulkan::ClearValue) == sizeof(prosper::ClearValue));
 	auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer&>(hCommandBuffer);
 	if(rpInfo.layerId.has_value())
 	{
 		auto r = primaryCmdBuffer.RecordBeginRenderPass(
 			*rpInfo.renderTarget,
 			*rpInfo.layerId,
-			reinterpret_cast<std::vector<vk::ClearValue>&>(rpInfo.clearValues),
+			reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
 			rpInfo.renderPass.get()
 		);
 		Lua::PushBool(l,r);
@@ -3135,7 +3135,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l,CommandBuf
 	}
 	auto r = primaryCmdBuffer.RecordBeginRenderPass(
 		*rpInfo.renderTarget,
-		reinterpret_cast<std::vector<vk::ClearValue>&>(rpInfo.clearValues),
+		reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
 		rpInfo.renderPass.get()
 	);
 	Lua::PushBool(l,r);
@@ -3270,7 +3270,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l,CommandBuffer
 	}
 	auto nodes = get_gradient_nodes(l,4);
 	auto primCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,pragma::util::record_draw_gradient(*c_engine,primCmd,rt,dir,nodes));
+	Lua::PushBool(l,pragma::util::record_draw_gradient(c_engine->GetRenderContext(),primCmd,rt,dir,nodes));
 }
 void Lua::Vulkan::VKCommandBuffer::StopRecording(lua_State *l,CommandBuffer &hCommandBuffer)
 {

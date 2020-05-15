@@ -63,12 +63,12 @@ void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_nodeOrigins.size() *sizeof(Node);
-	m_vertexBuffer = c_engine->CreateBuffer(createInfo,m_nodeOrigins.data());
+	m_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,m_nodeOrigins.data());
 
 	createInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(uint16_t) *indices.size();
-	m_indexBuffer = c_engine->CreateBuffer(createInfo,indices.data());
+	m_indexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,indices.data());
 }
 void CParticleRendererBeam::PostSimulate(double tDelta)
 {
@@ -87,7 +87,7 @@ void CParticleRendererBeam::UpdateNodes()
 		if(color != nullptr)
 			m_nodeOrigins[i].color = {color->r /255.f,color->g /255.f,color->b /255.f,color->a /255.f};
 	}
-	c_engine->ScheduleRecordUpdateBuffer(m_vertexBuffer,0ull,m_vertexBuffer->GetSize(),m_nodeOrigins.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer,0ull,m_vertexBuffer->GetSize(),m_nodeOrigins.data());
 }
 
 std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const

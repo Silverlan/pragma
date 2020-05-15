@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_polyboard.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -24,7 +25,7 @@ ShaderParticlePolyboard::ShaderParticlePolyboard(prosper::IPrContext &context,co
 	SetBaseShader<ShaderParticle>();
 }
 
-void ShaderParticlePolyboard::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -32,7 +33,7 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(Anvil::GraphicsPipelineCreat
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_VERTEX);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 
-	pipelineInfo.set_primitive_topology(Anvil::PrimitiveTopology::LINE_LIST_WITH_ADJACENCY);
+	pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::LineListWithAdjacency);
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(GeometryPushConstants),prosper::ShaderStageFlags::GeometryBit);
 	AttachPushConstantRange(pipelineInfo,sizeof(GeometryPushConstants),sizeof(FragmentPushConstants),prosper::ShaderStageFlags::FragmentBit);
 
@@ -49,8 +50,8 @@ bool ShaderParticlePolyboard::Draw(const rendering::RasterizationRenderer &rende
 			}) == false ||
 		RecordPushConstants(FragmentPushConstants{
 			static_cast<int32_t>(GetRenderFlags(ps)),
-			static_cast<float>(c_engine->GetWindowWidth()),
-			static_cast<float>(c_engine->GetWindowHeight())
+			static_cast<float>(c_engine->GetRenderContext().GetWindowWidth()),
+			static_cast<float>(c_engine->GetRenderContext().GetWindowHeight())
 		},sizeof(GeometryPushConstants)) == false
 		)
 		return false;

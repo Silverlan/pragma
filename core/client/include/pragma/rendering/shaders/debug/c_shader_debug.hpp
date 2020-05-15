@@ -46,7 +46,7 @@ namespace pragma
 	protected:
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		bool Draw(const std::vector<prosper::IBuffer*> &buffers,uint32_t vertexCount,const Mat4 &mvp,const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 	private:
 		// These are unused
@@ -70,7 +70,7 @@ namespace pragma
 		ShaderDebugTexture(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
@@ -89,7 +89,7 @@ namespace pragma
 
 		bool Draw(prosper::IBuffer &vertexBuffer,prosper::IBuffer &colorBuffer,uint32_t vertexCount,const Mat4 &modelMatrix=umat::identity());
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

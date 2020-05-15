@@ -12,6 +12,7 @@
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
@@ -230,7 +231,7 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 		// Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
 		return false;
 	}
-	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetLastFrameId())
+	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetRenderContext().GetLastFrameId())
 	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
 	return BindInstanceDescriptorSet(*descSet);
 }
@@ -296,13 +297,13 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 	offsets.reserve(3u);
 	if(bUseVertexWeightBuffer == true)
 	{
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetDummyBuffer().get());
+		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetRenderContext().GetDummyBuffer().get());
 		offsets.push_back(0ull);
 
 		// Extended vertex weights
 		auto &vertWeights = mesh.GetVertexWeights();
 		auto offset = vertWeights.size() *sizeof(vertWeights.front());
-		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetDummyBuffer().get());
+		vertexBuffers.push_back((vertexWeightBuffer != nullptr) ? vertexWeightBuffer.get() : c_engine->GetRenderContext().GetDummyBuffer().get());
 		offsets.push_back(offset);
 	}
 	vertexBuffers.push_back(vertexBuffer.get());

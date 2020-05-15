@@ -47,6 +47,7 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/shaders/wishader_textured.hpp>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -55,7 +56,6 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>
 #include <luainterface.hpp>
-#include <misc/compute_pipeline_create_info.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -162,10 +162,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShader.def("GetSpirvBlob",static_cast<void(*)(lua_State*,prosper::Shader&,uint32_t,uint32_t)>([](lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx) {
 		Lua::Shader::GetSpirvBlob(l,shader,shaderStage,0u);
 	}));
-	defShader.def("GetStatistics",&Lua::Shader::GetStatistics);
-	defShader.def("GetStatistics",static_cast<void(*)(lua_State*,prosper::Shader&,uint32_t,uint32_t)>([](lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx) {
-		Lua::Shader::GetStatistics(l,shader,shaderStage,0u);
-	}));
 
 	defShader.def("IsGraphicsShader",&Lua::Shader::IsGraphicsShader);
 	defShader.def("IsComputeShader",&Lua::Shader::IsComputeShader);
@@ -229,7 +225,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		Lua::Shader::Graphics::GetRenderPass(l,shader,0u);
 	}));
 	defShaderGraphics.scope[luabind::def("GetRenderPass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
-		auto &rp = prosper::ShaderGraphics::GetRenderPass<prosper::ShaderGraphics>(*c_engine);
+		auto &rp = prosper::ShaderGraphics::GetRenderPass<prosper::ShaderGraphics>(c_engine->GetRenderContext());
 		if(rp == nullptr)
 			return;
 		Lua::Push(l,rp);
@@ -304,7 +300,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderComposeRMA.add_static_constant("FLAG_USE_SPECULAR_WORKFLOW_BIT",umath::to_integral(pragma::ShaderComposeRMA::Flags::UseSpecularWorkflow));
 	defShaderComposeRMA.def("ComposeRMA",static_cast<void(*)(lua_State*,pragma::ShaderComposeRMA&,prosper::Texture*,prosper::Texture*,prosper::Texture*,uint32_t)>(
 		[](lua_State *l,pragma::ShaderComposeRMA &shader,prosper::Texture *roughnessMap,prosper::Texture *metalnessMap,prosper::Texture *aoMap,uint32_t flags) {
-		auto rma = shader.ComposeRMA(*c_engine,roughnessMap,metalnessMap,aoMap,static_cast<pragma::ShaderComposeRMA::Flags>(flags));
+		auto rma = shader.ComposeRMA(c_engine->GetRenderContext(),roughnessMap,metalnessMap,aoMap,static_cast<pragma::ShaderComposeRMA::Flags>(flags));
 		if(rma == nullptr)
 			return;
 		Lua::Push(l,rma);
@@ -347,12 +343,12 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defDescriptorSetBinding.def_readwrite("descriptorArraySize",&pragma::LuaDescriptorSetBinding::descriptorArraySize);
 	modShader[defDescriptorSetBinding];
 
-	auto defShaderBasePipelineCreateInfo = luabind::class_<Anvil::BasePipelineCreateInfo>("BasePipelineCreateInfo");
+	auto defShaderBasePipelineCreateInfo = luabind::class_<prosper::BasePipelineCreateInfo>("BasePipelineCreateInfo");
 	defShaderBasePipelineCreateInfo.def("AttachPushConstantRange",&Lua::BasePipelineCreateInfo::AttachPushConstantRange);
 	defShaderBasePipelineCreateInfo.def("AttachDescriptorSetInfo",&Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo);
 	modShader[defShaderBasePipelineCreateInfo];
 
-	auto defShaderGraphicsPipelineCreateInfo = luabind::class_<Anvil::GraphicsPipelineCreateInfo,Anvil::BasePipelineCreateInfo>("GraphicsPipelineCreateInfo");
+	auto defShaderGraphicsPipelineCreateInfo = luabind::class_<prosper::GraphicsPipelineCreateInfo,prosper::BasePipelineCreateInfo>("GraphicsPipelineCreateInfo");
 	defShaderGraphicsPipelineCreateInfo.def("SetBlendingProperties",&Lua::GraphicsPipelineCreateInfo::SetBlendingProperties);
 	defShaderGraphicsPipelineCreateInfo.def("SetCommonAlphaBlendProperties",&Lua::GraphicsPipelineCreateInfo::SetCommonAlphaBlendProperties);
 	defShaderGraphicsPipelineCreateInfo.def("SetColorBlendAttachmentProperties",&Lua::GraphicsPipelineCreateInfo::SetColorBlendAttachmentProperties);
@@ -362,9 +358,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderGraphicsPipelineCreateInfo.def("SetSampleMaskEnabled",&Lua::GraphicsPipelineCreateInfo::SetSampleMaskEnabled);
 	defShaderGraphicsPipelineCreateInfo.def("SetDynamicScissorBoxesCount",&Lua::GraphicsPipelineCreateInfo::SetDynamicScissorBoxesCount);
 	defShaderGraphicsPipelineCreateInfo.def("SetDynamicViewportsCount",&Lua::GraphicsPipelineCreateInfo::SetDynamicViewportsCount);
-	defShaderGraphicsPipelineCreateInfo.def("SetPatchControlPointsCount",&Lua::GraphicsPipelineCreateInfo::SetPatchControlPointsCount);
 	defShaderGraphicsPipelineCreateInfo.def("SetPrimitiveTopology",&Lua::GraphicsPipelineCreateInfo::SetPrimitiveTopology);
-	defShaderGraphicsPipelineCreateInfo.def("SetRasterizationOrder",&Lua::GraphicsPipelineCreateInfo::SetRasterizationOrder);
 	defShaderGraphicsPipelineCreateInfo.def("SetRasterizationProperties",&Lua::GraphicsPipelineCreateInfo::SetRasterizationProperties);
 	defShaderGraphicsPipelineCreateInfo.def("SetPolygonMode",&Lua::GraphicsPipelineCreateInfo::SetPolygonMode);
 	defShaderGraphicsPipelineCreateInfo.def("SetCullMode",&Lua::GraphicsPipelineCreateInfo::SetCullMode);
@@ -396,12 +390,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderGraphicsPipelineCreateInfo.def("GetSampleMask",&Lua::GraphicsPipelineCreateInfo::GetSampleMask);
 	defShaderGraphicsPipelineCreateInfo.def("GetDynamicScissorBoxesCount",&Lua::GraphicsPipelineCreateInfo::GetDynamicScissorBoxesCount);
 	defShaderGraphicsPipelineCreateInfo.def("GetDynamicViewportsCount",&Lua::GraphicsPipelineCreateInfo::GetDynamicViewportsCount);
-	defShaderGraphicsPipelineCreateInfo.def("GetPatchControlPointsCount",&Lua::GraphicsPipelineCreateInfo::GetPatchControlPointsCount);
 	defShaderGraphicsPipelineCreateInfo.def("GetScissorBoxesCount",&Lua::GraphicsPipelineCreateInfo::GetScissorBoxesCount);
 	defShaderGraphicsPipelineCreateInfo.def("GetViewportsCount",&Lua::GraphicsPipelineCreateInfo::GetViewportsCount);
 	defShaderGraphicsPipelineCreateInfo.def("GetPrimitiveTopology",&Lua::GraphicsPipelineCreateInfo::GetPrimitiveTopology);
 	defShaderGraphicsPipelineCreateInfo.def("GetPushConstantRanges",&Lua::GraphicsPipelineCreateInfo::GetPushConstantRanges);
-	defShaderGraphicsPipelineCreateInfo.def("GetRasterizationOrder",&Lua::GraphicsPipelineCreateInfo::GetRasterizationOrder);
 	defShaderGraphicsPipelineCreateInfo.def("GetRasterizationProperties",&Lua::GraphicsPipelineCreateInfo::GetRasterizationProperties);
 	defShaderGraphicsPipelineCreateInfo.def("GetPolygonMode",&Lua::GraphicsPipelineCreateInfo::GetPolygonMode);
 	defShaderGraphicsPipelineCreateInfo.def("GetCullMode",&Lua::GraphicsPipelineCreateInfo::GetCullMode);
@@ -447,7 +439,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderGraphicsPipelineCreateInfo.def("SetStencilTestEnabled",&Lua::GraphicsPipelineCreateInfo::SetStencilTestEnabled);
 	modShader[defShaderGraphicsPipelineCreateInfo];
 
-	auto defShaderComputePipelineCreateInfo = luabind::class_<Anvil::ComputePipelineCreateInfo,Anvil::BasePipelineCreateInfo>("ComputePipelineCreateInfo");
+	auto defShaderComputePipelineCreateInfo = luabind::class_<prosper::ComputePipelineCreateInfo,prosper::BasePipelineCreateInfo>("ComputePipelineCreateInfo");
 	defShaderComputePipelineCreateInfo.def("AddSpecializationConstant",&Lua::ComputePipelineCreateInfo::AddSpecializationConstant);
 	modShader[defShaderComputePipelineCreateInfo];
 

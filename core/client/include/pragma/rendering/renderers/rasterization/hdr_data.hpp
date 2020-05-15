@@ -17,7 +17,6 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include <mathutil/uvec.h>
-#include <misc/types.h>
 
 class Scene;
 namespace prosper

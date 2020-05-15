@@ -10,6 +10,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
@@ -105,7 +106,7 @@ static void initialize_material_settings_buffer()
 	//bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
 	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *524'288; // ~22 MiB
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
-	g_materialSettingsBuffer = c_engine->CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
+	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);
 }
 ShaderTextured3DBase::ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
@@ -121,11 +122,11 @@ ShaderTextured3DBase::~ShaderTextured3DBase()
 		g_materialSettingsBuffer = nullptr;
 }
 prosper::DescriptorSetInfo &ShaderTextured3DBase::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
@@ -145,11 +146,11 @@ void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(Anvil::Graphics
 	{
 		AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LIGHTMAP_UV);
 		const auto lightMapEnabled = true;
-		//pipelineInfo.add_specialization_constant(Anvil::ShaderStage::FRAGMENT,0u,sizeof(lightMapEnabled),&lightMapEnabled);
-		//pipelineInfo.add_specialization_constant(Anvil::ShaderStage::VERTEX,0u,sizeof(lightMapEnabled),&lightMapEnabled);
+		//pipelineInfo.add_specialization_constant(prosper::ShaderStage::FRAGMENT,0u,sizeof(lightMapEnabled),&lightMapEnabled);
+		//pipelineInfo.add_specialization_constant(prosper::ShaderStage::VERTEX,0u,sizeof(lightMapEnabled),&lightMapEnabled);
 	}*/
 }
-void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
@@ -159,18 +160,18 @@ void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPi
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CSM);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 }
-void ShaderTextured3DBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
-		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::FRONT_BIT);
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-	pipelineInfo.toggle_depth_writes(false);
-	pipelineInfo.toggle_depth_test(true,Anvil::CompareOp::LESS_OR_EQUAL);
+	pipelineInfo.ToggleDepthWrites(false);
+	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
-	pipelineInfo.toggle_depth_bias(true,0.f,0.f,0.f);
-	pipelineInfo.toggle_dynamic_state(true,Anvil::DynamicState::DEPTH_BIAS); // Required for decals
+	pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
+	pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
@@ -348,7 +349,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	outShouldUseLightmaps = false;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
 		return true;
-	auto *pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
+	auto *pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	if(m_boundEntity)
 	{
 		auto lightMapReceiverC = m_boundEntity->GetComponent<CLightMapReceiverComponent>();
@@ -366,7 +367,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 				if(pUvBuffer != nullptr)
 					pLightMapUvBuffer = pUvBuffer;
 				else
-					pLightMapUvBuffer = c_engine->GetDummyBuffer().get();
+					pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 			}
 		}
 	}
@@ -415,7 +416,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTextured3DBase::InitializeMa
 	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
 	if(diffuseTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(descSetInfo);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::DiffuseMap));

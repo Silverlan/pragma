@@ -61,7 +61,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
-	m_vertexAnimationBuffer = c_engine->CreateBuffer(createInfo);
+	m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
 
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
 	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimationFrameData));

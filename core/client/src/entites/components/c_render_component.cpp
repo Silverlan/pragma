@@ -70,7 +70,7 @@ void CRenderComponent::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
+	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 
 	pragma::initialize_articulated_buffers();
@@ -148,9 +148,9 @@ CRenderComponent::~CRenderComponent()
 		s_viewEntities.erase(it);
 
 	if(m_renderBuffer != nullptr)
-		c_engine->KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	if(m_renderDescSetGroup != nullptr)
-		c_engine->KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
 }
 void CRenderComponent::OnEntitySpawn()
 {
@@ -401,7 +401,7 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryC
 	InitializeRenderBuffers();
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto frameId = c_engine->GetLastFrameId();
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 
 	auto firstFrame = (frameId != m_lastRender);
 	if(firstFrame)
@@ -478,7 +478,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	if(m_renderBuffer != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
 	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
-	m_renderDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
 	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
 		*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
 	);
@@ -498,7 +498,6 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetBoneBuffer();
 	if(wpBoneBuffer.expired())
 		return;
-	auto &dev = c_engine->GetDevice();
 	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
 		*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 	);

@@ -66,7 +66,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.05f);
+	s_vertexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
 	s_vertexBuffer->SetPermanentlyMapped(true);
 
@@ -76,7 +76,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_vertexWeightBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
+	s_vertexWeightBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
 	s_vertexWeightBuffer->SetPermanentlyMapped(true);
 
@@ -86,7 +86,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_alphaBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
+	s_alphaBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
 	s_alphaBuffer->SetPermanentlyMapped(true);
 
@@ -96,7 +96,7 @@ void CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_indexBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
+	s_indexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
 	s_indexBuffer->SetPermanentlyMapped(true);
 }

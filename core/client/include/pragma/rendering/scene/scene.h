@@ -108,7 +108,7 @@ public:
 	const std::shared_ptr<prosper::IBuffer> &GetCameraBuffer() const;
 	const std::shared_ptr<prosper::IBuffer> &GetViewCameraBuffer() const;
 	const std::shared_ptr<prosper::IBuffer> &GetFogBuffer() const;
-	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint=vk::PipelineBindPoint::eGraphics) const;
+	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint=prosper::PipelineBindPoint::Graphics) const;
 	const std::shared_ptr<prosper::IDescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
 	prosper::IDescriptorSet *GetCameraDescriptorSetGraphics() const;
 	prosper::IDescriptorSet *GetCameraDescriptorSetCompute() const;

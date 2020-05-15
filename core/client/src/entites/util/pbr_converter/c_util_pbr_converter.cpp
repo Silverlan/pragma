@@ -195,7 +195,6 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	Con::cout<<"Converting material '"<<matTraditional.GetName()<<"' to PBR..."<<Con::endl;
 	m_convertedMaterials.insert(matTraditional.GetName());
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	auto &dev = c_engine->GetDevice();
 
 	auto matName = matTraditional.GetName();
 	ufile::remove_extension_from_filename(matName);
@@ -256,7 +255,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	std::string rmaMapName = "";
 	if(roughnessMap || metalnessMap || aoMap)
 	{
-		auto rmaMap = shaderComposeRMA->ComposeRMA(*c_engine,roughnessMap,metalnessMap,aoMap,flags);
+		auto rmaMap = shaderComposeRMA->ComposeRMA(c_engine->GetRenderContext(),roughnessMap,metalnessMap,aoMap,flags);
 
 		rmaMapName = matName +"_rma";
 		uimg::TextureInfo imgWriteInfo {};
@@ -322,7 +321,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 		return nullptr;
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	// Specular descriptor set
-	auto dsgSpecular = c_engine->CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
+	auto dsgSpecular = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderSpecularToRoughness::DESCRIPTOR_SET_TEXTURE);
 	dsgSpecular->GetDescriptorSet()->SetBindingTexture(specularMap,0u);
 
 	// Initialize roughness image
@@ -330,11 +329,11 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	createInfoRoughness.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfoRoughness.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfoRoughness.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
-	auto roughnessMap = c_engine->CreateImage(createInfoRoughness);
+	auto roughnessMap = c_engine->GetRenderContext().CreateImage(createInfoRoughness);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto roughnessTex = c_engine->CreateTexture({},*roughnessMap,imgViewCreateInfo,samplerCreateInfo);
-	auto roughnessRt = c_engine->CreateRenderTarget({roughnessTex},shaderSpecularToRoughness->GetRenderPass());
+	auto roughnessTex = c_engine->GetRenderContext().CreateTexture({},*roughnessMap,imgViewCreateInfo,samplerCreateInfo);
+	auto roughnessRt = c_engine->GetRenderContext().CreateRenderTarget({roughnessTex},shaderSpecularToRoughness->GetRenderPass());
 
 	// Specular to roughness
 	if(setupCmd->RecordBeginRenderPass(*roughnessRt) == true)

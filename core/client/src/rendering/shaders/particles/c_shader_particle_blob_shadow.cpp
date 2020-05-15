@@ -10,6 +10,7 @@
 #if 0
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
 
 using namespace Shader;

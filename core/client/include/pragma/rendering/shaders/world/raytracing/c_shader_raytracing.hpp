@@ -70,7 +70,7 @@ namespace pragma
 			uint32_t workGroupsX,uint32_t workGroupsY
 		);
 	protected:
-		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderRayTracing::RenderFlags)

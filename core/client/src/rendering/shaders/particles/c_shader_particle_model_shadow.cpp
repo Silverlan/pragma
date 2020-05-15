@@ -12,6 +12,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace Shader;
 

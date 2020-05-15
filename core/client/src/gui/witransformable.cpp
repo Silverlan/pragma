@@ -113,8 +113,8 @@ Vector2i WITransformable::GetConfinedMousePos()
 		pos.x = WIFRAME_DRAG_OFFSET_BORDER;
 	if(pos.y < WIFRAME_DRAG_OFFSET_BORDER)
 		pos.y = WIFRAME_DRAG_OFFSET_BORDER;
-	auto wViewport = c_engine->GetWindowWidth();
-	auto hViewport = c_engine->GetWindowHeight();
+	auto wViewport = c_engine->GetRenderContext().GetWindowWidth();
+	auto hViewport = c_engine->GetRenderContext().GetWindowHeight();
 	if(pos.x > static_cast<int32_t>(wViewport -WIFRAME_DRAG_OFFSET_BORDER))
 		pos.x = wViewport -WIFRAME_DRAG_OFFSET_BORDER;
 	if(pos.y > static_cast<int32_t>(hViewport -WIFRAME_DRAG_OFFSET_BORDER))

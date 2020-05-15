@@ -7,7 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/water/c_shader_water_surface.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -41,7 +41,7 @@ ShaderWaterSurface::ShaderWaterSurface(prosper::IPrContext &context,const std::s
 ShaderWaterSurface::ShaderWaterSurface(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderWaterSurface(context,identifier,"compute/water/cs_water_surface")
 {}
-void ShaderWaterSurface::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWaterSurface::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

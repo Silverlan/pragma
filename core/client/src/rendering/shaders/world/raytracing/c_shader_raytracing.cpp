@@ -12,7 +12,7 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/types/wirect.h>
 
 using namespace pragma;
@@ -98,7 +98,7 @@ ShaderRayTracing::ShaderRayTracing(prosper::IPrContext &context,const std::strin
 	: prosper::ShaderCompute(context,identifier,"world/raytracing/raytracing.gls")
 {}
 
-void ShaderRayTracing::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

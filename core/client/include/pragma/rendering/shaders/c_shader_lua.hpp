@@ -29,12 +29,6 @@ lua_registercheck(VertexBinding,pragma::LuaVertexBinding);
 lua_registercheck(VertexAttribute,pragma::LuaVertexAttribute);
 namespace pragma
 {
-	struct DLLCLIENT LuaVKPipelineRasterizationStateCreateInfo
-		: public vk::PipelineRasterizationStateCreateInfo
-	{
-		std::array<bool,10> custom = {false};
-	};
-
 	class DLLCLIENT LuaShaderManager
 	{
 	private:
@@ -104,7 +98,7 @@ namespace pragma
 		: public LuaObjectBase
 	{
 	public:
-		static LuaShaderBase *GetShader(Anvil::BasePipelineCreateInfo &pipelineInfo);
+		static LuaShaderBase *GetShader(prosper::BasePipelineCreateInfo &pipelineInfo);
 
 		LuaShaderBase(prosper::Shader &shader);
 		LuaShaderBase(const LuaShaderBase&)=delete;
@@ -119,8 +113,8 @@ namespace pragma
 		virtual void SetPipelineCount(uint32_t pipelineCount)=0;
 		virtual std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentCommandBuffer()=0;
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {}
-		static void Lua_default_InitializePipeline(lua_State *l,LuaShaderBase *shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader->Lua_InitializePipeline(pipelineInfo,pipelineIdx);}
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {}
+		static void Lua_default_InitializePipeline(lua_State *l,LuaShaderBase *shader,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader->Lua_InitializePipeline(pipelineInfo,pipelineIdx);}
 
 		void Lua_OnInitialized() {}
 		static void Lua_default_OnInitialized(lua_State *l,LuaShaderBase *shader) {shader->Lua_OnInitialized();}
@@ -134,10 +128,10 @@ namespace pragma
 		void OnPipelineInitialized(uint32_t pipelineIdx);
 		void OnInitialized();
 		void OnPipelinesInitialized();
-		void InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		prosper::Shader &m_shader;
 
-		Anvil::BasePipelineCreateInfo *m_currentPipelineInfo = nullptr;
+		prosper::BasePipelineCreateInfo *m_currentPipelineInfo = nullptr;
 	private:
 		uint32_t m_currentDescSetIndex = 0u;
 	};
@@ -149,7 +143,7 @@ namespace pragma
 		bool AttachVertexAttribute(const pragma::LuaVertexBinding &binding,const std::vector<pragma::LuaVertexAttribute> &attributes);
 	protected:
 		LuaShaderGraphicsBase(prosper::ShaderGraphics &shader);
-		void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx);
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)=0;
 	private:
@@ -162,7 +156,7 @@ namespace pragma
 	{
 	protected:
 		LuaShaderComputeBase(prosper::ShaderCompute &shader);
-		void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 	};
 
 	template<class TBaseShader,class TLuaBaseShader>
@@ -189,9 +183,9 @@ namespace pragma
 	public:
 		LuaShaderGraphics();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
@@ -202,9 +196,9 @@ namespace pragma
 	public:
 		LuaShaderCompute();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
-		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 
 	class DLLCLIENT LuaShaderGUITextured
@@ -213,9 +207,9 @@ namespace pragma
 	public:
 		LuaShaderGUITextured();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
@@ -226,9 +220,9 @@ namespace pragma
 	public:
 		LuaShaderImageProcessing();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
@@ -239,9 +233,9 @@ namespace pragma
 	public:
 		LuaShaderPostProcessing();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};
@@ -252,20 +246,20 @@ namespace pragma
 	public:
 		LuaShaderTextured3D();
 
-		virtual void Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		// virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override; // TODO: ShaderTexturedBase
 
 		bool Lua_BindMaterialParameters(Material &mat);
 		static bool Lua_default_BindMaterialParameters(lua_State *l,LuaShaderTextured3D &shader,Material &mat) {return shader.Lua_BindMaterialParameters(mat);}
 
-		void Lua_InitializeGfxPipelineVertexAttributes(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);}
+		void Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelineVertexAttributes(lua_State *l,LuaShaderTextured3D &shader,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);}
 
-		void Lua_InitializeGfxPipelinePushConstantRanges(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);}
+		void Lua_InitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelinePushConstantRanges(lua_State *l,LuaShaderTextured3D &shader,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);}
 
-		void Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
-		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l,LuaShaderTextured3D &shader,Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);}
+		void Lua_InitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		static void Lua_default_InitializeGfxPipelineDescriptorSets(lua_State *l,LuaShaderTextured3D &shader,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader.Lua_InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);}
 	
 		void Lua_OnBindMaterial(Material &mat);
 		static void Lua_default_OnBindMaterial(lua_State *l,LuaShaderTextured3D &shader,Material &mat) {shader.Lua_OnBindMaterial(mat);}
@@ -297,10 +291,10 @@ namespace pragma
 		virtual void EndDraw() override;
 	protected:
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
-		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	};

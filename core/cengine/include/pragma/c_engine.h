@@ -90,7 +90,6 @@ public:
 
 	virtual bool Initialize(int argc,char *argv[]) override;
 	StateInstance &GetClientStateInstance();
-	virtual void OnResolutionChanged(uint32_t width,uint32_t height) override;
 	virtual void Start() override;
 	virtual void Close() override;
 	virtual void ClearConsole() override;
@@ -204,12 +203,14 @@ protected:
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
+	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) override;
+	virtual void OnResolutionChanged(uint32_t w,uint32_t h) override;
+	virtual void OnClose() override;
 	virtual void UpdateTickCount() override;
 	virtual void OnWindowInitialized() override;
 	virtual void LoadConfig() override;
 	virtual void InitializeExternalArchiveManager() override;
-	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image) override;
-	virtual void OnClose() override;
+
 	virtual void RegisterConsoleCommands() override;
 	void InitializeStagingTarget();
 private:

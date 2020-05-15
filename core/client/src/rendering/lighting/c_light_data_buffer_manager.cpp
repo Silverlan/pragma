@@ -7,7 +7,6 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
-#include <wrappers/device.h>
 
 extern DLLCENGINE CEngine *c_engine;
 
@@ -46,10 +45,10 @@ ShadowDataBufferManager &ShadowDataBufferManager::GetInstance()
 }
 void ShadowDataBufferManager::DoInitialize()
 {
-	auto &limits = c_engine->GetDevice().get_physical_device_properties().core_vk1_0_properties_ptr->limits;
+	auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
 
 	auto shadowDataSize = sizeof(ShadowBufferData);
-	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.max_storage_buffer_range /shadowDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
+	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /shadowDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
 	m_maxCount = numShadows;
 
 	prosper::util::BufferCreateInfo createInfo {};
@@ -57,7 +56,7 @@ void ShadowDataBufferManager::DoInitialize()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_maxCount *shadowDataSize;
 
-	m_masterBuffer = c_engine->CreateUniformResizableBuffer(createInfo,shadowDataSize,createInfo.size,0.05f);
+	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,shadowDataSize,createInfo.size,0.05f);
 	m_masterBuffer->SetDebugName("light_shadow_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount,nullptr);
@@ -83,10 +82,10 @@ LightDataBufferManager &LightDataBufferManager::GetInstance()
 }
 void LightDataBufferManager::DoInitialize()
 {
-	auto &limits = c_engine->GetDevice().get_physical_device_properties().core_vk1_0_properties_ptr->limits;
+	auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
 
 	auto lightDataSize = sizeof(LightBufferData);
-	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.max_storage_buffer_range /lightDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));
+	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /lightDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));
 	m_maxCount = numLights;
 
 	prosper::util::BufferCreateInfo createInfo {};
@@ -97,7 +96,7 @@ void LightDataBufferManager::DoInitialize()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 #endif
 	createInfo.size = m_maxCount *lightDataSize;
-	m_masterBuffer = c_engine->CreateUniformResizableBuffer(createInfo,lightDataSize,createInfo.size,0.05f);
+	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,lightDataSize,createInfo.size,0.05f);
 	m_masterBuffer->SetDebugName("light_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount,nullptr);
@@ -145,7 +144,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 			throw std::logic_error("Expected valid light source at light buffer index " +std::to_string(m_highestBufferIndexInUse) +", but none available!");
 		pLight->SetRenderBuffer(renderBuffer);
 		// TODO: We can just copy the buffer data on the GPU instead
-		c_engine->ScheduleRecordUpdateBuffer(renderBuffer,0ull,pLight->GetBufferData());
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,0ull,pLight->GetBufferData());
 
 		m_bufferIndexToLightSource.at(m_highestBufferIndexInUse--) = nullptr;
 		m_bufferIndexToLightSource.at(baseIndex) = pLight;
@@ -162,7 +161,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 			throw std::logic_error("Light source buffer index " +std::to_string(baseIndex) +" exceeds highest lights buffer index in use (" +std::to_string(m_highestBufferIndexInUse) +")!");
 		m_highestBufferIndexInUse = 0;
 		//const auto flags = BufferFlags::None;
-		//c_engine->ScheduleRecordUpdateBuffer(renderBuffer,offsetof(BufferData,flags),flags);
+		//c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(BufferData,flags),flags);
 	}
 }
 #pragma optimize("",on)

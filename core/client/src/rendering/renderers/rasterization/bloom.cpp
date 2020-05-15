@@ -40,7 +40,7 @@ void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::IPrimaryCommand
 	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
 	{
-		prosper::util::record_blur_image(*c_engine,drawCmd,*hdrInfo.bloomBlurSet,{
+		prosper::util::record_blur_image(c_engine->GetRenderContext(),drawCmd,*hdrInfo.bloomBlurSet,{
 			Vector4(1.f,1.f,1.f,1.f),
 			blurSize,
 			kernelSize
@@ -57,8 +57,8 @@ void RasterizationRenderer::RenderGlowObjects(std::shared_ptr<prosper::IPrimaryC
 		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
-		vk::ClearValue{vk::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
-		vk::ClearValue{vk::ClearDepthStencilValue{}}
+		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
+		prosper::ClearValue{prosper::ClearDepthStencilValue{}}
 	});
 	if(!glowInfo.tmpBloomParticles.empty())
 	{
@@ -86,7 +86,7 @@ void RasterizationRenderer::RenderGlowObjects(std::shared_ptr<prosper::IPrimaryC
 	auto &blurImg = glowInfo.blurSet->GetFinalRenderTarget()->GetTexture().GetImage();
 	for(auto i=decltype(blurAmount){0u};i<blurAmount;++i)
 	{
-		prosper::util::record_blur_image(*c_engine,drawCmd,*glowInfo.blurSet,{
+		prosper::util::record_blur_image(c_engine->GetRenderContext(),drawCmd,*glowInfo.blurSet,{
 			Vector4(1.f,1.f,1.f,1.f), /* color scale */
 			1.75f, /* blur size */
 			3 /* kernel size */

@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/c_water_object.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
@@ -60,7 +61,7 @@ ShaderWater::ShaderWater(prosper::IPrContext &context,const std::string &identif
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 
@@ -152,20 +153,20 @@ bool ShaderWater::BindEntity(CBaseEntity &ent)
 	return UpdateBindFogDensity() && RecordBindDescriptorSet(*descSetEffect,DESCRIPTOR_SET_WATER.setIndex);
 }
 
-void ShaderWater::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::NONE);
-	pipelineInfo.toggle_depth_writes(true); // Water is not part of render pre-pass, but we need the depth for post-processing
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
+	pipelineInfo.ToggleDepthWrites(true); // Water is not part of render pre-pass, but we need the depth for post-processing
 }
 
-void ShaderWater::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWater::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER);
 }
 
-void ShaderWater::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderWater::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }

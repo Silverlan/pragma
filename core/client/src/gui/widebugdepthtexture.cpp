@@ -51,7 +51,7 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	auto &shader = static_cast<prosper::ShaderGraphics&>(*m_whDepthToRgbShader.get());
 	auto &inputImg = texture.GetImage();
 	auto extents = inputImg.GetExtents();
-	auto &context = *c_engine;
+	auto &context = c_engine->GetRenderContext();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.width = extents.width;

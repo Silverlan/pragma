@@ -296,7 +296,7 @@ CGame::~CGame() {}
 
 void CGame::OnRemove()
 {
-	c_engine->WaitIdle();
+	c_engine->GetRenderContext().WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
 		m_hCbDrawFrame.Remove();
@@ -627,7 +627,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
 
-	c_engine->SavePipelineCache();
+	c_engine->GetRenderContext().SavePipelineCache();
 
 	auto *cam = CreateCamera(
 		m_scene->GetWidth(),m_scene->GetHeight(),
@@ -1099,11 +1099,11 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 	loadInfo.flags = TextureLoadFlags::LoadInstantly;
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	loadInfo.sampler = c_engine->CreateSampler(samplerCreateInfo);
+	loadInfo.sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
 
 	std::shared_ptr<void> texture = nullptr;
 	static_cast<CMaterialManager&>(static_cast<ClientState*>(GetNetworkState())->GetMaterialManager()).GetTextureManager().Load(
-		*c_engine,worldData.GetLightmapAtlasTexturePath(GetMapName()),loadInfo,&texture
+		c_engine->GetRenderContext(),worldData.GetLightmapAtlasTexturePath(GetMapName()),loadInfo,&texture
 	);
 	if(texture)
 	{

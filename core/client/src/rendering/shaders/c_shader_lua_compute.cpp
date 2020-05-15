@@ -8,13 +8,13 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
-#include <misc/compute_pipeline_create_info.h>
 
-void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l,Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t constantId,::DataStream &ds)
+void Lua::ComputePipelineCreateInfo::AddSpecializationConstant(lua_State *l,prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t constantId,::DataStream &ds)
 {
-	Lua::PushBool(l,pipelineInfo.add_specialization_constant(constantId,ds->GetSize(),ds->GetData()));
+	Lua::PushBool(l,pipelineInfo.AddSpecializationConstant(constantId,ds->GetSize(),ds->GetData()));
 }
 
 void Lua::Shader::Compute::RecordDispatch(lua_State *l,prosper::ShaderCompute &shader,uint32_t x,uint32_t y,uint32_t z)

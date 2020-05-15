@@ -54,7 +54,7 @@ namespace pragma
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		bool BindDepthMatrix(const Mat4 &depthMVP);
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	private:
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;

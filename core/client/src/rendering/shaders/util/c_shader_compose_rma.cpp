@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_context.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -153,7 +154,7 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	return InsertAmbientOcclusion(context,rmaInputPath,*aoImg,optRmaOutputPath);
 }
 
-void pragma::ShaderComposeRMA::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void pragma::ShaderComposeRMA::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

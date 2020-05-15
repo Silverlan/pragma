@@ -42,17 +42,17 @@ bool GlowData::Initialize(uint32_t width,uint32_t height,const HDRData &hdrInfo)
 	imgCreateInfo.format = pragma::ShaderGlow::RENDER_PASS_FORMAT;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	auto img = c_engine->CreateImage(imgCreateInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
 	samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
-	auto tex = c_engine->CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	renderTarget = c_engine->CreateRenderTarget({tex,depthTex},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderGlow>(*c_engine));
+	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex,depthTex},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderGlow>(c_engine->GetRenderContext()));
 	renderTarget->SetDebugName("glow_rt");
 
-	auto rtBlur = c_engine->CreateRenderTarget({tex},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(*c_engine,umath::to_integral(prosper::ShaderBlurBase::Pipeline::R8G8B8A8Unorm)));
+	auto rtBlur = c_engine->GetRenderContext().CreateRenderTarget({tex},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(c_engine->GetRenderContext(),umath::to_integral(prosper::ShaderBlurBase::Pipeline::R8G8B8A8Unorm)));
 	rtBlur->SetDebugName("glow_blur_rt");
-	blurSet = prosper::BlurSet::Create(*c_engine,rtBlur);
+	blurSet = prosper::BlurSet::Create(c_engine->GetRenderContext(),rtBlur);
 	return true;
 }

@@ -7,7 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -54,7 +54,7 @@ ShaderForwardPLightCulling::ShaderForwardPLightCulling(prosper::IPrContext &cont
 	: prosper::ShaderCompute(context,identifier,"compute/cs_forwardp_light_culling")
 {}
 
-void ShaderForwardPLightCulling::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderCompute::InitializeComputePipeline(pipelineInfo,pipelineIdx);
 

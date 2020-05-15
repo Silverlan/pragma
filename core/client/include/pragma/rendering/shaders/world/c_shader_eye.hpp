@@ -33,7 +33,7 @@ namespace pragma
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		bool BindEyeball(uint32_t skinMatIdx);
-		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

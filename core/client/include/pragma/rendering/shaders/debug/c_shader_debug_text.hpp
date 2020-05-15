@@ -22,7 +22,7 @@ namespace pragma
 
 		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,prosper::IDescriptorSet &descSetTexture,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

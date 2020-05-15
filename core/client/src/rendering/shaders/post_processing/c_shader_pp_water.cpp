@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_water.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -36,7 +37,7 @@ ShaderPPWater::ShaderPPWater(prosper::IPrContext &context,const std::string &ide
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void ShaderPPWater::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
@@ -55,7 +56,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPPWater::InitializeMaterialD
 	auto *dudvMap = mat.GetTextureInfo("dudvmap");
 	if(dudvMap == nullptr || dudvMap->texture == nullptr)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_REFRACTION_MAP);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);

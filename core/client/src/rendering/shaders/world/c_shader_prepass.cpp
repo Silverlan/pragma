@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/model/vertex.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
@@ -88,18 +89,18 @@ bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
 	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 
-void ShaderPrepassBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
-		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::FRONT_BIT);
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-	pipelineInfo.toggle_depth_writes(true);
-	pipelineInfo.toggle_depth_test(true,Anvil::CompareOp::LESS);
+	pipelineInfo.ToggleDepthWrites(true);
+	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::Less);
 
-	pipelineInfo.toggle_depth_bias(true,0.f,0.f,0.f);
-	pipelineInfo.toggle_dynamic_state(true,Anvil::DynamicState::DEPTH_BIAS); // Required for decals
+	pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
+	pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
@@ -143,7 +144,7 @@ void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &
 	CreateCachedRenderPass<ShaderPrepass>({rpInfo},outRenderPass,pipelineIdx);
 }
 
-void ShaderPrepass::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderPrepassBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

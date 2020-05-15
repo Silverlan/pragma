@@ -143,7 +143,7 @@ int Lua::engine::load_texture(lua_State *l)
 		std::string fname = Lua::CheckString(l,1);
 		if(Lua::IsSet(l,2))
 			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
-		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,fname,loadInfo,&tex);
+		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fname,loadInfo,&tex);
 	}
 	else
 	{
@@ -161,7 +161,7 @@ int Lua::engine::load_texture(lua_State *l)
 			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,loadFlagsIdx));
 		if(cacheName.has_value() == false)
 			loadInfo.flags |= TextureLoadFlags::DontCache;
-		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
+		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
 	}
 	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return 0;
@@ -635,7 +635,7 @@ int Lua::engine::set_tick_delta_time_tied_to_frame_rate(lua_State *l)
 }
 int Lua::engine::get_window_resolution(lua_State *l)
 {
-	auto &createInfo = c_engine->GetWindowCreationInfo();
+	auto &createInfo = c_engine->GetRenderContext().GetWindowCreationInfo();
 	Lua::Push<Vector2i>(l,Vector2i{createInfo.width,createInfo.height});
 	return 1;
 }

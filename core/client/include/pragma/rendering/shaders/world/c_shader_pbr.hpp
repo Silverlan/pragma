@@ -58,7 +58,7 @@ namespace pragma
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
-		virtual void InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 
 		RenderFlags m_extRenderFlags = RenderFlags::None;
@@ -89,8 +89,8 @@ namespace pragma
 		ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
-		virtual void InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
+		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	};

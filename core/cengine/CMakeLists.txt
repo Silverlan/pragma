@@ -5,8 +5,6 @@ link_external_library(shared)
 link_external_library(client)
 link_external_library(wgui)
 link_external_library(prosper)
-link_external_library(vulkan)
-link_external_library(anvil)
 link_external_library(glfw)
 link_external_library(iglfw)
 link_external_library(util_zip)
@@ -24,13 +22,11 @@ if(WIN32)
 endif()
 
 add_include_dir(server)
-add_include_dir(anvil_build)
 add_include_dir(freetype)
 
 add_def(CENGINE_EXPORTS)
 add_def(DLLCENGINE_EX)
 add_def(ALSYS_LIBRARY_TYPE)
-add_def(ANVIL_VULKAN_CPP)
 
 set(PRECOMPILED_HEADER "stdafx_cengine")
 

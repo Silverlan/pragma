@@ -121,7 +121,7 @@ std::weak_ptr<CShadowManagerComponent::RenderTarget> CShadowComponent::RequestRe
 	auto *shadowManager = CShadowManagerComponent::GetShadowManager();
 	if(shadowManager == nullptr)
 		return std::weak_ptr<CShadowManagerComponent::RenderTarget>{};
-	auto priority = c_engine->GetLastFrameId();
+	auto priority = c_engine->GetRenderContext().GetLastFrameId();
 	if(m_hRt.valid())
 	{
 		// We'll keep our current render target; Just update the priority

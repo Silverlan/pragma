@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_equirectangular_to_cubemap.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -31,7 +32,7 @@ ShaderEquirectangularToCubemap::ShaderEquirectangularToCubemap(prosper::IPrConte
 	: ShaderCubemap{context,identifier,"screen/fs_equirectangular_to_cubemap"}
 {}
 
-void ShaderEquirectangularToCubemap::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderEquirectangularToCubemap::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderCubemap::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -63,8 +64,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::SampledBit;
 
-	auto &context = *c_engine;
-	auto &dev = context.GetDevice();
+	auto &context = c_engine->GetRenderContext();
 	auto img = context.CreateImage(createInfo,reinterpret_cast<uint8_t*>(imgBuffer->GetData()));
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -83,7 +83,7 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	auto rt = CreateCubeMapRenderTarget(resolution,resolution,prosper::util::ImageCreateInfo::Flags::FullMipmapChain);
 
 	// Shader input
-	auto dsg = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
+	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_EQUIRECTANGULAR_TEXTURE);
 	dsg->GetDescriptorSet()->SetBindingTexture(equirectangularTexture,0u);
 
 	PushConstants pushConstants {};

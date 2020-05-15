@@ -32,7 +32,7 @@ namespace pragma
 
 		bool Draw(const PushConstants &pushConstants={{0.f,0.f,0.f,0.f}});
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

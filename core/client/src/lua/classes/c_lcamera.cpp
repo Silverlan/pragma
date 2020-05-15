@@ -87,12 +87,12 @@ void Lua::Scene::InitializeRenderTarget(lua_State *l,::Scene &scene)
 }
 void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint)
 {
-	auto &descSet = scene.GetCameraDescriptorSetGroup(static_cast<vk::PipelineBindPoint>(bindPoint));
+	auto &descSet = scene.GetCameraDescriptorSetGroup(static_cast<prosper::PipelineBindPoint>(bindPoint));
 	if(descSet == nullptr)
 		return;
 	Lua::Push(l,descSet);
 }
-void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene) {GetCameraDescriptorSet(l,scene,umath::to_integral(vk::PipelineBindPoint::eGraphics));}
+void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene) {GetCameraDescriptorSet(l,scene,umath::to_integral(prosper::PipelineBindPoint::Graphics));}
 void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,::Scene &scene)
 {
 	auto &descSet = scene.GetViewCameraDescriptorSetGroup();

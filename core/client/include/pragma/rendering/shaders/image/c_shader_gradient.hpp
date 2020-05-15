@@ -43,7 +43,7 @@ namespace pragma
 		virtual ~ShaderGradient() override;
 		bool Draw(const PushConstants &pushConstants);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 
 	namespace util

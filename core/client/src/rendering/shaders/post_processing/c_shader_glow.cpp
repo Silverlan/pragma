@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
@@ -35,20 +36,20 @@ ShaderGlow::ShaderGlow(prosper::IPrContext &context,const std::string &identifie
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 prosper::DescriptorSetInfo &ShaderGlow::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderGlow::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
-void ShaderGlow::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 }
-void ShaderGlow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	pipelineInfo.toggle_depth_bias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
+	pipelineInfo.ToggleDepthBias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
 }
 bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
@@ -78,7 +79,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGlow::InitializeMaterialDesc
 	auto glowTexture = std::static_pointer_cast<Texture>(glowMap->texture);
 	if(glowTexture->HasValidVkTexture() == false)
 		return nullptr;
-	auto descSetGroup = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*glowTexture->GetVkTexture(),0u);

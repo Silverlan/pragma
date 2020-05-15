@@ -80,7 +80,7 @@ void CModel::UpdateVertexAnimationBuffer()
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = vertexAnimData.size() *sizeof(vertexAnimData.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	m_vertexAnimationBuffer = c_engine->CreateBuffer(createInfo,vertexAnimData.data());
+	m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,vertexAnimData.data());
 }
 const std::shared_ptr<prosper::IBuffer> &CModel::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
 bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &subMesh,uint32_t frameId,uint64_t &offset) const

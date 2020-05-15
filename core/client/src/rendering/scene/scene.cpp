@@ -142,7 +142,7 @@ void Scene::InitializeRenderSettingsBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_renderSettings);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_renderSettingsBuffer = c_engine->CreateBuffer(createInfo,&m_renderSettings);
+	m_renderSettingsBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&m_renderSettings);
 	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
@@ -158,12 +158,12 @@ void Scene::InitializeCameraBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_cameraData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_cameraBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
+	m_cameraBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&m_cameraData);
 	m_cameraBuffer->SetDebugName("camera_buf");
 	//
 
 	// View Camera
-	m_cameraViewBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
+	m_cameraViewBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&m_cameraData);
 	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
@@ -173,7 +173,7 @@ void Scene::InitializeFogBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_fogData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	m_fogBuffer = c_engine->CreateBuffer(createInfo,&m_cameraData);
+	m_fogBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
 pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
@@ -240,8 +240,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	auto &dev = c_engine->GetDevice();
-	m_camDescSetGroupGraphics = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	descSetGraphics.SetBindingUniformBuffer(
 		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
@@ -250,7 +249,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
 	);
 
-	m_camDescSetGroupCompute = c_engine->CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
 	descSetCompute.SetBindingUniformBuffer(
 		*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
@@ -259,7 +258,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
 	);
 
-	m_camViewDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	descSetViewGraphics.SetBindingUniformBuffer(
 		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
@@ -268,7 +267,7 @@ void Scene::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
 	);
 
-	m_fogDescSetGroup = c_engine->CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
+	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
 	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer,0u);
 }
 const std::shared_ptr<prosper::IBuffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
@@ -276,13 +275,13 @@ pragma::RenderSettings &Scene::GetRenderSettings() {return m_renderSettings;}
 const pragma::RenderSettings &Scene::GetRenderSettings() const {return const_cast<Scene*>(this)->GetRenderSettings();}
 const std::shared_ptr<prosper::IBuffer> &Scene::GetCameraBuffer() const {return m_cameraBuffer;}
 const std::shared_ptr<prosper::IBuffer> &Scene::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
-const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(vk::PipelineBindPoint bindPoint) const
+const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint) const
 {
 	switch(bindPoint)
 	{
-		case vk::PipelineBindPoint::eGraphics:
+		case prosper::PipelineBindPoint::Graphics:
 			return m_camDescSetGroupGraphics;
-		case vk::PipelineBindPoint::eCompute:
+		case prosper::PipelineBindPoint::Compute:
 			return m_camDescSetGroupCompute;
 	}
 	static std::shared_ptr<prosper::IDescriptorSetGroup> nptr = nullptr;
@@ -322,27 +321,27 @@ void Scene::SetWorldEnvironment(WorldEnvironment &env)
 	auto &fog = m_worldEnvironment->GetFogSettings();
 	m_envCallbacks.push_back(fog.GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldVal,std::reference_wrapper<const Color> newVal) {
 		m_fogData.color = newVal.get().ToVector4();
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),color),m_fogData.color);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),color),m_fogData.color);
 	}));
 	m_envCallbacks.push_back(fog.GetStartProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.start = newVal.get();
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),start),m_fogData.start);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),start),m_fogData.start);
 	}));
 	m_envCallbacks.push_back(fog.GetEndProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.end = newVal.get();
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),end),m_fogData.end);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),end),m_fogData.end);
 	}));
 	m_envCallbacks.push_back(fog.GetMaxDensityProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.density = newVal.get();
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),density),m_fogData.density);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),density),m_fogData.density);
 	}));
 	m_envCallbacks.push_back(fog.GetTypeProperty()->AddCallback([this](std::reference_wrapper<const uint8_t> oldVal,std::reference_wrapper<const uint8_t> newVal) {
 		m_fogData.type = static_cast<uint32_t>(newVal.get());
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),type),m_fogData.type);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),type),m_fogData.type);
 	}));
 	m_envCallbacks.push_back(fog.GetEnabledProperty()->AddCallback([this](std::reference_wrapper<const bool> oldVal,std::reference_wrapper<const bool> newVal) {
 		m_fogData.flags = static_cast<uint32_t>(newVal.get());
-		c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),flags),m_fogData.flags);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),flags),m_fogData.flags);
 	}));
 	m_fogData.color = fog.GetColor().ToVector4();
 	m_fogData.start = fog.GetStart();
@@ -350,7 +349,7 @@ void Scene::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.density = fog.GetMaxDensity();
 	m_fogData.type = umath::to_integral(fog.GetType());
 	m_fogData.flags = fog.IsEnabled();
-	c_engine->ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
 void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {

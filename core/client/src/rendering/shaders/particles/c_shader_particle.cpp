@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
@@ -22,10 +23,10 @@ ShaderParticleRotational::ShaderParticleRotational(prosper::IPrContext &context,
 	SetBaseShader<ShaderParticle>();
 }
 
-void ShaderParticleRotational::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleRotational::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderParticle2DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::NONE);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_WORLD_ROTATION);
 }
 

@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <pragma/model/vertex.h>
 
@@ -98,14 +99,14 @@ uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const {return std::numeric_
 uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
 void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {}
-void ShaderShadow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	ToggleDynamicScissorState(pipelineInfo,true);
-	pipelineInfo.toggle_depth_writes(true);
-	pipelineInfo.toggle_depth_test(true,Anvil::CompareOp::LESS_OR_EQUAL);
-	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,Anvil::CullModeFlagBits::NONE);
+	pipelineInfo.ToggleDepthWrites(true);
+	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
+	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
@@ -115,7 +116,7 @@ void ShaderShadow::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipe
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 
-	pipelineInfo.toggle_depth_bias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
+	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
 }
 
 //////////////////

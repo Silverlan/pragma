@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 #include "pragma/console/c_cvar.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -28,67 +29,67 @@ prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pra
 	if(animDescSet == nullptr)
 	{
 		if(m_dummyAnimDescSetGroup == nullptr)
-			m_dummyAnimDescSetGroup = c_engine->CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
+			m_dummyAnimDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(GetAnimationDescriptorSetInfo());
 		animDescSet = m_dummyAnimDescSetGroup->GetDescriptorSet();
 	}
 	return *animDescSet;
 }
-void ShaderParticleBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	auto colorComponents = Anvil::ColorComponentFlagBits::R_BIT | Anvil::ColorComponentFlagBits::G_BIT | Anvil::ColorComponentFlagBits::B_BIT | Anvil::ColorComponentFlagBits::A_BIT;
-	auto blendOp = Anvil::BlendOp::ADD;
+	auto colorComponents = prosper::ColorComponentFlags::RBit | prosper::ColorComponentFlags::GBit | prosper::ColorComponentFlags::BBit | prosper::ColorComponentFlags::ABit;
+	auto blendOp = prosper::BlendOp::Add;
 
 	auto alphaMode = GetAlphaMode(pipelineIdx);
 	switch(alphaMode)
 	{
 		case AlphaMode::Additive:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE, // color
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE, // alpha
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::One, // color
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::One, // alpha
 				colorComponents
 			);
 
 			break;
 		case AlphaMode::Opaque:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ZERO, // color
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ZERO, // alpha
+				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // color
+				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // alpha
 				colorComponents
 			);
 			break;
 		case AlphaMode::Masked:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ZERO, // color
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ZERO, // alpha
+				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // color
+				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // alpha
 				colorComponents
 			);
 			break;
 		case AlphaMode::Translucent:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA, // color
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA, // alpha
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // color
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // alpha
 				colorComponents
 			);
 			break;
 		case AlphaMode::AdditiveFull:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ONE, // color
-				Anvil::BlendFactor::ONE,Anvil::BlendFactor::ONE, // alpha
+				prosper::BlendFactor::One,prosper::BlendFactor::One, // color
+				prosper::BlendFactor::One,prosper::BlendFactor::One, // alpha
 				colorComponents
 			);
 			break;
 		case AlphaMode::Premultiplied:
-			pipelineInfo.set_color_blend_attachment_properties(
+			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA, // color
-				Anvil::BlendFactor::SRC_ALPHA,Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA, // alpha
-				//static_cast<VkBlendFactor>(Anvil::BlendFactor::ONE),static_cast<VkBlendFactor>(Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA), // color
-				//static_cast<VkBlendFactor>(Anvil::BlendFactor::ONE),static_cast<VkBlendFactor>(Anvil::BlendFactor::ONE_MINUS_SRC_ALPHA), // alpha
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // color
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // alpha
+				//static_cast<VkBlendFactor>(prosper::BlendFactor::ONE),static_cast<VkBlendFactor>(prosper::BlendFactor::ONE_MINUS_SRC_ALPHA), // color
+				//static_cast<VkBlendFactor>(prosper::BlendFactor::ONE),static_cast<VkBlendFactor>(prosper::BlendFactor::ONE_MINUS_SRC_ALPHA), // alpha
 				colorComponents
 			);
 			break;

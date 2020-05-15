@@ -67,7 +67,7 @@ namespace pragma
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
@@ -95,7 +95,7 @@ namespace pragma
 		ShaderPrepass(prosper::IPrContext &context,const std::string &identifier);
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderPrepassBase::Flags)

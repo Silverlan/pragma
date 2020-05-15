@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 

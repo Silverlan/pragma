@@ -76,7 +76,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		return;
 	m_bExtended = b;
 
-	auto &context = *c_engine;
+	auto &context = c_engine->GetRenderContext();
 	context.WaitIdle();
 
 	auto &imgDepth = textureDepth->GetImage();
@@ -95,7 +95,6 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
 	if(b == true)
 	{
-		auto &dev = context.GetDevice();
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.samples = imgDepth.GetSampleCount();
 		imgCreateInfo.format = ShaderPrepass::RENDER_PASS_NORMAL_FORMAT;
@@ -117,19 +116,18 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass(umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
-			vk::ClearValue{vk::ClearColorValue{}}, // Unused, but required
-			vk::ClearValue{vk::ClearDepthStencilValue{1.f,0}} // Clear depth
+			prosper::ClearValue{prosper::ClearColorValue{}}, // Unused, but required
+			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}
 	else
 	{
 		textureNormals = nullptr;
 
-		auto &dev = context.GetDevice();
 		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_rt");
 		m_clearValues = {
-			vk::ClearValue{vk::ClearDepthStencilValue{1.f,0}} // Clear depth
+			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}
 }

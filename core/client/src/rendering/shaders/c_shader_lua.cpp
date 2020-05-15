@@ -10,7 +10,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include <misc/compute_pipeline_create_info.h>
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
@@ -39,8 +39,8 @@ prosper::DescriptorSetInfo pragma::to_prosper_descriptor_set_info(const LuaDescr
 	return shaderDescSetInfo;
 }
 
-static std::unordered_map<Anvil::BasePipelineCreateInfo*,LuaShaderBase*> s_pipelineToShader;
-LuaShaderBase *LuaShaderBase::GetShader(Anvil::BasePipelineCreateInfo &pipelineInfo)
+static std::unordered_map<prosper::BasePipelineCreateInfo*,LuaShaderBase*> s_pipelineToShader;
+LuaShaderBase *LuaShaderBase::GetShader(prosper::BasePipelineCreateInfo &pipelineInfo)
 {
 	auto it = s_pipelineToShader.find(&pipelineInfo);
 	if(it == s_pipelineToShader.end())
@@ -59,13 +59,13 @@ void LuaShaderBase::ClearLuaObject() {m_baseLuaObj = nullptr;}
 void LuaShaderBase::OnInitialized() {CallLuaMember("OnInitialized");}
 void LuaShaderBase::OnPipelinesInitialized() {CallLuaMember("OnPipelinesInitialized");}
 void LuaShaderBase::OnPipelineInitialized(uint32_t pipelineIdx) {CallLuaMember<void,uint32_t>("OnPipelineInitialized",pipelineIdx);}
-void LuaShaderBase::InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderBase::InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	m_currentPipelineInfo = &pipelineInfo;
 	m_currentDescSetIndex = 0u;
 
 	auto it = s_pipelineToShader.insert(std::make_pair(&pipelineInfo,this)).first;
-	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializePipeline",std::ref(pipelineInfo),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializePipeline",std::ref(pipelineInfo),pipelineIdx);
 	s_pipelineToShader.erase(it);
 
 	m_currentPipelineInfo = nullptr;
@@ -92,7 +92,7 @@ bool LuaShaderGraphicsBase::AttachVertexAttribute(const pragma::LuaVertexBinding
 {
 	if(m_currentPipelineInfo == nullptr)
 		return false;
-	std::vector<Anvil::VertexInputAttribute> attributeData;
+	std::vector<prosper::VertexInputAttribute> attributeData;
 	attributeData.reserve(attributes.size());
 
 	auto offset = 0u;
@@ -101,22 +101,22 @@ bool LuaShaderGraphicsBase::AttachVertexAttribute(const pragma::LuaVertexBinding
 		auto attrSize = prosper::util::get_byte_size(attr.format);
 		auto attrOffset = (attr.offset != std::numeric_limits<uint32_t>::max()) ? attr.offset : offset;
 		auto attrLocation = (attr.location != std::numeric_limits<uint32_t>::max()) ? attr.location : m_currentVertexAttributeLocation;
-		attributeData.push_back({attrLocation,static_cast<Anvil::Format>(attr.format),attrOffset});
+		attributeData.push_back({attrLocation,static_cast<prosper::Format>(attr.format),attrOffset});
 
 		offset = attrOffset +attrSize;
 		++m_currentVertexAttributeLocation;
 	}
 	auto stride = (binding.stride != std::numeric_limits<uint32_t>::max()) ? binding.stride : offset;
 
-	return static_cast<Anvil::GraphicsPipelineCreateInfo*>(m_currentPipelineInfo)->add_vertex_binding(
+	return static_cast<prosper::GraphicsPipelineCreateInfo*>(m_currentPipelineInfo)->AddVertexBinding(
 		m_currentVertexBinding++,
-		static_cast<Anvil::VertexInputRate>(binding.inputRate),
+		static_cast<prosper::VertexInputRate>(binding.inputRate),
 		stride,
 		attributeData.size(),
 		attributeData.data()
 	);
 }
-void LuaShaderGraphicsBase::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderGraphicsBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	m_currentVertexAttributeLocation = 0u;
 	m_currentVertexBinding = 0u;
@@ -154,106 +154,106 @@ LuaShaderComputeBase::LuaShaderComputeBase(prosper::ShaderCompute &shader)
 	: LuaShaderBase(shader)
 {}
 
-void LuaShaderComputeBase::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {InitializePipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderComputeBase::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {InitializePipeline(pipelineInfo,pipelineIdx);}
 
 /////////////////
 
 LuaShaderGraphics::LuaShaderGraphics()
-	: TLuaShaderBase(*c_engine,"","","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {}
-void LuaShaderGraphics::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderGraphics::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	prosper::ShaderGraphics::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	prosper::ShaderGraphics::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
-void LuaShaderGraphics::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderGraphics::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderGraphics::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void LuaShaderGraphics::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {prosper::ShaderGraphics::InitializeRenderPass(outRenderPass,pipelineIdx);}
 
 /////////////////
 
 LuaShaderPostProcessing::LuaShaderPostProcessing()
-	: TLuaShaderBase(*c_engine,"","","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void LuaShaderPostProcessing::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderPostProcessing::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	pragma::ShaderPPBase::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	pragma::ShaderPPBase::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
 
-void LuaShaderPostProcessing::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderPostProcessing::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderPostProcessing::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void LuaShaderPostProcessing::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {pragma::ShaderPPBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 
 /////////////////
 
 LuaShaderImageProcessing::LuaShaderImageProcessing()
-	: TLuaShaderBase(*c_engine,"","","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {
 	SetBaseShader<prosper::ShaderCopyImage>();
 }
 
-void LuaShaderImageProcessing::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderImageProcessing::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	prosper::ShaderBaseImageProcessing::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
 
-void LuaShaderImageProcessing::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderImageProcessing::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderImageProcessing::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void LuaShaderImageProcessing::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {prosper::ShaderBaseImageProcessing::InitializeRenderPass(outRenderPass,pipelineIdx);}
 
 /////////////////
 
 LuaShaderGUITextured::LuaShaderGUITextured()
-	: TLuaShaderBase(*c_engine,"","","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {}
 
-void LuaShaderGUITextured::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderGUITextured::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	wgui::ShaderTextured::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	wgui::ShaderTextured::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
-void LuaShaderGUITextured::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderGUITextured::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderGUITextured::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void LuaShaderGUITextured::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {wgui::ShaderTextured::InitializeRenderPass(outRenderPass,pipelineIdx);}
 
 /////////////////
 
 LuaShaderCompute::LuaShaderCompute()
-	: TLuaShaderBase(*c_engine,"","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","")
 {}
-void LuaShaderCompute::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderCompute::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	prosper::ShaderCompute::InitializeComputePipeline(static_cast<Anvil::ComputePipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	prosper::ShaderCompute::InitializeComputePipeline(static_cast<prosper::ComputePipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
-void LuaShaderCompute::InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderComputeBase::InitializeComputePipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderCompute::InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderComputeBase::InitializeComputePipeline(pipelineInfo,pipelineIdx);}
 
 /////////////////
 
 LuaShaderTextured3D::LuaShaderTextured3D()
-	: TLuaShaderBase(*c_engine,"","","")
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-void LuaShaderTextured3D::Lua_InitializePipeline(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipeline(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	ShaderTextured3DBase::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
 bool LuaShaderTextured3D::Lua_BindMaterialParameters(Material &mat)
 {
 	return ShaderTextured3DBase::BindMaterialParameters(static_cast<CMaterial&>(mat));
 }
-void LuaShaderTextured3D::Lua_InitializeGfxPipelineVertexAttributes(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
-void LuaShaderTextured3D::Lua_InitializeGfxPipelinePushConstantRanges(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::Lua_InitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
-void LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(Anvil::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(static_cast<Anvil::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
 }
 void LuaShaderTextured3D::Lua_OnBindMaterial(Material &mat) {}
 int32_t LuaShaderTextured3D::Lua_OnDraw(ModelSubMesh &mesh) {return umath::to_integral(util::EventReply::Unhandled);}
@@ -316,19 +316,19 @@ bool LuaShaderTextured3D::BindMaterialParameters(CMaterial &mat)
 	auto ret = false;
 	return CallLuaMember<bool,std::reference_wrapper<Material>>("BindMaterialParameters",&ret,std::ref(static_cast<Material&>(mat))) == CallbackReturnType::HasReturnValue || ret;
 }
-void LuaShaderTextured3D::InitializeGfxPipelineVertexAttributes(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineVertexAttributes",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineVertexAttributes",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
-void LuaShaderTextured3D::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelinePushConstantRanges",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelinePushConstantRanges",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
-void LuaShaderTextured3D::InitializeGfxPipelineDescriptorSets(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void LuaShaderTextured3D::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	CallLuaMember<void,std::reference_wrapper<Anvil::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineDescriptorSets",std::ref(static_cast<Anvil::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineDescriptorSets",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
 }
-void LuaShaderTextured3D::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderTextured3D::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
 void LuaShaderTextured3D::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 void LuaShaderTextured3D::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {ShaderTextured3DBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
 

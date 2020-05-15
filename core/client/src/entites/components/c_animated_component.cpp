@@ -48,7 +48,7 @@ void pragma::initialize_articulated_buffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
-	s_instanceBoneBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
+	s_instanceBoneBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 }
 void pragma::clear_articulated_buffers() {s_instanceBoneBuffer = nullptr;}

@@ -453,7 +453,7 @@ void CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = vertices.size() *sizeof(vertices.front());
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
-		s_vertexBuffer = c_engine->CreateBuffer(createInfo,vertices.data());
+		s_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,vertices.data());
 		s_vertexBuffer->SetDebugName("particle_vertex_buf");
 	}
 	if(s_particleBuffer == nullptr)
@@ -465,7 +465,7 @@ void CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_particleBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.05f);
+		s_particleBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.05f);
 		s_particleBuffer->SetDebugName("particle_instance_buf");
 	}
 	if(s_animStartBuffer == nullptr)
@@ -477,7 +477,7 @@ void CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_animStartBuffer = c_engine->CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.01f);
+		s_animStartBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.01f);
 		s_animStartBuffer->SetDebugName("particle_anim_start_buf");
 	}
 	if(s_animBuffer == nullptr)
@@ -489,7 +489,7 @@ void CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.size = instanceSize *maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_animBuffer = c_engine->CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.01f);
+		s_animBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.01f);
 		s_animBuffer->SetDebugName("particle_anim_data_buf");
 	}
 }
@@ -825,7 +825,7 @@ void CParticleSystemComponent::Start()
 						animBlock.GetInt("columns",&m_animData->columns);
 						m_bufAnim = s_animBuffer->AllocateBuffer(m_animData.get());
 
-						m_descSetGroupAnimation = c_engine->CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
+						m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
 						m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
 							*m_bufAnim,0u
 						);
@@ -1436,14 +1436,14 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	m_numPrevRenderParticles = m_numRenderParticles;
 	if(bufParticles != nullptr && bUpdateBuffers == true && m_numRenderParticles > 0u)
 	{
-		c_engine->ScheduleRecordUpdateBuffer(bufParticles,0ull,m_numRenderParticles *sizeof(ParticleData),m_instanceData.data());
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(bufParticles,0ull,m_numRenderParticles *sizeof(ParticleData),m_instanceData.data());
 		umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,true);
 	}
 	if(IsAnimated())
 	{
 		auto &bufAnimStart = GetAnimationStartBuffer();
 		if(bufAnimStart != nullptr && m_numRenderParticles > 0u)
-			c_engine->ScheduleRecordUpdateBuffer(bufAnimStart,0ull,m_numRenderParticles *sizeof(float),m_dataAnimStart.data());
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(bufAnimStart,0ull,m_numRenderParticles *sizeof(float),m_dataAnimStart.data());
 	}
 	for(auto &r : m_renderers)
 		r->PostSimulate(tDelta);

@@ -126,7 +126,7 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
 	auto splitCount = static_cast<decltype(pragma::ShaderTextured3DBase::CSMData::count)>(numSplits);
-	c_engine->ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,count),splitCount);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,count),splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
@@ -251,8 +251,8 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	c_engine->ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
-	c_engine->ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,fard),splitDistance);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,fard),splitDistance);
 
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f *(-frustumSplit.split.fard *camProj[2][2] +camProj[3][2]) /frustumSplit.split.fard +0.5f;
@@ -277,7 +277,7 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightCom
 	if(smType == pragma::CLightComponent::ShadowMapType::Static)
 		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	imgCreateInfo.layers = layerCount;
-	auto img = c_engine->CreateImage(imgCreateInfo);
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	//samplerCreateInfo.compareEnable = true; // When enabled, causes strange behavior on Nvidia cards when doing texture lookups
@@ -290,11 +290,11 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightCom
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags |= prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer;
-	auto tex = c_engine->CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
 
-	set.renderTarget = c_engine->CreateRenderTarget({tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
+	set.renderTarget = c_engine->GetRenderContext().CreateRenderTarget({tex},static_cast<prosper::ShaderGraphics*>(wpShaderShadow.get())->GetRenderPass(),rtCreateInfo);
 	set.renderTarget->SetDebugName("csm_rt");
 }
 void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4 &matView,const Vector3 &dir)

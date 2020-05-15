@@ -34,9 +34,6 @@
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
-#include <wrappers/device.h>
-#include <wrappers/physical_device.h>
-#include <wrappers/instance.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern ClientState *client;
@@ -549,7 +546,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 				break;
 		}
 		
-		if(c_engine->GetPhysicalDeviceVendor() == prosper::Vendor::Nvidia)
+		if(c_engine->GetRenderContext().GetPhysicalDeviceVendor() == prosper::Vendor::Nvidia)
 			antiAliasing = 0; // TODO: Anti-Aliasing causes crashes on some modern Nvidia GPUs (Something to do with depth-image) FIXME
 		if(el->m_hTexQuality.IsValid())
 			static_cast<WIChoiceList*>(el->m_hTexQuality.get())->SelectChoice(textureQuality);
@@ -674,14 +671,9 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Device
 	auto *pDeviceMenu = pList->AddDropDownMenu(Locale::GetText("physical_device"),[](WIDropDownMenu *pMenu) {
-		auto &instance = c_engine->GetAnvilInstance();
-		auto numDevices = instance.get_n_physical_devices();
-		for(auto i=decltype(numDevices){0u};i<numDevices;++i)
-		{
-			auto &dev = *instance.get_physical_device(i);
-			auto &props = *dev.get_device_properties().core_vk1_0_properties_ptr;
-			pMenu->AddOption(props.device_name,std::to_string(props.vendor_id) +"," +std::to_string(props.device_id));
-		}
+		auto deviceList = prosper::util::get_available_vendor_devices(c_engine->GetRenderContext());
+		for(auto &devInfo : deviceList)
+			pMenu->AddOption(devInfo.deviceName,std::to_string(umath::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
 		
 		pMenu->SelectOption(0u);
 		pMenu->SelectOption(client->GetConVarString("cl_gpu_device"));
@@ -798,9 +790,9 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->AddChoice(Locale::GetText("texfilter_bilinear_filtering"),"1");
 		pList->AddChoice(Locale::GetText("texfilter_trilinear_filtering"),"2");
 
-		auto &limits = c_engine->GetDevice().get_physical_device_properties().core_vk1_0_properties_ptr->limits;
+		auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
 		std::vector<int> anisotropy;
-		auto maxAnisotropy = limits.max_sampler_anisotropy;
+		auto maxAnisotropy = limits.maxSamplerAnisotropy;
 		if(maxAnisotropy >= 2.f)
 		{
 			anisotropy.push_back(2);
@@ -839,24 +831,19 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Present Mode
 	auto *presentMode = pList->AddChoiceList(Locale::GetText("present_mode"),[](WIChoiceList *pList) {
-		Anvil::SurfaceCapabilities surfCapabilities {};
-		if(c_engine->GetSurfaceCapabilities(surfCapabilities) == false)
-		{
-			Con::cwar<<"WARNING: Unable to retrieve physical device surface capabilities!"<<Con::endl;
-			return;
-		}
-		auto maxImageCount = surfCapabilities.max_image_count;
+		auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
+		auto maxImageCount = limits.maxSurfaceImageCount;
 		if(maxImageCount > 0)
 		{
-			if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
+			if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
 				pList->AddChoice(Locale::GetText("immediate"),"0");
 			if(maxImageCount > 1)
 			{
-				if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
+				if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
 					pList->AddChoice(Locale::GetText("fifo"),"1");
 				if(maxImageCount > 2)
 				{
-					if(c_engine->IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
+					if(c_engine->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
 						pList->AddChoice(Locale::GetText("mailbox"),"2");
 				}
 			}
@@ -952,11 +939,12 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	pRow = pList->AddHeaderRow();
 	pRow->SetValue(0,Locale::GetText("gpu_memory_statistics"));
 	m_hGPUMemoryUsage = pList->AddSlider(Locale::GetText("gpu_memory_current_usage"),[](WISlider *pSlider) {
-		auto &memProps = c_engine->GetDevice().get_physical_device_memory_properties();
+		auto memProps = prosper::util::get_physical_device_memory_properties(c_engine->GetRenderContext());
+		if(memProps.has_value() == false)
+			return;
 		auto totalSize = 0ull;
-		auto numHeaps = memProps.n_heaps;
-		for(auto i=decltype(numHeaps){0};i<numHeaps;++i)
-			totalSize += memProps.heaps[i].size;
+		for(auto heapSize : memProps->heapSizes)
+			totalSize += heapSize;
 		pSlider->SetRange(0,totalSize,1);
 		pSlider->SetMouseInputEnabled(false);
 		pSlider->GetProgressProperty()->AddCallback([pSlider](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {

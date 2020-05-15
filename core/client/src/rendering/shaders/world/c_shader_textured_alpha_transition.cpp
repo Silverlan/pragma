@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured_alpha_transition.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -63,11 +64,11 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedAlphaTransition::Ini
 	return descSetGroup;
 }
 prosper::DescriptorSetInfo &ShaderTexturedAlphaTransition::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-void ShaderTexturedAlphaTransition::InitializeGfxPipelinePushConstantRanges(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTexturedAlphaTransition::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-void ShaderTexturedAlphaTransition::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderTexturedAlphaTransition::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
@@ -77,7 +78,7 @@ void ShaderTexturedAlphaTransition::InitializeGfxPipeline(Anvil::GraphicsPipelin
 bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
 {
 	auto numAlpha = 0;
-	auto alphaBuffer = c_engine->GetDummyBuffer();
+	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	auto &vkMesh = mesh.GetVKMesh();
 	if(vkMesh != nullptr)
 	{

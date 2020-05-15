@@ -47,7 +47,7 @@ namespace pragma
 		ShaderPPFog(prosper::IPrContext &context,const std::string &identifier);
 		bool Draw(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetDepth,prosper::IDescriptorSet &descSetCamera,prosper::IDescriptorSet &descSetFog);
 	protected:
-		virtual void InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

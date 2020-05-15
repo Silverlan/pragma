@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
@@ -78,7 +79,7 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context,const std::string &identifie
 	bufferCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufferCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufferCreateInfo.size = size;
-	m_kernelBuffer = c_engine->CreateBuffer(bufferCreateInfo,ssaoKernel.data());
+	m_kernelBuffer = c_engine->GetRenderContext().CreateBuffer(bufferCreateInfo,ssaoKernel.data());
 	m_kernelBuffer->SetDebugName("ssao_kernel_buf");
 
 	// Generate kernel rotations
@@ -143,14 +144,14 @@ void ShaderSSAO::OnPipelineInitialized(uint32_t pipelineIdx)
 	prosper::ShaderBaseImageProcessing::OnPipelineInitialized(pipelineIdx);
 	if(pipelineIdx != 0u)
 		return;
-	m_descSetGroupKernel = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
-	m_descSetGroupTexture = c_engine->CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
+	m_descSetGroupKernel = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_SAMPLE_BUFFER);
+	m_descSetGroupTexture = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_NOISE_TEXTURE);
 	
 	m_descSetGroupKernel->GetDescriptorSet()->SetBindingUniformBuffer(*m_kernelBuffer,0u);
 	m_descSetGroupTexture->GetDescriptorSet()->SetBindingTexture(*m_noiseTexture,0u);
 }
 
-void ShaderSSAO::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

@@ -126,7 +126,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
-	auto imgCubemap = c_engine->CreateImage(imgCreateInfo);
+	auto imgCubemap = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 	auto numMipmaps = imgCubemap->GetMipmapCount();
 
 	struct ImageBufferInfo
@@ -166,7 +166,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	bufCreateInfo.size = offset;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
-	auto buf = c_engine->CreateBuffer(bufCreateInfo);
+	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
 
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	for(auto &imgBufferInfo : imageBufferInfos)

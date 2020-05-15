@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 
 using namespace pragma;

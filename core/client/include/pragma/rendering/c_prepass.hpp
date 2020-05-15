@@ -42,7 +42,7 @@ namespace pragma
 			bool IsExtended() const;
 		private:
 			bool m_bExtended = false;
-			std::vector<vk::ClearValue> m_clearValues = {};
+			std::vector<prosper::ClearValue> m_clearValues = {};
 			util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
 			util::WeakHandle<prosper::Shader> m_shaderPrepassDepth = {};
 		};

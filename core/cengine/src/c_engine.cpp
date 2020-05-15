@@ -124,55 +124,53 @@ bool CEngine::IsGPUProfilingEnabled() const
 	return cvGPUProfiling->GetBool();
 }
 
-#include <wrappers/device.h>
-#include <wrappers/queue.h>
 void CEngine::DumpDebugInformation(ZIPFile &zip) const
 {
 	Engine::DumpDebugInformation(zip);
 	std::stringstream ss;
-	auto &dev = c_engine->GetDevice();
-	auto &gpuProperties = dev.get_physical_device_properties();
-	ss<<"Vulkan API Version: "<<gpuProperties.core_vk1_0_properties_ptr->api_version<<"\n";
-	ss<<"Device Name: "<<gpuProperties.core_vk1_0_properties_ptr->device_name<<"\n";
-	ss<<"Device Type: "<<prosper::util::to_string(static_cast<vk::PhysicalDeviceType>(gpuProperties.core_vk1_0_properties_ptr->device_type))<<"\n";
-	ss<<"Driver Version: "<<gpuProperties.core_vk1_0_properties_ptr->driver_version<<"\n";
-	ss<<"Vendor ID: "<<gpuProperties.core_vk1_0_properties_ptr->vendor_id;
+	auto deviceInfo = prosper::util::get_vendor_device_info(GetRenderContext());
+	ss<<"Vulkan API Version: "<<deviceInfo.apiVersion<<"\n";
+	ss<<"Device Name: "<<deviceInfo.deviceName<<"\n";
+	ss<<"Device Type: "<<prosper::util::to_string(deviceInfo.deviceType)<<"\n";
+	ss<<"Driver Version: "<<deviceInfo.driverVersion<<"\n";
+	ss<<"Vendor: "<<prosper::util::to_string(deviceInfo.vendor)<<"\n";
+	ss<<"Vendor ID: "<<umath::to_integral(deviceInfo.vendor);
 	zip.AddFile("gpu.txt",ss.str());
 	
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_layers(*c_engine,ss);
+	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_layers.txt",ss.str());
 
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_extensions(*c_engine,ss);
+	prosper::debug::dump_extensions(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_extensions.txt",ss.str());
 
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_limits(*c_engine,ss);
+	prosper::debug::dump_limits(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_limits.txt",ss.str());
 
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_features(*c_engine,ss);
+	prosper::debug::dump_features(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_features.txt",ss.str());
 
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_image_format_properties(*c_engine,ss);
+	prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_image_format_properties.txt",ss.str());
 
 	ss.str(std::string());
 	ss.clear();
-	prosper::debug::dump_format_properties(*c_engine,ss);
+	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_format_properties.txt",ss.str());
 }
 
 void CEngine::InitializeStagingTarget()
 {
-	c_engine->WaitIdle();
+	c_engine->GetRenderContext().WaitIdle();
 	auto resolution = GetRenderResolution();
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::ColorAttachmentBit;
@@ -180,18 +178,18 @@ void CEngine::InitializeStagingTarget()
 	createInfo.width = resolution.x;
 	createInfo.height = resolution.y;
 	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
-	auto stagingImg = CreateImage(createInfo);
+	auto stagingImg = GetRenderContext().CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	auto stagingTex = CreateTexture({},*stagingImg,imgViewCreateInfo);
+	auto stagingTex = GetRenderContext().CreateTexture({},*stagingImg,imgViewCreateInfo);
 
-	auto rp = CreateRenderPass(
+	auto rp = GetRenderContext().CreateRenderPass(
 		prosper::util::RenderPassCreateInfo{{{prosper::Format::R8G8B8A8_UNorm,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
 			prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ColorAttachmentOptimal
 		}}}
 		//prosper::util::RenderPassCreateInfo{vk::Format::eD32Sfloat,vk::ImageLayout::eDepthStencilAttachmentOptimal,vk::AttachmentLoadOp::eClear}
 	);
 	umath::set_flag(m_stateFlags,StateFlags::FirstFrame);
-	m_stagingRenderTarget = CreateRenderTarget({stagingTex},rp);//,finalDepthTex},rp);
+	m_stagingRenderTarget = GetRenderContext().CreateRenderTarget({stagingTex},rp);//,finalDepthTex},rp);
 	m_stagingRenderTarget->SetDebugName("engine_staging_rt");
 	// Vulkan TODO: Resize when window resolution was changed
 }
@@ -211,7 +209,7 @@ Vector2i CEngine::GetRenderResolution() const
 {
 	if(m_renderResolution.has_value())
 		return *m_renderResolution;
-	auto &windowCreateInfo = GetWindowCreationInfo();
+	auto &windowCreateInfo = GetRenderContext().GetWindowCreationInfo();
 	return Vector2i{windowCreateInfo.width,windowCreateInfo.height};
 }
 
@@ -361,6 +359,7 @@ bool CEngine::IsValidAxisInput(float axisInput) const
 {
 	return (umath::abs(axisInput) > cvAxisInputThreshold->GetFloat()) ? true : false;
 }
+
 bool CEngine::GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyState &inOutState) const
 {
 	if(IsValidAxisInput(axisInput) == false)
@@ -478,7 +477,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 
 	auto &cmds = *m_preloadedConfig.get();
 	auto res = cmds.find("cl_window_resolution");
-	pragma::RenderContext::CreateInfo contextCreateInfo {};
+	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
 	if(res != nullptr && !res->argv.empty())
@@ -516,7 +515,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		SetWindowedMode(false);
 	else
 		SetWindowedMode(true);
-	GetWindowCreationInfo().decorated = ((mode == 2) ? false : true);
+	GetRenderContext().GetWindowCreationInfo().decorated = ((mode == 2) ? false : true);
 
 	res = cmds.find("cl_render_monitor");
 	if(res != nullptr && !res->argv.empty())
@@ -552,14 +551,14 @@ bool CEngine::Initialize(int argc,char *argv[])
 	contextCreateInfo.presentMode = presentMode;
 
 	// Initialize Window context
-	pragma::RenderContext::Initialize(contextCreateInfo);
+	GetRenderContext().Initialize(contextCreateInfo);
 
-	auto &shaderManager = GetShaderManager();
+	auto &shaderManager = GetRenderContext().GetShaderManager();
 	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
 	shaderManager.RegisterShader("gradient",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGradient(context,identifier);});
 
 	// Initialize Client Instance
-	auto matManager = std::make_shared<CMaterialManager>(*this);
+	auto matManager = std::make_shared<CMaterialManager>(this->GetRenderContext());
 	matManager->GetTextureManager().SetTextureFileHandler([this](const std::string &fpath) -> VFilePtr {
 		if(FileManager::Exists(fpath) == false)
 		{
@@ -594,7 +593,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	m_clInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr});
 	//
 
-	auto &gui = WGUI::Open(*this,matManager);
+	auto &gui = WGUI::Open(GetRenderContext(),matManager);
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> Material* {
 		return GetClientState()->LoadMaterial(path);
 	});
@@ -691,7 +690,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
 
 #ifdef _WIN32
-	if(IsValidationEnabled())
+	if(GetRenderContext().IsValidationEnabled())
 	{
 		if(util::is_process_running("bdcam.exe"))
 		{
@@ -849,8 +848,8 @@ Engine::StateInstance &CEngine::GetClientStateInstance() {return *m_clInstance;}
 #ifndef _DEBUG
 #error ""
 #endif*/
-	WaitIdle();
-	auto whShader = GetShader(name);
+	GetRenderContext().WaitIdle();
+	auto whShader = GetRenderContext().GetShader(name);
 	if(whShader.expired())
 	{
 		if(IsVerbose())
@@ -864,10 +863,10 @@ Engine::StateInstance &CEngine::GetClientStateInstance() {return *m_clInstance;}
 }
 void CEngine::ReloadShaderPipelines()
 {
-	WaitIdle();
+	GetRenderContext().WaitIdle();
 	if(IsVerbose() == true)
 		Con::cout<<"Reloading shaders"<<Con::endl;
-	auto &shaderManager = GetShaderManager();
+	auto &shaderManager = GetRenderContext().GetShaderManager();
 	auto &shaders = shaderManager.GetShaders();
 	for(auto &pair : shaders)
 		pair.second->Initialize(true);
@@ -987,13 +986,14 @@ void CEngine::Close()
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
 	c_engine = nullptr;
-	pragma::RenderContext::Close();
+	pragma::RenderContext::Release();
 
 	Engine::Close();
 }
 
 void CEngine::OnClose()
 {
+	pragma::RenderContext::OnClose();
 	// Clear all Vulkan resources before closing the context
 	m_stagingRenderTarget = nullptr;
 	m_gpuProfiler = {};
@@ -1049,7 +1049,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 
 	// Change swapchain image layout to TransferDst
 	prosper::util::ImageSubresourceRange subresourceRange {0,1,0,1};
-	auto *universal_queue_ptr = m_devicePtr->get_universal_queue(0);
+	auto queueFamilyIndex = prosper::util::get_universal_queue_family_index(GetRenderContext());
 
 	{
 
@@ -1059,16 +1059,16 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		imgBarrierInfo.oldLayout = prosper::ImageLayout::Undefined;
 		imgBarrierInfo.newLayout = prosper::ImageLayout::TransferDstOptimal;
 		imgBarrierInfo.subresourceRange = subresourceRange;
-		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = universal_queue_ptr->get_queue_family_index();
+		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = queueFamilyIndex;
 
 		prosper::util::PipelineBarrierInfo barrierInfo {};
 		barrierInfo.srcStageMask = prosper::PipelineStageFlags::TopOfPipeBit;
 		barrierInfo.dstStageMask = prosper::PipelineStageFlags::TransferBit;
-		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
+		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetRenderContext().GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
 		drawCmd.RecordPipelineBarrier(barrierInfo);
 	}
 
-	drawCmd.RecordBlitImage({},finalImg,*GetSwapchainImage(n_current_swapchain_image));
+	drawCmd.RecordBlitImage({},finalImg,*GetRenderContext().GetSwapchainImage(n_current_swapchain_image));
 
 	/* Change the swap-chain image's layout to presentable */
 	{
@@ -1078,12 +1078,12 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		imgBarrierInfo.oldLayout = prosper::ImageLayout::TransferDstOptimal;
 		imgBarrierInfo.newLayout = prosper::ImageLayout::PresentSrcKHR;
 		imgBarrierInfo.subresourceRange = subresourceRange;
-		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = universal_queue_ptr->get_queue_family_index();
+		imgBarrierInfo.srcQueueFamilyIndex = imgBarrierInfo.dstQueueFamilyIndex = queueFamilyIndex;
 
 		prosper::util::PipelineBarrierInfo barrierInfo {};
 		barrierInfo.srcStageMask = prosper::PipelineStageFlags::TransferBit;
 		barrierInfo.dstStageMask = prosper::PipelineStageFlags::AllCommandsBit;
-		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
+		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetRenderContext().GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
 		drawCmd.RecordPipelineBarrier(barrierInfo);
 	}
 	///
@@ -1171,7 +1171,7 @@ void CEngine::Think()
 	if(GetWindow().ShouldClose())
 		ShutDown();
 
-	EndFrame();
+	GetRenderContext().EndFrame();
 }
 
 void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime)
@@ -1225,7 +1225,7 @@ void CEngine::UseFullbrightShader(bool b) {umath::set_flag(m_stateFlags,StateFla
 
 void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 {
-	prosper::IPrContext::OnResolutionChanged(width,height);
+	RenderContext::OnResolutionChanged(width,height);
 	if(m_renderResolution.has_value() == false)
 		OnRenderResolutionChanged(width,height);
 }

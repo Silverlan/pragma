@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -110,7 +111,7 @@ bool ShaderFlat::BindMaterial(CMaterial &mat)
 		return false;
 	return RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),DESCRIPTOR_SET_MATERIAL.setIndex);
 }
-void ShaderFlat::InitializeGfxPipeline(Anvil::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

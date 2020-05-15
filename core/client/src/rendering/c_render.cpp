@@ -249,7 +249,7 @@ void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCm
 	if(renderer && renderer->IsRasterizationRenderer())
 	{
 		//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-		auto frame = c_engine->GetLastFrameId();
+		auto frame = c_engine->GetRenderContext().GetLastFrameId();
 		if(frame > 0)
 			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
 		//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO

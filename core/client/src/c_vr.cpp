@@ -153,7 +153,7 @@ static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pro
 	WGUI::GetInstance().Think();
 
 	auto extents = rt.GetTexture().GetImage().GetExtents();
-	vk::ClearValue clearVal {vk::ClearDepthStencilValue{1.f}};
+	prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
 	if(drawCmd->RecordBeginRenderPass(rt,&clearVal) == false)
 		return;
 

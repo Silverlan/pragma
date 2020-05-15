@@ -30,7 +30,7 @@ namespace pragma
 		ShaderCalcImageColor(prosper::IPrContext &context,const std::string &identifier);
 		bool Compute(prosper::IDescriptorSet &descSetTexture,prosper::IDescriptorSet &descSetColor,uint32_t sampleCount);
 	protected:
-		virtual void InitializeComputePipeline(Anvil::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeComputePipeline(prosper::ComputePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
 

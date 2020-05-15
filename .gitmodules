@@ -28,9 +28,6 @@
 [submodule "external_libs/prosper"]
 	path = external_libs/prosper
 	url = https://github.com/Silverlan/prosper.git
-[submodule "external_libs/util_bsp"]
-	path = external_libs/util_bsp
-	url = https://github.com/Silverlan/util_bsp.git
 [submodule "external_libs/util_fgd"]
 	path = external_libs/util_fgd
 	url = https://github.com/Silverlan/util_fgd.git

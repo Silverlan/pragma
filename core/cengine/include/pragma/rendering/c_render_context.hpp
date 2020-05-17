@@ -18,6 +18,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
+namespace util {class Library;};
 namespace pragma
 {
 	class DLLCENGINE RenderContext
@@ -40,6 +41,7 @@ namespace pragma
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer(uint32_t swapchainIdx) const;
 		void FlushSetupCommandBuffer();
 		
+		void InitializeRenderAPI();
 		void SetWindowedMode(bool b);
 		void SetRefreshRate(uint32_t rate);
 		void SetNoBorder(bool b);
@@ -47,6 +49,8 @@ namespace pragma
 		void SetMonitor(GLFW::Monitor &monitor);
 		void SetPresentMode(prosper::PresentModeKHR presentMode);
 		float GetAspectRatio() const;
+		void SetRenderAPI(const std::string &renderAPI);
+		const std::string &GetRenderAPI() const;
 	protected:
 		void UpdateWindow();
 		virtual void OnClose();
@@ -54,9 +58,9 @@ namespace pragma
 		virtual void OnWindowInitialized();
 		virtual void OnResolutionChanged(uint32_t w,uint32_t h);
 		virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx);
-		virtual void ValidationCallback(
+		void ValidationCallback(
 			prosper::DebugMessageSeverityFlags severityFlags,
-			const char *message
+			const std::string &message
 		);
 	private:
 		struct WindowChangeInfo
@@ -74,7 +78,9 @@ namespace pragma
 		std::unique_ptr<WindowChangeInfo> m_scheduledWindowReloadInfo = nullptr;
 		bool m_bWindowedMode = false;
 		float m_aspectRatio = 1.f;
+		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;
+		std::string m_renderAPI = "vulkan";
 	};
 }
 #pragma warning(pop)

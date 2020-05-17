@@ -160,6 +160,14 @@ search_lib_recursive(DEPENDENCY_CLIENTMANAGER_LIBRARY external_libs/networkmanag
 set(DEPENDENCY_PROSPER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_PROSPER_LIBRARY prosper)
 
+set(DEPENDENCY_PROSPER_OPENGL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_opengl/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_PROSPER_OPENGL_LIBRARY prosper_opengl)
+
+set(DEPENDENCY_PROSPER_VULKAN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/include CACHE PATH "Path to include directory.")
+search_lib_recursive_ext(DEPENDENCY_PROSPER_VULKAN_LIBRARY prosper_vulkan)
+
+set(DEPENDENCY_GLAD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_opengl/third_party_libs/glad/include CACHE PATH "Path to include directory.")
+
 set(DEPENDENCY_SHADERINFO_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/shaderinfo/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_SHADERINFO_LIBRARY shaderinfo)
 
@@ -282,8 +290,8 @@ set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freet
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
 
 set(DEPENDENCY_RAPIDXML_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rapidxml CACHE STRING "" FORCE)
-set(DEPENDENCY_GLSLANG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/deps/glslang CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY third_party_libs/anvil/deps/glslang/glslang glslang STATIC)
+set(DEPENDENCY_GLSLANG_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang CACHE STRING "" FORCE)
+search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/glslang glslang STATIC)
 
 set(DEPENDENCY_CURL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_curl/third_party_libs/curl/include CACHE PATH "Path to include directory." FORCE)
 search_lib_recursive(DEPENDENCY_CURL_LIBRARY modules/pr_curl/third_party_libs/curl/lib/${BINARY_PRAGMA_DIR} libcurl_imp)
@@ -298,7 +306,7 @@ set(DEPENDENCY_LUA_INCLUDE ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 
 if(UNIX)
 	set(VULKAN_SDK "" CACHE PATH "Path to Vulkan SDK.")
-	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY third_party_libs/anvil/deps/glslang/glslang/OSDependent/Unix OSDependent STATIC)
+	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/glslang/OSDependent/Unix OSDependent STATIC)
 else()
 	set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE INTERNAL "Path to Vulkan SDK.")
 endif()
@@ -307,11 +315,11 @@ set(DEPENDENCY_VULKAN_INCLUDE "${VULKAN_SDK}/Include" CACHE PATH "Path to includ
 if(WIN32)
 	search_lib_recursive(DEPENDENCY_SPIRV_TOOLS_LIBRARY third_party_libs/vulkan/spirv-tools/source/${BINARY_PRAGMA_DIR} SPIRV-Tools)
 	search_lib_recursive(DEPENDENCY_SPIRV_TOOLS_OPT_LIBRARY third_party_libs/vulkan/spirv-tools/source/opt/${BINARY_PRAGMA_DIR} SPIRV-Tools-opt)
-	search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY third_party_libs/anvil/deps/glslang/glslang/${BINARY_PRAGMA_DIR} glslang)
-	search_lib_recursive(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY third_party_libs/anvil/deps/glslang/OGLCompilersDLL/${BINARY_PRAGMA_DIR} OGLCompiler)
-	search_lib_recursive(DEPENDENCY_SPIRV_LIBRARY third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPIRV)
-	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY third_party_libs/anvil/deps/glslang/glslang/OSDependent/Windows/${BINARY_PRAGMA_DIR} OSDependent)
-	search_lib_recursive(DEPENDENCY_SPV_REMAPPER_LIBRARY third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPVRemapper)
+	search_lib_recursive(DEPENDENCY_GLSLANG_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/glslang/${BINARY_PRAGMA_DIR} glslang)
+	search_lib_recursive(DEPENDENCY_GLSLANG_OGL_COMPILER_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/OGLCompilersDLL/${BINARY_PRAGMA_DIR} OGLCompiler)
+	search_lib_recursive(DEPENDENCY_SPIRV_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPIRV)
+	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/glslang/OSDependent/Windows/${BINARY_PRAGMA_DIR} OSDependent)
+	search_lib_recursive(DEPENDENCY_SPV_REMAPPER_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/SPIRV/${BINARY_PRAGMA_DIR} SPVRemapper)
 	# search_lib_recursive(DEPENDENCY_HLSL_LIBRARY "${VULKAN_SDK}/glslang/${BINARY_PRAGMA_DIR}/hlsl/${BINARY_PRAGMA_DIR}/HLSL")
 
 	search_lib_recursive_full(DEPENDENCY_VULKAN_LIBRARY "${VULKAN_SDK}/Lib/vulkan-1")
@@ -341,9 +349,9 @@ else()
 endif()
 search_lib_recursive(DEPENDENCY_GLFW_LIBRARY third_party_libs/glfw/src/${BINARY_PRAGMA_DIR} ${GLFW_LIB_NAME})
 
-set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
-set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_ANVIL_LIBRARY third_party_libs/anvil/${BINARY_PRAGMA_DIR} Anvil STATIC)
+set(DEPENDENCY_ANVIL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
+set(DEPENDENCY_ANVIL_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/external_libs/prosper_vulkan/third_party_libs/anvil/include CACHE PATH "Path to include directory.")
+search_lib_recursive(DEPENDENCY_ANVIL_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/${BINARY_PRAGMA_DIR} Anvil STATIC)
 
 set(DEPENDENCY_CLIP2TRI_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/clip2tri CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_CLIP2TRI_LIBRARY third_party_libs/clip2tri/${BINARY_PRAGMA_DIR} clip2tri-static STATIC)
@@ -945,15 +953,15 @@ set_target_properties(varispeed-play PROPERTIES FOLDER third_party_libs/libsampl
 #
 
 # anvil
-# set(ANVIL_INCLUDE_XCB_WINDOW_SYSTEM_SUPPORT OFF CACHE BOOL OFF FORCE)
-set(ANVIL_LINK_STATICALLY_WITH_VULKAN_LIB ON CACHE BOOL ON FORCE)
-set(ANVIL_USE_BUILT_IN_VULKAN_HEADERS OFF CACHE BOOL OFF FORCE)
-set(ENABLE_HLSL ON CACHE BOOL ".." FORCE)
-set(SKIP_GLSLANG_INSTALL ON CACHE BOOL ON FORCE)
-set(VULKAN_LIBRARY ${DEPENDENCY_VULKAN_LIBRARY} CACHE PATH "" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
-register_third_party_library(anvil)
-set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
+## set(ANVIL_INCLUDE_XCB_WINDOW_SYSTEM_SUPPORT OFF CACHE BOOL OFF FORCE)
+# set(ANVIL_LINK_STATICALLY_WITH_VULKAN_LIB ON CACHE BOOL ON FORCE)
+# set(ANVIL_USE_BUILT_IN_VULKAN_HEADERS OFF CACHE BOOL OFF FORCE)
+# set(ENABLE_HLSL ON CACHE BOOL ".." FORCE)
+# set(SKIP_GLSLANG_INSTALL ON CACHE BOOL ON FORCE)
+# set(VULKAN_LIBRARY ${DEPENDENCY_VULKAN_LIBRARY} CACHE PATH "" FORCE)
+# set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
+# register_third_party_library(anvil)
+# set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 set_target_properties(Anvil PROPERTIES FOLDER third_party_libs/anvil)
 set_target_properties(glslangValidator PROPERTIES FOLDER third_party_libs/anvil/tools)
 set_target_properties(spirv-remap PROPERTIES FOLDER third_party_libs/anvil/tools)
@@ -1134,10 +1142,10 @@ add_dependencies(luasystem vfilesystem luabind)
 add_dependencies(materialsystem datasystem util_image png VTFLib13)
 add_dependencies(iglfw glfw)
 add_dependencies(iglfw vfilesystem)
-add_dependencies(prosper vfilesystem iglfw Anvil util_image SPIRV SPIRV-Tools OSDependent OGLCompiler SPIRV-Tools-opt SPVRemapper glslang)
+add_dependencies(prosper vfilesystem iglfw util_image)
 
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
-add_dependencies(wgui cmaterialsystem freetype glslang util_formatted_text)
+add_dependencies(wgui cmaterialsystem freetype util_formatted_text)
 
 if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)
 	add_dependencies(alsoundsystem OpenAL)

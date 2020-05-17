@@ -7,24 +7,35 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/rendering/c_render_context.hpp"
+#include "pragma/rendering/render_apis.hpp"
 #include <prosper_util.hpp>
 #include <debug/prosper_debug.hpp>
 #include <shader/prosper_shader.hpp>
 #include <sharedutils/util_library.hpp>
+#include <pragma/util/util_module.hpp>
 
 using namespace pragma;
 #pragma optimize("",off)
 RenderContext::RenderContext()
 	: m_bWindowedMode(true),m_monitor(nullptr),m_aspectRatio(1.f)
+{}
+RenderContext::~RenderContext()
 {
-	// TODO
+	m_graphicsAPILib = nullptr;
+}
+void RenderContext::InitializeRenderAPI()
+{
+	auto &renderAPI = GetRenderAPI();
+	auto location = pragma::rendering::get_graphics_api_module_location(renderAPI);
+	auto modulePath = util::get_normalized_module_path(location);
+	auto &lib = (m_graphicsAPILib = util::load_library_module(modulePath,util::get_default_additional_library_search_directories(modulePath)));
+
 	std::string err;
-	auto lib = util::Library::Load("E:\\projects\\pragma\\build_winx64\\output\\modules\\graphics\\vulkan\\prosper_vulkan.dll",{""},&err);
 	if(lib != nullptr)
 	{
 		auto fInitRenderAPI = lib->FindSymbolAddress<bool(*)(const std::string&,bool,std::shared_ptr<prosper::IPrContext>&,std::string&)>("initialize_render_api");
 		if(fInitRenderAPI == nullptr)
-			err = "Symbol 'initialize_render_api' not found in Prosper library!";
+			err = "Symbol 'initialize_render_api' not found in library '" +location +"'!";
 		else
 		{
 			std::string errMsg;
@@ -37,7 +48,7 @@ RenderContext::RenderContext()
 		throw std::runtime_error{"Unable to load Vulkan implementation library for Prosper: " +err +"!"};
 
 	prosper::Callbacks callbacks {};
-	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags,const char *message) {
+	callbacks.validationCallback = [this](prosper::DebugMessageSeverityFlags severityFlags,const std::string &message) {
 		ValidationCallback(severityFlags,message);
 	};
 	callbacks.onWindowInitialized = [this]() {OnWindowInitialized();};
@@ -52,14 +63,12 @@ RenderContext::RenderContext()
 		Con::cwar<<"Shader Stage: "<<prosper::util::to_string(stage)<<Con::endl;
 		Con::cwar<<infoLog<<Con::endl<<Con::endl;
 		Con::cwar<<debugInfoLog<<Con::endl;
-	});
+		});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType,const std::string &msg) {
 		Con::cerr<<"[VK] "<<msg<<Con::endl;
-	});
+		});
 	GLFW::initialize();
 }
-RenderContext::~RenderContext()
-{}
 void RenderContext::Release()
 {
 	if(m_renderContext == nullptr)
@@ -86,7 +95,7 @@ const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCom
 void RenderContext::FlushSetupCommandBuffer() {GetRenderContext().FlushSetupCommandBuffer();}
 void RenderContext::ValidationCallback(
 	prosper::DebugMessageSeverityFlags severityFlags,
-	const char *message
+	const std::string &message
 )
 {
 	if((severityFlags &prosper::DebugMessageSeverityFlags::ErrorBit) != prosper::DebugMessageSeverityFlags::None)
@@ -200,4 +209,6 @@ void RenderContext::SetResolution(const Vector2i &sz)
 	changeInfo.height = sz.y;
 }
 float RenderContext::GetAspectRatio() const {return m_aspectRatio;}
+void RenderContext::SetRenderAPI(const std::string &renderAPI) {m_renderAPI = renderAPI;}
+const std::string &RenderContext::GetRenderAPI() const {return m_renderAPI;}
 #pragma optimize("",on)

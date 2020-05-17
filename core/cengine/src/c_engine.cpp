@@ -476,6 +476,24 @@ bool CEngine::Initialize(int argc,char *argv[])
 	Engine::Initialize(argc,argv,false);
 
 	auto &cmds = *m_preloadedConfig.get();
+
+	auto *cviRenderAPI = cmds.find("render_api");
+	if(cviRenderAPI && cviRenderAPI->argv.empty() == false)
+		SetRenderAPI(cviRenderAPI->argv.front());
+
+	// Initialize Window context
+	try
+	{
+		InitializeRenderAPI();
+	}
+	catch(const std::runtime_error &err)
+	{
+		Con::cerr<<"ERROR: Unable to initialize graphics API: "<<err.what()<<Con::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		Close();
+		return false;
+	}
+
 	auto res = cmds.find("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
@@ -550,7 +568,6 @@ bool CEngine::Initialize(int argc,char *argv[])
 	}
 	contextCreateInfo.presentMode = presentMode;
 
-	// Initialize Window context
 	GetRenderContext().Initialize(contextCreateInfo);
 
 	auto &shaderManager = GetRenderContext().GetShaderManager();

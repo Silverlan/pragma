@@ -15,3 +15,5 @@ build_info/
 modules/pr_spiral_knights/
 modules/pr_source/src/source2/model.cpp
 modules/pr_source/
+modules/pr_mmd/
+modules/pr_steamworks/

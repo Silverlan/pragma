@@ -165,7 +165,7 @@ namespace Lua
 			DLLCLIENT void GetMinLod(lua_State *l,Sampler &hSampler);
 			DLLCLIENT void GetMaxLod(lua_State *l,Sampler &hSampler);
 			DLLCLIENT void GetBorderColor(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler);
+			// DLLCLIENT void GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler);
 			DLLCLIENT void SetMagFilter(lua_State *l,Sampler &hSampler,int32_t magFilter);
 			DLLCLIENT void SetMinFilter(lua_State *l,Sampler &hSampler,int32_t minFilter);
 			DLLCLIENT void SetMipmapMode(lua_State *l,Sampler &hSampler,int32_t mipmapMode);
@@ -180,7 +180,7 @@ namespace Lua
 			DLLCLIENT void SetMinLod(lua_State *l,Sampler &hSampler,float minLod);
 			DLLCLIENT void SetMaxLod(lua_State *l,Sampler &hSampler,float maxLod);
 			DLLCLIENT void SetBorderColor(lua_State *l,Sampler &hSampler,int32_t borderColor);
-			DLLCLIENT void SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates);
+			// DLLCLIENT void SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates);
 		};
 		namespace VKFramebuffer
 		{
@@ -266,8 +266,8 @@ namespace Lua
 			DLLCLIENT void RecordBeginRenderPass(lua_State *l,CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo);
 			DLLCLIENT void RecordEndRenderPass(lua_State *l,CommandBuffer &hCommandBuffer);
 			DLLCLIENT void RecordBindIndexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &indexBuffer,uint32_t indexType,uint32_t offset);
-			DLLCLIENT void RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset);
-			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets);
+			DLLCLIENT void RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics&,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset);
+			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics&,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets);
 			DLLCLIENT void RecordCopyImageToBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,uint32_t srcImageLayout,Buffer &bufDst,const prosper::util::BufferImageCopyInfo &copyInfo);
 			//DLLCLIENT void RecordDispatch(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t x,uint32_t y,uint32_t z);
 			//DLLCLIENT void RecordDispatchIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset);
@@ -1862,7 +1862,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defSamplerCreateInfo.def_readwrite("minLod",&prosper::util::SamplerCreateInfo::minLod);
 	defSamplerCreateInfo.def_readwrite("maxLod",&prosper::util::SamplerCreateInfo::maxLod);
 	defSamplerCreateInfo.def_readwrite("borderColor",reinterpret_cast<uint32_t prosper::util::SamplerCreateInfo::*>(&prosper::util::SamplerCreateInfo::borderColor));
-	defSamplerCreateInfo.def_readwrite("useUnnormalizedCoordinates",&prosper::util::SamplerCreateInfo::useUnnormalizedCoordinates);
+	// defSamplerCreateInfo.def_readwrite("useUnnormalizedCoordinates",&prosper::util::SamplerCreateInfo::useUnnormalizedCoordinates);
 	vulkanMod[defSamplerCreateInfo];
 
 	auto defTextureCreateInfo = luabind::class_<prosper::util::TextureCreateInfo>("TextureCreateInfo");
@@ -2142,7 +2142,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkSampler.def("GetMinLod",&Lua::Vulkan::VKSampler::GetMinLod);
 	defVkSampler.def("GetMaxLod",&Lua::Vulkan::VKSampler::GetMaxLod);
 	defVkSampler.def("GetBorderColor",&Lua::Vulkan::VKSampler::GetBorderColor);
-	defVkSampler.def("GetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::GetUseUnnormalizedCoordinates);
+	// defVkSampler.def("GetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::GetUseUnnormalizedCoordinates);
 	defVkSampler.def("SetMagFilter",&Lua::Vulkan::VKSampler::SetMagFilter);
 	defVkSampler.def("SetMinFilter",&Lua::Vulkan::VKSampler::SetMinFilter);
 	defVkSampler.def("SetMipmapMode",&Lua::Vulkan::VKSampler::SetMipmapMode);
@@ -2157,7 +2157,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkSampler.def("SetMinLod",&Lua::Vulkan::VKSampler::SetMinLod);
 	defVkSampler.def("SetMaxLod",&Lua::Vulkan::VKSampler::SetMaxLod);
 	defVkSampler.def("SetBorderColor",&Lua::Vulkan::VKSampler::SetBorderColor);
-	defVkSampler.def("SetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates);
+	// defVkSampler.def("SetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates);
 	defVkSampler.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&,const std::string&)>([](lua_State *l,Lua::Vulkan::Sampler &smp,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Sampler>(l,smp,name,&Lua::Check<Lua::Vulkan::Sampler>);
 	}));
@@ -2264,18 +2264,18 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(l,hCommandBuffer,indexBuffer,indexType,0u);
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffer",&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer);
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &vertexBuffer,uint32_t startBinding) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,vertexBuffer,startBinding,0u);
+	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer,uint32_t startBinding) {
+		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,startBinding,0u);
 	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &vertexBuffer) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,vertexBuffer,0u,0u);
+	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer) {
+		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffers",&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers);
-	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,luabind::object,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,luabind::object vertexBuffers,uint32_t startBinding) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,vertexBuffers,startBinding,{});
+	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,luabind::object,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers,uint32_t startBinding) {
+		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,graphics,vertexBuffers,startBinding,{});
 	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,luabind::object)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,luabind::object vertexBuffers) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,vertexBuffers,0u,{});
+	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,luabind::object)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers) {
+		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,graphics,vertexBuffers,0u,{});
 	}));
 	defVkCommandBuffer.def("RecordCopyImageToBuffer",&Lua::Vulkan::VKCommandBuffer::RecordCopyImageToBuffer);
 #if 0
@@ -2808,10 +2808,12 @@ void Lua::Vulkan::VKSampler::GetBorderColor(lua_State *l,Sampler &hSampler)
 {
 	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetBorderColor()));
 }
+#if 0
 void Lua::Vulkan::VKSampler::GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler)
 {
 	Lua::PushBool(l,hSampler.GetUseUnnormalizedCoordinates());
 }
+#endif
 void Lua::Vulkan::VKSampler::SetMagFilter(lua_State *l,Sampler &hSampler,int32_t magFilter)
 {
 	hSampler.SetMagFilter(static_cast<prosper::Filter>(magFilter));
@@ -2868,10 +2870,12 @@ void Lua::Vulkan::VKSampler::SetBorderColor(lua_State *l,Sampler &hSampler,int32
 {
 	hSampler.SetBorderColor(static_cast<prosper::BorderColor>(borderColor));
 }
+#if 0
 void Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates)
 {
 	hSampler.SetUseUnnormalizedCoordinates(bUnnormalizedCoordinates);
 }
+#endif
 
 /////////////////////////////////
 
@@ -3154,11 +3158,11 @@ void Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(lua_State *l,CommandBuf
 {
 	Lua::PushBool(l,hCommandBuffer.RecordBindIndexBuffer(indexBuffer,static_cast<prosper::IndexType>(indexType),offset));
 }
-void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset)
+void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset)
 {
-	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers({&vertexBuffer},startBinding,{static_cast<uint64_t>(offset)}));
+	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers(graphics,{&vertexBuffer},startBinding,{static_cast<uint64_t>(offset)}));
 }
-void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets)
+void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets)
 {
 	auto buffers = Lua::get_table_values<prosper::IBuffer*>(l,2,[](lua_State *l,int32_t idx) {
 		return &Lua::Check<Buffer>(l,idx);
@@ -3173,7 +3177,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(lua_State *l,CommandB
 	}
 	else
 		voffsets.resize(buffers.size(),0ull);
-	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers(buffers,startBinding,voffsets));
+	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers(graphics,buffers,startBinding,voffsets));
 }
 void Lua::Vulkan::VKCommandBuffer::RecordCopyImageToBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,uint32_t srcImageLayout,Buffer &bufDst,const prosper::util::BufferImageCopyInfo &copyInfo)
 {

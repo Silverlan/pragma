@@ -29,6 +29,7 @@
 #include <luainterface.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
+#include <pragma/util/util_module.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include <wv_steamworks.hpp>
@@ -495,63 +496,14 @@ bool NetworkState::RunConsoleCommand(std::string scmd,std::vector<std::string> &
 	return true;
 }
 
-static std::string get_library_name(const NetworkState *nw,const std::string &lib)
-{
-	auto r = FileManager::GetCanonicalizedPath(lib);
-	std::replace(r.begin(),r.end(),'\\','/');
-	if(ustring::substr(r,0,8) != "modules/")
-		r = "modules/" +r;
-	std::string ext;
-	if(ufile::get_extension(r,&ext))
-		return r;
-#ifdef _WIN32
-	r += ".dll";
-#else
-	r += ".so";
-#endif
-	auto brLast = r.find_last_of("\\/");
-	auto fGetFileName = [&brLast](const std::string &name,std::string &outName,const std::string &prefixRepl="") -> bool {
-		auto r = name;
-		auto prefix = r.substr(brLast +1,3);
-		if(prefix != prefixRepl)
-			r = r.substr(0,brLast +1) +prefixRepl +r.substr(brLast +1,r.length());
-		outName = r;
-		std::replace(outName.begin(),outName.end(),'\\','/');
-		return FileManager::Exists(outName);
-	};
-	std::string outName;
-	if(
-		fGetFileName(r,outName) == false &&
-		(nw->IsClient() == false || fGetFileName(r,outName,"cl_") == false) &&
-		(nw->IsServer() == false || fGetFileName(r,outName,"sv_") == false)
-#ifdef __linux__
-		&&
-		fGetFileName(r,outName,"lib") == false &&
-		(nw->IsClient() == false || fGetFileName(r,outName,"libcl_") == false) &&
-		(nw->IsServer() == false || fGetFileName(r,outName,"libsv_") == false)
-#endif
-	)
-	{
-		fGetFileName(r,outName);
-	}
-	return outName;
-}
-
 std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::string *err)
 {
-	auto libPath = get_library_name(this,lib);
-	std::string lpath;
-	if(FileManager::FindAbsolutePath(libPath,lpath) == false)
-		lpath = libPath;
-#ifdef __linux__
-	std::replace(lpath.begin(),lpath.end(),'\\','/');
-#endif
-	return util::Library::Load(lpath,additionalSearchDirectories,err);
+	return util::load_library_module(lib,additionalSearchDirectories,err);
 }
 
 std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string &library) const
 {
-	auto lib = get_library_name(this,library);
+	auto lib = util::get_normalized_module_path(library,IsClient());
 	auto it = s_loadedLibraries.find(lib);
 	if(it == s_loadedLibraries.end())
 		return nullptr;
@@ -590,24 +542,14 @@ std::shared_ptr<util::Library> NetworkState::InitializeLibrary(std::string libra
 {
 	if(l == nullptr)
 		l = GetLuaState();
-	auto libAbs = get_library_name(this,library);
+	auto libAbs = util::get_normalized_module_path(library,IsClient());
 	auto brLast = libAbs.find_last_of('\\');
 
 	std::shared_ptr<util::Library> dllHandle = nullptr;
 	auto it = s_loadedLibraries.find(libAbs);
 	if(it == s_loadedLibraries.end())
 	{
-		auto programPath = FileManager::GetProgramPath();
-#ifdef _WIN32
-		auto pathBin = programPath +"\\bin";
-#else
-		auto pathBin = programPath +"\\lib";
-#endif
-		auto pathModules = programPath +std::string("\\") +libAbs.substr(0,brLast);
-		std::vector<std::string> additionalSearchDirectories = {
-			pathBin,
-			pathModules
-		};
+		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(libAbs);
 		dllHandle = LoadLibraryModule(libAbs.substr(8),additionalSearchDirectories,err);
 		m_lastModuleHandle = dllHandle;
 		if(dllHandle != NULL)

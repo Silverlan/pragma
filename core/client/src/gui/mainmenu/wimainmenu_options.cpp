@@ -20,6 +20,7 @@
 #include "pragma/gui/wimessagebox.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"
+#include "pragma/rendering/render_apis.hpp"
 #include "pragma/localization.h"
 #include <sharedutils/util_string.h>
 #include "pragma/rendering/c_settings.hpp"
@@ -632,6 +633,12 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Supersampling
 	// TODO
+	//
+	// Graphics API
+	std::unordered_map<std::string,std::string> graphicsAPIs {};
+	for(auto &api : pragma::rendering::get_available_graphics_apis())
+		graphicsAPIs.insert(std::make_pair(Locale::GetText("graphics_api_" +api),api));
+	auto *pGraphicsAPIList = pList->AddDropDownMenu(Locale::GetText("graphics_api"),graphicsAPIs,"render_api");
 	//
 	// Display
 	WIDropDownMenu *display = pList->AddDropDownMenu(Locale::GetText("monitor"),[](WIDropDownMenu *pMenu) {

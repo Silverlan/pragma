@@ -9,8 +9,9 @@
 #include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include <prosper_command_buffer.hpp>
 #include <luasystem.h>
-
 
 
 extern DLLCENGINE CEngine *c_engine;
@@ -136,6 +137,12 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	defPt.def("GetPosition",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::Push<Vector3>(l,pt.GetPosition());
 	}));
+	defPt.def("SetPreviousPosition",static_cast<void(*)(lua_State*,::CParticle&,const Vector3&)>([](lua_State *l,::CParticle &pt,const Vector3 &prevPos) {
+		pt.SetPrevPos(prevPos);
+	}));
+	defPt.def("GetPreviousPosition",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::Push<Vector3>(l,pt.GetPrevPos());
+	}));
 	defPt.def("GetVelocity",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::Push<Vector3>(l,pt.GetVelocity());
 	}));
@@ -143,7 +150,10 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 		Lua::Push<Vector3>(l,pt.GetAngularVelocity());
 	}));
 	defPt.def("GetColor",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
-		Lua::Push<Color>(l,pt.GetColor());
+		Lua::Push<Vector4>(l,pt.GetColor());
+	}));
+	defPt.def("GetAlpha",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetColor().a);
 	}));
 	defPt.def("GetLife",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::PushNumber(l,pt.GetLife());
@@ -163,8 +173,12 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	defPt.def("SetTimeCreated",static_cast<void(*)(lua_State*,::CParticle&,float)>([](lua_State *l,::CParticle &pt,float time) {
 		pt.SetTimeCreated(time);
 	}));
-	defPt.def("SetColor",static_cast<void(*)(lua_State*,::CParticle&,const Color&)>([](lua_State *l,::CParticle &pt,const Color &color) {
+	defPt.def("SetColor",static_cast<void(*)(lua_State*,::CParticle&,const Vector4&)>([](lua_State *l,::CParticle &pt,const Vector4 &color) {
 		pt.SetColor(color);
+	}));
+	defPt.def("SetAlpha",static_cast<void(*)(lua_State*,::CParticle&,float)>([](lua_State *l,::CParticle &pt,float a) {
+		auto &col = pt.GetColor();
+		col.a = a;
 	}));
 	defPt.def("SetPosition",static_cast<void(*)(lua_State*,::CParticle&,const Vector3&)>([](lua_State *l,::CParticle &pt,const Vector3 &pos) {
 		pt.SetPosition(pos);
@@ -247,6 +261,28 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	defPt.def("CalcRandomFloat",static_cast<void(*)(lua_State*,::CParticle&,float,float,uint32_t)>([](lua_State *l,::CParticle &pt,float min,float max,uint32_t seed) {
 		Lua::PushInt(l,pt.PseudoRandomReal(min,max,seed));
 	}));
+
+	defPt.def("GetInitialRadius",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialRadius());
+	}));
+	defPt.def("GetInitialLength",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialLength());
+	}));
+	defPt.def("GetInitialRotation",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialRotation());
+	}));
+	defPt.def("GetInitialLife",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialLife());
+	}));
+	defPt.def("GetInitialColor",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::Push<Vector4>(l,pt.GetInitialColor());
+	}));
+	defPt.def("GetInitialAlpha",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialColor().a);
+	}));
+	defPt.def("GetInitialAnimationFrameOffset",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetInitialFrameOffset());
+	}));
 	defPtc.scope[defPt];
 }
 void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc)
@@ -323,6 +359,7 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	defPtRendererBase.def("OnParticleSystemStopped",&CParticleRendererLua::Lua_OnParticleSystemStopped,&CParticleRendererLua::Lua_default_OnParticleSystemStopped);
 	defPtRendererBase.def("OnParticleCreated",&CParticleRendererLua::Lua_OnParticleCreated,&CParticleRendererLua::Lua_default_OnParticleCreated);
 	defPtRendererBase.def("OnParticleDestroyed",&CParticleRendererLua::Lua_OnParticleDestroyed,&CParticleRendererLua::Lua_default_OnParticleDestroyed);
+	defPtRendererBase.def("Render",&CParticleRendererLua::Lua_Render,&CParticleRendererLua::Lua_default_Render);
 	defPtc.scope[defPtRendererBase];
 }
 #pragma optimize("",on)

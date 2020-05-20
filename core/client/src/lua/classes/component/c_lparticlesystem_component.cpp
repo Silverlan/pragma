@@ -226,6 +226,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		hComponent.get()->AddChild(*hChild);
 		}));
 	defCParticleSystem.def("SetNodeTarget",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,EntityHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t nodeId,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetNodeTarget(nodeId,static_cast<CBaseEntity*>(hEnt.get()));
 		}));
@@ -376,7 +377,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto idx = 1u;
 		for(auto &hChild : children)
 		{
-			if(hChild.expired())
+			if(hChild.child.expired())
 				continue;
 			Lua::PushInt(l,idx++);
 			Lua::Push(l,hChild);
@@ -483,13 +484,6 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,hParent->GetHandle());
 		}));
-	defCParticleSystem.def("GetVertexBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		auto &vertexBuffer = hComponent->GetVertexBuffer();
-		if(vertexBuffer == nullptr)
-			return;
-		Lua::Push(l,vertexBuffer);
-		}));
 	defCParticleSystem.def("GetParticleBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		auto &particleBuffer = hComponent->GetParticleBuffer();
@@ -537,6 +531,37 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.def("InitializeFromParticleSystemDefinition",static_cast<void(*)(lua_State*,CParticleSystemHandle&,const std::string&)>([](lua_State *l,CParticleSystemHandle &hComponent,const std::string &name) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushBool(l,hComponent->SetupParticleSystem(name));
+	}));
+	defCParticleSystem.def("SetControlPointEntity",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,EntityHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetControlPointEntity(cpIdx,static_cast<CBaseEntity&>(*hEnt.get()));
+	}));
+	defCParticleSystem.def("SetControlPointPosition",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const Vector3&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const Vector3 &pos) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetControlPointPosition(cpIdx,pos);
+	}));
+	defCParticleSystem.def("SetControlPointRotation",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const Quat&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const Quat &rot) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetControlPointRotation(cpIdx,rot);
+	}));
+	defCParticleSystem.def("SetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const pragma::physics::Transform&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const pragma::physics::Transform &pose) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetControlPointPose(cpIdx,pose);
+	}));
+	defCParticleSystem.def("GetControlPointEntity",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *ent = hComponent->GetControlPointEntity(cpIdx);
+		if(ent == nullptr)
+			return;
+		ent->GetLuaObject()->push(l);
+	}));
+	defCParticleSystem.def("GetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx) {
+		pragma::Lua::check_component(l,hComponent);
+		auto pose = hComponent->GetControlPointPose(cpIdx);
+		if(pose.has_value() == false)
+			return;
+		Lua::Push(l,*pose);
 	}));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Aligned));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Upright));

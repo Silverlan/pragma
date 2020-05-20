@@ -316,6 +316,18 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
 	classDefRasterizationRenderer.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
 	classDefRasterizationRenderer.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
+	classDefRasterizationRenderer.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto *ds = renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
+		if(ds == nullptr)
+			return;
+		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
+	}));
+	classDefRasterizationRenderer.def("GetPSSMTextureDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto *ds = renderer.GetCSMDescriptorSet();
+		if(ds == nullptr)
+			return;
+		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
+	}));
 	classDefRasterizationRenderer.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &depthTex = renderer.GetPrepass().textureDepthSampled;
 		if (depthTex == nullptr)

@@ -20,11 +20,9 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_VERTEX) ShaderParticle2DBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX) ShaderParticle2DBase::VERTEX_ATTRIBUTE_VERTEX = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32_SFloat};
-
 decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSSCALE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSSCALE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_PARTICLE,prosper::Format::R16G16B16A16_UNorm};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
@@ -61,8 +59,8 @@ ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context,const st
 }
 void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_VERTEX);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PARTICLE);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSSCALE);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PREVPOS);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ROTATION);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LENGTH);
@@ -278,7 +276,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 	auto animStartBuffer = ps.GetAnimationStartBuffer();
 	if(animStartBuffer == nullptr)
 		animStartBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	return RecordBindVertexBuffers({ps.GetVertexBuffer().get(),ps.GetParticleBuffer().get(),animStartBuffer.get()}) == true &&
+	return RecordBindVertexBuffers({ps.GetParticleBuffer().get(),animStartBuffer.get()}) == true &&
 		RecordDraw(pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 }
 

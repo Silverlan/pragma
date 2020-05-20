@@ -93,7 +93,7 @@ bool CParticleSystemComponent::Save(VFilePtrReal &f,const std::vector<CParticleS
 		for(auto it=children.begin();it!=children.end();)
 		{
 			auto &hChild = *it;
-			if(hChild.valid())
+			if(hChild.child.valid())
 			{
 				++it;
 				continue;
@@ -102,7 +102,10 @@ bool CParticleSystemComponent::Save(VFilePtrReal &f,const std::vector<CParticleS
 		}
 		f->Write<unsigned char>(CUInt8(children.size()));
 		for(auto &hChild : children)
-			f->WriteString(hChild->GetParticleSystemName());
+		{
+			f->WriteString(hChild.child->GetParticleSystemName());
+			f->Write<float>(hChild.delay);
+		}
 	}
 	return true;
 }

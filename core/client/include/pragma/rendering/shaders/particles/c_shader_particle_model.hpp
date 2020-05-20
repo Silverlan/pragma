@@ -19,7 +19,8 @@ namespace pragma
 	{
 	public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_PARTICLE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_PARTICLE;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSSCALE;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ROTATION;

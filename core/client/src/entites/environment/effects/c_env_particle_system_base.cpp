@@ -179,7 +179,13 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 			auto &children = data->children;
 			auto numChildren = f->Read<uint8_t>();
 			for(auto i=decltype(numChildren){0};i<numChildren;++i)
-				children.push_back(f->ReadString());
+			{
+				children.push_back({});
+				auto &child = children.back();
+				child.childName = f->ReadString();
+				if(version >= 2)
+					child.delay = f->Read<float>();
+			}
 			s_particleData[name] = std::move(data);
 		}
 	}
@@ -221,7 +227,8 @@ bool CParticleSystemComponent::SetupParticleSystem(std::string fname,CParticleSy
 	// Children have to be initialized before operators (in case some operators need to access the children)
 	for(auto &child : data->children)
 	{
-		auto *pt = Create(child,this,bRecordKeyValues);
+		// TODO: child.delay is currently ignored, implement it!
+		auto *pt = Create(child.childName,this,bRecordKeyValues);
 		if(pt != nullptr)
 			pt->GetEntity().Spawn();
 	}
@@ -274,7 +281,6 @@ decltype(CParticleSystemComponent::VERTEX_COUNT) CParticleSystemComponent::VERTE
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_particleBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animStartBuffer = nullptr;
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_animBuffer = nullptr;
-static std::shared_ptr<prosper::IBuffer> s_vertexBuffer = nullptr;
 const auto PARTICLE_BUFFER_INSTANCE_SIZE = sizeof(CParticleSystemComponent::ParticleData);
 const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
 ::util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
@@ -366,6 +372,10 @@ const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
 		umath::set_flag(m_flags,Flags::MoveWithEmitter | Flags::RotateWithEmitter,::util::to_boolean(value));
 	else if(ustring::compare(key,"auto_simulate"))
 		SetAutoSimulate(::util::to_boolean(value));
+	else if(ustring::compare(key,"bounding_box_min"))
+		m_renderBounds.first = uvec::create(value);
+	else if(ustring::compare(key,"bounding_box_max"))
+		m_renderBounds.second = uvec::create(value);
 	else
 		return ::util::EventReply::Unhandled;
 	return ::util::EventReply::Handled;
@@ -374,14 +384,61 @@ const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
 CParticleSystemComponent::~CParticleSystemComponent()
 {
 	Stop();
-	for(auto &hChild : m_childSystems)
+	for(auto &childInfo : m_childSystems)
 	{
-		if(hChild.valid())
-			hChild->GetEntity().RemoveSafely();
+		if(childInfo.child.expired())
+			continue;
+		childInfo.child->GetEntity().RemoveSafely();
 	}
 }
 
-const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetGlobalVertexBuffer() {return s_vertexBuffer;}
+CParticleSystemComponent::ControlPoint &CParticleSystemComponent::InitializeControlPoint(ControlPointIndex idx)
+{
+	if(idx >= m_controlPoints.size())
+		m_controlPoints.resize(idx +1);
+	return m_controlPoints.at(idx);
+}
+void CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,CBaseEntity &ent)
+{
+	auto &cp = InitializeControlPoint(idx);
+	cp.hEntity = ent.GetHandle();
+}
+void CParticleSystemComponent::SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos)
+{
+	auto &cp = InitializeControlPoint(idx);
+	cp.pose.SetOrigin(pos);
+}
+void CParticleSystemComponent::SetControlPointRotation(ControlPointIndex idx,const Quat &rot)
+{
+	auto &cp = InitializeControlPoint(idx);
+	cp.pose.SetRotation(rot);
+}
+void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose)
+{
+	auto &cp = InitializeControlPoint(idx);
+	cp.pose = pose;
+}
+
+CBaseEntity *CParticleSystemComponent::GetControlPointEntity(ControlPointIndex idx) const
+{
+	if(idx >= m_controlPoints.size())
+		return nullptr;
+	return static_cast<CBaseEntity*>(m_controlPoints.at(idx).hEntity.get());
+}
+std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx) const
+{
+	if(idx >= m_controlPoints.size())
+		return {};
+	auto pose = m_controlPoints.at(idx).pose;
+	auto *ent = GetControlPointEntity(idx);
+	if(ent)
+	{
+		pragma::physics::Transform entPose;
+		ent->GetPose(entPose);
+		pose = entPose *pose;
+	}
+	return pose;
+}
 
 const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &CParticleSystemComponent::GetInitializers() const {return const_cast<CParticleSystemComponent*>(this)->GetInitializers();}
 const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &CParticleSystemComponent::GetOperators() const {return const_cast<CParticleSystemComponent*>(this)->GetOperators();}
@@ -439,23 +496,6 @@ Vector3 CParticleSystemComponent::DirectionToParticleSpace(const Vector3 &p) con
 
 void CParticleSystemComponent::InitializeBuffers()
 {
-	if(s_vertexBuffer == nullptr)
-	{
-		const std::array<Vector2,VERTEX_COUNT> vertices = {
-			Vector2(0.5f,-0.5f),
-			Vector2(-0.5f,-0.5f),
-			Vector2(-0.5f,0.5f),
-			Vector2(0.5f,0.5f),
-			Vector2(0.5f,-0.5f),
-			Vector2(-0.5f,0.5f)
-		};
-		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-		createInfo.size = vertices.size() *sizeof(vertices.front());
-		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
-		s_vertexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,vertices.data());
-		s_vertexBuffer->SetDebugName("particle_vertex_buf");
-	}
 	if(s_particleBuffer == nullptr)
 	{
 		auto instanceCount = 32'768ull;
@@ -495,7 +535,6 @@ void CParticleSystemComponent::InitializeBuffers()
 }
 void CParticleSystemComponent::ClearBuffers()
 {
-	s_vertexBuffer = nullptr;
 	s_particleBuffer = nullptr;
 	s_animStartBuffer = nullptr;
 	s_animBuffer = nullptr;
@@ -718,39 +757,38 @@ CParticleSystemComponent *CParticleSystemComponent::AddChild(const std::string &
 	return pt;
 }
 
-void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle)
+void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle,float delay)
 {
 	if(HasChild(particle))
 		return;
-	m_childSystems.push_back(::util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle.shared_from_this())});
+	ChildData childData {};
+	childData.child = ::util::WeakHandle<CParticleSystemComponent>{std::static_pointer_cast<CParticleSystemComponent>(particle.shared_from_this())};
+	childData.delay = delay;
+	m_childSystems.push_back(childData);
 	particle.SetParent(this);
 }
 
 void CParticleSystemComponent::RemoveChild(CParticleSystemComponent *particle)
 {
-	for(auto it=m_childSystems.begin();it!=m_childSystems.end();++it)
-	{
-		auto &hChild = *it;
-		if(hChild.get() == particle)
-		{
-			auto *child = hChild.get();
-			m_childSystems.erase(it);
-			if(child != nullptr)
-				child->SetParent(nullptr);
-			break;
-		}
-	}
+	auto it = std::find_if(m_childSystems.begin(),m_childSystems.end(),[particle](const ChildData &childInfo) {
+		return childInfo.child.get() == particle;
+	});
+	if(it == m_childSystems.end())
+		return;
+	auto *child = it->child.get();
+	m_childSystems.erase(it);
+	if(child)
+		child->SetParent(nullptr);
 }
 
 bool CParticleSystemComponent::HasChild(CParticleSystemComponent &particle)
 {
-	auto it = std::find_if(m_childSystems.begin(),m_childSystems.end(),[&particle](const ::util::WeakHandle<CParticleSystemComponent> &hchild) {
-		return (hchild.get() == &particle) ? true : false;
+	auto it = std::find_if(m_childSystems.begin(),m_childSystems.end(),[&particle](const ChildData &hchild) {
+		return (hchild.child.get() == &particle) ? true : false;
 	});
 	return (it != m_childSystems.end()) ? true : false;
 }
 
-const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetVertexBuffer() const {return s_vertexBuffer;}
 const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetParticleBuffer() const {return m_bufParticles;}
 const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationStartBuffer() const {return m_bufAnimStart;}
 const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationBuffer() const {return m_bufAnim;}
@@ -777,8 +815,9 @@ void CParticleSystemComponent::Start()
 	// in case one of the operators needs to access a child
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.valid())
-			hChild->Start();
+		if(hChild.child.expired())
+			continue;
+		hChild.child->Start();
 	}
 	//
 
@@ -885,8 +924,9 @@ void CParticleSystemComponent::Stop()
 	m_bufAnimStart = nullptr;
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.valid())
-			hChild->Stop();
+		if(hChild.child.expired())
+			continue;
+		hChild.child->Stop();
 	}
 	m_tLifeTime = 0.0;
 	OnComplete();
@@ -911,8 +951,9 @@ void CParticleSystemComponent::OnRemove()
 	BaseEnvParticleSystemComponent::OnRemove();
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.valid())
-			hChild->GetEntity().RemoveSafely();
+		if(hChild.child.expired())
+			continue;
+		hChild.child->GetEntity().RemoveSafely();
 	}
 }
 
@@ -927,9 +968,8 @@ void CParticleSystemComponent::Die(float maxRemainingLifetime)
 	}
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.expired())
-			continue;
-		hChild->Die();
+		if(hChild.child.expired())
+			hChild.child->Die();
 	}
 }
 
@@ -1047,10 +1087,10 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 	auto numRenderParticles = GetRenderParticleCount();
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.expired() || hChild->IsActiveOrPaused() == false)
+		if(hChild.child.expired() || hChild.child->IsActiveOrPaused() == false)
 			continue;
-		numRenderParticles += hChild->GetRenderParticleCount();
-		hChild->Render(drawCmd,renderer,bloom);
+		numRenderParticles += hChild.child->GetRenderParticleCount();
+		hChild.child->Render(drawCmd,renderer,bloom);
 	}
 	if(numRenderParticles == 0)
 	{
@@ -1070,8 +1110,8 @@ void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrim
 		return;
 	for(auto &hChild : m_childSystems)
 	{
-		if(hChild.valid() && hChild->IsActiveOrPaused())
-			hChild->RenderShadow(drawCmd,renderer,light,layerId);
+		if(hChild.child.valid() && hChild.child->IsActiveOrPaused())
+			hChild.child->RenderShadow(drawCmd,renderer,light,layerId);
 	}
 	for(auto &r : m_renderers)
 		r->RenderShadow(drawCmd,renderer,*light,layerId);
@@ -1131,12 +1171,17 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 			}
 		}
 	}
+	particle.PopulateInitialValues();
 	for(auto &init : m_initializers)
 		init->OnParticleCreated(particle);
 	for(auto &op : m_operators)
 		op->OnParticleCreated(particle);
 	for(auto &r : m_renderers)
 		r->OnParticleCreated(particle);
+
+
+	for(auto &op : m_operators)
+		op->Simulate(particle,0.0); // TODO: Should we use a delta time here?
 }
 
 uint32_t CParticleSystemComponent::CreateParticles(uint32_t count)
@@ -1229,6 +1274,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		auto &p = m_particles[i];
 		if(p.GetLife() > 0.f)
 		{
+			// p.SetPrevPos(p.GetPosition());
 			for(auto &op : m_operators)
 				op->PreSimulate(p,tDelta);
 			for(auto &op : m_operators)
@@ -1314,8 +1360,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		bChildrenSimulated = true;
 		for(auto &hChild : m_childSystems)
 		{
-			if(hChild.valid() && hChild->IsActiveOrPaused())
-				hChild->Simulate(tDelta);
+			if(hChild.child.valid() && hChild.child->IsActiveOrPaused())
+				hChild.child->Simulate(tDelta);
 		}
 	};
 
@@ -1328,7 +1374,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		auto bChildActive = false;
 		for(auto &hChild : m_childSystems)
 		{
-			if(hChild.valid() && hChild->IsActiveOrPaused())
+			if(hChild.child.valid() && hChild.child->IsActiveOrPaused())
 			{
 				bChildActive = true;
 				break;
@@ -1350,8 +1396,9 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		SortParticles(); // TODO Sort every frame?
 	fSimulateChildren();
 
+	auto constexpr enableDynamicBounds = false;
 	auto bStatic = IsStatic();
-	auto bUpdateBounds = (bStatic == true || m_tLastEmission == 0.0 || m_maxParticlesCur != m_prevMaxParticlesCur) ? true : false;
+	auto bUpdateBounds = (enableDynamicBounds && (bStatic == true || m_tLastEmission == 0.0 || m_maxParticlesCur != m_prevMaxParticlesCur)) ? true : false;
 	if(bUpdateBounds == true)
 	{
 		m_renderBounds.first = uvec::MAX;
@@ -1383,7 +1430,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		{
 			auto &data = m_instanceData[m_numRenderParticles];
 			auto &pos = p.GetPosition();
-			auto vCol = p.GetColor().ToVector4();
+			auto &prevPos = p.GetPrevPos();
+			auto &vCol = p.GetColor();
 			if(umath::is_flag_set(m_flags,Flags::PremultiplyAlpha))
 				pragma::premultiply_alpha(vCol,m_alphaMode);
 			auto &col = data.color;
@@ -1394,6 +1442,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			uvec::rotate(&origin,rot);
 
 			data.position = Vector4{pos.x +origin.x,pos.y +origin.y,pos.z +origin.z,radius};
+			data.prevPos = Vector4{prevPos.x +origin.x,prevPos.y +origin.y,prevPos.z +origin.z,p.GetTimeAlive()};
 			if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter))
 			{
 				for(auto i=0u;i<3u;++i)
@@ -1413,7 +1462,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 				auto minBounds = ptPos +minExtents *r;
 				auto maxBounds = ptPos +maxExtents *r;
 
-				uvec::to_min_max(m_renderBounds.first,m_renderBounds.second,minBounds,maxBounds);
+				if constexpr(enableDynamicBounds)
+					uvec::to_min_max(m_renderBounds.first,m_renderBounds.second,minBounds,maxBounds);
 			}
 			if(m_animData != nullptr)
 			{
@@ -1424,12 +1474,15 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			++m_numRenderParticles;
 		}
 	}
-	if(m_numRenderParticles == 0)
-		m_renderBounds = {{},{}};
-	for(auto &r : m_renderers)
+	if constexpr(enableDynamicBounds)
 	{
-		auto rendererBounds = r->GetRenderBounds();
-		uvec::to_min_max(m_renderBounds.first,m_renderBounds.second,rendererBounds.first,rendererBounds.second);
+		if(m_numRenderParticles == 0)
+			m_renderBounds = {{},{}};
+		for(auto &r : m_renderers)
+		{
+			auto rendererBounds = r->GetRenderBounds();
+			uvec::to_min_max(m_renderBounds.first,m_renderBounds.second,rendererBounds.first,rendererBounds.second);
+		}
 	}
 	auto &bufParticles = GetParticleBuffer();
 	auto bUpdateBuffers = (bStatic == false || m_numRenderParticles != m_numPrevRenderParticles) ? true : false;
@@ -1449,8 +1502,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		r->PostSimulate(tDelta);
 }
 
-const std::vector<::util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() const {return const_cast<CParticleSystemComponent*>(this)->GetChildren();}
-std::vector<::util::WeakHandle<CParticleSystemComponent>> &CParticleSystemComponent::GetChildren() {return m_childSystems;}
+const std::vector<CParticleSystemComponent::ChildData> &CParticleSystemComponent::GetChildren() const {return const_cast<CParticleSystemComponent*>(this)->GetChildren();}
+std::vector<CParticleSystemComponent::ChildData> &CParticleSystemComponent::GetChildren() {return m_childSystems;}
 
 bool CParticleSystemComponent::ShouldUseBlackAsAlpha() const {return umath::is_flag_set(m_flags,Flags::BlackToAlpha);}
 

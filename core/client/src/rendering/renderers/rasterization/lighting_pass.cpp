@@ -200,12 +200,6 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::IPrimary
 		auto &glowInfo = GetGlowInfo();
 
 		// Vertex buffer barrier
-		drawCmd->RecordBufferBarrier(
-			*pragma::CParticleSystemComponent::GetGlobalVertexBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
-		);
-
 		for(auto *particle : culledParticles)
 		{
 			auto &ptBuffer = particle->GetParticleBuffer();

@@ -76,9 +76,9 @@ void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrim
 				bloomParticles->reserve(bloomParticles->size() +children.size());
 				for(auto &hChild : children)
 				{
-					if(hChild.expired())
+					if(hChild.child.expired())
 						continue;
-					bloomParticles->push_back(hChild.get());
+					bloomParticles->push_back(hChild.child.get());
 				}
 			}
 		}

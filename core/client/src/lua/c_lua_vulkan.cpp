@@ -1069,7 +1069,7 @@ static void push_image_buffers(lua_State *l,uint32_t includeLayers,uint32_t incl
 
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
-	auto &vulkanMod = lua.RegisterLibrary("vulkan",{
+	auto &vulkanMod = lua.RegisterLibrary("prosper",{
 		{"create_descriptor_set",Lua::Vulkan::create_descriptor_set},
 		{"create_buffer",Lua::Vulkan::create_buffer},
 		{"create_image",Lua::Vulkan::create_image},
@@ -1115,7 +1115,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		]
 	];
 
-	Lua::RegisterLibraryEnums(lua.GetState(),"vulkan",{
+	Lua::RegisterLibraryEnums(lua.GetState(),"prosper",{
 		{"FORMAT_UNKNOWN",umath::to_integral(prosper::Format::Unknown)},
 		{"FORMAT_R4G4_UNORM_PACK8",umath::to_integral(prosper::Format::R4G4_UNorm_Pack8)},
 		{"FORMAT_R4G4B4A4_UNORM_PACK16",umath::to_integral(prosper::Format::R4G4B4A4_UNorm_Pack16)},

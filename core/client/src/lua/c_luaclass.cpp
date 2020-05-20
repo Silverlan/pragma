@@ -47,6 +47,7 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
 #include <wgui/shaders/wishader_textured.hpp>
@@ -472,6 +473,25 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	auto defShaderGUITexturedBase = luabind::class_<pragma::LuaShaderGUITextured,luabind::bases<pragma::LuaShaderGraphicsBase,wgui::ShaderTextured,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseGUITextured");
 	defShaderGUITexturedBase.def(luabind::constructor<>());
 	modShader[defShaderGUITexturedBase];
+
+	auto defShaderParticleBase = luabind::class_<pragma::LuaShaderGUIParticle2D,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseParticle2D");
+	defShaderParticleBase.def(luabind::constructor<>());
+	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
+	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
+	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,bool)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,bool bloom) {
+		pragma::Lua::check_component(l,ps);
+		Lua::PushBool(l,shader.Draw(renderer,*ps,ps->GetOrientationType(),bloom));
+	}));
+	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps) {
+		pragma::Lua::check_component(l,ps);
+		if(drawCmd.IsPrimary() == false)
+		{
+			Lua::PushBool(l,false);
+			return;
+		}
+		Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),*ps));
+	}));
+	modShader[defShaderParticleBase];
 
 	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderPostProcessing,luabind::bases<pragma::LuaShaderGraphicsBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BasePostProcessing");
 	defShaderPostProcessingBase.def(luabind::constructor<>());

@@ -112,6 +112,9 @@ public:
 	CParticleRendererLua()=default;
 	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+
+	void Lua_Render(prosper::ICommandBuffer &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {}
+	static void Lua_default_Render(lua_State *l,CParticleRendererLua &mod,prosper::ICommandBuffer &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {mod.Lua_Render(drawCmd,renderer,bloom);}
 };
 
 #endif

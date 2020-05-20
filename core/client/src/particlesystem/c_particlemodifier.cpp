@@ -98,8 +98,8 @@ public:
 	}
 	virtual void OnParticleCreated(CParticle &particle) override
 	{
-		Color &col = particle.GetColor();
-		col.a = CInt16(umath::random(m_alphaMin,m_alphaMax));
+		auto &col = particle.GetColor();
+		col.a = umath::random(m_alphaMin,m_alphaMax) /255.f;
 	}
 };
 REGISTER_PARTICLE_INITIALIZER(alpha_random,CParticleInitializerAlphaRandom);

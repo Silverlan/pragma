@@ -28,7 +28,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 int Lua::engine::create_font(lua_State *l)
 {
 	std::string identifier = Lua::CheckString(l,1);
@@ -373,8 +373,8 @@ int Lua::engine::save_particle_system(lua_State *l)
 	std::string name = luaL_checkstring(l,1);
 	Lua::CheckTable(l,2);
 	pragma::asset::get_particle_system_file_path(name);
-
-	if(Lua::file::validate_write_operation(l,name) == false)
+	std::string rootPath;
+	if(Lua::file::validate_write_operation(l,name,rootPath) == false)
 	{
 		Lua::PushBool(l,false);
 		return 1;
@@ -398,16 +398,16 @@ int Lua::engine::save_particle_system(lua_State *l)
 				particleSystems.reserve(particleSystems.size() +children.size());
 				for(auto &hChild : children)
 				{
-					if(hChild.expired())
+					if(hChild.child.expired())
 						continue;
-					auto *ps = hChild.get();
+					auto *ps = hChild.child.get();
 					if(ps->IsRecordingKeyValues() == false)
 					{
 						Con::cwar<<"WARNING: Cannot save particle system '"<<ps->GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
 						return;
 					}
-					particleSystems.push_back(hChild.get());
-					fIncludeChildren(*hChild.get());
+					particleSystems.push_back(hChild.child.get());
+					fIncludeChildren(*hChild.child.get());
 				}
 			};
 			for(auto i=decltype(numParticleSystems){0u};i<numParticleSystems;++i)
@@ -555,15 +555,23 @@ int Lua::engine::save_particle_system(lua_State *l)
 						Lua::PushNil(l);
 						while(Lua::GetNextPair(l,tchildren) != 0)
 						{
-							if(!Lua::IsTable(l,-1))
-							{
-								std::string child = Lua::ToString(l,-1);
-								StringToLower(child);
-								Lua::RemoveValue(l,-1);
-								data.children.push_back(child);
-							}
-							else
-								Lua::Pop(l,1);
+							Lua::CheckTable(l,-1);
+							auto tChild = Lua::GetStackTop(l);
+
+							CParticleChildData childData {};
+
+							Lua::PushString(l,"childName");
+							Lua::GetTableValue(l,tChild);
+							childData.childName = Lua::CheckString(l,-1);
+							Lua::Pop(l,1);
+
+							Lua::PushString(l,"delay");
+							Lua::GetTableValue(l,tChild);
+							if(Lua::IsSet(l,-1))
+								childData.delay = Lua::CheckNumber(l,-1);
+							Lua::Pop(l,1);
+
+							Lua::Pop(l,1);
 						}
 						Lua::Pop(l,1);
 						Lua::RemoveValue(l,-2);
@@ -587,7 +595,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 			Lua::Pop(l,1);
 	}
 	Lua::Pop(l,2);
-	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles));
+	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles,rootPath));
 	return 1;
 }
 int Lua::engine::create_texture(lua_State *l)
@@ -644,3 +652,4 @@ int Lua::engine::get_render_resolution(lua_State *l)
 	Lua::Push<Vector2i>(l,c_engine->GetRenderResolution());
 	return 1;
 }
+#pragma optimize("",on)

@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
+#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include <shader/prosper_shader_base_image_processing.hpp>
 #include <pragma/lua/luaobjectbase.h>
 #include <wgui/shaders/wishader_textured.hpp>
@@ -206,6 +207,19 @@ namespace pragma
 	{
 	public:
 		LuaShaderGUITextured();
+
+		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	protected:
+		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT LuaShaderGUIParticle2D
+		: public TLuaShaderBase<pragma::ShaderParticle2DBase,LuaShaderGraphicsBase>
+	{
+	public:
+		LuaShaderGUIParticle2D();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	protected:

@@ -219,6 +219,20 @@ void LuaShaderGUITextured::InitializeDefaultRenderPass(std::shared_ptr<prosper::
 
 /////////////////
 
+LuaShaderGUIParticle2D::LuaShaderGUIParticle2D()
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
+{}
+void LuaShaderGUIParticle2D::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	pragma::ShaderParticle2DBase::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+
+void LuaShaderGUIParticle2D::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void LuaShaderGUIParticle2D::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
+void LuaShaderGUIParticle2D::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {pragma::ShaderParticle2DBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
+
+/////////////////
+
 LuaShaderCompute::LuaShaderCompute()
 	: TLuaShaderBase(c_engine->GetRenderContext(),"","")
 {}

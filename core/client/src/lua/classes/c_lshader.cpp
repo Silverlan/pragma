@@ -38,7 +38,10 @@ void Lua::BasePipelineCreateInfo::AttachDescriptorSetInfo(lua_State *l,prosper::
 }
 void Lua::BasePipelineCreateInfo::AttachPushConstantRange(lua_State *l,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t offset,uint32_t size,uint32_t shaderStages)
 {
-	Lua::PushBool(l,pipelineInfo.AttachPushConstantRange(offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages)));
+	auto *shader = pragma::LuaShaderBase::GetShader(pipelineInfo);
+	if(shader == nullptr)
+		return;
+	shader->GetShader().AttachPushConstantRange(pipelineInfo,offset,size,static_cast<prosper::ShaderStageFlags>(shaderStages));
 }
 void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 {

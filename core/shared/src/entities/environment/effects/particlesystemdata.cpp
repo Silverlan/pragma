@@ -9,9 +9,9 @@
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 
-
-#define WPT_VERSION 0x0001
+#define WPT_VERSION 2
 void pragma::asset::get_particle_system_file_path(std::string &path)
 {
 	path = FileManager::GetCanonicalizedPath(path);
@@ -22,10 +22,11 @@ void pragma::asset::get_particle_system_file_path(std::string &path)
 	path += ".wpt";
 }
 // See c_particlesystem_save.cpp as well
-bool pragma::asset::save_particle_system(const std::string &name,const std::unordered_map<std::string,CParticleSystemData> &particles)
+bool pragma::asset::save_particle_system(const std::string &name,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath)
 {
 	auto ptPath = name;
 	get_particle_system_file_path(ptPath);
+	ptPath = (util::Path{rootPath} +ptPath).GetString();
 	FileManager::CreatePath(ufile::get_path_from_filename(ptPath).c_str());
 	auto f = FileManager::OpenFile<VFilePtrReal>(ptPath.c_str(),"wb");
 	if(f == NULL)
@@ -97,7 +98,11 @@ bool pragma::asset::save_particle_system(const std::string &name,const std::unor
 		auto &children = pair.second.children;
 		f->Write<unsigned char>(CUInt8(children.size()));
 		for(unsigned char j=0;j<children.size();j++)
-			f->WriteString(children[j]);
+		{
+			auto &child = children.at(j);
+			f->WriteString(child.childName);
+			f->Write<float>(child.delay);
+		}
 		i++;
 	}
 	return true;

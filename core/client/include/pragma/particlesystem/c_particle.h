@@ -43,7 +43,7 @@ private:
 	float m_tAlive = 0.f;
 	float m_tCreated = 0.f;
 	float m_rotation = 0.f;
-	Color m_color = {};
+	Vector4 m_color = {};
 	float m_camDist = 0.f;
 	bool m_bIsAlive = false;
 	float m_frameOffset = 0.f;
@@ -53,9 +53,22 @@ private:
 
 	bool m_bDying = false;
 	float m_tDeath = 0.f;
+
+	Vector3 m_prevPos = {};
+
+	// Initial values after the initializers have run
+	float m_initialRadius = 0.f;
+	float m_initialLength = 0.f;
+	float m_initialRotation = 0.f;
+	float m_initialLife = 0.f;
+	Vector4 m_initialColor = {};
+	float m_initialFrameOffset = 0.f;
 public:
 	CParticle();
 	~CParticle();
+
+	void PopulateInitialValues();
+	void SetPrevPos(const Vector3 &prevPos);
 
 	uint32_t GetIndex() const;
 	void SetIndex(uint32_t idx);
@@ -73,13 +86,13 @@ public:
 	void SetTimeAlive(float alive);
 	float GetTimeCreated() const;
 	void SetTimeCreated(float time);
+	void SetColor(const Vector4 &col);
 	void SetColor(const Color &col);
-	void SetColor(uint8_t r,uint8_t g,uint8_t b,uint8_t a);
 	void SetPosition(const Vector3 &pos);
 	void SetVelocity(const Vector3 &vel);
 	void SetAngularVelocity(const Vector3 &vel);
-	const Color &GetColor() const;
-	Color &GetColor();
+	const Vector4 &GetColor() const;
+	Vector4 &GetColor();
 	float GetRadius() const;
 	float GetLength() const;
 	float GetExtent() const;
@@ -90,6 +103,14 @@ public:
 	void Reset(float t);
 	void SetFrameOffset(float offset);
 	float GetFrameOffset() const;
+
+	const Vector3 &GetPrevPos() const;
+	float GetInitialRadius() const;
+	float GetInitialLength() const;
+	float GetInitialRotation() const;
+	float GetInitialLife() const;
+	const Vector4 &GetInitialColor() const;
+	float GetInitialFrameOffset() const;
 
 	void Die();
 	void Resurrect();

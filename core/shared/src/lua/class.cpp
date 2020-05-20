@@ -905,6 +905,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def_readwrite("x",&Vector3::x);
 	defVector.def_readwrite("y",&Vector3::y);
 	defVector.def_readwrite("z",&Vector3::z);
+	defVector.def_readwrite("r",&Vector3::r);
+	defVector.def_readwrite("g",&Vector3::g);
+	defVector.def_readwrite("b",&Vector3::b);
 	defVector.def(luabind::const_self /float());
 	defVector.def(luabind::const_self *float());
 	defVector.def(luabind::const_self *Vector3());
@@ -1013,6 +1016,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4.def_readwrite("x",&Vector4::x);
 	defVector4.def_readwrite("y",&Vector4::y);
 	defVector4.def_readwrite("z",&Vector4::z);
+	defVector4.def_readwrite("r",&Vector4::r);
+	defVector4.def_readwrite("g",&Vector4::g);
+	defVector4.def_readwrite("b",&Vector4::b);
+	defVector4.def_readwrite("a",&Vector4::a);
 	defVector4.def(luabind::const_self /float());
 	defVector4.def(luabind::const_self *float());
 	defVector4.def(luabind::const_self *Vector4());

@@ -35,7 +35,6 @@ namespace pragma
 		static void ClearBuffers();
 		static bool Precache(std::string fname,bool bReload=false);
 		static void ClearCache();
-		static const std::shared_ptr<prosper::IBuffer> &GetGlobalVertexBuffer();
 
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
@@ -71,11 +70,25 @@ namespace pragma
 			AutoSimulate = Setup<<1u
 		};
 
+		using ControlPointIndex = uint32_t;
+		struct DLLCLIENT ControlPoint
+		{
+			physics::Transform pose = {};
+			EntityHandle hEntity = {};
+		};
+
+		struct DLLCLIENT ChildData
+		{
+			util::WeakHandle<CParticleSystemComponent> child {};
+			float delay = 0.f;
+		};
+
 #pragma pack(push,1)
 		struct DLLCLIENT ParticleData
 		{
 			// Padding for std140 alignment rules (16-byte alignment), required for use in storage buffer
 			Vector4 position = {};
+			Vector4 prevPos = {};
 			std::array<uint16_t,4> color;
 			float rotation = 0.f;
 			float length = 0.f;
@@ -210,9 +223,9 @@ namespace pragma
 		bool IsActiveOrPaused() const;
 		bool IsEmissionPaused() const;
 		void SetParent(CParticleSystemComponent *particle);
-		const std::vector<util::WeakHandle<CParticleSystemComponent>> &GetChildren() const;
-		std::vector<util::WeakHandle<CParticleSystemComponent>> &GetChildren();
-		void AddChild(CParticleSystemComponent &particle);
+		const std::vector<ChildData> &GetChildren() const;
+		std::vector<ChildData> &GetChildren();
+		void AddChild(CParticleSystemComponent &particle,float delay=0.f);
 		CParticleSystemComponent *AddChild(const std::string &name);
 		void RemoveChild(CParticleSystemComponent *particle);
 		bool HasChild(CParticleSystemComponent &particle);
@@ -226,7 +239,6 @@ namespace pragma
 		bool SetupParticleSystem(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false);
 		bool SetupParticleSystem(CParticleSystemComponent *parent=nullptr);
 
-		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetAnimationStartBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetAnimationBuffer() const;
@@ -244,6 +256,14 @@ namespace pragma
 		template<class TRenderer>
 			void GetRenderers(std::vector<TRenderer*> &renderers);
 
+		void SetControlPointEntity(ControlPointIndex idx,CBaseEntity &ent);
+		void SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos);
+		void SetControlPointRotation(ControlPointIndex idx,const Quat &rot);
+		void SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose);
+
+		CBaseEntity *GetControlPointEntity(ControlPointIndex idx) const;
+		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx) const;
+
 		const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers() const;
 		const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators() const;
 		const std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &GetRenderers() const;
@@ -257,6 +277,7 @@ namespace pragma
 	private:
 		static std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> s_particleData;
 		static std::vector<std::string> s_precached;
+		ControlPoint &InitializeControlPoint(ControlPointIndex idx);
 
 		struct DLLCLIENT Node
 		{
@@ -273,7 +294,7 @@ namespace pragma
 			Complete,
 			Paused
 		};
-		std::vector<util::WeakHandle<CParticleSystemComponent>> m_childSystems;
+		std::vector<ChildData> m_childSystems;
 		util::WeakHandle<CParticleSystemComponent> m_hParent = {};
 		std::vector<Node> m_nodes;
 		std::vector<CParticle> m_particles;
@@ -309,6 +330,7 @@ namespace pragma
 		std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> m_operators;
 		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> m_renderers;
 
+		std::vector<ControlPoint> m_controlPoints {};
 		Material *m_material = nullptr;
 		float m_tNextEmission = 0.f;
 		double m_tLastEmission = 0.0;

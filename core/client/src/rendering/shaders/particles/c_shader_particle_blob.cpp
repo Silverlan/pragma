@@ -13,8 +13,8 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-decltype(ShaderParticleBlob::VERTEX_BINDING_VERTEX) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance,MAX_BLOB_NEIGHBORS *sizeof(uint16_t)};
-decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_VERTEX) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_VERTEX,prosper::Format::R32G32B32A32_UInt};
+decltype(ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_BINDING_BLOB_NEIGHBORS = {prosper::VertexInputRate::Instance,MAX_BLOB_NEIGHBORS *sizeof(uint16_t)};
+decltype(ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS) ShaderParticleBlob::VERTEX_ATTRIBUTE_BLOB_NEIGHBORS = {VERTEX_BINDING_BLOB_NEIGHBORS,prosper::Format::R32G32B32A32_UInt};
 decltype(ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA) ShaderParticleBlob::DESCRIPTOR_SET_PARTICLE_DATA = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Particle data

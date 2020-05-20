@@ -19,7 +19,8 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 
 decltype(ShaderParticleModel::VERTEX_BINDING_PARTICLE) ShaderParticleModel::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
-decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_PARTICLE) ShaderParticleModel::VERTEX_ATTRIBUTE_PARTICLE = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_PARTICLE,VERTEX_BINDING_PARTICLE};
+decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_POSSCALE) ShaderParticleModel::VERTEX_ATTRIBUTE_POSSCALE = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSSCALE,VERTEX_BINDING_PARTICLE};
+decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticleModel::VERTEX_ATTRIBUTE_PREVPOS = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS,VERTEX_BINDING_PARTICLE};
 decltype(ShaderParticleModel::VERTEX_ATTRIBUTE_COLOR) ShaderParticleModel::VERTEX_ATTRIBUTE_COLOR = {pragma::ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR,VERTEX_BINDING_PARTICLE};
 
 decltype(ShaderParticleModel::VERTEX_BINDING_ROTATION) ShaderParticleModel::VERTEX_BINDING_ROTATION = {prosper::VertexInputRate::Instance,sizeof(Quat)};
@@ -72,7 +73,8 @@ void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateI
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
 
 	//pipelineInfo.ToggleDepthWrites(true);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PARTICLE);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSSCALE);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PREVPOS);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ROTATION);
 

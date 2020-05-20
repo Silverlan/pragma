@@ -74,21 +74,34 @@ void CParticle::SetTimeAlive(float alive) {m_tAlive = alive;}
 float CParticle::GetTimeCreated() const {return m_tCreated;}
 void CParticle::SetTimeCreated(float time) {m_tCreated = time;}
 
+void CParticle::SetPrevPos(const Vector3 &prevPos) {m_prevPos = prevPos;}
+void CParticle::PopulateInitialValues()
+{
+	m_initialRadius = m_radius;
+	m_initialLength = m_length;
+	m_initialRotation = m_rotation;
+	m_initialLife = m_tLife;
+	m_initialColor = m_color;
+	m_initialFrameOffset = m_frameOffset;
+}
+
+const Vector3 &CParticle::GetPrevPos() const {return m_prevPos;}
+float CParticle::GetInitialRadius() const {return m_initialRadius;}
+float CParticle::GetInitialLength() const {return m_initialLength;}
+float CParticle::GetInitialRotation() const {return m_initialRotation;}
+float CParticle::GetInitialLife() const {return m_initialLife;}
+const Vector4 &CParticle::GetInitialColor() const {return m_initialColor;}
+float CParticle::GetInitialFrameOffset() const {return m_initialFrameOffset;}
+
 const Vector3 &CParticle::GetPosition() const {return m_pos;}
 const Vector3 &CParticle::GetVelocity() const {return m_velocity;}
 const Vector3 &CParticle::GetAngularVelocity() const {return m_angularVelocity;}
 float CParticle::GetLife() const {return m_tLife;}
 void CParticle::SetLife(float life) {m_tLife = life;}
-void CParticle::SetColor(const Color &col) {m_color = col;}
-void CParticle::SetColor(uint8_t r,uint8_t g,uint8_t b,uint8_t a)
-{
-	m_color.r = r;
-	m_color.g = g;
-	m_color.b = b;
-	m_color.a = a;
-}
-const Color &CParticle::GetColor() const {return m_color;}
-Color &CParticle::GetColor() {return m_color;}
+void CParticle::SetColor(const Vector4 &col) {m_color = col;}
+void CParticle::SetColor(const Color &col) {SetColor(col.ToVector4());}
+const Vector4 &CParticle::GetColor() const {return m_color;}
+Vector4 &CParticle::GetColor() {return m_color;}
 void CParticle::SetPosition(const Vector3 &pos) {m_pos = pos;}
 void CParticle::SetVelocity(const Vector3 &vel) {m_velocity = vel;}
 void CParticle::SetAngularVelocity(const Vector3 &vel) {m_angularVelocity = vel;}

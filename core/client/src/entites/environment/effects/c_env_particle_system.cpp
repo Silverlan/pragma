@@ -57,9 +57,9 @@ void CParticleSystemComponent::Initialize()
 			for(auto it=m_childSystems.begin();it!=m_childSystems.end();++it)
 			{
 				auto &hChild = *it;
-				if(hChild.valid())
+				if(hChild.child.valid())
 				{
-					auto pTrComponent = hChild->GetEntity().GetTransformComponent();
+					auto pTrComponent = hChild.child->GetEntity().GetTransformComponent();
 					if(pTrComponent.valid())
 						pTrComponent->SetPosition(pos);
 				}

@@ -86,12 +86,12 @@ void CParticleOperatorPauseChildEmission::Initialize(pragma::CParticleSystemComp
 			childName = pair.second;
 	}
 	auto &children = GetParticleSystem().GetChildren();
-	auto it = std::find_if(children.begin(),children.end(),[&childName](const util::WeakHandle<pragma::CParticleSystemComponent> &hSystem) {
-		return hSystem.valid() && ustring::match(childName,hSystem.get()->GetParticleSystemName());
+	auto it = std::find_if(children.begin(),children.end(),[&childName](const pragma::CParticleSystemComponent::ChildData &hSystem) {
+		return hSystem.child.valid() && ustring::match(childName,hSystem.child.get()->GetParticleSystemName());
 	});
 	if(it == children.end())
 		return;
-	m_hChildSystem = *it;
+	m_hChildSystem = it->child;
 }
 pragma::CParticleSystemComponent *CParticleOperatorPauseChildEmission::GetTargetParticleSystem() {return m_hChildSystem.get();}
 

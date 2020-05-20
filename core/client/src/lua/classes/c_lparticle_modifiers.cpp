@@ -256,10 +256,16 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 		Lua::PushInt(l,pt.PseudoRandomInt(min,max,seed));
 	}));
 	defPt.def("CalcRandomFloat",static_cast<void(*)(lua_State*,::CParticle&,float,float)>([](lua_State *l,::CParticle &pt,float min,float max) {
-		Lua::PushInt(l,pt.PseudoRandomReal(min,max));
+		Lua::PushNumber(l,pt.PseudoRandomReal(min,max));
 	}));
 	defPt.def("CalcRandomFloat",static_cast<void(*)(lua_State*,::CParticle&,float,float,uint32_t)>([](lua_State *l,::CParticle &pt,float min,float max,uint32_t seed) {
-		Lua::PushInt(l,pt.PseudoRandomReal(min,max,seed));
+		Lua::PushNumber(l,pt.PseudoRandomReal(min,max,seed));
+	}));
+	defPt.def("CalcRandomFloatExp",static_cast<void(*)(lua_State*,::CParticle&,float,float,float)>([](lua_State *l,::CParticle &pt,float min,float max,float exp) {
+		Lua::PushNumber(l,pt.PseudoRandomRealExp(min,max,exp));
+	}));
+	defPt.def("CalcRandomFloatExp",static_cast<void(*)(lua_State*,::CParticle&,float,float,float,uint32_t)>([](lua_State *l,::CParticle &pt,float min,float max,float exp,uint32_t seed) {
+		Lua::PushNumber(l,pt.PseudoRandomRealExp(min,max,exp,seed));
 	}));
 
 	defPt.def("GetInitialRadius",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {

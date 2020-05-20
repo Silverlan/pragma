@@ -563,6 +563,20 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,*pose);
 	}));
+	defCParticleSystem.def("GetAnimationFrameCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *animData = hComponent->GetAnimationData();
+		if(animData == nullptr)
+			return;
+		Lua::PushInt(l,animData->frames);
+	}));
+	defCParticleSystem.def("GetAnimationFPS",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *animData = hComponent->GetAnimationData();
+		if(animData == nullptr)
+			return;
+		Lua::PushInt(l,animData->fps);
+	}));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Aligned));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Upright));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Static));

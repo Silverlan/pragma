@@ -118,9 +118,6 @@
 [submodule "external_libs/util_pcl"]
 	path = external_libs/util_pcl
 	url = https://github.com/Silverlan/util_pcl.git
-[submodule "external_libs/util_archive"]
-	path = external_libs/util_archive
-	url = https://github.com/Silverlan/util_archive.git
 [submodule "third_party_libs/luabind"]
 	path = third_party_libs/luabind
 	url = https://github.com/Silverlan/luabind-deboostified.git
@@ -163,12 +160,6 @@
 [submodule "third_party_libs/luajit"]
 	path = third_party_libs/luajit
 	url = https://github.com/Silverlan/LuaJIT.git
-[submodule "third_party_libs/ba2lib"]
-	path = third_party_libs/ba2lib
-	url = https://github.com/Silverlan/BA2Lib.git
-[submodule "third_party_libs/libbsa"]
-	path = third_party_libs/libbsa
-	url = https://github.com/Silverlan/libbsa.git
 [submodule "external_libs/util_formatted_text"]
 	path = external_libs/util_formatted_text
 	url = https://github.com/Silverlan/util_formatted_text.git

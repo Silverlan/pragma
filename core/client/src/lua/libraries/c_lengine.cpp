@@ -571,6 +571,8 @@ int Lua::engine::save_particle_system(lua_State *l)
 								childData.delay = Lua::CheckNumber(l,-1);
 							Lua::Pop(l,1);
 
+							data.children.push_back(childData);
+
 							Lua::Pop(l,1);
 						}
 						Lua::Pop(l,1);

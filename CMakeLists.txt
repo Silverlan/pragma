@@ -177,8 +177,8 @@ search_lib_recursive_ext(DEPENDENCY_SMDMODEL_LIBRARY smdmodel)
 set(DEPENDENCY_UTIL_BSP_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_bsp/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp STATIC)
 
-set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
-search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
+# set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
+# search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
 
 set(DEPENDENCY_UTIL_PCL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_pcl/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_PCL_LIBRARY util_pcl)
@@ -363,8 +363,8 @@ search_lib_recursive(DEPENDENCY_MUPARSERX_LIBRARY third_party_libs/muparserx/${B
 
 set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
 
-set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_BSA_LIBRARY third_party_libs/libbsa/${BINARY_PRAGMA_DIR} bsa)
+# set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
+# search_lib_recursive(DEPENDENCY_BSA_LIBRARY third_party_libs/libbsa/${BINARY_PRAGMA_DIR} bsa)
 
 set(DEPENDENCY_RECAST_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/recastnavigation/Recast/Include CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_RECAST_LIBRARY third_party_libs/recastnavigation/Recast/${BINARY_PRAGMA_DIR} Recast STATIC)
@@ -561,7 +561,7 @@ if(UNIX)
 	resolve_links(DEPENDENCY_SQUISH_LIBRARY)
 	resolve_links(DEPENDENCY_STEAMWORKS_LIBRARY)
 	resolve_links(DEPENDENCY_STEAM_AUDIO_LIBRARY)
-	resolve_links(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
+	# resolve_links(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_BSP_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_FGD_LIBRARY)
 	resolve_links(DEPENDENCY_UTIL_IMAGE_LIBRARY)
@@ -760,23 +760,23 @@ target_include_directories(assimp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party
 #
 
 # libbsa
-set(PROJECT_STATIC_RUNTIME OFF CACHE BOOL OFF FORCE)
-set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
-register_third_party_library(libbsa)
-set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
-set_target_properties(bsa PROPERTIES FOLDER third_party_libs/libbsa)
-set_target_properties(tests PROPERTIES FOLDER third_party_libs/libbsa)
-# set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
-target_include_directories(bsa PUBLIC ${ZLIB_INCLUDE_DIR})
-target_include_directories(bsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
+# set(PROJECT_STATIC_RUNTIME OFF CACHE BOOL OFF FORCE)
+# set(Boost_INCLUDE_DIRS ${DEPENDENCY_BOOST_INCLUDE} CACHE PATH "Path to include directory." FORCE)
+# set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
+# register_third_party_library(libbsa)
+# set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
+# set_target_properties(bsa PROPERTIES FOLDER third_party_libs/libbsa)
+# set_target_properties(tests PROPERTIES FOLDER third_party_libs/libbsa)
+## set_target_properties(zlib PROPERTIES FOLDER third_party_libs/libbsa)
+# target_include_directories(bsa PUBLIC ${ZLIB_INCLUDE_DIR})
+# target_include_directories(bsa PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 #
 
 # ba2lib
-if(WIN32)
-	include_external_msproject(ba2lib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib/BA2Lib.vcxproj)
-	set_target_properties(ba2lib PROPERTIES FOLDER third_party_libs/libbsa)
-endif()
+# if(WIN32)
+# 	include_external_msproject(ba2lib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib/BA2Lib.vcxproj)
+# 	set_target_properties(ba2lib PROPERTIES FOLDER third_party_libs/libbsa)
+# endif()
 #
 
 # LuaJIT
@@ -1123,10 +1123,10 @@ add_dependencies(BulletDynamics BulletCollision)
 add_dependencies(util_pad zip)
 add_dependencies(pr_pcl util_pcl)
 add_dependencies(niflib_static qhullstatic)
-add_dependencies(util_archive bsa)
-# add_dependencies(pr_source util_archive util_source2 niflib_static)
+# add_dependencies(util_archive bsa)
+# add_dependencies(pr_source util_source2 niflib_static)
 add_dependencies(pr_video_recorder util_video_recorder)
-add_dependencies(pr_mdleditor util_archive ishared) # pr_source)
+add_dependencies(pr_mdleditor ishared) # pr_source)
 add_dependencies(pr_openvr iclient)
 add_dependencies(pr_ovr iclient)
 

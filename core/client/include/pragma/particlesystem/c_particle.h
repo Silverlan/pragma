@@ -136,6 +136,9 @@ public:
 		T PseudoRandomReal(T min,T max,uint32_t seed=0u) const;
 	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
 		T PseudoRandomReal(const std::uniform_real_distribution<T> &dis,uint32_t seed=0u) const;
+
+	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
+		T PseudoRandomRealExp(T min,T max,float exp,uint32_t seed=0u) const;
 };
 #pragma warning(pop)
 
@@ -163,6 +166,15 @@ template<typename T,typename>
 	T CParticle::PseudoRandomReal(T min,T max,uint32_t seed) const
 {
 	return PseudoRandomReal(std::uniform_real_distribution<T>(min,max),seed);
+}
+
+template<typename T,typename>
+	T CParticle::PseudoRandomRealExp(T min,T max,float exp,uint32_t seed) const
+{
+	auto v = PseudoRandomReal(std::uniform_real_distribution<T>(min,max),seed) -min;
+	if(exp != 1.f)
+		v = powf(v,exp);
+	return v +min;
 }
 
 inline bool operator<(const CParticle &a,const CParticle &b)

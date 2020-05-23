@@ -49,6 +49,7 @@ void CParticleInitializerInitialAnimationFrame::Initialize(pragma::CParticleSyst
 void CParticleInitializerInitialAnimationFrame::OnParticleCreated(CParticle &particle)
 {
 	CParticleInitializer::OnParticleCreated(particle);
+#if 0
 	auto &pSystem = GetParticleSystem();
 	auto *animData = pSystem.GetAnimationData();
 	if(animData == nullptr)
@@ -62,4 +63,5 @@ void CParticleInitializerInitialAnimationFrame::OnParticleCreated(CParticle &par
 	auto frameId = umath::random(umath::round(m_minFrame),umath::round(m_maxFrame));
 	auto frameBias = (1.f /static_cast<float>(animData->frames)) *0.5f; // Add a frame bias to make sure we use the right frame instead of the frame before it due to potential precision errors
 	particle.SetFrameOffset((animData->frames > 0) ? (frameId /static_cast<float>(animData->frames) +frameBias) : 0.f);
+#endif
 }

@@ -21,14 +21,17 @@ namespace pragma
 	{
 	public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_PARTICLE;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSSCALE;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RADIUS;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_PREVPOS;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_AGE;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LENGTH;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LENGTH_SEQUENCE;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_START;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;

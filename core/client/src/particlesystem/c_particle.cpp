@@ -60,6 +60,8 @@ void CParticle::SetWorldRotation(const Quat &rot) {m_rot = rot;}
 const Vector3 &CParticle::GetOrigin() const {return m_origin;}
 void CParticle::SetOrigin(const Vector3 &origin) {m_origin = origin;}
 
+void CParticle::SetSequence(uint32_t sequence) {m_sequence = sequence;}
+uint32_t CParticle::GetSequence() const {return m_sequence;}
 float CParticle::GetFrameOffset() const {return m_frameOffset;}
 void CParticle::SetFrameOffset(float offset) {m_frameOffset = offset;}
 void CParticle::SetIndex(uint32_t idx) {m_index = idx;}

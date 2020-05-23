@@ -21,14 +21,17 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSSCALE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSSCALE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32A32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_PREVPOS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_AGE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_AGE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_COLOR = {VERTEX_BINDING_PARTICLE,prosper::Format::R16G16B16A16_UNorm};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ROTATION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH_SEQUENCE) ShaderParticle2DBase::VERTEX_ATTRIBUTE_LENGTH_SEQUENCE = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_UInt};
 
-decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance};
-decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_START = {VERTEX_BINDING_ANIMATION_START,prosper::Format::R32_SFloat};
+decltype(ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START) ShaderParticle2DBase::VERTEX_BINDING_ANIMATION_START = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleAnimationData)};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES = {VERTEX_BINDING_ANIMATION_START,prosper::Format::R32_UInt};
+decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR) ShaderParticle2DBase::VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR = {VERTEX_BINDING_ANIMATION_START,prosper::Format::R32_SFloat};
 
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE) ShaderParticle2DBase::DESCRIPTOR_SET_TEXTURE = {
 	{
@@ -59,12 +62,16 @@ ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context,const st
 }
 void ShaderParticle2DBase::RegisterDefaultGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSSCALE);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RADIUS);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_PREVPOS);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_AGE);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_COLOR);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ROTATION);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LENGTH);
-	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_START);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_LENGTH_SEQUENCE);
+
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ANIMATION_INTERP_FACTOR);
 }
 void ShaderParticle2DBase::RegisterDefaultGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo)
 {
@@ -273,10 +280,10 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		return false;
 	auto bAnimated = ((renderFlags &RenderFlags::Animated) != RenderFlags::None) ? true : false;
 
-	auto animStartBuffer = ps.GetAnimationStartBuffer();
-	if(animStartBuffer == nullptr)
-		animStartBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	return RecordBindVertexBuffers({ps.GetParticleBuffer().get(),animStartBuffer.get()}) == true &&
+	auto ptAnimBuffer = ps.GetParticleAnimationBuffer();
+	if(ptAnimBuffer == nullptr)
+		ptAnimBuffer = c_engine->GetRenderContext().GetDummyBuffer();
+	return RecordBindVertexBuffers({ps.GetParticleBuffer().get(),ptAnimBuffer.get()}) == true &&
 		RecordDraw(pragma::CParticleSystemComponent::VERTEX_COUNT,ps.GetRenderParticleCount()) == true;
 }
 

@@ -18,7 +18,7 @@ using namespace pragma;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
-			prosper::DescriptorType::UniformBuffer,
+			prosper::DescriptorType::StorageBuffer,
 			prosper::ShaderStageFlags::FragmentBit
 		}
 	}

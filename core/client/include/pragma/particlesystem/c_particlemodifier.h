@@ -50,6 +50,9 @@ public:
 	virtual void OnParticleSystemStopped();
 	pragma::CParticleSystemComponent &GetParticleSystem() const;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
+
+	int32_t GetPriority() const;
+	void SetPriority(int32_t priority);
 protected:
 	virtual ~CParticleModifier()=default;
 	mutable pragma::CParticleSystemComponent *m_particleSystem = nullptr;
@@ -57,6 +60,7 @@ protected:
 private:
 	std::string m_name;
 	std::string m_type;
+	int32_t m_priority = 0;
 };
 
 ///////////////////////

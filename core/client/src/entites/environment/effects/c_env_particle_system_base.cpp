@@ -12,6 +12,8 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include <pragma/asset/util_asset.hpp>
+#include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_util.hpp>
@@ -33,6 +35,12 @@ decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_prec
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
+
+struct SpriteSheetTextureAnimationFrame
+{
+	Vector2 uvStart;
+	Vector2 uvEnd;
+};
 
 CParticleSystemComponent::Node::Node(CBaseEntity *ent)
 	: hEntity((ent != nullptr) ? ent->GetHandle() : EntityHandle{}),bEntity(true)
@@ -98,6 +106,41 @@ bool CParticleSystemComponent::IsParticleFilePrecached(const std::string &fname)
 	return (it != s_precached.end()) ? true : false;
 }
 
+std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(NetworkState &nw,const std::string &fileName)
+{
+	auto ptPath = pragma::asset::find_file(nw,fileName,pragma::asset::Type::ParticleSystem);
+	if(ptPath.has_value() == false)
+		return {};
+	auto fullPtPath = "particles/" +*ptPath;
+	auto f = FileManager::OpenFile(fullPtPath.c_str(),"rb");
+	if(f == nullptr)
+		return {};
+	return ReadHeader(f);
+}
+
+std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(VFilePtr &f)
+{
+	std::array<int8_t,3> header = {
+		static_cast<int8_t>(f->ReadChar()),
+		static_cast<int8_t>(f->ReadChar()),
+		static_cast<int8_t>(f->ReadChar())
+	};
+	if(header[0] != 'W' || header[1] != 'P' || header[2] != 'T')
+		return {}; // Incorrect format
+	ParticleSystemFileHeader fileHeader {};
+	fileHeader.version = f->Read<uint32_t>();
+	fileHeader.numParticles = f->Read<uint32_t>();
+	auto numParticles = fileHeader.numParticles;
+	fileHeader.particleSystemNames.resize(numParticles);
+	fileHeader.particleSystemOffsets.resize(numParticles);
+	for(auto i=decltype(numParticles){0};i<numParticles;++i)
+	{
+		fileHeader.particleSystemNames.at(i) = f->ReadString();
+		fileHeader.particleSystemOffsets.at(i) = f->Read<uint64_t>();
+	}
+	return fileHeader;
+}
+
 bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 {
 	fname = FileManager::GetCanonicalizedPath(fname);
@@ -116,29 +159,14 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	auto f = FileManager::OpenFile(path.c_str(),"rb");
 	if(f == nullptr)
 		return false;
-	std::array<int8_t,3> header = {
-		static_cast<int8_t>(f->ReadChar()),
-		static_cast<int8_t>(f->ReadChar()),
-		static_cast<int8_t>(f->ReadChar())
-	};
-	if(header[0] != 'W' || header[1] != 'P' || header[2] != 'T')
-		return false; // Incorrect format
-	auto version = f->Read<uint32_t>();
-	UNUSED(version);
-	auto numParticles = f->Read<uint32_t>();
-	std::vector<std::string> names(numParticles);
-	std::vector<uint64_t> offsets(numParticles);
+	auto header = ReadHeader(f);
+	if(header.has_value() == false)
+		return false;
+	auto numParticles = header->numParticles;
 	for(auto i=decltype(numParticles){0};i<numParticles;++i)
 	{
-		auto name = f->ReadString();
-		auto offset = f->Read<uint64_t>();
-		names[i] = name;
-		offsets[i] = offset;
-	}
-	for(auto i=decltype(numParticles){0};i<numParticles;++i)
-	{
-		auto &name = names[i];
-		auto offset = offsets[i];
+		auto &name = header->particleSystemNames.at(i);
+		auto offset = header->particleSystemOffsets.at(i);
 		if(bReload == true || s_particleData.find(name) == s_particleData.end())
 		{
 			f->Seek(offset);
@@ -183,7 +211,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 				children.push_back({});
 				auto &child = children.back();
 				child.childName = f->ReadString();
-				if(version >= 2)
+				if(header->version >= 2)
 					child.delay = f->Read<float>();
 			}
 			s_particleData[name] = std::move(data);
@@ -280,9 +308,9 @@ decltype(CParticleSystemComponent::PARTICLE_DATA_SIZE) CParticleSystemComponent:
 decltype(CParticleSystemComponent::VERTEX_COUNT) CParticleSystemComponent::VERTEX_COUNT = 6;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_particleBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animStartBuffer = nullptr;
-static std::shared_ptr<prosper::IUniformResizableBuffer> s_animBuffer = nullptr;
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_animBuffer = nullptr;
 const auto PARTICLE_BUFFER_INSTANCE_SIZE = sizeof(CParticleSystemComponent::ParticleData);
-const auto ANIM_START_BUFFER_INSTANCE_SIZE = sizeof(float);
+const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 ::util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
 {
 #pragma message ("TODO: Calculate max particles automatically!")
@@ -512,7 +540,7 @@ void CParticleSystemComponent::InitializeBuffers()
 	{
 		auto instanceCount = 524'288ull;
 		auto maxInstanceCount = instanceCount *5u;
-		auto instanceSize = ANIM_START_BUFFER_INSTANCE_SIZE;
+		auto instanceSize = PARTICLE_ANIM_BUFFER_INSTANCE_SIZE;
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize *maxInstanceCount;
@@ -524,12 +552,12 @@ void CParticleSystemComponent::InitializeBuffers()
 	{
 		auto instanceCount = 4'096u;
 		auto maxInstanceCount = instanceCount *5u;
-		auto instanceSize = sizeof(AnimationData);
+		auto instanceSize = sizeof(ParticleAnimationData);
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.size = instanceSize *maxInstanceCount;
-		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		s_animBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.01f);
+		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		s_animBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,instanceSize *maxInstanceCount,0.01f);
 		s_animBuffer->SetDebugName("particle_anim_data_buf");
 	}
 }
@@ -790,13 +818,12 @@ bool CParticleSystemComponent::HasChild(CParticleSystemComponent &particle)
 }
 
 const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetParticleBuffer() const {return m_bufParticles;}
-const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationStartBuffer() const {return m_bufAnimStart;}
-const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetAnimationBuffer() const {return m_bufAnim;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetParticleAnimationBuffer() const {return m_bufParticleAnimData;}
+const std::shared_ptr<prosper::IBuffer> &CParticleSystemComponent::GetSpriteSheetBuffer() const {return m_bufSpriteSheet;}
 prosper::IDescriptorSet *CParticleSystemComponent::GetAnimationDescriptorSet() {return (m_descSetGroupAnimation != nullptr) ? m_descSetGroupAnimation->GetDescriptorSet() : nullptr;}
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CParticleSystemComponent::GetAnimationDescriptorSetGroup() const {return m_descSetGroupAnimation;}
 
-bool CParticleSystemComponent::IsAnimated() const {return m_animData != nullptr;}
-const CParticleSystemComponent::AnimationData *CParticleSystemComponent::GetAnimationData() const {return m_animData.get();}
+bool CParticleSystemComponent::IsAnimated() const {return m_descSetGroupAnimation != nullptr;}
 
 void CParticleSystemComponent::Start()
 {
@@ -821,6 +848,16 @@ void CParticleSystemComponent::Start()
 	}
 	//
 
+	std::sort(m_initializers.begin(),m_initializers.end(),[](const std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)> &a,const std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)> &b) {
+		return a->GetPriority() > b->GetPriority();
+	});
+	std::sort(m_operators.begin(),m_operators.end(),[](const std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)> &a,const std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)> &b) {
+		return a->GetPriority() > b->GetPriority();
+	});
+	std::sort(m_renderers.begin(),m_renderers.end(),[](const std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)> &a,const std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)> &b) {
+		return a->GetPriority() > b->GetPriority();
+	});
+
 	//
 	for(auto &init : m_initializers)
 		init->OnParticleSystemStarted();
@@ -832,42 +869,71 @@ void CParticleSystemComponent::Start()
 
 	if(m_maxParticles > 0)
 	{
-		m_animData = nullptr;
-		m_bufAnim = nullptr;
+		m_bufParticleAnimData = nullptr;
 		m_descSetGroupAnimation = nullptr;
 		if(m_material != nullptr)
 		{
 			if(IsTextureScrollingEnabled())
 			{
-				// Animations and texture scrolling cannot be
-				// used at the same time
-				m_animData = std::make_unique<AnimationData>();
-				m_animData->frames = 1;
-				m_animData->rows = 1;
-				m_animData->columns = 1;
+
 			}
 			else if(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION.IsValid())
 			{
+				auto *spriteSheetAnim = static_cast<CMaterial*>(m_material)->GetSpriteSheetAnimation();
+				m_spriteSheetAnimationData = spriteSheetAnim ? std::make_unique<SpriteSheetAnimation>(*spriteSheetAnim) : nullptr;
+
+				if(m_spriteSheetAnimationData)
+				{
+					uint32_t numFrames = 0;
+					for(auto &seq : spriteSheetAnim->sequences)
+						numFrames += seq.frames.size();
+
+					std::vector<SpriteSheetTextureAnimationFrame> frames {};
+					frames.resize(numFrames);
+					uint32_t frameIndex = 0;
+					for(auto &seq : spriteSheetAnim->sequences)
+					{
+						for(auto &frame : seq.frames)
+						{
+							auto &frameData = frames.at(frameIndex++);
+							frameData.uvStart = frame.uvStart;
+							frameData.uvEnd = frame.uvEnd;
+						}
+					}
+					m_bufSpriteSheet = s_animBuffer->AllocateBuffer(frames.size() *sizeof(frames.front()),frames.data());
+
+					m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
+					m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
+						*m_bufSpriteSheet,0u
+					);
+				}
+
 				auto &data = m_material->GetDataBlock();
 				if(data != nullptr)
 				{
 					auto &anim = data->GetValue("animation");
-					if(anim != nullptr && anim->IsBlock())
+					if(anim)
 					{
-						auto &animBlock = *std::static_pointer_cast<ds::Block>(anim);
-						m_animData = std::make_unique<AnimationData>();
+						if(anim->IsBlock())
+						{
+							// TODO: Re-implement this and translate it to SpriteSheetAnimation data
+#if 0
+							auto &animBlock = *std::static_pointer_cast<ds::Block>(anim);
+							m_animData = std::make_unique<AnimationData>();
 
-						animBlock.GetInt("offset",&m_animData->offset);
-						animBlock.GetInt("frames",&m_animData->frames);
-						animBlock.GetInt("fps",&m_animData->fps);
-						animBlock.GetInt("rows",&m_animData->rows);
-						animBlock.GetInt("columns",&m_animData->columns);
-						m_bufAnim = s_animBuffer->AllocateBuffer(m_animData.get());
+							animBlock.GetInt("offset",&m_animData->offset);
+							animBlock.GetInt("frames",&m_animData->frames);
+							animBlock.GetInt("fps",&m_animData->fps);
+							animBlock.GetInt("rows",&m_animData->rows);
+							animBlock.GetInt("columns",&m_animData->columns);
+							m_bufAnim = s_animBuffer->AllocateBuffer(m_animData.get());
 
-						m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
-						m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
-							*m_bufAnim,0u
-						);
+							m_descSetGroupAnimation = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION);
+							m_descSetGroupAnimation->GetDescriptorSet()->SetBindingUniformBuffer(
+								*m_bufAnim,0u
+							);
+#endif
+						}
 					}
 				}
 			}
@@ -876,9 +942,9 @@ void CParticleSystemComponent::Start()
 		m_bufParticles = s_particleBuffer->AllocateBuffer(m_maxParticles *PARTICLE_BUFFER_INSTANCE_SIZE);
 		auto bAnimated = IsAnimated();
 		if(bAnimated)
-			m_bufAnimStart = s_animStartBuffer->AllocateBuffer(m_maxParticles *ANIM_START_BUFFER_INSTANCE_SIZE);
+			m_bufParticleAnimData = s_animStartBuffer->AllocateBuffer(m_maxParticles *PARTICLE_ANIM_BUFFER_INSTANCE_SIZE);
 		else
-			m_bufAnimStart = nullptr;
+			m_bufParticleAnimData = nullptr;
 
 		//if(m_maxParticles != m_maxParticlesCur)
 		//{
@@ -897,7 +963,7 @@ void CParticleSystemComponent::Start()
 			}
 			m_instanceData.resize(m_maxParticles);
 			if(bAnimated)
-				m_dataAnimStart.resize(m_maxParticles);
+				m_particleAnimData.resize(m_maxParticles);
 		//}
 		m_maxParticlesCur = m_maxParticles;
 	}
@@ -919,9 +985,9 @@ void CParticleSystemComponent::Stop()
 	m_instanceData.clear();
 	m_particleIndicesToBufferIndices.clear();
 	m_bufferIndicesToParticleIndices.clear();
-	m_dataAnimStart.clear();
+	m_particleAnimData.clear();
 	m_bufParticles = nullptr;
-	m_bufAnimStart = nullptr;
+	m_bufParticleAnimData = nullptr;
 	for(auto &hChild : m_childSystems)
 	{
 		if(hChild.child.expired())
@@ -936,7 +1002,7 @@ double CParticleSystemComponent::GetLifeTime() const {return m_tLifeTime;}
 float CParticleSystemComponent::GetSimulationTime() const {return m_simulationTime;}
 
 const std::vector<CParticleSystemComponent::ParticleData> &CParticleSystemComponent::GetRenderParticleData() const {return m_instanceData;}
-const std::vector<float> &CParticleSystemComponent::GetRenderParticleAnimationStartData() const {return m_dataAnimStart;}
+const std::vector<CParticleSystemComponent::ParticleAnimationData> &CParticleSystemComponent::GetParticleAnimationData() const {return m_particleAnimData;}
 
 bool CParticleSystemComponent::IsActive() const {return m_state == State::Active;}
 bool CParticleSystemComponent::IsEmissionPaused() const {return m_state == State::Paused;}
@@ -1143,6 +1209,8 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 			rot = pTrComponent->GetOrientation() *rot;
 	}
 	particle.SetWorldRotation(rot);
+#if 0
+	// TODO
 	if(IsAnimated() == true && IsTextureScrollingEnabled() == false)
 	{
 		if(m_material != nullptr)
@@ -1171,6 +1239,7 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 			}
 		}
 	}
+#endif
 	particle.PopulateInitialValues();
 	for(auto &init : m_initializers)
 		init->OnParticleCreated(particle);
@@ -1215,6 +1284,9 @@ void CParticleSystemComponent::OnComplete()
 	if(m_bRemoveOnComplete == true)
 		GetEntity().RemoveSafely();
 }
+
+SpriteSheetAnimation *CParticleSystemComponent::GetSpriteSheetAnimation() {return m_spriteSheetAnimationData.get();}
+const SpriteSheetAnimation *CParticleSystemComponent::GetSpriteSheetAnimation() const {return const_cast<CParticleSystemComponent*>(this)->GetSpriteSheetAnimation();}
 
 void CParticleSystemComponent::Simulate(double tDelta)
 {
@@ -1441,15 +1513,18 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			auto origin = p.GetOrigin() *p.GetRadius(); // TODO: What is this for?
 			uvec::rotate(&origin,rot);
 
-			data.position = Vector4{pos.x +origin.x,pos.y +origin.y,pos.z +origin.z,radius};
-			data.prevPos = Vector4{prevPos.x +origin.x,prevPos.y +origin.y,prevPos.z +origin.z,p.GetTimeAlive()};
+			data.position = Vector3{pos.x +origin.x,pos.y +origin.y,pos.z +origin.z};
+			data.radius = radius;
+			data.prevPos = Vector3{prevPos.x +origin.x,prevPos.y +origin.y,prevPos.z +origin.z};
+			data.age = p.GetTimeAlive();
 			if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter))
 			{
 				for(auto i=0u;i<3u;++i)
 					data.position[i] += psPos[i];
 			}
 			data.rotation = p.GetRotation();
-			data.length = p.GetLength();
+			data.length = umath::float32_to_float16_glm(p.GetLength());
+			data.sequence = p.GetSequence();
 			m_particleIndicesToBufferIndices[sortedIdx] = m_numRenderParticles;
 			m_bufferIndicesToParticleIndices[m_numRenderParticles] = sortedIdx;
 
@@ -1465,11 +1540,25 @@ void CParticleSystemComponent::Simulate(double tDelta)
 				if constexpr(enableDynamicBounds)
 					uvec::to_min_max(m_renderBounds.first,m_renderBounds.second,minBounds,maxBounds);
 			}
-			if(m_animData != nullptr)
+			if(m_particleAnimData.empty() == false && m_spriteSheetAnimationData)
 			{
-				m_dataAnimStart[m_numRenderParticles] = p.GetFrameOffset();
-				if(m_dataAnimStart[m_numRenderParticles] == 0.f && m_animData->fps > 0)
-					m_dataAnimStart[m_numRenderParticles] += p.GetTimeCreated();
+				auto seqIdx = p.GetSequence();
+				auto &animData = m_particleAnimData.at(m_numRenderParticles);
+				if(m_spriteSheetAnimationData && seqIdx < m_spriteSheetAnimationData->sequences.size())
+				{
+					auto &seq = m_spriteSheetAnimationData->sequences.at(seqIdx);
+					auto time = p.GetFrameOffset();
+					uint32_t frameIdx0,frameIdx1;
+					float interpFactor;
+					if(seq.GetInterpolatedFrameData(time,frameIdx0,frameIdx1,interpFactor))
+					{
+						auto &frame0 = seq.frames.at(frameIdx0);
+						auto &frame1 = seq.frames.at(frameIdx1);
+						animData.frameIndex0 = frameIdx0;
+						animData.frameIndex1 = frameIdx1;
+						animData.interpFactor = interpFactor;
+					}
+				}
 			}
 			++m_numRenderParticles;
 		}
@@ -1494,9 +1583,9 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	}
 	if(IsAnimated())
 	{
-		auto &bufAnimStart = GetAnimationStartBuffer();
-		if(bufAnimStart != nullptr && m_numRenderParticles > 0u)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(bufAnimStart,0ull,m_numRenderParticles *sizeof(float),m_dataAnimStart.data());
+		auto &particleAnimBuffer = GetParticleAnimationBuffer();
+		if(particleAnimBuffer != nullptr && m_numRenderParticles > 0u)
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(particleAnimBuffer,0ull,m_numRenderParticles *sizeof(ParticleAnimationData),m_particleAnimData.data());
 	}
 	for(auto &r : m_renderers)
 		r->PostSimulate(tDelta);

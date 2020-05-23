@@ -213,23 +213,23 @@ void RasterizationRenderer::RenderLightingPass(std::shared_ptr<prosper::IPrimary
 				);
 			}
 
-			auto &animStartBuffer = particle->GetAnimationStartBuffer();
-			if (animStartBuffer != nullptr)
+			auto &animBuffer = particle->GetParticleAnimationBuffer();
+			if (animBuffer != nullptr)
 			{
 				// Animation start buffer barrier
 				drawCmd->RecordBufferBarrier(
-					*animStartBuffer,
+					*animBuffer,
 					prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexInputBit,
 					prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::VertexAttributeReadBit
 				);
 			}
 
-			auto &animBuffer = particle->GetAnimationBuffer();
-			if (animBuffer != nullptr)
+			auto &spriteSheetBuffer = particle->GetSpriteSheetBuffer();
+			if (spriteSheetBuffer != nullptr)
 			{
 				// Animation buffer barrier
 				drawCmd->RecordBufferBarrier(
-					*animBuffer,
+					*spriteSheetBuffer,
 					prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit,
 					prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit
 				);

@@ -48,6 +48,7 @@ private:
 	bool m_bIsAlive = false;
 	float m_frameOffset = 0.f;
 	uint32_t m_index = 0u;
+	uint32_t m_sequence;
 	uint32_t m_seed = 0u;
 	mutable std::mt19937 m_mt;
 
@@ -103,6 +104,8 @@ public:
 	void Reset(float t);
 	void SetFrameOffset(float offset);
 	float GetFrameOffset() const;
+	void SetSequence(uint32_t sequence);
+	uint32_t GetSequence() const;
 
 	const Vector3 &GetPrevPos() const;
 	float GetInitialRadius() const;

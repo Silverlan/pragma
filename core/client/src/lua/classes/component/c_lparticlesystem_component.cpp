@@ -491,20 +491,27 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,particleBuffer);
 		}));
-	defCParticleSystem.def("GetAnimationStartBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+	defCParticleSystem.def("GetParticleAnimationBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
-		auto &animStartBuffer = hComponent->GetAnimationStartBuffer();
-		if(animStartBuffer == nullptr)
-			return;
-		Lua::Push(l,animStartBuffer);
-		}));
-	defCParticleSystem.def("GetAnimationBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		auto &animBuffer = hComponent->GetAnimationBuffer();
+		auto &animBuffer = hComponent->GetParticleAnimationBuffer();
 		if(animBuffer == nullptr)
 			return;
 		Lua::Push(l,animBuffer);
 		}));
+	defCParticleSystem.def("GetAnimationSpriteSheetBuffer",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &spriteSheetBuffer = hComponent->GetSpriteSheetBuffer();
+		if(spriteSheetBuffer == nullptr)
+			return;
+		Lua::Push(l,spriteSheetBuffer);
+		}));
+	defCParticleSystem.def("GetSpriteSheetAnimation",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *spriteSheetBuffer = hComponent->GetSpriteSheetAnimation();
+		if(spriteSheetBuffer == nullptr)
+			return;
+		Lua::Push(l,spriteSheetBuffer);
+	}));
 	defCParticleSystem.def("GetAnimationDescriptorSet",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		auto &animDescSetGroup = hComponent->GetAnimationDescriptorSetGroup();
@@ -563,9 +570,10 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,*pose);
 	}));
+#if 0
 	defCParticleSystem.def("GetAnimationFrameCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
-		auto *animData = hComponent->GetAnimationData();
+		auto *animData = hComponent->GetRenderParticleAnimationStartData();
 		if(animData == nullptr)
 			return;
 		Lua::PushInt(l,animData->frames);
@@ -577,6 +585,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::PushInt(l,animData->fps);
 	}));
+#endif
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_ALIGNED",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Aligned));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_UPRIGHT",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Upright));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_STATIC",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Static));
@@ -592,6 +601,42 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT",umath::to_integral(pragma::AlphaMode::Count));
 	ParticleSystemModifier::register_particle_class(defCParticleSystem);
 	ParticleSystemModifier::register_modifier_class(defCParticleSystem);
+	defCParticleSystem.scope[luabind::def("read_header_data",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {
+		auto fileHeader = pragma::CParticleSystemComponent::ReadHeader(*engine->GetNetworkState(l),name);
+		if(fileHeader.has_value() == false)
+			return;
+		auto t = Lua::CreateTable(l);
+
+		Lua::PushString(l,"version");
+		Lua::PushInt(l,fileHeader->version);
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"numParticles");
+		Lua::PushInt(l,fileHeader->numParticles);
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"particleSystemNames");
+		auto tNames = Lua::CreateTable(l);
+		for(auto i=decltype(fileHeader->particleSystemNames.size()){0};i<fileHeader->particleSystemNames.size();++i)
+		{
+			auto &name = fileHeader->particleSystemNames.at(i);
+			Lua::PushInt(l,i +1);
+			Lua::PushString(l,name);
+			Lua::SetTableValue(l,tNames);
+		}
+		Lua::SetTableValue(l,t);
+
+		Lua::PushString(l,"particleSystemOffsets");
+		auto tOffsets = Lua::CreateTable(l);
+		for(auto i=decltype(fileHeader->particleSystemOffsets.size()){0};i<fileHeader->particleSystemOffsets.size();++i)
+		{
+			auto offset = fileHeader->particleSystemOffsets.at(i);
+			Lua::PushInt(l,i +1);
+			Lua::PushInt(l,offset);
+			Lua::SetTableValue(l,tOffsets);
+		}
+		Lua::SetTableValue(l,t);
+	}))];
 	defCParticleSystem.scope[luabind::def("register_initializer",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &name,luabind::object oClass) {
 		register_particle_modifier(l,pragma::LuaParticleModifierManager::Type::Initializer,name,oClass);
 	}))];

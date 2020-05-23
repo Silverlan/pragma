@@ -86,6 +86,78 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto &modGame = lua.RegisterLibrary("game");
 	auto materialClassDef = luabind::class_<Material>("Material");
+
+	auto spriteSheetDef = luabind::class_<SpriteSheetAnimation>("SpriteSheetAnimation");
+
+	auto sequenceDef = luabind::class_<SpriteSheetAnimation::Sequence>("Sequence");
+
+	auto frameDef = luabind::class_<SpriteSheetAnimation::Sequence::Frame>("Frame");
+	frameDef.def("GetUVBounds",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
+		Lua::Push<Vector2>(l,frame.uvStart);
+		Lua::Push<Vector2>(l,frame.uvEnd);
+	}));
+	frameDef.def("GetDuration",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
+		Lua::PushNumber(l,frame.duration);
+	}));
+	sequenceDef.scope[frameDef];
+
+	sequenceDef.def("GetFrameCount",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
+		Lua::PushInt(l,sequence.frames.size());
+	}));
+	sequenceDef.def("GetFrame",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&,uint32_t)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,uint32_t frameIdx) {
+		if(frameIdx >= sequence.frames.size())
+			return;
+		auto &frame = sequence.frames.at(frameIdx);
+		Lua::Push<SpriteSheetAnimation::Sequence::Frame*>(l,&frame);
+	}));
+	sequenceDef.def("GetFrames",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
+		auto &frames = sequence.frames;
+		auto t = Lua::CreateTable(l);
+		uint32_t frameIndex = 1;
+		for(auto &frame : frames)
+		{
+			Lua::PushInt(l,frameIndex++);
+			Lua::Push<SpriteSheetAnimation::Sequence::Frame*>(l,&frame);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	sequenceDef.def("IsLooping",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
+		Lua::PushBool(l,sequence.loop);
+	}));
+	sequenceDef.def("GetInterpolatedFrameData",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&,float)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,float ptTime) {
+		uint32_t frameIndex0,frameIndex1;
+		float interpFactor;
+		if(sequence.GetInterpolatedFrameData(ptTime,frameIndex0,frameIndex1,interpFactor) == false)
+			return;
+		Lua::PushInt(l,frameIndex0);
+		Lua::PushInt(l,frameIndex1);
+		Lua::PushNumber(l,interpFactor);
+	}));
+
+	spriteSheetDef.scope[sequenceDef];
+	
+	spriteSheetDef.def("GetSequenceCount",static_cast<void(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) {
+		Lua::PushInt(l,spriteSheetAnim.sequences.size());
+	}));
+	spriteSheetDef.def("GetSequence",static_cast<void(*)(lua_State*,SpriteSheetAnimation&,uint32_t)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim,uint32_t seqIdx) {
+		if(seqIdx >= spriteSheetAnim.sequences.size())
+			return;
+		auto &seq = spriteSheetAnim.sequences.at(seqIdx);
+		Lua::Push<SpriteSheetAnimation::Sequence*>(l,&seq);
+	}));
+	spriteSheetDef.def("GetSequences",static_cast<void(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) {
+		auto &sequences = spriteSheetAnim.sequences;
+		auto t = Lua::CreateTable(l);
+		uint32_t seqIdx = 1;
+		for(auto &seq : sequences)
+		{
+			Lua::PushInt(l,seqIdx++);
+			Lua::Push<SpriteSheetAnimation::Sequence*>(l,&seq);
+			Lua::SetTableValue(l,t);
+		}
+	}));
+	materialClassDef.scope[spriteSheetDef];
+
 	Lua::Material::register_class(materialClassDef);
 	materialClassDef.def("SetTexture",static_cast<void(*)(lua_State*,Material*,const std::string&,const std::string&)>(&Lua::Material::Client::SetTexture));
 	materialClassDef.def("SetTexture",static_cast<void(*)(lua_State*,Material*,const std::string&,Texture&)>(&Lua::Material::Client::SetTexture));
@@ -94,6 +166,15 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	materialClassDef.def("GetData",&Lua::Material::Client::GetData);
 	materialClassDef.def("InitializeShaderDescriptorSet",static_cast<void(*)(lua_State*,::Material*,bool)>(&Lua::Material::Client::InitializeShaderData));
 	materialClassDef.def("InitializeShaderDescriptorSet",static_cast<void(*)(lua_State*,::Material*)>(&Lua::Material::Client::InitializeShaderData));
+	materialClassDef.def("ClearSpriteSheetAnimation",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		static_cast<CMaterial&>(mat).ClearSpriteSheetAnimation();
+	}));
+	materialClassDef.def("GetSpriteSheetAnimation",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		auto *spriteSheetAnim = static_cast<CMaterial&>(mat).GetSpriteSheetAnimation();
+		if(spriteSheetAnim == nullptr)
+			return;
+		Lua::Push<SpriteSheetAnimation*>(l,spriteSheetAnim);
+	}));
 	modGame[materialClassDef];
 
 	 // prosper TODO

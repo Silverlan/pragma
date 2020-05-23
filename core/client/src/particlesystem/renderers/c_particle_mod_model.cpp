@@ -198,12 +198,12 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticleModel*>(m_shader.get());
-	auto animStartBuffer = GetParticleSystem().GetAnimationStartBuffer();
-	if(animStartBuffer == nullptr)
-		animStartBuffer = c_engine->GetRenderContext().GetDummyBuffer();
+	auto animBuffer = GetParticleSystem().GetParticleAnimationBuffer();
+	if(animBuffer == nullptr)
+		animBuffer = c_engine->GetRenderContext().GetDummyBuffer();
 	if(
 		shader->BeginDraw(drawCmd,{},GetParticleSystem()) == false || 
-		shader->BindParticleBuffers(*GetParticleSystem().GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animStartBuffer) == false || 
+		shader->BindParticleBuffers(*GetParticleSystem().GetParticleBuffer(),*m_rotationalBuffer.GetBuffer(),*animBuffer) == false || 
 		shader->BindParticleSystem(GetParticleSystem()) == false
 	)
 		return;

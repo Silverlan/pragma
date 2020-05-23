@@ -249,6 +249,12 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	defPt.def("GetSeed",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::PushNumber(l,pt.GetSeed());
 	}));
+	defPt.def("GetSequence",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushInt(l,pt.GetSequence());
+	}));
+	defPt.def("SetSequence",static_cast<void(*)(lua_State*,::CParticle&,uint32_t)>([](lua_State *l,::CParticle &pt,uint32_t sequence) {
+		pt.SetSequence(sequence);
+	}));
 	defPt.def("CalcRandomInt",static_cast<void(*)(lua_State*,::CParticle&,int32_t,int32_t)>([](lua_State *l,::CParticle &pt,int32_t min,int32_t max) {
 		Lua::PushInt(l,pt.PseudoRandomInt(min,max));
 	}));
@@ -299,6 +305,12 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	}));
 	defPtModifier.def("GetType",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
 		Lua::PushString(l,ptm.GetType());
+	}));
+	defPtModifier.def("SetPriority",static_cast<void(*)(lua_State*,::CParticleModifier&,int32_t)>([](lua_State *l,::CParticleModifier &ptm,int32_t priority) {
+		ptm.SetPriority(priority);
+	}));
+	defPtModifier.def("GetPriority",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
+		Lua::PushInt(l,ptm.GetPriority());
 	}));
 	defPtModifier.def("GetParticleSystem",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {
 		ptm.GetParticleSystem().PushLuaObject(l);

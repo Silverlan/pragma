@@ -19,6 +19,13 @@
 class CParticleSystemData;
 namespace pragma
 {
+	struct DLLCLIENT ParticleSystemFileHeader
+	{
+		uint32_t version = 0;
+		uint32_t numParticles = 0;
+		std::vector<std::string> particleSystemNames {};
+		std::vector<uint64_t> particleSystemOffsets {};
+	};
 	class CParticleSystemComponent;
 	class DLLCLIENT CParticleSystemComponent final
 		: public BaseEnvParticleSystemComponent,
@@ -33,6 +40,8 @@ namespace pragma
 		static bool IsParticleFilePrecached(const std::string &fname);
 		static void InitializeBuffers();
 		static void ClearBuffers();
+		static std::optional<ParticleSystemFileHeader> ReadHeader(NetworkState &nw,const std::string &fileName);
+		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname,bool bReload=false);
 		static void ClearCache();
 
@@ -87,19 +96,20 @@ namespace pragma
 		struct DLLCLIENT ParticleData
 		{
 			// Padding for std140 alignment rules (16-byte alignment), required for use in storage buffer
-			Vector4 position = {};
-			Vector4 prevPos = {};
+			Vector3 position = {};
+			float radius = 0.f;
+			Vector3 prevPos = {};
+			float age = 0.f;
 			std::array<uint16_t,4> color;
 			float rotation = 0.f;
-			float length = 0.f;
+			uint16_t length = 0; // Encoded float
+			uint16_t sequence = 0;
 		};
-		struct DLLCLIENT AnimationData
+		struct DLLCLIENT ParticleAnimationData
 		{
-			int32_t offset = 0;
-			int32_t frames = 0;
-			int32_t fps = 0;
-			int32_t rows = 0;
-			int32_t columns = 0;
+			uint16_t frameIndex0 = 0;
+			uint16_t frameIndex1 = 0;
+			float interpFactor = 0.f;
 		};
 #pragma pack(pop)
 
@@ -135,7 +145,7 @@ namespace pragma
 		float GetRadius() const;
 		float GetExtent() const;
 		const std::vector<ParticleData> &GetRenderParticleData() const;
-		const std::vector<float> &GetRenderParticleAnimationStartData() const;
+		const std::vector<ParticleAnimationData> &GetParticleAnimationData() const;
 		void SetMaterial(Material *mat);
 		void SetMaterial(const char *mat);
 		Material *GetMaterial() const;
@@ -240,12 +250,11 @@ namespace pragma
 		bool SetupParticleSystem(CParticleSystemComponent *parent=nullptr);
 
 		const std::shared_ptr<prosper::IBuffer> &GetParticleBuffer() const;
-		const std::shared_ptr<prosper::IBuffer> &GetAnimationStartBuffer() const;
-		const std::shared_ptr<prosper::IBuffer> &GetAnimationBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetParticleAnimationBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetSpriteSheetBuffer() const;
 		prosper::IDescriptorSet *GetAnimationDescriptorSet();
 		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetAnimationDescriptorSetGroup() const;
 		bool IsAnimated() const;
-		const AnimationData *GetAnimationData() const;
 		const std::pair<Vector3,Vector3> &GetRenderBounds() const;
 		virtual void SetContinuous(bool b) override;
 
@@ -270,6 +279,9 @@ namespace pragma
 		std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers();
 		std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators();
 		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> &GetRenderers();
+
+		SpriteSheetAnimation *GetSpriteSheetAnimation();
+		const SpriteSheetAnimation *GetSpriteSheetAnimation() const;
 	protected:
 		util::EventReply HandleKeyValue(const std::string &key,const std::string &value);
 
@@ -337,16 +349,17 @@ namespace pragma
 		double m_tLifeTime = 0.0;
 		float m_radius = 0.f;
 		float m_extent = 0.f;
-		std::unique_ptr<AnimationData> m_animData = nullptr;
 		OrientationType m_orientationType = OrientationType::Aligned;
 
 		std::shared_ptr<prosper::IBuffer> m_bufParticles = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_bufAnimStart = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_bufAnim = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_bufParticleAnimData = nullptr;
+
+		std::unique_ptr<SpriteSheetAnimation> m_spriteSheetAnimationData = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupAnimation = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_bufSpriteSheet = nullptr;
 
 		std::vector<ParticleData> m_instanceData;
-		std::vector<float> m_dataAnimStart;
+		std::vector<ParticleAnimationData> m_particleAnimData = {};
 		float m_bloomScale = 0.f;
 		float m_intensity = 1.f;
 		State m_state = State::Initial;

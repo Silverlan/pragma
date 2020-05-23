@@ -550,6 +550,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::Push<util::Path>(l,{components});
 	}))];
 	defPath.def(luabind::constructor<>());
+	defPath.def(luabind::constructor<const util::Path&>());
 	defPath.def(luabind::constructor<const std::string&>());
 
 	defPath.def(luabind::tostring(luabind::self));
@@ -559,6 +560,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath.def(luabind::const_self ==luabind::const_self);
 	defPath.def(luabind::const_self ==std::string{});
 
+	defPath.def("Copy",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::Push<util::Path>(l,p);
+	}));
 	defPath.def("ToComponents",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		auto components = p.ToComponents();
 		auto t = Lua::CreateTable(l);
@@ -599,6 +603,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defPath.def("IsFile",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		Lua::PushBool(l,p.IsFile());
+	}));
+	defPath.def("IsPath",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
+		Lua::PushBool(l,!p.IsFile());
 	}));
 	defPath.def("GetFileExtension",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		auto ext = p.GetFileExtension();

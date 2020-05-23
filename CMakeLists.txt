@@ -391,7 +391,7 @@ search_lib_recursive(DEPENDENCY_RECTANGLEBINPACK_LIBRARY third_party_libs/rectan
 
 set(DEPENDENCY_MINIBALL_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/miniball/cpp/main CACHE PATH "Path to include directory.")
 
-set(DEPENDENCY_SQUISH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish CACHE PATH "Path to include directory.")
+set(DEPENDENCY_SQUISH_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/include CACHE PATH "Path to include directory.")
 set(DEPENDENCY_SQUISH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/lib64/vs9/squish CACHE PATH "Path to library.")
 
 set(DEPENDENCY_VTFLIB_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/vtflib/src CACHE PATH "Path to include directory.")
@@ -1045,10 +1045,8 @@ set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 #
 
 # squish
-if(WIN32)
-	include_external_msproject(squish ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/squish/vs9/squish/squish.vcproj)
-	set_target_properties(squish PROPERTIES FOLDER third_party_libs)
-endif()
+register_third_party_library(squish)
+set_target_properties(squish PROPERTIES FOLDER third_party_libs)
 #
 
 # rectangle_bin_pack
@@ -1072,44 +1070,6 @@ if(WIN32)
 	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
 	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
 endif()
-#
-
-# niflib
-register_third_party_library(niflib)
-set_target_properties(bslightingshaderproperty_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(missing_link_stack_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(niflib PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(niflib_static PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(ninode_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(numuvsets_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(skin_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(skinpart_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(trishape_test PROPERTIES FOLDER third_party_libs/niflib)
-set_target_properties(write_test PROPERTIES FOLDER third_party_libs/niflib)
-target_include_directories(niflib_static PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/niflib)
-#
-
-# qhull
-register_third_party_library(qhull)
-set_target_properties(libqhull PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qconvex PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qdelaunay PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhalf PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhull PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhull_p PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhull_r PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhullcpp PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhullp PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhullstatic PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qhullstatic_r PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(qvoronoi PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(rbox PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(testqset PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(testqset_r PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(user_eg PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(user_eg2 PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(user_eg3 PROPERTIES FOLDER third_party_libs/qhull)
-set_target_properties(user_egp PROPERTIES FOLDER third_party_libs/qhull)
 #
 
 # dependencies

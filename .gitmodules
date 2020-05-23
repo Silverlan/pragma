@@ -181,3 +181,6 @@
 [submodule "external_libs/prosper_vulkan"]
 	path = external_libs/prosper_vulkan
 	url = https://github.com/Silverlan/prosper_vulkan.git
+[submodule "third_party_libs/squish"]
+	path = third_party_libs/squish
+	url = https://github.com/ivan-kulikov-dev/squish.git

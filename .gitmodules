@@ -184,3 +184,6 @@
 [submodule "third_party_libs/squish"]
 	path = third_party_libs/squish
 	url = https://github.com/ivan-kulikov-dev/squish.git
+[submodule "external_libs/util_bsp"]
+	path = external_libs/util_bsp
+	url = https://github.com/Silverlan/util_bsp.git

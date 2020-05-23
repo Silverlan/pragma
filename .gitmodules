@@ -187,3 +187,9 @@
 [submodule "external_libs/util_bsp"]
 	path = external_libs/util_bsp
 	url = https://github.com/Silverlan/util_bsp.git
+[submodule "external_libs/util_source2"]
+	path = external_libs/util_source2
+	url = https://github.com/Silverlan/util_source2.git
+[submodule "external_libs/util_udm"]
+	path = external_libs/util_udm
+	url = https://github.com/Silverlan/util_udm.git

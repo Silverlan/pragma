@@ -29,7 +29,7 @@ void CParticleOperatorColorFade::OnParticleCreated(CParticle &particle)
 		return;
 	m_particleStartColors->at(particle.GetIndex()) = Color(std::numeric_limits<int16_t>::max(),0,0,0);
 }
-void CParticleOperatorColorFade::Simulate(CParticle &particle,double)
+void CParticleOperatorColorFade::Simulate(CParticle &particle,double,float strength)
 {
 	auto tFade = 0.f;
 	if(GetEasedFadeFraction(particle,tFade) == false)

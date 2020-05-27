@@ -26,7 +26,7 @@ void CParticleOperatorVelocity::Initialize(pragma::CParticleSystemComponent &pSy
 			m_velocity = uvec::create(it->second);
 	}
 }
-void CParticleOperatorVelocity::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorVelocity::Simulate(CParticle &particle,double tDelta,float strength)
 {
 	Vector3 vel = particle.GetVelocity();
 	vel += m_velocity *(float) tDelta;

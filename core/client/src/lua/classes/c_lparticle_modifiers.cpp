@@ -10,6 +10,7 @@
 #include "pragma/particlesystem/c_particlemodifier.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include <prosper_command_buffer.hpp>
 #include <luasystem.h>
 
@@ -116,6 +117,49 @@ luabind::object *pragma::LuaParticleModifierManager::GetClassObject(std::string 
 void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc)
 {
 	auto defPt = luabind::class_<::CParticle>("Particle");
+	defPt.add_static_constant("FIELD_ID_POS",umath::to_integral(CParticle::FieldId::Pos));
+	defPt.add_static_constant("FIELD_ID_ROT",umath::to_integral(CParticle::FieldId::Rot));
+	defPt.add_static_constant("FIELD_ID_ROT_YAW",umath::to_integral(CParticle::FieldId::RotYaw));
+	defPt.add_static_constant("FIELD_ID_ORIGIN",umath::to_integral(CParticle::FieldId::Origin));
+	defPt.add_static_constant("FIELD_ID_VELOCITY",umath::to_integral(CParticle::FieldId::Velocity));
+	defPt.add_static_constant("FIELD_ID_ANGULAR_VELOCITY",umath::to_integral(CParticle::FieldId::AngularVelocity));
+	defPt.add_static_constant("FIELD_ID_RADIUS",umath::to_integral(CParticle::FieldId::Radius));
+	defPt.add_static_constant("FIELD_ID_LENGTH",umath::to_integral(CParticle::FieldId::Length));
+	defPt.add_static_constant("FIELD_ID_LIFE",umath::to_integral(CParticle::FieldId::Life));
+	defPt.add_static_constant("FIELD_ID_COLOR",umath::to_integral(CParticle::FieldId::Color));
+	defPt.add_static_constant("FIELD_ID_ALPHA",umath::to_integral(CParticle::FieldId::Alpha));
+	defPt.add_static_constant("FIELD_ID_SEQUENCE",umath::to_integral(CParticle::FieldId::Sequence));
+	defPt.add_static_constant("FIELD_ID_INVALID",umath::to_integral(CParticle::FieldId::Invalid));
+	defPt.add_static_constant("FIELD_ID_COUNT",umath::to_integral(CParticle::FieldId::Count));
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 12);
+	defPt.scope[luabind::def("field_id_to_name",static_cast<void(*)(lua_State*,uint32_t)>([](lua_State *l,uint32_t id) {
+		auto name = ::CParticle::field_id_to_name(static_cast<CParticle::FieldId>(id));
+		Lua::PushString(l,name);
+	}))];
+	defPt.scope[luabind::def("name_to_field_id",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {
+		auto id = ::CParticle::name_to_field_id(name);
+		Lua::PushInt(l,umath::to_integral(id));
+	}))];
+	defPt.def("SetField",static_cast<void(*)(lua_State*,::CParticle&,uint32_t,const Vector4&)>([](lua_State *l,::CParticle &pt,uint32_t fieldId,const Vector4 &value) {
+		pt.SetField(static_cast<CParticle::FieldId>(fieldId),value);
+	}));
+	defPt.def("SetField",static_cast<void(*)(lua_State*,::CParticle&,uint32_t,float)>([](lua_State *l,::CParticle &pt,uint32_t fieldId,float value) {
+		pt.SetField(static_cast<CParticle::FieldId>(fieldId),value);
+	}));
+	defPt.def("GetField",static_cast<void(*)(lua_State*,::CParticle&,uint32_t)>([](lua_State *l,::CParticle &pt,uint32_t fieldId) {
+		float value;
+		if(pt.GetField(static_cast<CParticle::FieldId>(fieldId),value) == false)
+		{
+			Vector4 vValue;
+			if(pt.GetField(static_cast<CParticle::FieldId>(fieldId),vValue) == true)
+			{
+				Lua::Push<Vector4>(l,vValue);
+				return;
+			}
+			return;
+		}
+		Lua::PushNumber(l,value);
+	}));
 	defPt.def("GetIndex",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::PushInt(l,pt.GetIndex());
 	}));
@@ -133,6 +177,12 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	}));
 	defPt.def("SetRotation",static_cast<void(*)(lua_State*,::CParticle&,float)>([](lua_State *l,::CParticle &pt,float rot) {
 		pt.SetRotation(rot);
+	}));
+	defPt.def("GetRotationYaw",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
+		Lua::PushNumber(l,pt.GetRotationYaw());
+	}));
+	defPt.def("SetRotationYaw",static_cast<void(*)(lua_State*,::CParticle&,float)>([](lua_State *l,::CParticle &pt,float rot) {
+		pt.SetRotationYaw(rot);
 	}));
 	defPt.def("GetPosition",static_cast<void(*)(lua_State*,::CParticle&)>([](lua_State *l,::CParticle &pt) {
 		Lua::Push<Vector3>(l,pt.GetPosition());
@@ -346,6 +396,10 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	defPtc.scope[defPtInitializer];
 
 	auto defPtOperator = luabind::class_<::CParticleOperator,::CParticleModifier>("ParticleOperator");
+	defPtOperator.def("CalcStrength",static_cast<void(*)(lua_State*,::CParticleOperator&,float)>([](lua_State *l,::CParticleOperator &op,float curTime) {
+		auto strength = op.CalcStrength(curTime);
+		Lua::PushNumber(l,strength);
+	}));
 	defPtc.scope[defPtOperator];
 
 	auto defPtRenderer = luabind::class_<::CParticleRenderer,::CParticleModifier>("ParticleRenderer");
@@ -378,6 +432,21 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	defPtRendererBase.def("OnParticleCreated",&CParticleRendererLua::Lua_OnParticleCreated,&CParticleRendererLua::Lua_default_OnParticleCreated);
 	defPtRendererBase.def("OnParticleDestroyed",&CParticleRendererLua::Lua_OnParticleDestroyed,&CParticleRendererLua::Lua_default_OnParticleDestroyed);
 	defPtRendererBase.def("Render",&CParticleRendererLua::Lua_Render,&CParticleRendererLua::Lua_default_Render);
+	defPtRendererBase.def("SetShader",static_cast<void(*)(lua_State*,::CParticleRendererLua&,::pragma::LuaShaderGUIParticle2D&)>([](lua_State *l,::CParticleRendererLua &renderer,::pragma::LuaShaderGUIParticle2D &shader) {
+		renderer.SetShader(&shader);
+	}));
+	defPtRendererBase.def("GetShader",static_cast<void(*)(lua_State*,::CParticleRendererLua&)>([](lua_State *l,::CParticleRendererLua &renderer) {
+		auto *shader = dynamic_cast<prosper::ShaderGraphics*>(renderer.GetShader());
+		if(shader == nullptr)
+			return;
+		auto *lShader = dynamic_cast<pragma::LuaShaderGraphicsBase*>(shader);
+		if(lShader)
+		{
+			lShader->GetLuaObject().push(l);
+			return;
+		}
+		Lua::Push(l,shader);
+	}));
 	defPtc.scope[defPtRendererBase];
 }
 #pragma optimize("",on)

@@ -905,8 +905,8 @@ int Lua::util::fade_property(lua_State *l)
 		fade_vector_property_generic<LEulerAnglesProperty,EulerAngles>(game,l,[](const EulerAngles &a,const EulerAngles &b,float factor) -> EulerAngles {
 			return EulerAngles{static_cast<float>(umath::lerp_angle(a.p,b.p,factor)),static_cast<float>(umath::lerp_angle(a.y,b.y,factor)),static_cast<float>(umath::lerp_angle(a.r,b.r,factor))};
 		}) ||
-		fade_property_generic<LGenericIntPropertyWrapper,int64_t>(game,l,[](lua_State *l,int32_t idx) -> int64_t {return Lua::CheckInt(l,idx);},umath::lerp) ||
-		fade_property_generic<LGenericFloatPropertyWrapper,float>(game,l,[](lua_State *l,int32_t idx) -> float {return Lua::CheckNumber(l,idx);},umath::lerp)
+		fade_property_generic<LGenericIntPropertyWrapper,int64_t>(game,l,[](lua_State *l,int32_t idx) -> int64_t {return Lua::CheckInt(l,idx);},static_cast<Double(*)(Double,Double,Double)>(umath::lerp)) ||
+		fade_property_generic<LGenericFloatPropertyWrapper,float>(game,l,[](lua_State *l,int32_t idx) -> float {return Lua::CheckNumber(l,idx);},static_cast<Double(*)(Double,Double,Double)>(umath::lerp))
 	)
 		return 1;
 	return 0;

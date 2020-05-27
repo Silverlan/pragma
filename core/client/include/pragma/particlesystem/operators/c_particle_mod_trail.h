@@ -20,7 +20,7 @@ protected:
 public:
 	CParticleOperatorTrail()=default;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	void Simulate(CParticle &particle,double tDelta);
+	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
 };
 
 #endif

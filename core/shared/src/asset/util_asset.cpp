@@ -39,6 +39,8 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 		std::string ext;
 		if(ufile::get_extension(normName,&ext) == false)
 			normName += ".wpt";
+		if(FileManager::Exists("particles/" +normName) == false)
+			return {};
 		return normName;
 	}
 	}

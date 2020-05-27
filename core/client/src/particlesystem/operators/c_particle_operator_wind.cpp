@@ -41,8 +41,8 @@ void CParticleOperatorWind::Simulate(double tDelta)
 			uvec::rotate(&m_vDelta,pTrComponent->GetOrientation());
 	}
 }
-void CParticleOperatorWind::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorWind::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta);
+	CParticleOperator::Simulate(particle,tDelta,strength);
 	particle.SetVelocity(particle.GetVelocity() +m_vDelta);
 }

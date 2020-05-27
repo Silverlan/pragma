@@ -19,7 +19,7 @@ class DLLCLIENT CParticleOperatorColorFade
 {
 public:
 	CParticleOperatorColorFade()=default;
-	virtual void Simulate(CParticle &particle,double) override;
+	virtual void Simulate(CParticle &particle,double,float strength) override;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
 	virtual void OnParticleCreated(CParticle &particle) override;
 private:

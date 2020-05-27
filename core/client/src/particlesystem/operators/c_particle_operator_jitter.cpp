@@ -22,9 +22,9 @@ void CParticleOperatorJitter::Initialize(pragma::CParticleSystemComponent &pSyst
 {
 	CParticleOperatorWander::Initialize(pSystem,values);
 }
-void CParticleOperatorJitter::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorJitter::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta);
+	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
 
 	// jitter is just like wander, except it directly influences the position
 	auto pid = m_hashCodes.at(particle.GetIndex());

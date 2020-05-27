@@ -40,7 +40,7 @@ void CParticleOperatorTextureScrolling::SetFrameOffset(CParticle &particle,Vecto
 	particle.SetFrameOffset(reinterpret_cast<float&>(frameOffset));
 }
 void CParticleOperatorTextureScrolling::OnParticleCreated(CParticle &particle) {SetFrameOffset(particle,{});}
-void CParticleOperatorTextureScrolling::Simulate(CParticle &particle,double dt)
+void CParticleOperatorTextureScrolling::Simulate(CParticle &particle,double dt,float strength)
 {
 	auto offsetH = m_fHorizontalSpeed *dt;
 	auto offsetV = m_fVerticalSpeed *dt;

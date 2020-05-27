@@ -55,6 +55,7 @@ public:
 	virtual void Initialize() override;
 	virtual void InitializeHandle() override;
 	virtual void Think() override;
+	virtual void OnFirstThink() override;
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual util::EventReply KeyboardCallback(GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) override;
 	virtual util::EventReply CharCallback(unsigned int c,GLFW::Modifier mods=GLFW::Modifier::None) override;
@@ -82,6 +83,9 @@ public:
 
 	void OnThink();
 	static void default_OnThink(lua_State *l,WIHandle &hElement);
+
+	void OnFirstThink();
+	static void default_OnFirstThink(lua_State *l,WIHandle &hElement);
 
 	void MouseCallback(int button,int action,int mods);
 	static void default_MouseCallback(lua_State *l,WIHandle &hElement,int button,int action,int mods);

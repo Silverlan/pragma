@@ -80,9 +80,18 @@ class DLLCLIENT CParticleOperator
 public:
 	CParticleOperator()=default;
 	virtual void PreSimulate(CParticle &particle,double tDelta);
-	virtual void Simulate(CParticle &particle,double tDelta);
+	void Simulate(CParticle &particle,double tDelta);
 	virtual void PostSimulate(CParticle &particle,double tDelta);
 	virtual void Simulate(double tDelta);
+	virtual void Simulate(CParticle &particle,double tDelta,float strength);
+	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
+	float CalcStrength(float curTime) const;
+private:
+	float m_opStartFadein = 0.f;
+	float m_opEndFadein = 0.f;
+	float m_opStartFadeout = 0.f;
+	float m_opEndFadeout = 0.f;
+	float m_opFadeOscillate = 0.f;
 };
 
 class DLLCLIENT CParticleOperatorLifespanDecay
@@ -90,7 +99,7 @@ class DLLCLIENT CParticleOperatorLifespanDecay
 {
 public:
 	CParticleOperatorLifespanDecay()=default;
-	void Simulate(CParticle &particle,double tDelta);
+	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
 };
 
 ///////////////////////
@@ -100,6 +109,7 @@ namespace pragma
 {
 	class CLightComponent;
 	namespace rendering {class RasterizationRenderer;};
+	class ShaderParticleBase;
 };
 class DLLCLIENT CParticleRenderer
 	: public CParticleModifier
@@ -110,6 +120,7 @@ public:
 	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;
+	virtual pragma::ShaderParticleBase *GetShader() const=0;
 };
 #pragma warning(pop)
 

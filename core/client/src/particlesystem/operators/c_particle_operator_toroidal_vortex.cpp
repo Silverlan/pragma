@@ -47,9 +47,9 @@ void CParticleOperatorToroidalVortex::Simulate(double tDelta)
 	// find divergence rotation
 	m_dtRotation = uquat::create(m_dtAxis,-m_fDivergence);
 }
-void CParticleOperatorToroidalVortex::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorToroidalVortex::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta);
+	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
 	// cross product of ring axis and particle position is tangent
 	auto pos = particle.GetPosition() -m_dtOrigin;
 	auto tangent = uvec::cross(m_dtAxis,pos);

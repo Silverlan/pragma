@@ -97,12 +97,12 @@ class DLLCLIENT CParticleOperatorLua
 public:
 	CParticleOperatorLua()=default;
 	virtual void PreSimulate(CParticle &particle,double tDelta) override;
-	virtual void Simulate(CParticle &particle,double tDelta) override;
+	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
 	virtual void PostSimulate(CParticle &particle,double tDelta) override;
 	virtual void Simulate(double tDelta) override;
 
-	void Lua_Simulate(CParticle &pt,float dt) {}
-	static void Lua_default_Simulate(lua_State *l,CParticleOperatorLua &mod,CParticle &pt,float dt) {mod.Lua_Simulate(pt,dt);}
+	void Lua_Simulate(CParticle &pt,float dt,float strength) {}
+	static void Lua_default_Simulate(lua_State *l,CParticleOperatorLua &mod,CParticle &pt,float dt,float strength) {mod.Lua_Simulate(pt,dt,strength);}
 };
 
 class DLLCLIENT CParticleRendererLua
@@ -112,9 +112,13 @@ public:
 	CParticleRendererLua()=default;
 	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual pragma::ShaderParticleBase *GetShader() const override;
+	void SetShader(pragma::ShaderParticleBase *shader);
 
 	void Lua_Render(prosper::ICommandBuffer &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {}
 	static void Lua_default_Render(lua_State *l,CParticleRendererLua &mod,prosper::ICommandBuffer &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {mod.Lua_Render(drawCmd,renderer,bloom);}
+private:
+	pragma::ShaderParticleBase *m_shader = nullptr;
 };
 
 #endif

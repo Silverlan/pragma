@@ -45,9 +45,9 @@ void CParticleOperatorWander::Simulate(double tDelta)
 	m_dtTime += tDelta *m_fFrequency;
 	m_dtStrength = m_fStrength *tDelta *60.f;
 }
-void CParticleOperatorWander::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorWander::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta);
+	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
 
 	// using the system hash gives each particle a consistent unique identity;
 	// adding an offset to the time prevents synchronization of the zero points

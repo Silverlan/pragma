@@ -84,8 +84,8 @@ namespace pragma
 		LuaDescriptorSetInfo(luabind::object lbindings,uint32_t setIndex=std::numeric_limits<uint32_t>::max())
 			: setIndex(setIndex)
 		{
-			Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(),2u,bindings,[](lua_State *l,int32_t idx) -> LuaDescriptorSetBinding {
-				return *Lua::CheckDescriptorSetBinding(l,idx);
+			::Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(),2u,bindings,[](lua_State *l,int32_t idx) -> LuaDescriptorSetBinding {
+				return *::Lua::CheckDescriptorSetBinding(l,idx);
 			});
 		}
 		uint32_t setIndex = 0u;
@@ -222,7 +222,21 @@ namespace pragma
 		LuaShaderGUIParticle2D();
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+
+		Vector3 Lua_CalcVertexPosition(
+			lua_State *l,CParticleSystemHandle &hPtC,uint32_t ptIdx,uint32_t localVertIdx,const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+		);
+		static Vector3 Lua_default_CalcVertexPosition(
+			lua_State *l,LuaShaderGUIParticle2D &shader,CParticleSystemHandle &hPtC,uint32_t ptIdx,uint32_t localVertIdx,
+			const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+		) {
+			return shader.Lua_CalcVertexPosition(l,hPtC,ptIdx,localVertIdx,camPos,camUpWs,camRightWs,nearZ,farZ);
+		}
 	protected:
+		virtual Vector3 DoCalcVertexPosition(
+			const pragma::CParticleSystemComponent &ptc,uint32_t ptIdx,uint32_t localVertIdx,
+			const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+		) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;

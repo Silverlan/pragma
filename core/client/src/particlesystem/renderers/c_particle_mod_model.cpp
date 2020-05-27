@@ -126,6 +126,11 @@ CParticleRendererModel::~CParticleRendererModel()
 	}
 }
 
+pragma::ShaderParticleBase *CParticleRendererModel::GetShader() const
+{
+	return static_cast<pragma::ShaderParticleModel*>(m_shader.get());
+}
+
 CParticleRendererModel::ParticleModelComponent &CParticleRendererModel::GetParticleComponent(uint32_t particleIdx)
 {
 	if(particleIdx >= m_particleComponents.size())

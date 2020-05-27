@@ -70,6 +70,10 @@ void CParticleRendererBeam::Initialize(pragma::CParticleSystemComponent &pSystem
 	createInfo.size = sizeof(uint16_t) *indices.size();
 	m_indexBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,indices.data());
 }
+pragma::ShaderParticleBase *CParticleRendererBeam::GetShader() const
+{
+	return static_cast<pragma::ShaderParticlePolyboard*>(m_shader.get());
+}
 void CParticleRendererBeam::PostSimulate(double tDelta)
 {
 	CParticleRenderer::PostSimulate(tDelta);

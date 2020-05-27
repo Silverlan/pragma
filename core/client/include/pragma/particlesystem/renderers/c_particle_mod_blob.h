@@ -70,6 +70,7 @@ public:
 	virtual void OnParticleSystemStarted() override;
 	virtual void OnParticleDestroyed(CParticle &particle) override;
 	virtual void OnParticleSystemStopped() override;
+	virtual pragma::ShaderParticleBase *GetShader() const override;
 };
 
 #endif

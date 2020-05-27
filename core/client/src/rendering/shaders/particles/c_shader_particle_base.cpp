@@ -14,7 +14,7 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
@@ -43,14 +43,23 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	switch(alphaMode)
 	{
 		case AlphaMode::Additive:
+		{
+#if 0
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::One, // color
 				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::One, // alpha
 				colorComponents
 			);
-
+#endif
+			pipelineInfo.SetColorBlendAttachmentProperties(
+				0u,true,blendOp,blendOp,
+				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // color
+				prosper::BlendFactor::One,prosper::BlendFactor::OneMinusSrcAlpha, // alpha
+				colorComponents
+			);
 			break;
+	}
 		case AlphaMode::Opaque:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
@@ -121,3 +130,4 @@ pragma::AlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::CParticle
 }
 
 uint32_t ShaderParticleBase::GetParticlePipelineCount() const {return umath::to_integral(AlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count);}
+#pragma optimize("",on)

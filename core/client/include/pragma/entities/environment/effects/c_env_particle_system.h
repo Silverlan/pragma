@@ -14,6 +14,7 @@
 #include "pragma/particlesystem/c_particle.h"
 #include "pragma/rendering/c_alpha_mode.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
+#include <pragma/physics/transform.hpp>
 #include <fsys/vfileptr.h>
 
 class CParticleSystemData;
@@ -103,7 +104,7 @@ namespace pragma
 			std::array<uint16_t,4> color;
 			float rotation = 0.f;
 			uint16_t length = 0; // Encoded float
-			uint16_t sequence = 0;
+			uint16_t rotationYaw = 0.f; // Encoded float
 		};
 		struct DLLCLIENT ParticleAnimationData
 		{
@@ -211,11 +212,13 @@ namespace pragma
 		const Color &GetInitialColor() const;
 		void SetInitialColor(const Color &col);
 
-		float GetBloomScale() const;
-		void SetBloomScale(float scale);
+		const Vector4 &GetBloomColorFactor() const;
+		void SetBloomColorFactor(const Vector4 &colorFactor);
+		std::optional<Vector4> GetEffectiveBloomColorFactor() const;
+		bool IsBloomEnabled() const;
 
-		float GetIntensity() const;
-		void SetIntensity(float intensity);
+		const Vector4 &GetColorFactor() const;
+		void SetColorFactor(const Vector4 &colorFactor);
 		
 		void Simulate(double tDelta);
 		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom);
@@ -256,6 +259,7 @@ namespace pragma
 		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetAnimationDescriptorSetGroup() const;
 		bool IsAnimated() const;
 		const std::pair<Vector3,Vector3> &GetRenderBounds() const;
+		std::pair<Vector3,Vector3> CalcRenderBounds() const;
 		virtual void SetContinuous(bool b) override;
 
 		template<class TInitializer>
@@ -360,8 +364,8 @@ namespace pragma
 
 		std::vector<ParticleData> m_instanceData;
 		std::vector<ParticleAnimationData> m_particleAnimData = {};
-		float m_bloomScale = 0.f;
-		float m_intensity = 1.f;
+		Vector4 m_colorFactor = {1.f,1.f,1.f,1.f};
+		Vector4 m_bloomColorFactor = {1.f,1.f,1.f,1.f};
 		State m_state = State::Initial;
 
 		// Only with OrientationType::World

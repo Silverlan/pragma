@@ -27,7 +27,7 @@ void CParticleOperatorTrail::Initialize(pragma::CParticleSystemComponent &pSyste
 	}
 	m_particleNodes.resize(pSystem.GetMaxParticleCount(),0);
 }
-void CParticleOperatorTrail::Simulate(CParticle &particle,double)
+void CParticleOperatorTrail::Simulate(CParticle &particle,double,float strength)
 {
 	auto vel = particle.GetVelocity();
 	auto nodeIdx = particle.GetIndex();

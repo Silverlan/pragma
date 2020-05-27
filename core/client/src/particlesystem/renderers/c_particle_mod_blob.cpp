@@ -58,6 +58,11 @@ CParticleRendererBlob::~CParticleRendererBlob()
 	ShowDebugNeighborLinks(false);
 }
 
+pragma::ShaderParticleBase *CParticleRendererBlob::GetShader() const
+{
+	return nullptr; // TODO
+}
+
 void CParticleRendererBlob::ShowDebugNeighborLinks(bool b)
 {
 	if(b == false)

@@ -23,6 +23,7 @@
 #include <glm/gtx/norm.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <datasystem_vector.h>
 
 using namespace pragma;
 
@@ -348,9 +349,14 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 	else if(ustring::compare(key,"origin"))
 		m_origin = uvec::create(value);
 	else if(ustring::compare(key,"bloom_scale"))
-		m_bloomScale = ::util::to_float(value);
-	else if(ustring::compare(key,"intensity"))
-		m_intensity = ::util::to_float(value);
+	{
+		auto bloomFactor = ::util::to_float(value);
+		SetBloomColorFactor({bloomFactor,bloomFactor,bloomFactor,1.f});
+	}
+	else if(ustring::compare(key,"color_factor"))
+		m_colorFactor = uvec::create_v4(value);
+	else if(ustring::compare(key,"bloom_color_factor"))
+		SetBloomColorFactor(uvec::create_v4(value));
 	else if(ustring::compare(key,"max_node_count"))
 		m_maxNodes = ::util::to_int(value);
 	else if(ustring::compare(key,"lifetime"))
@@ -578,11 +584,50 @@ void CParticleSystemComponent::SetInitialColor(const Color &col) {m_initialColor
 
 void CParticleSystemComponent::SetCastShadows(bool b) {umath::set_flag(m_flags,Flags::CastShadows,b);}
 bool CParticleSystemComponent::GetCastShadows() const {return umath::is_flag_set(m_flags,Flags::CastShadows);}
-float CParticleSystemComponent::GetBloomScale() const {return m_bloomScale;}
-void CParticleSystemComponent::SetBloomScale(float scale) {m_bloomScale = scale;}
-float CParticleSystemComponent::GetIntensity() const {return m_intensity;}
-void CParticleSystemComponent::SetIntensity(float intensity) {m_intensity = intensity;}
+const Vector4 &CParticleSystemComponent::GetBloomColorFactor() const {return m_bloomColorFactor;}
+void CParticleSystemComponent::SetBloomColorFactor(const Vector4 &colorFactor) {m_bloomColorFactor = colorFactor;}
+std::optional<Vector4> CParticleSystemComponent::GetEffectiveBloomColorFactor() const
+{
+	auto colorFactor = GetBloomColorFactor();
+	auto *mat = GetMaterial();
+	if(mat)
+	{
+		auto &data = mat->GetDataBlock();
+		auto &dColorFactor = data->GetValue("bloom_color_factor");
+		if(dColorFactor != nullptr && typeid(*dColorFactor) == typeid(ds::Vector4))
+		{
+			auto &matColorFactor = static_cast<ds::Vector4*>(dColorFactor.get())->GetValue();
+			colorFactor *= matColorFactor;
+		}
+	}
+	if(colorFactor.r == 0.f && colorFactor.g == 0.f && colorFactor.b == 0.f)
+		return {};
+	return colorFactor;
+}
+bool CParticleSystemComponent::IsBloomEnabled() const {return GetEffectiveBloomColorFactor().has_value();}
+const Vector4 &CParticleSystemComponent::GetColorFactor() const {return m_colorFactor;}
+void CParticleSystemComponent::SetColorFactor(const Vector4 &colorFactor) {m_colorFactor = colorFactor;}
 const std::pair<Vector3,Vector3> &CParticleSystemComponent::GetRenderBounds() const {return m_renderBounds;}
+std::pair<Vector3,Vector3> CParticleSystemComponent::CalcRenderBounds() const
+{
+	std::pair<Vector3,Vector3> bounds {};
+	bounds.first = uvec::max();
+	bounds.second = uvec::min();
+
+	for(auto i=decltype(m_numRenderParticles){0u};i<m_numRenderParticles;++i)
+	{
+		auto &data = m_instanceData.at(i);
+		auto &ptPos = data.position;
+		if(data.color.at(3) == 0)
+			continue;
+		auto radius = data.radius;
+		auto ptMin = ptPos -Vector3{radius,radius,radius};
+		auto ptMax = ptPos +Vector3{radius,radius,radius};
+		uvec::min(&bounds.first,ptMin);
+		uvec::min(&bounds.second,ptMax);
+	}
+	return bounds;
+}
 
 CParticleSystemComponent::OrientationType CParticleSystemComponent::GetOrientationType() const {return m_orientationType;}
 void CParticleSystemComponent::SetOrientationType(OrientationType type)
@@ -1165,8 +1210,11 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 		return;
 	}
 
-	for(auto &r : m_renderers)
-		r->Render(drawCmd,renderer,bloom);
+	if(m_bufParticles != nullptr)
+	{
+		for(auto &r : m_renderers)
+			r->Render(drawCmd,renderer,bloom);
+	}
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
@@ -1240,14 +1288,13 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 		}
 	}
 #endif
-	particle.PopulateInitialValues();
 	for(auto &init : m_initializers)
 		init->OnParticleCreated(particle);
 	for(auto &op : m_operators)
 		op->OnParticleCreated(particle);
 	for(auto &r : m_renderers)
 		r->OnParticleCreated(particle);
-
+	particle.PopulateInitialValues();
 
 	for(auto &op : m_operators)
 		op->Simulate(particle,0.0); // TODO: Should we use a delta time here?
@@ -1523,8 +1570,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 					data.position[i] += psPos[i];
 			}
 			data.rotation = p.GetRotation();
+			data.rotationYaw = umath::float32_to_float16_glm(p.GetRotationYaw());
 			data.length = umath::float32_to_float16_glm(p.GetLength());
-			data.sequence = p.GetSequence();
 			m_particleIndicesToBufferIndices[sortedIdx] = m_numRenderParticles;
 			m_bufferIndicesToParticleIndices[m_numRenderParticles] = sortedIdx;
 
@@ -1547,15 +1594,13 @@ void CParticleSystemComponent::Simulate(double tDelta)
 				if(m_spriteSheetAnimationData && seqIdx < m_spriteSheetAnimationData->sequences.size())
 				{
 					auto &seq = m_spriteSheetAnimationData->sequences.at(seqIdx);
-					auto time = p.GetFrameOffset();
+					auto time = p.GetFrameOffset() *seq.GetDuration();
 					uint32_t frameIdx0,frameIdx1;
 					float interpFactor;
 					if(seq.GetInterpolatedFrameData(time,frameIdx0,frameIdx1,interpFactor))
 					{
-						auto &frame0 = seq.frames.at(frameIdx0);
-						auto &frame1 = seq.frames.at(frameIdx1);
-						animData.frameIndex0 = frameIdx0;
-						animData.frameIndex1 = frameIdx1;
+						animData.frameIndex0 = seq.GetAbsoluteFrameIndex(frameIdx0);
+						animData.frameIndex1 = seq.GetAbsoluteFrameIndex(frameIdx1);
 						animData.interpFactor = interpFactor;
 					}
 				}

@@ -50,6 +50,11 @@ void CParticleRendererSprite::PostSimulate(double tDelta)
 	m_rotationalBuffer->Update();
 }
 
+pragma::ShaderParticleBase *CParticleRendererSprite::GetShader() const
+{
+	return static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
+}
+
 void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());

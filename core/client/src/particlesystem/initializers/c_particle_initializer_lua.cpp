@@ -23,10 +23,10 @@ void CParticleOperatorLua::PreSimulate(CParticle &particle,double tDelta)
 {
 	TParticleModifierLua<CParticleOperator>::PreSimulate(particle,tDelta);
 }
-void CParticleOperatorLua::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorLua::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	TParticleModifierLua<CParticleOperator>::Simulate(particle,tDelta);
-	CallLuaMember<void,std::reference_wrapper<CParticle>,float>("Simulate",std::ref(particle),tDelta);
+	TParticleModifierLua<CParticleOperator>::Simulate(particle,tDelta,strength);
+	CallLuaMember<void,std::reference_wrapper<CParticle>,float,float>("Simulate",std::ref(particle),tDelta,strength);
 }
 void CParticleOperatorLua::PostSimulate(CParticle &particle,double tDelta)
 {
@@ -45,6 +45,7 @@ void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommand
 }
 void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
-
+	// TODO
 }
-
+pragma::ShaderParticleBase *CParticleRendererLua::GetShader() const {return m_shader;}
+void CParticleRendererLua::SetShader(pragma::ShaderParticleBase *shader) {m_shader = shader;}

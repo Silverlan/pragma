@@ -125,7 +125,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		for(auto &initializer : initializers)
 		{
 			Lua::PushInt(l,idx++);
-			Lua::Push(l,initializer.get());
+			auto *luaInit = dynamic_cast<CParticleInitializerLua*>(initializer.get());
+			if(luaInit)
+				luaInit->GetLuaObject().push(l);
+			else
+				Lua::Push(l,initializer.get());
 			Lua::SetTableValue(l,t);
 		}
 	}));
@@ -137,7 +141,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		for(auto &op : operators)
 		{
 			Lua::PushInt(l,idx++);
-			Lua::Push(l,op.get());
+			auto *luaOp = dynamic_cast<CParticleOperatorLua*>(op.get());
+			if(luaOp)
+				luaOp->GetLuaObject().push(l);
+			else
+				Lua::Push(l,op.get());
 			Lua::SetTableValue(l,t);
 		}
 	}));
@@ -149,7 +157,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		for(auto &renderer : renderers)
 		{
 			Lua::PushInt(l,idx++);
-			Lua::Push(l,renderer.get());
+			auto *luaRenderer = dynamic_cast<CParticleRendererLua*>(renderer.get());
+			if(luaRenderer)
+				luaRenderer->GetLuaObject().push(l);
+			else
+				Lua::Push(l,renderer.get());
 			Lua::SetTableValue(l,t);
 		}
 	}));
@@ -259,6 +271,12 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		Lua::Push<Vector3>(l,bounds.first);
 		Lua::Push<Vector3>(l,bounds.second);
 		}));
+	defCParticleSystem.def("CalcRenderBounds",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto bounds = hComponent->CalcRenderBounds();
+		Lua::Push<Vector3>(l,bounds.first);
+		Lua::Push<Vector3>(l,bounds.second);
+	}));
 	defCParticleSystem.def("SetRadius",static_cast<void(*)(lua_State*,CParticleSystemHandle&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,float radius) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetRadius(radius);
@@ -318,21 +336,21 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetCastShadows(b);
 		}));
-	defCParticleSystem.def("GetBloomScale",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+	defCParticleSystem.def("SetBloomColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&,const Vector4&)>([](lua_State *l,CParticleSystemHandle &hComponent,const Vector4 &factor) {
 		pragma::Lua::check_component(l,hComponent);
-		Lua::PushBool(l,hComponent->GetBloomScale());
+		hComponent->SetBloomColorFactor(factor);
 		}));
-	defCParticleSystem.def("SetBloomScale",static_cast<void(*)(lua_State*,CParticleSystemHandle&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,float scale) {
+	defCParticleSystem.def("GetBloomColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetBloomScale(scale);
+		Lua::Push<Vector4>(l,hComponent->GetBloomColorFactor());
+	}));
+	defCParticleSystem.def("SetColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&,const Vector4&)>([](lua_State *l,CParticleSystemHandle &hComponent,const Vector4 &factor) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetColorFactor(factor);
 		}));
-	defCParticleSystem.def("GetIntensity",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+	defCParticleSystem.def("GetColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
-		Lua::PushBool(l,hComponent->GetIntensity());
-		}));
-	defCParticleSystem.def("SetIntensity",static_cast<void(*)(lua_State*,CParticleSystemHandle&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,float intensity) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetIntensity(intensity);
+		Lua::Push<Vector4>(l,hComponent->GetColorFactor());
 		}));
 	defCParticleSystem.def("GetParticleCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);

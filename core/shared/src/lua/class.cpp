@@ -489,6 +489,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
 	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,const std::string&)>(Lua::DataBlock::load))];
 	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,VFilePtr)>(Lua::DataBlock::load))];
+	defDataBlock.scope[luabind::def("create",static_cast<void(*)(lua_State*)>(Lua::DataBlock::create))];
 
 	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetInt));
 	defDataBlock.def("GetFloat",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetFloat));
@@ -509,6 +510,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetData",&Lua::DataBlock::GetData);
 	defDataBlock.def("GetChildBlocks",&Lua::DataBlock::GetChildBlocks);
 	defDataBlock.def("SetValue",&Lua::DataBlock::SetValue);
+	defDataBlock.def("Merge",&Lua::DataBlock::Merge);
 	defDataBlock.def("GetValueType",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>([](lua_State *l,ds::Block &dataBlock,const std::string &key) {
 		auto val = dataBlock.GetDataValue(key);
 		if(val == nullptr)
@@ -907,6 +909,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto defVector = luabind::class_<Vector3>("Vector");
 	defVector.def(luabind::constructor<>());
 	defVector.def(luabind::constructor<float,float,float>());
+	defVector.def(luabind::constructor<const Vector2&,float>());
 	defVector.def(luabind::tostring(luabind::self));
 	defVector.def(-luabind::const_self);
 	defVector.def_readwrite("x",&Vector3::x);
@@ -1017,6 +1020,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto defVector4 = luabind::class_<Vector4>("Vector4");
 	defVector4.def(luabind::constructor<>());
 	defVector4.def(luabind::constructor<float,float,float,float>());
+	defVector4.def(luabind::constructor<const Vector3&,float>());
 	defVector4.def(luabind::tostring(luabind::self));
 	defVector4.def(-luabind::const_self);
 	defVector4.def_readwrite("w",&Vector4::w);

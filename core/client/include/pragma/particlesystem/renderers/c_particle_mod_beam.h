@@ -23,6 +23,7 @@ public:
 	virtual void OnParticleSystemStopped() override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const override;
+	virtual pragma::ShaderParticleBase *GetShader() const override;
 private:
 #pragma pack(push,1)
 	struct DLLCLIENT Node

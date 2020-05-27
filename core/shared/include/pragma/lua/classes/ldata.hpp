@@ -21,6 +21,7 @@ namespace Lua
 	{
 		DLLNETWORK void load(lua_State *l,const std::string &fileName);
 		DLLNETWORK void load(lua_State *l,VFilePtr f);
+		DLLNETWORK void create(lua_State *l);
 
 		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetFloat(lua_State *l,ds::Block &data,const std::string &val);
@@ -41,6 +42,7 @@ namespace Lua
 		DLLNETWORK void GetData(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetChildBlocks(lua_State *l,ds::Block &data);
 		DLLNETWORK void SetValue(lua_State *l,ds::Block &data,const std::string &type,const std::string &key,const std::string &val);
+		DLLNETWORK void Merge(lua_State *l,ds::Block &data,ds::Block &other);
 
 		DLLNETWORK void RemoveValue(lua_State*,ds::Block &data,const std::string &key);
 		DLLNETWORK void IsEmpty(lua_State *l,ds::Block &data);

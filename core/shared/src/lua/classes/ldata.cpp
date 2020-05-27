@@ -26,6 +26,12 @@ void Lua::DataBlock::load(lua_State *l,VFilePtr f)
 		return;
 	Lua::Push(l,db);
 }
+void Lua::DataBlock::create(lua_State *l)
+{
+	auto settings = ds::create_data_settings({std::unordered_map<std::string,std::string>{}});
+	auto db = std::make_shared<ds::Block>(*settings);
+	Lua::Push(l,db);
+}
 void Lua::DataBlock::GetInt(lua_State *l,ds::Block &data,const std::string &val,int32_t default) {Lua::PushInt(l,data.GetInt(val,default));}
 void Lua::DataBlock::GetFloat(lua_State *l,ds::Block &data,const std::string &val,float default) {Lua::PushNumber(l,data.GetFloat(val,default));}
 void Lua::DataBlock::GetBool(lua_State *l,ds::Block &data,const std::string &val,bool default) {Lua::PushBool(l,data.GetBool(val,false));}
@@ -91,6 +97,13 @@ void Lua::DataBlock::GetChildBlocks(lua_State *l,ds::Block &data)
 void Lua::DataBlock::SetValue(lua_State*,ds::Block &data,const std::string &type,const std::string &key,const std::string &val)
 {
 	data.AddValue(type,key,val);
+}
+void Lua::DataBlock::Merge(lua_State *l,ds::Block &data,ds::Block &other)
+{
+	auto *data0 = const_cast<std::unordered_map<std::string,std::shared_ptr<ds::Base>>*>(data.GetData());
+	auto *data1 = other.GetData();
+	for(auto &pair : *data1)
+		(*data0)[pair.first] = pair.second;
 }
 void Lua::DataBlock::RemoveValue(lua_State*,ds::Block &data,const std::string &key)
 {

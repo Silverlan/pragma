@@ -19,7 +19,7 @@ private:
 public:
 	CParticleOperatorVelocity()=default;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values) override;
-	virtual void Simulate(CParticle &particle,double tDelta) override;
+	virtual void Simulate(CParticle &particle,double tDelta,float strength) override;
 	float GetSpeed() const;
 };
 

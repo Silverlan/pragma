@@ -171,6 +171,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def(luabind::constructor<>());
 	wiBaseWIElement.def("OnInitialize",&WILuaWrapper::OnInitialize,&WILuaWrapper::default_OnInitialize);
 	wiBaseWIElement.def("OnThink",&WILuaWrapper::OnThink,&WILuaWrapper::default_OnThink);
+	wiBaseWIElement.def("OnInitialThink",&WILuaWrapper::OnFirstThink,&WILuaWrapper::default_OnFirstThink);
 	wiBaseWIElement.def("MouseCallback",&WILuaWrapper::MouseCallback,&WILuaWrapper::default_MouseCallback);
 	wiBaseWIElement.def("KeyboardCallback",&WILuaWrapper::KeyboardCallback,&WILuaWrapper::default_KeyboardCallback);
 	wiBaseWIElement.def("CharCallback",&WILuaWrapper::CharCallback,&WILuaWrapper::default_CharCallback);

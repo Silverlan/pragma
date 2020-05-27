@@ -24,8 +24,8 @@ void CParticleOperatorAngularAcceleration::Initialize(pragma::CParticleSystemCom
 			m_vAcceleration = uvec::create(pair.second);
 	}
 }
-void CParticleOperatorAngularAcceleration::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorAngularAcceleration::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta);
+	CParticleOperator::Simulate(particle,tDelta,strength);
 	particle.SetAngularVelocity(particle.GetAngularVelocity() +m_vAcceleration *static_cast<float>(tDelta));
 }

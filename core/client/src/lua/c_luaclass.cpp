@@ -90,6 +90,12 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	auto spriteSheetDef = luabind::class_<SpriteSheetAnimation>("SpriteSheetAnimation");
 
 	auto sequenceDef = luabind::class_<SpriteSheetAnimation::Sequence>("Sequence");
+	sequenceDef.def("GetDuration",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &seq) {
+		Lua::PushNumber(l,seq.GetDuration());
+	}));
+	sequenceDef.def("GetFrameOffset",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &seq) {
+		Lua::PushNumber(l,seq.GetFrameOffset());
+	}));
 
 	auto frameDef = luabind::class_<SpriteSheetAnimation::Sequence::Frame>("Frame");
 	frameDef.def("GetUVBounds",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
@@ -572,6 +578,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		}
 		Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),*ps));
 	}));
+
 	modShader[defShaderParticleBase];
 
 	auto defShaderPostProcessingBase = luabind::class_<pragma::LuaShaderPostProcessing,luabind::bases<pragma::LuaShaderGraphicsBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BasePostProcessing");

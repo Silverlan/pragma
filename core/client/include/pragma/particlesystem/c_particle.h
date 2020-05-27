@@ -28,43 +28,28 @@ private:
 
 class DLLCLIENT CParticle
 {
-private:
-	Vector3 m_pos = {};
-	Quat m_rot = uquat::identity(); // Only used by model renderer and physics
-	// Optional relative origin, which is rotated by the particle's rotation, and added to its position before
-	// being written to the render buffer (= Position modifier)
-	Vector3 m_origin = {};
-	Vector3 m_velocity = {};
-	Vector3 m_angularVelocity = {};
-	float m_radius = 0.f;
-	float m_length = 0.f;
-	bool m_bHasLength = false;
-	float m_tLife = 0.f;
-	float m_tAlive = 0.f;
-	float m_tCreated = 0.f;
-	float m_rotation = 0.f;
-	Vector4 m_color = {};
-	float m_camDist = 0.f;
-	bool m_bIsAlive = false;
-	float m_frameOffset = 0.f;
-	uint32_t m_index = 0u;
-	uint32_t m_sequence;
-	uint32_t m_seed = 0u;
-	mutable std::mt19937 m_mt;
-
-	bool m_bDying = false;
-	float m_tDeath = 0.f;
-
-	Vector3 m_prevPos = {};
-
-	// Initial values after the initializers have run
-	float m_initialRadius = 0.f;
-	float m_initialLength = 0.f;
-	float m_initialRotation = 0.f;
-	float m_initialLife = 0.f;
-	Vector4 m_initialColor = {};
-	float m_initialFrameOffset = 0.f;
 public:
+	enum class FieldId : uint8_t
+	{
+		Pos = 0,
+		Rot,
+		RotYaw,
+		Origin,
+		Velocity,
+		AngularVelocity,
+		Radius,
+		Length,
+		Life,
+		Color,
+		Alpha,
+		Sequence,
+
+		Count,
+		Invalid = Count
+	};
+	static const char *field_id_to_name(FieldId id);
+	static FieldId name_to_field_id(const std::string &fieldName);
+
 	CParticle();
 	~CParticle();
 
@@ -78,6 +63,8 @@ public:
 	bool ShouldDraw() const;
 	float GetRotation() const;
 	void SetRotation(float rotation);
+	float GetRotationYaw() const;
+	void SetRotationYaw(float yaw);
 	const Vector3 &GetPosition() const;
 	const Vector3 &GetVelocity() const;
 	const Vector3 &GetAngularVelocity() const;
@@ -128,6 +115,11 @@ public:
 	const Vector3 &GetOrigin() const;
 	void SetOrigin(const Vector3 &origin);
 
+	void SetField(FieldId fieldId,float value);
+	void SetField(FieldId fieldId,const Vector4 &value);
+	bool GetField(FieldId fieldId,float &outValue) const;
+	bool GetField(FieldId fieldId,Vector4 &outValue) const;
+
 	uint32_t GetSeed() const;
 	// Generates a random int, but gurantees to always return the same int for a specific particle and a specific seed
 	template<typename T,typename = std::enable_if_t<std::is_integral<T>::value>>
@@ -142,6 +134,44 @@ public:
 
 	template<typename T,typename = std::enable_if_t<std::is_floating_point<T>::value>>
 		T PseudoRandomRealExp(T min,T max,float exp,uint32_t seed=0u) const;
+private:
+	Vector3 m_pos = {};
+	Quat m_rot = uquat::identity(); // Only used by model renderer and physics
+									// Optional relative origin, which is rotated by the particle's rotation, and added to its position before
+									// being written to the render buffer (= Position modifier)
+	Vector3 m_origin = {};
+	Vector3 m_velocity = {};
+	Vector3 m_angularVelocity = {};
+	float m_radius = 0.f;
+	float m_length = 0.f;
+	bool m_bHasLength = false;
+	float m_tLife = 0.f;
+	float m_tAlive = 0.f;
+	float m_tCreated = 0.f;
+	float m_rotation = 0.f;
+	float m_rotationYaw = 0.f;
+	Vector4 m_color = {};
+	float m_camDist = 0.f;
+	bool m_bIsAlive = false;
+	float m_frameOffset = 0.f;
+	uint32_t m_index = 0u;
+	uint32_t m_sequence;
+	uint32_t m_seed = 0u;
+	mutable std::mt19937 m_mt;
+
+	bool m_bDying = false;
+	float m_tDeath = 0.f;
+
+	Vector3 m_prevPos = {};
+
+	// Initial values after the initializers have run
+	float m_initialRadius = 0.f;
+	float m_initialLength = 0.f;
+	float m_initialRotation = 0.f;
+	float m_initialRotationYaw = 0.f;
+	float m_initialLife = 0.f;
+	Vector4 m_initialColor = {};
+	float m_initialFrameOffset = 0.f;
 };
 #pragma warning(pop)
 

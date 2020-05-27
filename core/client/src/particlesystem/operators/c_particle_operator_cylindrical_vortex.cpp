@@ -43,9 +43,9 @@ void CParticleOperatorCylindricalVortex::Simulate(double tDelta)
 	// find divergence rotation
 	m_dtRotation = uquat::create(m_dtAxis,-m_fDivergence);
 }
-void CParticleOperatorCylindricalVortex::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorCylindricalVortex::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta);
+	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
 	// cross product of vortex axis and relative position is direction
 	auto v = uvec::cross(m_dtAxis,particle.GetPosition() -m_dtOrigin);
 	auto l = uvec::length(v);

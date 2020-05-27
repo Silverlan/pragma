@@ -173,19 +173,48 @@ const std::string &CParticleModifier::GetName() const {return m_name;}
 
 ///////////////////////
 
+void CParticleOperator::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
+{
+	CParticleModifier::Initialize(pSystem,values);
+	for(auto &pair : values)
+	{
+		if(ustring::compare(pair.first,"op_start_fadein"))
+			m_opStartFadein = util::to_float(pair.second);
+		else if(ustring::compare(pair.first,"op_start_fadeout"))
+			m_opStartFadeout = util::to_float(pair.second);
+		else if(ustring::compare(pair.first,"op_end_fadein"))
+			m_opEndFadein = util::to_float(pair.second);
+		else if(ustring::compare(pair.first,"op_end_fadeout"))
+			m_opEndFadeout = util::to_float(pair.second);
+		else if(ustring::compare(pair.first,"op_fade_oscillate_period"))
+			m_opFadeOscillate = util::to_float(pair.second);
+	}
+}
+float CParticleOperator::CalcStrength(float curTime) const
+{
+	auto flTime = curTime;
+	if(m_opFadeOscillate > 0.f)
+		flTime = fmodf(curTime *(1.0 /m_opFadeOscillate),1.f);
+	return umath::fade_in_out(m_opStartFadein,m_opEndFadein,m_opStartFadeout,m_opEndFadeout,flTime);
+}
 void CParticleOperator::Simulate(double)
 {}
 
 void CParticleOperator::PreSimulate(CParticle &particle,double tDelta)
 {}
 
-void CParticleOperator::Simulate(CParticle&,double)
-{}
+void CParticleOperator::Simulate(CParticle &pt,double dt)
+{
+	auto strength = CalcStrength(pt.GetTimeAlive());
+	Simulate(pt,dt,strength);
+}
+
+void CParticleOperator::Simulate(CParticle &particle,double tDelta,float strength) {}
 
 void CParticleOperator::PostSimulate(CParticle &particle,double tDelta)
 {}
 
-void CParticleOperatorLifespanDecay::Simulate(CParticle&,double)
+void CParticleOperatorLifespanDecay::Simulate(CParticle&,double,float strength)
 {}
 
 ///////////////////////

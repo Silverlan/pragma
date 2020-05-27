@@ -70,7 +70,7 @@ void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrim
 			particle->Render(drawCmd,*this,bloom);
 			if(bloomParticles != nullptr)
 			{
-				if(particle->GetBloomScale() != 0.f)
+				if(particle->IsBloomEnabled())
 					bloomParticles->push_back(particle);
 				auto &children = particle->GetChildren();
 				bloomParticles->reserve(bloomParticles->size() +children.size());

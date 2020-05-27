@@ -43,7 +43,7 @@ void CParticleOperatorRadiusFadeBase::OnParticleCreated(CParticle &particle)
 		return;
 	m_particleStartRadiuses->at(particle.GetIndex()) = std::numeric_limits<float>::max();
 }
-void CParticleOperatorRadiusFadeBase::Simulate(CParticle &particle,double)
+void CParticleOperatorRadiusFadeBase::Simulate(CParticle &particle,double,float strength)
 {
 	auto tFade = 0.f;
 	if(GetEasedFadeFraction(particle,tFade) == false)

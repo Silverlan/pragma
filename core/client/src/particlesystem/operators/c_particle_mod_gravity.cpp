@@ -40,9 +40,9 @@ void CParticleOperatorGravity::Simulate(double tDelta)
 		return;
 	m_dtGravity = GetParticleSystem().DirectionToParticleSpace(m_gravityForce *static_cast<float>(tDelta),ShouldRotateWithEmitter());
 }
-void CParticleOperatorGravity::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorGravity::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperatorWorldBase::Simulate(particle,tDelta);
+	CParticleOperatorWorldBase::Simulate(particle,tDelta,strength);
 	if(m_bUseCustomGravityForce)
 	{
 		particle.SetVelocity(particle.GetVelocity() +m_dtGravity);

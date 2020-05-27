@@ -56,6 +56,15 @@ void WILuaBase::Think()
 	CallLuaMember("OnThink");
 }
 
+void WILuaBase::OnFirstThink()
+{
+	auto hThis = GetHandle();
+	WIBase::OnFirstThink();
+	if(hThis.IsValid() == false)
+		return;
+	CallLuaMember("OnFirstThink");
+}
+
 util::EventReply WILuaBase::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	if(WIBase::MouseCallback(button,state,mods) == util::EventReply::Handled)
@@ -159,6 +168,9 @@ void WILuaWrapper::default_OnInitialize(lua_State*,WIHandle&) {}
 
 void WILuaWrapper::OnThink() {}
 void WILuaWrapper::default_OnThink(lua_State*,WIHandle&) {}
+
+void WILuaWrapper::OnFirstThink() {}
+void WILuaWrapper::default_OnFirstThink(lua_State*,WIHandle&) {}
 
 void WILuaWrapper::MouseCallback(int,int,int) {}
 void WILuaWrapper::default_MouseCallback(lua_State*,WIHandle&,int,int,int) {}

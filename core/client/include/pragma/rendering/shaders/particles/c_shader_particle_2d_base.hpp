@@ -27,7 +27,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_AGE;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_COLOR;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ROTATION;
-		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LENGTH_SEQUENCE;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_LENGTH_YAW;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ANIMATION_START;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_ANIMATION_FRAME_INDICES;
@@ -43,6 +43,10 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
+		static constexpr auto VERTEX_COUNT = 6u;
+		static constexpr auto TRIANGLE_COUNT = 2u;
+		static std::array<Vector2,6> GetQuadVertexPositions();
+		static Vector2 GetVertexUV(uint32_t vertIdx);
 		enum class VertexAttribute : uint32_t
 		{
 			Vertex = 0u,
@@ -57,6 +61,7 @@ namespace pragma
 #pragma pack(push,1)
 		struct PushConstants
 		{
+			Vector4 colorFactor;
 			Vector3 camRightWs;
 			int32_t orientation;
 			Vector3 camUpWs;
@@ -64,7 +69,6 @@ namespace pragma
 			Vector3 camPos;
 			float farZ;
 			uint32_t viewportSize; // First 16 bits = width, second 16 bits = height
-			float texIntensity;
 			uint32_t renderFlags;
 			uint32_t alphaMode;
 			float time;
@@ -84,8 +88,18 @@ namespace pragma
 			float &nearZ,float &farZ,const Material *material=nullptr,float camNearZ=0.f,float camFarZ=0.f
 		) const;
 
+		Vector3 CalcVertexPosition(
+			const pragma::CParticleSystemComponent &ptc,uint32_t ptIdx,uint32_t absVertIdx,
+			const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+		) const;
+
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:
+		virtual Vector3 DoCalcVertexPosition(
+			const pragma::CParticleSystemComponent &ptc,uint32_t ptIdx,uint32_t localVertIdx,
+			const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+		) const;
+
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
 		bool BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps);
 

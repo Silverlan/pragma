@@ -31,8 +31,8 @@ void CParticleOperatorLinearDrag::Simulate(double tDelta)
 	CParticleOperator::Simulate(tDelta);
 	m_fTickDrag = umath::max(0.f,1.f -m_fAmount *static_cast<float>(tDelta));
 }
-void CParticleOperatorLinearDrag::Simulate(CParticle &particle,double tDelta)
+void CParticleOperatorLinearDrag::Simulate(CParticle &particle,double tDelta,float strength)
 {
-	CParticleOperator::Simulate(particle,tDelta);
+	CParticleOperator::Simulate(particle,tDelta,strength);
 	particle.SetVelocity(particle.GetVelocity() *m_fTickDrag);
 }

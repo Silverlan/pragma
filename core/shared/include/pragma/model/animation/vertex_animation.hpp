@@ -19,7 +19,8 @@ public:
 	enum class Flags : uint8_t
 	{
 		None = 0u,
-		HasDeltaValues = 1u
+		HasDeltaValues = 1u,
+		HasNormals = HasDeltaValues<<1u
 	};
 
 	MeshVertexFrame()=default;
@@ -27,14 +28,24 @@ public:
 
 	const std::vector<std::array<uint16_t,4>> &GetVertices() const;
 	std::vector<std::array<uint16_t,4>> &GetVertices();
+	const std::vector<std::array<uint16_t,4>> &GetNormals() const;
+	std::vector<std::array<uint16_t,4>> &GetNormals();
 	void SetVertexCount(uint32_t count);
 	uint32_t GetVertexCount() const;
+
 	void SetVertexPosition(uint32_t vertId,const Vector3 &pos);
 	void SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos);
+	void SetVertexPosition(uint32_t vertId,const std::array<uint16_t,4> &pos);
+	bool GetVertexPosition(uint32_t vertId,Vector3 &pos) const;
+
+	void SetVertexNormal(uint32_t vertId,const Vector3 &n);
+	void SetVertexNormal(uint32_t vertId,const std::array<uint16_t,3> &n);
+	void SetVertexNormal(uint32_t vertId,const std::array<uint16_t,4> &n);
+	bool GetVertexNormal(uint32_t vertId,Vector3 &n) const;
+
 	void SetDeltaValue(uint32_t vertId,float deltaValue);
 	void SetDeltaValue(uint32_t vertId,uint16_t deltaValue);
 	bool GetDeltaValue(uint32_t vertId,float &deltaValue) const;
-	bool GetVertexPosition(uint32_t vertId,Vector3 &pos) const;
 
 	void SetFlags(Flags flags);
 	void SetFlagEnabled(Flags flags,bool enabled=true);
@@ -46,6 +57,7 @@ public:
 private:
 	// Each uint16_t is a half-float
 	std::vector<std::array<uint16_t,4>> m_vertices = {}; // Fourth component is wrinkle data
+	std::vector<std::array<uint16_t,4>> m_normals = {}; // Optional
 	Flags m_flags = Flags::None;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(MeshVertexFrame::Flags)

@@ -18,13 +18,14 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
+#include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <stack>
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -437,7 +438,7 @@ uint32_t Model::AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> 
 			itTexId = textures.end() -1;
 		}
 		if(optOutSkinTexIdx)
-			*optOutSkinTexIdx = *itTexId;
+			*optOutSkinTexIdx = itTexId -textures.begin();
 	}
 	return r;
 }
@@ -1097,6 +1098,62 @@ void Model::AddMeshGroup(std::shared_ptr<ModelMeshGroup> &meshGroup) {m_meshGrou
 std::vector<std::shared_ptr<CollisionMesh>> &Model::GetCollisionMeshes() {return m_collisionMeshes;}
 const std::vector<std::shared_ptr<CollisionMesh>> &Model::GetCollisionMeshes() const {return m_collisionMeshes;}
 
+std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &group,const ModelMesh &mesh,ModelSubMesh &subMesh)
+{
+	auto &meshes = const_cast<ModelMeshGroup&>(group).GetMeshes();
+	auto itMesh = std::find_if(meshes.begin(),meshes.end(),[&mesh](const std::shared_ptr<ModelMesh> &meshOther) {
+		return meshOther.get() == &mesh;
+	});
+	if(itMesh == meshes.end())
+		return {};
+	auto &subMeshes = const_cast<ModelMesh&>(mesh).GetSubMeshes();
+	auto itSubMesh = std::find_if(subMeshes.begin(),subMeshes.end(),[&subMesh](const std::shared_ptr<ModelSubMesh> &subMeshOther) {
+		return subMeshOther.get() == &subMesh;
+	});
+	if(itSubMesh == subMeshes.end())
+		return {};
+	auto meshIdx = itMesh -meshes.begin();
+	auto subMeshIdx = itSubMesh -subMeshes.begin();
+
+	auto matIdx = GetMaterialIndex(subMesh);
+	if(matIdx.has_value() == false)
+		return {};
+	auto hMat = m_materials.at(*matIdx);
+	if(hMat.IsValid() == false)
+		return {};
+	auto strPath = hMat->GetAbsolutePath();
+	if(strPath.has_value() == false)
+		return {};
+	util::Path path {*strPath};
+	path += '_' +group.GetName();
+	path += '_' +std::to_string(meshIdx);
+	path += '_' +std::to_string(subMeshIdx);
+
+	util::Path rootPath {};
+	while(path.GetFront() != "materials") // TODO: What if inside addon called "materials"?
+	{
+		auto front = path.GetFront();
+		rootPath += util::Path::CreatePath(front);
+		path.PopFront();
+	}
+	auto mpath = path.GetString();
+	path.PopFront();
+	path.RemoveFileExtension();
+	if(FileManager::Exists(mpath) == false)
+	{
+		if(hMat->Save(path.GetString(),rootPath.GetString()) == false)
+			return {};
+	}
+	auto *matNew = m_networkState->LoadMaterial(path.GetString());
+	if(matNew == nullptr)
+		return {};
+	std::optional<uint32_t> newSkinTexId {};
+	AddMaterial(0u,matNew,&newSkinTexId);
+	if(newSkinTexId.has_value())
+		subMesh.SetSkinTextureIndex(*newSkinTexId);
+	return newSkinTexId;
+}
+
 void Model::AddCollisionMesh(const std::shared_ptr<CollisionMesh> &mesh) {m_collisionMeshes.push_back(mesh);}
 
 std::optional<float> Model::CalcFlexWeight(
@@ -1662,4 +1719,4 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
-
+#pragma optimize("",on)

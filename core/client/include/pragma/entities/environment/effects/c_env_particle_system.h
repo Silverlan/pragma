@@ -105,6 +105,8 @@ namespace pragma
 			float rotation = 0.f;
 			uint16_t length = 0; // Encoded float
 			uint16_t rotationYaw = 0.f; // Encoded float
+
+			Color GetColor() const;
 		};
 		struct DLLCLIENT ParticleAnimationData
 		{
@@ -157,6 +159,7 @@ namespace pragma
 		uint32_t GetNodeCount() const;
 		Vector3 GetNodePosition(uint32_t node) const;
 		CBaseEntity *GetNodeTarget(uint32_t node) const;
+		Vector3 GetParticlePosition(uint32_t ptIdx) const;
 		void SetCastShadows(bool b);
 		bool GetCastShadows() const;
 		float GetStaticWorldScale() const;
@@ -168,8 +171,8 @@ namespace pragma
 		bool ShouldUseBlackAsAlpha() const;
 		CallbackHandle AddRenderCallback(const std::function<void(void)> &cb);
 		void AddRenderCallback(const CallbackHandle &hCb);
-		pragma::AlphaMode GetAlphaMode() const;
-		void SetAlphaMode(pragma::AlphaMode alphaMode);
+		pragma::ParticleAlphaMode GetAlphaMode() const;
+		void SetAlphaMode(pragma::ParticleAlphaMode alphaMode);
 		void SetTextureScrollingEnabled(bool b);
 		bool IsTextureScrollingEnabled() const;
 
@@ -232,6 +235,7 @@ namespace pragma
 		void Start();
 		void Stop();
 		void Die(float maxRemainingLifetime=5.f);
+		bool IsDying() const;
 		bool IsActive() const;
 		bool IsActiveOrPaused() const;
 		bool IsEmissionPaused() const;
@@ -341,7 +345,7 @@ namespace pragma
 		Vector3 m_origin = {};
 		float m_lifeTime = std::numeric_limits<float>::max();
 		float m_simulationTime = 0.f;
-		pragma::AlphaMode m_alphaMode = pragma::AlphaMode::Additive;
+		pragma::ParticleAlphaMode m_alphaMode = pragma::ParticleAlphaMode::Additive;
 		std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> m_initializers;
 		std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> m_operators;
 		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> m_renderers;

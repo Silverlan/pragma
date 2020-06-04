@@ -220,7 +220,7 @@ void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCm
 	{
 		auto &tDelta = DeltaTime();
 		auto pt = ent->GetComponent<pragma::CParticleSystemComponent>();
-		if(pt.valid() && pt->ShouldAutoSimulate())
+		if(pt.valid() && pt->GetParent() == nullptr && pt->ShouldAutoSimulate())
 			pt->Simulate(tDelta);
 	}
 

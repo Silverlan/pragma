@@ -96,12 +96,20 @@ void CAnimatedComponent::ReceiveData(NetPacket &packet)
 
 std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const
 {
+	return GetVertexTransformMatrix(subMesh,vertexId,nullptr,nullptr);
+}
+std::optional<Mat4> CAnimatedComponent::GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 *optOutNormalOffset,float *optOutDelta) const
+{
+	if(optOutNormalOffset)
+		*optOutNormalOffset = {};
+	if(optOutDelta)
+		*optOutDelta = 0.f;
 	auto t = BaseAnimatedComponent::GetVertexTransformMatrix(subMesh,vertexId);
 	if(t.has_value() == false)
 		return {};
 	Vector3 vertexOffset;
 	auto pVertexAnimatedComponent = GetEntity().GetComponent<pragma::CVertexAnimatedComponent>();
-	if(pVertexAnimatedComponent.expired() || pVertexAnimatedComponent->GetLocalVertexPosition(subMesh,vertexId,vertexOffset) == false)
+	if(pVertexAnimatedComponent.expired() || pVertexAnimatedComponent->GetLocalVertexPosition(subMesh,vertexId,vertexOffset,optOutNormalOffset,optOutDelta) == false)
 		return t;
 	return *t *glm::translate(umat::identity(),vertexOffset); // TODO: Confirm order!
 }

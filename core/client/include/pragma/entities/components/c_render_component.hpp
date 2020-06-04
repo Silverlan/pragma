@@ -46,7 +46,7 @@ namespace pragma
 		std::weak_ptr<prosper::IBuffer> GetRenderBuffer() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
 
-		static const std::vector<CRenderComponent*> &GetViewEntities();
+		static const std::vector<CRenderComponent*> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
 		static void InitializeBuffers();
 		static void ClearBuffers();
@@ -135,7 +135,7 @@ namespace pragma
 		unsigned long long m_lastRender = 0ull;
 		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
-		static std::vector<CRenderComponent*> s_viewEntities;
+		static std::vector<CRenderComponent*> s_ocExemptEntities;
 	private:
 		struct
 		{

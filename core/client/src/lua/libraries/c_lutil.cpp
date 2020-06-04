@@ -156,7 +156,7 @@ int Lua::util::Client::import_model(lua_State *l)
 	}
 	::util::Path outputPath {};
 	if(Lua::IsSet(l,2))
-		outputPath = Lua::CheckString(l,2);
+		outputPath = ::util::Path::CreatePath(Lua::CheckString(l,2));
 	std::string errMsg;
 	auto mdl = f ? pragma::asset::import_model(f,errMsg,outputPath) : pragma::asset::import_model(fileName,errMsg,outputPath);
 	if(mdl == nullptr)

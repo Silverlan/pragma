@@ -22,7 +22,7 @@ namespace pragma
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const;
-		bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const;
+		bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,Vector3 *optOutNormal=nullptr,float *optOutDelta=nullptr) const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:
 		// Vertex animations

@@ -142,34 +142,52 @@ void pragma::asset::GLTFWriter::WriteMorphTargets(ModelSubMesh &mesh,tinygltf::M
 			morphNames.push_back(tinygltf::Value{morphSet.name});
 
 			auto numVerts = morphSet.frame->GetVertexCount();
-			std::vector<Vector3> vertices {};
-			vertices.reserve(numVerts);
+
+			auto hasNormals = morphSet.frame->IsFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+			uint32_t numAttributes = 1;
+			if(hasNormals)
+				++numAttributes;
+
+			auto numVertexData = numVerts *numAttributes;
+			std::vector<Vector3> vertexData {};
+			vertexData.resize(numVertexData);
+
 			Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
 			Vector3 max {std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+			uint32_t offset = 0;
 			for(auto i=decltype(numVerts){0u};i<numVerts;++i)
 			{
 				Vector3 pos {};
 				morphSet.frame->GetVertexPosition(i,pos);
 				pos = TransformPos(pos);
-				vertices.push_back(pos);
+				vertexData.at(offset++) = pos;
 
 				uvec::min(&min,pos);
 				uvec::max(&max,pos);
+
+				if(hasNormals == false)
+					continue;
+				Vector3 n {};
+				morphSet.frame->GetVertexNormal(i,n);
+				vertexData.at(offset++) = n;
 			}
 
 			uint32_t morphBufferIdx;
 			auto &morphBuffer = AddBuffer("morph_" +morphSet.name,&morphBufferIdx);
 			auto &morphData = morphBuffer.data;
-			morphData.resize(vertices.size() *sizeof(vertices.front()));
-			memcpy(morphData.data(),vertices.data(),vertices.size() *sizeof(vertices.front()));
-			auto morphBufferView = AddBufferView("morph" +morphSet.name,morphBufferIdx,0,vertices.size() *sizeof(vertices.front()),{});
-			auto morphAccessor = AddAccessor("morph_" +morphSet.name +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,0,vertices.size(),morphBufferView);
+			morphData.resize(vertexData.size() *sizeof(vertexData.front()));
+			memcpy(morphData.data(),vertexData.data(),vertexData.size() *sizeof(vertexData.front()));
+			auto morphBufferView = AddBufferView("morph" +morphSet.name,morphBufferIdx,0,vertexData.size() *sizeof(vertexData.front()),numAttributes *sizeof(Vector3));
+			auto morphAccessor = AddAccessor("morph_" +morphSet.name +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,0,numVerts,morphBufferView);
 			m_gltfMdl.accessors.at(morphAccessor).minValues = {min.x,min.y,min.z};
 			m_gltfMdl.accessors.at(morphAccessor).maxValues = {max.x,max.y,max.z};
 
 			primitive.targets.push_back({});
 			auto &map = primitive.targets.back();
 			map["POSITION"] = morphAccessor;
+
+			if(hasNormals)
+				map["NORMAL"] = AddAccessor("morph_" +morphSet.name +"_normals",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,sizeof(Vector3),numVerts,morphBufferView);
 		}
 
 		std::map<std::string,tinygltf::Value> extras {};
@@ -362,7 +380,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 	if(m_exportInfo.verbose)
 		Con::cout<<"Initializing GLTF buffers..."<<Con::endl;
 
-	gltfMdl.buffers.reserve(BufferIndices::Count +numAnims +numVertexAnims);
+	gltfMdl.buffers.reserve(BufferIndices::Count +numAnims +numVertexAnims *2);
 
 	constexpr auto szVertex = sizeof(Vector3) *2 +sizeof(Vector2);
 	gltfMdl.bufferViews.reserve(BufferViewIndices::Count +numAnims +numFramesTotal);
@@ -1426,15 +1444,15 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 
 		auto alphaCutoff = 0.5f;
 		data->GetFloat("alpha_cutoff",&alphaCutoff);
-		switch(static_cast<Material::AlphaMode>(alphaMode))
+		switch(static_cast<AlphaMode>(alphaMode))
 		{
-		case Material::AlphaMode::Mask:
+		case AlphaMode::Mask:
 			gltfMat.alphaMode = "MASK";
 			break;
-		case Material::AlphaMode::Blend:
+		case AlphaMode::Blend:
 			gltfMat.alphaMode = "BLEND";
 			break;
-		case Material::AlphaMode::Opaque:
+		case AlphaMode::Opaque:
 		default:
 			gltfMat.alphaMode = "OPAQUE";
 			break;

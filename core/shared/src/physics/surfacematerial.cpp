@@ -122,19 +122,23 @@ void SurfaceMaterialManager::Load(const std::string &path)
 					if(pbr->GetFloat("roughness",&val))
 						physMat.GetPBRInfo().roughness = val;
 
-					if(pbr->GetFloat("subsurface_multiplier",&val))
-						physMat.GetPBRInfo().subsurfaceMultiplier = val;
+					auto sss = pbr->GetBlock("subsurface_scattering");
+					if(sss)
+					{
+						if(sss->GetFloat("factor",&val))
+							physMat.GetPBRInfo().subsurfaceMultiplier = val;
 
-					auto &subsurfaceColor = pbr->GetValue("subsurface_color");
-					if(subsurfaceColor != nullptr && typeid(*subsurfaceColor) == typeid(ds::Color))
-						physMat.GetPBRInfo().subsurfaceColor = static_cast<ds::Color&>(*subsurfaceColor).GetValue();
+						auto &subsurfaceColor = sss->GetValue("color");
+						if(subsurfaceColor != nullptr && typeid(*subsurfaceColor) == typeid(ds::Color))
+							physMat.GetPBRInfo().subsurfaceColor = static_cast<ds::Color&>(*subsurfaceColor).GetValue();
 
-					if(pbr->GetInt("subsurface_method",&ival))
-						physMat.GetPBRInfo().subsurfaceMethod = static_cast<SurfaceMaterial::PBRInfo::SubsurfaceMethod>(ival);
+						if(sss->GetInt("method",&ival))
+							physMat.GetPBRInfo().subsurfaceMethod = static_cast<SurfaceMaterial::PBRInfo::SubsurfaceMethod>(ival);
 
-					auto &subsurfaceRadius = pbr->GetValue("subsurface_radius");
-					if(subsurfaceRadius != nullptr && typeid(*subsurfaceRadius) == typeid(ds::Vector))
-						physMat.GetPBRInfo().subsurfaceRadius = static_cast<ds::Vector&>(*subsurfaceRadius).GetValue();
+						auto &subsurfaceRadius = sss->GetValue("radius");
+						if(subsurfaceRadius != nullptr && typeid(*subsurfaceRadius) == typeid(ds::Vector))
+							physMat.GetPBRInfo().subsurfaceRadius = static_cast<ds::Vector&>(*subsurfaceRadius).GetValue();
+					}
 				}
 			}
 		}

@@ -476,16 +476,20 @@ int Lua::math::calc_diagonal_fov(lua_State *l)
 int Lua::math::horizontal_fov_to_vertical_fov(lua_State *l)
 {
 	auto hFov = Lua::CheckNumber(l,1);
-	auto width = Lua::CheckNumber(l,2);
-	auto height = Lua::CheckNumber(l,3);
+	auto width = Lua::CheckNumber(l,2); // Aspect ratio if height is not set
+	auto height = 1.f;
+	if(Lua::IsSet(l,3))
+		height = Lua::CheckNumber(l,3);
 	Lua::PushNumber(l,::umath::horizontal_fov_to_vertical_fov(hFov,width,height));
 	return 1;
 }
 int Lua::math::vertical_fov_to_horizontal_fov(lua_State *l)
 {
 	auto hFov = Lua::CheckNumber(l,1);
-	auto width = Lua::CheckNumber(l,2);
-	auto height = Lua::CheckNumber(l,3);
+	auto width = Lua::CheckNumber(l,2); // Aspect ratio if height is not set
+	auto height = 1.f;
+	if(Lua::IsSet(l,3))
+		height = Lua::CheckNumber(l,3);
 	Lua::PushNumber(l,::umath::vertical_fov_to_horizontal_fov(hFov,width,height));
 	return 1;
 }

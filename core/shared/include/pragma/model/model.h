@@ -354,6 +354,8 @@ public:
 	int32_t LookupBone(const std::string &name) const;
 	void Merge(const Model &other,MergeFlags flags=MergeFlags::All);
 
+	std::optional<uint32_t> AssignDistinctMaterial(const ModelMeshGroup &group,const ModelMesh &mesh,ModelSubMesh &subMesh);
+
 	// Hitboxes
 	void AddHitbox(uint32_t boneId,HitGroup group,const Vector3 &min,const Vector3 &max);
 	void AddHitbox(uint32_t boneId,const Hitbox &hitbox);

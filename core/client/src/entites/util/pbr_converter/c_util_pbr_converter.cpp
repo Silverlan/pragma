@@ -203,27 +203,22 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	auto surfMatName = valSurfMat ? valSurfMat->GetString() : "";
 	auto *surfMat = valSurfMat ? c_game->GetSurfaceMaterial(surfMatName) : nullptr;
 
-	auto fSetMaterialValue = [&matTraditional,&dataBlock](const std::string &type,const std::string &name,const std::string &value) {
-		if(dataBlock->GetValue(name))
+	auto fSetMaterialValue = [&matTraditional](ds::Block &dataBlock,const std::string &type,const std::string &name,const std::string &value) {
+		if(dataBlock.GetValue(name))
 			return;
-		dataBlock->AddValue(type,name,value);
+		dataBlock.AddValue(type,name,value);
 	};
 
 	auto *pbrInfo = surfMat ? &surfMat->GetPBRInfo() : nullptr;
 	if(rmaInfo->GetBool("requires_sss_update") && pbrInfo && pbrInfo->subsurfaceMultiplier != 0.f)
 	{
-		auto hasSSS = (
-			dataBlock->GetValue("subsurface_multiplier") != nullptr ||
-			dataBlock->GetValue("subsurface_color") != nullptr ||
-			dataBlock->GetValue("subsurface_method") != nullptr ||
-			dataBlock->GetValue("subsurface_radius") != nullptr
-		);
-		if(hasSSS == false)
+		auto dataSSS = dataBlock->GetBlock("subsurface_scattering");
+		if(dataSSS == nullptr)
 		{
-			fSetMaterialValue("float","subsurface_multiplier",std::to_string(pbrInfo->subsurfaceMultiplier));
-			fSetMaterialValue("color","subsurface_color",pbrInfo->subsurfaceColor.ToString());
-			fSetMaterialValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo->subsurfaceMethod)));
-			fSetMaterialValue("vector","subsurface_radius",std::to_string(pbrInfo->subsurfaceRadius.x) +" " +std::to_string(pbrInfo->subsurfaceRadius.y) +" " +std::to_string(pbrInfo->subsurfaceRadius.z));
+			fSetMaterialValue(*dataSSS,"float","factor",std::to_string(pbrInfo->subsurfaceMultiplier));
+			fSetMaterialValue(*dataSSS,"color","color",pbrInfo->subsurfaceColor.ToString());
+			fSetMaterialValue(*dataSSS,"int","method",std::to_string(umath::to_integral(pbrInfo->subsurfaceMethod)));
+			fSetMaterialValue(*dataSSS,"vector","radius",std::to_string(pbrInfo->subsurfaceRadius.x) +" " +std::to_string(pbrInfo->subsurfaceRadius.y) +" " +std::to_string(pbrInfo->subsurfaceRadius.z));
 			
 			rmaInfo->RemoveValue("requires_sss_update");
 		}

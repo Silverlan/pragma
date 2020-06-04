@@ -204,8 +204,14 @@ bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh 
 	animCount = it->second.second;
 	return true;
 }
-bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
+bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,Vector3 *optOutNormal,float *optOutDelta) const
 {
+	pos = {};
+	if(optOutNormal)
+		*optOutNormal = {};
+	if(optOutDelta)
+		*optOutDelta = 0.f;
+
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
@@ -227,6 +233,19 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 		if(frame->GetVertexPosition(vertexId,vaPos) == false)
 			continue;
 		pos += vaPos *animSlot.blend;
+		if(optOutNormal)
+		{
+			Vector3 n;
+			if(frame->GetVertexNormal(vertexId,n) == false)
+				continue;
+			*optOutNormal += n *animSlot.blend;
+		}
+		if(optOutDelta)
+		{
+			float dtVal;
+			if(frame->GetDeltaValue(vertexId,dtVal))
+				*optOutDelta += dtVal *animSlot.blend;
+		}
 	}
 	return true;
 }

@@ -170,10 +170,11 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		{
 			auto &data = mat.GetDataBlock();
 			auto &pbrInfo = sufMatSSS->GetPBRInfo();
-			data->AddValue("float","subsurface_multiplier",std::to_string(pbrInfo.subsurfaceMultiplier));
-			data->AddValue("color","subsurface_color",pbrInfo.subsurfaceColor.ToString());
-			data->AddValue("int","subsurface_method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
-			data->AddValue("vector","subsurface_radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
+			auto dataSSS = data->AddBlock("subsurface_scattering");
+			data->AddValue("float","factor",std::to_string(pbrInfo.subsurfaceMultiplier));
+			data->AddValue("color","color",pbrInfo.subsurfaceColor.ToString());
+			data->AddValue("int","method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
+			data->AddValue("vector","radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
 		}
 		rmaInfo->RemoveValue("requires_sss_update");
 	}

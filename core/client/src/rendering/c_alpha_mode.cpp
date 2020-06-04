@@ -8,21 +8,21 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/c_alpha_mode.hpp"
 
-bool pragma::premultiply_alpha(Vector4 &color,pragma::AlphaMode alphaMode)
+bool pragma::premultiply_alpha(Vector4 &color,pragma::ParticleAlphaMode alphaMode)
 {
 	switch(alphaMode)
 	{
-		case pragma::AlphaMode::Opaque:
+		case pragma::ParticleAlphaMode::Opaque:
 			color = {color.r *color.a,color.g *color.a,color.b *color.a,1.f};
 			break;
-		case pragma::AlphaMode::Translucent:
+		case pragma::ParticleAlphaMode::Translucent:
 			color = {color.r *color.a,color.g *color.a,color.b *color.a,color.a};
 			break;
-		case pragma::AlphaMode::Additive:
-		case pragma::AlphaMode::AdditiveFull:
+		case pragma::ParticleAlphaMode::Additive:
+		case pragma::ParticleAlphaMode::AdditiveFull:
 			color = {color.r *color.a,color.g *color.a,color.b *color.a,0.f};
 			break;
-		case pragma::AlphaMode::Premultiplied:
+		case pragma::ParticleAlphaMode::Premultiplied:
 			// No change
 			break;
 		default:

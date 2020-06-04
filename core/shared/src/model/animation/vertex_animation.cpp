@@ -11,21 +11,21 @@
 
 MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other)
 	: std::enable_shared_from_this<MeshVertexFrame>(),
-	m_vertices(other.m_vertices)
+	m_vertices(other.m_vertices),m_normals{other.m_normals},
+	m_flags{other.m_flags}
 {}
 
 const std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() const {return const_cast<MeshVertexFrame*>(this)->GetVertices();}
 std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() {return m_vertices;}
-void MeshVertexFrame::SetVertexCount(uint32_t count) {m_vertices.resize(count,std::array<uint16_t,4>{0,0,0,0});}
-uint32_t MeshVertexFrame::GetVertexCount() const {return m_vertices.size();}
-void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const Vector3 &pos) {SetVertexPosition(vertId,std::array<uint16_t,3>{static_cast<uint16_t>(umath::float32_to_float16_glm(pos.x)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.y)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.z))});}
-void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos)
+const std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetNormals() const {return const_cast<MeshVertexFrame*>(this)->GetNormals();}
+std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetNormals() {return m_normals;}
+void MeshVertexFrame::SetVertexCount(uint32_t count)
 {
-	if(vertId >= m_vertices.size())
-		return;
-	for(uint8_t i=0;i<3;++i)
-		m_vertices.at(vertId).at(i) = pos.at(i);
+	m_vertices.resize(count,std::array<uint16_t,4>{0,0,0,0});
+	if(IsFlagEnabled(Flags::HasNormals))
+		m_normals.resize(count);
 }
+uint32_t MeshVertexFrame::GetVertexCount() const {return m_vertices.size();}
 void MeshVertexFrame::SetDeltaValue(uint32_t vertId,float deltaValue) {SetDeltaValue(vertId,static_cast<uint16_t>(umath::float32_to_float16_glm(deltaValue)));}
 void MeshVertexFrame::SetDeltaValue(uint32_t vertId,uint16_t deltaValue)
 {
@@ -40,6 +40,21 @@ bool MeshVertexFrame::GetDeltaValue(uint32_t vertId,float &deltaValue) const
 	deltaValue = umath::float16_to_float32_glm(m_vertices.at(vertId).at(3));
 	return true;
 }
+
+void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const Vector3 &pos) {SetVertexPosition(vertId,std::array<uint16_t,3>{static_cast<uint16_t>(umath::float32_to_float16_glm(pos.x)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.y)),static_cast<uint16_t>(umath::float32_to_float16_glm(pos.z))});}
+void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_t,3> &pos)
+{
+	if(vertId >= m_vertices.size())
+		return;
+	for(uint8_t i=0;i<3;++i)
+		m_vertices.at(vertId).at(i) = pos.at(i);
+}
+void MeshVertexFrame::SetVertexPosition(uint32_t vertId,const std::array<uint16_t,4> &pos)
+{
+	if(vertId >= m_vertices.size())
+		return;
+	m_vertices.at(vertId) = pos;
+}
 bool MeshVertexFrame::GetVertexPosition(uint32_t vertId,Vector3 &pos) const
 {
 	if(vertId >= m_vertices.size())
@@ -48,6 +63,30 @@ bool MeshVertexFrame::GetVertexPosition(uint32_t vertId,Vector3 &pos) const
 	pos = {umath::float16_to_float32_glm(v.at(0)),umath::float16_to_float32_glm(v.at(1)),umath::float16_to_float32_glm(v.at(2))};
 	return true;
 }
+
+void MeshVertexFrame::SetVertexNormal(uint32_t vertId,const Vector3 &n) {SetVertexNormal(vertId,std::array<uint16_t,3>{static_cast<uint16_t>(umath::float32_to_float16_glm(n.x)),static_cast<uint16_t>(umath::float32_to_float16_glm(n.y)),static_cast<uint16_t>(umath::float32_to_float16_glm(n.z))});}
+void MeshVertexFrame::SetVertexNormal(uint32_t vertId,const std::array<uint16_t,3> &n)
+{
+	if(vertId >= m_normals.size())
+		return;
+	for(uint8_t i=0;i<3;++i)
+		m_normals.at(vertId).at(i) = n.at(i);
+}
+void MeshVertexFrame::SetVertexNormal(uint32_t vertId,const std::array<uint16_t,4> &n)
+{
+	if(vertId >= m_normals.size())
+		return;
+	m_normals.at(vertId) = n;
+}
+bool MeshVertexFrame::GetVertexNormal(uint32_t vertId,Vector3 &n) const
+{
+	if(vertId >= m_normals.size())
+		return false;
+	auto &v = m_normals.at(vertId);
+	n = {umath::float16_to_float32_glm(v.at(0)),umath::float16_to_float32_glm(v.at(1)),umath::float16_to_float32_glm(v.at(2))};
+	return true;
+}
+
 void MeshVertexFrame::Rotate(const Quat &rot)
 {
 	auto numVerts = GetVertexCount();
@@ -72,8 +111,23 @@ void MeshVertexFrame::Scale(const Vector3 &scale)
 		SetVertexPosition(i,pos);
 	}
 }
-void MeshVertexFrame::SetFlags(Flags flags) {m_flags = flags;}
-void MeshVertexFrame::SetFlagEnabled(Flags flags,bool enabled) {umath::set_flag(m_flags,flags,enabled);}
+void MeshVertexFrame::SetFlags(Flags flags)
+{
+	m_flags = flags;
+	if(IsFlagEnabled(Flags::HasNormals))
+	{
+		if(m_normals.size() != m_vertices.size())
+			m_normals.resize(m_vertices.size());
+	}
+	else
+		m_normals.clear();
+}
+void MeshVertexFrame::SetFlagEnabled(Flags flags,bool enabled)
+{
+	auto newFlags = m_flags;
+	umath::set_flag(newFlags,flags,enabled);
+	SetFlags(newFlags);
+}
 bool MeshVertexFrame::IsFlagEnabled(Flags flags) const {return umath::is_flag_set(m_flags,flags);}
 MeshVertexFrame::Flags MeshVertexFrame::GetFlags() const {return m_flags;}
 

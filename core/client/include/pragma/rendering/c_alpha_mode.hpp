@@ -9,12 +9,13 @@
 #define __C_ALPHA_MODE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <alpha_mode.hpp>
 #include <cinttypes>
 #include <mathutil/uvec.h>
 
 namespace pragma
 {
-	enum class AlphaMode : uint32_t
+	enum class ParticleAlphaMode : uint32_t
 	{
 		Additive = 0u,
 		AdditiveFull,
@@ -25,7 +26,7 @@ namespace pragma
 
 		Count
 	};
-	DLLCLIENT bool premultiply_alpha(Vector4 &color,pragma::AlphaMode alphaMode);
+	DLLCLIENT bool premultiply_alpha(Vector4 &color,pragma::ParticleAlphaMode alphaMode);
 };
 
 #endif

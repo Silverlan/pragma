@@ -27,7 +27,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
 {
 	exportAnimations = true;
@@ -47,7 +47,7 @@ struct GLTFBufferData
 		auto stride = bufferView.byteStride;
 		if(stride == 0)
 			stride = sizeof(T);
-		auto offset = bufferView.byteOffset +vertexIndex *stride;
+		auto offset = bufferView.byteOffset +accessor.byteOffset +vertexIndex *stride;
 		if(offset +sizeof(T) >= buffer.data.size())
 			return default;
 		return *reinterpret_cast<T*>(buffer.data.data() +offset);
@@ -360,6 +360,8 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 
 		auto *mat = static_cast<CMaterial*>(client->CreateMaterial(matPathRelative.GetString(),"pbr"));
 		auto &dataBlock = mat->GetDataBlock();
+		dataBlock->AddValue("int","alpha_mode",std::to_string(umath::to_integral(alphaMode)));
+		dataBlock->AddValue("float","alpha_cutoff",std::to_string(gltfMat.alphaCutoff));
 
 		std::string textureRootPath = "addons/converted/";
 
@@ -529,6 +531,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 
 	auto &gltfMeshes = gltfMdl.meshes;
 	auto meshGroup = mdl->AddMeshGroup("reference");
+	uint32_t absUnnamedFcIdx = 0;
 	for(auto &gltfMesh : gltfMeshes)
 	{
 		auto mesh = c_game->CreateModelMesh();
@@ -540,8 +543,8 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			auto &idxAccessor = gltfMdl.accessors.at(primitive.indices);
 			auto &idxBufView = gltfMdl.bufferViews.at(idxAccessor.bufferView);
 			auto &idxBuf = gltfMdl.buffers.at(idxBufView.buffer);
-
-			auto *srcIndexData = idxBuf.data.data() +idxBufView.byteOffset;
+			
+			auto *srcIndexData = idxBuf.data.data() +idxBufView.byteOffset +idxAccessor.byteOffset;
 
 			auto subMesh = c_game->CreateModelSubMesh();
 			subMesh->SetSkinTextureIndex(primitive.material);
@@ -606,6 +609,16 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 				if(lightmapUvs)
 					(*lightmapUvs).at(i) = texCoordBufData1->GetValue<Vector2>(i);
 			}
+
+			for(auto i=decltype(idxAccessor.count){0u};i<idxAccessor.count;++i)
+			{
+
+				//idxAccessor.componentType == ;
+				//idxAccessor.type
+				//TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR
+
+				//	The indices data type. Valid values correspond to WebGL enums: 5121 (UNSIGNED_BYTE), 5123 (UNSIGNED_SHORT), 5125 (UNSIGNED_INT).
+			}
 #if 0
 			primitive.attributes["POSITION"] = posAccessor;
 			primitive.attributes["NORMAL"] = normalAccessor;
@@ -622,21 +635,86 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			}
 #endif
 
-
-			for(auto i=decltype(idxAccessor.count){0u};i<idxAccessor.count;++i)
+			uint32_t targetIdx = 0;
+			for(auto &target : primitive.targets)
 			{
+				ScopeGuard sg {[&targetIdx]() {++targetIdx;}};
+				auto itPos = target.find("POSITION");
+				auto itNormal = target.find("NORMAL");
+				// auto itTangent = target.find("TANGENT");
+				if(itPos == target.end())
+					continue;
+				auto &posAccessor = gltfMdl.accessors.at(itPos->second);
+				auto &posBufView = gltfMdl.bufferViews.at(posAccessor.bufferView);
+				auto &posBuf = gltfMdl.buffers.at(posBufView.buffer);
+				auto posBufData = GLTFBufferData{posAccessor,posBufView,posBuf};
 
-				//idxAccessor.componentType == ;
-				//idxAccessor.type
-				//TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,TINYGLTF_TYPE_SCALAR
+				std::unique_ptr<GLTFBufferData> normBufData {};
+				if(itNormal != target.end())
+				{
+					auto &normAccessor = gltfMdl.accessors.at(itNormal->second);
+					auto &normBufView = gltfMdl.bufferViews.at(normAccessor.bufferView);
+					auto &normBuf = gltfMdl.buffers.at(normBufView.buffer);
+					normBufData = std::unique_ptr<GLTFBufferData>{new GLTFBufferData{normAccessor,normBufView,normBuf}};
+				}
 
-				//	The indices data type. Valid values correspond to WebGL enums: 5121 (UNSIGNED_BYTE), 5123 (UNSIGNED_SHORT), 5125 (UNSIGNED_INT).
+				std::string morphTargetName;
+
+				if(gltfMesh.extras.Has("targetNames"))
+					morphTargetName = gltfMesh.extras.Get("targetNames").Get(targetIdx).Get<std::string>();
+				else
+					morphTargetName = std::to_string(absUnnamedFcIdx +targetIdx);
+
+				if(mdl->GetFlexController(morphTargetName) == nullptr)
+				{
+					auto defaultWeight = (targetIdx < gltfMesh.weights.size()) ? gltfMesh.weights.at(targetIdx) : 0.f;
+					auto &fc = mdl->AddFlexController(morphTargetName);
+					fc.min = 0.f;
+					fc.max = 1.f;
+					// TODO: Apply default
+				}
+				uint32_t fcId = 0;
+				mdl->GetFlexControllerId(morphTargetName,fcId);
+
+				if(mdl->GetFlex(morphTargetName) == false)
+				{
+					auto &flex = mdl->AddFlex(morphTargetName);
+					auto va = mdl->AddVertexAnimation(morphTargetName);
+					flex.SetVertexAnimation(*va);
+
+					auto &operations = flex.GetOperations();
+					operations.push_back({});
+					auto &op = flex.GetOperations().back();
+					op.type = Flex::Operation::Type::Fetch;
+					op.d.index = fcId;
+				}
+				uint32_t flexId;
+				mdl->GetFlexId(morphTargetName,flexId);
+				auto &va = *mdl->GetFlex(flexId)->GetVertexAnimation();
+
+				assert(posAccessor.count == numVerts);
+				auto mva = va.AddMeshFrame(*mesh,*subMesh);
+				mva->SetVertexCount(numVerts);
+				if(normBufData)
+					mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+				for(auto i=decltype(posAccessor.count){0u};i<posAccessor.count;++i)
+				{
+					auto pos = TransformPos(posBufData.GetValue<Vector3>(i));
+					mva->SetVertexPosition(i,pos);
+					if(normBufData)
+					{
+						auto n = normBufData->GetValue<Vector3>(i);
+						mva->SetVertexNormal(i,n);
+					}
+				}
 			}
 			//idxBuf.
 			//primitive.indices
 			//primitive.mode
 			mesh->AddSubMesh(subMesh);
 		}
+		if(gltfMesh.primitives.empty() == false)
+			absUnnamedFcIdx += gltfMesh.primitives.front().targets.size(); // All primitives have same number of targets
 		meshGroup->AddMesh(mesh);
 	}
 	mdl->Update(ModelUpdateFlags::All);
@@ -978,12 +1056,12 @@ std::optional<pragma::asset::MaterialTexturePaths> pragma::asset::export_materia
 	};
 
 	auto &data = mat.GetDataBlock();
-	auto translucent = data->GetBool("translucent");
+	auto alphaMode = mat.GetAlphaMode();
 	
 	pragma::asset::MaterialTexturePaths texturePaths {};
 
 	std::string imgOutputPath;
-	if(fSaveTexture(mat.GetAlbedoMap(),false,translucent,imgOutputPath,name))
+	if(fSaveTexture(mat.GetAlbedoMap(),false,alphaMode != AlphaMode::Opaque,imgOutputPath,name))
 		texturePaths.insert(std::make_pair(Material::ALBEDO_MAP_IDENTIFIER,imgOutputPath));
 	if(fSaveTexture(mat.GetNormalMap(),true,false,imgOutputPath,name +"_normal"))
 		texturePaths.insert(std::make_pair(Material::NORMAL_MAP_IDENTIFIER,imgOutputPath));
@@ -1207,3 +1285,4 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	});
 	return AOResult::AOJobReady;
 }
+#pragma optimize("",on)

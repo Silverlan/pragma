@@ -57,9 +57,14 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESC
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_CSM) ShaderParticle2DBase::DESCRIPTOR_SET_CSM = {&ShaderSceneLit::DESCRIPTOR_SET_CSM};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
 
-std::array<Vector2,6> ShaderParticle2DBase::GetQuadVertexPositions()
+static uint32_t get_vertex_index(uint32_t absVertIdx)
 {
-	return std::array<Vector2,6>{
+	constexpr std::array<uint32_t,6> baseIndices = {0,1,2,3,0,2};
+	return baseIndices.at(absVertIdx);
+}
+std::array<Vector2,4> ShaderParticle2DBase::GetQuadVertexPositions()
+{
+	return std::array<Vector2,4>{
 		Vector2{0.5,-0.5},
 		Vector2{-0.5,-0.5},
 		Vector2{-0.5,0.5},
@@ -68,7 +73,7 @@ std::array<Vector2,6> ShaderParticle2DBase::GetQuadVertexPositions()
 }
 Vector2 ShaderParticle2DBase::GetVertexUV(uint32_t vertIdx)
 {
-	return GetQuadVertexPositions().at(vertIdx) +Vector2{0.5f,0.5f};
+	return GetQuadVertexPositions().at(get_vertex_index(vertIdx)) +Vector2{0.5f,0.5f};
 }
 ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderSceneLit(context,identifier,vsShader,fsShader,gsShader)
@@ -119,8 +124,8 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 
 bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx,RecordFlags recordFlags)
 {
-	static AlphaMode alphaMode = GetRenderAlphaMode(pSys);
-	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(alphaMode),recordFlags);
+	auto alphaMode = GetRenderAlphaMode(pSys);
+	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx) *umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode),recordFlags);
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
@@ -352,12 +357,6 @@ static Mat3 get_rotation_matrix(Vector4 q)
 		2.0 *q.x *q.y -2.0 *q.z *q.w,1.0 -2.0 *umath::pow2(q.x) -2.0 *umath::pow2(q.z),2.0 *q.y *q.z +2.0 *q.x *q.w,
 		2.0 *q.x *q.z +2.0 *q.y *q.w,2.0 *q.y *q.z -2.0 *q.x *q.w,1.0 -2.0 *umath::pow2(q.x) -2.0 *umath::pow2(q.y)
 	);
-}
-
-static uint32_t get_vertex_index(uint32_t absVertIdx)
-{
-	constexpr std::array<uint32_t,6> baseIndices = {0,1,2,3,0,2};
-	return baseIndices.at(absVertIdx);
 }
 
 static Vector2 get_vertex_quad_pos(uint32_t localVertIdx)

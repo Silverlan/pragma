@@ -45,7 +45,7 @@ namespace pragma
 
 		static constexpr auto VERTEX_COUNT = 6u;
 		static constexpr auto TRIANGLE_COUNT = 2u;
-		static std::array<Vector2,6> GetQuadVertexPositions();
+		static std::array<Vector2,4> GetQuadVertexPositions();
 		static Vector2 GetVertexUV(uint32_t vertIdx);
 		enum class VertexAttribute : uint32_t
 		{

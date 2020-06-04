@@ -635,3 +635,11 @@ void Lua::MeshVertexFrame::GetVertexPosition(lua_State *l,::MeshVertexFrame &fra
 		return;
 	Lua::Push<Vector3>(l,pos);
 }
+void Lua::MeshVertexFrame::SetVertexNormal(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx,const Vector3 &n) {frame.SetVertexNormal(vertIdx,n);}
+void Lua::MeshVertexFrame::GetVertexNormal(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx)
+{
+	Vector3 n {};
+	if(frame.GetVertexPosition(vertIdx,n) == false)
+		return;
+	Lua::Push<Vector3>(l,n);
+}

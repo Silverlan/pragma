@@ -31,7 +31,7 @@
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
 
-
+#pragma optimize("",off)
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
 	auto cur = f->Tell();
@@ -782,7 +782,6 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				auto meshGroupId = std::numeric_limits<uint32_t>::max();
 				auto meshId = std::numeric_limits<uint32_t>::max();
 				auto subMeshId = std::numeric_limits<uint32_t>::max();
-				auto vertCount = 0u;
 				for(auto itMeshGroup=meshGroups.begin();itMeshGroup!=meshGroups.end();++itMeshGroup)
 				{
 					auto &meshGroup = *itMeshGroup;
@@ -819,38 +818,47 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				for(auto &frame : frames)
 				{
 					auto flags = frame->GetFlags();
+					auto offsetToEndOfFrameOffset = f->Tell();
+					f->Write<uint64_t>(0ull);
 					f->Write<MeshVertexFrame::Flags>(flags);
-					auto hasDeltaValues = umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues);
-					std::vector<uint16_t> usedVertIndices {};
-					auto &verts = frame->GetVertices();
-					usedVertIndices.reserve(verts.size());
-					auto vertIdx = 0u;
-					for(auto &v : verts)
+
+					struct Attribute
 					{
-						if(v.at(0) != 0 || v.at(1) != 0 || v.at(2) != 0 || (hasDeltaValues && v.at(3) != 0))
-							usedVertIndices.push_back(vertIdx);
-						++vertIdx;
+						Attribute(const std::string &name,const std::vector<std::array<uint16_t,4>> &vertexData)
+							: name{name},vertexData{vertexData}
+						{}
+						std::string name;
+						const std::vector<std::array<uint16_t,4>> &vertexData;
+					};
+					std::vector<Attribute> attributes {};
+					attributes.push_back({"position",frame->GetVertices()});
+					if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasNormals))
+						attributes.push_back({"normal",frame->GetNormals()});
+					std::set<uint16_t> usedVertIndices {};
+					for(auto &attr : attributes)
+					{
+						auto vertIdx = 0u;
+						auto &vdata = attr.vertexData.at(vertIdx);
+						for(auto &vdata : attr.vertexData)
+						{
+							auto itUsed = std::find_if(vdata.begin(),vdata.end(),[](const uint16_t &v) {return v != 0;});
+							if(itUsed != vdata.end())
+								usedVertIndices.insert(vertIdx);
+							++vertIdx;
+						}
 					}
 
 					f->Write<uint16_t>(usedVertIndices.size());
-					if(hasDeltaValues)
+					for(auto idx : usedVertIndices)
+						f->Write<uint16_t>(idx);
+					f->Write<uint16_t>(attributes.size());
+					for(auto &attr : attributes)
 					{
+						f->WriteString(attr.name);
 						for(auto idx : usedVertIndices)
-						{
-							f->Write<uint16_t>(idx);
-							auto &v = verts.at(idx);
-							f->Write(v.data(),v.size() *sizeof(v.front()));
-						}
+							f->Write<std::array<uint16_t,4>>(attr.vertexData.at(idx));
 					}
-					else
-					{
-						for(auto idx : usedVertIndices)
-						{
-							f->Write<uint16_t>(idx);
-							auto &v = verts.at(idx);
-							f->Write(v.data(),3u *sizeof(v.front()));
-						}
-					}
+					write_offset(f,offsetToEndOfFrameOffset);
 				}
 			}
 
@@ -948,4 +956,4 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->WriteString(inc);
 	return true;
 }
-
+#pragma optimize("",on)

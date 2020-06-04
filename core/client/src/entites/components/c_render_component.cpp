@@ -38,7 +38,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
-decltype(CRenderComponent::s_viewEntities) CRenderComponent::s_viewEntities = {};
+decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
@@ -143,9 +143,9 @@ void CRenderComponent::Initialize()
 CRenderComponent::~CRenderComponent()
 {
 	ClearRenderObjects();
-	auto it = std::find(s_viewEntities.begin(),s_viewEntities.end(),this);
-	if(it != s_viewEntities.end())
-		s_viewEntities.erase(it);
+	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
+	if(it != s_ocExemptEntities.end())
+		s_ocExemptEntities.erase(it);
 
 	if(m_renderBuffer != nullptr)
 		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
@@ -393,7 +393,18 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	}
 	return bestResult;
 }
-void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt) {umath::set_flag(m_stateFlags,StateFlags::ExemptFromOcclusionCulling,exempt);}
+void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
+{
+	umath::set_flag(m_stateFlags,StateFlags::ExemptFromOcclusionCulling,exempt);
+	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
+	if(exempt)
+	{
+		if(it == s_ocExemptEntities.end())
+			s_ocExemptEntities.push_back(this);
+	}
+	else if(it != s_ocExemptEntities.end())
+		s_ocExemptEntities.erase(it);
+}
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
 void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
@@ -460,14 +471,14 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 		return;
 	*m_renderMode = mode;
 
-	auto it = std::find(s_viewEntities.begin(),s_viewEntities.end(),this);
+	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
 	if(mode == RenderMode::View)
 	{
-		if(it == s_viewEntities.end())
-			s_viewEntities.push_back(this);
+		if(it == s_ocExemptEntities.end())
+			s_ocExemptEntities.push_back(this);
 	}
-	else if(it != s_viewEntities.end())
-		s_viewEntities.erase(it);
+	else if(it != s_ocExemptEntities.end() && IsExemptFromOcclusionCulling() == false)
+		s_ocExemptEntities.erase(it);
 
 	if(mode == RenderMode::None)
 		ClearRenderBuffers();
@@ -572,7 +583,7 @@ void CRenderComponent::PreRender()
 {
 	// TODO: Remove me
 }
-const std::vector<CRenderComponent*> &CRenderComponent::GetViewEntities() {return s_viewEntities;}
+const std::vector<CRenderComponent*> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() {return s_ocExemptEntities;}
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}
 void CRenderComponent::ClearBuffers()
 {

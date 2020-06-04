@@ -29,7 +29,7 @@ using namespace pragma;
 
 // 10 MiB
 #define PARTICLE_BUFFER_SIZE 10'485'760
-
+#pragma optimize("",off)
 decltype(CParticleSystemComponent::s_particleData) CParticleSystemComponent::s_particleData;
 decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_precached;
 
@@ -42,6 +42,11 @@ struct SpriteSheetTextureAnimationFrame
 	Vector2 uvStart;
 	Vector2 uvEnd;
 };
+
+Color CParticleSystemComponent::ParticleData::GetColor() const
+{
+	return Color{static_cast<int16_t>(color.at(0)),static_cast<int16_t>(color.at(1)),static_cast<int16_t>(color.at(2)),static_cast<int16_t>(color.at(3))};
+}
 
 CParticleSystemComponent::Node::Node(CBaseEntity *ent)
 	: hEntity((ent != nullptr) ? ent->GetHandle() : EntityHandle{}),bEntity(true)
@@ -94,6 +99,15 @@ CParticleSystemComponent *CParticleSystemComponent::Create(CParticleSystemCompon
 	if(bAutoSpawn)
 		entChild->Spawn();
 	return pParticleSysComponent.get();
+}
+Vector3 CParticleSystemComponent::GetParticlePosition(uint32_t ptIdx) const
+{
+	auto bufIdx = TranslateBufferIndex(ptIdx);
+	auto &ptData = m_instanceData.at(bufIdx);
+	auto pos = ptData.position;
+	if(ShouldParticlesMoveWithEmitter())
+		pos += GetEntity().GetPosition();
+	return pos;
 }
 bool CParticleSystemComponent::IsStatic() const {return (m_operators.empty() && umath::is_flag_set(m_flags,Flags::HasMovingParticles) == false) ? true : false;}
 bool CParticleSystemComponent::IsRendererBufferUpdateRequired() const {return umath::is_flag_set(m_flags,Flags::RendererBufferUpdateRequired);}
@@ -379,15 +393,15 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 		auto alphaMode = value;
 		ustring::to_lower(alphaMode);
 		if(alphaMode == "additive_full")
-			m_alphaMode = pragma::AlphaMode::AdditiveFull;
+			m_alphaMode = pragma::ParticleAlphaMode::AdditiveFull;
 		else if(alphaMode == "opaque")
-			m_alphaMode = pragma::AlphaMode::Opaque;
+			m_alphaMode = pragma::ParticleAlphaMode::Opaque;
 		else if(alphaMode == "masked")
-			m_alphaMode = pragma::AlphaMode::Masked;
+			m_alphaMode = pragma::ParticleAlphaMode::Masked;
 		else if(alphaMode == "translucent")
-			m_alphaMode = pragma::AlphaMode::Translucent;
+			m_alphaMode = pragma::ParticleAlphaMode::Translucent;
 		else if(alphaMode == "additive")
-			m_alphaMode = pragma::AlphaMode::Additive;
+			m_alphaMode = pragma::ParticleAlphaMode::Additive;
 	}
 	else if(ustring::compare(key,"premultiply_alpha"))
 		SetAlphaPremultiplied(::util::to_boolean(value));
@@ -436,21 +450,49 @@ void CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,CBase
 {
 	auto &cp = InitializeControlPoint(idx);
 	cp.hEntity = ent.GetHandle();
+
+	for(auto &childData : GetChildren())
+	{
+		if(childData.child.expired())
+			continue;
+		childData.child->SetControlPointEntity(idx,ent);
+	}
 }
 void CParticleSystemComponent::SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos)
 {
 	auto &cp = InitializeControlPoint(idx);
 	cp.pose.SetOrigin(pos);
+
+	for(auto &childData : GetChildren())
+	{
+		if(childData.child.expired())
+			continue;
+		childData.child->SetControlPointPosition(idx,pos);
+	}
 }
 void CParticleSystemComponent::SetControlPointRotation(ControlPointIndex idx,const Quat &rot)
 {
 	auto &cp = InitializeControlPoint(idx);
 	cp.pose.SetRotation(rot);
+
+	for(auto &childData : GetChildren())
+	{
+		if(childData.child.expired())
+			continue;
+		childData.child->SetControlPointRotation(idx,rot);
+	}
 }
 void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose)
 {
 	auto &cp = InitializeControlPoint(idx);
 	cp.pose = pose;
+
+	for(auto &childData : GetChildren())
+	{
+		if(childData.child.expired())
+			continue;
+		childData.child->SetControlPointPose(idx,pose);
+	}
 }
 
 CBaseEntity *CParticleSystemComponent::GetControlPointEntity(ControlPointIndex idx) const
@@ -614,6 +656,7 @@ std::pair<Vector3,Vector3> CParticleSystemComponent::CalcRenderBounds() const
 	bounds.first = uvec::max();
 	bounds.second = uvec::min();
 
+	uint32_t n = 0;
 	for(auto i=decltype(m_numRenderParticles){0u};i<m_numRenderParticles;++i)
 	{
 		auto &data = m_instanceData.at(i);
@@ -624,8 +667,11 @@ std::pair<Vector3,Vector3> CParticleSystemComponent::CalcRenderBounds() const
 		auto ptMin = ptPos -Vector3{radius,radius,radius};
 		auto ptMax = ptPos +Vector3{radius,radius,radius};
 		uvec::min(&bounds.first,ptMin);
-		uvec::min(&bounds.second,ptMax);
+		uvec::max(&bounds.second,ptMax);
+		++n;
 	}
+	if(n == 0)
+		return {};
 	return bounds;
 }
 
@@ -839,6 +885,14 @@ void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle,float
 	childData.delay = delay;
 	m_childSystems.push_back(childData);
 	particle.SetParent(this);
+	uint32_t cpIdx = 0;
+	for(auto &cp : m_controlPoints)
+	{
+		if(cp.hEntity.IsValid())
+			particle.SetControlPointEntity(cpIdx,static_cast<CBaseEntity&>(*cp.hEntity.get()));
+		particle.SetControlPointPose(cpIdx,cp.pose);
+		++cpIdx;
+	}
 }
 
 void CParticleSystemComponent::RemoveChild(CParticleSystemComponent *particle)
@@ -1025,6 +1079,15 @@ void CParticleSystemComponent::Stop()
 		op->OnParticleSystemStopped();
 	for(auto &r : m_renderers)
 		r->OnParticleSystemStopped();
+	m_numParticles = 0;
+	m_numRenderParticles = 0;
+	m_maxParticlesCur = 0;
+	m_prevMaxParticlesCur = 0;
+	m_simulationTime = 0.f;
+	m_tNextEmission = 0.f;
+	m_tLastEmission = 0.f;
+	m_currentParticleLimit = std::numeric_limits<uint32_t>::max();
+
 	m_particles.clear();
 	m_sortedParticleIndices.clear();
 	m_instanceData.clear();
@@ -1067,6 +1130,8 @@ void CParticleSystemComponent::OnRemove()
 		hChild.child->GetEntity().RemoveSafely();
 	}
 }
+
+bool CParticleSystemComponent::IsDying() const {return umath::is_flag_set(m_flags,Flags::Dying);}
 
 void CParticleSystemComponent::Die(float maxRemainingLifetime)
 {
@@ -1167,8 +1232,8 @@ CallbackHandle CParticleSystemComponent::AddRenderCallback(const std::function<v
 	return hCb;
 }
 void CParticleSystemComponent::AddRenderCallback(const CallbackHandle &hCb) {m_renderCallbacks.push_back(hCb);}
-pragma::AlphaMode CParticleSystemComponent::GetAlphaMode() const {return m_alphaMode;}
-void CParticleSystemComponent::SetAlphaMode(pragma::AlphaMode alphaMode) {m_alphaMode = alphaMode;}
+pragma::ParticleAlphaMode CParticleSystemComponent::GetAlphaMode() const {return m_alphaMode;}
+void CParticleSystemComponent::SetAlphaMode(pragma::ParticleAlphaMode alphaMode) {m_alphaMode = alphaMode;}
 void CParticleSystemComponent::SetTextureScrollingEnabled(bool b) {umath::set_flag(m_flags,Flags::TextureScrollingEnabled,b);}
 bool CParticleSystemComponent::IsTextureScrollingEnabled() const {return umath::is_flag_set(m_flags,Flags::TextureScrollingEnabled);}
 
@@ -1241,6 +1306,7 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 	particle.SetColor(m_initialColor);
 	particle.SetLife(m_lifeTime);
 	particle.SetRadius(m_radius);
+#if 0
 	auto pos = m_origin;
 	if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter) == false) // If the particle is moving with the emitter, the position is added elsewhere!
 	{
@@ -1257,6 +1323,7 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 			rot = pTrComponent->GetOrientation() *rot;
 	}
 	particle.SetWorldRotation(rot);
+#endif
 #if 0
 	// TODO
 	if(IsAnimated() == true && IsTextureScrollingEnabled() == false)
@@ -1671,3 +1738,4 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
+#pragma optimize("",on)

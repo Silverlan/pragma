@@ -12,7 +12,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
-
+#pragma optimize("",off)
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
@@ -578,30 +578,83 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 				auto numFrames = Read<uint32_t>();
 				for(auto k=decltype(numFrames){0};k<numFrames;++k)
 				{
+					uint64_t endOfFrameOffset = 0;
+					if(version >= 32)
+						endOfFrameOffset = Read<uint64_t>();
 					auto flags = MeshVertexFrame::Flags::None;
 					if(version >= 25)
 						flags = Read<MeshVertexFrame::Flags>();
-					auto numUsedVerts = Read<uint16_t>();
-					if(subMesh != nullptr)
+
+					if(version >= 32)
 					{
-						auto meshFrame = va->AddMeshFrame(*mesh,*subMesh);
-						meshFrame->SetFlags(flags);
-						for(auto l=decltype(numUsedVerts){0};l<numUsedVerts;++l)
+						if(subMesh == nullptr)
 						{
-							auto idx = Read<uint16_t>();
-							auto v = Read<std::array<uint16_t,3>>();
-							meshFrame->SetVertexPosition(idx,v);
-							if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues))
+							m_file->Seek(endOfFrameOffset);
+							Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
+						}
+						else
+						{
+							auto meshFrame = va->AddMeshFrame(*mesh,*subMesh);
+							meshFrame->SetFlags(flags);
+
+							auto numUsedVerts = Read<uint16_t>();
+							std::vector<uint16_t> usedVertIndices {};
+							usedVertIndices.resize(numUsedVerts);
+							Read(usedVertIndices.data(),usedVertIndices.size() *sizeof(usedVertIndices.front()));
+
+							auto numAttributes = Read<uint16_t>();
+							for(auto i=decltype(numAttributes){0u};i<numAttributes;++i)
 							{
-								auto deltaVal = Read<uint16_t>();
-								meshFrame->SetDeltaValue(idx,deltaVal);
+								auto attrName = ReadString();
+								std::vector<std::array<uint16_t,4>> vdata {};
+								vdata.resize(numUsedVerts);
+								Read(vdata.data(),vdata.size() *sizeof(vdata.front()));
+								if(attrName == "position")
+								{
+									for(auto j=decltype(numUsedVerts){0u};j<numUsedVerts;++j)
+									{
+										auto vertIdx = usedVertIndices.at(j);
+										meshFrame->SetVertexPosition(vertIdx,vdata.at(j));
+									}
+								}
+								else if(attrName == "normal")
+								{
+									for(auto j=decltype(numUsedVerts){0u};j<numUsedVerts;++j)
+									{
+										auto vertIdx = usedVertIndices.at(j);
+										meshFrame->SetVertexNormal(vertIdx,vdata.at(j));
+									}
+								}
 							}
 						}
 					}
 					else
 					{
-						Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
-						m_file->Seek(m_file->Tell() +numUsedVerts *(sizeof(uint16_t) +sizeof(std::array<uint16_t,3>)));
+						auto numUsedVerts = Read<uint16_t>();
+						if(subMesh != nullptr)
+						{
+							auto meshFrame = va->AddMeshFrame(*mesh,*subMesh);
+							meshFrame->SetFlags(flags);
+							for(auto l=decltype(numUsedVerts){0};l<numUsedVerts;++l)
+							{
+								auto idx = Read<uint16_t>();
+								auto v = Read<std::array<uint16_t,3>>();
+								meshFrame->SetVertexPosition(idx,v);
+								if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues))
+								{
+									auto deltaVal = Read<uint16_t>();
+									meshFrame->SetDeltaValue(idx,deltaVal);
+								}
+							}
+						}
+						else
+						{
+							Con::cwar<<"WARNING: Invalid mesh reference in vertex animation '"<<name<<"'! Skipping..."<<Con::endl;
+							auto szPerVertex = sizeof(uint16_t) *3;
+							if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasDeltaValues))
+								szPerVertex += sizeof(uint16_t);
+							m_file->Seek(m_file->Tell() +numUsedVerts *szPerVertex);
+						}
 					}
 				}
 			}
@@ -845,4 +898,4 @@ void FWMD::LoadBodygroups(Model &mdl)
 		}
 	}
 }
-
+#pragma optimize("",on)

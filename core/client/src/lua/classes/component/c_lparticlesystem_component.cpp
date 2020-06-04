@@ -81,6 +81,14 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.def("Stop",static_cast<void(*)(lua_State*,CParticleSystemHandle&,bool)>([](lua_State *l,CParticleSystemHandle &hComponent,bool bStopImmediately) {
 		Lua::ParticleSystem::Stop(l,hComponent,bStopImmediately);
 		}));
+	defCParticleSystem.def("Die",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->Die();
+	}));
+	defCParticleSystem.def("Die",static_cast<void(*)(lua_State*,CParticleSystemHandle&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,float t) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->Die(t);
+	}));
 	defCParticleSystem.def("AddInitializer",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::string,luabind::object)>([](lua_State *l,CParticleSystemHandle &hComponent,std::string name,luabind::object o) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::ParticleSystem::AddInitializer(l,*hComponent,name,o);
@@ -356,13 +364,28 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushInt(l,hComponent->GetParticleCount());
 		}));
+	defCParticleSystem.def("GetParticle",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t idx) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *pt = hComponent->GetParticle(idx);
+		if(pt == nullptr)
+			return;
+		Lua::Push(l,pt);
+	}));
+	defCParticleSystem.def("GetParticles",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &particles = hComponent->GetParticles();
+		auto t = Lua::CreateTable(l);
+		uint32_t ptIdx = 1u;
+		for(auto &pt : particles)
+		{
+			Lua::PushInt(l,ptIdx++);
+			Lua::Push<CParticle*>(l,const_cast<CParticle*>(&pt));
+			Lua::SetTableValue(l,t);
+		}
+	}));
 	defCParticleSystem.def("GetMaxParticleCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushInt(l,hComponent->GetMaxParticleCount());
-		}));
-	defCParticleSystem.def("Die",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->Die();
 		}));
 	defCParticleSystem.def("IsActive",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
@@ -388,6 +411,10 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushBool(l,hComponent->IsStatic());
 		}));
+	defCParticleSystem.def("IsDying",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushBool(l,hComponent->IsDying());
+		}));
 	defCParticleSystem.def("GetChildren",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		auto &children = hComponent->GetChildren();
@@ -408,7 +435,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		}));
 	defCParticleSystem.def("SetAlphaMode",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t alphaMode) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetAlphaMode(static_cast<pragma::AlphaMode>(alphaMode));
+		hComponent->SetAlphaMode(static_cast<pragma::ParticleAlphaMode>(alphaMode));
 		}));
 	defCParticleSystem.def("GetEmissionRate",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
@@ -610,13 +637,13 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_WORLD",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::World));
 	defCParticleSystem.add_static_constant("ORIENTATION_TYPE_BILLBOARD",umath::to_integral(pragma::CParticleSystemComponent::OrientationType::Billboard));
 
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE",umath::to_integral(pragma::AlphaMode::Additive));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_FULL",umath::to_integral(pragma::AlphaMode::AdditiveFull));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(pragma::AlphaMode::Opaque));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED",umath::to_integral(pragma::AlphaMode::Masked));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT",umath::to_integral(pragma::AlphaMode::Translucent));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED",umath::to_integral(pragma::AlphaMode::Premultiplied));
-	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT",umath::to_integral(pragma::AlphaMode::Count));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE",umath::to_integral(pragma::ParticleAlphaMode::Additive));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_ADDITIVE_FULL",umath::to_integral(pragma::ParticleAlphaMode::AdditiveFull));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(pragma::ParticleAlphaMode::Opaque));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_MASKED",umath::to_integral(pragma::ParticleAlphaMode::Masked));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_TRANSLUCENT",umath::to_integral(pragma::ParticleAlphaMode::Translucent));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_PREMULTIPLIED",umath::to_integral(pragma::ParticleAlphaMode::Premultiplied));
+	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT",umath::to_integral(pragma::ParticleAlphaMode::Count));
 	ParticleSystemModifier::register_particle_class(defCParticleSystem);
 	ParticleSystemModifier::register_modifier_class(defCParticleSystem);
 	defCParticleSystem.scope[luabind::def("read_header_data",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {

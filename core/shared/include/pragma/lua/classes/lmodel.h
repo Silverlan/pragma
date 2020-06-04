@@ -209,6 +209,8 @@ namespace Lua
 		
 		DLLNETWORK void GetPhonemeMap(lua_State *l,::Model &mdl);
 		DLLNETWORK void SetPhonemeMap(lua_State *l,::Model &mdl,luabind::object o);
+
+		DLLNETWORK void AssignDistinctMaterial(lua_State *l,::Model &mdl,::ModelMeshGroup &group,::ModelMesh &mesh,::ModelSubMesh &subMesh);
 	};
 };
 

@@ -50,8 +50,8 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 	auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
-	// View-models are just added without checking
-	for(auto *pRenderComponent : pragma::CRenderComponent::GetViewEntities())
+	// Occlusion-culling-exempt entities are just added without checking
+	for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 	{
 		if(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()).IsInScene(scene) == false)
 			continue;

@@ -12,7 +12,7 @@
 #include <prosper_util.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 void CModel::UpdateVertexAnimationBuffer()
 {
 	m_frameIndices.clear();
@@ -57,19 +57,38 @@ void CModel::UpdateVertexAnimationBuffer()
 			{
 				meshFrameOffsets.at(frameIdx++) = offset;
 				auto &verts = meshFrame->GetVertices();
-				//memcpy(vertexAnimData.data() +offset,verts.data(),verts.size() *sizeof(verts.front()));
-				std::vector<std::array<float,4>> floatData {};
-				floatData.reserve(verts.size());
+				auto &normals = meshFrame->GetNormals();
+				auto hasNormals = meshFrame->IsFlagEnabled(MeshVertexFrame::Flags::HasNormals);
+				std::vector<std::array<int32_t,4>> vertexData {};
+				vertexData.reserve(verts.size());
+				uint32_t vertIdx = 0;
 				for(auto &v : verts)
 				{
-					floatData.push_back(std::array<float,4>{
-						umath::float16_to_float32(v.at(0)),
-						umath::float16_to_float32(v.at(1)),
-						umath::float16_to_float32(v.at(2)),
-						umath::float16_to_float32(v.at(3))
-					});
+					vertexData.push_back(std::array<int32_t,4>{});
+					auto &vdata = vertexData.back();
+					vdata.at(0) = (v.at(0)<<16) | v.at(1);
+					vdata.at(1) = (v.at(2)<<16) | v.at(3);
+					if(hasNormals)
+					{
+						std::array<uint16_t,4> n {};
+						if(vertIdx < normals.size())
+							n = normals.at(vertIdx);
+						else
+						{
+							auto &dir = uvec::FORWARD;
+							n = {
+								static_cast<uint16_t>(umath::float32_to_float16_glm(dir.x)),
+								static_cast<uint16_t>(umath::float32_to_float16_glm(dir.y)),
+								static_cast<uint16_t>(umath::float32_to_float16_glm(dir.z)),
+								0
+							};
+						}
+						vdata.at(2) = (n.at(0)<<16) | n.at(1);
+						vdata.at(3) = (n.at(2)<<16) | n.at(3);
+					}
+					++vertIdx;
 				}
-				memcpy(vertexAnimData.data() +offset,floatData.data(),floatData.size() *sizeof(floatData.front()));
+				memcpy(vertexAnimData.data() +offset,vertexData.data(),vertexData.size() *sizeof(vertexData.front()));
 
 				offset += verts.size();
 			}
@@ -100,3 +119,4 @@ bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &s
 	offset = frameOffsets.at(frameId);
 	return true;
 }
+#pragma optimize("",on)

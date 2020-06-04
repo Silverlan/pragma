@@ -23,7 +23,7 @@
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace BaseEntityComponent
@@ -81,9 +81,11 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 			// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
 			// would also cause the std::function-object to be destroyed (and therefore the captured variables).
 			auto lTmp = l;
+			auto oCallbackTmp = oCallback;
+
 			auto nstack = Lua::GetStackTop(l);
-			auto c = Lua::CallFunction(l,[&oCallback,&ev](lua_State *l) -> Lua::StatusCode {
-				oCallback.push(l);
+			auto c = Lua::CallFunction(l,[&oCallbackTmp,&ev](lua_State *l) -> Lua::StatusCode {
+				oCallbackTmp.push(l);
 				ev.get().PushArguments(l);
 				return Lua::StatusCode::Ok;
 			},LUA_MULTRET);
@@ -149,4 +151,4 @@ void Lua::BaseEntityComponent::GetName(lua_State *l,BaseEntityComponentHandle &c
 	auto &info = *componentManager.GetComponentInfo(component->GetComponentId());
 	Lua::PushString(l,info.name);
 }
-
+#pragma optimize("",on)

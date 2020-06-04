@@ -42,7 +42,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	auto alphaMode = GetAlphaMode(pipelineIdx);
 	switch(alphaMode)
 	{
-		case AlphaMode::Additive:
+		case ParticleAlphaMode::Additive:
 		{
 #if 0
 			pipelineInfo.SetColorBlendAttachmentProperties(
@@ -60,7 +60,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 			);
 			break;
 	}
-		case AlphaMode::Opaque:
+		case ParticleAlphaMode::Opaque:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // color
@@ -68,7 +68,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
-		case AlphaMode::Masked:
+		case ParticleAlphaMode::Masked:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::One,prosper::BlendFactor::Zero, // color
@@ -76,7 +76,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
-		case AlphaMode::Translucent:
+		case ParticleAlphaMode::Translucent:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // color
@@ -84,7 +84,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
-		case AlphaMode::AdditiveFull:
+		case ParticleAlphaMode::AdditiveFull:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::One,prosper::BlendFactor::One, // color
@@ -92,7 +92,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
-		case AlphaMode::Premultiplied:
+		case ParticleAlphaMode::Premultiplied:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha, // color
@@ -120,14 +120,14 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 		renderFlags |= RenderFlags::TextureScrolling;
 	return renderFlags;
 }
-uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const {return pipelineIdx /umath::to_integral(AlphaMode::Count);}
-pragma::AlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const {return static_cast<AlphaMode>(pipelineIdx %umath::to_integral(AlphaMode::Count));}
-pragma::AlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::CParticleSystemComponent &particle) const
+uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const {return pipelineIdx /umath::to_integral(ParticleAlphaMode::Count);}
+pragma::ParticleAlphaMode ShaderParticleBase::GetAlphaMode(uint32_t pipelineIdx) const {return static_cast<ParticleAlphaMode>(pipelineIdx %umath::to_integral(ParticleAlphaMode::Count));}
+pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::CParticleSystemComponent &particle) const
 {
 	if(particle.IsAlphaPremultiplied())
-		return pragma::AlphaMode::Premultiplied;
+		return pragma::ParticleAlphaMode::Premultiplied;
 	return particle.GetAlphaMode();
 }
 
-uint32_t ShaderParticleBase::GetParticlePipelineCount() const {return umath::to_integral(AlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count);}
+uint32_t ShaderParticleBase::GetParticlePipelineCount() const {return umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count);}
 #pragma optimize("",on)

@@ -1420,6 +1420,13 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	});
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_CUBIC",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Cubic));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_GAUSSIAN",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Gaussian));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_PRINCIPLED",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Principled));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_BURLEY",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Burley));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_RANDOM_WALK",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::RandomWalk));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_PRINCIPLED_RANDOM_WALK",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::PrincipledRandomWalk));
+	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_COUNT",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Count));
 	surfaceMatDef.def(luabind::tostring(luabind::self));
 	surfaceMatDef.def("GetName",&Lua::SurfaceMaterial::GetName);
 	surfaceMatDef.def("GetIndex",&Lua::SurfaceMaterial::GetIndex);

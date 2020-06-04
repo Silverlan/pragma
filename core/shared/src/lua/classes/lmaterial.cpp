@@ -10,14 +10,15 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
 #include "material.h"
+#include <alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
 
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
-	classDef.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(::Material::AlphaMode::Opaque));
-	classDef.add_static_constant("ALPHA_MODE_MASK",umath::to_integral(::Material::AlphaMode::Mask));
-	classDef.add_static_constant("ALPHA_MODE_BLEND",umath::to_integral(::Material::AlphaMode::Blend));
+	classDef.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(::AlphaMode::Opaque));
+	classDef.add_static_constant("ALPHA_MODE_MASK",umath::to_integral(::AlphaMode::Mask));
+	classDef.add_static_constant("ALPHA_MODE_BLEND",umath::to_integral(::AlphaMode::Blend));
 	classDef.def("IsValid",&Lua::Material::IsValid);
 	classDef.def("GetShaderName",&Lua::Material::GetShaderName);
 	classDef.def("GetName",&Lua::Material::GetName);

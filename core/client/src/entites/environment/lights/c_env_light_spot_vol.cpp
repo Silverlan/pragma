@@ -105,9 +105,9 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 
 	auto *mat = static_cast<CMaterial*>(client->CreateMaterial("lightcone","light_cone"));
 	auto &data = mat->GetDataBlock();
-	data->AddValue("bool","translucent","1");
+	data->AddValue("int","alpha_mode",std::to_string(umath::to_integral(AlphaMode::Blend)));
 	data->AddValue("float","cone_height",std::to_string(maxDist));
-	mat->SetTexture("diffusemap","error");
+	mat->SetTexture("albedo_map","error");
 
 	const uint32_t coneDetail = 64;
 	const uint32_t segmentCount = 20;

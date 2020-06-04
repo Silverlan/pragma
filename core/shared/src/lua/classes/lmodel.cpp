@@ -397,6 +397,8 @@ void Lua::Model::register_class(
 	classDef.def("GetPhonemeMap",&Lua::Model::GetPhonemeMap);
 	classDef.def("SetPhonemeMap",&Lua::Model::SetPhonemeMap);
 
+	classDef.def("AssignDistinctMaterial",&Lua::Model::AssignDistinctMaterial);
+
 	classDef.def("SelectWeightedAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t activity) {
 		Lua::PushInt(l,mdl.SelectWeightedAnimation(static_cast<Activity>(activity)));
 	}));
@@ -738,6 +740,8 @@ void Lua::Model::register_class(
 		.def("SetVertexCount",&Lua::MeshVertexFrame::SetVertexCount)
 		.def("SetVertexPosition",&Lua::MeshVertexFrame::SetVertexPosition)
 		.def("GetVertexPosition",&Lua::MeshVertexFrame::GetVertexPosition)
+		.def("SetVertexNormal",&Lua::MeshVertexFrame::SetVertexNormal)
+		.def("GetVertexNormal",&Lua::MeshVertexFrame::GetVertexNormal)
 		.def("GetVertexCount",static_cast<void(*)(lua_State*,::MeshVertexFrame&)>([](lua_State *l,::MeshVertexFrame &meshVertFrame) {
 			Lua::PushInt(l,meshVertFrame.GetVertexCount());
 		}))
@@ -1440,8 +1444,11 @@ void Lua::Model::AddCollisionMesh(lua_State*,::Model &mdl,::CollisionMesh &colMe
 void Lua::Model::AddMaterial(lua_State *l,::Model &mdl,uint32_t textureGroup,Material *mat)
 {
 	//Lua::CheckModel(l,1);
-	auto r = mdl.AddMaterial(textureGroup,mat);
+	std::optional<uint32_t> skinTexIdx {};
+	auto r = mdl.AddMaterial(textureGroup,mat,&skinTexIdx);
 	Lua::PushInt(l,r);
+	if(skinTexIdx.has_value())
+		Lua::PushInt(l,*skinTexIdx);
 }
 void Lua::Model::SetMaterial(lua_State *l,::Model &mdl,uint32_t matId,::Material *mat)
 {
@@ -2192,6 +2199,13 @@ void Lua::Model::GetPhonemeMap(lua_State *l,::Model &mdl)
 		}
 		Lua::SetTableValue(l,t);
 	}
+}
+void Lua::Model::AssignDistinctMaterial(lua_State *l,::Model &mdl,::ModelMeshGroup &group,::ModelMesh &mesh,::ModelSubMesh &subMesh)
+{
+	auto idx = mdl.AssignDistinctMaterial(group,mesh,subMesh);
+	if(idx.has_value() == false)
+		return;
+	Lua::PushInt(l,*idx);
 }
 void Lua::Model::SetPhonemeMap(lua_State *l,::Model &mdl,luabind::object o)
 {

@@ -120,6 +120,8 @@ namespace Lua
 		DLLNETWORK void SetVertexCount(lua_State *l,::MeshVertexFrame &frame,uint32_t numVerts);
 		DLLNETWORK void SetVertexPosition(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx,const Vector3 &pos);
 		DLLNETWORK void GetVertexPosition(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx);
+		DLLNETWORK void SetVertexNormal(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx,const Vector3 &n);
+		DLLNETWORK void GetVertexNormal(lua_State *l,::MeshVertexFrame &frame,uint32_t vertIdx);
 	};
 };
 

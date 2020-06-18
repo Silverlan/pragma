@@ -18,6 +18,7 @@
 class Scene;
 class CBaseEntity;
 namespace pragma {struct RenderSettings; struct CameraData;};
+namespace util {struct DrawSceneInfo;};
 namespace pragma::rendering
 {
 	class DLLCLIENT BaseRenderer
@@ -29,7 +30,7 @@ namespace pragma::rendering
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
-		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All);
+		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
 		virtual bool ReloadRenderTarget()=0;
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();

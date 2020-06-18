@@ -9,6 +9,7 @@
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include <pragma/c_engine.h>
 #include <prosper_util.hpp>
@@ -23,11 +24,12 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 
-void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
 {
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 	auto &hdrInfo = GetHDRInfo();
 	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	// Blit high-res bloom image into low-res image, which is cheaper to blur
 	drawCmd->RecordImageBarrier(hdrInfo.bloomTexture->GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
 	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
@@ -50,20 +52,21 @@ void RasterizationRenderer::RenderBloom(std::shared_ptr<prosper::IPrimaryCommand
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 }
 
-void RasterizationRenderer::RenderGlowObjects(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &glowInfo = GetGlowInfo();
 	if(glowInfo.bGlowScheduled == false)
 		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,1.f}}},
 		prosper::ClearValue{prosper::ClearDepthStencilValue{}}
 	});
 	if(!glowInfo.tmpBloomParticles.empty())
 	{
-		RenderParticleSystems(drawCmd,glowInfo.tmpBloomParticles,RenderMode::World,true);
-		RenderParticleSystems(drawCmd,glowInfo.tmpBloomParticles,RenderMode::View,true);
+		RenderParticleSystems(drawSceneInfo,glowInfo.tmpBloomParticles,RenderMode::World,true);
+		RenderParticleSystems(drawSceneInfo,glowInfo.tmpBloomParticles,RenderMode::View,true);
 		glowInfo.tmpBloomParticles.clear();
 	}
 	for(auto i=std::underlying_type_t<RenderMode>{0};i<umath::to_integral(RenderMode::Count);++i)

@@ -19,7 +19,7 @@ bool pragma::premultiply_alpha(Vector4 &color,pragma::ParticleAlphaMode alphaMod
 			color = {color.r *color.a,color.g *color.a,color.b *color.a,color.a};
 			break;
 		case pragma::ParticleAlphaMode::Additive:
-		case pragma::ParticleAlphaMode::AdditiveFull:
+		case pragma::ParticleAlphaMode::AdditiveByColor:
 			color = {color.r *color.a,color.g *color.a,color.b *color.a,0.f};
 			break;
 		case pragma::ParticleAlphaMode::Premultiplied:

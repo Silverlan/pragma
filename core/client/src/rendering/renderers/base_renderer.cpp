@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/base_renderer.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 
 using namespace pragma::rendering;
 
@@ -15,9 +16,9 @@ BaseRenderer::BaseRenderer(Scene &scene)
 {}
 bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other == this;}
 bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
-bool BaseRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+bool BaseRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	BeginRendering(drawCmd);
+	BeginRendering(drawSceneInfo.commandBuffer);
 	return true;
 }
 void BaseRenderer::BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)

@@ -43,6 +43,7 @@ public:
 		Color,
 		Alpha,
 		Sequence,
+		CreationTime,
 
 		Count,
 		Invalid = Count

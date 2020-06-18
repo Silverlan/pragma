@@ -14,7 +14,7 @@
 #include <queries/prosper_pipeline_statistics_query.hpp>
 #include <chrono>
 
-namespace prosper {class QueryPool;};
+namespace prosper {class IQueryPool;};
 namespace pragma
 {
 	namespace debug
@@ -23,14 +23,14 @@ namespace pragma
 			: public Timer
 		{
 		public:
-			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
+			static std::shared_ptr<GPUSwapchainTimer> Create(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
 
 			virtual bool Start() override;
 			virtual bool Stop() override;
 			bool Reset();
 			virtual std::unique_ptr<ProfilerResult> GetResult() const override;
 		private:
-			GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
+			GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage);
 			void UpdateResult();
 			prosper::TimerQuery *GetTimerQuery();
 			prosper::PipelineStatisticsQuery *GetStatisticsQuery();
@@ -44,10 +44,10 @@ namespace pragma
 			std::vector<SwapchainQuery> m_swapchainTimers = {};
 			prosper::PipelineStageFlags m_stage;
 			bool m_bHasStartedAtLeastOnce = false;
-			std::weak_ptr<prosper::QueryPool> m_wpTimerQueryPool = {};
-			std::weak_ptr<prosper::QueryPool> m_wpStatsQueryPool = {};
+			std::weak_ptr<prosper::IQueryPool> m_wpTimerQueryPool = {};
+			std::weak_ptr<prosper::IQueryPool> m_wpStatsQueryPool = {};
 			std::optional<std::chrono::nanoseconds> m_lastTimeResult = {};
-			std::optional<prosper::PipelineStatisticsQuery::Statistics> m_lastStatsResult = {};
+			std::optional<prosper::PipelineStatistics> m_lastStatsResult = {};
 		};
 	};
 };

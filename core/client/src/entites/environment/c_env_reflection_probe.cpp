@@ -39,6 +39,7 @@
 #include "pragma/rendering/shaders/c_shader_brdf_convolution.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 
@@ -592,7 +593,12 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 		scene->UpdateBuffers(drawCmd); // TODO: Remove this?
 
 		// TODO: FRender::Reflection is required to flip the winding order, but why is this needed in the first place?
-		c_game->RenderScene(drawCmd,*img,(FRender::All | FRender::HDR | FRender::Reflection) &~(FRender::View | FRender::Dynamic),iLayer);
+		util::DrawSceneInfo drawSceneInfo {};
+		drawSceneInfo.commandBuffer = drawCmd;
+		drawSceneInfo.outputImage = img;
+		drawSceneInfo.renderFlags = (FRender::All | FRender::HDR | FRender::Reflection) &~(FRender::View | FRender::Dynamic);
+		drawSceneInfo.outputLayerId = iLayer;
+		c_game->RenderScene(drawSceneInfo);
 
 		// We're flushing the command buffer for each layer
 		// individually to make sure we're not gonna hit the TDR

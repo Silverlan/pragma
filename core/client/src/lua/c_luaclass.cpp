@@ -47,6 +47,7 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <wgui/fontmanager.h>
@@ -56,6 +57,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>
+#include <pragma/lua/lua_call.hpp>
 #include <luainterface.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -206,6 +208,17 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		}}
 	});
 
+	Lua::RegisterLibraryEnums(lua.GetState(),"shader",{
+		// These have to match shaders/modules/fs_tonemapping.gls!
+		{"TONE_MAPPING_GAMMA_CORRECTION",0},
+		{"TONE_MAPPING_REINHARD",1},
+		{"TONE_MAPPING_HEJIL_RICHARD",2},
+		{"TONE_MAPPING_UNCHARTED",3},
+		{"TONE_MAPPING_ACES",4},
+		{"TONE_MAPPING_GRAN_TURISMO",5},
+		{"TONE_MAPPING_COUNT",6}
+	});
+
 	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
 	defShaderInfo.def("GetName",&Lua_ShaderInfo_GetName);
@@ -312,7 +325,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderGraphics.def("GetRenderPass",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&)>([](lua_State *l,prosper::ShaderGraphics &shader) {
 		Lua::Shader::Graphics::GetRenderPass(l,shader,0u);
 	}));
-	defShaderGraphics.scope[luabind::def("GetRenderPass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+	defShaderGraphics.scope[luabind::def("get_render_pass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 		auto &rp = prosper::ShaderGraphics::GetRenderPass<prosper::ShaderGraphics>(c_engine->GetRenderContext());
 		if(rp == nullptr)
 			return;
@@ -324,8 +337,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	modShader[defShaderGUITextured];
 
 	auto defShaderScene = luabind::class_<pragma::ShaderScene,luabind::bases<prosper::ShaderGraphics,prosper::Shader>>("Scene3D");
-	defShaderScene.scope[luabind::def("GetRenderPass",&Lua::Shader::Scene3D::GetRenderPass)];
-	defShaderScene.scope[luabind::def("GetRenderPass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+	defShaderScene.scope[luabind::def("get_render_pass",&Lua::Shader::Scene3D::GetRenderPass)];
+	defShaderScene.scope[luabind::def("get_render_pass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 		Lua::Shader::Scene3D::GetRenderPass(l,0u);
 	}))];
 	defShaderScene.def("RecordBindSceneCamera",&Lua::Shader::Scene3D::BindSceneCamera);
@@ -362,6 +375,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderTextured3DBase::PushConstants));
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderTextured3DBase::PushConstants));
 	modShader[defShaderTextured3D];
+
+	auto defShaderGlow = luabind::class_<pragma::ShaderGlow,luabind::bases<pragma::ShaderTextured3DBase,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("Glow");
+	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT",umath::to_integral(pragma::ShaderGlow::RENDER_PASS_FORMAT));
+	modShader[defShaderGlow];
 
 	auto defShaderCompute = luabind::class_<prosper::ShaderCompute,prosper::Shader>("Compute");
 	defShaderCompute.def("RecordDispatch",&Lua::Shader::Compute::RecordDispatch);
@@ -636,13 +653,52 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.property("commandBuffer",static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer>(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> {
 		return drawSceneInfo.commandBuffer;
 	}),static_cast<void(*)(::util::DrawSceneInfo&,Lua::Vulkan::CommandBuffer&)>([](::util::DrawSceneInfo &drawSceneInfo,Lua::Vulkan::CommandBuffer &commandBuffer) {
-		drawSceneInfo.commandBuffer = commandBuffer.shared_from_this();
+		if(commandBuffer.IsPrimary() == false)
+			return;
+		drawSceneInfo.commandBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(commandBuffer.shared_from_this());
 	}));
 	defDrawSceneInfo.def_readwrite("renderFlags",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::renderFlags));
+	defDrawSceneInfo.def_readwrite("renderTarget",&::util::DrawSceneInfo::renderTarget);
+	defDrawSceneInfo.def_readwrite("outputImage",&::util::DrawSceneInfo::outputImage);
+	defDrawSceneInfo.def_readwrite("outputLayerId",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
 	defDrawSceneInfo.property("clearColor",static_cast<Color(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color {
 		return *drawSceneInfo.clearColor;
 	}),static_cast<void(*)(::util::DrawSceneInfo&,const Color&)>([](::util::DrawSceneInfo &drawSceneInfo,const Color &color) {
 		drawSceneInfo.clearColor = color;
+	}));
+	defDrawSceneInfo.def("SetEntityRenderFilter",static_cast<void(*)(lua_State*,util::DrawSceneInfo&,luabind::object)>([](lua_State *l,util::DrawSceneInfo &drawSceneInfo,luabind::object f) {
+		Lua::CheckFunction(l,2);
+		drawSceneInfo.renderFilter = [f,l](CBaseEntity &ent) -> bool {
+			auto r = Lua::CallFunction(l,[&f,&ent](lua_State *l) {
+				f.push(l);
+				ent.GetLuaObject()->push(l);
+				return Lua::StatusCode::Ok;
+				},1);
+			if(r == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return false;
+				return Lua::CheckBool(l,-1);
+			}
+			return true;
+		};
+	}));
+	defDrawSceneInfo.def("SetEntityPrepassFilter",static_cast<void(*)(lua_State*,util::DrawSceneInfo&,luabind::object)>([](lua_State *l,util::DrawSceneInfo &drawSceneInfo,luabind::object f) {
+		Lua::CheckFunction(l,2);
+		drawSceneInfo.prepassFilter = [f,l](CBaseEntity &ent) -> bool {
+			auto r = Lua::CallFunction(l,[&f,&ent](lua_State *l) {
+				f.push(l);
+				ent.GetLuaObject()->push(l);
+				return Lua::StatusCode::Ok;
+				},1);
+			if(r == Lua::StatusCode::Ok)
+			{
+				if(Lua::IsSet(l,-1) == false)
+					return false;
+				return Lua::CheckBool(l,-1);
+			}
+			return true;
+		};
 	}));
 	modGame[defDrawSceneInfo];
 

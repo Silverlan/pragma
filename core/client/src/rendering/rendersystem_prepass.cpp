@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
@@ -20,7 +21,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 
-void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
+void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -30,9 +31,9 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 	auto *renderInfo = rasterizer->GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return;
-	RenderPrepass(drawCmd,*renderInfo);
+	RenderPrepass(drawSceneInfo,*renderInfo);
 }
-void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes)
+void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -48,6 +49,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 	pragma::CRenderComponent *renderC = nullptr;
 	auto depthBiasActive = false;
 	auto &shaderDepthStage = rasterizer->GetPrepass().GetShader();
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto &meshInfo : containers)
 	{
 		for(auto &matMeshInfo : meshInfo->containers)
@@ -59,8 +61,11 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 				{
 					entPrev = ent;
 					renderC = entPrev->GetRenderComponent().get();
-					if(renderC == nullptr || renderC->IsDepthPassEnabled() == false)
+					if(renderC == nullptr || renderC->IsDepthPassEnabled() == false || (drawSceneInfo.prepassFilter && drawSceneInfo.prepassFilter(*ent) == false))
+					{
+						renderC = nullptr;
 						continue;
+					}
 					auto bWeighted = false;
 					shaderDepthStage.BindEntity(*ent);//,bWeighted); // prosper TODO
 
@@ -79,7 +84,7 @@ void RenderSystem::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 						drawCmd->RecordSetDepthBias();
 					}
 				}
-				if(renderC == nullptr || renderC->IsDepthPassEnabled() == false)
+				if(renderC == nullptr)
 					continue;
 				for(auto *cmesh : pair.second.meshes)
 				{

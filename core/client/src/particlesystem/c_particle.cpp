@@ -66,7 +66,7 @@ void CParticle::Reset(float t)
 
 uint32_t CParticle::GetSeed() const {return m_seed;}
 void CParticle::Die() {m_bDying = true; m_tDeath = m_tAlive;}
-void CParticle::Resurrect() {m_bDying = false ;m_tDeath = 0.f;}
+void CParticle::Resurrect() {m_bDying = false; m_tDeath = 0.f;}
 bool CParticle::IsDying() const {return m_bDying;}
 float CParticle::GetDeathTime() const {return m_tDeath;}
 float CParticle::GetLifeSpan() const {return GetTimeAlive() +GetLife();}
@@ -110,9 +110,12 @@ const char *CParticle::field_id_to_name(FieldId id)
 		return "alpha";
 	case FieldId::Sequence:
 		return "sequence";
+	case FieldId::CreationTime:
+		return "creation_time";
 	case FieldId::Life:
 		return "life";
 	}
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 	return "invalid";
 }
 CParticle::FieldId CParticle::name_to_field_id(const std::string &fieldName)
@@ -141,7 +144,9 @@ CParticle::FieldId CParticle::name_to_field_id(const std::string &fieldName)
 		return FieldId::Sequence;
 	else if(ustring::compare(fieldName,"life",false))
 		return FieldId::Life;
-	static_assert(umath::to_integral(FieldId::Count) == 12);
+	else if(ustring::compare(fieldName,"creation_time",false))
+		return FieldId::CreationTime;
+	static_assert(umath::to_integral(FieldId::Count) == 13);
 	return FieldId::Invalid;
 }
 void CParticle::SetField(FieldId fieldId,float value)
@@ -164,12 +169,16 @@ void CParticle::SetField(FieldId fieldId,float value)
 		m_sequence = static_cast<int32_t>(value);
 		break;
 	case FieldId::Life:
-		m_sequence = value;
+		m_tLife = value;
+		break;
+	case FieldId::CreationTime:
+		m_tCreated = value;
 		break;
 	case FieldId::Alpha:
 		m_color.a = value;
 		break;
 	}
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 }
 void CParticle::SetField(FieldId fieldId,const Vector4 &value)
 {
@@ -193,6 +202,7 @@ void CParticle::SetField(FieldId fieldId,const Vector4 &value)
 		m_color.b = value.b;
 		break;
 	}
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 }
 bool CParticle::GetField(FieldId fieldId,float &outValue) const
 {
@@ -216,12 +226,16 @@ bool CParticle::GetField(FieldId fieldId,float &outValue) const
 	case FieldId::Life:
 		outValue = m_tLife;
 		break;
+	case FieldId::CreationTime:
+		outValue = m_tCreated;
+		break;
 	case FieldId::Alpha:
 		outValue = m_color.a;
 		break;
 	default:
 		return false;
 	}
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 	return true;
 }
 bool CParticle::GetField(FieldId fieldId,Vector4 &outValue) const
@@ -246,6 +260,7 @@ bool CParticle::GetField(FieldId fieldId,Vector4 &outValue) const
 	default:
 		return false;
 	}
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 	return true;
 }
 

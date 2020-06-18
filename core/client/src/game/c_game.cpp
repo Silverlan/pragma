@@ -166,7 +166,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderWorld");
 	RegisterCallback<void>("PreRenderParticles");
 	RegisterCallback<void>("PostRenderParticles");
-	RegisterCallback<void>("Render");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render");
 	RegisterCallback<void>("PreRenderDebug");
 	RegisterCallback<void>("PostRenderDebug");
 	RegisterCallback<void>("PreRenderWater");
@@ -174,10 +174,10 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
 	RegisterCallback<void>("PreRenderScenes");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*>("DrawScene");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
-	RegisterCallback<void,FRender>("RenderPostProcessing");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
 	RegisterCallback<void,pragma::rendering::RasterizationRenderer*>("OnPreRender");
 	RegisterCallback<void>("RenderPrepass");
 	RegisterCallback<void>("PostRenderScene");
@@ -185,11 +185,11 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+		void,std::reference_wrapper<const util::DrawSceneInfo>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PreRender");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+		void,std::reference_wrapper<const util::DrawSceneInfo>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender");
 	RegisterCallback<void,CBaseEntity*>("UpdateEntityModel");

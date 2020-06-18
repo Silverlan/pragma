@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_ssao.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
@@ -21,7 +22,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderSSAO(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
 	auto *shaderSSAO = static_cast<pragma::ShaderSSAO*>(ssaoInfo.GetSSAOShader());
@@ -33,6 +34,7 @@ void RasterizationRenderer::RenderSSAO(std::shared_ptr<prosper::IPrimaryCommandB
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	// Pre-render depths, positions and normals (Required for SSAO)
 	auto *renderInfo  = GetRenderInfo(RenderMode::World);
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(renderInfo != nullptr)
 	{
 		// SSAO

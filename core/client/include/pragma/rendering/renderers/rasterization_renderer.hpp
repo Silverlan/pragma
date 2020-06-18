@@ -144,9 +144,9 @@ namespace pragma::rendering
 		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
-		bool BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass=nullptr);
-		bool EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		bool ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr);
+		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		void PrepareRendering(RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
 
 		const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
@@ -157,7 +157,7 @@ namespace pragma::rendering
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RenderParticleSystems(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
+		void RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
 		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode);
@@ -171,29 +171,29 @@ namespace pragma::rendering
 		const RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 
 		prosper::Shader *GetWireframeShader();
-		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
+		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);
 
-		void RenderGameScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
+		void RenderGameScene(const util::DrawSceneInfo &drawSceneInfo);
 
 		void PerformOcclusionCulling();
 		void CollectRenderObjects(FRender renderFlags);
-		void RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
-		void RenderSSAO(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		void CullLightSources(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		void RenderLightingPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags);
-		void RenderGlowObjects(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		void RenderBloom(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		void RenderToneMapping(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IDescriptorSet &descSetHdrResolve);
-		void RenderFXAA(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderSSAO(const util::DrawSceneInfo &drawSceneInfo);
+		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderLightingPass(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderBloom(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve);
+		void RenderFXAA(const util::DrawSceneInfo &drawSceneInfo);
 
 		void InitializeLightDescriptorSets();
 		virtual bool Initialize() override;
 		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 
-		void RenderSceneFog(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo);
 
 		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
 

@@ -846,7 +846,10 @@ int Lua::game::Client::get_gravity(lua_State *l)
 int Lua::game::Client::load_model(lua_State *l)
 {
 	auto *name = Lua::CheckString(l,1);
-	auto mdl = c_game->LoadModel(name);
+	auto reload = false;
+	if(Lua::IsSet(l,2))
+		reload = Lua::CheckBool(l,2);
+	auto mdl = c_game->LoadModel(name,reload);
 	if(mdl == nullptr)
 		return 0;
 	Lua::Push<decltype(mdl)>(l,mdl);
@@ -897,14 +900,9 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
-	auto &img = Lua::Check<Lua::Vulkan::Image>(l,2);
-	uint32_t layerId = 0;
-	if(Lua::IsSet(l,3))
-		layerId = Lua::CheckInt(l,3);
 	auto cmdBuffer = drawSceneInfo.commandBuffer;
 	if(cmdBuffer == nullptr || cmdBuffer->IsPrimary() == false)
 		return 0;
-	auto renderFlags = drawSceneInfo.renderFlags;
 	auto *clearColor = drawSceneInfo.clearColor.has_value() ? &drawSceneInfo.clearColor.value() : nullptr;
 	c_game->SetRenderScene(scene);
 
@@ -919,7 +917,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	}
 
 	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
-	c_game->RenderScene(primCmdBuffer,img,renderFlags,layerId);
+	c_game->RenderScene(drawSceneInfo);
 	c_game->SetRenderScene(nullptr);
 	return 0;
 }
@@ -979,7 +977,7 @@ int Lua::game::Client::get_draw_command_buffer(lua_State *l)
 int Lua::game::Client::get_setup_command_buffer(lua_State *l)
 {
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
-	Lua::Push(l,setupCmd);
+	Lua::Push<std::shared_ptr<prosper::ICommandBuffer>>(l,setupCmd);
 	return 1;
 }
 int Lua::game::Client::flush_setup_command_buffer(lua_State *l)

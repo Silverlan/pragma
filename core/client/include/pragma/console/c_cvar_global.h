@@ -70,6 +70,11 @@ REGISTER_CONCOMMAND_CL(debug_texture_mipmaps,Console::commands::debug_texture_mi
 REGISTER_CONCOMMAND_CL(debug_hitboxes,Console::commands::debug_hitboxes,ConVarFlags::None,"Displays the hitboxes for the entity under the crosshair, or the entity with the given name (If it was specified.).");
 
 REGISTER_CONCOMMAND_CL(debug_pbr_ibl,Console::commands::debug_pbr_ibl,ConVarFlags::None,"Displays the irradiance, prefilter and brdf map for the closest cubemap.");
+REGISTER_CONCOMMAND_CL(debug_particle_alpha_mode,Console::commands::debug_particle_alpha_mode,ConVarFlags::None,"Specifies the blend mode arguments for particle systems that use the \
+'custom' alpha mode. Argument order: <srcColorBlendFactor> <dstColorBlendFactor> <srcAlphaBlendFactor> <dstAlphaBlendFactor> <opColor> <opAlpha>.\n\
+Blend factor options: zero, one, src_color, one_minus_src_color, dst_color, one_minus_dst_color, src_alpha, one_minus_src_alpha, dst_alpha, one_minus_dst_alpha, constant_color, \
+one_minus_constant_color, constant_alpha, one_minus_constant_alpha, src_alpha_saturate, src1_color, one_minus_src1_color, src1_alpha, one_minus_src1_alpha\n\
+Operation options: add, subtract, reverse_subtract, min, max");
 
 #ifdef _DEBUG
 REGISTER_CONCOMMAND_CL(cl_dump_sounds,CMD_cl_dump_sounds,ConVarFlags::None,"Prints information about all active sounds to the console.");

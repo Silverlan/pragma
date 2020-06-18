@@ -352,6 +352,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.add_static_constant("TONE_MAPPING_ACES",umath::to_integral(uimg::ImageBuffer::ToneMapping::Aces));
 	defImageBuffer.add_static_constant("TONE_MAPPING_GRAN_TURISMO",umath::to_integral(uimg::ImageBuffer::ToneMapping::GranTurismo));
 
+	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t,DataStream&)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format,DataStream &ds) {
+		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(),width,height,static_cast<uimg::ImageBuffer::Format>(format));
+		if(imgBuffer == nullptr)
+			return;
+		Lua::Push(l,imgBuffer);
+	}))];
 	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format) {
 		auto imgBuffer = uimg::ImageBuffer::Create(width,height,static_cast<uimg::ImageBuffer::Format>(format));
 		if(imgBuffer == nullptr)
@@ -381,6 +387,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::Push(l,imgBuffer);
 	}))];
+	defImageBuffer.def("GetData",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
+		auto *data = imgBuffer.GetData();
+		auto dataSize = imgBuffer.GetSize();
+		DataStream ds {data,static_cast<uint32_t>(dataSize)};
+		ds->SetOffset(0);
+		Lua::Push(l,ds);
+	}));
 	defImageBuffer.def("GetFormat",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		Lua::PushInt(l,umath::to_integral(imgBuffer.GetFormat()));
 	}));
@@ -444,6 +457,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("Clear",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,const Vector4&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,const Vector4 &color) {
 		imgBuffer.Clear(color);
 	}));
+	defImageBuffer.def("ClearAlpha",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,float a) {
+		a = umath::clamp(a,0.f,1.f);
+		imgBuffer.ClearAlpha(a *std::numeric_limits<uint8_t>::max());
+	}));
 	defImageBuffer.def("GetPixelIndex",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
 		Lua::PushInt(l,imgBuffer.GetPixelIndex(x,y));
 	}));
@@ -477,6 +494,22 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	defImageBuffer.def("SetPixelValue",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,float value) {
 		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+	}));
+	defImageBuffer.def("SetPixelValueLDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint8_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,uint8_t value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+	}));
+	defImageBuffer.def("SetPixelValueHDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint16_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,uint16_t value) {
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+	}));
+	defImageBuffer.def("CalcLuminance",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
+		float avgLuminance,minLuminance,maxLuminance,logAvgLuminance;
+		Vector3 avgIntensity;
+		imgBuffer.CalcLuminance(avgLuminance,minLuminance,maxLuminance,avgIntensity,&logAvgLuminance);
+		Lua::PushNumber(l,avgLuminance);
+		Lua::PushNumber(l,minLuminance);
+		Lua::PushNumber(l,maxLuminance);
+		Lua::Push<Vector3>(l,avgIntensity);
+		Lua::PushNumber(l,logAvgLuminance);
 	}));
 	modUtil[defImageBuffer];
 

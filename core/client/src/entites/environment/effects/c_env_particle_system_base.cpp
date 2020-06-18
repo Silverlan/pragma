@@ -392,8 +392,8 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 	{
 		auto alphaMode = value;
 		ustring::to_lower(alphaMode);
-		if(alphaMode == "additive_full")
-			m_alphaMode = pragma::ParticleAlphaMode::AdditiveFull;
+		if(alphaMode == "additive_by_color" || alphaMode == "additive_full")
+			m_alphaMode = pragma::ParticleAlphaMode::AdditiveByColor;
 		else if(alphaMode == "opaque")
 			m_alphaMode = pragma::ParticleAlphaMode::Opaque;
 		else if(alphaMode == "masked")
@@ -402,6 +402,8 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 			m_alphaMode = pragma::ParticleAlphaMode::Translucent;
 		else if(alphaMode == "additive")
 			m_alphaMode = pragma::ParticleAlphaMode::Additive;
+		else if(alphaMode == "custom")
+			m_alphaMode = pragma::ParticleAlphaMode::Custom;
 	}
 	else if(ustring::compare(key,"premultiply_alpha"))
 		SetAlphaPremultiplied(::util::to_boolean(value));
@@ -411,7 +413,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 		m_particleRot = uquat::create(ang);
 	}
 	else if(ustring::compare(key,"black_to_alpha"))
-		umath::set_flag(m_flags,Flags::BlackToAlpha,::util::to_boolean(value));
+		m_alphaMode = pragma::ParticleAlphaMode::AdditiveByColor;
 	else if(ustring::compare(key,"move_with_emitter"))
 		umath::set_flag(m_flags,Flags::MoveWithEmitter,::util::to_boolean(value));
 	else if(ustring::compare(key,"rotate_with_emitter"))
@@ -444,6 +446,8 @@ CParticleSystemComponent::ControlPoint &CParticleSystemComponent::InitializeCont
 {
 	if(idx >= m_controlPoints.size())
 		m_controlPoints.resize(idx +1);
+	if(idx >= m_controlPointsPrev.size())
+		m_controlPointsPrev.resize(idx +1);
 	return m_controlPoints.at(idx);
 }
 void CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,CBaseEntity &ent)
@@ -460,38 +464,33 @@ void CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,CBase
 }
 void CParticleSystemComponent::SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos)
 {
-	auto &cp = InitializeControlPoint(idx);
-	cp.pose.SetOrigin(pos);
-
-	for(auto &childData : GetChildren())
-	{
-		if(childData.child.expired())
-			continue;
-		childData.child->SetControlPointPosition(idx,pos);
-	}
+	auto optPose = GetControlPointPose(idx);
+	auto pose = optPose.has_value() ? *optPose : physics::Transform{};
+	pose.SetOrigin(pos);
+	SetControlPointPose(idx,pose);
 }
 void CParticleSystemComponent::SetControlPointRotation(ControlPointIndex idx,const Quat &rot)
 {
-	auto &cp = InitializeControlPoint(idx);
-	cp.pose.SetRotation(rot);
-
-	for(auto &childData : GetChildren())
-	{
-		if(childData.child.expired())
-			continue;
-		childData.child->SetControlPointRotation(idx,rot);
-	}
+	auto optPose = GetControlPointPose(idx);
+	auto pose = optPose.has_value() ? *optPose : physics::Transform{};
+	pose.SetRotation(rot);
+	SetControlPointPose(idx,pose);
 }
-void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose)
+void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose,float *optTimestamp)
 {
-	auto &cp = InitializeControlPoint(idx);
+	InitializeControlPoint(idx);
+	auto t = optTimestamp ? *optTimestamp : m_simulationTime;
+	if(t > m_controlPoints.at(idx).simTimestamp)
+		m_controlPointsPrev.at(idx) = m_controlPoints.at(idx);
+	auto &cp = m_controlPoints.at(idx);
+	cp.simTimestamp = t;
 	cp.pose = pose;
 
 	for(auto &childData : GetChildren())
 	{
 		if(childData.child.expired())
 			continue;
-		childData.child->SetControlPointPose(idx,pose);
+		childData.child->SetControlPointPose(idx,pose,optTimestamp);
 	}
 }
 
@@ -501,7 +500,7 @@ CBaseEntity *CParticleSystemComponent::GetControlPointEntity(ControlPointIndex i
 		return nullptr;
 	return static_cast<CBaseEntity*>(m_controlPoints.at(idx).hEntity.get());
 }
-std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx) const
+std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
 {
 	if(idx >= m_controlPoints.size())
 		return {};
@@ -513,6 +512,38 @@ std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(
 		ent->GetPose(entPose);
 		pose = entPose *pose;
 	}
+	if(optOutTimestamp)
+		*optOutTimestamp = m_controlPoints.at(idx).simTimestamp;
+	return pose;
+}
+std::optional<physics::Transform> CParticleSystemComponent::GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
+{
+	if(idx >= m_controlPointsPrev.size())
+		return {};
+	auto pose = m_controlPointsPrev.at(idx).pose;
+	auto *ent = GetControlPointEntity(idx);
+	if(ent)
+	{
+		pragma::physics::Transform entPose;
+		ent->GetPose(entPose);
+		pose = entPose *pose;
+	}
+	if(optOutTimestamp)
+		*optOutTimestamp = m_controlPointsPrev.at(idx).simTimestamp;
+	return pose;
+}
+std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float t) const
+{
+	if(idx >= m_controlPoints.size())
+		return {};
+	auto &cp = m_controlPoints.at(idx);
+	if(idx >= m_controlPointsPrev.size() || umath::abs(cp.simTimestamp -m_controlPointsPrev.at(idx).simTimestamp) < 0.001f)
+		return GetControlPointPose(idx);
+	auto &cpPrev = m_controlPointsPrev.at(idx);
+	t = (t -cpPrev.simTimestamp) /(cp.simTimestamp -cpPrev.simTimestamp);
+	t = umath::clamp(t,0.f,1.f);
+	auto pose = *GetPrevControlPointPose(idx);
+	pose.Interpolate(*GetControlPointPose(idx),t);
 	return pose;
 }
 
@@ -694,18 +725,7 @@ void CParticleSystemComponent::SetExtent(float ext)
 float CParticleSystemComponent::GetRadius() const {return m_radius;}
 float CParticleSystemComponent::GetExtent() const {return m_extent;}
 
-void CParticleSystemComponent::SetMaterial(Material *mat)
-{
-	m_material = mat;
-	if(mat == nullptr)
-		return;
-	auto &root = mat->GetDataBlock();
-	if(root == nullptr)
-		return;
-	auto blackToAlpha = false;
-	if(root->GetBool("black_to_alpha",&blackToAlpha) == true)
-		umath::set_flag(m_flags,Flags::BlackToAlpha,true);
-}
+void CParticleSystemComponent::SetMaterial(Material *mat) {m_material = mat;}
 void CParticleSystemComponent::SetMaterial(const char *mat) {SetMaterial(client->LoadMaterial(mat));}
 Material *CParticleSystemComponent::GetMaterial() const {return m_material;}
 
@@ -885,6 +905,7 @@ void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle,float
 	childData.delay = delay;
 	m_childSystems.push_back(childData);
 	particle.SetParent(this);
+	particle.SetContinuous(IsContinuous());
 	uint32_t cpIdx = 0;
 	for(auto &cp : m_controlPoints)
 	{
@@ -935,6 +956,7 @@ void CParticleSystemComponent::Start()
 	m_state = State::Active;
 	m_tLastEmission = 0.0;
 	m_tLifeTime = 0.0;
+	m_tStartTime = c_game->RealTime();
 	m_currentParticleLimit = m_particleLimit;
 
 	// Children have to be started before operators are initialized,
@@ -1086,6 +1108,7 @@ void CParticleSystemComponent::Stop()
 	m_simulationTime = 0.f;
 	m_tNextEmission = 0.f;
 	m_tLastEmission = 0.f;
+	m_tStartTime = 0.0;
 	m_currentParticleLimit = std::numeric_limits<uint32_t>::max();
 
 	m_particles.clear();
@@ -1108,6 +1131,8 @@ void CParticleSystemComponent::Stop()
 
 double CParticleSystemComponent::GetLifeTime() const {return m_tLifeTime;}
 float CParticleSystemComponent::GetSimulationTime() const {return m_simulationTime;}
+
+double CParticleSystemComponent::GetStartTime() const {return m_tStartTime;}
 
 const std::vector<CParticleSystemComponent::ParticleData> &CParticleSystemComponent::GetRenderParticleData() const {return m_instanceData;}
 const std::vector<CParticleSystemComponent::ParticleAnimationData> &CParticleSystemComponent::GetParticleAnimationData() const {return m_particleAnimData;}
@@ -1233,6 +1258,20 @@ CallbackHandle CParticleSystemComponent::AddRenderCallback(const std::function<v
 }
 void CParticleSystemComponent::AddRenderCallback(const CallbackHandle &hCb) {m_renderCallbacks.push_back(hCb);}
 pragma::ParticleAlphaMode CParticleSystemComponent::GetAlphaMode() const {return m_alphaMode;}
+pragma::ParticleAlphaMode CParticleSystemComponent::GetEffectiveAlphaMode() const
+{
+	auto alphaMode = GetAlphaMode();
+	if(alphaMode != ParticleAlphaMode::Additive)
+		return alphaMode;
+	auto *mat = GetMaterial();
+	if(mat)
+	{
+		auto &data = mat->GetDataBlock();
+		if(data->GetBool("additive"))
+			alphaMode = ParticleAlphaMode::AdditiveByColor;
+	}
+	return alphaMode;
+}
 void CParticleSystemComponent::SetAlphaMode(pragma::ParticleAlphaMode alphaMode) {m_alphaMode = alphaMode;}
 void CParticleSystemComponent::SetTextureScrollingEnabled(bool b) {umath::set_flag(m_flags,Flags::TextureScrollingEnabled,b);}
 bool CParticleSystemComponent::IsTextureScrollingEnabled() const {return umath::is_flag_set(m_flags,Flags::TextureScrollingEnabled);}
@@ -1253,6 +1292,8 @@ void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flag
 
 void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
 {
+	if(bloom && IsBloomEnabled() == false)
+		return;
 	m_tLastEmission = c_game->RealTime();
 	if(IsActiveOrPaused() == false)
 	{
@@ -1296,13 +1337,14 @@ void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrim
 		r->RenderShadow(drawCmd,renderer,*light,layerId);
 }
 
-void CParticleSystemComponent::CreateParticle(uint32_t idx)
+CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreated,float timeAlive)
 {
 	auto &particle = m_particles[idx];
 	if(particle.IsAlive())
 		OnParticleDestroyed(particle);
-	particle.Reset(static_cast<float>(c_game->CurTime()));
+	particle.Reset(timeCreated);
 	particle.SetAlive(true);
+	particle.SetTimeAlive(timeAlive);
 	particle.SetColor(m_initialColor);
 	particle.SetLife(m_lifeTime);
 	particle.SetRadius(m_radius);
@@ -1365,13 +1407,15 @@ void CParticleSystemComponent::CreateParticle(uint32_t idx)
 
 	for(auto &op : m_operators)
 		op->Simulate(particle,0.0); // TODO: Should we use a delta time here?
+	return particle;
 }
 
-uint32_t CParticleSystemComponent::CreateParticles(uint32_t count)
+uint32_t CParticleSystemComponent::CreateParticles(uint32_t count,double tSimDelta,float tStart,float tDtPerParticle)
 {
 	auto bHasLimit = m_currentParticleLimit != std::numeric_limits<uint32_t>::max();
 	if(bHasLimit)
 		count = umath::min(count,m_currentParticleLimit);
+	auto t = tStart;
 	for(auto i=decltype(count){0};i<count;++i)
 	{
 		uint32_t idx;
@@ -1382,7 +1426,12 @@ uint32_t CParticleSystemComponent::CreateParticles(uint32_t count)
 			return i;
 		}
 		else
-			CreateParticle(idx);
+		{
+			// Simulation time hasn't been updated yet, so we have to add the delta sim time here
+			auto ptAge = GetSimulationTime() +tSimDelta -t;
+			auto &pt = CreateParticle(idx,t,ptAge);
+		}
+		t += tDtPerParticle;
 	}
 	if(bHasLimit)
 	{
@@ -1407,7 +1456,8 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto *cam = c_game->GetPrimaryCamera();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
-	m_simulationTime += tDelta;
+	ScopeGuard sg {[this,tDelta]() {m_simulationTime += tDelta;}}; // Increment simulation time once this tick is complete
+
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())
 		tDelta *= pTsComponent->GetTimeScale();
@@ -1507,11 +1557,19 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	if(numFill > 0)
 	{
 		int32_t numCreate = 0;
+		auto tEmissionStart = 0.f;
+		auto tEmissionRate = 0.f;
 		if(m_nextParticleEmissionCount != std::numeric_limits<uint32_t>::max())
 		{
 			if(bEmissionPaused == false)
 			{
 				numCreate = m_nextParticleEmissionCount;
+
+				// TODO: Unsure about these
+				tEmissionStart = m_simulationTime -tDelta;
+				tEmissionRate = static_cast<float>(tDelta) /static_cast<float>(numCreate);
+				//
+
 				m_nextParticleEmissionCount = std::numeric_limits<uint32_t>::max();
 				if(numCreate > 0u)
 					m_tNextEmission -= static_cast<float>(tDelta);
@@ -1522,20 +1580,24 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			auto emissionRate = bEmissionPaused ? 0u : m_emissionRate;
 			if(emissionRate > 0)
 			{
-				m_tNextEmission -= static_cast<float>(tDelta);
 				auto rate = 1.f /static_cast<float>(emissionRate);
+				m_tNextEmission -= static_cast<float>(tDelta);
 				if(m_tNextEmission <= 0.f)
 				{
+					tEmissionStart = (m_simulationTime +tDelta) +m_tNextEmission;
+					tEmissionRate = rate;
+
 					numCreate = umath::floor(-m_tNextEmission /rate);
 					if(numCreate == 0 && m_tLastEmission == 0.0 && rate > 0.f)
 						++numCreate; // Make sure at least one particle is created right away when the particle system was started
-					m_tNextEmission = -fmodf(-m_tNextEmission,rate);
+					m_tNextEmission += numCreate *rate;
 				}
 			}
 		}
 		if(numCreate > numFill)
 			numCreate = numFill;
-		numCreate = CreateParticles(numCreate);
+		tEmissionStart = umath::clamp(tEmissionStart,0.f,m_simulationTime +static_cast<float>(tDelta));
+		numCreate = CreateParticles(numCreate,tDelta,tEmissionStart,tEmissionRate);
 		m_numParticles += numCreate;
 	}
 
@@ -1607,6 +1669,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	}
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto psPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto alphaMode = GetEffectiveAlphaMode();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{
 		auto sortedIdx = m_sortedParticleIndices[i];
@@ -1619,7 +1682,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 			auto &prevPos = p.GetPrevPos();
 			auto &vCol = p.GetColor();
 			if(umath::is_flag_set(m_flags,Flags::PremultiplyAlpha))
-				pragma::premultiply_alpha(vCol,m_alphaMode);
+				pragma::premultiply_alpha(vCol,alphaMode);
 			auto &col = data.color;
 			col = {static_cast<uint16_t>(vCol.x *255.f),static_cast<uint16_t>(vCol.y *255.f),static_cast<uint16_t>(vCol.z *255.f),static_cast<uint16_t>(vCol.a *255.f)};
 
@@ -1705,8 +1768,6 @@ void CParticleSystemComponent::Simulate(double tDelta)
 
 const std::vector<CParticleSystemComponent::ChildData> &CParticleSystemComponent::GetChildren() const {return const_cast<CParticleSystemComponent*>(this)->GetChildren();}
 std::vector<CParticleSystemComponent::ChildData> &CParticleSystemComponent::GetChildren() {return m_childSystems;}
-
-bool CParticleSystemComponent::ShouldUseBlackAsAlpha() const {return umath::is_flag_set(m_flags,Flags::BlackToAlpha);}
 
 std::size_t CParticleSystemComponent::TranslateParticleIndex(std::size_t particleIdx) const
 {

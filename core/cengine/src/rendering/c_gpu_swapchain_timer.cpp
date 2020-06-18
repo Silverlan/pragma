@@ -16,11 +16,11 @@ using namespace pragma::debug;
 
 extern DLLCENGINE CEngine *c_engine;
 
-std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
+std::shared_ptr<GPUSwapchainTimer> GPUSwapchainTimer::Create(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
 {
 	return std::shared_ptr<GPUSwapchainTimer>(new GPUSwapchainTimer{timerQueryPool,statsQueryPool,stage});
 }
-GPUSwapchainTimer::GPUSwapchainTimer(prosper::QueryPool &timerQueryPool,prosper::QueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
+GPUSwapchainTimer::GPUSwapchainTimer(prosper::IQueryPool &timerQueryPool,prosper::IQueryPool &statsQueryPool,prosper::PipelineStageFlags stage)
 	: m_stage{stage},m_wpTimerQueryPool{timerQueryPool.shared_from_this()},m_wpStatsQueryPool{statsQueryPool.shared_from_this()}
 {}
 void GPUSwapchainTimer::UpdateResult()
@@ -28,7 +28,7 @@ void GPUSwapchainTimer::UpdateResult()
 	auto *pTimerQuery = GetTimerQuery();
 	auto *pStatsQuery = GetStatisticsQuery();
 	std::chrono::nanoseconds result;
-	prosper::PipelineStatisticsQuery::Statistics stats;
+	prosper::PipelineStatistics stats;
 	if(pTimerQuery == nullptr || pStatsQuery == nullptr || pTimerQuery->QueryResult(result) == false || pStatsQuery->QueryResult(stats) == false)
 		return;
 	m_lastTimeResult = result;
@@ -70,7 +70,7 @@ std::unique_ptr<ProfilerResult> GPUSwapchainTimer::GetResult() const
 {
 	auto result = std::make_unique<pragma::debug::GPUProfilerResult>();
 	result->duration = m_lastTimeResult.has_value() ? *m_lastTimeResult : std::optional<std::chrono::nanoseconds>{};
-	result->statistics = m_lastStatsResult.has_value() ? *m_lastStatsResult : std::optional<prosper::PipelineStatisticsQuery::Statistics>{};
+	result->statistics = m_lastStatsResult.has_value() ? *m_lastStatsResult : std::optional<prosper::PipelineStatistics>{};
 	return result;
 }
 
@@ -102,8 +102,8 @@ void GPUSwapchainTimer::InitializeQueries()
 	m_swapchainTimers.reserve(index +1);
 	for(auto i=decltype(m_swapchainTimers.size()){0u};i<=index;++i)
 	{
-		auto timerQuery = prosper::util::create_timer_query(*timerPool,static_cast<prosper::PipelineStageFlags>(m_stage));
-		auto statsQuery = prosper::util::create_pipeline_statistics_query(*statsPool);
+		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage));
+		auto statsQuery = statsPool->CreatePipelineStatisticsQuery();
 		m_swapchainTimers.push_back({timerQuery,statsQuery});
 	}
 }

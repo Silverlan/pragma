@@ -467,78 +467,78 @@ int Lua::engine::save_particle_system(lua_State *l)
 				{
 					if(Lua::IsTable(l,-2))
 					{
+						auto numOperators = Lua::GetObjectLength(l,-2);
 						Lua::PushValue(l,-2);
 						int tmod = Lua::GetStackTop(l);
-						Lua::PushNil(l);
-						while(Lua::GetNextPair(l,tmod) != 0)
+						for(auto i=decltype(numOperators){0u};i<numOperators;++i)
 						{
-							if(Lua::IsTable(l,-1))
+							Lua::PushInt(l,i +1);
+							Lua::GetTableValue(l,tmod);
+							auto tOp = Lua::GetStackTop(l);
+							Lua::CheckTable(l,tOp);
+
+							Lua::PushString(l,"operatorType");
+							Lua::GetTableValue(l,tOp);
+							std::string opType = Lua::CheckString(l,-1);
+							Lua::Pop(l,1);
+
+							std::vector<CParticleModifierData> modData;
+							modData.push_back(CParticleModifierData{opType});
+							int dataIdx = 0;
+							char dataType = -1;
+							Lua::PushNil(l);
+							while(Lua::GetNextPair(l,tOp) != 0)
 							{
-								Lua::PushValue(l,-2);
-								std::string mod = Lua::ToString(l,-3);
-								Lua::RemoveValue(l,-3);
-								int tmodSettings = Lua::GetStackTop(l) -1;
-								Lua::PushNil(l);
-								std::vector<CParticleModifierData> modData;
-								modData.push_back(CParticleModifierData{mod});
-								int dataIdx = 0;
-								char dataType = -1;
-								while(Lua::GetNextPair(l,tmodSettings) != 0)
+								if(!Lua::IsTable(l,-1))
 								{
-									if(!Lua::IsTable(l,-1))
-									{
-										if(dataType == 0)
-											Lua::Pop(l,1);
-										else
-										{
-											dataType = 1;
-											Lua::PushValue(l,-2);
-											std::string modKey = Lua::ToString(l,-3);
-											std::string modVal = Lua::ToString(l,-2);
-											Lua::RemoveValue(l,-3);
-											Lua::RemoveValue(l,-2);
-											modData[dataIdx].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
-										}
-									}
-									else if(dataType != 1)
-									{
-										dataType = 0;
-										if(dataIdx > 0)
-											modData.push_back(CParticleModifierData{mod});
-										dataIdx++;
-										int tModSubSettings = Lua::GetStackTop(l);
-										Lua::PushNil(l);
-										while(Lua::GetNextPair(l,tModSubSettings) != 0)
-										{
-											Lua::PushValue(l,-2);
-											std::string modKey = Lua::ToString(l,-3);
-											std::string modVal = Lua::ToString(l,-2);
-											Lua::RemoveValue(l,-3);
-											Lua::RemoveValue(l,-2);
-											modData[dataIdx -1].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
-										}
+									if(dataType == 0)
 										Lua::Pop(l,1);
-									}
 									else
-										Lua::Pop(l,1);
-								}
-								Lua::RemoveValue(l,-2);
-								StringToLower(mod);
-								for(unsigned int i=0;i<modData.size();i++)
-								{
-									if(modData[i].settings.empty() == false)
 									{
-										if(key == "initializers")
-											data.initializers.push_back(modData[i]);
-										else if(key == "operators")
-											data.operators.push_back(modData[i]);
-										else if(key == "renderers")
-											data.renderers.push_back(modData[i]);
+										dataType = 1;
+										Lua::PushValue(l,-2);
+										std::string modKey = Lua::ToString(l,-3);
+										std::string modVal = Lua::ToString(l,-2);
+										Lua::RemoveValue(l,-3);
+										Lua::RemoveValue(l,-2);
+										modData[dataIdx].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
 									}
+								}
+								else if(dataType != 1)
+								{
+									dataType = 0;
+									if(dataIdx > 0)
+										modData.push_back(CParticleModifierData{opType});
+									dataIdx++;
+									int tModSubSettings = Lua::GetStackTop(l);
+									Lua::PushNil(l);
+									while(Lua::GetNextPair(l,tModSubSettings) != 0)
+									{
+										Lua::PushValue(l,-2);
+										std::string modKey = Lua::ToString(l,-3);
+										std::string modVal = Lua::ToString(l,-2);
+										Lua::RemoveValue(l,-3);
+										Lua::RemoveValue(l,-2);
+										modData[dataIdx -1].settings.insert(std::unordered_map<std::string,std::string>::value_type(modKey,modVal));
+									}
+									Lua::Pop(l,1);
+								}
+								else
+									Lua::Pop(l,1);
+							}
+							Lua::Pop(l,1);
+							for(unsigned int i=0;i<modData.size();i++)
+							{
+								if(modData[i].settings.empty() == false)
+								{
+									if(key == "initializers")
+										data.initializers.push_back(modData[i]);
+									else if(key == "operators")
+										data.operators.push_back(modData[i]);
+									else if(key == "renderers")
+										data.renderers.push_back(modData[i]);
 								}
 							}
-							else
-								Lua::Pop(l,1);
 						}
 						Lua::Pop(l,1);
 						Lua::RemoveValue(l,-2);

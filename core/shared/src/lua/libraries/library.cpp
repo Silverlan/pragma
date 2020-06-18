@@ -399,6 +399,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		Lua::PushNumber(l,umath::cot(Lua::CheckNumber(l,1)));
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"math","float_to_half_float",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		Lua::PushInt(l,umath::float32_to_float16_glm(Lua::CheckNumber(l,1)));
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"math","half_float_to_float",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		Lua::PushNumber(l,umath::float16_to_float32_glm(Lua::CheckInt(l,1)));
+		return 1;
+	}));
 	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
@@ -602,6 +610,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		{"SIZEOF_CHAR",sizeof(char)},
 		{"SIZEOF_BOOL",sizeof(bool)},
 		{"SIZEOF_INT",sizeof(int)},
+		{"SIZEOF_SHORT",sizeof(int16_t)},
 		{"SIZEOF_FLOAT",sizeof(float)},
 		{"SIZEOF_DOUBLE",sizeof(double)},
 		{"SIZEOF_LONG_LONG",sizeof(long long)},

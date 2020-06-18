@@ -10,6 +10,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
 #include <pragma/console/convars.h>
@@ -27,12 +28,13 @@ static auto cvFxaaSubPixelAliasingRemoval = GetClientConVar("cl_render_fxaa_sub_
 static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold");
 static auto cvFxaaMinEdgeThreshold = GetClientConVar("cl_render_fxaa_min_edge_threshold");
 
-void RasterizationRenderer::RenderFXAA(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderFXAA(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) != AntiAliasing::FXAA)
 		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
 
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hdrInfo = GetHDRInfo();
 	auto whShaderPPFXAA = c_game->GetGameShader(CGame::GameShader::PPFXAA);
 	if(whShaderPPFXAA.valid() == true)

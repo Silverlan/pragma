@@ -9,6 +9,7 @@
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -19,7 +20,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &scene = GetScene();
 	auto &hdrInfo = GetHDRInfo();
@@ -34,6 +35,7 @@ void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::IPrimaryComm
 				descSetGroupFog = scene.GetFogDescriptorSetGroup();
 		}
 	}
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto hShaderFog = c_game->GetGameShader(CGame::GameShader::PPFog);
 	if(descSetGroupFog != nullptr && hShaderFog.expired() == false)
 	{
@@ -84,6 +86,6 @@ void RasterizationRenderer::RenderSceneFog(std::shared_ptr<prosper::IPrimaryComm
 		}
 		drawCmd->RecordImageBarrier(texDepth->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
-		hdrInfo.BlitStagingRenderTargetToMainRenderTarget(*drawCmd);
+		hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 	}
 }

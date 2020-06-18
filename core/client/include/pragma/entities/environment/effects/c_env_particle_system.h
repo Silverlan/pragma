@@ -18,6 +18,7 @@
 #include <fsys/vfileptr.h>
 
 class CParticleSystemData;
+class CGame;
 namespace pragma
 {
 	struct DLLCLIENT ParticleSystemFileHeader
@@ -49,6 +50,7 @@ namespace pragma
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(const std::unordered_map<std::string,std::string> &values,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
 		static CParticleSystemComponent *Create(CParticleSystemComponent *parent=nullptr,bool bAutoSpawn=true);
+		static std::shared_ptr<Model> GenerateModel(CGame &game,const std::vector<const CParticleSystemComponent*> &particleSystems);
 
 		enum class OrientationType : uint8_t
 		{
@@ -67,8 +69,7 @@ namespace pragma
 			TextureScrollingEnabled = SoftParticles<<1u,
 			RendererBufferUpdateRequired = TextureScrollingEnabled<<1u,
 			HasMovingParticles = RendererBufferUpdateRequired<<1u,
-			BlackToAlpha = HasMovingParticles<<1u,
-			MoveWithEmitter = BlackToAlpha<<1u,
+			MoveWithEmitter = HasMovingParticles<<1u,
 			RotateWithEmitter = MoveWithEmitter<<1u,
 			SortParticles = RotateWithEmitter<<1u,
 			Dying = SortParticles<<1u,
@@ -83,6 +84,7 @@ namespace pragma
 		using ControlPointIndex = uint32_t;
 		struct DLLCLIENT ControlPoint
 		{
+			float simTimestamp = 0.f;
 			physics::Transform pose = {};
 			EntityHandle hEntity = {};
 		};
@@ -168,10 +170,10 @@ namespace pragma
 		void SetRenderMode(RenderMode mode);
 		RenderMode GetRenderMode() const;
 		bool IsRendererBufferUpdateRequired() const;
-		bool ShouldUseBlackAsAlpha() const;
 		CallbackHandle AddRenderCallback(const std::function<void(void)> &cb);
 		void AddRenderCallback(const CallbackHandle &hCb);
 		pragma::ParticleAlphaMode GetAlphaMode() const;
+		pragma::ParticleAlphaMode GetEffectiveAlphaMode() const;
 		void SetAlphaMode(pragma::ParticleAlphaMode alphaMode);
 		void SetTextureScrollingEnabled(bool b);
 		bool IsTextureScrollingEnabled() const;
@@ -205,6 +207,8 @@ namespace pragma
 		// Returns the time the particle system has been alive
 		double GetLifeTime() const;
 		float GetSimulationTime() const;
+
+		double GetStartTime() const;
 
 		void SetSoftParticles(bool bSoft);
 		bool GetSoftParticles() const;
@@ -276,10 +280,12 @@ namespace pragma
 		void SetControlPointEntity(ControlPointIndex idx,CBaseEntity &ent);
 		void SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos);
 		void SetControlPointRotation(ControlPointIndex idx,const Quat &rot);
-		void SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose);
+		void SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose,float *optTimestamp=nullptr);
 
 		CBaseEntity *GetControlPointEntity(ControlPointIndex idx) const;
-		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx) const;
+		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
+		std::optional<physics::Transform> GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
+		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx,float t) const;
 
 		const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers() const;
 		const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators() const;
@@ -290,6 +296,8 @@ namespace pragma
 
 		SpriteSheetAnimation *GetSpriteSheetAnimation();
 		const SpriteSheetAnimation *GetSpriteSheetAnimation() const;
+
+		std::shared_ptr<Model> GenerateModel() const;
 	protected:
 		util::EventReply HandleKeyValue(const std::string &key,const std::string &value);
 
@@ -351,10 +359,12 @@ namespace pragma
 		std::vector<std::unique_ptr<CParticleRenderer,void(*)(CParticleRenderer*)>> m_renderers;
 
 		std::vector<ControlPoint> m_controlPoints {};
+		std::vector<ControlPoint> m_controlPointsPrev {};
 		Material *m_material = nullptr;
 		float m_tNextEmission = 0.f;
 		double m_tLastEmission = 0.0;
 		double m_tLifeTime = 0.0;
+		double m_tStartTime = 0.0;
 		float m_radius = 0.f;
 		float m_extent = 0.f;
 		OrientationType m_orientationType = OrientationType::Aligned;
@@ -376,8 +386,8 @@ namespace pragma
 		float m_worldScale = 1.f;
 
 		void SortParticles();
-		void CreateParticle(uint32_t idx);
-		uint32_t CreateParticles(uint32_t count);
+		CParticle &CreateParticle(uint32_t idx,float timeCreated,float timeAlive);
+		uint32_t CreateParticles(uint32_t count,double tSimDelta,float tStart,float tDtPerParticle);
 		void OnParticleDestroyed(CParticle &particle);
 		void OnComplete();
 	};

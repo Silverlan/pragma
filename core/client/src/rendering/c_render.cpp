@@ -28,6 +28,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/scene/scene.h"
 #include "luasystem.h"
@@ -58,7 +59,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-
+#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -199,19 +200,18 @@ static CVar cvDrawWorld = GetClientConVar("render_draw_world");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags,const Color *clearColor,uint32_t outLayerId)
+void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
 	if(cvDrawScene->GetBool() == false)
 		return;
-
 	auto drawWorld = cvDrawWorld->GetInt();
 	if(drawWorld == 2)
-		renderFlags &= ~(FRender::Shadows | FRender::Glow);
+		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
 	else if(drawWorld == 0)
-		renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
+		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
 
 	if(cvParticleQuality->GetInt() <= 0)
-		renderFlags &= ~FRender::Particles;
+		drawSceneInfo.renderFlags &= ~FRender::Particles;
 
 	// Update particle systems
 	EntityIterator itParticles {*this};
@@ -235,9 +235,10 @@ void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCm
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	if(cvClearScene->GetBool() == true || drawWorld == 2 || clearColor != nullptr)
+	auto &drawCmd = drawSceneInfo.commandBuffer;
+	if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 	{
-		auto clearCol = (clearColor != nullptr) ? clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
+		auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
 		auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
 		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
 		drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
@@ -269,17 +270,16 @@ void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCm
 		auto ret = false;
 		m_bMainRenderPass = false;
 
-
 		auto bSkipScene = CallCallbacksWithOptionalReturn<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
-		>("DrawScene",ret,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue;
+			bool,std::reference_wrapper<const util::DrawSceneInfo>
+		>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
 		m_bMainRenderPass = true;
 		if(bSkipScene == true && ret == true)
 			return;
 		m_bMainRenderPass = false;
 		if(CallLuaCallbacks<
-			bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
-		>("DrawScene",&bSkipScene,std::ref(drawCmd),&outImage) == CallbackReturnType::HasReturnValue && bSkipScene == true)
+			bool,std::reference_wrapper<const util::DrawSceneInfo>
+		>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 		{
 			CallCallbacks("PostRenderScenes");
 			m_bMainRenderPass = true;
@@ -288,10 +288,10 @@ void CGame::RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCm
 		else
 			m_bMainRenderPass = true;
 	}
-	RenderScene(drawCmd,outImage,renderFlags,outLayerId);
+	RenderScene(drawSceneInfo);
 	CallCallbacks("PostRenderScenes");
 	CallLuaCallbacks("PostRenderScenes");
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
-
+#pragma optimize("",on)

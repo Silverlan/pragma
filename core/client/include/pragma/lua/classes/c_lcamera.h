@@ -17,6 +17,7 @@ lua_registercheck(Scene,::Scene);
 
 class WorldEnvironment;
 class Material;
+namespace util {struct DrawSceneInfo;};
 namespace Lua
 {
 	namespace Scene
@@ -49,9 +50,9 @@ namespace Lua
 		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 
 		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer,prosper::IRenderPass &rp);
-		DLLCLIENT void EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
+		DLLCLIENT void EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
 		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 
 		DLLCLIENT void SetShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName,const std::string &dstName);

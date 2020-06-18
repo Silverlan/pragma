@@ -12,6 +12,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -217,7 +218,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	auto waterPlaneDist = std::make_shared<float>(std::numeric_limits<float>::max());
 	auto waterNormal = std::make_shared<Vector3>(surfaceNormal);
 	Mat4 matReflect;
-	m_waterScene->hRender = c_game->AddCallback("Render",FunctionCallback<void>::Create([this]() {
+	m_waterScene->hRender = c_game->AddCallback("Render",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		// This is called before the water render pass
 		if(cvDrawWater->GetBool() == false)
 			return;
@@ -227,8 +228,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr)
 			return;
-		auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-		renderer->EndRenderPass(drawCmd); // The current render pass needs to be ended so we can blit the scene texture and depth texture
+		auto drawCmd = drawSceneInfo.get().commandBuffer;
+		renderer->EndRenderPass(drawSceneInfo.get()); // The current render pass needs to be ended so we can blit the scene texture and depth texture
 
 		auto &hdrInfo = renderer->GetHDRInfo();
 		auto &tex = hdrInfo.sceneRenderTarget->GetTexture();
@@ -274,9 +275,10 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		//waterScene.texScene->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 		//waterScene.texSceneDepth->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
 		//depthTex->GetImage()->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // prosper TODO
-		renderer->BeginRenderPass(drawCmd,prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext()).get()); // Restart the render pass
+		renderer->BeginRenderPass(drawSceneInfo.get(),prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext()).get()); // Restart the render pass
 	}));
-	m_waterScene->hPostProcessing = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,FRender>::Create([this,waterNormal,waterPlaneDist,whShaderPPWater](FRender renderFlags) {
+	m_waterScene->hPostProcessing = c_game->AddCallback("RenderPostProcessing",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this,waterNormal,waterPlaneDist,whShaderPPWater](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+		auto renderFlags = drawSceneInfo.get().renderFlags;
 		if(cvDrawWater->GetBool() == false || (renderFlags &FRender::Water) == FRender::None)
 			return;
 		if(c_game->GetRenderScene() != c_game->GetScene())
@@ -306,7 +308,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				drawCmd->RecordImageBarrier(*imgTex,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
-			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(*drawCmd,fTransitionSampleImgToTransferDst);
+			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
 			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				auto &prepass = renderer->GetPrepass();
@@ -330,13 +332,13 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 				drawCmd->RecordEndRenderPass();
 			}
 			//fTransitionSampleImgToTransferDst(*drawCmd);
-			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(*drawCmd);
+			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());
 		}
 	}));
 	m_waterScene->hRenderScene = c_game->AddCallback("DrawScene",FunctionCallback<
-		bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
+		bool,std::reference_wrapper<const util::DrawSceneInfo>
 	>::CreateWithOptionalReturn([this,shader,pos,surfaceNormal,waterNormal,lastPos,lastRot,waterPlaneDist,matReflect](
-		bool *bSkipMainScene,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd,prosper::IImage *img
+		bool *bSkipMainScene,std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo
 	) mutable -> CallbackReturnType {
 		if(cvDrawWater->GetBool() == false)
 			return CallbackReturnType::NoReturnValue;
@@ -420,11 +422,16 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 					//sceneReflection->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::DepthStencilAttachmentOptimal); // prosper TODO
 
 					auto &imgReflection = rtReflection->GetTexture().GetImage();
+					auto &drawCmd = drawSceneInfo.get().commandBuffer;
 					drawCmd.get()->RecordImageBarrier(imgReflection,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 
+					util::DrawSceneInfo reflectionDrawSceneInfo {};
+					reflectionDrawSceneInfo.outputImage = imgReflection.shared_from_this();
+					reflectionDrawSceneInfo.renderFlags = renderFlags;
+					reflectionDrawSceneInfo.outputLayerId = 0u;
 					c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
 						c_game->SetRenderScene(sceneReflection);
-							c_game->RenderScene(drawCmd,imgReflection,renderFlags,0u);
+							c_game->RenderScene(drawSceneInfo.get());
 						c_game->SetRenderScene(nullptr);
 					c_game->SetRenderClipPlane({});
 

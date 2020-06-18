@@ -50,7 +50,7 @@ enum class GPUProfilingStage : uint32_t
 */
 namespace prosper
 {
-	class QueryPool;
+	class IQueryPool;
 	class TimerQuery;
 };
 namespace pragma
@@ -61,7 +61,7 @@ namespace pragma
 		struct DLLCENGINE GPUProfilerResult
 			: public pragma::debug::ProfilerResult
 		{
-			std::optional<prosper::PipelineStatisticsQuery::Statistics> statistics;
+			std::optional<prosper::PipelineStatistics> statistics;
 		};
 
 		class GPUProfiler;
@@ -91,8 +91,8 @@ namespace pragma
 			std::shared_ptr<Timer> CreateTimer(prosper::PipelineStageFlags stage);
 		private:
 			GPUProfiler();
-			std::shared_ptr<prosper::QueryPool> m_timerQueryPool = nullptr;
-			std::shared_ptr<prosper::QueryPool> m_statsQueryPool = nullptr;
+			std::shared_ptr<prosper::IQueryPool> m_timerQueryPool = nullptr;
+			std::shared_ptr<prosper::IQueryPool> m_statsQueryPool = nullptr;
 
 			void InitializeQueries();
 			template<class TProfiler>

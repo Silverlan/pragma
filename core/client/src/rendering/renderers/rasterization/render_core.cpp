@@ -18,6 +18,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_ssao_blur.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/c_settings.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -34,12 +35,13 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
+void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
 	auto bFirst = true;
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto *particle : particles)
 	{
-		if(particle != nullptr && particle->IsActive() == true && particle->GetRenderMode() == renderMode)
+		if(particle != nullptr && particle->IsActive() == true && particle->GetRenderMode() == renderMode && particle->GetParent() == nullptr)
 		{
 			if(bFirst == true)
 			{
@@ -47,7 +49,7 @@ void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrim
 
 				// We need to end the current render pass, because we need the depth buffer with everything
 				// that has been rendered thus far.
-				EndRenderPass(drawCmd);
+				EndRenderPass(drawSceneInfo);
 
 				auto &hdrInfo = GetHDRInfo();
 				auto &prepass = GetPrepass();
@@ -64,7 +66,7 @@ void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrim
 				//	.RecordImageBarrier(**drawCmd,**prepass.textureDepth->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
 				// Restart render pass
-				BeginRenderPass(drawCmd,hdrInfo.rpPostParticle.get());
+				BeginRenderPass(drawSceneInfo,hdrInfo.rpPostParticle.get());
 			}
 			//scene->ResolveDepthTexture(drawCmd); // Particles aren't multisampled, but requires scene depth buffer
 			particle->Render(drawCmd,*this,bloom);
@@ -85,10 +87,10 @@ void RasterizationRenderer::RenderParticleSystems(std::shared_ptr<prosper::IPrim
 	}
 }
 
-bool RasterizationRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+bool RasterizationRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
+	if(BaseRenderer::RenderScene(drawSceneInfo) == false)
 		return false;
-	RenderGameScene(drawCmd,renderFlags);
+	RenderGameScene(drawSceneInfo);
 	return true;
 }

@@ -18,6 +18,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/gui/widebugdepthtexture.h"
@@ -149,16 +150,17 @@ HDRData::~HDRData()
 		m_cbReloadCommandBuffer.Remove();
 }
 
-bool HDRData::BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass)
+bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass)
 {
-	return drawCmd->RecordBeginRenderPass(*sceneRenderTarget,{
+	auto &rt = GetRenderTarget(drawSceneInfo);
+	return drawSceneInfo.commandBuffer->RecordBeginRenderPass(rt,{
 		prosper::ClearValue{}, // Unused
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,0.f}}} // Clear bloom
 	},customRenderPass);
 }
-bool HDRData::EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	return drawCmd->RecordEndRenderPass();
+	return drawSceneInfo.commandBuffer->RecordEndRenderPass();
 }
 
 bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
@@ -311,9 +313,9 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	return true;
 }
 
-bool HDRData::ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+bool HDRData::ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	return EndRenderPass(drawCmd) && BeginRenderPass(drawCmd,rpPostParticle.get());
+	return EndRenderPass(drawSceneInfo) && BeginRenderPass(drawSceneInfo,rpPostParticle.get());
 }
 
 bool HDRData::InitializeDescriptorSets()
@@ -327,7 +329,7 @@ bool HDRData::InitializeDescriptorSets()
 	return true;
 }
 
-bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(prosper::ICommandBuffer &cmdBuffer,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst)
+bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst)
 {
 	auto &srcDepthTex = *prepass.textureDepth;
 	auto &srcDepthImg = srcDepthTex.GetImage();
@@ -336,6 +338,7 @@ bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(prosper::ICommandBuffer 
 	auto &ptrDstDepthImg = dstDepthTex.GetImage();
 	auto &dstDepthImg = ptrDstDepthImg;
 
+	auto &cmdBuffer = *drawSceneInfo.commandBuffer;
 	auto r = cmdBuffer.RecordImageBarrier(srcDepthImg,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal) &&
 		cmdBuffer.RecordImageBarrier(dstDepthImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal) &&
 		cmdBuffer.RecordBlitTexture(srcDepthTex,dstDepthImg) &&
@@ -349,9 +352,16 @@ bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(prosper::ICommandBuffer 
 	return r;
 }
 
-bool HDRData::BlitStagingRenderTargetToMainRenderTarget(prosper::ICommandBuffer &cmdBuffer)
+prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &hdrTex = sceneRenderTarget->GetTexture();
+	return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget;
+}
+
+bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto &rt = GetRenderTarget(drawSceneInfo);
+	auto &hdrTex = rt.GetTexture();
+	auto &cmdBuffer = *drawSceneInfo.commandBuffer;
 	auto b = cmdBuffer.RecordImageBarrier(hdrTex.GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 	if(b == false)
 		return false;
@@ -359,7 +369,7 @@ bool HDRData::BlitStagingRenderTargetToMainRenderTarget(prosper::ICommandBuffer 
 	if(b == false)
 		return false;
 	b = cmdBuffer.RecordBlitTexture(
-		hdrPostProcessingRenderTarget->GetTexture(),sceneRenderTarget->GetTexture().GetImage()
+		hdrPostProcessingRenderTarget->GetTexture(),rt.GetTexture().GetImage()
 	);
 	if(b == false)
 		return false;

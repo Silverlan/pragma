@@ -19,6 +19,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_particle_system,CEnvParticleSystem);
 
+#pragma optimize("",off)
 void CParticleSystemComponent::Initialize()
 {
 	BaseEnvParticleSystemComponent::Initialize();
@@ -107,6 +108,128 @@ void CParticleSystemComponent::CreateParticle()
 }
 void CParticleSystemComponent::SetRemoveOnComplete(bool b) {BaseEnvParticleSystemComponent::SetRemoveOnComplete(b);}
 
+#include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
+#include <pragma/model/model.h>
+#include <pragma/model/modelmesh.h>
+std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const std::vector<const CParticleSystemComponent*> &particleSystems)
+{
+	auto *cam = game.GetRenderCamera();
+	if(cam == nullptr)
+		return nullptr;
+	std::unordered_set<const CParticleSystemComponent*> particleSystemList {};
+	for(auto *pts : particleSystems)
+	{
+		particleSystemList.insert(pts);
+		for(auto &childData : pts->GetChildren())
+		{
+			if(childData.child.expired())
+				continue;
+			particleSystemList.insert(childData.child.get());
+		}
+	}
+	Vector3 camUpWs;
+	Vector3 camRightWs;
+	float ptNearZ,ptFarZ;
+	auto nearZ = cam->GetNearZ();
+	auto farZ = cam->GetFarZ();
+	auto &posCam = cam->GetEntity().GetPosition();
+	auto mdl = game.CreateModel();
+	constexpr uint32_t numVerts = pragma::ShaderParticle2DBase::VERTEX_COUNT;
+	uint32_t numTris = pragma::ShaderParticle2DBase::TRIANGLE_COUNT *2;
+	for(auto *pts : particleSystemList)
+	{
+		auto &renderers = pts->GetRenderers();
+		if(renderers.empty())
+			return nullptr;
+		auto &renderer = *renderers.front();
+		auto *pShader = dynamic_cast<pragma::ShaderParticle2DBase*>(renderer.GetShader());
+		if(pShader == nullptr)
+			return nullptr;
+		auto *mat = pts->GetMaterial();
+		if(mat == nullptr)
+			continue;
+		std::optional<uint32_t> skinTexIdx {};
+		mdl->AddMaterial(0,mat,&skinTexIdx);
+		if(skinTexIdx.has_value() == false)
+			continue;
+		auto orientationType = pts->GetOrientationType();
+		pShader->GetParticleSystemOrientationInfo(
+			cam->GetProjectionMatrix() *cam->GetViewMatrix(),*pts,orientationType,camUpWs,camRightWs,
+			ptNearZ,ptFarZ,mat,nearZ,farZ
+		);
+
+		auto *spriteSheetAnim = pts->GetSpriteSheetAnimation();
+		auto &particles = pts->GetRenderParticleData();
+		auto &animData = pts->GetParticleAnimationData();
+		auto numParticles = pts->GetRenderParticleCount();
+
+		auto subMesh = game.CreateModelSubMesh();
+		subMesh->SetSkinTextureIndex(*skinTexIdx);
+		auto &verts = subMesh->GetVertices();
+		auto &tris = subMesh->GetTriangles();
+		auto numTrisSys = numParticles *numTris;
+		auto numVertsSys = numParticles *numVerts;
+		tris.reserve(numTrisSys *3);
+		verts.resize(numVertsSys);
+		uint32_t vertOffset = 0;
+		for(auto i=decltype(numParticles){0u};i<numParticles;++i)
+		{
+			auto &pt = particles.at(i);
+			auto ptIdx = pts->TranslateBufferIndex(i);
+			auto pos = pts->GetParticlePosition(ptIdx);
+			Vector2 uvStart {0.f,0.f};
+			Vector2 uvEnd {1.f,1.f};
+			if(pts->IsAnimated() && spriteSheetAnim && spriteSheetAnim->sequences.empty() == false)
+			{
+				auto &animData = pts->GetParticleAnimationData().at(i);
+				auto &ptData = *const_cast<CParticleSystemComponent*>(pts)->GetParticle(ptIdx);
+				auto seqIdx = ptData.GetSequence();
+				assert(seqIdx < spriteSheetAnim->sequences.size());
+				auto &seq = (seqIdx < spriteSheetAnim->sequences.size()) ? spriteSheetAnim->sequences.at(seqIdx) : spriteSheetAnim->sequences.back();
+				auto frameIndex = (seqIdx < spriteSheetAnim->sequences.size()) ? seq.GetLocalFrameIndex(animData.frameIndex0) : 0;
+				auto &frame = seq.frames.at(frameIndex);
+				uvStart = frame.uvStart;
+				uvEnd = frame.uvEnd;
+			}
+			for(auto vertIdx=decltype(numVerts){0u};vertIdx<numVerts;++vertIdx)
+			{
+				auto vertPos = pShader->CalcVertexPosition(*pts,pts->TranslateBufferIndex(i),vertIdx,posCam,camUpWs,camRightWs,nearZ,farZ);
+				auto uv = pragma::ShaderParticle2DBase::GetVertexUV(vertIdx);
+				auto &v = verts.at(vertOffset +vertIdx);
+				v.position = vertPos;
+				v.normal = -uvec::RIGHT;
+				v.tangent = uvec::FORWARD;
+				v.uv = uvStart +uv *(uvEnd -uvStart);
+			}
+			static_assert(pragma::ShaderParticle2DBase::TRIANGLE_COUNT == 2 && pragma::ShaderParticle2DBase::VERTEX_COUNT == 6);
+			std::array<uint32_t,12> indices = {
+				0,1,2,
+				3,4,5,
+
+				// Back facing
+				0,2,1,
+				3,5,4
+			};
+			for(auto idx : indices)
+				tris.push_back(vertOffset +idx);
+
+			vertOffset += numVerts;
+		}
+
+		auto mesh = game.CreateModelMesh();
+		mesh->AddSubMesh(subMesh);
+		mdl->GetMeshGroup(0)->AddMesh(mesh);
+	}
+	return mdl;
+}
+std::shared_ptr<Model> CParticleSystemComponent::GenerateModel() const
+{
+	auto &game = static_cast<CGame&>(*GetEntity().GetNetworkState()->GetGameState());
+	std::vector<const CParticleSystemComponent*> particleSystems {};
+	particleSystems.push_back(this);
+	return GenerateModel(game,particleSystems);
+}
+
 luabind::object CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CParticleSystemComponentHandleWrapper>(l);}
 
 ///////////////
@@ -116,3 +239,4 @@ void CEnvParticleSystem::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CParticleSystemComponent>();
 }
+#pragma optimize("",on)

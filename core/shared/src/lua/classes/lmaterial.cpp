@@ -43,6 +43,9 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		}
 		Lua::PushBool(l,mat.Save(matFileName,rootPath));
 	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+		Lua::PushBool(l,mat.Save());
+	}));
 	classDef.def("IsError",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		Lua::PushBool(l,mat.IsError());
 	}));

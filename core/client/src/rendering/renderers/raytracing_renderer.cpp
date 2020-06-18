@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -50,11 +51,12 @@ bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
 // TODO
 // void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
 //#include <wgui/types/wirect.h>
-bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(m_whShader.expired() || BaseRenderer::RenderScene(drawCmd,renderFlags) == false)
+	if(m_whShader.expired() || BaseRenderer::RenderScene(drawSceneInfo) == false)
 		return false;
 	auto &imgOutput = GetSceneTexture()->GetImage();
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordImageBarrier(
 		imgOutput,
 		prosper::PipelineStageFlags::FragmentShaderBit,prosper::PipelineStageFlags::ComputeShaderBit,
@@ -70,13 +72,13 @@ bool RaytracingRenderer::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuf
 		extents.width,extents.height,cam.valid() ? cam->GetFOVRad() : umath::deg_to_rad(pragma::CCameraComponent::DEFAULT_FOV)
 	};
 	pushConstants.renderFlags = ShaderRayTracing::RenderFlags::None;
-	if(umath::is_flag_set(renderFlags,FRender::Skybox))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Skybox))
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderSkybox);
-	if(umath::is_flag_set(renderFlags,FRender::View))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::View))
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderView);
-	if(umath::is_flag_set(renderFlags,FRender::Water))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Water))
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWater);
-	if(umath::is_flag_set(renderFlags,FRender::World))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::World))
 		umath::set_flag(pushConstants.renderFlags,ShaderRayTracing::RenderFlags::RenderWorld);
 
 	float intensity;

@@ -14,6 +14,7 @@
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <wgui/types/wirect.h>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -132,14 +133,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	}
 }
 
-void pragma::rendering::Prepass::BeginRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer)
+void pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	cmdBuffer.RecordBeginRenderPass(*renderTarget,m_clearValues);
+	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues);
 }
-void pragma::rendering::Prepass::EndRenderPass(prosper::IPrimaryCommandBuffer &cmdBuffer)
+void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	cmdBuffer.RecordEndRenderPass();
+	drawSceneInfo.commandBuffer->RecordEndRenderPass();
 }
 
 void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

@@ -7,6 +7,7 @@
 
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -20,10 +21,11 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &scene = GetScene();
 	auto &prepass = GetPrepass();
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	{
 		c_game->StartProfilingStage(CGame::CPUProfilingPhase::CullLightSources);
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
@@ -139,7 +141,7 @@ void RasterizationRenderer::CullLightSources(std::shared_ptr<prosper::IPrimaryCo
 				if(hSm.valid() && hSm->HasRenderTarget())
 					hSm->RequestRenderTarget();
 			}
-			RenderSystem::RenderShadows(drawCmd,*this,culledLightSources);
+			RenderSystem::RenderShadows(drawSceneInfo,*this,culledLightSources);
 		}
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 		//drawCmd->SetViewport(w,h); // Reset the viewport

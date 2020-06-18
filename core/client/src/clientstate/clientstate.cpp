@@ -24,6 +24,7 @@
 #include "pragma/lua/libraries/c_lgui.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/util/c_resource_watcher.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/gui/wifps.h"
 #include <pragma/lua/libraries/lengine.h>
@@ -113,11 +114,11 @@ ClientState::ClientState()
 
 	RegisterCallback<void>("Draw");
 	RegisterCallback<
-		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+		void,std::reference_wrapper<const util::DrawSceneInfo>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PreRender");
 	RegisterCallback<
-			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+			void,std::reference_wrapper<const util::DrawSceneInfo>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
 	>("PostRender");
 	RegisterCallback<void,std::reference_wrapper<NetPacket>>("OnReceivePacket");
@@ -420,10 +421,10 @@ ConVar *ClientState::SetConVar(std::string scmd,std::string value,bool bApplyIfE
 	return cvar;
 }
 
-void ClientState::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &img)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
+void ClientState::Draw(util::DrawSceneInfo &drawSceneInfo)//const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
 {
 	if(m_game != nullptr)
-		GetGameState()->RenderScenes(drawCmd,img);
+		GetGameState()->RenderScenes(drawSceneInfo);
 	/*else // If game is NULL, that means render target has not been used in any render pass and we must transition the image layout ourselves
 	{
 		auto img = rt->GetTexture().lock()->GetImage().lock();
@@ -437,33 +438,35 @@ void ClientState::Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,
 	CallCallbacks("Draw"); // Don't call this more than once to prevent infinite loops
 }
 
-void ClientState::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
+void ClientState::Render(util::DrawSceneInfo &drawSceneInfo,std::shared_ptr<prosper::RenderTarget> &rt)
 {
+	auto &drawCmd = drawSceneInfo.commandBuffer;
+	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
 	CallCallbacks<
-		void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+		void,std::reference_wrapper<const util::DrawSceneInfo>,
 		std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-	>("PreRender",std::ref(drawCmd),std::ref(rt));
+	>("PreRender",std::ref(drawSceneInfo),std::ref(rt));
 	if(m_game != nullptr)
 	{
 		m_game->CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+			void,std::reference_wrapper<const util::DrawSceneInfo>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-		>("PreRender",std::ref(drawCmd),std::ref(rt));
+		>("PreRender",std::ref(drawSceneInfo),std::ref(rt));
 		m_game->CallLuaCallbacks("PreRender");
 	}
-	Draw(drawCmd,rt->GetTexture().GetImage());
+	Draw(drawSceneInfo);
 	if(m_game != nullptr)
 	{
 		m_game->CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+			void,std::reference_wrapper<const util::DrawSceneInfo>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-		>("PostRender",std::ref(drawCmd),std::ref(rt));
+		>("PostRender",std::ref(drawSceneInfo),std::ref(rt));
 		m_game->CallLuaCallbacks("PostRender");
 	}
 	CallCallbacks<
-			void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,
+			void,std::reference_wrapper<const util::DrawSceneInfo>,
 			std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>
-	>("PostRender",std::ref(drawCmd),std::ref(rt));
+	>("PostRender",std::ref(drawSceneInfo),std::ref(rt));
 }
 
 void ClientState::Think()

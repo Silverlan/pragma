@@ -8,6 +8,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
@@ -17,7 +18,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IDescriptorSet &descSetHdrResolve)
+void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve)
 {
 	auto hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired())
@@ -26,6 +27,7 @@ void RasterizationRenderer::RenderToneMapping(std::shared_ptr<prosper::IPrimaryC
 	auto *srcImg = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 	auto *srcImgBloom = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 	auto *srcImgGlow = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(IsMultiSampled() == false) // The resolved images already have the correct layout
 	{
 		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);

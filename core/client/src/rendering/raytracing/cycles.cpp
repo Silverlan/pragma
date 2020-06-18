@@ -23,7 +23,7 @@ struct CyclesModuleInterface
 	void(*render_image)(
 		uint32_t,uint32_t,uint32_t,bool,bool,
 		const Vector3&,const Quat&,const Mat4&,float,float,umath::Degree,
-		bool,std::string,EulerAngles,float,uint32_t,
+		pragma::rendering::cycles::SceneInfo::SceneFlags,std::string,EulerAngles,float,uint32_t,
 		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&
 	) = nullptr;
 
@@ -68,7 +68,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::render_image(Clien
 	cyclesInterface->render_image(
 		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
 		renderImageInfo.cameraPosition,renderImageInfo.cameraRotation,renderImageInfo.viewProjectionMatrix,renderImageInfo.nearZ,renderImageInfo.farZ,renderImageInfo.fov,
-		sceneInfo.cullObjectsOutsidePvs,sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.maxTransparencyBounces,
+		sceneInfo.sceneFlags,sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.maxTransparencyBounces,
 		fEntityFilter,job
 	);
 	if(job.IsValid() == false)

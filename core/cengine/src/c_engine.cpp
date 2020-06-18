@@ -21,6 +21,7 @@
 #include "pragma/networking/iclient.hpp"
 #include "pragma/networking/local_client.hpp"
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
+#include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include <pragma/entities/environment/lights/c_env_light.h>
 #include <cmaterialmanager.h>
 #include <pragma/model/c_modelmesh.h>
@@ -1117,7 +1118,9 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	{
 		StartProfilingStage(GPUProfilingPhase::DrawScene);
 
-		cl->Render(drawCmd,rt);
+		util::DrawSceneInfo drawSceneInfo {};
+		drawSceneInfo.commandBuffer = drawCmd;
+		cl->Render(drawSceneInfo,rt);
 
 		StopProfilingStage(GPUProfilingPhase::DrawScene);
 	}

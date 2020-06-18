@@ -16,6 +16,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/scene/scene.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/rendering/c_settings.hpp"
@@ -30,22 +31,25 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-
-void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage &outImage,uint32_t layerId)
+#pragma optimize("",off)
+void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId)
 {
-	drawCmd->RecordImageBarrier(outImage,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
-	prosper::util::BlitInfo blitInfo {};
-	blitInfo.dstSubresourceLayer.baseArrayLayer = layerId;
-	drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),outImage);
+	if(optOutImage)
+	{
+		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+		prosper::util::BlitInfo blitInfo {};
+		blitInfo.dstSubresourceLayer.baseArrayLayer = layerId;
+		drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),*optOutImage);
+		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	}
 	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	drawCmd->RecordImageBarrier(outImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 }
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
 	
-void CGame::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags,uint32_t outLayerId)
+void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	m_currentDrawCmd = drawCmd;
+	m_currentDrawCmd = drawSceneInfo.commandBuffer;
 	ScopeGuard sgCurrentDrawCmd {[this]() {
 		m_currentDrawCmd = {};
 	}};
@@ -54,19 +58,19 @@ void CGame::RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	auto *renderer = scene->GetRenderer();
 	if(renderer)
 	{
-		renderer->RenderScene(drawCmd,renderFlags);
+		renderer->RenderScene(drawSceneInfo);
 		StartProfilingStage(CGame::GPUProfilingPhase::Present);
 		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
 		prosper::Texture *presentationTexture = nullptr;
-		if(umath::is_flag_set(renderFlags,FRender::HDR))
-			presentationTexture = renderer->GetHDRPresentationTexture();
+		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
+			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else
 			presentationTexture = renderer->GetPresentationTexture();
 
-		RenderScenePresent(drawCmd,*presentationTexture,outImage,outLayerId);
+		RenderScenePresent(drawSceneInfo.commandBuffer,*presentationTexture,drawSceneInfo.outputImage.get(),drawSceneInfo.outputLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);
 		StopProfilingStage(CGame::GPUProfilingPhase::Present);
 	}
 }
-
+#pragma optimize("",on)

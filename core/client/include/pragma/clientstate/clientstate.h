@@ -121,8 +121,8 @@ public:
 	pragma::networking::IClient *GetClient();
 	void Think();
 	void Tick();
-	void Draw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &img);
-	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
+	void Draw(util::DrawSceneInfo &drawSceneInfo);
+	void Render(util::DrawSceneInfo &drawSceneInfo,std::shared_ptr<prosper::RenderTarget> &rt);
 	virtual void Close() override;
 	ConVarMap *GetConVarMap();
 	bool IsConnected() const;

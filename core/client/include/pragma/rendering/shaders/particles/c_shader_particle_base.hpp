@@ -22,8 +22,7 @@ namespace pragma
 			None = 0u,
 			Animated = 1u,
 			Unlit = Animated<<1,
-			BlackToAlpha = Unlit<<1,
-			SoftParticles = BlackToAlpha<<1,
+			SoftParticles = Unlit<<1,
 			TextureScrolling = SoftParticles<<1
 		};
 

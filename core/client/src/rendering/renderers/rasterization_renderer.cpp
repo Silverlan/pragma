@@ -19,6 +19,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
@@ -27,6 +28,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+
 
 using namespace pragma::rendering;
 
@@ -100,16 +102,14 @@ void RasterizationRenderer::InitializeLightDescriptorSets()
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
-
-void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-
 	// Occlusion Culling
 	PerformOcclusionCulling();
 
 	// Collect render objects
 	c_game->CallCallbacks<void,RasterizationRenderer*>("OnPreRender",this);
-	CollectRenderObjects(renderFlags);
+	CollectRenderObjects(drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// Collect 3D skybox data
@@ -122,23 +122,26 @@ void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::IPrimaryCom
 			continue;
 
 		auto skyCamera = ent->GetComponent<pragma::CSkyCameraComponent>();
-		auto &renderMeshes = skyCamera->UpdateRenderMeshes(*this,renderFlags);
+		auto &renderMeshes = skyCamera->UpdateRenderMeshes(*this,drawSceneInfo.renderFlags);
 		m_3dSkyCameras.push_back(skyCamera);
 	}
 	//
 
 	// Prepass
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
-	RenderPrepass(drawCmd,renderFlags);
+
+	auto &drawCmd = drawSceneInfo.commandBuffer;
+	if(drawSceneInfo.renderTarget == nullptr)
+		RenderPrepass(drawSceneInfo);
 
 	// SSAO
-	RenderSSAO(drawCmd);
+	RenderSSAO(drawSceneInfo);
 
 	// Cull light sources
-	CullLightSources(drawCmd);
+	CullLightSources(drawSceneInfo);
 
 	// Lighting pass
-	RenderLightingPass(drawCmd,renderFlags);
+	RenderLightingPass(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
 	// Post processing
@@ -147,19 +150,19 @@ void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::IPrimaryCom
 
 	// Fog
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-	RenderSceneFog(drawCmd);
+	RenderSceneFog(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
 
 	// Glow
-	RenderGlowObjects(drawCmd);
-	c_game->CallCallbacks<void,FRender>("RenderPostProcessing",renderFlags);
-	c_game->CallLuaCallbacks("RenderPostProcessing");
+	RenderGlowObjects(drawSceneInfo);
+	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
+	c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
 
 	// Bloom
-	RenderBloom(drawCmd);
+	RenderBloom(drawSceneInfo);
 
 	// Tone mapping
-	if(umath::is_flag_set(renderFlags,FRender::HDR))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
 	{
 		// Don't bother resolving HDR; Just apply the barrier
 		drawCmd->RecordImageBarrier(
@@ -170,11 +173,11 @@ void RasterizationRenderer::RenderGameScene(std::shared_ptr<prosper::IPrimaryCom
 	}
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 	auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
-	RenderToneMapping(drawCmd,*dsgBloomTonemapping->GetDescriptorSet());
+	RenderToneMapping(drawSceneInfo,*dsgBloomTonemapping->GetDescriptorSet());
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 
 	// FXAA
-	RenderFXAA(drawCmd);
+	RenderFXAA(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 }
@@ -440,23 +443,24 @@ bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 prosper::SampleCountFlags RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount();}
 bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != prosper::SampleCountFlags::e1Bit;}
 
-bool RasterizationRenderer::BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass)
+bool RasterizationRenderer::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass)
 {
 	auto &hdrInfo = GetHDRInfo();
-	auto &tex = hdrInfo.sceneRenderTarget->GetTexture();
+	auto &rt = hdrInfo.GetRenderTarget(drawSceneInfo);
+	auto &tex = rt.GetTexture();
 	if(tex.IsMSAATexture())
 		static_cast<prosper::MSAATexture&>(tex).Reset();
-	return hdrInfo.BeginRenderPass(drawCmd,customRenderPass);
+	return hdrInfo.BeginRenderPass(drawSceneInfo,customRenderPass);
 }
-bool RasterizationRenderer::EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+bool RasterizationRenderer::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
-	return hdrInfo.EndRenderPass(drawCmd);
+	return hdrInfo.EndRenderPass(drawSceneInfo);
 }
-bool RasterizationRenderer::ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+bool RasterizationRenderer::ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
-	return hdrInfo.ResolveRenderPass(drawCmd);
+	return hdrInfo.ResolveRenderPass(drawSceneInfo);
 }
 RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
 const RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() const {return const_cast<RasterizationRenderer*>(this)->GetRenderMeshCollectionHandler();}

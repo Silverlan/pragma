@@ -79,6 +79,7 @@ namespace pragma
 };
 namespace uimg {class ImageBuffer; struct TextureInfo;};
 namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet;};
+namespace util {struct DrawSceneInfo;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CGame
@@ -328,8 +329,8 @@ public:
 	pragma::CViewBodyComponent *GetViewBody();
 	void ReloadRenderFrameBuffer();
 
-	void RenderScenes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags=FRender::All,const Color *clearColor=nullptr,uint32_t outLayerId=0u);
-	void RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IImage &outImage,FRender renderFlags=FRender::All,uint32_t outLayerId=0u);
+	void RenderScenes(util::DrawSceneInfo &drawSceneInfo);
+	void RenderScene(const util::DrawSceneInfo &drawSceneInfo);
 
 	// GUI
 	void PreGUIDraw();
@@ -461,7 +462,7 @@ private:
 	bool m_bMainRenderPass = true;
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
-	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage &outImage,uint32_t layerId=0u);
+	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId=0u);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
 

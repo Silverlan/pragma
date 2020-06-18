@@ -11,18 +11,27 @@
 #include "pragma/rendering/c_renderflags.h"
 #include <memory>
 #include <optional>
+#include <functional>
 #include <mathutil/color.h>
 
 class Scene;
-namespace prosper {class ICommandBuffer;};
+class CBaseEntity;
+namespace prosper {class IPrimaryCommandBuffer;};
 namespace util
 {
-	struct DrawSceneInfo
+	struct DLLCLIENT DrawSceneInfo
 	{
 		std::shared_ptr<::Scene> scene = nullptr;
-		std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
+		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
+		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		FRender renderFlags = FRender::All;
 		std::optional<Color> clearColor = {};
+		
+		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
+		std::function<bool(CBaseEntity&)> renderFilter = nullptr;
+
+		std::shared_ptr<prosper::IImage> outputImage = nullptr;
+		uint32_t outputLayerId = 0u;
 	};
 };
 

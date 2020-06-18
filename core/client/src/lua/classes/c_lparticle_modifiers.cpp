@@ -129,9 +129,10 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	defPt.add_static_constant("FIELD_ID_COLOR",umath::to_integral(CParticle::FieldId::Color));
 	defPt.add_static_constant("FIELD_ID_ALPHA",umath::to_integral(CParticle::FieldId::Alpha));
 	defPt.add_static_constant("FIELD_ID_SEQUENCE",umath::to_integral(CParticle::FieldId::Sequence));
+	defPt.add_static_constant("FIELD_ID_CREATION_TIME",umath::to_integral(CParticle::FieldId::CreationTime));
 	defPt.add_static_constant("FIELD_ID_INVALID",umath::to_integral(CParticle::FieldId::Invalid));
 	defPt.add_static_constant("FIELD_ID_COUNT",umath::to_integral(CParticle::FieldId::Count));
-	static_assert(umath::to_integral(CParticle::FieldId::Count) == 12);
+	static_assert(umath::to_integral(CParticle::FieldId::Count) == 13);
 	defPt.scope[luabind::def("field_id_to_name",static_cast<void(*)(lua_State*,uint32_t)>([](lua_State *l,uint32_t id) {
 		auto name = ::CParticle::field_id_to_name(static_cast<CParticle::FieldId>(id));
 		Lua::PushString(l,name);

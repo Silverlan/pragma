@@ -18,11 +18,12 @@ namespace pragma
 	enum class ParticleAlphaMode : uint32_t
 	{
 		Additive = 0u,
-		AdditiveFull,
+		AdditiveByColor,
 		Opaque,
 		Masked,
 		Translucent,
 		Premultiplied,
+		Custom,
 
 		Count
 	};

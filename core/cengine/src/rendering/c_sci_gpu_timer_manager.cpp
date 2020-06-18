@@ -71,8 +71,8 @@ void GPUProfiler::InitializeQueries()
 	auto swapchainImageCount = c_engine->GetRenderContext().GetSwapchainImageCount();
 	const auto maxTimestampQueryCount = 200u; // Note: Every timer requires 2 timestamps
 	const auto maxStatisticsQueryCount = 100u;
-	m_timerQueryPool = prosper::util::create_query_pool(c_engine->GetRenderContext(),prosper::QueryType::Timestamp,maxTimestampQueryCount);
-	m_statsQueryPool = prosper::util::create_query_pool(c_engine->GetRenderContext(),
+	m_timerQueryPool = c_engine->GetRenderContext().CreateQueryPool(prosper::QueryType::Timestamp,maxTimestampQueryCount);
+	m_statsQueryPool = c_engine->GetRenderContext().CreateQueryPool(
 		prosper::QueryPipelineStatisticFlags::InputAssemblyVerticesBit |
 		prosper::QueryPipelineStatisticFlags::InputAssemblyPrimitivesBit |
 		prosper::QueryPipelineStatisticFlags::VertexShaderInvocationsBit |

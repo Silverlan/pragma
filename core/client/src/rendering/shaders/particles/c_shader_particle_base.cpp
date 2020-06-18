@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/console/c_cvar_global_functions.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
@@ -34,6 +35,103 @@ prosper::IDescriptorSet &ShaderParticleBase::GetAnimationDescriptorSet(const pra
 	}
 	return *animDescSet;
 }
+struct CustomAlphaBlendMode
+{
+	prosper::BlendOp opColor = prosper::BlendOp::Add;
+	prosper::BlendOp opAlpha = prosper::BlendOp::Add;
+
+	prosper::BlendFactor srcColorBlendFactor = prosper::BlendFactor::SrcAlpha;
+	prosper::BlendFactor dstColorBlendFactor = prosper::BlendFactor::OneMinusSrcAlpha;
+
+	prosper::BlendFactor srcAlphaBlendFactor = prosper::BlendFactor::One;
+	prosper::BlendFactor dstAlphaBlendFactor = prosper::BlendFactor::OneMinusSrcAlpha;
+} static g_customAlphaBlendMode {};
+
+static prosper::BlendFactor name_to_blend_factor(const std::string &name)
+{
+	if(ustring::compare(name,"zero",false))
+		return prosper::BlendFactor::Zero;
+	else if(ustring::compare(name,"one",false))
+		return prosper::BlendFactor::One;
+	else if(ustring::compare(name,"src_color",false))
+		return prosper::BlendFactor::SrcColor;
+	else if(ustring::compare(name,"one_minus_src_color",false))
+		return prosper::BlendFactor::OneMinusSrcColor;
+	else if(ustring::compare(name,"dst_color",false))
+		return prosper::BlendFactor::DstColor;
+	else if(ustring::compare(name,"one_minus_dst_color",false))
+		return prosper::BlendFactor::OneMinusDstColor;
+	else if(ustring::compare(name,"src_alpha",false))
+		return prosper::BlendFactor::SrcAlpha;
+	else if(ustring::compare(name,"one_minus_src_alpha",false))
+		return prosper::BlendFactor::OneMinusSrcAlpha;
+	else if(ustring::compare(name,"dst_alpha",false))
+		return prosper::BlendFactor::DstAlpha;
+	else if(ustring::compare(name,"one_minus_dst_alpha",false))
+		return prosper::BlendFactor::OneMinusDstAlpha;
+	else if(ustring::compare(name,"constant_color",false))
+		return prosper::BlendFactor::ConstantColor;
+	else if(ustring::compare(name,"one_minus_constant_color",false))
+		return prosper::BlendFactor::OneMinusConstantColor;
+	else if(ustring::compare(name,"constant_alpha",false))
+		return prosper::BlendFactor::ConstantAlpha;
+	else if(ustring::compare(name,"one_minus_constant_alpha",false))
+		return prosper::BlendFactor::OneMinusConstantAlpha;
+	else if(ustring::compare(name,"src_alpha_saturate",false))
+		return prosper::BlendFactor::SrcAlphaSaturate;
+	else if(ustring::compare(name,"src1_color",false))
+		return prosper::BlendFactor::Src1Color;
+	else if(ustring::compare(name,"one_minus_src1_color",false))
+		return prosper::BlendFactor::OneMinusSrc1Color;
+	else if(ustring::compare(name,"src1_alpha",false))
+		return prosper::BlendFactor::Src1Alpha;
+	else if(ustring::compare(name,"one_minus_src1_alpha",false))
+		return prosper::BlendFactor::OneMinusSrc1Alpha;
+	Con::cwar<<"WARNING: Invalid blend factor type '"<<name<<"'!"<<Con::endl;
+	return prosper::BlendFactor::One;
+}
+
+static prosper::BlendOp name_to_blend_op(const std::string &name)
+{
+	if(ustring::compare(name,"add",false))
+		return prosper::BlendOp::Add;
+	else if(ustring::compare(name,"subtract",false))
+		return prosper::BlendOp::Subtract;
+	else if(ustring::compare(name,"reverse_subtract",false))
+		return prosper::BlendOp::ReverseSubtract;
+	else if(ustring::compare(name,"min",false))
+		return prosper::BlendOp::Min;
+	else if(ustring::compare(name,"max",false))
+		return prosper::BlendOp::Max;
+	Con::cwar<<"WARNING: Invalid blend operation '"<<name<<"'!"<<Con::endl;
+	return prosper::BlendOp::Add;
+}
+
+void Console::commands::debug_particle_alpha_mode(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	g_customAlphaBlendMode = {};
+	if(argv.size() > 0)
+		g_customAlphaBlendMode.srcColorBlendFactor = name_to_blend_factor(argv.at(0));
+	if(argv.size() > 1)
+		g_customAlphaBlendMode.dstColorBlendFactor = name_to_blend_factor(argv.at(1));
+	if(argv.size() > 2)
+		g_customAlphaBlendMode.srcAlphaBlendFactor = name_to_blend_factor(argv.at(2));
+	if(argv.size() > 3)
+		g_customAlphaBlendMode.dstAlphaBlendFactor = name_to_blend_factor(argv.at(3));
+	if(argv.size() > 4)
+		g_customAlphaBlendMode.opColor = name_to_blend_op(argv.at(4));
+	if(argv.size() > 5)
+		g_customAlphaBlendMode.opAlpha = name_to_blend_op(argv.at(5));
+
+	for(auto &pair : c_engine->GetShaderManager().GetShaders())
+	{
+		auto *ptShader = dynamic_cast<ShaderParticleBase*>(pair.second.get());
+		if(ptShader == nullptr)
+			continue;
+		pair.second->ReloadPipelines();
+	}
+}
+
 void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	auto colorComponents = prosper::ColorComponentFlags::RBit | prosper::ColorComponentFlags::GBit | prosper::ColorComponentFlags::BBit | prosper::ColorComponentFlags::ABit;
@@ -84,11 +182,11 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
-		case ParticleAlphaMode::AdditiveFull:
+		case ParticleAlphaMode::AdditiveByColor:
 			pipelineInfo.SetColorBlendAttachmentProperties(
 				0u,true,blendOp,blendOp,
 				prosper::BlendFactor::One,prosper::BlendFactor::One, // color
-				prosper::BlendFactor::One,prosper::BlendFactor::One, // alpha
+				prosper::BlendFactor::One,prosper::BlendFactor::OneMinusSrcColor, // alpha
 				colorComponents
 			);
 			break;
@@ -102,6 +200,15 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 				colorComponents
 			);
 			break;
+		case ParticleAlphaMode::Custom:
+			// For debug purposes only
+			pipelineInfo.SetColorBlendAttachmentProperties(
+				0u,true,g_customAlphaBlendMode.opColor,g_customAlphaBlendMode.opAlpha,
+				g_customAlphaBlendMode.srcColorBlendFactor,g_customAlphaBlendMode.dstColorBlendFactor,
+				g_customAlphaBlendMode.srcAlphaBlendFactor,g_customAlphaBlendMode.dstAlphaBlendFactor,
+				colorComponents
+			);
+			break;
 		default:
 			throw std::invalid_argument("Unknown alpha mode " +std::to_string(umath::to_integral(alphaMode)) +"!");
 	}
@@ -112,8 +219,6 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 	auto renderFlags = (particle.IsAnimated() == true) ? RenderFlags::Animated : RenderFlags::None;
 	if(cvParticleQuality->GetInt() <= 1)
 		renderFlags |= RenderFlags::Unlit;
-	if(particle.ShouldUseBlackAsAlpha() == true)
-		renderFlags |= RenderFlags::BlackToAlpha;
 	if(particle.GetSoftParticles() == true)
 		renderFlags |= RenderFlags::SoftParticles;
 	if(particle.IsTextureScrollingEnabled())
@@ -126,7 +231,7 @@ pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::C
 {
 	if(particle.IsAlphaPremultiplied())
 		return pragma::ParticleAlphaMode::Premultiplied;
-	return particle.GetAlphaMode();
+	return particle.GetEffectiveAlphaMode();
 }
 
 uint32_t ShaderParticleBase::GetParticlePipelineCount() const {return umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count);}

@@ -16,6 +16,7 @@
 #include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/rendering/c_rendermode.h"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
@@ -291,6 +292,9 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_ALL",umath::to_integral(FRender::All)},
 		{"RENDER_FLAG_REFLECTION_BIT",umath::to_integral(FRender::Reflection)},
 		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)},
+		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(FRender::Static)},
+		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(FRender::Dynamic)},
+		{"RENDER_FLAG_HDR_BIT",umath::to_integral(FRender::HDR)},
 
 		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
 		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},
@@ -308,8 +312,8 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
 	classDefRasterizationRenderer.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
 	classDefRasterizationRenderer.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::ICommandBuffer&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,prosper::ICommandBuffer&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
 	classDefRasterizationRenderer.def("EndRenderPass",&Lua::RasterizationRenderer::EndRenderPass);
 	classDefRasterizationRenderer.def("GetPrepassShader",&Lua::RasterizationRenderer::GetPrepassShader);
 	classDefRasterizationRenderer.def("SetShaderOverride",&Lua::RasterizationRenderer::SetShaderOverride);
@@ -336,9 +340,29 @@ void CGame::RegisterLua()
 	}));
 	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
+		//renderer.GetHDRInfo().bloomBlurRenderTarget->GetTexture();
+		//renderer.GetGlowInfo().renderTarget->GetTexture()
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt);
+	}));
+	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
+		if(rt == nullptr)
+			return;
+		Lua::Push(l,rt);
+		}));
+	classDefRasterizationRenderer.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
+		if(rt == nullptr)
+			return;
+		Lua::Push(l,rt->GetTexture().shared_from_this());
+	}));
+	classDefRasterizationRenderer.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &rt = renderer.GetGlowInfo().renderTarget;
+		if(rt == nullptr)
+			return;
+		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
 	classDefRasterizationRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto *tex = renderer.GetPresentationTexture();

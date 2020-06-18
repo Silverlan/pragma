@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -39,7 +40,7 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static auto cvDrawSky = GetClientConVar("render_draw_sky");
 static auto cvDrawWater = GetClientConVar("render_draw_water");
 static auto cvDrawView = GetClientConVar("render_draw_view");
-void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags)
+void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto prepassMode = GetPrepassMode();
 	if(prepassMode == PrepassMode::NoPrepass)
@@ -56,6 +57,7 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 		static_cast<prosper::MSAATexture&>(*prepass.textureNormals).Reset();
 
 	// Entity instance buffer barrier
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBufferBarrier(
 		*pragma::CRenderComponent::GetInstanceBuffer(),
 		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
@@ -83,8 +85,8 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
-	prepass.BeginRenderPass(*drawCmd);
-	auto bReflection = ((renderFlags &FRender::Reflection) != FRender::None) ? true : false;
+	prepass.BeginRenderPass(drawSceneInfo);
+	auto bReflection = ((drawSceneInfo.renderFlags &FRender::Reflection) != FRender::None) ? true : false;
 	auto pipelineType = (bReflection == true) ? pragma::ShaderPrepassBase::Pipeline::Reflection :
 		(GetSampleCount() == prosper::SampleCountFlags::e1Bit) ? pragma::ShaderPrepassBase::Pipeline::Regular :
 		pragma::ShaderPrepassBase::Pipeline::MultiSample;
@@ -93,12 +95,12 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 	{
 		shaderDepthStage.BindClipPlane(c_game->GetRenderClipPlane());
 		shaderDepthStage.BindSceneCamera(*this,false);
-		if((renderFlags &FRender::Skybox) != FRender::None)
+		if((drawSceneInfo.renderFlags &FRender::Skybox) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
 			if(hCam.valid())
 			{
-				RenderSystem::RenderPrepass(drawCmd,RenderMode::Skybox);
+				RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::Skybox);
 
 				// 3D Skybox
 				if(m_3dSkyCameras.empty() == false)
@@ -113,7 +115,7 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 						auto &pos = ent.GetPosition();
 						Vector4 drawOrigin {pos.x,pos.y,pos.z,hSkyCam->GetSkyboxScale()};
 						shaderDepthStage.BindDrawOrigin(drawOrigin);
-						RenderSystem::RenderPrepass(drawCmd,*filteredMeshes);
+						RenderSystem::RenderPrepass(drawSceneInfo,*filteredMeshes);
 					}
 					shaderDepthStage.Set3DSky(false);
 				}
@@ -121,11 +123,11 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
 		}
 		shaderDepthStage.BindDrawOrigin(Vector4{0.f,0.f,0.f,1.f});
-		if((renderFlags &FRender::World) != FRender::None)
+		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
 			if(hCam.valid())
-				RenderSystem::RenderPrepass(drawCmd,RenderMode::World);
+				RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::World);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassWorld);
 		}
 		c_game->CallCallbacks<void>("RenderPrepass");
@@ -133,16 +135,16 @@ void RasterizationRenderer::RenderPrepass(std::shared_ptr<prosper::IPrimaryComma
 
 		shaderDepthStage.BindSceneCamera(*this,true);
 		auto *pl = c_game->GetLocalPlayer();
-		if((renderFlags &FRender::View) != FRender::None && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
+		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassView);
 			if(hCam.valid())
-				RenderSystem::RenderPrepass(drawCmd,RenderMode::View);
+				RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::View);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::PrepassView);
 		}
 		shaderDepthStage.EndDraw();
 	}
-	prepass.EndRenderPass(*drawCmd);
+	prepass.EndRenderPass(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
 }

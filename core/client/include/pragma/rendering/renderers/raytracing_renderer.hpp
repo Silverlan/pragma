@@ -22,7 +22,7 @@ namespace pragma::rendering
 		prosper::IDescriptorSet& GetOutputImageDescriptorSet();
 
 		virtual void EndRendering() override;
-		virtual bool RenderScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,FRender renderFlags=FRender::All) override;
+		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
 		virtual bool ReloadRenderTarget() override;
 		virtual bool IsRayTracingRenderer() const override;
 		virtual prosper::Texture *GetSceneTexture() override;

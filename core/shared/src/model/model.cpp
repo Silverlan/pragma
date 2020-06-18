@@ -1125,6 +1125,8 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 	if(strPath.has_value() == false)
 		return {};
 	util::Path path {*strPath};
+	auto ext = path.GetFileExtension();
+	path.RemoveFileExtension();
 	path += '_' +group.GetName();
 	path += '_' +std::to_string(meshIdx);
 	path += '_' +std::to_string(subMeshIdx);
@@ -1137,8 +1139,10 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 		path.PopFront();
 	}
 	auto mpath = path.GetString();
+	if(ext.has_value())
+		mpath += '.' +*ext;
 	path.PopFront();
-	path.RemoveFileExtension();
+
 	if(FileManager::Exists(mpath) == false)
 	{
 		if(hMat->Save(path.GetString(),rootPath.GetString()) == false)
@@ -1147,8 +1151,15 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 	auto *matNew = m_networkState->LoadMaterial(path.GetString());
 	if(matNew == nullptr)
 		return {};
+	auto numSkins = GetTextureGroups().size();
 	std::optional<uint32_t> newSkinTexId {};
-	AddMaterial(0u,matNew,&newSkinTexId);
+	for(auto i=decltype(numSkins){0u};i<numSkins;++i)
+	{
+		if(i == 0u)
+			AddMaterial(i,matNew,&newSkinTexId);
+		else
+			AddMaterial(i,matNew);
+	}
 	if(newSkinTexId.has_value())
 		subMesh.SetSkinTextureIndex(*newSkinTexId);
 	return newSkinTexId;

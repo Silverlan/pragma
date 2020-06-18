@@ -32,6 +32,7 @@ namespace prosper
 	class IBuffer;
 	class IFence;
 };
+namespace util {struct DrawSceneInfo;};
 namespace pragma::rendering
 {
 	class RasterizationRenderer;
@@ -43,16 +44,17 @@ namespace pragma::rendering
 		void UpdateExposure();
 		bool Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
+		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 
 		void SwapIOTextures();
 
-		bool BeginRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::IRenderPass *customRenderPass=nullptr);
-		bool EndRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
-		bool ResolveRenderPass(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr);
+		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 
 		void ResetIOTextureIndex();
-		bool BlitStagingRenderTargetToMainRenderTarget(prosper::ICommandBuffer &cmdBuffer);
-		bool BlitMainDepthBufferToSamplableDepthBuffer(prosper::ICommandBuffer &cmdBuffer,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst);
+		bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+		bool BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst);
 
 		SSAOInfo ssaoInfo;
 		pragma::rendering::Prepass prepass;

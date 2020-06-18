@@ -130,35 +130,17 @@ void Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::rendering:
 		return;
 	Lua::Push(l,rt);
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer)
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
 {
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer));
+	Lua::PushBool(l,renderer.BeginRenderPass(drawSceneInfo));
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer,prosper::IRenderPass &rp)
+void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp)
 {
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,renderer.BeginRenderPass(primCmdBuffer,&rp));
+	Lua::PushBool(l,renderer.BeginRenderPass(drawSceneInfo,&rp));
 }
-void Lua::RasterizationRenderer::EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,prosper::ICommandBuffer &hCommandBuffer)
+void Lua::RasterizationRenderer::EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
 {
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,renderer.EndRenderPass(primCmdBuffer));
+	Lua::PushBool(l,renderer.EndRenderPass(drawSceneInfo));
 }
 void Lua::RasterizationRenderer::GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer)
 {

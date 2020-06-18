@@ -73,7 +73,9 @@ std::array<Vector2,4> ShaderParticle2DBase::GetQuadVertexPositions()
 }
 Vector2 ShaderParticle2DBase::GetVertexUV(uint32_t vertIdx)
 {
-	return GetQuadVertexPositions().at(get_vertex_index(vertIdx)) +Vector2{0.5f,0.5f};
+	auto uv = GetQuadVertexPositions().at(get_vertex_index(vertIdx)) +Vector2{0.5f,0.5f};
+	uv = {uv.y,1.f -uv.x};
+	return uv;
 }
 ShaderParticle2DBase::ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderSceneLit(context,identifier,vsShader,fsShader,gsShader)

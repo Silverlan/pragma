@@ -28,12 +28,18 @@ namespace pragma::rendering::cycles
 			CPU = 0,
 			GPU
 		};
+		enum class SceneFlags : uint8_t // Has to match Scene Flags defined in Cycles module!
+		{
+			None = 0u,
+			CullObjectsOutsidePvs = 1u,
+			CullObjectsOutsideCameraFrustum = CullObjectsOutsidePvs<<1u
+		};
 		uint32_t width = 1'024;
 		uint32_t height = 768;
 		uint32_t samples = 1'024;
 		bool denoise = true;
 		bool hdrOutput = false;
-		bool cullObjectsOutsidePvs = true;
+		SceneFlags sceneFlags = static_cast<SceneFlags>(umath::to_integral(SceneFlags::CullObjectsOutsidePvs) | umath::to_integral(SceneFlags::CullObjectsOutsideCameraFrustum));
 		DeviceType device = DeviceType::CPU;
 		std::string sky = "";
 		float skyStrength = 1.f;
@@ -55,5 +61,6 @@ namespace pragma::rendering::cycles
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &entTarget);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::cycles::SceneInfo::SceneFlags)
 
 #endif

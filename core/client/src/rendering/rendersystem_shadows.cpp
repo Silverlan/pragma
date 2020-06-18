@@ -9,6 +9,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -17,7 +18,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 
-void RenderSystem::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights)
+void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowManagerComponent>>();
@@ -28,7 +29,7 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 	if(lights.empty() == false)
 	{
 		for(auto *pLight : lights)
-			shadowManagerC->GetRenderer().RenderShadows(drawCmd,*pLight);
+			shadowManagerC->GetRenderer().RenderShadows(drawSceneInfo.commandBuffer,*pLight);
 	}
 
 	// Directional light source is handled separately
@@ -41,7 +42,7 @@ void RenderSystem::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer>
 		if(toggleC.valid() && toggleC->IsTurnedOn() == false)
 			continue;
 		renderer.UpdateCSMDescriptorSet(*ent->GetComponent<pragma::CLightDirectionalComponent>());
-		shadowManagerC->GetRenderer().RenderShadows(drawCmd,*ent->GetComponent<pragma::CLightComponent>());
+		shadowManagerC->GetRenderer().RenderShadows(drawSceneInfo.commandBuffer,*ent->GetComponent<pragma::CLightComponent>());
 		break;
 	}
 

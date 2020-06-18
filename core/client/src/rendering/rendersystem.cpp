@@ -18,6 +18,7 @@
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "textureinfo.h"
 #include "pragma/console/c_cvar.h"
@@ -162,7 +163,7 @@ DLLCLIENT uint32_t s_shadowTriangleCount = 0;
 DLLCLIENT uint32_t s_shadowVertexCount = 0;
 #endif
 void RenderSystem::Render(
-	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam,RenderMode renderMode,
+	const util::DrawSceneInfo &drawSceneInfo,pragma::CCameraComponent &cam,RenderMode renderMode,
 	RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin
 )
 {
@@ -182,6 +183,7 @@ void RenderSystem::Render(
 	pragma::CRenderComponent *renderC = nullptr;
 	auto depthBiasActive = false;
 	auto debugMode = scene->GetDebugMode();
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto it=translucentMeshes.rbegin();it!=translucentMeshes.rend();++it) // Render back-to-front
 	{
 		auto &meshInfo = *it;
@@ -224,8 +226,11 @@ void RenderSystem::Render(
 			{
 				entPrev = ent;
 				renderC = entPrev->GetRenderComponent().get();
-				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr)
+				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr || (drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false))
+				{
+					renderC = nullptr;
 					continue;
+				}
 				if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 				{
 					float constantFactor,biasClamp,slopeFactor;
@@ -241,6 +246,8 @@ void RenderSystem::Render(
 					drawCmd->RecordSetDepthBias();
 				}
 			}
+			if(renderC == nullptr)
+				continue;
 			auto *mesh = meshInfo->mesh;
 			auto pRenderComponent = ent->GetRenderComponent();
 			if(pRenderComponent.valid() && pRenderComponent->Render(shader,&mat,mesh) == false)
@@ -274,7 +281,7 @@ void RenderSystem::Render(
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
 uint32_t RenderSystem::Render(
-	std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::CulledMeshData &renderMeshes,
+	const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes,
 	RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin
 )
 {
@@ -298,6 +305,7 @@ uint32_t RenderSystem::Render(
 	pragma::ShaderTextured3DBase *shaderLast = nullptr;
 	auto depthBiasActive = false;
 	auto debugMode = scene->GetDebugMode();
+	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
 	{
 		auto &shaderContainer = *itShader;
@@ -334,6 +342,11 @@ uint32_t RenderSystem::Render(
 								entLast = ent;
 								shaderLast = shader;
 								renderC = entLast->GetRenderComponent().get();
+								if(drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false)
+								{
+									renderC = nullptr;
+									continue;
+								}
 
 								if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 								{
@@ -350,6 +363,8 @@ uint32_t RenderSystem::Render(
 									drawCmd->RecordSetDepthBias();
 								}
 							}
+							if(renderC == nullptr)
+								continue;
 							for(auto *mesh : pair.second.meshes)
 							{
 #if DEBUG_RENDER_DISABLED == 0
@@ -404,7 +419,7 @@ uint32_t RenderSystem::Render(
 
 	return numShaderInvocations;
 }
-uint32_t RenderSystem::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
+uint32_t RenderSystem::Render(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
 {
 	auto &scene = c_game->GetRenderScene();
 	auto *renderer = scene->GetRenderer();
@@ -412,5 +427,5 @@ uint32_t RenderSystem::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &d
 		return 0;
 	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
-	return renderInfo ? Render(drawCmd,*renderInfo,renderMode,flags,drawOrigin) : 0;
+	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;
 }

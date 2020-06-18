@@ -746,15 +746,64 @@ void CGame::RegisterLuaLibraries()
 		})},
 		{"load_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			std::string fileName = Lua::CheckString(l,1);
+			std::string ext;
+			if(ufile::get_extension(fileName,&ext) == false)
+				return 0;
 			auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
 			if(f == nullptr)
 				return 0;
 			auto pixelFormat = uimg::PixelFormat::LDR;
+			if(ustring::compare(ext,"hdr"))
+				pixelFormat = uimg::PixelFormat::Float;
+
+			auto loadAsynch = false;
 			if(Lua::IsSet(l,2))
-				pixelFormat = static_cast<uimg::PixelFormat>(Lua::CheckInt(l,2));
+				loadAsynch = Lua::CheckBool(l,2);
+
+			std::optional<uimg::ImageBuffer::Format> targetFormat {};
+			if(Lua::IsSet(l,3))
+				targetFormat = static_cast<uimg::ImageBuffer::Format>(Lua::CheckInt(l,3));
+
+			if(loadAsynch)
+			{
+				class ImageLoadJob
+					: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
+				{
+				public:
+					ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::ImageBuffer::Format> targetFormat)
+					{
+						AddThread([this,f,pixelFormat,targetFormat]() {
+							m_imgBuffer = uimg::load_image(f,pixelFormat);
+							if(m_imgBuffer == nullptr)
+							{
+								SetStatus(util::JobStatus::Failed,"Unable to open image!");
+								UpdateProgress(1.f);
+								return;
+							}
+							if(targetFormat.has_value())
+							{
+								if(IsCancelled())
+									return;
+								UpdateProgress(0.9f);
+								m_imgBuffer->Convert(*targetFormat);
+							}
+							UpdateProgress(1.f);
+						});
+					}
+
+					virtual std::shared_ptr<uimg::ImageBuffer> GetResult() override {return m_imgBuffer;}
+				private:
+					std::shared_ptr<uimg::ImageBuffer> m_imgBuffer = nullptr;
+				};
+				auto job = util::create_parallel_job<ImageLoadJob>(f,pixelFormat,targetFormat);
+				Lua::Push(l,job);
+				return 1;
+			}
 			auto imgBuffer = uimg::load_image(f,pixelFormat);
 			if(imgBuffer == nullptr)
 				return 0;
+			if(targetFormat.has_value())
+				imgBuffer->Convert(*targetFormat);
 			Lua::Push(l,imgBuffer);
 			return 1;
 		})},
@@ -855,9 +904,9 @@ void CGame::RegisterLuaLibraries()
 	imgWriteInfoDef.add_static_constant("CONTAINER_FORMAT_KTX",umath::to_integral(uimg::TextureInfo::ContainerFormat::KTX));
 
 	imgWriteInfoDef.add_static_constant("FLAG_NONE",umath::to_integral(uimg::TextureInfo::Flags::None));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_CONVERT_TO_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_SRGB",umath::to_integral(uimg::TextureInfo::Flags::SRGB));
-	imgWriteInfoDef.add_static_constant("FLAG_BIT_NORMAL_GENERATE_MIPMAPS",umath::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_CONVERT_TO_NORMAL_MAP",umath::to_integral(uimg::TextureInfo::Flags::ConvertToNormalMap));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_SRGB",umath::to_integral(uimg::TextureInfo::Flags::SRGB));
+	imgWriteInfoDef.add_static_constant("FLAG_BIT_GENERATE_MIPMAPS",umath::to_integral(uimg::TextureInfo::Flags::GenerateMipmaps));
 
 	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_BOX",umath::to_integral(uimg::TextureInfo::MipmapFilter::Box));
 	imgWriteInfoDef.add_static_constant("MIPMAP_FILTER_KAISER",umath::to_integral(uimg::TextureInfo::MipmapFilter::Kaiser));

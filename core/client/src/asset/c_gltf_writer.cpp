@@ -18,6 +18,7 @@
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <pragma/model/animation/animation.h>
+#include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/umath_lighting.hpp>
@@ -674,8 +675,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			// primarily targeting Blender, we'll just do the conversion ourselves.
 			// TODO: Add an option to change this via a parameter?
 			auto intensity = lightSource.luminousIntensity;
-			auto lightType = (lightSource.type == LightSource::Type::Spot) ? LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? LightType::Directional : LightType::Point;
-			auto watt = pragma::math::light_intensity_to_watts(intensity,lightType);
+			auto lightType = (lightSource.type == LightSource::Type::Spot) ? util::pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? util::pragma::LightType::Directional : util::pragma::LightType::Point;
+			auto watt = util::pragma::light_intensity_to_watts(intensity,lightType);
 			intensity = watt;
 			
 			auto color = lightSource.color.ToVector3();
@@ -837,9 +838,9 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		// Transform pose to relative
 		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
-		std::function<void(::Bone&,const pragma::physics::Transform&)> fToRelativeTransforms = nullptr;
-		fToRelativeTransforms = [this,&fToRelativeTransforms,&referenceRelative,&inverseBindPoseMatrices](::Bone &bone,const pragma::physics::Transform &parentPose) {
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::physics::Transform{};
+		std::function<void(::Bone&,const umath::Transform&)> fToRelativeTransforms = nullptr;
+		fToRelativeTransforms = [this,&fToRelativeTransforms,&referenceRelative,&inverseBindPoseMatrices](::Bone &bone,const umath::Transform &parentPose) {
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform{};
 
 			auto scaledPose = pose;
 			scaledPose.SetOrigin(TransformPos(scaledPose.GetOrigin()));
@@ -851,7 +852,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 				fToRelativeTransforms(*pair.second,pose);
 		};
 		for(auto &pair : skeleton.GetRootBones())
-			fToRelativeTransforms(*pair.second,pragma::physics::Transform{});
+			fToRelativeTransforms(*pair.second,umath::Transform{});
 
 		auto &bones = skeleton.GetBones();
 
@@ -877,7 +878,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			traversedJoints.insert(nodeIdx);
 			auto &node = m_gltfMdl.nodes.at(nodeIdx);
 
-			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : pragma::physics::Transform{};
+			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform{};
 			auto pos = TransformPos(pose.GetOrigin());
 			auto &rot = pose.GetRotation();
 			auto *scale = referenceRelative->GetBoneScale(bone.ID);
@@ -1113,7 +1114,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 
 			for(auto &frame : frames)
 			{
-				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : pragma::physics::Transform{};
+				auto pose = frame->GetBoneTransform(i) ? *frame->GetBoneTransform(i) : umath::Transform{};
 
 				auto pos = TransformPos(pose.GetOrigin());
 				translations.push_back(pos);

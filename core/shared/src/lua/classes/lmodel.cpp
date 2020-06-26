@@ -335,13 +335,13 @@ void Lua::Model::register_class(
 		auto t = mdl.CalcReferenceAttachmentPose(attIdx);
 		if(t.has_value() == false)
 			return;
-		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
+		Lua::Push<umath::ScaledTransform>(l,*t);
 	}));
 	classDef.def("CalcReferenceBonePose",static_cast<void(*)(lua_State*,::Model&,int32_t)>([](lua_State *l,::Model &mdl,int32_t boneIdx) {
 		auto t = mdl.CalcReferenceBonePose(boneIdx);
 		if(t.has_value() == false)
 			return;
-		Lua::Push<pragma::physics::ScaledTransform>(l,*t);
+		Lua::Push<umath::ScaledTransform>(l,*t);
 	}));
 	classDef.def("IsRootBone",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t boneId) {
 		Lua::PushBool(l,mdl.IsRootBone(boneId));

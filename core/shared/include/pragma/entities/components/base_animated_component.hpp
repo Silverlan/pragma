@@ -13,7 +13,7 @@
 #include "pragma/model/animation/animation_event.h"
 #include <sharedutils/property/util_property.hpp>
 #include <pragma/math/orientation.h>
-#include <pragma/physics/transform.hpp>
+#include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
 class Animation;
@@ -62,11 +62,11 @@ namespace pragma
 			int32_t animation = -1;
 			float cycle = 0.f;
 			FPlayAnim flags = FPlayAnim::Default;
-			std::vector<pragma::physics::Transform> bonePoses;
+			std::vector<umath::Transform> bonePoses;
 			std::vector<Vector3> boneScales;
 
 			// These are only used if the animation has a blend-controller
-			std::vector<pragma::physics::Transform> bonePosesBc;
+			std::vector<umath::Transform> bonePosesBc;
 			std::vector<Vector3> boneScalesBc;
 
 			// Keep a reference to our last animation for blending
@@ -176,8 +176,8 @@ namespace pragma
 
 		void SetLastAnimationBlendScale(float scale);
 
-		const std::vector<physics::ScaledTransform> &GetProcessedBones() const;
-		std::vector<physics::ScaledTransform> &GetProcessedBones();
+		const std::vector<umath::ScaledTransform> &GetProcessedBones() const;
+		std::vector<umath::ScaledTransform> &GetProcessedBones();
 
 		void SetBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 *scale,Bool updatePhysics);
 
@@ -186,10 +186,10 @@ namespace pragma
 
 		bool ShouldUpdateBones() const;
 		UInt32 GetBoneCount() const;
-		const std::vector<physics::ScaledTransform> &GetBoneTransforms() const;
-		std::vector<physics::ScaledTransform> &GetBoneTransforms();
-		const std::vector<physics::ScaledTransform> &GetProcessedBoneTransforms() const;
-		std::vector<physics::ScaledTransform> &GetProcessedBoneTransforms();
+		const std::vector<umath::ScaledTransform> &GetBoneTransforms() const;
+		std::vector<umath::ScaledTransform> &GetBoneTransforms();
+		const std::vector<umath::ScaledTransform> &GetProcessedBoneTransforms() const;
+		std::vector<umath::ScaledTransform> &GetProcessedBoneTransforms();
 		const AnimationSlotInfo &GetBaseAnimationInfo() const;
 		AnimationSlotInfo &GetBaseAnimationInfo();
 		const std::unordered_map<uint32_t,AnimationSlotInfo> &GetAnimationSlotInfos() const;
@@ -198,13 +198,13 @@ namespace pragma
 		Activity TranslateActivity(Activity act);
 
 		void BlendBonePoses(
-			const std::vector<pragma::physics::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
-			const std::vector<pragma::physics::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
-			std::vector<pragma::physics::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
+			const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
+			const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
+			std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
 			Animation &anim,float interpFactor
 		) const;
 		void BlendBoneFrames(
-			std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,float blendScale
+			std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale
 		) const;
 
 		virtual bool MaintainAnimations(double dt);
@@ -268,16 +268,16 @@ namespace pragma
 		Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale);
 
 		// Animations
-		void TransformBoneFrames(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
-		void TransformBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
+		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
+		void TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
 		//
 
 		std::unordered_map<uint32_t,AnimationSlotInfo> m_animSlots = {};
 		AnimationSlotInfo m_baseAnim = {};
 
 		Vector3 m_animDisplacement = {};
-		std::vector<physics::ScaledTransform> m_bones = {};
-		std::vector<physics::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
+		std::vector<umath::ScaledTransform> m_bones = {};
+		std::vector<umath::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
 	private:
 		// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 		std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem>{};
@@ -428,11 +428,11 @@ namespace pragma
 	struct DLLNETWORK CEOnBlendAnimation
 		: public ComponentEvent
 	{
-		CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales);
+		CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales);
 		virtual void PushArguments(lua_State *l) override;
 		BaseAnimatedComponent::AnimationSlotInfo &slotInfo;
 		Activity activity;
-		std::vector<pragma::physics::Transform> &bonePoses;
+		std::vector<umath::Transform> &bonePoses;
 		std::vector<Vector3> *boneScales;
 	};
 	struct DLLNETWORK CEMaintainAnimations

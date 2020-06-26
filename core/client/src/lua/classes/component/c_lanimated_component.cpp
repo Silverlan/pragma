@@ -19,9 +19,9 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto &transforms = hAnim->GetProcessedBones();
 		if(boneIdx >= transforms.size())
 			return;
-		Lua::Push<pragma::physics::ScaledTransform*>(l,&transforms.at(boneIdx));
+		Lua::Push<umath::ScaledTransform*>(l,&transforms.at(boneIdx));
 		}));
-	defCAnimated.def("SetEffectiveBoneTransform",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t,const pragma::physics::ScaledTransform&)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIdx,const pragma::physics::ScaledTransform &t) {
+	defCAnimated.def("SetEffectiveBoneTransform",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIdx,const umath::ScaledTransform &t) {
 		pragma::Lua::check_component(l,hAnim);
 		auto &transforms = hAnim->GetProcessedBones();
 		if(boneIdx >= transforms.size())

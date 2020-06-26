@@ -177,20 +177,20 @@ void BaseEntity::Initialize()
 
 std::string BaseEntity::GetClass() const {return m_class;}
 
-void BaseEntity::GetPose(pragma::physics::Transform &outTransform) const
+void BaseEntity::GetPose(umath::Transform &outTransform) const
 {
 	outTransform = {GetPosition(),GetRotation()};
 }
-void BaseEntity::SetPose(const pragma::physics::Transform &outTransform)
+void BaseEntity::SetPose(const umath::Transform &outTransform)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 }
-void BaseEntity::GetPose(pragma::physics::ScaledTransform &outTransform) const
+void BaseEntity::GetPose(umath::ScaledTransform &outTransform) const
 {
 	outTransform = {GetPosition(),GetRotation(),GetScale()};
 }
-void BaseEntity::SetPose(const pragma::physics::ScaledTransform &outTransform)
+void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());

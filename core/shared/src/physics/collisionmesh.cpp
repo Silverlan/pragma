@@ -182,7 +182,7 @@ std::shared_ptr<pragma::physics::IShape> CollisionMesh::CreateShape(const Vector
 	if(shape)
 	{
 		shape->SetMass(GetMass());
-		shape->SetLocalPose(pragma::physics::Transform{-GetOrigin(),uquat::identity()});
+		shape->SetLocalPose(umath::Transform{-GetOrigin(),uquat::identity()});
 	}
 	return shape;
 }

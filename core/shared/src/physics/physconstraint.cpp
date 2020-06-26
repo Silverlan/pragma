@@ -32,8 +32,8 @@ bool pragma::physics::IConstraint::GetCollisionsEnabled() const {return m_bColli
 void pragma::physics::IConstraint::EnableCollisions() {SetCollisionsEnabled(true);}
 void pragma::physics::IConstraint::DisableCollisions() {SetCollisionsEnabled(false);}
 
-pragma::physics::Transform &pragma::physics::IConstraint::GetSourceTransform() {return m_srcTransform;}
-pragma::physics::Transform &pragma::physics::IConstraint::GetTargetTransform() {return m_tgtTransform;}
+umath::Transform &pragma::physics::IConstraint::GetSourceTransform() {return m_srcTransform;}
+umath::Transform &pragma::physics::IConstraint::GetTargetTransform() {return m_tgtTransform;}
 Vector3 pragma::physics::IConstraint::GetSourcePosition() {return m_srcTransform.GetOrigin();}
 Quat pragma::physics::IConstraint::GetSourceRotation() {return m_srcTransform.GetRotation();}
 Vector3 pragma::physics::IConstraint::GetTargetPosition() {return m_tgtTransform.GetOrigin();}

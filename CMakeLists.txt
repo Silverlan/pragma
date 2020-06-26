@@ -604,6 +604,9 @@ target_include_directories(cmaterialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/th
 message("Processing modules...")
 add_subdirectory(modules)
 
+message("Processing tools...")
+add_subdirectory(tools)
+
 message("Processing third-party libaries...")
 # include generated headers
 target_include_directories(shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/assimp/include)

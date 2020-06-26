@@ -13,7 +13,7 @@
 #include <sharedutils/def_handle.h>
 #include <mathutil/glmutil.h>
 #include <mathutil/uquat.h>
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/physics/base.hpp"
 #include "pragma/lua/baseluaobj.h"
 #include "pragma/physics/collisionmasks.h"
@@ -81,7 +81,7 @@ namespace pragma::physics
 		virtual void SetTrigger(bool bTrigger)=0;
 		virtual bool IsTrigger() const=0;
 
-		virtual void TransformLocalPose(const Transform &t)=0;
+		virtual void TransformLocalPose(const umath::Transform &t)=0;
 
 		virtual void SetActivationState(ActivationState state)=0;
 		virtual ActivationState GetActivationState() const=0;
@@ -96,8 +96,8 @@ namespace pragma::physics
 		virtual void SetPos(const Vector3 &pos)=0;
 		virtual Quat GetRotation() const=0;
 		virtual void SetRotation(const Quat &rot)=0;
-		virtual Transform GetWorldTransform()=0;
-		virtual void SetWorldTransform(const Transform &t)=0;
+		virtual umath::Transform GetWorldTransform()=0;
+		virtual void SetWorldTransform(const umath::Transform &t)=0;
 		virtual void WakeUp(bool forceActivation=false)=0;
 		virtual void PutToSleep()=0;
 		bool IsAsleep() const;

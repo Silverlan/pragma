@@ -99,7 +99,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			{
 				auto boneIdx = numOldBones +i;
 				auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-				pragma::physics::ScaledTransform t;
+				umath::ScaledTransform t;
 				if(referenceOther.GetBonePose(otherBoneIdx,t))
 					reference.SetBonePose(boneIdx,t);
 			}
@@ -116,7 +116,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 				{
 					auto boneIdx = numOldBones +i;
 					auto otherBoneIdx = newBoneIndicesToOtherBoneIndices.at(i);
-					pragma::physics::ScaledTransform t;
+					umath::ScaledTransform t;
 					if(frameRefOther->GetBonePose(otherBoneIdx,t))
 						frameRef->SetBonePose(boneIdx,t);
 				}

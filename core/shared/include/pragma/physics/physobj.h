@@ -17,7 +17,7 @@
 #include <sharedutils/def_handle.h>
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/physics/controllerhitdata.h"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/phys_contact_info.hpp"
 #ifdef __linux__

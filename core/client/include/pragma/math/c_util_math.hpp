@@ -17,12 +17,6 @@ namespace pragma::math
 {
 	DLLCLIENT const std::array<Mat4,6> &get_cubemap_view_matrices();
 	DLLCLIENT const Mat4 &get_cubemap_projection_matrix(float aspectRatio=1.f,float nearZ=0.1f,float farZ=10.f);
-
-	// Converts a candela light intensity value to watts.
-	// Note that the conversion is arbitrary and is not based on
-	// a conventional formula, as conventional conversion attempts
-	// have not resulted in good looking results.
-	DLLCLIENT float light_intensity_to_watts(float candelaOrLux,LightType lightType);
 };
 
 #endif

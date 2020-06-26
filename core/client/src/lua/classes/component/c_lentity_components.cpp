@@ -106,7 +106,7 @@ namespace Lua
 	};
 	namespace Decal
 	{
-		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes,const pragma::physics::ScaledTransform &pose)
+		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes,const umath::ScaledTransform &pose)
 		{
 			pragma::Lua::check_component(l,hComponent);
 			int32_t t = 2;
@@ -126,7 +126,7 @@ namespace Lua
 
 				Lua::PushString(l,"pose"); /* 2 */
 				Lua::GetTableValue(l,tMeshData); /* 2 */
-				meshData.pose = Lua::Check<pragma::physics::ScaledTransform>(l,-1);
+				meshData.pose = Lua::Check<umath::ScaledTransform>(l,-1);
 				Lua::Pop(l,1); /* 1 */
 				
 				Lua::PushString(l,"subMeshes"); /* 2 */
@@ -376,7 +376,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCDecal = luabind::class_<CDecalHandle,BaseEntityComponentHandle>("DecalComponent");
 	Lua::register_base_decal_component_methods<luabind::class_<CDecalHandle,BaseEntityComponentHandle>,CDecalHandle>(l,defCDecal);
-	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object,const pragma::physics::ScaledTransform&)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object,const umath::ScaledTransform&)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object)>(&Lua::Decal::create_from_projection));
 	defCDecal.def("DebugDraw",static_cast<void(*)(lua_State*,CDecalHandle&,float)>([](lua_State *l,CDecalHandle &hEnt,float duration) {
 		pragma::Lua::check_component(l,hEnt);

@@ -28,7 +28,7 @@ namespace pragma
 		util::WeakHandle<pragma::BaseVehicleComponent> m_vehicle = {};
 		uint8_t m_wheelId = 0u;
 		physics::WheelCreateInfo m_createInfo = {};
-		physics::Transform m_localTransform = {};
+		umath::Transform m_localTransform = {};
 
 		void Think();
 		void UpdateWheel();

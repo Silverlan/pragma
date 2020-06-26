@@ -247,9 +247,9 @@ void CAnimatedComponent::UpdateBoneMatrices()
 			auto &mat = m_boneMatrices[i];
 			if(i != physRootBoneId)
 			{
-				physics::Transform tBindPose {*posBind,*rotBind};
+				umath::Transform tBindPose {*posBind,*rotBind};
 				tBindPose = tBindPose.GetInverse();
-				physics::ScaledTransform tBone {pos,orientation,scale};
+				umath::ScaledTransform tBone {pos,orientation,scale};
 
 				mat = (tBone *tBindPose).ToMatrix();
 			}

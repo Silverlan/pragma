@@ -109,7 +109,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		softBody->SetOrigin(origin);
 		auto pTrComponent = ent.GetTransformComponent();
 		auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-		pragma::physics::Transform startTransform;
+		umath::Transform startTransform;
 		startTransform.SetIdentity();
 		startTransform.SetOrigin(-origin +originOffset);
 		startTransform.SetRotation(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());

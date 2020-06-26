@@ -10,7 +10,7 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
 #include "material.h"
-#include <alpha_mode.hpp>
+#include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
 

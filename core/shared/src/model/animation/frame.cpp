@@ -112,7 +112,7 @@ Frame::Frame(unsigned int numBones)
 	: m_move(nullptr)
 {
 	m_bones.resize(numBones);
-	std::fill(m_bones.begin(),m_bones.end(),pragma::physics::Transform{});
+	std::fill(m_bones.begin(),m_bones.end(),umath::Transform{});
 }
 
 Frame::Frame(const Frame &other)
@@ -191,21 +191,21 @@ void Frame::Scale(const Vector3 &scale)
 		t.SetOrigin(t.GetOrigin() *scale);
 }
 
-const std::vector<pragma::physics::Transform> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
+const std::vector<umath::Transform> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
 const std::vector<Vector3> &Frame::GetBoneScales() const {return const_cast<Frame*>(this)->GetBoneScales();}
-std::vector<pragma::physics::Transform> &Frame::GetBoneTransforms() {return m_bones;}
+std::vector<umath::Transform> &Frame::GetBoneTransforms() {return m_bones;}
 std::vector<Vector3> &Frame::GetBoneScales() {return m_scales;}
-pragma::physics::Transform *Frame::GetBoneTransform(uint32_t idx) {return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr;}
-const pragma::physics::Transform *Frame::GetBoneTransform(uint32_t idx) const {return const_cast<Frame*>(this)->GetBoneTransform(idx);}
-bool Frame::GetBonePose(uint32_t boneId,pragma::physics::ScaledTransform &outTransform) const
+umath::Transform *Frame::GetBoneTransform(uint32_t idx) {return (idx < m_bones.size()) ? &m_bones.at(idx) : nullptr;}
+const umath::Transform *Frame::GetBoneTransform(uint32_t idx) const {return const_cast<Frame*>(this)->GetBoneTransform(idx);}
+bool Frame::GetBonePose(uint32_t boneId,umath::ScaledTransform &outTransform) const
 {
 	if(boneId >= m_bones.size())
 		return false;
 	auto &t = m_bones.at(boneId);
-	outTransform = pragma::physics::ScaledTransform{t.GetOrigin(),t.GetRotation(),(boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3{1.f,1.f,1.f}};
+	outTransform = umath::ScaledTransform{t.GetOrigin(),t.GetRotation(),(boneId < m_scales.size()) ? m_scales.at(boneId) : Vector3{1.f,1.f,1.f}};
 	return true;
 }
-void Frame::SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &pose)
+void Frame::SetBonePose(uint32_t boneId,const umath::ScaledTransform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;
@@ -214,7 +214,7 @@ void Frame::SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &
 		m_scales.at(boneId) = pose.GetScale();
 }
 
-void Frame::SetBonePose(uint32_t boneId,const pragma::physics::Transform &pose)
+void Frame::SetBonePose(uint32_t boneId,const umath::Transform &pose)
 {
 	if(boneId >= m_bones.size())
 		return;

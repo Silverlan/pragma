@@ -17,6 +17,7 @@
 
 namespace prosper {class PrimaryCommandBuffer; class RenderTarget; class DescriptorSetGroup; class Shader;};
 namespace Anvil {class DescriptorSet;};
+namespace util::pragma {enum class LightType : uint8_t;};
 namespace pragma
 {
 	struct ShadowRenderInfo
@@ -53,13 +54,13 @@ namespace pragma
 		{
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> drawCmd;
 			pragma::CLightComponent *light;
-			LightType type;
+			util::pragma::LightType type;
 			Vector3 position;
 			float radius;
 		};
 		void RenderShadows(
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType,
-			LightType type,bool drawParticleShadows
+			util::pragma::LightType type,bool drawParticleShadows
 		);
 		bool UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType);
 		void UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light);

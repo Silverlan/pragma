@@ -7,6 +7,7 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include <sharedutils/util_pragma.hpp>
 #include <pragma/util/util_game.hpp>
 #include <alsoundsystem.hpp>
 #include <alsound_coordinate_system.hpp>
@@ -30,14 +31,14 @@ namespace sci
 al::SoundSystem *CEngine::InitializeSoundEngine()
 {
 	Con::cout<<"Initializing sound engine..."<<Con::endl;
-	m_soundSystem = al::SoundSystem::Create(util::units_to_metres(1.0));
+	m_soundSystem = al::SoundSystem::Create(util::pragma::units_to_metres(1.0));
 	if(m_soundSystem == nullptr)
 	{
 		Con::cerr<<"WARNING: Unable to initialize sound engine!"<<Con::endl;
 		return nullptr;
 	}
 	m_soundSystem->SetSoundSourceFactory(std::make_unique<sci::SoundSourceFactory>());
-	al::set_world_scale(util::units_to_metres(1.0));
+	al::set_world_scale(util::pragma::units_to_metres(1.0));
 	return m_soundSystem.get();
 }
 

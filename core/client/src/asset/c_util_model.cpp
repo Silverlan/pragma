@@ -16,6 +16,7 @@
 #include "c_gltf_writer.hpp"
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <pragma/asset_types/world.hpp>
@@ -163,7 +164,7 @@ static bool load_image(
 static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &optFileName,std::string &outErrMsg,const util::Path &outputPath)
 {
 	auto verbose = true; // TODO
-	auto scale = static_cast<float>(util::metres_to_units(1.f));
+	auto scale = static_cast<float>(util::pragma::metres_to_units(1.f));
 
 	std::string fileName = optFileName;
 	std::string absPathToFile;

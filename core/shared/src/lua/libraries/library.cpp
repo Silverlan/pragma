@@ -50,6 +50,7 @@
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
 #include <pragma/math/intersection.h>
+#include <mathutil/camera.hpp>
 #include <regex>
 #include <complex>
 #include <mpParser.h>
@@ -371,7 +372,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		auto sensorSize = Lua::CheckNumber(l,1);
 		auto focalLength = Lua::CheckNumber(l,1);
 		auto aspectRatio = Lua::CheckNumber(l,1);
-		Lua::PushNumber(l,::util::calc_fov_from_lens(sensorSize,focalLength,aspectRatio));
+		Lua::PushNumber(l,::umath::camera::calc_fov_from_lens(sensorSize,focalLength,aspectRatio));
 		return 1;
 	}));
 	lua_pushtablecfunction(lua.GetState(),"math","calc_aperture_size_from_fstop",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -380,19 +381,19 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		auto orthographicCamera = false;
 		if(Lua::IsSet(l,3))
 			orthographicCamera = Lua::CheckBool(l,3);
-		Lua::PushNumber(l,::util::calc_aperture_size_from_fstop(fstop,focalLength,orthographicCamera));
+		Lua::PushNumber(l,::umath::camera::calc_aperture_size_from_fstop(fstop,focalLength,orthographicCamera));
 		return 1;
 	}));
 	lua_pushtablecfunction(lua.GetState(),"math","calc_focal_length_from_fov",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 		auto fov = Lua::CheckNumber(l,1);
 		auto sensorSize = Lua::CheckNumber(l,2);
-		Lua::PushNumber(l,::util::calc_focal_length_from_fov(fov,sensorSize));
+		Lua::PushNumber(l,::umath::camera::calc_focal_length_from_fov(fov,sensorSize));
 		return 1;
 	}));
 	lua_pushtablecfunction(lua.GetState(),"math","calc_fov_from_focal_length",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 		auto focalLength = Lua::CheckNumber(l,1);
 		auto sensorSize = Lua::CheckNumber(l,2);
-		Lua::PushNumber(l,::util::calc_fov_from_focal_length(focalLength,sensorSize));
+		Lua::PushNumber(l,::umath::camera::calc_fov_from_focal_length(focalLength,sensorSize));
 		return 1;
 	}));
 	lua_pushtablecfunction(lua.GetState(),"math","cot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {

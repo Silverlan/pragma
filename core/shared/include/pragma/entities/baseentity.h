@@ -51,10 +51,10 @@ namespace pragma
 	class BaseNameComponent;
 	class BaseTransformComponent;
 	class BaseParentComponent;
-	namespace physics {class Transform; class ScaledTransform;};
 
 	using NetEventId = uint32_t;
 };
+namespace umath {class Transform; class ScaledTransform;};
 
 const double ENT_EPSILON = 0.000'01;
 
@@ -107,10 +107,10 @@ public:
 	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
 	// Returns ORIGIN if the entity has no transform component
-	void GetPose(pragma::physics::ScaledTransform &outTransform) const;
-	void GetPose(pragma::physics::Transform &outTransform) const;
-	void SetPose(const pragma::physics::ScaledTransform &outTransform);
-	void SetPose(const pragma::physics::Transform &outTransform);
+	void GetPose(umath::ScaledTransform &outTransform) const;
+	void GetPose(umath::Transform &outTransform) const;
+	void SetPose(const umath::ScaledTransform &outTransform);
+	void SetPose(const umath::Transform &outTransform);
 	const Vector3 &GetPosition() const;
 	void SetPosition(const Vector3 &pos);
 	Vector3 GetCenter() const;
@@ -148,7 +148,7 @@ public:
 	void SetModel(const std::shared_ptr<Model> &mdl);
 	std::shared_ptr<Model> GetModel() const;
 	std::string GetModelName() const;
-	std::optional<pragma::physics::Transform> GetAttachmentPose(uint32_t attId) const;
+	std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
 	uint32_t GetSkin() const;
 	void SetSkin(uint32_t skin);
 	uint32_t GetBodyGroup(const std::string &name) const;

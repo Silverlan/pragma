@@ -30,7 +30,7 @@ DecalProjector::DecalProjector(const Vector3 &pos,const Quat &rot,float size)
 {}
 const Vector3 &DecalProjector::GetPos() const {return m_pose.GetOrigin();}
 const Quat &DecalProjector::GetRotation() const {return m_pose.GetRotation();}
-const physics::Transform &DecalProjector::GetPose() const {return m_pose;}
+const umath::Transform &DecalProjector::GetPose() const {return m_pose;}
 float DecalProjector::GetSize() const {return m_size;}
 std::pair<Vector3,Vector3> DecalProjector::GetAABB() const
 {
@@ -359,7 +359,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 		return false;
 
 	// Vertices are in world space; Move them into entity space
-	physics::ScaledTransform pose;
+	umath::ScaledTransform pose;
 	GetEntity().GetPose(pose);
 	auto invPose = pose.GetInverse();
 	for(auto &v : verts)
@@ -416,7 +416,7 @@ bool CDecalComponent::ApplyDecal()
 		Vector3 min,max;
 		renderC->GetRenderBounds(&min,&max);
 
-		pragma::physics::Transform pose;
+		umath::Transform pose;
 		ent->GetPose(pose);
 		min = pose *min;
 		max = pose *max;
@@ -433,7 +433,7 @@ bool CDecalComponent::ApplyDecal()
 	meshDatas.reserve(targetEnts.size());
 	for(auto *ent : targetEnts)
 	{
-		pragma::physics::ScaledTransform pose;
+		umath::ScaledTransform pose;
 		ent->GetPose(pose);
 
 		auto renderC = ent->GetComponent<CRenderComponent>();

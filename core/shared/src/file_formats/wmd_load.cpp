@@ -280,7 +280,7 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 
 					if(version >= 26)
 					{
-						auto pose = Read<pragma::physics::ScaledTransform>();
+						auto pose = Read<umath::ScaledTransform>();
 						subMesh->SetPose(pose);
 					}
 

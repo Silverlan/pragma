@@ -50,7 +50,7 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	pragma::physics::Transform pose;
+	umath::Transform pose;
 	ent.GetPose(pose);
 	auto pos = pose.GetOrigin();
 	if(Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) == INTERSECT_OUTSIDE)
@@ -119,9 +119,9 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 		auto pToggleComponent = ent.GetComponent<pragma::CToggleComponent>();
 		if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn())
 		{
-			auto type = LightType::Undefined;
+			auto type = util::pragma::LightType::Undefined;
 			auto *pLight = light->GetLight(type);
-			if(type == LightType::Directional)
+			if(type == util::pragma::LightType::Directional)
 			{
 				lightsOut.insert(lightsOut.begin(),light);
 				distances.push_back(0.f);
@@ -165,16 +165,16 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 	for(auto it=lightsOut.begin();it!=lightsOut.end();)
 	{
 		auto *light = *it;
-		auto type = LightType::Undefined;
+		auto type = util::pragma::LightType::Undefined;
 		auto *pLight = light->GetLight(type);
-		if(type == LightType::Spot)
+		if(type == util::pragma::LightType::Spot)
 		{
 			if(++numSpotLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowMaps))
 				it = lightsOut.erase(it);
 			else
 				++it;
 		}
-		else if(type == LightType::Point)
+		else if(type == util::pragma::LightType::Point)
 		{
 			if(++numPointLights > static_cast<uint32_t>(GameLimits::MaxActiveShadowCubeMaps))
 				it = lightsOut.erase(it);

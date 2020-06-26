@@ -149,9 +149,9 @@ bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator
 std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy() const {return std::make_shared<ModelSubMesh>(*this);}
 uint32_t ModelSubMesh::GetReferenceId() const {return m_referenceId;}
 void ModelSubMesh::SetReferenceId(uint32_t refId) {m_referenceId = refId;}
-const pragma::physics::ScaledTransform &ModelSubMesh::GetPose() const {return const_cast<ModelSubMesh*>(this)->GetPose();}
-pragma::physics::ScaledTransform &ModelSubMesh::GetPose() {return m_pose;}
-void ModelSubMesh::SetPose(const pragma::physics::ScaledTransform &pose) {m_pose = pose;}
+const umath::ScaledTransform &ModelSubMesh::GetPose() const {return const_cast<ModelSubMesh*>(this)->GetPose();}
+umath::ScaledTransform &ModelSubMesh::GetPose() {return m_pose;}
+void ModelSubMesh::SetPose(const umath::ScaledTransform &pose) {m_pose = pose;}
 void ModelSubMesh::Scale(const Vector3 &scale)
 {
 	m_pose.SetOrigin(m_pose.GetOrigin() *scale);
@@ -292,7 +292,7 @@ void ModelSubMesh::Translate(const Vector3 &t)
 	m_min += t;
 	m_max += t;
 }
-void ModelSubMesh::Transform(const pragma::physics::ScaledTransform &pose)
+void ModelSubMesh::Transform(const umath::ScaledTransform &pose)
 {
 	Scale(pose.GetScale());
 	Rotate(pose.GetRotation());

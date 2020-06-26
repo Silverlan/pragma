@@ -10,7 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include <memory>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/util_weak_handle.hpp>
@@ -67,8 +67,8 @@ namespace pragma::physics
 		void SetMaterial(const IMaterial &mat);
 		IMaterial *GetMaterial() const;
 
-		virtual void SetLocalPose(const physics::Transform &localPose)=0;
-		virtual physics::Transform GetLocalPose() const=0;
+		virtual void SetLocalPose(const umath::Transform &localPose)=0;
+		virtual umath::Transform GetLocalPose() const=0;
 
 		virtual void SetDensity(float density);
 		float GetDensity() const;
@@ -156,10 +156,10 @@ namespace pragma::physics
 		struct DLLNETWORK ShapeInfo
 		{
 			std::shared_ptr<pragma::physics::IShape> shape;
-			Transform localPose;
+			umath::Transform localPose;
 		};
 		virtual void InitializeLuaObject(lua_State *lua) override;
-		void AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose={});
+		void AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose={});
 		virtual void GetAABB(Vector3 &min,Vector3 &max) const override;
 
 		virtual void SetMass(float mass) override;

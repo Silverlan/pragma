@@ -114,10 +114,10 @@ std::string pragma::asset::EntityData::GetKeyValue(const std::string &key,const 
 	return val.has_value() ? *val : default;
 }
 const Vector3 &pragma::asset::EntityData::GetOrigin() const {return m_origin;}
-pragma::physics::Transform pragma::asset::EntityData::GetPose() const
+umath::Transform pragma::asset::EntityData::GetPose() const
 {
 	auto origin = GetOrigin();
-	physics::Transform pose {};
+	umath::Transform pose {};
 	pose.SetOrigin(origin);
 	auto &keyValues = GetKeyValues();
 	auto itAngles = keyValues.find("angles");

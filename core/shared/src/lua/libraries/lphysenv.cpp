@@ -92,7 +92,7 @@ static void create_standard_four_wheel_drive(lua_State *l,luabind::object oWheel
 	Lua::Push<pragma::physics::VehicleCreateInfo>(l,pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(centerOffsets,handBrakeTorque,maxSteeringAngle));
 }
 
-static std::ostream &operator<<(std::ostream &out,const pragma::physics::Transform &t)
+static std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
 {
 	auto &origin = t.GetOrigin();
 	auto &rot = t.GetRotation();
@@ -100,7 +100,7 @@ static std::ostream &operator<<(std::ostream &out,const pragma::physics::Transfo
 	out<<"Transform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]";
 	return out;
 }
-static std::ostream &operator<<(std::ostream &out,const pragma::physics::ScaledTransform &t)
+static std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
 {
 	auto &origin = t.GetOrigin();
 	auto &rot = t.GetRotation();
@@ -591,10 +591,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,TraceData&,const pragma::physics::IConvexShape&)>(&Lua_TraceData_SetSource));
 	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetSource));
 	classDefRayCastData.def("SetSourceRotation",&TraceData::SetSourceRotation);
-	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const pragma::physics::Transform&)>(&TraceData::SetSource));
+	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const umath::Transform&)>(&TraceData::SetSource));
 	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetTarget));
 	classDefRayCastData.def("SetTargetRotation",&TraceData::SetTargetRotation);
-	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const pragma::physics::Transform&)>(&TraceData::SetTarget));
+	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const umath::Transform&)>(&TraceData::SetTarget));
 	classDefRayCastData.def("SetRotation",&TraceData::SetRotation);
 	classDefRayCastData.def("SetFlags",&Lua_TraceData_SetFlags);
 	classDefRayCastData.def("SetFilter",&Lua_TraceData_SetFilter);
@@ -801,51 +801,51 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefWheelCreateInfo.def_readwrite("maxSteeringAngle",&pragma::physics::WheelCreateInfo::maxSteeringAngle);
 	physMod[classDefWheelCreateInfo];
 
-	auto classDefTransform = luabind::class_<pragma::physics::Transform>("Transform");
+	auto classDefTransform = luabind::class_<umath::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<const Mat4&>());
 	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::tostring(luabind::self));
-	classDefTransform.def("GetOrigin",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+	classDefTransform.def("GetOrigin",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		Lua::Push<Vector3>(l,t.GetOrigin());
 	}));
-	classDefTransform.def("GetRotation",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+	classDefTransform.def("GetRotation",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		Lua::Push<Quat>(l,t.GetRotation());
 	}));
-	classDefTransform.def("SetOrigin",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &origin) {
+	classDefTransform.def("SetOrigin",static_cast<void(*)(lua_State*,umath::Transform&,const Vector3&)>([](lua_State *l,umath::Transform &t,const Vector3 &origin) {
 		t.SetOrigin(origin);
 	}));
-	classDefTransform.def("SetRotation",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rotation) {
+	classDefTransform.def("SetRotation",static_cast<void(*)(lua_State*,umath::Transform&,const Quat&)>([](lua_State *l,umath::Transform &t,const Quat &rotation) {
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		t.SetIdentity();
 	}));
-	classDefTransform.def("TranslateGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &v) {
+	classDefTransform.def("TranslateGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const Vector3&)>([](lua_State *l,umath::Transform &t,const Vector3 &v) {
 		t.TranslateGlobal(v);
 	}));
-	classDefTransform.def("TranslateLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Vector3&)>([](lua_State *l,pragma::physics::Transform &t,const Vector3 &v) {
+	classDefTransform.def("TranslateLocal",static_cast<void(*)(lua_State*,umath::Transform&,const Vector3&)>([](lua_State *l,umath::Transform &t,const Vector3 &v) {
 		t.TranslateLocal(v);
 	}));
-	classDefTransform.def("RotateGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rot) {
+	classDefTransform.def("RotateGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const Quat&)>([](lua_State *l,umath::Transform &t,const Quat &rot) {
 		t.RotateGlobal(rot);
 	}));
-	classDefTransform.def("RotateLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Quat&)>([](lua_State *l,pragma::physics::Transform &t,const Quat &rot) {
+	classDefTransform.def("RotateLocal",static_cast<void(*)(lua_State*,umath::Transform&,const Quat&)>([](lua_State *l,umath::Transform &t,const Quat &rot) {
 		t.RotateLocal(rot);
 	}));
-	classDefTransform.def("TransformGlobal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t,const pragma::physics::Transform &t2) {
+	classDefTransform.def("TransformGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &t2) {
 		t = t2 *t;
 	}));
-	classDefTransform.def("TransformLocal",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t,const pragma::physics::Transform &t2) {
+	classDefTransform.def("TransformLocal",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &t2) {
 		t *= t2;
 	}));
-	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
-		Lua::Push<pragma::physics::Transform>(l,t.GetInverse());
+	classDefTransform.def("GetInverse",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
+		Lua::Push<umath::Transform>(l,t.GetInverse());
 	}));
-	classDefTransform.def("ToMatrix",static_cast<void(*)(lua_State*,pragma::physics::Transform&)>([](lua_State *l,pragma::physics::Transform &t) {
+	classDefTransform.def("ToMatrix",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		Lua::Push<Mat4>(l,t.ToMatrix());
 	}));
-	classDefTransform.def("SetMatrix",static_cast<void(*)(lua_State*,pragma::physics::Transform&,const Mat4&)>([](lua_State *l,pragma::physics::Transform &t,const Mat4 &m) {
+	classDefTransform.def("SetMatrix",static_cast<void(*)(lua_State*,umath::Transform&,const Mat4&)>([](lua_State *l,umath::Transform &t,const Mat4 &m) {
 		Mat4 transformation;
 		Vector3 scale;
 		Quat rotation;
@@ -856,10 +856,10 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.SetOrigin(translation);
 		t.SetRotation(rotation);
 	}));
-	classDefTransform.def("Interpolate",static_cast<void(*)(lua_State*,pragma::physics::Transform&,pragma::physics::Transform&,float)>([](lua_State *l,pragma::physics::Transform &t,pragma::physics::Transform &dst,float factor) {
+	classDefTransform.def("Interpolate",static_cast<void(*)(lua_State*,umath::Transform&,umath::Transform&,float)>([](lua_State *l,umath::Transform &t,umath::Transform &dst,float factor) {
 		t.Interpolate(dst,factor);
 	}));
-	classDefTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,pragma::physics::Transform&,float)>([](lua_State *l,pragma::physics::Transform &t,float factor) {
+	classDefTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &t,float factor) {
 		t.InterpolateToIdentity(factor);
 	}));
 	classDefTransform.def(luabind::const_self *luabind::const_self);
@@ -867,31 +867,31 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
 
-	auto classDefScaledTransform = luabind::class_<pragma::physics::ScaledTransform,pragma::physics::Transform>("ScaledTransform");
+	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform,umath::Transform>("ScaledTransform");
 	classDefScaledTransform.def(luabind::constructor<const Mat4&>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
 	classDefScaledTransform.def(luabind::constructor<>());
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
-	classDefScaledTransform.def("GetScale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
+	classDefScaledTransform.def("GetScale",static_cast<void(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) {
 		Lua::Push<Vector3>(l,t.GetScale());
 	}));
-	classDefScaledTransform.def("SetScale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,const Vector3&)>([](lua_State *l,pragma::physics::ScaledTransform &t,const Vector3 &scale) {
+	classDefScaledTransform.def("SetScale",static_cast<void(*)(lua_State*,umath::ScaledTransform&,const Vector3&)>([](lua_State *l,umath::ScaledTransform &t,const Vector3 &scale) {
 		t.SetScale(scale);
 	}));
-	classDefScaledTransform.def("Scale",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,const Vector3&)>([](lua_State *l,pragma::physics::ScaledTransform &t,const Vector3 &scale) {
+	classDefScaledTransform.def("Scale",static_cast<void(*)(lua_State*,umath::ScaledTransform&,const Vector3&)>([](lua_State *l,umath::ScaledTransform &t,const Vector3 &scale) {
 		t.Scale(scale);
 	}));
-	classDefScaledTransform.def("GetInverse",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&)>([](lua_State *l,pragma::physics::ScaledTransform &t) {
-		Lua::Push<pragma::physics::ScaledTransform>(l,t.GetInverse());
+	classDefScaledTransform.def("GetInverse",static_cast<void(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) {
+		Lua::Push<umath::ScaledTransform>(l,t.GetInverse());
 	}));
-	classDefScaledTransform.def("Interpolate",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,pragma::physics::ScaledTransform&,float)>([](lua_State *l,pragma::physics::ScaledTransform &t,pragma::physics::ScaledTransform &dst,float factor) {
+	classDefScaledTransform.def("Interpolate",static_cast<void(*)(lua_State*,umath::ScaledTransform&,umath::ScaledTransform&,float)>([](lua_State *l,umath::ScaledTransform &t,umath::ScaledTransform &dst,float factor) {
 		t.Interpolate(dst,factor);
 	}));
-	classDefScaledTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,pragma::physics::ScaledTransform&,float)>([](lua_State *l,pragma::physics::ScaledTransform &t,float factor) {
+	classDefScaledTransform.def("InterpolateToIdentity",static_cast<void(*)(lua_State*,umath::ScaledTransform&,float)>([](lua_State *l,umath::ScaledTransform &t,float factor) {
 		t.InterpolateToIdentity(factor);
 	}));
-	classDefScaledTransform.def(luabind::const_self *pragma::physics::Transform());
+	classDefScaledTransform.def(luabind::const_self *umath::Transform());
 	classDefScaledTransform.def(luabind::const_self *luabind::const_self);
 	classDefScaledTransform.def(luabind::const_self *Vector3());
 	classDefScaledTransform.def(luabind::const_self *Quat());
@@ -1065,9 +1065,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		Lua::Push<std::shared_ptr<Node>>(l,node);
 	}))];
 	classTreeIkTreeNode.def("GetLocalTransform",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
-		pragma::physics::Transform t {};
+		umath::Transform t {};
 		util::ik::get_local_transform(node,t);
-		Lua::Push<pragma::physics::Transform>(l,t);
+		Lua::Push<umath::Transform>(l,t);
 	}));
 	classTreeIkTreeNode.def("PrintNode",static_cast<void(*)(lua_State*,Node&)>([](lua_State *l,Node &node) {
 		node.PrintNode();
@@ -1810,11 +1810,11 @@ int Lua::physenv::create_box_controller(lua_State *l)
 	auto &halfExtents = Lua::Check<Vector3>(l,argIdx++);
 	auto stepHeight = Lua::CheckNumber(l,argIdx++);
 	auto slopeLimit = 45.f;
-	pragma::physics::Transform startTransform = {};
+	umath::Transform startTransform = {};
 	if(Lua::IsSet(l,argIdx))
 		slopeLimit = Lua::CheckNumber(l,argIdx++);
 	if(Lua::IsSet(l,argIdx))
-		startTransform = Lua::Check<pragma::physics::Transform>(l,argIdx++);
+		startTransform = Lua::Check<umath::Transform>(l,argIdx++);
 	auto controller = env->CreateBoxController(halfExtents,stepHeight,slopeLimit,startTransform);
 	if(controller == nullptr)
 		return 0;
@@ -1833,11 +1833,11 @@ int Lua::physenv::create_capsule_controller(lua_State *l)
 	auto halfHeight = Lua::CheckNumber(l,argIdx++);
 	auto stepHeight = Lua::CheckNumber(l,argIdx++);
 	auto slopeLimit = 45.f;
-	pragma::physics::Transform startTransform = {};
+	umath::Transform startTransform = {};
 	if(Lua::IsSet(l,argIdx))
 		slopeLimit = Lua::CheckNumber(l,argIdx++);
 	if(Lua::IsSet(l,argIdx))
-		startTransform = Lua::Check<pragma::physics::Transform>(l,argIdx++);
+		startTransform = Lua::Check<umath::Transform>(l,argIdx++);
 	auto controller = env->CreateCapsuleController(halfWidth,halfHeight,stepHeight,slopeLimit,startTransform);
 	if(controller == nullptr)
 		return 0;

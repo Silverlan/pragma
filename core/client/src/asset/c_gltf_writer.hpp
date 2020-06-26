@@ -26,11 +26,11 @@ namespace pragma::asset
 	public:
 		struct ModelDesc
 		{
-			ModelDesc(::Model &mdl,const physics::Transform &pose={})
+			ModelDesc(::Model &mdl,const umath::Transform &pose={})
 				: model{mdl},pose{pose}
 			{}
 			::Model &model;
-			physics::Transform pose;
+			umath::Transform pose;
 		};
 		struct LightSource
 		{
@@ -49,7 +49,7 @@ namespace pragma::asset
 			};
 			Type type = Type::Point;
 			std::optional<float> range = {};
-			physics::Transform pose {};
+			umath::Transform pose {};
 
 			// Spot lights
 			umath::Degree innerConeAngle = 0.f;
@@ -99,7 +99,7 @@ namespace pragma::asset
 			{}
 
 			Model &model;
-			std::vector<physics::Transform> instances {};
+			std::vector<umath::Transform> instances {};
 
 			ExportMeshList exportMeshes;
 			uint64_t indexCount = 0;

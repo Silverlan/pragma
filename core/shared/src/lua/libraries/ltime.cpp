@@ -9,6 +9,7 @@
 #include "pragma/lua/libraries/ltime.hpp"
 #include "pragma/util/util_duration_type.hpp"
 
+#pragma optimize("",off)
 extern DLLENGINE Engine *engine;
 int Lua::time::cur_time(lua_State *l)
 {
@@ -66,7 +67,6 @@ template<typename TDurationTypeSrc>
 			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::hours>(duration).count());
 			break;
 	}
-	Lua::PushInt(l,duration.count());
 }
 
 int Lua::time::convert_duration(lua_State *l)
@@ -100,3 +100,4 @@ int Lua::time::convert_duration(lua_State *l)
 	}
 	return 1;
 }
+#pragma optimize("",on)

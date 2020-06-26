@@ -9,7 +9,7 @@
 #define __C_ALPHA_MODE_HPP__
 
 #include "pragma/clientdefinitions.h"
-#include <alpha_mode.hpp>
+#include <sharedutils/util_pragma.hpp>
 #include <cinttypes>
 #include <mathutil/uvec.h>
 

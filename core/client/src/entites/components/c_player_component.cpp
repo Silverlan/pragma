@@ -264,7 +264,7 @@ void CPlayerComponent::UpdateObserverCallback()
 		auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
 		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
 
-		physics::Transform pose;
+		umath::Transform pose;
 		obsC->GetEntity().GetPose(pose);
 		if(obsCamData && obsCamData->localOrigin.has_value())
 			pose.TranslateLocal(*obsCamData->localOrigin);

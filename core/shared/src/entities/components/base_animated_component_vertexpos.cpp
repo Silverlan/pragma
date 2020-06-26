@@ -69,7 +69,7 @@ std::optional<Mat4> BaseAnimatedComponent::GetVertexTransformMatrix(const ModelS
 			auto *rotBind = refFrame.GetBoneOrientation(boneId);
 			if(posBind != nullptr && rotBind != nullptr)
 			{
-				physics::Transform tBindPose {*posBind,*rotBind};
+				umath::Transform tBindPose {*posBind,*rotBind};
 				tBindPose = tBindPose.GetInverse();
 
 				auto mat = (t *tBindPose).ToMatrix();
@@ -103,9 +103,9 @@ bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32
 		return false;
 	auto pTrComponent = ent.GetTransformComponent();
 	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
-	physics::Transform t;
+	umath::Transform t;
 	ent.GetPose(t);
-	physics::ScaledTransform st {t};
+	umath::ScaledTransform st {t};
 	st.SetScale(scale);
 	pos *= st;
 	return true;

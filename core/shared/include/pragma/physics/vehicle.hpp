@@ -10,7 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/base.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/util/util_typed_manager.hpp"
 #include <optional>
 
@@ -266,7 +266,7 @@ namespace pragma::physics
 
 		virtual bool IsInAir() const=0;
 
-		virtual std::optional<physics::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const=0;
+		virtual std::optional<umath::Transform> GetLocalWheelPose(WheelIndex wheelIndex) const=0;
 		virtual uint32_t GetWheelCount() const=0;
 		virtual float GetSteerFactor() const=0;
 		virtual umath::Radian GetWheelYawAngle(WheelIndex wheel) const=0;

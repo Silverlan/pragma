@@ -550,6 +550,16 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::PushString(l,val->GetTypeString());
 	}));
+	defDataBlock.def("GetKeys",static_cast<void(*)(lua_State*,ds::Block&)>([](lua_State *l,ds::Block &dataBlock) {
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &pair : *dataBlock.GetData())
+		{
+			Lua::PushInt(l,idx++);
+			Lua::PushString(l,pair.first);
+			Lua::SetTableValue(l,t);
+		}
+	}));
 
 	defDataBlock.def("RemoveValue",&Lua::DataBlock::RemoveValue);
 	defDataBlock.def("IsEmpty",&Lua::DataBlock::IsEmpty);
@@ -958,12 +968,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def(luabind::const_self -luabind::const_self);
 	defVector.def(luabind::const_self ==luabind::const_self);
 	defVector.def(luabind::const_self *Quat());
-	//defVector.def(luabind::const_self *pragma::physics::Transform());
-	//defVector.def(luabind::const_self *pragma::physics::ScaledTransform());
-	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const pragma::physics::Transform&)>([](lua_State *l,const Vector3 &a,const pragma::physics::Transform &b) {
+	//defVector.def(luabind::const_self *umath::Transform());
+	//defVector.def(luabind::const_self *umath::ScaledTransform());
+	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const umath::Transform&)>([](lua_State *l,const Vector3 &a,const umath::Transform &b) {
 		Lua::Push<Vector3>(l,a *b);
 	}));
-	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const pragma::physics::ScaledTransform&)>([](lua_State *l,const Vector3 &a,const pragma::physics::ScaledTransform &b) {
+	defVector.def("Mul",static_cast<void(*)(lua_State*,const Vector3&,const umath::ScaledTransform&)>([](lua_State *l,const Vector3 &a,const umath::ScaledTransform &b) {
 		Lua::Push<Vector3>(l,a *b);
 	}));
 	defVector.def(float() /luabind::const_self);
@@ -1157,12 +1167,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def(luabind::const_self *float());
 	defQuat.def(luabind::const_self *luabind::const_self);
 	defQuat.def(luabind::const_self ==luabind::const_self);
-	//defQuat.def(luabind::const_self *pragma::physics::Transform());
-	//defQuat.def(luabind::const_self *pragma::physics::ScaledTransform());
-	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const pragma::physics::Transform&)>([](lua_State *l,const Quat &a,const pragma::physics::Transform &b) {
+	//defQuat.def(luabind::const_self *umath::Transform());
+	//defQuat.def(luabind::const_self *umath::ScaledTransform());
+	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const umath::Transform&)>([](lua_State *l,const Quat &a,const umath::Transform &b) {
 		Lua::Push<Quat>(l,a *b);
 		}));
-	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const pragma::physics::ScaledTransform&)>([](lua_State *l,const Quat &a,const pragma::physics::ScaledTransform &b) {
+	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const umath::ScaledTransform&)>([](lua_State *l,const Quat &a,const umath::ScaledTransform &b) {
 		Lua::Push<Quat>(l,a *b);
 	}));
 	defQuat.def(float() *luabind::const_self);

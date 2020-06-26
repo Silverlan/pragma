@@ -14,6 +14,7 @@
 
 namespace Anvil {class PrimaryCommandBuffer;};
 namespace prosper {class IPrContext; class RenderTarget; class Texture; class Shader; class PrimaryCommandBuffer;};
+namespace util {struct DrawSceneInfo;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 namespace pragma

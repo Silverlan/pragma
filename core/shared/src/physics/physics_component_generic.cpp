@@ -34,7 +34,7 @@ using namespace pragma;
 extern DLLENGINE Engine *engine;
 
 
-uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose,BoneId boneId)
+uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose,BoneId boneId)
 {
 	if(shape.IsCompoundShape())
 	{
@@ -66,7 +66,7 @@ const std::unordered_map<pragma::physics::PhysObjCreateInfo::MeshIndex,pragma::p
 
 /////////////
 
-util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const physics::Transform &localPose)
+util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const umath::Transform &localPose)
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
@@ -81,7 +81,7 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	auto rot = (pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity()) *localPose.GetRotation();
 	auto tOrigin = localPose.GetOrigin();
 	uvec::rotate(&tOrigin,rot);
-	physics::Transform startTransform;
+	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(/*-tOrigin +*/originOffset);
 	startTransform.SetRotation(rot);
@@ -154,7 +154,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 		auto &sortedShape = it->second;
 		auto &shapes = sortedShape;
 		std::shared_ptr<pragma::physics::IShape> shape;
-		pragma::physics::Transform localPose {};
+		umath::Transform localPose {};
 		if(shapes.size() == 1)
 		{
 			auto &shapeInfo = shapes.front();
@@ -545,7 +545,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 			auto bone = mesh->GetBoneParent();
 			// Note: Collision mesh origin has already been applied as local pose to the shape when it was created,
 			// so we don't need to define any pose transform here!
-			physObjCreateInfo.AddShape(*shape,physics::Transform{},bone);
+			physObjCreateInfo.AddShape(*shape,umath::Transform{},bone);
 			physObjCreateInfo.SetModelMeshBoneMapping(meshId,bone);
 		}
 		meshId++;

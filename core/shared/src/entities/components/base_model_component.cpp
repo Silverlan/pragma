@@ -98,7 +98,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 	auto *att = mdl ? mdl->GetAttachment(attID) : nullptr;
 	if(att == nullptr)
 		return false;
-	physics::Transform pose {};
+	umath::Transform pose {};
 	// ent.GetPose(pose);
 	auto animC = ent.GetAnimatedComponent();
 	if(animC.valid())
@@ -107,8 +107,8 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 		Vector3 posBone;
 		if(animC->GetLocalBonePosition(att->bone,posBone,rotBone) == false)
 			return false;
-		pose *= physics::Transform{posBone,rotBone};
-		pose *= physics::Transform{att->offset,uquat::create(att->angles)};
+		pose *= umath::Transform{posBone,rotBone};
+		pose *= umath::Transform{att->offset,uquat::create(att->angles)};
 	}
 	else
 	{

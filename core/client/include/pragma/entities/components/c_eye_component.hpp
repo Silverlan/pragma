@@ -10,7 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/components/base_entity_component.hpp>
-#include <pragma/physics/transform.hpp>
+#include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
 struct Eyeball;
@@ -84,7 +84,7 @@ namespace pragma
 		bool FindEyeballIndex(CModelSubMesh &subMesh,uint32_t &outEyeballIndex) const;
 		bool FindEyeballIndex(uint32_t skinMatIdx,uint32_t &outEyeballIndex) const;
 
-		physics::Transform CalcEyeballPose(uint32_t eyeballIndex,physics::Transform *optOutBonePose=nullptr) const;
+		umath::Transform CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose=nullptr) const;
 		
 		void UpdateEyeballs();
 	protected:

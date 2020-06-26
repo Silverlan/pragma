@@ -195,7 +195,7 @@ void BaseWheelComponent::UpdatePose()
 	if(pose.has_value() == false)
 		return;
 	auto &entVhc = m_vehicle->GetEntity();
-	auto t = physics::Transform{entVhc.GetPosition(),entVhc.GetRotation()};
+	auto t = umath::Transform{entVhc.GetPosition(),entVhc.GetRotation()};
 	t *= *pose;
 
 	auto &ent = GetEntity();

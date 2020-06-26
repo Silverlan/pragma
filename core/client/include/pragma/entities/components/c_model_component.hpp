@@ -38,7 +38,7 @@ namespace pragma
 		void SetMaterialOverride(uint32_t idx,CMaterial &mat);
 		void ClearMaterialOverride(uint32_t idx);
 		CMaterial *GetMaterialOverride(uint32_t idx) const;
-
+		const std::vector<MaterialHandle> &GetMaterialOverrides() const;
 		CMaterial *GetRenderMaterial(uint32_t idx) const;
 
 		bool IsWeighted() const;

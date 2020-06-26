@@ -14,7 +14,7 @@
 namespace pragma {class CParticleSystemComponent;};
 namespace util
 {
-	DLLCLIENT pragma::CParticleSystemComponent *create_smoke_trail_particle(float distance,float speed,float minSpriteSize,float maxSpriteSize,const std::string &material="particles/smoke_sprites_dense");
+	DLLCLIENT ::pragma::CParticleSystemComponent *create_smoke_trail_particle(float distance,float speed,float minSpriteSize,float maxSpriteSize,const std::string &material="particles/smoke_sprites_dense");
 };
 
 #endif

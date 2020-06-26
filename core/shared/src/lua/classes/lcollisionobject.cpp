@@ -52,7 +52,7 @@ namespace Lua
 		static void SetCollisionFilterMask(lua_State *l,pragma::physics::ICollisionObject *hPhys,uint32_t mask);
 		static void GetCollisionFilterMask(lua_State *l,pragma::physics::ICollisionObject *hPhys);
 		static void GetWorldTransform(lua_State *l,pragma::physics::ICollisionObject *hPhys);
-		static void SetWorldTransform(lua_State *l,pragma::physics::ICollisionObject *hPhys,const pragma::physics::Transform &t);
+		static void SetWorldTransform(lua_State *l,pragma::physics::ICollisionObject *hPhys,const umath::Transform &t);
 	};
 	namespace PhysRigidBody
 	{
@@ -563,9 +563,9 @@ void Lua::PhysCollisionObj::GetWorldTransform(lua_State *l,pragma::physics::ICol
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
 		return;
-	Lua::Push<pragma::physics::Transform>(l,hPhys->GetWorldTransform());
+	Lua::Push<umath::Transform>(l,hPhys->GetWorldTransform());
 }
-void Lua::PhysCollisionObj::SetWorldTransform(lua_State *l,pragma::physics::ICollisionObject *hPhys,const pragma::physics::Transform &t)
+void Lua::PhysCollisionObj::SetWorldTransform(lua_State *l,pragma::physics::ICollisionObject *hPhys,const umath::Transform &t)
 {
 	if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
 		return;

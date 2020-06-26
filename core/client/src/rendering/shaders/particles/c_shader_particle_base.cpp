@@ -223,6 +223,8 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 		renderFlags |= RenderFlags::SoftParticles;
 	if(particle.IsTextureScrollingEnabled())
 		renderFlags |= RenderFlags::TextureScrolling;
+	if(particle.GetEffectiveAlphaMode() == ParticleAlphaMode::AdditiveByColor)
+		renderFlags |= RenderFlags::AdditiveBlendByColor;
 	return renderFlags;
 }
 uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const {return pipelineIdx /umath::to_integral(ParticleAlphaMode::Count);}

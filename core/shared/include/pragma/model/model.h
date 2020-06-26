@@ -127,7 +127,7 @@ class CollisionMesh;
 class Game;
 class VertexAnimation;
 class NetworkState;
-namespace pragma::physics{class ScaledTransform;};
+namespace umath {class ScaledTransform;};
 class DLLNETWORK Model
 	: public std::enable_shared_from_this<Model>
 {
@@ -339,8 +339,8 @@ public:
 	void RemoveAttachment(const std::string &name);
 	void RemoveAttachment(uint32_t idx);
 	int32_t LookupAttachment(const std::string &name);
-	std::optional<pragma::physics::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
-	std::optional<pragma::physics::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
+	std::optional<umath::ScaledTransform> CalcReferenceAttachmentPose(int32_t attId) const;
+	std::optional<umath::ScaledTransform> CalcReferenceBonePose(int32_t boneId) const;
 
 	const std::vector<ObjectAttachment> &GetObjectAttachments() const;
 	std::vector<ObjectAttachment> &GetObjectAttachments();

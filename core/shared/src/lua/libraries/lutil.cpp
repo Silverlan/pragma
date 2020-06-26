@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/class_manager.hpp"
+#include "pragma/lua/libraries/lfile.h"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"
@@ -41,6 +42,7 @@
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
 #include <luabind/class_info.hpp>
+#include <util_zip.h>
 
 extern DLLENGINE Engine *engine;
 
@@ -759,13 +761,13 @@ int Lua::util::get_pretty_time(lua_State *l)
 int Lua::util::units_to_metres(lua_State *l)
 {
 	auto units = Lua::CheckNumber(l,1);
-	Lua::PushNumber(l,::util::units_to_metres(units));
+	Lua::PushNumber(l,::util::pragma::units_to_metres(units));
 	return 1;
 }
 int Lua::util::metres_to_units(lua_State *l)
 {
 	auto metres = Lua::CheckNumber(l,1);
-	Lua::PushNumber(l,::util::metres_to_units(metres));
+	Lua::PushNumber(l,::util::pragma::metres_to_units(metres));
 	return 1;
 }
 int Lua::util::read_scene_file(lua_State *l)
@@ -966,6 +968,53 @@ int Lua::util::get_class_value(lua_State *l)
 	}
 	// Pop key from stack
 	Lua::RemoveValue(l,-2); /* 1 */
+	return 1;
+}
+
+int Lua::util::pack_zip_archive(lua_State *l)
+{
+	std::string zipFileName = Lua::CheckString(l,1);
+	ufile::remove_extension_from_filename(zipFileName);
+	zipFileName += ".zip";
+	if(Lua::file::validate_write_operation(l,zipFileName) == false)
+	{
+		Lua::PushBool(l,false);
+		return 1;
+	}
+
+	int32_t t = 2;
+	Lua::CheckTable(l,t);
+	std::vector<std::string> files {};
+	auto numFiles = Lua::GetObjectLength(l,t);
+	files.reserve(numFiles);
+	for(auto i=decltype(numFiles){0u};i<numFiles;++i)
+	{
+		Lua::PushInt(l,i +1);
+		Lua::GetTableValue(l,t);
+		std::string fileName = Lua::CheckString(l,-1);
+		files.push_back(fileName);
+		Lua::Pop(l,1);
+	}
+
+	auto zip = ZIPFile::Open(zipFileName,ZIPFile::OpenFlags::CreateIfNotExist);
+	if(zip == nullptr)
+	{
+		Lua::PushBool(l,false);
+		return 1;
+	}
+	for(auto &fileName : files)
+	{
+		auto f = FileManager::OpenFile(fileName.c_str(),"rb");
+		if(f == nullptr)
+			continue;
+		auto sz = f->GetSize();
+		std::vector<uint8_t> data {};
+		data.resize(sz);
+		f->Read(data.data(),sz);
+		zip->AddFile(fileName,data.data(),sz);
+	}
+	zip = nullptr;
+	Lua::PushBool(l,true);
 	return 1;
 }
 

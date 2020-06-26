@@ -152,19 +152,19 @@ Quat TraceData::GetSourceRotation() const
 Vector3 TraceData::GetTargetOrigin() const {return m_tEnd.GetOrigin();}
 Quat TraceData::GetTargetRotation() const {return m_tEnd.GetRotation();}
 bool TraceData::HasTarget() const {return m_bHasTarget;}
-const pragma::physics::Transform &TraceData::GetSource() const
+const umath::Transform &TraceData::GetSource() const
 {
 	return m_tStart;
 }
-const pragma::physics::Transform &TraceData::GetTarget() const {return m_tEnd;}
+const umath::Transform &TraceData::GetTarget() const {return m_tEnd;}
 CollisionMask TraceData::GetCollisionFilterMask() const {return m_filterMask;}
 CollisionMask TraceData::GetCollisionFilterGroup() const {return m_filterGroup;}
 void TraceData::SetSource(const Vector3 &origin) {m_tStart.SetOrigin(origin);}
 void TraceData::SetSourceRotation(const Quat &rot) {m_tStart.SetRotation(rot);}
-void TraceData::SetSource(const pragma::physics::Transform &t) {m_tStart = t;}
+void TraceData::SetSource(const umath::Transform &t) {m_tStart = t;}
 void TraceData::SetTarget(const Vector3 &target) {m_tEnd.SetOrigin(target);m_bHasTarget = true;}
 void TraceData::SetTargetRotation(const Quat &rot) {m_tEnd.SetRotation(rot);m_bHasTarget = true;}
-void TraceData::SetTarget(const pragma::physics::Transform &t) {m_tEnd = t;m_bHasTarget = true;}
+void TraceData::SetTarget(const umath::Transform &t) {m_tEnd = t;m_bHasTarget = true;}
 void TraceData::SetRotation(const Quat &rot)
 {
 	SetSourceRotation(rot);

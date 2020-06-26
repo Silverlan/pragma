@@ -8,7 +8,7 @@
 #define __PRAGMA_SCENE_SNAPSHOT_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include <memory>
 #include <functional>
 #include <mathutil/uvec.h>
@@ -48,7 +48,7 @@ namespace pragma
 		};
 		struct DLLNETWORK Object
 		{
-			pragma::physics::Transform pose = {};
+			umath::Transform pose = {};
 		};
 		static std::shared_ptr<SceneSnapshot> Create();
 		SceneSnapshot(const SceneSnapshot&)=delete;

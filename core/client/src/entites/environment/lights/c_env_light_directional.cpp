@@ -127,9 +127,9 @@ void CLightDirectionalComponent::Initialize()
 		FlagCallbackForRemoval(pTrComponent->GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
 			auto &ent = GetEntity();
 			auto pLightComponent = ent.GetComponent<CLightComponent>();
-			auto type = LightType::Undefined;
+			auto type = util::pragma::LightType::Undefined;
 			auto *pLight = pLightComponent.valid() ? pLightComponent->GetLight(type) : nullptr;
-			if(pLight == nullptr || type != LightType::Directional)
+			if(pLight == nullptr || type != util::pragma::LightType::Directional)
 				return;
 			auto pTrComponent = pLight->GetEntity().GetTransformComponent();
 			if(pTrComponent.valid())

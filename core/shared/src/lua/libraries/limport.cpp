@@ -465,7 +465,7 @@ std::shared_ptr<aiScene> Lua::import::snapshot_to_assimp_scene(const pragma::Sce
 		for(uint32_t vertIdx=0u;vertIdx<numVerts;++vertIdx)
 		{
 			auto &v = mesh->verts.at(vertIdx);
-			aiMesh.mVertices[vertIdx] = aiVector3D{v.position.x,v.position.y,v.position.z} *static_cast<float>(util::units_to_metres(1.0));
+			aiMesh.mVertices[vertIdx] = aiVector3D{v.position.x,v.position.y,v.position.z} *static_cast<float>(util::pragma::units_to_metres(1.0));
 			aiMesh.mNormals[vertIdx] = aiVector3D{v.normal.x,v.normal.y,v.normal.z};
 			aiMesh.mTextureCoords[0][vertIdx] = aiVector3D{v.uv.x,1.f -v.uv.y,0.f};
 			if(lightmapUvs.empty() == false)
@@ -571,8 +571,8 @@ int Lua::import::import_model_asset(lua_State *l)
 	};
 
 	std::vector<std::shared_ptr<ModelSubMesh>> subMeshes {};
-	std::function<void(aiNode&,const pragma::physics::ScaledTransform&)> fIterateTree = nullptr;
-	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node,const pragma::physics::ScaledTransform &parentPose) {
+	std::function<void(aiNode&,const umath::ScaledTransform&)> fIterateTree = nullptr;
+	fIterateTree = [aiScene,&fIterateTree,&fConvertMesh,&subMeshes](aiNode &node,const umath::ScaledTransform &parentPose) {
 		aiVector3D scale;
 		aiQuaternion rot;
 		aiVector3D pos;
@@ -580,7 +580,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		// t.Inverse();
 		t.Decompose(scale,rot,pos);
 
-		pragma::physics::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
+		umath::ScaledTransform pose {Vector3{pos.x,pos.y,pos.z},Quat{rot.w,rot.x,rot.y,rot.z},Vector3{scale.x,scale.y,scale.z}};
 		auto ang = EulerAngles{pose.GetRotation()};
 		//umath::swap(ang.r,ang.y);
 		//pose.SetRotation(uquat::identity());//uquat::create(ang));
@@ -606,7 +606,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		for(auto i=decltype(node.mNumChildren){0u};i<node.mNumChildren;++i)
 			fIterateTree(*node.mChildren[i],pose);
 	};
-	pragma::physics::ScaledTransform pose {};
+	umath::ScaledTransform pose {};
 	fIterateTree(*aiScene->mRootNode,pose);
 
 	auto t = Lua::CreateTable(l);

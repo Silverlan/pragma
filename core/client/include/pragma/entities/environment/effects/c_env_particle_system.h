@@ -14,8 +14,9 @@
 #include "pragma/particlesystem/c_particle.h"
 #include "pragma/rendering/c_alpha_mode.hpp"
 #include "pragma/particlesystem/c_particlemodifier.h"
-#include <pragma/physics/transform.hpp>
+#include <mathutil/transform.hpp>
 #include <fsys/vfileptr.h>
+#include <optional>
 
 class CParticleSystemData;
 class CGame;
@@ -45,6 +46,9 @@ namespace pragma
 		static std::optional<ParticleSystemFileHeader> ReadHeader(NetworkState &nw,const std::string &fileName);
 		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname,bool bReload=false);
+		static const std::vector<std::string> &GetPrecachedParticleSystemFiles();
+		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
+		static const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
 		static void ClearCache();
 
 		static CParticleSystemComponent *Create(const std::string &fname,CParticleSystemComponent *parent=nullptr,bool bRecordKeyValues=false,bool bAutoSpawn=true);
@@ -85,7 +89,7 @@ namespace pragma
 		struct DLLCLIENT ControlPoint
 		{
 			float simTimestamp = 0.f;
-			physics::Transform pose = {};
+			umath::Transform pose = {};
 			EntityHandle hEntity = {};
 		};
 
@@ -280,12 +284,12 @@ namespace pragma
 		void SetControlPointEntity(ControlPointIndex idx,CBaseEntity &ent);
 		void SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos);
 		void SetControlPointRotation(ControlPointIndex idx,const Quat &rot);
-		void SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose,float *optTimestamp=nullptr);
+		void SetControlPointPose(ControlPointIndex idx,const umath::Transform &pose,float *optTimestamp=nullptr);
 
 		CBaseEntity *GetControlPointEntity(ControlPointIndex idx) const;
-		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
-		std::optional<physics::Transform> GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
-		std::optional<physics::Transform> GetControlPointPose(ControlPointIndex idx,float t) const;
+		std::optional<umath::Transform> GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
+		std::optional<umath::Transform> GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp=nullptr) const;
+		std::optional<umath::Transform> GetControlPointPose(ControlPointIndex idx,float t) const;
 
 		const std::vector<std::unique_ptr<CParticleInitializer,void(*)(CParticleInitializer*)>> &GetInitializers() const;
 		const std::vector<std::unique_ptr<CParticleOperator,void(*)(CParticleOperator*)>> &GetOperators() const;

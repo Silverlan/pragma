@@ -745,6 +745,10 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 		lua_checkgui(l,hPanel);
 		Lua::PushInt(l,static_cast<::WIDropDownMenu*>(hPanel.get())->GetSelectedOption());
 	}));
+	classDef.def("ClearSelectedOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&)>([](lua_State *l,WIDropDownMenuHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->ClearSelectedOption();
+	}));
 }
 
 void Lua::WIText::register_class(luabind::class_<WITextHandle,WIHandle> &classDef)

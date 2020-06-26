@@ -50,6 +50,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		Lua::PushInt(l,hEnt->GetLocalIndex());
 	}));
+	classDef.def("IsMapEntity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,hEnt->IsMapEntity());
+	}));
 	classDef.def("IsCharacter",&IsCharacter);
 	classDef.def("IsPlayer",&IsPlayer);
 	classDef.def("IsWorld",&IsWorld);
@@ -68,15 +72,15 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("GetSpawnFlags",&GetSpawnFlags);
 	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		pragma::physics::ScaledTransform t;
+		umath::ScaledTransform t;
 		hEnt->GetPose(t);
-		Lua::Push<pragma::physics::ScaledTransform>(l,t);
+		Lua::Push<umath::ScaledTransform>(l,t);
 	}));
-	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const pragma::physics::Transform&)>([](lua_State *l,EntityHandle &hEnt,const pragma::physics::Transform &t) {
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::Transform&)>([](lua_State *l,EntityHandle &hEnt,const umath::Transform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->SetPose(t);
 	}));
-	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const pragma::physics::ScaledTransform&)>([](lua_State *l,EntityHandle &hEnt,const pragma::physics::ScaledTransform &t) {
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::ScaledTransform&)>([](lua_State *l,EntityHandle &hEnt,const umath::ScaledTransform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->SetPose(t);
 	}));
@@ -381,7 +385,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		auto t = hEnt->GetAttachmentPose(attId);
 		if(t.has_value() == false)
 			return;
-		Lua::Push<pragma::physics::Transform>(l,*t);
+		Lua::Push<umath::Transform>(l,*t);
 	}));
 	classDef.def("GetSkin",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

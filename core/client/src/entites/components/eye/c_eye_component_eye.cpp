@@ -55,9 +55,9 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 			auto attRot = uquat::identity();
 			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
 			{
-				physics::Transform attPose;
+				umath::Transform attPose;
 				ent.GetPose(attPose);
-				attPose *= physics::Transform{attPos,attRot};
+				attPose *= umath::Transform{attPos,attRot};
 				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;
 			}
 		}
@@ -103,9 +103,9 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		auto rot = uquat::identity();
 		mdlC->GetAttachment(m_eyeAttachmentIndex,&pos,&rot);
 
-		physics::Transform attPose;
+		umath::Transform attPose;
 		GetEntity().GetPose(attPose);
-		attPose *= physics::Transform{pos,rot};
+		attPose *= umath::Transform{pos,rot};
 		auto localPos = attPose.GetInverse() *tmp;
 		
 		if(localPos.z < 6)
@@ -159,7 +159,7 @@ void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 {
 	m_viewTarget = ClampViewTarget(viewTarget);
 }
-pragma::physics::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,physics::Transform *optOutBonePose) const
+umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose) const
 {
 	auto *eyeballData = GetEyeballData(eyeballIndex);
 	auto mdl = GetEntity().GetModel();
@@ -168,7 +168,7 @@ pragma::physics::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeba
 	{
 		if(optOutBonePose)
 			*optOutBonePose = {};
-		return physics::Transform{};
+		return umath::Transform{};
 	}
 	auto &config = eyeballData->config;
 	auto tmp = eyeball->origin;
@@ -179,10 +179,10 @@ pragma::physics::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeba
 	Vector3 bonePos;
 	Quat boneRot;
 	m_animC->GetGlobalBonePosition(eyeball->boneIndex,bonePos,boneRot);
-	physics::Transform bonePose {bonePos,boneRot};
+	umath::Transform bonePose {bonePos,boneRot};
 	if(optOutBonePose)
 		*optOutBonePose = bonePose;
-	return bonePose *physics::Transform{tmp,uquat::identity()};
+	return bonePose *umath::Transform{tmp,uquat::identity()};
 }
 bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex,Vector4 &outProjU,Vector4 &outProjV) const
 {
@@ -204,7 +204,7 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 	auto &viewTarget = GetViewTarget();
 
 	// To world space
-	physics::Transform bonePose {};
+	umath::Transform bonePose {};
 	state.origin = CalcEyeballPose(eyeballIndex,&bonePose).GetOrigin();
 	state.up = eyeball.up;
 	uvec::rotate(&state.up,bonePose.GetRotation());

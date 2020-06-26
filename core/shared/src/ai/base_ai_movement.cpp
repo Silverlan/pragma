@@ -282,7 +282,7 @@ void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 }
 Activity BaseAIComponent::GetMoveActivity() const {return m_moveInfo.moveActivity;}
 
-void BaseAIComponent::BlendAnimationMovement(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales)
+void BaseAIComponent::BlendAnimationMovement(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales)
 {
 	if(m_seqIdle == -1)
 		return;

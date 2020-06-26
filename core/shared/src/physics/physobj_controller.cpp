@@ -280,7 +280,7 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents,unsigned int st
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	pragma::physics::Transform startTransform;
+	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 	NetworkState *state = m_networkState;
@@ -361,7 +361,7 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width,unsigned int height
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
 	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	pragma::physics::Transform startTransform;
+	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
 

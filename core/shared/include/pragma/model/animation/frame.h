@@ -16,7 +16,7 @@
 
 class Animation;
 class Model;
-namespace pragma::physics {class Transform; class ScaledTransform;};
+namespace umath {class Transform; class ScaledTransform;};
 
 struct DLLNETWORK FlexFrameData
 {
@@ -40,9 +40,9 @@ public:
 	const Vector3 *GetBonePosition(unsigned int boneID) const;
 	const Quat *GetBoneOrientation(unsigned int boneID) const;
 	const Vector3 *GetBoneScale(uint32_t boneId) const;
-	bool GetBonePose(uint32_t boneId,pragma::physics::ScaledTransform &outTransform) const;
-	void SetBonePose(uint32_t boneId,const pragma::physics::ScaledTransform &pose);
-	void SetBonePose(uint32_t boneId,const pragma::physics::Transform &pose);
+	bool GetBonePose(uint32_t boneId,umath::ScaledTransform &outTransform) const;
+	void SetBonePose(uint32_t boneId,const umath::ScaledTransform &pose);
+	void SetBonePose(uint32_t boneId,const umath::Transform &pose);
 	bool GetBoneMatrix(unsigned int boneID,Mat4 *mat);
 	Vector2 *GetMoveOffset();
 	void GetMoveOffset(float *x,float *z);
@@ -66,16 +66,16 @@ public:
 
 	bool HasScaleTransforms() const;
 
-	const std::vector<pragma::physics::Transform> &GetBoneTransforms() const;
+	const std::vector<umath::Transform> &GetBoneTransforms() const;
 	const std::vector<Vector3> &GetBoneScales() const;
-	std::vector<pragma::physics::Transform> &GetBoneTransforms();
+	std::vector<umath::Transform> &GetBoneTransforms();
 	std::vector<Vector3> &GetBoneScales();
-	pragma::physics::Transform *GetBoneTransform(uint32_t idx);
-	const pragma::physics::Transform *GetBoneTransform(uint32_t idx) const;
+	umath::Transform *GetBoneTransform(uint32_t idx);
+	const umath::Transform *GetBoneTransform(uint32_t idx) const;
 private:
 	Frame(unsigned int numBones);
 	Frame(const Frame &other);
-	std::vector<pragma::physics::Transform> m_bones;
+	std::vector<umath::Transform> m_bones;
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;
 	FlexFrameData m_flexFrameData {};

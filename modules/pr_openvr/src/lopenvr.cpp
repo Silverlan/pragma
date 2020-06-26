@@ -843,7 +843,7 @@ int Lua::openvr::lib::get_pose_transform(lua_State *l)
 	if(s_vrInstance->GetPoseTransform(deviceIdx,pose,m) == false)
 		return 0;
 	Lua::Push<Mat4>(l,m);
-	Lua::Push<Vector3>(l,Vector3(pose.vVelocity.v[0],pose.vVelocity.v[1],pose.vVelocity.v[2]) *static_cast<float>(::util::metres_to_units(1.f)));
+	Lua::Push<Vector3>(l,Vector3(pose.vVelocity.v[0],pose.vVelocity.v[1],pose.vVelocity.v[2]) *static_cast<float>(::util::pragma::metres_to_units(1.f)));
 	return 2;
 }
 

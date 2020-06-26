@@ -3203,7 +3203,7 @@ namespace Lua
 			auto r = hEnt->GetBonePosition(boneId,pos,rot,scale);
 			if(r == false)
 				return;
-			Lua::Push<pragma::physics::ScaledTransform>(l,pragma::physics::ScaledTransform{pos,rot,scale});
+			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
 		}));
 		def.def("GetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);
@@ -3701,9 +3701,9 @@ namespace Lua
 			auto pose = hEnt->GetLocalPose();
 			if(pose.has_value() == false)
 				return;
-			Lua::Push<pragma::physics::Transform>(l,*pose);
+			Lua::Push<umath::Transform>(l,*pose);
 		}));
-		def.def("SetLocalPose",static_cast<void(*)(lua_State*,THandle&,const pragma::physics::Transform&)>([](lua_State *l,THandle &hEnt,const pragma::physics::Transform &pose) {
+		def.def("SetLocalPose",static_cast<void(*)(lua_State*,THandle&,const umath::Transform&)>([](lua_State *l,THandle &hEnt,const umath::Transform &pose) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetLocalPose(pose);
 		}));

@@ -10,7 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/physics/surface_type_manager.hpp"
 #include "pragma/physics/tire_type_manager.hpp"
 #include <sharedutils/functioncallback.h>
@@ -144,8 +144,8 @@ namespace pragma::physics
 		virtual util::TSharedHandle<IDoFConstraint> CreateDoFConstraint(IRigidBody &a,const Vector3 &pivotA,const Quat &rotA,IRigidBody &b,const Vector3 &pivotB,const Quat &rotB)=0;
 		virtual util::TSharedHandle<IDoFSpringConstraint> CreateDoFSpringConstraint(IRigidBody &a,const Vector3 &pivotA,const Quat &rotA,IRigidBody &b,const Vector3 &pivotB,const Quat &rotB)=0;
 
-		virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth,float halfHeight,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
-		virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const Transform &startTransform={})=0;
+		virtual util::TSharedHandle<IController> CreateCapsuleController(float halfWidth,float halfHeight,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const umath::Transform &startTransform={})=0;
+		virtual util::TSharedHandle<IController> CreateBoxController(const Vector3 &halfExtents,float stepHeight,umath::Degree slopeLimit=DEFAULT_CHARACTER_SLOPE_LIMIT,const umath::Transform &startTransform={})=0;
 		virtual util::TSharedHandle<ICollisionObject> CreateCollisionObject(IShape &shape)=0;
 		virtual util::TSharedHandle<IRigidBody> CreateRigidBody(IShape &shape,bool dynamic=true)=0;
 		virtual util::TSharedHandle<ISoftBody> CreateSoftBody(const PhysSoftBodyInfo &info,float mass,const std::vector<Vector3> &verts,const std::vector<uint16_t> &indices,std::vector<uint16_t> &indexTranslations)=0;

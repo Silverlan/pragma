@@ -22,12 +22,12 @@ namespace pragma
 		struct DLLCLIENT MeshData
 		{
 			std::vector<ModelSubMesh*> subMeshes {};
-			physics::ScaledTransform pose = {};
+			umath::ScaledTransform pose = {};
 		};
 		DecalProjector(const Vector3 &pos,const Quat &rot,float size);
 		const Vector3 &GetPos() const;
 		const Quat &GetRotation() const;
-		const physics::Transform &GetPose() const;
+		const umath::Transform &GetPose() const;
 		float GetSize() const;
 		std::pair<Vector3,Vector3> GetAABB() const;
 
@@ -49,7 +49,7 @@ namespace pragma
 			const std::vector<VertexInfo> &verts,const Vector2 &lineStart,const Vector2 &lineEnd
 		);
 
-		physics::Transform m_pose = {};
+		umath::Transform m_pose = {};
 		float m_size = 0.f;
 	};
 

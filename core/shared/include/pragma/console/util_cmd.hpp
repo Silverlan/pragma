@@ -17,7 +17,7 @@ namespace util
 {
 	namespace cmd
 	{
-		DLLNETWORK std::vector<std::pair<BaseEntity*,float>> get_sorted_entities(Game &game,pragma::BasePlayerComponent *pl=nullptr);
+		DLLNETWORK std::vector<std::pair<BaseEntity*,float>> get_sorted_entities(Game &game,::pragma::BasePlayerComponent *pl=nullptr);
 	};
 };
 

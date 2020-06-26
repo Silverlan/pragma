@@ -428,9 +428,9 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
 		}),CallbackType::Component,&component);
 		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			LightType lightType;
+			util::pragma::LightType lightType;
 			GetLight(lightType);
-			if(lightType == LightType::Point)
+			if(lightType == util::pragma::LightType::Point)
 				return;
 			auto dir = uquat::forward(rot);
 			if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == true)
@@ -556,17 +556,17 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 	{
 		Con::cout<<"Light #"<<lightId<<":"<<Con::endl;
 		Con::cout<<"\tType: ";
-		auto type = LightType::Undefined;
+		auto type = util::pragma::LightType::Undefined;
 		auto *pLight = l->GetLight(type);
 		switch(type)
 		{
-			case LightType::Directional:
+			case util::pragma::LightType::Directional:
 				Con::cout<<"Directional";
 				break;
-			case LightType::Point:
+			case util::pragma::LightType::Point:
 				Con::cout<<"Point";
 				break;
-			case LightType::Spot:
+			case util::pragma::LightType::Spot:
 				Con::cout<<"Spot";
 				break;
 			default:

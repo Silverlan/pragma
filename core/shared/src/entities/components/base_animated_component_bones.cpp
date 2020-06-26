@@ -14,7 +14,7 @@
 using namespace pragma;
 
 
-static void get_local_bone_position(std::vector<physics::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	std::function<void(std::shared_ptr<Bone>&,Vector3*,Quat*,Vector3*)> apply;
 	apply = [&transforms,&apply,fscale](std::shared_ptr<Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
@@ -37,7 +37,7 @@ static void get_local_bone_position(std::vector<physics::ScaledTransform> &trans
 	if(parent != nullptr)
 		apply(parent,pos,rot,scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vector<physics::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	get_local_bone_position(transforms,bone,fscale,pos,rot,scale);
 
@@ -57,10 +57,10 @@ static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vecto
 	}*/
 }
 UInt32 BaseAnimatedComponent::GetBoneCount() const {return CInt32(m_bones.size());}
-const std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetBoneTransforms();}
-std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() {return m_bones;}
-const std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetProcessedBoneTransforms();}
-std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() {return m_processedBones;}
+const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetBoneTransforms();}
+std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetBoneTransforms() {return m_bones;}
+const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() const {return const_cast<BaseAnimatedComponent&>(*this).GetProcessedBoneTransforms();}
+std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBoneTransforms() {return m_processedBones;}
 
 Bool BaseAnimatedComponent::GetBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 &scale) const
 {
@@ -133,7 +133,7 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 	auto bone = skeleton.GetBone(boneId).lock();
 	if(bone == nullptr)
 		return false;
-	physics::ScaledTransform t {};
+	umath::ScaledTransform t {};
 	while(bone)
 	{
 		auto &boneTransform = m_bones.at(bone->ID);
@@ -323,7 +323,7 @@ bool BaseAnimatedComponent::ShouldUpdateBones() const
 	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES,evData) == util::EventReply::Handled && evData.shouldUpdate;
 }
 
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
 {
 	for(unsigned int i=0;i<bonePoses.size();i++)
 	{
@@ -355,7 +355,7 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Tra
 		}
 	}
 }
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
 {
 	for(auto i=decltype(tgt.size()){0};i<tgt.size();++i)
 	{
@@ -383,9 +383,9 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<pragma::physics::Tra
 	}
 }
 void BaseAnimatedComponent::BlendBonePoses(
-	const std::vector<pragma::physics::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
-	const std::vector<pragma::physics::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
-	std::vector<pragma::physics::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
+	const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
+	const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
+	std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
 	Animation &anim,float interpFactor
 ) const
 {
@@ -406,7 +406,7 @@ void BaseAnimatedComponent::BlendBonePoses(
 		optOutBoneScales->at(boneId) = uvec::lerp(optSrcBoneScales->at(boneId),optDstBoneScales->at(boneId) *boneWeight,interpFactor);
 	}
 }
-void BaseAnimatedComponent::BlendBoneFrames(std::vector<pragma::physics::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<pragma::physics::Transform> &add,std::vector<Vector3> *addScales,float blendScale) const
+void BaseAnimatedComponent::BlendBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale) const
 {
 	if(blendScale == 0.f)
 		return;
@@ -419,7 +419,7 @@ void BaseAnimatedComponent::BlendBoneFrames(std::vector<pragma::physics::Transfo
 	}
 }
 
-static void get_global_bone_transforms(std::vector<physics::ScaledTransform> &transforms,std::unordered_map<uint32_t,std::shared_ptr<Bone>> &childBones,const physics::ScaledTransform &tParent={})
+static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &transforms,std::unordered_map<uint32_t,std::shared_ptr<Bone>> &childBones,const umath::ScaledTransform &tParent={})
 {
 	for(auto &pair : childBones)
 	{

@@ -1553,17 +1553,17 @@ int32_t Model::LookupAttachment(const std::string &name)
 	return -1;
 }
 
-std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceAttachmentPose(int32_t attId) const
+std::optional<umath::ScaledTransform> Model::CalcReferenceAttachmentPose(int32_t attId) const
 {
 	auto *att = const_cast<Model*>(this)->GetAttachment(attId);
 	if(att == nullptr)
 		return {};
-	pragma::physics::ScaledTransform t {att->offset,uquat::create(att->angles)};
+	umath::ScaledTransform t {att->offset,uquat::create(att->angles)};
 	auto &reference = GetReference();
 	auto *bonePos = reference.GetBonePosition(att->bone);
 	auto *boneRot = reference.GetBoneOrientation(att->bone);
 	auto *boneScale = reference.GetBoneScale(att->bone);
-	t = pragma::physics::ScaledTransform {
+	t = umath::ScaledTransform {
 		bonePos ? *bonePos : Vector3{},
 		boneRot ? *boneRot : uquat::identity(),
 		boneScale ? *boneScale : Vector3{1.f,1.f,1.f}
@@ -1571,13 +1571,13 @@ std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceAttachmentPo
 	return t;
 }
 
-std::optional<pragma::physics::ScaledTransform> Model::CalcReferenceBonePose(int32_t boneId) const
+std::optional<umath::ScaledTransform> Model::CalcReferenceBonePose(int32_t boneId) const
 {
 	auto &reference = GetReference();
 	auto *bonePos = reference.GetBonePosition(boneId);
 	auto *boneRot = reference.GetBoneOrientation(boneId);
 	auto *boneScale = reference.GetBoneScale(boneId);
-	return pragma::physics::ScaledTransform {
+	return umath::ScaledTransform {
 		bonePos ? *bonePos : Vector3{},
 		boneRot ? *boneRot : uquat::identity(),
 		boneScale ? *boneScale : Vector3{1.f,1.f,1.f}

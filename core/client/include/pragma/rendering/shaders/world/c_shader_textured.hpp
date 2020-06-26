@@ -9,6 +9,7 @@
 #define __C_SHADER_TEXTURED_HPP__
 
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include <sharedutils/alpha_mode.hpp>
 
 namespace prosper {class IDescriptorSet;};
 namespace pragma

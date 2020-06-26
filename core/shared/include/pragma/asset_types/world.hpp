@@ -10,7 +10,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/util/util_bsp_tree.hpp"
 #include "pragma/game/game_resources.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include <sharedutils/util_path.hpp>
 #include <fsys/filesystem.h>
 #include <mathutil/uvec.h>
@@ -71,7 +71,7 @@ namespace pragma::asset
 		const std::vector<uint16_t> &GetLeaves() const;
 		std::vector<uint16_t> &GetLeaves();
 		const Vector3 &GetOrigin() const;
-		pragma::physics::Transform GetPose() const;
+		umath::Transform GetPose() const;
 		void GetLeafData(uint32_t &outFirstLeaf,uint32_t &outNumLeaves) const;
 	private:
 		friend WorldData;

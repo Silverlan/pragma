@@ -19,6 +19,7 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
+#include "pragma/physics/jointinfo.h"
 #include "pragma/entities/baseentity_trace.hpp"
 #include <pragma/physics/environment.hpp>
 
@@ -422,7 +423,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		auto bIkPlaced = false;
 		if(pTrComponent.valid())
 		{
-			auto traceData = util::get_entity_trace_data(*pTrComponent);
+			auto traceData = ::util::get_entity_trace_data(*pTrComponent);
 			traceData.SetSource(srcPos);
 			traceData.SetTarget(dstPos);
 			auto *game = ent.GetNetworkState()->GetGameState();
@@ -457,7 +458,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			continue;
 
 		auto &treeInfo = *pair.second;
-		std::vector<physics::Transform> rootDeltaTransforms {};
+		std::vector<umath::Transform> rootDeltaTransforms {};
 		rootDeltaTransforms.reserve(treeInfo.rootNodes.size());
 		for(auto &rootNodeInfo : treeInfo.rootNodes)
 		{
@@ -533,7 +534,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		if(debugPrint)
 		{
 			auto *game = GetEntity().GetNetworkState()->GetGameState();
-			auto fGetLocalTransform = [](const Node* node, physics::Transform& act) {
+			auto fGetLocalTransform = [](const Node* node, umath::Transform& act) {
 				auto axis = Vector3(node->v.x, node->v.y, node->v.z);
 				auto rot = uquat::identity();
 				if (axis.length())
@@ -542,8 +543,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				act.SetRotation(rot);
 				act.SetOrigin(Vector3(node->r.x, node->r.y, node->r.z));
 			};
-			std::function<void(Node*, const physics::Transform&)> fDrawTree = nullptr;
-			fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node, const physics::Transform& tr) {
+			std::function<void(Node*, const umath::Transform&)> fDrawTree = nullptr;
+			fDrawTree = [&fGetLocalTransform,&fDrawTree,game](Node* node, const umath::Transform& tr) {
 				Vector3 lineColor = Vector3(0, 0, 0);
 				int lineWidth = 2;
 				auto fUpdateLine = [game](int32_t tIdx,const Vector3 &start,const Vector3 &end,const Color &col) {
@@ -583,10 +584,10 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 					//node->DrawNode(node == root);	// Recursively draw node and update ModelView matrix
 					if (node->left) {
-						physics::Transform act;
+						umath::Transform act;
 						fGetLocalTransform(node->left, act);
 				
-						physics::Transform trl = tr*act;
+						umath::Transform trl = tr*act;
 						auto trOrigin = tr.GetOrigin();
 						auto trlOrigin = trl.GetOrigin();
 						fUpdateLine(5,trOrigin,trlOrigin,Color::Maroon);
@@ -594,9 +595,9 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 					}
 				//	glPopMatrix();
 					if (node->right) {
-						physics::Transform act;
+						umath::Transform act;
 						fGetLocalTransform(node->right, act);
-						physics::Transform trr = tr*act;
+						umath::Transform trr = tr*act;
 						auto trOrigin = tr.GetOrigin();
 						auto trrOrigin = trr.GetOrigin();
 						fUpdateLine(6,trOrigin,trrOrigin,Color::Silver);
@@ -606,7 +607,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			};
 			auto fRenderScene = [&fGetLocalTransform,&fDrawTree,&rootDeltaTransforms](Tree &tree) {
 				auto &tRoot = rootDeltaTransforms.front();
-				physics::Transform act {};
+				umath::Transform act {};
 				fGetLocalTransform(tree.GetRoot(),act);
 				act = tRoot *act;
 
@@ -616,8 +617,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		}
 
 		// Apply IK transforms to entity skeleton
-		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>>&,physics::Transform&,physics::Transform*,bool)> fIterateIkTree = nullptr;
-		fIterateIkTree = [this,&fIterateIkTree,&rootDeltaTransforms,&animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes,physics::Transform &tParent,physics::Transform *rootDeltaTransform,bool root) {
+		std::function<void(const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>>&,umath::Transform&,umath::Transform*,bool)> fIterateIkTree = nullptr;
+		fIterateIkTree = [this,&fIterateIkTree,&rootDeltaTransforms,&animComponent](const std::vector<std::shared_ptr<IKTreeInfo::NodeInfo>> &nodes,umath::Transform &tParent,umath::Transform *rootDeltaTransform,bool root) {
 			auto nodeIdx = 0u;
 			for(auto &nodeInfo : nodes)
 			{
@@ -628,13 +629,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 						continue;
 					rootDeltaTransform = &rootDeltaTransforms.at(nodeIdx);
 				}
-				physics::Transform tNode {};
+				umath::Transform tNode {};
 				util::ik::get_local_transform(*nodeInfo->ikNodes.at(0u),tNode);
 				tNode = tParent *tNode;
 
 				for(auto i=decltype(nodeInfo->ikNodes.size()){1u};i<nodeInfo->ikNodes.size();++i)
 				{
-					physics::Transform tNodeOther {};
+					umath::Transform tNodeOther {};
 					auto &nodeOther = nodeInfo->ikNodes.at(i);
 					if(nodeOther != nullptr)
 					{
@@ -652,7 +653,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				++nodeIdx;
 			}
 		};
-		physics::Transform t {};
+		umath::Transform t {};
 		fIterateIkTree(treeInfo.rootNodes,t,nullptr,true);
 	}
 

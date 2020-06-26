@@ -10,6 +10,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
+#include <pragma/entities/environment/effects/particlesystemdata.h>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -68,10 +69,71 @@ static void register_particle_modifier(lua_State *l,pragma::LuaParticleModifierM
 	}
 }
 
+static void push_particle_system_definition_data(lua_State *l,const CParticleSystemData &ptSysData)
+{
+	auto tPtSys = Lua::CreateTable(l);
+
+	for(auto &pair : ptSysData.settings)
+	{
+		Lua::PushString(l,pair.first);
+		Lua::PushString(l,pair.second);
+		Lua::SetTableValue(l,tPtSys);
+	}
+
+	auto fPushOperators = [l,tPtSys](const std::string &type,const std::vector<CParticleModifierData> &data) {
+		Lua::PushString(l,type);
+		auto tInitializers = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &initializer : data)
+		{
+			Lua::PushInt(l,idx++);
+			auto tInitializer = Lua::CreateTable(l);
+
+			Lua::PushString(l,"operatorType");
+			Lua::PushString(l,initializer.name);
+			Lua::SetTableValue(l,tInitializer);
+
+			for(auto &pair : initializer.settings)
+			{
+				Lua::PushString(l,pair.first);
+				Lua::PushString(l,pair.second);
+				Lua::SetTableValue(l,tInitializer);
+			}
+
+			Lua::SetTableValue(l,tInitializers);
+		}
+		Lua::SetTableValue(l,tPtSys);
+	};
+	fPushOperators("initializers",ptSysData.initializers);
+	fPushOperators("operators",ptSysData.operators);
+	fPushOperators("renderers",ptSysData.renderers);
+
+	Lua::PushString(l,"children");
+	auto tChildren = Lua::CreateTable(l);
+	int32_t idx = 1;
+	for(auto &childData : ptSysData.children)
+	{
+		Lua::PushInt(l,idx++);
+		auto tChild = Lua::CreateTable(l);
+
+		Lua::PushString(l,"childName");
+		Lua::PushString(l,childData.childName);
+		Lua::SetTableValue(l,tChild);
+
+		Lua::PushString(l,"delay");
+		Lua::PushNumber(l,childData.delay);
+		Lua::SetTableValue(l,tChild);
+
+		Lua::SetTableValue(l,tChildren);
+	}
+	Lua::SetTableValue(l,tPtSys);
+}
+
 void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCParticleSystem = luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle>("ParticleSystemComponent");
 	Lua::register_base_env_particle_system_component_methods<luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle>,CParticleSystemHandle>(l,defCParticleSystem);
+
 	defCParticleSystem.def("Start",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->Start();
@@ -357,6 +419,17 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::Push<Vector4>(l,hComponent->GetBloomColorFactor());
 	}));
+	defCParticleSystem.def("GetEffectiveBloomColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto bloomCol = hComponent->GetEffectiveBloomColorFactor();
+		if(bloomCol.has_value() == false)
+			return;
+		Lua::Push<Vector4>(l,*bloomCol);
+	}));
+	defCParticleSystem.def("IsBloomEnabled",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushBool(l,hComponent->IsBloomEnabled());
+	}));
 	defCParticleSystem.def("SetColorFactor",static_cast<void(*)(lua_State*,CParticleSystemHandle&,const Vector4&)>([](lua_State *l,CParticleSystemHandle &hComponent,const Vector4 &factor) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetColorFactor(factor);
@@ -618,11 +691,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetControlPointRotation(cpIdx,rot);
 	}));
-	defCParticleSystem.def("SetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const pragma::physics::Transform&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const pragma::physics::Transform &pose) {
+	defCParticleSystem.def("SetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const umath::Transform&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const umath::Transform &pose) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetControlPointPose(cpIdx,pose);
 	}));
-	defCParticleSystem.def("SetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const pragma::physics::Transform&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const pragma::physics::Transform &pose,float timeStamp) {
+	defCParticleSystem.def("SetControlPointPose",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const umath::Transform&,float)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const umath::Transform &pose,float timeStamp) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetControlPointPose(cpIdx,pose,&timeStamp);
 	}));
@@ -696,6 +769,32 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCParticleSystem.add_static_constant("ALPHA_MODE_COUNT",umath::to_integral(pragma::ParticleAlphaMode::Count));
 	ParticleSystemModifier::register_particle_class(defCParticleSystem);
 	ParticleSystemModifier::register_modifier_class(defCParticleSystem);
+	defCParticleSystem.scope[luabind::def("find_particle_system_file",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &ptSystemName) {
+		std::string ptName = Lua::CheckString(l,1);
+		auto ptFileName = pragma::CParticleSystemComponent::FindParticleSystemFile(ptName);
+		if(ptFileName.has_value() == false)
+			return;
+		Lua::PushString(l,"particles/" +*ptFileName +".wpt");
+	}))];
+	defCParticleSystem.scope[luabind::def("get_particle_system_definitions",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		auto &ptSystemCache = pragma::CParticleSystemComponent::GetCachedParticleSystemData();
+		auto t = Lua::CreateTable(l);
+		for(auto &pair : ptSystemCache)
+		{
+			Lua::PushString(l,pair.first);
+			push_particle_system_definition_data(l,*pair.second);
+			Lua::SetTableValue(l,t);
+		}
+	}))];
+	defCParticleSystem.scope[luabind::def("get_particle_system_definition",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &ptSystemName) {
+		auto lPtSystemName = ptSystemName;
+		ustring::to_lower(lPtSystemName);
+		auto &ptSystemCache = pragma::CParticleSystemComponent::GetCachedParticleSystemData();
+		auto it = ptSystemCache.find(lPtSystemName);
+		if(it == ptSystemCache.end())
+			return;
+		push_particle_system_definition_data(l,*it->second);
+	}))];
 	defCParticleSystem.scope[luabind::def("generate_model",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l,t);

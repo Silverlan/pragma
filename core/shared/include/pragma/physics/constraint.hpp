@@ -12,7 +12,7 @@
 #include <memory>
 #include <sharedutils/def_handle.h>
 #include "pragma/physics/base.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/lua/baseluaobj.h"
 #include "pragma/entities/baseentity_handle.h"
 #include <vector>
@@ -41,8 +41,8 @@ namespace pragma::physics
 		void DisableCollisions();
 		virtual pragma::physics::IRigidBody *GetSourceActor()=0;
 		virtual pragma::physics::IRigidBody *GetTargetActor()=0;
-		Transform &GetSourceTransform();
-		Transform &GetTargetTransform();
+		umath::Transform &GetSourceTransform();
+		umath::Transform &GetTargetTransform();
 		Vector3 GetSourcePosition();
 		Quat GetSourceRotation();
 		Vector3 GetTargetPosition();
@@ -70,8 +70,8 @@ namespace pragma::physics
 	protected:
 		IConstraint(IEnvironment &env);
 		virtual void DoSetCollisionsEnabled(Bool b)=0;
-		Transform m_srcTransform;
-		Transform m_tgtTransform;
+		umath::Transform m_srcTransform;
+		umath::Transform m_tgtTransform;
 		EntityHandle m_hEntity = {};
 	private:
 		bool m_bCollisionsEnabled = true;
@@ -215,15 +215,15 @@ namespace pragma::physics
 
 		virtual void InitializeLuaObject(lua_State *lua) override;
 		virtual void CalculateTransforms()=0;
-		virtual void CalculateTransforms(const Transform &frameA,const Transform &frameB)=0;
-		virtual Transform GetCalculatedTransformA() const=0;
-		virtual Transform GetCalculatedTransformB() const=0;
-		virtual Transform GetFrameOffsetA() const=0;
-		virtual Transform GetFrameOffsetB() const=0;
+		virtual void CalculateTransforms(const umath::Transform &frameA,const umath::Transform &frameB)=0;
+		virtual umath::Transform GetCalculatedTransformA() const=0;
+		virtual umath::Transform GetCalculatedTransformB() const=0;
+		virtual umath::Transform GetFrameOffsetA() const=0;
+		virtual umath::Transform GetFrameOffsetB() const=0;
 		virtual Vector3 GetAxis(pragma::Axis axisIndex) const=0;
 		virtual double GetAngle(pragma::Axis axisIndex) const=0;
 		virtual double GetRelativePivotPosition(pragma::Axis axisIndex) const=0;
-		virtual void SetFrames(const Transform &frameA,const Transform &frameB)=0;
+		virtual void SetFrames(const umath::Transform &frameA,const umath::Transform &frameB)=0;
 		virtual void SetLinearLowerLimit(const Vector3 &linearLower)=0;
 		virtual Vector3 GetLinearLowerLimit() const=0;
 		virtual void SetLinearUpperLimit(const Vector3 &linearUpper)=0;

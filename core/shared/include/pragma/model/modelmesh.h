@@ -12,7 +12,7 @@
 #include <mathutil/glmutil.h>
 #include "pragma/model/vertex.h"
 #include "pragma/model/modelupdateflags.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 
 namespace umath
 {
@@ -94,7 +94,7 @@ public:
 	void Optimize();
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
-	void Transform(const pragma::physics::ScaledTransform &pose);
+	void Transform(const umath::ScaledTransform &pose);
 	void Merge(const ModelSubMesh &other);
 	void Scale(const Vector3 &scale);
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMeshA,ModelSubMesh &clippedMeshB,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMeshA=nullptr,ModelSubMesh *clippedCoverMeshB=nullptr);
@@ -103,9 +103,9 @@ public:
 	void ApplyUVMapping(const Vector3 &nu,const Vector3 &nv,uint32_t w,uint32_t h,float ou,float ov,float su,float sv);
 	void RemoveVertex(uint64_t idx);
 
-	const pragma::physics::ScaledTransform &GetPose() const;
-	pragma::physics::ScaledTransform &GetPose();
-	void SetPose(const pragma::physics::ScaledTransform &pose);
+	const umath::ScaledTransform &GetPose() const;
+	umath::ScaledTransform &GetPose();
+	void SetPose(const umath::ScaledTransform &pose);
 
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
@@ -126,7 +126,7 @@ protected:
 	Vector3 m_max;
 	GeometryType m_geometryType = GeometryType::Triangles;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
-	pragma::physics::ScaledTransform m_pose = pragma::physics::ScaledTransform{};
+	umath::ScaledTransform m_pose = umath::ScaledTransform{};
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMesh,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMesh=nullptr);
 };
 

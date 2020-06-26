@@ -57,6 +57,7 @@ CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 {
 	return (idx < m_materialOverrides.size()) ? static_cast<CMaterial*>(m_materialOverrides.at(idx).get()) : nullptr;
 }
+const std::vector<MaterialHandle> &CModelComponent::GetMaterialOverrides() const {return m_materialOverrides;}
 
 CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
 {

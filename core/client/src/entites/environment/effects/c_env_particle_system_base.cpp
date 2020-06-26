@@ -156,12 +156,33 @@ std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(VFi
 	return fileHeader;
 }
 
-bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
+static void to_cache_name(std::string &fname)
 {
 	fname = FileManager::GetCanonicalizedPath(fname);
 	ustring::to_lower(fname);
 	if(fname.length() >= 4 && fname.substr(fname.length() -4) == ".wpt")
 		fname = fname.substr(0,fname.length() -4);
+}
+static std::unordered_map<std::string,std::vector<std::string>> s_particleFileToSystems {};
+const std::vector<std::string> &CParticleSystemComponent::GetPrecachedParticleSystemFiles() {return s_precached;}
+const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &CParticleSystemComponent::GetCachedParticleSystemData() {return s_particleData;}
+std::optional<std::string> CParticleSystemComponent::FindParticleSystemFile(const std::string ptName)
+{
+	for(auto &pair : s_particleFileToSystems)
+	{
+		auto it = std::find_if(pair.second.begin(),pair.second.end(),[&ptName](const std::string &ptNameOther) {
+			return ustring::compare(ptNameOther,ptName,false);
+		});
+		if(it == pair.second.end())
+			continue;
+		return pair.first;
+	}
+	return {};
+}
+
+bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
+{
+	to_cache_name(fname);
 	auto it = std::find(s_precached.begin(),s_precached.end(),fname);
 	if(it != s_precached.end())
 	{
@@ -177,10 +198,14 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	auto header = ReadHeader(f);
 	if(header.has_value() == false)
 		return false;
+	auto &ptSystemNames = s_particleFileToSystems.insert(std::make_pair(fname,std::vector<std::string>{})).first->second;
+	ptSystemNames.clear();
 	auto numParticles = header->numParticles;
+	ptSystemNames.reserve(numParticles);
 	for(auto i=decltype(numParticles){0};i<numParticles;++i)
 	{
 		auto &name = header->particleSystemNames.at(i);
+		ptSystemNames.push_back(name);
 		auto offset = header->particleSystemOffsets.at(i);
 		if(bReload == true || s_particleData.find(name) == s_particleData.end())
 		{
@@ -465,18 +490,18 @@ void CParticleSystemComponent::SetControlPointEntity(ControlPointIndex idx,CBase
 void CParticleSystemComponent::SetControlPointPosition(ControlPointIndex idx,const Vector3 &pos)
 {
 	auto optPose = GetControlPointPose(idx);
-	auto pose = optPose.has_value() ? *optPose : physics::Transform{};
+	auto pose = optPose.has_value() ? *optPose : umath::Transform{};
 	pose.SetOrigin(pos);
 	SetControlPointPose(idx,pose);
 }
 void CParticleSystemComponent::SetControlPointRotation(ControlPointIndex idx,const Quat &rot)
 {
 	auto optPose = GetControlPointPose(idx);
-	auto pose = optPose.has_value() ? *optPose : physics::Transform{};
+	auto pose = optPose.has_value() ? *optPose : umath::Transform{};
 	pose.SetRotation(rot);
 	SetControlPointPose(idx,pose);
 }
-void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const physics::Transform &pose,float *optTimestamp)
+void CParticleSystemComponent::SetControlPointPose(ControlPointIndex idx,const umath::Transform &pose,float *optTimestamp)
 {
 	InitializeControlPoint(idx);
 	auto t = optTimestamp ? *optTimestamp : m_simulationTime;
@@ -500,7 +525,7 @@ CBaseEntity *CParticleSystemComponent::GetControlPointEntity(ControlPointIndex i
 		return nullptr;
 	return static_cast<CBaseEntity*>(m_controlPoints.at(idx).hEntity.get());
 }
-std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
+std::optional<umath::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
 {
 	if(idx >= m_controlPoints.size())
 		return {};
@@ -508,7 +533,7 @@ std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(
 	auto *ent = GetControlPointEntity(idx);
 	if(ent)
 	{
-		pragma::physics::Transform entPose;
+		umath::Transform entPose;
 		ent->GetPose(entPose);
 		pose = entPose *pose;
 	}
@@ -516,7 +541,7 @@ std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(
 		*optOutTimestamp = m_controlPoints.at(idx).simTimestamp;
 	return pose;
 }
-std::optional<physics::Transform> CParticleSystemComponent::GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
+std::optional<umath::Transform> CParticleSystemComponent::GetPrevControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
 {
 	if(idx >= m_controlPointsPrev.size())
 		return {};
@@ -524,7 +549,7 @@ std::optional<physics::Transform> CParticleSystemComponent::GetPrevControlPointP
 	auto *ent = GetControlPointEntity(idx);
 	if(ent)
 	{
-		pragma::physics::Transform entPose;
+		umath::Transform entPose;
 		ent->GetPose(entPose);
 		pose = entPose *pose;
 	}
@@ -532,7 +557,7 @@ std::optional<physics::Transform> CParticleSystemComponent::GetPrevControlPointP
 		*optOutTimestamp = m_controlPointsPrev.at(idx).simTimestamp;
 	return pose;
 }
-std::optional<physics::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float t) const
+std::optional<umath::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float t) const
 {
 	if(idx >= m_controlPoints.size())
 		return {};
@@ -1502,7 +1527,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto bMoving = (umath::is_flag_set(m_flags,Flags::MoveWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::PositionChanged))
 		|| (umath::is_flag_set(m_flags,Flags::RotateWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags,Flags::HasMovingParticles,bMoving);
-	physics::Transform pose;
+	umath::Transform pose;
 	GetEntity().GetPose(pose);
 	auto &posCam = cam->GetEntity().GetPosition();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)

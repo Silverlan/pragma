@@ -310,9 +310,9 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		Vector3 {}, /* camRightWs */
 		umath::to_integral(orientationType),
 		Vector3{}, /* camUpWs */
-		float{}, /* nearZ */
+		0.f, /* nearZ */
 		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},
-		float{}, /* farZ */
+		0.f, /* farZ */
 		viewportSize,
 		umath::to_integral(renderFlags),
 		umath::to_integral(ps.GetAlphaMode()),
@@ -324,7 +324,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		auto &v = cam->GetViewMatrix();
 		vp = cam->GetProjectionMatrix() *v;
 	}
-	GetParticleSystemOrientationInfo(vp,ps,pushConstants.camUpWs,pushConstants.camRightWs,pushConstants.nearZ,pushConstants.farZ,ps.GetMaterial());
+	GetParticleSystemOrientationInfo(vp,ps,pushConstants.camUpWs,pushConstants.camRightWs,pushConstants.nearZ,pushConstants.farZ,ps.GetMaterial(),cam.get());
 
 	if(RecordPushConstants(pushConstants) == false)
 		return false;

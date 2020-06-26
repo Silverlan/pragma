@@ -16,7 +16,7 @@ pragma::CParticleSystemComponent *util::create_smoke_trail_particle(float distan
 		{"material",material},
 		{"sort_particles","1"}
 	};
-	auto *pt = pragma::CParticleSystemComponent::Create(values);
+	auto *pt = ::pragma::CParticleSystemComponent::Create(values);
 	if(pt == nullptr)
 		return nullptr;
 	auto lifeTime = distance /speed;

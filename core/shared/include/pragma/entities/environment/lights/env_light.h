@@ -14,15 +14,8 @@
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/baseentity_handle.h"
+#include <sharedutils/util_pragma.hpp>
 #include <string>
-
-enum class LightType : uint8_t
-{
-	Undefined = 0,
-	Spot,
-	Point,
-	Directional
-};
 
 namespace pragma
 {
@@ -68,7 +61,7 @@ namespace pragma
 		void SetLight(BaseEnvLightPointComponent &light);
 		void SetLight(BaseEnvLightDirectionalComponent &light);
 
-		BaseEntityComponent *GetLight(LightType &outType) const;
+		BaseEntityComponent *GetLight(util::pragma::LightType &outType) const;
 		BaseEntityComponent *GetLight() const;
 
 		virtual void SetLightIntensityType(LightIntensityType type);
@@ -82,7 +75,7 @@ namespace pragma
 		virtual void InitializeLight(BaseEntityComponent &component);
 		util::WeakHandle<BaseEntityComponent> m_hLight = {};
 
-		LightType m_lightType = LightType::Undefined;
+		util::pragma::LightType m_lightType = util::pragma::LightType::Undefined;
 		ShadowType m_shadowType = ShadowType::Full;
 		LightFlags m_lightFlags = LightFlags::None;
 		float m_falloffExponent = 1.f;

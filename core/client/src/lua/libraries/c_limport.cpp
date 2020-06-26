@@ -16,7 +16,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
-#include <pragma/physics/transform.hpp>
+#include <mathutil/transform.hpp>
 #include <pragma/util/util_game.hpp>
 #include <pragma/game/scene_snapshot.hpp>
 #include <sharedutils/util_file.h>
@@ -40,7 +40,7 @@ extern DLLCLIENT CGame *c_game;
 
 static aiVector3D to_assimp_position(const Vector3 &pos)
 {
-	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(util::units_to_metres(1.f));
+	return aiVector3D{pos.x,pos.y,pos.z} *static_cast<float>(util::pragma::units_to_metres(1.f));
 }
 static aiVector3D to_assimp_normal(const Vector3 &dir)
 {
@@ -93,11 +93,11 @@ static aiMatrix4x4 to_assimp_matrix(const Mat4 &m)
 
 static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &name,BaseEntity &ent)
 {
-	pragma::physics::Transform t {};
+	umath::Transform t {};
 	ent.GetPose(t);
 
-	auto scale = static_cast<float>(util::units_to_metres(1.f));
-	pragma::physics::ScaledTransform tScaled = t;
+	auto scale = static_cast<float>(util::pragma::units_to_metres(1.f));
+	umath::ScaledTransform tScaled = t;
 	tScaled.Scale(Vector3{scale,scale,scale});
 
 	auto m = tScaled.ToMatrix();
@@ -202,8 +202,8 @@ int Lua::lib_export::export_scene(lua_State *l)
 		auto &entCam = cam->GetEntity();
 		std::string name = add_node(*scene->mRootNode,camNodeIndex,"cam",cam->GetEntity()).mName.C_Str();
 		outCam->mAspect = cam->GetAspectRatio();
-		outCam->mClipPlaneFar = ::util::units_to_metres(cam->GetFarZ());
-		outCam->mClipPlaneNear = ::util::units_to_metres(cam->GetNearZ());
+		outCam->mClipPlaneFar = ::util::pragma::units_to_metres(cam->GetFarZ());
+		outCam->mClipPlaneNear = ::util::pragma::units_to_metres(cam->GetNearZ());
 		outCam->mHorizontalFOV = cam->GetFOVRad();
 		outCam->mName = name;
 	}

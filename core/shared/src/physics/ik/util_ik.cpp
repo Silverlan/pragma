@@ -7,11 +7,11 @@
 
 #include "stdafx_shared.h"
 #include "pragma/physics/ik/util_ik.hpp"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/physics/environment.hpp"
 #include "pragma/buss_ik/Tree.h"
 
-void util::ik::get_local_transform(const Node &node,pragma::physics::Transform &t)
+void util::ik::get_local_transform(const Node &node,umath::Transform &t)
 {
 	auto rot = get_rotation(node);
 	t.SetRotation(rot);

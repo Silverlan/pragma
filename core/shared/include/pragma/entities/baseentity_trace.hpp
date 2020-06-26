@@ -18,7 +18,7 @@ namespace pragma
 namespace util
 {
 	DLLNETWORK TraceData get_entity_trace_data(BaseEntity &ent);
-	DLLNETWORK TraceData get_entity_trace_data(pragma::BaseTransformComponent &component);
+	DLLNETWORK TraceData get_entity_trace_data(::pragma::BaseTransformComponent &component);
 };
 
 #endif

@@ -162,7 +162,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	{
 		for(UInt32 i=0;i<anim->GetBoneCount();i++)
 		{
-			m_bones[i] = physics::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
+			m_bones[i] = umath::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
 		}
 	}
 }
@@ -408,7 +408,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	// Initialize buffer for blended/interpolated animation data
 	auto &animBoneList = anim->GetBoneList();
 	auto numBones = animBoneList.size();
-	std::vector<pragma::physics::Transform> bonePoses {};
+	std::vector<umath::Transform> bonePoses {};
 	std::vector<Vector3> boneScales {};
 
 	// Blend between the last frame and the current frame of this animation.
@@ -487,7 +487,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 				// Interpolated poses of source animation
 				Frame *srcFrame,*dstFrame;
 				float animInterpFactor;
-				std::vector<pragma::physics::Transform> ppBonePosesSrc {};
+				std::vector<umath::Transform> ppBonePosesSrc {};
 				std::vector<Vector3> ppBoneScalesSrc {};
 				if(GetBlendFramesFromCycle(*blendAnimSrc,cycle,&srcFrame,&dstFrame,animInterpFactor))
 				{
@@ -510,7 +510,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 				}
 
 				// Interpolated poses of destination animation
-				std::vector<pragma::physics::Transform> ppBonePosesDst {};
+				std::vector<umath::Transform> ppBonePosesDst {};
 				std::vector<Vector3> ppBoneScalesDst {};
 				if(GetBlendFramesFromCycle(*blendAnimDst,cycle,&srcFrame,&dstFrame,animInterpFactor))
 				{
@@ -976,8 +976,8 @@ void BaseAnimatedComponent::StopLayeredAnimation(int slot)
 	m_animSlots.erase(it);
 }
 
-const std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const {return const_cast<BaseAnimatedComponent*>(this)->GetProcessedBones();}
-std::vector<physics::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() {return m_processedBones;}
+const std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() const {return const_cast<BaseAnimatedComponent*>(this)->GetProcessedBones();}
+std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() {return m_processedBones;}
 
 bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t frameOffset) const
 {
@@ -1349,7 +1349,7 @@ void CEOnStopLayeredAnimation::PushArguments(lua_State *l)
 
 /////////////////
 
-CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<pragma::physics::Transform> &bonePoses,std::vector<Vector3> *boneScales)
+CEOnBlendAnimation::CEOnBlendAnimation(BaseAnimatedComponent::AnimationSlotInfo &slotInfo,Activity activity,std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales)
 	: slotInfo{slotInfo},activity{activity},bonePoses{bonePoses},boneScales{boneScales}
 {}
 void CEOnBlendAnimation::PushArguments(lua_State *l)

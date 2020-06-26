@@ -23,7 +23,8 @@ namespace pragma
 			Animated = 1u,
 			Unlit = Animated<<1,
 			SoftParticles = Unlit<<1,
-			TextureScrolling = SoftParticles<<1
+			TextureScrolling = SoftParticles<<1,
+			AdditiveBlendByColor = TextureScrolling<<1
 		};
 
 		ShaderParticleBase()=default;

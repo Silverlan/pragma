@@ -79,14 +79,14 @@ void BaseAttachableComponent::OnEntitySpawn()
 	}
 }
 void BaseAttachableComponent::ClearAttachment() {AttachToEntity(nullptr);}
-std::optional<physics::Transform> BaseAttachableComponent::GetLocalPose() const
+std::optional<umath::Transform> BaseAttachableComponent::GetLocalPose() const
 {
 	auto *attData = GetAttachmentData();
 	if(attData == nullptr)
 		return {};
-	return physics::Transform{attData->offset,attData->rotation};
+	return umath::Transform{attData->offset,attData->rotation};
 }
-void BaseAttachableComponent::SetLocalPose(const physics::Transform &pose)
+void BaseAttachableComponent::SetLocalPose(const umath::Transform &pose)
 {
 	auto *attData = GetAttachmentData();
 	if(attData == nullptr)
@@ -438,11 +438,11 @@ void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma:
 		rot = uquat::get_inverse(rotRef) *rot;*/
 	}
 }
-std::optional<physics::Transform> BaseAttachableComponent::GetParentPose() const
+std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 {
 	if(m_attachment == nullptr || m_attachment->parent.expired())
 		return {};
-	physics::Transform pose {};
+	umath::Transform pose {};
 	auto *parent = m_attachment->parent.get();
 	auto *pAttachableComponentParent = static_cast<BaseAttachableComponent*>(parent->GetEntity().FindComponent("attachable").get());
 	if(pAttachableComponentParent != nullptr)

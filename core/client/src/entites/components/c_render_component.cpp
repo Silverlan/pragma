@@ -188,7 +188,7 @@ Sphere CRenderComponent::GetRenderSphereBounds() const
 }
 void CRenderComponent::GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const
 {
-	physics::Transform pose;
+	umath::Transform pose;
 	GetEntity().GetPose(pose);
 	GetRenderBounds(&outMin,&outMax);
 	outMin = pose *outMin;
@@ -347,7 +347,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
 		return {};
-	physics::Transform pose;
+	umath::Transform pose;
 	GetEntity().GetPose(pose);
 	auto invPose = pose.GetInverse();
 

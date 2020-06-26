@@ -149,7 +149,7 @@ pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env)
 pragma::physics::ICompoundShape::ICompoundShape(IEnvironment &env,pragma::physics::IShape &shape,const Vector3 &origin)
 	: IShape{env}
 {}
-void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose)
+void pragma::physics::ICompoundShape::AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose)
 {
 	m_shapes.push_back({std::static_pointer_cast<IShape>(shape.shared_from_this()),localPose});
 	if(m_shapes.size() == 1)

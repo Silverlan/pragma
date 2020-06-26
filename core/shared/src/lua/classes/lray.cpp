@@ -37,8 +37,8 @@ void Lua_TraceData_SetCollisionFilterGroup(lua_State*,TraceData &data,unsigned i
 {
 	data.SetCollisionFilterGroup(static_cast<CollisionMask>(group));
 }
-void Lua_TraceData_GetSourceTransform(lua_State *l,TraceData &data) {Lua::Push<pragma::physics::Transform>(l,data.GetSource());}
-void Lua_TraceData_GetTargetTransform(lua_State *l,TraceData &data) {Lua::Push<pragma::physics::Transform>(l,data.GetTarget());}
+void Lua_TraceData_GetSourceTransform(lua_State *l,TraceData &data) {Lua::Push<umath::Transform>(l,data.GetSource());}
+void Lua_TraceData_GetTargetTransform(lua_State *l,TraceData &data) {Lua::Push<umath::Transform>(l,data.GetTarget());}
 void Lua_TraceData_GetSourceOrigin(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetSourceOrigin());}
 void Lua_TraceData_GetTargetOrigin(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetTargetOrigin());}
 void Lua_TraceData_GetSourceRotation(lua_State *l,TraceData &data) {Lua::Push<Quat>(l,data.GetSourceRotation());}

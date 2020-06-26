@@ -6,7 +6,7 @@
  */
 
 #include "pragma/entities/baseentity.h"
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
@@ -82,10 +82,10 @@ std::string BaseEntity::GetModelName() const
 	auto mdlC = GetModelComponent();
 	return mdlC.valid() ? mdlC->GetModelName() : "";
 }
-std::optional<pragma::physics::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) const
+std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) const
 {
 	auto mdlC = GetModelComponent();
-	pragma::physics::Transform t {};
+	umath::Transform t {};
 	if(mdlC.valid())
 	{
 		Vector3 pos;

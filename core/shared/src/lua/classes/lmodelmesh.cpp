@@ -185,12 +185,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		mesh.AddPoint(idx);
 	}));
 	classDef.def("GetPose",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
-		Lua::Push<pragma::physics::ScaledTransform>(l,mesh.GetPose());
+		Lua::Push<umath::ScaledTransform>(l,mesh.GetPose());
 	}));
-	classDef.def("SetPose",static_cast<void(*)(lua_State*,::ModelSubMesh&,const pragma::physics::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const pragma::physics::ScaledTransform &pose) {
+	classDef.def("SetPose",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const umath::ScaledTransform &pose) {
 		mesh.SetPose(pose);
 	}));
-	classDef.def("Transform",static_cast<void(*)(lua_State*,::ModelSubMesh&,const pragma::physics::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const pragma::physics::ScaledTransform &pose) {
+	classDef.def("Transform",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const umath::ScaledTransform &pose) {
 		mesh.Transform(pose);
 	}));
 	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES",umath::to_integral(::ModelSubMesh::GeometryType::Triangles));

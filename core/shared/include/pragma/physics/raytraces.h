@@ -9,7 +9,7 @@
 #define __RAYTRACES_H__
 
 #include <mathutil/glmutil.h>
-#include "pragma/physics/transform.hpp"
+#include <mathutil/transform.hpp>
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/physics/physobj.h"
 #include <sharedutils/util_weak_handle.hpp>
@@ -48,8 +48,8 @@ public:
 	TraceData();
 	TraceData(const TraceData &other);
 	RayCastFlags GetFlags() const;
-	const pragma::physics::Transform &GetSource() const;
-	const pragma::physics::Transform &GetTarget() const;
+	const umath::Transform &GetSource() const;
+	const umath::Transform &GetTarget() const;
 	Vector3 GetSourceOrigin() const;
 	Quat GetSourceRotation() const;
 	Vector3 GetTargetOrigin() const;
@@ -62,10 +62,10 @@ public:
 	const pragma::physics::IConvexShape *GetShape() const;
 	void SetSource(const Vector3 &origin);
 	void SetSourceRotation(const Quat &rot);
-	void SetSource(const pragma::physics::Transform &t);
+	void SetSource(const umath::Transform &t);
 	void SetTarget(const Vector3 &target);
 	void SetTargetRotation(const Quat &rot);
-	void SetTarget(const pragma::physics::Transform &t);
+	void SetTarget(const umath::Transform &t);
 	void SetRotation(const Quat &rot);
 	void SetFlags(RayCastFlags flags);
 	void SetCollisionFilterMask(CollisionMask mask);
@@ -84,8 +84,8 @@ public:
 protected:
 	bool HasTarget() const;
 private:
-	pragma::physics::Transform m_tStart;
-	pragma::physics::Transform m_tEnd;
+	umath::Transform m_tStart;
+	umath::Transform m_tEnd;
 
 	RayCastFlags m_flags;
 	bool m_bHasTarget = false;

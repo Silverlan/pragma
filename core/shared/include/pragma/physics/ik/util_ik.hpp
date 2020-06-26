@@ -17,7 +17,7 @@ namespace util
 {
 	namespace ik
 	{
-		DLLNETWORK void get_local_transform(const Node &node,pragma::physics::Transform &t);
+		DLLNETWORK void get_local_transform(const Node &node,umath::Transform &t);
 		DLLNETWORK Quat get_rotation(const Node &node);
 	};
 };

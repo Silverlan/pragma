@@ -11,7 +11,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "cmaterial.h"
 #include <pragma/physics/collisionmesh.h>
-#include <pragma/physics/transform.hpp>
+#include <mathutil/transform.hpp>
 
 using namespace pragma;
 
@@ -42,7 +42,7 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	{
 		auto boneId = colMesh->GetBoneParent();
 		auto tBone = mdl.CalcReferenceBonePose(boneId);
-		pragma::physics::Transform t {};
+		umath::Transform t {};
 		if(tBone.has_value())
 			t = *tBone;
 

@@ -72,26 +72,26 @@ void BaseEnvLightComponent::OnEntitySpawn()
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightSpotComponent &light)
 {
-	m_lightType = LightType::Spot;
+	m_lightType = util::pragma::LightType::Spot;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f,LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightPointComponent &light)
 {
-	m_lightType = LightType::Point;
+	m_lightType = util::pragma::LightType::Point;
 	if(m_lightIntensityType == LightIntensityType::Lux)
 		SetLightIntensity(0.f,LightIntensityType::Lumen);
 	InitializeLight(light);
 }
 void BaseEnvLightComponent::SetLight(BaseEnvLightDirectionalComponent &light)
 {
-	m_lightType = LightType::Directional;
+	m_lightType = util::pragma::LightType::Directional;
 	if(m_lightIntensityType != LightIntensityType::Lux)
 		SetLightIntensity(0.f,LightIntensityType::Lux);
 	InitializeLight(light);
 }
-BaseEntityComponent *BaseEnvLightComponent::GetLight(LightType &outType) const
+BaseEntityComponent *BaseEnvLightComponent::GetLight(util::pragma::LightType &outType) const
 {
 	outType = m_lightType;
 	return m_hLight.get();
@@ -102,12 +102,12 @@ void BaseEnvLightComponent::SetLightIntensityType(LightIntensityType type) {m_li
 BaseEnvLightComponent::LightIntensityType BaseEnvLightComponent::GetLightIntensityType() const {return m_lightIntensityType;}
 void BaseEnvLightComponent::SetLightIntensity(float intensity,LightIntensityType type)
 {
-	if(m_lightType == LightType::Directional && type != LightIntensityType::Lux)
+	if(m_lightType == util::pragma::LightType::Directional && type != LightIntensityType::Lux)
 	{
 		Con::cwar<<"WARNING: Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a directional light source. This is not allowed!"<<Con::endl;
 		return;
 	}
-	if((m_lightType == LightType::Point || m_lightType == LightType::Spot) && type == LightIntensityType::Lux)
+	if((m_lightType == util::pragma::LightType::Point || m_lightType == util::pragma::LightType::Spot) && type == LightIntensityType::Lux)
 	{
 		Con::cwar<<"WARNING: Attempted to use intensity type "<<LightIntensityTypeToString(type)<<" for a point or spot light source. This is not allowed!"<<Con::endl;
 		return;

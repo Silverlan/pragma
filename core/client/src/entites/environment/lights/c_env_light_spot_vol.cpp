@@ -13,6 +13,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
+#include <sharedutils/alpha_mode.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/math/intersection.h>

@@ -66,6 +66,7 @@ namespace Lua
 		DLLNETWORK int get_addon_path(lua_State *l);
 		DLLNETWORK int get_string_hash(lua_State *l);
 		DLLNETWORK int get_class_value(lua_State *l);
+		DLLNETWORK int pack_zip_archive(lua_State *l);
 	};
 
 	template<class T,class TCast>
@@ -130,7 +131,8 @@ namespace Lua
 	{"open_path_in_explorer",Lua::util::open_path_in_explorer}, \
 	{"get_addon_path",Lua::util::get_addon_path}, \
 	{"get_string_hash",Lua::util::get_string_hash}, \
-	{"get_class_value",Lua::util::get_class_value},
+	{"get_class_value",Lua::util::get_class_value}, \
+	{"pack_zip_archive",Lua::util::pack_zip_archive},
 
 #define REGISTER_SHARED_UTIL \
 	REGISTER_SHARED_UTIL_GENERIC \

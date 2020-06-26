@@ -29,10 +29,10 @@ namespace pragma
 			struct DLLNETWORK ShapeInfo
 			{
 				std::weak_ptr<pragma::physics::IShape> shape = {};
-				physics::Transform localPose = {};
+				umath::Transform localPose = {};
 			};
 			// Returns the number of shapes that have been added
-			uint32_t AddShape(pragma::physics::IShape &shape,const physics::Transform &localPose={},BoneId boneId=-1);
+			uint32_t AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose={},BoneId boneId=-1);
 			void SetModelMeshBoneMapping(MeshIndex modelMeshIndex,BoneId boneIndex);
 			void SetModel(Model &model);
 			Model *GetModel() const;
@@ -234,7 +234,7 @@ namespace pragma
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
-		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const physics::Transform &localPose={});
+		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const umath::Transform &localPose={});
 		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
 		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
 		util::WeakHandle<PhysObj> InitializeBoxControllerPhysics();

@@ -50,8 +50,8 @@ namespace pragma
 		void UpdateAttachmentData(bool bForceReload=false);
 		void ClearAttachment();
 
-		std::optional<physics::Transform> GetLocalPose() const;
-		void SetLocalPose(const physics::Transform &pose);
+		std::optional<umath::Transform> GetLocalPose() const;
+		void SetLocalPose(const umath::Transform &pose);
 
 		void GetChildren(std::vector<BaseEntity*> &children) const;
 		const std::vector<BaseEntity*> &GetChildren() const;
@@ -62,7 +62,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 		void AddChild(BaseEntity *ent);
 		void RemoveChild(BaseEntity *ent);
-		std::optional<physics::Transform> GetParentPose() const;
+		std::optional<umath::Transform> GetParentPose() const;
 
 		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<BaseEntity*> m_children = {};

@@ -13,6 +13,7 @@
 
 namespace pragma
 {
+	enum class ParticleRenderFlags : uint32_t;
 	class CParticleSystemComponent;
 	class DLLCLIENT ShaderParticleBase
 	{
@@ -24,11 +25,14 @@ namespace pragma
 			Unlit = Animated<<1,
 			SoftParticles = Unlit<<1,
 			TextureScrolling = SoftParticles<<1,
-			AdditiveBlendByColor = TextureScrolling<<1
+			AdditiveBlendByColor = TextureScrolling<<1,
+			DepthPass = AdditiveBlendByColor<<1
 		};
+		static uint32_t PIPELINE_COUNT;
 
 		ShaderParticleBase()=default;
-		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle) const;
+		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle,ParticleRenderFlags ptRenderFlags) const;
+		static uint32_t GetDepthPipelineIndex();
 	protected:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const=0;
@@ -36,7 +40,7 @@ namespace pragma
 		uint32_t GetBasePipelineIndex(uint32_t pipelineIdx) const;
 		pragma::ParticleAlphaMode GetAlphaMode(uint32_t pipelineIdx) const;
 		pragma::ParticleAlphaMode GetRenderAlphaMode(const CParticleSystemComponent &particle) const;
-		uint32_t GetParticlePipelineCount() const;
+		static uint32_t GetParticlePipelineCount();
 		void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 	private:
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyAnimDescSetGroup = nullptr;

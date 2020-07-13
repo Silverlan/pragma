@@ -71,6 +71,7 @@ bool HDRData::Exposure::Initialize(prosper::Texture &texture)
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = sizeof(Vector4);
+	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	avgColorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
 	avgColorBuffer->SetDebugName("avg_color_buf");
@@ -482,7 +483,7 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 		r->SetSize(size *idx,size);
 		return r->GetHandle();
 		});
-	dbg->AddCallback("PostRenderScene",FunctionCallback<>::Create([]() {
+	dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
 			static_cast<WIDebugMSAATexture*>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)

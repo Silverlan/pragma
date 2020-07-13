@@ -677,6 +677,8 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hDisplay = display->GetHandle();
 	//
 	// Device
+	// TODO
+#if 0
 	auto *pDeviceMenu = pList->AddDropDownMenu(Locale::GetText("physical_device"),[](WIDropDownMenu *pMenu) {
 		auto deviceList = prosper::util::get_available_vendor_devices(c_engine->GetRenderContext());
 		for(auto &devInfo : deviceList)
@@ -685,6 +687,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pMenu->SelectOption(0u);
 		pMenu->SelectOption(client->GetConVarString("cl_gpu_device"));
 	},"cl_gpu_device");
+#endif
 	//
 	// Window Mode
 	pList->AddChoiceList(Locale::GetText("window_mode"),{
@@ -797,7 +800,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->AddChoice(Locale::GetText("texfilter_bilinear_filtering"),"1");
 		pList->AddChoice(Locale::GetText("texfilter_trilinear_filtering"),"2");
 
-		auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
+		auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 		std::vector<int> anisotropy;
 		auto maxAnisotropy = limits.maxSamplerAnisotropy;
 		if(maxAnisotropy >= 2.f)
@@ -838,7 +841,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 	// Present Mode
 	auto *presentMode = pList->AddChoiceList(Locale::GetText("present_mode"),[](WIChoiceList *pList) {
-		auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
+		auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 		auto maxImageCount = limits.maxSurfaceImageCount;
 		if(maxImageCount > 0)
 		{
@@ -943,6 +946,8 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	//
 
 	// Memory usage
+	// TODO
+#if 0
 	pRow = pList->AddHeaderRow();
 	pRow->SetValue(0,Locale::GetText("gpu_memory_statistics"));
 	m_hGPUMemoryUsage = pList->AddSlider(Locale::GetText("gpu_memory_current_usage"),[](WISlider *pSlider) {
@@ -971,6 +976,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			return util::get_pretty_bytes(static_cast<uint64_t>(f)) +" / " +util::get_pretty_bytes(totalSize) +" (" +util::round_string(percent *100.0,2) +"%)";
 		});
 	})->GetHandle();
+#endif
 	//
 
 	InitializeOptionsList(pList);

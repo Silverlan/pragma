@@ -28,13 +28,11 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_descriptor_set_group.hpp>
-#include <prosper_util_square_shape.hpp>
-#include <prosper_util_line_shape.hpp>
 #include <util_image_buffer.hpp>
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
-
+#pragma optimize("",off)
 extern DLLCENGINE CEngine *c_engine;
 namespace Lua
 {
@@ -273,7 +271,7 @@ namespace Lua
 			//DLLCLIENT void RecordDispatch(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t x,uint32_t y,uint32_t z);
 			//DLLCLIENT void RecordDispatchIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset);
 			DLLCLIENT void RecordDraw(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance);
-			DLLCLIENT void RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t vertexOffset,uint32_t firstInstance);
+			DLLCLIENT void RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance);
 			DLLCLIENT void RecordDrawIndexedIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride);
 			DLLCLIENT void RecordDrawIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride);
 			DLLCLIENT void RecordFillBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t size,uint32_t data);
@@ -883,13 +881,13 @@ int Lua::Vulkan::wait_idle(lua_State *l)
 }
 int Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
 {
-	auto buf = prosper::util::get_line_vertex_buffer(c_engine->GetRenderContext());
+	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetLineVertexBuffer();
 	Lua::Push(l,buf);
 	return 1;
 }
 int Lua::Vulkan::get_line_vertices(lua_State *l)
 {
-	auto &verts = prosper::util::get_line_vertices();
+	auto &verts = prosper::CommonBufferCache::GetLineVertices();
 	auto t = Lua::CreateTable(l);
 	auto idx = 1u;
 	for(auto &v : verts)
@@ -902,37 +900,37 @@ int Lua::Vulkan::get_line_vertices(lua_State *l)
 }
 int Lua::Vulkan::get_line_vertex_count(lua_State *l)
 {
-	auto numVerts = prosper::util::get_line_vertex_count();
+	auto numVerts = prosper::CommonBufferCache::GetLineVertexCount();
 	Lua::PushInt(l,numVerts);
 	return 1;
 }
 int Lua::Vulkan::get_line_vertex_format(lua_State *l)
 {
-	auto format = prosper::util::get_line_vertex_format();
+	auto format = prosper::CommonBufferCache::GetLineVertexFormat();
 	Lua::PushInt(l,umath::to_integral(format));
 	return 1;
 }
 int Lua::Vulkan::get_square_vertex_uv_buffer(lua_State *l)
 {
-	auto uvBuffer = prosper::util::get_square_vertex_uv_buffer(c_engine->GetRenderContext());
+	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer();
 	Lua::Push(l,uvBuffer);
 	return 1;
 }
 int Lua::Vulkan::get_square_vertex_buffer(lua_State *l)
 {
-	auto vertexBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
+	auto vertexBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
 	Lua::Push(l,vertexBuffer);
 	return 1;
 }
 int Lua::Vulkan::get_square_uv_buffer(lua_State *l)
 {
-	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
+	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	Lua::Push(l,uvBuffer);
 	return 1;
 }
 int Lua::Vulkan::get_square_vertices(lua_State *l)
 {
-	auto &squareVerts = prosper::util::get_square_vertices();
+	auto &squareVerts = prosper::CommonBufferCache::GetSquareVertices();
 	auto t = Lua::CreateTable(l);
 	auto idx = 1u;
 	for(auto &v : squareVerts)
@@ -945,7 +943,7 @@ int Lua::Vulkan::get_square_vertices(lua_State *l)
 }
 int Lua::Vulkan::get_square_uv_coordinates(lua_State *l)
 {
-	auto &squareUvs = prosper::util::get_square_uv_coordinates();
+	auto &squareUvs = prosper::CommonBufferCache::GetSquareUvCoordinates();
 	auto t = Lua::CreateTable(l);
 	auto idx = 1u;
 	for(auto &v : squareUvs)
@@ -958,19 +956,19 @@ int Lua::Vulkan::get_square_uv_coordinates(lua_State *l)
 }
 int Lua::Vulkan::get_square_vertex_count(lua_State *l)
 {
-	auto numVerts = prosper::util::get_square_vertex_count();
+	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
 	Lua::PushInt(l,numVerts);
 	return 1;
 }
 int Lua::Vulkan::get_square_vertex_format(lua_State *l)
 {
-	auto format = prosper::util::get_square_vertex_format();
+	auto format = prosper::CommonBufferCache::GetSquareVertexFormat();
 	Lua::PushInt(l,umath::to_integral(format));
 	return 1;
 }
 int Lua::Vulkan::get_square_uv_format(lua_State *l)
 {
-	auto uvFormat = prosper::util::get_square_uv_format();
+	auto uvFormat = prosper::CommonBufferCache::GetSquareUvFormat();
 	Lua::PushInt(l,umath::to_integral(uvFormat));
 	return 1;
 }
@@ -1674,8 +1672,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"PIPELINE_STAGE_TRANSFER_BIT",umath::to_integral(prosper::PipelineStageFlags::TransferBit)},
 		{"PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT",umath::to_integral(prosper::PipelineStageFlags::BottomOfPipeBit)},
 		{"PIPELINE_STAGE_HOST_BIT",umath::to_integral(prosper::PipelineStageFlags::HostBit)},
-		{"PIPELINE_STAGE_ALL_GRAPHICS_BIT",umath::to_integral(prosper::PipelineStageFlags::AllGraphicsBit)},
-		{"PIPELINE_STAGE_ALL_COMMANDS_BIT",umath::to_integral(prosper::PipelineStageFlags::AllCommandsBit)},
+		{"PIPELINE_STAGE_ALL_GRAPHICS",umath::to_integral(prosper::PipelineStageFlags::AllGraphics)},
+		{"PIPELINE_STAGE_ALL_COMMANDS",umath::to_integral(prosper::PipelineStageFlags::AllCommands)},
 
 		{"SAMPLE_COUNT_1_BIT",umath::to_integral(prosper::SampleCountFlags::e1Bit)},
 		{"SAMPLE_COUNT_2_BIT",umath::to_integral(prosper::SampleCountFlags::e2Bit)},
@@ -2026,6 +2024,22 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	auto defBufferImageCopyInfo = luabind::class_<prosper::util::BufferImageCopyInfo>("BufferImageCopyInfo");
 	defBufferImageCopyInfo.def(luabind::constructor<>());
+	defBufferImageCopyInfo.def("SetWidth",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&,uint32_t)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t width) {
+		copyInfo.width = width;
+	}));
+	defBufferImageCopyInfo.def("SetHeight",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&,uint32_t)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t height) {
+		copyInfo.height = height;
+	}));
+	defBufferImageCopyInfo.def("GetWidth",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) {
+		if(copyInfo.width.has_value() == false)
+			return;
+		Lua::PushInt(l,*copyInfo.width);
+	}));
+	defBufferImageCopyInfo.def("GetHeight",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) {
+		if(copyInfo.height.has_value() == false)
+			return;
+		Lua::PushInt(l,*copyInfo.height);
+	}));
 	defBufferImageCopyInfo.def_readwrite("bufferOffset",&prosper::util::BufferImageCopyInfo::bufferOffset);
 	defBufferImageCopyInfo.def_readwrite("width",&prosper::util::BufferImageCopyInfo::width);
 	defBufferImageCopyInfo.def_readwrite("height",&prosper::util::BufferImageCopyInfo::height);
@@ -2387,17 +2401,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,1u,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexed",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed);
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t vertexOffset) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,vertexOffset,0u);
-	}));
 	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,0u,0u);
+		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,0u,0u,0u);
+		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,1u,0u,0u,0u);
+		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,1u,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexedIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect);
 	defVkCommandBuffer.def("RecordDrawIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndirect);
@@ -3294,9 +3305,9 @@ void Lua::Vulkan::VKCommandBuffer::RecordDraw(lua_State *l,CommandBuffer &hComma
 {
 	Lua::PushBool(l,hCommandBuffer.RecordDraw(vertexCount,instanceCount,firstVertex,firstInstance));
 }
-void Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t vertexOffset,uint32_t firstInstance)
+void Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,hCommandBuffer.RecordDrawIndexed(indexCount,instanceCount,firstIndex,vertexOffset,firstInstance));
+	Lua::PushBool(l,hCommandBuffer.RecordDrawIndexed(indexCount,instanceCount,firstIndex,firstInstance));
 }
 void Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride)
 {
@@ -3646,3 +3657,4 @@ void Lua::Vulkan::VKTimerQuery::QueryResult(lua_State *l,TimerQuery &hTimerQuery
 	else
 		Lua::PushInt(l,r.count());
 }
+#pragma optimize("",on)

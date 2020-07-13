@@ -198,7 +198,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;

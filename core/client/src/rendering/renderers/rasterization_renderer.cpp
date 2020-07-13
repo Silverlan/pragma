@@ -182,11 +182,9 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 }
 
-bool RasterizationRenderer::ReloadRenderTarget()
+bool RasterizationRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
 	auto &scene = GetScene();
-	auto width = scene.GetWidth();
-	auto height = scene.GetHeight();
 	auto bSsao = IsSSAOEnabled();
 	if(
 		m_hdrInfo.Initialize(*this,width,height,m_sampleCount,bSsao) == false || 
@@ -230,7 +228,7 @@ void RasterizationRenderer::SetSSAOEnabled(bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
 	UpdateRenderSettings(GetScene().GetRenderSettings());
-	ReloadRenderTarget();
+	ReloadRenderTarget(GetWidth(),GetHeight());
 	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
 	if(b == true)
 	{
@@ -435,9 +433,9 @@ void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> 
 	descSetCamView.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
 }
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
-prosper::Texture *RasterizationRenderer::GetSceneTexture() {return &m_hdrInfo.sceneRenderTarget->GetTexture();}
-prosper::Texture *RasterizationRenderer::GetPresentationTexture() {return &m_hdrInfo.toneMappedRenderTarget->GetTexture();}
-prosper::Texture *RasterizationRenderer::GetHDRPresentationTexture() {return &m_hdrInfo.sceneRenderTarget->GetTexture();}
+prosper::Texture *RasterizationRenderer::GetSceneTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}
+prosper::Texture *RasterizationRenderer::GetPresentationTexture() {return m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;}
+prosper::Texture *RasterizationRenderer::GetHDRPresentationTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
 
 prosper::SampleCountFlags RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount();}

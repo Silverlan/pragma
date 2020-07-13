@@ -799,27 +799,27 @@ void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>
 
 void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_limits(c_engine->GetRenderContext(),"vk_limits.txt");
+	// prosper::debug::dump_limits(c_engine->GetRenderContext(),"vk_limits.txt");
 }
 void Console::commands::vk_dump_features(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_features(c_engine->GetRenderContext(),"vk_features.txt");
+	// prosper::debug::dump_features(c_engine->GetRenderContext(),"vk_features.txt");
 }
 void Console::commands::vk_dump_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),"vk_format_properties.txt");
+	// prosper::debug::dump_format_properties(c_engine->GetRenderContext(),"vk_format_properties.txt");
 }
 void Console::commands::vk_dump_image_format_properties(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),"vk_image_format_properties.txt");
+	// prosper::debug::dump_image_format_properties(c_engine->GetRenderContext(),"vk_image_format_properties.txt");
 }
 void Console::commands::vk_dump_layers(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_layers(c_engine->GetRenderContext(),"vk_layers.txt");
+	// prosper::debug::dump_layers(c_engine->GetRenderContext(),"vk_layers.txt");
 }
 void Console::commands::vk_dump_extensions(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	prosper::debug::dump_extensions(c_engine->GetRenderContext(),"vk_extensions.txt");
+	// prosper::debug::dump_extensions(c_engine->GetRenderContext(),"vk_extensions.txt");
 }
 /*static void print_memory_stats(std::stringstream &ss,Vulkan::MemoryManager::StatInfo &info)
 {
@@ -867,6 +867,7 @@ void Console::commands::vk_dump_memory_stats(NetworkState *state,pragma::BasePla
 
 void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
+#if 0
 	//bool prosper::util::get_memory_stats(IPrContext &context,MemoryPropertyFlags memPropFlags,DeviceSize &outAvailableSize,DeviceSize &outAllocatedSize)
 	prosper::DeviceSize availableSize,allocatedSize;
 	std::vector<uint32_t> memIndices;
@@ -1040,6 +1041,7 @@ void Console::commands::vk_print_memory_stats(NetworkState *state,pragma::BasePl
 			Con::flush();
 		}
 	}*/ // prosper TODO
+#endif
 }
 
 static void cvar_net_graph(bool val)

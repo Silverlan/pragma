@@ -409,6 +409,17 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		return 1;
 	}));
 	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
+	lua_pushtablecfunction(lua.GetState(),"math","set_flag",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		auto flags = Lua::CheckInt(l,1);
+		auto flag = Lua::CheckInt(l,2);
+		auto set = Lua::CheckBool(l,3);
+		if(set)
+			flags |= flag;
+		else
+			flags &= ~flag;
+		Lua::PushInt(l,flags);
+		return 1;
+	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
 		{"EXPRESSION_CODE_BRACKET_OPENING",mup::ECmdCode::cmBO},

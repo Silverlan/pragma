@@ -24,7 +24,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
 
 void CSkyboxComponent::Initialize()
@@ -276,3 +276,4 @@ void CSkybox::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSkyboxComponent>();
 }
+#pragma optimize("",on)

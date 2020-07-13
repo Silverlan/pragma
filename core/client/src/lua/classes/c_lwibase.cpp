@@ -308,6 +308,10 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		lua_checkgui(l,hPanel);
 		hPanel->Update();
 	}));
+	classDef.def("ApplySkin",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		hPanel->ApplySkin();
+	}));
 	classDef.def("SetLeft",static_cast<void(*)(lua_State*,WIHandle&,int32_t)>([](lua_State *l,WIHandle &hPanel,int32_t pos) {
 		lua_checkgui(l,hPanel);
 		hPanel->SetLeft(pos);

@@ -99,7 +99,7 @@ bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &p
 	if(r == false)
 		return r;
 	PushConstants pushConstants {
-		umath::to_integral(GetRenderFlags(pSys)),
+		umath::to_integral(GetRenderFlags(pSys,ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 		umath::to_integral(pSys.GetAlphaMode())
 	};
 	return RecordPushConstants(sizeof(pushConstants),&pushConstants,sizeof(ShaderTextured3DBase::PushConstants));
@@ -113,7 +113,7 @@ bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,p
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
 {
 	return ShaderTextured3DBase::Draw(mesh,[this,numInstances,firstInstance](CModelSubMesh &mesh) {
-		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,0,firstInstance);
+		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
 }
 

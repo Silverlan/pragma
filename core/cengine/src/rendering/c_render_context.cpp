@@ -17,8 +17,10 @@
 using namespace pragma;
 #pragma optimize("",off)
 RenderContext::RenderContext()
-	: m_bWindowedMode(true),m_monitor(nullptr),m_aspectRatio(1.f)
-{}
+	: m_monitor(nullptr),m_aspectRatio(1.f)
+{
+	umath::set_flag(m_stateFlags,StateFlags::WindowedMode);
+}
 RenderContext::~RenderContext()
 {
 	m_graphicsAPILib = nullptr;
@@ -56,16 +58,21 @@ void RenderContext::InitializeRenderAPI()
 	callbacks.onResolutionChanged = [this](uint32_t w,uint32_t h) {OnResolutionChanged(w,h);};
 	callbacks.drawFrame = [this](prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) {DrawFrame(drawCmd,swapchainImageIdx);};
 	m_renderContext->SetCallbacks(callbacks);
+	if(umath::is_flag_set(m_stateFlags,StateFlags::GfxAPIValidationEnabled))
+		m_renderContext->SetValidationEnabled(true);
 
 	GetRenderContext().GetWindowCreationInfo().resizable = false;
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader,prosper::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
 		Con::cwar<<"Unable to load shader '"<<shader.GetIdentifier()<<"':"<<Con::endl;
 		Con::cwar<<"Shader Stage: "<<prosper::util::to_string(stage)<<Con::endl;
+		auto filePath = shader.GetStageSourceFilePath(stage);
+		if(filePath.has_value())
+			Con::cwar<<"Shader Stage Filename: "<<*filePath<<Con::endl;
 		Con::cwar<<infoLog<<Con::endl<<Con::endl;
 		Con::cwar<<debugInfoLog<<Con::endl;
 		});
 	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType,const std::string &msg) {
-		Con::cerr<<"[VK] "<<msg<<Con::endl;
+		Con::cerr<<"[PR] "<<msg<<Con::endl;
 		});
 	GLFW::initialize();
 }
@@ -98,7 +105,7 @@ void RenderContext::ValidationCallback(
 	const std::string &message
 )
 {
-	if((severityFlags &prosper::DebugMessageSeverityFlags::ErrorBit) != prosper::DebugMessageSeverityFlags::None)
+	if((severityFlags &(prosper::DebugMessageSeverityFlags::ErrorBit | prosper::DebugMessageSeverityFlags::WarningBit)) != prosper::DebugMessageSeverityFlags::None)
 	{
 		std::string strMsg = message;
 		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
@@ -106,8 +113,8 @@ void RenderContext::ValidationCallback(
 		// TODO: Remove this condition once the Anvil bug has been dealt with.
 		if(ustring::compare(strMsg.c_str(),"VkImageStencilUsageCreateInfoEXT",true,strlen("VkImageStencilUsageCreateInfoEXT")) == false)
 		{
-			prosper::debug::add_debug_object_information(strMsg);
-			Con::cerr<<"[VK] "<<strMsg<<Con::endl;
+			m_renderContext->AddDebugObjectInformation(strMsg);
+			Con::cerr<<"[PR] "<<strMsg<<Con::endl;
 		}
 	}
 }
@@ -131,7 +138,7 @@ void RenderContext::UpdateWindow()
 	GetRenderContext().WaitIdle();
 	auto &creationInfo = GetRenderContext().GetWindowCreationInfo();
 	if(m_scheduledWindowReloadInfo->windowedMode.has_value())
-		m_bWindowedMode = *m_scheduledWindowReloadInfo->windowedMode;
+		umath::set_flag(m_stateFlags,StateFlags::WindowedMode,*m_scheduledWindowReloadInfo->windowedMode);
 	if(m_scheduledWindowReloadInfo->refreshRate.has_value())
 		creationInfo.refreshRate = (*m_scheduledWindowReloadInfo->refreshRate != 0u) ? static_cast<int32_t>(*m_scheduledWindowReloadInfo->refreshRate) : GLFW_DONT_CARE;
 	if(m_scheduledWindowReloadInfo->decorated.has_value())
@@ -146,7 +153,7 @@ void RenderContext::UpdateWindow()
 	if(m_scheduledWindowReloadInfo->presentMode.has_value())
 		GetRenderContext().SetPresentMode(*m_scheduledWindowReloadInfo->presentMode);
 	m_scheduledWindowReloadInfo = nullptr;
-	if(m_bWindowedMode == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::WindowedMode) == false)
 	{
 		if(creationInfo.monitor == nullptr)
 			creationInfo.monitor = std::make_unique<GLFW::Monitor>(GLFW::get_primary_monitor());
@@ -161,6 +168,7 @@ RenderContext::WindowChangeInfo &RenderContext::ScheduleWindowReload()
 		m_scheduledWindowReloadInfo = std::unique_ptr<WindowChangeInfo>(new WindowChangeInfo{});
 	return *m_scheduledWindowReloadInfo;
 }
+void RenderContext::SetGfxAPIValidationEnabled(bool b) {umath::set_flag(m_stateFlags,StateFlags::GfxAPIValidationEnabled,b);}
 void RenderContext::SetMonitor(GLFW::Monitor &monitor)
 {
 	auto &creationInfo = GetRenderContext().GetWindowCreationInfo();
@@ -178,7 +186,7 @@ void RenderContext::SetPresentMode(prosper::PresentModeKHR presentMode)
 }
 void RenderContext::SetWindowedMode(bool b)
 {
-	if(b == m_bWindowedMode)
+	if(b == umath::is_flag_set(m_stateFlags,StateFlags::WindowedMode))
 		return;
 	auto &changeInfo = ScheduleWindowReload();
 	changeInfo.windowedMode = b;
@@ -207,6 +215,22 @@ void RenderContext::SetResolution(const Vector2i &sz)
 	auto &changeInfo = ScheduleWindowReload();
 	changeInfo.width = sz.x;
 	changeInfo.height = sz.y;
+}
+void RenderContext::SetResolutionWidth(uint32_t w)
+{
+	auto &creationInfo = GetRenderContext().GetWindowCreationInfo();
+	if(w == creationInfo.width)
+		return;
+	auto &changeInfo = ScheduleWindowReload();
+	changeInfo.width = w;
+}
+void RenderContext::SetResolutionHeight(uint32_t h)
+{
+	auto &creationInfo = GetRenderContext().GetWindowCreationInfo();
+	if(h == creationInfo.height)
+		return;
+	auto &changeInfo = ScheduleWindowReload();
+	changeInfo.width = h;
 }
 float RenderContext::GetAspectRatio() const {return m_aspectRatio;}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) {m_renderAPI = renderAPI;}

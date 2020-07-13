@@ -10,7 +10,6 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_context.hpp>
 #include <prosper_util.hpp>
-#include <prosper_util_square_shape.hpp>
 #include <buffers/prosper_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -18,8 +17,8 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 decltype(ShaderDepthToRGB::VERTEX_BINDING_VERTEX) ShaderDepthToRGB::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex};
-decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION) ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::util::get_square_vertex_format()};
-decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV) ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,prosper::util::get_square_uv_format()};
+decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION) ShaderDepthToRGB::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_VERTEX,prosper::CommonBufferCache::GetSquareVertexFormat()};
+decltype(ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV) ShaderDepthToRGB::VERTEX_ATTRIBUTE_UV = {VERTEX_BINDING_VERTEX,prosper::CommonBufferCache::GetSquareUvFormat()};
 
 decltype(ShaderDepthToRGB::DESCRIPTOR_SET) ShaderDepthToRGB::DESCRIPTOR_SET = {
 	{
@@ -52,10 +51,10 @@ void ShaderDepthToRGB::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo
 template<class TPushConstants>
 	bool ShaderDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,const TPushConstants &pushConstants)
 {
-	return RecordBindVertexBuffers({prosper::util::get_square_vertex_uv_buffer(c_engine->GetRenderContext()).get()}) == true &&
+	return RecordBindVertexBuffers({c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer().get()}) == true &&
 		RecordBindDescriptorSet(descSetDepthTex) == true &&
 		RecordPushConstants(pushConstants) == true &&
-		RecordDraw(prosper::util::get_square_vertex_count()) == true;
+		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount()) == true;
 }
 
 bool ShaderDepthToRGB::Draw(prosper::IDescriptorSet &descSetDepthTex,float nearZ,float farZ,float contrastFactor)

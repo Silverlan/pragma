@@ -91,7 +91,7 @@ namespace pragma::rendering
 		virtual void EndRendering() override;
 		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings) override;
 		virtual void UpdateCameraData(pragma::CameraData &cameraData) override;
-		virtual bool ReloadRenderTarget() override;
+		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height) override;
 		using BaseRenderer::GetSceneTexture;
 		using BaseRenderer::GetPresentationTexture;
 		using BaseRenderer::GetHDRPresentationTexture;

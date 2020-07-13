@@ -17,8 +17,8 @@ enum class GameLimits : uint32_t
 	MaxCSMCascades = 4,
 	MaxDirectionalLightSources = 4,
 
-	MaxActiveShadowMaps = 20, // Spot lights
-	MaxActiveShadowCubeMaps = 20, // Point lights
+	MaxActiveShadowMaps = 5, // Spot lights
+	MaxActiveShadowCubeMaps = 5, // Point lights
 
 	MaxMeshVertices = 1'872'457,
 	MaxWorldDistance = 1'048'576, // Maximum reasonable distance; Used for raycasts, among other things

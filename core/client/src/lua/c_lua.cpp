@@ -295,6 +295,7 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(FRender::Static)},
 		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(FRender::Dynamic)},
 		{"RENDER_FLAG_HDR_BIT",umath::to_integral(FRender::HDR)},
+		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(FRender::ParticleDepth)},
 
 		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
 		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},
@@ -320,6 +321,16 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
 	classDefRasterizationRenderer.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
 	classDefRasterizationRenderer.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t width,uint32_t height,bool reload) {
+		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
+			return;
+		renderer.ReloadRenderTarget(width,height);
+	}));
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t width,uint32_t height) {
+		if(width == renderer.GetWidth() && height == renderer.GetHeight())
+			return;
+		renderer.ReloadRenderTarget(width,height);
+	}));
 	classDefRasterizationRenderer.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto *ds = renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 		if(ds == nullptr)
@@ -333,18 +344,22 @@ void CGame::RegisterLua()
 		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
 	}));
 	classDefRasterizationRenderer.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &depthTex = renderer.GetPrepass().textureDepthSampled;
+		auto &depthTex = renderer.GetPrepass().textureDepth;
 		if (depthTex == nullptr)
 			return;
 		Lua::Push(l,depthTex);
 	}));
-	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
-		//renderer.GetHDRInfo().bloomBlurRenderTarget->GetTexture();
-		//renderer.GetGlowInfo().renderTarget->GetTexture()
-		if(rt == nullptr)
+	classDefRasterizationRenderer.def("GetPostProcessingDepthDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &depthTex = renderer.GetHDRInfo().dsgDepthPostProcessing;
+		if (depthTex == nullptr)
 			return;
-		Lua::Push(l,rt);
+		Lua::Push(l,depthTex);
+	}));
+	classDefRasterizationRenderer.def("GetPostProcessingHDRColorDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
+		if(dsg == nullptr)
+			return;
+		Lua::Push(l,dsg);
 	}));
 	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
@@ -352,6 +367,9 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,rt);
 		}));
+	classDefRasterizationRenderer.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const util::DrawSceneInfo&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
+	}));
 	classDefRasterizationRenderer.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
 		if(rt == nullptr)
@@ -381,6 +399,19 @@ void CGame::RegisterLua()
 		if(dsg == nullptr)
 			return;
 		Lua::Push(l,dsg);
+	}));
+	classDefRasterizationRenderer.def("GetRenderParticleSystems",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		auto &particleSystems = renderer.GetCulledParticles();
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &pts : particleSystems)
+		{
+			if(pts == nullptr)
+				continue;
+			Lua::PushInt(l,idx++);
+			pts->PushLuaObject(l);
+			Lua::SetTableValue(l,t);
+		}
 	}));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
 		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
@@ -427,7 +458,7 @@ void CGame::RegisterLua()
 	classDefScene.def("GetWorldEnvironment",&Lua::Scene::GetWorldEnvironment);
 	classDefScene.def("SetWorldEnvironment",&Lua::Scene::SetWorldEnvironment);
 	classDefScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
-	classDefScene.def("InitializeRenderTarget",&Lua::Scene::InitializeRenderTarget);
+	classDefScene.def("InitializeRenderTarget",&Lua::Scene::ReloadRenderTarget);
 
 	classDefScene.def("GetIndex",&Lua::Scene::GetIndex);
 	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
@@ -492,6 +523,15 @@ void CGame::RegisterLua()
 			break;
 		}
 		}
+	}));
+	classDefScene.def("GetSceneIndex",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
+		Lua::PushInt(l,scene.GetSceneIndex());
+	}));
+	classDefScene.def("SetParticleSystemColorFactor",static_cast<void(*)(lua_State*,::Scene&,const Vector4&)>([](lua_State *l,::Scene &scene,const Vector4 &factor) {
+		scene.SetParticleSystemColorFactor(factor);
+	}));
+	classDefScene.def("GetParticleSystemColorFactor",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
+		Lua::Push<Vector4>(l,scene.GetParticleSystemColorFactor());
 	}));
 
 	// Texture indices for scene render target

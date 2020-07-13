@@ -128,19 +128,6 @@ void Lua::Shader::GetGlslSourceCode(lua_State *l,prosper::Shader &shader,uint32_
 		return;
 	Lua::PushString(l,ep->shader_module_ptr->GetGLSLSourceCode());
 }
-void Lua::Shader::GetSpirvBlob(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx)
-{
-	auto *ep = shader.GetModuleStageEntryPoint(static_cast<prosper::ShaderStage>(shaderStage),pipelineIdx);
-	if(ep == nullptr || ep->shader_module_ptr == nullptr)
-		return;
-	auto &spirvBlob = ep->shader_module_ptr->GetSPIRVData();
-	if(spirvBlob.has_value() == false)
-		return;
-	auto sz = spirvBlob->size() *sizeof(spirvBlob->front());
-	auto ds = DataStream(sz);
-	ds->Write(reinterpret_cast<const uint8_t*>(spirvBlob->data()),sz);
-	Lua::Push(l,ds);
-}
 void Lua::Shader::IsGraphicsShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsGraphicsShader());}
 void Lua::Shader::IsComputeShader(lua_State *l,prosper::Shader &shader) {Lua::PushBool(l,shader.IsComputeShader());}
 void Lua::Shader::GetPipelineBindPoint(lua_State *l,prosper::Shader &shader) {Lua::PushInt(l,static_cast<int32_t>(shader.GetPipelineBindPoint()));}

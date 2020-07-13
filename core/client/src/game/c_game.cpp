@@ -180,7 +180,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
 	RegisterCallback<void,pragma::rendering::RasterizationRenderer*>("OnPreRender");
 	RegisterCallback<void>("RenderPrepass");
-	RegisterCallback<void>("PostRenderScene");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>>("CalcViewOffset");
@@ -547,12 +547,12 @@ void CGame::Initialize()
 	InitializeWorldEnvironment();
 
 	auto resolution = c_engine->GetRenderResolution();
-	m_scene = Scene::Create(Scene::CreateInfo{static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y)});
+	m_scene = Scene::Create(Scene::CreateInfo{});
 	m_scene->SetDebugMode(static_cast<Scene::DebugMode>(GetConVarInt("render_debug_mode")));
 	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
 	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(*m_scene);
-	//auto renderer = pragma::rendering::RaytracingRenderer::Create<pragma::rendering::RaytracingRenderer>(*m_scene);
 	m_scene->SetRenderer(renderer);
+	m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
 	m_scene->SetWorldEnvironment(GetWorldEnvironment());
 	if(renderer && renderer->IsRasterizationRenderer())
 		renderer->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
@@ -671,13 +671,13 @@ void CGame::Resize()
 	cam->UpdateMatrices();
 }
 
-void CGame::PreGUIDraw()
+void CGame::PreGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	CallLuaCallbacks("PreGUIDraw");
+	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PreGUIDraw",drawCmd);
 }
-void CGame::PostGUIDraw()
+void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	CallLuaCallbacks("PostGUIDraw");
+	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
 }
 void CGame::SetRenderScene(const std::shared_ptr<Scene> &scene)
 {
@@ -949,7 +949,7 @@ uint32_t CGame::GetMSAASampleCount()
 void CGame::ReloadRenderFrameBuffer()
 {
 	if(m_scene != nullptr)
-		m_scene->ReloadRenderTarget();
+		m_scene->ReloadRenderTarget(m_scene->GetWidth(),m_scene->GetHeight());
 }
 
 void CGame::Think()

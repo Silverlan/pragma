@@ -155,7 +155,6 @@ namespace Lua
 		DLLCLIENT void GetPipelineInfo(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx);
 		DLLCLIENT void GetEntrypointName(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx);
 		DLLCLIENT void GetGlslSourceCode(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx);
-		DLLCLIENT void GetSpirvBlob(lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx);
 		DLLCLIENT void IsGraphicsShader(lua_State *l,prosper::Shader &shader);
 		DLLCLIENT void IsComputeShader(lua_State *l,prosper::Shader &shader);
 		DLLCLIENT void GetPipelineBindPoint(lua_State *l,prosper::Shader &shader);
@@ -173,7 +172,7 @@ namespace Lua
 			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,prosper::ShaderGraphics &shader,luabind::object buffers,uint32_t startBinding,luabind::object offsets);
 			DLLCLIENT void RecordBindIndexBuffer(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType,uint32_t offset);
 			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader,uint32_t vertCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance);
-			DLLCLIENT void RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,int32_t vertexOffset,uint32_t firstInstance);
+			DLLCLIENT void RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance);
 			DLLCLIENT void RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx);
 			DLLCLIENT void RecordDraw(lua_State *l,prosper::ShaderGraphics &shader);
 			DLLCLIENT void RecordEndDraw(lua_State *l,prosper::ShaderGraphics &shader);

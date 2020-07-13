@@ -110,7 +110,7 @@ class DLLCLIENT CParticleRendererLua
 {
 public:
 	CParticleRendererLua()=default;
-	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) override;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags) override;
 	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 	void SetShader(pragma::ShaderParticleBase *shader);

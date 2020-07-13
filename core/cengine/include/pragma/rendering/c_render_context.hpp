@@ -24,6 +24,12 @@ namespace pragma
 	class DLLCENGINE RenderContext
 	{
 	public:
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			WindowedMode = 1u,
+			GfxAPIValidationEnabled = WindowedMode<<1u
+		};
 		RenderContext();
 		virtual ~RenderContext();
 
@@ -42,10 +48,13 @@ namespace pragma
 		void FlushSetupCommandBuffer();
 		
 		void InitializeRenderAPI();
+		void SetGfxAPIValidationEnabled(bool b);
 		void SetWindowedMode(bool b);
 		void SetRefreshRate(uint32_t rate);
 		void SetNoBorder(bool b);
 		void SetResolution(const Vector2i &sz);
+		void SetResolutionWidth(uint32_t w);
+		void SetResolutionHeight(uint32_t h);
 		void SetMonitor(GLFW::Monitor &monitor);
 		void SetPresentMode(prosper::PresentModeKHR presentMode);
 		float GetAspectRatio() const;
@@ -76,13 +85,14 @@ namespace pragma
 		WindowChangeInfo &ScheduleWindowReload();
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
 		std::unique_ptr<WindowChangeInfo> m_scheduledWindowReloadInfo = nullptr;
-		bool m_bWindowedMode = false;
+		StateFlags m_stateFlags = StateFlags::None;
 		float m_aspectRatio = 1.f;
 		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI = "vulkan";
 	};
 }
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::RenderContext::StateFlags)
 #pragma warning(pop)
 
 #endif

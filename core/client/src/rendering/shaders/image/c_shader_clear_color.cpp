@@ -11,7 +11,6 @@
 #include <prosper_context.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
-#include <prosper_util_square_shape.hpp>
 
 using namespace pragma;
 
@@ -36,9 +35,9 @@ void ShaderClearColor::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo
 bool ShaderClearColor::Draw(const PushConstants &pushConstants)
 {
 	if(
-		RecordBindVertexBuffer(*prosper::util::get_square_vertex_buffer(GetContext())) == false ||
+		RecordBindVertexBuffer(*GetContext().GetCommonBufferCache().GetSquareVertexBuffer()) == false ||
 		RecordPushConstants(pushConstants) == false ||
-		RecordDraw(prosper::util::get_square_vertex_count()) == false
+		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount()) == false
 	)
 		return false;
 	return true;

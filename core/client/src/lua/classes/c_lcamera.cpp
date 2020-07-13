@@ -81,9 +81,9 @@ void Lua::Scene::SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironmen
 {
 	scene.SetWorldEnvironment(worldEnv);
 }
-void Lua::Scene::InitializeRenderTarget(lua_State *l,::Scene &scene)
+void Lua::Scene::ReloadRenderTarget(lua_State *l,::Scene &scene,uint32_t width,uint32_t height)
 {
-	scene.InitializeRenderTarget();
+	scene.ReloadRenderTarget(width,height);
 }
 void Lua::Scene::GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint)
 {

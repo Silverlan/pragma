@@ -13,7 +13,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 int GetMaxMSAASampleCount()
 {
-	auto props = prosper::util::get_physical_device_image_format_properties(c_engine->GetRenderContext(),{
+	auto props = c_engine->GetRenderContext().GetPhysicalDeviceImageFormatProperties({
 		prosper::ImageCreateFlags{},prosper::Format::R16G16B16A16_SFloat,prosper::ImageType::e2D,prosper::ImageTiling::Optimal,
 		prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit
 	});

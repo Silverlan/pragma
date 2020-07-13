@@ -16,10 +16,15 @@
 
 struct lua_State;
 namespace Lua {class Interface;};
-namespace prosper {class Shader; class Image; class PrimaryCommandBuffer; class Fence;};
+namespace prosper {class Shader; class IImage; class IPrimaryCommandBuffer; class IFence;};
 
 namespace openvr
 {
+	enum class RenderAPI : uint8_t
+	{
+		OpenGL = 0,
+		Vulkan
+	};
 	struct ControllerState;
 	struct Eye;
 	std::string to_string(vr::VREvent_t ev);
@@ -159,10 +164,10 @@ namespace openvr
 		bool IsFullscreen() const;
 		bool ShouldAppRenderWithLowResources() const;
 		void SuspendRendering(bool b) const;
-		vr::EVRCompositorError SetSkyboxOverride(prosper::Image &img) const;
-		vr::EVRCompositorError SetSkyboxOverride(prosper::Image &img,prosper::Image &img2) const;
+		vr::EVRCompositorError SetSkyboxOverride(prosper::IImage &img) const;
+		vr::EVRCompositorError SetSkyboxOverride(prosper::IImage &img,prosper::IImage &img2) const;
 		vr::EVRCompositorError SetSkyboxOverride(
-			prosper::Image &front,prosper::Image &back,prosper::Image &left,prosper::Image &right,prosper::Image &top,prosper::Image &bottom
+			prosper::IImage &front,prosper::IImage &back,prosper::IImage &left,prosper::IImage &right,prosper::IImage &top,prosper::IImage &bottom
 		) const;
 		vr::Compositor_CumulativeStats GetCumulativeStats() const;
 		vr::ETrackingUniverseOrigin GetTrackingSpace() const;
@@ -172,8 +177,8 @@ namespace openvr
 
 		struct CommandBufferInfo
 		{
-			std::shared_ptr<prosper::PrimaryCommandBuffer> commandBuffer;
-			std::shared_ptr<prosper::Fence> fence;
+			std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
+			std::shared_ptr<prosper::IFence> fence;
 		};
 		std::optional<CommandBufferInfo> StartRecording();
 		void StopRecording();
@@ -205,6 +210,7 @@ namespace openvr
 		std::unique_ptr<Eye> m_rightEye = nullptr;
 		std::function<void(uint32_t,uint32_t,GLFW::KeyState)> m_controllerStateCallback = nullptr;
 		bool m_bHmdViewEnabled = false;
+		RenderAPI m_renderAPI = RenderAPI::OpenGL;
 
 		std::deque<CommandBufferInfo> m_commandBuffers = {};
 		std::optional<CommandBufferInfo> m_activeCommandBuffer = {};
@@ -213,7 +219,7 @@ namespace openvr
 		void PollEvents();
 		void ProcessEvent(vr::VREvent_t ev);
 		void OnControllerStateChanged(uint32_t controllerId,uint32_t key,GLFW::KeyState state);
-		vr::EVRCompositorError SetSkyboxOverride(const std::vector<prosper::Image*> &images) const;
+		vr::EVRCompositorError SetSkyboxOverride(const std::vector<prosper::IImage*> &images) const;
 	};
 };
 

@@ -66,7 +66,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
-
+#pragma optimize("",off)
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -129,6 +129,8 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 {
 	Engine::DumpDebugInformation(zip);
 	std::stringstream ss;
+	// TODO
+#if 0
 	auto deviceInfo = prosper::util::get_vendor_device_info(GetRenderContext());
 	ss<<"Vulkan API Version: "<<deviceInfo.apiVersion<<"\n";
 	ss<<"Device Name: "<<deviceInfo.deviceName<<"\n";
@@ -137,9 +139,11 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 	ss<<"Vendor: "<<prosper::util::to_string(deviceInfo.vendor)<<"\n";
 	ss<<"Vendor ID: "<<umath::to_integral(deviceInfo.vendor);
 	zip.AddFile("gpu.txt",ss.str());
+#endif
 	
 	ss.str(std::string());
 	ss.clear();
+#if 0
 	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_layers.txt",ss.str());
 
@@ -167,6 +171,7 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 	ss.clear();
 	prosper::debug::dump_format_properties(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_format_properties.txt",ss.str());
+#endif
 }
 
 void CEngine::InitializeStagingTarget()
@@ -1067,7 +1072,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 
 	// Change swapchain image layout to TransferDst
 	prosper::util::ImageSubresourceRange subresourceRange {0,1,0,1};
-	auto queueFamilyIndex = prosper::util::get_universal_queue_family_index(GetRenderContext());
+	auto queueFamilyIndex = GetRenderContext().GetUniversalQueueFamilyIndex();
 
 	{
 
@@ -1100,7 +1105,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 
 		prosper::util::PipelineBarrierInfo barrierInfo {};
 		barrierInfo.srcStageMask = prosper::PipelineStageFlags::TransferBit;
-		barrierInfo.dstStageMask = prosper::PipelineStageFlags::AllCommandsBit;
+		barrierInfo.dstStageMask = prosper::PipelineStageFlags::AllCommands;
 		barrierInfo.imageBarriers.push_back(prosper::util::create_image_barrier(*GetRenderContext().GetSwapchainImage(n_current_swapchain_image),imgBarrierInfo));
 		drawCmd.RecordPipelineBarrier(barrierInfo);
 	}
@@ -1126,9 +1131,10 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	}
 
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
-	drawCmd->RecordBeginRenderPass(*rt);
 	if(c_game != nullptr)
-		c_game->PreGUIDraw();
+		c_game->PreGUIDraw(drawCmd);
+
+	drawCmd->RecordBeginRenderPass(*rt);
 	
 	StartProfilingStage(GPUProfilingPhase::GUI);
 		auto &gui = WGUI::GetInstance();
@@ -1139,7 +1145,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
 
 	if(c_game != nullptr)
-		c_game->PostGUIDraw();
+		c_game->PostGUIDraw(drawCmd);
 }
 
 #include <prosper_util.hpp>
@@ -1321,3 +1327,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

@@ -13,6 +13,7 @@
 #include <prosper_fence.hpp>
 #include <shader/prosper_shader.hpp>
 #include <prosper_util.hpp>
+#include <pragma/c_engine.h>
 #include <pragma/iscene.h>
 #include <pragma/game/c_game.h>
 #include <pragma/entities/environment/c_env_camera.h>
@@ -21,6 +22,7 @@
 #include <iostream>
 #endif
 
+extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace openvr;
@@ -255,6 +257,12 @@ Instance::Instance(vr::IVRSystem *system,uint32_t width,uint32_t height,vr::IVRR
 	m_cbThink = m_cbDraw = IState::add_callback(IState::Callback::Think,FunctionCallback<void>::Create([this]() {
 		PollEvents();
 	}));
+
+	auto renderAPI = c_engine->GetRenderContext().GetAPIIdentifier();
+	if(ustring::compare(renderAPI,"OpenGL"))
+		m_renderAPI = RenderAPI::OpenGL;
+	else if(ustring::compare(renderAPI,"Vulkan"))
+		m_renderAPI = RenderAPI::Vulkan;
 #ifdef _DEBUG
 	m_compositor->ShowMirrorWindow();
 #endif
@@ -314,8 +322,8 @@ bool Instance::InitializeScene()
 		return;
 	}));
 	m_cbDrawGame = IState::add_callback(IState::Callback::DrawScene,FunctionCallback<
-		bool,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>>,prosper::Image*
-	>::CreateWithOptionalReturn([this](bool *ret,std::reference_wrapper<std::shared_ptr<prosper::PrimaryCommandBuffer>> drawCmd,prosper::Image *img) -> CallbackReturnType {
+		bool,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>,prosper::IImage*
+	>::CreateWithOptionalReturn([this](bool *ret,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd,prosper::IImage *img) -> CallbackReturnType {
 		if(m_bHmdViewEnabled == false)
 			return CallbackReturnType::NoReturnValue;
 #if LOPENVR_VERBOSE == 1
@@ -495,15 +503,18 @@ void Instance::DrawScene()
 	{
 		auto &rt = eye->vkRenderTarget;
 		auto &vkTexture = rt->GetTexture();
-		auto &vkImg = vkTexture->GetImage();
+		auto &vkImg = vkTexture.GetImage();
 		auto &cam = eye->camera;
 		if(cam.expired())
 			continue;
 		cam->SetViewMatrix(camGame->GetViewMatrix());
-		auto &scene = eye->scene;
 		auto mViewCam = cam->GetViewMatrix();
 		auto mView = m_hmdPoseMatrix *eye->GetEyeViewMatrix(*cam);
 		cam->SetViewMatrix(mView);
+
+		auto scene = c_game->GetRenderScene();
+		auto *renderer = scene->GetRenderer();
+		scene->SetRenderer(*renderer);
 
 		// TODO
 		//auto mProj = eye->GetEyeProjectionMatrix(scene.GetZNear(),scene.GetZFar());
@@ -515,17 +526,17 @@ void Instance::DrawScene()
 		if(drawCmdInfo.has_value())
 		{
 #ifdef USE_VULKAN
-			prosper::util::record_image_barrier(**drawCmdInfo->commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
+			drawCmdInfo->commandBuffer->RecordImageBarrier(eye->vkRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL);
 			//prosper::util::record_clear_image(**drawCmdInfo.commandBuffer,**vkImg,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,std::array<float,4>{1.f,0.f,0.f,1.f});
 			//prosper::util::record_image_barrier(**drawCmdInfo.commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 
 #endif
 			IState::draw_scene(scene,drawCmdInfo->commandBuffer,rt);
-			eye->UpdateImage(*vkImg);
+			eye->UpdateImage(vkImg);
 
 #ifdef USE_VULKAN
-			prosper::util::record_image_barrier(**drawCmdInfo->commandBuffer,**eye->vkRenderTarget->GetTexture()->GetImage(),Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
+			drawCmdInfo->commandBuffer->RecordImageBarrier(eye->vkRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
 #endif
 
 			StopRecording();
@@ -552,10 +563,10 @@ std::optional<Instance::CommandBufferInfo> Instance::StartRecording()
 		m_activeCommandBuffer = cmdBufferInfo;
 		return m_activeCommandBuffer;
 	}
-	auto &context = const_cast<prosper::Context&>(IState::get_render_context());
-	auto &dev = context.GetDevice();
-	auto cmdBuffer = prosper::PrimaryCommandBuffer::Create(context,dev.get_command_pool_for_queue_family_index(dev.get_universal_queue(0)->get_queue_family_index())->alloc_primary_level_command_buffer(),Anvil::QueueFamilyType::UNIVERSAL);
-	auto fence = prosper::Fence::Create(context);
+	auto &context = const_cast<prosper::IPrContext&>(IState::get_render_context());
+	uint32_t universalQueueFamilyIndex;
+	auto cmdBuffer = context.AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
+	auto fence = context.CreateFence();
 	if(cmdBuffer->StartRecording() == false)
 		return {};
 	m_activeCommandBuffer = CommandBufferInfo{cmdBuffer,fence};
@@ -567,7 +578,7 @@ void Instance::StopRecording()
 		return;
 	m_activeCommandBuffer->commandBuffer->StopRecording();
 	check_error(m_compositor->SubmitExplicitTimingData());
-	m_activeCommandBuffer->commandBuffer->GetContext().SubmitCommandBuffer(*m_activeCommandBuffer->commandBuffer,false,&m_activeCommandBuffer->fence->GetAnvilFence());
+	m_activeCommandBuffer->commandBuffer->GetContext().SubmitCommandBuffer(*m_activeCommandBuffer->commandBuffer,false,m_activeCommandBuffer->fence.get());
 	m_commandBuffers.push_front(*m_activeCommandBuffer);
 
 	m_activeCommandBuffer = {};
@@ -694,7 +705,7 @@ std::unique_ptr<Instance> Instance::Create(vr::EVRInitError *err,std::vector<std
 		pCompositor->GetVulkanInstanceExtensionsRequired(const_cast<char*>(instanceExt.data()),0);
 	}
 	auto &vkContext = IState::get_render_context();
-	auto &vkDevice = const_cast<prosper::Context&>(vkContext).GetDevice().get_physical_device()->get_physical_device();
+	auto *vkDevice = static_cast<VkPhysicalDevice_T*>(vkContext.GetInternalPhysicalDevice());
 	auto deviceExtLen = pCompositor->GetVulkanDeviceExtensionsRequired(vkDevice,nullptr,0);
 	std::string deviceExt;
 	if(deviceExtLen > 0)
@@ -711,7 +722,7 @@ std::unique_ptr<Instance> Instance::Create(vr::EVRInitError *err,std::vector<std
 
 	for(auto &ext : reqInstanceExtensions)
 	{
-		if(const_cast<prosper::Context&>(vkContext).GetAnvilInstance().is_instance_extension_enabled(ext) == false)
+		if(vkContext.IsInstanceExtensionEnabled(ext) == false)
 		{
 			Con::cerr<<"[VR] ERROR: Required instance extension '"<<ext<<"' is not enabled!"<<Con::endl;
 			break;
@@ -719,7 +730,7 @@ std::unique_ptr<Instance> Instance::Create(vr::EVRInitError *err,std::vector<std
 	}
 	for(auto &ext : reqDeviceExtensions)
 	{
-		if(const_cast<prosper::Context&>(vkContext).GetDevice().is_extension_enabled(ext) == false)
+		if(vkContext.IsDeviceExtensionEnabled(ext) == false)
 		{
 			Con::cerr<<"[VR] ERROR: Required device extension '"<<ext<<"' is not enabled!"<<Con::endl;
 			break;
@@ -891,24 +902,33 @@ vr::Compositor_CumulativeStats Instance::GetCumulativeStats() const
 	m_compositor->GetCumulativeStats(&stats,sizeof(stats));
 	return stats;
 }
-vr::EVRCompositorError Instance::SetSkyboxOverride(const std::vector<prosper::Image*> &images) const
+vr::EVRCompositorError Instance::SetSkyboxOverride(const std::vector<prosper::IImage*> &images) const
 {
+	auto renderAPI = c_engine->GetRenderContext().GetAPIIdentifier();
 	std::vector<vr::Texture_t> imgTexData(images.size());
 	for(auto i=decltype(images.size()){0};i<images.size();++i)
 	{
 		auto &img = images.at(i);
 		auto &texData = imgTexData.at(i);
 		texData.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
-		texData.eType = vr::ETextureType::TextureType_Vulkan;
-		texData.handle = (*img)->get_image();
+		texData.handle = const_cast<void*>(img->GetInternalHandle());
+		switch(m_renderAPI)
+		{
+		case RenderAPI::OpenGL:
+			texData.eType = vr::ETextureType::TextureType_OpenGL;
+			break;
+		case RenderAPI::Vulkan:
+			texData.eType = vr::ETextureType::TextureType_Vulkan;
+			break;
+		}
 	}
 	return m_compositor->SetSkyboxOverride(imgTexData.data(),imgTexData.size());
 }
-vr::EVRCompositorError Instance::SetSkyboxOverride(prosper::Image &img) const {return SetSkyboxOverride({&img});}
-vr::EVRCompositorError Instance::SetSkyboxOverride(prosper::Image &img,prosper::Image &img2) const {return SetSkyboxOverride({&img,&img2});}
+vr::EVRCompositorError Instance::SetSkyboxOverride(prosper::IImage &img) const {return SetSkyboxOverride({&img});}
+vr::EVRCompositorError Instance::SetSkyboxOverride(prosper::IImage &img,prosper::IImage &img2) const {return SetSkyboxOverride({&img,&img2});}
 vr::EVRCompositorError Instance::SetSkyboxOverride(
-	prosper::Image &front,prosper::Image &back,prosper::Image &left,
-	prosper::Image &right,prosper::Image &top,prosper::Image &bottom
+	prosper::IImage &front,prosper::IImage &back,prosper::IImage &left,
+	prosper::IImage &right,prosper::IImage &top,prosper::IImage &bottom
 ) const
 {
 	return SetSkyboxOverride({&front,&back,&left,&right,&top,&bottom});

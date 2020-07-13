@@ -48,8 +48,8 @@ ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
 
 ///////////////////////////
 
-Scene::CreateInfo::CreateInfo(uint32_t width,uint32_t height)
-	: width{width},height{height},sampleCount{static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())}
+Scene::CreateInfo::CreateInfo()
+	: sampleCount{static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())}
 {}
 
 ///////////////////////////
@@ -99,7 +99,6 @@ Scene *Scene::GetByIndex(SceneIndex sceneIndex)
 
 Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	: std::enable_shared_from_this<Scene>(),
-	m_width(createInfo.width),m_height(createInfo.height),
 	m_sceneIndex{sceneIndex}
 {
 	for(auto i=decltype(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT){0};i<pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;++i)
@@ -219,6 +218,10 @@ void Scene::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawC
 	auto &cam = GetActiveCamera();
 	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
 	m_renderSettings.posCam = camPos;
+
+	// These may have changed through a renderer resize
+	m_renderSettings.viewportW = GetWidth();
+	m_renderSettings.viewportH = GetHeight();
 
 	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
@@ -387,11 +390,13 @@ void Scene::ClearWorldEnvironment()
 Vulkan::Texture &Scene::ResolveDepthTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->Resolve(cmdBuffer));}
 Vulkan::Texture &Scene::ResolveBloomTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.textureBloom->Resolve(cmdBuffer));}*/ // prosper TODO
 
-void Scene::Resize(uint32_t width,uint32_t height)
+void Scene::Resize(uint32_t width,uint32_t height,bool reload)
 {
-	m_width = width;
-	m_height = height;
-	ReloadRenderTarget();
+	if(m_renderer == nullptr)
+		return;
+	if(reload == false && width == GetWidth() && height == GetHeight())
+		return;
+	ReloadRenderTarget(width,height);
 }
 void Scene::LinkWorldEnvironment(Scene &other)
 {
@@ -418,37 +423,32 @@ void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &
 	m_renderer = renderer;
 	InitializeRenderSettingsBuffer();
 	InitializeSwapDescriptorBuffers();
-	Resize(m_width,m_height);
 }
 pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
 
 Scene::DebugMode Scene::GetDebugMode() const {return m_debugMode;}
 void Scene::SetDebugMode(Scene::DebugMode debugMode) {m_debugMode = debugMode;}
 
+void Scene::SetParticleSystemColorFactor(const Vector4 &colorFactor) {m_particleSystemColorFactor = colorFactor;}
+const Vector4 &Scene::GetParticleSystemColorFactor() const {return m_particleSystemColorFactor;}
+
 bool Scene::IsValid() const {return m_bValid;}
 
 Scene::SceneIndex Scene::GetSceneIndex() const {return m_sceneIndex;}
 
-uint32_t Scene::GetWidth() const {return m_width;}
-uint32_t Scene::GetHeight() const {return m_height;}
+uint32_t Scene::GetWidth() const {return m_renderer ? m_renderer->GetWidth() : 0;}
+uint32_t Scene::GetHeight() const {return m_renderer ? m_renderer->GetHeight() : 0;}
 
 //const Vulkan::DescriptorSet &Scene::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
-void Scene::ReloadRenderTarget()
+void Scene::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
 	m_bValid = false;
 
-	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget() == false)
+	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(width,height) == false)
 		return;
 
 	m_bValid = true;
-}
-
-void Scene::InitializeRenderTarget()
-{
-	if(IsValid())
-		return;
-	ReloadRenderTarget();
 }
 
 const util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() const {return const_cast<Scene*>(this)->GetActiveCamera();}

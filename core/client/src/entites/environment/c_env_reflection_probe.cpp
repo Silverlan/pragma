@@ -48,7 +48,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
 
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
@@ -979,3 +979,4 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
+#pragma optimize("",on)

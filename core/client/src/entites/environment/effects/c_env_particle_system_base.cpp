@@ -1315,9 +1315,9 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags)
 {
-	if(bloom && IsBloomEnabled() == false)
+	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
 	m_tLastEmission = c_game->RealTime();
 	if(IsActiveOrPaused() == false)
@@ -1332,7 +1332,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 		if(hChild.child.expired() || hChild.child->IsActiveOrPaused() == false)
 			continue;
 		numRenderParticles += hChild.child->GetRenderParticleCount();
-		hChild.child->Render(drawCmd,renderer,bloom);
+		hChild.child->Render(drawCmd,renderer,renderFlags);
 	}
 	if(numRenderParticles == 0)
 	{
@@ -1344,7 +1344,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 	if(m_bufParticles != nullptr)
 	{
 		for(auto &r : m_renderers)
-			r->Render(drawCmd,renderer,bloom);
+			r->Render(drawCmd,renderer,renderFlags);
 	}
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }

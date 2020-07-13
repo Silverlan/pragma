@@ -181,7 +181,7 @@ static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,b
 			return r->GetHandle();
 		});
 		auto *d = dbg.get();
-		dbg->AddCallback("PostRenderScene",FunctionCallback<>::Create([d]() {
+		dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 			auto *el = d->GetGUIElement();
 			if(el == nullptr)
 				return;

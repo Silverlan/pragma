@@ -6,7 +6,7 @@
 #include <pragma/iscene.h>
 #include <sharedutils/util_weak_handle.hpp>
 
-namespace prosper {class RenderTarget; class Image; class PrimaryCommandBuffer; class Fence;};
+namespace prosper {class RenderTarget; class IImage; class IPrimaryCommandBuffer; class IFence;};
 namespace pragma {class CCameraComponent;};
 namespace openvr
 {
@@ -20,7 +20,7 @@ namespace openvr
 		~Eye();
 		bool Initialize(uint32_t w,uint32_t h);
 		vr::EVREye eye;
-		IScene scene;
+		std::shared_ptr<pragma::rendering::BaseRenderer> renderer = nullptr;
 		util::WeakHandle<pragma::CCameraComponent> camera;
 #ifdef USE_VULKAN
 		std::shared_ptr<prosper::RenderTarget> vkRenderTarget = nullptr;
@@ -32,7 +32,7 @@ namespace openvr
 		uint32_t width;
 		uint32_t height;
 		vr::Texture_t vrTexture;
-		void UpdateImage(const prosper::Image &src);
+		void UpdateImage(const prosper::IImage &src);
 		Mat4 GetEyeViewMatrix(pragma::CCameraComponent &cam) const;
 		Mat4 GetEyeProjectionMatrix(float nearZ,float farZ) const;
 	};

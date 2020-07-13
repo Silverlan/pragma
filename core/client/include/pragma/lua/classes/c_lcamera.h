@@ -34,7 +34,7 @@ namespace Lua
 		DLLCLIENT void ClearWorldEnvironment(lua_State *l,::Scene &scene);
 		DLLCLIENT void SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironment &worldEnv);
 
-		DLLCLIENT void InitializeRenderTarget(lua_State *l,::Scene &scene);
+		DLLCLIENT void ReloadRenderTarget(lua_State *l,::Scene &scene,uint32_t width,uint32_t height);
 
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene);
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint);

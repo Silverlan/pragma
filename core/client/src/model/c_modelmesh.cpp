@@ -62,6 +62,7 @@ void CModelSubMesh::InitializeBuffers()
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = GLOBAL_MESH_VERTEX_BUFFER_SIZE;
+	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;

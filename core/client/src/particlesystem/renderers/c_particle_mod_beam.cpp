@@ -110,12 +110,12 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;
 	auto *shader = static_cast<pragma::ShaderParticlePolyboard*>(m_shader.get());
-	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem()) == false)
+	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false)
 		return;
 	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
 	auto &descSetShadows = *renderer.GetCSMDescriptorSet();

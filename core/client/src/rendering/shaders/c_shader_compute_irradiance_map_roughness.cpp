@@ -106,6 +106,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	bufCreateInfo.size = sizeof(RoughnessData);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
 	buf->SetPermanentlyMapped(true);
 

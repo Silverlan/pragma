@@ -68,6 +68,8 @@ std::vector<std::string> engine_info::get_patrons()
 		"Siejax",
 		"SquarePeg",
 		"_HappyGoLucky",
+		"Gnomp",
+		"RED_EYE",
 
 		"Ruthoranium",
 		"CodaAnim",
@@ -78,7 +80,7 @@ std::vector<std::string> engine_info::get_patrons()
 		"branpurn",
 		"Elektrospy",
 		"Syrr",
-		"Tanooki Jon",
+		"Tanooki_Jon",
 		"Xrdexst",
 		"Noah The Troll-Hunting Christian Spy",
 		"Boris \"SunRade\" Serousov",

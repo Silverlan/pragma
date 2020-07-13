@@ -16,10 +16,12 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_command_buffer.hpp>
-
+#include <image/prosper_render_target.hpp>
+#include <pragma/model/c_vertex_buffer_data.hpp>
+#include <pragma/model/vk_mesh.h>
+#pragma optimize("",off)
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
 
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
@@ -121,4 +123,4 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 	}
 	//
 }
-
+#pragma optimize("",on)

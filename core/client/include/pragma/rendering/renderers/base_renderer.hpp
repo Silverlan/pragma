@@ -31,7 +31,7 @@ namespace pragma::rendering
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
-		virtual bool ReloadRenderTarget()=0;
+		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height)=0;
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();
 		virtual prosper::Texture *GetHDRPresentationTexture()=0;
@@ -46,6 +46,8 @@ namespace pragma::rendering
 		virtual bool IsRayTracingRenderer() const;
 
 		Scene &GetScene() const;
+		uint32_t GetWidth() const;
+		uint32_t GetHeight() const;
 	protected:
 		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		virtual void EndRendering()=0;

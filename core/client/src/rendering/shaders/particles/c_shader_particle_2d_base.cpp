@@ -116,7 +116,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
 	ShaderSceneLit::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
 
-	pipelineInfo.ToggleDepthWrites(false);
+	pipelineInfo.ToggleDepthWrites(pipelineIdx == GetDepthPipelineIndex()); // Last pipeline is depth pipeline
 
 	ShaderParticleBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	RegisterDefaultGfxPipelineVertexAttributes(pipelineInfo);
@@ -124,10 +124,17 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipeline,RecordFlags recordFlags)
 {
-	auto alphaMode = GetRenderAlphaMode(pSys);
-	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx) *umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode),recordFlags);
+	uint32_t pipelineIdx;
+	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::DepthOnly))
+		pipelineIdx = GetDepthPipelineIndex();
+	else
+	{
+		auto alphaMode = GetRenderAlphaMode(pSys);
+		pipelineIdx = umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
+	}
+	return ShaderSceneLit::BeginDraw(cmdBuffer,pipelineIdx,recordFlags);
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
@@ -155,20 +162,33 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMa
 void ShaderParticle2DBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
-	CreateCachedRenderPass<ShaderParticle2DBase>({{
-		{
-			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
-			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
-		},
-		{ // Bloom Attachment
-			RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
-			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
-		},
-		{
-			RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
-			prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
-		}
-	}},outRenderPass,pipelineIdx);
+	if(pipelineIdx != GetDepthPipelineIndex())
+	{
+		CreateCachedRenderPass<ShaderParticle2DBase>({{
+			{
+				RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
+			},
+			{ // Bloom Attachment
+				RENDER_PASS_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
+			},
+			{
+				RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
+			}
+		}},outRenderPass,pipelineIdx);
+	}
+	else
+	{
+		// Depth only
+		CreateCachedRenderPass<ShaderParticle2DBase>({{
+			{
+				RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,
+				prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
+			}
+		}},outRenderPass,pipelineIdx);
+	}
 }
 
 bool ShaderParticle2DBase::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderSceneLit::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
@@ -266,19 +286,19 @@ bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRe
 	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,bool bloom)
+bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
 	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 
-	Vector4 colorFactor {1.f,1.f,1.f,1.f};
-	if(bloom)
+	auto colorFactor = renderer.GetScene().GetParticleSystemColorFactor();
+	if(umath::is_flag_set(ptRenderFlags,ParticleRenderFlags::Bloom))
 	{
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();
 		if(bloomColorFactor.has_value())
-			colorFactor = *bloomColorFactor;
+			colorFactor *= *bloomColorFactor;
 	}
 	else
 	{
@@ -297,7 +317,7 @@ bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer
 		}
 	}
 
-	auto renderFlags = GetRenderFlags(ps);
+	auto renderFlags = GetRenderFlags(ps,ptRenderFlags);
 	auto width = c_engine->GetRenderContext().GetWindowWidth();
 	auto height = c_engine->GetRenderContext().GetWindowHeight();
 	assert(width <= std::numeric_limits<uint16_t>::max() && height <= std::numeric_limits<uint16_t>::max());

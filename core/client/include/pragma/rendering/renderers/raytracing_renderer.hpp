@@ -23,7 +23,7 @@ namespace pragma::rendering
 
 		virtual void EndRendering() override;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
-		virtual bool ReloadRenderTarget() override;
+		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height) override;
 		virtual bool IsRayTracingRenderer() const override;
 		virtual prosper::Texture *GetSceneTexture() override;
 		virtual prosper::Texture *GetHDRPresentationTexture() override;

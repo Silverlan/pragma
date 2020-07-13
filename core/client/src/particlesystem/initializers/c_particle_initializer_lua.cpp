@@ -39,9 +39,9 @@ void CParticleOperatorLua::Simulate(double tDelta)
 
 //////////////
 
-void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)
+void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
-	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,std::reference_wrapper<pragma::rendering::RasterizationRenderer>,bool>("Render",std::ref(*drawCmd),std::ref(const_cast<pragma::rendering::RasterizationRenderer&>(renderer)),bloom);
+	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,std::reference_wrapper<pragma::rendering::RasterizationRenderer>,uint32_t>("Render",std::ref(*drawCmd),std::ref(const_cast<pragma::rendering::RasterizationRenderer&>(renderer)),umath::to_integral(renderFlags));
 }
 void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {

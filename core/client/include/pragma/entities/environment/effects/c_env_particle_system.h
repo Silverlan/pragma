@@ -29,6 +29,12 @@ namespace pragma
 		std::vector<std::string> particleSystemNames {};
 		std::vector<uint64_t> particleSystemOffsets {};
 	};
+	enum class ParticleRenderFlags : uint32_t
+	{
+		None = 0u,
+		Bloom = 1u,
+		DepthOnly = Bloom<<1u
+	};
 	class CParticleSystemComponent;
 	class DLLCLIENT CParticleSystemComponent final
 		: public BaseEnvParticleSystemComponent,
@@ -232,7 +238,7 @@ namespace pragma
 		void SetColorFactor(const Vector4 &colorFactor);
 		
 		void Simulate(double tDelta);
-		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom);
+		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags);
 		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
 		uint32_t GetParticleCount() const;
 		// Same as m_numParticles, minus particles with a radius of 0, alpha of 0 or similar (Invisible particles)
@@ -397,6 +403,7 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CParticleSystemComponent::Flags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ParticleRenderFlags)
 
 template<class TInitializer>
 	void pragma::CParticleSystemComponent::GetInitializers(std::vector<TInitializer*> &initializers)

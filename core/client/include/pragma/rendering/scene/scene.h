@@ -72,9 +72,7 @@ public:
 	using SceneIndex = uint8_t;
 	struct DLLCLIENT CreateInfo
 	{
-		CreateInfo(uint32_t width,uint32_t height);
-		uint32_t width;
-		uint32_t height;
+		CreateInfo();
 		prosper::SampleCountFlags sampleCount;
 	};
 
@@ -93,13 +91,11 @@ public:
 	void SetActiveCamera(pragma::CCameraComponent &cam);
 	void SetActiveCamera();
 
-	void InitializeRenderTarget();
-
 	uint32_t GetWidth() const;
 	uint32_t GetHeight() const;
-	void Resize(uint32_t width,uint32_t height);
+	void Resize(uint32_t width,uint32_t height,bool reload=false);
 
-	void ReloadRenderTarget();
+	void ReloadRenderTarget(uint32_t width,uint32_t height);
 
 	void UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 	const std::shared_ptr<prosper::IBuffer> &GetRenderSettingsBuffer() const;
@@ -128,6 +124,9 @@ public:
 	DebugMode GetDebugMode() const;
 	void SetDebugMode(DebugMode debugMode);
 
+	void SetParticleSystemColorFactor(const Vector4 &colorFactor);
+	const Vector4 &GetParticleSystemColorFactor() const;
+
 	pragma::COcclusionCullerComponent *FindOcclusionCuller();
 	SceneIndex GetSceneIndex() const;
 	bool IsValid() const;
@@ -143,10 +142,6 @@ private:
 
 	SceneIndex m_sceneIndex = std::numeric_limits<SceneIndex>::max();
 
-	// Render Target
-	uint32_t m_width;
-	uint32_t m_height;
-
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
@@ -159,6 +154,7 @@ private:
 	pragma::RenderSettings m_renderSettings = {};
 	pragma::CameraData m_cameraData = {};
 	DebugMode m_debugMode = DebugMode::None;
+	Vector4 m_particleSystemColorFactor {1.f,1.f,1.f,1.f};
 
 	// Fog
 	pragma::FogData m_fogData = {};

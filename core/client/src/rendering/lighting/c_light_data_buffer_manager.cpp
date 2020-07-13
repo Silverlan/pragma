@@ -45,7 +45,7 @@ ShadowDataBufferManager &ShadowDataBufferManager::GetInstance()
 }
 void ShadowDataBufferManager::DoInitialize()
 {
-	auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
+	auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 
 	auto shadowDataSize = sizeof(ShadowBufferData);
 	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /shadowDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
@@ -82,7 +82,7 @@ LightDataBufferManager &LightDataBufferManager::GetInstance()
 }
 void LightDataBufferManager::DoInitialize()
 {
-	auto limits = prosper::util::get_physical_device_limits(c_engine->GetRenderContext());
+	auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 
 	auto lightDataSize = sizeof(LightBufferData);
 	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /lightDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));

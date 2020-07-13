@@ -33,23 +33,21 @@ static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	auto sz = c_engine->GetRenderContext().GetWindowSize();
-	c_engine->SetResolution(Vector2i(atoi(argv[0].c_str()),sz.at(1)));
+	c_engine->SetResolutionWidth(atoi(argv[0].c_str()));
 }
 
 static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	auto sz = c_engine->GetRenderContext().GetWindowSize();
-	c_engine->SetResolution(Vector2i(sz.at(0),atoi(argv[0].c_str())));
+	c_engine->SetResolutionHeight(atoi(argv[0].c_str()));
 }
 
 static void LPARAM_fullbright(const std::vector<std::string> &argv) {c_engine->UseFullbrightShader(true);}
 
 static void LPARAM_vk_enable_validation(const std::vector<std::string> &argv)
 {
-	c_engine->GetRenderContext().SetValidationEnabled(true);
+	c_engine->SetGfxAPIValidationEnabled(true);
 }
 
 static void LPARAM_render_api(const std::vector<std::string> &argv)

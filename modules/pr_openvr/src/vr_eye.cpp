@@ -2,6 +2,7 @@
 #include "vr_eye.hpp"
 #include "vr_instance.hpp"
 #include "wvmodule.h"
+#include <pragma/c_engine.h>
 #include <pragma/game/c_game.h>
 #include <pragma/entities/environment/c_env_camera.h>
 #include <pragma/rendering/renderers/rasterization_renderer.hpp>
@@ -17,14 +18,15 @@
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-openvr::Eye::Eye(Instance *instance,vr::EVREye _eye)
+openvr::Eye::Eye(Instance *instance,vr::EVREye eye)
 	: 
 #ifdef USE_OPENGL_OFFSCREEN_CONTEXT
 	fbo(0),texture(0),
 #endif
-	width(0),height(0),eye(_eye),scene(nullptr),m_instance(instance)
+	width(0),height(0),eye(eye),m_instance(instance)
 {}
 
 openvr::Eye::~Eye()
@@ -85,8 +87,8 @@ bool openvr::Eye::Initialize(uint32_t w,uint32_t h)
 #ifdef USE_OPENGL_OFFSCREEN_CONTEXT
 	bHostVisible = true;
 #endif
-	auto &context = const_cast<prosper::Context&>(IState::get_render_context());
-	auto format = Anvil::Format::R8G8B8A8_UNORM;
+	auto &context = const_cast<prosper::IPrContext&>(IState::get_render_context());
+	auto format = prosper::Format::R8G8B8A8_UNorm;
 #if LOPENVR_VERBOSE == 1
 		std::cout<<"[VR] Creating render target..."<<std::endl;
 #endif
@@ -94,53 +96,30 @@ bool openvr::Eye::Initialize(uint32_t w,uint32_t h)
 	imgCreateInfo.width = w;
 	imgCreateInfo.height = h;
 	imgCreateInfo.format = format;
-	imgCreateInfo.usage = Anvil::ImageUsageFlagBits::COLOR_ATTACHMENT_BIT | Anvil::ImageUsageFlagBits::TRANSFER_DST_BIT | Anvil::ImageUsageFlagBits::TRANSFER_SRC_BIT | Anvil::ImageUsageFlagBits::SAMPLED_BIT;
-	imgCreateInfo.postCreateLayout = Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 #ifdef USE_OPENGL_OFFSCREEN_CONTEXT
 	imgCreateInfo.tiling = vk::ImageTiling::eLinear;
 	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::CPUToGPU;
 #else
-	imgCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL;
-	imgCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUBulk;
+	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
+	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 #endif
-	auto &dev = context.GetDevice();
-	auto img = prosper::util::create_image(dev,imgCreateInfo);
-	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto tex = prosper::util::create_texture(dev,{},img,&imgViewCreateInfo,&samplerCreateInfo);
+	auto img = context.CreateImage(imgCreateInfo);
+	auto tex = context.CreateTexture({},*img,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
 	prosper::util::RenderPassCreateInfo rpCreateInfo {
-		{{format,Anvil::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,Anvil::AttachmentLoadOp::DONT_CARE,Anvil::AttachmentStoreOp::STORE,Anvil::SampleCountFlagBits::_1_BIT,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL}}
+		{{format,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ShaderReadOnlyOptimal}}
 	};
-	auto rp = prosper::util::create_render_pass(dev,rpCreateInfo);
-	vkRenderTarget = prosper::util::create_render_target(dev,{tex},rp,{});
+	auto rp = context.CreateRenderPass(rpCreateInfo);
+	vkRenderTarget = context.CreateRenderTarget({tex},rp,{});
 	if(vkRenderTarget == nullptr)
 		return false;
 	auto mainScene = IState::get_main_scene();
 #if LOPENVR_VERBOSE == 1
 		std::cout<<"[VR] Creating render scene..."<<std::endl;
 #endif
-	scene = IScene::Create(w,h);
-	scene.InitializeRenderTarget();
-	scene.SetWorldEnvironment(mainScene.GetWorldEnvironment());
-	scene.SetLightSourceListInfo(mainScene.GetLightSourceListInfo());
-	scene.LinkEntities(mainScene);
 
-	auto &pragmaScene = scene.GetInternalScene();
-	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(pragmaScene);
-	pragmaScene.SetRenderer(renderer);
-
-	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
-	auto it = entIt.begin();
-	if(it != entIt.end())
-	{
-		auto *entWorld = *it;
-		auto lightMapC = entWorld->GetComponent<pragma::CLightMapComponent>();
-		auto &lightMap = lightMapC->GetLightMap();
-		if(lightMap)
-			renderer->SetLightMap(lightMap);
-	}
+	renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(mainScene.GetInternalScene());
 
 	auto *cam = c_game->GetPrimaryCamera();
 	auto *camEye = cam ? c_game->CreateCamera(width,height,cam->GetFOV(),cam->GetNearZ(),cam->GetFarZ()) : nullptr;
@@ -152,32 +131,33 @@ bool openvr::Eye::Initialize(uint32_t w,uint32_t h)
 		auto m = glm::transpose(reinterpret_cast<Mat4&>(mProj.m));
 		m = glm::scale(m,Vector3(1.f,-1.f,1.f));
 		camEye->SetProjectionMatrix(m);
-		pragmaScene.SetActiveCamera(*camera);
 	}
 
 #ifdef USE_VULKAN
 	auto extents = img->GetExtents();
 	auto queueFamily = 0u;
 
-	auto *queue = dev.get_universal_queue(0u);
-	vrTextureData.m_nImage = reinterpret_cast<uint64_t>((*img)->get_image());
-	vrTextureData.m_pDevice = dev.get_device_vk();
-	vrTextureData.m_pPhysicalDevice = dev.get_physical_device()->get_physical_device();
-	vrTextureData.m_pInstance = dev.get_parent_instance()->get_instance_vk();
-	vrTextureData.m_pQueue = queue->get_queue();
-	vrTextureData.m_nQueueFamilyIndex = queue->get_queue_family_index();
+	//auto *queue = dev.get_universal_queue(0u);
+	auto &renderContext = c_engine->GetRenderContext();
+	vrTextureData.m_nImage = reinterpret_cast<uint64_t>(img->GetInternalHandle());
+	vrTextureData.m_pDevice = static_cast<VkDevice_T*>(renderContext.GetInternalDevice());
+	vrTextureData.m_pPhysicalDevice = static_cast<VkPhysicalDevice_T*>(renderContext.GetInternalPhysicalDevice());
+	vrTextureData.m_pInstance = static_cast<VkInstance_T*>(renderContext.GetInternalInstance());
+	vrTextureData.m_pQueue = static_cast<VkQueue_T*>(renderContext.GetInternalUniversalQueue());
+	vrTextureData.m_nQueueFamilyIndex = renderContext.GetUniversalQueueFamilyIndex();
 	vrTextureData.m_nWidth = extents.width;
 	vrTextureData.m_nHeight = extents.height;
 	vrTextureData.m_nFormat = umath::to_integral(img->GetFormat());
 	vrTextureData.m_nSampleCount = umath::to_integral(img->GetSampleCount());
-	vrTexture = {&vrTextureData,vr::TextureType_Vulkan,vr::EColorSpace::ColorSpace_Auto};
+	vrTexture = {&vrTextureData /* handle */,vr::TextureType_Vulkan,vr::EColorSpace::ColorSpace_Auto};
+	//TextureType_OpenGL = 1,  // Handle is an OpenGL texture name or an OpenGL render buffer name, depending on submit flags
 #endif
 #if LOPENVR_VERBOSE == 1
 		std::cout<<"[VR] Done!"<<std::endl;
 #endif
 	return true;
 }
-void openvr::Eye::UpdateImage(const prosper::Image &src)
+void openvr::Eye::UpdateImage(const prosper::IImage &src)
 {
 #if USE_OPENGL_OFFSCREEN_CONTEXT
 	auto &mem = src->GetMemory();

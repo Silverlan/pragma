@@ -109,7 +109,6 @@ public:
 	// If the input is an axis input, inOutState may change to represent actual button state
 	bool GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyState &inOutState) const;
 
-	void SetVulkanValidationLayersEnabled(bool b);
 	const std::shared_ptr<prosper::RenderTarget> &GetStagingRenderTarget() const;
 
 	void SetRenderResolution(std::optional<Vector2i> resolution);

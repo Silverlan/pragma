@@ -25,7 +25,8 @@ enum class FRender : uint32_t
 	Dynamic = Static<<1,
 	All = (Dynamic <<1) -1,
 	Reflection = Dynamic<<1,
-	HDR = Reflection<<1
+	HDR = Reflection<<1,
+	ParticleDepth = HDR<<1
 };
 REGISTER_BASIC_BITWISE_OPERATORS(FRender)
 

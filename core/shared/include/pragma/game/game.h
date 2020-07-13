@@ -78,6 +78,7 @@ namespace pragma
 	{
 		class Mesh;
 	};
+	namespace asset {class WorldData; class EntityData;};
 	namespace lua {class ClassManager;};
 	namespace networking {enum class DropReason : int8_t;};
 };

@@ -9,7 +9,6 @@
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/model/vertex.h>
-#include <prosper_util_square_shape.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
@@ -126,11 +125,11 @@ void ShaderDebugTexture::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 }
 bool ShaderDebugTexture::Draw(prosper::IDescriptorSet &descSetTexture,const ShaderDebug::PushConstants &pushConstants)
 {
-	auto buf = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
+	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
 	return RecordBindVertexBuffer(*buf) &&
 		RecordBindDescriptorSet(descSetTexture,DESCRIPTOR_SET_TEXTURE.setIndex) &&
 		RecordPushConstants(pushConstants) &&
-		RecordDraw(prosper::util::get_square_vertex_count());
+		RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount());
 }
 
 /////////////////////

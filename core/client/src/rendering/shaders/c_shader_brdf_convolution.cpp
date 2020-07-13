@@ -10,7 +10,6 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>
-#include <prosper_util_square_shape.hpp>
 #include <prosper_command_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -51,8 +50,8 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	auto tex = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	auto rt = c_engine->GetRenderContext().CreateRenderTarget({tex},GetRenderPass());
 
-	auto vertBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
-	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
+	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
 	auto &setupCmd = c_engine->GetSetupCommandBuffer();
 	auto success = false;
 	if(setupCmd->RecordBeginRenderPass(*rt))
@@ -61,7 +60,7 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 		{
 			if(
 				RecordBindVertexBuffers({vertBuffer.get(),uvBuffer.get()}) &&
-				RecordDraw(prosper::util::get_square_vertex_count())
+				RecordDraw(prosper::CommonBufferCache::GetSquareVertexCount())
 			)
 				success = true;
 		}

@@ -106,6 +106,7 @@ static void initialize_material_settings_buffer()
 	//bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *2'048;
 	bufCreateInfo.size = sizeof(ShaderTextured3DBase::MaterialData) *524'288; // ~22 MiB
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
+	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);
 }

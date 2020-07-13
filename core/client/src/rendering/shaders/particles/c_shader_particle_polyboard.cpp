@@ -49,7 +49,7 @@ bool ShaderParticlePolyboard::Draw(const rendering::RasterizationRenderer &rende
 		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},radius,curvature
 			}) == false ||
 		RecordPushConstants(FragmentPushConstants{
-			static_cast<int32_t>(GetRenderFlags(ps)),
+			static_cast<int32_t>(GetRenderFlags(ps,ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 			static_cast<float>(c_engine->GetRenderContext().GetWindowWidth()),
 			static_cast<float>(c_engine->GetRenderContext().GetWindowHeight())
 		},sizeof(GeometryPushConstants)) == false

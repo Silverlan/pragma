@@ -30,6 +30,8 @@ namespace pragma {class CParticleSystemComponent;};
 #define REGISTER_PARTICLE_RENDERER(localname,classname) \
 	REGISTER_PARTICLE_MODIFIER(localname,classname,CParticleRenderer);
 
+namespace pragma {enum class ParticleRenderFlags : uint32_t;};
+
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CParticleModifier
@@ -116,7 +118,7 @@ class DLLCLIENT CParticleRenderer
 {
 public:
 	CParticleRenderer()=default;
-	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,bool bloom)=0;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)=0;
 	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;

@@ -316,6 +316,26 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 {
 	return Draw(mesh,[this](CModelSubMesh &mesh) {
+#if 0
+		static std::shared_ptr<prosper::IBuffer> vertexBuffer = nullptr;
+		if(vertexBuffer == nullptr)
+		{
+			static const GLfloat g_vertex_buffer_data[] = {
+				-1.0f, -1.0f, 0.0f,
+				1.0f, -1.0f, 0.0f,
+				0.0f,  1.0f, 0.0f,
+			};
+			prosper::util::BufferCreateInfo bufCreateInfo {};
+			bufCreateInfo.size = sizeof(GLfloat) *9;
+			bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
+			bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+			vertexBuffer = GetContext().CreateBuffer(bufCreateInfo,g_vertex_buffer_data);
+		}
+		RecordBindVertexBuffer(*vertexBuffer);
+
+		RecordDraw(9);
+		return true;
+#endif
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount());
 	},bUseVertexWeightBuffer);
 }

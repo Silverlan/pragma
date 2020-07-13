@@ -129,8 +129,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return;
 	m_waterScene = std::make_unique<WaterScene>();
 	m_waterScene->descSetGroupTexEffects = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWater::DESCRIPTOR_SET_WATER);
-	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{width,height});
-	sceneReflection->InitializeRenderTarget();
+	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{});
+	sceneReflection->ReloadRenderTarget(width,height);
 	if(cam)
 	{
 		camReflection->GetFOVProperty()->Link(*cam->GetFOVProperty());

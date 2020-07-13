@@ -21,7 +21,7 @@
 #include <mutex>
 #include <unordered_set>
 
-namespace prosper {class Texture; class Image;};
+namespace prosper {class Texture; class IImage;};
 namespace uimg {class ImageBuffer;};
 namespace pragma
 {

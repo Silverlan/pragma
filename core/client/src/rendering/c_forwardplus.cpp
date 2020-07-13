@@ -124,6 +124,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_shadowLightBits.resize(get_shadow_integer_count(),0);
 	createInfo.size = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_bufVisLightIndex = context.CreateBuffer(createInfo,m_shadowLightBits.data());
 	m_bufVisLightIndex->SetPermanentlyMapped(true);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");

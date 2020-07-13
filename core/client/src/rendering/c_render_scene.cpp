@@ -72,5 +72,7 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);
 		StopProfilingStage(CGame::GPUProfilingPhase::Present);
 	}
+	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene",drawSceneInfo);
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene",drawSceneInfo);
 }
 #pragma optimize("",on)

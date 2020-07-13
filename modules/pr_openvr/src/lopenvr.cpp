@@ -996,10 +996,10 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 			Lua::Push(l,eye.vkRenderTarget);
 			return 1;
 		})},
-		{"get_scene",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		{"get_scene_renderer",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto eyeIdx = Lua::CheckInt(l,1);
 			auto &eye = static_cast<vr::EVREye>(eyeIdx) == vr::EVREye::Eye_Left ? s_vrInstance->GetLeftEye() : s_vrInstance->GetRightEye();
-			Lua::Push(l,const_cast<IScene&>(eye.scene).GetInternalScene().shared_from_this());
+			/Lua::Push(l,eye.renderer);
 			return 1;
 		})},
 		{"update_poses",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -1034,7 +1034,7 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 			if(cmdBufferInfo.has_value() == false)
 				return 0;
 			Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l,cmdBufferInfo->commandBuffer);
-			Lua::Push<Lua::Vulkan::Fence*>(l,&cmdBufferInfo->fence->GetAnvilFence());
+			Lua::Push<Lua::Vulkan::Fence*>(l,cmdBufferInfo->fence.get());
 			return 2;
 		})},
 		{"stop_recording",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -1207,7 +1207,7 @@ void Lua::openvr::register_lua_library(Lua::Interface &l)
 			return;
 		eye.camera->PushLuaObject(l);
 	}));
-	classDefEye.def("GetScene",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
+	classDefEye.def("GetSceneRenderer",static_cast<void(*)(lua_State*,::openvr::Eye&)>([](lua_State *l,::openvr::Eye &eye) {
 		auto &scene = eye.scene.GetInternalScene();
 		Lua::Push(l,scene.shared_from_this());
 	}));

@@ -49,6 +49,8 @@ GPUProfiler::GPUProfiler()
 }
 void GPUProfiler::Initialize()
 {
+	if(m_timerQueryPool == nullptr || m_statsQueryPool == nullptr)
+		return;
 	m_rootStage = GPUProfilingStage::Create(*this,"root",prosper::PipelineStageFlags::None);
 }
 std::shared_ptr<pragma::debug::Timer> GPUProfiler::CreateTimer(prosper::PipelineStageFlags stage)

@@ -16,6 +16,8 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 #pragma optimize("",off)
+// +1 for depth pass
+uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
@@ -137,6 +139,20 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	auto colorComponents = prosper::ColorComponentFlags::RBit | prosper::ColorComponentFlags::GBit | prosper::ColorComponentFlags::BBit | prosper::ColorComponentFlags::ABit;
 	auto blendOp = prosper::BlendOp::Add;
 
+	if(pipelineIdx == GetDepthPipelineIndex())
+	{
+		// We only care about depth values
+		colorComponents = prosper::ColorComponentFlags::None;
+		blendOp = prosper::BlendOp::Add;
+		pipelineInfo.SetColorBlendAttachmentProperties(
+			0u,false,blendOp,blendOp,
+			prosper::BlendFactor::SrcAlpha,prosper::BlendFactor::OneMinusSrcAlpha,
+			prosper::BlendFactor::One,prosper::BlendFactor::OneMinusSrcAlpha,
+			colorComponents
+		);
+		return;
+	}
+
 	auto alphaMode = GetAlphaMode(pipelineIdx);
 	switch(alphaMode)
 	{
@@ -214,7 +230,8 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	}
 }
 static auto cvParticleQuality = GetClientConVar("cl_render_particle_quality");
-ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::CParticleSystemComponent &particle) const
+uint32_t ShaderParticleBase::GetDepthPipelineIndex() {return GetParticlePipelineCount() -1;}
+ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma::CParticleSystemComponent &particle,ParticleRenderFlags ptRenderFlags) const
 {
 	auto renderFlags = (particle.IsAnimated() == true) ? RenderFlags::Animated : RenderFlags::None;
 	if(cvParticleQuality->GetInt() <= 1)
@@ -225,6 +242,9 @@ ShaderParticleBase::RenderFlags ShaderParticleBase::GetRenderFlags(const pragma:
 		renderFlags |= RenderFlags::TextureScrolling;
 	if(particle.GetEffectiveAlphaMode() == ParticleAlphaMode::AdditiveByColor)
 		renderFlags |= RenderFlags::AdditiveBlendByColor;
+
+	if(umath::is_flag_set(ptRenderFlags,ParticleRenderFlags::DepthOnly))
+		renderFlags |= RenderFlags::DepthPass;
 	return renderFlags;
 }
 uint32_t ShaderParticleBase::GetBasePipelineIndex(uint32_t pipelineIdx) const {return pipelineIdx /umath::to_integral(ParticleAlphaMode::Count);}
@@ -236,5 +256,8 @@ pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::C
 	return particle.GetEffectiveAlphaMode();
 }
 
-uint32_t ShaderParticleBase::GetParticlePipelineCount() const {return umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count);}
+uint32_t ShaderParticleBase::GetParticlePipelineCount()
+{
+	return PIPELINE_COUNT;
+}
 #pragma optimize("",on)

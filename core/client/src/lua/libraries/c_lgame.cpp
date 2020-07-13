@@ -924,12 +924,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 int Lua::game::Client::create_scene(lua_State *l)
 {
 	auto argIdx = 1;
-	auto width = Lua::CheckInt(l,argIdx++);
-	auto height = Lua::CheckInt(l,argIdx++);
-	auto fov = Lua::CheckNumber(l,argIdx++);
-	::Scene::CreateInfo createInfo {
-		static_cast<uint32_t>(width),static_cast<uint32_t>(height)
-	};
+	::Scene::CreateInfo createInfo {};
 	if(Lua::IsSet(l,argIdx))
 		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
 	auto scene = ::Scene::Create(createInfo);

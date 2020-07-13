@@ -52,4 +52,3 @@ void openvr::ControllerState::UpdateState(const vr::VRControllerState_t &state)
 	}
 	m_vrState = state;
 }
-

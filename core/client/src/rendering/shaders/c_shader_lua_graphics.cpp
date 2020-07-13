@@ -615,9 +615,9 @@ void Lua::Shader::Graphics::RecordDraw(lua_State *l,prosper::ShaderGraphics &sha
 {
 	Lua::PushBool(l,shader.RecordDraw(vertCount,instanceCount,firstVertex,firstInstance));
 }
-void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,int32_t vertexOffset,uint32_t firstInstance)
+void Lua::Shader::Graphics::RecordDrawIndexed(lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
 {
-	Lua::PushBool(l,shader.RecordDrawIndexed(indexCount,instanceCount,firstIndex,vertexOffset,firstInstance));
+	Lua::PushBool(l,shader.RecordDrawIndexed(indexCount,instanceCount,firstIndex,firstInstance));
 }
 void Lua::Shader::Graphics::RecordBeginDraw(lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t pipelineIdx)
 {

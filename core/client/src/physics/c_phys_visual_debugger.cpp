@@ -70,6 +70,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.size = totalBufferSize;
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
 	m_debugBuffer->SetPermanentlyMapped(true);
 

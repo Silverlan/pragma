@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <prosper_util_square_shape.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -77,9 +76,9 @@ std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquir
 	setupCmd->RecordPostRenderPassImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	auto success = true;
 
-	auto vertBuffer = prosper::util::get_square_vertex_buffer(c_engine->GetRenderContext());
-	auto uvBuffer = prosper::util::get_square_uv_buffer(c_engine->GetRenderContext());
-	auto numVerts = prosper::util::get_square_vertex_count();
+	auto vertBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
 
 	if(setupCmd->RecordBeginRenderPass(*rt) == false)
 		success = false;

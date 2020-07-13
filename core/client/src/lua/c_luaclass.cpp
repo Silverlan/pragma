@@ -259,10 +259,6 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShader.def("GetGlslSourceCode",static_cast<void(*)(lua_State*,prosper::Shader&,uint32_t,uint32_t)>([](lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx) {
 		Lua::Shader::GetGlslSourceCode(l,shader,shaderStage,0u);
 	}));
-	defShader.def("GetSpirvBlob",&Lua::Shader::GetSpirvBlob);
-	defShader.def("GetSpirvBlob",static_cast<void(*)(lua_State*,prosper::Shader&,uint32_t,uint32_t)>([](lua_State *l,prosper::Shader &shader,uint32_t shaderStage,uint32_t pipelineIdx) {
-		Lua::Shader::GetSpirvBlob(l,shader,shaderStage,0u);
-	}));
 
 	defShader.def("IsGraphicsShader",&Lua::Shader::IsGraphicsShader);
 	defShader.def("IsComputeShader",&Lua::Shader::IsComputeShader);
@@ -303,17 +299,14 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		Lua::Shader::Graphics::RecordDraw(l,shader,vertCount,1u,0u,0u);
 	}));
 	defShaderGraphics.def("RecordDrawIndexed",&Lua::Shader::Graphics::RecordDrawIndexed);
-	defShaderGraphics.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&,uint32_t,uint32_t,uint32_t,int32_t)>([](lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,int32_t vertexOffset) {
-		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,instanceCount,firstIndex,vertexOffset,0u);
-	}));
 	defShaderGraphics.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex) {
-		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,instanceCount,firstIndex,0,0u);
+		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,instanceCount,firstIndex,0u);
 	}));
 	defShaderGraphics.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&,uint32_t,uint32_t)>([](lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount,uint32_t instanceCount) {
-		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,instanceCount,0u,0,0u);
+		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,instanceCount,0u,0);
 	}));
 	defShaderGraphics.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&,uint32_t)>([](lua_State *l,prosper::ShaderGraphics &shader,uint32_t indexCount) {
-		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,1u,0u,0,0u);
+		Lua::Shader::Graphics::RecordDrawIndexed(l,shader,indexCount,1u,0u,0);
 	}));
 	defShaderGraphics.def("RecordBeginDraw",&Lua::Shader::Graphics::RecordBeginDraw);
 	defShaderGraphics.def("RecordBeginDraw",static_cast<void(*)(lua_State*,prosper::ShaderGraphics&,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,prosper::ShaderGraphics &shader,Lua::Vulkan::CommandBuffer &hCommandBuffer) {
@@ -579,21 +572,27 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	modShader[defShaderGUITexturedBase];
 
 	auto defShaderParticleBase = luabind::class_<pragma::LuaShaderGUIParticle2D,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseParticle2D");
+	defShaderParticleBase.scope[luabind::def("get_depth_pipeline_render_pass",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		auto &rp = prosper::ShaderGraphics::GetRenderPass<pragma::ShaderParticle2DBase>(c_engine->GetRenderContext(),pragma::ShaderParticle2DBase::GetDepthPipelineIndex());
+		if(rp == nullptr)
+			return;
+		Lua::Push(l,rp);
+	}))];
 	defShaderParticleBase.def(luabind::constructor<>());
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
-	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,bool)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,bool bloom) {
+	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
-		Lua::PushBool(l,shader.Draw(renderer,*ps,ps->GetOrientationType(),bloom));
+		Lua::PushBool(l,shader.Draw(renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
 	}));
-	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps) {
+	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
 		if(drawCmd.IsPrimary() == false)
 		{
 			Lua::PushBool(l,false);
 			return;
 		}
-		Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),*ps));
+		Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),*ps,static_cast<pragma::ParticleRenderFlags>(renderFlags)));
 	}));
 
 	modShader[defShaderParticleBase];

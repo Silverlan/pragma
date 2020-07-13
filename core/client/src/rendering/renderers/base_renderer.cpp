@@ -35,4 +35,15 @@ const prosper::Texture *BaseRenderer::GetSceneTexture() const {return const_cast
 const prosper::Texture *BaseRenderer::GetPresentationTexture() const {return const_cast<BaseRenderer*>(this)->GetPresentationTexture();}
 const prosper::Texture *BaseRenderer::GetHDRPresentationTexture() const {return const_cast<BaseRenderer*>(this)->GetHDRPresentationTexture();}
 
+uint32_t BaseRenderer::GetWidth() const
+{
+	auto *tex = GetSceneTexture();
+	return tex ? tex->GetImage().GetWidth() : 0;
+}
+uint32_t BaseRenderer::GetHeight() const
+{
+	auto *tex = GetSceneTexture();
+	return tex ? tex->GetImage().GetHeight() : 0;
+}
+
 Scene &BaseRenderer::GetScene() const {return m_scene;}

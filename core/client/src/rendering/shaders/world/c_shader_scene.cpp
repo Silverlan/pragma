@@ -48,6 +48,14 @@ decltype(ShaderScene::DESCRIPTOR_SET_CAMERA) ShaderScene::DESCRIPTOR_SET_CAMERA 
 		prosper::DescriptorSetInfo::Binding { // Render Settings
 			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
+		}
+	}
+};
+decltype(ShaderScene::DESCRIPTOR_SET_RENDERER) ShaderScene::DESCRIPTOR_SET_RENDERER = {
+	{
+		prosper::DescriptorSetInfo::Binding { // Renderer
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::FragmentBit
 		},
 		prosper::DescriptorSetInfo::Binding { // SSAO Map
 			prosper::DescriptorType::CombinedImageSampler,
@@ -135,11 +143,7 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_L
 		prosper::DescriptorSetInfo::Binding { // Shadow buffers
 			prosper::DescriptorType::StorageBuffer,
 			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
-decltype(ShaderSceneLit::DESCRIPTOR_SET_CSM) ShaderSceneLit::DESCRIPTOR_SET_CSM = {
-	{
+		},
 		prosper::DescriptorSetInfo::Binding { // Cascade Maps
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit,umath::to_integral(GameLimits::MaxCSMCascades)
@@ -161,19 +165,17 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_SHADOWS) ShaderSceneLit::DESCRIPTOR_SET_
 ShaderSceneLit::ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderScene(context,identifier,vsShader,fsShader,gsShader)
 {}
-bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources)
+bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &dsLights)
 {
 	auto *descSetShadow = pragma::CShadowComponent::GetDescriptorSet();
 	if(descSetShadow == nullptr)
 		return false;
-	return RecordBindDescriptorSets({
-		&descSetLightSources,&descSetShadowMaps,descSetShadow
-	},GetLightDescriptorSetIndex());
+	return RecordBindDescriptorSets({&dsLights,descSetShadow},GetLightDescriptorSetIndex());
 }
 bool ShaderSceneLit::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
 {
-	return BindSceneCamera(renderer,bView) &&
-		BindLights(*renderer.GetCSMDescriptorSet(),*renderer.GetForwardPlusInstance().GetDescriptorSetGraphics());
+	return BindSceneCamera(renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
+		BindLights(*renderer.GetLightSourceDescriptorSet());
 }
 
 /////////////////////

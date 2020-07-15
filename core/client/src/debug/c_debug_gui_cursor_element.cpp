@@ -309,3 +309,44 @@ void Console::commands::debug_gui_cursor(NetworkState *state,pragma::BasePlayerC
 	if(s_dbgManager->Initialize() == false)
 		s_dbgManager = nullptr;
 }
+
+void Console::commands::debug_font_glyph_map(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	auto &wgui = WGUI::GetInstance();
+	auto *el = static_cast<WITexturedRect*>(wgui.GetBaseElement()->FindDescendantByName("dbg_glyph_map"));
+	if(el)
+	{
+		el->RemoveSafely();
+		return;
+	}
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No font specified!"<<Con::endl;
+		return;
+	}
+	auto &fontName = argv.front();
+	auto font = FontManager::GetFont(fontName);
+	if(font == nullptr)
+	{
+		Con::cwar<<"WARNING: No font by name '"<<fontName<<"' found!"<<Con::endl;
+		return;
+	}
+	auto glyphMap = font->GetGlyphMap();
+	if(glyphMap == nullptr)
+	{
+		Con::cwar<<"WARNING: Font '"<<fontName<<"' has invalid glyph map!"<<Con::endl;
+		return;
+	}
+	auto &glyphImg = glyphMap->GetImage();
+	auto aspectRatio = glyphImg.GetWidth() /static_cast<float>(glyphImg.GetHeight());
+	auto w = c_engine->GetRenderResolution().x;
+	auto h = umath::round(w /aspectRatio);
+	auto scale = 5.f;
+	w *= scale;
+	h *= scale;
+	el = wgui.Create<WITexturedRect>();
+	el->SetZPos(std::numeric_limits<int32_t>::max());
+	el->SetName("dbg_glyph_map");
+	el->SetTexture(*glyphMap);
+	el->SetSize(w,h);
+}

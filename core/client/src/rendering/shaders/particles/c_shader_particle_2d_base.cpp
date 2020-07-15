@@ -54,7 +54,6 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::D
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA) ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA = {&ShaderSceneLit::DESCRIPTOR_SET_CAMERA};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderSceneLit::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderSceneLit::DESCRIPTOR_SET_LIGHTS};
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_CSM) ShaderParticle2DBase::DESCRIPTOR_SET_CSM = {&ShaderSceneLit::DESCRIPTOR_SET_CSM};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
 
 static uint32_t get_vertex_index(uint32_t absVertIdx)
@@ -107,7 +106,6 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CSM);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 }
 

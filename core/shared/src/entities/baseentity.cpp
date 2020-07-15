@@ -33,9 +33,10 @@ bool BaseEntity::IsDynamic() const {return !IsStatic();}
 extern DLLENGINE Engine *engine;
 Con::c_cout& BaseEntity::print(Con::c_cout &os)
 {
-	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(FindComponent("name").get());
+	auto *componentManager = GetComponentManager();
+	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent*>(FindComponent("name").get()) : nullptr;
 	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
-	auto mdlComponent = GetModelComponent();
+	auto mdlComponent = componentManager ? GetModelComponent() : util::WeakHandle<pragma::BaseModelComponent>{};
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		os<<"NULL";

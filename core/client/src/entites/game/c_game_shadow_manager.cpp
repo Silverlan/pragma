@@ -44,21 +44,21 @@ void CShadowManagerComponent::Initialize()
 	m_cubeSet.limit = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
 	m_cubeSet.buffers.reserve(m_cubeSet.limit);
 
-	if(m_descSetGroup != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid() == false)
+	if(m_descSetGroup != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return;
 	g_shadowManager = this;
 	m_whShadowShader = c_engine->GetShader("shadow");
-	m_descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+	m_descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
 
 	auto *descSet = m_descSetGroup->GetDescriptorSet();
 
 	// Shadow map descriptor bindings need to be bound to dummy images.
 	// For normal shadow maps this is already taken care of, but cubemaps are a special case
 	// that needs to be dealt with
-	auto arraySize = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
+	auto arraySize = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
 	for(auto i=decltype(arraySize){0u};i<arraySize;++i)
-		descSet->SetBindingArrayTexture(*dummyTex,0,i);
+		descSet->SetBindingArrayTexture(*dummyTex,umath::to_integral(pragma::ShaderSceneLit::LightBinding::CSM),i);
 }
 
 void CShadowManagerComponent::OnRemove()

@@ -332,13 +332,7 @@ void CGame::RegisterLua()
 		renderer.ReloadRenderTarget(width,height);
 	}));
 	classDefRasterizationRenderer.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto *ds = renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-		if(ds == nullptr)
-			return;
-		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetPSSMTextureDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto *ds = renderer.GetCSMDescriptorSet();
+		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
 		if(ds == nullptr)
 			return;
 		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());

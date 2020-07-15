@@ -60,9 +60,7 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryComm
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
-	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(descSetShadows,descSetLightSources);
+	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->BindSceneCamera(renderer,(m_particleSystem->GetRenderMode() == RenderMode::View) ? true : false);
 	if(m_bPlanarRotation == false)

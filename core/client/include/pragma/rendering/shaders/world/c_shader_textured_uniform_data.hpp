@@ -23,9 +23,6 @@ namespace pragma
 		float shadowRatioY;
 		float nearZ;
 		float farZ;
-		int32_t viewportW;
-		int32_t viewportH;
-		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
 		int32_t shaderQuality;
 
 		float lightmapIntensity;

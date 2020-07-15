@@ -22,6 +22,8 @@ void BaseEntityComponentSystem::Initialize(BaseEntity &ent,EntityComponentManage
 	m_entity = &ent;
 	m_componentManager = &componentManager;
 }
+EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() {return m_componentManager;}
+const EntityComponentManager *BaseEntityComponentSystem::GetComponentManager() const {return const_cast<BaseEntityComponentSystem*>(this)->GetComponentManager();}
 void BaseEntityComponentSystem::ClearComponents()
 {
 	while(m_components.empty() == false)

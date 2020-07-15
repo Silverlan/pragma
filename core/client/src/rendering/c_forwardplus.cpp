@@ -41,7 +41,7 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 	fp.Initialize(c_engine->GetRenderContext(),scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
 
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	rasterizer->UpdateRenderSettings(scene->GetRenderSettings());
+	rasterizer->UpdateRenderSettings();
 	c_engine->ReloadShader("forwardp_light_culling");
 }
 REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size,cmd_forwardplus_tile_size);
@@ -86,24 +86,6 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;
-	auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
-	auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
-	m_descSetGroupLightSourcesGraphics = context.CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
-	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
-		const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
-	);
-	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
-		const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
-	);
-
-	m_descSetGroupLightSourcesCompute = context.CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
-	m_descSetGroupLightSourcesCompute->GetDescriptorSet()->SetBindingStorageBuffer(
-		const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
-	);
-	m_descSetGroupLightSourcesCompute->GetDescriptorSet()->SetBindingStorageBuffer(
-		const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
-	);
-
 	auto workGroupCount = CalcWorkGroupCount(width,height);
 	m_workGroupCountX = workGroupCount.first;
 	m_workGroupCountY = workGroupCount.second;
@@ -129,11 +111,11 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_bufVisLightIndex->SetPermanentlyMapped(true);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
-	m_descSetGroupLightSourcesGraphics->GetDescriptorSet()->SetBindingStorageBuffer(
+	m_rasterizer.GetLightSourceDescriptorSet()->SetBindingStorageBuffer(
 		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
 	);
 
-	auto &descSetCompute = *m_descSetGroupLightSourcesCompute->GetDescriptorSet();
+	auto &descSetCompute = *m_rasterizer.GetLightSourceDescriptorSetCompute();
 	descSetCompute.SetBindingStorageBuffer(
 		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer)
 	);
@@ -183,8 +165,10 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 
 	auto workGroupCount = GetWorkGroupCount();
 	auto sceneIndex = m_rasterizer.GetScene().GetSceneIndex();
+	auto vpWidth = m_rasterizer.GetWidth();
+	auto vpHeight = m_rasterizer.GetHeight();
 	if(
-		shaderLightCulling.Compute(*GetDescriptorSetCompute(),descSetCam,workGroupCount.first,workGroupCount.second,pragma::CLightComponent::GetLightCount(),sceneIndex) == false
+		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,pragma::CLightComponent::GetLightCount(),sceneIndex) == false
 	)
 		return;
 
@@ -204,8 +188,6 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 const std::vector<uint32_t> &pragma::rendering::ForwardPlusInstance::GetShadowLightBits() const {return m_shadowLightBits;}
 std::pair<uint32_t,uint32_t> pragma::rendering::ForwardPlusInstance::GetWorkGroupCount() const {return {m_workGroupCountX,m_workGroupCountY};}
 uint32_t pragma::rendering::ForwardPlusInstance::GetTileCount() const {return m_tileCount;}
-prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetGraphics() const {return m_descSetGroupLightSourcesGraphics->GetDescriptorSet();}
-prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDescriptorSetCompute() const {return m_descSetGroupLightSourcesCompute->GetDescriptorSet();}
 prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return m_dsgSceneDepthBuffer->GetDescriptorSet();}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}

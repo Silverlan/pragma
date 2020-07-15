@@ -39,7 +39,7 @@ namespace pragma
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override;
 		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
-		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources) override;
+		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:

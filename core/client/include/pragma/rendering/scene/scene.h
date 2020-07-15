@@ -49,8 +49,7 @@ public:
 	enum class FRenderSetting : uint32_t
 	{
 		None = 0,
-		Unlit = 1,
-		SSAOEnabled = 2
+		Unlit = 1
 	};
 
 	enum class DebugMode : uint32_t
@@ -132,6 +131,8 @@ public:
 	bool IsValid() const;
 private:
 	Scene(const CreateInfo &createInfo,SceneIndex sceneIndex);
+	void InitializeShadowDescriptorSet();
+	void UpdateRendererLightMap();
 	// CSM Data
 	struct DLLCLIENT CSMCascadeDescriptor
 	{
@@ -145,7 +146,9 @@ private:
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
 	std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
+	std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
+	util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
 	util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 	std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
 	std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;

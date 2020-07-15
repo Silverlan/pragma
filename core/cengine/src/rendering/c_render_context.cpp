@@ -65,7 +65,7 @@ void RenderContext::InitializeRenderAPI()
 	prosper::Shader::SetLogCallback([](prosper::Shader &shader,prosper::ShaderStage stage,const std::string &infoLog,const std::string &debugInfoLog) {
 		Con::cwar<<"Unable to load shader '"<<shader.GetIdentifier()<<"':"<<Con::endl;
 		Con::cwar<<"Shader Stage: "<<prosper::util::to_string(stage)<<Con::endl;
-		auto filePath = shader.GetStageSourceFilePath(stage);
+		auto filePath = (stage != prosper::ShaderStage::Unknown) ? shader.GetStageSourceFilePath(stage) : std::optional<std::string>{};
 		if(filePath.has_value())
 			Con::cwar<<"Shader Stage Filename: "<<*filePath<<Con::endl;
 		Con::cwar<<infoLog<<Con::endl<<Con::endl;

@@ -26,7 +26,7 @@ void BaseRenderer::BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer
 	GetScene().UpdateBuffers(drawCmd);
 }
 void BaseRenderer::Resize(uint32_t width, uint32_t height) {}
-void BaseRenderer::UpdateRenderSettings(pragma::RenderSettings &renderSettings) {}
+void BaseRenderer::UpdateRenderSettings() {}
 void BaseRenderer::UpdateCameraData(pragma::CameraData &cameraData) {}
 bool BaseRenderer::IsRasterizationRenderer() const {return false;}
 bool BaseRenderer::IsRayTracingRenderer() const {return false;}

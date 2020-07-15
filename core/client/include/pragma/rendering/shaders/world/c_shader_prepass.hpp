@@ -77,7 +77,7 @@ namespace pragma
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
-		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources) override {return false;}
+		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
 		Flags m_stateFlags = Flags::None;
 	};
 	using ShaderPrepassDepth = ShaderPrepassBase;

@@ -262,6 +262,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	CallCallbacks("PreRenderScenes");
 	CallLuaCallbacks("PreRenderScenes");
 
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
+
 	static auto bSkipCallbacks = false;
 	if(bSkipCallbacks == false)
 	{

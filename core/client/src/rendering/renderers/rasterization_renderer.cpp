@@ -17,6 +17,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -57,11 +58,30 @@ RasterizationRenderer::RasterizationRenderer(Scene &scene)
 
 	InitializeLightDescriptorSets();
 	ReloadOcclusionCullingHandler();
+
+	prosper::util::BufferCreateInfo bufCreateInfo {};
+	bufCreateInfo.size = sizeof(m_rendererData);
+	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
+	m_rendererBuffer = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,&m_rendererData);
+
+	auto *shaderPbr = static_cast<pragma::ShaderPBR*>(c_engine->GetShader("pbr").get());
+	assert(shaderPbr);
+	if(shaderPbr)
+	{
+		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
+		m_descSetGroupRenderer->GetDescriptorSet()->SetBindingUniformBuffer(*m_rendererBuffer,umath::to_integral(pragma::ShaderScene::RendererBinding::Renderer));
+	}
 }
 
 RasterizationRenderer::~RasterizationRenderer()
 {
 	m_occlusionCullingHandler = nullptr;
+}
+
+void RasterizationRenderer::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+{
+	drawCmd->RecordUpdateBuffer(*m_rendererBuffer,0ull,m_rendererData);
 }
 
 bool RasterizationRenderer::Initialize() {return true;}
@@ -75,10 +95,40 @@ CulledMeshData *RasterizationRenderer::GetRenderInfo(RenderMode renderMode) cons
 	return it->second.get();
 }
 
+prosper::IDescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr;}
+prosper::IDescriptorSet *RasterizationRenderer::GetRendererDescriptorSet() const {return m_descSetGroupRenderer->GetDescriptorSet();}
+
+prosper::IDescriptorSet *RasterizationRenderer::GetLightSourceDescriptorSet() const {return m_dsgLights->GetDescriptorSet();}
+prosper::IDescriptorSet *RasterizationRenderer::GetLightSourceDescriptorSetCompute() const {return m_dsgLightsCompute->GetDescriptorSet();}
+
+void RasterizationRenderer::InitializeLightDescriptorSets()
+{
+	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid())
+	{
+		auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
+		auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
+		m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
+		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+		);
+		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+		);
+
+		m_dsgLightsCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
+		);
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
+		);
+	}
+}
+
 void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource)
 {
-	auto *descSetShadowMaps = GetCSMDescriptorSet();
-	if(descSetShadowMaps == nullptr)
+	auto *dsLights = GetLightSourceDescriptorSet();
+	if(dsLights == nullptr)
 		return;
 	auto *pShadowMap = lightSource.GetShadowMap();
 	auto texture = pShadowMap ? pShadowMap->GetDepthTexture() : nullptr;
@@ -87,18 +137,10 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 	auto numLayers = pShadowMap->GetLayerCount();
 	for(auto i=decltype(numLayers){0};i<numLayers;++i)
 	{
-		descSetShadowMaps->SetBindingArrayTexture(
-			*texture,0u,i,i
+		dsLights->SetBindingArrayTexture(
+			*texture,umath::to_integral(pragma::ShaderSceneLit::LightBinding::CSM),i,i
 		);
 	}
-}
-
-prosper::IDescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr;}
-
-void RasterizationRenderer::InitializeLightDescriptorSets()
-{
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM.IsValid())
-		m_descSetGroupCSM = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CSM);
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
@@ -207,12 +249,14 @@ bool RasterizationRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
 		auto *ssaoBlurTexResolved = &ssaoInfo.renderTargetBlur->GetTexture();
 		if(ssaoBlurTexResolved->IsMSAATexture())
 			ssaoBlurTexResolved = static_cast<prosper::MSAATexture*>(ssaoBlurTexResolved)->GetResolvedTexture().get();
-		descSetCam.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
-		descSetCamView.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::CameraBinding::SSAOMap));
+
+		auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
+		ds.SetBindingTexture(*ssaoBlurTexResolved,umath::to_integral(pragma::ShaderScene::RendererBinding::SSAOMap));
 	}
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
-	descSetCam.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	descSetCamView.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
+	UpdateRenderSettings();
 	return true;
 }
 void RasterizationRenderer::SetFrameDepthBufferSamplingRequired() {m_bFrameDepthBufferSamplingRequired = true;}
@@ -227,7 +271,7 @@ bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_s
 void RasterizationRenderer::SetSSAOEnabled(bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
-	UpdateRenderSettings(GetScene().GetRenderSettings());
+	UpdateRenderSettings();
 	ReloadRenderTarget(GetWidth(),GetHeight());
 	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
 	if(b == true)
@@ -243,15 +287,16 @@ void RasterizationRenderer::UpdateCameraData(pragma::CameraData &cameraData)
 {
 	UpdateFrustumPlanes();
 }
-void RasterizationRenderer::UpdateRenderSettings(pragma::RenderSettings &renderSettings)
+void RasterizationRenderer::UpdateRenderSettings()
 {
 	auto &scene = GetScene();
-	auto &tileInfo = renderSettings.tileInfo;
+	auto &tileInfo = m_rendererData.tileInfo;
 	tileInfo = static_cast<uint32_t>(pragma::ShaderForwardPLightCulling::TILE_SIZE)<<16;
-	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(scene.GetWidth(),scene.GetHeight()).first);
+	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(),GetHeight()).first);
+	m_rendererData.SetResolution(GetWidth(),GetHeight());
 
 	if(IsSSAOEnabled() == true)
-		renderSettings.flags |= umath::to_integral(Scene::FRenderSetting::SSAOEnabled);
+		m_rendererData.flags |= pragma::rendering::RendererData::Flags::SSAOEnabled;
 }
 void RasterizationRenderer::SetShaderOverride(const std::string &srcShaderId,const std::string &shaderOverrideId)
 {
@@ -320,8 +365,6 @@ RasterizationRenderer::PrepassMode RasterizationRenderer::GetPrepassMode() const
 }
 
 pragma::ShaderPrepassBase &RasterizationRenderer::GetPrepassShader() const {return const_cast<RasterizationRenderer*>(this)->GetPrepass().GetShader();}
-
-prosper::IDescriptorSet *RasterizationRenderer::GetCSMDescriptorSet() const {return m_descSetGroupCSM->GetDescriptorSet();}
 
 HDRData &RasterizationRenderer::GetHDRInfo() {return m_hdrInfo;}
 GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}
@@ -426,11 +469,12 @@ void RasterizationRenderer::UpdateFrustumPlanes()
 
 void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> &lightMapTexture)
 {
+	if(lightMapTexture == m_lightMapInfo.lightMapTexture)
+		return;
 	m_lightMapInfo.lightMapTexture = lightMapTexture;
-	auto &descSetCam = *GetScene().GetCameraDescriptorSetGraphics();
-	auto &descSetCamView = *GetScene().GetViewCameraDescriptorSet();
-	descSetCam.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
-	descSetCamView.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::CameraBinding::LightMap));
+
+	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
+	ds.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
 }
 const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
 prosper::Texture *RasterizationRenderer::GetSceneTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}

@@ -101,7 +101,7 @@ bool ShaderSkybox::BindSceneCamera(const pragma::rendering::RasterizationRendere
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}
-bool ShaderSkybox::BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources) {return true;}
+bool ShaderSkybox::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
 bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(mesh,false);}
 

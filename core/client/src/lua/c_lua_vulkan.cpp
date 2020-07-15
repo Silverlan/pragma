@@ -62,6 +62,7 @@ namespace Lua
 		DLLCLIENT int get_byte_size(lua_State *l);
 		DLLCLIENT int get_swapchain_image_count(lua_State *l);
 		DLLCLIENT int wait_idle(lua_State *l);
+		DLLCLIENT int flush(lua_State *l);
 		DLLCLIENT int get_square_vertex_uv_buffer(lua_State *l);
 		DLLCLIENT int get_square_vertex_buffer(lua_State *l);
 		DLLCLIENT int get_square_uv_buffer(lua_State *l);
@@ -879,6 +880,11 @@ int Lua::Vulkan::wait_idle(lua_State *l)
 	c_engine->GetRenderContext().WaitIdle();
 	return 0;
 }
+int Lua::Vulkan::flush(lua_State *l)
+{
+	c_engine->GetRenderContext().Flush();
+	return 0;
+}
 int Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
 {
 	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetLineVertexBuffer();
@@ -1135,7 +1141,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"get_bit_size",Lua::Vulkan::get_bit_size},
 		{"get_byte_size",Lua::Vulkan::get_byte_size},
 		{"get_swapchain_image_count",Lua::Vulkan::get_swapchain_image_count},
-		{"wait_idle",Lua::Vulkan::wait_idle}
+		{"wait_idle",Lua::Vulkan::wait_idle},
+		{"flush",Lua::Vulkan::flush}
 	});
 	vulkanMod[
 		luabind::namespace_("util")

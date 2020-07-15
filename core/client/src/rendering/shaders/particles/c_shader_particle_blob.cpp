@@ -51,7 +51,6 @@ void ShaderParticleBlob::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CSM);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PARTICLE_DATA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CUBEMAP);

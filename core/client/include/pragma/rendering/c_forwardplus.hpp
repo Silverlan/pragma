@@ -39,8 +39,6 @@ namespace pragma
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
 			uint32_t GetTileCount() const;
 			const std::vector<uint32_t> &GetShadowLightBits() const;
-			prosper::IDescriptorSet *GetDescriptorSetGraphics() const;
-			prosper::IDescriptorSet *GetDescriptorSetCompute() const;
 			prosper::IDescriptorSet *GetDepthDescriptorSetGraphics() const;
 			const std::shared_ptr<prosper::IBuffer> &GetTileVisLightIndexBuffer() const;
 			const std::shared_ptr<prosper::IBuffer> &GetVisLightIndexBuffer() const;
@@ -55,8 +53,6 @@ namespace pragma
 			uint32_t m_workGroupCountY = 0u;
 			uint32_t m_tileCount = 0u;
 			std::vector<uint32_t> m_shadowLightBits;
-			std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupLightSourcesGraphics = nullptr;
-			std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupLightSourcesCompute = nullptr;
 			std::shared_ptr<prosper::IBuffer> m_bufTileVisLightIndex = nullptr;
 			std::shared_ptr<prosper::IBuffer> m_bufVisLightIndex = nullptr;
 			util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};

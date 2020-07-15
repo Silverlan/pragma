@@ -66,6 +66,7 @@ namespace pragma
 		const util::PMatrix4Property &GetProjectionMatrixProperty() const;
 		const util::PMatrix4Property &GetViewMatrixProperty() const;
 
+		const util::PFloatProperty &GetAspectRatioProperty() const;
 		const util::PFloatProperty &GetNearZProperty() const;
 		const util::PFloatProperty &GetFarZProperty() const;
 		const util::PFloatProperty &GetFOVProperty() const;
@@ -93,7 +94,7 @@ namespace pragma
 		util::PMatrix4Property m_projectionMatrix = nullptr;
 		util::PMatrix4Property m_viewMatrix = nullptr;
 		util::PFloatProperty m_fov = nullptr;
-		float m_aspectRatio = 1.f;
+		util::PFloatProperty m_aspectRatio = nullptr;
 		util::PFloatProperty m_nearZ = nullptr;
 		util::PFloatProperty m_farZ = nullptr;
 		std::vector<Plane> m_frustumPlanes;

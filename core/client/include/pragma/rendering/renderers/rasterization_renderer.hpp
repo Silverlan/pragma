@@ -38,6 +38,22 @@ namespace pragma
 };
 namespace pragma::rendering
 {
+	struct DLLCLIENT RendererData
+	{
+		enum class Flags : uint32_t
+		{
+			None = 0u,
+			SSAOEnabled = 1u
+		};
+		void SetResolution(uint32_t w,uint32_t h)
+		{
+			vpResolution = w<<16 | (static_cast<uint16_t>(h));
+		}
+		Flags flags = Flags::None;
+		uint32_t vpResolution = 0;
+		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
+	};
+
 	class Prepass;
 	class ForwardPlusInstance;
 	struct CulledMeshData;
@@ -89,7 +105,7 @@ namespace pragma::rendering
 		virtual ~RasterizationRenderer() override;
 
 		virtual void EndRendering() override;
-		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings) override;
+		virtual void UpdateRenderSettings() override;
 		virtual void UpdateCameraData(pragma::CameraData &cameraData) override;
 		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height) override;
 		using BaseRenderer::GetSceneTexture;
@@ -122,9 +138,6 @@ namespace pragma::rendering
 		std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes();
 		const std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles() const;
 		std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles();
-		//const Vulkan::DescriptorSet &GetBloomGlowDescriptorSet() const; // prosper TODO
-		prosper::IDescriptorSet *GetCSMDescriptorSet() const;
-		//prosper::IDescriptorSet *GetLightSourceDescriptorSet() const;
 
 		Float GetHDRExposure() const;
 		Float GetMaxHDRExposure() const;
@@ -134,8 +147,8 @@ namespace pragma::rendering
 		SSAOInfo &GetSSAOInfo();
 
 		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
-		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
 		void SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup);
+		prosper::IDescriptorSet *GetRendererDescriptorSet() const;
 
 		pragma::rendering::Prepass &GetPrepass();
 		const pragma::rendering::ForwardPlusInstance &GetForwardPlusInstance() const;
@@ -170,11 +183,17 @@ namespace pragma::rendering
 		RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
 		const RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 
+		prosper::IDescriptorSet *GetLightSourceDescriptorSet() const;
+		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
+
 		prosper::Shader *GetWireframeShader();
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
+		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer(Scene &scene);
+		void InitializeLightDescriptorSets();
 
 		void RenderGameScene(const util::DrawSceneInfo &drawSceneInfo);
 
@@ -189,7 +208,6 @@ namespace pragma::rendering
 		void RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve);
 		void RenderFXAA(const util::DrawSceneInfo &drawSceneInfo);
 
-		void InitializeLightDescriptorSets();
 		virtual bool Initialize() override;
 		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 
@@ -203,6 +221,8 @@ namespace pragma::rendering
 
 		LightMapInfo m_lightMapInfo = {};
 		bool m_bFrameDepthBufferSamplingRequired = false;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
 
 		// HDR
 		HDRData m_hdrInfo;
@@ -213,16 +233,20 @@ namespace pragma::rendering
 		std::vector<Plane> m_clippedFrustumPlanes = {};
 		void UpdateFrustumPlanes();
 
+		RendererData m_rendererData {};
+		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
+
 		// 3D sky cameras used for the current rendering pass
 		std::vector<util::WeakHandle<pragma::CSkyCameraComponent>> m_3dSkyCameras = {};
 
 		RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupCSM;
 
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::RasterizationRenderer::StateFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::RendererData::Flags)
 
 #endif

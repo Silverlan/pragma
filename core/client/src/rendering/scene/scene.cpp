@@ -14,6 +14,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
+#include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
@@ -92,6 +93,12 @@ std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo,Scene *optPare
 	return scene;
 }
 
+void Scene::InitializeShadowDescriptorSet()
+{
+	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
+		m_shadowDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+}
+
 Scene *Scene::GetByIndex(SceneIndex sceneIndex)
 {
 	return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr;
@@ -106,6 +113,10 @@ Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	InitializeCameraBuffer();
 	InitializeFogBuffer();
 	InitializeDescriptorSetLayouts();
+
+	InitializeRenderSettingsBuffer();
+	InitializeSwapDescriptorBuffers();
+	InitializeShadowDescriptorSet();
 }
 
 Scene::~Scene()
@@ -128,14 +139,12 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.flags = umath::to_integral(FRenderSetting::None);
 	m_renderSettings.shadowRatioX = 1.f /szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
-	m_renderSettings.viewportW = w;
-	m_renderSettings.viewportH = h;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
 	m_renderSettings.lightmapIntensity = 1.f;
 	m_renderSettings.lightmapSqrt = 0.f;
 
 	if(m_renderer)
-		m_renderer->UpdateRenderSettings(m_renderSettings);
+		m_renderer->UpdateRenderSettings();
 
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
@@ -219,12 +228,11 @@ void Scene::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawC
 	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
 	m_renderSettings.posCam = camPos;
 
-	// These may have changed through a renderer resize
-	m_renderSettings.viewportW = GetWidth();
-	m_renderSettings.viewportH = GetHeight();
-
 	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
+
+	if(m_renderer && m_renderer->IsRasterizationRenderer())
+		static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
 void Scene::InitializeDescriptorSetLayouts()
 {
@@ -359,7 +367,19 @@ void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
 	auto &renderSettings = GetRenderSettings();
 	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
 	renderSettings.lightmapSqrt = lightMapC.GetLightMapSqrtFactor();
+	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
 	UpdateRenderSettings();
+	UpdateRendererLightMap();
+}
+void Scene::UpdateRendererLightMap()
+{
+	if(m_renderer == nullptr || m_renderer->IsRasterizationRenderer() == false || m_lightMap.expired())
+		return;
+	auto &texLightMap = m_lightMap->GetLightMap();
+	if(texLightMap == nullptr)
+		return;
+	// TODO: Not ideal to have this here; How to handle this in a better way?
+	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(texLightMap);
 }
 void Scene::UpdateRenderSettings()
 {
@@ -371,7 +391,7 @@ void Scene::UpdateRenderSettings()
 		flags |= FRenderSetting::Unlit;
 	m_renderSettings.flags = umath::to_integral(flags);
 	if(m_renderer)
-		m_renderer->UpdateRenderSettings(m_renderSettings);
+		m_renderer->UpdateRenderSettings();
 }
 void Scene::ClearWorldEnvironment()
 {
@@ -421,8 +441,8 @@ void Scene::LinkWorldEnvironment(Scene &other)
 void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
 {
 	m_renderer = renderer;
-	InitializeRenderSettingsBuffer();
-	InitializeSwapDescriptorBuffers();
+	UpdateRenderSettings();
+	UpdateRendererLightMap();
 }
 pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
 

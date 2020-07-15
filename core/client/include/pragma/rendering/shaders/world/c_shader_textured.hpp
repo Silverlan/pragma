@@ -54,10 +54,9 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class VertexBinding : uint32_t
 		{
@@ -184,6 +183,7 @@ namespace pragma
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
+		virtual uint32_t GetRendererDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;

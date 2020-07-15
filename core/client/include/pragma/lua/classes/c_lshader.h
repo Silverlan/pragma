@@ -188,7 +188,7 @@ namespace Lua
 
 		namespace SceneLit3D
 		{
-			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetShadowMaps,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetLightSources);
+			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights);
 			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 		};
 

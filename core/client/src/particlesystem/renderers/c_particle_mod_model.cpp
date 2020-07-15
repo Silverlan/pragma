@@ -212,9 +212,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 		shader->BindParticleSystem(GetParticleSystem()) == false
 	)
 		return;
-	auto &descSetShadowmps = *renderer.GetCSMDescriptorSet();
-	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	shader->BindLights(descSetShadowmps,descSetLightSources);
+	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 

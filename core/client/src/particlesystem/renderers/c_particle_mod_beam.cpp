@@ -117,9 +117,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryComman
 	auto *shader = static_cast<pragma::ShaderParticlePolyboard*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false)
 		return;
-	auto &descSetLightSources = *renderer.GetForwardPlusInstance().GetDescriptorSetGraphics();
-	auto &descSetShadows = *renderer.GetCSMDescriptorSet();
-	shader->BindLights(descSetShadows,descSetLightSources);
+	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom

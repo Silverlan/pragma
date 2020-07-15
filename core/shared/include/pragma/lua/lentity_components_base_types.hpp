@@ -320,6 +320,11 @@ namespace Lua
 				return;
 			Lua::PushBool(l,hEnt.get()->IsTurnedOn());
 		}));
+		def.def("IsTurnedOff",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			if(pragma::Lua::check_component(l,hEnt) == false)
+				return;
+			Lua::PushBool(l,!hEnt.get()->IsTurnedOn());
+		}));
 		def.def("SetTurnedOn",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
 			if(pragma::Lua::check_component(l,hEnt) == false)
 				return;
@@ -1561,6 +1566,10 @@ namespace Lua
 		def.def("GetFOVProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Property::push(l,*hComponent->GetFOVProperty());
+		}));
+		def.def("GetAspectRatioProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
+			pragma::Lua::check_component(l,hComponent);
+			Lua::Property::push(l,*hComponent->GetAspectRatioProperty());
 		}));
 		def.def("SetAspectRatio",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hComponent,float aspectRatio) {
 			pragma::Lua::check_component(l,hComponent);

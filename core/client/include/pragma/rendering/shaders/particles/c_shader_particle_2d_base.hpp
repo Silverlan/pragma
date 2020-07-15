@@ -40,7 +40,6 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		static constexpr auto VERTEX_COUNT = 6u;

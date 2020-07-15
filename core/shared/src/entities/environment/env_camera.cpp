@@ -25,7 +25,7 @@ decltype(BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV) BaseEnvCameraComponent::
 BaseEnvCameraComponent::BaseEnvCameraComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent},m_nearZ(util::FloatProperty::Create(DEFAULT_NEAR_Z)),m_farZ(util::FloatProperty::Create(DEFAULT_FAR_Z)),
 	m_projectionMatrix(util::Matrix4Property::Create()),m_viewMatrix(util::Matrix4Property::Create()),
-	m_fov(util::FloatProperty::Create(75.f))
+	m_fov(util::FloatProperty::Create(75.f)),m_aspectRatio(util::FloatProperty::Create(1.f))
 {}
 void BaseEnvCameraComponent::Initialize()
 {
@@ -64,7 +64,7 @@ void BaseEnvCameraComponent::UpdateViewMatrix()
 }
 void BaseEnvCameraComponent::UpdateProjectionMatrix()
 {
-	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(),m_aspectRatio,**m_nearZ,**m_farZ);
+	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(),*m_aspectRatio,**m_nearZ,**m_farZ);
 }
 void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 {
@@ -210,7 +210,7 @@ void BaseEnvCameraComponent::GetFarPlaneBounds(float *wFar,float *hFar) const
 }
 void BaseEnvCameraComponent::GetPlaneBounds(float z,float &outW,float &outH) const
 {
-	umath::frustum::get_plane_size(GetFOVRad(),z,m_aspectRatio,outW,outH);
+	umath::frustum::get_plane_size(GetFOVRad(),z,*m_aspectRatio,outW,outH);
 }
 void BaseEnvCameraComponent::GetFarPlaneBoundaries(std::array<Vector3,4> &outPoints,float *wFar,float *hFar) const
 {
@@ -237,11 +237,11 @@ void BaseEnvCameraComponent::GetPlaneBoundaries(float z,std::array<Vector3,4> &o
 	auto pos = trComponent.valid() ? trComponent->GetPosition() : Vector3{};
 	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
 	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	outPoints = umath::frustum::get_plane_boundaries(pos,forward,up,GetFOVRad(),z,m_aspectRatio,wNear,hNear);
+	outPoints = umath::frustum::get_plane_boundaries(pos,forward,up,GetFOVRad(),z,*m_aspectRatio,wNear,hNear);
 }
 
 void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov;}
-void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {m_aspectRatio = aspectRatio;}
+void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {*m_aspectRatio = aspectRatio;}
 void BaseEnvCameraComponent::SetNearZ(float nearZ) {*m_nearZ = nearZ;}
 void BaseEnvCameraComponent::SetFarZ(float farZ) {*m_farZ = farZ;}
 const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const {return *m_projectionMatrix;}
@@ -253,11 +253,12 @@ float BaseEnvCameraComponent::GetFOVRad() const {return umath::deg_to_rad(*m_fov
 const util::PMatrix4Property &BaseEnvCameraComponent::GetProjectionMatrixProperty() const {return m_projectionMatrix;}
 const util::PMatrix4Property &BaseEnvCameraComponent::GetViewMatrixProperty() const {return m_viewMatrix;}
 
+const util::PFloatProperty &BaseEnvCameraComponent::GetAspectRatioProperty() const {return m_aspectRatio;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetNearZProperty() const {return m_nearZ;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFarZProperty() const {return m_farZ;}
 const util::PFloatProperty &BaseEnvCameraComponent::GetFOVProperty() const {return m_fov;}
 
-float BaseEnvCameraComponent::GetAspectRatio() const {return m_aspectRatio;}
+float BaseEnvCameraComponent::GetAspectRatio() const {return *m_aspectRatio;}
 float BaseEnvCameraComponent::GetNearZ() const {return *m_nearZ;}
 float BaseEnvCameraComponent::GetFarZ() const {return *m_farZ;}
 void BaseEnvCameraComponent::UpdateFrustumPlanes()
@@ -281,7 +282,7 @@ Vector3 BaseEnvCameraComponent::GetPlanePoint(float z,const Vector2 &uv) const
 	auto forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent.valid() ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
-	return umath::frustum::get_plane_point(pos,forward,right,up,GetFOVRad(),z,m_aspectRatio,uv);
+	return umath::frustum::get_plane_point(pos,forward,right,up,GetFOVRad(),z,*m_aspectRatio,uv);
 }
 
 void BaseEnvCameraComponent::CreateFrustumMesh(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Vector3> &verts,std::vector<uint16_t> &indices) const

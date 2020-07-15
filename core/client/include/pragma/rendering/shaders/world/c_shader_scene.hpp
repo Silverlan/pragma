@@ -32,6 +32,7 @@ namespace pragma
 		};
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 
 		static prosper::Format RENDER_PASS_FORMAT;
 		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
@@ -42,7 +43,12 @@ namespace pragma
 		enum class CameraBinding : uint32_t
 		{
 			Camera = 0u,
-			RenderSettings,
+			RenderSettings
+		};
+
+		enum class RendererBinding : uint32_t
+		{
+			Renderer = 0u,
 			SSAOMap,
 			LightMap
 		};
@@ -87,6 +93,7 @@ namespace pragma
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const=0;
 		virtual uint32_t GetCameraDescriptorSetIndex() const=0;
+		virtual uint32_t GetRendererDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 	};
 
 	/////////////////////
@@ -96,20 +103,20 @@ namespace pragma
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CSM;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class LightBinding : uint32_t
 		{
 			LightBuffers = 0u,
 			TileVisLightIndexBuffer,
-			ShadowData
+			ShadowData,
+			CSM
 		};
 
 		enum class ShadowBinding : uint32_t
 		{
 			ShadowMaps = 0u,
-			ShadowCubeMaps
+			ShadowCubeMaps,
 		};
 
 #pragma pack(push,1)
@@ -121,7 +128,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindLights(prosper::IDescriptorSet &descSetShadowMaps,prosper::IDescriptorSet &descSetLightSources);
+		virtual bool BindLights(prosper::IDescriptorSet &dsLights);
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");

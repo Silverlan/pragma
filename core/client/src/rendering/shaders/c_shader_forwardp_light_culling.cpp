@@ -67,12 +67,12 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipel
 }
 
 bool ShaderForwardPLightCulling::Compute(
-	prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
+	prosper::IDescriptorSet &descSetLights,prosper::IDescriptorSet &descSetCamera,uint32_t vpWidth,uint32_t vpHeight,uint32_t workGroupsX,uint32_t workGroupsY,uint32_t lightCount,
 	uint32_t sceneIndex
 )
 {
 	return RecordPushConstants(PushConstants{
-			lightCount,1u<<sceneIndex
+			lightCount,1u<<sceneIndex,vpWidth<<16 | static_cast<uint16_t>(vpHeight)
 		}) &&
 		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
 		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_CAMERA.setIndex) &&

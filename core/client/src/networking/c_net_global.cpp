@@ -567,7 +567,7 @@ DLLCLIENT void NET_cl_map_load(NetPacket packet)
 		return;
 	auto mapName = packet->ReadString();
 	auto origin = packet->Read<Vector3>();
-	auto startIdx = packet->Read<uint32_t>();
+	//auto startIdx = packet->Read<uint32_t>();
 	//c_game->SetEntityMapIndexStart(startIdx);
 	client->ReadEntityData(packet);
 	auto bNewWorld = packet->Read<bool>();

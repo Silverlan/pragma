@@ -38,7 +38,7 @@ namespace pragma::rendering
 		const prosper::Texture *GetSceneTexture() const;
 		const prosper::Texture *GetPresentationTexture() const;
 		const prosper::Texture *GetHDRPresentationTexture() const;
-		virtual void UpdateRenderSettings(pragma::RenderSettings &renderSettings);
+		virtual void UpdateRenderSettings();
 		virtual void UpdateCameraData(pragma::CameraData &cameraData);
 		void Resize(uint32_t width, uint32_t height);
 

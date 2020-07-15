@@ -86,10 +86,9 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DE
 	}
 };
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA) ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA = {&ShaderEntity::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER) ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER = {&ShaderEntity::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderEntity::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS) ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderEntity::DESCRIPTOR_SET_LIGHTS};
-decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CSM) ShaderTextured3DBase::DESCRIPTOR_SET_CSM = {&ShaderEntity::DESCRIPTOR_SET_CSM};
-decltype(ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS) ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderEntity::DESCRIPTOR_SET_SHADOWS};
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> g_materialSettingsBuffer = nullptr;
 static uint32_t g_instanceCount = 0;
@@ -155,11 +154,10 @@ void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(prosper::Graphics
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CSM);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 }
 void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -392,10 +390,11 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 }
 size_t ShaderTextured3DBase::GetBaseTypeHashCode() const {return HASH_TYPE;}
 uint32_t ShaderTextured3DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderTextured3DBase::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
 uint32_t ShaderTextured3DBase::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
 uint32_t ShaderTextured3DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
 uint32_t ShaderTextured3DBase::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
-uint32_t ShaderTextured3DBase::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
+uint32_t ShaderTextured3DBase::GetMaterialDescriptorSetIndex() const {return GetMaterialDescriptorSetInfo().setIndex;}
 void ShaderTextured3DBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
 {
 	offset = offsetof(PushConstants,vertexAnimInfo);

@@ -58,6 +58,10 @@ namespace pragma
 
 		util::WeakHandle<BaseEntityComponent> FindComponent(ComponentId componentId) const;
 		util::WeakHandle<BaseEntityComponent> FindComponent(const std::string &name) const;
+
+		// For internal use only
+		EntityComponentManager *GetComponentManager();
+		const EntityComponentManager *GetComponentManager() const;
 	protected:
 		BaseEntityComponentSystem()=default;
 

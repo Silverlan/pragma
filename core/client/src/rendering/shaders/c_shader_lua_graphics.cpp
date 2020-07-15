@@ -659,9 +659,9 @@ void Lua::Shader::Scene3D::BindRenderSettings(lua_State *l,pragma::ShaderScene &
 {
 	Lua::PushBool(l,shader.BindRenderSettings(*descSet->GetDescriptorSet()));
 }
-void Lua::Shader::SceneLit3D::BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetShadowMaps,std::shared_ptr<prosper::IDescriptorSetGroup> &descSetLightSources)
+void Lua::Shader::SceneLit3D::BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights)
 {
-	Lua::PushBool(l,shader.BindLights(*descSetShadowMaps->GetDescriptorSet(),*descSetLightSources->GetDescriptorSet()));
+	Lua::PushBool(l,shader.BindLights(*dsLights->GetDescriptorSet()));
 }
 void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {

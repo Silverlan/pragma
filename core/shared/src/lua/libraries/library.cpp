@@ -1162,6 +1162,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("ReadQuaternion",static_cast<void(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) {
 		Lua::Push<Quat>(l,f.Read<Quat>());
 	}));
+	classDefFile.def("ReadColor",static_cast<Color(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Color {
+		return f.Read<Color>();
+	}));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&,uint32_t)>(&Lua_LFile_ReadString));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&)>(&Lua_LFile_ReadString));
 	classDefFile.def("WriteInt32",&Lua_LFile_WriteInt32);
@@ -1183,6 +1186,9 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("WriteAngles",&Lua_LFile_WriteAngles);
 	classDefFile.def("WriteQuaternion",static_cast<void(*)(lua_State*,LFile&,const Quat&)>([](lua_State *l,LFile &f,const Quat &rot) {
 		f.Write<Quat>(rot);
+	}));
+	classDefFile.def("WriteColor",static_cast<void(*)(lua_State*,LFile&,const Color&)>([](lua_State *l,LFile &f,const Color &col) {
+		f.Write<Color>(col);
 	}));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string,bool)>(&Lua_LFile_WriteString));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_WriteString));

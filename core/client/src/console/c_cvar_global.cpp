@@ -52,7 +52,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
@@ -440,6 +440,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 	auto scene = game->GetScene();
 	std::shared_ptr<prosper::IImage> imgScreenshot = nullptr;
+	std::shared_ptr<prosper::IBuffer> bufScreenshot = nullptr;
 #if 0
 	{
 		//c_engine->RunConsoleCommand("render_technique",std::vector<std::string>{"1"});
@@ -527,40 +528,52 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		if(renderer == nullptr)
 			return;
 
-		auto rt = renderer->GetHDRInfo().toneMappedRenderTarget;
+		enum class ImageStage : uint8_t
+		{
+			GameScene = 0,
+			ScreenOutput
+		};
+		auto stage = ImageStage::ScreenOutput;
+		std::shared_ptr<prosper::RenderTarget> rt = nullptr;
+		switch(stage)
+		{
+		case ImageStage::GameScene:
+			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
+			break;
+		case ImageStage::ScreenOutput:
+			rt = c_engine->GetStagingRenderTarget();
+			break;
+		}
 		if(rt == nullptr)
 			return;
 		c_engine->GetRenderContext().WaitIdle(); // Make sure rendering is complete
 
-		uint32_t queueFamilyIndex;
-		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
-
 		auto &img = rt->GetTexture().GetImage();
+		imgScreenshot = img.shared_from_this();
+
+		auto layout = img.GetSubresourceLayout();
+		if(layout.has_value() == false)
+			return;
 		auto extents = img.GetExtents();
-		prosper::util::ImageCreateInfo createInfo {};
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
-		createInfo.width = extents.width;
-		createInfo.height = extents.height;
-		createInfo.tiling = prosper::ImageTiling::Linear;
-		createInfo.format = prosper::Format::R8G8B8A8_UNorm;
-		createInfo.postCreateLayout = prosper::ImageLayout::TransferDstOptimal;
-		createInfo.usage = prosper::ImageUsageFlags::TransferDstBit;
-		imgScreenshot = c_engine->GetRenderContext().CreateImage(createInfo);
+		bufScreenshot = c_engine->GetRenderContext().AllocateTemporaryBuffer(layout->size);
 
 		// TODO: Check if image formats are compatible (https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#features-formats-compatibility)
 		// before issuing the copy command
+		uint32_t queueFamilyIndex;
+		auto cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,queueFamilyIndex);
 		cmdBuffer->StartRecording();
 		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
-		cmdBuffer->RecordCopyImage({},img,*imgScreenshot);
+		cmdBuffer->RecordCopyImageToBuffer({},img,prosper::ImageLayout::TransferDstOptimal,*bufScreenshot);
 		cmdBuffer->RecordImageBarrier(img,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		// Note: Blit can't be used because some Nvidia GPUs don't support blitting for images with linear tiling
 		//.RecordBlitImage(**cmdBuffer,{},**img,**imgDst);
 		cmdBuffer->StopRecording();
 		c_engine->GetRenderContext().SubmitCommandBuffer(*cmdBuffer,true);
 	}
-	if(imgScreenshot == nullptr)
+	if(bufScreenshot == nullptr)
 		return;
-	auto path = get_screenshot_name(game,uimg::ImageFormat::TGA); // TODO
+	auto imgFormat = uimg::ImageFormat::PNG;
+	auto path = get_screenshot_name(game,imgFormat);
 	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
 	if(f == nullptr)
 		return;
@@ -581,8 +594,11 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	auto byteSize = prosper::util::get_byte_size(format);
 	auto extents = imgScreenshot->GetExtents();
 	auto numBytes = extents.width *extents.height *byteSize;
-	imgScreenshot->Map(0ull,numBytes,&data);
+	bufScreenshot->Map(0ull,numBytes,prosper::IBuffer::MapFlags::None,&data);
+#if 0
 	auto layout = imgScreenshot->GetSubresourceLayout();
+	if(layout.has_value() == false)
+		return;
 	auto offset = layout->offset;
 	auto rowPitch = layout->row_pitch;
 	std::vector<unsigned char> pixels(numBytes);
@@ -656,7 +672,11 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			}
 		}
 	}
-	util::tga::write_tga(f,extents.width,extents.height,pixels);
+#endif
+	auto imgBuf = uimg::ImageBuffer::Create(data,extents.width,extents.height,uimg::ImageBuffer::Format::RGBA8);
+	uimg::save_image(f,*imgBuf,imgFormat);
+	bufScreenshot->Unmap();
+	//util::tga::write_tga(f,extents.width,extents.height,pixels);
 	Con::cout<<"Saved screenshot as '"<<path<<"'!"<<Con::endl;
 }
 
@@ -1068,3 +1088,4 @@ static void cvar_net_graph(bool val)
 REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
 	cvar_net_graph(val);
 })
+#pragma optimize("",on)

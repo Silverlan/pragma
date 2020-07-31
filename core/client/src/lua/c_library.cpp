@@ -309,6 +309,22 @@ static void register_gui(Lua::Interface &lua)
 		lua_checkgui(l,hEl);
 		static_cast<::WIScrollContainer*>(hEl.get())->SetContentsHeightFixed(fixed);
 	}));
+	wiScrollContainerClassDef.def("GetVerticalScrollBar",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pScrollBar = static_cast<::WIScrollContainer*>(hEl.get())->GetVerticalScrollBar();
+		if(pScrollBar == nullptr)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*pScrollBar);
+		o.push(l);
+	}));
+	wiScrollContainerClassDef.def("GetHorizontalScrollBar",static_cast<void(*)(lua_State*,WIScrollContainerHandle&)>([](lua_State *l,WIScrollContainerHandle &hEl) {
+		lua_checkgui(l,hEl);
+		auto *pScrollBar = static_cast<::WIScrollContainer*>(hEl.get())->GetHorizontalScrollBar();
+		if(pScrollBar == nullptr)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*pScrollBar);
+		o.push(l);
+	}));
 	guiMod[wiScrollContainerClassDef];
 
 	auto wiContainerClassDef = luabind::class_<WIContainerHandle,WIHandle>("Container");
@@ -853,7 +869,12 @@ void CGame::RegisterLuaLibraries()
 			return 1;
 		})},
 		{"get_clipboard_string",Lua::util::Client::get_clipboard_string},
-		{"set_clipboard_string",Lua::util::Client::set_clipboard_string}
+		{"set_clipboard_string",Lua::util::Client::set_clipboard_string},
+		{"get_image_format_file_extension",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto imgFormat = Lua::CheckInt(l,1);
+			Lua::PushString(l,uimg::get_file_extension(static_cast<uimg::ImageFormat>(imgFormat)));
+			return 1;
+		})}
 	});
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
@@ -933,6 +954,7 @@ void CGame::RegisterLuaLibraries()
 		{"IMAGE_FORMAT_TGA",umath::to_integral(uimg::ImageFormat::TGA)},
 		{"IMAGE_FORMAT_JPG",umath::to_integral(uimg::ImageFormat::JPG)},
 		{"IMAGE_FORMAT_HDR",umath::to_integral(uimg::ImageFormat::HDR)},
+		{"IMAGE_FORMAT_COUNT",umath::to_integral(uimg::ImageFormat::Count)},
 
 		{"PIXEL_FORMAT_LDR",umath::to_integral(uimg::PixelFormat::LDR)},
 		{"PIXEL_FORMAT_HDR",umath::to_integral(uimg::PixelFormat::HDR)},
@@ -1039,7 +1061,7 @@ void CGame::RegisterLuaLibraries()
 		{"draw_cone",Lua::DebugRenderer::Client::DrawCone},
 		{"draw_truncated_cone",Lua::DebugRenderer::Client::DrawTruncatedCone},
 		{"draw_cylinder",Lua::DebugRenderer::Client::DrawCylinder},
-		{"draw_axis",Lua::DebugRenderer::Client::DrawAxis},
+		{"draw_pose",Lua::DebugRenderer::Client::DrawAxis},
 		{"draw_text",Lua::DebugRenderer::Client::DrawText},
 		{"draw_path",Lua::DebugRenderer::Client::DrawPath},
 		{"draw_spline",Lua::DebugRenderer::Client::DrawSpline},

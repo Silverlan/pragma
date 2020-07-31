@@ -57,6 +57,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 
 		enum class VertexBinding : uint32_t
 		{

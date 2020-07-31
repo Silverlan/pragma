@@ -17,7 +17,7 @@
 using namespace pragma;
 #pragma optimize("",off)
 RenderContext::RenderContext()
-	: m_monitor(nullptr),m_aspectRatio(1.f)
+	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"opengl"}
 {
 	umath::set_flag(m_stateFlags,StateFlags::WindowedMode);
 }

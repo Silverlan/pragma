@@ -131,6 +131,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(),"string","calc_levenshtein_similarity",Lua::string::calc_levenshtein_similarity);
 	lua_pushtablecfunction(lua.GetState(),"string","find_longest_common_substring",Lua::string::find_longest_common_substring);
 	lua_pushtablecfunction(lua.GetState(),"string","find_similar_elements",Lua::string::find_similar_elements);
+	lua_pushtablecfunction(lua.GetState(),"string","is_integer",Lua::string::is_integer);
+	lua_pushtablecfunction(lua.GetState(),"string","is_number",Lua::string::is_number);
 	lua_pushtablecfunction(lua.GetState(),"string","split",Lua::string::split);
 	lua_pushtablecfunction(lua.GetState(),"string","join",Lua::string::join);
 	lua_pushtablecfunction(lua.GetState(),"string","remove_whitespace",Lua::string::remove_whitespace);

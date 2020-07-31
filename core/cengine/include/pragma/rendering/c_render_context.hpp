@@ -89,7 +89,7 @@ namespace pragma
 		float m_aspectRatio = 1.f;
 		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;
-		std::string m_renderAPI = "vulkan";
+		std::string m_renderAPI;
 	};
 }
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::RenderContext::StateFlags)

@@ -32,6 +32,7 @@ namespace Lua
 
 		DLLNETWORK int is_valid(lua_State *l);
 		DLLNETWORK int is_valid_entity(lua_State *l);
+		DLLNETWORK int remove(lua_State *l);
 		DLLNETWORK int is_table(lua_State *l);
 		DLLNETWORK int date_time(lua_State *l);
 		DLLNETWORK int fire_bullets(lua_State *l,const std::function<void(::DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f);
@@ -111,6 +112,7 @@ namespace Lua
 	{"get_date_time",Lua::util::date_time}, \
 	{"is_table",Lua::util::is_table}, \
 	{"is_valid",Lua::util::is_valid}, \
+	{"remove",Lua::util::remove}, \
 	{"register_class",Lua::util::register_class}, \
 	{"get_faded_time_factor",Lua::util::get_faded_time_factor}, \
 	{"get_scale_factor",Lua::util::get_scale_factor}, \

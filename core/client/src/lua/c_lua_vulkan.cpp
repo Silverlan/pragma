@@ -129,6 +129,9 @@ namespace Lua
 			DLLCLIENT void GetUsage(lua_State *l,Image &hImg);
 			DLLCLIENT void GetWidth(lua_State *l,Image &hImg);
 			DLLCLIENT void GetHeight(lua_State *l,Image &hImg);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf);
 		};
 		namespace VKImageView
 		{
@@ -1962,9 +1965,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	auto defRenderPassCreateInfo = luabind::class_<prosper::util::RenderPassCreateInfo>("RenderPassCreateInfo");
 	defRenderPassCreateInfo.def(luabind::constructor<>());
-	defRenderPassCreateInfo.def("AddAttachment",static_cast<void(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t format,uint32_t initialLayout,uint32_t finalLayout,uint32_t loadOp,uint32_t storeOp,uint32_t sampleCount) {
+	defRenderPassCreateInfo.def("AddAttachment",static_cast<uint32_t(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t format,uint32_t initialLayout,uint32_t finalLayout,uint32_t loadOp,uint32_t storeOp,uint32_t sampleCount) -> uint32_t {
 		createInfo.attachments.push_back({static_cast<prosper::Format>(format),static_cast<prosper::ImageLayout>(initialLayout),static_cast<prosper::AttachmentLoadOp>(loadOp),static_cast<prosper::AttachmentStoreOp>(storeOp),static_cast<prosper::SampleCountFlags>(sampleCount),static_cast<prosper::ImageLayout>(finalLayout)});
-		Lua::PushInt(l,createInfo.attachments.size() -1ull);
+		return createInfo.attachments.size() -1ull;
 	}));
 	defRenderPassCreateInfo.def("AddAttachment",static_cast<void(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t format,uint32_t initialLayout,uint32_t finalLayout,uint32_t loadOp,uint32_t storeOp) {
 		createInfo.attachments.push_back({static_cast<prosper::Format>(format),static_cast<prosper::ImageLayout>(initialLayout),static_cast<prosper::AttachmentLoadOp>(loadOp),static_cast<prosper::AttachmentStoreOp>(storeOp),prosper::SampleCountFlags::e1Bit,static_cast<prosper::ImageLayout>(finalLayout)});
@@ -2137,6 +2140,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetUsage",&Lua::Vulkan::VKImage::GetUsage);
 	defVkImage.def("GetWidth",&Lua::Vulkan::VKImage::GetWidth);
 	defVkImage.def("GetHeight",&Lua::Vulkan::VKImage::GetHeight);
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,const std::string&)>([](lua_State *l,Lua::Vulkan::Image &img,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Image>(l,img,name,&Lua::Check<Lua::Vulkan::Image>);
 	}));
@@ -2263,6 +2269,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkFramebuffer.def(luabind::tostring(luabind::self));
 	defVkFramebuffer.def(luabind::const_self ==luabind::const_self);
 	defVkFramebuffer.def("IsValid",&Lua::Vulkan::VKFramebuffer::IsValid);
+	defVkFramebuffer.def("GetWidth",static_cast<void(*)(lua_State*,Lua::Vulkan::Framebuffer&)>([](lua_State *l,Lua::Vulkan::Framebuffer &framebuffer) {
+		Lua::PushInt(l,framebuffer.GetWidth());
+	}));
+	defVkFramebuffer.def("GetHeight",static_cast<void(*)(lua_State*,Lua::Vulkan::Framebuffer&)>([](lua_State *l,Lua::Vulkan::Framebuffer &framebuffer) {
+		Lua::PushInt(l,framebuffer.GetHeight());
+	}));
 	vulkanMod[defVkFramebuffer];
 	
 	auto defVkRenderPass = luabind::class_<Lua::Vulkan::RenderPass>("RenderPass");
@@ -2778,6 +2790,18 @@ void Lua::Vulkan::VKImage::GetHeight(lua_State *l,Image &hImg)
 {
 	auto extents = hImg.GetExtents();
 	Lua::PushInt(l,extents.height);
+}
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel)
+{
+	hImg.WriteImageData(imgBuf.GetWidth(),imgBuf.GetHeight(),layerIndex,mipLevel,imgBuf.GetSize(),static_cast<uint8_t*>(imgBuf.GetData()));
+}
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex)
+{
+	WriteMemory(l,hImg,imgBuf,layerIndex,0);
+}
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf)
+{
+	WriteMemory(l,hImg,imgBuf,0u,0);
 }
 
 /////////////////////////////////

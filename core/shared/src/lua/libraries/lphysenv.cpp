@@ -806,6 +806,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::tostring(luabind::self));
+	classDefTransform.def("Copy",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
+		Lua::Push<umath::Transform>(l,t);
+	}));
+	classDefTransform.def("Set",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &tOther) {
+		t = tOther;
+	}));
 	classDefTransform.def("GetOrigin",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		Lua::Push<Vector3>(l,t.GetOrigin());
 	}));
@@ -873,6 +879,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
 	classDefScaledTransform.def(luabind::constructor<>());
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
+	classDefScaledTransform.def("Copy",static_cast<void(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) {
+		Lua::Push<umath::ScaledTransform>(l,t);
+	}));
+	classDefScaledTransform.def("Set",static_cast<void(*)(lua_State*,umath::ScaledTransform&,const umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t,const umath::ScaledTransform &tOther) {
+		t = tOther;
+	}));
 	classDefScaledTransform.def("GetScale",static_cast<void(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) {
 		Lua::Push<Vector3>(l,t.GetScale());
 	}));

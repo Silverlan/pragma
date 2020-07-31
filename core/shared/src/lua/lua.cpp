@@ -38,7 +38,7 @@ void Game::InitializeLua()
 	RegisterLua();
 
 	// Initialize component ids
-	std::unordered_map<std::string,int32_t> componentIds;
+	std::unordered_map<std::string,lua_Integer> componentIds;
 	for(auto &componentInfo : m_componentManager->GetRegisteredComponentTypes())
 	{
 		auto name = componentInfo.name;

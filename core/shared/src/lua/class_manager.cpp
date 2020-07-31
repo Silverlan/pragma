@@ -7,6 +7,7 @@
 
 #include "pragma/lua/class_manager.hpp"
 
+#pragma optimize("",off)
 pragma::lua::ClassManager::ClassManager(lua_State &l)
 	: m_luaState{l}
 {}
@@ -30,21 +31,29 @@ const pragma::lua::ClassManager::ClassInfo *pragma::lua::ClassManager::FindClass
 }
 void pragma::lua::ClassManager::RegisterClass(const std::string &className,luabind::object oClass)
 {
+	/*
+	// Obsolete? Lua-registered classes don't seem to be a part of the luabind registry
 	auto *reg = luabind::detail::class_registry::get_registry(&m_luaState);
 	if(reg == nullptr)
 		return;
 	auto &classes = reg->get_classes();
 	auto it = std::find_if(classes.begin(),classes.end(),[&className](const std::pair<luabind::type_id,luabind::detail::class_rep*> &pair) {
 		return pair.second->name() == className;
-		});
+	});
 	if(it == classes.end())
+		return;*/
+
+	auto it = std::find_if(m_classes.begin(),m_classes.end(),[&className](const ClassInfo &classInfo) {
+		return classInfo.className == className;
+	});
+	if(it != m_classes.end())
 		return;
 	if(m_classes.size() == m_classes.capacity())
 		m_classes.reserve(m_classes.size() +100);
 	m_classes.push_back({});
 	auto &classInfo = m_classes.back();
 	classInfo.classObject = oClass;
-	classInfo.class_rep = it->second;
+	classInfo.className = className;
 
 	m_classNameToClassIndex[className] = m_classes.size() -1u;
 }
@@ -55,6 +64,9 @@ bool pragma::lua::ClassManager::IsClassRegistered(const ClassRef &classRef) cons
 }
 bool pragma::lua::ClassManager::IsClassMethodDefined(const ClassRef &classRef,const std::string &methodName) const
 {
+	return false;
+	// Obsolete?
+#if 0
 	auto *classInfo = FindClassInfo(classRef);
 	if(classInfo == nullptr)
 		return false;
@@ -79,4 +91,6 @@ bool pragma::lua::ClassManager::IsClassMethodDefined(const ClassRef &classRef,co
 			return true;
 	}
 	return false;
+#endif
 }
+#pragma optimize("",on)

@@ -11,6 +11,7 @@
 #include "pragma/console/conout.h"
 #include <luainterface.hpp>
 #include <luabind/class_info.hpp>
+#include <luabind/function_introspection.hpp>
 
 static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) {s_bExtendedModules = b;}
@@ -57,7 +58,10 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 	}
 	luabind::open(l);
 	if(s_bExtendedModules)
+	{
 		luabind::bind_class_info(l);
+		luabind::bind_function_introspection(l);
+	}
 	Lua::initialize_error_handler();
 	lua_atpanic(l,[](lua_State *l) -> int32_t {
 		Lua::HandleLuaError(l);

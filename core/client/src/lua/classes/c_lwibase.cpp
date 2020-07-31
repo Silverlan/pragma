@@ -1562,6 +1562,21 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 			},0);
 		});
 	}
+	if(name == "onscrolloffsetchanged")
+	{
+		hCallback = FunctionCallback<void,uint32_t>::Create([l,hPanel,o](uint32_t offset) {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l,[&o,hPanel,offset](lua_State *l) {
+				o.push(l);
+
+				auto obj = WGUILuaInterface::GetLuaObject(l,*hPanel.get());
+				obj.push(l);
+				Lua::PushInt(l,offset);
+				return Lua::StatusCode::Ok;
+			},0);
+		});
+	}
 	else if(name == "oncharevent")
 	{
 		hCallback = FunctionCallback<::util::EventReply,int,GLFW::Modifier>::CreateWithOptionalReturn(
@@ -1995,17 +2010,21 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	ScopeGuard sg {[&window]() {
+		window.ClearCursorPosOverride();
+	}};
 	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
-	window.ClearCursorPosOverride();
 }
 void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods)
 {
-	lua_checkgui(l,hPanel);
+ 	lua_checkgui(l,hPanel);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	ScopeGuard sg {[&window]() {
+		window.ClearCursorPosOverride();
+	}};
 	hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
-	window.ClearCursorPosOverride();
 }
 void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action) {InjectMouseInput(l,hPanel,mousePos,button,action,0);}
 void Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods)

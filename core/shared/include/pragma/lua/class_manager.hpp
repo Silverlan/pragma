@@ -33,20 +33,20 @@ namespace pragma::lua
 			std::optional<std::string> className;
 			std::optional<luabind::object> classObject;
 		};
+		struct DLLNETWORK ClassInfo
+		{
+			luabind::object classObject;
+			std::string className;
+		};
 
 		ClassManager(lua_State &l);
 		void RegisterClass(const std::string &className,luabind::object oClass);
 		bool IsClassRegistered(const ClassRef &classRef) const;
 		bool IsClassMethodDefined(const ClassRef &classRef,const std::string &methodName) const;
-	private:
-		lua_State &m_luaState;
-		struct ClassInfo
-		{
-			luabind::object classObject;
-			luabind::detail::class_rep *class_rep;
-		};
 		ClassInfo *FindClassInfo(const ClassRef &classRef);
 		const ClassInfo *FindClassInfo(const ClassRef &classRef) const;
+	private:
+		lua_State &m_luaState;
 		std::vector<ClassInfo> m_classes = {};
 		std::unordered_map<std::string,size_t> m_classNameToClassIndex = {};
 	};

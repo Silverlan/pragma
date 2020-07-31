@@ -602,6 +602,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	modShader[defShaderPostProcessingBase];
 
 	auto defShaderImageProcessing = luabind::class_<pragma::LuaShaderImageProcessing,luabind::bases<pragma::LuaShaderGraphicsBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseImageProcessing");
+	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE",0);
+	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE_BINDING_TEXTURE",0);
 	defShaderImageProcessing.def(luabind::constructor<>());
 	modShader[defShaderImageProcessing];
 

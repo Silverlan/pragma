@@ -189,17 +189,31 @@ int Lua::DebugRenderer::Server::DrawCylinder(lua_State *l)
 }
 int Lua::DebugRenderer::Server::DrawAxis(lua_State *l)
 {
-	auto *origin = Lua::CheckVector(l,1);
 	auto duration = 0.f;
-	if(Lua::IsEulerAngles(l,2))
+	std::optional<Vector3> origin {};
+	std::optional<EulerAngles> ang {};
+	if(Lua::IsType<umath::Transform>(l,1))
 	{
-		auto *ang = Lua::CheckEulerAngles(l,2);
-		duration = static_cast<float>(Lua::CheckNumber(l,3));
-		SDebugRenderer::DrawAxis(*origin,*ang,duration);
-		return 0;
+		auto &pose = Lua::Check<umath::Transform>(l,1);
+		origin = pose.GetOrigin();
+		ang = EulerAngles{pose.GetRotation()};
+
+		if(Lua::IsSet(l,2))
+			duration = static_cast<float>(Lua::CheckNumber(l,2));
 	}
 	else
-		duration = static_cast<float>(Lua::CheckNumber(l,2));
+	{
+		origin = *Lua::CheckVector(l,1);
+		if(Lua::IsEulerAngles(l,2))
+		{
+			ang = *Lua::CheckEulerAngles(l,2);
+			duration = static_cast<float>(Lua::CheckNumber(l,3));
+			SDebugRenderer::DrawAxis(*origin,*ang,duration);
+			return 0;
+		}
+		else
+			duration = static_cast<float>(Lua::CheckNumber(l,2));
+	}
 	SDebugRenderer::DrawAxis(*origin,duration);
 	return 0;
 }

@@ -282,19 +282,9 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	teName->SizeToContents();
 	//
 	// Language
-	auto f = FileManager::OpenFile("scripts/localization/languages.txt","r");
-	std::unordered_map<std::string,std::string> lanOptions;
-	if(f != nullptr)
-	{
-		while(!f->Eof())
-		{
-			std::string l = f->ReadLine();
-			std::string key;
-			std::string val;
-			if(ustring::get_key_value(l,key,val))
-				lanOptions.insert(std::unordered_map<std::string,std::string>::value_type(val,key));
-		}
-	}
+	std::unordered_map<std::string,std::string> lanOptions {};
+	for(auto &pair : Locale::GetLanguages())
+		lanOptions[pair.second] = pair.first;
 	WIDropDownMenu *language = pList->AddDropDownMenu(Locale::GetText("language"),lanOptions,"cl_language");
 	//
 

@@ -46,7 +46,7 @@
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -200,7 +200,7 @@ static bool check_valid_lua_object(lua_State *l,int32_t stackIdx)
 	return bValid;
 }
 
-int Lua::util::is_valid(lua_State *l)
+static bool is_valid(lua_State *l)
 {
 	auto bValid = Lua::IsSet(l,1);
 	if(bValid == true)
@@ -223,7 +223,12 @@ int Lua::util::is_valid(lua_State *l)
 			}
 		}
 	}
-	Lua::PushBool(l,bValid);
+	return bValid;
+}
+
+int Lua::util::is_valid(lua_State *l)
+{
+	Lua::PushBool(l,::is_valid(l));
 	return 1;
 }
 
@@ -234,7 +239,32 @@ int Lua::util::is_valid_entity(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	return is_valid(l);
+	return ::is_valid(l);
+}
+
+int Lua::util::remove(lua_State *l)
+{
+	auto valid = ::is_valid(l);
+	if(valid == false)
+		return 0;
+	auto o = luabind::object(luabind::from_stack(l,1));
+	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
+	if(pEnt != nullptr)// Used frequently, and is faster than looking up "IsValid"
+	{
+		if(pEnt->IsValid())
+			(*pEnt)->Remove();
+		return 0;
+	}
+	try
+	{
+		auto oRemove = o["Remove"];
+		if(!oRemove)
+			return 0;
+		luabind::call_member<void>(o,"Remove");
+	}
+	catch(std::exception&) // No "IsValid" method exists
+	{}
+	return 0;
 }
 
 int Lua::util::is_table(lua_State *l)
@@ -372,6 +402,18 @@ int Lua::util::fire_bullets(lua_State *l) {return fire_bullets(l,nullptr);}
 int Lua::util::register_class(lua_State *l)
 {
 	std::string className = Lua::CheckString(l,1);
+	auto fullClassName = className;
+
+	auto nParentClasses = Lua::GetStackTop(l) -1;
+	auto fRegisterBaseClasses = [l,nParentClasses]() {
+		for(auto i=decltype(nParentClasses){2};i<=(nParentClasses +1);++i)
+		{
+			Lua::PushValue(l,-1); /* 2 */
+			Lua::PushValue(l,i); /* 3 */
+			if(Lua::ProtectedCall(l,1,0) != Lua::StatusCode::Ok) /* 1 */
+				Lua::HandleLuaError(l);
+		}
+	};
 
 	auto d = className.rfind('.');
 	std::string slibs;
@@ -412,6 +454,18 @@ int Lua::util::register_class(lua_State *l)
 				if(bLast == true)
 				{
 					Lua::Pop(l,numPop +1); /* 0 */
+
+					auto *nw = engine->GetNetworkState(l);
+					auto *game = nw->GetGameState();
+					auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
+					if(classInfo)
+					{
+						// Re-register base classes for this class, in case they have been changed
+						classInfo->classObject.push(l); /* 1 */
+						fRegisterBaseClasses();
+						Lua::Pop(l,1); /* 0 */
+					}
+
 					Lua::PushBool(l,false);
 					return 1;
 				}
@@ -427,13 +481,23 @@ int Lua::util::register_class(lua_State *l)
 		if(Lua::IsUserData(l,-1))
 		{
 			Lua::Pop(l,1); /* 0 */
+
+			auto *nw = engine->GetNetworkState(l);
+			auto *game = nw->GetGameState();
+			auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
+			if(classInfo)
+			{
+				// Re-register base classes for this class, in case they have been changed
+				classInfo->classObject.push(l); /* 1 */
+				fRegisterBaseClasses();
+				Lua::Pop(l,1); /* 0 */
+			}
+
 			Lua::PushBool(l,false);
 			return 1;
 		}
 		Lua::Pop(l,1); /* 0 */
 	}
-
-	auto nParentClasses = Lua::GetStackTop(l) -1;
 
 	auto restorePreviousGlobalValue = slibs.empty() == false;
 	if(restorePreviousGlobalValue)
@@ -446,15 +510,9 @@ int Lua::util::register_class(lua_State *l)
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		luabind::object oClass {luabind::from_stack(l,-1)};
-		game->GetLuaClassManager().RegisterClass(className,oClass);
+		game->GetLuaClassManager().RegisterClass(fullClassName,oClass);
 
-		for(auto i=decltype(nParentClasses){2};i<=(nParentClasses +1);++i)
-		{
-			Lua::PushValue(l,-1); /* 2 */
-			Lua::PushValue(l,i); /* 3 */
-			if(Lua::ProtectedCall(l,1,0) != Lua::StatusCode::Ok) /* 1 */
-				Lua::HandleLuaError(l);
-		}
+		fRegisterBaseClasses();
 		Lua::Pop(l,1); /* 0 */
 
 		if(slibs.empty() == false)
@@ -1036,3 +1094,4 @@ int Lua::util::get_addon_path(lua_State *l)
 	Lua::PushString(l,path);
 	return 1;
 }
+#pragma optimize("",on)

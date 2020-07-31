@@ -9,6 +9,9 @@
 #include "pragma/localization.h"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
+#include <sharedutils/util_path.hpp>
+
+#undef CreateFile
 
 decltype(Locale::m_localization) Locale::m_localization;
 decltype(Locale::m_language) Locale::m_language;
@@ -21,15 +24,21 @@ Localization::Localization()
 
 bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 {
-	std::string fPath = "scripts/localization/";
-	fPath += lan;
-	fPath += "/";
-	fPath += file;
-	fPath = FileManager::GetCanonicalizedPath(fPath);
-	auto it = std::find(m_loadedFiles.begin(),m_loadedFiles.end(),fPath);
+	auto filePath = util::Path::CreateFile(file);
+	auto it = std::find(m_loadedFiles.begin(),m_loadedFiles.end(),filePath.GetString());
 	if(it != m_loadedFiles.end())
-		return true;
-	auto f = FileManager::OpenFile(fPath.c_str(),"r");
+	{
+		if(bReload == false)
+			return true;
+		m_loadedFiles.erase(it);
+	}
+	return LoadFile(filePath.GetString(),lan);
+}
+
+bool Locale::LoadFile(const std::string &file,const std::string &lan)
+{
+	auto filePath = "scripts/localization/" +lan +'/' +file;
+	auto f = FileManager::OpenFile(filePath.c_str(),"r");
 	if(f != nullptr)
 	{
 		while(!f->Eof())
@@ -40,7 +49,7 @@ bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 			if(ustring::get_key_value(l,key,val))
 				m_localization.texts[key] = val;
 		}
-		m_loadedFiles.push_back(fPath);
+		m_loadedFiles.push_back(file);
 		return true;
 	}
 	return false;
@@ -55,12 +64,34 @@ bool Locale::Load(const std::string &file,bool bReload)
 	return r;
 }
 
-void Locale::Initialize(std::string lan)
+void Locale::SetLanguage(std::string lan)
 {
 	ustring::to_lower(lan);
 	m_language = lan;
+
+	auto loadedFiles = m_loadedFiles;
+	m_loadedFiles.clear();
+	for(auto &fpath : loadedFiles)
+		LoadFile(fpath,lan);
 }
 const std::string &Locale::GetLanguage() {return m_language;}
+std::unordered_map<std::string,std::string> Locale::GetLanguages()
+{
+	auto f = FileManager::OpenFile("scripts/localization/languages.txt","r");
+	std::unordered_map<std::string,std::string> lanOptions;
+	if(f != nullptr)
+	{
+		while(!f->Eof())
+		{
+			std::string l = f->ReadLine();
+			std::string key;
+			std::string val;
+			if(ustring::get_key_value(l,key,val))
+				lanOptions.insert(std::unordered_map<std::string,std::string>::value_type(key,val));
+		}
+	}
+	return lanOptions;
+}
 bool Locale::GetText(const std::string &id,std::string &outText) {return GetText(id,{},outText);}
 static void insert_arguments(const std::vector<std::string> &args,std::string &inOutText)
 {

@@ -260,7 +260,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	UpdateShaderTimeData();
 
 	CallCallbacks("PreRenderScenes");
-	CallLuaCallbacks("PreRenderScenes");
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
 
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
 

@@ -121,7 +121,7 @@ void CEngine::PreloadClientConfig()
 	auto res = cmds.find("cl_language");
 	if(res != nullptr && !res->argv.empty())
 		lan = res->argv[0];
-	Locale::Initialize(lan);
+	Locale::SetLanguage(lan);
 	Locale::Load("inputs.txt");
 	Locale::Load("menu.txt");
 	Locale::Load("misc.txt");

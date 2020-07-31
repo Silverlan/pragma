@@ -202,7 +202,9 @@ void CGame::RegisterLua()
 	Lua::RegisterLibrary(GetLuaState(),"locale",{
 		{"get_text",Lua::Locale::get_text},
 		{"load",Lua::Locale::load},
-		{"get_language",Lua::Locale::get_language}
+		{"get_language",Lua::Locale::get_language},
+		{"get_languages",Lua::Locale::get_languages},
+		{"change_language",Lua::Locale::change_language}
 	});
 
 	Game::RegisterLua();

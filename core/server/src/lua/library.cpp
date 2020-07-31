@@ -45,7 +45,7 @@ void SGame::RegisterLuaLibraries()
 		{"draw_cone",&Lua::DebugRenderer::Server::DrawCone},
 		{"draw_truncated_cone",&Lua::DebugRenderer::Server::DrawTruncatedCone},
 		{"draw_cylinder",&Lua::DebugRenderer::Server::DrawCylinder},
-		{"draw_axis",&Lua::DebugRenderer::Server::DrawAxis},
+		{"draw_pose",&Lua::DebugRenderer::Server::DrawAxis},
 		{"draw_text",&Lua::DebugRenderer::Server::DrawText},
 		{"draw_path",&Lua::DebugRenderer::Server::DrawPath},
 		{"draw_spline",&Lua::DebugRenderer::Server::DrawSpline},

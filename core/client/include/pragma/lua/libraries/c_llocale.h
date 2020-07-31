@@ -15,9 +15,11 @@ namespace Lua
 {
 	namespace Locale
 	{
+		DLLCLIENT int change_language(lua_State *l);
 		DLLCLIENT int get_text(lua_State *l);
 		DLLCLIENT int load(lua_State *l);
 		DLLCLIENT int get_language(lua_State *l);
+		DLLCLIENT int get_languages(lua_State *l);
 	};
 };
 

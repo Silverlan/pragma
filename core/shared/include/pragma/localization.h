@@ -29,16 +29,18 @@ class DLLNETWORK Locale
 {
 public:
 	static bool Load(const std::string &file,bool bReload=false);
-	static void Initialize(std::string lan);
+	static void SetLanguage(std::string lan);
 	static bool GetText(const std::string &id,std::string &outText);
 	static bool GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText);
 	static std::string GetText(const std::string &id,const std::vector<std::string> &args={});
 	static const std::string &GetLanguage();
+	static std::unordered_map<std::string,std::string> GetLanguages();
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;
 	static std::string m_language;
 	static bool Load(const std::string &file,const std::string &lan,bool bReload);
+	static bool LoadFile(const std::string &file,const std::string &lan);
 };
 
 #endif

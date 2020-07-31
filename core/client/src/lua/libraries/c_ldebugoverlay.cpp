@@ -321,6 +321,22 @@ int Lua::DebugRenderer::Client::DrawSphere(lua_State *l)
 }
 int Lua::DebugRenderer::Client::DrawAxis(lua_State *l)
 {
+	if(Lua::IsType<umath::Transform>(l,1))
+	{
+		auto &pose = Lua::Check<umath::Transform>(l,1);
+		auto duration = 0.f;
+		if(Lua::IsSet(l,2))
+			duration = static_cast<float>(Lua::CheckNumber(l,2));
+		auto r = ::DebugRenderer::DrawAxis(pose.GetOrigin(),EulerAngles{pose.GetRotation()},duration);
+		auto t = Lua::CreateTable(l);
+		for(auto i=decltype(r.size()){0};i<r.size();++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::Push<decltype(r[i])>(l,r[i]);
+			Lua::SetTableValue(l,t);
+		}
+		return 1;
+	}
 	auto *origin = Lua::CheckVector(l,1);
 	std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3> r{nullptr};
 	auto duration = 0.f;

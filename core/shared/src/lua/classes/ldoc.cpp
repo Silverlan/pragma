@@ -11,7 +11,10 @@
 #include <luainterface.hpp>
 
 #include <luabind/detail/class_rep.hpp>
+#include <luabind/detail/call.hpp>
+#include <luabind/class_info.hpp>
 
+#pragma optimize("",off)
 #if 0
 struct LUABIND_API class_base : scope
 {
@@ -47,16 +50,19 @@ private:
 
 #undef GetClassInfo
 
-#if 0
-struct LuaFunctionInfo
+struct LuaMethodInfo
 {
 	std::string name;
+	std::vector<std::string> overloads;
 };
 
 struct LuaClassInfo
 {
+	luabind::detail::class_rep *classRep = nullptr;
 	std::string name;
-	std::vector<LuaFunctionInfo> methods;
+	std::vector<LuaMethodInfo> methods;
+	std::vector<std::string> attributes;
+	std::vector<luabind::detail::class_rep*> bases;
 };
 
 class DocValidator
@@ -197,43 +203,387 @@ static const pragma::doc::Collection *find_class(const std::vector<pragma::doc::
 	return nullptr;
 }
 
-static luabind::object get_class_names(lua_State* L)
+static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 {
-	luabind::detail::class_registry* reg = luabind::detail::class_registry::get_registry(L);
+	crep->get_table(L);
+	luabind::object table(luabind::from_stack(L, -1));
+	lua_pop(L, 1);
 
-	std::map<luabind::type_id, luabind::detail::class_rep*> const& classes = reg->get_classes();
-
-	luabind::object result = luabind::newtable(L);
 	std::size_t index = 1;
 
-	for(const auto& cl : classes) {
-		//result[index++] = cl.second->name();
-		auto *name = cl.second->name();
+	for(luabind::iterator i(table), e; i != e; ++i)
+	{
+		std::string key;
+		auto lkey = i.key();
+		lkey.push(L);
+		if(Lua::IsString(L,-1))
+			key = Lua::CheckString(L,-1);
+		Lua::Pop(L,1);
 
-		std::vector<pragma::doc::PCollection> collections {};
+		auto type = luabind::type(*i);
+		switch(type)
+		{
+		case LUA_TFUNCTION:
+		{
+			std::cout<<"FUNC: "<<key<<std::endl;
+			
+			/*auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
+			if(f == nullptr)
+			{
+				std::stringstream ss;
+				ss<<"Function '"<<key<<"' not found!";
+				WriteToLog(ss);
+			}*/
+			break;
+		}
+		case LUA_TBOOLEAN:
+			break;
+		case LUA_TNUMBER:
+			break;
+		case LUA_TSTRING:
+			break;
+		case LUA_TTABLE:
+			break;
+		case LUA_TUSERDATA:
+			break;
+		case LUA_TLIGHTUSERDATA:
+			break;
+		}
+		if(type != LUA_TFUNCTION)
+			Con::cout<<"Type: "<<type<<Con::endl;
+		if(type == LUA_TNUMBER)
+		{
+		}
+		if(type != LUA_TFUNCTION)
+			continue;
+
+		// We have to create a temporary `object` here, otherwise the proxy
+		// returned by operator->() will mess up the stack. This is a known
+		// problem that probably doesn't show up in real code very often.
+		luabind::object member(*i);
+		member.push(L);
+		luabind::detail::stack_pop pop(L, 1);
+
+		luabind::detail::function_object const* impl_const = *(luabind::detail::function_object const**)lua_touserdata(L, -1);
+		std::cout<<impl_const<<std::endl;
+
+		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
+		{
+			//result.attributes[index++] = i.key();
+		} else
+		{
+			//result.methods[i.key()] = *i;
+		}
+	}
+}
+
+// We have to access some members of luabind::detail::class_rep which are inaccessable,
+// so we'll force them to be accessable.
+class Luaclass_rep
+{
+public:
+	luabind::type_id m_type;
+	std::vector<luabind::detail::class_rep::base_info> m_bases;
+	const char* m_name;
+	luabind::detail::lua_reference m_self_ref;
+	luabind::handle m_table;
+	luabind::handle m_default_table;
+	luabind::detail::class_rep::class_type m_class_type;
+	int m_instance_metatable;
+	std::map<const char*, int, luabind::detail::ltstr> m_static_constants;
+	int m_operator_cache;
+	luabind::detail::cast_graph* m_casts;
+	luabind::detail::class_id_map* m_classes;
+};
+static_assert(sizeof(Luaclass_rep) == sizeof(luabind::detail::class_rep));
+static Luaclass_rep &access_class_rep(luabind::detail::class_rep &rep) {return reinterpret_cast<Luaclass_rep&>(rep);}
+
+namespace luabind {
+
+	LUABIND_API class_info get_class_info(argument const& o);
+	detail::function_object* get_function_object(object const& fn) {
+		lua_State * L = fn.interpreter();
+		{
+			fn.push(L);
+			detail::stack_pop pop(L, 1);
+			if(!detail::is_luabind_function(L, -1)) {
+				return NULL;
+			}
+		}
+		return *touserdata<detail::function_object*>(std::get<1>(getupvalue(fn, 1)));
+	}
+
+	std::string get_function_name(object const& fn) {
+		detail::function_object * f = get_function_object(fn);
+		if(!f) {
+			return "";
+		}
+		return f->name;
+	}
+};
+
+
+static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep)
+{
+	crep->get_table(L);
+	luabind::object table(luabind::from_stack(L, -1));
+	lua_pop(L, 1);
+
+	LuaClassInfo result {};
+	result.classRep = crep;
+	result.name = crep->name();
+
+	for(auto &baseInfo : crep->bases())
+		result.bases.push_back(baseInfo.base);
+
+	for(luabind::iterator i(table), e; i != e; ++i)
+	{
+		if(luabind::type(*i) != LUA_TFUNCTION)
+			continue;
+
+		// We have to create a temporary `object` here, otherwise the proxy
+		// returned by operator->() will mess up the stack. This is a known
+		// problem that probably doesn't show up in real code very often.
+		luabind::object member(*i);
+		member.push(L);
+		luabind::detail::stack_pop pop(L, 1);
+
+		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
+		{
+			auto attr = i.key();
+			attr.push(L);
+			if(Lua::IsString(L,-1))
+				result.attributes.push_back(Lua::CheckString(L,-1));
+			Lua::Pop(L,1);
+		} else
+		{
+			auto method = i.key();
+			method.push(L);
+			if(Lua::IsString(L,-1))
+			{
+				result.methods.push_back({});
+				auto &method = result.methods.back();
+				method.name = Lua::CheckString(L,-1);
+
+				auto &omethod = *i;
+				luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
+				if(fobj) {
+					luabind::object overloadTable(luabind::newtable(L));
+					const char* function_name = fobj->name.c_str();
+					for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
+					{
+						f->format_signature(L, function_name);
+						luabind::detail::stack_pop pop(L, 1);
+
+						if(Lua::IsString(L,-1))
+							method.overloads.push_back(Lua::CheckString(L,-1));
+					}
+				}
+				Lua::Pop(L,1);
+			}
+		}
+	}
+	return result;
+}
+
+static void strip_base_class_methods(std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> &classInfoList,LuaClassInfo &classInfo,LuaClassInfo &bc)
+{
+	for(auto *base : bc.bases)
+	{
+		auto it = classInfoList.find(base);
+		if(it == classInfoList.end())
+			continue;
+		auto &baseClassInfo = it->second;
+		strip_base_class_methods(classInfoList,classInfo,baseClassInfo);
+		for(auto itMethod=classInfo.methods.begin();itMethod!=classInfo.methods.end();)
+		{
+			auto &methodInfo = *itMethod;
+			auto it = std::find_if(baseClassInfo.methods.begin(),baseClassInfo.methods.end(),[&methodInfo](const LuaMethodInfo &methodInfoOther) {
+				return methodInfo.name == methodInfoOther.name;
+			});
+			if(it == baseClassInfo.methods.end())
+			{
+				++itMethod;
+				continue;
+			}
+			auto &baseClassMethod = *it;
+			for(auto it=methodInfo.overloads.begin();it!=methodInfo.overloads.end();)
+			{
+				auto &overload = *it;
+				auto itBase = std::find_if(baseClassMethod.overloads.begin(),baseClassMethod.overloads.end(),[&overload](const std::string &overloadInfoOther) {
+					return overload == overloadInfoOther;
+				});
+				if(itBase != baseClassMethod.overloads.end())
+					it = methodInfo.overloads.erase(it);
+				else
+					++it;
+			}
+			if(methodInfo.overloads.empty())
+				itMethod = classInfo.methods.erase(itMethod);
+			else
+				++itMethod;
+		}
+	}
+}
+
+static std::unordered_map<std::string,std::string> g_typeTranslationTable {
+	{"std::string","string"},
+	{"short","int"},
+	{"unsigned char","int"},
+	{"unsigned int","int"},
+	{"QuaternionInternal","Quaternion"},
+	{"double","float"},
+};
+
+static void normalize_param_name(std::string &paramName)
+{
+	auto isRef = (paramName.find("&") != std::string::npos);
+	auto isPtr = (paramName.find("*") != std::string::npos);
+	auto isConst = (paramName.find(" const") != std::string::npos);
+	ustring::replace(paramName,"&","");
+	ustring::replace(paramName,"*","");
+	ustring::replace(paramName,"custom ","");
+	ustring::replace(paramName," const","");
+
+	if(paramName.empty() == false && paramName.front() == '[' && paramName.back() == ']')
+	{
+		paramName.erase(paramName.begin());
+		paramName.erase(paramName.end() -1);
+		ustring::replace(paramName,"struct ","");
+		ustring::replace(paramName,"class ","");
+		// ustring::replace(paramName,"std::shared_ptr<","");
+	}
+
+	for(auto &pair : g_typeTranslationTable)
+		ustring::replace(paramName,pair.first,pair.second);
+}
+
+static void normalize_return_name(std::string &retName)
+{
+	normalize_param_name(retName);
+}
+
+static void normalize_method_name(std::string &methodName)
+{
+	auto paramStart = methodName.find('(');
+	auto paramEnd = methodName.rfind(')');
+	if(paramStart == std::string::npos || paramEnd == std::string::npos)
+		return;
+
+	auto params = methodName.substr(paramStart +1,paramEnd -paramStart -1);
+	if(params.empty() == false && params.front() == ',')
+		params.erase(params.begin());
+
+	std::vector<std::string> paramList;
+	ustring::explode(params,",",paramList);
+	for(auto &param : paramList)
+		normalize_param_name(param);
+	if(paramList.size() >= 2)
+	{
+		if(paramList.front() == "lua_State")
+			paramList.erase(paramList.begin());
+		paramList.erase(paramList.begin()); // Second arg is self
+	}
+
+	params.clear();
+	for(auto i=decltype(paramList.size()){0u};i<paramList.size();++i)
+	{
+		if(i > 0)
+			params += ',';
+		params += paramList.at(i);
+	}
+
+	methodName = methodName.substr(0,paramStart) +'(' +params +')';
+
+	auto sp = methodName.rfind(' ',paramStart);
+	if(sp != std::string::npos)
+	{
+		auto retType = methodName.substr(0,sp);
+		normalize_return_name(retType);
+		methodName = retType +' ' +methodName.substr(sp +1);
+	}
+}
+
+static void autogenerate(lua_State *L)
+{
+	auto* reg = luabind::detail::class_registry::get_registry(L);
+	auto& classes = reg->get_classes();
+
+	std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> classInfo {};
+	for(const auto &cl : classes)
+		classInfo[cl.second] = get_class_info(L,cl.second);
+
+	for(auto &pair : classInfo)
+		strip_base_class_methods(classInfo,pair.second,pair.second);
+
+	for(auto &pair : classInfo)
+	{
+		for(auto &methodInfo : pair.second.methods)
+		{
+			for(auto &overload : methodInfo.overloads)
+				normalize_method_name(overload);
+		}
+	}
+
+	// Generate pragma doc
+	for(auto &pair : classInfo)
+	{
+		auto &classInfo = pair.second;
+		auto collection = pragma::doc::Collection::Create();
+		for(auto *base : classInfo.bases)
+		{
+			// TODO: Base class of base class?
+			auto derivedFrom = pragma::doc::DerivedFrom::Create(base->name());
+			collection->AddDerivedFrom(*derivedFrom);
+		}
+
+		for(auto &attr : classInfo.attributes)
+		{
+			auto member = pragma::doc::Member::Create(*collection,attr);
+			collection->AddMember(member);
+		}
+
+		for(auto &method : classInfo.methods)
+		{
+
+			//method.name;
+			//method.overloads;
+
+		}
+		//classInfo.methods
+	}
+
+	std::stringstream ss;
+	for(auto &pair : classInfo)
+	{
+		auto &classInfo = pair.second;
+		ss<<"Class: "<<classInfo.name<<"\n";
+		for(auto &attr : classInfo.attributes)
+			ss<<"\t"<<attr<<"\n";
+		for(auto &method : classInfo.methods)
+		{
+			for(auto &overload : method.overloads)
+				ss<<"\t"<<overload<<"\n";
+		}
+
+		//std::vector<pragma::doc::PCollection> collections {};
 		// TODO
 
 		//get_class_info(L,cl.second);
 	}
-
-	luabind::detail::class_registry* r = luabind::detail::class_registry::get_registry(L);
-	//r->
-	return result;
-}
-static void test()
-{
-
+	auto f = FileManager::OpenFile<VFilePtrReal>("testdoc.txt","w");
+	f->WriteString(ss.str());
+	f = nullptr;
 }
 
-#endif
 namespace Lua::doc
 {
 	void register_library(Lua::Interface &lua);
 };
+
 void Lua::doc::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
-	//get_class_names(l);
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
 	Lua::RegisterLibrary(l,libName,{
@@ -256,6 +606,10 @@ void Lua::doc::register_library(Lua::Interface &lua)
 				Lua::SetTableValue(l,t);
 			}
 			return 1;
+		})},
+		{"autogenerate",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			autogenerate(l);
+			return 0;
 		})}
 	});
 	Lua::RegisterLibraryEnums(l,libName,{
@@ -556,7 +910,7 @@ void Lua::doc::register_library(Lua::Interface &lua)
 		for(auto &df : derivedFrom)
 		{
 			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::doc::DerivedFrom*>(l,&const_cast<pragma::doc::DerivedFrom&>(df));
+			Lua::Push(l,const_cast<std::shared_ptr<pragma::doc::DerivedFrom>&>(df));
 			Lua::SetTableValue(l,t);
 		}
 	}));
@@ -586,3 +940,4 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
+#pragma optimize("",on)

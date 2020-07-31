@@ -13,6 +13,13 @@
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
+int Lua::Locale::change_language(lua_State *l)
+{
+	std::string lan = Lua::CheckString(l,1);
+	::Locale::SetLanguage(lan);
+	return 0;
+}
+
 int Lua::Locale::get_text(lua_State *l)
 {
 	auto id = Lua::CheckString(l,1);
@@ -60,5 +67,18 @@ int Lua::Locale::get_language(lua_State *l)
 {
 	auto &lan = ::Locale::GetLanguage();
 	Lua::PushString(l,lan);
+	return 1;
+}
+
+int Lua::Locale::get_languages(lua_State *l)
+{
+	auto languages = ::Locale::GetLanguages();
+	auto t = Lua::CreateTable(l);
+	for(auto &pair : languages)
+	{
+		Lua::PushString(l,pair.first);
+		Lua::PushString(l,pair.second);
+		Lua::SetTableValue(l,t);
+	}
 	return 1;
 }

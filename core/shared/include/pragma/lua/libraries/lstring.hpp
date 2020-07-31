@@ -22,6 +22,8 @@ namespace Lua
 		DLLNETWORK int32_t remove_whitespace(lua_State *l);
 		DLLNETWORK int32_t remove_quotes(lua_State *l);
 		DLLNETWORK int32_t find_similar_elements(lua_State *l);
+		DLLNETWORK int32_t is_integer(lua_State *l);
+		DLLNETWORK int32_t is_number(lua_State *l);
 	};
 };
 

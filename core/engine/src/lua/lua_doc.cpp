@@ -260,7 +260,7 @@ void print_collection(const pragma::doc::Collection &collection)
 				Con::cout<<"- ";
 				bFirst = false;
 			}
-			Con::cout<<wrap_link(df.GetName());
+			Con::cout<<wrap_link(df->GetName());
 		}
 		Con::cout<<Con::endl<<Con::endl;
 	}

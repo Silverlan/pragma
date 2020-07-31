@@ -10,6 +10,16 @@
 #include "pragma/lua/libraries/lstring.hpp"
 #include <pragma/lua/luaapi.h>
 
+int32_t Lua::string::is_integer(lua_State *l)
+{
+	Lua::PushBool(l,ustring::is_integer(Lua::CheckString(l,1)));
+	return 1;
+}
+int32_t Lua::string::is_number(lua_State *l)
+{
+	Lua::PushBool(l,ustring::is_number(Lua::CheckString(l,1)));
+	return 1;
+}
 int32_t Lua::string::calc_levenshtein_distance(lua_State *l)
 {
 	auto *str1 = Lua::CheckString(l,1);

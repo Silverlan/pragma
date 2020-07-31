@@ -36,7 +36,6 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)

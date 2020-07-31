@@ -12,6 +12,7 @@
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include <prosper_descriptor_set_group.hpp>
@@ -44,21 +45,27 @@ void CShadowManagerComponent::Initialize()
 	m_cubeSet.limit = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
 	m_cubeSet.buffers.reserve(m_cubeSet.limit);
 
-	if(m_descSetGroup != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
+	if(m_descSetGroup != nullptr || pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.IsValid() == false)
 		return;
 	g_shadowManager = this;
 	m_whShadowShader = c_engine->GetShader("shadow");
-	m_descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
+	m_descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS);
 
 	auto *descSet = m_descSetGroup->GetDescriptorSet();
 
 	// Shadow map descriptor bindings need to be bound to dummy images.
 	// For normal shadow maps this is already taken care of, but cubemaps are a special case
 	// that needs to be dealt with
-	auto arraySize = pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.bindings.at(umath::to_integral(pragma::ShaderTextured3DBase::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
-	auto &dummyTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
-	for(auto i=decltype(arraySize){0u};i<arraySize;++i)
-		descSet->SetBindingArrayTexture(*dummyTex,umath::to_integral(pragma::ShaderSceneLit::LightBinding::CSM),i);
+	auto arraySizeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowMaps)).descriptorArraySize;
+	auto arraySizeCubeShadows = pragma::ShaderPBR::DESCRIPTOR_SET_SHADOWS.bindings.at(umath::to_integral(pragma::ShaderPBR::ShadowBinding::ShadowCubeMaps)).descriptorArraySize;
+
+	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
+	for(auto i=decltype(arraySizeShadows){0u};i<arraySizeShadows;++i)
+		descSet->SetBindingArrayTexture(*dummyTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowMaps),i);
+
+	auto &dummyCubeTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
+	for(auto i=decltype(arraySizeCubeShadows){0u};i<arraySizeCubeShadows;++i)
+		descSet->SetBindingArrayTexture(*dummyCubeTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),i);
 }
 
 void CShadowManagerComponent::OnRemove()

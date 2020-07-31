@@ -89,6 +89,7 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA) ShaderTextured3DBase::DESC
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER) ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER = {&ShaderEntity::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderEntity::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS) ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderEntity::DESCRIPTOR_SET_LIGHTS};
+decltype(ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS) ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderEntity::DESCRIPTOR_SET_SHADOWS};
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> g_materialSettingsBuffer = nullptr;
 static uint32_t g_instanceCount = 0;
@@ -158,6 +159,7 @@ void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(prosper::Graphics
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
 }
 void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {

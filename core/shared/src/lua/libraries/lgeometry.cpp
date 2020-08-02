@@ -21,359 +21,111 @@
 //#include <pragma/model/mesh.h>
 //#include <triangle.h>
 
-int Lua::geometry::closest_point_on_aabb_to_point(lua_State *l)
+Vector3 Lua::geometry::closest_point_on_aabb_to_point(const Vector3 &min,const Vector3 &max,const Vector3 &p)
 {
-	Vector3 *min = _lua_Vector_check(l,1);
-	Vector3 *max = _lua_Vector_check(l,2);
-	Vector3 *p = _lua_Vector_check(l,3);
 	Vector3 res;
-	Geometry::ClosestPointOnAABBToPoint(*min,*max,*p,&res);
-	luabind::object(l,res).push(l);
-	return 1;
+	Geometry::ClosestPointOnAABBToPoint(min,max,p,&res);
+	return res;
 }
 
-int Lua::geometry::closest_points_between_lines(lua_State *l)
+void Lua::geometry::closest_points_between_lines(const Vector3 &pA,const Vector3 &qA,const Vector3 &pB,const Vector3 &qB,Vector3 &outCA,Vector3 &outCB,float &outD)
 {
-	Vector3 *pA = _lua_Vector_check(l,1);
-	Vector3 *qA = _lua_Vector_check(l,2);
-	Vector3 *pB = _lua_Vector_check(l,3);
-	Vector3 *qB = _lua_Vector_check(l,4);
 	float s,t;
-	Vector3 cA,cB;
-	float d = Geometry::ClosestPointsBetweenLines(*pA,*qA,*pB,*qB,&s,&t,&cA,&cB);
-	luabind::object(l,cA).push(l);
-	luabind::object(l,cB).push(l);
-	Lua::PushNumber(l,d);
-	return 3;
+	outD = Geometry::ClosestPointsBetweenLines(pA,qA,pB,qB,&s,&t,&outCA,&outCB);
 }
 
-int Lua::geometry::closest_point_on_plane_to_point(lua_State *l)
+Vector3 Lua::geometry::closest_point_on_plane_to_point(const Vector3 &n,float d,const Vector3 &p)
 {
-	Vector3 *n = _lua_Vector_check(l,1);
-	float d = Lua::CheckNumber<float>(l,2);
-	Vector3 *p = _lua_Vector_check(l,3);
 	Vector3 res;
-	Geometry::ClosestPointOnPlaneToPoint(*n,d,*p,&res);
-	luabind::object(l,res).push(l);
-	return 1;
+	Geometry::ClosestPointOnPlaneToPoint(n,d,p,&res);
+	return res;
 }
 
-int Lua::geometry::closest_point_on_triangle_to_point(lua_State *l)
+Vector3 Lua::geometry::closest_point_on_triangle_to_point(const Vector3 &a,const Vector3 &b,const Vector3 &c,const Vector3 &p)
 {
-	Vector3 *a = _lua_Vector_check(l,1);
-	Vector3 *b = _lua_Vector_check(l,2);
-	Vector3 *c = _lua_Vector_check(l,3);
-	Vector3 *p = _lua_Vector_check(l,4);
 	Vector3 res;
-	Geometry::ClosestPointOnTriangleToPoint(*a,*b,*c,*p,&res);
-	luabind::object(l,res).push(l);
-	return 1;
+	Geometry::ClosestPointOnTriangleToPoint(a,b,c,p,&res);
+	return res;
 }
 
-int Lua::geometry::smallest_enclosing_sphere(lua_State *l)
+void Lua::geometry::smallest_enclosing_sphere(lua_State *l,luabind::table<> tVerts,Vector3 &outCenter,float &outRadius)
 {
-	std::vector<Vector3> verts;
-
-	Lua::CheckTable(l,1);
-	Lua::PushNil(l);
-	while(Lua::GetNextPair(l,1) != 0)
-	{
-		Vector3 *v = Lua::CheckVector(l,-1);
-		verts.push_back(*v);
-		Lua::Pop(l,1);
-	}
-
-	Vector3 center;
-	float radius;
-	Seb::Calculate(verts,center,radius);
-	Lua::Push<Vector3>(l,center);
-	Lua::PushNumber(l,radius);
-	return 2;
+	auto verts = Lua::table_to_vector<Vector3>(l,tVerts,1);
+	Seb::Calculate(verts,outCenter,outRadius);
 }
 
-int Lua::geometry::closest_point_on_line_to_point(lua_State *l)
+void Lua::geometry::generate_truncated_cone_mesh(
+	lua_State *l,const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,
+	luabind::object &outVerts,luabind::object &outTris,luabind::object &outNormals,
+	uint32_t segmentCount,bool caps,bool generateTriangles,bool generateNormals
+)
 {
-	auto *start = Lua::CheckVector(l,1);
-	auto *end = Lua::CheckVector(l,2);
-	auto *p = Lua::CheckVector(l,3);
-	auto bClampResultToSegment = true;
-	if(Lua::IsSet(l,4))
-		bClampResultToSegment = Lua::CheckBool(l,4);
-	auto r = Geometry::ClosestPointOnLineToPoint(*start,*end,*p,bClampResultToSegment);
-	Lua::Push<Vector3>(l,r);
-	return 1;
-}
-
-int Lua::geometry::closest_point_on_sphere_to_line(lua_State *l)
-{
-	auto *origin = Lua::CheckVector(l,1);
-	auto radius = Lua::CheckNumber(l,2);
-	auto *start = Lua::CheckVector(l,3);
-	auto *end = Lua::CheckVector(l,4);
-	auto bClampResultToSegment = true;
-	if(Lua::IsSet(l,5))
-		bClampResultToSegment = Lua::CheckBool(l,5);
-	auto r = Geometry::ClosestPointOnSphereToLine(*origin,static_cast<float>(radius),*start,*end,bClampResultToSegment);
-	Lua::Push<Vector3>(l,r);
-	return 1;
-}
-
-int Lua::geometry::get_triangle_winding_order(lua_State *l)
-{
-	if(Lua::IsVector(l,1))
-	{
-		auto &v0 = *Lua::CheckVector(l,1);
-		auto &v1 = *Lua::CheckVector(l,2);
-		auto &v2 = *Lua::CheckVector(l,3);
-		auto &n = *Lua::CheckVector(l,4);
-		auto windingOrder = ::Geometry::get_triangle_winding_order(v0,v1,v2,n);
-		Lua::PushInt(l,umath::to_integral(windingOrder));
-		return 1;
-	}
-	Lua::CheckVector2(l,1);
-	auto &v0 = *Lua::CheckVector2(l,1);
-	auto &v1 = *Lua::CheckVector2(l,2);
-	auto &v2 = *Lua::CheckVector2(l,3);
-	auto windingOrder = ::Geometry::get_triangle_winding_order(v0,v1,v2);
-	Lua::PushInt(l,umath::to_integral(windingOrder));
-	return 1;
-}
-
-int Lua::geometry::calc_face_normal(lua_State *l)
-{
-	auto &v0 = *Lua::CheckVector(l,1);
-	auto &v1 = *Lua::CheckVector(l,2);
-	auto &v2 = *Lua::CheckVector(l,3);
-	auto n = Geometry::CalcFaceNormal(v0,v1,v2);
-	Lua::Push<Vector3>(l,n);
-	return 1;
-}
-
-int Lua::geometry::generate_truncated_cone_mesh(lua_State *l)
-{
-	auto &origin = *Lua::CheckVector(l,1);
-	auto startRadius = Lua::CheckNumber(l,2);
-	auto &dir = *Lua::CheckVector(l,3);
-	auto dist = Lua::CheckNumber(l,4);
-	auto endRadius = Lua::CheckNumber(l,5);
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
 	std::vector<Vector3> normals;
-	uint32_t segmentCount = 12;
-	if(Lua::IsSet(l,6))
-		segmentCount = static_cast<uint32_t>(Lua::CheckInt(l,6));
+	Geometry::GenerateTruncatedConeMesh(origin,static_cast<float>(startRadius),dir,static_cast<float>(dist),static_cast<float>(endRadius),verts,(generateTriangles == true) ? &triangles : nullptr,(generateNormals == true) ? &normals : nullptr,segmentCount,caps);
 
-	auto bCaps = true;
-	if(Lua::IsSet(l,7))
-		bCaps = Lua::CheckBool(l,7);
-
-	auto bGenerateTriangles = true;
-	if(Lua::IsSet(l,8))
-		bGenerateTriangles = Lua::CheckBool(l,8);
-
-	auto bGenerateNormals = false;
-	if(Lua::IsSet(l,9))
-		bGenerateNormals = Lua::CheckBool(l,9);
-	Geometry::GenerateTruncatedConeMesh(origin,static_cast<float>(startRadius),dir,static_cast<float>(dist),static_cast<float>(endRadius),verts,(bGenerateTriangles == true) ? &triangles : nullptr,(bGenerateNormals == true) ? &normals : nullptr,segmentCount,bCaps);
-
-	int32_t numRet = 1;
-	auto t = Lua::CreateTable(l);
-	for(auto i=decltype(verts.size()){0};i<verts.size();++i)
+	outVerts = Lua::vector_to_table(l,verts);
+	auto *outNext = &outTris;
+	if(generateTriangles == true)
 	{
-		auto &v = verts[i];
-		Lua::PushInt(l,i +1);
-		Lua::Push<Vector3>(l,v);
-		Lua::SetTableValue(l,t);
+		*outNext = Lua::vector_to_table(l,triangles);
+		outNext = &outNormals;
 	}
-
-	if(bGenerateTriangles == true)
-	{
-		t = Lua::CreateTable(l);
-		for(auto i=decltype(triangles.size()){0};i<triangles.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushInt(l,triangles[i]);
-			Lua::SetTableValue(l,t);
-		}
-		++numRet;
-	}
-	if(bGenerateNormals == true)
-	{
-		t = Lua::CreateTable(l);
-		for(auto i=decltype(normals.size()){0};i<normals.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::Push<Vector3>(l,normals[i]);
-			Lua::SetTableValue(l,t);
-		}
-		++numRet;
-	}
-	return numRet;
+	if(generateNormals == true)
+		*outNext = Lua::vector_to_table(l,normals);
 }
-
-int Lua::geometry::calc_volume_of_triangle(lua_State *l)
+double Lua::geometry::calc_volume_of_polyhedron(lua_State *l,luabind::table<> tVerts,luabind::table<> tTriangles)
 {
-	auto *v0 = Lua::CheckVector(l,1);
-	auto *v1 = Lua::CheckVector(l,2);
-	auto *v2 = Lua::CheckVector(l,3);
-	auto vol = ::Geometry::calc_volume_of_triangle(*v0,*v1,*v2);
-	Lua::PushNumber(l,vol);
-	return 1;
-}
-int Lua::geometry::calc_volume_of_polyhedron(lua_State *l)
-{
-	int32_t tVerts = 1;
-	Lua::CheckTable(l,tVerts);
-	int32_t tTriangles = tVerts +1;
-	Lua::CheckTable(l,tTriangles);
-
-	Lua::PushNil(l);
-	auto volume = Geometry::calc_volume_of_polyhedron([l,tVerts,tTriangles](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
-		if(Lua::GetNextPair(l,tTriangles) == 0)
+	auto verts = Lua::table_to_vector<Vector3>(l,tVerts,1);
+	auto tris = Lua::table_to_vector<uint16_t>(l,tTriangles,2);
+	auto numTris = Lua::GetObjectLength(l,2);
+	uint32_t idx = 0;
+	return Geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
+		if(idx >= numTris)
 			return false;
-		auto v0Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
+		auto idx0 = tris.at(idx);
+		auto idx1 = tris.at(idx +1);
+		auto idx2 = tris.at(idx +2);
+		*v0 = &verts.at(idx0);
+		*v1 = &verts.at(idx1);
+		*v2 = &verts.at(idx2);
 
-		if(Lua::GetNextPair(l,tTriangles) == 0)
-			return false;
-		auto v1Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
-
-		if(Lua::GetNextPair(l,tTriangles) == 0)
-			return false;
-		auto v2Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v0Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v0 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v1Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v1 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v2Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v2 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
+		idx += 3;
 		return true;
 	});
-	Lua::PushNumber(l,volume);
-	return 1;
 }
-int Lua::geometry::calc_center_of_mass(lua_State *l)
+void Lua::geometry::calc_center_of_mass(lua_State *l,luabind::table<> tVerts,luabind::table<> tTriangles,Vector3 &outCom,double &outVolume)
 {
-	int32_t tVerts = 1;
-	Lua::CheckTable(l,tVerts);
-	int32_t tTriangles = tVerts +1;
-	Lua::CheckTable(l,tTriangles);
-
-	Lua::PushNil(l);
-	Vector3 com {};
-	auto volume = Geometry::calc_volume_of_polyhedron([l,tVerts,tTriangles](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
-		if(Lua::GetNextPair(l,tTriangles) == 0)
+	auto verts = Lua::table_to_vector<Vector3>(l,tVerts,1);
+	auto tris = Lua::table_to_vector<uint16_t>(l,tTriangles,2);
+	auto numTris = Lua::GetObjectLength(l,2);
+	uint32_t idx = 0;
+	outVolume = Geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
+		if(idx >= numTris)
 			return false;
-		auto v0Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
+		auto idx0 = tris.at(idx);
+		auto idx1 = tris.at(idx +1);
+		auto idx2 = tris.at(idx +2);
+		*v0 = &verts.at(idx0);
+		*v1 = &verts.at(idx1);
+		*v2 = &verts.at(idx2);
 
-		if(Lua::GetNextPair(l,tTriangles) == 0)
-			return false;
-		auto v1Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
-
-		if(Lua::GetNextPair(l,tTriangles) == 0)
-			return false;
-		auto v2Idx = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v0Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v0 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v1Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v1 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
-
-		Lua::PushInt(l,v2Idx +1);
-		Lua::GetTableValue(l,tVerts);
-		*v2 = Lua::CheckVector(l,-1);
-		Lua::Pop(l,1);
+		idx += 3;
 		return true;
-	},&com);
-	Lua::Push<Vector3>(l,com);
-	Lua::PushNumber(l,volume);
-	return 2;
+	},&outCom);
 }
-int Lua::geometry::calc_triangle_area(lua_State *l)
-{
-	auto &p0 = Lua::Check<Vector3>(l,1);
-	auto &p1 = Lua::Check<Vector3>(l,2);
-	auto &p2 = Lua::Check<Vector3>(l,3);
-	auto keepSign = false;
-	if(Lua::IsSet(l,4))
-		keepSign = Lua::CheckBool(l,4);
-	Lua::PushNumber(l,Geometry::calc_triangle_area(p0,p1,p2,keepSign));
-	return 1;
-}
-int Lua::geometry::calc_barycentric_coordinates(lua_State *l)
+Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &hitPoint)
 {
 	float b1,b2;
-	auto r = false;
-	int32_t idx = 1;
-	if(Lua::IsVector2(l,2) == true)
-	{
-		auto &p0 = *Lua::CheckVector(l,idx++);
-		auto &uv0 = *Lua::CheckVector2(l,idx++);
-		auto &p1 = *Lua::CheckVector(l,idx++);
-		auto &uv1 = *Lua::CheckVector2(l,idx++);
-		auto &p2 = *Lua::CheckVector(l,idx++);
-		auto &uv2 = *Lua::CheckVector2(l,idx++);
-		auto &hitPoint = *Lua::CheckVector(l,idx++);
-		r = ::Geometry::calc_barycentric_coordinates(p0,uv0,p1,uv1,p2,uv2,hitPoint,b1,b2);
-	}
-	else
-	{
-		auto &p0 = *Lua::CheckVector(l,idx++);
-		auto &p1 = *Lua::CheckVector(l,idx++);
-		auto &p2 = *Lua::CheckVector(l,idx++);
-		auto &hitPoint = *Lua::CheckVector(l,idx++);
-		r = ::Geometry::calc_barycentric_coordinates(p0,p1,p2,hitPoint,b1,b2);
-	}
-	Lua::Push<Vector2>(l,Vector2{b1,b2});
-	return 1;
+	auto r = ::Geometry::calc_barycentric_coordinates(p0,p1,p2,hitPoint,b1,b2);
+	return Vector2{b1,b2};
 }
-int Lua::geometry::calc_rotation_between_planes(lua_State *l)
+Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0,const Vector2 &uv0,const Vector3 &p1,const Vector2 &uv1,const Vector3 &p2,const Vector2 &uv2,const Vector3 &hitPoint)
 {
-	int32_t idx = 1;
-	auto &n0 = *Lua::CheckVector(l,idx++);
-	auto &n1 = *Lua::CheckVector(l,idx++);
-	auto rot = ::Geometry::calc_rotation_between_planes(n0,n1);
-	Lua::Push<Quat>(l,rot);
-	return 1;
-}
-
-int Lua::geometry::get_side_of_point_to_line(lua_State *l)
-{
-	auto &lineStart = *Lua::CheckVector2(l,1);
-	auto &lineEnd = *Lua::CheckVector2(l,2);
-	auto &p = *Lua::CheckVector2(l,3);
-	auto side = ::Geometry::get_side_of_point_to_line(lineStart,lineEnd,p);
-	Lua::PushInt(l,umath::to_integral(side));
-	return 1;
-}
-
-int Lua::geometry::get_side_of_point_to_plane(lua_State *l)
-{
-	auto &n = *Lua::CheckVector(l,1);
-	auto d = Lua::CheckNumber(l,2);
-	auto &p = *Lua::CheckVector(l,3);
-	auto planeSide = ::Geometry::get_side_of_point_to_plane(n,d,p);
-	Lua::PushInt(l,umath::to_integral(planeSide));
-	return 1;
+	float b1,b2;
+	auto r = ::Geometry::calc_barycentric_coordinates(p0,uv0,p1,uv1,p2,uv2,hitPoint,b1,b2);
+	return Vector2{b1,b2};
 }
 
 int Lua::geometry::get_outline_vertices(lua_State *l)
@@ -592,32 +344,12 @@ class MyListener : public SmartBody::SBSceneListener
 	void OnEvent( const std::string & eventName, const std::string & eventParameters );
 };
 */
-int Lua::geometry::triangulate(lua_State *l)
+luabind::object Lua::geometry::triangulate(lua_State *l,luabind::table<> tContour)
 {
-	std::vector<Vector2> contour {};
+	auto contour = Lua::table_to_vector<Vector2>(l,tContour,1);
 	std::vector<uint16_t> result {};
-	auto tContour = 1;
-	Lua::CheckTable(l,tContour);
-	auto numVerts = Lua::GetObjectLength(l,tContour);
-	contour.reserve(numVerts);
-	for(auto i=decltype(numVerts){0u};i<numVerts;++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,tContour);
-		auto &v = *Lua::CheckVector2(l,-1);
-		contour.push_back(v);
-		Lua::Pop(l,1);
-	}
 	auto r = ::Geometry::triangulate(contour,result);
 	if(r == false)
-		return 0;
-	auto tResult = Lua::CreateTable(l);
-	auto i = 1;
-	for(auto idx : result)
-	{
-		Lua::PushInt(l,i++);
-		Lua::PushInt(l,idx);
-		Lua::SetTableValue(l,tResult);
-	}
-	return 1;
+		return {};
+	return Lua::vector_to_table(l,result);
 }

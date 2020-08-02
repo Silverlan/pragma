@@ -45,16 +45,20 @@
 #include "pragma/util/util_handled.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
 #include "pragma/model/animation/animation.h"
+#include "pragma/model/modelmesh.h"
+#include "pragma/model/model.h"
 #include <pragma/math/vector/util_winding_order.hpp>
 #include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
+#include <sharedutils/util_file.h>
 #include <pragma/math/intersection.h>
 #include <mathutil/camera.hpp>
 #include <regex>
 #include <complex>
 #include <mpParser.h>
 #include <luainterface.hpp>
+#include <luabind/out_value_policy.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -227,16 +231,24 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	luabind::globals(lua.GetState())["print"] = luabind::nil;
 
-	lua.RegisterLibrary("vector",{
-		{"to_min_max",Lua::vector::to_min_max},
-		{"get_min_max",Lua::vector::get_min_max},
-		{"random",Lua::vector::random},
-		{"random2D",Lua::vector::random_2d},
-		{"create_from_string",Lua::vector::create_from_string},
-		{"calc_average",Lua::vector::calc_average},
-		{"calc_best_fitting_plane",Lua::vector::calc_best_fitting_plane},
-		{"calc_linear_velocity_from_angular",Lua::vector::angular_velocity_to_linear}
-	});
+	auto modVec = luabind::module_(lua.GetState(),"vector");
+	modVec[
+		luabind::def("to_min_max",static_cast<void(*)(::Vector2&,::Vector2&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("to_min_max",static_cast<void(*)(::Vector3&,::Vector3&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("to_min_max",static_cast<void(*)(::Vector4&,::Vector4&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("to_min_max",static_cast<void(*)(::Vector2&,::Vector2&,const Vector2&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("to_min_max",static_cast<void(*)(::Vector3&,::Vector3&,const Vector3&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("to_min_max",static_cast<void(*)(::Vector4&,::Vector4&,const Vector4&)>(Lua::vector::to_min_max),luabind::meta::join<luabind::out_value<1>,luabind::out_value<2>>::type{}),
+		luabind::def("get_min_max",static_cast<void(*)(lua_State*,luabind::table<>,::Vector2&,::Vector2&)>(Lua::vector::get_min_max),luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("get_min_max",static_cast<void(*)(lua_State*,luabind::table<>,::Vector3&,::Vector3&)>(Lua::vector::get_min_max),luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("get_min_max",static_cast<void(*)(lua_State*,luabind::table<>,::Vector4&,::Vector4&)>(Lua::vector::get_min_max),luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("random",uvec::create_random_unit_vector),
+		luabind::def("random2D",Lua::vector::random_2d),
+		luabind::def("create_from_string",static_cast<Vector3(*)(const std::string&)>(uvec::create)),
+		luabind::def("calc_average",Lua::vector::calc_average),
+		luabind::def("calc_best_fitting_plane",Lua::vector::calc_best_fitting_plane,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("calc_linear_velocity_from_angular",util::angular_velocity_to_linear)
+	];
 
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","ORIGIN",uvec::ORIGIN);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","FORWARD",uvec::FORWARD);
@@ -1113,31 +1125,48 @@ void Game::RegisterLuaLibraries()
 
 	Lua::nav::register_library(GetLuaInterface());
 
-	Lua::RegisterLibrary(GetLuaState(),"file",{
-		{"open",Lua::file::Open},
-		{"create_directory",Lua::file::CreateDir},
-		{"create_path",Lua::file::CreatePath},
-		{"exists",Lua::file::Exists},
-		{"delete",Lua::file::Delete},
-		{"find_external_game_asset_files",Lua::file::find_external_game_resource_files},
-		{"open_external_asset_file",Lua::file::open_external_asset_file},
-		{"is_directory",Lua::file::IsDir},
-		{"find",Lua::file::Find},
-		{"find_lua_files",Lua::file::FindLuaFiles},
-		{"get_attributes",Lua::file::GetAttributes},
-		{"get_flags",Lua::file::GetFlags},
-		{"read",Lua::file::Read},
-		{"write",Lua::file::Write},
-		{"get_canonicalized_path",Lua::file::GetCanonicalizedPath},
-		{"get_file_path",Lua::file::GetFilePath},
-		{"get_file_name",Lua::file::GetFileName},
-		{"get_file_extension",Lua::file::GetFileExtension},
-		{"get_size",Lua::file::GetSize},
-		{"compare_path",Lua::file::ComparePath},
-		{"remove_file_extension",Lua::file::RemoveFileExtension}
-	});
-
 	auto fileMod = luabind::module(GetLuaState(),"file");
+	fileMod[
+		luabind::def("open",Lua::file::Open),
+		luabind::def("create_directory",Lua::file::CreateDir),
+		luabind::def("create_path",Lua::file::CreatePath),
+		luabind::def("exists",static_cast<bool(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
+			return FileManager::Exists(path,searchFlags);
+		})),
+		luabind::def("exists",static_cast<bool(*)(std::string)>([](std::string path) {
+			return FileManager::Exists(path);
+		})),
+		luabind::def("delete",Lua::file::Delete),
+		luabind::def("find_external_game_asset_files",Lua::file::find_external_game_resource_files,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("open_external_asset_file",Lua::file::open_external_asset_file),
+		luabind::def("is_directory",FileManager::IsDir),
+		luabind::def("is_directory",static_cast<bool(*)(std::string)>([](std::string path) {return FileManager::IsDir(path);})),
+		luabind::def("find",Lua::file::Find,luabind::meta::join<luabind::pure_out_value<4>,luabind::pure_out_value<5>>::type{}),
+		luabind::def("find",static_cast<void(*)(lua_State*,const std::string&,luabind::object&,luabind::object&)>([](lua_State *l,const std::string &path,luabind::object &outFiles,luabind::object &outDirs) {
+			Lua::file::Find(l,path,fsys::SearchFlags::All,outFiles,outDirs);
+		}),luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("find_lua_files",Lua::file::FindLuaFiles),
+		luabind::def("get_attributes",FileManager::GetFileAttributes),
+		luabind::def("get_flags",static_cast<uint64_t(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
+			return FileManager::GetFileFlags(path,searchFlags);
+		})),
+		luabind::def("get_flags",static_cast<uint64_t(*)(std::string)>([](std::string path) {
+			return FileManager::GetFileFlags(path);
+		})),
+		luabind::def("read",Lua::file::Read),
+		luabind::def("write",Lua::file::Write),
+		luabind::def("get_canonicalized_path",Lua::file::GetCanonicalizedPath),
+		luabind::def("get_file_path",ufile::get_path_from_filename),
+		luabind::def("get_file_name",ufile::get_file_from_filename),
+		luabind::def("get_file_extension",Lua::file::GetFileExtension),
+		luabind::def("get_size",FileManager::GetFileSize),
+		luabind::def("get_size",static_cast<uint64_t(*)(std::string)>([](std::string path) {
+			return FileManager::GetFileSize(path);
+		})),
+		luabind::def("compare_path",Lua::file::ComparePath),
+		luabind::def("remove_file_extension",Lua::file::RemoveFileExtension)
+	];
+
 	auto classDefFile = luabind::class_<LFile>("File");
 	classDefFile.def("Close",&Lua_LFile_Close);
 	classDefFile.def("Size",&Lua_LFile_Size);
@@ -1205,17 +1234,17 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("GetPath",&Lua_LFile_GetPath);
 	fileMod[classDefFile];
 
-	Lua::RegisterLibrary(GetLuaState(),"time",{
-		{"create_timer",Lua::time::create_timer},
-		{"create_simple_timer",Lua::time::create_simple_timer},
-		{"cur_time",Lua::time::cur_time},
-		{"real_time",Lua::time::real_time},
-		{"delta_time",Lua::time::delta_time},
-		{"time_since_epoch",Lua::time::time_since_epoch},
-		{"convert_duration",Lua::time::convert_duration}
-	});
-
 	auto timeMod = luabind::module(GetLuaState(),"time");
+	timeMod[
+		luabind::def("create_timer",Lua::time::create_timer),
+		luabind::def("create_simple_timer",Lua::time::create_simple_timer),
+		luabind::def("cur_time",Lua::time::cur_time),
+		luabind::def("real_time",Lua::time::real_time),
+		luabind::def("delta_time",Lua::time::delta_time),
+		luabind::def("time_since_epoch",Lua::time::time_since_epoch),
+		luabind::def("convert_duration",Lua::time::convert_duration)
+	];
+
 	auto classDefTimer = luabind::class_<TimerHandle>("Timer");
 	classDefTimer.def("Start",&Lua_Timer_Start);
 	classDefTimer.def("Stop",&Lua_Timer_Stop);
@@ -1233,53 +1262,136 @@ void Game::RegisterLuaLibraries()
 	classDefTimer.def("SetCall",&Lua_Timer_SetCall);
 	timeMod[classDefTimer];
 
-	Lua::RegisterLibrary(GetLuaState(),"boundingvolume",{
-		{"get_rotated_aabb",Lua_boundingvolume_GetRotatedAABB}
-	});
+	auto boundingVolMod = luabind::module(GetLuaState(),"boundingvolume");
+	boundingVolMod[
+		luabind::def("get_rotated_aabb",Lua::boundingvolume::GetRotatedAABB,luabind::meta::join<luabind::pure_out_value<4>,luabind::pure_out_value<5>>::type{})
+	];
 
-	Lua::RegisterLibrary(GetLuaState(),"intersect",{
-		{"aabb_with_aabb",Lua::intersect::aabb_with_aabb},
-		{"sphere_with_sphere",Lua::intersect::sphere_with_sphere},
-		{"aabb_with_sphere",Lua::intersect::aabb_with_sphere},
-		{"line_with_aabb",Lua::intersect::line_aabb},
-		{"line_with_obb",Lua::intersect::line_obb},
-		{"line_with_mesh",Lua::intersect::line_mesh},
-		{"line_with_plane",Lua::intersect::line_plane},
-		{"point_in_aabb",Lua::intersect::vector_in_bounds},
-		{"point_in_plane_mesh",Lua::intersect::point_in_plane_mesh},
-		{"sphere_in_plane_mesh",Lua::intersect::sphere_in_plane_mesh},
-		{"aabb_in_plane_mesh",Lua::intersect::aabb_in_plane_mesh},
-		{"sphere_with_cone",Lua::intersect::sphere_with_cone},
-		{"line_with_triangle",Lua::intersect::line_triangle},
-		{"aabb_with_plane",Lua::intersect::aabb_with_plane},
-		{"aabb_with_triangle",Lua::intersect::aabb_with_triangle},
-		{"obb_with_plane",Lua::intersect::obb_with_plane},
-		{"sphere_with_plane",Lua::intersect::sphere_with_plane}
-	});
+	auto intersectMod = luabind::module(GetLuaState(),"intersect");
+	intersectMod[
+		luabind::def("aabb_with_aabb",static_cast<int(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&)>(Intersection::AABBAABB)),
+		luabind::def("sphere_with_sphere",Intersection::SphereSphere),
+		luabind::def("aabb_with_sphere",Intersection::AABBSphere),
+		luabind::def("line_with_aabb",Lua::intersect::line_aabb,luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>,luabind::pure_out_value<8>>::type{}),
+		luabind::def("line_with_obb",Lua::intersect::line_obb),
+		luabind::def("line_with_obb",static_cast<luabind::object(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,bool)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max,bool precise) {
+			return Lua::intersect::line_obb(l,rayStart,rayDir,min,max,precise);
+		})),
+		luabind::def("line_with_obb",static_cast<luabind::object(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max) {
+			return Lua::intersect::line_obb(l,rayStart,rayDir,min,max);
+		})),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelSubMesh&,luabind::object&,luabind::object&,bool,const umath::Transform&)>(Lua::intersect::line_mesh),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelSubMesh&,luabind::object&,luabind::object&,bool)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,ModelSubMesh &mesh,luabind::object &r0,luabind::object &r1,bool precise) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mesh,r0,r1,precise);
+		}),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelSubMesh&,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,ModelSubMesh &mesh,luabind::object &r0,luabind::object &r1) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mesh,r0,r1);
+		}),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelMesh&,luabind::object&,luabind::object&,bool,const umath::Transform&)>(Lua::intersect::line_mesh),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelMesh&,luabind::object&,luabind::object&,bool)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,ModelMesh &mesh,luabind::object &r0,luabind::object &r1,bool precise) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mesh,r0,r1,precise);
+		}),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,ModelMesh&,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,ModelMesh &mesh,luabind::object &r0,luabind::object &r1) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mesh,r0,r1);
+		}),luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,uint32_t,luabind::object&,luabind::object&,bool,const umath::Transform&)>(Lua::intersect::line_mesh),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,uint32_t,luabind::object&,luabind::object&,bool)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,uint32_t lod,luabind::object &r0,luabind::object &r1,bool precise) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mdl,lod,r0,r1,precise);
+		}),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,uint32_t,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,uint32_t lod,luabind::object &r0,luabind::object &r1) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mdl,lod,r0,r1);
+		}),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,luabind::table<>,luabind::object&,luabind::object&,bool,const umath::Transform&)>(Lua::intersect::line_mesh),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,luabind::table<>,luabind::object&,luabind::object&,bool)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,luabind::table<> bodyGroups,luabind::object &r0,luabind::object &r1,bool precise) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mdl,bodyGroups,r0,r1,precise);
+		}),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_mesh",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,Model&,luabind::table<>,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,luabind::table<> bodyGroups,luabind::object &r0,luabind::object &r1) {
+			return Lua::intersect::line_mesh(l,rayStart,rayDir,mdl,bodyGroups,r0,r1);
+		}),luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("line_with_plane",Lua::intersect::line_plane),
+		luabind::def("point_in_aabb",static_cast<bool(*)(const Vector3&,const Vector3&,const Vector3&)>([](const Vector3 &vec,const Vector3 &min,const Vector3 &max) {
+			return Intersection::VectorInBounds(vec,min,max);
+		})),
+		luabind::def("point_in_plane_mesh",Lua::intersect::point_in_plane_mesh),
+		luabind::def("sphere_in_plane_mesh",Lua::intersect::sphere_in_plane_mesh),
+		luabind::def("aabb_in_plane_mesh",Lua::intersect::aabb_in_plane_mesh),
+		luabind::def("sphere_with_cone",Intersection::SphereCone),
+		luabind::def("line_with_triangle",Lua::intersect::line_triangle,luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>>::type{}),
+		luabind::def("line_with_triangle",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,const Vector3&,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,luabind::object &outT,luabind::object &outUv) {
+			Lua::intersect::line_triangle(l,lineOrigin,lineDir,v0,v1,v2,outT,outUv);
+		}),luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>>::type{}),
+		luabind::def("aabb_with_plane",Intersection::AABBPlane),
+		luabind::def("aabb_with_triangle",Intersection::AABBTriangle),
+		luabind::def("obb_with_plane",Intersection::OBBPlane),
+		luabind::def("sphere_with_plane",Intersection::SpherePlane)
+	];
 
-	Lua::RegisterLibrary(GetLuaState(),"geometry",{
-		{"closest_point_on_aabb_to_point",Lua::geometry::closest_point_on_aabb_to_point},
-		{"closest_points_between_lines",Lua::geometry::closest_points_between_lines},
-		{"closest_point_on_plane_to_point",Lua::geometry::closest_point_on_plane_to_point},
-		{"closest_point_on_triangle_to_point",Lua::geometry::closest_point_on_triangle_to_point},
-		{"smallest_enclosing_sphere",Lua::geometry::smallest_enclosing_sphere},
-		{"closest_point_on_line_to_point",Lua::geometry::closest_point_on_line_to_point},
-		{"closest_point_on_sphere_to_line",Lua::geometry::closest_point_on_sphere_to_line},
-		{"get_triangle_winding_order",Lua::geometry::get_triangle_winding_order},
-		{"generate_truncated_cone_mesh",Lua::geometry::generate_truncated_cone_mesh},
-		{"calc_face_normal",Lua::geometry::calc_face_normal},
-		{"calc_volume_of_triangle",Lua::geometry::calc_volume_of_triangle},
-		{"calc_volume_of_polyhedron",Lua::geometry::calc_volume_of_polyhedron},
-		{"calc_center_of_mass",Lua::geometry::calc_center_of_mass},
-		{"calc_triangle_area",Lua::geometry::calc_triangle_area},
-		{"calc_barycentric_coordinates",Lua::geometry::calc_barycentric_coordinates},
-		{"calc_rotation_between_planes",Lua::geometry::calc_rotation_between_planes},
-		{"get_side_of_point_to_line",Lua::geometry::get_side_of_point_to_line},
-		{"get_side_of_point_to_plane",Lua::geometry::get_side_of_point_to_plane},
-		{"get_outline_vertices",Lua::geometry::get_outline_vertices},
-		//{"triangulate_point_cloud",Lua::geometry::triangulate_point_cloud},
-		{"triangulate",Lua::geometry::triangulate}
-	});
+	auto modGeometry = luabind::module_(GetLuaState(),"geometry");
+	modGeometry[
+		luabind::def("closest_point_on_aabb_to_point",Lua::geometry::closest_point_on_aabb_to_point),
+		luabind::def("closest_points_between_lines",Lua::geometry::closest_points_between_lines,luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{}),
+		luabind::def("closest_point_on_plane_to_point",Lua::geometry::closest_point_on_plane_to_point),
+		luabind::def("closest_point_on_triangle_to_point",Lua::geometry::closest_point_on_triangle_to_point),
+		luabind::def("smallest_enclosing_sphere",Lua::geometry::smallest_enclosing_sphere,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
+		luabind::def("closest_point_on_line_to_point",Geometry::ClosestPointOnLineToPoint),
+		luabind::def("closest_point_on_line_to_point",static_cast<Vector3(*)(const Vector3&,const Vector3&,const Vector3&)>([](const Vector3 &start,const Vector3 &end,const Vector3 &p) {
+			return Geometry::ClosestPointOnLineToPoint(start,end,p);
+		})),
+		luabind::def("closest_point_on_sphere_to_line",Geometry::ClosestPointOnSphereToLine),
+		luabind::def("closest_point_on_sphere_to_line",static_cast<Vector3(*)(const Vector3&,float,const Vector3&,const Vector3&)>([](const Vector3 &origin,float radius,const Vector3 &start,const Vector3 &end) {
+			return Geometry::ClosestPointOnSphereToLine(origin,radius,start,end);
+		})),
+		luabind::def("get_triangle_winding_order",static_cast<WindingOrder(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&)>(::Geometry::get_triangle_winding_order)),
+		luabind::def("get_triangle_winding_order",static_cast<WindingOrder(*)(const Vector2&,const Vector2&,const Vector2&)>(::Geometry::get_triangle_winding_order)),
+		luabind::def("generate_truncated_cone_mesh",Lua::geometry::generate_truncated_cone_mesh,luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>>::type{}),
+		luabind::def("generate_truncated_cone_mesh",static_cast<void(*)(lua_State*,const Vector3&,float,const Vector3&,float,float,luabind::object&,luabind::object&,luabind::object&,uint32_t,bool,bool)>(
+			[](
+				lua_State *l,const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,
+				luabind::object &outVerts,luabind::object &outTris,luabind::object &outNormals,
+				uint32_t segmentCount,bool caps,bool generateTriangles
+			) {
+			Lua::geometry::generate_truncated_cone_mesh(l,origin,startRadius,dir,dist,endRadius,outVerts,outTris,outNormals,segmentCount,caps,generateTriangles);
+		}),luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>>::type{}),
+		luabind::def("generate_truncated_cone_mesh",static_cast<void(*)(lua_State*,const Vector3&,float,const Vector3&,float,float,luabind::object&,luabind::object&,luabind::object&,uint32_t,bool)>(
+			[](
+				lua_State *l,const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,
+				luabind::object &outVerts,luabind::object &outTris,luabind::object &outNormals,
+				uint32_t segmentCount,bool caps
+			) {
+			Lua::geometry::generate_truncated_cone_mesh(l,origin,startRadius,dir,dist,endRadius,outVerts,outTris,outNormals,segmentCount,caps);
+		}),luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>>::type{}),
+		luabind::def("generate_truncated_cone_mesh",static_cast<void(*)(lua_State*,const Vector3&,float,const Vector3&,float,float,luabind::object&,luabind::object&,luabind::object&,uint32_t)>(
+			[](
+				lua_State *l,const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,
+				luabind::object &outVerts,luabind::object &outTris,luabind::object &outNormals,
+				uint32_t segmentCount
+			) {
+			Lua::geometry::generate_truncated_cone_mesh(l,origin,startRadius,dir,dist,endRadius,outVerts,outTris,outNormals,segmentCount);
+		}),luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>>::type{}),
+		luabind::def("generate_truncated_cone_mesh",static_cast<void(*)(lua_State*,const Vector3&,float,const Vector3&,float,float,luabind::object&,luabind::object&,luabind::object&)>(
+			[](
+				lua_State *l,const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,
+				luabind::object &outVerts,luabind::object &outTris,luabind::object &outNormals
+			) {
+			Lua::geometry::generate_truncated_cone_mesh(l,origin,startRadius,dir,dist,endRadius,outVerts,outTris,outNormals);
+		}),luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>>::type{}),
+		luabind::def("calc_face_normal",Geometry::CalcFaceNormal),
+		luabind::def("calc_volume_of_triangle",::Geometry::calc_volume_of_triangle),
+		luabind::def("calc_volume_of_polyhedron",Lua::geometry::calc_volume_of_polyhedron),
+		luabind::def("calc_center_of_mass",Lua::geometry::calc_center_of_mass,luabind::meta::join<luabind::pure_out_value<4>,luabind::pure_out_value<5>>::type{}),
+		luabind::def("calc_triangle_area",static_cast<float(*)(const Vector2&,const Vector2&,const Vector2&,bool)>(Geometry::calc_triangle_area)),
+			luabind::def("calc_triangle_area",static_cast<float(*)(const Vector2&,const Vector2&,const Vector2&)>([](const Vector2 &p0,const Vector2 &p1,const Vector2 &p2) {
+			return Geometry::calc_triangle_area(p0,p1,p2,false);
+		})),
+		luabind::def("calc_barycentric_coordinates",static_cast<::Vector2(*)(const Vector3&,const Vector2&,const Vector3&,const Vector2&,const Vector3&,const Vector2&,const Vector3&)>(Lua::geometry::calc_barycentric_coordinates)),
+		luabind::def("calc_barycentric_coordinates",static_cast<::Vector2(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&)>(Lua::geometry::calc_barycentric_coordinates)),
+		luabind::def("calc_rotation_between_planes",::Geometry::calc_rotation_between_planes),
+		luabind::def("get_side_of_point_to_line",::Geometry::get_side_of_point_to_line),
+		luabind::def("get_side_of_point_to_plane",::Geometry::get_side_of_point_to_plane),
+		luabind::def("get_outline_vertices",Lua::geometry::get_outline_vertices),
+		//luabind::def("triangulate_point_cloud",Lua::geometry::triangulate_point_cloud),
+		luabind::def("triangulate",Lua::geometry::triangulate)
+	];
 	Lua::RegisterLibraryEnums(GetLuaState(),"geometry",{
 		{"WINDING_ORDER_CLOCKWISE",umath::to_integral(WindingOrder::Clockwise)},
 		{"WINDING_ORDER_COUNTER_CLOCKWISE",umath::to_integral(WindingOrder::CounterClockwise)},
@@ -1293,19 +1405,22 @@ void Game::RegisterLuaLibraries()
 		{"PLANE_SIDE_ON_PLANE",umath::to_integral(Geometry::PlaneSide::OnPlane)}
 	});
 
-	Lua::RegisterLibrary(GetLuaState(),"sweep",{
-		{"aabb_with_aabb",Lua_sweep_AABBWithAABB},
-		{"aabb_with_plane",Lua_sweep_AABBWithPlane}
-	});
+	auto modSweep = luabind::module_(GetLuaState(),"sweep");
+	modSweep[
+		luabind::def("aabb_with_aabb",Lua::sweep::AABBWithAABB,luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>,luabind::pure_out_value<9>,luabind::pure_out_value<10>>::type{}),
+		luabind::def("aabb_with_plane",Lua::sweep::AABBWithPlane,luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>>::type{})
+	];
 
-	Lua::RegisterLibrary(GetLuaState(),"matrix",{
-		{"create_from_axis_angle",Lua::matrix::create_from_axis_angle},
-		{"create_from_axes",Lua::matrix::create_from_axes},
-		{"create_orthogonal_matrix",Lua::matrix::create_orthogonal_matrix},
-		{"create_perspective_matrix",Lua::matrix::create_perspective_matrix},
-		{"create_look_at_matrix",Lua::matrix::create_look_at_matrix},
-		{"calc_covariance_matrix",Lua::matrix::calc_covariance_matrix}
-	});
+	auto modMat = luabind::module_(GetLuaState(),"matrix");
+	modMat[
+		luabind::def("create_from_axis_angle",umat::create_from_axis_angle),
+		luabind::def("create_from_axes",umat::create_from_axes),
+		luabind::def("create_orthogonal_matrix",Lua::matrix::create_orthogonal_matrix),
+		luabind::def("create_perspective_matrix",Lua::matrix::create_perspective_matrix),
+		luabind::def("create_look_at_matrix",glm::lookAtRH<float,glm::packed_highp>),
+		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>,const Vector3&)>(Lua::matrix::calc_covariance_matrix)),
+		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>)>(Lua::matrix::calc_covariance_matrix))
+	];
 
 	Lua::RegisterLibrary(GetLuaState(),"mesh",{
 		{"generate_convex_hull",Lua::mesh::generate_convex_hull},

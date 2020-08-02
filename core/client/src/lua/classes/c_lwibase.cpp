@@ -359,6 +359,7 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	}));
 	classDef.def("GetAnchor",&GetAnchor);
 	classDef.def("HasAnchor",&HasAnchor);
+	classDef.def("SetRemoveOnParentRemoval",&SetRemoveOnParentRemoval);
 	classDef.def("GetCenter",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
 		lua_checkgui(l,hPanel);
 		Lua::Push<Vector2>(l,hPanel->GetCenter());
@@ -2359,6 +2360,11 @@ void Lua::WIBase::HasAnchor(lua_State *l,WIHandle &hPanel)
 {
 	lua_checkgui(l,hPanel);
 	Lua::PushBool(l,hPanel->HasAnchor());
+}
+void Lua::WIBase::SetRemoveOnParentRemoval(lua_State *l,WIHandle &hPanel,bool b)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->SetRemoveOnParentRemoval(b);
 }
 
 ////////////////////////////////////

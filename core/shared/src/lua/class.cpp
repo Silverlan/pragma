@@ -57,6 +57,7 @@
 #include <mathutil/umath_lighting.hpp>
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
+#include <luabind/out_value_policy.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -127,106 +128,48 @@ static Quat QuaternionConstruct(const Vector3 &forward,const Vector3 &up) {retur
 
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
-	lua_pushtablecfunction(lua.GetState(),"string","calc_levenshtein_distance",Lua::string::calc_levenshtein_distance);
-	lua_pushtablecfunction(lua.GetState(),"string","calc_levenshtein_similarity",Lua::string::calc_levenshtein_similarity);
-	lua_pushtablecfunction(lua.GetState(),"string","find_longest_common_substring",Lua::string::find_longest_common_substring);
-	lua_pushtablecfunction(lua.GetState(),"string","find_similar_elements",Lua::string::find_similar_elements);
-	lua_pushtablecfunction(lua.GetState(),"string","is_integer",Lua::string::is_integer);
-	lua_pushtablecfunction(lua.GetState(),"string","is_number",Lua::string::is_number);
-	lua_pushtablecfunction(lua.GetState(),"string","split",Lua::string::split);
-	lua_pushtablecfunction(lua.GetState(),"string","join",Lua::string::join);
-	lua_pushtablecfunction(lua.GetState(),"string","remove_whitespace",Lua::string::remove_whitespace);
-	lua_pushtablecfunction(lua.GetState(),"string","remove_quotes",Lua::string::remove_quotes);
-	lua_pushtablecfunction(lua.GetState(),"string","replace",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		std::string subject = Lua::CheckString(l,1);
-		std::string from = Lua::CheckString(l,2);
-		std::string to = Lua::CheckString(l,3);
-		ustring::replace(subject,from,to);
-		Lua::PushString(l,subject);
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"string","fill_zeroes",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		std::string str = Lua::CheckString(l,1);
-		auto numDigits = Lua::CheckInt(l,2);
-		str = ustring::fill_zeroes(str,numDigits);
-		Lua::PushString(l,str);
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"string","compare",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto *str0 = Lua::CheckString(l,1);
-		auto *str1 = Lua::CheckString(l,2);
-		auto caseSensitive = true;
-		if(Lua::IsSet(l,3))
-			caseSensitive = Lua::CheckBool(l,3);
-		auto len = std::string::npos;
-		if(Lua::IsSet(l,4))
-			len = Lua::CheckInt(l,4);
-		Lua::PushBool(l,ustring::compare(str0,str1,caseSensitive,len));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"string","is_number",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		std::string str = Lua::CheckString(l,1);
-		char* p;
-		strtol(str.c_str(),&p,10);
-		Lua::PushBool(l,*p == 0);
-		return 1;
-	}));
+	auto modString = luabind::module_(lua.GetState(),"string");
+	modString[
+		luabind::def("calc_levenshtein_distance",Lua::string::calc_levenshtein_distance),
+		luabind::def("calc_levenshtein_similarity",Lua::string::calc_levenshtein_similarity),
+		luabind::def("find_longest_common_substring",Lua::string::find_longest_common_substring,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>,luabind::pure_out_value<5>>::type{}),
+		luabind::def("find_similar_elements",Lua::string::find_similar_elements,luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
+		luabind::def("is_integer",ustring::is_integer),
+		luabind::def("is_number",ustring::is_number),
+		luabind::def("split",Lua::string::split,luabind::return_stl_iterator{}),
+		luabind::def("join",static_cast<std::string(*)(lua_State*,luabind::table<>,const std::string&)>(Lua::string::join)),
+		luabind::def("join",static_cast<std::string(*)(lua_State*,luabind::table<>)>([](lua_State *l,luabind::table<> values) {return Lua::string::join(l,values);})),
+		luabind::def("remove_whitespace",Lua::string::remove_whitespace),
+		luabind::def("remove_quotes",Lua::string::remove_quotes),
+		luabind::def("replace",static_cast<std::string(*)(const std::string&,const std::string&,const std::string&)>([](const std::string &subject,const std::string &from,const std::string &to) -> std::string {
+			auto tmp = subject;
+			ustring::replace(tmp,from,to);
+			return tmp;
+		})),
+		luabind::def("fill_zeroes",ustring::fill_zeroes),
+		luabind::def("compare",static_cast<bool(*)(const char*,const char*,bool,size_t)>(ustring::compare)),
+		luabind::def("compare",static_cast<bool(*)(const std::string&,const std::string&,bool)>(ustring::compare)),
+		luabind::def("compare",static_cast<bool(*)(const std::string&,const std::string&)>([](const std::string &a,const std::string &b) -> bool {return ustring::compare(a,b,true);}))
+	];
 
-	auto &modLight = lua.RegisterLibrary("light",{
-		{"get_color_temperature",[](lua_State *l) -> int {
-			auto type = static_cast<ulighting::NaturalLightType>(Lua::CheckInt(l,1));
-			auto range = ulighting::get_color_temperature(type);
-			Lua::PushInt(l,range.first);
-			Lua::PushInt(l,range.second);
-			return 2;
-		}},
-		{"get_average_color_temperature",[](lua_State *l) -> int {
-			auto type = static_cast<ulighting::NaturalLightType>(Lua::CheckInt(l,1));
-			Lua::PushInt(l,ulighting::get_average_color_temperature(type));
-			return 1;
-		}},
-		{"color_temperature_to_color",[](lua_State *l) -> int {
-			auto temperature = static_cast<Kelvin>(Lua::CheckInt(l,1));
-			Lua::Push<Vector3>(l,ulighting::color_temperature_to_color(temperature));
-			return 1;
-		}},
-		{"wavelength_to_color",[](lua_State *l) -> int {
-			auto wavelength = static_cast<Wavelength>(Lua::CheckInt(l,1));
-			Lua::Push<Vector3>(l,ulighting::wavelength_to_color(wavelength));
-			return 1;
-		}},
-		{"get_luminous_efficacy",[](lua_State *l) -> int {
-			auto lightType = static_cast<ulighting::LightSourceType>(Lua::CheckInt(l,1));
-			Lua::PushInt(l,ulighting::get_luminous_efficacy(lightType));
-			return 1;
-		}},
-		{"lumens_to_watts",[](lua_State *l) -> int {
-			auto lumens = static_cast<Lumen>(Lua::CheckInt(l,1));
-			if(Lua::IsSet(l,2))
-				Lua::PushNumber(l,ulighting::lumens_to_watts(lumens,static_cast<LuminousEfficacy>(Lua::CheckInt(l,2))));
-			else
-				Lua::PushNumber(l,ulighting::lumens_to_watts(lumens));
-			return 1;
-		}},
-		{"watts_to_lumens",[](lua_State *l) -> int {
-			auto watt = Lua::CheckNumber(l,1);
-			if(Lua::IsSet(l,2))
-				Lua::PushNumber(l,ulighting::watts_to_lumens(watt,static_cast<LuminousEfficacy>(Lua::CheckInt(l,2))));
-			else
-				Lua::PushNumber(l,ulighting::watts_to_lumens(watt));
-			return 1;
-		}},
-		{"irradiance_to_lux",[](lua_State *l) -> int {
-			auto irradiance = Lua::CheckInt(l,1);
-			Lua::PushInt(l,ulighting::irradiance_to_lux(irradiance));
-			return 1;
-		}},
-		{"lux_to_irradiance",[](lua_State *l) -> int {
-			auto lux = Lua::CheckInt(l,1);
-			Lua::PushInt(l,ulighting::lux_to_irradiance(lux));
-			return 1;
-		}}
-	});
+	auto modLight = luabind::module_(lua.GetState(),"light");
+	modLight[
+		luabind::def("get_color_temperature",static_cast<void(*)(ulighting::NaturalLightType,Kelvin&,Kelvin&)>([](ulighting::NaturalLightType type,Kelvin &outMin,Kelvin &outMax) {
+			auto colTemp = ulighting::get_color_temperature(type);
+			outMin = colTemp.first;
+			outMax = colTemp.second;
+		}),luabind::meta::join<luabind::pure_out_value<2>,luabind::pure_out_value<3>>::type{}),
+		luabind::def("get_average_color_temperature",ulighting::get_average_color_temperature),
+		luabind::def("color_temperature_to_color",ulighting::color_temperature_to_color),
+		luabind::def("wavelength_to_color",ulighting::wavelength_to_color),
+		luabind::def("get_luminous_efficacy",ulighting::get_luminous_efficacy),
+		luabind::def("lumens_to_watts",static_cast<Watt(*)(Lumen,LuminousEfficacy)>(ulighting::lumens_to_watts)),
+		luabind::def("lumens_to_watts",static_cast<Watt(*)(Lumen)>([](Lumen lumen) -> Watt {return ulighting::lumens_to_watts(lumen);})),
+		luabind::def("watts_to_lumens",static_cast<Watt(*)(Lumen,LuminousEfficacy)>(ulighting::watts_to_lumens)),
+		luabind::def("watts_to_lumens",static_cast<Watt(*)(Lumen)>([](Watt watt) -> Lumen {return ulighting::watts_to_lumens(watt);})),
+		luabind::def("irradiance_to_lux",ulighting::irradiance_to_lux),
+		luabind::def("lux_to_irradiance",ulighting::lux_to_irradiance)
+	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"light",{
 		{"NATURAL_LIGHT_TYPE_MATCH_FLAME",umath::to_integral(ulighting::NaturalLightType::MatchFlame)},
@@ -981,18 +924,18 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def(float() /luabind::const_self);
 	defVector.def(float() *luabind::const_self);
 	defVector.def(Quat() *luabind::const_self);
-	defVector.def("GetNormal",&Lua::Vector::GetNormal);
+	defVector.def("GetNormal",uvec::get_normal);
 	defVector.def("Normalize",&Lua::Vector::Normalize);
-	defVector.def("ToEulerAngles",&Lua::Vector::Angle);
-	defVector.def("Length",&Lua::Vector::Length);
-	defVector.def("LengthSqr",&Lua::Vector::LengthSqr);
-	defVector.def("Distance",&Lua::Vector::Distance);
-	defVector.def("DistanceSqr",&Lua::Vector::DistanceSqr);
-	defVector.def("PlanarDistance",&Lua::Vector::PlanarDistance);
-	defVector.def("PlanarDistanceSqr",&Lua::Vector::PlanarDistanceSqr);
-	defVector.def("Cross",&Lua::Vector::Cross);
-	defVector.def("DotProduct",&Lua::Vector::DotProduct);
-	defVector.def("GetRotation",&Lua::Vector::GetRotation);
+	defVector.def("ToEulerAngles",static_cast<EulerAngles(*)(const Vector3&)>(uvec::to_angle));
+	defVector.def("Length",uvec::length);
+	defVector.def("LengthSqr",uvec::length_sqr);
+	defVector.def("Distance",uvec::distance);
+	defVector.def("DistanceSqr",uvec::distance_sqr);
+	defVector.def("PlanarDistance",uvec::planar_distance);
+	defVector.def("PlanarDistanceSqr",uvec::planar_distance_sqr);
+	defVector.def("Cross",uvec::cross);
+	defVector.def("DotProduct",uvec::dot);
+	defVector.def("GetRotation",uvec::get_rotation);
 	defVector.def("Rotate",static_cast<void(*)(lua_State*,Vector3&,const EulerAngles&)>(&Lua::Vector::Rotate));
 	defVector.def("Rotate",static_cast<void(*)(lua_State*,Vector3&,const Vector3&,float)>(&Lua::Vector::Rotate));
 	defVector.def("Rotate",static_cast<void(*)(lua_State*,Vector3&,const Quat&)>(&Lua::Vector::Rotate));
@@ -1021,10 +964,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("ToMatrix",&Lua::Vector::ToMatrix);
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&)>(&Lua::Vector::SnapToGrid));
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&,UInt32)>(&Lua::Vector::SnapToGrid));
-	defVector.def("Project",&Lua::Vector::Project);
-	defVector.def("ProjectToPlane",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>(&Lua::Vector::ProjectToPlane));
-	defVector.def("GetPerpendicular",&Lua::Vector::GetPerpendicular);
-	defVector.def("OuterProduct",&Lua::Vector::OuterProduct);
+	defVector.def("Project",uvec::project);
+	defVector.def("ProjectToPlane",uvec::project_to_plane);
+	defVector.def("GetPerpendicular",uvec::get_perpendicular);
+	defVector.def("OuterProduct",&uvec::calc_outer_product);
 	modMath[defVector];
 
 	auto defVector2 = luabind::class_<Vector2>("Vector2");

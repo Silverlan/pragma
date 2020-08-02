@@ -19,64 +19,13 @@
 #include <glm/gtx/projection.hpp>
 #include <sharedutils/scope_guard.h>
 
-void Lua::Vertex::Copy(lua_State *l,::Vertex &v)
-{
-	Lua::Push<::Vertex>(l,::Vertex{v});
-}
-void Lua::VertexWeight::Copy(lua_State *l,::VertexWeight &vw)
-{
-	Lua::Push<::VertexWeight>(l,::VertexWeight{vw});
-}
-void Lua::Vectori::Copy(lua_State *l,::Vector3i &v)
-{
-	Lua::Push<::Vector3i>(l,::Vector3i{v});
-}
-void Lua::Vector2i::Copy(lua_State *l,::Vector2i &v)
-{
-	Lua::Push<::Vector2i>(l,::Vector2i{v});
-}
-void Lua::Vector4i::Copy(lua_State *l,::Vector4i &v)
-{
-	Lua::Push<::Vector4i>(l,::Vector4i{v});
-}
-
-Vector3 Lua::Vector::GetNormal(const Vector3 &vec)
-{
-	Vector3 normal(vec);
-	uvec::normalize(&normal);
-	return normal;
-}
+::Vertex Lua::Vertex::Copy(::Vertex &v) {return v;}
+::VertexWeight Lua::VertexWeight::Copy(::VertexWeight &vw) {return vw;}
+::Vector3i Lua::Vectori::Copy(::Vector3i &v) {return v;}
+::Vector2i Lua::Vector2i::Copy(::Vector2i &v) {return v;}
+::Vector4i Lua::Vector4i::Copy(::Vector4i &v) {return v;}
 
 void Lua::Vector::Normalize(Vector3 &vec) {uvec::normalize(&vec);}
-
-EulerAngles Lua::Vector::Angle(const Vector3 &vec) {return uvec::to_angle(vec);}
-
-float Lua::Vector::Length(const Vector3 &vec) {return uvec::length(vec);}
-
-float Lua::Vector::LengthSqr(const Vector3 &vec) {return uvec::length_sqr(vec);}
-
-float Lua::Vector::Distance(const Vector3 &a,const Vector3 &b) {return uvec::length(b -a);}
-float Lua::Vector::DistanceSqr(const Vector3 &a,const Vector3 &b) {return uvec::length_sqr(b -a);}
-float Lua::Vector::PlanarDistance(const Vector3 &a,const Vector3 &b,const Vector3 &n) {return uvec::planar_distance(a,b,n);}
-float Lua::Vector::PlanarDistanceSqr(const Vector3 &a,const Vector3 &b,const Vector3 &n) {return uvec::planar_distance_sqr(a,b,n);}
-
-void Lua::Vector::Cross(lua_State *l,const Vector3 &a,const Vector3 &b)
-{
-	Vector3 cross = glm::cross(a,b);
-	luabind::object(l,cross).push(l);
-}
-
-void Lua::Vector::DotProduct(lua_State *l,const Vector3 &a,const Vector3 &b)
-{
-	float d = glm::dot(a,b);
-	Lua::PushNumber(l,d);
-}
-
-void Lua::Vector::GetRotation(lua_State *l,const Vector3 &va,const Vector3 &vb)
-{
-	auto rot = uvec::get_rotation(va,vb);
-	luabind::object(l,rot).push(l);
-}
 
 static const Vector3 vPitch(1,0,0);
 static const Vector3 vYaw(0,1,0);
@@ -115,22 +64,6 @@ void Lua::Vector::SnapToGrid(lua_State*,Vector3 &vec,UInt32 gridSize)
 void Lua::Vector::SnapToGrid(lua_State *l,Vector3 &vec)
 {
 	Lua::Vector::SnapToGrid(l,vec,1);
-}
-void Lua::Vector::Project(lua_State *l,const Vector3 &vec,const Vector3 &n)
-{
-	Lua::Push<Vector3>(l,uvec::project(vec,n));
-}
-void Lua::Vector::ProjectToPlane(lua_State *l,const Vector3 &p,const Vector3 &n,float d)
-{
-	Lua::Push<Vector3>(l,uvec::project_to_plane(p,n,d));
-}
-void Lua::Vector::GetPerpendicular(lua_State *l,const Vector3 &vec)
-{
-	Lua::Push<Vector3>(l,uvec::get_perpendicular(vec));
-}
-void Lua::Vector::OuterProduct(lua_State *l,const Vector3 &v0,const Vector3 &v1)
-{
-	Lua::Push<::Mat3>(l,uvec::calc_outer_product(v0,v1));
 }
 
 ////////////////////////
@@ -268,200 +201,95 @@ void Lua::Vector4::Project(lua_State *l,const ::Vector4 &vec,const ::Vector4 &n)
 
 ////////////////////////
 
-namespace Lua
-{
-	namespace vector
-	{
-		template<class TVector>
-			int to_min_max(lua_State *l,TVector*(*f)(lua_State*,int));
-	};
-};
-
 template<class TVector>
-	int Lua::vector::to_min_max(lua_State *l,TVector*(*f)(lua_State*,int))
+	static void to_min_max(TVector &inOutA,TVector &inOutB)
 {
-	auto &a = *f(l,1);
-	auto numComponents = a.length();
-	auto &b = *f(l,2);
-	if(Lua::IsSet(l,3))
-	{
-		auto &c = *f(l,3);
-		for(auto i=decltype(numComponents){0};i<numComponents;++i)
-		{
-			if(c[i] < a[i])
-				a[i] = c[i];
-			if(c[i] > b[i])
-				b[i] = c[i];
-		}
-		return 0;
-	}
+	auto numComponents = inOutA.length();
 	for(auto i=decltype(numComponents){0};i<numComponents;++i)
 	{
-		if(b[i] < a[i])
+		if(inOutB[i] < inOutA[i])
 		{
-			auto t = a[i];
-			a[i] = b[i];
-			b[i] = t;
+			auto t = inOutA[i];
+			inOutA[i] = inOutB[i];
+			inOutB[i] = t;
 		}
 	}
-	return 0;
 }
 
-int Lua::vector::to_min_max(lua_State *l)
+template<class TVector>
+	static void to_min_max(TVector &inOutA,TVector &inOutB,const TVector &c)
 {
-	if(Lua::IsVector(l,1))
-		return to_min_max(l,&Lua::CheckVector);
-	if(Lua::IsVector2(l,1))
-		return to_min_max(l,&Lua::CheckVector2);
-	return to_min_max(l,&Lua::CheckVector4);
+	auto numComponents = inOutA.length();
+	for(auto i=decltype(numComponents){0};i<numComponents;++i)
+	{
+		if(c[i] < inOutA[i])
+			inOutA[i] = c[i];
+		if(c[i] > inOutB[i])
+			inOutB[i] = c[i];
+	}
 }
 
-int Lua::vector::get_min_max(lua_State *l)
+void Lua::vector::to_min_max(::Vector2 &inOutA,::Vector2 &inOutB) {::to_min_max(inOutA,inOutB);}
+void Lua::vector::to_min_max(::Vector3 &inOutA,::Vector3 &inOutB) {::to_min_max(inOutA,inOutB);}
+void Lua::vector::to_min_max(::Vector4 &inOutA,::Vector4 &inOutB) {::to_min_max(inOutA,inOutB);}
+void Lua::vector::to_min_max(::Vector2 &inOutA,::Vector2 &inOutB,const ::Vector2 &c) {::to_min_max(inOutA,inOutB,c);}
+void Lua::vector::to_min_max(::Vector3 &inOutA,::Vector3 &inOutB,const ::Vector3 &c) {::to_min_max(inOutA,inOutB,c);}
+void Lua::vector::to_min_max(::Vector4 &inOutA,::Vector4 &inOutB,const ::Vector4 &c) {::to_min_max(inOutA,inOutB,c);}
+
+template<class TVector>
+	static void get_min_max(lua_State *l,luabind::table<> t,TVector &outMin,TVector &outMax)
 {
-	int table = 1;
-	Lua::CheckTable(l,table);
-	Lua::PushNil(l);
-	unsigned int idx = 0;
-	if(Lua::GetNextPair(l,table) == 0)
+	auto numEls = Lua::GetObjectLength(l,1);
+	if(numEls == 0)
 	{
-		Lua::Push<Vector3>(l,Vector3(0.f,0.f,0.f));
-		Lua::Push<Vector3>(l,Vector3(0.f,0.f,0.f));
-		return 2;
+		outMin = {};
+		outMax = {};
+		return;
 	}
-	bool bVec4 = Lua::IsVector4(l,-1);
-	bool bVec3 = Lua::IsVector(l,-1);
-	bool bVec2 = Lua::IsVector2(l,-1);
-	UNUSED(bVec2);
-	if(bVec4)
+	for(auto i=decltype(outMin.length()){0u};i<outMin.length();++i)
 	{
-		::Vector4 min(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
-		::Vector4 max(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
-		do
+		outMin[i] = std::numeric_limits<float>::max();
+		outMax[i] = std::numeric_limits<float>::lowest();
+	}
+	for(auto it=luabind::iterator{t};it!=luabind::iterator{};++it)
+	{
+		auto val = luabind::object_cast_nothrow<TVector>(*it,TVector{});
+		for(auto i=decltype(outMin.length()){0u};i<outMin.length();++i)
 		{
-			::Vector4 *v = Lua::CheckVector4(l,-1);
-			for(char i=0;i<4;i++)
-			{
-				if((*v)[i] < min[i])
-					min[i] = (*v)[i];
-				if((*v)[i] > max[i])
-					max[i] = (*v)[i];
-			}
-			Lua::Pop(l,1);
-			idx++;
+			outMin[i] = umath::min(outMin[i],val[i]);
+			outMax[i] = umath::min(outMax[i],val[i]);
 		}
-		while(Lua::GetNextPair(l,table) != 0);
-		Lua::Push<::Vector4>(l,min);
-		Lua::Push<::Vector4>(l,max);
-		return 2;
 	}
-	if(bVec3)
-	{
-		Vector3 min(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
-		Vector3 max(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
-		do
-		{
-			Vector3 *v = Lua::CheckVector(l,-1);
-			for(char i=0;i<3;i++)
-			{
-				if((*v)[i] < min[i])
-					min[i] = (*v)[i];
-				if((*v)[i] > max[i])
-					max[i] = (*v)[i];
-			}
-			Lua::Pop(l,1);
-			idx++;
-		}
-		while(Lua::GetNextPair(l,table) != 0);
-		Lua::Push<Vector3>(l,min);
-		Lua::Push<Vector3>(l,max);
-		return 2;
-	}
-	::Vector2 min(std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
-	::Vector2 max(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
-	do
-	{
-		::Vector2 *v = Lua::CheckVector2(l,-1);
-		for(char i=0;i<2;i++)
-		{
-			if((*v)[i] < min[i])
-				min[i] = (*v)[i];
-			if((*v)[i] > max[i])
-				max[i] = (*v)[i];
-		}
-		Lua::Pop(l,1);
-		idx++;
-	}
-	while(Lua::GetNextPair(l,table) != 0);
-	Lua::Push<::Vector2>(l,min);
-	Lua::Push<::Vector2>(l,max);
-	return 2;
 }
 
-int Lua::vector::random_2d(lua_State *l)
+void Lua::vector::get_min_max(lua_State *l,luabind::table<> t,::Vector2 &outMin,::Vector2 &outMax) {return ::get_min_max<::Vector2>(l,t,outMin,outMax);}
+void Lua::vector::get_min_max(lua_State *l,luabind::table<> t,::Vector3 &outMin,::Vector3 &outMax) {return ::get_min_max<::Vector3>(l,t,outMin,outMax);}
+void Lua::vector::get_min_max(lua_State *l,luabind::table<> t,::Vector4 &outMin,::Vector4 &outMax) {return ::get_min_max<::Vector4>(l,t,outMin,outMax);}
+
+::Vector2 Lua::vector::random_2d()
 {
 	float azimuth = umath::random(0.f,2.f) *static_cast<float>(M_PI);
-	luabind::object(l,::Vector2(std::cos(azimuth),std::sin(azimuth))).push(l);
-	return 1;
+	return ::Vector2(std::cos(azimuth),std::sin(azimuth));
 }
 
-int Lua::vector::create_from_string(lua_State *l)
-{
-	auto *str = Lua::CheckString(l,1);
-	auto v = uvec::create(str);
-	Lua::Push<Vector3>(l,v);
-	return 1;
-}
-
-int Lua::vector::random(lua_State *l)
-{
-	luabind::object(l,uvec::create_random_unit_vector()).push(l);
-	return 1;
-}
-
-int Lua::vector::calc_average(lua_State *l)
+Vector3 Lua::vector::calc_average(luabind::table<> points)
 {
 	Vector3 avg {};
-	int32_t tPoints = 1;
-	Lua::CheckTable(l,tPoints);
-	auto numPoints = Lua::GetObjectLength(l,tPoints);
-	for(auto i=decltype(numPoints){0};i<numPoints;++i)
+	uint32_t numPoints = 0;
+	for(auto it=luabind::iterator{points};it!=luabind::iterator{};++it)
 	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,tPoints);
-		avg += *Lua::CheckVector(l,-1);
+		auto val = luabind::object_cast_nothrow<Vector3>(*it,Vector3{});
+		avg += val;
+		++numPoints;
 	}
 	avg /= static_cast<float>(numPoints);
-	Lua::Push<Vector3>(l,avg);
-	return 1;
+	return avg;
 }
 
-int Lua::vector::calc_best_fitting_plane(lua_State *l)
+void Lua::vector::calc_best_fitting_plane(luabind::table<> points,float ang,Vector3 &outNormal,double &outDistance)
 {
-	if(calc_average(l) < 1)
-		return 0;
-	auto &avg = *Lua::CheckVector(l,-1);
-	if(Lua::matrix::calc_covariance_matrix(l) < 1)
-	{
-		Lua::Pop(l,1); // Pop vector
-		return 0;
-	}
-	auto &mat = *Lua::CheckMat3(l,-1);
-	Vector3 n;
-	double d;
-	umath::calc_best_fitting_plane(mat,avg,n,d);
+	auto avg = calc_average(points);
+	auto mat = umat::create_from_axis_angle(avg,ang);
 
-	Lua::Pop(l,2); // Pop vector and matrix
-
-	Lua::Push<Vector3>(l,n);
-	Lua::PushNumber(l,d);
-	return 2;
-}
-
-int Lua::vector::angular_velocity_to_linear(lua_State *l)
-{
-	auto &refPos = *Lua::CheckVector(l,1);
-	auto &angVel = *Lua::CheckVector(l,2);
-	auto &tgtPos = *Lua::CheckVector(l,3);
-	Lua::Push<Vector3>(l,util::angular_velocity_to_linear(refPos,angVel,tgtPos));
-	return 1;
+	umath::calc_best_fitting_plane(mat,avg,outNormal,outDistance);
 }

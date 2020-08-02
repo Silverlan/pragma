@@ -11,93 +11,80 @@
 
 #pragma optimize("",off)
 extern DLLENGINE Engine *engine;
-int Lua::time::cur_time(lua_State *l)
+double Lua::time::cur_time(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	Lua::PushNumber(l,game->CurTime());
-	return 1;
+	return game->CurTime();
 }
 
-int Lua::time::real_time(lua_State *l)
+double Lua::time::real_time(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	Lua::PushNumber(l,game->RealTime());
-	return 1;
+	return game->RealTime();
 }
 
-int Lua::time::delta_time(lua_State *l)
+double Lua::time::delta_time(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	Lua::PushNumber(l,game->DeltaTickTime());
-	return 1;
+	return game->DeltaTickTime();
 }
 
-int Lua::time::time_since_epoch(lua_State *l)
+uint64_t Lua::time::time_since_epoch(lua_State *l)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	Lua::PushInt(l,std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-	return 1;
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 template<typename TDurationTypeSrc>
-	void convert_duration(lua_State *l,TDurationTypeSrc duration,util::DurationType durationTypeDst)
+	int64_t convert_duration(TDurationTypeSrc duration,util::DurationType durationTypeDst)
 {
 	switch(durationTypeDst)
 	{
 		case util::DurationType::NanoSeconds:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 		case util::DurationType::MicroSeconds:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::microseconds>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 		case util::DurationType::MilliSeconds:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 		case util::DurationType::Seconds:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::seconds>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 		case util::DurationType::Minutes:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::minutes>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::minutes>(duration).count();
 		case util::DurationType::Hours:
-			Lua::PushInt(l,std::chrono::duration_cast<std::chrono::hours>(duration).count());
-			break;
+			return std::chrono::duration_cast<std::chrono::hours>(duration).count();
 	}
+	return 0;
 }
 
-int Lua::time::convert_duration(lua_State *l)
+int64_t Lua::time::convert_duration(int64_t duration,util::DurationType srcType,util::DurationType dstType)
 {
-	auto duration = Lua::CheckInt(l,1);
-	auto durationTypeSrc = static_cast<util::DurationType>(Lua::CheckInt(l,2));
-	auto durationTypeDst = static_cast<util::DurationType>(Lua::CheckInt(l,3));
-	switch(durationTypeSrc)
+	switch(srcType)
 	{
 		case util::DurationType::NanoSeconds:
-			::convert_duration<std::chrono::nanoseconds>(l,std::chrono::nanoseconds{duration},durationTypeDst);
+			::convert_duration<std::chrono::nanoseconds>(std::chrono::nanoseconds{duration},dstType);
 			break;
 		case util::DurationType::MicroSeconds:
-			::convert_duration<std::chrono::microseconds>(l,std::chrono::microseconds{duration},durationTypeDst);
+			::convert_duration<std::chrono::microseconds>(std::chrono::microseconds{duration},dstType);
 			break;
 		case util::DurationType::MilliSeconds:
-			::convert_duration<std::chrono::milliseconds>(l,std::chrono::milliseconds{duration},durationTypeDst);
+			::convert_duration<std::chrono::milliseconds>(std::chrono::milliseconds{duration},dstType);
 			break;
 		case util::DurationType::Seconds:
-			::convert_duration<std::chrono::seconds>(l,std::chrono::seconds{duration},durationTypeDst);
+			::convert_duration<std::chrono::seconds>(std::chrono::seconds{duration},dstType);
 			break;
 		case util::DurationType::Minutes:
-			::convert_duration<std::chrono::minutes>(l,std::chrono::minutes{duration},durationTypeDst);
+			::convert_duration<std::chrono::minutes>(std::chrono::minutes{duration},dstType);
 			break;
 		case util::DurationType::Hours:
-			::convert_duration<std::chrono::hours>(l,std::chrono::hours{duration},durationTypeDst);
+			::convert_duration<std::chrono::hours>(std::chrono::hours{duration},dstType);
 			break;
 		default:
-			Lua::PushInt(l,duration);
-			break;
+			return duration;
 	}
-	return 1;
+	return 0;
 }
 #pragma optimize("",on)

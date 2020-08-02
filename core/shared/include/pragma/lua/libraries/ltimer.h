@@ -9,12 +9,13 @@
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/functioncallback.h>
 
+class TimerHandle;
 namespace Lua
 {
 	namespace time
 	{
-		int create_timer(lua_State *l);
-		int create_simple_timer(lua_State *l);
+		std::shared_ptr<TimerHandle> create_timer(lua_State *l,float delay,int32_t repetitions,luabind::function<> fc,TimerType timerType=TimerType::CurTime);
+		std::shared_ptr<TimerHandle> create_simple_timer(lua_State *l,float delay,luabind::function<> fc,TimerType timerType=TimerType::CurTime);
 	};
 };
 
@@ -28,7 +29,7 @@ private:
 	TimerType m_timeType;
 	float m_delay;
 	unsigned int m_reps;
-	int m_function;
+	std::optional<luabind::function<>> m_luaFunction {};
 	CallbackHandle m_callback;
 	double m_start;
 	bool m_bRemove;
@@ -43,7 +44,7 @@ protected:
 	virtual void Reset();
 	Timer();
 public:
-	Timer(float delay,unsigned int reps,int function,TimerType timetype=TimerType::CurTime);
+	Timer(float delay,unsigned int reps,luabind::function<> luaFunction,TimerType timetype=TimerType::CurTime);
 	Timer(float delay,unsigned int reps,const CallbackHandle &hCallback,TimerType timetype=TimerType::CurTime);
 	~Timer();
 	void Update(Game *game);
@@ -61,7 +62,7 @@ public:
 	unsigned int GetRepetitionsLeft();
 	void SetRepetitions(unsigned int rep);
 	std::shared_ptr<TimerHandle> CreateHandle();
-	void SetCall(Game *game,int function);
+	void SetCall(Game *game,luabind::function<> luaFunction);
 	void SetCall(Game *game,const CallbackHandle &hCallback);
 
 	void Call(Game *game);
@@ -82,6 +83,6 @@ DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l,TimerHandle &timer,unsigne
 DLLNETWORK void Lua_Timer_IsRunning(lua_State *l,TimerHandle &timer);
 DLLNETWORK void Lua_Timer_IsPaused(lua_State *l,TimerHandle &timer);
 DLLNETWORK void Lua_Timer_Call(lua_State *l,TimerHandle &timer);
-DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,luabind::object o);
+DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,luabind::function<> o);
 
 #endif

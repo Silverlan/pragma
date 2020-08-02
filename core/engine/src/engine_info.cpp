@@ -70,6 +70,9 @@ std::vector<std::string> engine_info::get_patrons()
 		"_HappyGoLucky",
 		"Gnomp",
 		"RED_EYE",
+		"Degman D-Man",
+		"InternalAtake",
+		"yodaman888",
 
 		"Ruthoranium",
 		"CodaAnim",
@@ -91,7 +94,7 @@ std::vector<std::string> engine_info::get_patrons()
 		"PixMedia"
 	};
 }
-uint32_t engine_info::get_total_patron_count() {return 56;}
+uint32_t engine_info::get_total_patron_count() {return 59;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}

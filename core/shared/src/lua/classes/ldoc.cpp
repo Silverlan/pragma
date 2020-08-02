@@ -9,6 +9,7 @@
 #include <util_pragma_doc.hpp>
 #include <luasystem.h>
 #include <luainterface.hpp>
+#include <unordered_set>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
@@ -50,10 +51,16 @@ private:
 
 #undef GetClassInfo
 
+struct LuaOverloadInfo
+{
+	std::vector<std::string> parameters {};
+	std::string returnValue {};
+};
+
 struct LuaMethodInfo
 {
 	std::string name;
-	std::vector<std::string> overloads;
+	std::vector<LuaOverloadInfo> overloads;
 };
 
 struct LuaClassInfo
@@ -322,6 +329,76 @@ namespace luabind {
 	}
 };
 
+static std::unordered_map<std::string,std::string> g_typeTranslationTable {
+	{"std::string","string"},
+{"short","int"},
+{"unsigned char","int"},
+{"unsigned int","int"},
+{"QuaternionInternal","Quaternion"},
+{"double","float"},
+};
+
+static void normalize_param_name(std::string &paramName)
+{
+	auto isRef = (paramName.find("&") != std::string::npos);
+	auto isPtr = (paramName.find("*") != std::string::npos);
+	auto isConst = (paramName.find(" const") != std::string::npos);
+	ustring::replace(paramName,"&","");
+	ustring::replace(paramName,"*","");
+	ustring::replace(paramName,"custom ","");
+	ustring::replace(paramName," const","");
+
+	if(paramName.empty() == false && paramName.front() == '[' && paramName.back() == ']')
+	{
+		paramName.erase(paramName.begin());
+		paramName.erase(paramName.end() -1);
+		ustring::replace(paramName,"struct ","");
+		ustring::replace(paramName,"class ","");
+		// ustring::replace(paramName,"std::shared_ptr<","");
+	}
+
+	for(auto &pair : g_typeTranslationTable)
+		ustring::replace(paramName,pair.first,pair.second);
+}
+
+static void normalize_return_name(std::string &retName)
+{
+	normalize_param_name(retName);
+}
+
+static std::optional<LuaOverloadInfo> parse_function_overload(std::string &methodName)
+{
+	auto paramStart = methodName.find('(');
+	auto paramEnd = methodName.rfind(')');
+	if(paramStart == std::string::npos || paramEnd == std::string::npos)
+		return {};
+
+	LuaOverloadInfo info {};
+
+	auto params = methodName.substr(paramStart +1,paramEnd -paramStart -1);
+	if(params.empty() == false && params.front() == ',')
+		params.erase(params.begin());
+
+	auto &paramList = info.parameters;
+	ustring::explode(params,",",paramList);
+	for(auto &param : paramList)
+		normalize_param_name(param);
+	if(paramList.size() >= 2)
+	{
+		if(paramList.front() == "lua_State")
+			paramList.erase(paramList.begin());
+		paramList.erase(paramList.begin()); // Second arg is self
+	}
+
+	auto sp = methodName.rfind(' ',paramStart);
+	if(sp != std::string::npos)
+	{
+		auto retType = methodName.substr(0,sp);
+		normalize_return_name(retType);
+		info.returnValue = retType;
+	}
+	return info;
+}
 
 static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep)
 {
@@ -376,7 +453,12 @@ static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep
 						luabind::detail::stack_pop pop(L, 1);
 
 						if(Lua::IsString(L,-1))
-							method.overloads.push_back(Lua::CheckString(L,-1));
+						{
+							std::string def = Lua::CheckString(L,-1);
+							auto overloadInfo = parse_function_overload(def);
+							if(overloadInfo.has_value())
+								method.overloads.push_back(*overloadInfo);
+						}
 					}
 				}
 				Lua::Pop(L,1);
@@ -410,8 +492,8 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 			for(auto it=methodInfo.overloads.begin();it!=methodInfo.overloads.end();)
 			{
 				auto &overload = *it;
-				auto itBase = std::find_if(baseClassMethod.overloads.begin(),baseClassMethod.overloads.end(),[&overload](const std::string &overloadInfoOther) {
-					return overload == overloadInfoOther;
+				auto itBase = std::find_if(baseClassMethod.overloads.begin(),baseClassMethod.overloads.end(),[&overload](const LuaOverloadInfo &overloadInfoOther) {
+					return overload.parameters == overloadInfoOther.parameters && overload.returnValue == overloadInfoOther.returnValue;
 				});
 				if(itBase != baseClassMethod.overloads.end())
 					it = methodInfo.overloads.erase(it);
@@ -426,82 +508,35 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 	}
 }
 
-static std::unordered_map<std::string,std::string> g_typeTranslationTable {
-	{"std::string","string"},
-	{"short","int"},
-	{"unsigned char","int"},
-	{"unsigned int","int"},
-	{"QuaternionInternal","Quaternion"},
-	{"double","float"},
-};
-
-static void normalize_param_name(std::string &paramName)
+static void iterate_libraries(luabind::object o,std::vector<luabind::object> &traversed)
 {
-	auto isRef = (paramName.find("&") != std::string::npos);
-	auto isPtr = (paramName.find("*") != std::string::npos);
-	auto isConst = (paramName.find(" const") != std::string::npos);
-	ustring::replace(paramName,"&","");
-	ustring::replace(paramName,"*","");
-	ustring::replace(paramName,"custom ","");
-	ustring::replace(paramName," const","");
-
-	if(paramName.empty() == false && paramName.front() == '[' && paramName.back() == ']')
+	if(std::find(traversed.begin(),traversed.end(),o) != traversed.end())
+		return; // Prevent infinite recursion
+	traversed.push_back(o);
+	for(luabind::iterator it{o},end;it!=end;++it)
 	{
-		paramName.erase(paramName.begin());
-		paramName.erase(paramName.end() -1);
-		ustring::replace(paramName,"struct ","");
-		ustring::replace(paramName,"class ","");
-		// ustring::replace(paramName,"std::shared_ptr<","");
+		auto val = *it;
+		auto type = luabind::type(val);
+		if(type == LUA_TTABLE)
+		{
+			auto libName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
+			//std::cout<<"LIBRARY: "<<libName<<std::endl;
+			iterate_libraries(val,traversed);
+		}
+		else if(type == LUA_TFUNCTION)
+		{
+			auto fcName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
+			luabind::detail::function_object * fobj = luabind::get_function_object(val);
+			if(fobj)
+				std::cout<<"FUN: "<<fcName<<std::endl;
+		}
 	}
-
-	for(auto &pair : g_typeTranslationTable)
-		ustring::replace(paramName,pair.first,pair.second);
 }
 
-static void normalize_return_name(std::string &retName)
+static void iterate_libraries(luabind::object o)
 {
-	normalize_param_name(retName);
-}
-
-static void normalize_method_name(std::string &methodName)
-{
-	auto paramStart = methodName.find('(');
-	auto paramEnd = methodName.rfind(')');
-	if(paramStart == std::string::npos || paramEnd == std::string::npos)
-		return;
-
-	auto params = methodName.substr(paramStart +1,paramEnd -paramStart -1);
-	if(params.empty() == false && params.front() == ',')
-		params.erase(params.begin());
-
-	std::vector<std::string> paramList;
-	ustring::explode(params,",",paramList);
-	for(auto &param : paramList)
-		normalize_param_name(param);
-	if(paramList.size() >= 2)
-	{
-		if(paramList.front() == "lua_State")
-			paramList.erase(paramList.begin());
-		paramList.erase(paramList.begin()); // Second arg is self
-	}
-
-	params.clear();
-	for(auto i=decltype(paramList.size()){0u};i<paramList.size();++i)
-	{
-		if(i > 0)
-			params += ',';
-		params += paramList.at(i);
-	}
-
-	methodName = methodName.substr(0,paramStart) +'(' +params +')';
-
-	auto sp = methodName.rfind(' ',paramStart);
-	if(sp != std::string::npos)
-	{
-		auto retType = methodName.substr(0,sp);
-		normalize_return_name(retType);
-		methodName = retType +' ' +methodName.substr(sp +1);
-	}
+	std::vector<luabind::object> traversed {};
+	iterate_libraries(o,traversed);
 }
 
 static void autogenerate(lua_State *L)
@@ -516,20 +551,15 @@ static void autogenerate(lua_State *L)
 	for(auto &pair : classInfo)
 		strip_base_class_methods(classInfo,pair.second,pair.second);
 
-	for(auto &pair : classInfo)
-	{
-		for(auto &methodInfo : pair.second.methods)
-		{
-			for(auto &overload : methodInfo.overloads)
-				normalize_method_name(overload);
-		}
-	}
-
 	// Generate pragma doc
+	std::vector<pragma::doc::PCollection> collections {};
+	collections.reserve(classInfo.size());
 	for(auto &pair : classInfo)
 	{
 		auto &classInfo = pair.second;
 		auto collection = pragma::doc::Collection::Create();
+		collection->SetFlags(pragma::doc::Collection::Flags::Class);
+
 		for(auto *base : classInfo.bases)
 		{
 			// TODO: Base class of base class?
@@ -545,14 +575,27 @@ static void autogenerate(lua_State *L)
 
 		for(auto &method : classInfo.methods)
 		{
-
-			//method.name;
-			//method.overloads;
-
+			auto fc = pragma::doc::Function::Create(*collection,method.name);
+			for(auto &overloadInfo : method.overloads)
+			{
+				auto overload = pragma::doc::Overload::Create();
+				for(auto &paramInfo : overloadInfo.parameters)
+				{
+					auto param = pragma::doc::Parameter::Create(paramInfo);
+					overload.AddParameter(param);
+				}
+				if(overloadInfo.returnValue != "void")
+				{
+					auto param = pragma::doc::Parameter::Create(overloadInfo.returnValue);
+					overload.AddReturnValue(param);
+				}
+				fc.AddOverload(overload);
+			}
 		}
-		//classInfo.methods
+		collections.push_back(collection);
 	}
-
+	iterate_libraries(luabind::globals(L));
+#if 0
 	std::stringstream ss;
 	for(auto &pair : classInfo)
 	{
@@ -574,6 +617,7 @@ static void autogenerate(lua_State *L)
 	auto f = FileManager::OpenFile<VFilePtrReal>("testdoc.txt","w");
 	f->WriteString(ss.str());
 	f = nullptr;
+#endif
 }
 
 namespace Lua::doc
@@ -584,6 +628,17 @@ namespace Lua::doc
 void Lua::doc::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
+
+	auto mod = luabind::module(l, "my_library");
+	auto ns = luabind::namespace_("detail");
+	mod[ns];
+
+
+	//luabind::module(l, "my_library")
+	//[
+	//	luabind::def("f2",static_cast<void(*)(lua_State*)>([](lua_State *l) {std::cout<<"f2"<<std::endl;}))
+	//];
+
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
 	Lua::RegisterLibrary(l,libName,{

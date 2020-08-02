@@ -308,7 +308,7 @@ public:
 	virtual void OnPlayerReady(pragma::BasePlayerComponent &pl);
 	virtual void OnPlayerJoined(pragma::BasePlayerComponent &pl);
 	// Timers
-	Timer *CreateTimer(float delay,int reps,int fcLua,TimerType timeType=TimerType::CurTime);
+	Timer *CreateTimer(float delay,int reps,luabind::function<> luaFunction,TimerType timeType=TimerType::CurTime);
 	Timer *CreateTimer(float delay,int reps,const CallbackHandle &hCallback,TimerType timeType=TimerType::CurTime);
 	void ClearTimers();
 	// ConVars

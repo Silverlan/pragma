@@ -43,12 +43,10 @@ namespace Lua
 	LUA_MATRIX_MEMBERS_DEC(4x3);
 	namespace matrix
 	{
-		DLLNETWORK int create_from_axis_angle(lua_State *l);
-		DLLNETWORK int create_orthogonal_matrix(lua_State *l);
-		DLLNETWORK int create_perspective_matrix(lua_State *l);
-		DLLNETWORK int create_look_at_matrix(lua_State *l);
-		DLLNETWORK int create_from_axes(lua_State *l);
-		DLLNETWORK int calc_covariance_matrix(lua_State *l);
+		DLLNETWORK ::Mat4 create_orthogonal_matrix(float left,float right,float bottom,float top,float zNear,float zFar);
+		DLLNETWORK ::Mat4 create_perspective_matrix(float fov,float aspectRatio,float zNear,float zFar);
+		DLLNETWORK ::Mat3 calc_covariance_matrix(lua_State *l,luabind::table<> points);
+		DLLNETWORK ::Mat3 calc_covariance_matrix(lua_State *l,luabind::table<> points,const Vector3 &avg);
 	};
 	namespace Mat4
 	{

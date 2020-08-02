@@ -6,7 +6,13 @@
 
 #ifndef __LBOUNDINGVOLUME_H__
 #define __LBOUNDINGVOLUME_H__
+
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
-DLLNETWORK int Lua_boundingvolume_GetRotatedAABB(lua_State *l);
+
+namespace Lua::boundingvolume
+{
+	DLLNETWORK void GetRotatedAABB(const Vector3 &min,const Vector3 &max,const Mat4 &rot,Vector3 &rmin,Vector3 &rmax);
+};
+
 #endif

@@ -191,6 +191,7 @@ namespace Lua
 		DLLCLIENT void SetAnchorBottom(lua_State *l,WIHandle &hPanel,float f);
 		DLLCLIENT void GetAnchor(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void HasAnchor(lua_State *l,WIHandle &hPanel);
+		DLLCLIENT void SetRemoveOnParentRemoval(lua_State *l,WIHandle &hPanel,bool b);
 	};
 
 	namespace WIButton

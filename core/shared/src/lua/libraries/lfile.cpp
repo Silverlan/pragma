@@ -321,10 +321,8 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path)
 	return true;
 }
 
-int Lua::file::Open(lua_State *l)
+std::shared_ptr<LFile> Lua::file::Open(lua_State *l,std::string path,FileOpenMode openMode,fsys::SearchFlags searchFlags)
 {
-	std::string path = luaL_checkstring(l,1);
-	auto openMode = static_cast<FileOpenMode>(Lua::CheckInt(l,2));
 	std::string mode {};
 	if((openMode &FileOpenMode::Read) != FileOpenMode::None)
 		mode += "r";
@@ -343,293 +341,151 @@ int Lua::file::Open(lua_State *l)
 		if(validate_write_operation(l,path) == false)
 			return 0;
 	}
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,3))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,3));
-	else
-		fsearchmode = fsys::SearchFlags::All;
 	auto f = std::make_shared<LFile>();
-	if(f->Construct(path.c_str(),mode.c_str(),fsearchmode) == false)
-		return 0;
-	luabind::object(l,f).push(l);
-	return 1;
+	if(f->Construct(path.c_str(),mode.c_str(),searchFlags) == false)
+		return nullptr;
+	return f;
 }
 
-int Lua::file::CreateDir(lua_State *l)
+bool Lua::file::CreateDir(lua_State *l,std::string path)
 {
-	std::string path = luaL_checkstring(l,1);
 	if(validate_write_operation(l,path) == false)
-		return 0;
-	lua_pushboolean(l,FileManager::CreateDirectory(path.c_str()));
-	return 1;
+		return false;
+	return FileManager::CreateDirectory(path.c_str());
 }
 
-int Lua::file::CreatePath(lua_State *l)
+bool Lua::file::CreatePath(lua_State *l,std::string path)
 {
-	std::string path = luaL_checkstring(l,1);
 	if(validate_write_operation(l,path) == false)
-		return 0;
-	lua_pushboolean(l,FileManager::CreatePath(path.c_str()));
-	return 1;
+		return false;
+	return FileManager::CreatePath(path.c_str());
 }
 
-int Lua::file::Exists(lua_State *l)
+bool Lua::file::Delete(lua_State *l,std::string path)
 {
-	std::string path = luaL_checkstring(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
-	lua_pushboolean(l,FileManager::Exists(path.c_str(),fsearchmode));
-	return 1;
-}
-
-int Lua::file::Delete(lua_State *l)
-{
-	std::string path = luaL_checkstring(l,1);
 	if(validate_write_operation(l,path) == false)
-		return 0;
-	lua_pushboolean(l,FileManager::RemoveFile(path.c_str()));
-	return 1;
+		return false;
+	return FileManager::RemoveFile(path.c_str());
 }
 
-int Lua::file::IsDir(lua_State *l)
+std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path)
 {
-	std::string path = luaL_checkstring(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
-	lua_pushboolean(l,FileManager::IsDir(path.c_str(),fsearchmode));
-	return 1;
-}
-
-int Lua::file::GetAttributes(lua_State *l)
-{
-	std::string path = luaL_checkstring(l,1);
-	Lua::PushInt<unsigned long long>(l,FileManager::GetFileAttributes(path.c_str()));
-	return 1;
-}
-
-int Lua::file::GetFlags(lua_State *l)
-{
-	std::string path = luaL_checkstring(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
-	Lua::PushInt<unsigned long long>(l,FileManager::GetFileFlags(path.c_str(),fsearchmode));
-	return 1;
-}
-
-int Lua::file::open_external_asset_file(lua_State *l)
-{
-	std::string path = Lua::CheckString(l,1);
 	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
-		return 0;
+		return nullptr;
 	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&)>("open_archive_file");
 	if(fOpenFile == nullptr)
-		return 0;
+		return nullptr;
 	VFilePtr f = nullptr;
 	fOpenFile(path,f);
 	if(f == nullptr)
-		return 0;
+		return nullptr;
 	auto lf = std::make_shared<LFile>();
 	lf->Construct(f);
-	luabind::object(l,lf).push(l);
-	return 1;
+	return lf;
 }
 
-int32_t Lua::file::find_external_game_resource_files(lua_State *l)
+void Lua::file::find_external_game_resource_files(lua_State *l,const std::string &path,luabind::object &outFiles,luabind::object &outDirs)
 {
-	std::string path = Lua::CheckString(l,1);
+	outFiles = luabind::newtable(l);
+	outDirs = luabind::newtable(l);
 	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
-	{
-		Lua::CreateTable(l);
-		Lua::CreateTable(l);
-		return 2;
-	}
+		return;
 	auto *fFindFiles = dllHandle->FindSymbolAddress<void(*)(const std::string&,std::vector<std::string>*,std::vector<std::string>*)>("find_files");
 	if(fFindFiles == nullptr)
-	{
-		Lua::CreateTable(l);
-		Lua::CreateTable(l);
-		return 2;
-	}
+		return;
 	std::vector<std::string> files {};
 	std::vector<std::string> directories {};
 	fFindFiles(path,&files,&directories);
 
-	auto tFiles = Lua::CreateTable(l);
-	auto idx = 1;
-	for(auto &fName : files)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::PushString(l,fName);
-		Lua::SetTableValue(l,tFiles);
-	}
+	uint32_t idx = 1;
+	for(auto &f : files)
+		outFiles[idx++] = f;
 
-	auto tDirs = Lua::CreateTable(l);
 	idx = 1;
-	for(auto &fDir : directories)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::PushString(l,fDir);
-		Lua::SetTableValue(l,tDirs);
-	}
-	return 2;
+	for(auto &d : directories)
+		outDirs[idx++] = d;
 }
 
-int Lua::file::FindLuaFiles(lua_State *l)
+luabind::object Lua::file::FindLuaFiles(lua_State *l,const std::string &path,fsys::SearchFlags searchFlag)
 {
-	std::string path = Lua::CheckString(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(Lua::IsSet(l,2) == true)
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
 	std::vector<std::string> files;
-	FileManager::FindFiles((path +"/*.lua").c_str(),&files,nullptr,fsearchmode);
-	FileManager::FindFiles((path +"/*.clua").c_str(),&files,nullptr,fsearchmode);
+	FileManager::FindFiles((path +"/*.lua").c_str(),&files,nullptr,searchFlag);
+	FileManager::FindFiles((path +"/*.clua").c_str(),&files,nullptr,searchFlag);
 
-	auto t = Lua::CreateTable(l);
+	auto t = luabind::newtable(l);
 	auto idx = 1;
 	for(auto &f : files)
 	{
 		ufile::remove_extension_from_filename(f);
 		f += ".lua";
-		Lua::PushInt(l,idx++);
-		Lua::PushString(l,f);
-		Lua::SetTableValue(l,t);
+		t[idx++] = f;
 	}
-	return 1;
+	return t;
 }
 
-int Lua::file::Find(lua_State *l)
+void Lua::file::Find(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags,luabind::object &outFiles,luabind::object &outDirs)
 {
-	std::string path = luaL_checkstring(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
 	std::vector<std::string> files;
 	std::vector<std::string> dirs;
-	FileManager::FindFiles(path.c_str(),&files,&dirs,fsearchmode);
+	FileManager::FindFiles(path.c_str(),&files,&dirs,searchFlags);
 
-	lua_newtable(l);
-	int topFiles = lua_gettop(l);
-	lua_newtable(l);
-	int topDirs = lua_gettop(l);
-	for(unsigned int i=0;i<files.size();i++)
-	{
-		lua_pushstring(l,files[i].c_str());
-		lua_rawseti(l,topFiles,i +1);
-	}
+	outFiles = luabind::newtable(l);
+	uint32_t idx = 1;
+	for(auto &f : files)
+		outFiles[idx++] = f;
 
-	for(unsigned int i=0;i<dirs.size();i++)
-	{
-		lua_pushstring(l,dirs[i].c_str());
-		lua_rawseti(l,topDirs,i +1);
-	}
-	return 2;
+	outDirs = luabind::newtable(l);
+	idx = 1;
+	for(auto &d : dirs)
+		outDirs[idx++] = d;
 }
 
-int Lua::file::Read(lua_State *l)
+luabind::object Lua::file::Read(lua_State *l,const std::string &path)
 {
-	std::string path = luaL_checkstring(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(!lua_isnoneornil(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt<unsigned int>(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
 	auto f = FileManager::OpenFile(path.c_str(),"rb");
 	if(f == NULL)
-		return 0;
+		return {};
 	std::string str = f->ReadString();
-	lua_pushstring(l,str.c_str());
-	return 1;
+	return luabind::object{l,str};
 }
 
-int Lua::file::Write(lua_State *l)
+bool Lua::file::Write(lua_State *l,std::string path,const std::string &content)
 {
-	std::string path = FileManager::GetCanonicalizedPath(luaL_checkstring(l,1));
+	path = FileManager::GetCanonicalizedPath(path);
 	if(validate_write_operation(l,path) == false)
-		return 0;
-	std::string content = luaL_checkstring(l,2);
+		return false;
 	auto f = FileManager::OpenFile(path.c_str(),"w");
 	if(f == NULL || f->GetType() != VFILE_LOCAL)
-	{
-		Lua::PushBool(l,false);
-		return 1;
-	}
+		return false;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);
 	freal->Write(content.c_str(),content.length());
-	Lua::PushBool(l,true);
-	return 1;
+	return true;
 }
 
-int Lua::file::GetCanonicalizedPath(lua_State *l)
+std::string Lua::file::GetCanonicalizedPath(const std::string &path)
 {
-	auto *path = Lua::CheckString(l,1);
 	auto r = FileManager::GetCanonicalizedPath(path);
 	ustring::replace(r,"\\","/");
-	Lua::PushString(l,r);
-	return 1;
+	return r;
 }
 
-int Lua::file::GetFilePath(lua_State *l)
+luabind::object Lua::file::GetFileExtension(lua_State *l,const std::string &path)
 {
-	auto *path = Lua::CheckString(l,1);
-	auto r = ufile::get_path_from_filename(path);
-	Lua::PushString(l,r);
-	return 1;
-}
-int Lua::file::GetFileName(lua_State *l)
-{
-	auto *path = Lua::CheckString(l,1);
-	auto r = ufile::get_file_from_filename(path);
-	Lua::PushString(l,r);
-	return 1;
-}
-int Lua::file::GetFileExtension(lua_State *l)
-{
-	auto *path = Lua::CheckString(l,1);
 	std::string ext;
 	auto r = ufile::get_extension(path,&ext);
 	if(r == false)
-		return 0;
-	Lua::PushString(l,ext);
-	return 1;
+		return {};
+	return luabind::object{l,ext};
 }
-int Lua::file::RemoveFileExtension(lua_State *l)
+std::string Lua::file::RemoveFileExtension(const std::string &path)
 {
-	std::string fpath = Lua::CheckString(l,1);
+	auto fpath = path;
 	ufile::remove_extension_from_filename(fpath);
-	Lua::PushString(l,fpath);
-	return 1;
+	return fpath;
 }
-int Lua::file::GetSize(lua_State *l)
+bool Lua::file::ComparePath(const std::string &path0,const std::string &path1)
 {
-	auto *path = Lua::CheckString(l,1);
-	fsys::SearchFlags fsearchmode;
-	if(Lua::IsSet(l,2))
-		fsearchmode = static_cast<fsys::SearchFlags>(Lua::CheckInt(l,2));
-	else
-		fsearchmode = fsys::SearchFlags::All;
-	auto size = FileManager::GetFileSize(path,fsearchmode);
-	Lua::PushInt(l,size);
-	return 1;
-}
-int Lua::file::ComparePath(lua_State *l)
-{
-	auto p0 = FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
-	auto p1 = FileManager::GetCanonicalizedPath(Lua::CheckString(l,2));
-	Lua::PushBool(l,p0 == p1);
-	return 1;
+	return FileManager::GetCanonicalizedPath(path0) == FileManager::GetCanonicalizedPath(path1);
 }

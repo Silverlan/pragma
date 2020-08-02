@@ -10,148 +10,77 @@
 #include "pragma/lua/libraries/lstring.hpp"
 #include <pragma/lua/luaapi.h>
 
-int32_t Lua::string::is_integer(lua_State *l)
+uint32_t Lua::string::calc_levenshtein_distance(const std::string &s0,const std::string &s1) {return ustring::calc_levenshtein_distance(s0,s1);}
+double Lua::string::calc_levenshtein_similarity(const std::string &s0,const std::string &s1) {return ustring::calc_levenshtein_similarity(s0,s1);}
+void Lua::string::find_longest_common_substring(const std::string &s0,const std::string &s1,size_t &outStartIdx,size_t &outLen,size_t &outEndIdx)
 {
-	Lua::PushBool(l,ustring::is_integer(Lua::CheckString(l,1)));
-	return 1;
+	outLen = ustring::longest_common_substring(s0,s1,outStartIdx,outEndIdx);
 }
-int32_t Lua::string::is_number(lua_State *l)
+void Lua::string::find_similar_elements(lua_State *l,const std::string &baseElement,luabind::table<> inElements,uint32_t limit,luabind::object &outSimilarElements,luabind::object &outSimilarities)
 {
-	Lua::PushBool(l,ustring::is_number(Lua::CheckString(l,1)));
-	return 1;
-}
-int32_t Lua::string::calc_levenshtein_distance(lua_State *l)
-{
-	auto *str1 = Lua::CheckString(l,1);
-	auto *str2 = Lua::CheckString(l,2);
-	auto dist = ustring::calc_levenshtein_distance(str1,str2);
-	Lua::PushInt(l,dist);
-	return 1;
-}
-int32_t Lua::string::calc_levenshtein_similarity(lua_State *l)
-{
-	auto *str1 = Lua::CheckString(l,1);
-	auto *str2 = Lua::CheckString(l,2);
-	auto sim = ustring::calc_levenshtein_similarity(str1,str2);
-	Lua::PushNumber(l,sim);
-	return 1;
-}
-int32_t Lua::string::find_longest_common_substring(lua_State *l)
-{
-	auto *str1 = Lua::CheckString(l,1);
-	auto *str2 = Lua::CheckString(l,2);
-	std::size_t startIdx = 0;
-	std::size_t endIdx = 0;
-	auto len = ustring::longest_common_substring(str1,str2,startIdx,endIdx);
-	Lua::PushInt(l,startIdx);
-	Lua::PushInt(l,len);
-	Lua::PushInt(l,endIdx);
-	return 3;
-}
-int32_t Lua::string::find_similar_elements(lua_State *l)
-{
-	std::string baseElement = Lua::CheckString(l,1);
-	auto tElements = 2;
-	Lua::CheckTable(l,tElements);
-	auto limit = Lua::CheckInt(l,3);
-	auto numElements = Lua::GetObjectLength(l,tElements);
+	auto numElements = Lua::GetObjectLength(l,2);
 	std::vector<std::string> elements {};
 	elements.reserve(numElements);
-	for(auto i=decltype(numElements){0u};i<numElements;++i)
+	for(auto it=luabind::iterator{inElements};it!=luabind::iterator{};++it)
 	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,tElements);
-		elements.push_back(Lua::CheckString(l,-1));
-		Lua::Pop(l,1);
+		auto val = luabind::object_cast_nothrow<std::string>(*it,std::string{});
+		elements.push_back(val);
 	}
 
 	std::vector<size_t> similarElements {};
 	std::vector<float> similarities {};
-	uint32_t offset = 0u;
 	ustring::gather_similar_elements(baseElement,elements,similarElements,limit,&similarities);
 
-	auto tOutElements = Lua::CreateTable(l);
-	offset = 1u;
+	uint32_t offset = 1u;
+	outSimilarElements = luabind::newtable(l);
 	for(auto idx : similarElements)
-	{
-		Lua::PushInt(l,offset++);
-		Lua::PushInt(l,idx +1);
-		Lua::SetTableValue(l,tOutElements);
-	}
+		outSimilarElements[offset++] = idx +1;
 
-	auto tSimilarities = Lua::CreateTable(l);
 	offset = 1u;
+	outSimilarities = luabind::newtable(l);
 	for(auto &val : similarities)
-	{
-		Lua::PushInt(l,offset++);
-		Lua::PushNumber(l,val);
-		Lua::SetTableValue(l,tSimilarities);
-	}
-	return 2;
+		outSimilarities[offset++] = val;
 }
-int32_t Lua::string::join(lua_State *l)
+std::string Lua::string::join(lua_State *l,luabind::table<> values,const std::string &joinChar)
 {
-	int32_t t = 1;
-	Lua::CheckTable(l,t);
-
-	auto joinChar = ';';
-	if(Lua::IsSet(l,2))
-		joinChar = *Lua::CheckString(l,2);
-
 	std::string r {};
-	auto numEls = Lua::GetObjectLength(l,t);
 	auto bFirst = true;
-	for(auto i=decltype(numEls){0};i<numEls;++i)
+	for(auto it=luabind::iterator{values};it!=luabind::iterator{};++it)
 	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,t);
-		auto *v = Lua::CheckString(l,-1);
+		auto val = luabind::object_cast_nothrow<std::string>(*it,std::string{});
 		if(bFirst == false)
 			r += joinChar;
 		else
 			bFirst = false;
-		r += v;
-		Lua::Pop(l,1);
+		r += val;
 	}
-	Lua::PushString(l,r);
-	return 1;
+	return r;
 }
-int32_t Lua::string::split(lua_State *l)
+std::vector<std::string> Lua::string::split(lua_State *l,const std::string &str,const std::string &delimiter)
 {
-	std::string str(Lua::CheckString(l,1));
-	const char *delimiter = Lua::CheckString(l,2);
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	int n = 1;
-
-	size_t len = strlen(delimiter);
+	size_t len = delimiter.length();
 	size_t from = 0;
 	size_t f = str.find(delimiter,from);
+	std::vector<std::string> result {};
 	while(f != std::string::npos)
 	{
-		lua_pushstring(l,str.substr(from,f -from).c_str());
-		lua_rawseti(l,top,n);
-		n++;
+		result.push_back(str.substr(from,f -from));
 
 		from = f +len;
 		f = str.find(delimiter,from);
 	}
-	lua_pushstring(l,str.substr(from).c_str());
-	lua_rawseti(l,top,n);
-	n++;
-	return 1;
+	result.push_back(str.substr(from));
+	return result;
 }
-int32_t Lua::string::remove_whitespace(lua_State *l)
+std::string Lua::string::remove_whitespace(const std::string &s)
 {
-	std::string str = Lua::CheckString(l,1);
+	std::string str = s;
 	ustring::remove_whitespace(str);
-	Lua::PushString(l,str);
-	return 1;
+	return str;
 }
-int32_t Lua::string::remove_quotes(lua_State *l)
+std::string Lua::string::remove_quotes(const std::string &s)
 {
-	std::string str = Lua::CheckString(l,1);
+	std::string str = s;
 	ustring::remove_quotes(str);
-	Lua::PushString(l,str);
-	return 1;
+	return str;
 }

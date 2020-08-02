@@ -108,7 +108,53 @@ namespace Lua
 	DLLNETWORK void HandleLuaError(lua_State *l);
 	DLLNETWORK void HandleLuaError(lua_State *l,Lua::StatusCode s);
 	DLLNETWORK ErrorColorMode GetErrorColorMode(lua_State *l);
+	template<typename T>
+		void table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::vector<T> &outData);
+	template<typename T>
+		std::vector<T> table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
+	template<typename T>
+		luabind::object vector_to_table(lua_State *l,const std::vector<T> &data);
+
+	template<typename T=luabind::object>
+		luabind::object function_to_object(const luabind::function<T> &f);
 };
+
+template<typename T>
+	void Lua::table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::vector<T> &outData)
+{
+	auto n = Lua::GetObjectLength(l,tableStackIndex);
+	outData.reserve(outData.size() +n);
+	for(auto it=luabind::iterator{t},end=luabind::iterator{};it!=end;++it)
+	{
+		auto val = luabind::object_cast_nothrow<T>(*it,T{});
+		outData.push_back(val);
+	}
+}
+
+template<typename T>
+	std::vector<T> Lua::table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex)
+{
+	std::vector<T> result {};
+	table_to_vector(l,t,tableStackIndex,result);
+	return result;
+}
+
+template<typename T>
+	luabind::object Lua::vector_to_table(lua_State *l,const std::vector<T> &data)
+{
+	auto t = luabind::newtable(l);
+	uint32_t idx = 1;
+	for(auto &v : data)
+		t[idx++] = v;
+	return t;
+}
+
+template<typename T>
+	luabind::object Lua::function_to_object(const luabind::function<T> &f)
+{
+	static_assert(sizeof(luabind::function<T>) == sizeof(luabind::object));
+	return const_cast<luabind::object&>(reinterpret_cast<const luabind::object&>(f));
+}
 
 #define lua_registerglobalint(global) \
 	lua_pushinteger(m_lua,global); \

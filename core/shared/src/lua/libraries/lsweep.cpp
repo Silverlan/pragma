@@ -12,42 +12,12 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include <pragma/math/intersection.h>
 #include "luasystem.h"
-DLLNETWORK int Lua_sweep_AABBWithAABB(lua_State *l)
+void Lua::sweep::AABBWithAABB(const Vector3 &originA,const Vector3 &endA,const Vector3 &extentsA,const Vector3 &originB,const Vector3 &endB,const Vector3 &extentsB,bool &outResult,float &outTEntry,float &outTExit,Vector3 &outNormal)
 {
-	Vector3 originA = *_lua_Vector_check(l,1);
-	Vector3 endA = *_lua_Vector_check(l,2);
-	Vector3 extentsA = *_lua_Vector_check(l,3);
-	Vector3 originB = *_lua_Vector_check(l,4);
-	Vector3 endB = *_lua_Vector_check(l,5);
-	Vector3 extentsB = *_lua_Vector_check(l,6);
-	float tEntry,tExit;
-	Vector3 n;
-	bool b = Sweep::AABBWithAABB(originA,endA,extentsA,originB,endB,extentsB,&tEntry,&tExit,&n);
-	lua_pushboolean(l,b);
-	if(b)
-	{
-		Lua::PushNumber(l,tEntry);
-		Lua::PushNumber(l,tExit);
-		luabind::object(l,n).push(l);
-		return 4;
-	}
-	return 1;
+	outResult = Sweep::AABBWithAABB(originA,endA,extentsA,originB,endB,extentsB,&outTEntry,&outTExit,&outNormal);
 }
 
-DLLNETWORK int Lua_sweep_AABBWithPlane(lua_State *l)
+void Lua::sweep::AABBWithPlane(const Vector3 &ext,const Vector3 &origin,const Vector3 &dir,const Vector3 &n,float d,bool &outResult,float &outT)
 {
-	Vector3 ext = *_lua_Vector_check(l,1);
-	Vector3 origin = *_lua_Vector_check(l,2);
-	Vector3 dir = *_lua_Vector_check(l,3);
-	Vector3 n = *_lua_Vector_check(l,4);
-	float d = static_cast<float>(Lua::CheckNumber(l,5));
-	float t;
-	bool b = Sweep::AABBWithPlane(origin,dir,ext,n,d,&t);
-	lua_pushboolean(l,b);
-	if(b)
-	{
-		Lua::PushNumber(l,t);
-		return 2;
-	}
-	return 1;
+	outResult = Sweep::AABBWithPlane(origin,dir,ext,n,d,&outT);
 }

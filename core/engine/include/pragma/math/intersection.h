@@ -42,7 +42,7 @@ namespace Intersection
 	DLLENGINE bool SpherePlane(const Vector3 &sphereOrigin,float sphereRadius,const Vector3 &n,double d);
 	DLLENGINE Result LineAABB(const Vector3 &o,const Vector3 &d,const Vector3 &min,const Vector3 &max,float *tMinRes,float *tMaxRes=NULL);
 	DLLENGINE Result LinePlane(const Vector3 &o,const Vector3 &d,const Vector3 &nPlane,float distPlane,float *t=NULL);
-	DLLENGINE bool LineOBB(const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max,float *dist=nullptr,const Vector3 &origin={},const Quat &rot={});
+	DLLENGINE bool LineOBB(const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max,float *dist=nullptr,const Vector3 &origin={},const Quat &rot=uquat::identity());
 	struct DLLENGINE LineMeshResult
 	{
 		Result result = Result::NoIntersection;

@@ -15,6 +15,7 @@
 #include <mathutil/glmutil.h>
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/ldef_mat4.h"
+#include "pragma/lua/classes/lvector.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <Eigen/Eigenvalues>
@@ -109,100 +110,46 @@ void Lua::Mat4::Decompose(lua_State *l,const ::Mat4 &mat)
 	Quat rotation;
 	Vector3 translation;
 	Vector3 skew;
-	Vector4 perspective;
+	::Vector4 perspective;
 	glm::decompose(mat,scale,rotation,translation,skew,perspective);
 	Lua::Push<Vector3>(l,scale);
 	Lua::Push<Quat>(l,glm::conjugate(rotation));
 	Lua::Push<Vector3>(l,translation);
 	Lua::Push<Vector3>(l,skew);
-	Lua::Push<Vector4>(l,perspective);
+	Lua::Push<::Vector4>(l,perspective);
 }
 
-int Lua::matrix::create_from_axis_angle(lua_State *l)
+::Mat4 Lua::matrix::create_orthogonal_matrix(float left,float right,float bottom,float top,float zNear,float zFar)
 {
-	const Vector3 &v = *_lua_Vector_check(l,1);
-	float ang = Lua::CheckNumber<float>(l,2);
-	::Mat4 m = umat::create_from_axis_angle(v,ang);
-	Lua::Push<::Mat4>(l,m);
-	return 1;
-}
-
-int Lua::matrix::create_from_axes(lua_State *l)
-{
-	auto *v1 = Lua::CheckVector(l,1);
-	auto *v2 = Lua::CheckVector(l,2);
-	auto *v3 = Lua::CheckVector(l,3);
-	Lua::Push<::Mat4>(l,umat::create_from_axes(*v1,*v2,*v3));
-	return 1;
-}
-
-int Lua::matrix::create_orthogonal_matrix(lua_State *l)
-{
-	float left = Lua::CheckNumber<float>(l,1);
-	float right = Lua::CheckNumber<float>(l,2);
-	float bottom = Lua::CheckNumber<float>(l,3);
-	float top = Lua::CheckNumber<float>(l,4);
-	float zNear = Lua::CheckNumber<float>(l,5);
-	float zFar = Lua::CheckNumber<float>(l,6);
 	auto p = glm::ortho(left,right,bottom,top,zNear,zFar);
 	p = glm::scale(p,Vector3(1.f,-1.f,1.f));
-	Lua::Push<::Mat4>(l,p);
-	return 1;
+	return p;
 }
 
-int Lua::matrix::create_perspective_matrix(lua_State *l)
+::Mat4 Lua::matrix::create_perspective_matrix(float fov,float aspectRatio,float zNear,float zFar)
 {
-	float fov = Lua::CheckNumber<float>(l,1);
-	float aspectRatio = Lua::CheckNumber<float>(l,2);
-	float zNear = Lua::CheckNumber<float>(l,3);
-	float zFar = Lua::CheckNumber<float>(l,4);
 	auto p = glm::perspective(fov,aspectRatio,zNear,zFar);
 	p = glm::scale(p,Vector3(1.f,-1.f,1.f));
-	Lua::Push<::Mat4>(l,p);
-	return 1;
+	return p;
 }
 
-int Lua::matrix::create_look_at_matrix(lua_State *l)
+::Mat3 Lua::matrix::calc_covariance_matrix(lua_State *l,luabind::table<> points)
 {
-	const Vector3 &pos = *_lua_Vector_check(l,1);
-	const Vector3 &target = *_lua_Vector_check(l,2);
-	const Vector3 &up = *_lua_Vector_check(l,3);
-	Lua::Push<::Mat4>(l,glm::lookAtRH(pos,target,up));
-	return 1;
+	auto avg = Lua::vector::calc_average(points);
+	return calc_covariance_matrix(l,points,avg);
 }
 
-int Lua::matrix::calc_covariance_matrix(lua_State *l)
+::Mat3 Lua::matrix::calc_covariance_matrix(lua_State *l,luabind::table<> points,const Vector3 &avg)
 {
-	int32_t tPoints = 1;
-	Lua::CheckTable(l,tPoints);
-
-	Vector3 avg {};
-	if(Lua::IsSet(l,2))
-		avg = *Lua::CheckVector(l,2);
-	else
-	{
-		auto numPoints = Lua::GetObjectLength(l,tPoints);
-		for(auto i=decltype(numPoints){0};i<numPoints;++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,tPoints);
-			avg += *Lua::CheckVector(l,-1);
-		}
-		avg /= static_cast<float>(numPoints);
-	}
-
+	auto numEls = Lua::GetObjectLength(l,1);
 	auto C = ::Mat3(0.f);
-	auto numPoints = Lua::GetObjectLength(l,tPoints);
-	for(auto i=decltype(numPoints){0};i<numPoints;++i)
+	for(auto it=luabind::iterator{points};it!=luabind::iterator{};++it)
 	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,tPoints);
-		auto p = *Lua::CheckVector(l,-1);
+		auto p = luabind::object_cast_nothrow<Vector3>(*it,Vector3{});
 		p -= avg;
 		C += uvec::calc_outer_product(p,p);
 	}
-	Lua::Push<::Mat3>(l,C);
-	return 1;
+	return C;
 }
 
 ////////////////////////////////////////

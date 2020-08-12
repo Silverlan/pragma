@@ -498,7 +498,7 @@ bool NetworkState::RunConsoleCommand(std::string scmd,std::vector<std::string> &
 
 std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::string *err)
 {
-	return util::load_library_module(lib,additionalSearchDirectories,err);
+	return util::load_library_module(lib,additionalSearchDirectories,{},err);
 }
 
 std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string &library) const

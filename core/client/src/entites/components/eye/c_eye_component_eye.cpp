@@ -10,7 +10,7 @@
 #include "pragma/model/c_model.h"
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void pragma::CEyeComponent::UpdateEyeballs()
 {
 	auto mdlC = GetEntity().GetModelComponent();
@@ -132,6 +132,9 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 
 		// Is eye aiming outside the max eye deflection?
 		auto maxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
+		static auto testDeflection = true;
+		if(testDeflection)
+		{
 		if(localPos.z < maxEyeDeflection)
 		{
 			// TODO: Unsure if this is correct, further testing required
@@ -148,7 +151,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 			else
 				localPos.z = 1.0;
 		}
-
+		}
 		localPos = localPos *flDist;
 		localPos = attPose *localPos;
 		tmp = localPos;
@@ -157,7 +160,10 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 }
 void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 {
-	m_viewTarget = ClampViewTarget(viewTarget);
+	m_viewTarget = viewTarget;
+	static auto clamp = true;
+	if(clamp)
+		m_viewTarget = ClampViewTarget(viewTarget);
 }
 umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose) const
 {
@@ -254,3 +260,4 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 	state.irisProjectionV.z = v.z;
 	state.irisProjectionV.w = -uvec::dot(org,v);
 }
+#pragma optimize("",on)

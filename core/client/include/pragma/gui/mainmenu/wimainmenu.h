@@ -54,6 +54,7 @@ protected:
 	WIHandle m_hBuild = {};
 	WIHandle m_logoContainer = {};
 	WIHandle m_hVersionAttributes;
+	WIHandle m_hRenderAPI;
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	WIHandle m_hPatreonIcon;
 #endif

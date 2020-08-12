@@ -453,7 +453,7 @@ int Lua::math::calc_horizontal_fov(lua_State *l)
 	auto focalLengthInMM = Lua::CheckNumber(l,1);
 	auto width = Lua::CheckNumber(l,2);
 	auto height = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::umath::calc_horizontal_fov(focalLengthInMM,width,height));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::calc_horizontal_fov(focalLengthInMM,width,height)));
 	return 1;
 }
 int Lua::math::calc_vertical_fov(lua_State *l)
@@ -461,7 +461,7 @@ int Lua::math::calc_vertical_fov(lua_State *l)
 	auto focalLengthInMM = Lua::CheckNumber(l,1);
 	auto width = Lua::CheckNumber(l,2);
 	auto height = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::umath::calc_vertical_fov(focalLengthInMM,width,height));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::calc_vertical_fov(focalLengthInMM,width,height)));
 	return 1;
 }
 int Lua::math::calc_diagonal_fov(lua_State *l)
@@ -469,35 +469,35 @@ int Lua::math::calc_diagonal_fov(lua_State *l)
 	auto focalLengthInMM = Lua::CheckNumber(l,1);
 	auto width = Lua::CheckNumber(l,2);
 	auto height = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::umath::calc_diagonal_fov(focalLengthInMM,width,height));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::calc_diagonal_fov(focalLengthInMM,width,height)));
 	return 1;
 }
 
 int Lua::math::horizontal_fov_to_vertical_fov(lua_State *l)
 {
-	auto hFov = Lua::CheckNumber(l,1);
+	auto hFov = umath::deg_to_rad(Lua::CheckNumber(l,1));
 	auto width = Lua::CheckNumber(l,2); // Aspect ratio if height is not set
 	auto height = 1.f;
 	if(Lua::IsSet(l,3))
 		height = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::umath::horizontal_fov_to_vertical_fov(hFov,width,height));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::horizontal_fov_to_vertical_fov(hFov,width,height)));
 	return 1;
 }
 int Lua::math::vertical_fov_to_horizontal_fov(lua_State *l)
 {
-	auto hFov = Lua::CheckNumber(l,1);
+	auto hFov = umath::deg_to_rad(Lua::CheckNumber(l,1));
 	auto width = Lua::CheckNumber(l,2); // Aspect ratio if height is not set
 	auto height = 1.f;
 	if(Lua::IsSet(l,3))
 		height = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::umath::vertical_fov_to_horizontal_fov(hFov,width,height));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::vertical_fov_to_horizontal_fov(hFov,width,height)));
 	return 1;
 }
 int Lua::math::diagonal_fov_to_vertical_fov(lua_State *l)
 {
 	auto diagonalFov = Lua::CheckNumber(l,1);
 	auto aspectRatio = Lua::CheckNumber(l,2);
-	Lua::PushNumber(l,::umath::diagonal_fov_to_vertical_fov(diagonalFov,aspectRatio));
+	Lua::PushNumber(l,umath::rad_to_deg(::umath::diagonal_fov_to_vertical_fov(umath::deg_to_rad(diagonalFov),aspectRatio)));
 	return 1;
 }
 int Lua::math::get_frustum_plane_center(lua_State *l)

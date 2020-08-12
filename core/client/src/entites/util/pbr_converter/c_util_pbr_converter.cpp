@@ -266,10 +266,6 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		if(aoMap)
 			rmaInfo->RemoveValue("requires_ao_update");
 	}
-	
-	if(rmaMapName.empty())
-		rmaMapName = "pbr/rma_neutral";
-	dataBlock->AddValue("texture",Material::RMA_MAP_IDENTIFIER,rmaMapName);
 
 	float tmp;
 	if(dataBlock->GetFloat("roughness_factor",&tmp))
@@ -292,6 +288,16 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		rmaInfo->AddValue("bool","requires_ao_update","1");
 	else
 		rmaInfo->RemoveValue("requires_ao_update");
+
+	if(rmaMapName.empty())
+	{
+		rmaMapName = "pbr/rma_neutral";
+		if(dataBlock->HasValue("metalness_factor") == false)
+			dataBlock->AddValue("float","metalness_factor","0.0");
+		if(dataBlock->HasValue("roughness_factor") == false)
+			dataBlock->AddValue("float","roughness_factor","0.5");
+	}
+	dataBlock->AddValue("texture",Material::RMA_MAP_IDENTIFIER,rmaMapName);
 
 	if(rmaInfo->IsEmpty())
 		dataBlock->RemoveValue("rma_info");

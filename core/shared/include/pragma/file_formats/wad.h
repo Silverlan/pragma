@@ -10,9 +10,6 @@
 #include "pragma/file_formats/wdf.h"
 #include "pragma/model/animation/animation.h"
 
-// Currently unused
-//#define WAD_VERSION 0x0001
-
 class DLLNETWORK FWAD
 	: FWDF
 {

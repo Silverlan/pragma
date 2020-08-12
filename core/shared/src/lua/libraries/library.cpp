@@ -682,6 +682,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		{"EVENT_REPLY_HANDLED",umath::to_integral(util::EventReply::Handled)},
 		{"EVENT_REPLY_UNHANDLED",umath::to_integral(util::EventReply::Unhandled)}
 	});
+	Lua::util::register_std_vector_types(lua.GetState());
 
 	auto classDefErrorCode = luabind::class_<ErrorCode>("ResultCode");
 	classDefErrorCode.def(luabind::constructor<>());
@@ -1128,6 +1129,9 @@ void Game::RegisterLuaLibraries()
 	auto fileMod = luabind::module(GetLuaState(),"file");
 	fileMod[
 		luabind::def("open",Lua::file::Open),
+		luabind::def("open",static_cast<std::shared_ptr<LFile>(*)(lua_State*,std::string,FileOpenMode)>([](lua_State *l,std::string path,FileOpenMode openMode) {
+			return Lua::file::Open(l,path,openMode);
+		})),
 		luabind::def("create_directory",Lua::file::CreateDir),
 		luabind::def("create_path",Lua::file::CreatePath),
 		luabind::def("exists",static_cast<bool(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
@@ -1146,6 +1150,9 @@ void Game::RegisterLuaLibraries()
 			Lua::file::Find(l,path,fsys::SearchFlags::All,outFiles,outDirs);
 		}),luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
 		luabind::def("find_lua_files",Lua::file::FindLuaFiles),
+		luabind::def("find_lua_files",static_cast<luabind::object(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) {
+			return Lua::file::FindLuaFiles(l,path);
+		})),
 		luabind::def("get_attributes",FileManager::GetFileAttributes),
 		luabind::def("get_flags",static_cast<uint64_t(*)(std::string,fsys::SearchFlags)>([](std::string path,fsys::SearchFlags searchFlags) {
 			return FileManager::GetFileFlags(path,searchFlags);
@@ -1194,6 +1201,33 @@ void Game::RegisterLuaLibraries()
 	classDefFile.def("ReadColor",static_cast<Color(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Color {
 		return f.Read<Color>();
 	}));
+	classDefFile.def("ReadMat2",static_cast<Mat2(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat2 {
+		return f.Read<Mat2>();
+	}));
+	classDefFile.def("ReadMat2x3",static_cast<Mat2x3(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat2x3 {
+		return f.Read<Mat2x3>();
+	}));
+	classDefFile.def("ReadMat2x4",static_cast<Mat2x4(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat2x4 {
+		return f.Read<Mat2x4>();
+	}));
+	classDefFile.def("ReadMat3x2",static_cast<Mat3x2(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat3x2 {
+		return f.Read<Mat3x2>();
+	}));
+	classDefFile.def("ReadMat3",static_cast<Mat3(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat3 {
+		return f.Read<Mat3>();
+	}));
+	classDefFile.def("ReadMat3x4",static_cast<Mat3x4(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat3x4 {
+		return f.Read<Mat3x4>();
+	}));
+	classDefFile.def("ReadMat4x2",static_cast<Mat4x2(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat4x2 {
+		return f.Read<Mat4x2>();
+	}));
+	classDefFile.def("ReadMat4x3",static_cast<Mat4x3(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat4x3 {
+		return f.Read<Mat4x3>();
+	}));
+	classDefFile.def("ReadMat4",static_cast<Mat4(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> Mat4 {
+		return f.Read<Mat4>();
+	}));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&,uint32_t)>(&Lua_LFile_ReadString));
 	classDefFile.def("ReadString",static_cast<void(*)(lua_State*,LFile&)>(&Lua_LFile_ReadString));
 	classDefFile.def("WriteInt32",&Lua_LFile_WriteInt32);
@@ -1218,6 +1252,33 @@ void Game::RegisterLuaLibraries()
 	}));
 	classDefFile.def("WriteColor",static_cast<void(*)(lua_State*,LFile&,const Color&)>([](lua_State *l,LFile &f,const Color &col) {
 		f.Write<Color>(col);
+	}));
+	classDefFile.def("WriteMat2",static_cast<void(*)(lua_State*,LFile&,const Mat2&)>([](lua_State *l,LFile &f,const Mat2 &col) {
+		f.Write<Mat2>(col);
+	}));
+	classDefFile.def("WriteMat2x3",static_cast<void(*)(lua_State*,LFile&,const Mat2x3&)>([](lua_State *l,LFile &f,const Mat2x3 &col) {
+		f.Write<Mat2x3>(col);
+	}));
+	classDefFile.def("WriteMat2x4",static_cast<void(*)(lua_State*,LFile&,const Mat2x4&)>([](lua_State *l,LFile &f,const Mat2x4 &col) {
+		f.Write<Mat2x4>(col);
+	}));
+	classDefFile.def("WriteMat3x2",static_cast<void(*)(lua_State*,LFile&,const Mat3x2&)>([](lua_State *l,LFile &f,const Mat3x2 &col) {
+		f.Write<Mat3x2>(col);
+	}));
+	classDefFile.def("WriteMat3",static_cast<void(*)(lua_State*,LFile&,const Mat3&)>([](lua_State *l,LFile &f,const Mat3 &col) {
+		f.Write<Mat3>(col);
+	}));
+	classDefFile.def("WriteMat3x4",static_cast<void(*)(lua_State*,LFile&,const Mat3x4&)>([](lua_State *l,LFile &f,const Mat3x4 &col) {
+		f.Write<Mat3x4>(col);
+	}));
+	classDefFile.def("WriteMat4x2",static_cast<void(*)(lua_State*,LFile&,const Mat4x2&)>([](lua_State *l,LFile &f,const Mat4x2 &col) {
+		f.Write<Mat4x2>(col);
+	}));
+	classDefFile.def("WriteMat4x3",static_cast<void(*)(lua_State*,LFile&,const Mat4x3&)>([](lua_State *l,LFile &f,const Mat4x3 &col) {
+		f.Write<Mat4x3>(col);
+	}));
+	classDefFile.def("WriteMat4",static_cast<void(*)(lua_State*,LFile&,const Mat4&)>([](lua_State *l,LFile &f,const Mat4 &col) {
+		f.Write<Mat4>(col);
 	}));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string,bool)>(&Lua_LFile_WriteString));
 	classDefFile.def("WriteString",static_cast<void(*)(lua_State*,LFile&,std::string)>(&Lua_LFile_WriteString));

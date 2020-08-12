@@ -14,6 +14,7 @@
 class MeshVertexAnimation;
 class MeshVertexFrame;
 class VertexAnimation;
+class LFile;
 namespace Lua
 {
 	namespace Animation
@@ -22,6 +23,7 @@ namespace Lua
 		DLLNETWORK void GetAnimationEventArguments(lua_State *l,int32_t tArgs,std::vector<std::string> &args);
 
 		DLLNETWORK void Create(lua_State *l);
+		DLLNETWORK void Load(lua_State *l,LFile &f);
 		DLLNETWORK void RegisterActivityEnum(lua_State *l,const std::string &name);
 		DLLNETWORK void RegisterEventEnum(lua_State *l,const std::string &name);
 		DLLNETWORK void GetActivityEnums(lua_State *l);

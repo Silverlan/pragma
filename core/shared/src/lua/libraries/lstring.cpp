@@ -56,20 +56,21 @@ std::string Lua::string::join(lua_State *l,luabind::table<> values,const std::st
 	}
 	return r;
 }
-std::vector<std::string> Lua::string::split(lua_State *l,const std::string &str,const std::string &delimiter)
+luabind::object Lua::string::split(lua_State *l,const std::string &str,const std::string &delimiter)
 {
 	size_t len = delimiter.length();
 	size_t from = 0;
 	size_t f = str.find(delimiter,from);
-	std::vector<std::string> result {};
+	uint32_t idx = 1;
+	auto result = luabind::newtable(l);
 	while(f != std::string::npos)
 	{
-		result.push_back(str.substr(from,f -from));
+		result[idx++] = str.substr(from,f -from);
 
 		from = f +len;
 		f = str.find(delimiter,from);
 	}
-	result.push_back(str.substr(from));
+	result[idx] = str.substr(from);
 	return result;
 }
 std::string Lua::string::remove_whitespace(const std::string &s)

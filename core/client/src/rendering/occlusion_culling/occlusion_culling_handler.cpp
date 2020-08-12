@@ -33,13 +33,15 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 }
 bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
+	auto &scene = renderer.GetScene();
+	if(ent.IsInScene(scene) == false)
+		return false;
 	if(outPlanes == nullptr)
 		return true; // Skip the frustum culling
-	auto &scene = renderer.GetScene();
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(ent.IsSpawned() == false || ent.IsInScene(scene) == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
+	if(ent.IsSpawned() == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
 		return false;
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;

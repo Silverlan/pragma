@@ -119,6 +119,28 @@ static void register_gui(Lua::Interface &lua)
 			}
 			return 1;
 		})},
+		{"find_elements_by_class",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string className = Lua::CheckString(l,1);
+			auto *p = WGUI::GetInstance().GetBaseElement();
+			if(p == nullptr)
+				return 0;
+			auto t = luabind::newtable(l);
+			uint32_t idx = 1;
+			std::function<void(WIBase&)> fIterateChildren = nullptr;
+			fIterateChildren = [l,&fIterateChildren,&className,&t,&idx](WIBase &el) mutable {
+				if(ustring::compare(el.GetClass(),className,false))
+					t[idx++] = WGUILuaInterface::GetLuaObject(l,el);
+				for(auto &hChild : *el.GetChildren())
+				{
+					if(hChild.IsValid() == false)
+						continue;
+					fIterateChildren(*hChild.get());
+				}
+			};
+			fIterateChildren(*p);
+			t.push(l);
+			return 1;
+		})},
 		{"get_console",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto *pConsole = WIConsole::GetConsole();
 			if(pConsole == nullptr)

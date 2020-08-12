@@ -869,6 +869,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.InterpolateToIdentity(factor);
 	}));
 	classDefTransform.def(luabind::const_self *luabind::const_self);
+	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
 	physMod[classDefTransform];
@@ -904,7 +905,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 		t.InterpolateToIdentity(factor);
 	}));
 	classDefScaledTransform.def(luabind::const_self *umath::Transform());
-	classDefScaledTransform.def(luabind::const_self *luabind::const_self);
+	classDefScaledTransform.def(luabind::const_self *umath::ScaledTransform()); // Note: We use umath::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
 	classDefScaledTransform.def(luabind::const_self *Vector3());
 	classDefScaledTransform.def(luabind::const_self *Quat());
 	physMod[classDefScaledTransform];

@@ -308,6 +308,13 @@ void WIMainMenu::Initialize()
 		pAttributes->SetText("[D]");
 		pAttributes->SizeToContents();
 	}
+
+	/*m_hRenderAPI = CreateChild<WIText>();
+	auto *pAttributes = m_hRenderAPI.get<WIText>();
+	pAttributes->AddStyleClass("game_version");
+	pAttributes->SetColor(Color::Lime);
+	pAttributes->SetText("[" +c_engine->GetRenderContext().GetAPIAbbreviation() +"]");
+	pAttributes->SizeToContents();*/
 	
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	m_hPatreonIcon = CreateChild<WITexturedRect>();

@@ -136,7 +136,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		luabind::def("find_similar_elements",Lua::string::find_similar_elements,luabind::meta::join<luabind::pure_out_value<5>,luabind::pure_out_value<6>>::type{}),
 		luabind::def("is_integer",ustring::is_integer),
 		luabind::def("is_number",ustring::is_number),
-		luabind::def("split",Lua::string::split,luabind::return_stl_iterator{}),
+		luabind::def("split",Lua::string::split),
 		luabind::def("join",static_cast<std::string(*)(lua_State*,luabind::table<>,const std::string&)>(Lua::string::join)),
 		luabind::def("join",static_cast<std::string(*)(lua_State*,luabind::table<>)>([](lua_State *l,luabind::table<> values) {return Lua::string::join(l,values);})),
 		luabind::def("remove_whitespace",Lua::string::remove_whitespace),

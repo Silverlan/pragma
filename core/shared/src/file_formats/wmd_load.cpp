@@ -540,13 +540,16 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 		std::string name = ReadString();
 		FWAD wad;
 		auto anim = std::shared_ptr<Animation>(wad.ReadData(version,m_file));
-		if(version < 0x0007)
+		if(anim)
 		{
-			Vector3 min,max;
-			mdl.GetRenderBounds(min,max);
-			anim->SetRenderBounds(min,max);
+			if(version < 0x0007)
+			{
+				Vector3 min,max;
+				mdl.GetRenderBounds(min,max);
+				anim->SetRenderBounds(min,max);
+			}
+			mdl.AddAnimation(name,anim);
 		}
-		mdl.AddAnimation(name,anim);
 	}
 
 	if(version >= 0x0015)

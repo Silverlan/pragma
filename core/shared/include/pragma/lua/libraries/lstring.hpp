@@ -17,7 +17,7 @@ namespace Lua
 		DLLNETWORK uint32_t calc_levenshtein_distance(const std::string &s0,const std::string &s1);
 		DLLNETWORK double calc_levenshtein_similarity(const std::string &s0,const std::string &s1);
 		DLLNETWORK void find_longest_common_substring(const std::string &s0,const std::string &s1,size_t &outStartIdx,size_t &outLen,size_t &outEndIdx);
-		DLLNETWORK std::vector<std::string> split(lua_State *l,const std::string &str,const std::string &delimiter);
+		DLLNETWORK luabind::object split(lua_State *l,const std::string &str,const std::string &delimiter);
 		DLLNETWORK std::string join(lua_State *l,luabind::table<> values,const std::string &joinChar=";");
 		DLLNETWORK std::string remove_whitespace(const std::string &s);
 		DLLNETWORK std::string remove_quotes(const std::string &s);

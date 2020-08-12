@@ -698,9 +698,16 @@ void Lua::Model::register_class(
 		.def("GetBoneWeights",&Lua::Animation::GetBoneWeights)
 		.def("ClearFrames",static_cast<void(*)(lua_State*,::Animation&)>([](lua_State *l,::Animation &anim) {
 			anim.GetFrames().clear();
+		}))
+		.def("Save",static_cast<void(*)(lua_State*,::Animation&,LFile&)>([](lua_State *l,::Animation &anim,LFile &f) {
+			auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+			if(fptr == nullptr)
+				return;
+			anim.Save(fptr);
 		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),
+		luabind::def("Load",&Lua::Animation::Load),
 		luabind::def("RegisterActivity",&Lua::Animation::RegisterActivityEnum),
 		luabind::def("RegisterEvent",&Lua::Animation::RegisterEventEnum),
 		luabind::def("GetActivityEnums",&Lua::Animation::GetActivityEnums),

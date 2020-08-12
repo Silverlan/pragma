@@ -11,15 +11,27 @@
 #include <mathutil/uquat.h>
 #include "pragma/model/animation/fanim.h"
 
-std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
+std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 {
 	m_file = f;
+	uint32_t animVersion = 0;
+	if(mdlVersion >= 33)
+	{
+		animVersion = f->Read<uint32_t>();
+		auto offset = f->Tell();
+		auto len = f->Read<uint64_t>();
+		if(PRAGMA_ANIMATION_VERSION > animVersion || animVersion < 1)
+		{
+			f->Seek(offset +len);
+			return nullptr;
+		}
+	}
 	auto anim = Animation::Create();
 	//unsigned short ver = Read<unsigned short>();
 	//Con::cout<<"Animation Version: "<<ver<<Con::endl;
 
 	auto activity = Activity::Invalid;
-	if(version >= 0x0013)
+	if(mdlVersion >= 0x0013)
 	{
 		auto activityName = ReadString();
 		auto id = Animation::GetActivityEnumRegister().RegisterEnum(activityName);
@@ -41,7 +53,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 	unsigned int fps = Read<unsigned int>();
 	anim->SetFPS(static_cast<unsigned char>(fps));
 
-	if(version >= 0x0007)
+	if(mdlVersion >= 0x0007)
 	{
 		auto min = Read<Vector3>();
 		auto max = Read<Vector3>();
@@ -70,7 +82,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 		anim->AddBoneId(boneID);
 	}
 
-	if(version >= 0x0012)
+	if(mdlVersion >= 0x0012)
 	{
 		auto bHasWeights = Read<bool>();
 		if(bHasWeights == true)
@@ -90,14 +102,14 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 		for(char i=0;i<numTransitions;i++)
 		{
 			unsigned int animation = Read<unsigned int>();
-			auto transition = (version >= 29) ? Read<float>() : static_cast<float>(Read<int>());
+			auto transition = (mdlVersion >= 29) ? Read<float>() : static_cast<float>(Read<int>());
 			blend.transitions.push_back(AnimationBlendControllerTransition());
 			AnimationBlendControllerTransition &t = blend.transitions.back();
 			t.animation = animation +1; // Account for reference pose
 			t.transition = transition;
 		}
 
-		if(version >= 29)
+		if(mdlVersion >= 29)
 		{
 			blend.animationPostBlendController = Read<int32_t>();
 			blend.animationPostBlendTarget = Read<int32_t>();
@@ -128,11 +140,20 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 			}
 			frame->SetBoneMatrix(j,mat);*/
 		}
+
+		if(animVersion >= 2)
+		{
+			auto numScales = Read<uint32_t>();
+			auto &boneScales = frame->GetBoneScales();
+			boneScales.resize(numScales);
+			Read(boneScales.data(),boneScales.size() *sizeof(boneScales.front()));
+		}
+
 		unsigned short numEvents = Read<unsigned short>();
 		for(unsigned short j=0;j<numEvents;j++)
 		{
 			AnimationEvent *ev = new AnimationEvent;
-			if(version >= 0x0013)
+			if(mdlVersion >= 0x0013)
 			{
 				auto name = ReadString();
 				auto id = Animation::GetEventEnumRegister().RegisterEnum(name);
@@ -155,7 +176,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short version,VFilePtr f)
 				move.x = Read<float>();
 			if(bMoveZ == true)
 				move.y = Read<float>();
-			if(version < 0x0009)
+			if(mdlVersion < 0x0009)
 				move *= static_cast<float>(fps);
 			frame->SetMoveOffset(move);
 		}

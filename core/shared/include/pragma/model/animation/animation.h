@@ -17,6 +17,8 @@
 #include <optional>
 #include <vector>
 
+#define PRAGMA_ANIMATION_VERSION 2
+
 struct DLLNETWORK AnimationBlendControllerTransition
 {
 	uint32_t animation = std::numeric_limits<uint32_t>::max();
@@ -34,6 +36,7 @@ struct DLLNETWORK AnimationBlendController
 	uint32_t animationPostBlendController = std::numeric_limits<uint32_t>::max();
 };
 
+class VFilePtrInternalReal;
 class DLLNETWORK Animation
 	: public std::enable_shared_from_this<Animation>
 {
@@ -100,6 +103,8 @@ public:
 	bool GetBoneWeight(uint32_t boneId,float &weight) const;
 	const std::vector<float> &GetBoneWeights() const;
 	std::vector<float> &GetBoneWeights();
+
+	bool Save(std::shared_ptr<VFilePtrInternalReal> &f);
 private:
 	static util::EnumRegister s_activityEnumRegister;
 	static util::EnumRegister s_eventEnumRegister;

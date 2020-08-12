@@ -989,7 +989,7 @@ bool pragma::asset::export_texture(
 	auto imgPath = optFileNameOverride.has_value() ? *optFileNameOverride : ufile::get_file_from_filename(texturePath);
 	ufile::remove_extension_from_filename(imgPath);
 	if(optExportPath)
-		imgPath = util::Path{*optExportPath}.GetString() +imgPath;
+		imgPath = (util::Path::CreatePath(*optExportPath) +imgPath).GetString();
 	auto imgOutputPath = EXPORT_PATH +imgPath;
 
 	auto exportSuccess = false;

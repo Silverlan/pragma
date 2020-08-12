@@ -7,14 +7,24 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lanimation.h"
+#include "pragma/lua/libraries/lfile.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "luasystem.h"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
+#include "pragma/file_formats/wad.h"
 
 void Lua::Animation::Create(lua_State *l)
 {
 	auto anim = ::Animation::Create();
+	Lua::Push<std::shared_ptr<::Animation>>(l,anim);
+}
+void Lua::Animation::Load(lua_State *l,LFile &f)
+{
+	FWAD wad;
+	auto anim = std::shared_ptr<::Animation>(wad.ReadData(33,f.GetHandle())); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
+	if(anim == nullptr)
+		return;
 	Lua::Push<std::shared_ptr<::Animation>>(l,anim);
 }
 void Lua::Animation::RegisterActivityEnum(lua_State *l,const std::string &name)

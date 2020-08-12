@@ -1599,7 +1599,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1626,7 +1626,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1653,7 +1653,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1734,7 +1734,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1758,7 +1758,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1782,7 +1782,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1808,7 +1808,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});
@@ -1833,7 +1833,7 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 				auto result = static_cast<::util::EventReply>(Lua::CheckInt(l,-1));
 				Lua::Pop(l,1);
 				*reply = result;
-				return (*reply != ::util::EventReply::Unhandled) ? CallbackReturnType::HasReturnValue : CallbackReturnType::NoReturnValue;
+				return CallbackReturnType::NoReturnValue; // We'll always return 'NoReturnValue' to allow other callbacks for this element to be executed as well
 			}
 			return CallbackReturnType::NoReturnValue;
 		});

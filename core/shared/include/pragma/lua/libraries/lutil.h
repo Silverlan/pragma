@@ -68,6 +68,8 @@ namespace Lua
 		DLLNETWORK int get_string_hash(lua_State *l);
 		DLLNETWORK int get_class_value(lua_State *l);
 		DLLNETWORK int pack_zip_archive(lua_State *l);
+
+		DLLNETWORK void register_std_vector_types(lua_State *l);
 	};
 
 	template<class T,class TCast>

@@ -44,7 +44,7 @@ void OcclusionCullingHandlerInert::PerformCulling(
 		if(ent == nullptr)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired())
+		if(pRenderComponent.expired() || ent->IsInScene(scene) == false)
 			continue;
 		bool bViewModel = false;
 		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(camPos) != false))

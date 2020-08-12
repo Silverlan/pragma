@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/model/animation/animation_event.h"
+#include "pragma/model/animation/animation.h"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
@@ -3136,6 +3137,13 @@ namespace Lua
 		def.def("GetAnimation",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) {
 			pragma::Lua::check_component(l,hAnim);
 			Lua::PushInt(l,hAnim->GetAnimation());
+		}));
+		def.def("GetAnimationObject",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) {
+			pragma::Lua::check_component(l,hAnim);
+			auto *anim = hAnim->GetAnimationObject();
+			if(anim == nullptr)
+				return;
+			Lua::Push<std::shared_ptr<::Animation>>(l,anim->shared_from_this());
 		}));
 		def.def("PlayActivity",static_cast<void(*)(lua_State*,THandle&,int,uint32_t)>([](lua_State *l,THandle &hAnim,int activity,uint32_t flags) {
 			pragma::Lua::check_component(l,hAnim);

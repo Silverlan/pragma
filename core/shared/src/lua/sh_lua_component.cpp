@@ -687,16 +687,12 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua_State *l,pragma::Compon
 			// See also BaseLuaBaseEntityComponent::HandleEvent
 			auto o = GetLuaObject();
 			auto r = o[methodName];
-			if(r)
+			if(r && luabind::type(r) == LUA_TFUNCTION)
 			{
 				auto *l = o.interpreter();
 				auto numRet = ev.get().GetReturnCount();
-				auto c = Lua::CallFunction(l,[&ev,&o,&methodName](lua_State *l) -> Lua::StatusCode {
-					o.push(l);
-					Lua::PushString(l,methodName);
-					Lua::GetTableValue(l,-2);
-					Lua::RemoveValue(l,-2);
-
+				auto c = Lua::CallFunction(l,[&ev,&o,&r,&methodName](lua_State *l) -> Lua::StatusCode {
+					r.push(l);
 					o.push(l);
 					ev.get().PushArguments(l);
 					return Lua::StatusCode::Ok;

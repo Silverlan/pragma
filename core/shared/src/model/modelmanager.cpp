@@ -169,7 +169,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::LoadModel(const std::string 
 		if(it != m_cache.end())
 		{
 			auto &mdl = it->second;
-			mdl->PrecacheTextureGroup(0);
+			// mdl->PrecacheTextureGroup(0);
 			return mdl;
 		}
 	}

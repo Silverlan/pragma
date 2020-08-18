@@ -10,12 +10,15 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/model/vertex.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 
 using namespace pragma;
+
+extern DLLCENGINE CEngine *c_engine;
 
 ShaderPrepassBase::Pipeline ShaderPrepassBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount)
 {

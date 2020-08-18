@@ -15,7 +15,7 @@ namespace Lua
 {
 	namespace os
 	{
-		DLLNETWORK int time_since_epoch(lua_State *l);
+		DLLNETWORK int64_t time_since_epoch(lua_State *l);
 	};
 };
 

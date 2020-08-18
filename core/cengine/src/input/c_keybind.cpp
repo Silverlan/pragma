@@ -26,7 +26,7 @@ KeyBind::KeyBind(std::string bind)
 	m_bind = std::make_unique<std::string>(bind);
 	Initialize();
 }
-KeyBind::KeyBind(int function)
+KeyBind::KeyBind(luabind::function<> function)
 {
 	m_type = Type::Function;
 	m_function = function;
@@ -41,7 +41,7 @@ const std::string &KeyBind::GetBind() const
 		return r;
 	return *m_bind;
 }
-int32_t KeyBind::GetFunction() const {return m_function;}
+std::optional<luabind::function<>> KeyBind::GetFunction() const {return m_function;}
 // Deprecated (Replaced by "toggle" console command)
 /*DLLCENGINE void KeyBind_CmdToggle(std::string cmd,std::vector<std::string>&)
 {
@@ -143,12 +143,8 @@ bool KeyBind::Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::
 			if(clState == NULL)
 				return false;
 			auto *game = clState->GetGameState();
-			game->ProtectedLuaCall([this,pressState](lua_State *l) {
-				lua_rawgeti(l,LUA_REGISTRYINDEX,GetFunction());
-
-				lua_pushboolean(l,(pressState == GLFW::KeyState::Press) ? true : false);
-				return Lua::StatusCode::Ok;
-			},0);
+			// TODO: Check for errors?
+			(*m_function)((pressState == GLFW::KeyState::Press) ? true : false);
 			return true;
 		}
 		// Deprecated (Replaced by "toggle" console command)

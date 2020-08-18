@@ -52,10 +52,13 @@
 #include <pragma/lua/libraries/lnet.hpp>
 #include <luainterface.hpp>
 #include <pragma/lua/lua_component_event.hpp>
+#include <pragma/model/model.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
+#include <pragma/lua/libraries/lfile.h>
+#include <wgui/fontmanager.h>
 
 #undef LEFT
 #undef RIGHT
@@ -71,42 +74,35 @@ void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
 
-	auto &modEngine = GetLuaInterface().RegisterLibrary("engine",{
+	GetLuaInterface().RegisterLibrary("engine",{
 		LUA_SHARED_CL_ENGINE_FUNCTIONS
-		{"bind_key",Lua::engine::bind_key},
-		{"unbind_key",Lua::engine::unbind_key},
 		{"load_library",&Lua::engine::LoadLibrary},
-		{"get_text_size",&Lua::engine::get_text_size},
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
-		{"get_tick_count",&Lua::engine::GetTickCount},
-		{"get_info",&Lua::engine::get_info},
-		{"shutdown",&Lua::engine::exit}
+		{"get_info",&Lua::engine::get_info}
 	});
-
+	Lua::engine::register_library(GetLuaState());
+	auto modEngine = luabind::module_(GetLuaState(),"engine");
+	modEngine[
+		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,const std::string&)>(Lua::engine::bind_key)),
+		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,luabind::function<>)>(Lua::engine::bind_key)),
+		luabind::def("unbind_key",Lua::engine::unbind_key),
+		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const std::string&)>(Lua::engine::get_text_size)),
+		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const FontInfo&)>(Lua::engine::get_text_size))
+	];
+	
 	Lua::RegisterLibrary(GetLuaState(),"game",{
 		LUA_LIB_GAME_SHARED
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},
-		{"precache_model",Lua::engine::precache_model},
-		{"precache_material",Lua::engine::precache_material},
-		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
-		{"load_material",Lua::engine::load_material},
-		{"load_texture",Lua::engine::load_texture},
-		{"get_error_material",Lua::engine::get_error_material},
-		{"clear_unused_materials",Lua::engine::clear_unused_materials},
-		//{"create_texture",&Lua::engine::create_texture},
-		{"create_material",Lua::engine::create_material},
 		{"create_particle_system",&Lua::engine::create_particle_system},
-		{"precache_particle_system",&Lua::engine::precache_particle_system},
 		{"save_particle_system",&Lua::engine::save_particle_system},
 
 		{"open_dropped_file",Lua::game::Client::open_dropped_file},
 		{"set_gravity",Lua::game::Client::set_gravity},
 		{"get_gravity",Lua::game::Client::get_gravity},
 		{"load_model",Lua::game::Client::load_model},
-		{"get_model",Lua::engine::get_model},
 		{"create_model",Lua::game::Client::create_model},
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
@@ -135,13 +131,27 @@ void CGame::RegisterLua()
 			return 0;
 		})}*/
 	});
+	auto modGame = luabind::module_(GetLuaState(),"game");
+	modGame[
+		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool,bool)>(Lua::engine::load_material)),
+		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool)>(Lua::engine::load_material)),
+		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&)>(Lua::engine::load_material)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&)>(Lua::engine::load_texture)),
+		luabind::def("create_material",static_cast<Material*(*)(const std::string&,const std::string&)>(Lua::engine::create_material)),
+		luabind::def("create_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::create_material)),
+		luabind::def("precache_model",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_model)),
+		luabind::def("precache_material",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_material)),
+		luabind::def("get_error_material",Lua::engine::get_error_material),
+		luabind::def("clear_unused_materials",Lua::engine::clear_unused_materials),
+		luabind::def("precache_particle_system",static_cast<bool(*)(lua_State*,const std::string&,bool)>(Lua::engine::precache_particle_system)),
+		luabind::def("precache_particle_system",static_cast<bool(*)(lua_State*,const std::string&)>(Lua::engine::precache_particle_system)),
+		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&,bool)>(Lua::engine::LoadSoundScripts)),
+		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::LoadSoundScripts)),
+		luabind::def("get_model",Lua::engine::get_model)
+	];
 
-	Lua::RegisterLibrary(GetLuaState(),"render",{
-		{"set_material_override",Lua_render_SetMaterialOverride},
-		{"set_color_scale",Lua_render_SetColorScale},
-		{"set_alpha_scale",Lua_render_SetAlphaScale},
-	});
-
+	Lua::ents::register_library(GetLuaState());
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",{
 		LUA_LIB_ENTS_SHARED
 		{"get_local_player",Lua::ents::Client::get_local_player},
@@ -201,11 +211,14 @@ void CGame::RegisterLua()
 
 	Lua::RegisterLibrary(GetLuaState(),"locale",{
 		{"get_text",Lua::Locale::get_text},
-		{"load",Lua::Locale::load},
-		{"get_language",Lua::Locale::get_language},
-		{"get_languages",Lua::Locale::get_languages},
-		{"change_language",Lua::Locale::change_language}
+		{"get_languages",Lua::Locale::get_languages}
 	});
+	auto modLocale = luabind::module_(GetLuaState(),"locale");
+	modLocale[
+		luabind::def("load",Lua::Locale::load),
+		luabind::def("get_language",Lua::Locale::get_language),
+		luabind::def("change_language",Lua::Locale::change_language)
+	];
 
 	Game::RegisterLua();
 	/*lua_bind(
@@ -220,8 +233,11 @@ void CGame::RegisterLua()
 	lua_pushboolean(GetLuaState(),0);
 	lua_setglobal(GetLuaState(),"SERVER");
 
-	lua_pushtablecfunction(GetLuaState(),"time","server_time",Lua_ServerTime);
-	lua_pushtablecfunction(GetLuaState(),"time","frame_time",Lua_FrameTime);
+	auto modTime = luabind::module_(GetLuaState(),"time");
+	modTime[
+		luabind::def("server_time",Lua::ServerTime),
+		luabind::def("frame_time",Lua::FrameTime)
+	];
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"sound",{
 		{"CHANNEL_CONFIG_MONO",umath::to_integral(al::ChannelConfig::Mono)},

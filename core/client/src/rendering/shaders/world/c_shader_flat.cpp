@@ -130,7 +130,7 @@ bool ShaderFlat::Draw(CModelSubMesh &mesh)
 		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
 		return false;
 	}
-	auto &vkMesh = mesh.GetVKMesh();
+	auto &vkMesh = mesh.GetSceneMesh();
 	auto &vertexBuffer = vkMesh->GetVertexBuffer();
 	auto &indexBuffer = vkMesh->GetIndexBuffer();
 	auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();

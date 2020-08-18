@@ -54,18 +54,8 @@ int Lua::regex::search(lua_State *l)
 	return 1;
 }
 
-int Lua::regex::replace(lua_State *l)
-{
-	auto *input = Lua::CheckString(l,1);
-	auto e = Lua::CheckString(l,2);
-	std::string format = Lua::CheckString(l,3);
-	std::regex_constants::match_flag_type regexFlags {};
-	if(Lua::IsSet(l,4))
-		regexFlags = static_cast<std::regex_constants::match_flag_type>(Lua::CheckInt(l,4));
-	auto r = std::regex_replace(input,std::regex{e},format,regexFlags);
-	Lua::PushString(l,r);
-	return 1;
-}
+std::string Lua::regex::replace(const std::string &input,const std::string &e,const std::string &format,std::regex_constants::match_flag_type regexFlags) {return std::regex_replace(input,std::regex{e},format,regexFlags);}
+std::string Lua::regex::replace(const std::string &input,const std::string &e,const std::string &format) {return replace(input,e,format,{});}
 
 ////////////////////////
 

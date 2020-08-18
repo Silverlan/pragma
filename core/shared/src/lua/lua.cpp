@@ -11,6 +11,7 @@
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/ldebug.h"
+#include <pragma/model/model.h>
 #include <fsys/filesystem.h>
 #include "luasystem_file.h"
 #include "pragma/lua/class_manager.hpp"
@@ -292,7 +293,10 @@ void Game::RegisterLua()
 	RegisterLuaLibraries();
 	RegisterLuaGlobals();
 
-	lua_pushtablecfunction(GetLuaState(),"debug","stackdump",Lua::debug::stackdump);
+	auto modDebug = luabind::module_(GetLuaState(),"debug");
+	modDebug[
+		luabind::def("stackdump",Lua::debug::stackdump)
+	];
 }
 
 DLLNETWORK void IncludeLuaEntityBaseClasses(lua_State *l,int refEntities,int obj,int data)

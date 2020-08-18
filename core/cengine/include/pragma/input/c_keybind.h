@@ -26,7 +26,7 @@ public:
 private:
 	std::unique_ptr<std::string> m_bind = nullptr;
 	Type m_type = Type::Invalid;
-	int m_function;
+	std::optional<luabind::function<>> m_function {};
 
 	struct Command
 	{
@@ -39,10 +39,10 @@ private:
 public:
 	KeyBind();
 	KeyBind(std::string bind);
-	KeyBind(int function);
+	KeyBind(luabind::function<> function);
 	Type GetType() const;
 	const std::string &GetBind() const;
-	int32_t GetFunction() const;
+	std::optional<luabind::function<>> GetFunction() const;
 	bool Execute(GLFW::KeyState inputState,GLFW::KeyState pressState,GLFW::Modifier mods,float magnitude=1.f);
 };
 #pragma warning(pop)

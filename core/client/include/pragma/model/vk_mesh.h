@@ -14,27 +14,37 @@
 namespace prosper
 {
 	class Buffer;
+	class IRenderBuffer;
 };
 
 namespace pragma
 {
-	class DLLCLIENT VkMesh
+	class ShaderEntity;
+	class DLLCLIENT SceneMesh
 	{
-	private:
-		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 	public:
-		VkMesh();
+		SceneMesh();
 		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetVertexWeightBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetAlphaBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetIndexBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetLightmapUvBuffer() const;
 		void SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
+		void SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer);
+
+		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
+	private:
+		void SetDirty();
+		std::unordered_map<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> m_renderBuffers;
+
+		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
+		std::shared_ptr<prosper::IBuffer> m_lightmapUvBuffer = nullptr;
 	};
 };
 #endif

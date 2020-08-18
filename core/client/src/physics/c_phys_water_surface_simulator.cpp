@@ -283,7 +283,7 @@ void CPhysWaterSurfaceSimulator::Draw(std::shared_ptr<prosper::IPrimaryCommandBu
 		//pos += offset;
 		verts.at(i).position = pos;
 	}
-	auto &vkMesh = mesh.GetVKMesh();
+	auto &vkMesh = mesh.GetSceneMesh();
 	drawCmd->RecordUpdateBuffer(
 		*vkMesh->GetVertexBuffer(),
 		0ull,verts.size() *sizeof(verts.front()),verts.data()

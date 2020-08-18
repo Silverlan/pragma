@@ -171,7 +171,7 @@ public:
 	virtual void HandleLocalHostPlayerClientPacket(NetPacket &p) override;
 	// KeyMappings
 	void MapKey(short c,std::string cmd);
-	void MapKey(short c,int function);
+	void MapKey(short c,luabind::function<> function);
 	void AddKeyMapping(short c,std::string cmd);
 	void RemoveKeyMapping(short c,std::string cmd);
 	void ClearLuaKeyMappings();

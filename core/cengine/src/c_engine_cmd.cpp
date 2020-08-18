@@ -46,7 +46,7 @@ void CEngine::RegisterConsoleCommands()
 			static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar("render_debug_mode","0",ConVarFlags::None,"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission.");
-	conVarMap.RegisterConVar("render_api","vulkan",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+	conVarMap.RegisterConVar("render_api","opengl",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto &renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
@@ -66,6 +66,11 @@ void CEngine::RegisterConsoleCommands()
 			autoCompleteOptions.push_back(strOption);
 		}
 	});
+	conVarMap.RegisterConCommand("render_api_info",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto &renderAPI = GetRenderAPI();
+		auto &context = GetRenderContext();
+		Con::cout<<"Active render API: "<<renderAPI<<" ("<<context.GetAPIAbbreviation()<<")"<<Con::endl;
+	},ConVarFlags::None,"Prints information about the current render API to the console.");
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty()) return;

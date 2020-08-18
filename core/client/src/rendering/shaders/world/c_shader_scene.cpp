@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -244,6 +244,52 @@ void ShaderEntity::EndDraw()
 	m_boundEntity = nullptr;
 }
 
+bool ShaderEntity::GetRenderBufferTargets(
+	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+) const
+{
+	auto &sceneMesh = mesh.GetSceneMesh();
+	if(sceneMesh == nullptr)
+		return false;
+	auto &indexBuffer = sceneMesh->GetIndexBuffer();
+	if(indexBuffer)
+	{
+		outIndexBufferInfo = prosper::IndexBufferInfo{};
+		outIndexBufferInfo->buffer = indexBuffer;
+		outIndexBufferInfo->indexType = prosper::IndexType::UInt16;
+		outIndexBufferInfo->offset = 0;
+	}
+
+	auto *vweightBuf = sceneMesh->GetVertexWeightBuffer().get();
+	auto *vweightExtBuf = sceneMesh->GetVertexWeightBuffer().get();
+	auto *vBuf = sceneMesh->GetVertexBuffer().get();
+
+	outBuffers = {vweightBuf,vweightBuf,vBuf};
+	auto &vertWeights = mesh.GetVertexWeights();
+	outOffsets = {
+		0ull,
+		vertWeights.size() *sizeof(vertWeights.front()),
+		0ull
+	};
+	return true;
+}
+std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelSubMesh &mesh,uint32_t pipelineIdx) const
+{
+	std::vector<prosper::IBuffer*> buffers;
+	std::vector<prosper::DeviceSize> offsets;
+	std::optional<prosper::IndexBufferInfo> indexBufferInfo {};
+	if(GetRenderBufferTargets(mesh,pipelineIdx,buffers,offsets,indexBufferInfo) == false)
+		return nullptr;
+	auto *dummyBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+	for(auto it=buffers.begin();it!=buffers.end();++it)
+	{
+		auto *buf = *it;
+		*it = buf ? buf : dummyBuffer;
+	}
+	return GetContext().CreateRenderBuffer(static_cast<const prosper::GraphicsPipelineCreateInfo&>(*GetPipelineCreateInfo(pipelineIdx)),buffers,offsets,indexBufferInfo);
+}
+
 CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
 
 bool ShaderEntity::BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet)
@@ -263,7 +309,6 @@ bool ShaderEntity::BindScene(rendering::RasterizationRenderer &renderer,bool bVi
 	return ShaderSceneLit::BindScene(renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }
-
 bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
 {
 	auto numTriangleVertices = mesh.GetTriangleVertexCount();
@@ -272,7 +317,10 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 		Con::cerr<<"ERROR: Attempted to draw mesh with more than maximum ("<<umath::to_integral(GameLimits::MaxMeshVertices)<<") amount of vertices!"<<Con::endl;
 		return false;
 	}
-	auto &vkMesh = mesh.GetVKMesh();
+	auto &vkMesh = mesh.GetSceneMesh();
+	auto renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
+	return RecordBindRenderBuffer(*renderBuffer) && fDraw(mesh);
+#if 0
 	auto &vertexBuffer = vkMesh->GetVertexBuffer();
 	auto &indexBuffer = vkMesh->GetIndexBuffer();
 	auto &vertexWeightBuffer = vkMesh->GetVertexWeightBuffer();
@@ -313,6 +361,7 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 	return RecordBindVertexBuffers(vertexBuffers,0u,offsets) &&
 		RecordBindIndexBuffer(*indexBuffer,prosper::IndexType::UInt16) &&
 		fDraw(mesh);
+#endif
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
@@ -343,3 +392,4 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh) {return Draw(mesh,true);}
+#pragma optimize("",on)

@@ -57,11 +57,13 @@ extern DLLCLIENT CGame *c_game;
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
-	auto *ptrRenderComponent = dynamic_cast<pragma::CRenderComponent*>(&component);
-	if(ptrRenderComponent != nullptr)
-		m_renderComponent = std::static_pointer_cast<pragma::CRenderComponent>(ptrRenderComponent->shared_from_this());
+	if(typeid(component) == typeid(pragma::CRenderComponent))
+		m_renderComponent = std::static_pointer_cast<pragma::CRenderComponent>(component.shared_from_this());
+	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
+		m_physComponent = std::static_pointer_cast<pragma::CPhysicsComponent>(component.shared_from_this());
 }
-util::WeakHandle<pragma::CRenderComponent> CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
+util::WeakHandle<pragma::CRenderComponent> &CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
+util::WeakHandle<pragma::CPhysicsComponent> &CBaseEntity::GetCPhysicsComponent() const {return m_physComponent;}
 
 //////////////////////////////////
 

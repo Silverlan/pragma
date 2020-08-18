@@ -21,7 +21,8 @@ namespace Lua
 	{
 		DLLNETWORK int match(lua_State *l);
 		DLLNETWORK int search(lua_State *l);
-		DLLNETWORK int replace(lua_State *l);
+		DLLNETWORK std::string replace(const std::string &input,const std::string &e,const std::string &format,std::regex_constants::match_flag_type regexFlags);
+		DLLNETWORK std::string replace(const std::string &input,const std::string &e,const std::string &format);
 		namespace RegexResult
 		{
 			DLLNETWORK void HasMatch(lua_State *l,std::match_results<const char*> &match);

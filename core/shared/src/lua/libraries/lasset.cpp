@@ -16,38 +16,37 @@ extern DLLENGINE Engine *engine;
 
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 {
-	std::unordered_map<std::string,int32_t(*)(lua_State*)> functions = {
-		{"clear_unused_models",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+	auto modAsset = luabind::module_(lua.GetState(),"asset");
+	modAsset[
+		luabind::def("clear_unused_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
 			auto *nw = engine->GetNetworkState(l);
-			Lua::PushInt(l,nw->GetModelManager().ClearUnused());
-			return 1;
-		})},
-		{"clear_flagged_models",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			return nw->GetModelManager().ClearUnused();
+		})),
+		luabind::def("clear_flagged_models",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
 			auto *nw = engine->GetNetworkState(l);
-			Lua::PushInt(l,nw->GetModelManager().ClearFlagged());
-			return 1;
-		})},
-		{"flag_model_for_cache_removal",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			return nw->GetModelManager().ClearFlagged();
+		})),
+		luabind::def("flag_model_for_cache_removal",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			auto *nw = engine->GetNetworkState(l);
 			auto &mdl = Lua::Check<Model>(l,1);
 			nw->GetModelManager().FlagForRemoval(mdl);
-			return 0;
-		})},
-		{"clear_unused_materials",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		})),
+		luabind::def("clear_unused_materials",static_cast<uint32_t(*)(lua_State*)>([](lua_State *l) -> uint32_t {
 			auto *nw = engine->GetNetworkState(l);
-			Lua::PushInt(l,nw->GetMaterialManager().ClearUnused());
-			return 1;
-		})},
-		{"lock_asset_watchers",&Lua::asset::lock_asset_watchers},
-		{"unlock_asset_watchers",&Lua::asset::unlock_asset_watchers}
-	};
+			return nw->GetMaterialManager().ClearUnused();
+		})),
+		luabind::def("lock_asset_watchers",&Lua::asset::lock_asset_watchers),
+		luabind::def("unlock_asset_watchers",&Lua::asset::unlock_asset_watchers)
+	];
+
 	if(extended)
 	{
-		functions.insert(std::make_pair("clear_unused_models",Lua::asset::exists));
-		functions.insert(std::make_pair("clear_unused_models",Lua::asset::find_file));
-		functions.insert(std::make_pair("is_loaded",Lua::asset::is_loaded));
+		modAsset[
+			luabind::def("clear_unused_models",Lua::asset::exists),
+			luabind::def("clear_unused_models",Lua::asset::find_file),
+			luabind::def("is_loaded",Lua::asset::is_loaded)
+		];
 	}
-	lua.RegisterLibrary("asset",functions);
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"asset",{
 		{"TYPE_MODEL",umath::to_integral(pragma::asset::Type::Model)},
@@ -60,40 +59,29 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","MATERIAL_FILE_EXTENSION","wmi");
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","PARTICLE_SYSTEM_FILE_EXTENSION","wpt");
 }
-int32_t Lua::asset::exists(lua_State *l)
+bool Lua::asset::exists(lua_State *l,const std::string &name,pragma::asset::Type type)
 {
-	std::string name = Lua::CheckString(l,1);
-	auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
 	auto *nw = engine->GetNetworkState(l);
-	Lua::PushBool(l,pragma::asset::exists(*nw,name,type));
-	return 1;
+	return pragma::asset::exists(*nw,name,type);
 }
-int32_t Lua::asset::find_file(lua_State *l)
+luabind::object Lua::asset::find_file(lua_State *l,const std::string &name,pragma::asset::Type type)
 {
-	std::string name = Lua::CheckString(l,1);
-	auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
 	auto *nw = engine->GetNetworkState(l);
 	auto path = pragma::asset::find_file(*nw,name,type);
 	if(path.has_value() == false)
-		return 0;
-	Lua::PushString(l,*path);
-	return 1;
+		return {};
+	return luabind::object{l,*path};
 }
-int32_t Lua::asset::is_loaded(lua_State *l)
+bool Lua::asset::is_loaded(lua_State *l,const std::string &name,pragma::asset::Type type)
 {
-	std::string name = Lua::CheckString(l,1);
-	auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
 	auto *nw = engine->GetNetworkState(l);
-	Lua::PushBool(l,pragma::asset::is_loaded(*nw,name,type));
-	return 1;
+	return pragma::asset::is_loaded(*nw,name,type);
 }
-int32_t Lua::asset::lock_asset_watchers(lua_State *l)
+void Lua::asset::lock_asset_watchers(lua_State *l)
 {
 	engine->LockResourceWatchers();
-	return 0;
 }
-int32_t Lua::asset::unlock_asset_watchers(lua_State *l)
+void Lua::asset::unlock_asset_watchers(lua_State *l)
 {
 	engine->UnlockResourceWatchers();
-	return 0;
 }

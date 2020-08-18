@@ -79,7 +79,7 @@ bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	auto &vkMesh = mesh.GetVKMesh();
+	auto &vkMesh = mesh.GetSceneMesh();
 	if(vkMesh != nullptr)
 	{
 		auto &meshAlphaBuffer = vkMesh->GetAlphaBuffer();

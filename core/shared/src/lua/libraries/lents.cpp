@@ -29,17 +29,23 @@
 
 extern DLLENGINE Engine *engine;
 
-int Lua::ents::create(lua_State *l)
+void Lua::ents::register_library(lua_State *l)
+{
+	auto entsMod = luabind::module(l,"ents");
+	entsMod[
+		luabind::def("create",create)
+	];
+}
+
+LuaEntityObject Lua::ents::create(lua_State *l,const std::string &classname)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	std::string classname = luaL_checkstring(l,1);
 
-	BaseEntity *ent = game->CreateEntity(classname);
+	auto *ent = game->CreateEntity(classname);
 	if(ent == NULL)
-		return 0;
-	lua_pushentity(l,ent);
-	return 1;
+		return {};
+	return *ent->GetLuaObject();
 }
 
 int Lua::ents::create_trigger(lua_State *l)

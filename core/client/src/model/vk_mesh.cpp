@@ -7,18 +7,50 @@
 
 #include "stdafx_client.h"
 #include "pragma/model/vk_mesh.h"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include <buffers/prosper_render_buffer.hpp>
+#include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
-VkMesh::VkMesh()
+extern DLLCENGINE CEngine *c_engine;
+
+#pragma optimize("",off)
+SceneMesh::SceneMesh()
 	: m_vertexBuffer(nullptr),m_vertexWeightBuffer(nullptr),
 	m_alphaBuffer(nullptr),m_indexBuffer(nullptr)
 {}
-const std::shared_ptr<prosper::IBuffer> &VkMesh::GetVertexBuffer() const {return m_vertexBuffer;}
-const std::shared_ptr<prosper::IBuffer> &VkMesh::GetVertexWeightBuffer() const {return m_vertexWeightBuffer;}
-const std::shared_ptr<prosper::IBuffer> &VkMesh::GetAlphaBuffer() const {return m_alphaBuffer;}
-const std::shared_ptr<prosper::IBuffer> &VkMesh::GetIndexBuffer() const {return m_indexBuffer;}
-void VkMesh::SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexBuffer = buffer;}
-void VkMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexWeightBuffer = buffer;}
-void VkMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_alphaBuffer = buffer;}
-void VkMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_indexBuffer = buffer;}
+const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexBuffer() const {return m_vertexBuffer;}
+const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexWeightBuffer() const {return m_vertexWeightBuffer;}
+const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetAlphaBuffer() const {return m_alphaBuffer;}
+const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetIndexBuffer() const {return m_indexBuffer;}
+const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetLightmapUvBuffer() const {return m_lightmapUvBuffer;}
+
+void SceneMesh::SetVertexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexBuffer = buffer; SetDirty();}
+void SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_vertexWeightBuffer = buffer; SetDirty();}
+void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_alphaBuffer = buffer; SetDirty();}
+void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_indexBuffer = buffer; SetDirty();}
+void SceneMesh::SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer) {m_lightmapUvBuffer = lightmapUvBuffer; SetDirty();}
+
+void SceneMesh::SetDirty() {m_renderBuffers.clear();}
+const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx)
+{
+	prosper::PipelineID pipelineId;
+	if(shader.GetPipelineId(pipelineId,pipelineIdx) == false)
+	{
+		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
+		return nptr;
+	}
+	auto it = m_renderBuffers.find(pipelineId);
+	if(it != m_renderBuffers.end())
+		return it->second;
+	auto renderBuffer = shader.CreateRenderBuffer(mesh,pipelineIdx);
+	if(renderBuffer == nullptr)
+	{
+		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
+		return nptr;
+	}
+	it = m_renderBuffers.insert(std::make_pair(pipelineId,renderBuffer)).first;
+	return it->second;
+}
+#pragma optimize("",on)

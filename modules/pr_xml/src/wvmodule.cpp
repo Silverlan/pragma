@@ -7,7 +7,6 @@
 #include <iostream>
 #endif
 
-#pragma comment(lib,"lua51.lib")
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"luasystem.lib")
 #pragma comment(lib,"luabind.lib")

@@ -25,6 +25,7 @@ namespace pragma
 	class BaseEntityComponent;
 	class ShaderTextured3DBase;
 	class CRenderComponent;
+	class CPhysicsComponent;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -58,7 +59,8 @@ public:
 	// This only works for single-player / listen servers!
 	BaseEntity *GetServersideEntity() const;
 
-	util::WeakHandle<pragma::CRenderComponent> GetRenderComponent() const;
+	util::WeakHandle<pragma::CRenderComponent> &GetRenderComponent() const;
+	util::WeakHandle<pragma::CPhysicsComponent> &GetCPhysicsComponent() const;
 
 	virtual void Initialize() override;
 	virtual void ReceiveData(NetPacket &packet);
@@ -99,6 +101,7 @@ protected:
 	uint32_t m_clientIdx = 0u;
 	uint32_t m_sceneFlags = 0;
 	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
+	mutable util::WeakHandle<pragma::CPhysicsComponent> m_physComponent = {};
 
 	//std::unique_ptr<std::shared_ptr<prosper::IBuffer>> m_softBodyBuffers = nullptr; // prosper TODO
 };

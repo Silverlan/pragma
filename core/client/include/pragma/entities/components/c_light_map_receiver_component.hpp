@@ -28,6 +28,8 @@ namespace pragma
 		const std::unordered_map<MeshIdx,std::vector<Vector2>> &GetMeshLightMapUvData() const;
 		void AssignBufferIndex(MeshIdx meshIdx,BufferIdx bufIdx);
 		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;
+
+		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
 	protected:
 		void UpdateModelMeshes();
 

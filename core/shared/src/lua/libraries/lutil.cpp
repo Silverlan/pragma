@@ -50,15 +50,38 @@ extern DLLENGINE Engine *engine;
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
-int Lua::global::include(lua_State *l)
+void Lua::util::register_library(lua_State *l)
 {
-	std::string f = Lua::CheckString(l,1);
-	auto bIgnoreCache = s_bIgnoreIncludeCache;
-	if(Lua::IsSet(l,2) && bIgnoreCache == false)
-		bIgnoreCache = Lua::CheckBool(l,2);
+	auto utilMod = luabind::module(l,"util");
+	utilMod[
+		luabind::def("splash_damage",splash_damage),
+		luabind::def("get_date_time",static_cast<std::string(*)(const std::string&)>(Lua::util::date_time)),
+		luabind::def("get_date_time",static_cast<std::string(*)()>(Lua::util::date_time)),
+		luabind::def("is_table",static_cast<bool(*)(luabind::argument)>(Lua::util::is_table)),
+		luabind::def("is_table",static_cast<bool(*)()>(Lua::util::is_table)),
+		luabind::def("get_faded_time_factor",static_cast<float(*)(float,float,float,float)>(Lua::util::get_faded_time_factor)),
+		luabind::def("get_faded_time_factor",static_cast<float(*)(float,float,float)>(Lua::util::get_faded_time_factor)),
+		luabind::def("get_scale_factor",static_cast<float(*)(float,float,float)>(Lua::util::get_scale_factor)),
+		luabind::def("get_scale_factor",static_cast<float(*)(float,float)>(Lua::util::get_scale_factor)),
+		luabind::def("open_path_in_explorer",static_cast<void(*)(const std::string&,const std::string&)>(Lua::util::open_path_in_explorer)),
+		luabind::def("open_path_in_explorer",static_cast<void(*)(const std::string&)>(Lua::util::open_path_in_explorer)),
+		luabind::def("get_pretty_bytes",Lua::util::get_pretty_bytes),
+		luabind::def("units_to_metres",Lua::util::units_to_metres),
+		luabind::def("metres_to_units",Lua::util::metres_to_units),
+		luabind::def("variable_type_to_string",Lua::util::variable_type_to_string),
+		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
+		luabind::def("get_addon_path",Lua::util::get_addon_path),
+		luabind::def("get_string_hash",Lua::util::get_string_hash)
+	];
+}
+
+luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache);}
+
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache)
+{
 	auto *lInterface = engine->GetLuaInterface(l);
 	std::vector<std::string> *includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache,bIgnoreCache](std::string fpath) -> bool {
+	auto fShouldInclude = [includeCache,ignoreCache](std::string fpath) -> bool {
 		if(includeCache == nullptr)
 			return true;
 		if(fpath.empty() == false)
@@ -73,7 +96,7 @@ int Lua::global::include(lua_State *l)
 			return ustring::compare(fpath,other,false);
 		});
 		if(it != includeCache->end())
-			return bIgnoreCache;
+			return ignoreCache;
 		includeCache->push_back(fpath);
 		return true;
 	};
@@ -135,7 +158,7 @@ int Lua::global::include(lua_State *l)
 					break;
 			}
 		}
-		return 0;
+		return {};
 	}
 	if(fShouldInclude(f) == true)
 	{
@@ -143,7 +166,8 @@ int Lua::global::include(lua_State *l)
 		//	return Lua::IncludeFile(l,f,traceback);
 		//});
 		auto n = Lua::GetStackTop(l);
-		auto r = Lua::IncludeFile(l,f,Lua::HandleTracebackError,LUA_MULTRET);
+		auto fileName = f;
+		auto r = Lua::IncludeFile(l,fileName,Lua::HandleTracebackError,LUA_MULTRET);
 		switch(r)
 		{
 			case Lua::StatusCode::ErrorFile:
@@ -151,35 +175,18 @@ int Lua::global::include(lua_State *l)
 				/* unreachable */
 				break;
 			case Lua::StatusCode::ErrorSyntax:
-				Lua::HandleSyntaxError(l,r,f);
+				Lua::HandleSyntaxError(l,r,fileName);
 				break;
 			case Lua::StatusCode::Ok:
-				return Lua::GetStackTop(l) -n;
+				return luabind::object{luabind::from_stack{l,Lua::GetStackTop(l) -n}};
 		}
 	}
-	return 0;
+	return {};
 }
 
-int Lua::global::get_script_path(lua_State *l)
-{
-	auto path = Lua::GetIncludePath();
-	Lua::PushString(l,path);
-	return 1;
-}
-
-int Lua::global::angle_rand(lua_State *l)
-{
-	luabind::object(l,EulerAngles(umath::random(-180.f,180.f),umath::random(-180.f,180.f),umath::random(-180.f,180.f))).push(l);
-	return 1;
-}
-
-int Lua::global::create_from_string(lua_State *l)
-{
-	auto *str = Lua::CheckString(l,1);
-	EulerAngles ang(str);
-	Lua::Push<EulerAngles>(l,ang);
-	return 1;
-}
+std::string Lua::global::get_script_path() {return Lua::GetIncludePath();}
+EulerAngles Lua::global::angle_rand() {return EulerAngles(umath::random(-180.f,180.f),umath::random(-180.f,180.f),umath::random(-180.f,180.f));}
+EulerAngles Lua::global::create_from_string(const std::string &str) {return EulerAngles{str};}
 
 static bool check_valid_lua_object(lua_State *l,int32_t stackIdx)
 {
@@ -267,26 +274,11 @@ int Lua::util::remove(lua_State *l)
 	return 0;
 }
 
-int Lua::util::is_table(lua_State *l)
-{
-	lua_pushboolean(l,(!lua_isnoneornil(l,1) && lua_istable(l,1)) ? true : false);
-	return 1;
-}
+bool Lua::util::is_table(luabind::argument arg) {return luabind::type(arg) == LUA_TTABLE;}
+bool Lua::util::is_table() {return false;}
 
-int Lua::util::date_time(lua_State *l)
-{
-	int argc = lua_gettop(l);
-	std::string datetime;
-	if(argc == 0)
-		datetime = engine->GetDate();
-	else
-	{
-		std::string format = luaL_checkstring(l,1);
-		datetime = engine->GetDate(format);
-	}
-	lua_pushstring(l,datetime.c_str());
-	return 1;
-}
+std::string Lua::util::date_time(const std::string &format) {return engine->GetDate(format);}
+std::string Lua::util::date_time() {return engine->GetDate();}
 
 int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,TraceData&,TraceResult&,uint32_t&)> &f)
 {
@@ -536,9 +528,9 @@ int Lua::util::register_class(lua_State *l)
 	return 1;
 }
 
-int Lua::util::splash_damage(
+void Lua::util::splash_damage(
 	lua_State *l,
-	::util::SplashDamageInfo &splashDamageInfo
+	const ::util::SplashDamageInfo &splashDamageInfo
 )
 {
 	auto *nw = engine->GetNetworkState(l);
@@ -570,14 +562,7 @@ int Lua::util::splash_damage(
 			return true;
 		};
 	}
-	game->SplashDamage(splashDamageInfo.origin,splashDamageInfo.radius,splashDamageInfo.damageInfo,splashDamageInfo.callback);
-	return 0;
-}
-
-int Lua::util::splash_damage(lua_State *l)
-{
-	auto &splashDamageInfo = Lua::Check<::util::SplashDamageInfo>(l,1);
-	return splash_damage(l,splashDamageInfo);
+	game->SplashDamage(splashDamageInfo.origin,splashDamageInfo.radius,const_cast<DamageInfo&>(splashDamageInfo.damageInfo),splashDamageInfo.callback);
 }
 
 int Lua::util::shake_screen(lua_State *l)
@@ -629,33 +614,12 @@ int Lua::util::shake_screen(lua_State *l)
 	return 0;
 }
 
-int Lua::util::get_faded_time_factor(lua_State *l)
-{
-	auto cur = Lua::CheckNumber(l,1);
-	auto dur = Lua::CheckNumber(l,2);
-	auto fadeIn = 0.f;
-	if(Lua::IsSet(l,3))
-		fadeIn = CFloat(Lua::CheckNumber(l,3));
-	auto fadeOut = 0.f;
-	if(Lua::IsSet(l,4))
-		fadeOut = CFloat(Lua::CheckNumber(l,4));
-	Lua::PushNumber(l,::util::get_faded_time_factor(CFloat(cur),CFloat(dur),fadeIn,fadeOut));
-	return 1;
-}
+float Lua::util::get_faded_time_factor(float cur,float dur,float fadeIn,float fadeOut) {return ::util::get_faded_time_factor(CFloat(cur),CFloat(dur),fadeIn,fadeOut);}
+float Lua::util::get_faded_time_factor(float cur,float dur,float fadeIn) {return get_faded_time_factor(cur,dur,fadeIn,0.f);}
+float Lua::util::get_faded_time_factor(float cur,float dur) {return get_faded_time_factor(cur,dur,0.f);}
 
-int Lua::util::get_scale_factor(lua_State *l)
-{
-	auto val = Lua::CheckNumber(l,1);
-	auto min = Lua::CheckNumber(l,2);
-	if(!Lua::IsSet(l,3))
-	{
-		Lua::PushNumber(l,::util::get_scale_factor(CFloat(val),CFloat(min)));
-		return 1;
-	}
-	auto max = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,::util::get_scale_factor(CFloat(val),CFloat(min),CFloat(max)));
-	return 1;
-}
+float Lua::util::get_scale_factor(float val,float min,float max) {return ::util::get_scale_factor(CFloat(val),CFloat(min),CFloat(max));}
+float Lua::util::get_scale_factor(float val,float min) {return ::util::get_scale_factor(CFloat(val),CFloat(min));}
 
 int Lua::util::local_to_world(lua_State *l)
 {
@@ -733,22 +697,9 @@ int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }
-int Lua::util::open_url_in_browser(lua_State *l)
-{
-	std::string url = Lua::CheckString(l,1);
-	::util::open_url_in_browser(url);
-	return 0;
-}
-int Lua::util::open_path_in_explorer(lua_State *l)
-{
-	std::string path = Lua::CheckString(l,1);
-	path = ::util::get_program_path() +'/' +path;
-	std::optional<std::string> selectFile {};
-	if(Lua::IsSet(l,2))
-		selectFile = Lua::CheckString(l,2);
-	::util::open_path_in_explorer(path,selectFile);
-	return 0;
-}
+void Lua::util::open_url_in_browser(const std::string &url) {return ::util::open_url_in_browser(url);}
+void Lua::util::open_path_in_explorer(const std::string &path,const std::string &selectFile) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path,selectFile);}
+void Lua::util::open_path_in_explorer(const std::string &path) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path);}
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 {
 	auto w = Lua::CheckInt(l,1);
@@ -766,13 +717,7 @@ int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 	Lua::PushNumber(l,h);
 	return 2;
 }
-int Lua::util::get_pretty_bytes(lua_State *l)
-{
-	auto bytes = Lua::CheckInt(l,1);
-	auto r = ::util::get_pretty_bytes(bytes);
-	Lua::PushString(l,r);
-	return 1;
-}
+std::string Lua::util::get_pretty_bytes(uint32_t bytes) {return ::util::get_pretty_bytes(bytes);}
 int Lua::util::get_pretty_duration(lua_State *l)
 {
 	auto ms = Lua::CheckInt(l,1);
@@ -816,18 +761,8 @@ int Lua::util::get_pretty_time(lua_State *l)
 	Lua::PushString(l,prettyTime);
 	return 1;
 }
-int Lua::util::units_to_metres(lua_State *l)
-{
-	auto units = Lua::CheckNumber(l,1);
-	Lua::PushNumber(l,::util::pragma::units_to_metres(units));
-	return 1;
-}
-int Lua::util::metres_to_units(lua_State *l)
-{
-	auto metres = Lua::CheckNumber(l,1);
-	Lua::PushNumber(l,::util::pragma::metres_to_units(metres));
-	return 1;
-}
+double Lua::util::units_to_metres(double units) {return ::util::pragma::units_to_metres(units);}
+double Lua::util::metres_to_units(double metres) {return ::util::pragma::metres_to_units(metres);}
 int Lua::util::read_scene_file(lua_State *l)
 {
 	auto fname = "scenes\\" +FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
@@ -996,19 +931,8 @@ int Lua::util::get_type_name(lua_State *l)
 	return 1;
 }
 
-int Lua::util::variable_type_to_string(lua_State *l)
-{
-	auto type = static_cast<::util::VarType>(Lua::CheckInt(l,1));
-	Lua::PushString(l,::util::variable_type_to_string(type));
-	return 1;
-}
-
-int Lua::util::get_string_hash(lua_State *l)
-{
-	auto *str = Lua::CheckString(l,1);
-	Lua::PushString(l,std::to_string(std::hash<std::string>{}(str)));
-	return 1;
-}
+std::string Lua::util::variable_type_to_string(::util::VarType varType) {return ::util::variable_type_to_string(varType);}
+std::string Lua::util::get_string_hash(const std::string &str) {return std::to_string(std::hash<std::string>{}(str));}
 
 int Lua::util::get_class_value(lua_State *l)
 {
@@ -1076,22 +1000,18 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	return 1;
 }
 
-int Lua::util::get_addon_path(lua_State *l)
+std::string Lua::util::get_addon_path(lua_State *l)
 {
 	auto path = Lua::get_current_file(l);
 	ustring::replace(path,"\\","/");
 	if(ustring::compare(path.c_str(),"addons/",false,7) == false)
-	{
-		Lua::PushString(l,"");
-		return 1;
-	}
+		return "";
 
 	// Get path up to addon directory
 	auto br = path.find('/',7);
 	if(br != std::string::npos)
 		path = path.substr(0,br);
 	path += '/';
-	Lua::PushString(l,path);
-	return 1;
+	return path;
 }
 #pragma optimize("",on)

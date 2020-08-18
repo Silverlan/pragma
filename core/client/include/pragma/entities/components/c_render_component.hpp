@@ -21,6 +21,8 @@ namespace Intersection {struct LineMeshResult;};
 namespace pragma
 {
 	class CModelComponent;
+	class CAnimatedComponent;
+	class CLightMapReceiverComponent;
 	class DLLCLIENT CRenderComponent final
 		: public BaseRenderComponent,
 		public CBaseNetComponent
@@ -91,6 +93,8 @@ namespace pragma
 		void UpdateRenderBounds();
 
 		util::WeakHandle<CModelComponent> &GetModelComponent() const;
+		util::WeakHandle<CAnimatedComponent> &GetAnimatedComponent() const;
+		util::WeakHandle<CLightMapReceiverComponent> &GetLightMapReceiverComponent() const;
 
 		void SetExemptFromOcclusionCulling(bool exempt);
 		bool IsExemptFromOcclusionCulling() const;
@@ -123,7 +127,11 @@ namespace pragma
 		Mat4 m_matTranslation = umat::identity();
 		Mat4 m_matTransformation = umat::identity();
 		util::PEnumProperty<RenderMode> m_renderMode = nullptr;
-		mutable util::WeakHandle<CModelComponent> m_mdlComponent = {}; // Used for quick access to avoid having to do a lookup on the entity's components
+
+		// Used for quick access to avoid having to do a lookup on the entity's components
+		mutable util::WeakHandle<CModelComponent> m_mdlComponent = {};
+		mutable util::WeakHandle<CAnimatedComponent> m_animComponent = {};
+		mutable util::WeakHandle<CLightMapReceiverComponent> m_lightMapReceiverComponent = {};
 
 		Vector3 m_renderMin = {};
 		Vector3 m_renderMax = {};

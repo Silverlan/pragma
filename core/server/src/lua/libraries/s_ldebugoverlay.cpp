@@ -13,22 +13,13 @@
 #include "pragma/lua/classes/ldef_plane.h"
 #include "luasystem.h"
 
-int Lua::DebugRenderer::Server::DrawPoint(lua_State *l)
+void Lua::DebugRenderer::Server::DrawPoint(const Vector3 &pos,const Color &col,float duration)
 {
-	auto *pos = Lua::CheckVector(l,1);
-	auto *col = Lua::CheckColor(l,2);
-	auto duration = Lua::CheckNumber(l,3);
-	SDebugRenderer::DrawPoint(*pos,*col,static_cast<float>(duration));
-	return 0;
+	SDebugRenderer::DrawPoint(pos,col,static_cast<float>(duration));
 }
-int Lua::DebugRenderer::Server::DrawLine(lua_State *l)
+void Lua::DebugRenderer::Server::DrawLine(const Vector3 &start,const Vector3 &end,const Color &col,float duration)
 {
-	auto *start = Lua::CheckVector(l,1);
-	auto *end = Lua::CheckVector(l,2);
-	auto *col = Lua::CheckColor(l,3);
-	auto duration = Lua::CheckNumber(l,4);
-	SDebugRenderer::DrawLine(*start,*end,*col,static_cast<float>(duration));
-	return 0;
+	SDebugRenderer::DrawLine(start,end,col,static_cast<float>(duration));
 }
 int Lua::DebugRenderer::Server::DrawBox(lua_State *l)
 {

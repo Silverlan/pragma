@@ -12,8 +12,8 @@
 #include <pragma/model/modelmesh.h>
 #include <memory>
 
-namespace prosper {class IDynamicResizableBuffer;};
-namespace pragma {class VkMesh;};
+namespace prosper {class IDynamicResizableBuffer; class IRenderBuffer;};
+namespace pragma {class SceneMesh; class ShaderEntity;};
 struct VertexBufferData;
 class DLLCLIENT CModelSubMesh
 	: public ModelSubMesh,public NormalMesh
@@ -21,7 +21,7 @@ class DLLCLIENT CModelSubMesh
 public:
 	CModelSubMesh();
 	CModelSubMesh(const CModelSubMesh &other);
-	const std::shared_ptr<pragma::VkMesh> &GetVKMesh() const;
+	const std::shared_ptr<pragma::SceneMesh> &GetSceneMesh() const;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData) override;
 	virtual void Centralize(const Vector3 &origin) override;
 	virtual std::shared_ptr<ModelSubMesh> Copy() const override;
@@ -32,13 +32,14 @@ public:
 	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalVertexWeightBuffer();
 	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalAlphaBuffer();
 	static const std::shared_ptr<prosper::IDynamicResizableBuffer> &GetGlobalIndexBuffer();
+	const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
 
 	using VertexType = VertexBufferData;
 	using VertexWeightType = VertexWeight;
 	using IndexType = uint16_t;
 	using AlphaType = Vector2;
 private:
-	std::shared_ptr<pragma::VkMesh> m_vkMesh;
+	std::shared_ptr<pragma::SceneMesh> m_sceneMesh;
 	void UpdateVertexBuffer();
 };
 

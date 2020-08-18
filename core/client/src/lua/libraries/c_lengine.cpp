@@ -14,12 +14,14 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/file_formats/wmd_load.h"
+#include "pragma/lua/libraries/c_lengine.h"
 #include <wgui/fontmanager.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include "pragma/rendering/scene/scene.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/libraries/lengine.h>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <image/prosper_render_target.hpp>
@@ -29,99 +31,80 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
-int Lua::engine::create_font(lua_State *l)
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size,bool reload) {return FontManager::LoadFont(identifier.c_str(),font.c_str(),size,reload);}
+std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size) {return create_font(l,identifier,font,size,false);}
+std::shared_ptr<const FontInfo> Lua::engine::get_font(lua_State *l,const std::string &identifier) {return FontManager::GetFont(identifier);}
+
+void Lua::engine::register_library(lua_State *l)
 {
-	std::string identifier = Lua::CheckString(l,1);
-	std::string font = Lua::CheckString(l,2);
-	unsigned int size = Lua::CheckInt<unsigned int>(l,3);
-	bool bReload = false;
-	if(Lua::IsSet(l,4))
-		bReload = Lua::CheckBool(l,4);
-	auto info = FontManager::LoadFont(identifier.c_str(),font.c_str(),size,bReload);
-	if(info == nullptr)
-		return 0;
-	Lua::Push<std::shared_ptr<const FontInfo>>(l,info);
-	return 1;
+	auto modEngine = luabind::module_(l,"engine");
+	modEngine[
+		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,uint32_t,bool)>(Lua::engine::create_font)),
+		luabind::def("create_font",static_cast<std::shared_ptr<const FontInfo>(*)(lua_State*,const std::string&,const std::string&,uint32_t)>(Lua::engine::create_font)),
+		luabind::def("get_font",Lua::engine::get_font),
+		luabind::def("set_fixed_frame_delta_time_interpretation",Lua::engine::set_fixed_frame_delta_time_interpretation),
+		luabind::def("clear_fixed_frame_delta_time_interpretation",Lua::engine::clear_fixed_frame_delta_time_interpretation),
+		luabind::def("set_tick_delta_time_tied_to_frame_rate",Lua::engine::set_tick_delta_time_tied_to_frame_rate),
+		luabind::def("get_window_resolution",Lua::engine::get_window_resolution),
+		luabind::def("get_render_resolution",Lua::engine::get_render_resolution),
+		luabind::def("get_staging_render_target",Lua::engine::get_staging_render_target),
+		luabind::def("set_record_console_output",Lua::engine::set_record_console_output),
+		luabind::def("get_tick_count",&Lua::engine::GetTickCount),
+		luabind::def("shutdown",&Lua::engine::exit),
+		luabind::def("get_working_directory",Lua::engine::get_working_directory)
+	];
 }
 
-int Lua::engine::get_font(lua_State *l)
+Vector2i Lua::engine::get_text_size(lua_State *l,const std::string &text,const std::string &font)
 {
-	std::string identifier = Lua::CheckString(l,1);
-	auto info = FontManager::GetFont(identifier.c_str());
+	auto info = FontManager::GetFont(font);
 	if(info == nullptr)
-		return 0;
-	Lua::Push<std::shared_ptr<const FontInfo>>(l,info);
-	return 1;
-}
-
-int Lua::engine::get_text_size(lua_State *l)
-{
-	std::string text = Lua::CheckString(l,1);
-	if(Lua::IsString(l,2))
-	{
-		std::string identifier = Lua::CheckString(l,2);
-		auto info = FontManager::GetFont(identifier.c_str());
-		if(info == nullptr)
-		{
-			Lua::PushNumber(l,0.f);
-			Lua::PushNumber(l,0.f);
-			return 2;
-		}
-		int w = 0;
-		int h = 0;
-		FontManager::GetTextSize(text.c_str(),0u,info.get(),&w,&h);
-		Lua::Push<Vector2i>(l,Vector2i{w,h});
-		return 1;
-	}
-	auto *info = _lua_Font_check(l,2);
+		return {0,0};
 	int w = 0;
 	int h = 0;
-	FontManager::GetTextSize(text.c_str(),0u,info,&w,&h);
-	Lua::Push<Vector2i>(l,Vector2i{w,h});
-	return 1;
+	FontManager::GetTextSize(text.c_str(),0u,info.get(),&w,&h);
+	return Vector2i{w,h};
 }
 
-int Lua::engine::bind_key(lua_State *l)
+Vector2i Lua::engine::get_text_size(lua_State *l,const std::string &text,const FontInfo &font)
 {
-	std::string key = luaL_checkstring(l,1);
-	if(lua_isstring(l,2))
-	{
-		std::string cmd = luaL_checkstring(l,2);
-		short c;
-		if(!StringToKey(key,&c))
-			return 0;
-		c_engine->MapKey(c,cmd);
-		return 0;
-	}
+	int w = 0;
+	int h = 0;
+	FontManager::GetTextSize(text.c_str(),0u,&font,&w,&h);
+	return Vector2i{w,h};
+}
+
+void Lua::engine::bind_key(lua_State *l,const std::string &key,const std::string &cmd)
+{
+	short c;
+	if(!StringToKey(key,&c))
+		return;
+	c_engine->MapKey(c,cmd);
+	return;
+}
+
+void Lua::engine::bind_key(lua_State *l,const std::string &key,luabind::function<> function)
+{
+
 	luaL_checkfunction(l,2);
 	int fc = lua_createreference(l,2);
 	short c;
 	if(!StringToKey(key,&c))
-		return 0;
-	c_engine->MapKey(c,fc);
-	return 0;
+		return;
+	c_engine->MapKey(c,function);
 }
 
-int Lua::engine::unbind_key(lua_State *l)
+void Lua::engine::unbind_key(const std::string &key)
 {
-	std::string key = luaL_checkstring(l,1);
 	short c;
 	if(!StringToKey(key,&c))
-		return 0;
+		return;
 	c_engine->UnmapKey(c);
-	return 0;
 }
+void Lua::engine::precache_material(lua_State *l,const std::string &mat) {client->LoadMaterial(mat.c_str());}
 
-int Lua::engine::precache_material(lua_State *l)
+void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 {
-	std::string mat = luaL_checkstring(l,1);
-	client->LoadMaterial(mat.c_str());
-	return 0;
-}
-
-int Lua::engine::precache_model(lua_State *l)
-{
-	std::string mdl = luaL_checkstring(l,1);
 	auto *nw = c_engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<CModel,CModelMesh,CModelSubMesh>(nw->GetGameState(),mdl.c_str(),[](const std::string &path,bool bReload) -> Material* {
@@ -129,93 +112,54 @@ int Lua::engine::precache_model(lua_State *l)
 	},[](const std::string &path) -> std::shared_ptr<Model> {
 		return c_game->LoadModel(path);
 	});
-	return 0;
 }
 
-int Lua::engine::load_texture(lua_State *l)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name)
 {
 	TextureManager::LoadInfo loadInfo {};
-
-	std::shared_ptr<void> tex = nullptr;
-	auto result = false;
-	if(Lua::IsString(l,1))
-	{
-		std::string fname = Lua::CheckString(l,1);
-		if(Lua::IsSet(l,2))
-			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
-		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fname,loadInfo,&tex);
-	}
-	else
-	{
-		auto *lf = Lua::CheckFile(l,1);
-		if(lf == nullptr)
-			return 0;
-		std::optional<std::string> cacheName {};
-		int32_t loadFlagsIdx = 2;
-		if(Lua::IsNumber(l,2) == false)
-		{
-			cacheName = Lua::CheckString(l,2);
-			++loadFlagsIdx;
-		}
-		if(Lua::IsSet(l,loadFlagsIdx))
-			loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,loadFlagsIdx));
-		if(cacheName.has_value() == false)
-			loadInfo.flags |= TextureLoadFlags::DontCache;
-		result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
-	}
-	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
-		return 0;
-	auto &vkTex = std::static_pointer_cast<Texture>(tex)->GetVkTexture();
-	Lua::Push(l,vkTex);
-	return 1;
-}
-
-int Lua::engine::load_material(lua_State *l)
-{
-	std::string mat = Lua::CheckString(l,1);
-	bool bReload = false;
+	std::string fname = Lua::CheckString(l,1);
 	if(Lua::IsSet(l,2))
-		bReload = Lua::CheckBool(l,2);
-	auto bLoadInstantly = false;
-	if(Lua::IsSet(l,3))
-		bLoadInstantly = Lua::CheckBool(l,3);
-	Material *material = client->LoadMaterial(mat.c_str(),bLoadInstantly,bReload);
-	if(material == NULL)
-		return 0;
-	luabind::object(l,material).push(l);
-	return 1;
+		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
+	std::shared_ptr<void> tex = nullptr;
+	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fname,loadInfo,&tex);
+	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+		return nullptr;
+	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
 
-int Lua::engine::get_error_material(lua_State *l)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file)
 {
-	auto *errMat = client->GetMaterialManager().GetErrorMaterial();
-	if(errMat == nullptr)
-		return 0;
-	Lua::Push<Material*>(l,errMat);
-	return 1;
-}
-
-int Lua::engine::clear_unused_materials(lua_State *l)
-{
-	client->GetMaterialManager().ClearUnused();
-	return 0;
-}
-
-int Lua::engine::create_material(lua_State *l)
-{
-	if(Lua::IsString(l,2) == true)
+	auto *lf = Lua::CheckFile(l,1);
+	if(lf == nullptr)
+		return nullptr;
+	std::optional<std::string> cacheName {};
+	int32_t loadFlagsIdx = 2;
+	if(Lua::IsNumber(l,2) == false)
 	{
-		auto *identifier = Lua::CheckString(l,1);
-		auto *shader = Lua::CheckString(l,2);
-		auto *mat = client->CreateMaterial(identifier,shader);
-		Lua::Push<Material*>(l,mat);
-		return 1;
+		cacheName = Lua::CheckString(l,2);
+		++loadFlagsIdx;
 	}
-	auto *shader = Lua::CheckString(l,1);
-	auto *mat = client->CreateMaterial(shader);
-	Lua::Push<Material*>(l,mat);
-	return 1;
+	TextureManager::LoadInfo loadInfo {};
+	if(Lua::IsSet(l,loadFlagsIdx))
+		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,loadFlagsIdx));
+	if(cacheName.has_value() == false)
+		loadInfo.flags |= TextureLoadFlags::DontCache;
+	std::shared_ptr<void> tex = nullptr;
+	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
+	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+		return nullptr;
+	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
+
+Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly) {return client->LoadMaterial(mat,loadInstantly,reload);}
+Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload) {return load_material(l,mat,reload,false);}
+Material *Lua::engine::load_material(lua_State *l,const std::string &mat) {return load_material(l,mat,false,false);}
+
+Material *Lua::engine::get_error_material() {return client->GetMaterialManager().GetErrorMaterial();}
+void Lua::engine::clear_unused_materials() {client->GetMaterialManager().ClearUnused();}
+
+Material *Lua::engine::create_material(const std::string &identifier,const std::string &shader) {return client->CreateMaterial(identifier,shader);;}
+Material *Lua::engine::create_material(const std::string &shader) {return client->CreateMaterial(shader);}
 
 int Lua::engine::create_particle_system(lua_State *l)
 {
@@ -358,15 +302,8 @@ int Lua::engine::create_particle_system(lua_State *l)
 	return 1;
 }
 
-int Lua::engine::precache_particle_system(lua_State *l)
-{
-	std::string particle = luaL_checkstring(l,1);
-	auto bReload = false;
-	if(Lua::IsSet(l,2))
-		bReload = Lua::CheckBool(l,2);
-	Lua::PushBool(l,pragma::CParticleSystemComponent::Precache(particle,bReload));
-	return 1;
-}
+bool Lua::engine::precache_particle_system(lua_State *l,const std::string &particle,bool reload) {return pragma::CParticleSystemComponent::Precache(particle,reload);}
+bool Lua::engine::precache_particle_system(lua_State *l,const std::string &particle) {return precache_particle_system(l,particle,false);}
 
 int Lua::engine::save_particle_system(lua_State *l)
 {
@@ -600,58 +537,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles,rootPath));
 	return 1;
 }
-int Lua::engine::create_texture(lua_State *l)
-{
-	/*auto name = Lua::CheckString(l,1);
-	if(Lua::IsGLTexture(l,2))
-	{
-		auto *glTex = Lua::CheckGLTexture(l,2);
-		auto *tex = TextureManager::CreateTexture(name,*glTex);
-		if(tex == nullptr)
-			return 0;
-		Lua::Push<Texture*>(l,tex);
-		return 1;
-	}
-	auto w = Lua::CheckInt(l,2);
-	auto h = Lua::CheckInt(l,3);
-	auto *tex = TextureManager::CreateTexture(name,CUInt32(w),CUInt32(h));
-	if(tex == nullptr)
-		return 0;
-	Lua::Push<Texture*>(l,tex);*/ // Vulkan TODO
-	return 1;
-}
-int Lua::engine::get_staging_render_target(lua_State *l)
-{
-	auto &stagingRt = c_engine->GetStagingRenderTarget();
-	Lua::Push<std::shared_ptr<prosper::RenderTarget>>(l,stagingRt);
-	return 1;
-}
-int Lua::engine::set_fixed_frame_delta_time_interpretation(lua_State *l)
-{
-	auto fps = Lua::CheckInt(l,1);
-	c_engine->SetFixedFrameDeltaTimeInterpretationByFPS(fps);
-	return 0;
-}
-int Lua::engine::clear_fixed_frame_delta_time_interpretation(lua_State *l)
-{
-	c_engine->SetFixedFrameDeltaTimeInterpretation({});
-	return 0;
-}
-int Lua::engine::set_tick_delta_time_tied_to_frame_rate(lua_State *l)
-{
-	auto tieToFrameRate = Lua::CheckBool(l,1);
-	c_engine->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate);
-	return 0;
-}
-int Lua::engine::get_window_resolution(lua_State *l)
+std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() {return c_engine->GetStagingRenderTarget();;}
+void Lua::engine::set_fixed_frame_delta_time_interpretation(uint16_t fps) {c_engine->SetFixedFrameDeltaTimeInterpretationByFPS(fps);}
+void Lua::engine::clear_fixed_frame_delta_time_interpretation() {c_engine->SetFixedFrameDeltaTimeInterpretation({});}
+void Lua::engine::set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate) {c_engine->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate);}
+Vector2i Lua::engine::get_window_resolution()
 {
 	auto &createInfo = c_engine->GetRenderContext().GetWindowCreationInfo();
-	Lua::Push<Vector2i>(l,Vector2i{createInfo.width,createInfo.height});
-	return 1;
+	return Vector2i{createInfo.width,createInfo.height};
 }
-int Lua::engine::get_render_resolution(lua_State *l)
-{
-	Lua::Push<Vector2i>(l,c_engine->GetRenderResolution());
-	return 1;
-}
+Vector2i Lua::engine::get_render_resolution() {return c_engine->GetRenderResolution();}
 #pragma optimize("",on)

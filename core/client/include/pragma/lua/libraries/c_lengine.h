@@ -11,45 +11,47 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
+class FontInfo;
+class LFile;
 namespace Lua
 {
 	namespace engine
 	{
-		DLLCLIENT int bind_key(lua_State *l);
-		DLLCLIENT int unbind_key(lua_State *l);
-		DLLCLIENT int precache_material(lua_State *l);
-		DLLCLIENT int precache_model(lua_State *l);
-		DLLCLIENT int load_material(lua_State *l);
-		DLLCLIENT int load_texture(lua_State *l);
-		DLLCLIENT int get_error_material(lua_State *l);
-		DLLCLIENT int clear_unused_materials(lua_State *l);
-		DLLCLIENT int create_material(lua_State *l);
+		DLLCLIENT void bind_key(lua_State *l,const std::string &key,const std::string &cmd);
+		DLLCLIENT void bind_key(lua_State *l,const std::string &key,luabind::function<> function);
+		DLLCLIENT void unbind_key(const std::string &key);
+		DLLCLIENT void precache_material(lua_State *l,const std::string &mat);
+		DLLCLIENT void precache_model(lua_State *l,const std::string &mdl);
+		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly);
+		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat,bool reload);
+		DLLCLIENT Material *load_material(lua_State *l,const std::string &mat);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const std::string &name);
+		DLLCLIENT std::shared_ptr<prosper::Texture> load_texture(lua_State *l,const LFile &file);
+		DLLCLIENT Material *get_error_material();
+		DLLCLIENT void clear_unused_materials();
+		DLLCLIENT Material *create_material(const std::string &identifier,const std::string &shader);
+		DLLCLIENT Material *create_material(const std::string &shader);
 		DLLCLIENT int create_particle_system(lua_State *l);
-		DLLCLIENT int precache_particle_system(lua_State *l);
+		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle,bool reload);
+		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle);
 		DLLCLIENT int save_particle_system(lua_State *l);
-		DLLCLIENT int create_font(lua_State *l);
-		DLLCLIENT int get_font(lua_State *l);
-		DLLCLIENT int get_text_size(lua_State *l);
-		DLLCLIENT int create_texture(lua_State *l);
-		DLLCLIENT int get_staging_render_target(lua_State *l);
-		DLLCLIENT int set_fixed_frame_delta_time_interpretation(lua_State *l);
-		DLLCLIENT int clear_fixed_frame_delta_time_interpretation(lua_State *l);
-		DLLCLIENT int set_tick_delta_time_tied_to_frame_rate(lua_State *l);
-		DLLCLIENT int get_window_resolution(lua_State *l);
-		DLLCLIENT int get_render_resolution(lua_State *l);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size,bool reload);
+		DLLCLIENT std::shared_ptr<const FontInfo> create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size);
+		DLLCLIENT std::shared_ptr<const FontInfo> get_font(lua_State *l,const std::string &identifier);
+		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const std::string &font);
+		DLLCLIENT Vector2i get_text_size(lua_State *l,const std::string &text,const FontInfo &font);
+		DLLCLIENT std::shared_ptr<prosper::RenderTarget> get_staging_render_target();
+		DLLCLIENT void set_fixed_frame_delta_time_interpretation(uint16_t fps);
+		DLLCLIENT void clear_fixed_frame_delta_time_interpretation();
+		DLLCLIENT void set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate);
+		DLLCLIENT Vector2i get_window_resolution();
+		DLLCLIENT Vector2i get_render_resolution();
+
+		DLLCLIENT void register_library(lua_State *l);
 	};
 };
 
 #define LUA_SHARED_CL_ENGINE_FUNCTIONS \
-	{"create_font",&Lua::engine::create_font}, \
-	{"get_font",&Lua::engine::get_font}, \
-	{"set_record_console_output",&Lua::engine::set_record_console_output}, \
-	{"poll_console_output",&Lua::engine::poll_console_output}, \
-	{"get_staging_render_target",&Lua::engine::get_staging_render_target}, \
-	{"set_fixed_frame_delta_time_interpretation",&Lua::engine::set_fixed_frame_delta_time_interpretation}, \
-	{"clear_fixed_frame_delta_time_interpretation",&Lua::engine::clear_fixed_frame_delta_time_interpretation}, \
-	{"set_tick_delta_time_tied_to_frame_rate",&Lua::engine::set_tick_delta_time_tied_to_frame_rate}, \
-	{"get_window_resolution",&Lua::engine::get_window_resolution}, \
-	{"get_render_resolution",&Lua::engine::get_render_resolution},
+	{"poll_console_output",&Lua::engine::poll_console_output},
 
 #endif

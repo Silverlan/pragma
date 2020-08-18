@@ -15,12 +15,15 @@
 extern DLLENGINE Engine *engine;
 
 class LuaEntityIterator;
+using LuaEntityObject = luabind::object;
 namespace Lua
 {
 	namespace ents
 	{
 		DLLNETWORK LuaEntityIterator create_lua_entity_iterator(lua_State *l,luabind::object oFilter,uint32_t idxFilter,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
 		
+		DLLNETWORK void register_library(lua_State *l);
+
 		DLLNETWORK int get_closest(lua_State *l);
 		DLLNETWORK int get_farthest(lua_State *l);
 		DLLNETWORK int get_sorted_by_distance(lua_State *l);
@@ -39,7 +42,7 @@ namespace Lua
 		DLLNETWORK int get_by_local_index(lua_State *l);
 		DLLNETWORK int find_by_unique_index(lua_State *l);
 		DLLNETWORK int get_null(lua_State *l);
-		DLLNETWORK int create(lua_State *l);
+		DLLNETWORK LuaEntityObject create(lua_State *l,const std::string &classname);
 		DLLNETWORK int create_trigger(lua_State *l);
 		DLLNETWORK int find_by_filter(lua_State *l);
 		DLLNETWORK int find_by_class(lua_State *l);
@@ -167,7 +170,6 @@ namespace Lua
 	{"find_in_sphere",Lua::ents::find_in_sphere}, \
 	{"find_in_aabb",Lua::ents::find_in_aabb}, \
 	{"find_in_cone",Lua::ents::find_in_cone}, \
-	{"create",Lua::ents::create}, \
 	{"create_trigger",Lua::ents::create_trigger}, \
 	{"register",Lua::ents::register_class}, \
 	{"get_closest",Lua::ents::get_closest}, \

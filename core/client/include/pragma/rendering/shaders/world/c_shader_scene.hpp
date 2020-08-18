@@ -14,8 +14,10 @@
 #include <shader/prosper_shader.hpp>
 
 class CModelSubMesh;
+namespace prosper {class IRenderBuffer;};
 namespace pragma
 {
+	class SceneMesh;
 	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
@@ -192,6 +194,11 @@ namespace pragma
 		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh);
 		virtual void EndDraw() override;
+		virtual bool GetRenderBufferTargets(
+			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+		) const;
+		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(CModelSubMesh &mesh,uint32_t pipelineIdx) const;
 		CBaseEntity *GetBoundEntity();
 	protected:
 		ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");

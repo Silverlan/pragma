@@ -416,6 +416,7 @@ bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
 	if(!IsServerOnly())
 		LoadConfig();
 
+	/*
 	auto cacheVersion = util::Version::FromString(GetConVarString("cache_version"));
 	auto curVersion = get_engine_version();
 	if(curVersion != cacheVersion)
@@ -423,6 +424,7 @@ bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
 		SetConVar("cache_version",curVersion.ToString());
 		ClearCache();
 	}
+	*/
 	ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();

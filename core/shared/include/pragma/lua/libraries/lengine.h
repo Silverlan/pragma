@@ -15,18 +15,17 @@ namespace Lua
 {
 	namespace engine
 	{
-		DLLNETWORK int CreateLight(lua_State *l);
-		DLLNETWORK int RemoveLights(lua_State *l);
-		DLLNETWORK int CreateSprite(lua_State *l);
-		DLLNETWORK int PrecacheModel_sv(lua_State *l);
-		DLLNETWORK int LoadSoundScripts(lua_State *l);
-		DLLNETWORK int get_model(lua_State *l);
+		DLLNETWORK void PrecacheModel_sv(lua_State *l,const std::string &mdlName);
+		DLLNETWORK void LoadSoundScripts(lua_State *l,const std::string &fileName,bool precache);
+		DLLNETWORK void LoadSoundScripts(lua_State *l,const std::string &fileName);
+		DLLNETWORK std::shared_ptr<Model> get_model(lua_State *l,const std::string &mdlName);
 		DLLNETWORK int LoadLibrary(lua_State *l);
-		DLLNETWORK int GetTickCount(lua_State *l);
+		DLLNETWORK uint64_t GetTickCount();
 		DLLNETWORK int get_info(lua_State *l);
-		DLLNETWORK int exit(lua_State *l);
+		DLLNETWORK void exit();
+		DLLNETWORK std::string get_working_directory();
 
-		DLLNETWORK int32_t set_record_console_output(lua_State *l);
+		DLLNETWORK void set_record_console_output(bool record);
 		DLLNETWORK int32_t poll_console_output(lua_State *l);
 	};
 };

@@ -731,13 +731,14 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 }
 void CGame::RegisterLuaLibraries()
 {
-	auto &utilMod = GetLuaInterface().RegisterLibrary("util",{
+	Lua::util::register_library(GetLuaState());
+	GetLuaInterface().RegisterLibrary("util",{
 		REGISTER_SHARED_UTIL
 		{"calc_world_direction_from_2d_coordinates",Lua::util::Client::calc_world_direction_from_2d_coordinates},
 		{"create_particle_tracer",Lua::util::Client::create_particle_tracer},
-		{"fire_bullets",Lua::util::fire_bullets},
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
 		{"create_giblet",Lua::util::Client::create_giblet},
+		{"fire_bullets",static_cast<int(*)(lua_State*)>(Lua::util::fire_bullets)},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			if(Lua::IsType<uimg::ImageBuffer>(l,1))
 			{
@@ -890,14 +891,18 @@ void CGame::RegisterLuaLibraries()
 			Lua::Push(l,equiRect);
 			return 1;
 		})},
-		{"get_clipboard_string",Lua::util::Client::get_clipboard_string},
-		{"set_clipboard_string",Lua::util::Client::set_clipboard_string},
 		{"get_image_format_file_extension",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto imgFormat = Lua::CheckInt(l,1);
 			Lua::PushString(l,uimg::get_file_extension(static_cast<uimg::ImageFormat>(imgFormat)));
 			return 1;
 		})}
 	});
+	auto utilMod = luabind::module(GetLuaState(),"util");
+	utilMod[
+		luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),
+		luabind::def("get_clipboard_string",Lua::util::Client::get_clipboard_string),
+		luabind::def("set_clipboard_string",Lua::util::Client::set_clipboard_string)
+	];
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
 	imgWriteInfoDef.def(luabind::constructor<>());

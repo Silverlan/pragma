@@ -10,9 +10,7 @@
 #include "pragma/lua/libraries/los.h"
 #include <pragma/lua/luaapi.h>
 
-int Lua::os::time_since_epoch(lua_State *l)
+int64_t Lua::os::time_since_epoch(lua_State *l)
 {
-	auto ms = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
-	Lua::PushInt(l,ms);
-	return 1;
+	return std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 }

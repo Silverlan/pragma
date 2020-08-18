@@ -10,6 +10,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/game/game_limits.h>
 #include <datasystem_color.h>
@@ -17,6 +18,7 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -353,26 +355,35 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	auto *pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	if(m_boundEntity)
 	{
-		auto lightMapReceiverC = m_boundEntity->GetComponent<CLightMapReceiverComponent>();
-		auto bufIdx = lightMapReceiverC.valid() ? lightMapReceiverC->FindBufferIndex(mesh) : std::optional<uint32_t>{};
-		if(bufIdx.has_value())
+		auto &renderC = m_boundEntity->GetRenderComponent();
+		if(renderC.valid())
 		{
-			outShouldUseLightmaps = true;
-
-			auto *world = c_game->GetWorld();
-			auto pLightMapComponent = world ? world->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
-			//auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
-			if(pLightMapComponent.valid())
+			auto lightMapReceiverC = renderC->GetLightMapReceiverComponent();
+			auto bufIdx = lightMapReceiverC.valid() ? lightMapReceiverC->FindBufferIndex(mesh) : std::optional<uint32_t>{};
+			if(bufIdx.has_value())
 			{
-				auto *pUvBuffer = pLightMapComponent->GetMeshLightMapUvBuffer(*bufIdx);
-				if(pUvBuffer != nullptr)
-					pLightMapUvBuffer = pUvBuffer;
-				else
-					pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+				outShouldUseLightmaps = true;
+
+				// Commented because vertex buffers are now bound through render buffer
+#if 0
+				auto *world = c_game->GetWorld();
+				auto pLightMapComponent = world ? world->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+				//auto pLightMapComponent = (m_boundEntity != nullptr) ? m_boundEntity->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+				if(pLightMapComponent.valid())
+				{
+					auto *pUvBuffer = pLightMapComponent->GetMeshLightMapUvBuffer(*bufIdx);
+					if(pUvBuffer != nullptr)
+						pLightMapUvBuffer = pUvBuffer;
+					else
+						pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+				}
+#endif
 			}
 		}
 	}
-	return RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
+	// Commented because vertex buffers are now bound through render buffer
+	// TODO: Restructure this function and clean this up!
+	return true;//RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
@@ -389,6 +400,19 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 		umath::set_flag(renderFlags,RenderFlags::Is3DSky);
 	UpdateRenderFlags(mesh,renderFlags);
 	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
+}
+bool ShaderTextured3DBase::GetRenderBufferTargets(
+	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+) const
+{
+	if(ShaderEntity::GetRenderBufferTargets(mesh,pipelineIdx,outBuffers,outOffsets,outIndexBufferInfo) == false)
+		return false;
+	auto &sceneMesh = mesh.GetSceneMesh();
+	auto *lightmapUvBuf = sceneMesh->GetLightmapUvBuffer().get();
+	outBuffers.push_back(lightmapUvBuf);
+	outOffsets.push_back(0ull);
+	return true;
 }
 size_t ShaderTextured3DBase::GetBaseTypeHashCode() const {return HASH_TYPE;}
 uint32_t ShaderTextured3DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}

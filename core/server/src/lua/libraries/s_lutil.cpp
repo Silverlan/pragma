@@ -18,27 +18,25 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
-int Lua::util::Server::fire_bullets(lua_State *l)
+int Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo)
 {
-	auto *bulletInfo = Lua::CheckBulletInfo(l,1);
-
 	uint8_t tracerSettings = 0;
-	if(bulletInfo->tracerRadius != BulletInfo::DEFAULT_TRACER_RADIUS)
+	if(bulletInfo.tracerRadius != BulletInfo::DEFAULT_TRACER_RADIUS)
 		tracerSettings |= 1;
 
-	if(bulletInfo->tracerColor != BulletInfo::DEFAULT_TRACER_COLOR)
+	if(bulletInfo.tracerColor != BulletInfo::DEFAULT_TRACER_COLOR)
 		tracerSettings |= 2;
 
-	if(bulletInfo->tracerLength != BulletInfo::DEFAULT_TRACER_LENGTH)
+	if(bulletInfo.tracerLength != BulletInfo::DEFAULT_TRACER_LENGTH)
 		tracerSettings |= 4;
 
-	if(bulletInfo->tracerSpeed != BulletInfo::DEFAULT_TRACER_SPEED)
+	if(bulletInfo.tracerSpeed != BulletInfo::DEFAULT_TRACER_SPEED)
 		tracerSettings |= 8;
 
-	if(bulletInfo->tracerMaterial != BulletInfo::DEFAULT_TRACER_MATERIAL)
+	if(bulletInfo.tracerMaterial != BulletInfo::DEFAULT_TRACER_MATERIAL)
 		tracerSettings |= 16;
 
-	if(bulletInfo->tracerBloom != BulletInfo::DEFAULT_TRACER_BLOOM)
+	if(bulletInfo.tracerBloom != BulletInfo::DEFAULT_TRACER_BLOOM)
 		tracerSettings |= 32;
 
 	NetPacket packet;
@@ -63,22 +61,22 @@ int Lua::util::Server::fire_bullets(lua_State *l)
 	packet->Write<uint8_t>(static_cast<uint8_t>(numTracer));
 	packet->Write<uint8_t>(tracerSettings);
 	if(tracerSettings &1)
-		packet->Write<float>(bulletInfo->tracerRadius);
+		packet->Write<float>(bulletInfo.tracerRadius);
 	if(tracerSettings &2)
 	{
-		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo->tracerColor.r));
-		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo->tracerColor.g));
-		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo->tracerColor.b));
-		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo->tracerColor.a));
+		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.r));
+		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.g));
+		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.b));
+		packet->Write<uint8_t>(static_cast<uint8_t>(bulletInfo.tracerColor.a));
 	}
 	if(tracerSettings &4)
-		packet->Write<float>(bulletInfo->tracerLength);
+		packet->Write<float>(bulletInfo.tracerLength);
 	if(tracerSettings &8)
-		packet->Write<float>(bulletInfo->tracerSpeed);
+		packet->Write<float>(bulletInfo.tracerSpeed);
 	if(tracerSettings &16)
-		packet->WriteString(bulletInfo->tracerMaterial);
+		packet->WriteString(bulletInfo.tracerMaterial);
 	if(tracerSettings &32)
-		packet->Write<float>(bulletInfo->tracerBloom);
+		packet->Write<float>(bulletInfo.tracerBloom);
 
 	packet->Write<Vector3>(start);
 	packet->Write<uint8_t>(static_cast<uint8_t>(numHits));
@@ -95,15 +93,12 @@ int Lua::util::Server::fire_bullets(lua_State *l)
 	return r;
 }
 
-int Lua::util::Server::create_giblet(lua_State *l)
+void Lua::util::Server::create_giblet(lua_State *l,const GibletCreateInfo &gibletInfo)
 {
-	auto *gibletInfo = Lua::CheckGibletCreateInfo(l,1);
-	s_game->CreateGiblet(*gibletInfo);
-	return 0;
+	s_game->CreateGiblet(gibletInfo);
 }
 
-int Lua::util::Server::create_explosion(lua_State *l)
+void Lua::util::Server::create_explosion(lua_State *l,const ::util::SplashDamageInfo &splashDamageInfo)
 {
-	auto &splashDamageInfo = Lua::Check<::util::SplashDamageInfo>(l,1);
-	return Lua::util::splash_damage(l,splashDamageInfo);
+	Lua::util::splash_damage(l,splashDamageInfo);
 }

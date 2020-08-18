@@ -19,27 +19,22 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
-DLLSERVER int Lua::game::Server::set_gravity(lua_State *l)
-{
-	Vector3 *gravity = Lua::CheckVector(l,1);
-	Game *game = server->GetGameState();
-	game->SetGravity(*gravity);
-	return 0;
-}
-DLLSERVER int Lua::game::Server::get_gravity(lua_State *l)
+void Lua::game::Server::set_gravity(const Vector3 &gravity)
 {
 	Game *game = server->GetGameState();
-	Lua::Push<Vector3>(l,game->GetGravity());
-	return 1;
+	game->SetGravity(const_cast<Vector3&>(gravity));
 }
-int Lua::game::Server::load_model(lua_State *l)
+Vector3 Lua::game::Server::get_gravity()
 {
-	auto *name = Lua::CheckString(l,1);
+	Game *game = server->GetGameState();
+	return game->GetGravity();
+}
+LuaModelObject Lua::game::Server::load_model(lua_State *l,const std::string &name)
+{
 	auto mdl = s_game->LoadModel(name);
 	if(mdl == nullptr)
-		return 0;
-	Lua::Push<decltype(mdl)>(l,mdl);
-	return 1;
+		return {};
+	return luabind::object{l,mdl};
 }
 int Lua::game::Server::create_model(lua_State *l)
 {
@@ -106,12 +101,5 @@ int Lua::game::Server::load_map(lua_State *l)
 	return pair.second;
 }
 
-int Lua::game::Server::change_level(lua_State *l)
-{
-	std::string mapName = Lua::CheckString(l,1);
-	std::string landmarkName {};
-	if(Lua::IsSet(l,2))
-		landmarkName = Lua::CheckString(l,2);
-	s_game->ChangeLevel(mapName,landmarkName);
-	return 0;
-}
+void Lua::game::Server::change_level(const std::string &mapName,const std::string &landmarkName) {s_game->ChangeLevel(mapName,landmarkName);}
+void Lua::game::Server::change_level(const std::string &mapName) {change_level(mapName,"");}

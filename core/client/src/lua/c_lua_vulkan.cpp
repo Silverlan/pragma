@@ -331,14 +331,14 @@ namespace Lua
 		};
 		namespace VKMesh
 		{
-			DLLCLIENT void GetVertexBuffer(lua_State *l,pragma::VkMesh &mesh);
-			DLLCLIENT void GetVertexWeightBuffer(lua_State *l,pragma::VkMesh &mesh);
-			DLLCLIENT void GetAlphaBuffer(lua_State *l,pragma::VkMesh &mesh);
-			DLLCLIENT void GetIndexBuffer(lua_State *l,pragma::VkMesh &mesh);
-			DLLCLIENT void SetVertexBuffer(lua_State *l,pragma::VkMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetVertexWeightBuffer(lua_State *l,pragma::VkMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetAlphaBuffer(lua_State *l,pragma::VkMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetIndexBuffer(lua_State *l,pragma::VkMesh &mesh,Buffer &hImg);
+			DLLCLIENT void GetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh);
+			DLLCLIENT void GetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh);
+			DLLCLIENT void GetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh);
+			DLLCLIENT void GetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh);
+			DLLCLIENT void SetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
+			DLLCLIENT void SetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
+			DLLCLIENT void SetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
+			DLLCLIENT void SetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
 		};
 		namespace VKRenderTarget
 		{
@@ -482,7 +482,7 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Descript
 	return out;
 }
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const pragma::VkMesh&)
+DLLCLIENT std::ostream &operator<<(std::ostream &out,const pragma::SceneMesh&)
 {
 	out<<"VKMesh";
 	return out;
@@ -530,7 +530,7 @@ static bool operator==(const Lua::Vulkan::Fence &a,const Lua::Vulkan::Fence &b) 
 static bool operator==(const Lua::Vulkan::CommandBuffer &a,const Lua::Vulkan::CommandBuffer &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::Buffer &a,const Lua::Vulkan::Buffer &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::DescriptorSet &a,const Lua::Vulkan::DescriptorSet &b) {return &a == &b;}
-static bool operator==(const pragma::VkMesh &a,const pragma::VkMesh &b) {return &a == &b;}
+static bool operator==(const pragma::SceneMesh &a,const pragma::SceneMesh &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::RenderTarget &a,const Lua::Vulkan::RenderTarget &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::TimestampQuery &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
@@ -2541,7 +2541,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	vulkanMod[defVkDescriptorSet];
 	
-	auto defVkMesh = luabind::class_<pragma::VkMesh>("Mesh");
+	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
 	defVkMesh.def(luabind::tostring(luabind::self));
 	defVkMesh.def(luabind::const_self ==luabind::const_self);
 	defVkMesh.def("GetVertexBuffer",&Lua::Vulkan::VKMesh::GetVertexBuffer);
@@ -3558,43 +3558,43 @@ void Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,D
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKMesh::GetVertexBuffer(lua_State *l,pragma::VkMesh &mesh)
+void Lua::Vulkan::VKMesh::GetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh)
 {
 	auto &vertexBuffer = mesh.GetVertexBuffer();
 	if(vertexBuffer != nullptr)
 		Lua::Push<std::shared_ptr<Buffer>>(l,vertexBuffer);
 }
-void Lua::Vulkan::VKMesh::GetVertexWeightBuffer(lua_State *l,pragma::VkMesh &mesh)
+void Lua::Vulkan::VKMesh::GetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh)
 {
 	auto &vertexWeightBuffer = mesh.GetVertexBuffer();
 	if(vertexWeightBuffer != nullptr)
 		Lua::Push<std::shared_ptr<Buffer>>(l,vertexWeightBuffer);
 }
-void Lua::Vulkan::VKMesh::GetAlphaBuffer(lua_State *l,pragma::VkMesh &mesh)
+void Lua::Vulkan::VKMesh::GetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh)
 {
 	auto &alphaBuffer = mesh.GetAlphaBuffer();
 	if(alphaBuffer != nullptr)
 		Lua::Push<std::shared_ptr<Buffer>>(l,alphaBuffer);
 }
-void Lua::Vulkan::VKMesh::GetIndexBuffer(lua_State *l,pragma::VkMesh &mesh)
+void Lua::Vulkan::VKMesh::GetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh)
 {
 	auto &indexBuffer = mesh.GetIndexBuffer();
 	if(indexBuffer != nullptr)
 		Lua::Push<std::shared_ptr<Buffer>>(l,indexBuffer);
 }
-void Lua::Vulkan::VKMesh::SetVertexBuffer(lua_State*,pragma::VkMesh &mesh,Buffer &hBuffer)
+void Lua::Vulkan::VKMesh::SetVertexBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
 {
 	mesh.SetVertexBuffer(hBuffer.shared_from_this());
 }
-void Lua::Vulkan::VKMesh::SetVertexWeightBuffer(lua_State*,pragma::VkMesh &mesh,Buffer &hBuffer)
+void Lua::Vulkan::VKMesh::SetVertexWeightBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
 {
 	mesh.SetVertexWeightBuffer(hBuffer.shared_from_this());
 }
-void Lua::Vulkan::VKMesh::SetAlphaBuffer(lua_State*,pragma::VkMesh &mesh,Buffer &hBuffer)
+void Lua::Vulkan::VKMesh::SetAlphaBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
 {
 	mesh.SetAlphaBuffer(hBuffer.shared_from_this());
 }
-void Lua::Vulkan::VKMesh::SetIndexBuffer(lua_State*,pragma::VkMesh &mesh,Buffer &hBuffer)
+void Lua::Vulkan::VKMesh::SetIndexBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
 {
 	mesh.SetIndexBuffer(hBuffer.shared_from_this());
 }

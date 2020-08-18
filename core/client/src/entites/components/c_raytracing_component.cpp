@@ -143,7 +143,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
 			auto &cSubMesh = static_cast<CModelSubMesh&>(*subMesh);
-			auto &vkMesh = cSubMesh.GetVKMesh();
+			auto &vkMesh = cSubMesh.GetSceneMesh();
 			if(vkMesh == nullptr)
 				continue;
 			auto matIdx = mdl->GetMaterialIndex(cSubMesh);

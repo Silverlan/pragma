@@ -164,6 +164,10 @@ namespace pragma
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat);
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool GetRenderBufferTargets(
+			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+		) const override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
 		bool SetDebugMode(Scene::DebugMode debugMode);

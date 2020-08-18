@@ -26,8 +26,8 @@ namespace Lua
 			DLLCLIENT int import_model(lua_State *l);
 			DLLCLIENT int export_texture(lua_State *l);
 			DLLCLIENT int export_material(lua_State *l);
-			DLLCLIENT int get_clipboard_string(lua_State *l);
-			DLLCLIENT int set_clipboard_string(lua_State *l);
+			DLLCLIENT std::string get_clipboard_string();
+			DLLCLIENT void set_clipboard_string(const std::string &str);
 		};
 	};
 };

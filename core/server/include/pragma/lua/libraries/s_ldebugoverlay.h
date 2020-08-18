@@ -15,8 +15,8 @@ namespace Lua
 	{
 		namespace Server
 		{
-			DLLSERVER int DrawPoint(lua_State *l);
-			DLLSERVER int DrawLine(lua_State *l);
+			DLLSERVER void DrawPoint(const Vector3 &pos,const Color &col,float duration);
+			DLLSERVER void DrawLine(const Vector3 &start,const Vector3 &end,const Color &col,float duration);
 			DLLSERVER int DrawBox(lua_State *l);
 			DLLSERVER int DrawSphere(lua_State *l);
 			DLLSERVER int DrawCone(lua_State *l);

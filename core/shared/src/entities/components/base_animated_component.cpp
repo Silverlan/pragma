@@ -22,7 +22,7 @@
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -285,7 +285,10 @@ bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,
 		return false;
 	auto *f = anim.GetFrame(umath::max(static_cast<int32_t>(frameVal) +1 +frameOffset,0)).get();
 	if(f == *outFrameSrc) // No need to blend if both frames are the same
+	{
 		outInterpFactor = 0.f;
+		*outFrameDst = nullptr;
+	}
 	else
 		*outFrameDst = f;
 	return true;
@@ -1395,4 +1398,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
-
+#pragma optimize("",on)

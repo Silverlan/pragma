@@ -18,7 +18,7 @@ void CEngine::MapKey(short c,std::string cmd)
 	m_keyMappings.insert(std::unordered_map<short,KeyBind>::value_type(c,KeyBind(cmd)));
 }
 
-void CEngine::MapKey(short c,int function)
+void CEngine::MapKey(short c,luabind::function<> function)
 {
 	UnmapKey(c);
 	m_keyMappings.insert(std::unordered_map<short,KeyBind>::value_type(c,KeyBind(function)));
@@ -82,18 +82,6 @@ void CEngine::UnmapKey(short c)
 	auto i = m_keyMappings.find(c);
 	if(i == m_keyMappings.end())
 		return;
-	if(i->second.GetType() == KeyBind::Type::Function)
-	{
-		NetworkState *client = GetClientState();
-		if(client != NULL)
-		{
-			Game *game = client->GetGameState();
-			if(game != NULL)
-			{
-				lua_removereference(game->GetLuaState(),i->second.GetFunction());
-			}
-		}
-	}
 	m_keyMappings.erase(i);
 }
 
@@ -114,8 +102,6 @@ void CEngine::ClearLuaKeyMappings()
 		{
 			j = i;
 			++i;
-			if(lua != NULL)
-				lua_removereference(lua,j->second.GetFunction());
 			m_keyMappings.erase(j);
 		}
 		else ++i;
@@ -133,15 +119,6 @@ void CEngine::ClearKeyMappings()
 		Game *game = client->GetGameState();
 		if(game != NULL)
 			lua = game->GetLuaState();
-	}
-	std::unordered_map<short,KeyBind>::iterator it;
-	for(it=m_keyMappings.begin();it!=m_keyMappings.end();++it)
-	{
-		if(it->second.GetType() == KeyBind::Type::Function)
-		{
-			if(lua != NULL)
-				lua_removereference(lua,it->second.GetFunction());
-		}
 	}
 	m_keyMappings.clear();
 }

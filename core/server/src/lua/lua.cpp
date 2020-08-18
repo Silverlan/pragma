@@ -34,6 +34,7 @@
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/libraries/lnet.hpp>
+#include <pragma/model/model.h>
 #include <pragma/networking/nwm_util.h>
 #include <luainterface.hpp>
 
@@ -52,33 +53,41 @@ void SGame::RegisterLua()
 	Lua::RegisterLibrary(GetLuaState(),"engine",{
 		{"load_library",&Lua::engine::LoadLibrary},
 		{"get_info",&Lua::engine::get_info},
-		{"shutdown",&Lua::engine::exit},
-		{"get_tick_count",&Lua::engine::GetTickCount},
-		{"set_record_console_output",&Lua::engine::set_record_console_output},
 		{"poll_console_output",&Lua::engine::poll_console_output}
 	});
-
+	auto engineMod = luabind::module(GetLuaState(),"engine");
+	engineMod[
+		luabind::def("shutdown",Lua::engine::exit),
+		luabind::def("get_working_directory",Lua::engine::get_working_directory),
+		luabind::def("set_record_console_output",Lua::engine::set_record_console_output),
+		luabind::def("get_tick_count",Lua::engine::GetTickCount)
+	];
+	
 	Lua::RegisterLibrary(GetLuaState(),"game",{
 		LUA_LIB_GAME_SHARED
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},
-		{"precache_model",Lua::engine::PrecacheModel_sv},
-		{"load_sound_scripts",Lua::engine::LoadSoundScripts},
-		{"get_model",Lua::engine::get_model},
 		{"load_material",Lua_sv_engine_LoadMaterial},
-
-		{"set_gravity",Lua::game::Server::set_gravity},
-		{"get_gravity",Lua::game::Server::get_gravity},
-		{"load_model",Lua::game::Server::load_model},
 		{"create_model",Lua::game::Server::create_model},
 		{"set_time_scale",Lua::game::set_time_scale},
-		{"load_map",Lua::game::Server::load_map},
-		{"change_map",Lua::game::Server::change_level}
+		{"load_map",Lua::game::Server::load_map}
 	});
 	auto gameMod = luabind::module(GetLuaState(),"game");
+	gameMod[
+		luabind::def("change_map",static_cast<void(*)(const std::string&,const std::string&)>(Lua::game::Server::change_level)),
+		luabind::def("change_map",static_cast<void(*)(const std::string&)>(Lua::game::Server::change_level)),
+		luabind::def("set_gravity",Lua::game::Server::set_gravity),
+		luabind::def("get_gravity",Lua::game::Server::get_gravity),
+		luabind::def("load_model",Lua::game::Server::load_model),
+		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&,bool)>(Lua::engine::LoadSoundScripts)),
+		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::LoadSoundScripts)),
+		luabind::def("precache_model",Lua::engine::PrecacheModel_sv),
+		luabind::def("get_model",Lua::engine::get_model)
+	];
 	RegisterLuaGameClasses(gameMod);
 
+	Lua::ents::register_library(GetLuaState());
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",{
 		LUA_LIB_ENTS_SHARED
 		{"register_component",Lua::ents::register_component<pragma::SLuaBaseEntityComponent>},

@@ -11,16 +11,14 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-int Lua_ServerTime(lua_State *l)
+double Lua::ServerTime(lua_State *l)
 {
 	NetworkState *state = c_engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	Lua::PushNumber(l,game->ServerTime());
-	return 1;
+	return game->ServerTime();
 }
 
-int Lua_FrameTime(lua_State *l)
+double Lua::FrameTime(lua_State *l)
 {
-	Lua::PushNumber(l,c_engine->GetDeltaFrameTime());
-	return 1;
+	return c_engine->GetDeltaFrameTime();
 }

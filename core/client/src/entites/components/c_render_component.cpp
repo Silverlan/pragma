@@ -290,14 +290,24 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	}
 	else if(typeid(component) == typeid(pragma::CModelComponent))
 		m_mdlComponent = component.GetHandle<CModelComponent>();
+	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
+		m_animComponent = component.GetHandle<CAnimatedComponent>();
+	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
+		m_lightMapReceiverComponent = component.GetHandle<CLightMapReceiverComponent>();
 }
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::CModelComponent))
 		m_mdlComponent = {};
+	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
+		m_animComponent = {};
+	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
+		m_lightMapReceiverComponent = {};
 }
 util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
+util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
+util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
 void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();

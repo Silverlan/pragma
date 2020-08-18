@@ -15,26 +15,17 @@
 #include "luasystem.h"
 #include "pragma/model/modelmesh.h"
 #include <pragma/lua/lua_call.hpp>
+#include <sharedutils/util_path.hpp>
 #include <mathutil/color.h>
 
 extern DLLENGINE Engine *engine;
 
-int Lua::engine::CreateLight(lua_State *l)
-{
-	Vector3 *pos = _lua_Vector_check(l,1);
-	UNUSED(pos);
-	float power = Lua::CheckNumber<float>(l,2);
-	UNUSED(power);
-	Vector3 *col = _lua_Vector_check(l,3);
-	UNUSED(col);
-	//engine->CreateLight(*pos,power,*col); // WEAVETODO
-	return 0;
-}
+void Lua::engine::exit() {::engine->ShutDown();}
 
-int Lua::engine::exit(lua_State *l)
+std::string Lua::engine::get_working_directory()
 {
-	::engine->ShutDown();
-	return 0;
+	auto path = ::util::Path::CreatePath(::util::get_program_path());
+	return path.GetString();
 }
 
 int Lua::engine::get_info(lua_State *l)
@@ -96,58 +87,32 @@ int Lua::engine::get_info(lua_State *l)
 	return 1;
 }
 
-int Lua::engine::RemoveLights(lua_State*)
+void Lua::engine::PrecacheModel_sv(lua_State *l,const std::string &mdlName)
 {
-	//engine->RemoveLights(); // WEAVETODO
-	return 0;
-}
-
-int Lua::engine::CreateSprite(lua_State*)
-{
-	/*float scale = luaL_checknumber(l,1);
-	Vector3 *pos = _lua_Vector_check(l,2);
-	Sprite *spr = engine->CreateSprite(scale);
-	spr->SetPosition(pos);*/ // WEAVETODO
-	return 0;
-}
-
-int Lua::engine::PrecacheModel_sv(lua_State *l)
-{
-	std::string mdl = luaL_checkstring(l,1);
 	auto *nw = ::engine->GetNetworkState(l);
 	FWMD wmd(nw->GetGameState());
 	wmd.Load<Model,ModelMesh,ModelSubMesh>(
-		nw->GetGameState(),mdl.c_str(),[nw](const std::string &matName,bool bReload) -> Material* {
+		nw->GetGameState(),mdlName,[nw](const std::string &matName,bool bReload) -> Material* {
 			return nw->LoadMaterial(matName,bReload);
 		},[nw](const std::string &mdlName) -> std::shared_ptr<Model> {
 			return nw->GetGameState()->LoadModel(mdlName,false);
 		}
 	);
-	return 0;
 }
 
-int Lua::engine::get_model(lua_State *l)
+std::shared_ptr<Model> Lua::engine::get_model(lua_State *l,const std::string &mdlName)
 {
 	auto *state = ::engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
-	auto *name = Lua::CheckString(l,1);
-	auto mdl = game->LoadModel(name);
-	if(mdl == nullptr)
-		return 0;
-	Lua::Push<decltype(mdl)>(l,mdl);
-	return 1;
+	return game->LoadModel(mdlName);
 }
 
-int Lua::engine::LoadSoundScripts(lua_State *l)
+void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName,bool precache)
 {
 	NetworkState *state = ::engine->GetNetworkState(l);
-	std::string file = luaL_checkstring(l,1);
-	bool bPrecache = false;
-	if(Lua::IsSet(l,2))
-		bPrecache = Lua::CheckBool(l,2);
-	state->LoadSoundScripts(file.c_str(),bPrecache);
-	return 0;
+	state->LoadSoundScripts(fileName.c_str(),precache);
 }
+void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName) {LoadSoundScripts(l,fileName,false);}
 
 int Lua::engine::LoadLibrary(lua_State *l)
 {
@@ -162,19 +127,9 @@ int Lua::engine::LoadLibrary(lua_State *l)
 	return 1;
 }
 
-int Lua::engine::GetTickCount(lua_State *l)
-{
-	auto tick = ::engine->GetTickCount();
-	Lua::PushInt(l,tick);
-	return 1;
-}
+uint64_t Lua::engine::GetTickCount() {return ::engine->GetTickCount();}
 
-int32_t Lua::engine::set_record_console_output(lua_State *l)
-{
-	auto record = Lua::CheckBool(l,1);
-	::engine->SetRecordConsoleOutput(record);
-	return 0;
-}
+void Lua::engine::set_record_console_output(bool record) {::engine->SetRecordConsoleOutput(record);}
 int32_t Lua::engine::poll_console_output(lua_State *l)
 {
 	auto output = ::engine->PollConsoleOutput();

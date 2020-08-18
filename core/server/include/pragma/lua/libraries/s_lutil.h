@@ -10,15 +10,18 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/luaapi.h>
 
+struct BulletInfo;
+struct GibletCreateInfo;
+namespace util {struct SplashDamageInfo;};
 namespace Lua
 {
 	namespace util
 	{
 		namespace Server
 		{
-			DLLSERVER int fire_bullets(lua_State *l);
-			DLLSERVER int create_explosion(lua_State *l);
-			DLLSERVER int create_giblet(lua_State *l);
+			DLLSERVER int fire_bullets(lua_State *l,const BulletInfo &bulletInfo);
+			DLLSERVER void create_giblet(lua_State *l,const GibletCreateInfo &gibletInfo);
+			DLLSERVER void create_explosion(lua_State *l,const ::util::SplashDamageInfo &splashDamageInfo);
 		};
 	};
 };

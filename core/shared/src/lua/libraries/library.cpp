@@ -18,7 +18,6 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/libraries/lmatrix.h"
 #include "pragma/lua/libraries/lasset.hpp"
-
 #include "pragma/lua/classes/ldef_vector.h"
 #include "luasystem.h"
 #include <pragma/math/angle/wvquaternion.h>
@@ -47,6 +46,7 @@
 #include "pragma/model/animation/animation.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
+#include "pragma/util/util_ballistic.h"
 #include <pragma/math/vector/util_winding_order.hpp>
 #include <pragma/math/util_engine_math.hpp>
 #include "pragma/game/game_coordinate_system.hpp"
@@ -54,8 +54,11 @@
 #include <sharedutils/util_file.h>
 #include <pragma/math/intersection.h>
 #include <mathutil/camera.hpp>
+#include <mathutil/umath_frustum.hpp>
 #include <regex>
 #include <complex>
+#include <random>
+#include <algorithm>
 #include <mpParser.h>
 #include <luainterface.hpp>
 #include <luabind/out_value_policy.hpp>
@@ -257,10 +260,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","MIN",uvec::MIN);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(),"vector","MAX",uvec::MAX);
 
-	Lua::RegisterLibrary(lua.GetState(),"angle",{
-		{"random",Lua::global::angle_rand},
-		{"create_from_string",Lua::global::create_from_string}
-	});
+	auto modAng = luabind::module_(lua.GetState(),"angle");
+	modAng[
+		luabind::def("random",Lua::global::angle_rand),
+		luabind::def("create_from_string",Lua::global::create_from_string)
+	];
 
 	Lua::RegisterLibrary(lua.GetState(),"noise",{
 		{"perlin",Lua_noise_perlin},
@@ -277,6 +281,33 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	//lua_pushtablecfunction(lua.GetState(),"table","has_value",Lua::table::has_value); // Function is incomplete
 	lua_pushtablecfunction(lua.GetState(),"table","random",Lua::table::random);
+	lua_pushtablecfunction(lua.GetState(),"table","randomize",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		int32_t t = 1;
+		Lua::CheckTable(l,t);
+		auto n = Lua::GetObjectLength(l,t);
+		auto tNew = Lua::CreateTable(l);
+		std::vector<uint32_t> indices {};
+		indices.reserve(n);
+		for(auto i=decltype(n){0u};i<n;++i)
+			indices.push_back(i);
+		std::random_device rng;
+		std::mt19937 urng(rng());
+		std::shuffle(indices.begin(),indices.end(),urng);
+
+		for(auto i=decltype(indices.size()){0u};i<indices.size();++i)
+		{
+			auto newIdx = indices.at(i);
+			Lua::PushInt(l,i +1); /* 1 */
+			Lua::PushInt(l,i +1); /* 2 */
+			Lua::GetTableValue(l,t); /* 2 */
+
+			Lua::PushInt(l,newIdx +1); /* 3 */
+			Lua::PushValue(l,-2); /* 4 */
+			Lua::SetTableValue(l,tNew); /* 2 */
+			Lua::Pop(l,2); /* 0 */
+		}
+		return 1;
+	}));
 	lua_pushtablecfunction(lua.GetState(),"table","merge",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 		auto t0 = 1;
 		auto t1 = 2;
@@ -315,36 +346,42 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		return 1;
 	}));
 
+	auto modMath = luabind::module_(lua.GetState(),"math");
+	modMath[
+		luabind::def("approach",umath::approach<double>),
+		luabind::def("get_angle_difference",umath::get_angle_difference),
+		luabind::def("approach_angle",umath::approach_angle),
+		luabind::def("clamp_angle",umath::clamp_angle),
+		luabind::def("is_angle_in_range",umath::is_angle_in_range),
+		luabind::def("clamp",umath::clamp<double>),
+		luabind::def("get_next_power_of_2",umath::next_power_of_2),
+		luabind::def("get_previous_power_of_2",umath::previous_power_of_2),
+		luabind::def("smooth_step",umath::smooth_step<double>),
+		luabind::def("smoother_step",umath::smoother_step<double>),
+		luabind::def("calc_ballistic_range",umath::calc_ballistic_range),
+		luabind::def("calc_ballistic_position",umath::calc_ballistic_position),
+		luabind::def("calc_ballistic_angle_of_reach",umath::approach<double>),
+		luabind::def("approach",umath::approach<double>),
+		luabind::def("get_frustum_plane_center",umath::frustum::get_plane_center),
+		luabind::def("approach",umath::approach<double>)
+	];
 	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
-	lua_pushtablecfunction(lua.GetState(),"math","approach",Lua::math::approach);
-	lua_pushtablecfunction(lua.GetState(),"math","get_angle_difference",Lua::math::get_angle_difference);
-	lua_pushtablecfunction(lua.GetState(),"math","approach_angle",Lua::math::approach_angle);
 	lua_pushtablecfunction(lua.GetState(),"math","normalize_angle",Lua::math::normalize_angle);
-	lua_pushtablecfunction(lua.GetState(),"math","clamp_angle",Lua::math::clamp_angle);
-	lua_pushtablecfunction(lua.GetState(),"math","is_angle_in_range",Lua::math::is_angle_in_range);
 	lua_pushtablecfunction(lua.GetState(),"math","perlin_noise",Lua::math::perlin_noise);
 	lua_pushtablecfunction(lua.GetState(),"math","sign",Lua::math::sign);
-	lua_pushtablecfunction(lua.GetState(),"math","clamp",Lua::math::clamp);
 	lua_pushtablecfunction(lua.GetState(),"math","lerp",Lua::math::lerp);
-	lua_pushtablecfunction(lua.GetState(),"math","get_next_power_of_2",Lua::math::get_next_power_of_2);
-	lua_pushtablecfunction(lua.GetState(),"math","get_previous_power_of_2",Lua::math::get_previous_power_of_2);
 	lua_pushtablecfunction(lua.GetState(),"math","round",Lua::math::round);
 	lua_pushtablecfunction(lua.GetState(),"math","snap_to_grid",Lua::math::snap_to_grid);
 	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline",Lua::math::calc_hermite_spline);
 	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline_position",Lua::math::calc_hermite_spline_position);
-	lua_pushtablecfunction(lua.GetState(),"math","smooth_step",Lua::math::smooth_step);
-	lua_pushtablecfunction(lua.GetState(),"math","smoother_step",Lua::math::smoother_step);
 	lua_pushtablecfunction(lua.GetState(),"math","is_in_range",Lua::math::is_in_range);
 	lua_pushtablecfunction(lua.GetState(),"math","normalize_uv_coordinates",Lua::math::normalize_uv_coordinates);
 
 	lua_pushtablecfunction(lua.GetState(),"math","solve_quadric",Lua::math::solve_quadric);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_cubic",Lua::math::solve_cubic);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_quartic",Lua::math::solve_quartic);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_range",Lua::math::calc_ballistic_range);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_position",Lua::math::calc_ballistic_position);
 	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_velocity",Lua::math::calc_ballistic_velocity);
 	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_time_of_flight",Lua::math::calc_ballistic_time_of_flight);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_angle_of_reach",Lua::math::calc_ballistic_angle_of_reach);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc",Lua::math::solve_ballistic_arc);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc_lateral",Lua::math::solve_ballistic_arc_lateral);
 
@@ -356,7 +393,6 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(),"math","vertical_fov_to_horizontal_fov",Lua::math::vertical_fov_to_horizontal_fov);
 	lua_pushtablecfunction(lua.GetState(),"math","diagonal_fov_to_vertical_fov",Lua::math::diagonal_fov_to_vertical_fov);
 
-	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_center",Lua::math::get_frustum_plane_center);
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_size",Lua::math::get_frustum_plane_size);
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_boundaries",Lua::math::get_frustum_plane_boundaries);
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_point",Lua::math::get_frustum_plane_point);
@@ -522,8 +558,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	complexNumberClassDef.def(luabind::const_self -double());
 	complexNumberClassDef.def(luabind::const_self ==double());
 #ifdef _WIN32
-	complexNumberClassDef.def("SetReal",static_cast<double(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
-	complexNumberClassDef.def("SetImaginary",static_cast<double(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
+	complexNumberClassDef.def("SetReal",static_cast<void(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
+	complexNumberClassDef.def("SetImaginary",static_cast<void(std::complex<double>::*)(const double&)>(&std::complex<double>::real));
 #else
 	complexNumberClassDef.def("SetReal",static_cast<void(std::complex<double>::*)(double)>(&std::complex<double>::real));
 	complexNumberClassDef.def("SetImaginary",static_cast<void(std::complex<double>::*)(double)>(&std::complex<double>::real));
@@ -559,7 +595,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	mathMod[expressionClassDef];
 #endif
 
-	lua_pushtablecfunction(lua.GetState(),"debug","move_state_to_string",Lua::debug::move_state_to_string);
+	auto modDebug = luabind::module_(lua.GetState(),"debug");
+	modVec[
+		luabind::def("move_state_to_string",Lua::debug::move_state_to_string)
+	];
 	if(Lua::get_extended_lua_modules_enabled())
 	{
 		DLLLUA int lua_snapshot(lua_State *L);
@@ -1490,9 +1529,13 @@ void Game::RegisterLuaLibraries()
 
 	Lua::RegisterLibrary(GetLuaState(),"regex",{
 		{"match",Lua::regex::match},
-		{"search",Lua::regex::search},
-		{"replace",Lua::regex::replace}
+		{"search",Lua::regex::search}
 	});
+	auto modRegex = luabind::module_(GetLuaState(),"regex");
+	modRegex[
+		luabind::def("replace",static_cast<std::string(*)(const std::string&,const std::string&,const std::string&,std::regex_constants::match_flag_type)>(Lua::regex::replace)),
+		luabind::def("replace",static_cast<std::string(*)(const std::string&,const std::string&,const std::string&)>(Lua::regex::replace))
+	];
 
 	auto regexMod = luabind::module(GetLuaState(),"regex");
 	auto classDefRegexResult = luabind::class_<std::match_results<const char*>>("Result");

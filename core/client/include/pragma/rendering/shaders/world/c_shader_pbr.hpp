@@ -88,6 +88,10 @@ namespace pragma
 
 		ShaderPBRBlend(prosper::IPrContext &context,const std::string &identifier);
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool GetRenderBufferTargets(
+			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+		) const override;
 	protected:
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);

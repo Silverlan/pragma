@@ -38,7 +38,7 @@ bool CSoftBodyComponent::InitializeSoftBodyData()
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
 			subMesh->Update(ModelUpdateFlags::UpdateBuffers);
-			auto &vkMesh = static_cast<CModelSubMesh&>(*subMesh).GetVKMesh();
+			auto &vkMesh = static_cast<CModelSubMesh&>(*subMesh).GetSceneMesh();
 			if(vkMesh == nullptr)
 				continue;
 			auto &verts = subMesh->GetVertices();
@@ -100,7 +100,7 @@ void CSoftBodyComponent::UpdateSoftBodyGeometry()
 		auto &softBodies = pair.second;
 
 		auto &buf = m_softBodyBuffers->at(0u); // TODO
-		auto &vkMesh = mesh.GetVKMesh();
+		auto &vkMesh = mesh.GetSceneMesh();
 		if(vkMesh == nullptr)
 			continue;
 		auto numVerts = mesh.GetVertexCount();

@@ -63,7 +63,7 @@ void Lua::ModelSubMesh::Client::CreateRing(lua_State *l,float innerRadius,float 
 }
 void Lua::ModelSubMesh::Client::GetVkMesh(lua_State *l,::ModelSubMesh &mesh)
 {
-	Lua::Push<std::shared_ptr<::pragma::VkMesh>>(l,static_cast<CModelSubMesh&>(mesh).GetVKMesh());
+	Lua::Push<std::shared_ptr<::pragma::SceneMesh>>(l,static_cast<CModelSubMesh&>(mesh).GetSceneMesh());
 }
 void Lua::ModelSubMesh::Client::GetTangents(lua_State *l,::ModelSubMesh &mesh)
 {
@@ -91,7 +91,7 @@ void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l,::ModelSubMesh &mesh)
 }
 void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexBuffer();
 	if(buf == nullptr)
 		return;
@@ -99,7 +99,7 @@ void Lua::ModelSubMesh::Client::GetVertexBuffer(lua_State *l,::ModelSubMesh &mes
 }
 void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetVertexWeightBuffer();
 	if(buf == nullptr)
 		return;
@@ -107,7 +107,7 @@ void Lua::ModelSubMesh::Client::GetVertexWeightBuffer(lua_State *l,::ModelSubMes
 }
 void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetAlphaBuffer();
 	if(buf == nullptr)
 		return;
@@ -115,7 +115,7 @@ void Lua::ModelSubMesh::Client::GetAlphaBuffer(lua_State *l,::ModelSubMesh &mesh
 }
 void Lua::ModelSubMesh::Client::GetIndexBuffer(lua_State *l,::ModelSubMesh &mesh)
 {
-	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetVKMesh();
+	auto &vkMesh = static_cast<CModelSubMesh&>(mesh).GetSceneMesh();
 	auto &buf = vkMesh->GetIndexBuffer();
 	if(buf == nullptr)
 		return;

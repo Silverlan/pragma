@@ -307,7 +307,7 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
-	auto &vkMesh = mesh.GetVKMesh();
+	auto &vkMesh = mesh.GetSceneMesh();
 	if(vkMesh != nullptr)
 	{
 		auto &meshAlphaBuffer = vkMesh->GetAlphaBuffer();
@@ -320,5 +320,18 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
 		ShaderPBR::Draw(mesh) == true;
+}
+bool ShaderPBRBlend::GetRenderBufferTargets(
+	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+) const
+{
+	if(ShaderPBR::GetRenderBufferTargets(mesh,pipelineIdx,outBuffers,outOffsets,outIndexBufferInfo) == false)
+		return false;
+	auto &sceneMesh = mesh.GetSceneMesh();
+	auto *alphaBuf = sceneMesh->GetAlphaBuffer().get();
+	outBuffers.push_back(alphaBuf);
+	outOffsets.push_back(0ull);
+	return true;
 }
 #pragma optimize("",on)

@@ -255,6 +255,7 @@ void ClientState::InitializeGUILua()
 	Lua::RegisterLibrary(GetGUILuaState(),"engine",{
 		LUA_SHARED_CL_ENGINE_FUNCTIONS
 	});
+	Lua::engine::register_library(GetGUILuaState());
 
 	WGUILuaInterface::Initialize();
 

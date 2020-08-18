@@ -10,6 +10,7 @@
 #include <mathutil/umath.h>
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 
 static constexpr uint64_t MEGABYTE = 1'024 *1'024;
@@ -42,11 +43,11 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = 
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
 CModelSubMesh::CModelSubMesh()
-	: ModelSubMesh(),NormalMesh(),m_vkMesh(std::make_shared<pragma::VkMesh>())
+	: ModelSubMesh(),NormalMesh(),m_sceneMesh(std::make_shared<pragma::SceneMesh>())
 {}
 
 CModelSubMesh::CModelSubMesh(const CModelSubMesh &other)
-	: ModelSubMesh(other),m_vkMesh(std::make_shared<pragma::VkMesh>(*other.m_vkMesh))
+	: ModelSubMesh(other),m_sceneMesh(std::make_shared<pragma::SceneMesh>(*other.m_sceneMesh))
 {}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexBuffer() {return s_vertexBuffer;}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
@@ -109,7 +110,17 @@ void CModelSubMesh::ClearBuffers()
 	s_indexBuffer = nullptr;
 }
 
-const std::shared_ptr<pragma::VkMesh> &CModelSubMesh::GetVKMesh() const {return m_vkMesh;}
+const std::shared_ptr<pragma::SceneMesh> &CModelSubMesh::GetSceneMesh() const {return m_sceneMesh;}
+
+const std::shared_ptr<prosper::IRenderBuffer> &CModelSubMesh::GetRenderBuffer(pragma::ShaderEntity &shader,uint32_t pipelineIdx)
+{
+	if(m_sceneMesh == nullptr)
+	{
+		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
+		return nptr;
+	}
+	return m_sceneMesh->GetRenderBuffer(*this,shader,pipelineIdx);
+}
 
 void CModelSubMesh::UpdateVertexBuffer()
 {
@@ -121,16 +132,16 @@ void CModelSubMesh::UpdateVertexBuffer()
 #else
 	auto &vertexBufferData = *m_vertices;
 #endif
-	auto vertexBuffer = m_vkMesh->GetVertexBuffer();
+	auto vertexBuffer = m_sceneMesh->GetVertexBuffer();
 	auto bufferSize = vertexBufferData.size() *sizeof(vertexBufferData.front());
 	if(vertexBuffer == nullptr || bufferSize != vertexBuffer->GetSize())
 	{
-		m_vkMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
+		m_sceneMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
 		vertexBuffer = s_vertexBuffer->AllocateBuffer(bufferSize,vertexBufferData.data());
 	}
 	else
 		vertexBuffer->Write(0ull,bufferSize,vertexBufferData.data());
-	m_vkMesh->SetVertexBuffer(std::move(vertexBuffer));
+	m_sceneMesh->SetVertexBuffer(std::move(vertexBuffer));
 }
 
 void CModelSubMesh::Centralize(const Vector3 &origin)
@@ -153,9 +164,9 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	
 	if((flags &ModelUpdateFlags::UpdateIndexBuffer) != ModelUpdateFlags::None)
 	{
-		m_vkMesh->SetIndexBuffer(nullptr); // Clear the old index buffer
+		m_sceneMesh->SetIndexBuffer(nullptr); // Clear the old index buffer
 		auto indexBuffer = s_indexBuffer->AllocateBuffer(m_triangles->size() *sizeof(IndexType),m_triangles->data());
-		m_vkMesh->SetIndexBuffer(std::move(indexBuffer));
+		m_sceneMesh->SetIndexBuffer(std::move(indexBuffer));
 	}
 	if((flags &ModelUpdateFlags::UpdateVertexBuffer) != ModelUpdateFlags::None)
 		UpdateVertexBuffer();
@@ -171,7 +182,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 		if(m_extendedVertexWeights->empty())
 		{
 			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(m_vertexWeights->size() *sizeof(VertexWeightType),m_vertexWeights->data());
-			m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
+			m_sceneMesh->SetVertexWeightBuffer(std::move(weightBuffer));
 		}
 		else
 		{
@@ -182,14 +193,14 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 			memcpy(vertWeights.data() +m_vertexWeights->size(),m_extendedVertexWeights->data(),m_extendedVertexWeights->size() *sizeof(m_extendedVertexWeights->front()));
 
 			auto weightBuffer = s_vertexWeightBuffer->AllocateBuffer(vertWeights.size() *sizeof(VertexWeightType),vertWeights.data());
-			m_vkMesh->SetVertexWeightBuffer(std::move(weightBuffer));
+			m_sceneMesh->SetVertexWeightBuffer(std::move(weightBuffer));
 		}
 	}
 	
 	if(bHasAlphas == true && (flags &ModelUpdateFlags::UpdateAlphaBuffer) != ModelUpdateFlags::None)
 	{
 		auto alphaBuffer = s_alphaBuffer->AllocateBuffer(m_alphas->size() *sizeof(AlphaType),m_alphas->data());
-		m_vkMesh->SetAlphaBuffer(std::move(alphaBuffer));
+		m_sceneMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}
 }
 

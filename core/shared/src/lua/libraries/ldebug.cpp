@@ -8,9 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
-#include "pragma/entities/components/base_ai_component.hpp"
 
-int Lua::debug::stackdump(lua_State *l)
+void Lua::debug::stackdump(lua_State *l)
 {
 	int top = lua_gettop(l);
 	Con::cout<<"Total in stack: "<<top<<Con::endl;
@@ -35,39 +34,31 @@ int Lua::debug::stackdump(lua_State *l)
 	}
 	if(top > 0)
 		Con::cout<<Con::endl;
-	return 0;
 }
 
-int Lua::debug::move_state_to_string(lua_State *l)
+std::string Lua::debug::move_state_to_string(lua_State *l,pragma::BaseAIComponent::MoveResult v)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::BaseAIComponent::MoveResult>(v))
+	switch(v)
 	{
 		case pragma::BaseAIComponent::MoveResult::TargetUnreachable:
-			Lua::PushString(l,"ai.MOVE_STATE_TARGET_UNREACHABLE");
-			break;
+			return "ai.MOVE_STATE_TARGET_UNREACHABLE";
 		case pragma::BaseAIComponent::MoveResult::TargetReached:
-			Lua::PushString(l,"ai.MOVE_STATE_TARGET_REACHED");
-			break;
+			return "ai.MOVE_STATE_TARGET_REACHED";
 		case pragma::BaseAIComponent::MoveResult::WaitingForPath:
-			Lua::PushString(l,"ai.MOVE_STATE_WAITING_FOR_PATH");
-			break;
+			return "ai.MOVE_STATE_WAITING_FOR_PATH";
 		case pragma::BaseAIComponent::MoveResult::MovingToTarget:
-			Lua::PushString(l,"ai.MOVE_STATE_MOVING_TO_TARGET");
-			break;
+			return "ai.MOVE_STATE_MOVING_TO_TARGET";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::enable_remote_debugging(lua_State *l)
+void Lua::debug::enable_remote_debugging(lua_State *l)
 {
 	if(get_extended_lua_modules_enabled() == false)
 	{
 		Con::cwar<<"WARNING: Unable to enable remote debugging: Game has to be started with -luaext launch parameter!"<<Con::endl;
-		return 0;
+		return;
 	}
 	auto _G = luabind::globals(l);
 	auto programPath = util::get_program_path();
@@ -78,7 +69,7 @@ int Lua::debug::enable_remote_debugging(lua_State *l)
 	if(!oPackage)
 	{
 		Con::cwar<<"WARNING: Unable to enable remote debugging: package library is missing!"<<Con::endl;
-		return 0;
+		return;
 	}
 	oPackage["path"] = path;
 	oPackage["cpath"] = cpath;
@@ -95,5 +86,4 @@ int Lua::debug::enable_remote_debugging(lua_State *l)
 	}
 	if(r != Lua::StatusCode::Ok)
 		Con::cwar<<"WARNING: Unable to enable remote debugging: "<<err<<Con::endl;
-	return 0;
 }

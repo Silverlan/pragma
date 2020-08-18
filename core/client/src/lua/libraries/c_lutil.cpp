@@ -275,16 +275,5 @@ int Lua::util::Client::export_material(lua_State *l)
 	return 2;
 }
 
-
-int Lua::util::Client::get_clipboard_string(lua_State *l)
-{
-	Lua::PushString(l,c_engine->GetWindow().GetClipboardString());
-	return 1;
-}
-int Lua::util::Client::set_clipboard_string(lua_State *l)
-{
-	std::string str = Lua::CheckString(l,1);
-	c_engine->GetWindow().SetClipboardString(str);
-	return 0;
-}
-
+std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow().GetClipboardString();}
+void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow().SetClipboardString(str);}

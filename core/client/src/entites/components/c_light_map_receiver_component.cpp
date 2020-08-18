@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/model/vk_mesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
@@ -16,7 +17,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 {
 	auto mdl = ent.GetModel();
@@ -118,3 +119,28 @@ std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent:
 		return {};
 	return it->second;
 }
+void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC)
+{
+	auto mdl = GetEntity().GetModel();
+	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
+	if(meshGroup == nullptr)
+		return;
+	for(auto &mesh : meshGroup->GetMeshes())
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
+		{
+			auto &sceneMesh = static_cast<CModelSubMesh*>(subMesh.get())->GetSceneMesh();
+			auto bufIdx = FindBufferIndex(*static_cast<CModelSubMesh*>(subMesh.get()));
+			if(bufIdx.has_value() == false || sceneMesh == nullptr)
+				continue;
+			auto *pUvBuffer = lightMapC.GetMeshLightMapUvBuffer(*bufIdx);
+			prosper::IBuffer *pLightMapUvBuffer = nullptr;
+			if(pUvBuffer != nullptr)
+				pLightMapUvBuffer = pUvBuffer;
+			else
+				pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
+			sceneMesh->SetLightmapUvBuffer(pLightMapUvBuffer->shared_from_this());
+		}
+	}
+}
+#pragma optimize("",on)

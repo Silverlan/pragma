@@ -629,16 +629,6 @@ void Lua::doc::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
 
-	auto mod = luabind::module(l, "my_library");
-	auto ns = luabind::namespace_("detail");
-	mod[ns];
-
-
-	//luabind::module(l, "my_library")
-	//[
-	//	luabind::def("f2",static_cast<void(*)(lua_State*)>([](lua_State *l) {std::cout<<"f2"<<std::endl;}))
-	//];
-
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
 	Lua::RegisterLibrary(l,libName,{

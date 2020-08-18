@@ -10,6 +10,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include "pragma/model/vk_mesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/gui/wiframe.h"
@@ -47,6 +48,14 @@ void CLightMapComponent::InitializeLightMapData(
 	m_lightMapAtlas = lightMap;
 	m_meshLightMapUvBuffer = lightMapUvBuffer;
 	m_meshLightMapUvBuffers = meshUvBuffers;
+
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapReceiverComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
+		lightMapReceiverC->UpdateMeshLightmapUvBuffers(*this);
+	}
 }
 
 const std::shared_ptr<prosper::Texture> &CLightMapComponent::GetLightMap() const {return m_lightMapAtlas;}

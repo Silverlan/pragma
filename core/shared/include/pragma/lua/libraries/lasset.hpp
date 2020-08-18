@@ -8,7 +8,9 @@
 #define __LASSET_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <string>
 
+namespace pragma::asset {enum class Type : uint8_t;};
 namespace Lua
 {
 	class Interface;
@@ -16,11 +18,11 @@ namespace Lua
 	{
 		DLLNETWORK void register_library(Lua::Interface &lua,bool extended);
 
-		DLLNETWORK int32_t exists(lua_State *l);
-		DLLNETWORK int32_t find_file(lua_State *l);
-		DLLNETWORK int32_t is_loaded(lua_State *l);
-		DLLNETWORK int32_t lock_asset_watchers(lua_State *l);
-		DLLNETWORK int32_t unlock_asset_watchers(lua_State *l);
+		DLLNETWORK bool exists(lua_State *l,const std::string &name,pragma::asset::Type type);
+		DLLNETWORK luabind::object find_file(lua_State *l,const std::string &name,pragma::asset::Type type);
+		DLLNETWORK bool is_loaded(lua_State *l,const std::string &name,pragma::asset::Type type);
+		DLLNETWORK void lock_asset_watchers(lua_State *l);
+		DLLNETWORK void unlock_asset_watchers(lua_State *l);
 	};
 };
 

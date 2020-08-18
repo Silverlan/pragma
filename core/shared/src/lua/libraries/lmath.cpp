@@ -21,15 +21,6 @@
 #include <mathutil/umath_frustum.hpp>
 
 extern DLLENGINE Engine *engine;
-int Lua::math::approach(lua_State *l)
-{
-	auto val = Lua::CheckNumber(l,1);
-	auto tgt = Lua::CheckNumber(l,2);
-	auto inc = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,umath::approach(val,tgt,inc));
-	return 1;
-}
-
 int Lua::math::randomf(lua_State *l)
 {
 	float min,max;
@@ -46,22 +37,6 @@ int Lua::math::randomf(lua_State *l)
 	Lua::PushNumber(l,umath::random(min,max));
 	return 1;
 }
-
-int Lua::math::get_angle_difference(lua_State *l)
-{
-	float angA = Lua::CheckNumber<float>(l,1);
-	float angB = Lua::CheckNumber<float>(l,2);
-	Lua::PushNumber(l,umath::get_angle_difference(angA,angB));
-	return 1;
-}
-int Lua::math::approach_angle(lua_State *l)
-{
-	float angA = Lua::CheckNumber<float>(l,1);
-	float angB = Lua::CheckNumber<float>(l,2);
-	float am = Lua::CheckNumber<float>(l,3);
-	Lua::PushNumber(l,umath::approach_angle(angA,angB,am));
-	return 1;
-}
 int Lua::math::normalize_angle(lua_State *l)
 {
 	float ang = Lua::CheckNumber<float>(l,1);
@@ -72,22 +47,6 @@ int Lua::math::normalize_angle(lua_State *l)
 	}
 	else
 		Lua::PushNumber(l,umath::normalize_angle(ang));
-	return 1;
-}
-int Lua::math::clamp_angle(lua_State *l)
-{
-	auto ang = Lua::CheckNumber<float>(l,1);
-	auto min = Lua::CheckNumber<float>(l,2);
-	auto max = Lua::CheckNumber<float>(l,3);
-	Lua::PushNumber(l,umath::clamp_angle(ang,min,max));
-	return 1;
-}
-int Lua::math::is_angle_in_range(lua_State *l)
-{
-	auto ang = Lua::CheckNumber<float>(l,1);
-	auto min = Lua::CheckNumber<float>(l,2);
-	auto max = Lua::CheckNumber<float>(l,3);
-	Lua::PushBool(l,umath::is_angle_in_range(ang,min,max));
 	return 1;
 }
 
@@ -118,35 +77,12 @@ int Lua::math::sign(lua_State *l)
 	return 1;
 }
 
-int Lua::math::clamp(lua_State *l)
-{
-	auto val = Lua::CheckNumber(l,1);
-	auto min = Lua::CheckNumber(l,2);
-	auto max = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,umath::clamp(val,min,max));
-	return 1;
-}
-
 int Lua::math::lerp(lua_State *l)
 {
 	float a = Lua::CheckNumber<float>(l,1);
 	float b = Lua::CheckNumber<float>(l,2);
 	float f = Lua::CheckNumber<float>(l,3);
 	Lua::PushNumber(l,a +f *(b -a));
-	return 1;
-}
-
-int Lua::math::get_next_power_of_2(lua_State *l)
-{
-	int v = Lua::CheckInt<int>(l,1);
-	Lua::PushInt(l,umath::next_power_of_2(v));
-	return 1;
-}
-
-int Lua::math::get_previous_power_of_2(lua_State *l)
-{
-	int v = Lua::CheckInt<int>(l,1);
-    Lua::PushInt(l,umath::previous_power_of_2(v));
 	return 1;
 }
 
@@ -218,23 +154,6 @@ int Lua::math::calc_hermite_spline_position(lua_State *l)
 	Lua::Push<Vector3>(l,pos);
 	return 1;
 }
-
-int Lua::math::smooth_step(lua_State *l)
-{
-	auto edge0 = Lua::CheckNumber(l,1);
-	auto edge1 = Lua::CheckNumber(l,2);
-	auto x = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,umath::smooth_step(edge0,edge1,x));
-	return 1;
-}
-int Lua::math::smoother_step(lua_State *l)
-{
-	auto edge0 = Lua::CheckNumber(l,1);
-	auto edge1 = Lua::CheckNumber(l,2);
-	auto x = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,umath::smoother_step(edge0,edge1,x));
-	return 1;
-}
 int Lua::math::is_in_range(lua_State *l)
 {
 	auto v = Lua::CheckNumber(l,1);
@@ -270,26 +189,6 @@ template<int32_t nc,int32_t ns>
 int Lua::math::solve_quadric(lua_State *l) {return solve_equation<3,2>(l,&umath::solve_quadric);}
 int Lua::math::solve_cubic(lua_State *l) {return solve_equation<4,3>(l,&umath::solve_cubic);}
 int Lua::math::solve_quartic(lua_State *l) {return solve_equation<5,4>(l,&umath::solve_quartic);}
-int Lua::math::calc_ballistic_range(lua_State *l)
-{
-	auto speed = Lua::CheckNumber(l,1);
-	auto gravity = Lua::CheckNumber(l,2);
-	auto initialHeight = Lua::CheckNumber(l,3);
-	auto r = umath::calc_ballistic_range(speed,gravity,initialHeight);
-	Lua::PushNumber(l,r);
-	return 1;
-}
-int Lua::math::calc_ballistic_position(lua_State *l)
-{
-	auto &start = *Lua::CheckVector(l,1);
-	auto &vel = *Lua::CheckVector(l,2);
-	auto gravity = Lua::CheckNumber(l,3);
-	auto t = Lua::CheckNumber(l,4);
-
-	auto r = umath::calc_ballistic_position(start,vel,gravity,t);
-	Lua::Push<Vector3>(l,r);
-	return 1;
-}
 int Lua::math::calc_ballistic_velocity(lua_State *l)
 {
 	auto &start = *Lua::CheckVector(l,1);
@@ -340,17 +239,6 @@ int Lua::math::calc_ballistic_time_of_flight(lua_State *l)
 	auto gravity = Lua::CheckNumber(l,argIdx++);
 	auto t = umath::calc_ballistic_time_of_flight(start,*v0,gravity);
 	Lua::PushNumber(l,t);
-	return 1;
-}
-int Lua::math::calc_ballistic_angle_of_reach(lua_State *l)
-{
-	auto &start = *Lua::CheckVector(l,1);
-	auto distance = Lua::CheckNumber(l,2);
-	auto initialVelocity = Lua::CheckNumber(l,3);
-	auto gravity = Lua::CheckNumber(l,4);
-	
-	auto ang = umath::calc_ballistic_angle_of_reach(start,distance,initialVelocity,gravity);
-	Lua::PushNumber(l,ang);
 	return 1;
 }
 int Lua::math::solve_ballistic_arc(lua_State *l)
@@ -498,14 +386,6 @@ int Lua::math::diagonal_fov_to_vertical_fov(lua_State *l)
 	auto diagonalFov = Lua::CheckNumber(l,1);
 	auto aspectRatio = Lua::CheckNumber(l,2);
 	Lua::PushNumber(l,umath::rad_to_deg(::umath::diagonal_fov_to_vertical_fov(umath::deg_to_rad(diagonalFov),aspectRatio)));
-	return 1;
-}
-int Lua::math::get_frustum_plane_center(lua_State *l)
-{
-	auto &pos = Lua::Check<Vector3>(l,1);
-	auto &forward = Lua::Check<Vector3>(l,2);
-	auto z = Lua::CheckNumber(l,3);
-	Lua::Push<Vector3>(l,::umath::frustum::get_plane_center(pos,forward,z));
 	return 1;
 }
 int Lua::math::get_frustum_plane_size(lua_State *l)

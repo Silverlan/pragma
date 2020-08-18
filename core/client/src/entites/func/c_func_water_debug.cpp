@@ -112,7 +112,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				auto *meshSurface = pWaterSurfComponent.valid() ? pWaterSurfComponent->GetWaterSurfaceMesh() : nullptr;
 				if(meshSurface != nullptr)
 				{
-					auto &vkMesh = meshSurface->GetVKMesh();
+					auto &vkMesh = meshSurface->GetSceneMesh();
 					auto *sim = static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator());
 					//auto &buf = sim->GetPositionBuffer();
 					auto dbgPoints = DebugRenderer::DrawPoints(vkMesh->GetVertexBuffer(),meshSurface->GetVertexCount(),Color::Yellow);

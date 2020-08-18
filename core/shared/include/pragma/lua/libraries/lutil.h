@@ -11,38 +11,43 @@
 #include <pragma/lua/luaapi.h>
 
 struct TraceResult;
-namespace util {struct SplashDamageInfo;};
+namespace util {struct SplashDamageInfo; enum class VarType : uint8_t;};
 namespace Lua
 {
 	DLLNETWORK void set_ignore_include_cache(bool b);
 	namespace global
 	{
-		DLLNETWORK int include(lua_State *l);
-		DLLNETWORK int get_script_path(lua_State *l);
+		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache);
+		DLLNETWORK luabind::object include(lua_State *l,const std::string &f);
+		DLLNETWORK std::string get_script_path();
 
-		DLLNETWORK int angle_rand(lua_State *l);
-		DLLNETWORK int create_from_string(lua_State *l);
+		DLLNETWORK EulerAngles angle_rand();
+		DLLNETWORK EulerAngles create_from_string(const std::string &str);
 	};
 	namespace util
 	{
-		DLLNETWORK int splash_damage(
+		DLLNETWORK void splash_damage(
 			lua_State *l,
-			::util::SplashDamageInfo &splashDamageInfo
+			const ::util::SplashDamageInfo &splashDamageInfo
 		);
 
 		DLLNETWORK int is_valid(lua_State *l);
 		DLLNETWORK int is_valid_entity(lua_State *l);
 		DLLNETWORK int remove(lua_State *l);
-		DLLNETWORK int is_table(lua_State *l);
-		DLLNETWORK int date_time(lua_State *l);
+		DLLNETWORK bool is_table(luabind::argument arg);
+		DLLNETWORK bool is_table();
+		DLLNETWORK std::string date_time(const std::string &format);
+		DLLNETWORK std::string date_time();
 		DLLNETWORK int fire_bullets(lua_State *l,const std::function<void(::DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f);
 		DLLNETWORK int fire_bullets(lua_State *l);
 		DLLNETWORK int register_class(lua_State *l);
 
-		DLLNETWORK int splash_damage(lua_State *l);
 		DLLNETWORK int shake_screen(lua_State *l);
-		DLLNETWORK int get_faded_time_factor(lua_State *l);
-		DLLNETWORK int get_scale_factor(lua_State *l);
+		DLLNETWORK float get_faded_time_factor(float cur,float dur,float fadeIn,float fadeOut);
+		DLLNETWORK float get_faded_time_factor(float cur,float dur,float fadeIn);
+		DLLNETWORK float get_faded_time_factor(float cur,float dur);
+		DLLNETWORK float get_scale_factor(float val,float min,float max);
+		DLLNETWORK float get_scale_factor(float val,float min);
 
 		DLLNETWORK int local_to_world(lua_State *l);
 		DLLNETWORK int world_to_local(lua_State *l);
@@ -51,25 +56,28 @@ namespace Lua
 
 		DLLNETWORK int is_same_object(lua_State *l);
 		DLLNETWORK int clamp_resolution_to_aspect_ratio(lua_State *l);
-		DLLNETWORK int open_url_in_browser(lua_State *l);
-		DLLNETWORK int open_path_in_explorer(lua_State *l);
-		DLLNETWORK int get_pretty_bytes(lua_State *l);
+		DLLNETWORK void open_url_in_browser(const std::string &url);
+		DLLNETWORK void open_path_in_explorer(const std::string &path);
+		DLLNETWORK void open_path_in_explorer(const std::string &path,const std::string &selectFile);
+		DLLNETWORK std::string get_pretty_bytes(uint32_t bytes);
 		DLLNETWORK int get_pretty_duration(lua_State *l);
 		DLLNETWORK int get_pretty_time(lua_State *l);
-		DLLNETWORK int units_to_metres(lua_State *l);
-		DLLNETWORK int metres_to_units(lua_State *l);
+		DLLNETWORK double units_to_metres(double units);
+		DLLNETWORK double metres_to_units(double metres);
 
 		DLLNETWORK int read_scene_file(lua_State *l);
 		DLLNETWORK int fade_property(lua_State *l);
 		DLLNETWORK int round_string(lua_State *l);
 		DLLNETWORK int get_type_name(lua_State *l);
-		DLLNETWORK int variable_type_to_string(lua_State *l);
-		DLLNETWORK int get_addon_path(lua_State *l);
-		DLLNETWORK int get_string_hash(lua_State *l);
+		DLLNETWORK std::string variable_type_to_string(::util::VarType varType);
+		DLLNETWORK std::string get_addon_path(lua_State *l);
+		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK int get_class_value(lua_State *l);
 		DLLNETWORK int pack_zip_archive(lua_State *l);
 
 		DLLNETWORK void register_std_vector_types(lua_State *l);
+
+		DLLNETWORK void register_library(lua_State *l);
 	};
 
 	template<class T,class TCast>
@@ -111,37 +119,24 @@ namespace Lua
 };
 
 #define REGISTER_SHARED_UTIL_GENERIC \
-	{"get_date_time",Lua::util::date_time}, \
-	{"is_table",Lua::util::is_table}, \
 	{"is_valid",Lua::util::is_valid}, \
 	{"remove",Lua::util::remove}, \
 	{"register_class",Lua::util::register_class}, \
-	{"get_faded_time_factor",Lua::util::get_faded_time_factor}, \
-	{"get_scale_factor",Lua::util::get_scale_factor}, \
 	{"local_to_world",Lua::util::local_to_world}, \
 	{"world_to_local",Lua::util::world_to_local}, \
-	{"get_pretty_bytes",Lua::util::get_pretty_bytes}, \
 	{"get_pretty_duration",Lua::util::get_pretty_duration}, \
 	{"get_pretty_time",Lua::util::get_pretty_time}, \
-	{"units_to_metres",Lua::util::units_to_metres}, \
-	{"metres_to_units",Lua::util::metres_to_units}, \
 	{"fade_property",Lua::util::fade_property}, \
 	{"round_string",Lua::util::round_string}, \
 	{"get_type_name",Lua::util::get_type_name}, \
-	{"variable_type_to_string",Lua::util::variable_type_to_string}, \
 	{"is_same_object",Lua::util::is_same_object}, \
 	{"clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio}, \
-	{"open_url_in_browser",Lua::util::open_url_in_browser}, \
-	{"open_path_in_explorer",Lua::util::open_path_in_explorer}, \
-	{"get_addon_path",Lua::util::get_addon_path}, \
-	{"get_string_hash",Lua::util::get_string_hash}, \
 	{"get_class_value",Lua::util::get_class_value}, \
 	{"pack_zip_archive",Lua::util::pack_zip_archive},
 
 #define REGISTER_SHARED_UTIL \
 	REGISTER_SHARED_UTIL_GENERIC \
 	{"is_valid_entity",Lua::util::is_valid_entity}, \
-	{"splash_damage",Lua::util::splash_damage}, \
 	{"shake_screen",Lua::util::shake_screen}, \
 	{"read_scene_file",Lua::util::read_scene_file},
 

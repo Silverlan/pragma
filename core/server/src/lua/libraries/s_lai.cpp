@@ -34,25 +34,29 @@
 
 extern DLLSERVER SGame *s_game;
 
+using LuaFactionObject = luabind::object;
 namespace Lua
 {
 	namespace ai
 	{
-		static int create_schedule(lua_State *l);
-		static int register_faction(lua_State *l);
+		static std::shared_ptr<pragma::ai::Schedule> create_schedule();
+		static std::shared_ptr<::Faction> register_faction(const std::string &name);
 		static int get_factions(lua_State *l);
-		static int find_faction_by_name(lua_State *l);
+		static LuaFactionObject find_faction_by_name(lua_State *l,const std::string &name);
 		static int register_task(lua_State *l);
 	};
 };
 
 void Lua::ai::server::register_library(Lua::Interface &lua)
 {
-	auto &modAi = lua.RegisterLibrary("ai",{
-		{"create_schedule",create_schedule},
-		{"register_faction",register_faction},
+	auto modAi = luabind::module_(lua.GetState(),"ai");
+	modAi[
+		luabind::def("create_schedule",create_schedule),
+		luabind::def("register_faction",register_faction),
+		luabind::def("find_faction_by_name",find_faction_by_name)
+	];
+	lua.RegisterLibrary("ai",{
 		{"get_factions",get_factions},
-		{"find_faction_by_name",find_faction_by_name},
 		{"register_task",register_task}
 	});
 	Lua::ai::register_library(lua);
@@ -308,20 +312,15 @@ std::shared_ptr<::pragma::ai::BehaviorNode> Lua::ai::server::create_lua_task(lua
 	return nullptr;
 }
 
-int Lua::ai::create_schedule(lua_State *l)
+std::shared_ptr<pragma::ai::Schedule> Lua::ai::create_schedule()
 {
-	auto sched = ::pragma::ai::Schedule::Create();
-	Lua::Push(l,sched);
-	return 1;
+	return ::pragma::ai::Schedule::Create();
 }
 
-int Lua::ai::register_faction(lua_State *l)
+std::shared_ptr<Faction> Lua::ai::register_faction(const std::string &name)
 {
-	auto *name = Lua::CheckString(l,1);
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
-	auto faction = factionManager.RegisterFaction(name);
-	Lua::Push(l,faction);
-	return 1;
+	return factionManager.RegisterFaction(name);
 }
 int Lua::ai::get_factions(lua_State *l)
 {
@@ -336,15 +335,13 @@ int Lua::ai::get_factions(lua_State *l)
 	}
 	return 1;
 }
-int Lua::ai::find_faction_by_name(lua_State *l)
+LuaFactionObject Lua::ai::find_faction_by_name(lua_State *l,const std::string &name)
 {
-	auto *name = Lua::CheckString(l,1);
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
 	auto faction = factionManager.FindFactionByName(name);
 	if(faction == nullptr)
-		return 0;
-	Lua::Push(l,faction);
-	return 1;
+		return {};
+	return luabind::object{l,faction};
 }
 
 int Lua::ai::register_task(lua_State *l)

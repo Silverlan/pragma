@@ -8,222 +8,153 @@
 #include "pragma/lua/libraries/s_ldebug.h"
 #include <pragma/serverstate/serverstate.h>
 #include "luasystem.h"
-#include "pragma/ai/ai_behavior.h"
-#include "pragma/ai/ai_task_decorator.h"
-#include "pragma/ai/ai_memory.h"
-#include "pragma/ai/s_disposition.h"
-#include "pragma/ai/s_npcstate.h"
-#include "pragma/ai/ai_task.h"
 
-int Lua::debug::Server::behavior_selector_type_to_string(lua_State *l)
+std::string Lua::debug::Server::behavior_selector_type_to_string(pragma::ai::SelectorType selectorType)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::ai::SelectorType>(v))
+	switch(selectorType)
 	{
 		case pragma::ai::SelectorType::Sequential:
-			Lua::PushString(l,"ai.BEHAVIOR_SELECTOR_TYPE_SEQUENTIAL");
-			break;
+			return "ai.BEHAVIOR_SELECTOR_TYPE_SEQUENTIAL";
 		case pragma::ai::SelectorType::RandomShuffle:
-			Lua::PushString(l,"ai.BEHAVIOR_SELECTOR_TYPE_RANDOM_SHUFFLE");
-			break;
+			return "ai.BEHAVIOR_SELECTOR_TYPE_RANDOM_SHUFFLE";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::behavior_task_decorator_type_to_string(lua_State *l)
+std::string Lua::debug::Server::behavior_task_decorator_type_to_string(pragma::ai::TaskDecorator::DecoratorType decoratorType)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::ai::TaskDecorator::DecoratorType>(v))
+	switch(decoratorType)
 	{
 		case pragma::ai::TaskDecorator::DecoratorType::Inherit:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_INHERIT");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_INHERIT";
 		case pragma::ai::TaskDecorator::DecoratorType::AlwaysFail:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_ALWAYS_FAIL");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_ALWAYS_FAIL";
 		case pragma::ai::TaskDecorator::DecoratorType::AlwaysSucceed:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_ALWAYS_SUCCEED");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_ALWAYS_SUCCEED";
 		case pragma::ai::TaskDecorator::DecoratorType::Invert:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_INVERT");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_INVERT";
 		case pragma::ai::TaskDecorator::DecoratorType::Limit:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_LIMIT");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_LIMIT";
 		case pragma::ai::TaskDecorator::DecoratorType::Repeat:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_REPEAT");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_REPEAT";
 		case pragma::ai::TaskDecorator::DecoratorType::UntilFail:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_UNTIL_FAIL");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_UNTIL_FAIL";
 		case pragma::ai::TaskDecorator::DecoratorType::UntilSuccess:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_DECORATOR_TYPE_UNTIL_SUCCESS");
-			break;
+			return "ai.BEHAVIOR_TASK_DECORATOR_TYPE_UNTIL_SUCCESS";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::behavior_task_result_to_string(lua_State *l)
+std::string Lua::debug::Server::behavior_task_result_to_string(pragma::ai::BehaviorNode::Result result)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::ai::BehaviorNode::Result>(v))
+	switch(result)
 	{
 		case pragma::ai::BehaviorNode::Result::Pending:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_RESULT_PENDING");
-			break;
+			return "ai.BEHAVIOR_TASK_RESULT_PENDING";
 		case pragma::ai::BehaviorNode::Result::Failed:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_RESULT_FAILED");
-			break;
+			return "ai.BEHAVIOR_TASK_RESULT_FAILED";
 		case pragma::ai::BehaviorNode::Result::Succeeded:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_RESULT_SUCCEEDED");
-			break;
+			return "ai.BEHAVIOR_TASK_RESULT_SUCCEEDED";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::behavior_task_type_to_string(lua_State *l)
+std::string Lua::debug::Server::behavior_task_type_to_string(pragma::ai::BehaviorNode::Type type)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::ai::BehaviorNode::Type>(v))
+	switch(type)
 	{
 		case pragma::ai::BehaviorNode::Type::Selector:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_TYPE_SELECTOR");
-			break;
+			return "ai.BEHAVIOR_TASK_TYPE_SELECTOR";
 		case pragma::ai::BehaviorNode::Type::Sequence:
-			Lua::PushString(l,"ai.BEHAVIOR_TASK_TYPE_SEQUENCE");
-			break;
+			return "ai.BEHAVIOR_TASK_TYPE_SEQUENCE";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::disposition_to_string(lua_State *l)
+std::string Lua::debug::Server::disposition_to_string(DISPOSITION disposition)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<DISPOSITION>(v))
+	switch(disposition)
 	{
 		case DISPOSITION::HATE:
-			Lua::PushString(l,"ai.DISPOSITION_HATE");
-			break;
+			return "ai.DISPOSITION_HATE";
 		case DISPOSITION::FEAR:
-			Lua::PushString(l,"ai.DISPOSITION_FEAR");
-			break;
+			return "ai.DISPOSITION_FEAR";
 		case DISPOSITION::NEUTRAL:
-			Lua::PushString(l,"ai.DISPOSITION_NEUTRAL");
-			break;
+			return "ai.DISPOSITION_NEUTRAL";
 		case DISPOSITION::LIKE:
-			Lua::PushString(l,"ai.DISPOSITION_LIKE");
-			break;
+			return "ai.DISPOSITION_LIKE";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::memory_type_to_string(lua_State *l)
+std::string Lua::debug::Server::memory_type_to_string(pragma::ai::Memory::MemoryType memoryType)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<pragma::ai::Memory::MemoryType>(v))
+	switch(memoryType)
 	{
 		case pragma::ai::Memory::MemoryType::Visual:
-			Lua::PushString(l,"ai.MEMORY_TYPE_VISUAL");
-			break;
+			return "ai.MEMORY_TYPE_VISUAL";
 		case pragma::ai::Memory::MemoryType::Sound:
-			Lua::PushString(l,"ai.MEMORY_TYPE_SOUND");
-			break;
+			return "ai.MEMORY_TYPE_SOUND";
 		case pragma::ai::Memory::MemoryType::Smell:
-			Lua::PushString(l,"ai.MEMORY_TYPE_SMELL");
-			break;
+			return "ai.MEMORY_TYPE_SMELL";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::npc_state_to_string(lua_State *l)
+std::string Lua::debug::Server::npc_state_to_string(NPCSTATE npcState)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<NPCSTATE>(v))
+	switch(npcState)
 	{
 		case NPCSTATE::NONE:
-			Lua::PushString(l,"ai.NPC_STATE_NONE");
-			break;
+			return "ai.NPC_STATE_NONE";
 		case NPCSTATE::IDLE:
-			Lua::PushString(l,"ai.NPC_STATE_IDLE");
-			break;
+			return "ai.NPC_STATE_IDLE";
 		case NPCSTATE::ALERT:
-			Lua::PushString(l,"ai.NPC_STATE_ALERT");
-			break;
+			return "ai.NPC_STATE_ALERT";
 		case NPCSTATE::COMBAT:
-			Lua::PushString(l,"ai.NPC_STATE_COMBAT");
-			break;
+			return "ai.NPC_STATE_COMBAT";
 		case NPCSTATE::SCRIPT:
-			Lua::PushString(l,"ai.NPC_STATE_SCRIPT");
-			break;
+			return "ai.NPC_STATE_SCRIPT";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }
 
-int Lua::debug::Server::task_to_string(lua_State *l)
+std::string Lua::debug::Server::task_to_string(::pragma::ai::Task task)
 {
-	auto v = Lua::CheckInt(l,1);
-	switch(static_cast<::pragma::ai::Task>(v))
+	switch(task)
 	{
 		case ::pragma::ai::Task::MoveToTarget:
-			Lua::PushString(l,"ai.TASK_MOVE_TO_TARGET");
-			break;
+			return "ai.TASK_MOVE_TO_TARGET";
 		case ::pragma::ai::Task::PlayAnimation:
-			Lua::PushString(l,"ai.TASK_PLAY_ANIMATION");
-			break;
+			return "ai.TASK_PLAY_ANIMATION";
 		case ::pragma::ai::Task::PlayActivity:
-			Lua::PushString(l,"ai.TASK_PLAY_ACTIVITY");
-			break;
+			return "ai.TASK_PLAY_ACTIVITY";
 		case ::pragma::ai::Task::PlayLayeredAnimation:
-			Lua::PushString(l,"ai.TASK_PLAY_LAYERED_ANIMATION");
-			break;
+			return "ai.TASK_PLAY_LAYERED_ANIMATION";
 		case ::pragma::ai::Task::PlayLayeredActivity:
-			Lua::PushString(l,"ai.TASK_PLAY_LAYERED_ACTIVITY");
-			break;
+			return "ai.TASK_PLAY_LAYERED_ACTIVITY";
 		case ::pragma::ai::Task::MoveRandom:
-			Lua::PushString(l,"ai.TASK_MOVE_RANDOM");
-			break;
+			return "ai.TASK_MOVE_RANDOM";
 		case ::pragma::ai::Task::PlaySound:
-			Lua::PushString(l,"ai.TASK_PLAY_SOUND");
-			break;
+			return "ai.TASK_PLAY_SOUND";
 		case ::pragma::ai::Task::DebugPrint:
-			Lua::PushString(l,"ai.TASK_DEBUG_PRINT");
-			break;
+			return "ai.TASK_DEBUG_PRINT";
 		case ::pragma::ai::Task::DebugDrawText:
-			Lua::PushString(l,"ai.TASK_DEBUG_DRAW_TEXT");
-			break;
+			return "ai.TASK_DEBUG_DRAW_TEXT";
 		case ::pragma::ai::Task::Decorator:
-			Lua::PushString(l,"ai.TASK_DECORATOR");
-			break;
+			return "ai.TASK_DECORATOR";
 		case ::pragma::ai::Task::Wait:
-			Lua::PushString(l,"ai.TASK_WAIT");
-			break;
+			return "ai.TASK_WAIT";
 		case ::pragma::ai::Task::TurnToTarget:
-			Lua::PushString(l,"ai.TASK_TURN_TO_TARGET");
-			break;
+			return "ai.TASK_TURN_TO_TARGET";
 		default:
-			Lua::PushString(l,"");
-			break;
+			return "";
 	}
-	return 1;
 }

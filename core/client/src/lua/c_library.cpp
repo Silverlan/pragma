@@ -28,6 +28,7 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/asset/c_util_model.hpp"
+#include <pragma/util/giblet_create_info.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -737,7 +738,6 @@ void CGame::RegisterLuaLibraries()
 		{"calc_world_direction_from_2d_coordinates",Lua::util::Client::calc_world_direction_from_2d_coordinates},
 		{"create_particle_tracer",Lua::util::Client::create_particle_tracer},
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
-		{"create_giblet",Lua::util::Client::create_giblet},
 		{"fire_bullets",static_cast<int(*)(lua_State*)>(Lua::util::fire_bullets)},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			if(Lua::IsType<uimg::ImageBuffer>(l,1))
@@ -890,18 +890,15 @@ void CGame::RegisterLuaLibraries()
 				return 0;
 			Lua::Push(l,equiRect);
 			return 1;
-		})},
-		{"get_image_format_file_extension",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto imgFormat = Lua::CheckInt(l,1);
-			Lua::PushString(l,uimg::get_file_extension(static_cast<uimg::ImageFormat>(imgFormat)));
-			return 1;
 		})}
 	});
 	auto utilMod = luabind::module(GetLuaState(),"util");
 	utilMod[
 		luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),
 		luabind::def("get_clipboard_string",Lua::util::Client::get_clipboard_string),
-		luabind::def("set_clipboard_string",Lua::util::Client::set_clipboard_string)
+		luabind::def("set_clipboard_string",Lua::util::Client::set_clipboard_string),
+		luabind::def("create_giblet",Lua::util::Client::create_giblet),
+		luabind::def("get_image_format_file_extension",uimg::get_file_extension)
 	];
 
 	auto imgWriteInfoDef = luabind::class_<uimg::TextureInfo>("TextureInfo");
@@ -994,10 +991,6 @@ void CGame::RegisterLuaLibraries()
 	ClientState::RegisterSharedLuaLibraries(GetLuaInterface());
 
 	GetLuaInterface().RegisterLibrary("asset",{
-		{"clear_unused_textures",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			Lua::PushInt(l,static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused());
-			return 1;
-		})},
 		{"export_map",Lua::util::Client::export_map},
 		{"import_model",Lua::util::Client::import_model},
 		{"export_texture",Lua::util::Client::export_texture},
@@ -1057,13 +1050,18 @@ void CGame::RegisterLuaLibraries()
 		})}
 	});
 
+	auto modAsset = luabind::module_(GetLuaState(),"asset");
+	modAsset[
+		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();}))
+	];
+
 	Lua::asset::register_library(GetLuaInterface(),false);
 
 	auto defTexImportInfo = luabind::class_<pragma::asset::TextureImportInfo>("TextureImportInfo");
 	defTexImportInfo.def(luabind::constructor<>());
 	defTexImportInfo.def_readwrite("srgb",&pragma::asset::TextureImportInfo::srgb);
 	defTexImportInfo.def_readwrite("normalMap",&pragma::asset::TextureImportInfo::normalMap);
-	auto &modAsset = GetLuaInterface().RegisterLibrary("asset");
+	GetLuaInterface().RegisterLibrary("asset");
 	modAsset[defTexImportInfo];
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"asset",{

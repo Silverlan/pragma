@@ -38,7 +38,8 @@ namespace Lua
 {
 	namespace Vulkan
 	{
-		DLLCLIENT int create_buffer(lua_State *l);
+		DLLCLIENT std::shared_ptr<prosper::IBuffer> create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds);
+		DLLCLIENT std::shared_ptr<prosper::IBuffer> create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo);
 		DLLCLIENT int create_texture(lua_State *l);
 		DLLCLIENT int create_descriptor_set(lua_State *l);
 		DLLCLIENT int create_image(lua_State *l);
@@ -536,23 +537,22 @@ static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::T
 static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
 };
 
-int Lua::Vulkan::create_buffer(lua_State *l)
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds)
 {
-	auto arg = 1;
-	auto &bufCreateInfo = Lua::Check<prosper::util::BufferCreateInfo>(l,arg++);
-	std::shared_ptr<Buffer> buf = nullptr;
-	if(Lua::IsSet(l,arg) == false)
-		buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
-	else
-	{
-		auto &ds = *Lua::CheckDataStream(l,arg++);
-		buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,ds->GetData());
-	}
+	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,ds->GetData());
 	if(buf == nullptr)
 		return 0;
 	buf->SetDebugName("lua_buf");
-	Lua::Push(l,buf);
-	return 1;
+	return buf;
+}
+
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo)
+{
+	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
+	if(buf == nullptr)
+		return 0;
+	buf->SetDebugName("lua_buf");
+	return buf;
 }
 
 #if 0
@@ -1120,9 +1120,8 @@ static void push_image_buffers(lua_State *l,uint32_t includeLayers,uint32_t incl
 
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
-	auto &vulkanMod = lua.RegisterLibrary("prosper",{
+	lua.RegisterLibrary("prosper",{
 		{"create_descriptor_set",Lua::Vulkan::create_descriptor_set},
-		{"create_buffer",Lua::Vulkan::create_buffer},
 		{"create_image",Lua::Vulkan::create_image},
 		{"create_image_view",Lua::Vulkan::create_image_view},
 		{"create_image_create_info",Lua::Vulkan::create_image_create_info},
@@ -1147,7 +1146,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"wait_idle",Lua::Vulkan::wait_idle},
 		{"flush",Lua::Vulkan::flush}
 	});
-	vulkanMod[
+	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
+	prosperMod[
+		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::util::BufferCreateInfo&,::DataStream&)>([](prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds) {return Lua::Vulkan::create_buffer(bufCreateInfo,ds);})),
+		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::util::BufferCreateInfo&)>([](prosper::util::BufferCreateInfo &bufCreateInfo) {return Lua::Vulkan::create_buffer(bufCreateInfo);}))
+	];
+
+	prosperMod[
 		luabind::namespace_("util")
 		[
 			luabind::def("get_square_vertex_uv_buffer",&Lua::Vulkan::get_square_vertex_uv_buffer),
@@ -1858,7 +1863,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		stats.computeWorkGroupSize[1] = v.y;
 		stats.computeWorkGroupSize[2] = v.z;
 	}));
-	vulkanMod[defShaderStatisticsInfoAMD];
+	prosperMod[defShaderStatisticsInfoAMD];
 
 	auto defShaderResourceUsageAMD = luabind::class_<prosper::ShaderResourceUsageAMD>("ShaderResourceUsageAMD");
 	defShaderResourceUsageAMD.def_readwrite("numUsedVgprs",&prosper::ShaderResourceUsageAMD::numUsedVgprs);
@@ -1866,7 +1871,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defShaderResourceUsageAMD.def_readwrite("ldsSizePerLocalWorkGroup",&prosper::ShaderResourceUsageAMD::ldsSizePerLocalWorkGroup);
 	defShaderResourceUsageAMD.def_readwrite("ldsUsageSizeInBytes",&prosper::ShaderResourceUsageAMD::ldsUsageSizeInBytes);
 	defShaderResourceUsageAMD.def_readwrite("scratchMemUsageInBytes",&prosper::ShaderResourceUsageAMD::scratchMemUsageInBytes);
-	vulkanMod[defShaderResourceUsageAMD];
+	prosperMod[defShaderResourceUsageAMD];
 
 	auto defPipelineColorBlendAttachmentState = luabind::class_<prosper::PipelineColorBlendAttachmentState>("PipelineColorBlendAttachmentState");
 	defPipelineColorBlendAttachmentState.def(luabind::constructor<>());
@@ -1878,7 +1883,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defPipelineColorBlendAttachmentState.def_readwrite("dstAlphaBlendFactor",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::dstAlphaBlendFactor));
 	defPipelineColorBlendAttachmentState.def_readwrite("alphaBlendOp",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::alphaBlendOp));
 	defPipelineColorBlendAttachmentState.def_readwrite("colorWriteMask",reinterpret_cast<uint32_t prosper::PipelineColorBlendAttachmentState::*>(&prosper::PipelineColorBlendAttachmentState::colorWriteMask));
-	vulkanMod[defPipelineColorBlendAttachmentState];
+	prosperMod[defPipelineColorBlendAttachmentState];
 #endif
 
 	auto defBufferCreateInfo = luabind::class_<prosper::util::BufferCreateInfo>("BufferCreateInfo");
@@ -1893,12 +1898,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBufferCreateInfo.add_static_constant("FLAG_DONT_ALLOCATE_MEMORY_BIT",umath::to_integral(prosper::util::BufferCreateInfo::Flags::DontAllocateMemory));
 	defBufferCreateInfo.add_static_constant("FLAG_SPARSE_BIT",umath::to_integral(prosper::util::BufferCreateInfo::Flags::Sparse));
 	defBufferCreateInfo.add_static_constant("FLAG_SPARSE_ALIASED_RESIDENCY_BIT",umath::to_integral(prosper::util::BufferCreateInfo::Flags::SparseAliasedResidency));
-	vulkanMod[defBufferCreateInfo];
+	prosperMod[defBufferCreateInfo];
 
 	auto defRenderTargetCreateInfo = luabind::class_<prosper::util::RenderTargetCreateInfo>("RenderTargetCreateInfo");
 	defRenderTargetCreateInfo.def(luabind::constructor<>());
 	defRenderTargetCreateInfo.def_readwrite("useLayerFramebuffers",&prosper::util::RenderTargetCreateInfo::useLayerFramebuffers);
-	vulkanMod[defRenderTargetCreateInfo];
+	prosperMod[defRenderTargetCreateInfo];
 
 	auto defSamplerCreateInfo = luabind::class_<prosper::util::SamplerCreateInfo>("SamplerCreateInfo");
 	defSamplerCreateInfo.def(luabind::constructor<>());
@@ -1916,7 +1921,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defSamplerCreateInfo.def_readwrite("maxLod",&prosper::util::SamplerCreateInfo::maxLod);
 	defSamplerCreateInfo.def_readwrite("borderColor",reinterpret_cast<uint32_t prosper::util::SamplerCreateInfo::*>(&prosper::util::SamplerCreateInfo::borderColor));
 	// defSamplerCreateInfo.def_readwrite("useUnnormalizedCoordinates",&prosper::util::SamplerCreateInfo::useUnnormalizedCoordinates);
-	vulkanMod[defSamplerCreateInfo];
+	prosperMod[defSamplerCreateInfo];
 
 	auto defTextureCreateInfo = luabind::class_<prosper::util::TextureCreateInfo>("TextureCreateInfo");
 	defTextureCreateInfo.def(luabind::constructor<>());
@@ -1926,7 +1931,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defTextureCreateInfo.add_static_constant("FLAG_NONE",umath::to_integral(prosper::util::TextureCreateInfo::Flags::None));
 	defTextureCreateInfo.add_static_constant("FLAG_RESOLVABLE",umath::to_integral(prosper::util::TextureCreateInfo::Flags::Resolvable));
 	defTextureCreateInfo.add_static_constant("FLAG_CREATE_IMAGE_VIEW_FOR_EACH_LAYER",umath::to_integral(prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer));
-	vulkanMod[defTextureCreateInfo];
+	prosperMod[defTextureCreateInfo];
 
 	auto defImageCreateInfo = luabind::class_<prosper::util::ImageCreateInfo>("ImageCreateInfo");
 	defImageCreateInfo.def(luabind::constructor<>());
@@ -1948,7 +1953,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defImageCreateInfo.add_static_constant("FLAG_FULL_MIPMAP_CHAIN_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::FullMipmapChain));
 	defImageCreateInfo.add_static_constant("FLAG_SPARSE_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::Sparse));
 	defImageCreateInfo.add_static_constant("FLAG_SPARSE_ALIASED_RESIDENCY_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::SparseAliasedResidency));
-	vulkanMod[defImageCreateInfo];
+	prosperMod[defImageCreateInfo];
 
 	auto defImageViewCreateInfo = luabind::class_<prosper::util::ImageViewCreateInfo>("ImageViewCreateInfo");
 	defImageViewCreateInfo.def(luabind::constructor<>());
@@ -1961,7 +1966,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defImageViewCreateInfo.def_readwrite("swizzleGreen",reinterpret_cast<uint32_t prosper::util::ImageViewCreateInfo::*>(&prosper::util::ImageViewCreateInfo::swizzleGreen));
 	defImageViewCreateInfo.def_readwrite("swizzleBlue",reinterpret_cast<uint32_t prosper::util::ImageViewCreateInfo::*>(&prosper::util::ImageViewCreateInfo::swizzleBlue));
 	defImageViewCreateInfo.def_readwrite("swizzleAlpha",reinterpret_cast<uint32_t prosper::util::ImageViewCreateInfo::*>(&prosper::util::ImageViewCreateInfo::swizzleAlpha));
-	vulkanMod[defImageViewCreateInfo];
+	prosperMod[defImageViewCreateInfo];
 
 	auto defRenderPassCreateInfo = luabind::class_<prosper::util::RenderPassCreateInfo>("RenderPassCreateInfo");
 	defRenderPassCreateInfo.def(luabind::constructor<>());
@@ -1996,7 +2001,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			static_cast<prosper::AccessFlags>(sourceAccessMask),static_cast<prosper::AccessFlags>(destinationAccessMask)
 		});
 	}));
-	vulkanMod[defRenderPassCreateInfo];
+	prosperMod[defRenderPassCreateInfo];
 
 	auto defImageSubresourceLayers = luabind::class_<prosper::util::ImageSubresourceLayers>("ImageSubresourceLayers");
 	defImageSubresourceLayers.def(luabind::constructor<>());
@@ -2004,13 +2009,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
     defImageSubresourceLayers.def_readwrite("mipLevel",&prosper::util::ImageSubresourceLayers::mipLevel);
 	defImageSubresourceLayers.def_readwrite("baseArrayLayer",&prosper::util::ImageSubresourceLayers::baseArrayLayer);
 	defImageSubresourceLayers.def_readwrite("layerCount",&prosper::util::ImageSubresourceLayers::layerCount);
-	vulkanMod[defImageSubresourceLayers];
+	prosperMod[defImageSubresourceLayers];
 
 	auto defBlitInfo = luabind::class_<prosper::util::BlitInfo>("BlitInfo");
 	defBlitInfo.def(luabind::constructor<>());
 	defBlitInfo.def_readwrite("srcSubresourceLayer",&prosper::util::BlitInfo::srcSubresourceLayer);
 	defBlitInfo.def_readwrite("dstSubresourceLayer",&prosper::util::BlitInfo::dstSubresourceLayer);
-	vulkanMod[defBlitInfo];
+	prosperMod[defBlitInfo];
 
 	static_assert(sizeof(prosper::Offset3D) == sizeof(Vector3i));
 	auto defCopyInfo = luabind::class_<prosper::util::CopyInfo>("ImageCopyInfo");
@@ -2023,14 +2028,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defCopyInfo.def_readwrite("dstOffset",reinterpret_cast<Vector3i prosper::util::CopyInfo::*>(&prosper::util::CopyInfo::dstOffset));
 	defCopyInfo.def_readwrite("srcImageLayout",reinterpret_cast<uint32_t prosper::util::CopyInfo::*>(&prosper::util::CopyInfo::srcImageLayout));
 	defCopyInfo.def_readwrite("dstImageLayout",reinterpret_cast<uint32_t prosper::util::CopyInfo::*>(&prosper::util::CopyInfo::dstImageLayout));
-	vulkanMod[defCopyInfo];
+	prosperMod[defCopyInfo];
 
 	auto defBufferCopyInfo = luabind::class_<prosper::util::BufferCopy>("BufferCopyInfo");
 	defBufferCopyInfo.def(luabind::constructor<>());
 	defBufferCopyInfo.def_readwrite("srcOffset",&prosper::util::BufferCopy::srcOffset);
 	defBufferCopyInfo.def_readwrite("dstOffset",&prosper::util::BufferCopy::dstOffset);
 	defBufferCopyInfo.def_readwrite("size",&prosper::util::BufferCopy::size);
-	vulkanMod[defBufferCopyInfo];
+	prosperMod[defBufferCopyInfo];
 
 	auto defBufferImageCopyInfo = luabind::class_<prosper::util::BufferImageCopyInfo>("BufferImageCopyInfo");
 	defBufferImageCopyInfo.def(luabind::constructor<>());
@@ -2058,7 +2063,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBufferImageCopyInfo.def_readwrite("layerCount",&prosper::util::BufferImageCopyInfo::layerCount);
 	defBufferImageCopyInfo.def_readwrite("aspectMask",reinterpret_cast<uint32_t prosper::util::BufferImageCopyInfo::*>(&prosper::util::BufferImageCopyInfo::aspectMask));
 	defBufferImageCopyInfo.def_readwrite("dstImageLayout",reinterpret_cast<uint32_t prosper::util::BufferImageCopyInfo::*>(&prosper::util::BufferImageCopyInfo::dstImageLayout));
-	vulkanMod[defBufferImageCopyInfo];
+	prosperMod[defBufferImageCopyInfo];
 
 	auto defPipelineBarrierInfo = luabind::class_<prosper::util::PipelineBarrierInfo>("PipelineBarrierInfo");
 	defPipelineBarrierInfo.def(luabind::constructor<>());
@@ -2066,7 +2071,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defPipelineBarrierInfo.def_readwrite("dstStageMask",reinterpret_cast<uint32_t prosper::util::PipelineBarrierInfo::*>(&prosper::util::PipelineBarrierInfo::dstStageMask));
 	//defPipelineBarrierInfo.def_readwrite("bufferBarriers",&prosper::util::PipelineBarrierInfo::bufferBarriers); // prosper TODO
 	//defPipelineBarrierInfo.def_readwrite("imageBarriers",&prosper::util::PipelineBarrierInfo::imageBarriers); // prosper TODO
-	vulkanMod[defPipelineBarrierInfo];
+	prosperMod[defPipelineBarrierInfo];
 
 	auto defImageSubresourceRange = luabind::class_<prosper::util::ImageSubresourceRange>("ImageSubresourceRange");
 	defImageSubresourceRange.def(luabind::constructor<>());
@@ -2078,12 +2083,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defImageSubresourceRange.def_readwrite("levelCount",&prosper::util::ImageSubresourceRange::levelCount);
 	defImageSubresourceRange.def_readwrite("baseArrayLayer",&prosper::util::ImageSubresourceRange::baseArrayLayer);
 	defImageSubresourceRange.def_readwrite("layerCount",&prosper::util::ImageSubresourceRange::layerCount);
-	vulkanMod[defImageSubresourceRange];
+	prosperMod[defImageSubresourceRange];
 
 	auto defClearImageInfo = luabind::class_<prosper::util::ClearImageInfo>("ClearImageInfo");
 	defClearImageInfo.def(luabind::constructor<>());
 	defClearImageInfo.def_readwrite("subresourceRange",&prosper::util::ClearImageInfo::subresourceRange);
-	vulkanMod[defClearImageInfo];
+	prosperMod[defClearImageInfo];
 
 	auto defVkTexture = luabind::class_<Lua::Vulkan::Texture>("Texture");
 	defVkTexture.def(luabind::tostring(luabind::self));
@@ -2106,7 +2111,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		tex.SetImageView(imgView);
 	}));
 	//
-	vulkanMod[defVkTexture];
+	prosperMod[defVkTexture];
 
 	auto defVkImage = luabind::class_<Lua::Vulkan::Image>("Image");
 	defVkImage.def(luabind::tostring(luabind::self));
@@ -2186,7 +2191,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Push(l,buf);
 		//Lua::Push(l,buf->shared_from_this());
 	}));
-	vulkanMod[defVkImage];
+	prosperMod[defVkImage];
 
 	auto debSubresourceLayout = luabind::class_<prosper::util::SubresourceLayout>("SubresourceLayout");
 	debSubresourceLayout.def(luabind::constructor<>());
@@ -2195,7 +2200,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	debSubresourceLayout.def_readwrite("rowPitch",&prosper::util::SubresourceLayout::row_pitch);
 	debSubresourceLayout.def_readwrite("arrayPitch",&prosper::util::SubresourceLayout::array_pitch);
 	debSubresourceLayout.def_readwrite("depthPitch",&prosper::util::SubresourceLayout::depth_pitch);
-	vulkanMod[debSubresourceLayout];
+	prosperMod[debSubresourceLayout];
 
 	auto defVkImageView = luabind::class_<Lua::Vulkan::ImageView>("ImageView");
 	defVkImageView.def(luabind::tostring(luabind::self));
@@ -2220,7 +2225,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImageView.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::ImageView&)>([](lua_State *l,Lua::Vulkan::ImageView &imgView) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::ImageView>(l,imgView,&Lua::Check<Lua::Vulkan::ImageView>);
 	}));
-	vulkanMod[defVkImageView];
+	prosperMod[defVkImageView];
 
 	auto defVkSampler = luabind::class_<Lua::Vulkan::Sampler>("Sampler");
 	defVkSampler.def(luabind::tostring(luabind::self));
@@ -2263,7 +2268,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkSampler.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&)>([](lua_State *l,Lua::Vulkan::Sampler &smp) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Sampler>(l,smp,&Lua::Check<Lua::Vulkan::Sampler>);
 	}));
-	vulkanMod[defVkSampler];
+	prosperMod[defVkSampler];
 
 	auto defVkFramebuffer = luabind::class_<Lua::Vulkan::Framebuffer>("Framebuffer");
 	defVkFramebuffer.def(luabind::tostring(luabind::self));
@@ -2275,31 +2280,31 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkFramebuffer.def("GetHeight",static_cast<void(*)(lua_State*,Lua::Vulkan::Framebuffer&)>([](lua_State *l,Lua::Vulkan::Framebuffer &framebuffer) {
 		Lua::PushInt(l,framebuffer.GetHeight());
 	}));
-	vulkanMod[defVkFramebuffer];
+	prosperMod[defVkFramebuffer];
 	
 	auto defVkRenderPass = luabind::class_<Lua::Vulkan::RenderPass>("RenderPass");
 	defVkRenderPass.def(luabind::tostring(luabind::self));
 	defVkRenderPass.def(luabind::const_self ==luabind::const_self);
 	defVkRenderPass.def("IsValid",&Lua::Vulkan::VKRenderPass::IsValid);
-	vulkanMod[defVkRenderPass];
+	prosperMod[defVkRenderPass];
 	
 	auto defVkEvent = luabind::class_<Lua::Vulkan::Event>("Event");
 	defVkEvent.def(luabind::tostring(luabind::self));
 	defVkEvent.def(luabind::const_self ==luabind::const_self);
 	defVkEvent.def("IsValid",&Lua::Vulkan::VKEvent::IsValid);
-	vulkanMod[defVkEvent];
+	prosperMod[defVkEvent];
 	
 	auto defVkFence = luabind::class_<Lua::Vulkan::Fence>("Fence");
 	defVkFence.def(luabind::tostring(luabind::self));
 	defVkFence.def(luabind::const_self ==luabind::const_self);
 	defVkFence.def("IsValid",&Lua::Vulkan::VKFence::IsValid);
-	vulkanMod[defVkFence];
+	prosperMod[defVkFence];
 	
 #if 0
 	auto defVkSemaphore = luabind::class_<Lua::Vulkan::Semaphore>("Semaphore");
 	defVkSemaphore.def(luabind::tostring(luabind::self));
 	defVkSemaphore.def("IsValid",&Lua::Vulkan::VKSemaphore::IsValid);
-	vulkanMod[defVkSemaphore];
+	prosperMod[defVkSemaphore];
 	
 	auto defVkMemory = luabind::class_<Lua::Vulkan::Memory>("Memory");
 	defVkMemory.def(luabind::tostring(luabind::self));
@@ -2324,7 +2329,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Vulkan::VKMemory::Map(l,hMemory,0u,hMemory.get_create_info_ptr()->get_size());
 	}));
 	defVkMemory.def("Unmap",&Lua::Vulkan::VKMemory::Unmap);
-	vulkanMod[defVkMemory];
+	prosperMod[defVkMemory];
 #endif
 	auto defVkCommandBuffer = luabind::class_<Lua::Vulkan::CommandBuffer>("CommandBuffer");
 	defVkCommandBuffer.def(luabind::tostring(luabind::self));
@@ -2454,7 +2459,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkCommandBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::CommandBuffer>(l,cb,&Lua::Check<Lua::Vulkan::CommandBuffer>);
 	}));
-	vulkanMod[defVkCommandBuffer];
+	prosperMod[defVkCommandBuffer];
 
 	auto devVkBuffer = luabind::class_<Lua::Vulkan::Buffer>("Buffer");
 	devVkBuffer.def(luabind::tostring(luabind::self));
@@ -2492,7 +2497,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Vulkan::VKBuffer::Map(l,hBuffer,0u,hBuffer.GetSize());
 	}));
 	devVkBuffer.def("UnmapMemory",&Lua::Vulkan::VKBuffer::Unmap);
-	vulkanMod[devVkBuffer];
+	prosperMod[devVkBuffer];
 
 	auto defVkDescriptorSet = luabind::class_<Lua::Vulkan::DescriptorSet>("DescriptorSet");
 	defVkDescriptorSet.def(luabind::tostring(luabind::self));
@@ -2539,7 +2544,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkDescriptorSet.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::DescriptorSet>(l,ds,&Lua::Check<Lua::Vulkan::DescriptorSet>);
 	}));
-	vulkanMod[defVkDescriptorSet];
+	prosperMod[defVkDescriptorSet];
 	
 	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
 	defVkMesh.def(luabind::tostring(luabind::self));
@@ -2552,7 +2557,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkMesh.def("SetVertexWeightBuffer",&Lua::Vulkan::VKMesh::SetVertexWeightBuffer);
 	defVkMesh.def("SetAlphaBuffer",&Lua::Vulkan::VKMesh::SetAlphaBuffer);
 	defVkMesh.def("SetIndexBuffer",&Lua::Vulkan::VKMesh::SetIndexBuffer);
-	vulkanMod[defVkMesh];
+	prosperMod[defVkMesh];
 	
 	auto defVkRenderTarget = luabind::class_<Lua::Vulkan::RenderTarget>("RenderTarget");
 	defVkRenderTarget.def(luabind::tostring(luabind::self));
@@ -2572,19 +2577,19 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkRenderTarget.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::RenderTarget>(l,rt,&Lua::Check<Lua::Vulkan::RenderTarget>);
 	}));
-	vulkanMod[defVkRenderTarget];
+	prosperMod[defVkRenderTarget];
 	
 	auto defVkTimestampQuery = luabind::class_<Lua::Vulkan::TimestampQuery>("TimestampQuery");
 	defVkTimestampQuery.def(luabind::tostring(luabind::self));
 	defVkTimestampQuery.def(luabind::const_self ==luabind::const_self);
 	defVkTimestampQuery.def("IsValid",&Lua::Vulkan::VKTimestampQuery::IsValid);
-	vulkanMod[defVkTimestampQuery];
+	prosperMod[defVkTimestampQuery];
 	
 	auto defVkTimerQuery = luabind::class_<Lua::Vulkan::TimerQuery>("TimerQuery");
 	defVkTimerQuery.def(luabind::tostring(luabind::self));
 	defVkTimerQuery.def(luabind::const_self ==luabind::const_self);
 	defVkTimerQuery.def("IsValid",&Lua::Vulkan::VKTimerQuery::IsValid);
-	vulkanMod[defVkTimerQuery];
+	prosperMod[defVkTimerQuery];
 
 	auto defClearValue = luabind::class_<Lua::Vulkan::ClearValue>("ClearValue");
 	defClearValue.def(luabind::constructor<>());
@@ -2600,7 +2605,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defClearValue.def("SetDepthStencil",static_cast<void(*)(lua_State*,Lua::Vulkan::ClearValue&,float,uint32_t)>([](lua_State *l,Lua::Vulkan::ClearValue &clearValue,float depth,uint32_t stencil) {
 		clearValue.clearValue.setDepthStencil(prosper::ClearDepthStencilValue{depth,stencil});
 	}));
-	vulkanMod[defClearValue];
+	prosperMod[defClearValue];
 
 	auto defRenderPassInfo = luabind::class_<Lua::Vulkan::RenderPassInfo>("RenderPassInfo");
 	defRenderPassInfo.def(luabind::constructor<const std::shared_ptr<Lua::Vulkan::RenderTarget>&>());
@@ -2634,7 +2639,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defRenderPassInfo.def("SetRenderPass",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,Lua::Vulkan::RenderPass&)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,Lua::Vulkan::RenderPass &rp) {
 		rpInfo.renderPass = rp.shared_from_this();
 	}));
-	vulkanMod[defRenderPassInfo];
+	prosperMod[defRenderPassInfo];
 }
 
 /////////////////////////////////

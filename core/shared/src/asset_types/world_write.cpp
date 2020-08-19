@@ -14,7 +14,7 @@
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
@@ -89,7 +89,7 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	WriteMaterials(f);
 
 	m_messageLogger("Writing BSP Tree...");
-	if(m_bspTree)
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
 	{
 		WriteDataOffset(f,offsetBSPTree);
 		flags |= DataFlags::HasBSPTree;
@@ -308,4 +308,4 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
 	return result;
 }
-
+#pragma optimize("",on)

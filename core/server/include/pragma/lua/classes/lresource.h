@@ -14,9 +14,10 @@ namespace Lua
 {
 	namespace resource
 	{
-		DLLSERVER int add_file(lua_State *l);
-		DLLSERVER int add_lua_file(lua_State *l);
-		DLLSERVER int get_list(lua_State *l);
+		DLLSERVER bool add_file(const std::string &res,bool stream);
+		DLLSERVER bool add_file(const std::string &res);
+		DLLSERVER bool add_lua_file(const std::string &f);
+		DLLSERVER LuaTableObject get_list(lua_State *l);
 	};
 };
 

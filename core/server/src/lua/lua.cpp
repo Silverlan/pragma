@@ -68,7 +68,6 @@ void SGame::RegisterLua()
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},
-		{"load_material",Lua_sv_engine_LoadMaterial},
 		{"create_model",Lua::game::Server::create_model},
 		{"set_time_scale",Lua::game::set_time_scale},
 		{"load_map",Lua::game::Server::load_map}
@@ -83,7 +82,9 @@ void SGame::RegisterLua()
 		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&,bool)>(Lua::engine::LoadSoundScripts)),
 		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::LoadSoundScripts)),
 		luabind::def("precache_model",Lua::engine::PrecacheModel_sv),
-		luabind::def("get_model",Lua::engine::get_model)
+		luabind::def("get_model",Lua::engine::get_model),
+		luabind::def("load_material",static_cast<Material*(*)(const std::string&,bool)>(Lua::engine::server::LoadMaterial)),
+		luabind::def("load_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::server::LoadMaterial))
 	];
 	RegisterLuaGameClasses(gameMod);
 

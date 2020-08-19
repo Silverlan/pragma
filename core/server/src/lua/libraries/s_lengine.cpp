@@ -10,15 +10,6 @@
 #include <pragma/serverstate/serverstate.h>
 
 extern ServerState *server;
-DLLSERVER int Lua_sv_engine_LoadMaterial(lua_State *l)
-{
-	std::string mat = Lua::CheckString(l,1);
-	auto bReload = false;
-	if(Lua::IsSet(l,2))
-		bReload = Lua::CheckBool(l,2);
-	Material *material = server->LoadMaterial(mat.c_str(),bReload);
-	if(material == NULL)
-		return 0;
-	luabind::object(l,material).push(l);
-	return 1;
-}
+
+Material *Lua::engine::server::LoadMaterial(const std::string &mat,bool reload) {return ::server->LoadMaterial(mat,reload);}
+Material *Lua::engine::server::LoadMaterial(const std::string &mat) {return LoadMaterial(mat,false);}

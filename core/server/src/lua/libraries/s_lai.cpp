@@ -41,9 +41,11 @@ namespace Lua
 	{
 		static std::shared_ptr<pragma::ai::Schedule> create_schedule();
 		static std::shared_ptr<::Faction> register_faction(const std::string &name);
-		static int get_factions(lua_State *l);
+		static LuaTableObject get_factions(lua_State *l);
 		static LuaFactionObject find_faction_by_name(lua_State *l,const std::string &name);
-		static int register_task(lua_State *l);
+		static uint32_t register_task(lua_State *l,const LuaClassObject &taskClass,::pragma::ai::BehaviorNode::Type taskType,::pragma::ai::SelectorType selectorType);
+		static uint32_t register_task(lua_State *l,const LuaClassObject &taskClass,::pragma::ai::BehaviorNode::Type taskType);
+		static uint32_t register_task(lua_State *l,const LuaClassObject &taskClass);
 	};
 };
 
@@ -53,12 +55,12 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	modAi[
 		luabind::def("create_schedule",create_schedule),
 		luabind::def("register_faction",register_faction),
-		luabind::def("find_faction_by_name",find_faction_by_name)
+		luabind::def("find_faction_by_name",find_faction_by_name),
+		luabind::def("get_factions",get_factions),
+		luabind::def("register_task",static_cast<uint32_t(*)(lua_State*,const LuaClassObject&,::pragma::ai::BehaviorNode::Type,::pragma::ai::SelectorType)>(register_task)),
+		luabind::def("register_task",static_cast<uint32_t(*)(lua_State*,const LuaClassObject&,::pragma::ai::BehaviorNode::Type)>(register_task)),
+		luabind::def("register_task",static_cast<uint32_t(*)(lua_State*,const LuaClassObject&)>(register_task))
 	];
-	lua.RegisterLibrary("ai",{
-		{"get_factions",get_factions},
-		{"register_task",register_task}
-	});
 	Lua::ai::register_library(lua);
 
 	auto *l = lua.GetState();
@@ -322,18 +324,11 @@ std::shared_ptr<Faction> Lua::ai::register_faction(const std::string &name)
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
 	return factionManager.RegisterFaction(name);
 }
-int Lua::ai::get_factions(lua_State *l)
+LuaTableObject Lua::ai::get_factions(lua_State *l)
 {
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
 	auto &factions = factionManager.GetFactions();
-	auto t = Lua::CreateTable(l);
-	for(auto i=decltype(factions.size()){0};i<factions.size();++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::Push(l,factions[i]);
-		Lua::SetTableValue(l,t);
-	}
-	return 1;
+	return Lua::vector_to_table(l,factions);
 }
 LuaFactionObject Lua::ai::find_faction_by_name(lua_State *l,const std::string &name)
 {
@@ -344,18 +339,11 @@ LuaFactionObject Lua::ai::find_faction_by_name(lua_State *l,const std::string &n
 	return luabind::object{l,faction};
 }
 
-int Lua::ai::register_task(lua_State *l)
+uint32_t Lua::ai::register_task(lua_State *l,const LuaClassObject &taskClass,::pragma::ai::BehaviorNode::Type taskType,::pragma::ai::SelectorType selectorType)
 {
-	luaL_checkuserdata(l,1);
-	auto o = luabind::object(luabind::from_stack(l,1)); // Class Definition
-	auto taskType = ::pragma::ai::BehaviorNode::Type::Sequence;
-	auto selectorType = ::pragma::ai::SelectorType::Sequential;
-	if(Lua::IsSet(l,2) == true)
-		taskType = static_cast<::pragma::ai::BehaviorNode::Type>(Lua::CheckInt(l,2));
-	if(Lua::IsSet(l,3) == true)
-		selectorType = static_cast<::pragma::ai::SelectorType>(Lua::CheckInt(l,3));
+	Lua::CheckUserData(l,1);
 	auto &taskManager = s_game->GetAITaskManager();
-	auto taskId = taskManager.RegisterTask(std::bind(server::create_lua_task,l,o,taskType,selectorType));
-	Lua::PushInt(l,taskId);
-	return 1;
+	return taskManager.RegisterTask(std::bind(server::create_lua_task,l,taskClass,taskType,selectorType));
 }
+uint32_t Lua::ai::register_task(lua_State *l,const LuaClassObject &taskClass,::pragma::ai::BehaviorNode::Type taskType) {return register_task(l,taskClass,taskType,::pragma::ai::SelectorType::Sequential);}
+uint32_t Lua::ai::register_task(lua_State *l,const LuaClassObject &taskClass) {return register_task(l,taskClass,::pragma::ai::BehaviorNode::Type::Sequence);}

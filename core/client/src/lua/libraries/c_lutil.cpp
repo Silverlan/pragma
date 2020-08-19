@@ -129,15 +129,13 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 	return 1;
 }
 
-int Lua::util::Client::create_giblet(lua_State *l)
+luabind::object Lua::util::Client::create_giblet(GibletCreateInfo &createInfo)
 {
-	auto *createInfo = Lua::CheckGibletCreateInfo(l,1);
 	pragma::CParticleSystemComponent *particle = nullptr;
-	c_game->CreateGiblet(*createInfo,&particle);
+	c_game->CreateGiblet(createInfo,&particle);
 	if(particle == nullptr)
-		return 0;
-	particle->PushLuaObject(l);
-	return 1;
+		return {};
+	return particle->GetLuaObject();
 }
 
 int Lua::util::Client::import_model(lua_State *l)

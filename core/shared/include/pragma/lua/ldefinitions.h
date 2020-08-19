@@ -18,6 +18,9 @@
 #define luaL_checkthread(L,n)    (luaL_checktype(L, (n), LUA_TTHREAD))
 #define luaL_checkuserdata(L,n)    (luaL_checktype(L, (n), LUA_TUSERDATA))
 
+using LuaTableObject = luabind::object;
+using LuaClassObject = luabind::object;
+
 class BaseLuaObj;
 namespace Lua
 {

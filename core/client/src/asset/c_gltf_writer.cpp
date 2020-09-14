@@ -1419,12 +1419,10 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		if(itAlbedo != texturePaths->end())
 			gltfMat.pbrMetallicRoughness.baseColorTexture.index = fAddTexture(itAlbedo->second);
 
-		auto &color = data->GetValue("color_factor");
-		if(color != nullptr && typeid(*color) == typeid(ds::Vector4))
-		{
-			auto &col = static_cast<ds::Vector4*>(color.get())->GetValue();
-			gltfMat.pbrMetallicRoughness.baseColorFactor = {col[0],col[1],col[2],col[3]};
-		}
+		Vector4 colorFactor{1.f,1.f,1.f,1.f};
+		data->GetVector3("color_factor",reinterpret_cast<Vector3*>(&colorFactor));
+		data->GetFloat("alpha_factor",&colorFactor.a);
+		gltfMat.pbrMetallicRoughness.baseColorFactor = {colorFactor[0],colorFactor[1],colorFactor[2],colorFactor[3]};
 
 		auto itNormal = texturePaths->find(Material::NORMAL_MAP_IDENTIFIER);
 		if(itNormal != texturePaths->end())

@@ -42,6 +42,10 @@ namespace pragma
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool GetRenderBufferTargets(
+			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+		) const override;
 	protected:
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;

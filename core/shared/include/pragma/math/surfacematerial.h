@@ -59,23 +59,14 @@ public:
 	};
 	struct PBRInfo
 	{
-		enum class SubsurfaceMethod : uint8_t
-		{
-			Cubic = 0,
-			Gaussian,
-			Principled,
-			Burley,
-			RandomWalk,
-			PrincipledRandomWalk,
-			Count
-		};
 		float metalness = 0.f;
 		float roughness = 0.5f;
-
-		float subsurfaceMultiplier = 0.f;
-		Color subsurfaceColor = Color::White;
-		SubsurfaceMethod subsurfaceMethod = SubsurfaceMethod::PrincipledRandomWalk;
-		Vector3 subsurfaceRadius = {};
+		struct {
+			Color color = Color::White;
+			Vector3 scatterColor = {0.f,0.f,0.f};
+			Vector3 radiusMM {};
+			float factor = 0.f;
+		} subsurface;
 	};
 public:
 	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
@@ -90,6 +81,10 @@ public:
 	float GetDynamicFriction() const;
 	void SetDynamicFriction(float friction);
 	Float GetRestitution() const;
+
+	const std::optional<float> &GetIOR() const;
+	void SetIOR(float ior);
+	void ClearIOR();
 
 	pragma::physics::IMaterial &GetPhysicsMaterial() const;
 	pragma::physics::SurfaceType *GetSurfaceType() const;
@@ -149,6 +144,7 @@ protected:
 	std::string m_hardImpactSound;
 	std::string m_bulletImpactSound;
 	std::string m_impactParticle;
+	std::optional<float> m_ior {};
 	pragma::nav::PolyFlags m_navigationFlags;
 	std::unique_ptr<PhysLiquid> m_liquidInfo = nullptr;
 	std::shared_ptr<pragma::physics::IMaterial> m_physMaterial = nullptr;

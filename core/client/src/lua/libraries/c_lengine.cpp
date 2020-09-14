@@ -83,11 +83,9 @@ void Lua::engine::bind_key(lua_State *l,const std::string &key,const std::string
 	return;
 }
 
-void Lua::engine::bind_key(lua_State *l,const std::string &key,luabind::function<> function)
+void Lua::engine::bind_key(lua_State *l,const std::string &key,luabind::object function)
 {
-
-	luaL_checkfunction(l,2);
-	int fc = lua_createreference(l,2);
+	Lua::CheckType(function,Lua::Type::Function);
 	short c;
 	if(!StringToKey(key,&c))
 		return;
@@ -114,42 +112,47 @@ void Lua::engine::precache_model(lua_State *l,const std::string &mdl)
 	});
 }
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name,TextureLoadFlags loadFlags)
 {
 	TextureManager::LoadInfo loadInfo {};
-	std::string fname = Lua::CheckString(l,1);
-	if(Lua::IsSet(l,2))
-		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,2));
+	loadInfo.flags = loadFlags;
 	std::shared_ptr<void> tex = nullptr;
-	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),fname,loadInfo,&tex);
+	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),name,loadInfo,&tex);
 	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const std::string &name) {return load_texture(l,name,TextureLoadFlags::None);}
 
-std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file)
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName,TextureLoadFlags loadFlags)
 {
 	auto *lf = Lua::CheckFile(l,1);
 	if(lf == nullptr)
 		return nullptr;
-	std::optional<std::string> cacheName {};
-	int32_t loadFlagsIdx = 2;
-	if(Lua::IsNumber(l,2) == false)
-	{
-		cacheName = Lua::CheckString(l,2);
-		++loadFlagsIdx;
-	}
 	TextureManager::LoadInfo loadInfo {};
-	if(Lua::IsSet(l,loadFlagsIdx))
-		loadInfo.flags = static_cast<TextureLoadFlags>(Lua::CheckInt(l,loadFlagsIdx));
-	if(cacheName.has_value() == false)
-		loadInfo.flags |= TextureLoadFlags::DontCache;
+	loadInfo.flags = loadFlags;
+	loadInfo.flags |= TextureLoadFlags::DontCache;
 	std::shared_ptr<void> tex = nullptr;
-	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName.has_value() ? *cacheName : "",lf->GetHandle(),loadInfo,&tex);
+	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),cacheName,lf->GetHandle(),loadInfo,&tex);
 	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
 		return nullptr;
 	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
 }
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,const std::string &cacheName) {return load_texture(l,file,cacheName,TextureLoadFlags::None);}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file,TextureLoadFlags loadFlags)
+{
+	auto *lf = Lua::CheckFile(l,1);
+	if(lf == nullptr)
+		return nullptr;
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = loadFlags;
+	std::shared_ptr<void> tex = nullptr;
+	auto result = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(c_engine->GetRenderContext(),"",lf->GetHandle(),loadInfo,&tex);
+	if(result == false || tex == nullptr || std::static_pointer_cast<Texture>(tex)->HasValidVkTexture() == false)
+		return nullptr;
+	return std::static_pointer_cast<Texture>(tex)->GetVkTexture();
+}
+std::shared_ptr<prosper::Texture> Lua::engine::load_texture(lua_State *l,const LFile &file) {return load_texture(l,file,TextureLoadFlags::None);}
 
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload,bool loadInstantly) {return client->LoadMaterial(mat,loadInstantly,reload);}
 Material *Lua::engine::load_material(lua_State *l,const std::string &mat,bool reload) {return load_material(l,mat,reload,false);}

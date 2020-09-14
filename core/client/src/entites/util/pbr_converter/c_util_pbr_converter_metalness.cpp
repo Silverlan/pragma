@@ -123,6 +123,8 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 	auto accMetalness = 0.f;
 	auto accRoughness = 0.f;
 	auto accFlesh = 0.f;
+	auto accGlass = 0.f;
+	SurfaceMaterial *surfMatGlass = nullptr;
 	SurfaceMaterial *sufMatSSS = nullptr;
 	for(auto *colMesh : matColMeshes)
 	{
@@ -137,11 +139,18 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		auto &pbrInfo = surfMat->GetPBRInfo();
 		accMetalness += pbrInfo.metalness;
 		accRoughness += pbrInfo.roughness;
-		if(pbrInfo.subsurfaceMultiplier != 0.f && sufMatSSS == nullptr)
+		if(surfMat->GetIdentifier().find("glass") != std::string::npos)
+		{
+			if(surfMatGlass == nullptr)
+				surfMatGlass = surfMat;
+			accGlass += 1.f;
+		}
+		if(pbrInfo.subsurface.factor != 0.f && sufMatSSS == nullptr)
 			sufMatSSS = surfMat; // We'll just take the first surface material that has SSS values instead of interpolating.
 	}
 	std::optional<float> metalness = (numSurfMats > 0) ? (accMetalness /static_cast<float>(numSurfMats)) : std::optional<float>{};
 	std::optional<float> roughness = (numSurfMats > 0) ? (accRoughness /static_cast<float>(numSurfMats)) : std::optional<float>{};
+	accGlass = (numSurfMats > 0) ? (accGlass /static_cast<float>(numSurfMats)) : 0.f;
 
 	auto rmaInfo = mat.GetDataBlock()->GetBlock("rma_info");
 	if(rmaInfo == nullptr)
@@ -171,15 +180,17 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 			auto &data = mat.GetDataBlock();
 			auto &pbrInfo = sufMatSSS->GetPBRInfo();
 			auto dataSSS = data->AddBlock("subsurface_scattering");
-			data->AddValue("float","factor",std::to_string(pbrInfo.subsurfaceMultiplier));
-			data->AddValue("color","color",pbrInfo.subsurfaceColor.ToString());
-			data->AddValue("int","method",std::to_string(umath::to_integral(pbrInfo.subsurfaceMethod)));
-			data->AddValue("vector","radius",std::to_string(pbrInfo.subsurfaceRadius.x) +" " +std::to_string(pbrInfo.subsurfaceRadius.y) +" " +std::to_string(pbrInfo.subsurfaceRadius.z));
+			data->AddValue("float","factor",std::to_string(pbrInfo.subsurface.factor));
+			data->AddValue("int","method","0");
+			data->AddValue("vector","scatter_color",std::to_string(pbrInfo.subsurface.scatterColor.r) +' ' +std::to_string(pbrInfo.subsurface.scatterColor.g) +' ' +std::to_string(pbrInfo.subsurface.scatterColor.b));
 		}
 		rmaInfo->RemoveValue("requires_sss_update");
 	}
-	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
 
+	if(accGlass > 0.5f)
+		ApplyMiscMaterialProperties(*mat.GetDataBlock(),*surfMatGlass,"glass");
+
+	auto resWatcherLock = c_engine->ScopeLockResourceWatchers();
 	if(rmaInfo->IsEmpty())
 		mat.GetDataBlock()->RemoveValue("rma_info");
 

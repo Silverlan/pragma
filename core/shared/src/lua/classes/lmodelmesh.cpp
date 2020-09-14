@@ -193,6 +193,41 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("Transform",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::ScaledTransform&)>([](lua_State *l,::ModelSubMesh &mesh,const umath::ScaledTransform &pose) {
 		mesh.Transform(pose);
 	}));
+	classDef.def("ClearVertices",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetVertices().clear();
+	}));
+	classDef.def("ClearTriangles",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetTriangles().clear();
+	}));
+	classDef.def("ClearAlphas",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetAlphas().clear();
+	}));
+	classDef.def("ClearUVSets",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetUVSets().clear();
+	}));
+	classDef.def("ClearVertexWeights",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetVertexWeights().clear();
+	}));
+	classDef.def("ClearExtendedVertexWeights",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetExtendedVertexWeights().clear();
+	}));
+	classDef.def("ClearVertexData",static_cast<void(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) {
+		mesh.GetTriangles().clear();
+		mesh.GetVertices().clear();
+		mesh.GetAlphas().clear();
+		mesh.GetUVSets().clear();
+		mesh.GetVertexWeights().clear();
+		mesh.GetExtendedVertexWeights().clear();
+	}));
+	classDef.def("ReserveVertices",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
+		mesh.GetVertices().reserve(numVerts);
+	}));
+	classDef.def("ReserveTriangles",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numTris) {
+		mesh.GetTriangles().reserve(numTris *3);
+	}));
+	classDef.def("ReserveVertexWeights",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
+		mesh.GetVertexWeights().reserve(numVerts);
+	}));
 	classDef.add_static_constant("GEOMETRY_TYPE_TRIANGLES",umath::to_integral(::ModelSubMesh::GeometryType::Triangles));
 	classDef.add_static_constant("GEOMETRY_TYPE_LINES",umath::to_integral(::ModelSubMesh::GeometryType::Lines));
 	classDef.add_static_constant("GEOMETRY_TYPE_POINTS",umath::to_integral(::ModelSubMesh::GeometryType::Points));

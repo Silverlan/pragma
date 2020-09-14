@@ -256,9 +256,9 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 	if(data->GetBool("black_to_alpha") == true)
 		matFlags |= MaterialFlags::BlackToAlpha;
 
-	auto &colorFactor = data->GetValue("color_factor");
-	if(colorFactor != nullptr && typeid(*colorFactor) == typeid(ds::Vector4))
-		matData.color = static_cast<ds::Vector4*>(colorFactor.get())->GetValue();
+	matData.color = {1.f,1.f,1.f,1.f};
+	data->GetVector3("color_factor",reinterpret_cast<Vector3*>(&matData.color));
+	data->GetFloat("alpha_factor",&matData.color.a);
 
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap != nullptr && glowMap->texture != nullptr)

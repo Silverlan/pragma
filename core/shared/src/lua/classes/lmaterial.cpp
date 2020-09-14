@@ -55,6 +55,12 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("IsTranslucent",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		Lua::PushBool(l,mat.IsTranslucent());
 	}));
+	classDef.def("GetAlphaMode",static_cast<AlphaMode(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) -> AlphaMode {
+		return mat.GetAlphaMode();
+	}));
+	classDef.def("GetAlphaCutoff",static_cast<float(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) -> float {
+		return mat.GetAlphaCutoff();
+	}));
 }
 
 void Lua::Material::IsTranslucent(lua_State *l,::Material &mat)

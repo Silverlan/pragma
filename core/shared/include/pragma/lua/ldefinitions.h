@@ -18,8 +18,16 @@
 #define luaL_checkthread(L,n)    (luaL_checktype(L, (n), LUA_TTHREAD))
 #define luaL_checkuserdata(L,n)    (luaL_checktype(L, (n), LUA_TUSERDATA))
 
+namespace Lua
+{
+	static void TypeError(const luabind::object &o,Type type);
+	DLLNETWORK Lua::Type GetType(const luabind::object &o);
+	DLLNETWORK void CheckType(const luabind::object &o,Type type);
+};
+
 using LuaTableObject = luabind::object;
 using LuaClassObject = luabind::object;
+using LuaFunctionObject = luabind::object;
 
 class BaseLuaObj;
 namespace Lua
@@ -117,9 +125,6 @@ namespace Lua
 		std::vector<T> table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
 	template<typename T>
 		luabind::object vector_to_table(lua_State *l,const std::vector<T> &data);
-
-	template<typename T=luabind::object>
-		luabind::object function_to_object(const luabind::function<T> &f);
 };
 
 template<typename T>
@@ -150,13 +155,6 @@ template<typename T>
 	for(auto &v : data)
 		t[idx++] = v;
 	return t;
-}
-
-template<typename T>
-	luabind::object Lua::function_to_object(const luabind::function<T> &f)
-{
-	static_assert(sizeof(luabind::function<T>) == sizeof(luabind::object));
-	return const_cast<luabind::object&>(reinterpret_cast<const luabind::object&>(f));
 }
 
 #define lua_registerglobalint(global) \

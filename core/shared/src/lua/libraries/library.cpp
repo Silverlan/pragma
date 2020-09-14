@@ -396,6 +396,7 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_size",Lua::math::get_frustum_plane_size);
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_boundaries",Lua::math::get_frustum_plane_boundaries);
 	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_point",Lua::math::get_frustum_plane_point);
+	lua_pushtablecfunction(lua.GetState(),"math","calc_dielectric_specular_reflection",Lua::math::calc_dielectric_specular_reflection);
 
 	lua_pushtablecfunction(lua.GetState(),"math","max_abs",Lua::math::abs_max);
 	lua_pushtablecfunction(lua.GetState(),"math","ease_in",Lua::math::ease_in);
@@ -1336,8 +1337,10 @@ void Game::RegisterLuaLibraries()
 
 	auto timeMod = luabind::module(GetLuaState(),"time");
 	timeMod[
-		luabind::def("create_timer",Lua::time::create_timer),
-		luabind::def("create_simple_timer",Lua::time::create_simple_timer),
+		luabind::def("create_timer",static_cast<std::shared_ptr<TimerHandle>(*)(lua_State*,float,int32_t,LuaFunctionObject,TimerType)>(Lua::time::create_timer)),
+		luabind::def("create_timer",static_cast<std::shared_ptr<TimerHandle>(*)(lua_State*,float,int32_t,LuaFunctionObject)>(Lua::time::create_timer)),
+		luabind::def("create_simple_timer",static_cast<std::shared_ptr<TimerHandle>(*)(lua_State*,float,LuaFunctionObject,TimerType)>(Lua::time::create_simple_timer)),
+		luabind::def("create_simple_timer",static_cast<std::shared_ptr<TimerHandle>(*)(lua_State*,float,LuaFunctionObject)>(Lua::time::create_simple_timer)),
 		luabind::def("cur_time",Lua::time::cur_time),
 		luabind::def("real_time",Lua::time::real_time),
 		luabind::def("delta_time",Lua::time::delta_time),

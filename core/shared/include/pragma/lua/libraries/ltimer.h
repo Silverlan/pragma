@@ -14,8 +14,10 @@ namespace Lua
 {
 	namespace time
 	{
-		std::shared_ptr<TimerHandle> create_timer(lua_State *l,float delay,int32_t repetitions,luabind::function<> fc,TimerType timerType=TimerType::CurTime);
-		std::shared_ptr<TimerHandle> create_simple_timer(lua_State *l,float delay,luabind::function<> fc,TimerType timerType=TimerType::CurTime);
+		std::shared_ptr<TimerHandle> create_timer(lua_State *l,float delay,int32_t repetitions,LuaFunctionObject fc,TimerType timerType);
+		std::shared_ptr<TimerHandle> create_timer(lua_State *l,float delay,int32_t repetitions,LuaFunctionObject fc);
+		std::shared_ptr<TimerHandle> create_simple_timer(lua_State *l,float delay,LuaFunctionObject fc,TimerType timerType);
+		std::shared_ptr<TimerHandle> create_simple_timer(lua_State *l,float delay,LuaFunctionObject fc);
 	};
 };
 
@@ -29,7 +31,7 @@ private:
 	TimerType m_timeType;
 	float m_delay;
 	unsigned int m_reps;
-	std::optional<luabind::function<>> m_luaFunction {};
+	LuaFunctionObject m_luaFunction {};
 	CallbackHandle m_callback;
 	double m_start;
 	bool m_bRemove;
@@ -44,7 +46,7 @@ protected:
 	virtual void Reset();
 	Timer();
 public:
-	Timer(float delay,unsigned int reps,luabind::function<> luaFunction,TimerType timetype=TimerType::CurTime);
+	Timer(float delay,unsigned int reps,LuaFunctionObject luaFunction,TimerType timetype=TimerType::CurTime);
 	Timer(float delay,unsigned int reps,const CallbackHandle &hCallback,TimerType timetype=TimerType::CurTime);
 	~Timer();
 	void Update(Game *game);
@@ -62,7 +64,7 @@ public:
 	unsigned int GetRepetitionsLeft();
 	void SetRepetitions(unsigned int rep);
 	std::shared_ptr<TimerHandle> CreateHandle();
-	void SetCall(Game *game,luabind::function<> luaFunction);
+	void SetCall(Game *game,LuaFunctionObject luaFunction);
 	void SetCall(Game *game,const CallbackHandle &hCallback);
 
 	void Call(Game *game);
@@ -83,6 +85,6 @@ DLLNETWORK void Lua_Timer_SetRepetitions(lua_State *l,TimerHandle &timer,unsigne
 DLLNETWORK void Lua_Timer_IsRunning(lua_State *l,TimerHandle &timer);
 DLLNETWORK void Lua_Timer_IsPaused(lua_State *l,TimerHandle &timer);
 DLLNETWORK void Lua_Timer_Call(lua_State *l,TimerHandle &timer);
-DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,luabind::function<> o);
+DLLNETWORK void Lua_Timer_SetCall(lua_State *l,TimerHandle &timer,LuaFunctionObject o);
 
 #endif

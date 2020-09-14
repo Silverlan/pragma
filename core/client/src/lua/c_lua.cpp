@@ -85,7 +85,7 @@ void CGame::RegisterLua()
 	auto modEngine = luabind::module_(GetLuaState(),"engine");
 	modEngine[
 		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,const std::string&)>(Lua::engine::bind_key)),
-		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,luabind::function<>)>(Lua::engine::bind_key)),
+		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>(Lua::engine::bind_key)),
 		luabind::def("unbind_key",Lua::engine::unbind_key),
 		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const std::string&)>(Lua::engine::get_text_size)),
 		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const FontInfo&)>(Lua::engine::get_text_size))
@@ -136,7 +136,11 @@ void CGame::RegisterLua()
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool,bool)>(Lua::engine::load_material)),
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool)>(Lua::engine::load_material)),
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&)>(Lua::engine::load_material)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&,TextureLoadFlags)>(Lua::engine::load_texture)),
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const std::string&)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,const std::string&,TextureLoadFlags loadFlags)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,const std::string&)>(Lua::engine::load_texture)),
+		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&,TextureLoadFlags)>(Lua::engine::load_texture)),
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&)>(Lua::engine::load_texture)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&,const std::string&)>(Lua::engine::create_material)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::create_material)),

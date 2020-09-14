@@ -433,3 +433,9 @@ int Lua::math::get_frustum_plane_point(lua_State *l)
 	Lua::Push<Vector3>(l,::umath::frustum::get_plane_point(pos,forward,right,up,fovRad,z,aspectRatio,uv));
 	return 1;
 }
+int Lua::math::calc_dielectric_specular_reflection(lua_State *l)
+{
+	auto ior = Lua::CheckNumber(l,1);
+	Lua::PushNumber(l,::umath::calc_dielectric_specular_reflection(ior));
+	return 1;
+}

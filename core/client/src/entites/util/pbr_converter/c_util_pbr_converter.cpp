@@ -185,6 +185,19 @@ void CPBRConverterComponent::PollEvents()
 	ProcessQueue();
 }
 
+void CPBRConverterComponent::ApplyMiscMaterialProperties(ds::Block &dataBlock,const SurfaceMaterial &surfMat,const std::string &surfMatName)
+{
+	auto ior = surfMat.GetIOR();
+	if(ior.has_value() == false)
+		return;
+	dataBlock.AddValue("float","ior",std::to_string(*ior));
+	if(surfMatName.find("glass") == std::string::npos)
+		return;
+	auto cyclesBlock = dataBlock.AddBlock("cycles");
+	if(cyclesBlock && cyclesBlock->HasValue("shader") == false)
+		cyclesBlock->AddValue("string","shader","glass");
+}
+
 bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 {
 	auto dataBlock = matTraditional.GetDataBlock();
@@ -210,15 +223,14 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	};
 
 	auto *pbrInfo = surfMat ? &surfMat->GetPBRInfo() : nullptr;
-	if(rmaInfo->GetBool("requires_sss_update") && pbrInfo && pbrInfo->subsurfaceMultiplier != 0.f)
+	if(rmaInfo->GetBool("requires_sss_update") && pbrInfo && pbrInfo->subsurface.factor != 0.f)
 	{
 		auto dataSSS = dataBlock->GetBlock("subsurface_scattering");
 		if(dataSSS == nullptr)
 		{
-			fSetMaterialValue(*dataSSS,"float","factor",std::to_string(pbrInfo->subsurfaceMultiplier));
-			fSetMaterialValue(*dataSSS,"color","color",pbrInfo->subsurfaceColor.ToString());
-			fSetMaterialValue(*dataSSS,"int","method",std::to_string(umath::to_integral(pbrInfo->subsurfaceMethod)));
-			fSetMaterialValue(*dataSSS,"vector","radius",std::to_string(pbrInfo->subsurfaceRadius.x) +" " +std::to_string(pbrInfo->subsurfaceRadius.y) +" " +std::to_string(pbrInfo->subsurfaceRadius.z));
+			fSetMaterialValue(*dataSSS,"float","factor",std::to_string(pbrInfo->subsurface.factor));
+			fSetMaterialValue(*dataSSS,"int","method","0");
+			fSetMaterialValue(*dataSSS,"vector","scatter_color",std::to_string(pbrInfo->subsurface.scatterColor.r) +' ' +std::to_string(pbrInfo->subsurface.scatterColor.g) +' ' +std::to_string(pbrInfo->subsurface.scatterColor.b));
 			
 			rmaInfo->RemoveValue("requires_sss_update");
 		}
@@ -266,6 +278,9 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 		if(aoMap)
 			rmaInfo->RemoveValue("requires_ao_update");
 	}
+
+	if(surfMat)
+		ApplyMiscMaterialProperties(*dataBlock,*surfMat,surfMatName);
 
 	float tmp;
 	if(dataBlock->GetFloat("roughness_factor",&tmp))

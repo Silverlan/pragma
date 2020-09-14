@@ -21,31 +21,31 @@
 
 extern DLLENGINE Engine *engine;
 
-void Lua_TraceData_SetSource(lua_State *l,TraceData &data,const pragma::physics::IConvexShape &shape)
+void Lua::TraceData::SetSource(lua_State *l,::TraceData &data,const pragma::physics::IConvexShape &shape)
 {
 	data.SetShape(shape);
 }
-void Lua_TraceData_SetFlags(lua_State*,TraceData &data,unsigned int flags)
+void Lua::TraceData::SetFlags(lua_State*,::TraceData &data,unsigned int flags)
 {
 	data.SetFlags(static_cast<RayCastFlags>(flags));
 }
-void Lua_TraceData_SetCollisionFilterMask(lua_State*,TraceData &data,unsigned int mask)
+void Lua::TraceData::SetCollisionFilterMask(lua_State*,::TraceData &data,unsigned int mask)
 {
 	data.SetCollisionFilterMask(static_cast<CollisionMask>(mask));
 }
-void Lua_TraceData_SetCollisionFilterGroup(lua_State*,TraceData &data,unsigned int group)
+void Lua::TraceData::SetCollisionFilterGroup(lua_State*,::TraceData &data,unsigned int group)
 {
 	data.SetCollisionFilterGroup(static_cast<CollisionMask>(group));
 }
-void Lua_TraceData_GetSourceTransform(lua_State *l,TraceData &data) {Lua::Push<umath::Transform>(l,data.GetSource());}
-void Lua_TraceData_GetTargetTransform(lua_State *l,TraceData &data) {Lua::Push<umath::Transform>(l,data.GetTarget());}
-void Lua_TraceData_GetSourceOrigin(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetSourceOrigin());}
-void Lua_TraceData_GetTargetOrigin(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetTargetOrigin());}
-void Lua_TraceData_GetSourceRotation(lua_State *l,TraceData &data) {Lua::Push<Quat>(l,data.GetSourceRotation());}
-void Lua_TraceData_GetTargetRotation(lua_State *l,TraceData &data) {Lua::Push<Quat>(l,data.GetTargetRotation());}
-void Lua_TraceData_GetDistance(lua_State *l,TraceData &data) {Lua::PushNumber(l,data.GetDistance());}
-void Lua_TraceData_GetDirection(lua_State *l,TraceData &data) {Lua::Push<Vector3>(l,data.GetDirection());}
-void Lua_TraceData_SetFilter(lua_State *l,TraceData &data,luabind::object)
+void Lua::TraceData::GetSourceTransform(lua_State *l,::TraceData &data) {Lua::Push<umath::Transform>(l,data.GetSource());}
+void Lua::TraceData::GetTargetTransform(lua_State *l,::TraceData &data) {Lua::Push<umath::Transform>(l,data.GetTarget());}
+void Lua::TraceData::GetSourceOrigin(lua_State *l,::TraceData &data) {Lua::Push<Vector3>(l,data.GetSourceOrigin());}
+void Lua::TraceData::GetTargetOrigin(lua_State *l,::TraceData &data) {Lua::Push<Vector3>(l,data.GetTargetOrigin());}
+void Lua::TraceData::GetSourceRotation(lua_State *l,::TraceData &data) {Lua::Push<Quat>(l,data.GetSourceRotation());}
+void Lua::TraceData::GetTargetRotation(lua_State *l,::TraceData &data) {Lua::Push<Quat>(l,data.GetTargetRotation());}
+void Lua::TraceData::GetDistance(lua_State *l,::TraceData &data) {Lua::PushNumber(l,data.GetDistance());}
+void Lua::TraceData::GetDirection(lua_State *l,::TraceData &data) {Lua::Push<Vector3>(l,data.GetDirection());}
+void Lua::TraceData::SetFilter(lua_State *l,::TraceData &data,luabind::object)
 {
 	if(Lua::IsEntity(l,2))
 	{

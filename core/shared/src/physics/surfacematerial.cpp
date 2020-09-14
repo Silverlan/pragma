@@ -114,6 +114,10 @@ void SurfaceMaterialManager::Load(const std::string &path)
 						physMat.SetAudioHighFrequencyTransmission(val);
 				}
 
+				float ior;
+				if(mat->GetFloat("ior",&ior))
+					physMat.SetIOR(ior);
+
 				auto pbr = mat->GetBlock("pbr",0u);
 				if(pbr)
 				{
@@ -121,23 +125,23 @@ void SurfaceMaterialManager::Load(const std::string &path)
 						physMat.GetPBRInfo().metalness = val;
 					if(pbr->GetFloat("roughness",&val))
 						physMat.GetPBRInfo().roughness = val;
-
 					auto sss = pbr->GetBlock("subsurface_scattering");
 					if(sss)
 					{
 						if(sss->GetFloat("factor",&val))
-							physMat.GetPBRInfo().subsurfaceMultiplier = val;
+							physMat.GetPBRInfo().subsurface.factor = val;
 
-						auto &subsurfaceColor = sss->GetValue("color");
-						if(subsurfaceColor != nullptr && typeid(*subsurfaceColor) == typeid(ds::Color))
-							physMat.GetPBRInfo().subsurfaceColor = static_cast<ds::Color&>(*subsurfaceColor).GetValue();
+						auto &color = sss->GetValue("color");
+						if(color != nullptr && typeid(*color) == typeid(ds::Color))
+							physMat.GetPBRInfo().subsurface.color = static_cast<ds::Color&>(*color).GetValue();
 
-						if(sss->GetInt("method",&ival))
-							physMat.GetPBRInfo().subsurfaceMethod = static_cast<SurfaceMaterial::PBRInfo::SubsurfaceMethod>(ival);
+						auto &scatterColor = sss->GetValue("scatter_color");
+						if(scatterColor != nullptr && typeid(*scatterColor) == typeid(ds::Vector))
+							physMat.GetPBRInfo().subsurface.scatterColor = static_cast<ds::Vector&>(*scatterColor).GetValue();
 
-						auto &subsurfaceRadius = sss->GetValue("radius");
-						if(subsurfaceRadius != nullptr && typeid(*subsurfaceRadius) == typeid(ds::Vector))
-							physMat.GetPBRInfo().subsurfaceRadius = static_cast<ds::Vector&>(*subsurfaceRadius).GetValue();
+						auto &radiusMM = sss->GetValue("radius_mm");
+						if(radiusMM != nullptr && typeid(*radiusMM) == typeid(ds::Vector))
+							physMat.GetPBRInfo().subsurface.radiusMM = static_cast<ds::Vector&>(*radiusMM).GetValue();
 					}
 				}
 			}
@@ -294,6 +298,9 @@ void SurfaceMaterial::SetFriction(Float friction)
 	SetStaticFriction(friction);
 	SetDynamicFriction(friction);
 }
+const std::optional<float> &SurfaceMaterial::GetIOR() const {return m_ior;}
+void SurfaceMaterial::SetIOR(float ior) {m_ior = ior;}
+void SurfaceMaterial::ClearIOR() {m_ior = {};}
 Float SurfaceMaterial::GetRestitution() const {return m_physMaterial->GetRestitution();}
 void SurfaceMaterial::SetRestitution(Float restitution) {m_physMaterial->SetRestitution(restitution);}
 float SurfaceMaterial::GetStaticFriction() const {return m_physMaterial->GetStaticFriction();}

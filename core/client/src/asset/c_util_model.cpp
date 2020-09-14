@@ -461,6 +461,8 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			auto baseColorImage = fGetImage(baseColorTexture.index);
 			if(baseColorImage)
 				fWriteImage(Material::ALBEDO_MAP_IDENTIFIER,matName +"_albedo",*baseColorImage,false /* greyScale */,false /* normalMap */,alphaMode);
+			else
+				mat->SetTexture(Material::ALBEDO_MAP_IDENTIFIER,"white");
 
 			auto &baseColorFactor = gltfMat.pbrMetallicRoughness.baseColorFactor;
 			if(baseColorFactor != std::vector<double>{1.0,1.0,1.0,1.0})

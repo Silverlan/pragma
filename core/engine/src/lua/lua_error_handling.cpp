@@ -358,6 +358,8 @@ void Lua::initialize_error_handler()
 {
 	luabind::set_pcall_callback([](lua_State *l) -> void {
 		Lua::PushCFunction(l,[](lua_State *l) -> int32_t {
+			if(Lua::IsString(l,-1) == false)
+				return 0; // This should never happen
 			std::stringstream ssMsg;
 			std::string luaMsg = Lua::ToString(l,-1);
 

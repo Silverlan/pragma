@@ -1414,13 +1414,6 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	});
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_CUBIC",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Cubic));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_GAUSSIAN",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Gaussian));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_PRINCIPLED",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Principled));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_BURLEY",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Burley));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_RANDOM_WALK",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::RandomWalk));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_PRINCIPLED_RANDOM_WALK",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::PrincipledRandomWalk));
-	surfaceMatDef.add_static_constant("SUBSURFACE_SCATTERING_METHOD_COUNT",umath::to_integral(SurfaceMaterial::PBRInfo::SubsurfaceMethod::Count));
 	surfaceMatDef.def(luabind::tostring(luabind::self));
 	surfaceMatDef.def("GetName",&Lua::SurfaceMaterial::GetName);
 	surfaceMatDef.def("GetIndex",&Lua::SurfaceMaterial::GetIndex);
@@ -1441,6 +1434,14 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def("GetHardImpactSound",&Lua::SurfaceMaterial::GetHardImpactSound);
 	surfaceMatDef.def("SetSoftImpactSound",&Lua::SurfaceMaterial::SetSoftImpactSound);
 	surfaceMatDef.def("GetSoftImpactSound",&Lua::SurfaceMaterial::GetSoftImpactSound);
+	surfaceMatDef.def("GetIOR",static_cast<luabind::object(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) -> luabind::object {
+		auto ior = surfMat.GetIOR();
+		if(ior.has_value() == false)
+			return {};
+		return luabind::object{l,*ior};
+	}));
+	surfaceMatDef.def("SetIOR",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float ior) {surfMat.SetIOR(ior);}));
+	surfaceMatDef.def("ClearIOR",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {surfMat.ClearIOR();}));
 
 	surfaceMatDef.def("SetAudioLowFrequencyAbsorption",&Lua::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
 	surfaceMatDef.def("GetAudioLowFrequencyAbsorption",&Lua::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
@@ -1499,17 +1500,29 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def("GetPBRRoughness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
 		Lua::PushNumber(l,surfMat.GetPBRInfo().roughness);
 	}));
-	surfaceMatDef.def("GetSubsurfaceMultiplier",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetPBRInfo().subsurfaceMultiplier);
+	surfaceMatDef.def("GetSubsurfaceFactor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::PushNumber(l,surfMat.GetPBRInfo().subsurface.factor);
+	}));
+	surfaceMatDef.def("SetSubsurfaceFactor",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float factor) {
+		surfMat.GetPBRInfo().subsurface.factor = factor;
+	}));
+	surfaceMatDef.def("GetSubsurfaceScatterColor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurface.scatterColor);
+	}));
+	surfaceMatDef.def("SetSubsurfaceScatterColor",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Vector3&)>([](lua_State *l,SurfaceMaterial &surfMat,const Vector3 &radiusRGB) {
+		surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB;
+	}));
+	surfaceMatDef.def("GetSubsurfaceRadiusMM",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurface.radiusMM);
+	}));
+	surfaceMatDef.def("SetSubsurfaceRadiusMM",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Vector3&)>([](lua_State *l,SurfaceMaterial &surfMat,const Vector3 &radiusMM) {
+		surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM;
 	}));
 	surfaceMatDef.def("GetSubsurfaceColor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::Push<Color>(l,surfMat.GetPBRInfo().subsurfaceColor);
+		Lua::Push<Color>(l,surfMat.GetPBRInfo().subsurface.color);
 	}));
-	surfaceMatDef.def("GetSubsurfaceMethod",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushInt(l,umath::to_integral(surfMat.GetPBRInfo().subsurfaceMethod));
-	}));
-	surfaceMatDef.def("GetSubsurfaceRadius",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurfaceRadius);
+	surfaceMatDef.def("SetSubsurfaceColor",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Color&)>([](lua_State *l,SurfaceMaterial &surfMat,const Color &color) {
+		surfMat.GetPBRInfo().subsurface.color = color;
 	}));
 	gameMod[surfaceMatDef];
 

@@ -130,9 +130,9 @@ namespace Lua
 			DLLCLIENT void GetUsage(lua_State *l,Image &hImg);
 			DLLCLIENT void GetWidth(lua_State *l,Image &hImg);
 			DLLCLIENT void GetHeight(lua_State *l,Image &hImg);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex);
+			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf);
 		};
 		namespace VKImageView
 		{
@@ -2145,9 +2145,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetUsage",&Lua::Vulkan::VKImage::GetUsage);
 	defVkImage.def("GetWidth",&Lua::Vulkan::VKImage::GetWidth);
 	defVkImage.def("GetHeight",&Lua::Vulkan::VKImage::GetHeight);
-	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
-	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
-	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
+	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,const std::string&)>([](lua_State *l,Lua::Vulkan::Image &img,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Image>(l,img,name,&Lua::Check<Lua::Vulkan::Image>);
 	}));
@@ -2796,17 +2796,17 @@ void Lua::Vulkan::VKImage::GetHeight(lua_State *l,Image &hImg)
 	auto extents = hImg.GetExtents();
 	Lua::PushInt(l,extents.height);
 }
-void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel)
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel)
 {
-	hImg.WriteImageData(imgBuf.GetWidth(),imgBuf.GetHeight(),layerIndex,mipLevel,imgBuf.GetSize(),static_cast<uint8_t*>(imgBuf.GetData()));
+	hImg.WriteImageData(x,y,imgBuf.GetWidth(),imgBuf.GetHeight(),layerIndex,mipLevel,imgBuf.GetSize(),static_cast<uint8_t*>(imgBuf.GetData()));
 }
-void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf,uint32_t layerIndex)
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex)
 {
-	WriteMemory(l,hImg,imgBuf,layerIndex,0);
+	WriteMemory(l,hImg,x,y,imgBuf,layerIndex,0);
 }
-void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uimg::ImageBuffer &imgBuf)
+void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf)
 {
-	WriteMemory(l,hImg,imgBuf,0u,0);
+	WriteMemory(l,hImg,x,y,imgBuf,0u,0);
 }
 
 /////////////////////////////////

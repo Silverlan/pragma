@@ -586,28 +586,28 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	physMod[classMat];
 
-	auto classDefRayCastData = luabind::class_<TraceData>("RayCastData");
+	auto classDefRayCastData = luabind::class_<::TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
-	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,TraceData&,const pragma::physics::IConvexShape&)>(&Lua_TraceData_SetSource));
-	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetSource));
-	classDefRayCastData.def("SetSourceRotation",&TraceData::SetSourceRotation);
-	classDefRayCastData.def("SetSource",static_cast<void(TraceData::*)(const umath::Transform&)>(&TraceData::SetSource));
-	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const Vector3&)>(&TraceData::SetTarget));
-	classDefRayCastData.def("SetTargetRotation",&TraceData::SetTargetRotation);
-	classDefRayCastData.def("SetTarget",static_cast<void(TraceData::*)(const umath::Transform&)>(&TraceData::SetTarget));
-	classDefRayCastData.def("SetRotation",&TraceData::SetRotation);
-	classDefRayCastData.def("SetFlags",&Lua_TraceData_SetFlags);
-	classDefRayCastData.def("SetFilter",&Lua_TraceData_SetFilter);
-	classDefRayCastData.def("SetCollisionFilterMask",&Lua_TraceData_SetCollisionFilterMask);
-	classDefRayCastData.def("SetCollisionFilterGroup",&Lua_TraceData_SetCollisionFilterGroup);
-	classDefRayCastData.def("GetSourceTransform",&Lua_TraceData_GetSourceTransform);
-	classDefRayCastData.def("GetTargetTransform",&Lua_TraceData_GetTargetTransform);
-	classDefRayCastData.def("GetSourceOrigin",&Lua_TraceData_GetSourceOrigin);
-	classDefRayCastData.def("GetTargetOrigin",&Lua_TraceData_GetTargetOrigin);
-	classDefRayCastData.def("GetSourceRotation",&Lua_TraceData_GetSourceRotation);
-	classDefRayCastData.def("GetTargetRotation",&Lua_TraceData_GetTargetRotation);
-	classDefRayCastData.def("GetDistance",&Lua_TraceData_GetDistance);
-	classDefRayCastData.def("GetDirection",&Lua_TraceData_GetDirection);
+	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,::TraceData&,const pragma::physics::IConvexShape&)>(&Lua::TraceData::SetSource));
+	classDefRayCastData.def("SetSource",static_cast<void(::TraceData::*)(const Vector3&)>(&::TraceData::SetSource));
+	classDefRayCastData.def("SetSourceRotation",&::TraceData::SetSourceRotation);
+	classDefRayCastData.def("SetSource",static_cast<void(::TraceData::*)(const umath::Transform&)>(&::TraceData::SetSource));
+	classDefRayCastData.def("SetTarget",static_cast<void(::TraceData::*)(const Vector3&)>(&::TraceData::SetTarget));
+	classDefRayCastData.def("SetTargetRotation",&::TraceData::SetTargetRotation);
+	classDefRayCastData.def("SetTarget",static_cast<void(::TraceData::*)(const umath::Transform&)>(&::TraceData::SetTarget));
+	classDefRayCastData.def("SetRotation",&::TraceData::SetRotation);
+	classDefRayCastData.def("SetFlags",&Lua::TraceData::SetFlags);
+	classDefRayCastData.def("SetFilter",&Lua::TraceData::SetFilter);
+	classDefRayCastData.def("SetCollisionFilterMask",&Lua::TraceData::SetCollisionFilterMask);
+	classDefRayCastData.def("SetCollisionFilterGroup",&Lua::TraceData::SetCollisionFilterGroup);
+	classDefRayCastData.def("GetSourceTransform",&Lua::TraceData::GetSourceTransform);
+	classDefRayCastData.def("GetTargetTransform",&Lua::TraceData::GetTargetTransform);
+	classDefRayCastData.def("GetSourceOrigin",&Lua::TraceData::GetSourceOrigin);
+	classDefRayCastData.def("GetTargetOrigin",&Lua::TraceData::GetTargetOrigin);
+	classDefRayCastData.def("GetSourceRotation",&Lua::TraceData::GetSourceRotation);
+	classDefRayCastData.def("GetTargetRotation",&Lua::TraceData::GetTargetRotation);
+	classDefRayCastData.def("GetDistance",&Lua::TraceData::GetDistance);
+	classDefRayCastData.def("GetDirection",&Lua::TraceData::GetDirection);
 	physMod[classDefRayCastData];
 
 	auto classDefRayCastResult = luabind::class_<TraceResult>("RayCastResult");
@@ -1395,12 +1395,12 @@ int Lua::physenv::raycast(lua_State *l)
 		for(size_t i=0;i<res.size();i++)
 		{
 			auto &r = res[i];
-			Lua_TraceData_FillTraceResultTable(l,r);
+			Lua::TraceData::FillTraceResultTable(l,r);
 			lua_rawseti(l,table,i +1);
 		}
 	}
 	else
-		Lua_TraceData_FillTraceResultTable(l,res.back());
+		Lua::TraceData::FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::sweep(lua_State *l)
@@ -1421,12 +1421,12 @@ int Lua::physenv::sweep(lua_State *l)
 		for(size_t i=0;i<res.size();i++)
 		{
 			auto &r = res[i];
-			Lua_TraceData_FillTraceResultTable(l,r);
+			Lua::TraceData::FillTraceResultTable(l,r);
 			lua_rawseti(l,table,i +1);
 		}
 	}
 	else
-		Lua_TraceData_FillTraceResultTable(l,res.back());
+		Lua::TraceData::FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::overlap(lua_State *l)
@@ -1447,12 +1447,12 @@ int Lua::physenv::overlap(lua_State *l)
 		for(size_t i=0;i<res.size();i++)
 		{
 			auto &r = res[i];
-			Lua_TraceData_FillTraceResultTable(l,r);
+			Lua::TraceData::FillTraceResultTable(l,r);
 			lua_rawseti(l,table,i +1);
 		}
 	}
 	else
-		Lua_TraceData_FillTraceResultTable(l,res.back());
+		Lua::TraceData::FillTraceResultTable(l,res.back());
 	return 1;
 }
 int Lua::physenv::create_convex_hull_shape(lua_State *l)

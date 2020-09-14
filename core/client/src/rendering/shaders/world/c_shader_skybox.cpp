@@ -9,6 +9,8 @@
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
+#include "pragma/model/c_modelmesh.h"
+#include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -40,6 +42,29 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &ident
 	: ShaderTextured3DBase(context,identifier,vsShader,fsShader)
 {
 	// SetBaseShader<ShaderTextured3DBase>();
+}
+
+bool ShaderSkybox::GetRenderBufferTargets(
+	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
+	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
+) const
+{
+	auto &sceneMesh = mesh.GetSceneMesh();
+	if(sceneMesh == nullptr)
+		return false;
+	auto &indexBuffer = sceneMesh->GetIndexBuffer();
+	if(indexBuffer)
+	{
+		outIndexBufferInfo = prosper::IndexBufferInfo{};
+		outIndexBufferInfo->buffer = indexBuffer;
+		outIndexBufferInfo->indexType = prosper::IndexType::UInt16;
+		outIndexBufferInfo->offset = 0;
+	}
+
+	auto *vBuf = sceneMesh->GetVertexBuffer().get();
+	outBuffers = {vBuf};
+	outOffsets = {0ull};
+	return true;
 }
 
 void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

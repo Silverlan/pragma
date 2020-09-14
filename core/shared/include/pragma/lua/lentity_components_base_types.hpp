@@ -21,7 +21,7 @@
 
 extern DLLENGINE Engine *engine;
 
-DLLNETWORK void Lua_TraceData_FillTraceResultTable(lua_State *l,TraceResult &res);
+namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &res);};
 namespace Lua
 {
 	DLLNETWORK bool get_bullet_master(BaseEntity &ent);
@@ -60,7 +60,7 @@ namespace Lua
 			{
 				auto &r = results[i];
 				Lua::PushInt(l,i +1);
-				Lua_TraceData_FillTraceResultTable(l,r);
+				Lua::TraceData::FillTraceResultTable(l,r);
 
 				Lua::SetTableValue(l,t);
 			}
@@ -2369,11 +2369,11 @@ namespace Lua
 		}));
 		def.def("GetAimRayData",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<TraceData>(l,hEnt.get()->GetAimTraceData());
+			Lua::Push<::TraceData>(l,hEnt.get()->GetAimTraceData());
 		}));
 		def.def("GetAimRayData",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,float maxDist) {
 			pragma::Lua::check_component(l,hEnt);
-			Lua::Push<TraceData>(l,hEnt.get()->GetAimTraceData(maxDist));
+			Lua::Push<::TraceData>(l,hEnt.get()->GetAimTraceData(maxDist));
 		}));
 		def.def("FootStep",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t foot) {
 			pragma::Lua::check_component(l,hEnt);

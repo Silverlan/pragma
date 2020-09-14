@@ -280,7 +280,7 @@ bool Lua::util::is_table() {return false;}
 std::string Lua::util::date_time(const std::string &format) {return engine->GetDate(format);}
 std::string Lua::util::date_time() {return engine->GetDate();}
 
-int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,TraceData&,TraceResult&,uint32_t&)> &f)
+int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f)
 {
 	auto *bulletInfo = Lua::CheckBulletInfo(l,1);
 	auto bHitReport = false;
@@ -307,7 +307,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 		auto randSpread = EulerAngles(umath::random(-bulletInfo->spread.p,bulletInfo->spread.p),umath::random(-bulletInfo->spread.y,bulletInfo->spread.y),0);
 		auto bulletDir = bulletInfo->direction;
 		uvec::rotate(&bulletDir,randSpread);
-		TraceData data;
+		::TraceData data;
 		data.SetSource(src);
 		data.SetTarget(src +bulletDir *bulletInfo->distance);
 		data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
@@ -360,7 +360,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 			{
 				TraceResult result {data};
 				Lua::PushInt(l,tIdx++);
-				Lua_TraceData_FillTraceResultTable(l,result);
+				Lua::TraceData::FillTraceResultTable(l,result);
 				Lua::SetTableValue(l,idxResultTable);
 			}
 			else
@@ -368,7 +368,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,Tr
 				for(auto &result : results)
 				{
 					Lua::PushInt(l,tIdx++);
-					Lua_TraceData_FillTraceResultTable(l,result);
+					Lua::TraceData::FillTraceResultTable(l,result);
 					Lua::SetTableValue(l,idxResultTable);
 				}
 			}

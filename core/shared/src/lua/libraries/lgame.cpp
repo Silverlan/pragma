@@ -402,7 +402,7 @@ int Lua::game::raycast(lua_State *l)
 		auto *phys = entClosest->GetPhysicsComponent()->GetPhysicsObject();
 		if(phys != nullptr)
 			r.physObj = phys->GetHandle();
-		Lua_TraceData_FillTraceResultTable(l,r);
+		Lua::TraceData::FillTraceResultTable(l,r);
 		return 1;
 		//if(res.size() == res.capacity())
 		//	res.reserve(res.size() +5);

@@ -51,6 +51,8 @@ namespace Lua
 		DLLNETWORK int get_frustum_plane_size(lua_State *l);
 		DLLNETWORK int get_frustum_plane_boundaries(lua_State *l);
 		DLLNETWORK int get_frustum_plane_point(lua_State *l);
+		
+		DLLNETWORK int calc_dielectric_specular_reflection(lua_State *l);
 	};
 };
 

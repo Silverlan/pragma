@@ -333,7 +333,7 @@ void Lua::IK::GetIKEffectorPos(lua_State *l,IKHandle &hEnt,uint32_t ikController
 
 //////////////
 
-DLLNETWORK void Lua_TraceData_FillTraceResultTable(lua_State *l,TraceResult &res)
+DLLNETWORK void Lua::TraceData::FillTraceResultTable(lua_State *l,TraceResult &res)
 {
 	Lua::Push<TraceResult>(l,res);
 	//Lua::Push<boost::reference_wrapper<TraceResult>>(l,boost::ref<TraceResult>(res));

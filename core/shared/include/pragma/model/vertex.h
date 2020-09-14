@@ -21,6 +21,7 @@ struct DLLNETWORK Vertex
 	Vertex(const Vector3 &position,const Vector2 &uv,const Vector3 &normal);
 	Vertex(const Vector3 &position,const Vector3 &normal);
 	Vertex();
+	bool Equal(const Vertex &other,float epsilon) const;
 	bool operator==(const Vertex &other) const;
 	bool operator!=(const Vertex &other) const;
 	Vector3 position = {};

@@ -38,7 +38,7 @@ Vertex::Vertex()
 	: Vertex(Vector3{0.f,0.f,0.f},Vector3{0.f,0.f,0.f})
 {}
 
-bool Vertex::operator==(const Vertex &other) const
+bool Vertex::Equal(const Vertex &other,float epsilon) const
 {
 	return (
 		umath::abs(position.x -other.position.x) <= VERTEX_EPSILON && umath::abs(position.y -other.position.y) <= VERTEX_EPSILON && umath::abs(position.z -other.position.z) <= VERTEX_EPSILON &&
@@ -46,6 +46,8 @@ bool Vertex::operator==(const Vertex &other) const
 		umath::abs(normal.x -other.normal.x) <= VERTEX_EPSILON && umath::abs(normal.y -other.normal.y) <= VERTEX_EPSILON && umath::abs(normal.z -other.normal.z) <= VERTEX_EPSILON
 	) ? true : false;
 }
+
+bool Vertex::operator==(const Vertex &other) const {return Equal(other,VERTEX_EPSILON);}
 bool Vertex::operator!=(const Vertex &other) const
 {
 	return (*this == other) ? false : true;

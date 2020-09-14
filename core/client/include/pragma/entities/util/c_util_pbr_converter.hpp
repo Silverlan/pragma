@@ -71,6 +71,7 @@ namespace pragma
 		void UpdateMetalness(Model &mdl,CMaterial &mat);
 		void UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo={});
 		void UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo);
+		void ApplyMiscMaterialProperties(ds::Block &dataBlock,const SurfaceMaterial &surfMat,const std::string &surfMatName);
 		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo={});
 
 		void ProcessQueue();

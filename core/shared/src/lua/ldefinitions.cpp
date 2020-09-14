@@ -13,6 +13,24 @@
 #include <sharedutils/util_file.h>
 
 extern DLLENGINE Engine *engine;
+#pragma optimize("",off)
+static void Lua::TypeError(const luabind::object &o,Type type)
+{
+	// TODO
+	auto *l = o.interpreter();
+	o.push(l);
+	auto *typeName = Lua::GetTypeString(l,-1);
+	Lua::Pop(l,1);
+	Lua::PushString(l,typeName);
+	lua_error(o.interpreter());
+}
+Lua::Type Lua::GetType(const luabind::object &o) {return static_cast<Type>(luabind::type(o));}
+void Lua::CheckType(const luabind::object &o,Type type)
+{
+	if(GetType(o) == type)
+		return;
+	TypeError(o,type);
+}
 
 void Lua::PushObject(lua_State *l,BaseLuaObj *o)
 {
@@ -52,3 +70,4 @@ Lua::ErrorColorMode Lua::GetErrorColorMode(lua_State *l)
 		return state->GetLuaErrorColorMode();
 	return ErrorColorMode::White;
 }
+#pragma optimize("",on)

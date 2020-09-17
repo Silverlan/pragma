@@ -10,7 +10,7 @@
 #include <mathutil/umath.h>
 
 CSide::CSide()
-	: Side(),NormalMesh()
+	: Side()
 {
 }
 

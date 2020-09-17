@@ -85,7 +85,7 @@ void Lua::ModelSubMesh::Client::GetBiTangents(lua_State *l,::ModelSubMesh &mesh)
 	for(auto i=decltype(verts.size()){0};i<verts.size();++i)
 	{
 		Lua::PushInt(l,i +1);
-		Lua::Push<Vector3>(l,verts[i].biTangent);
+		Lua::Push<Vector3>(l,verts[i].GetBiTangent());
 		Lua::SetTableValue(l,tBiTangents);
 	}
 }

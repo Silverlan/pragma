@@ -197,8 +197,8 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel(CGame &game,const
 				auto uv = pragma::ShaderParticle2DBase::GetVertexUV(vertIdx);
 				auto &v = verts.at(vertOffset +vertIdx);
 				v.position = vertPos;
-				v.normal = -uvec::RIGHT;
-				v.tangent = uvec::FORWARD;
+				v.normal = Vector4{-uvec::RIGHT,1.f};
+				// v.tangent = uvec::FORWARD;
 				v.uv = uvStart +uv *(uvEnd -uvStart);
 			}
 			static_assert(pragma::ShaderParticle2DBase::TRIANGLE_COUNT == 2 && pragma::ShaderParticle2DBase::VERTEX_COUNT == 6);

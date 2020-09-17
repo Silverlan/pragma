@@ -12,11 +12,13 @@
 #include <mathutil/glmutil.h>
 #include "pragma/model/vertex.h"
 #include "pragma/model/modelupdateflags.hpp"
+#include <unordered_map>
 #include <mathutil/transform.hpp>
 
 namespace umath
 {
 	DLLNETWORK void normalize_uv_coordinates(Vector2 &uv);
+	DLLNETWORK void compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<uint16_t> &triangles);
 };
 
 class DLLNETWORK ModelSubMesh
@@ -112,6 +114,7 @@ public:
 protected:
 	std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx);
 	const std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
+	void ComputeTangentBasis();
 
 	uint32_t m_skinTextureIndex;
 	Vector3 m_center;

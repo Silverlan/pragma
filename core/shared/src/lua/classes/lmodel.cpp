@@ -807,7 +807,7 @@ void Lua::Model::register_class(
 
 	// Vertex
 	auto defVertex = luabind::class_<::Vertex>("Vertex");
-	defVertex.def(luabind::constructor<const Vector3&,const ::Vector2&,const Vector3&,const Vector3&,const Vector3&>());
+	defVertex.def(luabind::constructor<const Vector3&,const ::Vector2&,const Vector3&,const ::Vector4&>());
 	defVertex.def(luabind::constructor<const Vector3&,const ::Vector2&,const Vector3&>());
 	defVertex.def(luabind::constructor<const Vector3&,const Vector3&>());
 	defVertex.def(luabind::constructor<>());
@@ -817,8 +817,8 @@ void Lua::Model::register_class(
 	defVertex.def_readwrite("uv",&::Vertex::uv);
 	defVertex.def_readwrite("normal",&::Vertex::normal);
 	defVertex.def_readwrite("tangent",&::Vertex::tangent);
-	defVertex.def_readwrite("bitangent",&::Vertex::biTangent);
 	defVertex.def("Copy",&Lua::Vertex::Copy);
+	defVertex.def("GetBiTangent",&::Vertex::GetBiTangent);
 	classDef.scope[defVertex];
 
 	auto defVertWeight = luabind::class_<::VertexWeight>("VertexWeight");

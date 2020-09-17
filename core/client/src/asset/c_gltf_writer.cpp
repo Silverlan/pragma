@@ -678,8 +678,9 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		if(m_exportInfo.verbose)
 			Con::cout<<"Initializing "<<m_sceneDesc.lightSources.size()<<" light sources..."<<Con::endl;
 		tinygltf::Value::Array lights {};
-		for(auto &lightSource : m_sceneDesc.lightSources)
+		for(auto i=decltype(m_sceneDesc.lightSources.size()){0u};i<m_sceneDesc.lightSources.size();++i)
 		{
+			auto &lightSource = m_sceneDesc.lightSources.at(i);
 			auto outerConeAngle = lightSource.outerConeAngle;
 			if(lightSource.type == LightSource::Type::Spot)
 			{
@@ -702,12 +703,14 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 					}
 				}
 			}
-			auto nodeIdx = AddNode(lightSource.name,true);
+
+			auto nodeName = "light_node" +std::to_string(i);
+			auto nodeIdx = AddNode(nodeName,true);
 			auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
 
-			int32_t lightSourceIndex = gltfMdl.lights.size();
+			int32_t lightSourceIndex = i;
 			ToGLTFPose(lightSource.pose,gltfNode.translation,gltfNode.rotation);
-			gltfNode.name = lightSource.name;
+			gltfNode.name = nodeName;
 			gltfNode.extensions["KHR_lights_punctual"] = tinygltf::Value{tinygltf::Value::Object{
 				{"light",tinygltf::Value{lightSourceIndex}}
 			}};
@@ -732,13 +735,23 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			// TODO: Add an option to change this via a parameter?
 			auto color = lightSource.color.ToVector3();
 			auto intensity = lightSource.luminousIntensity;
+			auto colMax = umath::max(color.r,color.g,color.b);
+			if(colMax > 1.f)
+			{
+				color /= colMax;
+				intensity *= colMax;
+			}
 			auto lightType = (lightSource.type == LightSource::Type::Spot) ? util::pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? util::pragma::LightType::Directional : util::pragma::LightType::Point;
 			intensity = (lightType == util::pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity,color,outerConeAngle) :
 				(lightType == util::pragma::LightType::Point) ? ulighting::cycles::lumen_to_watt_point(intensity,color) :
 				ulighting::cycles::lumen_to_watt_area(intensity,color);
 			
+			auto lightName = lightSource.name;
+			if(lightName.empty())
+				lightName = type;
+			lightName += "_" +std::to_string(i);
 			tinygltf::Value::Object light {
-				{"name",tinygltf::Value{std::string{lightSource.name}}},
+				{"name",tinygltf::Value{lightName}},
 				{"type",tinygltf::Value{type}},
 				{"color",tinygltf::Value{tinygltf::Value::Array{{tinygltf::Value{color.r},tinygltf::Value{color.g},tinygltf::Value{color.b}}}}},
 				{"intensity",tinygltf::Value{intensity}}

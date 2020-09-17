@@ -54,7 +54,7 @@ static void to_vertex_list(ModelMesh &mesh,std::vector<Vertex> &vertices,std::un
 			auto it = std::find(vertices.begin(),vertices.end(),v);
 			if(it == vertices.end())
 			{
-				vertices.push_back({v.position,v.uv,v.normal,v.tangent,v.biTangent});
+				vertices.push_back({v.position,v.uv,v.normal,v.tangent});
 				it = vertices.end() -1;
 			}
 			vertIds.push_back(static_cast<uint32_t>(it -vertices.begin()));

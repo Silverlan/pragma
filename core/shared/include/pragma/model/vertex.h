@@ -10,6 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
+#include <iostream>
 
 static const auto VERTEX_EPSILON = 0.001f;
 
@@ -17,7 +18,7 @@ static const auto VERTEX_EPSILON = 0.001f;
 #pragma warning(disable : 4251)
 struct DLLNETWORK Vertex
 {
-	Vertex(const Vector3 &position,const Vector2 &uv,const Vector3 &normal,const Vector3 &tangent,const Vector3 &biTangent);
+	Vertex(const Vector3 &position,const Vector2 &uv,const Vector3 &normal,const Vector4 &tangent);
 	Vertex(const Vector3 &position,const Vector2 &uv,const Vector3 &normal);
 	Vertex(const Vector3 &position,const Vector3 &normal);
 	Vertex();
@@ -27,8 +28,8 @@ struct DLLNETWORK Vertex
 	Vector3 position = {};
 	Vector2 uv = {};
 	Vector3 normal = {};
-	Vector3 tangent = {};
-	Vector3 biTangent = {};
+	Vector4 tangent = {}; // w-component is handedness
+	Vector3 GetBiTangent() const;
 };
 
 struct DLLNETWORK VertexWeight

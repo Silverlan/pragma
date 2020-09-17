@@ -22,12 +22,12 @@ std::ostream &operator<<(std::ostream &out,const VertexWeight &v)
 
 ///////////////////////////////
 
-Vertex::Vertex(const Vector3 &_position,const Vector2 &_uv,const Vector3 &_normal,const Vector3 &_tangent,const Vector3 &_biTangent)
-	: position(_position),uv(_uv),normal(_normal),tangent(_tangent),biTangent(_biTangent)
+Vertex::Vertex(const Vector3 &_position,const Vector2 &_uv,const Vector3 &_normal,const Vector4 &_tangent)
+	: position(_position),uv(_uv),normal(_normal),tangent(_tangent)
 {}
 
 Vertex::Vertex(const Vector3 &position,const Vector2 &uv,const Vector3 &normal)
-	: Vertex(position,uv,normal,Vector3{},Vector3{})
+	: Vertex(position,uv,normal,Vector4{0.f,0.f,0.f,1.f})
 {}
 
 Vertex::Vertex(const Vector3 &position,const Vector3 &normal)
@@ -37,6 +37,11 @@ Vertex::Vertex(const Vector3 &position,const Vector3 &normal)
 Vertex::Vertex()
 	: Vertex(Vector3{0.f,0.f,0.f},Vector3{0.f,0.f,0.f})
 {}
+
+Vector3 Vertex::GetBiTangent() const
+{
+	return tangent.w *uvec::cross(normal,Vector3{tangent});
+}
 
 bool Vertex::Equal(const Vertex &other,float epsilon) const
 {

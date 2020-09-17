@@ -25,5 +25,5 @@ VertexBufferData::VertexBufferData(const VertexBufferData &other)
 	: VertexBufferData{other.position,other.uv,other.normal,other.tangent,other.biTangent}
 {}
 VertexBufferData::VertexBufferData(const Vertex &vertex)
-	: VertexBufferData{vertex.position,vertex.uv,vertex.normal,vertex.tangent,vertex.biTangent}
+	: VertexBufferData{vertex.position,vertex.uv,vertex.normal,Vector3{vertex.tangent},vertex.GetBiTangent()}
 {}

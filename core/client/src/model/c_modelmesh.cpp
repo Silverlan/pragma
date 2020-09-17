@@ -43,7 +43,7 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> s_vertexWeightBuffer = 
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_alphaBuffer = nullptr;
 static std::shared_ptr<prosper::IDynamicResizableBuffer> s_indexBuffer = nullptr;
 CModelSubMesh::CModelSubMesh()
-	: ModelSubMesh(),NormalMesh(),m_sceneMesh(std::make_shared<pragma::SceneMesh>())
+	: ModelSubMesh(),m_sceneMesh(std::make_shared<pragma::SceneMesh>())
 {}
 
 CModelSubMesh::CModelSubMesh(const CModelSubMesh &other)
@@ -157,7 +157,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 	auto bAnimated = !m_vertexWeights->empty() ? true : false;
 
 	if((flags &ModelUpdateFlags::UpdateTangents) != ModelUpdateFlags::None)
-		ComputeTangentBasis(*m_vertices,*m_triangles);
+		ComputeTangentBasis();
 
 	//auto &renderState = c_engine->GetRenderContext();
 	//auto &context = c_engine->GetRenderContext();

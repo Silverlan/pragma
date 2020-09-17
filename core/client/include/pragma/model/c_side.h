@@ -13,7 +13,7 @@
 #include "pragma/model/c_normalmesh.h"
 
 class DLLCLIENT CSide
-	: public Side,public NormalMesh
+	: public Side
 {
 public:
 	CSide();

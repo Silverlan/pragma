@@ -8,7 +8,6 @@
 #ifndef __C_MODELMESH_H__
 #define __C_MODELMESH_H__
 #include "pragma/clientdefinitions.h"
-#include "pragma/model/c_normalmesh.h"
 #include <pragma/model/modelmesh.h>
 #include <memory>
 
@@ -16,7 +15,7 @@ namespace prosper {class IDynamicResizableBuffer; class IRenderBuffer;};
 namespace pragma {class SceneMesh; class ShaderEntity;};
 struct VertexBufferData;
 class DLLCLIENT CModelSubMesh
-	: public ModelSubMesh,public NormalMesh
+	: public ModelSubMesh
 {
 public:
 	CModelSubMesh();

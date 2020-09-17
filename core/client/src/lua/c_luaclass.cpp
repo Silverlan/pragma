@@ -207,16 +207,30 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 			return 1;
 		}}
 	});
+	
+	// These have to match shaders/modules/fs_tonemapping.gls!
+	enum class ToneMapping : uint8_t
+	{
+		None = 0,
+		GammaCorrection,
+		Reinhard,
+		HejilRichard,
+		Uncharted,
+		Aces,
+		GranTurismo,
 
+		Count
+	};
 	Lua::RegisterLibraryEnums(lua.GetState(),"shader",{
-		// These have to match shaders/modules/fs_tonemapping.gls!
-		{"TONE_MAPPING_GAMMA_CORRECTION",0},
-		{"TONE_MAPPING_REINHARD",1},
-		{"TONE_MAPPING_HEJIL_RICHARD",2},
-		{"TONE_MAPPING_UNCHARTED",3},
-		{"TONE_MAPPING_ACES",4},
-		{"TONE_MAPPING_GRAN_TURISMO",5},
-		{"TONE_MAPPING_COUNT",6}
+		{"TONE_MAPPING_NONE",umath::to_integral(ToneMapping::None)},
+		{"TONE_MAPPING_GAMMA_CORRECTION",umath::to_integral(ToneMapping::GammaCorrection)},
+		{"TONE_MAPPING_REINHARD",umath::to_integral(ToneMapping::Reinhard)},
+		{"TONE_MAPPING_HEJIL_RICHARD",umath::to_integral(ToneMapping::HejilRichard)},
+		{"TONE_MAPPING_UNCHARTED",umath::to_integral(ToneMapping::Uncharted)},
+		{"TONE_MAPPING_ACES",umath::to_integral(ToneMapping::Aces)},
+		{"TONE_MAPPING_GRAN_TURISMO",umath::to_integral(ToneMapping::GranTurismo)},
+
+		{"TONE_MAPPING_COUNT",umath::to_integral(ToneMapping::Count)}
 	});
 
 	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");

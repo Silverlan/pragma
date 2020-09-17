@@ -297,6 +297,16 @@ void pragma::asset::GLTFWriter::GenerateUniqueModelExportList()
 	uint64_t vertCount = 0;
 }
 
+void pragma::asset::GLTFWriter::ToGLTFPose(const umath::Transform &pose,std::vector<double> &outPos,std::vector<double> &outRot) const
+{
+	auto pos = pose.GetOrigin() *m_exportInfo.scale;
+	auto rot = pose.GetRotation();
+	uquat::rotate_z(rot,umath::deg_to_rad(180.f));
+	uquat::rotate_x(rot,umath::deg_to_rad(180.f));
+	outPos = {pos.x,pos.y,pos.z};
+	outRot = {rot.x,rot.y,rot.z,rot.w};
+}
+
 bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string &outputFileName)
 {
 	// HACK: If the model was just ported, we need to make sure the material and textures are in order by invoking the
@@ -614,6 +624,55 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		gltfMdl.skins.at(exportData.skinIndex).inverseBindMatrices = bindPoseAccessor;
 	}
 
+	if(m_sceneDesc.cameras.empty() == false)
+	{
+		if(m_exportInfo.verbose)
+			Con::cout<<"Initializing "<<m_sceneDesc.cameras.size()<<" light sources..."<<Con::endl;
+
+		auto &cameras = gltfMdl.cameras;
+		cameras.reserve(m_sceneDesc.cameras.size());
+		for(auto &cam : m_sceneDesc.cameras)
+		{
+			auto nodeIdx = AddNode(cam.name,true);
+			auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
+
+			ToGLTFPose(cam.pose,gltfNode.translation,gltfNode.rotation);
+			int32_t camIndex = gltfMdl.cameras.size();
+			gltfNode.name = cam.name;
+			gltfNode.camera = camIndex;
+
+			std::string type;
+			switch(cam.type)
+			{
+			case Camera::Type::Orthographic:
+				type = "orthographic";
+				break;
+			case Camera::Type::Perspective:
+			default:
+				type = "perspective";
+				break;
+			}
+
+			cameras.push_back({});
+			auto &camData = cameras.back();
+			camData.name = cam.name;
+			camData.type = type;
+			if(cam.type == Camera::Type::Perspective)
+			{
+				camData.perspective.aspectRatio = cam.aspectRatio;
+
+				// Note: Pragma uses horizontal FOV, but glTF expects vertical FOV, so this value should be converted.
+				// However when importing the glTF into Blender, the FOV only matches ours if we're using horizontal FOV here.
+				// The reason for this is currently unknown, either Blender (v2.9) interprets the glTF FOV as horizontal by mistake,
+				// or something is wrong on this side. TODO: Compare the behavior with another application that supports glTF assets with camera data.
+				camData.perspective.yfov = umath::deg_to_rad(cam.vFov);
+
+				camData.perspective.znear = util::pragma::units_to_metres(cam.zNear);
+				camData.perspective.zfar = util::pragma::units_to_metres(cam.zFar);
+			}
+		}
+	}
+
 	if(m_sceneDesc.lightSources.empty() == false)
 	{
 		if(m_exportInfo.verbose)
@@ -646,12 +705,9 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			auto nodeIdx = AddNode(lightSource.name,true);
 			auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
 
-			auto pos = lightSource.pose.GetOrigin() *m_exportInfo.scale;
 			int32_t lightSourceIndex = gltfMdl.lights.size();
-			auto &rot = lightSource.pose.GetRotation();
+			ToGLTFPose(lightSource.pose,gltfNode.translation,gltfNode.rotation);
 			gltfNode.name = lightSource.name;
-			gltfNode.translation = {pos.x,pos.y,pos.z};
-			gltfNode.rotation = {rot.x,rot.y,rot.z,rot.w};
 			gltfNode.extensions["KHR_lights_punctual"] = tinygltf::Value{tinygltf::Value::Object{
 				{"light",tinygltf::Value{lightSourceIndex}}
 			}};
@@ -674,17 +730,18 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			// However, the Blender Cycles renderer does not convert it to radiometric units, and since we're
 			// primarily targeting Blender, we'll just do the conversion ourselves.
 			// TODO: Add an option to change this via a parameter?
+			auto color = lightSource.color.ToVector3();
 			auto intensity = lightSource.luminousIntensity;
 			auto lightType = (lightSource.type == LightSource::Type::Spot) ? util::pragma::LightType::Spot : (lightSource.type == LightSource::Type::Directional) ? util::pragma::LightType::Directional : util::pragma::LightType::Point;
-			auto watt = util::pragma::light_intensity_to_watts(intensity,lightType);
-			intensity = watt;
+			intensity = (lightType == util::pragma::LightType::Spot) ? ulighting::cycles::lumen_to_watt_spot(intensity,color,outerConeAngle) :
+				(lightType == util::pragma::LightType::Point) ? ulighting::cycles::lumen_to_watt_point(intensity,color) :
+				ulighting::cycles::lumen_to_watt_area(intensity,color);
 			
-			auto color = lightSource.color.ToVector3();
 			tinygltf::Value::Object light {
 				{"name",tinygltf::Value{std::string{lightSource.name}}},
 				{"type",tinygltf::Value{type}},
 				{"color",tinygltf::Value{tinygltf::Value::Array{{tinygltf::Value{color.r},tinygltf::Value{color.g},tinygltf::Value{color.b}}}}},
-				{"intensity",tinygltf::Value{intensity}} // Doesn't matter which intensity we pick
+				{"intensity",tinygltf::Value{intensity}}
 			};
 			if(lightSource.range.has_value() && (lightSource.type == LightSource::Type::Point || lightSource.type == LightSource::Type::Spot))
 				light["range"] = tinygltf::Value{*lightSource.range};

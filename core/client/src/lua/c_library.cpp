@@ -1054,6 +1054,18 @@ void CGame::RegisterLuaLibraries()
 	modAsset[
 		luabind::def("clear_unused_textures",static_cast<uint32_t(*)()>([]() -> uint32_t {return static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();}))
 	];
+	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
+	defMapExportInfo.def(luabind::constructor<>());
+	defMapExportInfo.def_readwrite("includeMapLightSources",&pragma::asset::MapExportInfo::includeMapLightSources);
+	defMapExportInfo.def("AddCamera",static_cast<void(*)(lua_State*,pragma::asset::MapExportInfo&,const CCameraHandle&)>([](lua_State *l,pragma::asset::MapExportInfo &exportInfo,const CCameraHandle &cam) {
+		pragma::Lua::check_component(l,cam);
+		exportInfo.AddCamera(const_cast<pragma::CCameraComponent&>(*cam));
+	}));
+	defMapExportInfo.def("AddLightSource",static_cast<void(*)(lua_State*,pragma::asset::MapExportInfo&,const CLightHandle&)>([](lua_State *l,pragma::asset::MapExportInfo &exportInfo,const CLightHandle &light) {
+		pragma::Lua::check_component(l,light);
+		exportInfo.AddLightSource(const_cast<pragma::CLightComponent&>(*light));
+	}));
+	modAsset[defMapExportInfo];
 
 	Lua::asset::register_library(GetLuaInterface(),false);
 

@@ -57,6 +57,18 @@ namespace pragma::asset
 	private:
 		std::optional<std::vector<std::string>> m_animations {};
 	};
+	struct DLLCLIENT MapExportInfo
+	{
+		bool includeMapLightSources = true;
+		void AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
+		const std::vector<util::WeakHandle<CCameraComponent>> &GetCameras() const {return m_cameras;}
+
+		void AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
+		const std::vector<util::WeakHandle<CLightComponent>> &GetLightSources() const {return m_lightSources;}
+	private:
+		std::vector<util::WeakHandle<CCameraComponent>> m_cameras {};
+		std::vector<util::WeakHandle<CLightComponent>> m_lightSources {};
+	};
 	struct DLLCLIENT TextureImportInfo
 	{
 		bool srgb = false;
@@ -73,7 +85,7 @@ namespace pragma::asset
 
 	DLLCLIENT bool export_model(Model &model,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
 	DLLCLIENT bool export_animation(Model &model,const std::string &animName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<std::string> &modelName={});
-	DLLCLIENT bool export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
+	DLLCLIENT bool export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<MapExportInfo> &mapExportInfo={});
 	DLLCLIENT bool export_texture(
 		uimg::ImageBuffer &imgBuf,ModelExportInfo::ImageFormat imageFormat,const std::string &outputPath,std::string &outErrMsg,
 		bool normalMap=false,bool srgb=false,uimg::TextureInfo::AlphaMode alphaMode=uimg::TextureInfo::AlphaMode::Auto,

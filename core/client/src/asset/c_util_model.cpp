@@ -14,6 +14,7 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
 #include "c_gltf_writer.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/alpha_mode.hpp>
@@ -796,7 +797,7 @@ bool pragma::asset::import_texture(prosper::IImage &img,const TextureImportInfo 
 	return c_game->SaveImage(img,imgOutputPath.GetString(),texWriteInfo);
 }
 
-bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg)
+bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<MapExportInfo> &mapExp)
 {
 	::util::Path mapPath {mapName};
 	mapPath.RemoveFileExtension();
@@ -831,6 +832,80 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 		Con::cout<<"Collecting world node models..."<<Con::endl;
 
 	pragma::asset::GLTFWriter::SceneDesc sceneDesc {};
+	if(mapExp.has_value())
+	{
+		auto &cameras = mapExp->GetCameras();
+		sceneDesc.cameras.reserve(cameras.size());
+		for(auto &hCamC : cameras)
+		{
+			if(hCamC.expired())
+				continue;
+			auto &camC = *hCamC;
+			auto &ent = camC.GetEntity();
+			sceneDesc.cameras.push_back({});
+
+			auto &camScene = sceneDesc.cameras.back();
+			camScene.name = ent.GetName();
+			camScene.type = pragma::asset::GLTFWriter::Camera::Type::Perspective;
+			camScene.aspectRatio = camC.GetAspectRatio();
+			camScene.vFov = camC.GetFOV();
+			camScene.zNear = camC.GetNearZ();
+			camScene.zFar = camC.GetFarZ();
+			ent.GetPose(camScene.pose);
+		}
+
+		auto &lightSources = mapExp->GetLightSources();
+		sceneDesc.lightSources.reserve(lightSources.size());
+		for(auto &hLightC : lightSources)
+		{
+			if(hLightC.expired())
+				continue;
+			auto &lightC = *hLightC;
+			auto &ent = lightC.GetEntity();
+			sceneDesc.lightSources.push_back({});
+
+			auto &lightScene = sceneDesc.lightSources.back();
+			lightScene.name = ent.GetName();
+			ent.GetPose(lightScene.pose);
+
+			auto colorC = ent.GetComponent<CColorComponent>();
+			if(colorC.valid())
+				lightScene.color = colorC->GetColor();
+
+			auto radiusC = ent.GetComponent<CRadiusComponent>();
+			if(radiusC.valid())
+				lightScene.range = util::pragma::units_to_metres(radiusC->GetRadius());
+			
+			auto spotC = ent.GetComponent<CLightSpotComponent>();
+			if(spotC.valid())
+			{
+				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Spot;
+				lightScene.innerConeAngle = spotC->GetInnerCutoffAngle();
+				lightScene.outerConeAngle = spotC->GetOuterCutoffAngle();
+			}
+
+			auto pointC = ent.GetComponent<CLightPointComponent>();
+			if(pointC.valid())
+				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Point;
+
+			auto dirC = ent.GetComponent<CLightDirectionalComponent>();
+			if(dirC.valid())
+				lightScene.type = pragma::asset::GLTFWriter::LightSource::Type::Directional;
+
+			switch(lightScene.type)
+			{
+			case pragma::asset::GLTFWriter::LightSource::Type::Spot:
+			case pragma::asset::GLTFWriter::LightSource::Type::Point:
+				// TODO: This should be Candela, not Lumen, but Lumen produces closer results for Blender
+				lightScene.luminousIntensity = lightC.GetLightIntensityLumen();
+				break;
+			case pragma::asset::GLTFWriter::LightSource::Type::Directional:
+				lightScene.illuminance = lightC.GetLightIntensity();
+				break;
+			}
+		}
+	}
+
 	for(auto &ent : worldData->GetEntities())
 	{
 		if(ent->IsWorld() || ent->GetClassName() == "prop_static" || ent->GetClassName() == "prop_physics" || ent->GetClassName() == "prop_dynamic")
@@ -854,6 +929,8 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 		}
 		else if(ent->GetClassName() == "env_light_spot" || ent->GetClassName() == "env_light_point" || ent->GetClassName() == "env_light_environment")
 		{
+			if(mapExp.has_value() && mapExp->includeMapLightSources == false)
+				continue;
 			sceneDesc.lightSources.push_back({});
 			auto &ls = sceneDesc.lightSources.back();
 

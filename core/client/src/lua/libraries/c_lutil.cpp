@@ -171,8 +171,12 @@ int Lua::util::Client::export_map(lua_State *l)
 	std::string mapName = Lua::CheckString(l,1);
 	auto &exportInfo = Lua::Check<pragma::asset::ModelExportInfo>(l,2);
 
+	pragma::asset::MapExportInfo mapExportInfo {};
+	if(Lua::IsSet(l,3))
+		mapExportInfo = Lua::Check<pragma::asset::MapExportInfo>(l,3);
+
 	std::string errMsg;
-	auto result = pragma::asset::export_map(mapName,exportInfo,errMsg);
+	auto result = pragma::asset::export_map(mapName,exportInfo,errMsg,mapExportInfo);
 	Lua::PushBool(l,result);
 	if(result)
 		return 1;

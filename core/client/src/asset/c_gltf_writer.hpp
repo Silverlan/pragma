@@ -55,12 +55,30 @@ namespace pragma::asset
 			umath::Degree innerConeAngle = 0.f;
 			umath::Degree outerConeAngle = 45.f;
 		};
+		struct Camera
+		{
+			enum class Type : uint8_t
+			{
+				Perspective = 0,
+				Orthographic
+			};
+			std::string name;
+			Type type = Type::Perspective;
+			float aspectRatio = 1.f;
+			umath::Degree vFov = 90.f;
+			float zNear = 0.01f;
+			float zFar = 1'000.f;
+
+			umath::Transform pose {};
+		};
 		using ModelCollection = std::vector<ModelDesc>;
 		using LightSourceList = std::vector<LightSource>;
+		using CameraList = std::vector<Camera>;
 		struct SceneDesc
 		{
 			ModelCollection modelCollection {};
 			LightSourceList lightSources {};
+			CameraList cameras {};
 		};
 
 		static bool Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const ModelExportInfo &exportInfo,std::string &outErrMsg);
@@ -129,6 +147,7 @@ namespace pragma::asset
 		void WriteMorphTargets(ModelSubMesh &mesh,tinygltf::Mesh &gltfMesh,tinygltf::Primitive &primitive,const std::vector<uint32_t> &nodeIndices);
 		void WriteMaterials();
 		void WriteLightSources();
+		void ToGLTFPose(const umath::Transform &pose,std::vector<double> &outPos,std::vector<double> &outRot) const;
 		void GenerateAO(::Model &mdl);
 		uint32_t AddBufferView(const std::string &name,BufferIndex bufferIdx,uint64_t byteOffset,uint64_t byteLength,std::optional<uint64_t> byteStride);
 		tinygltf::Buffer &AddBuffer(const std::string &name,uint32_t *optOutBufIdx=nullptr);

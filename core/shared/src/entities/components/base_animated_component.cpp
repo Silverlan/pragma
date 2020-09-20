@@ -630,7 +630,7 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 			if(MaintainAnimation(animInfo,dt,it->first) == true)
 			{
 				auto anim = hModel->GetAnimation(animInfo.animation);
-				TransformBoneFrames(bonePoses,&boneScales,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture));
+				TransformBoneFrames(bonePoses,!boneScales.empty() ? &boneScales : nullptr,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture));
 				if(animInfo.cycle >= 1.f)
 				{
 					if(anim->HasFlag(FAnim::Loop) == false)

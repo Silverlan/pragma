@@ -9,8 +9,11 @@
 #include "model/mikktspace/mikktspace.h"
 #include <pragma/console/conout.h>
 
+#pragma optimize("",off)
 void umath::compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<uint16_t> &triangles)
 {
+	if(triangles.empty())
+		return;
 	struct MeshData
 	{
 		std::vector<Vertex> &verts;
@@ -58,3 +61,4 @@ void umath::compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<u
 	if(result == false)
 		Con::cwar<<"WARNING: Unable to calculate mesh tangents!"<<Con::endl;
 }
+#pragma optimize("",on)

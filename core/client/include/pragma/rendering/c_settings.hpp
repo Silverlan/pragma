@@ -19,7 +19,8 @@ namespace pragma::rendering
 
 	enum class ToneMapping : uint32_t
 	{
-		GammaCorrection = 0u,
+		None = 0u,
+		GammaCorrection,
 		Reinhard,
 		HejilRichard,
 		Uncharted,

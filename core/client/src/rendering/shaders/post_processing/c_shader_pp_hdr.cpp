@@ -67,7 +67,7 @@ bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure,fl
 	case -1:
 		break;
 	default:
-		toneMapping = static_cast<rendering::ToneMapping>(toneMappingCvarVal);
+		toneMapping = static_cast<rendering::ToneMapping>(toneMappingCvarVal +1);
 		break;
 	}
 	return RecordPushConstants(PushConstants{exposure,bloomScale,glowScale,toneMapping}) &&
